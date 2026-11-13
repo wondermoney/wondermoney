@@ -28,10 +28,25 @@ export const API_ERROR_CODE = {
   BAD_REQUEST: "bad_request",
   BANK_CREDENTIAL_INVALID: "bank_credential_invalid",
   CONFLICT: "conflict",
+  /** A crypto wallet address is already on that wallet (409); `details.addressIndex` on create. */
+  CRYPTO_WALLET_ADDRESS_EXISTS: "crypto_wallet_address_exists",
+  /** Not a Bitcoin or Ethereum public address or xpub for the chain (400); `details.addressIndex` on create. */
+  CRYPTO_WALLET_ADDRESS_INVALID: "crypto_wallet_address_invalid",
+  /** A wallet route on an asset that is not a crypto wallet (400). */
+  CRYPTO_WALLET_REQUIRED: "crypto_wallet_required",
+  /**
+   * The input looked like a private key or a recovery phrase and was refused unseen (400). The
+   * server never echoes it, and the client never shows or keeps it either.
+   */
+  CRYPTO_WALLET_SECRET_REJECTED: "crypto_wallet_secret_rejected",
+  /** Recording or editing a valuation of a crypto wallet, whose value comes from its balances (409). */
+  CRYPTO_WALLET_VALUE_SYNCED: "crypto_wallet_value_synced",
   DEMO_READ_ONLY: "demo_read_only",
   /** `POST /v1/auth/demo` on a server that has the demo on but no demo account set up (503). */
   DEMO_UNAVAILABLE: "demo_unavailable",
   EMAIL_VERIFICATION_REQUIRED: "email_verification_required",
+  /** The operator has not set this feature up, such as a chain with no explorer configured (501). */
+  FEATURE_DISABLED: "feature_disabled",
   FORBIDDEN: "forbidden",
   HOUSEHOLD_FULL: "household_full",
   HOUSEHOLD_OWNER_REQUIRED: "household_owner_required",
@@ -183,6 +198,26 @@ export function getPortfolioLinkHolderName(error: unknown): string | undefined {
     { linkedBy?: unknown } | undefined;
   const name = details?.linkedBy;
   return typeof name === "string" && name.trim().length > 0 ? name : undefined;
+}
+
+/**
+ * Which of the addresses sent when creating a crypto wallet the error is about
+ * (`details.addressIndex`), when the API says.
+ */
+export function getCryptoWalletAddressIndex(
+  error: unknown,
+): number | undefined {
+  const details = (error as ApiErrorResponse | undefined)?.response?.data
+    ?.details as { addressIndex?: unknown } | undefined;
+  // Error details travel as strings ("0"); a number is read the same way.
+  const raw = details?.addressIndex;
+  const index =
+    typeof raw === "number"
+      ? raw
+      : typeof raw === "string" && /^\d+$/.test(raw)
+        ? Number(raw)
+        : NaN;
+  return Number.isInteger(index) && index >= 0 ? index : undefined;
 }
 
 /**

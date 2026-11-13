@@ -2055,7 +2055,8 @@
       "property": "Inmueble",
       "vehicle": "Vehículo",
       "valuable": "Objeto de valor",
-      "other": "Otro"
+      "other": "Otro",
+      "crypto_wallet": "Monedero de criptomonedas"
     },
     "failures": {
       "demo": "La demo es de solo lectura, así que no se guardó nada.",
@@ -2156,6 +2157,107 @@
     "noteOptional": "Nota, opcional",
     "notePlaceholder": "p. ej. Estimación de la agencia",
     "description": "Registrar un valor nunca crea una transacción. Un valor ya registrado para la misma fecha se sustituye."
+  },
+  "cryptoWallet": {
+    "add": "Añadir monedero de criptomonedas",
+    "notValuedYet": "Aún sin valorar",
+    "publicOnly": "Solo se aceptan direcciones públicas: una dirección de Bitcoin o Ethereum, o una xpub, ypub o zpub de Bitcoin. Nunca introduzcas una clave privada ni una frase de recuperación. Quien tenga una puede gastar tus monedas.",
+    "secretBlocked": "Parecía una clave privada o una frase de recuperación, así que se ha borrado y no se ha enviado. Introduce una dirección pública.",
+    "chain": "Red",
+    "address": "Dirección",
+    "label": "Etiqueta",
+    "labelOptional": "Etiqueta, opcional",
+    "chains": {
+      "bitcoin": "Bitcoin",
+      "ethereum": "Ethereum",
+      "unknown": "Otra red"
+    },
+    "kinds": {
+      "address": "Dirección",
+      "xpub": "Clave pública extendida"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "ok": "Sincronizado",
+      "failed": "Error"
+    },
+    "errors": {
+      "timeout": "El explorador tardó demasiado en responder.",
+      "rate_limited": "El explorador está limitando las peticiones. Se volverá a intentar más tarde.",
+      "unavailable": "No se pudo contactar con el explorador.",
+      "rejected": "El explorador no aceptó esta dirección.",
+      "invalid_response": "El explorador envió una respuesta que no se pudo leer.",
+      "disabled": "Esta red ya no está activada en este servidor.",
+      "unknown": "La última lectura falló."
+    },
+    "addressHints": {
+      "bitcoin": "Una dirección que empieza por 1, 3 o bc1, o una xpub, ypub o zpub.",
+      "ethereum": "Una dirección que empieza por 0x. Se leen el ETH y sus tokens."
+    },
+    "fieldErrors": {
+      "address": "Introduce una dirección",
+      "name": "Introduce un nombre"
+    },
+    "failures": {
+      "secret-rejected": "Parecía una clave privada o una frase de recuperación, así que no se ha aceptado. Introduce una dirección pública.",
+      "address-invalid": "No es una dirección válida para la red elegida.",
+      "address-exists": "Esta dirección ya está en el monedero.",
+      "feature-disabled": "Los monederos de criptomonedas no están activados para esta red en este servidor.",
+      "demo": "La demo es de solo lectura, así que no se ha guardado nada.",
+      "access": "Ya no puedes cambiar este monedero. Vuelve a iniciar sesión o consulta con tu hogar.",
+      "mfa": "Confirma que eres tú para continuar.",
+      "not-found": "Este monedero ya no existe o es privado del otro miembro de tu hogar.",
+      "invalid": "Algún dato no es válido. Revisa los campos e inténtalo de nuevo.",
+      "invalid-response": "Puede que se haya guardado, pero no se pudo leer la respuesta del servidor. Actualiza antes de volver a intentarlo.",
+      "network-ambiguous": "Se perdió la conexión, así que no se sabe si se guardó. Actualiza antes de volver a intentarlo.",
+      "general": "No se pudo guardar. Inténtalo de nuevo."
+    },
+    "create": {
+      "title": "Añadir monedero de criptomonedas",
+      "save": "Añadir monedero",
+      "saving": "Añadiendo",
+      "name": "Nombre",
+      "namePlaceholder": "p. ej., Monedero físico",
+      "private": "Monedero privado",
+      "addressHeading": "Dirección {{number}}",
+      "removeAddress": "Quitar",
+      "removeAddressNumber": "Quitar la dirección {{number}}",
+      "addAddress": "Añadir otra dirección",
+      "numbered": "{{label}}, dirección {{number}}"
+    },
+    "detail": {
+      "title": "Direcciones",
+      "lastSynced": "Saldos leídos {{time}}. Se vuelven a leer cada día.",
+      "neverSynced": "Los saldos aún no se han leído. La primera lectura está en camino.",
+      "tickHint": "Solo los tokens marcados cuentan en el valor. Los tokens detectados en una dirección se ignoran hasta que los marques.",
+      "unpriced": "No hay precio para {{symbols}}, así que el valor de hoy no se ha actualizado. Desmarca un token para dejarlo fuera.",
+      "removeTitle": "¿Quitar esta dirección?",
+      "removeMessage": "{{address}} y sus tokens dejan de contar en este monedero.",
+      "remove": "Quitar",
+      "removeFor": "Quitar {{address}}",
+      "addAddress": "Añadir dirección",
+      "adding": "Añadiendo",
+      "syncNow": "Sincronizar ahora",
+      "syncQueued": "Sincronización solicitada. Desliza para actualizar dentro de un momento y ver los saldos.",
+      "synced": "Sincronizado {{time}}",
+      "balancesAsOf": "Saldos a {{time}}.",
+      "pending": "Esperando la primera lectura",
+      "editLabel": "Editar etiqueta",
+      "editLabelFor": "Editar la etiqueta de {{address}}",
+      "saveLabel": "Guardar etiqueta",
+      "noPrice": "Sin precio",
+      "countToken": "Contar {{symbol}}",
+      "notValuedYet": "Aún sin valorar: el valor aparece tras la primera sincronización.",
+      "manageOnWeb": "Archiva este monedero o edita sus notas en WonderMoney en la web."
+    },
+    "manage": {
+      "edit": "Editar monedero",
+      "editTitle": "Editar monedero",
+      "save": "Guardar",
+      "remove": "Eliminar monedero",
+      "removeTitle": "¿Eliminar este monedero?",
+      "removeMessage": "Se eliminan {{name}}, sus direcciones y su historial de valor. No se puede deshacer."
+    }
   },
   "budgets": {
     "title": "Presupuestos",

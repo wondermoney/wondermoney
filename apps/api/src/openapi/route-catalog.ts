@@ -139,6 +139,7 @@ import {
   loanScheduleEntrySchema,
   loanSchema,
   loanSummarySchema,
+  cryptoWalletSchema,
   manualAssetSchema,
   marketSchemas,
   metricsSchema,
@@ -737,8 +738,9 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'GET /v1/manual-assets/:manualAssetId': {
     tag: 'Manual assets',
     summary: 'Get one manual asset',
+    description: 'A crypto wallet (kind `crypto_wallet`) also carries `wallet`: its public addresses, their sync status and tokens. Null for other kinds.',
     request: manualAssetParamsSchema,
-    response: itemResponse('ManualAssetResponse', 'asset', manualAssetSchema),
+    response: z.object({ asset: manualAssetSchema, wallet: cryptoWalletSchema.nullable() }).passthrough().openapi('ManualAssetResponse'),
   },
   'GET /v1/manual-assets/:manualAssetId/valuations': {
     tag: 'Manual assets',

@@ -52,6 +52,19 @@ export const ERROR_CODE = {
   MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
   /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */
   MANUAL_ASSET_LAST_VALUATION: 'manual_asset_last_valuation',
+  /**
+   * A crypto wallet address that looks like a private key or a recovery phrase (400). Only public
+   * addresses are accepted; the input is never stored, logged or sent back.
+   */
+  CRYPTO_WALLET_SECRET_REJECTED: 'crypto_wallet_secret_rejected',
+  /** Not a valid public address (or Bitcoin extended public key) for the chain (400). */
+  CRYPTO_WALLET_ADDRESS_INVALID: 'crypto_wallet_address_invalid',
+  /** The address is already on the wallet (409). */
+  CRYPTO_WALLET_ADDRESS_EXISTS: 'crypto_wallet_address_exists',
+  /** A crypto wallet's value comes from its sync; it takes no valuation by hand (409). */
+  CRYPTO_WALLET_VALUE_SYNCED: 'crypto_wallet_value_synced',
+  /** An address, token or sync route on a manual asset that is not a crypto wallet (400). */
+  CRYPTO_WALLET_REQUIRED: 'crypto_wallet_required',
   /** The assistant is not enabled for this user. */
   ASSISTANT_NOT_ENABLED: 'assistant_not_enabled',
   /** Applying an assistant proposal past its seven days (409). It is now `expired`; nothing changed. */

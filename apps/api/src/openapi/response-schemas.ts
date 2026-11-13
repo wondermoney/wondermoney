@@ -394,6 +394,7 @@ export const assetLinkedLoanSchema = open('ManualAssetLinkedLoan', {
 
 export const manualAssetSchema = open('ManualAsset', {
   assetType: z.string().optional(),
+  kind: z.enum(['property', 'vehicle', 'valuable', 'other', 'crypto_wallet']).optional().describe('A `crypto_wallet` is valued in USD by the daily sync of its public addresses, never by hand.'),
   currencyKey: z.object({ code: z.string() }).optional(),
   currentValue: nullableNumber,
   manualAssetKey: id,
@@ -402,6 +403,39 @@ export const manualAssetSchema = open('ManualAsset', {
   linkedDebt: nullableNumber.describe('Their total outstanding principal in the asset\'s currency: 0 with none, null when a loan has no exchange rate.'),
   equity: nullableNumber.describe('Today\'s value less linkedDebt, in the asset\'s currency. Null when the asset has no value today or linkedDebt is null.'),
   unconvertedLoanCurrencies: z.array(z.string()).describe('Currencies of linked loans no rate converts into the asset\'s currency.'),
+});
+
+/** A coin or token one crypto wallet address holds, as the explorer last reported it. */
+export const cryptoWalletTokenSchema = open('CryptoWalletToken', {
+  cryptoWalletTokenKey: id,
+  native: z.boolean().describe('The chain\'s own coin (BTC, ETH) rather than an ERC-20 token.'),
+  contractAddress: nullableString.describe('The ERC-20 contract, lower-case; null for the native coin.'),
+  symbol: z.string(),
+  name: nullableString,
+  quantity: z.string().describe('The balance in whole units, as an exact decimal string.'),
+  tracked: z.boolean().describe('Ticked: counts towards the wallet\'s value. Detected tokens start unticked.'),
+  priceMissing: z.boolean().describe('Ticked with a balance and no price at the last sync, so that day\'s value was not written.'),
+});
+
+/** One public address (or Bitcoin extended public key) of a crypto wallet and its last sync. */
+export const cryptoWalletAddressSchema = open('CryptoWalletAddress', {
+  cryptoWalletAddressKey: id,
+  chain: z.enum(['bitcoin', 'ethereum']),
+  kind: z.enum(['address', 'xpub']),
+  address: z.string().describe('The public address, normalised (bech32 lower-case, Ethereum EIP-55 checksummed), or the xpub/ypub/zpub.'),
+  label: nullableString,
+  status: z.enum(['pending', 'ok', 'failed']),
+  errorCode: z.enum(['timeout', 'rate_limited', 'unavailable', 'rejected', 'invalid_response', 'disabled']).nullable().describe('Why the last attempt failed; null unless status is failed.'),
+  lastAttemptAt: nullableString,
+  lastSyncedAt: nullableString.describe('The last successful read; the token balances are as of then.'),
+  tokens: z.array(cryptoWalletTokenSchema),
+});
+
+/** A manual asset of kind `crypto_wallet`: its addresses, each with its tokens. */
+export const cryptoWalletSchema = open('CryptoWallet', {
+  addresses: z.array(cryptoWalletAddressSchema),
+  lastSyncedAt: nullableString,
+  unpricedSymbols: z.array(z.string()).describe('Ticked tokens with a balance and no price at the last sync.'),
 });
 
 export const valuationSchema = open('Valuation', {

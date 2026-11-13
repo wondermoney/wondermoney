@@ -15,6 +15,7 @@ export type QueueName =
   | 'asset-price.historical-backfill'
   | 'bank-recovery.send'
   | 'bank-sync-alert.send'
+  | 'crypto-wallet.sync'
   | 'demo-data.refresh'
   | 'email.budget.coordinator'
   | 'email.budget.user'

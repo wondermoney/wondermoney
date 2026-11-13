@@ -18,7 +18,7 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import type { ManualAssetDto, ManualAssetKind, ManualAssetsResponse } from './manual-assets-contract'
+import type { AssetKind, ManualAssetDto, ManualAssetsResponse } from './manual-assets-contract'
 import { formatDay, shownValue, splitAssets } from './manual-assets-view-model'
 
 export type AssetsViewState =
@@ -29,9 +29,9 @@ export type AssetsViewState =
   | { status: 'loaded'; data: ManualAssetsResponse; refreshing?: boolean }
   | { status: 'refresh-error'; data: ManualAssetsResponse; refreshing?: boolean }
 
-const KIND_GLYPHS: Record<ManualAssetKind, IconName> = { property: 'home', vehicle: 'car', valuable: 'gem', other: 'layers' }
+const KIND_GLYPHS: Record<AssetKind, IconName> = { property: 'home', vehicle: 'car', valuable: 'gem', other: 'layers', crypto_wallet: 'coins' }
 
-export const kindGlyph = (kind: ManualAssetKind): IconName => KIND_GLYPHS[kind]
+export const kindGlyph = (kind: AssetKind): IconName => KIND_GLYPHS[kind]
 
 /** "GBP and USD", or a plain list where the engine lacks Intl.ListFormat. */
 export function currencyList(currencies: readonly string[], locale: string): string {
@@ -46,12 +46,15 @@ export function currencyList(currencies: readonly string[], locale: string): str
 /**
  * Web's Assets page (`assets/assets-client.tsx`) at phone width: title and description, the total
  * in the viewer's currency (with what it leaves out for want of a rate), the assets that count
- * today, then the archived ones. Adding an asset is the floating "+".
+ * today, then the archived ones. Adding an asset is the floating "+"; "Add crypto wallet" sits
+ * under the total, only on a server that reads wallets (`onCreateWallet` given).
  */
-export function AssetsScreen({ state, onOpenAsset, onCreateAsset, onRefresh }: {
+export function AssetsScreen({ state, onOpenAsset, onCreateAsset, onCreateWallet, onRefresh }: {
   state: AssetsViewState
   onOpenAsset: (assetId: number) => void
   onCreateAsset: () => void
+  /** Absent when the server has no crypto wallet chain enabled: the entry is hidden then. */
+  onCreateWallet?: () => void
   onRefresh: () => void | Promise<void>
 }) {
   const { t, i18n } = useTranslation()
@@ -77,6 +80,7 @@ export function AssetsScreen({ state, onOpenAsset, onCreateAsset, onRefresh }: {
                 <Text accessibilityRole="header" variant="section">{t('manualAssets.emptyTitle')}</Text>
                 <Text tone="muted" variant="meta">{t('manualAssets.emptyMessage')}</Text>
                 <Button icon="plus" label={t('manualAssets.add')} onPress={onCreateAsset} style={styles.hug} />
+                {onCreateWallet ? <Button icon="coins" label={t('cryptoWallet.add')} onPress={onCreateWallet} style={styles.hug} testID="assets-add-wallet" variant="outline" /> : null}
               </View>
             ) : (
               <>
@@ -89,6 +93,7 @@ export function AssetsScreen({ state, onOpenAsset, onCreateAsset, onRefresh }: {
                       {t('manualAssets.unconverted', { count: summary.unconvertedAssets, currencies: currencyList(summary.unconvertedCurrencies, locale) })}
                     </Text>
                   ) : null}
+                  {onCreateWallet ? <Button icon="coins" label={t('cryptoWallet.add')} onPress={onCreateWallet} style={styles.hug} testID="assets-add-wallet" variant="outline" /> : null}
                 </View>
                 {active.length > 0 ? (
                   <List>
@@ -122,10 +127,14 @@ function AssetRow({ asset, locale, userCurrency, separated, onPress }: { asset: 
   const formatMoney = useFormatMoney()
   const value = shownValue(asset)
   const foreign = asset.currency !== userCurrency
-  const converted = foreign && !asset.archived
+  // A wallet before its first sync has no value yet, so nothing to convert.
+  const converted = foreign && !asset.archived && asset.value !== null
     ? (asset.valueInUserCurrency === null ? t('manualAssets.noRate') : formatMoney(asset.valueInUserCurrency, { locale, currency: userCurrency }))
     : null
-  const lastValued = asset.lastValuation ? t('manualAssets.lastValued', { date: formatDay(asset.lastValuation.date, locale) }) : null
+  const lastValued = asset.lastValuation
+    ? t('manualAssets.lastValued', { date: formatDay(asset.lastValuation.date, locale) })
+    // A new wallet has no value until its first sync.
+    : asset.kind === 'crypto_wallet' && !asset.archived ? t('cryptoWallet.notValuedYet') : null
   const label = [
     asset.name,
     t(`manualAssets.kinds.${asset.kind}`),

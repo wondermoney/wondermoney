@@ -63,8 +63,11 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * 1.5 added `website` and `logoUrl` to `data/merchants.json`: the https addresses the household set for the
  * merchant, or null.
  * 1.6 added `data/transaction-reimbursements.json`: refunds linked to the expenses they offset.
+ * 1.7 added `data/crypto-wallet-addresses.json` and `data/crypto-wallet-tokens.json`: a crypto
+ * wallet's (manual asset of kind `crypto_wallet`) public addresses, and the coins and tokens each held
+ * at its last sync (`balance` in the token's smallest unit) and whether they count.
  */
-export const EXPORT_FORMAT_VERSION = '1.6';
+export const EXPORT_FORMAT_VERSION = '1.7';
 
 export interface ExportManifest {
   appVersion: string;

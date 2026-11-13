@@ -84,6 +84,17 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://{domain}/favicon.ico' })).toThrow(/MERCHANT_LOGO_URL_TEMPLATE/);
   });
 
+  it('takes the crypto explorer URLs only as https URLs, on the API and the worker', () => {
+    // Empty, as the env samples ship them: off.
+    expect(() => loadConfiguration('api', { ...validApi, CRYPTO_BTC_EXPLORER_URL: '', CRYPTO_ETH_EXPLORER_URL: '' })).not.toThrow();
+    expect(() => loadConfiguration('api', { ...validApi, CRYPTO_BTC_EXPLORER_URL: 'https://mempool.example.org/api', CRYPTO_ETH_EXPLORER_URL: 'https://blockscout.example.org/' })).not.toThrow();
+    expect(() => loadConfiguration('worker', { ...validShared, CRYPTO_BTC_EXPLORER_URL: 'https://mempool.example.org/api' })).not.toThrow();
+    expect(() => loadConfiguration('api', { ...validApi, CRYPTO_BTC_EXPLORER_URL: 'http://mempool.example.org/api' })).toThrow(/CRYPTO_BTC_EXPLORER_URL/);
+    expect(() => loadConfiguration('worker', { ...validShared, CRYPTO_ETH_EXPLORER_URL: 'blockscout.example.org' })).toThrow(/CRYPTO_ETH_EXPLORER_URL/);
+    expect(() => loadConfiguration('api', { ...validApi, CRYPTO_ETH_EXPLORER_URL: 'https://user:pass@blockscout.example.org' })).toThrow(/CRYPTO_ETH_EXPLORER_URL/);
+    expect(() => loadConfiguration('api', { ...validApi, CRYPTO_BTC_EXPLORER_URL: 'https://mempool.example.org/api?key=1' })).toThrow(/CRYPTO_BTC_EXPLORER_URL/);
+  });
+
   it('takes MARKET_DATA_PROVIDERS as an ordered list of known providers and refuses anything else', () => {
     expect(loadConfiguration('api', validApi).integrations.marketDataProviders).toEqual(['eodhd']);
     expect(loadConfiguration('api', { ...validApi, MARKET_DATA_PROVIDERS: '' }).integrations.marketDataProviders).toEqual(['eodhd']);

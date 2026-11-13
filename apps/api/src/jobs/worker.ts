@@ -88,6 +88,7 @@ import {
   scheduleCreditCardDueReminderJob,
 } from '@app/jobs/credit-card-due-reminder.queue';
 import { type CronMonitorOptions, withCronMonitor } from '@app/jobs/cron-monitor';
+import { CRYPTO_WALLET_SYNC_CRON, CRYPTO_WALLET_SYNC_QUEUE, type CryptoWalletSyncPayload, ensureCryptoWalletSyncQueue, scheduleCryptoWalletSyncJob } from '@app/jobs/crypto-wallet-sync.queue';
 import {
   DATA_EXPORT_CLEANUP_QUEUE,
   DATA_EXPORT_QUEUE,
@@ -348,6 +349,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureAccountRecalculateQueue(boss);
     await ensureHistoricalAssetPriceBackfillQueue(boss);
     await ensureCertificadoAforroRateSyncQueue(boss);
+    await ensureCryptoWalletSyncQueue(boss);
     await ensureBudgetYearExtensionQueue(boss);
     await ensureApiTokenExpiryQueue(boss);
     await ensureAssistantProposalExpiryQueue(boss);
@@ -392,6 +394,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleExchangeRateRefreshJob(boss);
       await schedulePortfolioSnapshotAutoJob(boss);
       await scheduleCertificadoAforroRateSyncAutoJob(boss);
+      await scheduleCryptoWalletSyncJob(boss);
       await scheduleBudgetYearExtensionJob(boss);
       await scheduleApiTokenExpiryJob(boss);
       await scheduleAssistantProposalExpiryJob(boss);
@@ -586,6 +589,17 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       workJobs<JobWithMetadata<Partial<AccountRecalculatePayload>>>(ACCOUNT_RECALCULATE_QUEUE, async (job) => {
         const { handleAccountRecalculateJob } = await import('@app/jobs/account-recalculate.worker');
         await runInRequestContext(() => handleAccountRecalculateJob(job));
+      }),
+    );
+
+    await boss.work<Partial<CryptoWalletSyncPayload>>(
+      CRYPTO_WALLET_SYNC_QUEUE,
+      workJobs<Job<Partial<CryptoWalletSyncPayload>>>(CRYPTO_WALLET_SYNC_QUEUE, async (job) => {
+        const { handleCryptoWalletSyncJob } = await import('@app/jobs/crypto-wallet-sync.worker');
+        const run = () => runInRequestContext(() => handleCryptoWalletSyncJob(job));
+        // Only the daily run of every wallet checks in; a sync of one wallet runs whenever someone asks.
+        if (typeof job.data.manualAssetKey === 'number') return run();
+        return withCronMonitor({ checkinMarginMinutes: 120, maxRuntimeMinutes: 60, monitorSlug: CRYPTO_WALLET_SYNC_QUEUE, schedule: CRYPTO_WALLET_SYNC_CRON }, run);
       }),
     );
 

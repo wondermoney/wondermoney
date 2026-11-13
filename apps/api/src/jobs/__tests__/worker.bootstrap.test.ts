@@ -239,6 +239,7 @@ describe('createWorker', () => {
       'account.recalculate',
       'asset-price.historical-backfill',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'worker.heartbeat',
       // ensureFinancialEmailQueues always creates all six financial-email queues (budget,
@@ -269,6 +270,13 @@ describe('createWorker', () => {
       expect.not.objectContaining({ policy: 'short', singletonKey: expect.anything() }),
     );
     expect(createQueueMock).toHaveBeenCalledBefore(workMock);
+    // pg-boss asserts queue names and schedule keys against /^[\w.\-/]+$/ at runtime; a mocked
+    // boss would not, so a bad name only showed up as a worker that never started.
+    const PG_BOSS_NAME = /^[\w.\-/]+$/;
+    for (const [queue] of createQueueMock.mock.calls) expect(queue).toMatch(PG_BOSS_NAME);
+    const scheduled = scheduleMock.mock.calls as [string, string, unknown, undefined | { key?: string; singletonKey?: string }][];
+    const scheduleNames = scheduled.flatMap(([queue, , , options]) => [queue, options?.key, options?.singletonKey]).filter((name) => name !== undefined);
+    for (const name of scheduleNames) expect(name).toMatch(PG_BOSS_NAME);
     expect(workMock).toHaveBeenCalledWith('foundation.health-check', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.initial-sync', { includeMetadata: true }, expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('user.data-export', expect.any(Function));
@@ -312,6 +320,7 @@ describe('createWorker', () => {
       'portfolio.snapshot.auto',
       'portfolio.snapshot.manual',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
@@ -392,6 +401,7 @@ describe('createWorker', () => {
       'exchange-rate.refresh',
       'portfolio.snapshot.auto',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',

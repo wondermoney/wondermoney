@@ -2,8 +2,8 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native'
 
 import { ApiError } from '@/lib/api/errors'
 
-import { AssetCreateRoute, AssetDetailRoute, AssetsRoute, ValuationRoute } from './asset-routes'
-import { assetDetailFixture, assetFixture, assetsFixture } from './test-fixtures'
+import { AssetCreateRoute, AssetDetailRoute, AssetsRoute, CryptoWalletCreateRoute, ValuationRoute } from './asset-routes'
+import { assetDetailFixture, assetFixture, assetsFixture, walletAssetFixture, walletDetailFixture } from './test-fixtures'
 
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
@@ -12,6 +12,25 @@ const mockUseAssets = jest.fn()
 const mockUseAsset = jest.fn()
 const mockCreate = jest.fn()
 const mockRecord = jest.fn()
+const mockCreateWallet = jest.fn()
+const mockToggle = jest.fn()
+const mockDeleteWallet = jest.fn()
+let mockChains: string[] = []
+jest.mock('@/lib/server/use-instance', () => ({ useCryptoWalletChains: () => mockChains }))
+jest.mock('./use-crypto-wallet-writes', () => {
+  const idle = () => ({ mutateAsync: jest.fn(), isPending: false })
+  return {
+    ...jest.requireActual('./use-crypto-wallet-writes'),
+    useCreateCryptoWallet: () => ({ mutateAsync: mockCreateWallet, isPending: false }),
+    useSetCryptoWalletTokenTracked: () => ({ mutateAsync: mockToggle, isPending: false }),
+    useAddCryptoWalletAddress: idle,
+    useSetCryptoWalletAddressLabel: idle,
+    useRemoveCryptoWalletAddress: idle,
+    useSyncCryptoWallet: idle,
+    useUpdateCryptoWallet: idle,
+    useDeleteCryptoWallet: () => ({ mutateAsync: mockDeleteWallet, isPending: false }),
+  }
+})
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: mockReplace }), useLocalSearchParams: () => mockParams }))
 jest.mock('./use-manual-assets', () => ({ useManualAssets: () => mockUseAssets(), useManualAsset: (id: number | null) => mockUseAsset(id) }))
 jest.mock('@/features/loans/use-loan-currencies', () => ({ useLoanCurrencies: () => ({ isLoading: false, data: { currencies: [{ currencyKey: 1, code: 'EUR', description: 'Euro' }] } }) }))
@@ -24,15 +43,16 @@ const pressable = (label: string, onPress: () => void) => {
   const Native = jest.requireActual<typeof import('react-native')>('react-native')
   return <Native.Pressable key={label} accessibilityRole="button" accessibilityLabel={label} onPress={onPress}><Native.Text>{label}</Native.Text></Native.Pressable>
 }
-jest.mock('./assets-screen', () => ({ AssetsScreen: ({ state, onOpenAsset, onCreateAsset }: { state: { status: string }; onOpenAsset: (id: number) => void; onCreateAsset: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{state.status}</Native.Text>{pressable('Asset row', () => onOpenAsset(7))}{pressable('Add', onCreateAsset)}</> } }))
-jest.mock('./asset-detail-screen', () => ({ AssetDetailScreen: ({ state, onBack, onUpdateValue }: { state: { status: string }; onBack: () => void; onUpdateValue: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{state.status}</Native.Text>{pressable('Back', onBack)}{pressable('Update value', onUpdateValue)}</> } }))
+jest.mock('./assets-screen', () => ({ AssetsScreen: ({ state, onOpenAsset, onCreateAsset, onCreateWallet }: { state: { status: string }; onOpenAsset: (id: number) => void; onCreateAsset: () => void; onCreateWallet?: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{state.status}</Native.Text>{pressable('Asset row', () => onOpenAsset(7))}{pressable('Add', onCreateAsset)}{onCreateWallet ? pressable('Add wallet', onCreateWallet) : null}</> } }))
+jest.mock('./asset-detail-screen', () => ({ AssetDetailScreen: ({ state, onBack, onUpdateValue, wallet }: { state: { status: string }; onBack: () => void; onUpdateValue: () => void; wallet?: { onToggleToken: (id: number, tracked: boolean) => Promise<unknown>; onDeleteWallet: () => Promise<unknown> } }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{state.status}</Native.Text>{pressable('Back', onBack)}{pressable('Update value', onUpdateValue)}{wallet ? pressable('Tick XYZ', () => void wallet.onToggleToken(44, true)) : null}{wallet ? pressable('Remove wallet', () => void wallet.onDeleteWallet()) : null}</> } }))
+jest.mock('./crypto-wallet-create-screen', () => ({ CryptoWalletCreateScreen: ({ chains, onCreate }: { chains: string[]; onCreate: (value: unknown) => Promise<unknown> }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); const [result, setResult] = jest.requireActual<typeof import('react')>('react').useState('none'); return <><Native.Text>{`chains:${chains.join(',')}`}</Native.Text><Native.Text>{`result:${result}`}</Native.Text>{pressable('Create wallet', () => void onCreate({ name: 'Cold storage' }).then((outcome) => setResult(JSON.stringify(outcome))))}</> } }))
 jest.mock('./asset-create-screen', () => ({ AssetCreateScreen: ({ userCurrency, outcome, onCreate }: { userCurrency: string | null; outcome: string | null; onCreate: (value: unknown) => Promise<void> }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{`currency:${userCurrency}`}</Native.Text><Native.Text>{`outcome:${outcome}`}</Native.Text>{pressable('Create', () => void onCreate({ name: 'Car' }))}</> } }))
 jest.mock('./valuation-screen', () => ({ ValuationScreen: ({ assetName, outcome, onSave }: { assetName: string | null; outcome: string | null; onSave: (value: unknown) => Promise<void> }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{`asset:${assetName}`}</Native.Text><Native.Text>{`outcome:${outcome}`}</Native.Text>{pressable('Save', () => void onSave({ value: 1, date: '2026-11-10' }))}</> } }))
 
 const loaded = (data: unknown) => ({ isInvalidId: false, isAccessTransition: false, isLoading: false, isNotFound: false, data, isRefreshFailure: false, isRefreshing: false, refetch: jest.fn() })
 
 describe('asset routes', () => {
-  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseAssets.mockReset(); mockUseAsset.mockReset(); mockCreate.mockReset(); mockRecord.mockReset(); mockParams = {} })
+  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseAssets.mockReset(); mockUseAsset.mockReset(); mockCreate.mockReset(); mockRecord.mockReset(); mockCreateWallet.mockReset(); mockToggle.mockReset(); mockDeleteWallet.mockReset(); mockChains = []; mockParams = {} })
 
   it('opens an asset and the add form from the list', async () => {
     mockUseAssets.mockReturnValue(loaded(assetsFixture()))
@@ -88,5 +108,49 @@ describe('asset routes', () => {
     mockRecord.mockRejectedValueOnce(new ApiError('demo-forbidden'))
     await fireEvent.press(view.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(view.getByText('outcome:demo')).toBeOnTheScreen())
+  })
+
+  it('offers Add crypto wallet only when the server reads a chain, and opens its form', async () => {
+    mockUseAssets.mockReturnValue(loaded(assetsFixture()))
+    const off = await render(<AssetsRoute />)
+    expect(off.queryByRole('button', { name: 'Add wallet' })).not.toBeOnTheScreen()
+    await off.unmount()
+    mockChains = ['ethereum']
+    const on = await render(<AssetsRoute />)
+    await fireEvent.press(on.getByRole('button', { name: 'Add wallet' }))
+    expect(mockPush).toHaveBeenCalledWith('/assets/crypto-wallet')
+  })
+
+  it('creates a wallet and opens it, or answers with why it failed', async () => {
+    mockChains = ['bitcoin', 'ethereum']
+    mockCreateWallet.mockResolvedValueOnce({ asset: walletAssetFixture, wallet: walletDetailFixture().wallet })
+    const view = await render(<CryptoWalletCreateRoute />)
+    expect(view.getByText('chains:bitcoin,ethereum')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Create wallet' }))
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith({ pathname: '/assets/[assetId]', params: { assetId: '21' } }))
+    mockCreateWallet.mockRejectedValueOnce(new ApiError('http', 400, { serverCode: 'crypto_wallet_address_invalid', addressIndex: 0 }))
+    await fireEvent.press(view.getByRole('button', { name: 'Create wallet' }))
+    await waitFor(() => expect(view.getByText('result:{"kind":"address-invalid","addressIndex":0}')).toBeOnTheScreen())
+  })
+
+  it("ticks a wallet's token through the PATCH write", async () => {
+    mockParams = { assetId: '21' }
+    mockUseAsset.mockReturnValue(loaded(walletDetailFixture()))
+    mockToggle.mockResolvedValue({})
+    const view = await render(<AssetDetailRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Tick XYZ' }))
+    await waitFor(() => expect(mockToggle).toHaveBeenCalledWith({ assetId: 21, tokenId: 44, tracked: true }))
+  })
+
+  it('goes back to Assets once the wallet is removed, and stays when that fails', async () => {
+    mockParams = { assetId: '21' }
+    mockUseAsset.mockReturnValue(loaded(walletDetailFixture()))
+    mockDeleteWallet.mockRejectedValueOnce(new ApiError('network')).mockResolvedValueOnce(undefined)
+    const view = await render(<AssetDetailRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Remove wallet' }))
+    await waitFor(() => expect(mockDeleteWallet).toHaveBeenCalledWith({ assetId: 21 }))
+    expect(mockReplace).not.toHaveBeenCalled()
+    await fireEvent.press(view.getByRole('button', { name: 'Remove wallet' }))
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/assets'))
   })
 })

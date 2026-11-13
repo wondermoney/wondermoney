@@ -12,10 +12,11 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.6 only added files (manual assets, loan rate periods, reimbursement links), a loan rate type and
- * optional fields (a loan's secured asset, a budget's month start day, which defaults to the 1st, a
- * merchant's website and logo URL), which an older export simply does not have, so there is nothing to
- * migrate yet. Another major version is refused.
+ * 1.7 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
+ * and tokens), a loan rate type, a manual asset kind and optional fields (a loan's secured asset, a
+ * budget's month start day, which defaults to the 1st, a merchant's website and logo URL), which an
+ * older export simply does not have, so there is nothing to migrate yet. Another major version is
+ * refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -265,12 +266,23 @@ const manualAsset = z.object({
   growthStartDate: day.nullable(),
   id,
   isPrivate: z.boolean(),
-  kind: z.enum(['other', 'property', 'valuable', 'vehicle']),
+  kind: z.enum(['crypto_wallet', 'other', 'property', 'valuable', 'vehicle']),
   name: name(255),
   notes: text(10_000),
   ownerMemberId: ref,
   purchaseDate: day.nullable(),
   purchasePrice: optionalDecimal,
+});
+// The address is checked again as a public one when it is restored (`household-restore.ts`).
+const cryptoWalletAddress = z.object({ address: z.string().min(1).max(200), chain: z.enum(['bitcoin', 'ethereum']), id, kind: z.enum(['address', 'xpub']), label: text(100), manualAssetId: id });
+const cryptoWalletToken = z.object({
+  addressId: id,
+  balance: z.string().regex(/^\d{1,78}$/u),
+  contractAddress: z.string().regex(/^0x[0-9a-f]{40}$/u).nullable(),
+  decimals: z.number().int().min(0).max(36),
+  name: text(255),
+  symbol: name(32),
+  tracked: z.boolean(),
 });
 const manualAssetValuation = z.object({ date: day, manualAssetId: id, note: text(10_000), value: decimal });
 const loanAdjustment = z.object({ amount: decimal, effectiveDate: day, loanId: id, reason: text(10_000), type: z.enum(['BALANCE_CORRECTION', 'CAPITALIZED_INTEREST', 'FEE', 'PRINCIPAL_DECREASE', 'PRINCIPAL_INCREASE', 'WRITE_OFF']) });
@@ -338,6 +350,8 @@ export const DATA_FILES = {
   'budgets': budget,
   'categories': category,
   'category-settings': categorySetting,
+  'crypto-wallet-addresses': cryptoWalletAddress,
+  'crypto-wallet-tokens': cryptoWalletToken,
   'goal-account-links': goalAccountLink,
   'goal-activities': goalActivity,
   'goal-transaction-fundings': goalFunding,
@@ -429,6 +443,8 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'transactionId', file: 'loan-repayments', target: 'transactions' },
   { field: 'ownerMemberId', file: 'manual-assets', target: 'members' },
   { field: 'manualAssetId', file: 'manual-asset-valuations', target: 'manual-assets' },
+  { field: 'manualAssetId', file: 'crypto-wallet-addresses', target: 'manual-assets' },
+  { field: 'addressId', file: 'crypto-wallet-tokens', target: 'crypto-wallet-addresses' },
   { field: 'linkedAccountId', file: 'portfolios', target: 'accounts' },
   { field: 'ownerMemberId', file: 'portfolios', target: 'members' },
   { field: 'memberId', file: 'portfolio-transactions', target: 'members' },

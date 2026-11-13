@@ -52,6 +52,13 @@ const allowedMessageClaims = new Set([
   "en:common.json:toast-success-processing",
   "pt:common.json:toast-success-processing",
   "es:common.json:toast-success-processing",
+  // Crypto wallets name what they are. The app shows these only on a server
+  // whose operator set up a blockchain explorer, where the feature works.
+  ...locales.flatMap((locale) =>
+    ["assets.kinds.crypto_wallet", "assets.wallet.addTitle", "assets.wallet.actions.add"].map(
+      (key) => `${locale}:assets.json:${key}`,
+    ),
+  ),
 ]);
 
 /**

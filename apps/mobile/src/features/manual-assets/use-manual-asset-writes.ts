@@ -31,7 +31,7 @@ export function classifyManualAssetWriteFailure(error: unknown): ManualAssetWrit
  * An asset's value is part of net worth, today and in its history, so a write refreshes the
  * assets and the whole ['net-worth', epoch] family (summary and history) with them.
  */
-function refreshAfterWrite(queryClient: QueryClient, epochId: number, assetId?: number) {
+export function refreshAfterWrite(queryClient: QueryClient, epochId: number, assetId?: number) {
   void Promise.all([
     queryClient.invalidateQueries({ queryKey: manualAssetsKey(epochId), exact: true }),
     ...(assetId === undefined ? [] : [queryClient.invalidateQueries({ queryKey: manualAssetKey(epochId, assetId), exact: true })]),

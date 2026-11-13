@@ -8,10 +8,15 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import type {
+  CryptoChain,
   GetManualAssetsResponse,
   ManualAsset,
 } from "@/lib/api/manual-asset/types";
-import { figure, manualAsset } from "@/lib/manual-assets/asset-fixture";
+import {
+  cryptoWalletAsset,
+  figure,
+  manualAsset,
+} from "@/lib/manual-assets/asset-fixture";
 
 import enAssets from "../../../../messages/en/assets.json";
 import enCommon from "../../../../messages/en/common.json";
@@ -21,6 +26,15 @@ import AssetsClient from "./assets-client";
 const state = vi.hoisted(() => ({
   data: undefined as GetManualAssetsResponse | undefined,
   push: vi.fn(),
+  chains: [] as CryptoChain[],
+}));
+
+vi.mock("@/lib/api/instance/useInstance", () => ({
+  useCryptoWalletChains: () => state.chains,
+}));
+vi.mock("@/components/manual-asset/CryptoWalletFormDrawer", () => ({
+  default: ({ open, chains }: { open: boolean; chains: string[] }) =>
+    open ? <div data-testid="wallet-form">{chains.join(",")}</div> : null,
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -51,6 +65,7 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   state.push.mockReset();
+  state.chains = [];
 });
 
 const m = enAssets.assets;
@@ -190,4 +205,40 @@ test("a row opens the asset's page", async () => {
 
   await user.click(screen.getByText("Family home"));
   assert.deepEqual(state.push.mock.calls, [["/assets/42"]]);
+});
+
+test("without a blockchain explorer on the server, no crypto wallet is offered", () => {
+  renderPage([]);
+  assert.equal(
+    screen.queryByRole("button", { name: m.wallet.actions.add }),
+    null,
+  );
+  cleanup();
+  renderPage([manualAsset()]);
+  assert.equal(
+    screen.queryByRole("button", { name: m.wallet.actions.add }),
+    null,
+  );
+});
+
+test("with chains to read, a crypto wallet can be added on those chains", async () => {
+  state.chains = ["bitcoin"];
+  const user = userEvent.setup();
+  renderPage([manualAsset()]);
+
+  await user.click(screen.getByRole("button", { name: m.wallet.actions.add }));
+  assert.equal(screen.getByTestId("wallet-form").textContent, "bitcoin");
+  cleanup();
+
+  renderPage([]);
+  screen.getByRole("button", { name: m.wallet.actions.add });
+});
+
+test("a wallet is listed like any asset, as a crypto wallet in US dollars", () => {
+  renderPage([manualAsset(), cryptoWalletAsset({ manualAssetKey: 2 })]);
+
+  const row = screen.getByRole("row", { name: /Hardware wallet/ });
+  within(row).getByText(m.kinds.crypto_wallet);
+  within(row).getByText(figure(/\$1,200\.00/));
+  within(row).getByText(figure("€1,100.00"));
 });

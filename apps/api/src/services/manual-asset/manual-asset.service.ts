@@ -7,13 +7,14 @@ import { Loan } from '@entity/Loan';
 import { ManualAsset } from '@entity/ManualAsset';
 import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { Tenant } from '@entity/Tenant';
+import { type CryptoWalletDto, markWalletPartsDeleted, walletOf } from '@service/crypto-wallet/wallet-parts';
 import { type CurrencyPair, loadRateTable, type RateScope, rateScope, type RateTable } from '@service/currency/exchange-rate';
 import { outstandingPrincipalsOn } from '@service/loan/loan-balance';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, ForbiddenError, NotFoundError } from '@utils/errors';
 import { Money } from '@utils/money';
 
-import type { ManualAssetKind } from './manual-asset-types';
+import { ManualAssetKind } from './manual-asset-types';
 import { type AssetValueSeriesPoint, buildValueSeries, latestValuationOn, type ValuedAsset, valueOn } from './manual-asset-valuation';
 
 /**
@@ -157,6 +158,7 @@ const ASSET_POPULATE = ['currencyKey', 'ownerAppuserKey'] as const;
 
 export async function addValuation(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, input: { date?: Date; note?: null | string; value: number }, now = new Date()) {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
+  assertValuedByHand(loaded.asset);
   const date = input.date ?? utcDayOf(now);
   // One valuation a day: a second one for the same day corrects the first.
   const sameDay = loaded.valuations.find((valuation) => sameUtcDay(valuation.valuationDate, date));
@@ -244,6 +246,7 @@ export async function deleteManualAsset(em: EntityManager, viewer: AssetViewer, 
   const deletedAt = new Date();
   asset.deletedAt = deletedAt;
   for (const valuation of valuations) valuation.deletedAt = deletedAt;
+  await markWalletPartsDeleted(em, asset, deletedAt);
   // Every member's loans on it lose the link and stay as they are.
   const securedLoans = await em.find(Loan, { securedAssetKey: asset, tenantKey: { tenantKey: viewer.tenantKey } });
   for (const loan of securedLoans) loan.securedAssetKey = null;
@@ -259,12 +262,14 @@ export async function deleteValuation(em: EntityManager, viewer: AssetViewer, ma
   await em.flush();
 }
 
-export async function getManualAsset(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, now = new Date()): Promise<{ asset: ManualAssetDto; history: AssetValueSeriesPoint[]; valuations: ManualAssetValuationDto[] }> {
+/** An asset with its value history and valuations; a crypto wallet also with its addresses and tokens. */
+export async function getManualAsset(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, now = new Date()): Promise<{ asset: ManualAssetDto; history: AssetValueSeriesPoint[]; valuations: ManualAssetValuationDto[]; wallet: CryptoWalletDto | null }> {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
   return {
     asset: await describeAsset(em, viewer, loaded, now),
     history: buildValueSeries(toValuedAsset(loaded), currentValueDate(loaded, now)),
     valuations: sortedValuationDtos(loaded),
+    wallet: loaded.asset.kind === ManualAssetKind.CRYPTO_WALLET ? await walletOf(em, loaded.asset) : null,
   };
 }
 
@@ -393,7 +398,11 @@ export async function updateManualAsset(em: EntityManager, viewer: AssetViewer, 
     asset.isPrivate = input.isPrivate;
   }
   if (input.name !== undefined) asset.name = input.name;
-  if (input.kind !== undefined) asset.kind = input.kind;
+  if (input.kind !== undefined && input.kind !== asset.kind) {
+    // A wallet is valued by its sync and any other asset by hand: neither turns into the other.
+    if (input.kind === ManualAssetKind.CRYPTO_WALLET || asset.kind === ManualAssetKind.CRYPTO_WALLET) throw new BadRequestError('A crypto wallet cannot change kind', ERROR_CODE.CRYPTO_WALLET_REQUIRED);
+    asset.kind = input.kind;
+  }
   if (input.notes !== undefined) asset.notes = input.notes;
   if (input.purchaseDate !== undefined) asset.purchaseDate = input.purchaseDate;
   if (input.purchasePrice !== undefined) asset.purchasePrice = input.purchasePrice;
@@ -409,6 +418,7 @@ export async function updateManualAsset(em: EntityManager, viewer: AssetViewer, 
 
 export async function updateValuation(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, valuationKey: number, input: { date?: Date; note?: null | string; value?: number }, now = new Date()) {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
+  assertValuedByHand(loaded.asset);
   const valuation = findValuationOrThrow(loaded, valuationKey);
   const { date } = input;
   if (date !== undefined) {
@@ -425,6 +435,11 @@ export async function updateValuation(em: EntityManager, viewer: AssetViewer, ma
 /** Tenant and privacy as explicit criteria: shared assets of the household, and the viewer's own private ones. */
 export function visibleAssetsWhere(viewer: Pick<AssetViewer, 'appuserKey' | 'tenantKey'>): FilterQuery<ManualAsset> {
   return { $or: [{ isPrivate: false }, { ownerAppuserKey: { appuserKey: viewer.appuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
+}
+
+/** A crypto wallet's value comes from its sync: a valuation by hand would be overwritten, or contradict it. */
+function assertValuedByHand(asset: ManualAsset): void {
+  if (asset.kind === ManualAssetKind.CRYPTO_WALLET) throw new ConflictError('A crypto wallet is valued by its sync, not by hand', ERROR_CODE.CRYPTO_WALLET_VALUE_SYNCED);
 }
 
 async function describeAsset(em: EntityManager, viewer: AssetViewer, loaded: LoadedManualAsset, now: Date): Promise<ManualAssetDto> {

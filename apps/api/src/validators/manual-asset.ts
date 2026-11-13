@@ -25,6 +25,9 @@ const growthRule = z.object({
   startDate: day.nullish(),
 });
 
+/** The kinds valued by hand. A crypto wallet has its own route (`validators/crypto-wallet.ts`). */
+const handValuedKind = z.enum(ManualAssetKind).refine((kind) => kind !== ManualAssetKind.CRYPTO_WALLET, { message: 'Create a crypto wallet from its addresses' });
+
 const assetParams = z.object({ manualAssetId: positiveIntId });
 const valuationParams = z.object({ manualAssetId: positiveIntId, valuationId: positiveIntId });
 
@@ -33,7 +36,7 @@ export const createManualAssetSchema = z.object({
     currencyKey: positiveIntId,
     growthRule: growthRule.nullish(),
     isPrivate: booleanLike.optional(),
-    kind: z.enum(ManualAssetKind),
+    kind: handValuedKind,
     name,
     notes: z.string().max(10_000).nullish(),
     purchaseDate: pastDay.nullish(),
@@ -48,7 +51,7 @@ export const updateManualAssetSchema = z.object({
     archived: booleanLike.optional(),
     growthRule: growthRule.nullish(),
     isPrivate: booleanLike.optional(),
-    kind: z.enum(ManualAssetKind).optional(),
+    kind: handValuedKind.optional(),
     name: name.optional(),
     notes: z.string().max(10_000).nullish(),
     purchaseDate: pastDay.nullish(),
@@ -68,7 +71,7 @@ export const importManualAssetsSchema = z.object({
     assets: z.array(z.object({
       currencyCode: z.string().trim().regex(/^[a-z]{3}$/i, 'Currency must be a three-letter code').transform((value) => value.toUpperCase()),
       isPrivate: booleanLike.optional(),
-      kind: z.enum(ManualAssetKind),
+      kind: handValuedKind,
       name,
       notes: z.string().max(10_000).nullish(),
       valuationDate: pastDay.optional(),

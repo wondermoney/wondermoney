@@ -1,0 +1,77 @@
+---
+title: Carteiras de criptomoedas
+description: Conta no teu património a Bitcoin e a Ethereum guardadas em endereços públicos, avaliadas a partir da blockchain uma vez por dia.
+---
+
+Uma carteira de criptomoedas é um bem cujo valor o WonderMoney calcula por ti. Dás-lhe um ou mais endereços públicos; uma vez por dia, o servidor lê o que eles têm num explorador de blocos e avalia-o aos preços desse dia. Tal como uma casa ou um carro, conta para o teu património (vê [Casas, veículos e outros bens](/pt/docs/portfolio-investments/manual-assets)), mas nunca introduzes o valor.
+
+<Callout type="warn" title="Só endereços públicos">
+Nunca introduzas uma chave privada nem uma frase de recuperação (as 12 a 24 palavras que a tua carteira te pediu para anotar). Quem tiver uma delas pode gastar as tuas moedas, e o WonderMoney nunca precisa delas para ler um saldo. A aplicação recusa tudo o que pareça uma delas, limpa o campo e não a envia, não a guarda nem a regista.
+</Callout>
+
+## Quando estão disponíveis
+
+As carteiras de criptomoedas só aparecem quando o operador do teu servidor as liga, escolhendo um explorador de blocos para cada rede ([Configurar a tua instância](/pt/docs/self-hosting/configure#carteiras-de-criptomoedas)). Sem ele, Adicionar carteira de criptomoedas não aparece. Um servidor pode ligar a Bitcoin, a Ethereum ou ambas, e a aplicação só oferece as redes que ele tem. O serviço alojado da WonderMoney não as liga.
+
+## O que podes adicionar
+
+| Rede | O que introduzir | O que é lido |
+|---|---|---|
+| Bitcoin | Um endereço (que começa por `1`, `3`, `bc1q` ou `bc1p`), ou uma chave pública estendida (`xpub`, `ypub` ou `zpub`) | O saldo em BTC |
+| Ethereum | Um endereço `0x` | O saldo em ETH e os tokens ERC-20 que o endereço tem |
+
+Uma chave pública estendida abrange todos os endereços que uma conta da carteira já usou. O WonderMoney lê os endereços de receção e de troco por ordem, até encontrar 20 seguidos sem uso. A maioria das aplicações de carteira mostra-a nas definições ou nos detalhes da conta, às vezes como "chave pública da conta". Usa a que começa por `xpub`, `ypub` ou `zpub`, nunca uma que comece por `xprv`, `yprv` ou `zprv`.
+
+Só é lida a própria rede Ethereum: os tokens noutras redes que usam os mesmos endereços `0x` não são.
+
+## Adicionar uma carteira
+
+1. Abre Bens e escolhe Adicionar carteira de criptomoedas.
+2. Introduz um nome para a carteira.
+3. Adiciona cada endereço: escolhe a rede, cola o endereço público e, se quiseres, dá-lhe uma etiqueta. Uma carteira tem até 20 endereços, e o mesmo endereço só pode ser adicionado uma vez.
+4. Escolhe se a carteira é privada e, se quiseres, acrescenta notas.
+5. Guarda.
+
+A primeira sincronização começa logo. Até terminar, a carteira não tem valor e não conta para o teu património.
+
+Mais tarde, podes adicionar, mudar a etiqueta e remover endereços na página da carteira. Muda o nome da carteira, as notas ou a privacidade, arquiva-a ou elimina-a como qualquer outro bem.
+
+## Sincronização
+
+O servidor sincroniza todas as carteiras uma vez por dia, de madrugada (UTC). Também sincroniza uma carteira logo depois de a criares, de adicionares um endereço ou de marcares um token. Para sincronizar agora, abre a carteira e escolhe Sincronizar agora.
+
+Cada endereço mostra o seu próprio estado:
+
+- **Pendente**: ainda não foi lido.
+- **Sincronizado**: a hora da última leitura. Os saldos são dessa altura.
+- **Falhou**: a última tentativa não resultou, e porquê: o explorador demorou demasiado, estava sobrecarregado, estava indisponível ou recusou o endereço, enviou uma resposta que o servidor não conseguiu ler, ou a rede foi desligada no servidor.
+
+Um endereço que falha não trava os outros: esses continuam a sincronizar, e o que falhou mantém os saldos da última leitura bem-sucedida. O servidor volta a tentar na sincronização seguinte.
+
+## Escolher que tokens contam
+
+As moedas nativas, BTC e ETH, contam desde o início. Os tokens ERC-20 encontrados num endereço Ethereum começam desmarcados: marca os que queres contar. Um token desmarcado é ignorado, tenha o que tiver.
+
+Os endereços recebem muitas vezes tokens que ninguém pediu, enviados na esperança de que os procures ou tentes vendê-los. Deixa-os desmarcados.
+
+Os tokens têm preço pelo símbolo, não pelo contrato. Um token sem valor pode chamar-se `USDC` e seria então avaliado como USDC. Marca só os tokens que reconheces, e confirma o endereço do contrato que aparece ao lado de cada um.
+
+## Como o valor é calculado
+
+- O valor de cada dia é a soma, pelos tokens marcados, da quantidade detida vezes o preço desse dia em dólares americanos. Uma carteira tem um valor por dia; entre sincronizações mantém o último.
+- Uma carteira está sempre em dólares americanos, porque as criptomoedas têm preço em dólares. O teu património converte-a para a tua moeda como qualquer outro bem noutra moeda.
+- Os preços vêm dos fornecedores de dados de mercado do servidor. Se um token marcado com saldo não tiver preço, o valor desse dia não é atualizado: a carteira mantém o último valor e indica o token sem preço. Desmarca-o, ou espera até ter preço. Num servidor cujos fornecedores não dão preços de criptomoedas, a carteira mostra os saldos mas não tem valor.
+- Não podes registar um valor à mão. Podes continuar a remover uma avaliação na lista Avaliações, na página da carteira.
+- Um bem de outro tipo não pode passar a carteira de criptomoedas, e uma carteira não pode passar a outro tipo.
+
+## Privacidade
+
+Uma carteira é partilhada com o teu agregado, a não ser que a tornes privada, tal como os outros bens: uma carteira partilhada, com os seus endereços, é visível para os dois membros; uma privada só para ti. Vê [Bens privados num agregado](/pt/docs/portfolio-investments/manual-assets#bens-privados-num-agregado).
+
+Um endereço é público, mas continua a dizer respeito a ti. Para ler os saldos, o servidor pergunta pelo endereço ao explorador de blocos que o operador escolheu, incluindo cada endereço derivado de uma chave pública estendida. O explorador vê esses endereços e o endereço IP do servidor, e consegue perceber que estão a ser lidos em conjunto. Não lhe é enviado o teu nome, a tua conta, os teus montantes nem mais nada do WonderMoney. Se isso te importa, pergunta ao operador que explorador o servidor usa.
+
+## Páginas relacionadas
+
+- [Casas, veículos e outros bens](/pt/docs/portfolio-investments/manual-assets)
+- [Configurar a tua instância](/pt/docs/self-hosting/configure#carteiras-de-criptomoedas)
+- [Privacidade das contas](/pt/docs/household/account-privacy)

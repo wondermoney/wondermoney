@@ -1,8 +1,8 @@
 import Papa from "papaparse";
 
 import {
+  type EditableManualAssetKind,
   MANUAL_ASSET_KINDS,
-  type ManualAssetKind,
 } from "@/lib/api/manual-asset/types";
 import { parseLocaleNumber } from "@/lib/utils/number";
 
@@ -33,7 +33,7 @@ export function buildManualAssetTemplateCsv() {
 
 export interface ManualAssetImportRow {
   name: string;
-  kind: ManualAssetKind;
+  kind: EditableManualAssetKind;
   value: number;
   /** `YYYY-MM-DD`; absent means today. */
   valuationDate?: string;
@@ -133,7 +133,7 @@ export function parseManualAssetsCsv(
     const name = cell("name");
     if (!name || name.length > 255) issues.push("name");
 
-    const kind = cell("kind").toLowerCase() as ManualAssetKind;
+    const kind = cell("kind").toLowerCase() as EditableManualAssetKind;
     if (!MANUAL_ASSET_KINDS.includes(kind)) issues.push("kind");
 
     const value = parseLocaleNumber(cell("value"), options.locale);

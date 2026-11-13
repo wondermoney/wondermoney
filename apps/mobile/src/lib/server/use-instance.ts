@@ -64,6 +64,18 @@ export function useSignupOpen(): boolean {
 }
 
 /**
+ * The chains the server reads crypto wallets on (`features.cryptoWalletChains`). Empty while the
+ * description loads, when it can't be fetched, on an older server and when the operator has not
+ * configured an explorer: "Add crypto wallet" stays hidden then.
+ */
+export function useCryptoWalletChains(): readonly ('bitcoin' | 'ethereum')[] {
+  const { data } = useInstance()
+  return data?.features.cryptoWalletChains ?? NO_CHAINS
+}
+
+const NO_CHAINS: readonly ('bitcoin' | 'ethereum')[] = []
+
+/**
  * Which build the connected server runs, for the More screen's version line. Null until the
  * description arrives, and on an older server that does not report a version.
  */

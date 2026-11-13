@@ -2055,7 +2055,8 @@
       "property": "Imóvel",
       "vehicle": "Veículo",
       "valuable": "Objeto de valor",
-      "other": "Outro"
+      "other": "Outro",
+      "crypto_wallet": "Carteira de criptomoedas"
     },
     "failures": {
       "demo": "A demonstração é só de leitura, por isso nada foi guardado.",
@@ -2156,6 +2157,107 @@
     "noteOptional": "Nota, opcional",
     "notePlaceholder": "ex.: Estimativa da agência",
     "description": "Registar um valor nunca cria uma transação. Um valor já registado para a mesma data é substituído."
+  },
+  "cryptoWallet": {
+    "add": "Adicionar carteira de criptomoedas",
+    "notValuedYet": "Ainda sem valor",
+    "publicOnly": "Só são aceites endereços públicos: um endereço Bitcoin ou Ethereum, ou uma xpub, ypub ou zpub de Bitcoin. Nunca introduzas uma chave privada nem uma frase de recuperação. Quem tiver uma pode gastar as tuas moedas.",
+    "secretBlocked": "Parecia uma chave privada ou uma frase de recuperação, por isso foi apagada e não foi enviada. Introduz um endereço público.",
+    "chain": "Rede",
+    "address": "Endereço",
+    "label": "Etiqueta",
+    "labelOptional": "Etiqueta, opcional",
+    "chains": {
+      "bitcoin": "Bitcoin",
+      "ethereum": "Ethereum",
+      "unknown": "Outra rede"
+    },
+    "kinds": {
+      "address": "Endereço",
+      "xpub": "Chave pública estendida"
+    },
+    "status": {
+      "pending": "Pendente",
+      "ok": "Sincronizado",
+      "failed": "Falhou"
+    },
+    "errors": {
+      "timeout": "O explorador demorou demasiado a responder.",
+      "rate_limited": "O explorador está a limitar os pedidos. Volta a ser tentado mais tarde.",
+      "unavailable": "Não foi possível contactar o explorador.",
+      "rejected": "O explorador não aceitou este endereço.",
+      "invalid_response": "O explorador enviou uma resposta que não foi possível ler.",
+      "disabled": "Esta rede já não está ativada neste servidor.",
+      "unknown": "A última leitura falhou."
+    },
+    "addressHints": {
+      "bitcoin": "Um endereço que começa por 1, 3 ou bc1, ou uma xpub, ypub ou zpub.",
+      "ethereum": "Um endereço que começa por 0x. São lidos o ETH e os seus tokens."
+    },
+    "fieldErrors": {
+      "address": "Introduz um endereço",
+      "name": "Introduz um nome"
+    },
+    "failures": {
+      "secret-rejected": "Parecia uma chave privada ou uma frase de recuperação, por isso não foi aceite. Introduz um endereço público.",
+      "address-invalid": "Não é um endereço válido para a rede escolhida.",
+      "address-exists": "Este endereço já está na carteira.",
+      "feature-disabled": "As carteiras de criptomoedas não estão ativadas para esta rede neste servidor.",
+      "demo": "A demonstração é só de leitura, por isso nada foi guardado.",
+      "access": "Já não podes alterar esta carteira. Inicia sessão de novo ou fala com o teu agregado.",
+      "mfa": "Confirma que és tu para continuar.",
+      "not-found": "Esta carteira já não existe, ou é privada do outro membro do teu agregado.",
+      "invalid": "Algum dado não é válido. Verifica os campos e tenta de novo.",
+      "invalid-response": "Pode ter sido guardado, mas não foi possível ler a resposta do servidor. Atualiza antes de tentar de novo.",
+      "network-ambiguous": "A ligação caiu, por isso não se sabe se foi guardado. Atualiza antes de tentar de novo.",
+      "general": "Não foi possível guardar. Tenta de novo."
+    },
+    "create": {
+      "title": "Adicionar carteira de criptomoedas",
+      "save": "Adicionar carteira",
+      "saving": "A adicionar",
+      "name": "Nome",
+      "namePlaceholder": "p. ex., Carteira física",
+      "private": "Carteira privada",
+      "addressHeading": "Endereço {{number}}",
+      "removeAddress": "Remover",
+      "removeAddressNumber": "Remover o endereço {{number}}",
+      "addAddress": "Adicionar outro endereço",
+      "numbered": "{{label}}, endereço {{number}}"
+    },
+    "detail": {
+      "title": "Endereços",
+      "lastSynced": "Saldos lidos {{time}}. São lidos de novo todos os dias.",
+      "neverSynced": "Os saldos ainda não foram lidos. A primeira leitura está a caminho.",
+      "tickHint": "Só os tokens assinalados contam para o valor. Os tokens encontrados num endereço são ignorados até os assinalares.",
+      "unpriced": "Não há preço para {{symbols}}, por isso o valor de hoje não foi atualizado. Desassinala um token para o deixar de fora.",
+      "removeTitle": "Remover este endereço?",
+      "removeMessage": "{{address}} e os seus tokens deixam de contar para esta carteira.",
+      "remove": "Remover",
+      "removeFor": "Remover {{address}}",
+      "addAddress": "Adicionar endereço",
+      "adding": "A adicionar",
+      "syncNow": "Sincronizar agora",
+      "syncQueued": "Sincronização pedida. Arrasta para atualizar daqui a pouco para ver os saldos.",
+      "synced": "Sincronizado {{time}}",
+      "balancesAsOf": "Saldos de {{time}}.",
+      "pending": "À espera da primeira leitura",
+      "editLabel": "Editar etiqueta",
+      "editLabelFor": "Editar a etiqueta de {{address}}",
+      "saveLabel": "Guardar etiqueta",
+      "noPrice": "Sem preço",
+      "countToken": "Contar {{symbol}}",
+      "notValuedYet": "Ainda sem valor: o valor aparece depois da primeira sincronização.",
+      "manageOnWeb": "Arquiva esta carteira ou edita as suas notas no WonderMoney na web."
+    },
+    "manage": {
+      "edit": "Editar carteira",
+      "editTitle": "Editar carteira",
+      "save": "Guardar",
+      "remove": "Eliminar carteira",
+      "removeTitle": "Eliminar esta carteira?",
+      "removeMessage": "{{name}}, os seus endereços e o seu histórico de valor são eliminados. Não é possível anular."
+    }
   },
   "budgets": {
     "title": "Orçamentos",

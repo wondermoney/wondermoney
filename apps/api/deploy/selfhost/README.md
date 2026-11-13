@@ -82,6 +82,7 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | CSV imports and receipt copies | an S3-compatible bucket, or the bundled store: `COMPOSE_PROFILES=storage` plus the values in `.env`'s file storage section |
 | Receipt scanning, smart categorisation, CSV column mapping, the assistant | `AI_BASE_URL`, `AI_MODEL` (any OpenAI-compatible endpoint, including Ollama), or `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Ticker search and live prices | `EODHD_API_KEY`, or the free Stooq and CoinGecko providers for prices through `MARKET_DATA_PROVIDERS` |
+| Crypto wallets valued from public addresses | `CRYPTO_BTC_EXPLORER_URL` (a mempool or Esplora API), `CRYPTO_ETH_EXPLORER_URL` (a Blockscout instance), and crypto prices through `MARKET_DATA_PROVIDERS` |
 | A contact form and a support address in the app | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
@@ -100,7 +101,8 @@ To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` 
 Nothing leaves your server for the WonderMoney project. Without configuration, the only
 outside call is the worker's daily download of euro exchange rates from the European Central
 Bank. Everything else is switched on by its setting: email (SMTP or Resend), AI (`AI_BASE_URL` or
-`ANTHROPIC_API_KEY`), market data (EODHD), file storage (S3), off-site backups
+`ANTHROPIC_API_KEY`), market data (EODHD), crypto wallet explorers (`CRYPTO_BTC_EXPLORER_URL`,
+`CRYPTO_ETH_EXPLORER_URL`), file storage (S3), off-site backups
 (`BACKUP_DESTINATION`), error tracking (`SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`), analytics
 (above), Google sign-in, reCAPTCHA, and bank sync (Enable Banking, once a user adds their key or you set `ENABLE_BANKING_APP_ID`). The docs site's self-hosting guide lists each one.
 

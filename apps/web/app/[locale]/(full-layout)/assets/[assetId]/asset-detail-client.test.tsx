@@ -16,10 +16,16 @@ import type { ReactNode } from "react";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import type {
+  CryptoWalletDto,
   GetManualAssetResponse,
   ManualAssetValuation,
 } from "@/lib/api/manual-asset/types";
-import { figure, manualAsset } from "@/lib/manual-assets/asset-fixture";
+import {
+  cryptoWallet,
+  cryptoWalletAsset,
+  figure,
+  manualAsset,
+} from "@/lib/manual-assets/asset-fixture";
 
 import enAssets from "../../../../../messages/en/assets.json";
 import enCommon from "../../../../../messages/en/common.json";
@@ -34,6 +40,12 @@ const state = vi.hoisted(() => ({
   remove: vi.fn(),
   removeValuation: vi.fn(),
   toastError: vi.fn(),
+  toastSuccess: vi.fn(),
+  track: vi.fn(),
+  sync: vi.fn(),
+  addAddress: vi.fn(),
+  updateLabel: vi.fn(),
+  removeAddress: vi.fn(),
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -42,7 +54,31 @@ vi.mock("@/i18n/navigation", () => ({
   ),
   useRouter: () => ({ push: state.push }),
 }));
-vi.mock("sonner", () => ({ toast: { error: state.toastError } }));
+vi.mock("sonner", () => ({
+  toast: { error: state.toastError, success: state.toastSuccess },
+}));
+vi.mock("@/lib/api/instance/useInstance", () => ({
+  useCryptoWalletChains: () => ["bitcoin", "ethereum"],
+}));
+vi.mock("@/lib/api/manual-asset/useCryptoWalletMutations", () => ({
+  useSyncCryptoWallet: () => ({ mutateAsync: state.sync, isPending: false }),
+  useSetWalletTokenTracked: () => ({
+    mutateAsync: state.track,
+    isPending: false,
+  }),
+  useAddWalletAddress: () => ({
+    mutateAsync: state.addAddress,
+    isPending: false,
+  }),
+  useUpdateWalletAddressLabel: () => ({
+    mutateAsync: state.updateLabel,
+    isPending: false,
+  }),
+  useRemoveWalletAddress: () => ({
+    mutateAsync: state.removeAddress,
+    isPending: false,
+  }),
+}));
 vi.mock("@/lib/api/manual-asset/useManualAsset", () => ({
   default: () => ({
     data: state.isError ? undefined : state.data,
@@ -91,6 +127,15 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   };
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+  window.matchMedia ??= ((query: string) => ({
+    matches: true,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  })) as unknown as typeof window.matchMedia;
 });
 
 afterEach(() => {
@@ -102,6 +147,12 @@ afterEach(() => {
     state.remove,
     state.removeValuation,
     state.toastError,
+    state.toastSuccess,
+    state.track,
+    state.sync,
+    state.addAddress,
+    state.updateLabel,
+    state.removeAddress,
   ])
     mock.mockReset();
 });
@@ -124,14 +175,18 @@ const latest: ManualAssetValuation = {
 function renderDetail(
   overrides: Parameters<typeof manualAsset>[0] = {},
   valuations: ManualAssetValuation[] = [latest, older],
+  wallet: CryptoWalletDto | null = null,
 ) {
-  const asset = manualAsset({ lastValuation: valuations[0], ...overrides });
+  const asset = wallet
+    ? cryptoWalletAsset({ lastValuation: valuations[0] ?? null, ...overrides })
+    : manualAsset({ lastValuation: valuations[0], ...overrides });
   state.data = {
     asset,
     valuations,
     history: [...valuations]
       .reverse()
       .map(({ date, value }) => ({ date, value })),
+    wallet,
   };
   render(
     <QueryClientProvider client={new QueryClient()}>
@@ -469,4 +524,273 @@ test("an underwater asset shows the negative equity with a sign and a note, not 
   const section = equityHeading()!.closest("section")!;
   within(section).getByText(figure("−€10,000.00"));
   within(section).getByRole("note");
+});
+
+const w = m.wallet;
+
+const walletValuation: ManualAssetValuation = {
+  manualAssetValuationKey: 300,
+  date: "2026-11-12",
+  value: 1_200,
+  note: null,
+};
+
+/** Two addresses: Bitcoin read, Ethereum failing, with a token not counted and one without a price. */
+function twoAddressWallet() {
+  const base = cryptoWallet();
+  return cryptoWallet({
+    unpricedSymbols: ["XYZ"],
+    addresses: [
+      base.addresses[0],
+      {
+        cryptoWalletAddressKey: 12,
+        chain: "ethereum",
+        kind: "address",
+        address: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+        label: null,
+        status: "failed",
+        errorCode: "rate_limited",
+        lastAttemptAt: "2026-11-12T04:31:00.000Z",
+        lastSyncedAt: null,
+        tokens: [
+          {
+            cryptoWalletTokenKey: 22,
+            native: true,
+            contractAddress: null,
+            symbol: "ETH",
+            name: "Ether",
+            quantity: "0.5",
+            tracked: true,
+            priceMissing: false,
+          },
+          {
+            cryptoWalletTokenKey: 23,
+            native: false,
+            contractAddress: "0x0000000000000000000000000000000000000001",
+            symbol: "USDC",
+            name: "USD Coin",
+            quantity: "250",
+            tracked: false,
+            priceMissing: false,
+          },
+          {
+            cryptoWalletTokenKey: 24,
+            native: false,
+            contractAddress: "0x0000000000000000000000000000000000000002",
+            symbol: "XYZ",
+            name: null,
+            quantity: "10",
+            tracked: true,
+            priceMissing: true,
+          },
+        ],
+      },
+    ],
+  });
+}
+
+test("a wallet's value comes from its balances: no value is recorded or edited by hand", () => {
+  renderDetail({}, [walletValuation], twoAddressWallet());
+
+  screen.getByRole("heading", { name: "Hardware wallet" });
+  screen.getAllByText(m.kinds.crypto_wallet);
+  assert.equal(
+    screen.queryByRole("button", { name: m.actions.updateValue }),
+    null,
+  );
+  assert.equal(
+    screen.queryByRole("button", { name: m.detail.valuations.edit }),
+    null,
+  );
+  assert.equal(screen.queryByTestId("valuation-drawer"), null);
+  screen.getByRole("button", { name: w.actions.syncNow });
+  // Renaming, privacy and removal go through the usual flows.
+  screen.getByRole("button", { name: m.actions.edit });
+  screen.getByRole("button", { name: m.actions.delete });
+});
+
+test("each address shows its network, kind, short address, and how its last read went", () => {
+  renderDetail({}, [walletValuation], twoAddressWallet());
+
+  const cold = screen.getByRole("listitem", { name: "Cold storage" });
+  // The network as a badge; the coin's own name is in its balance row.
+  within(cold).getByText(w.chains.bitcoin, { selector: "div" });
+  within(cold).getByText(w.addressKinds.address);
+  within(cold).getByText("bc1qar0srr…wf5mdq");
+  within(cold).getByText(/^Balances read on /);
+  within(cold).getByText("BTC");
+  within(cold).getByText("0.01234567");
+
+  const eth = screen.getByRole("listitem", { name: w.chains.ethereum });
+  within(eth).getByText(
+    "The last read failed: the explorer asked to slow down.",
+  );
+  // A ticked token with no price is flagged, and today's value said not to have moved.
+  within(eth).getByText(w.tokens.noPrice);
+  screen.getByText(
+    "Today's value was not updated: there is no price for XYZ. Untick them to count the rest.",
+  );
+  screen.getByText(w.detail.howItWorks);
+});
+
+test("a new address waits for its first read", () => {
+  const base = cryptoWallet();
+  renderDetail(
+    { value: null, valueInUserCurrency: null, lastValuation: null },
+    [],
+    cryptoWallet({
+      lastSyncedAt: null,
+      addresses: [
+        {
+          ...base.addresses[0],
+          status: "pending",
+          lastSyncedAt: null,
+          lastAttemptAt: null,
+          tokens: [],
+        },
+      ],
+    }),
+  );
+
+  screen.getByText(w.status.pending);
+  screen.getByText(w.tokens.none);
+  screen.getByText(w.detail.noValueYet);
+});
+
+test("ticking a token counts it, and unticking ignores it", async () => {
+  state.track.mockResolvedValue(twoAddressWallet());
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], twoAddressWallet());
+
+  const usdc = screen.getByRole("checkbox", {
+    name: "Count USDC in the value",
+  });
+  assert.equal(usdc.getAttribute("aria-checked"), "false");
+  await user.click(usdc);
+  await waitFor(() =>
+    assert.deepEqual(state.track.mock.calls, [
+      [{ manualAssetId: 1, tokenId: 23, tracked: true }],
+    ]),
+  );
+
+  await user.click(
+    screen.getByRole("checkbox", { name: "Count BTC in the value" }),
+  );
+  await waitFor(() =>
+    assert.deepEqual(state.track.mock.calls[1], [
+      { manualAssetId: 1, tokenId: 21, tracked: false },
+    ]),
+  );
+});
+
+test("Sync now asks for a fresh read", async () => {
+  state.sync.mockResolvedValue(undefined);
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], cryptoWallet());
+
+  await user.click(screen.getByRole("button", { name: w.actions.syncNow }));
+  await waitFor(() => assert.deepEqual(state.sync.mock.calls, [[1]]));
+  assert.deepEqual(state.toastSuccess.mock.calls, [[w.syncQueued]]);
+});
+
+test("an address is removed after confirming, and the only one cannot be", async () => {
+  state.removeAddress.mockResolvedValue(cryptoWallet());
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], twoAddressWallet());
+
+  await user.click(screen.getByRole("button", { name: "Remove Cold storage" }));
+  within(screen.getByRole("alertdialog")).getByText(w.removeAddressConfirm);
+  await user.click(
+    within(screen.getByRole("alertdialog")).getByRole("button", {
+      name: w.actions.removeAddress,
+    }),
+  );
+  await waitFor(() =>
+    assert.deepEqual(state.removeAddress.mock.calls, [
+      [{ manualAssetId: 1, addressId: 11 }],
+    ]),
+  );
+  cleanup();
+
+  renderDetail({}, [walletValuation], cryptoWallet());
+  assert.equal(
+    screen.queryByRole("button", { name: /^Remove Cold storage/ }),
+    null,
+  );
+});
+
+test("an address's label can be changed or cleared", async () => {
+  state.updateLabel.mockResolvedValue(cryptoWallet());
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], cryptoWallet());
+
+  await user.click(
+    screen.getByRole("button", { name: "Edit the label of Cold storage" }),
+  );
+  const label = screen.getByLabelText(w.fields.label);
+  await user.clear(label);
+  await user.click(screen.getByRole("button", { name: m.actions.save }));
+  await waitFor(() =>
+    assert.deepEqual(state.updateLabel.mock.calls, [
+      [{ manualAssetId: 1, addressId: 11, label: null }],
+    ]),
+  );
+});
+
+test("adding an address refuses a recovery phrase before sending it", async () => {
+  const seed =
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], cryptoWallet());
+
+  await user.click(screen.getByRole("button", { name: w.actions.addAddress }));
+  const dialog = screen.getByRole("dialog");
+  within(dialog).getByText(w.publicOnly.title);
+  const input = within(dialog).getByLabelText(
+    new RegExp(w.fields.addressOrXpub),
+  ) as HTMLInputElement;
+  await user.click(input);
+  await user.paste(seed);
+  await user.click(
+    within(dialog).getByRole("button", { name: w.actions.addAddress }),
+  );
+
+  await within(dialog).findByText(w.errors.secretBlocked);
+  assert.equal(input.value, "");
+  assert.equal(state.addAddress.mock.calls.length, 0);
+  assert.equal(document.body.innerHTML.includes(seed), false);
+});
+
+test("adding an address sends its network, address and label", async () => {
+  state.addAddress.mockResolvedValue(twoAddressWallet());
+  const user = userEvent.setup();
+  renderDetail({}, [walletValuation], cryptoWallet());
+
+  await user.click(screen.getByRole("button", { name: w.actions.addAddress }));
+  const dialog = screen.getByRole("dialog");
+  await user.click(within(dialog).getByRole("combobox"));
+  await user.click(
+    await screen.findByRole("option", { name: w.chains.ethereum }),
+  );
+  await user.type(
+    within(dialog).getByLabelText(new RegExp(`^${w.fields.address}`)),
+    "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+  );
+  await user.click(
+    within(dialog).getByRole("button", { name: w.actions.addAddress }),
+  );
+  await waitFor(() =>
+    assert.deepEqual(state.addAddress.mock.calls, [
+      [
+        {
+          manualAssetId: 1,
+          payload: {
+            chain: "ethereum",
+            address: "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+            label: null,
+          },
+        },
+      ],
+    ]),
+  );
 });

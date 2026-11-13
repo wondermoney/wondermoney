@@ -23,7 +23,8 @@
       "property": "Imóvel",
       "vehicle": "Veículo",
       "valuable": "Objeto de valor",
-      "other": "Outro"
+      "other": "Outro",
+      "crypto_wallet": "Carteira cripto"
     },
     "summary": {
       "total": "Valor total",
@@ -162,6 +163,90 @@
       "close": "Fechar",
       "done-title": "Bens importados",
       "done-description": "{count, plural, one {# bem foi adicionado com a sua avaliação.} other {# bens foram adicionados com as suas avaliações.}}"
+    },
+    "wallet": {
+      "addTitle": "Adicionar carteira cripto",
+      "actions": {
+        "add": "Adicionar carteira cripto",
+        "addRow": "Adicionar outro endereço",
+        "removeRow": "Remover o endereço {number}",
+        "removeRowShort": "Remover",
+        "addAddress": "Adicionar endereço",
+        "editLabel": "Editar etiqueta",
+        "editLabelOf": "Editar a etiqueta de {title}",
+        "removeAddress": "Remover endereço",
+        "removeAddressOf": "Remover {title}",
+        "syncNow": "Sincronizar agora"
+      },
+      "publicOnly": {
+        "title": "Só endereços públicos",
+        "body": "Introduz um endereço público, ou uma xpub, ypub ou zpub para Bitcoin. Nunca introduzas uma chave privada nem uma frase de recuperação: quem tiver qualquer uma delas pode gastar as tuas moedas, e esta aplicação nunca precisa delas."
+      },
+      "fields": {
+        "namePlaceholder": "ex.: Carteira de hardware",
+        "private": "Carteira privada",
+        "chain": "Rede",
+        "address": "Endereço público",
+        "addressOrXpub": "Endereço público ou xpub",
+        "addressPlaceholder": {
+          "bitcoin": "bc1q…, 1…, 3… ou xpub…",
+          "ethereum": "0x…"
+        },
+        "label": "Etiqueta",
+        "labelPlaceholder": "ex.: Poupanças",
+        "addressNumber": "Endereço {number}"
+      },
+      "chains": {
+        "bitcoin": "Bitcoin",
+        "ethereum": "Ethereum"
+      },
+      "addressKinds": {
+        "address": "Endereço",
+        "xpub": "Chave pública estendida"
+      },
+      "explorerNote": "Os saldos são lidos uma vez por dia num explorador de blockchain configurado pelo operador deste servidor. O explorador vê os endereços que lhe são pedidos e pode perceber que pertencem ao mesmo dono. Mais nada é enviado.",
+      "validation": {
+        "labelTooLong": "Usa 100 caracteres ou menos"
+      },
+      "errors": {
+        "secretBlocked": "Isto parece uma chave privada ou uma frase de recuperação, por isso foi apagado e não foi enviado. Introduz antes um endereço público.",
+        "secretRejected": "Aquilo parecia uma chave privada ou uma frase de recuperação, por isso foi recusado e não foi guardado. Introduz antes um endereço público.",
+        "addressInvalid": "Este não é um endereço público válido para a rede escolhida.",
+        "addressExists": "Este endereço já está nesta carteira.",
+        "featureDisabled": "Este servidor não consegue ler saldos nessa rede."
+      },
+      "status": {
+        "pending": "À espera da primeira leitura dos saldos.",
+        "ok": "Saldos lidos em {date}.",
+        "okNoDate": "Saldos lidos.",
+        "failed": "A última leitura falhou: {reason}.",
+        "balancesFrom": "Os saldos apresentados são de {date}."
+      },
+      "failure": {
+        "timeout": "o explorador demorou demasiado a responder",
+        "rate_limited": "o explorador pediu para abrandar",
+        "unavailable": "não foi possível contactar o explorador",
+        "rejected": "o explorador recusou este endereço",
+        "invalid_response": "o explorador enviou uma resposta que não foi possível ler",
+        "disabled": "este servidor já não lê essa rede"
+      },
+      "tokens": {
+        "title": "Saldos",
+        "count": "Contar {symbol} no valor",
+        "noPrice": "Sem preço",
+        "none": "Ainda não há saldos lidos."
+      },
+      "detail": {
+        "title": "Endereços e saldos",
+        "howItWorks": "O valor são os saldos assinalados aos preços de hoje, em dólares americanos, lidos uma vez por dia. A moeda própria da rede vem assinalada desde o início. Os outros tokens encontrados num endereço são ignorados até os assinalares, por isso assinala só os tokens que reconheces.",
+        "unpriced": "O valor de hoje não foi atualizado: não há preço para {symbols}. Desmarca-os para contar o resto.",
+        "noValueYet": "Ainda sem valor: os saldos ainda não foram lidos.",
+        "lastSynced": "Saldos lidos pela última vez em {date}.",
+        "noValuations": "Fica registado um valor em cada dia em que os saldos são lidos."
+      },
+      "removeAddressTitle": "Remover este endereço?",
+      "removeAddressConfirm": "Os saldos dele deixam de contar para o valor da carteira a partir da próxima leitura. Os valores já registados mantêm-se.",
+      "syncQueued": "A ler os saldos outra vez. O valor é atualizado quando chegarem."
     }
   }
 }

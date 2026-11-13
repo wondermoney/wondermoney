@@ -22,6 +22,7 @@
       "require": "./dist/index.js"
     },
     "./bank-sync": "./lib/bank-sync/index.ts",
+    "./crypto-wallet": "./lib/crypto-wallet/index.ts",
     "./decimal": "./lib/decimal/index.ts",
     "./amount-expression": "./lib/amount-expression/index.ts",
     "./dashboard-layout": "./lib/dashboard-layout/index.ts",

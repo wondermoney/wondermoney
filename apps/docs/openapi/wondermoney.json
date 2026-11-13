@@ -1463,6 +1463,178 @@
         ],
         "additionalProperties": {}
       },
+      "CryptoWallet": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CryptoWalletAddress"
+            }
+          },
+          "lastSyncedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unpricedSymbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Ticked tokens with a balance and no price at the last sync."
+          }
+        },
+        "required": [
+          "addresses",
+          "lastSyncedAt",
+          "unpricedSymbols"
+        ],
+        "additionalProperties": {}
+      },
+      "CryptoWalletAddress": {
+        "type": "object",
+        "properties": {
+          "cryptoWalletAddressKey": {
+            "type": "integer"
+          },
+          "chain": {
+            "type": "string",
+            "enum": [
+              "bitcoin",
+              "ethereum"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "address",
+              "xpub"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "The public address, normalised (bech32 lower-case, Ethereum EIP-55 checksummed), or the xpub/ypub/zpub."
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "ok",
+              "failed"
+            ]
+          },
+          "errorCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "timeout",
+              "rate_limited",
+              "unavailable",
+              "rejected",
+              "invalid_response",
+              "disabled",
+              null
+            ],
+            "description": "Why the last attempt failed; null unless status is failed."
+          },
+          "lastAttemptAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastSyncedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The last successful read; the token balances are as of then."
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CryptoWalletToken"
+            }
+          }
+        },
+        "required": [
+          "cryptoWalletAddressKey",
+          "chain",
+          "kind",
+          "address",
+          "label",
+          "status",
+          "errorCode",
+          "lastAttemptAt",
+          "lastSyncedAt",
+          "tokens"
+        ],
+        "additionalProperties": {}
+      },
+      "CryptoWalletToken": {
+        "type": "object",
+        "properties": {
+          "cryptoWalletTokenKey": {
+            "type": "integer"
+          },
+          "native": {
+            "type": "boolean",
+            "description": "The chain's own coin (BTC, ETH) rather than an ERC-20 token."
+          },
+          "contractAddress": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The ERC-20 contract, lower-case; null for the native coin."
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quantity": {
+            "type": "string",
+            "description": "The balance in whole units, as an exact decimal string."
+          },
+          "tracked": {
+            "type": "boolean",
+            "description": "Ticked: counts towards the wallet's value. Detected tokens start unticked."
+          },
+          "priceMissing": {
+            "type": "boolean",
+            "description": "Ticked with a balance and no price at the last sync, so that day's value was not written."
+          }
+        },
+        "required": [
+          "cryptoWalletTokenKey",
+          "native",
+          "contractAddress",
+          "symbol",
+          "name",
+          "quantity",
+          "tracked",
+          "priceMissing"
+        ],
+        "additionalProperties": {}
+      },
       "CsvFile": {
         "type": "string",
         "description": "A CSV file"
@@ -3205,6 +3377,17 @@
           "assetType": {
             "type": "string"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "property",
+              "vehicle",
+              "valuable",
+              "other",
+              "crypto_wallet"
+            ],
+            "description": "A `crypto_wallet` is valued in USD by the daily sync of its public addresses, never by hand."
+          },
           "currencyKey": {
             "type": "object",
             "properties": {
@@ -3322,10 +3505,14 @@
         "properties": {
           "asset": {
             "$ref": "#/components/schemas/ManualAsset"
+          },
+          "wallet": {
+            "$ref": "#/components/schemas/CryptoWallet"
           }
         },
         "required": [
-          "asset"
+          "asset",
+          "wallet"
         ],
         "additionalProperties": {}
       },
@@ -15437,7 +15624,7 @@
     },
     "/v1/manual-assets/{manualAssetId}": {
       "get": {
-        "description": "**Required scope:** `read`.",
+        "description": "**Required scope:** `read`.\n\nA crypto wallet (kind `crypto_wallet`) also carries `wallet`: its public addresses, their sync status and tokens. Null for other kinds.",
         "security": [
           {
             "bearerAuth": []

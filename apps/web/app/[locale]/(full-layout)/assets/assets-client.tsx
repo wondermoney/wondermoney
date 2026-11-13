@@ -1,9 +1,10 @@
 "use client";
 
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Wallet } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import CryptoWalletFormDrawer from "@/components/manual-asset/CryptoWalletFormDrawer";
 import ManualAssetFormDrawer from "@/components/manual-asset/ManualAssetFormDrawer";
 import { ManualAssetImportFlow } from "@/components/manual-asset/ManualAssetImportFlow";
 import ManualAssetsTable from "@/components/manual-asset/ManualAssetsTable";
@@ -19,6 +20,7 @@ import {
 import { Section } from "@/components/ui/RuledSection";
 import { StatCard, StatCardGrid } from "@/components/ui/StatCard";
 import { useRouter } from "@/i18n/navigation";
+import { useCryptoWalletChains } from "@/lib/api/instance/useInstance";
 import useManualAssets from "@/lib/api/manual-asset/useManualAssets";
 import { splitAssets } from "@/lib/manual-assets/asset-view";
 
@@ -29,6 +31,9 @@ export default function AssetsClient() {
   const { data, isPending, error, refetch } = useManualAssets();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
+  // Offered only once the server has said which chains it can read.
+  const walletChains = useCryptoWalletChains();
 
   const { active, archived } = useMemo(
     () => splitAssets(data?.assets ?? []),
@@ -60,6 +65,14 @@ export default function AssetsClient() {
         userCurrency={summary.currencyCode}
         onCreated={(asset) => openAsset(asset.manualAssetKey)}
       />
+      {walletChains.length > 0 && (
+        <CryptoWalletFormDrawer
+          open={walletOpen}
+          onOpenChange={setWalletOpen}
+          chains={walletChains}
+          onCreated={(asset) => openAsset(asset.manualAssetKey)}
+        />
+      )}
       {importOpen ? (
         <DrawerDialog
           open
@@ -80,6 +93,13 @@ export default function AssetsClient() {
       {t("actions.import")}
     </Button>
   );
+  const walletButton =
+    walletChains.length > 0 ? (
+      <Button variant="secondary" onClick={() => setWalletOpen(true)}>
+        <Wallet className="mr-2 size-4" />
+        {t("wallet.actions.add")}
+      </Button>
+    ) : null;
 
   if (data.assets.length === 0) {
     return (
@@ -98,6 +118,7 @@ export default function AssetsClient() {
               <Plus className="mr-2 size-4" />
               {t("actions.add")}
             </Button>
+            {walletButton}
             {importButton}
           </div>
         </div>
@@ -119,6 +140,7 @@ export default function AssetsClient() {
         </div>
         <div className="flex flex-wrap gap-2">
           {importButton}
+          {walletButton}
           <Button onClick={() => setDrawerOpen(true)}>
             <Plus className="mr-2 size-4" />
             {t("actions.add")}
