@@ -1,5 +1,6 @@
 import type { AuthRecoveryPort } from './auth-recovery'
 import type { NativeIdentityProviderId } from './native-identity'
+import type { SignupLocale } from './resolve-signup-locale'
 import type { AuthSessionPort } from './session-lifecycle'
 
 /**
@@ -139,7 +140,11 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
      * session cookie it carries (or the pending two-factor cookie).
      */
     signInWithBrowser: (provider: typeof OIDC_PROVIDER_ID) => Promise<BrowserSignInOutcome>
-    signUp: (email: string, password: string) => Promise<SignUpOutcome>
+    /**
+     * Email/password sign-up. `locale` is the app language: the API mails the verification link,
+     * which goes out before the account exists, in it.
+     */
+    signUp: (email: string, password: string, locale?: SignupLocale) => Promise<SignUpOutcome>
     signOutLocal: () => Promise<{ error: unknown | null }>
     /**
      * Enrolls a TOTP factor on the caller's current session. The secret is

@@ -11,6 +11,7 @@ import { createSessionOperationScope } from '@/lib/auth/session-operation-scope'
 
 import { AppSessionProvider } from './app-session-context'
 import { AuthenticatedRouteBoundary } from './authenticated-route-boundary'
+import { type LanguagePreference, SessionPreferencesProvider } from './session-preferences-provider'
 import {
   ProductRuntimeProvider,
   useProductRuntime,
@@ -783,6 +784,72 @@ describe('ProductRuntimeProvider integration', () => {
     signingOut.resolve({ error: null })
     await act(async () => { await logout })
     await harness.cleanup()
+  })
+})
+
+describe('ProductRuntimeProvider sign-up language', () => {
+  const storageWith = (language?: LanguagePreference) => ({
+    load: jest.fn(async () => ({ theme: null, language: language ?? null, privacyMode: null })),
+    saveTheme: jest.fn(async () => undefined),
+    saveLanguage: jest.fn(async () => undefined),
+    savePrivacyMode: jest.fn(async () => undefined),
+  })
+
+  async function signUpWith(preferences: { language?: LanguagePreference; deviceLocale: string } | null) {
+    ;(provisionAppUser as jest.Mock).mockReset().mockResolvedValue('provisioned')
+    const auth = { ...createAuth(), signUp: jest.fn(async () => ({ status: 'accepted' as const })) }
+    const storage = storageWith(preferences?.language)
+    const queryClient = new QueryClient()
+    let latest!: ProductRuntimeContextValue
+    const tree = (value: ReturnType<typeof session> | null) => {
+      const runtime = (
+        <QueryClientProvider client={queryClient}>
+          <AppSessionProvider session={value}>
+            <ProductRuntimeProvider auth={auth as never} transport={{ request: jest.fn() } as never}>
+              <Probe capture={(next) => { latest = next }} />
+            </ProductRuntimeProvider>
+          </AppSessionProvider>
+        </QueryClientProvider>
+      )
+      return preferences
+        ? <SessionPreferencesProvider deviceLocale={preferences.deviceLocale} deviceTheme="light" appearance={{ setColorScheme: jest.fn() }} storage={storage}>{runtime}</SessionPreferencesProvider>
+        : runtime
+    }
+    const view = await render(tree(null))
+    await waitFor(() => expect(storage.load).toHaveBeenCalled())
+    await act(async () => { await Promise.resolve() })
+    await act(async () => { await latest.signUp('ana@example.com', 'pw12345678') })
+    // The sign-up's session arrives, and activation records the new account.
+    await view.rerender(tree(session('new-user')))
+    await waitFor(() => expect(latest.routeState.status).toBe('authenticated'))
+    const result = { signUp: auth.signUp.mock.calls, provision: (provisionAppUser as jest.Mock).mock.calls }
+    await view.unmount()
+    queryClient.clear()
+    return result
+  }
+
+  it.each([
+    ['pt-PT', 'pt'],
+    ['es', 'es'],
+  ] as const)('signs up and records an app set to %s in %s, whatever the device language', async (language, locale) => {
+    const { signUp, provision } = await signUpWith({ language, deviceLocale: 'en-US' })
+
+    expect(signUp).toEqual([['ana@example.com', 'pw12345678', locale]])
+    expect(provision).toEqual([[expect.anything(), locale, undefined]])
+  })
+
+  it('follows the device language when the app does', async () => {
+    const { signUp, provision } = await signUpWith({ deviceLocale: 'es-ES' })
+
+    expect(signUp).toEqual([['ana@example.com', 'pw12345678', 'es']])
+    expect(provision).toEqual([[expect.anything(), 'es', undefined]])
+  })
+
+  it('falls back to English for a language the app does not have', async () => {
+    const { signUp, provision } = await signUpWith({ deviceLocale: 'fr-FR' })
+
+    expect(signUp).toEqual([['ana@example.com', 'pw12345678', 'en']])
+    expect(provision).toEqual([[expect.anything(), 'en', undefined]])
   })
 })
 

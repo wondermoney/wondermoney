@@ -17,7 +17,7 @@ import { createAuthRecoveryCoordinator } from '@/lib/auth/auth-recovery'
 import { validateHouseholdInviteToken, type ValidateInviteOutcome } from '@/lib/auth/household-invite-validation'
 import { takePendingInviteToken } from '@/lib/auth/invite-token-store'
 import { provisionAppUser } from '@/lib/auth/provision-app-user'
-import { resolveSignupLocale } from '@/lib/auth/resolve-signup-locale'
+import { resolveSignupLocale, type SignupLocale, toSignupLocale } from '@/lib/auth/resolve-signup-locale'
 import { securePushTokenStore } from '@/lib/push/push-token-store'
 import { unregisterPushDevice } from '@/lib/push/push-sign-out'
 import {
@@ -45,6 +45,7 @@ import {
 } from '@/lib/auth/app-auth'
 
 import { useAppSession } from './app-session-context'
+import { useOptionalSessionPreferences } from './session-preferences-provider'
 
 export type AuthEpochId = number & { readonly __authEpoch: unique symbol }
 export type ProductRuntime = Readonly<{
@@ -217,6 +218,14 @@ export function ProductRuntimeProvider({
   const terminalLocked = useRef(false)
   const retirementFlight = useRef<Promise<void> | null>(null)
   const activationVersion = useRef(0)
+  // The app language a new account is recorded in (`/v1/auth/callback`) and its first email is
+  // sent in (`signUp`). Read when they run, so a language change rebuilds neither; the device
+  // language stands in only where no preferences are mounted.
+  const appLocale = useOptionalSessionPreferences()?.resolvedLocale ?? null
+  const signupLocale = useRef<SignupLocale>('en')
+  useEffect(() => {
+    signupLocale.current = appLocale ? toSignupLocale(appLocale) : resolveSignupLocale()
+  }, [appLocale])
 
   const deactivate = useCallback((reason: AuthenticatedContextTransitionReason) => {
     runtimeRef.current = null
@@ -299,7 +308,7 @@ export function ProductRuntimeProvider({
     // immediately before calling signUp, so it survives exactly one activation and is never
     // resent on a later, unrelated login.
     const pendingInviteToken = takePendingInviteToken() ?? undefined
-    const outcome = await provisionAppUser(next.apiClient, resolveSignupLocale(), pendingInviteToken)
+    const outcome = await provisionAppUser(next.apiClient, signupLocale.current, pendingInviteToken)
     // A fresher activation state transition may have occurred while this one awaited
     // provisioning — either a newer activate() call (epochCounter bumped), or the
     // session clearing to null and the activation effect setting signed-out directly
@@ -398,7 +407,7 @@ export function ProductRuntimeProvider({
     if (terminalFlight.current) return { status: 'unavailable' as const }
     terminalLocked.current = false
     setActivationError(null)
-    return auth.signUp(email, password)
+    return auth.signUp(email, password, signupLocale.current)
   }, [auth])
 
   const clearActivationError = useCallback(() => setActivationError(null), [])

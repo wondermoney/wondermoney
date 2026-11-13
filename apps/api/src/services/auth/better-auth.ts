@@ -24,6 +24,7 @@ import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/
 import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
 import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
 import { passkeyPlugins } from '@service/auth/passkey';
+import { signUpLocale } from '@service/auth/sign-up-locale';
 import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
@@ -251,6 +252,9 @@ const auth = betterAuth({
     // Every way of creating an account (email/password, Google, Apple, OIDC) goes through here,
     // so this is where SIGNUP_MODE is enforced (services/auth/signup-policy.ts).
     signupPolicy({ deps: signupPolicyDeps, oidc: authConfig.oidc }),
+    // A sign-up without a page of its own (the mobile app) takes its language from
+    // Accept-Language, for its verification email and landing page (services/auth/sign-up-locale.ts).
+    signUpLocale({ appUrl: FRONTEND_URL }),
     ...(authConfig.oidc
       ? oidcPlugins(authConfig.oidc, {
         // Outside a request's MikroORM context: a fork of its own.
