@@ -29,6 +29,7 @@ import {
   type MemberPayload,
   type RecordSettlementDraft,
   type ShareExpensePayload,
+  type UpdateGroupPayload,
 } from './expense-groups-contract'
 import {
   expenseGroupBalancesKey,
@@ -170,7 +171,7 @@ export function useCreateExpenseGroup() {
 }
 
 export function useUpdateExpenseGroup() {
-  return useGroupWrite('useUpdateExpenseGroup', (runtime, input: Readonly<{ groupId: number; archived?: boolean; name?: string }>, commit) => {
+  return useGroupWrite('useUpdateExpenseGroup', (runtime, input: Readonly<{ groupId: number; archived?: boolean } & UpdateGroupPayload>, commit) => {
     const { groupId, ...body } = input
     return runtime.apiClient.write(createUpdateExpenseGroupEndpoint(groupId), { body, commit })
   })

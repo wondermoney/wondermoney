@@ -2141,6 +2141,12 @@
       "remove": "Remover",
       "removePerson": "Remover {{name}}"
     },
+    "edit": {
+      "action": "Editar grupo",
+      "title": "Editar grupo",
+      "save": "Guardar",
+      "currencyHint": "Os novos acertos usam esta moeda por omissão. As despesas partilhadas e os acertos já registados mantêm a sua moeda, e os saldos continuam a ser mantidos por moeda."
+    },
     "detail": {
       "notFoundTitle": "Grupo não encontrado",
       "notFoundMessage": "Este grupo foi eliminado ou não é do teu agregado.",

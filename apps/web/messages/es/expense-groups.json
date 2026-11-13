@@ -39,6 +39,13 @@
       "created": "Grupo creado"
     },
     "add-person": "Añadir persona",
+    "edit": {
+      "action": "Editar grupo",
+      "title": "Editar grupo",
+      "description": "Cambia el nombre del grupo o su moneda.",
+      "currency-hint": "Las nuevas liquidaciones la usan. Los gastos compartidos y las liquidaciones ya registrados mantienen su propia moneda, y los saldos siguen por moneda.",
+      "saved": "Grupo actualizado"
+    },
     "detail": {
       "back": "Todos los grupos",
       "people": "Personas",

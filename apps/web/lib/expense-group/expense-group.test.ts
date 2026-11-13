@@ -15,6 +15,7 @@ import {
   canLinkSettlement,
   defaultPayerKey,
   expenseGroupErrorKey,
+  groupEditChanges,
   groupShareBlocker,
   nonZeroBalances,
   partitionGroups,
@@ -469,4 +470,32 @@ test("maps the API's refusals to messages", () => {
   );
   assert.equal(expenseGroupErrorKey(apiError("something_else")), null);
   assert.equal(expenseGroupErrorKey(new Error("boom")), null);
+});
+
+// ---------------------------------------------------------------------------------------------
+// Editing a group
+// ---------------------------------------------------------------------------------------------
+
+const lisbon = { name: "Lisbon trip", currencyCode: "EUR" };
+
+test("an edit sends only what changed, the name trimmed", () => {
+  assert.deepEqual(
+    groupEditChanges(lisbon, { name: "  Porto trip ", currencyCode: "EUR" }),
+    { name: "Porto trip" },
+  );
+  assert.deepEqual(
+    groupEditChanges(lisbon, { name: "Lisbon trip", currencyCode: "usd" }),
+    { currencyCode: "USD" },
+  );
+  assert.deepEqual(
+    groupEditChanges(lisbon, { name: "Porto trip", currencyCode: "GBP" }),
+    { name: "Porto trip", currencyCode: "GBP" },
+  );
+});
+
+test("an edit that changes nothing sends nothing", () => {
+  assert.equal(
+    groupEditChanges(lisbon, { name: " Lisbon trip ", currencyCode: "eur" }),
+    null,
+  );
 });

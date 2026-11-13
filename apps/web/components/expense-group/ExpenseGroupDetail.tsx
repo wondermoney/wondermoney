@@ -53,6 +53,7 @@ import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 import { parseDateInputValue } from "@/lib/loans/calendar-day";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
+import { EditExpenseGroupForm } from "./EditExpenseGroupForm";
 import { GroupMembersSection, useMemberLabel } from "./GroupMembersSection";
 import {
   RecordSettlementForm,
@@ -409,7 +410,11 @@ function SettlementsSection({
   );
 }
 
-/** One group: balances and suggested payments, shared expenses, settlements and people. */
+/**
+ * One group: balances and suggested payments, shared expenses, settlements and people. Writers
+ * can record a settlement, edit the group's name and currency, archive and delete it; a
+ * household viewer gets none of those actions.
+ */
 export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
   const t = useTranslations("expenseGroups");
   const tRoot = useTranslations();
@@ -426,6 +431,7 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
   const [deleting, setDeleting] = useState<"confirm" | "not-empty" | null>(
     null,
   );
+  const [editing, setEditing] = useState(false);
 
   const back = (
     <Link
@@ -498,6 +504,9 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
       <Button onClick={() => setRecording({ prefill: null })}>
         {t("settlement.action")}
       </Button>
+      <Button variant="secondary" onClick={() => setEditing(true)}>
+        {t("edit.action")}
+      </Button>
       <Button
         variant="secondary"
         loading={update.isPending}
@@ -552,6 +561,21 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
             prefill={recording.prefill}
             onDone={() => setRecording(null)}
             onCancel={() => setRecording(null)}
+          />
+        ) : null}
+      </DrawerDialog>
+
+      <DrawerDialog
+        open={editing}
+        onOpenChange={setEditing}
+        title={t("edit.title")}
+        description={t("edit.description")}
+      >
+        {editing ? (
+          <EditExpenseGroupForm
+            group={group}
+            onDone={() => setEditing(false)}
+            onCancel={() => setEditing(false)}
           />
         ) : null}
       </DrawerDialog>

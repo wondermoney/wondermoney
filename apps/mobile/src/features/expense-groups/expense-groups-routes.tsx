@@ -86,6 +86,7 @@ export function ExpenseGroupDetailRoute() {
   const expenses = useGroupExpenses(groupId)
   const settlements = useGroupSettlements(groupId)
   const access = useGroupAccess()
+  const currencies = useLoanCurrencies()
   let state: ExpenseGroupDetailState
   if (groupId === null) state = { status: 'not-found' }
   else if (group.isLoading) state = { status: 'loading' }
@@ -107,6 +108,7 @@ export function ExpenseGroupDetailRoute() {
     <ExpenseGroupDetailScreen
       canWrite={access.canWrite}
       candidates={state.status === 'loaded' ? access.candidates.filter((candidate) => !state.group.members.some((member) => member.appuserKey === candidate.appuserKey)) : []}
+      currencies={currencies.data?.currencies.map((currency) => currency.code) ?? []}
       onBack={() => router.replace('/groups' as Href)}
       onDeleted={() => router.replace('/groups' as Href)}
       onRefresh={async () => { await Promise.all([group.refetch(), balances.refetch(), expenses.refetch(), settlements.refetch()]) }}

@@ -2141,6 +2141,12 @@
       "remove": "Remove",
       "removePerson": "Remove {{name}}"
     },
+    "edit": {
+      "action": "Edit group",
+      "title": "Edit group",
+      "save": "Save",
+      "currencyHint": "New settlements default to it. Shared expenses and settlements already recorded keep their own currency, and balances stay per currency."
+    },
     "detail": {
       "notFoundTitle": "Group not found",
       "notFoundMessage": "This group was deleted or is not in your household.",

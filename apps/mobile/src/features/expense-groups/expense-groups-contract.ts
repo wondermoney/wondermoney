@@ -274,6 +274,25 @@ export function freezeCreateGroup(draft: CreateGroupDraft): CreateGroupPayload {
   })
 }
 
+export type UpdateGroupDraft = Readonly<{ name: string; currencyCode: string }>
+export type UpdateGroupPayload = Readonly<{ name?: string; currencyCode?: string }>
+
+/**
+ * An "Edit group" draft as the `PATCH /v1/expense-groups/:id` body: only what differs from the
+ * group, the name trimmed and the currency upper-cased as the API stores them; null when nothing
+ * changes. The API takes any known currency at any time: it only sets what new settlements
+ * default to, and recorded expenses and settlements keep their own.
+ */
+export function freezeUpdateGroup(group: Readonly<{ name: string; currencyCode: string }>, draft: UpdateGroupDraft): UpdateGroupPayload | null {
+  const name = nameSchema.parse(draft.name)
+  const code = currencyCode.parse(draft.currencyCode.trim().toUpperCase())
+  const payload = {
+    ...(name !== group.name ? { name } : {}),
+    ...(code !== group.currencyCode ? { currencyCode: code } : {}),
+  }
+  return Object.keys(payload).length > 0 ? Object.freeze(payload) : null
+}
+
 export type ShareLinePayload = Readonly<{ memberId: number; amount?: number; percentage?: number }>
 export type ShareExpensePayload = Readonly<{
   transactionId: number
