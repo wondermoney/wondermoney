@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   detectStatement: vi.fn(),
@@ -41,12 +41,16 @@ function request(preferences: Record<string, unknown>) {
 describe('account CSV preview with AI hidden', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('AI_BASE_URL', 'http://localhost:11434/v1');
+    vi.stubEnv('AI_MODEL', 'llama3.1');
     mocks.findOne.mockResolvedValue({ accountFinancialInstitutionKey: null, currencyKey: { code: 'EUR' } });
     mocks.validateCsvObjectKey.mockReturnValue(true);
     mocks.getLimitedCsvObjectBuffer.mockResolvedValue(Buffer.from('Date;Description;Amount\n2026-01-02;Shop;-1,00\n'));
     mocks.detectStatement.mockResolvedValue({ headers: [], invalidRows: 0, sample: [], source: 'none', totalRows: 0 });
     mocks.toStatementPreview.mockReturnValue({ source: 'none', totalRows: 0 });
   });
+
+  afterEach(() => vi.unstubAllEnvs());
 
   it('reads the file without a model call and still previews it', async () => {
     const json = vi.fn();
@@ -64,5 +68,16 @@ describe('account CSV preview with AI hidden', () => {
 
     expect(mocks.detectStatement).toHaveBeenCalledWith(expect.objectContaining({ model: expect.objectContaining({ allowed: true }) }));
     expect(json).toHaveBeenCalled();
+  });
+
+  it('does not let the model be asked on a server with no AI provider', async () => {
+    vi.stubEnv('AI_BASE_URL', '');
+    vi.stubEnv('AI_MODEL', '');
+    const json = vi.fn();
+
+    await previewAccountCsvImport(request({ aiHidden: false }), { json } as unknown as Response, vi.fn());
+
+    expect(mocks.detectStatement).toHaveBeenCalledWith(expect.objectContaining({ model: expect.objectContaining({ allowed: false }) }));
+    expect(json).toHaveBeenCalledWith({ source: 'none', totalRows: 0 });
   });
 });

@@ -54,6 +54,11 @@ function classifyFailure(error: unknown): PortfolioImportFailure {
   return 'general'
 }
 
+function isSuggestRefusedWithoutAi(error: unknown): boolean {
+  if (!(error instanceof ApiError) || error.code !== 'http') return false
+  return error.status === 501 || (error.status === 403 && error.serverCode === 'feature_disabled')
+}
+
 export type UsePortfolioImportOptions = Readonly<{
   pollIntervalMs?: number
   maxPollAttempts?: number
@@ -92,14 +97,15 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
     throw new Error('Portfolio import polling timed out')
   }, [maxPollAttempts, pollIntervalMs, runtime, wait])
 
-  // The suggest route is gated on the server having an AI provider (501 without one), although a
-  // saved spec or the local heuristic would not need it. Without a suggestion there is nothing to
-  // auto-accept, so that reads as columns this app cannot map, not as a failed request.
+  // A suggestion from a saved mapping or the column names is accepted like one from the model.
+  // An older API refused the whole route without AI (501 with no provider, 403 `feature_disabled`
+  // for a person who hid AI); that is no suggestion to auto-accept, so it reads as columns this
+  // app cannot map, not as a failed request or a lost session.
   const suggestColumnMapping = useCallback(async (importSessionId: number) => {
     try {
       return await runtime.apiClient.write(createSuggestPortfolioImportColumnMappingEndpoint(importSessionId), { commit: () => undefined })
     } catch (error) {
-      if (error instanceof ApiError && error.code === 'http' && error.status === 501) return null
+      if (isSuggestRefusedWithoutAi(error)) return null
       throw error
     }
   }, [runtime])

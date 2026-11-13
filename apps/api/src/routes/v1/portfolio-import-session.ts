@@ -1,11 +1,12 @@
 import express from 'express';
 
 import { confirmPortfolioImportSession, confirmPortfolioImportSessionAssetMappings, confirmPortfolioImportSessionColumnMapping, getPortfolioImportSessionPreview, suggestPortfolioImportSessionColumnMapping, triggerPortfolioImportSessionParse, updatePortfolioImportSessionRowInclusion } from '@controller/portfolio-import-session';
-import { requireAiAllowed } from '@middleware/ai-enabled';
 
 const router = express.Router();
 
-router.post('/:importSessionId/column-mapping/suggest', requireAiAllowed('csvMapping'), suggestPortfolioImportSessionColumnMapping);
+// Not behind `requireAiAllowed`: a saved spec or the column names answer without a model, and the
+// controller only lets the service ask one when this person may use AI column mapping.
+router.post('/:importSessionId/column-mapping/suggest', suggestPortfolioImportSessionColumnMapping);
 router.patch('/:importSessionId/column-mapping', confirmPortfolioImportSessionColumnMapping);
 router.patch('/:importSessionId/asset-mappings', confirmPortfolioImportSessionAssetMappings);
 router.patch('/:importSessionId/row-inclusions', updatePortfolioImportSessionRowInclusion);

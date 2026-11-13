@@ -34,9 +34,10 @@ import useCreatePortfolioImportSession from "@/lib/api/portfolio/useCreatePortfo
 import useFinancialBrokers from "@/lib/api/portfolio/useFInancialBrokers";
 import usePortfolioImportSessionPreview from "@/lib/api/portfolio/usePortfolioImportSessionPreview";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
-import useSuggestPortfolioImportColumnMapping from "@/lib/api/portfolio/useSuggestPortfolioImportColumnMapping";
+import useSuggestPortfolioImportColumnMapping, {
+  isSuggestionRefusedWithoutAi,
+} from "@/lib/api/portfolio/useSuggestPortfolioImportColumnMapping";
 import useTriggerPortfolioImportSessionParse from "@/lib/api/portfolio/useTriggerPortfolioImportSessionParse";
-import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import {
   extractPortfolioImportCsvColumns,
   getPortfolioImportAvailableColumns,
@@ -249,7 +250,6 @@ const PortfolioTransactionImportModal: React.FC<
 > = ({ defaultPortfolioId, isOpen, setOpen, trigger }) => {
   const t = useTranslations();
   const canImportFiles = useFeature((features) => features.fileStorage);
-  const aiHidden = useAiHidden();
   const posthog = usePostHog();
   const methods = useForm<FormProps>({
     resolver: zodResolver(formSchema),
@@ -643,7 +643,19 @@ const PortfolioTransactionImportModal: React.FC<
       );
 
       await refetchPreview().catch(() => undefined);
-    } catch {
+    } catch (error) {
+      if (isSuggestionRefusedWithoutAi(error)) {
+        capturePortfolioImportFunnelEvent(
+          posthog,
+          PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSuggestionRequested,
+          {
+            mapping_source: "disabled",
+            outcome: "succeeded",
+            stage: "column_mapping",
+          },
+        );
+        return;
+      }
       capturePortfolioImportFunnelEvent(
         posthog,
         PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSaved,
@@ -678,8 +690,9 @@ const PortfolioTransactionImportModal: React.FC<
   );
 
   useEffect(() => {
+    // Asked whether or not AI is on: the API answers from a saved mapping or the column names
+    // without it, and only adds the model's suggestion when this person may use AI.
     if (
-      aiHidden ||
       !shouldSuggestPortfolioImportColumnMapping({
         hasSuggestion: Boolean(previewColumnMapping?.suggestion),
         hasWarning: Boolean(previewColumnMapping?.warning),
@@ -696,7 +709,6 @@ const PortfolioTransactionImportModal: React.FC<
     void requestColumnMappingSuggestion();
   }, [
     activeImportSessionId,
-    aiHidden,
     isSuggestingPortfolioImportColumnMapping,
     preview?.status,
     previewColumnMapping?.suggestion,

@@ -293,11 +293,35 @@ describe('usePortfolioImport', () => {
     await hook.unmount(); client.clear()
   })
 
-  it('reports unmapped-columns when the server has no AI provider for the suggest route', async () => {
+  it.each(['local_heuristic', 'saved_spec'])('auto-accepts a %s suggestion, made without AI, like any other', async (mappingSource) => {
     mockWrite
       .mockResolvedValueOnce(session)
       .mockResolvedValueOnce(parseTrigger)
-      .mockRejectedValueOnce(new ApiError('http', 501))
+      .mockResolvedValueOnce({ ...suggestion, mappingSource })
+      .mockResolvedValueOnce(confirmMapping)
+    mockUpload.mockResolvedValue(undefined)
+    mockRead
+      .mockResolvedValueOnce(needsMapping)
+      .mockResolvedValueOnce(readyPreview)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+
+    expect(mockWrite.mock.calls[3]?.[0].path).toBe('/v1/portfolio-import-sessions/1/column-mapping')
+    expect(mockWrite.mock.calls[3]?.[1].body.columnMapping).toEqual(suggestion.columnMapping.columnMapping)
+    expect(hook.result.current.state).toEqual({ phase: 'review', preview: readyPreview })
+    await hook.unmount(); client.clear()
+  })
+
+  it.each([
+    ['501 on a server with no AI provider', new ApiError('http', 501)],
+    ['403 feature_disabled for a person who hid AI', new ApiError('http', 403, { serverCode: 'feature_disabled' })],
+  ])('reports unmapped-columns, not a failure, when an older API refuses the suggest route with %s', async (_label, refusal) => {
+    mockWrite
+      .mockResolvedValueOnce(session)
+      .mockResolvedValueOnce(parseTrigger)
+      .mockRejectedValueOnce(refusal)
     mockUpload.mockResolvedValue(undefined)
     mockRead.mockResolvedValueOnce(needsMapping)
 
@@ -307,6 +331,22 @@ describe('usePortfolioImport', () => {
 
     expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'unmapped-columns' })
     expect(mockWrite).toHaveBeenCalledTimes(3)
+    await hook.unmount(); client.clear()
+  })
+
+  it('still reports a 403 the suggest route answers for another reason as an access failure', async () => {
+    mockWrite
+      .mockResolvedValueOnce(session)
+      .mockResolvedValueOnce(parseTrigger)
+      .mockRejectedValueOnce(new ApiError('http', 403, { serverCode: 'forbidden' }))
+    mockUpload.mockResolvedValue(undefined)
+    mockRead.mockResolvedValueOnce(needsMapping)
+
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => usePortfolioImport(7, noWait), { wrapper })
+    await act(async () => { await hook.result.current.start(file) })
+
+    expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'access' })
     await hook.unmount(); client.clear()
   })
 
