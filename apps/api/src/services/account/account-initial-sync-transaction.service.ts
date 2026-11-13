@@ -213,7 +213,9 @@ class AccountInitialSyncTransactionService {
         log.warn({ error: sanitizeError(error) }, 'Transfer matching failed');
       }
       // Link posted rows that pay an installment of a card's plan ("PARC 03/12"), so the plan reads
-      // them as paid instead of projecting them again. Best-effort, like transfer matching.
+      // them as paid instead of projecting them again. A pending charge is not linked; once the bank
+      // posts it, the promotion above flips the row in place and this pass, over every unlinked
+      // charge, links it. Best-effort, like transfer matching.
       try {
         const linked = await em.fork().transactional((tx) => linkPostedInstallments(tx, { tenantKey: tenant.tenantKey.tenantKey }));
         if (linked > 0) log.info({ linked, tenantKey: tenant.tenantKey.tenantKey }, 'Linked posted installments');

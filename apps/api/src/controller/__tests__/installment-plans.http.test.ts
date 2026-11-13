@@ -217,6 +217,33 @@ describe('installment plans over HTTP', () => {
     expect((await plans.as(owner.appuser).get('/v1/installment-plans/suggestions')).body.suggestions).toEqual([]);
   });
 
+  it('suggests plans only from posted charges, and refuses a plan whose links hold one that is not posted, whole', async () => {
+    const { em, owner } = await household();
+    const first = await charge(em, owner, owner.account, 'PHONE SHOP PARC 01/04', -50, daysFromToday(-31));
+    const pending = await charge(em, owner, owner.account, 'PHONE SHOP PARC 02/04', -50, daysFromToday(-1), 'PENDING');
+    await charge(em, owner, owner.account, 'SOFA PARC 01/02', -80, daysFromToday(-1), 'PENDING');
+    const dropped = await charge(em, owner, owner.account, 'LAMP PARC 01/02', -20, daysFromToday(-1), 'EXPIRED');
+    const unstated = await charge(em, owner, owner.account, 'DESK PARC 01/02', -60, daysFromToday(-1), null);
+
+    const suggested = await plans.as(owner.appuser).get('/v1/installment-plans/suggestions');
+    expect(suggested.status).toBe(200);
+    const byName = Object.fromEntries(suggested.body.suggestions.map((suggestion: { description: string; transactions: { transactionKey: number }[] }) => [suggestion.description, suggestion.transactions.map((row) => row.transactionKey)]));
+    expect(byName).toEqual({ DESK: [unstated.transactionKey], 'PHONE SHOP': [first.transactionKey] });
+
+    const accept = (links: { installmentNumber: number; transactionKey: number }[]) => create(owner.appuser, owner.account, { description: 'Phone shop', installmentCount: 4, links, purchaseDate: isoDay(daysFromToday(-31)), totalAmount: 200 });
+    const refusedPending = await accept([{ installmentNumber: 1, transactionKey: first.transactionKey }, { installmentNumber: 2, transactionKey: pending.transactionKey }]);
+    const refusedDropped = await accept([{ installmentNumber: 1, transactionKey: first.transactionKey }, { installmentNumber: 2, transactionKey: dropped.transactionKey }]);
+    expect([refusedPending.status, refusedPending.body.code]).toEqual([400, 'transaction_pending']);
+    expect([refusedDropped.status, refusedDropped.body.code]).toEqual([400, 'transaction_expired']);
+    // All or none: no plan, and the posted row in the same request is not linked either.
+    expect((await plans.as(owner.appuser).get('/v1/installment-plans')).body.installmentPlans).toEqual([]);
+    expect((await db.em().fork().findOneOrFail(Transaction, { transactionKey: first.transactionKey }, { filters: false })).installmentPlanKey).toBeNull();
+
+    const accepted = await accept([{ installmentNumber: 1, transactionKey: first.transactionKey }]);
+    expect(accepted.status).toBe(201);
+    expect(accepted.body.installmentPlan.installments.slice(0, 2).map((row: { transactionKey: null | number }) => row.transactionKey)).toEqual([first.transactionKey, null]);
+  });
+
   it('reports each card’s remaining commitment', async () => {
     const { owner } = await household();
     await create(owner.appuser, owner.account, { purchaseDate: isoDay(daysFromToday(1)), totalAmount: 300 });

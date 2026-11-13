@@ -10,7 +10,7 @@ import { InstallmentPlan } from '@entity/InstallmentPlan';
 import type { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { type CreditCardCycle, toCalendarDate, utcDayNumber } from '@service/account/credit-card-cycle';
-import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName, isPendingStatusName } from '@service/transaction/transaction-status';
+import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName, isPendingStatusName, onlyPosted } from '@service/transaction/transaction-status';
 import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { roundDisplay, toNumber } from '@utils/money';
 
@@ -313,16 +313,23 @@ async function writeSchedule(em: EntityManager, plan: InstallmentPlan): Promise<
 }
 
 /**
- * Link a posted transaction to installment `installmentNumber` of `plan`. The transaction must be a
- * live row the caller can see, on the plan's card, and not already paying an installment; the
- * installment must not already be paid. Flushes nothing.
+ * Link a posted transaction to installment `installmentNumber` of `plan`, by hand or with a new plan's
+ * `links`. The transaction must be a live row the caller can see, posted, on the plan's card, and not
+ * already paying an installment; the installment must not already be paid. Flushes nothing.
+ *
+ * Posted is the rule the automatic linker and the suggestions apply too (`isPostedStatusName`): a
+ * pending charge can still change or drop out (400 `transaction_pending`), and an EXPIRED one never
+ * moved money (400 `transaction_expired`). A row with no status (manual and older rows) is posted.
  * The two 409s carry their own codes, so a client can word them: `transaction_already_linked` and
  * `installment_already_paid`.
  */
 async function assignTransaction(em: EntityManager, plan: InstallmentPlan, installmentNumber: number, transactionKey: number): Promise<void> {
   if (installmentNumber > plan.installmentCount) throw new BadRequestError(`Installment ${installmentNumber} is past the plan's ${plan.installmentCount}`);
-  const transaction = await em.findOne(Transaction, { deletedAt: null, transactionKey }, { filters: { [HIDDEN_FILTER]: false } });
+  const transaction = await em.findOne(Transaction, { deletedAt: null, transactionKey }, { filters: { [HIDDEN_FILTER]: false }, populate: ['transactionStatusKey'] });
   if (!transaction) throw new NotFoundError(`Transaction not found: ${transactionKey}`);
+  const status = transaction.transactionStatusKey?.name;
+  if (isPendingStatusName(status)) throw new BadRequestError('The transaction is still pending; link it once it is posted', ERROR_CODE.TRANSACTION_PENDING);
+  if (isExpiredStatusName(status)) throw new BadRequestError('The transaction expired and never moved money', ERROR_CODE.TRANSACTION_EXPIRED);
   if (transaction.accountKey?.accountKey !== plan.accountKey.accountKey) throw new BadRequestError('The transaction is not on the plan\'s account');
   const current = transaction.installmentPlanKey?.installmentPlanKey;
   if (current != null && (current !== plan.installmentPlanKey || transaction.installmentNumber !== installmentNumber)) {
@@ -349,20 +356,13 @@ export async function deleteInstallmentPlan(em: EntityManager, plan: Installment
 }
 
 /**
- * Link a posted transaction to one installment by hand. The row must be posted: a pending charge can
- * still change or drop out (400 `transaction_pending`), and an EXPIRED one never moved money (400
- * `transaction_expired`). A row with no status (manual and older rows) is posted, as everywhere else.
+ * Link a posted transaction to one installment by hand, under {@link assignTransaction}'s rules.
  *
  * The amount is deliberately not compared with the installment's: banks round installments
  * differently and the last one absorbs the rounding, so a mismatch is not a reason to refuse a link
  * the person chose. The detail shows the posted amount beside the scheduled one.
  */
 export async function linkInstallment(em: EntityManager, plan: InstallmentPlan, installmentNumber: number, transactionKey: number): Promise<void> {
-  const transaction = await em.findOne(Transaction, { deletedAt: null, transactionKey }, { filters: { [HIDDEN_FILTER]: false }, populate: ['transactionStatusKey'] });
-  if (!transaction) throw new NotFoundError(`Transaction not found: ${transactionKey}`);
-  const status = transaction.transactionStatusKey?.name;
-  if (isPendingStatusName(status)) throw new BadRequestError('The transaction is still pending; link it once it is posted', ERROR_CODE.TRANSACTION_PENDING);
-  if (isExpiredStatusName(status)) throw new BadRequestError('The transaction expired and never moved money', ERROR_CODE.TRANSACTION_EXPIRED);
   await assignTransaction(em, plan, installmentNumber, transactionKey);
   await em.flush();
 }
@@ -416,13 +416,15 @@ export async function listCommitments(em: EntityManager, input: { accountKey?: n
 
 /**
  * Suggested plans from the caller's visible, unlinked posted rows whose description carries an
- * installment marker. Read-only: accepting one is a `createInstallmentPlan` with its links.
+ * installment marker. Posted as everywhere installments link: a pending or EXPIRED row is left out,
+ * so accepting a suggestion never links one. Read-only: accepting one is a `createInstallmentPlan`
+ * with its links.
  */
 export async function listSuggestions(em: EntityManager, input: { accountKey?: number; tenantKey: number; today: Date }): Promise<InstallmentSuggestionDto[]> {
   const since = new Date(startOfUtcDay(input.today).getTime() - SUGGESTION_LOOKBACK_DAYS * DAY_MS);
   const rows = await em.find(
     Transaction,
-    {
+    onlyPosted({
       accountKey: { deletedAt: null, ...(input.accountKey === undefined ? {} : { accountKey: input.accountKey }) },
       deletedAt: null,
       // A cheap pre-filter; the parser decides.
@@ -431,7 +433,7 @@ export async function listSuggestions(em: EntityManager, input: { accountKey?: n
       settlementAmount: { $lt: 0 },
       tenantKey: { tenantKey: input.tenantKey },
       transactionDate: { $gte: since },
-    },
+    }),
     { populate: ['accountKey', 'accountKey.currencyKey'] },
   );
   const accounts = new Map(rows.flatMap((row) => (row.accountKey ? [[row.accountKey.accountKey, row.accountKey] as const] : [])));
@@ -449,13 +451,17 @@ export async function listSuggestions(em: EntityManager, input: { accountKey?: n
  * instead of being counted next to its projection. Run after a sync or an import and when a plan
  * is created or rescheduled; idempotent, and it never unlinks.
  *
- * A row is linked only when it is a charge on the plan's card whose description names the
+ * A row is linked only when it is a posted charge (pending and EXPIRED rows wait or never link, as
+ * for a link by hand) on the plan's card whose description names the
  * installment (`PARC 03/12`: number 3 of a 12-installment plan), whose amount is that installment's
  * within a cent per installment (banks put the rounding on different installments), and whose date
  * is within the plan's schedule give or take two months (some banks date every installment on the
  * purchase day). When two plans fit, the purchase name in the description must pick one; when it
  * cannot, the row is left for the user to link. A row a member unlinked from a plan by hand is never
  * linked to that plan again (`Transaction.installmentUnlinkedPlanKey`).
+ *
+ * Every run looks at all the unlinked charges in the plans' windows, not only new ones, so a pending
+ * charge the sync promotes to posted in place is linked by that sync's own run.
  *
  * `tenantKey` is explicit, so the same code runs in a request and in the sync worker.
  */
@@ -495,19 +501,18 @@ export async function linkPostedInstallments(em: EntityManager, input: { account
 
   const candidates = await em.find(
     Transaction,
-    {
+    onlyPosted({
       accountKey: { accountKey: { $in: accountKeys } },
       deletedAt: null,
       installmentPlanKey: null,
       settlementAmount: { $lt: 0 },
       transactionDate: { $gte: new Date(earliest) },
-    },
-    { filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionDate: 'asc', transactionKey: 'asc' }, populate: ['transactionStatusKey'] },
+    }),
+    { filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionDate: 'asc', transactionKey: 'asc' } },
   );
 
   let linked = 0;
   for (const candidate of candidates) {
-    if (candidate.transactionStatusKey?.name === EXPIRED_TRANSACTION_STATUS) continue;
     const marker = parseInstallmentMarker(candidate.description);
     if (!marker || !candidate.transactionDate) continue;
     const amountCents = Math.round(Math.abs(toNumber(candidate.settlementAmount)) * 100);

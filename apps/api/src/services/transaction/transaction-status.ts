@@ -15,7 +15,9 @@ import type { Transaction } from '@entity/Transaction';
  * - A row with no status is a legacy row and counts as before.
  *
  * Every reader that sums, lists or analyses transactions applies the rule through one of the
- * three forms below, so there is no string literal to get wrong at the call site.
+ * three forms below, so there is no string literal to get wrong at the call site. What must hold
+ * only settled money (an installment link) takes the stricter posted-only rule: `isPostedStatusName`
+ * and `onlyPosted`.
  */
 export const EXPIRED_TRANSACTION_STATUS = 'EXPIRED';
 
@@ -30,6 +32,14 @@ export function isPendingStatusName(name: null | string | undefined): boolean {
 /** True when a status name marks a row whose money never moved. */
 export function isExpiredStatusName(name: null | string | undefined): boolean {
   return name === EXPIRED_TRANSACTION_STATUS;
+}
+
+/**
+ * True when a status name marks a posted row: neither PENDING nor EXPIRED. A row with no status is
+ * posted. The rule for anything that must only ever hold settled money, such as an installment link.
+ */
+export function isPostedStatusName(name: null | string | undefined): boolean {
+  return !isPendingStatusName(name) && !isExpiredStatusName(name);
 }
 
 /**
@@ -48,8 +58,22 @@ export const NOT_EXPIRED_TRANSACTION = {
  * (`{ transactionKey: excludeExpired({ ... }) }`).
  */
 export function excludeExpired<Where extends FilterQuery<Transaction>>(where: Where): Where {
+  return withCondition(where, NOT_EXPIRED_TRANSACTION);
+}
+
+/** MikroORM condition on `Transaction`: posted only, so no status, or any status but PENDING and EXPIRED. */
+export const POSTED_TRANSACTION = {
+  $or: [{ transactionStatusKey: null }, { transactionStatusKey: { name: { $nin: [PENDING_TRANSACTION_STATUS, EXPIRED_TRANSACTION_STATUS] } } }],
+} satisfies FilterQuery<Transaction>;
+
+/** Add the posted-only condition ({@link isPostedStatusName}) to a `Transaction` where clause, as {@link excludeExpired} does. */
+export function onlyPosted<Where extends FilterQuery<Transaction>>(where: Where): Where {
+  return withCondition(where, POSTED_TRANSACTION);
+}
+
+function withCondition<Where extends FilterQuery<Transaction>>(where: Where, condition: FilterQuery<Transaction>): Where {
   const clause = where as Record<string, unknown> & { $and?: unknown[] };
-  return { ...clause, $and: [...(clause.$and ?? []), NOT_EXPIRED_TRANSACTION] } as Where;
+  return { ...clause, $and: [...(clause.$and ?? []), condition] } as Where;
 }
 
 /**
