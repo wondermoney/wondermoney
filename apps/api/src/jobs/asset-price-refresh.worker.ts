@@ -1,7 +1,7 @@
 import type { Job } from 'pg-boss';
 
 import { BackgroundOperationStatus } from '@entity/BackgroundOperation';
-import { isMarketDataEnabled } from '@service/market-data/eodhd.service';
+import { isMarketDataEnabled } from '@service/market-data/registry';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import assetPriceRefreshService from '@service/portfolio/asset-price-refresh.service';
 

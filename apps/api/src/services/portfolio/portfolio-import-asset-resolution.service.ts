@@ -6,7 +6,7 @@ import { PortfolioImportAssetCandidate } from '@entity/PortfolioImportAssetCandi
 import { PortfolioImportAssetGroup, PortfolioImportAssetGroupSelectedAction, PortfolioImportAssetGroupStatus } from '@entity/PortfolioImportAssetGroup';
 import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioImportRow';
 import { PortfolioImportSession, PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
-import eodhd from '@service/market-data/eodhd.service';
+import { marketData } from '@service/market-data/registry';
 import { ConflictError } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -27,6 +27,8 @@ export interface AssetSearchCandidate {
   ISIN?: string;
   Name?: string;
   profileJson?: Record<string, unknown>;
+  /** The market-data provider that found it; EODHD when unset. */
+  provider?: string;
   Type?: string;
 }
 
@@ -61,7 +63,6 @@ export interface ProviderLookupContext {
 
 const PROVIDER_HIGH_CONFIDENCE = 0.95;
 const UNSUPPORTED_ASSET_REASON = 'Unsupported asset';
-const eodhdSearch = eodhd as unknown as { search: (query: string) => Promise<AssetSearchCandidate[]> };
 
 class PortfolioImportAssetResolutionService {
   async resolveImportSessionAssets(input: { importSessionId: number }, deps: PortfolioImportAssetResolutionDeps = {}): Promise<PortfolioImportAssetResolutionResult> {
@@ -216,7 +217,7 @@ class PortfolioImportAssetResolutionService {
           name: candidate.Name,
           portfolioImportAssetGroupKey: group,
           profileJson: candidate.profileJson,
-          provider: 'eodhd',
+          provider: candidate.provider ?? 'eodhd',
           rejectedReason: score.rejectedReason,
           symbol: candidate.Code,
         });
@@ -402,7 +403,7 @@ class PortfolioImportAssetResolutionService {
     if (cached) {
       try { return { candidates: await cached }; } catch (error) { this.logProviderLookupFailure(error, context); return { kind: 'provider_error' }; }
     }
-    const search = deps.search ?? eodhdSearch.search.bind(eodhdSearch);
+    const search = deps.search ?? registrySearch;
 
     const searchPromise = this.runWithConcurrency(async () => {
       try {
@@ -418,6 +419,12 @@ class PortfolioImportAssetResolutionService {
     searchCache.set(cacheKey, searchPromise);
     try { return { candidates: await searchPromise }; } catch { searchCache.delete(cacheKey); return { kind: 'provider_error' }; }
   }
+}
+
+/** Search the market-data providers, tagging each candidate with the one that found it. */
+async function registrySearch(query: string): Promise<AssetSearchCandidate[]> {
+  const { provider, value } = await marketData().search(query);
+  return value.map((match) => ({ ...match, provider }));
 }
 
 export default new PortfolioImportAssetResolutionService();

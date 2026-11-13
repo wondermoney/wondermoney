@@ -6,7 +6,8 @@ import { Currency } from '@entity/Currency';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetExchange } from '@entity/FinancialAssetExchange';
 import { FinancialAssetType } from '@entity/FinancialAssetType';
-import eodhd from '@service/market-data/eodhd.service';
+import type { SecurityMatch } from '@service/market-data/providers/types';
+import { marketData } from '@service/market-data/registry';
 import { BadRequestError, InternalServerError } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -21,19 +22,13 @@ interface MappedAssetFields {
   symbol: string;
 }
 
-// Row type is inferred (EodhdTypes.SearchResult) rather than annotated
-// explicitly: @wondermoney/shared@8.1.0's bundled .d.ts re-exports the eodhd
-// package's SearchResult *interface* as a namespaced value, so
-// `EodhdTypes.SearchResult` cannot be referenced in a type position (TS2749).
-// `eodhd.search()`'s own return type is unaffected and correctly infers this
-// shape — see financial-markets.ts / portfolio-import-asset-resolution.service.ts
-// for the same pattern elsewhere in this migration.
+// A search match is EODHD's search-result shape, whichever provider answered.
 //
 // EODHD's search Type field isn't a fixed enum in the SDK's own types (typed as
 // plain, always-present `string`) — it's been observed as free text like
 // "Common Stock", "ETF", "Fund". Match loosely rather than exact-string, and
 // default unrecognized values to Stock.
-export function mapProfileToAssetFields(profile: Awaited<ReturnType<typeof eodhd.search>>[number]): MappedAssetFields {
+export function mapProfileToAssetFields(profile: SecurityMatch): MappedAssetFields {
   // Defensive: the SDK types Type as a required string, but the live API can
   // still omit or null it at runtime (e.g. a search result missing profile
   // data) — widen to `string | null | undefined` so this guard is a real
@@ -58,7 +53,7 @@ export function mapProfileToAssetFields(profile: Awaited<ReturnType<typeof eodhd
 
 /**
  * Returns an existing FinancialAsset for the given symbol, or creates one
- * on-demand from EODHD search data if it doesn't exist yet.
+ * on-demand from market-data search (the registry) if it doesn't exist yet.
  *
  * Handles concurrent creation races: if two requests create the same symbol
  * simultaneously, the unique constraint violation is caught and we fall back
@@ -69,10 +64,10 @@ export async function resolveOrCreateFinancialAsset(symbol: string, options: { e
   const existing = await em.findOne(FinancialAsset, { symbol });
   if (existing) return existing;
 
-  // Fetch profile from EODHD search (Fundamentals-tier profile data — cik,
+  // Fetch profile from market-data search (Fundamentals-tier profile data — cik,
   // cusip, logo, isActivelyTrading — is not available on this plan; those
   // fields are left unset and the FinancialAsset entity's own defaults apply).
-  const results = await eodhd.search(symbol);
+  const { value: results } = await marketData().search(symbol);
   const profile = results.find((row) => row.Code.toUpperCase() === symbol.toUpperCase()) ?? results[0];
   if (!profile) {
     throw new BadRequestError(`Unknown symbol: ${symbol}`);

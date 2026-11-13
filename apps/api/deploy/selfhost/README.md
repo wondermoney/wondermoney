@@ -81,7 +81,7 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | Email | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` (or `RESEND_API_KEY`) |
 | CSV imports and receipt copies | an S3-compatible bucket, or the bundled store: `COMPOSE_PROFILES=storage` plus the values in `.env`'s file storage section |
 | Receipt scanning, smart categorisation, CSV column mapping, the assistant | `AI_BASE_URL`, `AI_MODEL` (any OpenAI-compatible endpoint, including Ollama), or `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `AI_MODEL` |
-| Ticker search and live prices | `EODHD_API_KEY` |
+| Ticker search and live prices | `EODHD_API_KEY`, or the free Stooq and CoinGecko providers for prices through `MARKET_DATA_PROVIDERS` |
 | A contact form and a support address in the app | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |

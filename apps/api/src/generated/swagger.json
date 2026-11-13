@@ -938,6 +938,16 @@
         }
       }
     },
+    "/v1/admin/market-data/sources": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/admin/transactions/audit/dedup-skipped": {
       "get": {
         "description": "",

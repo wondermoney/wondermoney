@@ -1,4 +1,7 @@
-import type { HoldingPricePoint } from "@/lib/api/portfolio/useHoldingPriceOverrides";
+import type { HoldingPricePoint, HoldingPriceProvider } from "@/lib/api/portfolio/useHoldingPriceOverrides";
+
+/** Provider names are brands, shown as written in every language. */
+const PROVIDER_NAMES: Record<HoldingPriceProvider, string> = { coingecko: "CoinGecko", eodhd: "EODHD", stooq: "Stooq" };
 
 export function isIsoCalendarDate(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) &&
@@ -30,4 +33,15 @@ export function toHoldingPriceChartRows(points: HoldingPricePoint[]): HoldingPri
     manual: point.source === "manual" ? point.price : null,
     price: point.price,
   }));
+}
+
+/** The providers the market prices came from, most recent first, by name. Empty when none is recorded. */
+export function getMarketPriceProviderNames(points: HoldingPricePoint[]): string[] {
+  const names: string[] = [];
+  for (const point of [...points].reverse()) {
+    if (point.source !== "market" || !point.provider) continue;
+    const name = PROVIDER_NAMES[point.provider] ?? point.provider;
+    if (!names.includes(name)) names.push(name);
+  }
+  return names;
 }

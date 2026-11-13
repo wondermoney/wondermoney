@@ -35,6 +35,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { parseMarketDataProviders } from './market-data-providers';
 import { isMerchantLogoTemplate } from './merchant-logo-template';
 import { parseTrustProxy, TrustProxyError } from './trust-proxy';
 
@@ -206,6 +207,12 @@ const sharedSchema = z.object({
   AZURE_OPENAI_OCR_DEPLOYMENT: z.string().trim().optional(),
   AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT: z.string().trim().optional(),
   EODHD_API_KEY: z.string().trim().optional(),
+  // The market-data providers to ask, in order (`services/market-data/registry.ts`). Read by the
+  // API and the worker's price jobs; unset means EODHD alone.
+  MARKET_DATA_PROVIDERS: z.string().superRefine((value, ctx) => {
+    const parsed = parseMarketDataProviders(value);
+    if (!parsed.ok) ctx.addIssue({ code: 'custom', message: parsed.error });
+  }).optional(),
 
   // Defaults live in jobs/pgboss.config.ts.
   PGBOSS_MIGRATE: boolFlag('pg-boss migrate flag').optional(),
@@ -378,6 +385,7 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
     credentialEncryptionKey: parsed.CREDENTIAL_ENCRYPTION_KEY_V1,
     emailOptOutSigningSecret: parsed.EMAIL_OPT_OUT_SIGNING_SECRET,
     eodhdApiKey: parsed.EODHD_API_KEY,
+    marketDataProviders: marketDataProviders(parsed.MARKET_DATA_PROVIDERS),
     resend: {
       apiKey: parsed.RESEND_API_KEY,
     },
@@ -449,6 +457,12 @@ function freeze<T>(value: T): T {
     return Object.freeze(next) as unknown as T;
   }
   return value;
+}
+
+function marketDataProviders(raw: string | undefined) {
+  const parsed = parseMarketDataProviders(raw);
+  // The schema already refused an invalid list.
+  return parsed.ok ? [...parsed.ids] : [];
 }
 
 function oidcIssues(parsed: z.infer<typeof authSchema>): ConfigurationIssue[] {

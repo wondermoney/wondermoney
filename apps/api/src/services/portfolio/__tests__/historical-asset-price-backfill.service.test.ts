@@ -58,7 +58,7 @@ describe('historical asset price backfill service', () => {
     expect(result.failed).toBe(1);
     expect(snapSvc.backfillSnapshotsForPortfolio).not.toHaveBeenCalled();
   });
-  it('inserts fetched prices, ignoring a day already stored', async () => {
+  it('inserts fetched prices with the provider that supplied them, ignoring a day already stored', async () => {
     const database = kyselyDouble();
     em.getKysely.mockReturnValueOnce(database.db);
     em.find.mockResolvedValueOnce([]);
@@ -67,7 +67,7 @@ describe('historical asset price backfill service', () => {
     await service.backfillHistoricalAssetPrices({ items: [{ financialAssetId: 7, symbol: 'AAPL', transactionDate: '2026-05-20' }], portfolioId: 1 }, { now: new Date('2026-05-22T12:00:00Z') });
 
     expect(database.queries).toHaveLength(1);
-    expect(database.queries[0]?.sql).toBe('insert into "financial_asset_price" ("date", "financial_asset_key", "price", "volume") values ($1, $2, $3, $4) on conflict ("financial_asset_key", "date") do nothing');
-    expect(database.queries[0]?.parameters).toEqual([new Date('2026-05-20T00:00:00.000Z'), 7, 100, 0]);
+    expect(database.queries[0]?.sql).toBe('insert into "financial_asset_price" ("date", "financial_asset_key", "price", "source", "volume") values ($1, $2, $3, $4, $5) on conflict ("financial_asset_key", "date") do nothing');
+    expect(database.queries[0]?.parameters).toEqual([new Date('2026-05-20T00:00:00.000Z'), 7, 100, 'eodhd', 0]);
   });
 });

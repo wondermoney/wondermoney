@@ -84,6 +84,16 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, MERCHANT_LOGO_URL_TEMPLATE: 'https://{domain}/favicon.ico' })).toThrow(/MERCHANT_LOGO_URL_TEMPLATE/);
   });
 
+  it('takes MARKET_DATA_PROVIDERS as an ordered list of known providers and refuses anything else', () => {
+    expect(loadConfiguration('api', validApi).integrations.marketDataProviders).toEqual(['eodhd']);
+    expect(loadConfiguration('api', { ...validApi, MARKET_DATA_PROVIDERS: '' }).integrations.marketDataProviders).toEqual(['eodhd']);
+    expect(loadConfiguration('worker', { ...validShared, MARKET_DATA_PROVIDERS: ' Stooq , eodhd,coingecko ' }).integrations.marketDataProviders)
+      .toEqual(['stooq', 'eodhd', 'coingecko']);
+
+    expect(() => loadConfiguration('api', { ...validApi, MARKET_DATA_PROVIDERS: 'eodhd,yahoo' })).toThrow(/MARKET_DATA_PROVIDERS.*yahoo/);
+    expect(() => loadConfiguration('worker', { ...validShared, MARKET_DATA_PROVIDERS: 'stooq,stooq' })).toThrow(/MARKET_DATA_PROVIDERS.*more than once/);
+  });
+
   it('takes the cross-currency transfer tolerance as a fraction and refuses a percentage', () => {
     expect(() => loadConfiguration('worker', { ...validShared, TRANSFER_MATCH_FX_TOLERANCE: '0.02' })).not.toThrow();
     expect(() => loadConfiguration('api', { ...validApi, TRANSFER_MATCH_FX_TOLERANCE: '0' })).not.toThrow();

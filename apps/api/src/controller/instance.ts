@@ -9,7 +9,7 @@ import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
 import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
-import { isMarketDataEnabled } from '@service/market-data/eodhd.service';
+import { isMarketDataEnabled, marketDataFeatures } from '@service/market-data/registry';
 import { resolveStorageConfig } from '@service/storage/s3';
 import { buildInfo } from '@utils/constants';
 
@@ -26,6 +26,7 @@ export function getInstance(_req: Request, res: Response) {
   const { commit, version } = buildInfo();
   const bankSync = bankSyncFeatures();
   const signIn = signInMethods();
+  const market = marketDataFeatures();
   const statementProvider = aiProviderLabel('statementImport');
   return res.json({
     apiVersion: 1,
@@ -44,6 +45,10 @@ export function getInstance(_req: Request, res: Response) {
       fileStorage: resolveStorageConfig() !== null,
       googleSignIn: isGoogleSignInConfigured(),
       marketData: isMarketDataEnabled(),
+      /** What the market-data providers here can be asked (`search`, `quote`, `dailyHistory`, `dividends`, `splits`). */
+      marketDataCapabilities: market.marketDataCapabilities,
+      /** The set-up providers, in the order `MARKET_DATA_PROVIDERS` asks them. */
+      marketDataProviders: market.marketDataProviders,
       // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
       mcp: isMcpEnabled(),
       // Single sign-on through the operator's OIDC provider: "Sign in with <name>". Null when off.

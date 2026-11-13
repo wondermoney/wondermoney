@@ -6,11 +6,16 @@ import { getPortfolioTransactionMutationInvalidationKeys } from "./portfolioInva
 
 export type HoldingPriceSource = "manual" | "market";
 
+/** The market-data provider a server took a market price from (`MARKET_DATA_PROVIDERS`). */
+export type HoldingPriceProvider = "coingecko" | "eodhd" | "stooq";
+
 /** One day's price: the market's, or the household's manual price for that day. */
 export interface HoldingPricePoint {
   /** `YYYY-MM-DD`. */
   date: string;
   price: number;
+  /** Where a market price came from; null for a manual price or one stored before sources were recorded. */
+  provider: HoldingPriceProvider | null;
   source: HoldingPriceSource;
 }
 
@@ -27,6 +32,7 @@ export interface HoldingPriceOnDay {
   override: { note: string | null; price: number } | null;
   /** The price in effect that day, which may come from an earlier manual price. */
   price: number | null;
+  provider: HoldingPriceProvider | null;
   source: HoldingPriceSource | null;
 }
 

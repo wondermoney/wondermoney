@@ -2,14 +2,16 @@ import { subDays } from 'date-fns';
 
 import { DI } from '@app/database/di';
 import { anyOf, sqlQuery, toDate } from '@app/database/sql';
+import { isMarketDataProviderId, type MarketDataProviderId } from '@config/market-data-providers';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
-
-import eodhdClient from '../market-data/eodhd.service';
+import { marketData } from '@service/market-data/registry';
 
 export interface EffectivePrice {
   date: Date;
   price: number;
+  /** For a market price, the provider that supplied it when recorded; null for a manual price. */
+  provider?: MarketDataProviderId | null;
   source: 'manual' | 'market';
 }
 
@@ -18,7 +20,11 @@ interface PriceRow {
   date: Date | string;
   financial_asset_key: number;
   price: number;
+  source?: null | string;
 }
+
+/** The provider recorded on a stored price, when it is one this server knows. */
+export const priceProvider = (source: unknown): MarketDataProviderId | null => (isMarketDataProviderId(source) ? source : null);
 
 /** `YYYY-MM-DD` of a stored price date, in UTC. */
 export const priceDay = (date: Date | string): string => toDate(date).toISOString().slice(0, 10);
@@ -35,7 +41,12 @@ export function pickNewerPrice(market: EffectivePrice | undefined, override: Eff
 }
 
 function mergePrices(marketRows: readonly PriceRow[], overrideRows: readonly PriceRow[]): Map<number, EffectivePrice> {
-  const toPrice = (row: PriceRow, source: EffectivePrice['source']): EffectivePrice => ({ date: toDate(row.date), price: row.price, source });
+  const toPrice = (row: PriceRow, source: EffectivePrice['source']): EffectivePrice => ({
+    date: toDate(row.date),
+    price: row.price,
+    provider: source === 'market' ? priceProvider(row.source) : null,
+    source,
+  });
   const merged = new Map<number, EffectivePrice>(marketRows.map((row) => [row.financial_asset_key, toPrice(row, 'market')]));
   for (const row of overrideRows) {
     const assetKey = row.financial_asset_key;
@@ -46,10 +57,9 @@ function mergePrices(marketRows: readonly PriceRow[], overrideRows: readonly Pri
 }
 
 /**
- * Service for managing asset prices and EODHD API integration
+ * Stored asset prices, and fetching new ones through the market-data registry.
  */
 class AssetPriceService {
-  private eodhd = eodhdClient;
 
   /**
    * The current price of every priced asset: the latest market price, or for `tenantKey` the
@@ -88,7 +98,7 @@ class AssetPriceService {
     const marketPrices = (await sqlQuery(DI.em)
       .selectFrom('financial_asset_price')
       .distinctOn('financial_asset_key')
-      .select(['financial_asset_key', 'date', 'price'])
+      .select(['financial_asset_key', 'date', 'price', 'source'])
       .where(anyOf('financial_asset_key', uniqueKeys))
       .where('date', '<=', through)
       .orderBy('financial_asset_key')
@@ -146,17 +156,18 @@ class AssetPriceService {
   }
 
   /**
-   * Fetch and save asset price from EODHD API.
+   * Fetch the asset's latest price from the market-data registry and save it, with the provider
+   * that supplied it as its `source`.
    * Returns null (rather than persisting a NULL price, which violates the not-null constraint)
-   * when the provider has no usable price/timestamp for the symbol.
+   * when no provider has a usable price/timestamp for the symbol.
    * @param financialAsset - Financial asset entity
    * @returns Saved asset price entity, or null when the provider returned no usable price
    */
   async fetchAndSaveAssetPrice(financialAsset: FinancialAsset): Promise<FinancialAssetPrice | null> {
-    const quote = await this.eodhd.getQuote(financialAsset.symbol);
-    // EODHD's declared type promises `close`/`timestamp`/`volume` are always numbers, but the
-    // live API can still omit or null them for thinly-traded/delisted symbols — widen to `unknown`
-    // so these defensive checks are real guards rather than lint-flagged dead conditions.
+    const { provider, value: quote } = await marketData().quote(financialAsset.symbol);
+    // A provider can omit or null `close`/`timestamp`/`volume` for thinly-traded or delisted
+    // symbols (EODHD's own types claim they are always numbers) — widen to `unknown` so these
+    // defensive checks are real guards rather than lint-flagged dead conditions.
     const close: unknown = quote.close;
     const timestamp: unknown = quote.timestamp;
     const volume: unknown = quote.volume;
@@ -171,12 +182,13 @@ class AssetPriceService {
       date: new Date(Number(timestamp) * 1000),
       financialAssetKey: financialAsset,
       price,
+      source: provider,
       volume: Number.isFinite(Number(volume)) ? Number(volume) : 0,
     });
   }
 
   /**
-   * Ensure asset has recent price, fetching from EODHD if needed
+   * Ensure asset has recent price, fetching from the market-data providers if needed
    * @param financialAsset - Financial asset entity
    * @param daysThreshold - Number of days to consider "recent"
    */
@@ -220,7 +232,7 @@ class AssetPriceService {
     }));
   }
   /**
-   * Fetch historical prices for an index/benchmark from EODHD
+   * Fetch historical prices for an index/benchmark from the market-data providers
    * @param symbol - Index symbol (e.g., '^GSPC' for S&P 500)
    * @param from - Start date (yyyy-MM-dd)
    * @param to - End date (yyyy-MM-dd)
@@ -232,11 +244,9 @@ class AssetPriceService {
     to: string,
   ): Promise<{ date: string; value: number }[]> {
     try {
-      // EODHD indices use a `.INDX` suffix (e.g. GSPC.INDX for the S&P 500) rather
-      // than the caret prefix (^GSPC) callers of this method pass; translate at the
-      // boundary rather than pushing this knowledge up into every caller.
-      const eodhdSymbol = symbol.startsWith('^') ? `${symbol.slice(1)}.INDX` : symbol;
-      const rows = await this.eodhd.getEndOfDayPrices(eodhdSymbol, { from, to });
+      // The caret form (^GSPC) is the registry's index symbol; each provider translates it to
+      // its own (EODHD's GSPC.INDX, Stooq's ^spx).
+      const { value: rows } = await marketData().dailyHistory(symbol, { from, to });
       return rows
         .filter((row) => typeof row.date === 'string' && typeof row.close === 'number')
         .map((row) => ({ date: row.date, value: row.close }))

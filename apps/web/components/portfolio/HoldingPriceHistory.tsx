@@ -33,7 +33,7 @@ import {
 import type { PortfolioHolding } from "@/lib/api/portfolio/usePortfoliosHoldings";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
-import { getManualPriceDates, isIsoCalendarDate, parsePositivePrice, toHoldingPriceChartRows } from "./holding-price-utils";
+import { getManualPriceDates, getMarketPriceProviderNames, isIsoCalendarDate, parsePositivePrice, toHoldingPriceChartRows } from "./holding-price-utils";
 
 type Props = { holding: PortfolioHolding; enabled: boolean };
 
@@ -67,6 +67,8 @@ export function HoldingPriceHistory({ holding, enabled }: Props) {
   const chartRows = useMemo(() => toHoldingPriceChartRows(points), [points]);
   const manualDates = useMemo(() => getManualPriceDates(points), [points]);
   const manualPoints = points.filter((point) => point.source === "manual");
+  const providerNames = useMemo(() => getMarketPriceProviderNames(points), [points]);
+  const listFormatter = useMemo(() => new Intl.ListFormat(locale, { style: "long", type: "conjunction" }), [locale]);
   const editing = manualDates.has(date);
   // Until the member types a note, show the one saved for the day.
   const noteValue = note ?? day.data?.override?.note ?? "";
@@ -161,6 +163,9 @@ export function HoldingPriceHistory({ holding, enabled }: Props) {
                   activeDot={{ fill: "var(--background)", r: 5, stroke: "var(--color-manual)", strokeWidth: 2 }}
                 />
               </AreaLineChartBase>
+              {providerNames.length ? (
+                <p className="text-muted-foreground text-xs">{t("holding-price-market-sources", { providers: listFormatter.format(providerNames) })}</p>
+              ) : null}
               {manualPoints.length ? (
                 <>
                   <p className="text-muted-foreground flex items-center gap-2 text-xs">

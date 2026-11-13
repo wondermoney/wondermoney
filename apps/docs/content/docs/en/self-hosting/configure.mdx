@@ -80,6 +80,20 @@ To cap what each household can spend on the model per day, set `AI_DAILY_LIMIT_A
 
 Set `EODHD_API_KEY` to turn on ticker search, live prices and the Financial Markets module.
 
+`MARKET_DATA_PROVIDERS` lists the market-data providers to ask, in order, separated by commas. Empty means `eodhd` alone. When a provider fails or has nothing for a security, the next one in the list is asked, and a feature that no listed provider offers is hidden. An unknown or repeated provider stops the API and the worker at start-up. Set it on both.
+
+| Provider | What it gives | Needs |
+|---|---|---|
+| `eodhd` | Search, latest prices, daily history, dividends and splits, on most exchanges | `EODHD_API_KEY` |
+| `stooq` | The latest daily close and daily history for US, London, Xetra and Tokyo listings and the main US indices. No search, dividends or splits | Nothing |
+| `coingecko` | Crypto search, latest prices and up to a year of daily history, for pairs written like `BTC-USD` | Nothing |
+
+`MARKET_DATA_PROVIDERS=eodhd,stooq,coingecko` asks EODHD first and the free providers when it cannot answer. `MARKET_DATA_PROVIDERS=stooq,coingecko` prices holdings without an EODHD key; securities are then found only through CoinGecko's crypto search, so stocks must already be in your catalogue.
+
+Stooq and CoinGecko are outside services with their own terms of use, and they stay off until you list them. Read their terms before you do: you are responsible for following them, including any limits on requests and on commercial use. WonderMoney's hosted service does not use them.
+
+Each stored price records the provider it came from. A holding's price history shows it, and administrators see the providers and the recent prices from each at `GET /v1/admin/market-data/sources`.
+
 ## Merchant logos
 
 Merchant logos are off by default. Each merchant then shows the first letter of its name in a colored circle, and nothing about your users' merchants leaves the server.
@@ -162,6 +176,8 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Email (your SMTP server or Resend) | The API and the worker, to send password resets, invites and notifications | `SMTP_HOST` or `RESEND_API_KEY` |
 | AI (your OpenAI-compatible endpoint or Anthropic) | The API and the worker, with the receipt, CSV columns, statement pages, transactions or chat messages the feature needs | `AI_BASE_URL` and `AI_MODEL`, or `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` and `AI_MODEL` |
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
+| Market data (Stooq) | The API and the worker, with ticker symbols, not user data | `stooq` in `MARKET_DATA_PROVIDERS` |
+| Market data (CoinGecko) | The API and the worker, with coin symbols and search text, not user data | `coingecko` in `MARKET_DATA_PROVIDERS` |
 | Merchant logos (the service you choose) | The API, with the domain of a merchant's website, not user data ([Merchant logos](#merchant-logos)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |

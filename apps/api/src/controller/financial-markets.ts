@@ -24,24 +24,21 @@ import {
   searchTickerResponseSchema,
 } from '@app/validators/financial-markets-dtos';
 import { zParse } from '@app/validators/parser';
-import eodhd, { handleEodhdError } from '@service/market-data/eodhd.service';
-import { NotFoundError } from '@utils/errors';
+import type { MarketDataProviderId } from '@config/market-data-providers';
+import { handleMarketDataError } from '@service/market-data/errors';
+import { marketData } from '@service/market-data/registry';
+import { FeatureDisabledError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 
-const PROVIDER = 'eodhd' as const
-
-const SOURCE_METADATA = { asOf: null, provider: PROVIDER } as const
+/** Which provider answered (`MARKET_DATA_PROVIDERS`, in order; EODHD by default). */
+const sourceMetadata = (provider: MarketDataProviderId) => ({ asOf: null, provider })
 
 export async function getCompanyInformation(req: Request, res: Response) {
   const {
     params: { ticker },
   } = await zParse(getCompanyInfoRequestSchema, req)
   try {
-    // Row type is inferred rather than annotated explicitly: see the
-    // searchTicker comment above on why `EodhdTypes.SearchResult` can't be
-    // referenced in a type position (TS2749). eodhd.search()'s own return
-    // type is unaffected and correctly infers this shape.
-    const results = await eodhd.search(ticker)
+    const { value: results } = await marketData().search(ticker)
     // search() is a fuzzy/fielded lookup — take the first exact symbol match,
     // falling back to the first result so a near-miss ticker still resolves.
     const profile = results.find((row) => readSymbol(row.Code) === readSymbol(ticker)) ?? results[0]
@@ -76,7 +73,7 @@ export async function getCompanyInformation(req: Request, res: Response) {
     }
     return res.json({ companyInformation: companyInformationResponseSchema.parse(dto) })
   } catch (error) {
-    handleEodhdError(error)
+    handleMarketDataError(error)
   }
 }
 
@@ -103,11 +100,7 @@ export async function getHistoricalDividend(req: Request, res: Response) {
     params: { ticker },
   } = await zParse(getHistoricalDividendRequestSchema, req)
   try {
-    // Row type is inferred rather than annotated explicitly: see the
-    // searchTicker comment above on why `EodhdTypes.DividendDataPoint` can't
-    // be referenced in a type position (TS2749). eodhd.getDividends()'s own
-    // return type is unaffected and correctly infers this shape.
-    const rows = await eodhd.getDividends(ticker)
+    const { provider, value: rows } = await marketData().dividends(ticker)
     const dto: HistoricalDividendResponseDto = {
       dividends: rows
         .map((row) => ({
@@ -121,12 +114,12 @@ export async function getHistoricalDividend(req: Request, res: Response) {
           date: dateString(row.date) ?? '',
         }))
         .filter((entry) => Boolean(entry.date)),
-      source: { ...SOURCE_METADATA },
+      source: sourceMetadata(provider),
       symbol: readSymbol(ticker),
     }
     return res.json(historicalDividendResponseSchema.parse(dto))
   } catch (error) {
-    handleEodhdError(error)
+    handleMarketDataError(error)
   }
 }
 
@@ -136,14 +129,10 @@ export async function getHistoricalPrice(req: Request, res: Response) {
     query: { from, includeDividends, to },
   } = await zParse(getHistoricalPriceRequestSchema, req)
   try {
-    // Row types below are inferred rather than annotated explicitly: see the
-    // searchTicker comment above on why `EodhdTypes.EodDataPoint` /
-    // `EodhdTypes.DividendDataPoint` can't be referenced in a type position
-    // (TS2749). eodhd.getEndOfDayPrices()/getDividends()'s own return types
-    // are unaffected and correctly infer these shapes.
-    const [companyHistoricalPrice, companyHistoricalDividends] = await Promise.all([
-      eodhd.getEndOfDayPrices(ticker, { from, to }),
-      includeDividends ? eodhd.getDividends(ticker, { from, to }) : Promise.resolve(null),
+    const [{ provider, value: companyHistoricalPrice }, companyHistoricalDividends] = await Promise.all([
+      marketData().dailyHistory(ticker, { from, to }),
+      // Without a provider that has dividends here, the prices still come back, without them.
+      includeDividends ? marketData().dividends(ticker, { from, to }).then((answer) => answer.value, ignoreDisabled) : Promise.resolve(null),
     ])
     const dividendByDate = new Map(
       (companyHistoricalDividends ?? []).map((row) => [
@@ -171,12 +160,12 @@ export async function getHistoricalPrice(req: Request, res: Response) {
           }
         })
         .filter((entry): entry is NonNullable<typeof entry> => entry !== null),
-      source: { ...SOURCE_METADATA },
+      source: sourceMetadata(provider),
       symbol: readSymbol(ticker),
     }
     return res.json(historicalPriceResponseSchema.parse(dto))
   } catch (error) {
-    handleEodhdError(error)
+    handleMarketDataError(error)
   }
 }
 
@@ -191,27 +180,27 @@ export async function getQuote(req: Request, res: Response) {
     params: { ticker },
   } = await zParse(getQuoteRequestSchema, req)
   try {
-    const quote = await eodhd.getQuote(ticker)
+    const { provider, value: quote } = await marketData().quote(ticker)
     const price = numeric(quote.close)
     const change = numeric(quote.change)
     const changePercent = roundPercent(numeric(quote.change_p))
     const dto: QuoteResponseDto = {
       change,
       changePercent,
-      // EODHD's RealTimeQuote has no currency or company-name field — both
-      // require the Fundamentals tier this plan doesn't cover.
+      // A quote carries no currency or company name (EODHD's needs the
+      // Fundamentals tier this plan doesn't cover; the free providers have none).
       currency: null,
       marketState: null,
       name: null,
       price,
-      source: { ...SOURCE_METADATA },
+      source: sourceMetadata(provider),
       symbol: readSymbol(quote.code || ticker),
       timestamp: quote.timestamp ? new Date(quote.timestamp * 1000).toISOString() : null,
       volume: numeric(quote.volume),
     }
     return res.json(quoteResponseSchema.parse(dto))
   } catch (error) {
-    handleEodhdError(error)
+    handleMarketDataError(error)
   }
 }
 
@@ -222,19 +211,12 @@ export async function searchTicker(req: Request, res: Response) {
 
   // Blank query → empty results (the search box fires before the user types).
   if (!searchTerm) {
-    const empty: SearchTickerResponseDto = { results: [], source: { ...SOURCE_METADATA } }
+    const empty: SearchTickerResponseDto = { results: [], source: sourceMetadata(marketData().providers[0]?.id ?? 'eodhd') }
     return res.json(searchTickerResponseSchema.parse(empty))
   }
 
   try {
-    // Row type is inferred (EodhdTypes.SearchResult) rather than annotated
-    // explicitly: @wondermoney/shared@8.1.0's bundled .d.ts re-exports the
-    // eodhd package's SearchResult *interface* as a namespaced value
-    // (`declare const types_SearchResult: typeof SearchResult`), so
-    // `EodhdTypes.SearchResult` cannot be referenced in a type position
-    // (TS2749). `eodhd.search()`'s own return type is unaffected and
-    // correctly infers this shape.
-    const results = await eodhd.search(searchTerm)
+    const { provider, value: results } = await marketData().search(searchTerm)
     const dto: SearchTickerResponseDto = {
       results: results.map((row) => ({
         currency: upperCurrency(row.Currency),
@@ -245,11 +227,11 @@ export async function searchTicker(req: Request, res: Response) {
         // "ETF"); the DTO field is a nullable string.
         type: stringValue(row.Type),
       })),
-      source: { ...SOURCE_METADATA },
+      source: sourceMetadata(provider),
     }
     return res.json(searchTickerResponseSchema.parse(dto))
   } catch (error) {
-    handleEodhdError(error)
+    handleMarketDataError(error)
   }
 }
 
@@ -264,20 +246,20 @@ function dateString(value: unknown): null | string {
 }
 
 /**
- * Real-time price + daily change for `ticker`, from the exact same EODHD
- * real-time quote call `getQuote` above uses. Shared so company-information
+ * Real-time price + daily change for `ticker`, from the exact same
+ * registry quote call `getQuote` above uses. Shared so company-information
  * (Explorer) and quote (Watchlist) can never derive "current price" from two
  * different provider calls.
  *
  * Best-effort: a quote hiccup returns nulls rather than throwing, so it
  * doesn't take down the rest of the company-profile response — the caller
- * already resolved that independently via `eodhd.search()`. The frontend
+ * already resolved that independently via the registry's search. The frontend
  * knows how to render a null price/changePercentage (its last-close
  * fallback), same as it already does for a quote-only failure.
  */
 async function fetchQuoteSnapshot(ticker: string): Promise<{ changePercentage: null | number; price: null | number }> {
   try {
-    const quote = await eodhd.getQuote(ticker)
+    const { value: quote } = await marketData().quote(ticker)
     return {
       changePercentage: roundPercent(numeric(quote.change_p)),
       price: numeric(quote.close),
@@ -286,6 +268,11 @@ async function fetchQuoteSnapshot(ticker: string): Promise<{ changePercentage: n
     logger.warn({ error, ticker }, 'Failed to fetch real-time quote for company-information price snapshot')
     return { changePercentage: null, price: null }
   }
+}
+
+function ignoreDisabled(error: unknown): null {
+  if (error instanceof FeatureDisabledError) return null
+  throw error
 }
 
 function numeric(value: unknown): null | number {

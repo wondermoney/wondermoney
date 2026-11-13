@@ -6,13 +6,13 @@ import { sqlQuery } from '@app/database/sql';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FINANCIAL_ASSET_STOCK_ADJUSTMENT_TYPES } from '@entity/FinancialAssetStockAdjustment';
 import { FinancialAssetStockAdjustment } from '@entity/FinancialAssetStockAdjustment';
-import eodhd from '@service/market-data/eodhd.service';
+import { marketData, marketDataProviderLabel } from '@service/market-data/registry';
 import { getRef } from '@utils/em-helpers';
 import logger from '@utils/logger';
 
 import portfolioSnapshotService from './portfolio-snapshot.service';
 
-/** A normalized split row this service works with, independent of EODHD's raw string ratio format. */
+/** A normalized split row this service works with, independent of the provider's raw string ratio format. */
 export interface NormalizedSplitRow {
   date: string;
   denominator: number;
@@ -45,15 +45,17 @@ export async function syncStockSplitsForSymbol(symbol: string): Promise<{ insert
   return syncStockSplits(financialAsset);
 }
 
-async function fetchSplitRows(symbol: string): Promise<NormalizedSplitRow[]> {
-  const rows = await eodhd.getSplits(symbol);
-  return rows
+async function fetchSplitRows(symbol: string): Promise<{ rows: NormalizedSplitRow[]; source: string }> {
+  const { provider, value } = await marketData().splits(symbol);
+  const rows = value
     .map((row) => {
       const ratio = parseSplitRatio(row.split);
       if (!ratio) return null;
       return { date: row.date, denominator: ratio.denominator, label: row.split, numerator: ratio.numerator };
     })
     .filter((row): row is NormalizedSplitRow => row !== null);
+  // The adjustment's `source` names the provider in capitals, as it always has ('EODHD').
+  return { rows, source: marketDataProviderLabel(provider).toUpperCase() };
 }
 
 async function findExistingSplitAdjustment(em: typeof DI.em, financialAssetKey: number, date: Date, numerator: number, denominator: number, name: string): Promise<FinancialAssetStockAdjustment | null> {
@@ -134,7 +136,7 @@ async function syncStockSplits(financialAsset: FinancialAsset): Promise<{ insert
   const em = DI.em.fork();
   const assetKey = financialAsset.financialAssetKey;
   const assetSymbol = financialAsset.symbol;
-  const rows = await fetchSplitRows(assetSymbol);
+  const { rows, source } = await fetchSplitRows(assetSymbol);
   let inserted = 0;
   let earliestInsertedSplitDate: Date | null = null;
 
@@ -156,7 +158,7 @@ async function syncStockSplits(financialAsset: FinancialAsset): Promise<{ insert
         existing.financialAssetKey = getRef(em, FinancialAsset, assetKey);
         existing.name = name;
         existing.numerator = numerator;
-        existing.source = 'EODHD';
+        existing.source = source;
         existing.sourceLabel = row.label;
         existing.splitRatio = numerator / denominator;
         await em.flush();
@@ -175,7 +177,7 @@ async function syncStockSplits(financialAsset: FinancialAsset): Promise<{ insert
         financialAssetKey: assetRef,
         name,
         numerator,
-        source: 'EODHD',
+        source,
         sourceLabel: row.label,
         splitRatio: numerator / denominator,
       } as RequiredEntityData<FinancialAssetStockAdjustment>);

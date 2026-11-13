@@ -45,7 +45,7 @@ import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioImportSessionType } from '@entity/PortfolioImportSession';
 import { authedContext } from '@middleware/authed-context';
-import eodhd from '@service/market-data/eodhd.service';
+import { marketData } from '@service/market-data/registry';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { loadVisiblePortfolioAccountLinks, setPortfolioAccountLink } from '@service/portfolio/portfolio-account-link';
 import { latestImportBrokers } from '@service/portfolio/portfolio-brokers';
@@ -613,12 +613,8 @@ export async function getPortfolioCalendar(req: Request, res: Response) {
   const dividendResults = await Promise.all(
     symbols.map(async (s) => {
       try {
-        // Row type is inferred rather than annotated explicitly:
-        // EodhdTypes.DividendDataPoint can't be referenced in a type
-        // position (TS2749; see financial-markets.ts). eodhd.getDividends()'s
-        // own return type is unaffected and correctly infers this shape.
-        const rows = await eodhd.getDividends(s, { from: fromStr, to: toStr });
-        // EODHD's rows don't carry a `symbol` field, so tag
+        const { value: rows } = await marketData().dividends(s, { from: fromStr, to: toStr });
+        // Dividend rows don't carry a `symbol` field, so tag
         // each row with the symbol it was queried for before merging.
         return rows.map((row) => ({ ...row, symbol: s }));
       } catch {
