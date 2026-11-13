@@ -81,7 +81,9 @@ numbers belong in commit messages. **Tests never touch the network or `.env`:**
 `vitest.setup.ts` mocks `dotenv` to a no-op and makes `globalThis.fetch` throw; stub it
 explicitly (`vi.stubGlobal('fetch', vi.fn())`).
 
-Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverage`).
+Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverage`). Locally,
+run the files you touch, then `pnpm verify:changed` from the repository root before pushing (the
+root `CLAUDE.md`, "Verifying a change"); CI runs the whole suite.
 
 ## Code conventions
 

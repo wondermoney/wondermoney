@@ -35,7 +35,8 @@ explains both. Never write those values, the App Store Connect app ID or the App
 
 ## Checks
 
-Before handing off, run `pnpm test` (Jest), `pnpm lint` and `pnpm type-check` here. CI also runs
+Before handing off, run `pnpm verify:changed` from the repository root: it runs the related Jest
+tests, `type-check` and ESLint on Node 24 (the root `CLAUDE.md`, "Verifying a change"). CI also runs
 `pnpm exec expo install --check` and Expo Doctor; run them when you change dependencies.
 
 `pnpm reset-project` is Expo scaffold residue that moves application files. It is not setup;
