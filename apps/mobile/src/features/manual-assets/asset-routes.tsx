@@ -6,7 +6,8 @@ import { ApiError } from '@/lib/api/errors'
 import { useCryptoWalletChains } from '@/lib/server/use-instance'
 
 import { AssetCreateScreen } from './asset-create-screen'
-import { AssetDetailScreen, type AssetDetailViewState } from './asset-detail-screen'
+import { AssetDetailScreen, type AssetDetailViewState, type ManualAssetManageActions } from './asset-detail-screen'
+import { AssetEditScreen, type AssetEditViewState } from './asset-edit-screen'
 import { AssetsScreen, type AssetsViewState } from './assets-screen'
 import { CryptoWalletCreateScreen } from './crypto-wallet-create-screen'
 import type { CryptoWalletActions } from './crypto-wallet-section'
@@ -22,7 +23,14 @@ import {
   useSyncCryptoWallet,
   useUpdateCryptoWallet,
 } from './use-crypto-wallet-writes'
-import { classifyManualAssetWriteFailure, type ManualAssetWriteFailure, useCreateManualAsset, useRecordValuation } from './use-manual-asset-writes'
+import {
+  classifyManualAssetWriteFailure,
+  type ManualAssetWriteFailure,
+  useCreateManualAsset,
+  useDeleteManualAsset,
+  useRecordValuation,
+  useUpdateManualAsset,
+} from './use-manual-asset-writes'
 import { useManualAsset, useManualAssets } from './use-manual-assets'
 import { ValuationScreen } from './valuation-screen'
 
@@ -54,6 +62,10 @@ export function AssetDetailRoute() {
   const query = useManualAsset(assetId)
   const router = useRouter()
   const wallet = useCryptoWalletActions(assetId, () => router.replace('/assets' as Href))
+  const manage = useManualAssetManageActions(assetId, {
+    onEdit: (id) => router.push({ pathname: '/assets/[assetId]/edit', params: { assetId: String(id) } } as Href),
+    onDeleted: () => router.replace('/assets' as Href),
+  })
   let state: AssetDetailViewState
   if (query.isInvalidId) state = { status: 'invalid-id' }
   else if (query.isAccessTransition) state = { status: 'access-transition' }
@@ -69,7 +81,36 @@ export function AssetDetailRoute() {
     onRefresh={async () => { await query.refetch() }}
     onUpdateValue={() => { if (assetId !== null) router.push({ pathname: '/assets/[assetId]/value', params: { assetId: String(assetId) } } as Href) }}
     wallet={wallet}
+    manage={manage}
   />
+}
+
+/**
+ * A hand-valued asset's Edit, Archive / Bring back and Delete. Each write answers with why it
+ * failed (or null); the demo's read-only answer comes back as 'demo' and nothing changes.
+ */
+function useManualAssetManageActions(assetId: number | null, { onEdit, onDeleted }: { onEdit: (assetId: number) => void; onDeleted: () => void }): ManualAssetManageActions | undefined {
+  const update = useUpdateManualAsset()
+  const remove = useDeleteManualAsset()
+  if (assetId === null) return undefined
+  const attempt = async (write: () => Promise<unknown>) => {
+    try {
+      await write()
+      return null
+    } catch (error) {
+      return classifyManualAssetWriteFailure(error)
+    }
+  }
+  return {
+    pending: update.isPending || remove.isPending,
+    onEdit: () => onEdit(assetId),
+    onSetArchived: (archived) => attempt(() => update.mutateAsync({ assetId, value: { archived } })),
+    onDelete: async () => {
+      const outcome = await attempt(() => remove.mutateAsync({ assetId }))
+      if (outcome === null) onDeleted()
+      return outcome
+    },
+  }
 }
 
 /** A wallet page's writes, each answering with why it failed (or null). */
@@ -169,6 +210,41 @@ export function ValuationRoute() {
     currency={query.data?.asset.currency ?? null}
     pending={mutation.isPending}
     outcome={assetId === null ? 'not-found' : outcome}
+    onBack={back}
+    onSave={async (value) => {
+      if (assetId === null) return
+      setOutcome(null)
+      try {
+        await mutation.mutateAsync({ assetId, value })
+        back()
+      } catch (error) {
+        setOutcome(classifyManualAssetWriteFailure(error))
+      }
+    }}
+  />
+}
+
+/** Edit asset: back to the asset once saved, or the reason it was not. */
+export function AssetEditRoute() {
+  const params = useLocalSearchParams<{ assetId?: string | string[] }>()
+  const assetId = parseManualAssetId(params.assetId)
+  const query = useManualAsset(assetId)
+  const router = useRouter()
+  const mutation = useUpdateManualAsset()
+  const [outcome, setOutcome] = useState<ManualAssetWriteFailure | null>(null)
+  let state: AssetEditViewState
+  if (query.isInvalidId) state = { status: 'invalid-id' }
+  else if (query.isAccessTransition) state = { status: 'access-transition' }
+  else if (query.isLoading) state = { status: 'loading' }
+  else if (query.data) state = { status: 'loaded', asset: query.data.asset }
+  else if (query.isNotFound) state = { status: 'not-found' }
+  else if (query.error instanceof ApiError && query.error.code === 'invalid-response') state = { status: 'invalid-response' }
+  else state = { status: 'error' }
+  const back = () => (assetId === null ? router.replace('/assets' as Href) : router.replace(detailHref(assetId)))
+  return <AssetEditScreen
+    state={state}
+    pending={mutation.isPending}
+    outcome={outcome}
     onBack={back}
     onSave={async (value) => {
       if (assetId === null) return

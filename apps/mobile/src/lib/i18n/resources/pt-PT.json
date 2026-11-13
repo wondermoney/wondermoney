@@ -2089,7 +2089,17 @@
     "historyTitle": "Valor ao longo do tempo",
     "chartLabel": "Valor ao longo do tempo, de {{from}} a {{to}}",
     "valuationsTitle": "Avaliações",
-    "manageOnWeb": "Edita, arquiva ou elimina este bem, ou corrige uma avaliação, no WonderMoney na web.",
+    "valuationsOnWeb": "Corrige ou remove uma avaliação no WonderMoney na web.",
+    "manage": {
+      "edit": "Editar bem",
+      "archive": "Arquivar",
+      "unarchive": "Repor",
+      "delete": "Eliminar bem",
+      "archiveTitle": "Arquivar este bem?",
+      "archiveMessage": "Deixa de contar para o património a partir de hoje. O histórico mantém-se.",
+      "deleteTitle": "Eliminar este bem?",
+      "deleteMessage": "As avaliações vão com ele, e sai do histórico do teu património. Não é possível anular."
+    },
     "facts": {
       "title": "Detalhes",
       "kind": "Tipo",
@@ -2145,6 +2155,21 @@
       "value": "Introduz zero ou mais",
       "amount": "Introduz zero ou mais",
       "growthRate": "Introduz uma percentagem acima de -100 e até 1000"
+    }
+  },
+  "manualAssetEdit": {
+    "title": "Editar bem",
+    "loading": "A carregar o bem",
+    "error": "Não foi possível carregar este bem. Fecha e tenta outra vez.",
+    "invalid": "O servidor enviou algo que esta versão da app não consegue ler. Fecha e tenta outra vez, ou atualiza a app.",
+    "notFound": "Este bem já não existe, ou é privado do outro membro do teu agregado.",
+    "save": "Guardar alterações",
+    "saving": "A guardar",
+    "growthStartDate": "Varia a partir de",
+    "growthStartDateHint": "O valor fica como está até esta data.",
+    "ownerOnlyPrivacy": "Só o titular do bem pode alterar se é privado.",
+    "fieldErrors": {
+      "name": "Este campo é obrigatório"
     }
   },
   "manualAssetValuation": {
@@ -3866,7 +3891,9 @@
       },
       "simplefin": {
         "statusRevoked": "Acesso revogado",
-        "accessEnded": "O acesso do SimpleFIN foi revogado. Volta a ligar com um novo token de configuração."
+        "accessEnded": "O acesso do SimpleFIN foi revogado. Volta a ligar com um novo token de configuração.",
+        "accounts": "Contas: {{names}}",
+        "noAccounts": "Ainda sem contas"
       }
     },
     "connect": {

@@ -14,6 +14,12 @@ export type BankConnectionLastError = Readonly<{ code: string; occurredAt: strin
 
 export type BankConnectionRow = Readonly<{
   accessType: BankConnectionDto['accessType']
+  /**
+   * The names of the accounts a SimpleFIN connection feeds, blank names left out; empty when it
+   * feeds none yet (they arrive with the first sync). Null when the API did not say: an older one,
+   * or another provider.
+   */
+  accountNames: readonly string[] | null
   /** What starting a new connection to this bank takes; null when the row can't be reconnected. */
   bankId: null | string
   connectionId: null | number
@@ -29,6 +35,9 @@ export type BankConnectionRow = Readonly<{
 function asRow(dto: BankConnectionDto): BankConnectionRow {
   return {
     accessType: dto.accessType,
+    accountNames: dto.accounts === undefined
+      ? null
+      : dto.accounts.flatMap((account) => (account.accountName?.trim() ? [account.accountName.trim()] : [])),
     bankId: dto.bankId ?? null,
     connectionId: dto.connectionId ?? null,
     dataFreshAsOf: dto.dataFreshAsOf,

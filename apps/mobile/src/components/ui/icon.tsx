@@ -48,6 +48,7 @@ const ICONS = {
   link: { ios: 'link', android: 'link', web: 'link' },
   pencil: { ios: 'pencil', android: 'edit', web: 'edit' },
   trash: { ios: 'trash', android: 'delete', web: 'delete' },
+  archive: { ios: 'archivebox', android: 'archive', web: 'archive' },
   search: { ios: 'magnifyingglass', android: 'search', web: 'search' },
   x: { ios: 'xmark', android: 'close', web: 'close' },
   check: { ios: 'checkmark', android: 'check', web: 'check' },

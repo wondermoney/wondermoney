@@ -10,6 +10,7 @@ import { ConnectionsScreen, type ConnectionsScreenState } from '../connections-s
 
 const row = (over: Partial<BankConnectionRow> = {}): BankConnectionRow => ({
   accessType: 'open_banking',
+  accountNames: null,
   bankId: null,
   connectionId: 42,
   dataFreshAsOf: null,
@@ -212,6 +213,8 @@ describe('ConnectionsScreen row title', () => {
 
 describe('ConnectionsScreen with SimpleFIN', () => {
   const simplefin = (over: Partial<BankConnectionRow> = {}) => row({ connectionId: 7, institutionName: 'Credit Union', provider: 'SimpleFIN', ...over })
+  const simplefinDto = { accessType: 'open_banking', connectionId: 7, dataFreshAsOf: null, expiresAt: null, institutionName: 'Credit Union', provider: 'SimpleFIN', status: 'connected' }
+  const mapped = (connections: unknown[]) => loadedState(mapBankConnections(bankConnectionsResponseSchema.parse({ connections }).connections))
 
   it('offers Connect with SimpleFIN only when the route passes the handler', async () => {
     const hidden = await renderScreen({ state: loadedState([]), onConnectBank: jest.fn() })
@@ -255,6 +258,34 @@ describe('ConnectionsScreen with SimpleFIN', () => {
     const view = await renderScreen({ state: loadedState([simplefin({ institutionName: null })]) })
     expect(view.getByText(/SimpleFIN/)).toBeOnTheScreen()
     expect(view.queryByText(i18n.t('banking.connections.expiresOn', { date: i18n.t('banking.connections.unavailableDate') }))).not.toBeOnTheScreen()
+  })
+
+  it("names the accounts a SimpleFIN connection feeds, outside the row's summary", async () => {
+    const view = await renderScreen({ state: loadedState([simplefin({ accountNames: ['Everyday checking', 'Savings'] })]) })
+    expect(view.getByTestId('simplefin-accounts')).toHaveTextContent('Accounts: Everyday checking, Savings')
+  })
+
+  it('says a SimpleFIN connection has no accounts yet when its list is empty', async () => {
+    const view = await renderScreen({ state: loadedState([simplefin({ accountNames: [] })]) })
+    expect(view.getByTestId('simplefin-accounts')).toHaveTextContent('No accounts yet')
+  })
+
+  it('shows nothing extra when an older API sends no account list', async () => {
+    const view = await renderScreen({ state: mapped([{ ...simplefinDto }]) })
+    expect(view.getByText('Credit Union')).toBeOnTheScreen()
+    expect(view.queryByTestId('simplefin-accounts')).not.toBeOnTheScreen()
+    expect(view.queryByText('No accounts yet')).not.toBeOnTheScreen()
+  })
+
+  it('reads the account names from the API response through to the row', async () => {
+    const view = await renderScreen({ state: mapped([{ ...simplefinDto, accounts: [{ accountKey: 3, accountName: 'Everyday checking' }, { accountKey: 4, accountName: null }] }]) })
+    expect(view.getByTestId('simplefin-accounts')).toHaveTextContent('Accounts: Everyday checking')
+  })
+
+  it('names the accounts in Portuguese', async () => {
+    const i18n = await initMobileI18n('pt-PT')
+    const view = await render(<I18nextProvider i18n={i18n}><ConnectionsScreen {...baseProps} state={loadedState([simplefin({ accountNames: [] })])} /></I18nextProvider>)
+    expect(view.getByTestId('simplefin-accounts')).toHaveTextContent('Ainda sem contas')
   })
 
   it('offers no Reconnect on a revoked SimpleFIN connection and says to connect again with a new token', async () => {

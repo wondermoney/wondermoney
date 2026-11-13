@@ -260,7 +260,14 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
         <Text tone="muted" variant="label">{freshness}</Text>
       </View>
 
-      {/* Outside the summary, whose accessibility label would hide it from screen readers. */}
+      {/* Outside the summary, whose accessibility label would hide them from screen readers. */}
+      {isSimplefin && row.accountNames !== null ? (
+        <Text testID="simplefin-accounts" tone="muted" variant="label">
+          {row.accountNames.length > 0
+            ? t('banking.connections.simplefin.accounts', { names: row.accountNames.join(', ') })
+            : t('banking.connections.simplefin.noAccounts')}
+        </Text>
+      ) : null}
       {consentNotice ? <Text variant="label">{consentNotice}</Text> : null}
 
       {row.lastError ? (

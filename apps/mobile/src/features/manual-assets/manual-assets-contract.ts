@@ -158,6 +158,26 @@ export const cryptoWalletUpdateWriteSchema = z.object({
 
 export type CryptoWalletUpdateWrite = z.input<typeof cryptoWalletUpdateWriteSchema>
 
+/**
+ * Edit asset (web's `ManualAssetFormDrawer` with an asset): what a hand-valued asset's PATCH
+ * changes. Only the fields that changed are sent; null clears an optional one. The currency, the
+ * value and its date are not here: every valuation is in the currency, and the value changes
+ * through Update value, which keeps the history. `isPrivate` is the owner's alone (the API answers
+ * 403 to anyone else), and `archived` alone is Archive or Bring back.
+ */
+export const manualAssetUpdateWriteSchema = z.object({
+  name: z.string().trim().min(1).max(255).optional(),
+  kind: manualAssetKindSchema.optional(),
+  purchasePrice: money.nonnegative().nullable().optional(),
+  purchaseDate: day.nullable().optional(),
+  growthRule: z.object({ annualRatePercent: z.number().finite().gt(-100).max(1000), startDate: day.nullable() }).strict().nullable().optional(),
+  isPrivate: z.boolean().optional(),
+  notes: z.string().max(10_000).nullable().optional(),
+  archived: z.boolean().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0)
+
+export type ManualAssetUpdateWrite = z.input<typeof manualAssetUpdateWriteSchema>
+
 export function createManualAssetUpdateEndpoint(assetId: number) {
   if (!isValidManualAssetId(assetId)) throw new Error('A positive safe asset id is required.')
   return writeEndpoint({ method: 'PATCH', path: `/v1/manual-assets/${assetId}`, schema: z.object({ asset: manualAssetSchema }), successStatuses: [200] })

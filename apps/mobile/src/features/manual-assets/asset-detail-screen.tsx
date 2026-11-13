@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+import { Alert as NativeAlert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Amount, MISSING } from '@/components/ui/amount'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { EntityMark } from '@/components/ui/entity-mark'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { ListRow } from '@/components/ui/list-row'
+import { Notice } from '@/components/ui/notice'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
@@ -20,6 +22,21 @@ import { currencyList, kindGlyph } from './assets-screen'
 import { CryptoWalletManage, CryptoWalletSection, type CryptoWalletActions } from './crypto-wallet-section'
 import type { ManualAssetDto, ManualAssetResponse } from './manual-assets-contract'
 import { changeSincePurchase, formatDay, isEstimated, monthlyChartPoints, shownValue } from './manual-assets-view-model'
+import type { ManualAssetWriteFailure } from './use-manual-asset-writes'
+
+type Outcome = Promise<ManualAssetWriteFailure | null>
+
+/** What a hand-valued asset's page can change on it; each write resolves with why it failed, or null. */
+export type ManualAssetManageActions = Readonly<{
+  /** A write is in flight: the controls wait. */
+  pending: boolean
+  /** Opens Edit asset. */
+  onEdit: () => void
+  /** Archive (once confirmed) or Bring back. */
+  onSetArchived: (archived: boolean) => Outcome
+  /** Delete, once confirmed; on success the route leaves the page. */
+  onDelete: () => Outcome
+}>
 
 export type AssetDetailViewState =
   | { status: 'loading' }
@@ -35,18 +52,21 @@ export type AssetDetailViewState =
  * Web's asset page (`assets/[assetId]/asset-detail-client.tsx`) at phone width: "← Assets"; the
  * asset's mark, name and kind; today's value as the headline figure (and in the viewer's currency
  * when it is in another one); Update value as the one control; the value over time; the
- * valuations, newest first; then the details. Editing, archiving and deleting are on the web.
+ * valuations, newest first; then the details, with Archive (or Bring back) and Delete under them.
+ * Edit sits beside Update value, as on the web; correcting or removing a valuation stays on the web.
  *
  * A crypto wallet is valued by its daily sync, not by hand: it has no Update value and no list of
  * valuations, and shows its addresses and tokens (`CryptoWalletSection`) instead.
  */
-export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wallet: walletActions }: {
+export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wallet: walletActions, manage }: {
   state: AssetDetailViewState
   onBack: () => void
   onUpdateValue: () => void
   onRefresh: () => void | Promise<void>
   /** A crypto wallet's writes; without them its section is read-only. */
   wallet?: CryptoWalletActions
+  /** Edit, archive and delete for a hand-valued asset; without them the page offers none. */
+  manage?: ManualAssetManageActions
 }) {
   const { t, i18n } = useTranslation()
   const formatMoney = useFormatMoney()
@@ -101,9 +121,10 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wal
             {noRate ? <Text accessibilityRole="alert" tone="muted" variant="meta">{t('manualAssets.unconverted', { count: 1, currencies: currencyList([asset.currency], locale) })}</Text> : null}
             {state.status === 'refresh-error' ? <Alert label={t('manualAssetDetail.stale')} /> : null}
             {isWallet && asset.value === null && !asset.archived ? <Text tone="muted" variant="meta">{t('cryptoWallet.detail.notValuedYet')}</Text> : null}
-            {!asset.archived && !isWallet ? (
+            {!isWallet && (!asset.archived || manage) ? (
               <View style={styles.actions}>
-                <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} />
+                {!asset.archived ? <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} /> : null}
+                {manage ? <Button disabled={manage.pending} icon="pencil" label={t('manualAssetDetail.manage.edit')} onPress={manage.onEdit} variant="outline" /> : null}
               </View>
             ) : null}
           </View>
@@ -175,7 +196,8 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wal
               {asset.notes ? <Fact label={t('manualAssetDetail.facts.notes')} value={asset.notes} /> : null}
             </View>
             {isWallet && walletActions && !asset.archived ? <CryptoWalletManage actions={walletActions} asset={asset} /> : null}
-            <Text style={styles.webNote} tone="muted" variant="meta">{t(isWallet ? 'cryptoWallet.detail.manageOnWeb' : 'manualAssetDetail.manageOnWeb')}</Text>
+            {!isWallet && manage ? <AssetManage actions={manage} archived={asset.archived} /> : null}
+            <Text style={styles.webNote} tone="muted" variant="meta">{t(isWallet ? 'cryptoWallet.detail.manageOnWeb' : 'manualAssetDetail.valuationsOnWeb')}</Text>
           </Section>
         </View>
       </ScrollView>
@@ -229,6 +251,53 @@ function AssetEquity({ asset, locale }: { asset: ManualAssetDto; locale: string 
   )
 }
 
+const confirm = (title: string, message: string, cancel: string, proceed: string, destructive: boolean) => new Promise<boolean>((resolve) => {
+  NativeAlert.alert(title, message, [
+    { text: cancel, style: 'cancel', onPress: () => resolve(false) },
+    { text: proceed, style: destructive ? 'destructive' : 'default', onPress: () => resolve(true) },
+  ], { cancelable: true, onDismiss: () => resolve(false) })
+})
+
+/**
+ * Web's Archive / Bring back and Delete asset, under the details. Archiving asks first (it stops
+ * counting in net worth from today; the history stays); bringing it back does not. Deleting asks
+ * first, with web's warning, and cannot be undone.
+ */
+function AssetManage({ actions, archived }: { actions: ManualAssetManageActions; archived: boolean }) {
+  const { t } = useTranslation()
+  const [failure, setFailure] = useState<ManualAssetWriteFailure | null>(null)
+  const [busy, setBusy] = useState<'archive' | 'delete' | null>(null)
+  const run = async (which: 'archive' | 'delete', write: () => Outcome) => {
+    setFailure(null)
+    setBusy(which)
+    try {
+      setFailure(await write())
+    } finally {
+      setBusy(null)
+    }
+  }
+  const archive = async () => {
+    if (actions.pending) return
+    if (archived) return run('archive', () => actions.onSetArchived(false))
+    const confirmed = await confirm(t('manualAssetDetail.manage.archiveTitle'), t('manualAssetDetail.manage.archiveMessage'), t('common.cancel'), t('manualAssetDetail.manage.archive'), false)
+    if (confirmed) await run('archive', () => actions.onSetArchived(true))
+  }
+  const remove = async () => {
+    if (actions.pending) return
+    const confirmed = await confirm(t('manualAssetDetail.manage.deleteTitle'), t('manualAssetDetail.manage.deleteMessage'), t('common.cancel'), t('manualAssetDetail.manage.delete'), true)
+    if (confirmed) await run('delete', actions.onDelete)
+  }
+  return (
+    <View style={styles.manage} testID="asset-manage">
+      <View style={styles.actions}>
+        <Button disabled={actions.pending} icon="archive" label={archived ? t('manualAssetDetail.manage.unarchive') : t('manualAssetDetail.manage.archive')} loading={busy === 'archive'} onPress={archive} variant="outline" />
+        <Button disabled={actions.pending} icon="trash" label={t('manualAssetDetail.manage.delete')} loading={busy === 'delete'} onPress={remove} variant="destructive-quiet" />
+      </View>
+      {failure ? <Notice message={t(`manualAssets.failures.${failure}`)} tone="destructive" testID="asset-manage-failure" /> : null}
+    </View>
+  )
+}
+
 const noWrite = async () => null
 const READ_ONLY_WALLET: CryptoWalletActions = {
   chains: [],
@@ -269,4 +338,5 @@ const styles = StyleSheet.create({
   equityNote: { marginTop: themeTokens.spacing[3] },
   loansHead: { marginTop: themeTokens.spacing[6], marginBottom: themeTokens.spacing[1] },
   webNote: { marginTop: themeTokens.spacing[4] },
+  manage: { gap: themeTokens.spacing[3], marginTop: themeTokens.spacing[4] },
 })
