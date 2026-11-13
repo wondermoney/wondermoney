@@ -170,7 +170,15 @@ interface AccountTransactionTableProps {
    * all N matching", whose bulk actions send these filters instead of ids.
    */
   selectionFilter?: TransactionListFilter;
+  /**
+   * Accounts the person can only view (`myAccess: "read"`), by `accountKey`. Their rows keep
+   * every fact but lose the edit actions: no menu, no category picker, no edit in the
+   * inspector, and they cannot be selected for a bulk change.
+   */
+  readOnlyAccountKeys?: ReadonlySet<number>;
 }
+
+const NO_READ_ONLY_ACCOUNTS: ReadonlySet<number> = new Set();
 
 const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
   React.memo(
@@ -194,6 +202,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       serverTotal,
       onServerFiltersChange,
       selectionFilter,
+      readOnlyAccountKeys = NO_READ_ONLY_ACCOUNTS,
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
@@ -206,6 +215,12 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const [resetPagination, setResetPagination] = useState(false);
       const isDesktop = useBreakpoint("md");
       const isLedger = layout === "ledger";
+      // A row on an account shared to view only: shown, never changed.
+      const canEditRow = useCallback(
+        (transaction: Transaction) =>
+          !readOnlyAccountKeys.has(transaction.accountKey.accountKey),
+        [readOnlyAccountKeys],
+      );
 
       // Edit transaction modal
       const [transactionData, setTransactionData] =
@@ -649,7 +664,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         transaction={transaction}
                         className="shrink-0 font-mono text-sm leading-tight font-semibold"
                       />
-                      {withRowActions && (
+                      {withRowActions && canEditRow(transaction) && (
                         <TransactionActionsMenu
                           transaction={transaction}
                           triggerClassName="-mt-1 flex size-8 shrink-0 p-0"
@@ -740,16 +755,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   id: "actions",
                   enableHiding: false,
                   size: 48,
-                  cell: ({ row }) => {
-                    return (
+                  cell: ({ row }) =>
+                    canEditRow(row.original) ? (
                       <TransactionActionsMenu transaction={row.original} />
-                    );
-                  },
+                    ) : null,
                 }),
               ]
             : []),
         ],
-        [withRowActions, columnHelper, TransactionActionsMenu],
+        [withRowActions, columnHelper, TransactionActionsMenu, canEditRow],
       );
       const columns: ColumnDef<Transaction, any>[] = useMemo(
         () => [
@@ -1047,7 +1061,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <TransactionSplitSummary transaction={info.row.original} />
                   <TagChipList tags={info.row.original.tags} />
                 </div>
-              ) : info.row.original.transactionKey > 0 ? (
+              ) : info.row.original.transactionKey > 0 &&
+                canEditRow(info.row.original) ? (
                 <div className="flex min-w-0 flex-col gap-1">
                   <CategorySelect
                     categories={categories}
@@ -1065,6 +1080,23 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     }
                   />
                   {/* Tags sit small, after the category they qualify. */}
+                  <TagChipList tags={info.row.original.tags} />
+                </div>
+              ) : info.row.original.transactionKey > 0 ? (
+                // A view-only row names its category without offering to change it.
+                <div className="flex min-w-0 flex-col gap-1">
+                  <div className="flex items-center text-sm">
+                    <CategoryCellContent
+                      label={(() => {
+                        const category = info.getValue().at(0);
+                        if (!category) return "—";
+                        return category.isSystemCategory
+                          ? t(getCategoryTranslationKey(category.name))
+                          : category.name;
+                      })()}
+                      muted={info.getValue().length === 0}
+                    />
+                  </div>
                   <TagChipList tags={info.row.original.tags} />
                 </div>
               ) : (
@@ -1185,6 +1217,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           desktopColumns,
           isLedger,
           openLinkedTransaction,
+          canEditRow,
         ],
       );
 
@@ -1838,6 +1871,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               withSelectRow={withSelectRow}
               withMultiSelectRow={withMultiSelectRow}
               onRowSelectionChange={onRowSelect}
+              canSelectRow={canEditRow}
               sticky={sticky}
               footerActions={footerActions}
               serverTotal={serverTotalForFooter}
@@ -1892,7 +1926,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               )
             }
             actions={
-              inspectedTransaction ? (
+              inspectedTransaction && canEditRow(inspectedTransaction) ? (
                 <>
                   <Button
                     size="sm"
@@ -2047,6 +2081,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               selectAllMatching={
                 selectionFilter &&
                 filtersAppliedByServer &&
+                selectAllMatchingIsWritable(
+                  selectionFilter,
+                  readOnlyAccountKeys,
+                ) &&
                 pageFullySelected &&
                 serverTotal != null &&
                 serverTotal > selectedTransactions.length
@@ -2103,3 +2141,20 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 AccountTransactionsTable.displayName = "AccountTransactionsTable";
 
 export default AccountTransactionsTable;
+
+/**
+ * "Select all N matching" sends the list's filter, so the server would act on rows the page
+ * never loaded. It is offered only when no view-only account can be among them: the person has
+ * none, or the account filter names only accounts they may change.
+ */
+function selectAllMatchingIsWritable(
+  filter: TransactionListFilter,
+  readOnlyAccountKeys: ReadonlySet<number>,
+): boolean {
+  if (readOnlyAccountKeys.size === 0) return true;
+  const accountKeys = filter.accountKeys ?? [];
+  return (
+    accountKeys.length > 0 &&
+    accountKeys.every((key) => !readOnlyAccountKeys.has(Number(key)))
+  );
+}

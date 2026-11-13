@@ -1,6 +1,6 @@
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
-import type { AccountSource, AccountSummaryDto, AccountsResponseDto, CreditCardSettingsDto, CsvImportFormat } from './accounts-contract'
+import type { AccountAccess, AccountSource, AccountSummaryDto, AccountsResponseDto, CreditCardSettingsDto, CsvImportFormat } from './accounts-contract'
 
 export type AccountSyncStaleness = 'fresh' | 'stale' | 'very_stale' | 'error' | 'unknown'
 
@@ -34,6 +34,8 @@ export type AccountSummaryViewModel = Readonly<{
    * "Not converted". `provisional`: an estimate at an older rate. Absent on older fixtures: exact.
    */
   fx?: FxState
+  /** The caller's access (#95). `read` hides every edit action; absent on older fixtures: writable. */
+  myAccess?: AccountAccess
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -56,6 +58,7 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   institutionLogoUrl: dto.accountFinancialInstitutionKey?.logoUrl ?? null,
   accountType: dto.accountType ?? null,
   creditCard: dto.creditCard ?? null,
+  myAccess: dto.myAccess,
   fx: resolveFxState({
     fxStatus: dto.fxStatus,
     fxRateDate: dto.fxRateDate,

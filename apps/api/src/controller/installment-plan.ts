@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 
 import { DI } from '@app/app';
 import { authedContext } from '@middleware/authed-context';
+import { accountActor, assertAccountWritable, assertTransactionWritable } from '@service/account/account-access';
 import {
   createInstallmentPlan,
   deleteInstallmentPlan,
@@ -73,6 +74,8 @@ export async function getInstallmentPlan(req: Request, res: Response) {
 export async function postInstallmentPlan(req: Request, res: Response) {
   const { tenant, tenantKey, user } = authedContext(req);
   const { body } = await zParse(createInstallmentPlanRequestSchema, req);
+  // A plan belongs to its card: creating one changes that account's data.
+  await assertAccountWritable(DI.em, body.accountKey, accountActor(req));
   const created = await createInstallmentPlan(DI.em, body, { tenant, tenantKey, user });
   const plan = await findPlanOrFail(DI.em, created.installmentPlanKey, tenantKey);
   return res.status(201).json({ installmentPlan: await describePlan(DI.em, plan, new Date()) });
@@ -83,6 +86,7 @@ export async function patchInstallmentPlan(req: Request, res: Response) {
   const { tenant, tenantKey, user } = authedContext(req);
   const { body, params } = await zParse(updateInstallmentPlanRequestSchema, req);
   const plan = await findPlanOrFail(DI.em, params.installmentPlanId, tenantKey);
+  await assertAccountWritable(DI.em, plan.accountKey, accountActor(req));
   await updateInstallmentPlan(DI.em, plan, body, { tenant, tenantKey, user });
   return res.json({ installmentPlan: await describePlan(DI.em, plan, new Date()) });
 }
@@ -92,6 +96,7 @@ export async function removeInstallmentPlan(req: Request, res: Response) {
   const { tenantKey } = authedContext(req);
   const { params } = await zParse(deleteInstallmentPlanRequestSchema, req);
   const plan = await findPlanOrFail(DI.em, params.installmentPlanId, tenantKey);
+  await assertAccountWritable(DI.em, plan.accountKey, accountActor(req));
   await deleteInstallmentPlan(DI.em, plan);
   return res.sendStatus(204);
 }
@@ -101,6 +106,8 @@ export async function postInstallmentLink(req: Request, res: Response) {
   const { tenantKey } = authedContext(req);
   const { body, params } = await zParse(linkInstallmentRequestSchema, req);
   const plan = await findPlanOrFail(DI.em, params.installmentPlanId, tenantKey);
+  await assertAccountWritable(DI.em, plan.accountKey, accountActor(req));
+  await assertTransactionWritable(DI.em, body.transactionKey, accountActor(req));
   await linkInstallment(DI.em, plan, params.installmentNumber, body.transactionKey);
   return res.json({ installmentPlan: await describePlan(DI.em, plan, new Date()) });
 }
@@ -110,6 +117,7 @@ export async function deleteInstallmentLink(req: Request, res: Response) {
   const { tenantKey } = authedContext(req);
   const { params } = await zParse(unlinkInstallmentRequestSchema, req);
   const plan = await findPlanOrFail(DI.em, params.installmentPlanId, tenantKey);
+  await assertAccountWritable(DI.em, plan.accountKey, accountActor(req));
   await unlinkInstallment(DI.em, plan, params.installmentNumber);
   return res.json({ installmentPlan: await describePlan(DI.em, plan, new Date()) });
 }

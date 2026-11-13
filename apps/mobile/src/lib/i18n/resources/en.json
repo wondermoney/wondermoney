@@ -48,7 +48,8 @@
     },
     "close": "Close",
     "moreActions": "More actions",
-    "householdReadOnly": "You have view-only access to this household, so nothing was changed. Ask an owner or admin if you need to make changes."
+    "householdReadOnly": "You have view-only access to this household, so nothing was changed. Ask an owner or admin if you need to make changes.",
+    "accountReadOnly": "You can view this account but not change it."
   },
   "navigation": {
     "home": "Home",
@@ -561,6 +562,7 @@
     "stale": "Could not refresh. Showing previously loaded account details",
     "viewTransactions": "View account transactions",
     "edit": "Edit account",
+    "sharing": "Sharing",
     "error": {
       "title": "Could not load account",
       "message": "Check your connection and try again"
@@ -602,6 +604,7 @@
       "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
       "demo": "Recalculating is not available in the demo.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Sign in again to recalculate this account.",
       "not-found": "This account is no longer available.",
       "network": "Could not reach the server. Check your connection and try again.",
@@ -624,12 +627,45 @@
     "privacyTitle": "Private account",
     "privacyHelper": "Only you can see this account and its transactions. Other people in your household won't see it anywhere.",
     "privacySwitch": "Private account",
+    "sharing": {
+      "title": "Sharing",
+      "screenTitle": "Account sharing",
+      "helper": "Choose what each person in your household can do with this account.",
+      "readOnlyHelper": "Only the account's owner or the household owner can change who it's shared with.",
+      "owner": "Owner",
+      "choices": {
+        "hidden": "Hidden",
+        "read": "Can view",
+        "write": "Can edit"
+      },
+      "memberAccess": "Access for {{name}}",
+      "viewerHint": "Viewers can only view, never edit.",
+      "unnamedMember": "Household member",
+      "laterShared": "People who join the household later can see and edit it too.",
+      "laterPrivate": "People who join the household later won't see it until someone shares it with them.",
+      "alone": "There's nobody else in your household to share it with yet.",
+      "loading": "Loading who can see this account…",
+      "error": "Couldn't load who this account is shared with.",
+      "failures": {
+        "demo": "Demo mode is read-only. Sharing was not changed.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "manager-required": "Only the account's owner or the household owner can change who it's shared with.",
+        "access": "You no longer have access to change this account's sharing.",
+        "cancelled": "The save was cancelled because your signed-in context changed.",
+        "not-found": "This account no longer exists.",
+        "invalid": "Someone joined or left the household since this list loaded. Refresh and try again.",
+        "network-ambiguous": "The connection was lost while saving. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
+        "general": "Sharing could not be saved."
+      }
+    },
     "discardTitle": "Discard unsaved changes?",
     "discardMessage": "Your unsaved account changes will be lost.",
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You no longer have access to change this account.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
       "not-found": "This account no longer exists. Your form has not been cleared.",
@@ -647,6 +683,7 @@
     "deleteFailures": {
       "demo": "Demo mode is read-only. This account was not deleted.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You no longer have access to delete this account.",
       "cancelled": "The deletion was cancelled because your signed-in context changed.",
       "not-found": "This account no longer exists.",
@@ -807,6 +844,7 @@
     "reviewResult": {
       "demo": "Demo profiles are read-only. The selected transactions were not changed",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Multi-factor authentication is required. The selected transactions were not changed",
       "cancelled": "The change was cancelled because your session changed. The selected transactions were not changed",
       "network": "The request had an uncertain network result. Inspect the selected transactions before trying again",
@@ -923,6 +961,7 @@
         "not-found": "That transaction or link is no longer available. Refresh and try again.",
         "demo": "Demo profiles are read-only. Nothing was changed.",
         "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "mfa": "Multi-factor authentication is required. Nothing was changed.",
         "cancelled": "The change was cancelled because your session changed. Nothing was changed.",
         "network": "The request had an uncertain network result. Check the transaction before trying again.",
@@ -1092,6 +1131,7 @@
     "result": {
       "demo": "Demo profiles are read-only. Nothing was recorded.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You do not have access to record this transaction. Nothing was recorded.",
       "mfa": "Additional verification is required. Nothing was recorded.",
       "validation": "These details were rejected. Edit them before submitting again.",
@@ -1177,6 +1217,7 @@
     "failures": {
       "demo": "Importing transactions is unavailable in demo mode.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The import was cancelled before it was sent.",
@@ -1285,6 +1326,7 @@
     "failures": {
       "demo": "Scanning receipts is unavailable in demo mode.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "allowance": "Your household has used today's receipt-scanning allowance. It resets at midnight UTC.",
       "unverified": "Verify your email address to use receipt scanning.",
       "access": "Your access changed. Try again.",
@@ -1338,6 +1380,7 @@
     "actionResult": {
       "demo": "Demo profiles are read-only. Nothing was changed",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Additional verification is required. Nothing was changed",
       "cancelled": "The change was cancelled because your session changed",
       "network": "The result is uncertain because the connection was lost. Check the list before trying again",
@@ -4082,6 +4125,7 @@
       "failures": {
         "demo": "This action is unavailable in demo mode.",
         "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "access": "You don't have access to import a statement.",
         "mfa": "Additional verification is required before you can import a statement.",
         "cancelled": "The import was cancelled.",
@@ -4648,6 +4692,7 @@
     "accountBalance": "Account balance",
     "available": "Available",
     "private": "Private",
+    "viewOnly": "View only",
     "sharedBy": "Shared by {{name}}",
     "edit": "Edit",
     "delete": "Delete",
@@ -4987,6 +5032,7 @@
     "failures": {
       "demo": "This is not available in demo mode.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You do not have access to this card’s plans.",
       "invalid": "The plan was refused. Check the details and try again.",
       "conflict": "One of these transactions is already linked to another installment.",
@@ -5257,6 +5303,7 @@
       "gone": "That change can no longer be applied: it expired, was already decided, or a transaction or category is gone. The list is up to date.",
       "demo": "Changes are turned off in the demo.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "general": "Couldn't save that. Try again."
     }
   },

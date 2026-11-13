@@ -56,6 +56,7 @@ const account = (fields: Partial<Account>): Account => ({
   isPrivate: false,
   isOwnedByViewer: true,
   ownerFirstName: null,
+  myAccess: "owner",
   availableBalance: null,
   appuserCurrencyAvailableBalance: null,
   syncStatus: null,
@@ -184,3 +185,20 @@ test("reorder mode cannot move the first account up or the last one down", () =>
   );
 });
 
+
+test("an account shared to view only has no edit, recalculate or delete menu, and says so", () => {
+  renderList([
+    account({ accountKey: 1, accountName: "Mine", myAccess: "owner" }),
+    account({
+      accountKey: 2,
+      accountName: "Joint",
+      isOwnedByViewer: false,
+      ownerFirstName: "Ana",
+      myAccess: "read",
+    }),
+  ]);
+
+  // One menu, on the account the person may change.
+  assert.equal(screen.getAllByRole("button", { name: "Open menu" }).length, 1);
+  assert.ok(screen.getByLabelText("View only"));
+});

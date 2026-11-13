@@ -7,6 +7,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionReimbursement } from '@entity/TransactionReimbursement';
+import { type AccountActor, assertAccountsWritable, isAccountVisibleTo, loadAccountAudiences, loadSharedAccountKeys, visibleAccountWhere } from '@service/account/account-access';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { big, toNumber } from '@utils/money';
@@ -79,10 +80,7 @@ export interface TransactionReimbursementsDto {
   role: null | ReimbursementRole;
 }
 
-interface Actor {
-  appuserKey: number;
-  tenantKey: number;
-}
+type Actor = AccountActor;
 
 /** How far apart a reimbursement and its expense are suggested: the refund within 60 days after the expense. */
 export const SUGGESTION_WINDOW_DAYS = 60;
@@ -117,15 +115,15 @@ function isTransfer(transaction: Transaction): boolean {
   return transaction.transferCounterpartKey != null || (type !== undefined && (TRANSFER_TYPE_NAMES as readonly string[]).includes(type));
 }
 
-/** Whether the member may see the transaction: same household, live, and not on another member's private account. */
-function isVisibleTo(transaction: Transaction, actor: Actor): boolean {
+/** Whether the member may see the transaction: same household, live, and on an account they see (`sharedAccountKeys`: the accounts shared with them). */
+function isVisibleTo(transaction: Transaction, actor: Actor, sharedAccountKeys: ReadonlySet<number>): boolean {
   const account = transaction.accountKey;
   return (
     transaction.tenantKey?.tenantKey === actor.tenantKey &&
     !transaction.deletedAt &&
     !!account &&
     !account.deletedAt &&
-    (!account.isPrivate || account.accountOwnerAppuserKey?.appuserKey === actor.appuserKey)
+    isAccountVisibleTo(account, actor.appuserKey, sharedAccountKeys)
   );
 }
 
@@ -136,16 +134,17 @@ async function findVisible(em: EntityManager, actor: Actor, transactionKey: numb
     { deletedAt: null, tenantKey: getRef(em, Tenant, actor.tenantKey), transactionKey },
     { filters: { [HIDDEN_FILTER]: false }, populate: LINKED_TRANSACTION_POPULATE, ...(lock ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {}) },
   );
-  if (!transaction || !isVisibleTo(transaction, actor) || isExpiredStatusName(transaction.transactionStatusKey?.name)) throw new NotFoundError('Transaction not found');
+  if (!transaction || !isVisibleTo(transaction, actor, await loadSharedAccountKeys(em, actor)) || isExpiredStatusName(transaction.transactionStatusKey?.name)) throw new NotFoundError('Transaction not found');
   return transaction;
 }
 
-function sameVisibility(a: Transaction, b: Transaction): boolean {
+async function sameVisibility(em: EntityManager, a: Transaction, b: Transaction): Promise<boolean> {
   const first = a.accountKey;
   const second = b.accountKey;
   if (!first || !second) return false;
-  if (first.isPrivate !== second.isPrivate) return false;
-  return !first.isPrivate || first.accountOwnerAppuserKey?.appuserKey === second.accountOwnerAppuserKey?.appuserKey;
+  const audiences = await loadAccountAudiences(em, [first.accountKey, second.accountKey]);
+  const audience = audiences.get(first.accountKey);
+  return audience !== undefined && audience === audiences.get(second.accountKey);
 }
 
 /** The live links on `transactions` in `role`, summed per transaction. */
@@ -240,9 +239,11 @@ export async function linkReimbursement(em: EntityManager, actor: Actor, reimbur
     if (!expense.settlementCurrencyKey || expense.settlementCurrencyKey.currencyKey !== reimbursement.settlementCurrencyKey?.currencyKey) {
       throw new BadRequestError('A reimbursement can only be linked to an expense in the same currency', ERROR_CODE.REIMBURSEMENT_CURRENCY_MISMATCH);
     }
-    if (!sameVisibility(expense, reimbursement)) {
-      throw new BadRequestError('A transaction on a private account can only be linked to another one on the same member\'s private accounts', ERROR_CODE.REIMBURSEMENT_VISIBILITY_MISMATCH);
+    if (!(await sameVisibility(tx, expense, reimbursement))) {
+      throw new BadRequestError('A transaction on a private account can only be linked to another one seen by the same members', ERROR_CODE.REIMBURSEMENT_VISIBILITY_MISMATCH);
     }
+    // A link changes both sides' totals, so the member must be able to change both accounts.
+    await assertAccountsWritable(tx, [expense.accountKey, reimbursement.accountKey].filter((account) => account !== undefined), actor);
     if (await tx.count(TransactionReimbursement, { deletedAt: null, expenseTransactionKey: expense, reimbursementTransactionKey: reimbursement }) > 0) {
       throw new ConflictError('These transactions are already linked', ERROR_CODE.REIMBURSEMENT_LINK_EXISTS);
     }
@@ -286,7 +287,8 @@ export async function unlinkReimbursement(em: EntityManager, actor: Actor, trans
     const other = link.expenseTransactionKey.transactionKey === transaction.transactionKey ? link.reimbursementTransactionKey : link.expenseTransactionKey;
     const counterpart = await tx.findOne(Transaction, { transactionKey: other.transactionKey }, { filters: { [HIDDEN_FILTER]: false }, populate: ['accountKey'] });
     // A link whose other side the member cannot see (the account went private since) is not theirs to remove.
-    if (!counterpart || !isVisibleTo(counterpart, actor)) throw new NotFoundError('Reimbursement link not found');
+    if (!counterpart || !isVisibleTo(counterpart, actor, await loadSharedAccountKeys(tx, actor))) throw new NotFoundError('Reimbursement link not found');
+    await assertAccountsWritable(tx, [transaction.accountKey, counterpart.accountKey].filter((account) => account !== undefined), actor);
     link.deletedAt = new Date();
     for (const side of [transaction, counterpart]) await audit(tx, actor, side, 'transaction-reimbursement-remove', { from: auditValue(link), to: null });
     await tx.flush();
@@ -321,8 +323,9 @@ export async function loadReimbursementLinks(em: EntityManager, actor: Actor, tr
     { filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionReimbursementKey: 'asc' }, populate: LINK_POPULATE },
   );
   const keys = new Set(transactions.map((transaction) => transaction.transactionKey));
+  const shared = await loadSharedAccountKeys(em, actor);
   for (const link of links) {
-    if (!isVisibleTo(link.expenseTransactionKey, actor) || !isVisibleTo(link.reimbursementTransactionKey, actor)) continue;
+    if (!isVisibleTo(link.expenseTransactionKey, actor, shared) || !isVisibleTo(link.reimbursementTransactionKey, actor, shared)) continue;
     const dto = toLinkDto(link);
     for (const side of [link.expenseTransactionKey.transactionKey, link.reimbursementTransactionKey.transactionKey]) {
       if (!keys.has(side)) continue;
@@ -375,7 +378,7 @@ export async function suggestReimbursementCounterparts(em: EntityManager, actor:
     Transaction,
     excludeExpired({
       $and: conditions,
-      accountKey: { deletedAt: null, isPrivate: account.isPrivate, ...(account.isPrivate ? { accountOwnerAppuserKey: account.accountOwnerAppuserKey } : {}), tenantKey: getRef(em, Tenant, actor.tenantKey) },
+      accountKey: { $and: [visibleAccountWhere(actor.appuserKey), { deletedAt: null, isPrivate: account.isPrivate, tenantKey: getRef(em, Tenant, actor.tenantKey) }] },
       deletedAt: null,
       settlementCurrencyKey: anchor.settlementCurrencyKey,
       tenantKey: getRef(em, Tenant, actor.tenantKey),
@@ -394,8 +397,13 @@ export async function suggestReimbursementCounterparts(em: EntityManager, actor:
   );
   const anchorMerchant = anchor.transactionMerchantKey?.transactionMerchantKey;
   const anchorTime = anchor.transactionDate?.getTime() ?? 0;
+  const shared = await loadSharedAccountKeys(em, actor);
+  // Only accounts seen by exactly the same members as the anchor's (see `reimbursement-sql.ts`).
+  const audiences = await loadAccountAudiences(em, [account.accountKey, ...candidates.flatMap((candidate) => (candidate.accountKey ? [candidate.accountKey.accountKey] : []))]);
+  const anchorAudience = audiences.get(account.accountKey);
   return candidates
-    .filter((candidate) => !alreadyLinked.has(candidate.transactionKey) && isVisibleTo(candidate, actor))
+    .filter((candidate) => !alreadyLinked.has(candidate.transactionKey) && isVisibleTo(candidate, actor, shared)
+      && candidate.accountKey !== undefined && audiences.get(candidate.accountKey.accountKey) === anchorAudience)
     .map((candidate) => {
       const sameMerchant = anchorMerchant !== undefined && candidate.transactionMerchantKey?.transactionMerchantKey === anchorMerchant;
       const reason: ReimbursementSuggestionDto['reason'] = search ? 'search' : sameMerchant ? 'merchant' : 'amount';

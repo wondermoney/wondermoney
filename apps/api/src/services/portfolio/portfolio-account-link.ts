@@ -3,6 +3,7 @@ import { type EntityManager, wrap } from '@mikro-orm/postgresql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { type Portfolio, PortfolioAccountBalanceMode } from '@entity/Portfolio';
+import { accountAccessOf, assertAccountWritable, canWrite } from '@service/account/account-access';
 import { NotFoundError, PortfolioLinkHeldByMemberError } from '@utils/errors';
 
 /**
@@ -90,7 +91,7 @@ export async function setPortfolioAccountLink(em: EntityManager, input: { link: 
     if (currentKey != null && currentKey !== link?.accountId) {
       const current = await em.findOne(Account, { accountKey: currentKey }, { fields: ['accountKey', 'accountOwnerAppuserKey', 'deletedAt', 'isPrivate'], filters: false });
       const ownerKey = current?.accountOwnerAppuserKey?.appuserKey;
-      if (current && current.deletedAt == null && current.isPrivate && ownerKey !== viewerAppuserKey) {
+      if (current && current.deletedAt == null && current.isPrivate && !canWrite(await accountAccessOf(em, current.accountKey, { appuserKey: viewerAppuserKey, tenantKey }))) {
         throw new PortfolioLinkHeldByMemberError(await memberDisplayName(em, ownerKey));
       }
     }
@@ -103,6 +104,8 @@ export async function setPortfolioAccountLink(em: EntityManager, input: { link: 
   }
   const account = await em.findOne(Account, { accountKey: link.accountId, deletedAt: undefined, tenantKey: { tenantKey } });
   if (!account) throw new NotFoundError('Account not found');
+  // Linking puts the account's money in a household portfolio: a change to the account.
+  await assertAccountWritable(em, account, { appuserKey: viewerAppuserKey, tenantKey });
   portfolio.linkedAccountKey = account;
   portfolio.accountBalanceMode = link.mode === 'cash_only' ? PortfolioAccountBalanceMode.CASH_ONLY : PortfolioAccountBalanceMode.INCLUDES_HOLDINGS;
 }

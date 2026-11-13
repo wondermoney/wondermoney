@@ -142,6 +142,15 @@ describe('AccountsScreen', () => {
     expect(onEditAccount).toHaveBeenCalledWith(1)
   })
 
+  it('marks an account the caller can only view, and offers only its details from its menu', async () => {
+    const onEditAccount = jest.fn()
+    const viewOnly: AccountsData = { accounts: [{ ...data.accounts[2]!, myAccess: 'read' }] }
+    const { view } = await renderScreen({ status: 'loaded', data: viewOnly }, { onEditAccount })
+    expect(view.getByTestId('account-view-only')).toHaveTextContent('View only')
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Yen savings' }))
+    expect(view.getAllByRole('menuitem').map((item) => item.props.accessibilityLabel)).toEqual(['Account details'])
+  })
+
   it('adds a manual account from the floating add, and keeps linking a bank and import behind the overflow menu', async () => {
     const onConnectBank = jest.fn()
     const onImportTransactions = jest.fn()

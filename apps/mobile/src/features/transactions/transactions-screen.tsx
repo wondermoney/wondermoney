@@ -48,7 +48,7 @@ import { canSplitTransaction, splitCategoryCount } from './transactions-split-vi
 import type { TransactionViewModel } from './transactions-view-model'
 import type { TransactionsLeadData } from './use-transactions-lead'
 
-export type ReviewResult = 'success' | 'demo' | 'read-only' | 'mfa' | 'cancelled' | 'network' | 'error'
+export type ReviewResult = 'success' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'error'
 export type TransactionCategoryState =
   | { status: 'loading' | 'error' }
   | { status: 'loaded'; categories: readonly CategoryViewModel[] }
@@ -147,7 +147,15 @@ type Props = Readonly<{
   onOpenTransaction?: (transaction: LinkedTransactionDto) => void
   /** A row to open expanded when the list first shows (a link followed from another ledger). */
   focusTransactionId?: number | null
+  /**
+   * The accounts the caller can only view (#95), by key. Their rows open and show their details
+   * but offer no change: no review, edit, tags, split, reimbursement, transfer, delete or
+   * selection. An account not in the set stays writable (the server enforces it anyway).
+   */
+  readOnlyAccountIds?: ReadonlySet<number>
 }>
+
+const NO_READ_ONLY_ACCOUNTS: ReadonlySet<number> = new Set()
 
 export function TransactionsScreen(props: Props) {
   const { filters } = props
@@ -212,6 +220,7 @@ function TransactionsContent({
   onUnlinkReimbursement,
   onOpenTransaction,
   focusTransactionId = null,
+  readOnlyAccountIds = NO_READ_ONLY_ACCOUNTS,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
@@ -348,7 +357,9 @@ function TransactionsContent({
     )
   }
 
-  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden || onBulkTag || onBulkDelete) && loaded.some(isSelectable)
+  // A row the caller may change: a stored transaction on an account they can edit.
+  const isWritable = (row: TransactionViewModel) => isSelectable(row) && !readOnlyAccountIds.has(row.accountId)
+  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden || onBulkTag || onBulkDelete) && loaded.some(isWritable)
   const resultMessage = reviewResult && reviewResult !== 'success'
     ? t(`transactions.reviewResult.${reviewResult}`) : null
   const passesLocalFilters = (row: TransactionViewModel) => (accountFilter === null || row.accountId === accountFilter)
@@ -367,7 +378,7 @@ function TransactionsContent({
   const countLine = total !== null && total > loaded.length
     ? t('transactions.resultShowing', { shown: loaded.length, total })
     : t('transactions.resultCount', { count: loaded.length })
-  const loadedIds = new Set(loaded.filter(isSelectable).map((row) => row.id))
+  const loadedIds = new Set(loaded.filter(isWritable).map((row) => row.id))
   const selected = [...selectedIds].filter((id) => loadedIds.has(id)).sort((left, right) => left - right)
   const selectedRows = loaded.filter((row) => selectedIds.has(row.id))
   // "Select all N matching" acts on the server's filters, so it is offered only while every
@@ -375,7 +386,10 @@ function TransactionsContent({
   // type, merchant) would not be in the request, and the action would reach rows it hides.
   const localFiltersActive = accountFilter !== null || categoryFilter !== null || typeFilter !== null || merchantFilter.trim() !== ''
   const everyLoadedSelected = loadedIds.size > 0 && [...loadedIds].every((id) => selectedIds.has(id))
+  // Every matching row would also reach rows of an account the caller can only view, unless the
+  // ledger is one account's (whose own rows are writable, or nothing is selectable at all).
   const matchingAvailable = !localFiltersActive && everyLoadedSelected && total !== null && total > loadedIds.size
+    && (perAccount || readOnlyAccountIds.size === 0)
   const matchingSelected = allMatching && matchingAvailable
   const scope: BulkScope = matchingSelected ? 'matching' : selected
   const scopeCount = matchingSelected && total !== null ? total : selected.length
@@ -642,6 +656,7 @@ function TransactionsContent({
       isFirst={index === 0}
       monthStart={index === 0 || monthKey(visible[index - 1].date) !== monthKey(item.date)}
       expanded={expandedId === item.id}
+      readOnly={readOnlyAccountIds.has(item.accountId)}
       selecting={selecting}
       selected={selectedIds.has(item.id)}
       scopeLocked={scopeLocked}
@@ -711,7 +726,7 @@ function TransactionsContent({
   const allValue = ''
 
   const menuRow = rowMenuId === null ? null : loaded.find((row) => row.id === rowMenuId) ?? null
-  const menuEditable = menuRow ? isSelectable(menuRow) : false
+  const menuEditable = menuRow ? isWritable(menuRow) : false
   type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'transfer' | 'notTransfer' | 'destination' | 'select' | 'delete'
   const canRetype = Boolean(onSetTransfer) && menuRow !== null && menuEditable && menuRow.direction !== 'unknown' && !mutationPending
   const rowActions: { value: RowAction; label: string }[] = menuRow ? [
@@ -1153,6 +1168,8 @@ type TransactionRowProps = Readonly<{
   /** Opens a month: the row carries web's month line ("October 2025") above it. */
   monthStart: boolean
   expanded: boolean
+  /** The row's account is one the caller can only view: details only, no change. */
+  readOnly: boolean
   selecting: boolean
   selected: boolean
   scopeLocked: boolean
@@ -1199,6 +1216,7 @@ const TransactionRow = memo(function TransactionRow({
   isFirst,
   monthStart,
   expanded,
+  readOnly,
   selecting,
   selected,
   scopeLocked,
@@ -1245,8 +1263,9 @@ const TransactionRow = memo(function TransactionRow({
     : null
   const title = item.title ?? t('transactions.unnamed')
   const account = item.accountName ?? t('transactions.accountUnavailable')
-  const selectable = selecting && isSelectable(item)
-  const editable = isSelectable(item)
+  const stored = isSelectable(item)
+  const editable = stored && !readOnly
+  const selectable = selecting && editable
   // A split row shows its count in place of the one category, as web's ledger does.
   const splitLabel = item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
   const installment = item.installment ? installmentLabel(item.installment) : null
@@ -1383,7 +1402,7 @@ const TransactionRow = memo(function TransactionRow({
             </View>
           ) : null}
           {item.repayment ? <Detail label={t('transactions.repayment')} value={t('transactions.repaymentValue', { name: item.repayment.loanName, amount: formatAvailableMoney(item.repayment.spendingAmount, item.currency, locale, t, amountsHidden) })} /> : null}
-          {editable ? <TransactionAttachmentsSection transactionId={item.id} /> : null}
+          {stored ? <TransactionAttachmentsSection readOnly={readOnly} transactionId={item.id} /> : null}
           {editable && canEditAmount && editing ? (
             <View style={styles.amountEdit}>
               <TextField
@@ -1429,7 +1448,7 @@ const TransactionRow = memo(function TransactionRow({
               {editable && canEditTags ? (
                 <UiButton disabled={mutationPending} icon="tag" label={t('tags.edit')} onPress={() => onEditTags(item.id)} size="sm" variant="secondary" />
               ) : null}
-              {editable && item.installment && onOpenInstallmentPlan ? (
+              {stored && item.installment && onOpenInstallmentPlan ? (
                 <UiButton disabled={mutationPending} icon="calendar" label={t('installments.viewPlan')} onPress={() => onOpenInstallmentPlan(item)} size="sm" variant="secondary" />
               ) : null}
               {editable && onCreateRule ? (
@@ -1438,7 +1457,7 @@ const TransactionRow = memo(function TransactionRow({
               {editable && canSplit && onSplit && canSplitTransaction(item) ? (
                 <UiButton disabled={mutationPending} icon="split" label={item.isSplit ? t('transactions.split.edit') : t('transactions.split.action')} onPress={() => onSplit(item.id)} size="sm" variant="secondary" />
               ) : null}
-              {onMarkReimbursement && canMarkAsReimbursement(item) ? (
+              {editable && onMarkReimbursement && canMarkAsReimbursement(item) ? (
                 <UiButton disabled={mutationPending} icon="link" label={t('transactions.reimbursement.action')} onPress={() => onMarkReimbursement(item)} size="sm" variant="secondary" />
               ) : null}
             </View>

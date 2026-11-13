@@ -94,6 +94,29 @@ describe('TransactionsRoute', () => {
     expect(mockCapturedProps.perAccount).toBe(true)
     expect(mockCapturedProps.lead).toBeUndefined()
   })
+  it('hands the screen the accounts the caller can only view, and offers no add on a view-only ledger', async () => {
+    mockParams = { accountId: '7' }
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [], total: 0, hasMore: false }, refetch: jest.fn() })
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 3, accountName: 'Mine', myAccess: 'owner' }, { accountKey: 7, accountName: 'Joint', myAccess: 'read' }] } })
+    await render(<TransactionsRoute perAccount />)
+    expect([...(mockCapturedProps.readOnlyAccountIds as ReadonlySet<number>)]).toEqual([7])
+    expect(mockCapturedProps.onCreate).toBeUndefined()
+    expect(mockCapturedProps.onImport).toBeUndefined()
+    expect(mockCapturedProps.onScanReceipt).toBeUndefined()
+  })
+
+  it('keeps adding on the all-accounts ledger while any account is writable, and drops it when none is', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [], total: 0, hasMore: false }, refetch: jest.fn() })
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 3, myAccess: 'write' }, { accountKey: 7, myAccess: 'read' }] } })
+    const first = await render(<TransactionsRoute />)
+    expect(mockCapturedProps.onCreate).toEqual(expect.any(Function))
+    await first.unmount()
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 7, myAccess: 'read' }] } })
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.onCreate).toBeUndefined()
+    expect(mockCapturedProps.onImport).toBeUndefined()
+  })
+
   it('reports the oldest account refresh as the list freshness, and the lead in the owner currency', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [], total: 0, hasMore: false }, refetch: jest.fn() })
     mockUseAccounts.mockReturnValue({ data: { accounts: [
@@ -132,6 +155,7 @@ describe('TransactionsRoute', () => {
 
   it.each([
     ['demo-forbidden', 'demo', undefined],
+    ['account-read-only', 'account-read-only', undefined],
     ['mfa-required', 'mfa', 'mfa-required'],
     ['cancelled', 'cancelled', undefined],
     ['network', 'network', undefined],

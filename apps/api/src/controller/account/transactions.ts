@@ -13,6 +13,7 @@ import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditL
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
+import { accountActor, assertTransactionsWritable, loadSharedAccountKeys, onlyWritableTransactions } from '@service/account/account-access';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
@@ -588,7 +589,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
   ]);
 
   const merchant = transaction.transactionMerchantKey ? { transactionMerchantKey: toMerchantDto(transaction.transactionMerchantKey) } : {};
-  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
+  const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: user.appuserKey, tenantKey: authedContext(req).tenantKey });
+  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, transferDestination: transferDestinationOf(transaction, user.appuserKey, sharedAccountKeys) } });
 }
 
 /**
@@ -615,6 +617,7 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       filter ? { filter } : { transactionIds: transactionIds ?? [] },
       { populate: BULK_CHANGE_POPULATE },
     );
+    transactions = await writableSelection(req, transactions, Boolean(filter));
   } catch (error) {
     next(error);
     return;
@@ -637,6 +640,17 @@ export async function updateTransactions(req: Request, res: Response, next: Next
 }
 
 /**
+ * The rows of a bulk write the caller may change. Named rows must all be on accounts they can
+ * change (403 `account_read_only` otherwise); a filter's matches on accounts they may only view
+ * are left out, so "everything this filter matches" means everything they can change.
+ */
+async function writableSelection(req: Request, transactions: Transaction[], byFilter: boolean): Promise<Transaction[]> {
+  if (byFilter) return onlyWritableTransactions(DI.em, transactions, accountActor(req));
+  await assertTransactionsWritable(DI.em, transactions, accountActor(req));
+  return transactions;
+}
+
+/**
  * `DELETE /v1/account/transaction`: delete `transactionIds`, or every row `filter` matches (at most
  * 5,000). Bank-synced rows are skipped and reported; the rules are in `transaction-deletion.service.ts`.
  */
@@ -644,7 +658,7 @@ export async function deleteTransactions(req: Request, res: Response) {
   const { body } = await zParse(deleteTransactionsRequestSchema, req);
   const { appuserKey, tenant } = authedContext(req);
   const selection = body.filter ? { filter: body.filter } : { transactionIds: body.transactionIds ?? [] };
-  const transactions = await loadTransactionSelection(DI.em, { tenant, viewerAppuserKey: appuserKey }, selection, { populate: ['accountKey'] });
+  const transactions = await writableSelection(req, await loadTransactionSelection(DI.em, { tenant, viewerAppuserKey: appuserKey }, selection, { populate: ['accountKey'] }), Boolean(body.filter));
   const result = await deleteTransactionRows(DI.em, { appuserKey, tenantKey: tenant.tenantKey }, transactions);
   return res.json(result);
 }

@@ -137,6 +137,37 @@ describe('AccountDetailScreen', () => {
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
+  it('on an account the caller can only view, offers no change: only its sharing, marked View only', async () => {
+    const handlers = {
+      onCreateTransaction: jest.fn(), onImportTransactions: jest.fn(), onRecalculate: jest.fn(),
+      onOpenInstallmentPlan: jest.fn(), onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn(),
+    }
+    const suggestion = { key: 's1', description: 'Phone', currency: 'USD', installmentAmount: 25, installmentCount: 4, matchedCount: 2, firstDate: '2026-08-01', lastDate: '2026-09-01', transactionKeys: [1, 2] }
+    const plan = { installmentPlanKey: 11, accountKey: 42, currency: 'USD', description: 'Laptop', purchaseDate: '2026-08-20', totalAmount: 100, installmentCount: 4, paidCount: 2, paidAmount: 50, remainingCount: 2, remainingAmount: 50 }
+    const { view, edit } = await renderScreen({ status: 'loaded', data: {
+      ...openBanking,
+      isOwnedByViewer: false,
+      myAccess: 'read',
+      installmentPlans: {
+        commitment: { status: 'loaded', data: null },
+        plans: { status: 'loaded', data: [plan] },
+        suggestions: { status: 'loaded', data: [suggestion] as never },
+      },
+    } }, { ...handlers, recalculation: { phase: 'idle' } })
+    expect(view.getByTestId('account-view-only')).toHaveTextContent('View only')
+    expect(view.queryByTestId('account-add-transaction')).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Add transaction' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit account' })).not.toBeOnTheScreen()
+    // The plans still open (their own screen is view-only too); nothing adds or accepts one.
+    expect(view.getByRole('button', { name: new RegExp('^Laptop, Remaining') })).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Add plan' })).not.toBeOnTheScreen()
+    expect(view.queryByTestId('installment-suggestions')).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    expect(view.getAllByRole('menuitem').map((item) => item.props.accessibilityLabel)).toEqual(['Sharing'])
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Sharing' }))
+    expect(edit).toHaveBeenCalledTimes(1)
+  })
+
   it('recalculates balances from the overflow menu after a confirmation', async () => {
     const onRecalculate = jest.fn()
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)

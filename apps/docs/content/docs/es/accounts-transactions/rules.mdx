@@ -35,7 +35,7 @@ Cuando corriges una y otra vez el mismo tipo de transacción, WonderMoney te pro
 
 - **De este tipo** quiere decir el mismo comercio, o el mismo comienzo de la descripción sin referencias ni números. "TRF MB WAY 912345678 JOAO" y "TRF MB WAY 913333333 ANA" empiezan ambas por "TRF MB WAY". Una cabecera de tarjeta como "COMPRA 1192" se omite, así que "COMPRA 1192 CONTINENTE" cuenta como "CONTINENTE".
 - Cambiar varias transacciones a la vez cuenta cada una de ellas, y cada transacción cuenta una sola vez.
-- Solo cuentan los cambios que haces tú. Los de los demás miembros, una propuesta del asistente que confirmes y las categorías asignadas por una regla, por la categorización aprendida o por una importación no cuentan. Las transacciones de las cuentas privadas de los demás miembros nunca cuentan.
+- Solo cuentan los cambios que haces tú. Los de los demás miembros, una propuesta del asistente que confirmes y las categorías asignadas por una regla, por la categorización aprendida o por una importación no cuentan. Las transacciones de las cuentas privadas que no ves nunca cuentan.
 - Elige **Crear regla** para abrir el editor de reglas ya rellenado, con su vista previa, y revísala antes de guardar. Elige **No volver a sugerir** para dejar de ver esa sugerencia. Si no eliges ninguna, puede volver a aparecer la próxima vez.
 
 No aparece ninguna sugerencia cuando una regla activa ya da esa categoría a esas transacciones, o cuando WonderMoney ya las reconoce por la categoría que elegiste para su comercio. Esa categoría aprendida solo se reutiliza cuando la descripción de una transacción nueva es exactamente el nombre del comercio, así que la regla se sigue sugiriendo para descripciones con más texto.
@@ -44,7 +44,7 @@ No aparece ninguna sugerencia cuando una regla activa ya da esa categoría a esa
 
 Mientras editas, la vista previa junto al formulario muestra cuántas de tus transacciones coinciden con la regla, cuántas de ellas cambiaría, y las 50 coincidencias más recientes con el cambio que recibiría cada una. Se actualiza poco después de que dejes de escribir.
 
-La vista previa evalúa la regla sola y abarca las transacciones del hogar que puedes ver, incluidas las ocultas. Nunca muestra las cuentas privadas de los demás miembros. Una coincidencia puede aparecer como **Sin cambios** cuando la transacción ya tiene esos valores, o cuando definiste ese valor tú mismo (ver abajo).
+La vista previa evalúa la regla sola y abarca las transacciones del hogar que puedes ver, incluidas las ocultas. Nunca muestra las cuentas privadas que no ves. Una coincidencia puede aparecer como **Sin cambios** cuando la transacción ya tiene esos valores, o cuando definiste ese valor tú mismo (ver abajo).
 
 Guardar una regla no cambia las transacciones que ya tienes. Para cambiarlas también, aplica la regla (ver más abajo).
 
@@ -56,7 +56,7 @@ Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (po
 
 - El número que confirmas es exactamente lo que cambia al aplicar.
 - La aplicación se ejecuta en segundo plano: el diálogo muestra el progreso, y puedes cerrarlo mientras se ejecuta. Al terminar, un mensaje te dice cuántas transacciones cambiaron.
-- Abarca las transacciones del hogar que puedes ver, incluidas las ocultas, pero no las eliminadas ni las cuentas privadas de los demás miembros. Todo lo que aparece en "Lo que las reglas nunca cambian" sigue valiendo.
+- Abarca las transacciones del hogar que puedes ver, incluidas las ocultas, pero no las eliminadas ni las cuentas privadas que no ves. Todo lo que aparece en "Lo que las reglas nunca cambian" sigue valiendo.
 - Aplicar la misma regla otra vez no cambia nada más. Cada cambio queda registrado en la actividad de la transacción.
 - Solo una aplicación a la vez por hogar: espera a que termine una antes de empezar otra.
 
@@ -64,7 +64,7 @@ Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (po
 
 - Lo que definiste a mano: una categoría que elegiste, un comercio o una descripción que editaste, y notas que escribiste. La regla sigue contando como coincidencia, pero deja esos campos como están.
 - El tipo de transacción. Solo la detección de transferencias marca una transacción como transferencia.
-- Las transacciones de las cuentas privadas de los demás miembros. Una regla actúa en nombre del miembro que cambió por última vez sus condiciones o acciones, y solo sobre las transacciones que ese miembro puede ver.
+- Las transacciones de cuentas que el miembro de la regla no puede editar. Una regla actúa en nombre del miembro que cambió por última vez sus condiciones o acciones, y solo sobre las transacciones que ese miembro puede ver y editar: nunca en cuentas privadas ocultas para él o que solo puede ver.
 
 ## Orden
 

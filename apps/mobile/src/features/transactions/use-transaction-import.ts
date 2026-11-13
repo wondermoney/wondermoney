@@ -12,7 +12,7 @@ import {
 import { decideUpload, isCamtFileName, isCsvFileName, isOfxFileName, isQifFileName } from './generic-csv-format'
 import { uploadTransactionImportFile } from './transaction-import-upload'
 
-export type TransactionImportFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'network' | 'conflict' | 'upload-failed' | 'unsupported-bank' | 'unknown-format' | 'csv-only' | 'general'
+export type TransactionImportFailure = 'demo' | 'read-only' | 'account-read-only' | 'access' | 'mfa' | 'cancelled' | 'network' | 'conflict' | 'upload-failed' | 'unsupported-bank' | 'unknown-format' | 'csv-only' | 'general'
 
 export type TransactionImportPhase =
   | { phase: 'idle' }
@@ -28,6 +28,7 @@ export function classifyTransactionImportFailure(error: unknown): TransactionImp
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (error.code === 'cancelled') return isPostDispatchCancellation(error) ? 'general' : 'cancelled'

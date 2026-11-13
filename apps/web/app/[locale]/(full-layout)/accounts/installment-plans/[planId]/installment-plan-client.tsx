@@ -7,6 +7,8 @@ import InstallmentPlanDetail from "@/components/installments/InstallmentPlanDeta
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
+import { canEditAccount } from "@/lib/account/account-access";
+import useAccounts from "@/lib/api/account/useAccounts";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { useInstallmentPlan } from "@/lib/api/installment-plans/useInstallmentPlans";
 
@@ -15,6 +17,7 @@ export default function InstallmentPlanClient({ planId }: { planId: string }) {
   const router = useRouter();
   const { data, isLoading, isError } = useInstallmentPlan(planId);
   const { data: configsData } = useConfigs();
+  const { data: accountsData } = useAccounts();
 
   if (isLoading) {
     return (
@@ -47,6 +50,13 @@ export default function InstallmentPlanClient({ planId }: { planId: string }) {
       plan={plan}
       categories={configsData?.categories ?? []}
       onDeleted={() => router.push(`/accounts/${plan.accountKey}`)}
+      readOnly={
+        !canEditAccount(
+          accountsData?.accounts.find(
+            (account) => account.accountKey === plan.accountKey,
+          ),
+        )
+      }
     />
   );
 }

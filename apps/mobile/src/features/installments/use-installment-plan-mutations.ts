@@ -16,12 +16,13 @@ import {
 } from './installments-contract'
 import { installmentPlanDetailKey, installmentPlansRootKey } from './query-keys'
 
-export type InstallmentWriteFailure = 'demo' | 'read-only' | 'access' | 'invalid' | 'conflict' | 'not-found' | 'network' | 'general'
+export type InstallmentWriteFailure = 'demo' | 'read-only' | 'account-read-only' | 'access' | 'invalid' | 'conflict' | 'not-found' | 'network' | 'general'
 
 export function classifyInstallmentWriteFailure(error: unknown): InstallmentWriteFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'network' || error.code === 'cancelled') return 'network'
   if (error.code === 'http' && error.status === 400) return 'invalid'

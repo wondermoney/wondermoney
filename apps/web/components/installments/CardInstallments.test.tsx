@@ -149,14 +149,19 @@ const suggestion: InstallmentSuggestion = {
   ],
 };
 
-function renderSection() {
+function renderSection({ readOnly = false }: { readOnly?: boolean } = {}) {
   return render(
     <NextIntlClientProvider
       locale="en"
       messages={commonMessages}
       timeZone="UTC"
     >
-      <CardInstallments accountKey={3} currency="EUR" categories={[]} />
+      <CardInstallments
+        accountKey={3}
+        currency="EUR"
+        categories={[]}
+        readOnly={readOnly}
+      />
     </NextIntlClientProvider>,
   );
 }
@@ -179,6 +184,18 @@ describe("CardInstallments", () => {
     const link = screen.getByRole("link", { name: /Laptop/ });
     assert.equal(link.getAttribute("href"), "/accounts/installment-plans/9");
     assert.match(link.textContent ?? "", /€900\.00/);
+  });
+
+  test("a card shared to view only shows its plans but offers no new plan or suggestion", () => {
+    state.plans = [plan];
+    state.suggestions = [suggestion];
+    renderSection({ readOnly: true });
+    assert.ok(screen.getByText(plan.description));
+    assert.equal(
+      screen.queryByRole("button", { name: "New installment plan" }),
+      null,
+    );
+    assert.equal(screen.queryByRole("button", { name: "Create plan" }), null);
   });
 
   test("a card with no plan says so and still offers a new one", () => {

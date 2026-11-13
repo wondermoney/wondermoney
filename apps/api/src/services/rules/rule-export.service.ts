@@ -1,12 +1,12 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
-import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
 import { Rule } from '@entity/Rule';
 import { Tag } from '@entity/Tag';
 import { Tenant } from '@entity/Tenant';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { getRef } from '@utils/em-helpers';
 
 import {
@@ -48,7 +48,7 @@ export async function exportRules(em: EntityManager, actor: Actor): Promise<Rule
   const [rules, categories, accounts, merchants, tags] = await Promise.all([
     em.find(Rule, { deletedAt: null, tenantKey: tenant }, { orderBy: { position: 'asc', ruleKey: 'asc' } }),
     em.find(Category, { $or: [{ tenantKey: tenant }, { tenantKey: null }], deletedAt: null }),
-    em.find(Account, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: getRef(em, Appuser, actor.appuserKey) }], deletedAt: null, tenantKey: tenant }),
+    em.find(Account, { ...visibleAccountWhere(actor.appuserKey), deletedAt: null, tenantKey: tenant }),
     em.find(TransactionMerchant, { deletedAt: null, tenantKey: tenant }),
     em.find(Tag, { deletedAt: null, tenantKey: tenant }),
   ]);

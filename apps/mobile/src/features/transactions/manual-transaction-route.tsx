@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
+import { canWriteAccount } from '@/features/accounts/account-access'
 import { mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { mapCategories } from '@/features/categories/categories-view-model'
@@ -62,7 +63,8 @@ export function ManualTransactionRoute() {
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
 
   return <ManualTransactionScreen
-    accounts={accounts.data ? mapAccounts(accounts.data) : []}
+    // A transaction is added to an account the caller can edit, never one they can only view (#95).
+    accounts={accounts.data ? mapAccounts(accounts.data).filter(canWriteAccount) : []}
     categories={categories.data ? mapCategories(categories.data, t, locale) : []}
     tags={toTagsState(tagsQuery)}
     onCreateTag={createTag}

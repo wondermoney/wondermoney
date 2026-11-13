@@ -1,3 +1,5 @@
+import { accountAudienceSql } from '../account/account-visibility-sql';
+
 import { notExpiredTransactionSql } from './transaction-status';
 
 /**
@@ -12,7 +14,8 @@ import { notExpiredTransactionSql } from './transaction-status';
  *
  * A link counts while it is live and both of its transactions are live (not deleted, not EXPIRED)
  * on live accounts, settled in the same currency, and seen by the same members: both on shared
- * accounts, or both on private accounts of the same owner. Linking checks all of this; reading
+ * accounts, or both on private accounts seen by exactly the same people (owner and shares,
+ * `accountAudienceSql`). Linking checks all of this; reading
  * checks it again, so a link whose side was deleted, expired or moved behind a private account
  * afterwards simply stops counting (on both sides at once) instead of leaking or double counting.
  * None of it depends on who is looking, so a total is the same for every member who can see it.
@@ -30,8 +33,7 @@ export function countingReimbursementLinkSql(link: string): string {
       and link_expense_account.deleted_at is null and link_refund_account.deleted_at is null
       and link_expense.tenant_key = ${link}.tenant_key and link_refund.tenant_key = ${link}.tenant_key
       and link_expense.settlement_currency_key = link_refund.settlement_currency_key
-      and link_expense_account.is_private = link_refund_account.is_private
-      and (link_expense_account.is_private = false or link_expense_account.account_owner_appuser_key = link_refund_account.account_owner_appuser_key)
+      and ${accountAudienceSql('link_expense_account')} = ${accountAudienceSql('link_refund_account')}
       and ${notExpiredTransactionSql('link_expense')} and ${notExpiredTransactionSql('link_refund')}))`;
 }
 

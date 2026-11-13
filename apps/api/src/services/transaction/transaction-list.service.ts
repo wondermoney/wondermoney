@@ -11,6 +11,7 @@ import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAttachment } from '@entity/TransactionAttachment';
+import { loadSharedAccountKeys, visibleAccountWhere } from '@service/account/account-access';
 import { type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { completenessFromCounts } from '@service/reports/report-currency';
@@ -114,11 +115,12 @@ export async function listTransactions(request: TransactionListRequest) {
   const attachmentCounts = await loadAttachmentCounts(transactions);
   // Refunds linked to expenses, either side; only links whose other side the viewer can see.
   const reimbursements = await loadReimbursementLinks(DI.em, { appuserKey: viewerAppuserKey, tenantKey }, transactions);
+  const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: viewerAppuserKey, tenantKey });
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const fx = await describeTransactionsFx(transactions, rateScope(tenantKey));
   const rows = transactions.map((transaction, index) => {
     const row = {
-      ...toTransactionRow(transaction, viewerAppuserKey, spendingFlags),
+      ...toTransactionRow(transaction, viewerAppuserKey, sharedAccountKeys, spendingFlags),
       ...(fx[index] ?? UNKNOWN_FX),
       // The ledger shows a paperclip only when there is something behind it.
       attachmentCount: attachmentCounts.get(transaction.transactionKey) ?? 0,
@@ -211,9 +213,9 @@ async function loadAttachmentCounts(transactions: Transaction[]): Promise<Map<nu
   return counts;
 }
 
-/** The accounts the list covers: the household's, a private one only for its owner. Explicit, so it holds with no tenant filter set too. */
+/** The accounts the list covers: the household's, a private one only for the members who see it. Explicit, so it holds with no tenant filter set too. */
 async function loadScopeAccounts(scope: TransactionListRequest['scope'], viewer: TransactionViewer): Promise<Account[]> {
-  const visible: FilterQuery<Account> = { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: viewer.viewerAppuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
+  const visible: FilterQuery<Account> = { $and: [visibleAccountWhere(viewer.viewerAppuserKey), { deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } }] };
   if (scope === 'all-accounts') {
     return DI.em.find(Account, visible, { populate: ['currencyKey', 'accountFinancialInstitutionKey', 'accountOwnerAppuserKey.currencyKey'] });
   }
@@ -268,14 +270,14 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
  * `appuserTransactionCategories` is the largest line's category; clients show the lines instead.
  * An outgoing transfer carries where it went, when the user said so.
  */
-function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
+function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, sharedAccountKeys: ReadonlySet<number>, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
   return {
     ...pickTransactionRow(transaction, spendingFlags),
     // The bank sent it, so it cannot be deleted (`transaction-deletion.service.ts`): a client says so before asking.
     bankSynced: isBankSyncedTransaction(transaction),
     splits: toSplitLineDtos(transaction),
     tags: rowTags(transaction),
-    transferDestination: transferDestinationOf(transaction, viewerAppuserKey),
+    transferDestination: transferDestinationOf(transaction, viewerAppuserKey, sharedAccountKeys),
   };
 }
 

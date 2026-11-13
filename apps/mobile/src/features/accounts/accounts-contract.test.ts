@@ -110,6 +110,24 @@ describe('accounts contract', () => {
     expect(accountsResponseSchema.safeParse(response).success).toBe(false)
   })
 
+  it('reads the caller\'s access to each account, and words an older server\'s silence from ownership', () => {
+    const parsed = accountsResponseSchema.parse({ accounts: [
+      { ...account, myAccess: 'owner' },
+      { ...account, isOwnedByViewer: false, myAccess: 'write' },
+      { ...account, isOwnedByViewer: false, myAccess: 'read' },
+      // An older API sends no myAccess: the owner owns it, anyone else could always edit it.
+      account,
+      { ...account, isOwnedByViewer: false },
+      // A value this build doesn't know falls back the same way (the server enforces writes anyway).
+      { ...account, isOwnedByViewer: false, myAccess: 'admin' },
+    ] })
+    expect(parsed.accounts.map((row) => row.myAccess)).toEqual(['owner', 'write', 'read', 'owner', 'write', 'write'])
+  })
+
+  it('rejects a non-string myAccess', () => {
+    expect(accountSummarySchema.safeParse({ ...account, myAccess: 1 }).success).toBe(false)
+  })
+
   it('reads a source this build does not know as unknown instead of failing the list', () => {
     const parsed = accountsResponseSchema.parse({ accounts: [{ ...account, source: 'csv_import' }, account] })
     expect(parsed.accounts.map((row) => row.source)).toEqual(['unknown', 'open_banking'])

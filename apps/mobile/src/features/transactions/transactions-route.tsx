@@ -12,6 +12,7 @@ import type { RuleDto, RuleSuggestionDto } from '@/features/rules/rules-contract
 import { seedRuleFromSuggestion, seedRuleFromTransaction, type RuleEditorForm } from '@/features/rules/rules-view-model'
 import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
+import { canWriteAccount, readOnlyAccountKeys } from '@/features/accounts/account-access'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useTranslation } from 'react-i18next'
@@ -39,6 +40,7 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
   if (!(error instanceof ApiError)) return 'error'
   if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network'
   if (error.code === 'mfa-required') { blockAccess('mfa-required'); return 'mfa' }
@@ -159,6 +161,12 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const refreshed = accounts.map((account) => account.refreshedAt).filter((value): value is string => Boolean(value) && Number.isFinite(Date.parse(value as string)))
   const freshness: TransactionsFreshness = refreshed.length === 0 ? null : { kind: 'updated', at: refreshed.reduce((oldest, value) => Date.parse(value) < Date.parse(oldest) ? value : oldest) }
   const leadCurrency = accounts[0]?.accountOwnerAppuserKey?.currencyKey.code ?? null
+  // Rows of an account the caller can only view (#95) offer no change; nor does a ledger whose
+  // accounts all are, which has nowhere to add or import a transaction.
+  const readOnlyAccountIds = readOnlyAccountKeys(accounts)
+  const canAddTransactions = perAccount
+    ? canWriteAccount(accounts.find((account) => account.accountKey === accountId))
+    : accounts.length === 0 || accounts.some(canWriteAccount)
 
   const runAction = async (action: TransactionBulkAction): Promise<ReviewResult> => {
     try {
@@ -275,9 +283,9 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     leadCurrency={leadCurrency}
     freshness={perAccount ? null : freshness}
     onBack={() => perAccount && accountId ? router.replace(`/accounts/${accountId}`) : router.replace('/accounts')}
-    onCreate={() => router.push({ pathname: '/accounts/transactions/create', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
-    onImport={() => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
-    onScanReceipt={aiHidden ? undefined : () => router.push('/accounts/transactions/scan' as Href)}
+    onCreate={!canAddTransactions ? undefined : () => router.push({ pathname: '/accounts/transactions/create', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
+    onImport={!canAddTransactions ? undefined : () => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
+    onScanReceipt={aiHidden || !canAddTransactions ? undefined : () => router.push('/accounts/transactions/scan' as Href)}
     onFiltersChange={setFilters}
     onRefresh={async () => { await query.refetch() }}
     onMarkReviewed={(transactionId) => runAction({ type: 'review', transactionIds: [transactionId] })}
@@ -304,6 +312,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onUnlinkReimbursement={runUnlinkReimbursement}
     onOpenTransaction={(linked) => router.push(linkedTransactionHref(linked))}
     focusTransactionId={focusTransactionId}
+    readOnlyAccountIds={readOnlyAccountIds}
   />
   {reimburseRow ? (
     <TransactionReimbursementScreen

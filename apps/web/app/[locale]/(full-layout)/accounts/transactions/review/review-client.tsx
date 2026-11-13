@@ -9,6 +9,7 @@ import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
 import AccountsTransactionsEmptyState from "@/components/account/AccountsTransactionsEmptyState";
 import TransactionReviewInbox from "@/components/account/TransactionReviewInbox";
 import { Spinner } from "@/components/ui/Spinner";
+import { readOnlyAccountKeys } from "@/lib/account/account-access";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
 import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions";
@@ -112,10 +113,17 @@ export default function ReviewTransactionsClient({
     );
   }
 
+  // Reviewing is categorising and approving, which a view-only account's rows do not allow.
+  const viewOnlyAccountKeys = readOnlyAccountKeys(accountsData?.accounts);
+  const reviewable = transactionsData.transactions.filter(
+    (transaction) =>
+      !viewOnlyAccountKeys.has(transaction.accountKey.accountKey),
+  );
+
   return (
     <TransactionReviewInbox
       categories={configsData?.categories ?? []}
-      transactions={transactionsData.transactions}
+      transactions={reviewable}
     />
   );
 }

@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { parseAccountId } from '@/features/accounts/accounts-contract'
+import { canWriteAccount } from '@/features/accounts/account-access'
 import { mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
@@ -57,7 +58,8 @@ export function TransactionImportRoute() {
 
   usePreventRemove(BLOCKING_PHASES.has(importState.state.phase))
 
-  const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data) : []
+  // Only accounts the caller can edit take an import; a view-only one (#95) is not offered.
+  const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data).filter(canWriteAccount) : []
   const accounts = accountModels.map((account) => ({ id: account.accountId, name: account.accountName ?? t('accounts.unnamed') }))
   const selectedAccount = accountModels.find((account) => account.accountId === selectedAccountId) ?? null
   const flow = selectedAccount ? importFlowForAccount(selectedAccount.csvImportFormat) : null

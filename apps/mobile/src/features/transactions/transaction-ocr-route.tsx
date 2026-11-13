@@ -1,6 +1,7 @@
 import * as DocumentPicker from 'expo-document-picker'
 import { type Href, usePreventRemove, useRouter } from 'expo-router'
 
+import { canWriteAccount } from '@/features/accounts/account-access'
 import { mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useResendVerificationEmail } from '@/features/auth/use-resend-verification-email'
@@ -21,7 +22,8 @@ export function TransactionOcrRoute() {
 
   usePreventRemove(BLOCKING_PHASES.has(ocr.state.phase))
 
-  const accounts = accountsQuery.data ? mapAccounts(accountsQuery.data) : []
+  // A receipt is added to an account the caller can edit, never one they can only view (#95).
+  const accounts = accountsQuery.data ? mapAccounts(accountsQuery.data).filter(canWriteAccount) : []
   const types = metadata.types.data?.transactionTypes ?? []
   const currencies = metadata.currencies.data?.currencies ?? []
   const metadataLoading = accountsQuery.isLoading || metadata.types.isLoading || metadata.currencies.isLoading

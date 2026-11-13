@@ -12,6 +12,7 @@ import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
 import { Category } from '@entity/Category';
 import type { Currency } from '@entity/Currency';
 import { authedContext } from '@middleware/authed-context';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { getBudgetForecast as forecastBudget } from '@service/budget/budget-forecast.service';
 import { budgetMonthOf, budgetPeriodDays, budgetPeriodRange, shiftBudgetMonth } from '@service/budget/budget-period';
 import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
@@ -773,7 +774,7 @@ export async function updateBudgetAccounts(req: Request, res: Response, next: Ne
   // query intentionally narrow so a missing result has the same generic error whether the
   // key is unknown, belongs to another tenant, or is another household member's private key.
   const accounts = await DI.em.find(Account, {
-    $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey } }],
+    ...visibleAccountWhere(appuserKey),
     accountKey: { $in: accountKeys },
     closed: false,
     deletedAt: undefined,
@@ -876,7 +877,7 @@ export async function updateBudgetTemplateAccounts(req: Request, res: Response, 
   // Match updateBudgetAccounts: assignment must be limited to active accounts visible to
   // this authenticated tenant/user, without disclosing why an account key was not found.
   const accounts = await DI.em.find(Account, {
-    $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey } }],
+    ...visibleAccountWhere(appuserKey),
     accountKey: { $in: accountKeys },
     closed: false,
     deletedAt: undefined,

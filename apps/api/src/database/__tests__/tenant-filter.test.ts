@@ -27,9 +27,9 @@ describe('tenant filter conditions', () => {
     });
   });
 
-  it('accountTenantCond adds the privacy carve-out (private = owner-only)', () => {
+  it('accountTenantCond adds the privacy carve-out (private = owner and the members it is shared with)', () => {
     expect(accountTenantCond({ appuserKey: 3, tenantKey: 7 })).toEqual({
-      $and: [{ tenantKey: 7 }, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: 3 }] }],
+      $and: [{ tenantKey: 7 }, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: 3 }, { shares: { $some: { appuserKey: 3 } } }] }],
     });
   });
 
@@ -37,13 +37,7 @@ describe('tenant filter conditions', () => {
     expect(transactionTenantCond({ appuserKey: 3, tenantKey: 7 })).toEqual({
       $and: [
         { tenantKey: 7 },
-        {
-          $or: [
-            { accountKey: null },
-            { accountKey: { isPrivate: false } },
-            { accountKey: { accountOwnerAppuserKey: 3 } },
-          ],
-        },
+        { $or: [{ accountKey: null }, { accountKey: { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: 3 }, { shares: { $some: { appuserKey: 3 } } }] } }] },
       ],
     });
   });

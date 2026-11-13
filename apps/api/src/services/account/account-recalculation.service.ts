@@ -9,6 +9,7 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import type { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
+import { accountAccessOf, canWrite } from '@service/account/account-access';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { reconvertAccountRows } from '@service/currency/fx-reconvert.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
@@ -257,10 +258,10 @@ export async function runAccountRecalculation(em: EntityManager, correlationId: 
   return true;
 }
 
-/** Whether the member is still in the account's household and, for a private account, owns it. */
+/** Whether the member is still in the account's household and may change the account (`account-access.ts`). */
 async function isVisibleTo(em: EntityManager, account: Account, viewer: Omit<AccountRecalculationScope, 'accountKey'>): Promise<boolean> {
   if (account.tenantKey.tenantKey !== viewer.tenantKey) return false;
-  if (account.isPrivate && account.accountOwnerAppuserKey?.appuserKey !== viewer.appuserKey) return false;
+  if (!canWrite(await accountAccessOf(em, account.accountKey, viewer))) return false;
   const membership = await em.findOne(AppuserTenant, { appuserKey: { appuserKey: viewer.appuserKey }, deletedAt: null, recordActive: true, tenantKey: { tenantKey: viewer.tenantKey } }, { filters: false });
   return membership !== null;
 }

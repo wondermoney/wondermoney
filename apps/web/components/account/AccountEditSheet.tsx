@@ -17,9 +17,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+import { accountAccessErrorKey } from "@/lib/account/access-error-messages";
+import {
+  initialSharingState,
+  sharesRequest,
+  sharingChanged,
+  type SharingState,
+} from "@/lib/account/account-sharing";
 import type { CreditCardSettings } from "@/lib/api/account/useAccounts";
+import useAccountShares, {
+  useUpdateAccountShares,
+} from "@/lib/api/account/useAccountShares";
 import useEditAccount from "@/lib/api/account/useEditAccount";
 import useUpdateCreditCard from "@/lib/api/account/useUpdateCreditCard";
+import {
+  isDemoReadOnlyError,
+  isHouseholdReadOnlyError,
+} from "@/lib/api/errors";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -32,13 +46,12 @@ import {
   SheetTitle,
 } from "../ui/sheet";
 import { Switch } from "../ui/switch";
+import { AccountSharingField } from "./AccountSharingField";
 
 interface AccountEditSheetProps {
   accountName: string;
   accountKey: number;
   isOpen: boolean;
-  isOwnedByViewer: boolean;
-  isPrivate: boolean;
   /** The card's cycle and limit, or null when the account is not a credit card. */
   creditCard?: CreditCardSettings | null;
   onOpenChange: (open: boolean) => void;
@@ -46,7 +59,6 @@ interface AccountEditSheetProps {
 
 const formSchema = z.object({
   accountName: z.string(),
-  isPrivate: z.boolean(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -60,8 +72,6 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   accountName,
   accountKey,
   isOpen,
-  isOwnedByViewer,
-  isPrivate,
   creditCard = null,
   onOpenChange,
 }) => {
@@ -69,7 +79,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   const posthog = usePostHog();
   const methods = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { accountName, isPrivate },
+    defaultValues: { accountName },
   });
   const {
     handleSubmit,
@@ -78,6 +88,19 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   const editAccountMutation = useEditAccount();
   const updateCreditCard = useUpdateCreditCard();
   const qc = useQueryClient();
+
+  // Who sees and edits the account. The control starts from the API's answer, once it arrives,
+  // and is saved with the rest of the sheet.
+  const sharesQuery = useAccountShares(accountKey, { enabled: isOpen });
+  const updateShares = useUpdateAccountShares(accountKey);
+  const shares = sharesQuery.data;
+  const [sharingStart, setSharingStart] = useState<SharingState | null>(null);
+  const [sharing, setSharing] = useState<SharingState | null>(null);
+  if (shares && sharingStart === null) {
+    const start = initialSharingState(shares);
+    setSharingStart(start);
+    setSharing(start);
+  }
 
   // A card cannot be un-marked: there is no endpoint that removes the cycle, and the account type
   // stays CREDIT_CARD. Once set, the toggle is checked and locked.
@@ -138,26 +161,49 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
       const saved = await saveCreditCard();
       if (!saved) return;
     }
-    await editAccountMutation.mutateAsync(
-      {
+    const sharesBody =
+      shares?.canManage &&
+      sharing &&
+      sharingStart &&
+      sharingChanged(shares.members, sharingStart, sharing)
+        ? sharesRequest(shares.members, sharing)
+        : null;
+    let step: "account" | "sharing" = "account";
+    try {
+      await editAccountMutation.mutateAsync({
         accountKey,
         accountName: data.accountName,
-        // Only the owner may change privacy — omit otherwise so the API's
-        // owner-guard doesn't reject a member renaming a shared account.
-        isPrivate: isOwnedByViewer ? data.isPrivate : undefined,
-      },
-      {
-        onSettled: async () => {
-          await qc.invalidateQueries({ queryKey: ["accounts"], exact: true });
-          await qc.invalidateQueries({ queryKey: ["account", accountKey] });
-          await qc.invalidateQueries({
-            queryKey: ["credit-card-statements", accountKey],
-          });
-          onOpenChange(false);
-        },
-        onSuccess: () => toast.success(t("account-updated")),
-      },
-    );
+      });
+      if (sharesBody) {
+        step = "sharing";
+        await updateShares.mutateAsync(sharesBody);
+      }
+      toast.success(t("account-updated"));
+      onOpenChange(false);
+    } catch (error) {
+      // A viewer's or a view-only member's refusal has its own toast (HouseholdReadOnlyNotifier).
+      if (accountAccessErrorKey(error) || isHouseholdReadOnlyError(error))
+        return;
+      if (isDemoReadOnlyError(error)) {
+        toast.error(t("demo-read-only-title"), {
+          description: t("demo-read-only-description"),
+        });
+        return;
+      }
+      toast.error(
+        t(
+          step === "sharing"
+            ? "accountSharing.save-error"
+            : "account-update-error",
+        ),
+      );
+    } finally {
+      await qc.invalidateQueries({ queryKey: ["accounts"], exact: true });
+      await qc.invalidateQueries({ queryKey: ["account", accountKey] });
+      await qc.invalidateQueries({
+        queryKey: ["credit-card-statements", accountKey],
+      });
+    }
   };
 
   return (
@@ -186,28 +232,14 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
                 </FormItem>
               )}
             />
-            {isOwnedByViewer && (
-              <FormField
-                control={methods.control}
-                name="isPrivate"
-                render={({ field }) => (
-                  <FormItem className="mt-6 flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <FormLabel>{t("private-account")}</FormLabel>
-                      <p className="text-muted-foreground text-xs">
-                        {t("private-account-description")}
-                      </p>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            )}
+            <AccountSharingField
+              shares={shares}
+              isLoading={sharesQuery.isLoading}
+              isError={sharesQuery.isError}
+              state={sharing}
+              onChange={setSharing}
+              disabled={isSubmitting}
+            />
 
             <div className="border-border mt-8 border-t pt-6">
               <div className="flex items-start justify-between gap-4">

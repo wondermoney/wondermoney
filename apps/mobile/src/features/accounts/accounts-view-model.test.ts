@@ -12,6 +12,7 @@ const dto = (converted: number | null): AccountSummaryDto => ({
   isOwnedByViewer: true,
   isPrivate: false,
   refreshedAt: '2026-07-17T12:00:00.000Z',
+  myAccess: 'owner',
   source: 'manual',
 })
 
@@ -38,6 +39,7 @@ describe('accounts view model', () => {
       institutionLogoUrl: null,
       accountType: null,
       creditCard: null,
+      myAccess: 'owner',
       fx: { status: 'exact' },
     })
     expect('logoUrl' in result).toBe(false)

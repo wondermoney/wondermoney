@@ -7,6 +7,7 @@ import {
   createTransactionRequestSchema,
   getAccountMetricsRequestSchema,
   getAccountRequestSchema,
+  getAccountSharesRequestSchema,
   getAccountsCashflowRequestSchema,
   getAccountsForecastRequestSchema,
   getAccountsMetricsRequestSchema,
@@ -98,6 +99,7 @@ import { setTransactionSplitsRequestSchema } from '@validators/transaction-split
 
 import {
   accountSchema,
+  accountSharesSchema,
   accountTypeSchema,
   allocationSchema,
   assistantAuditEventSchema,
@@ -283,6 +285,12 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'Get one account',
     request: getAccountRequestSchema,
     response: itemResponse('AccountResponse', 'account', accountSchema),
+  },
+  'GET /v1/account/:accountId/shares': {
+    tag: 'Accounts',
+    summary: 'Get who sees and who may change an account',
+    request: getAccountSharesRequestSchema,
+    response: accountSharesSchema,
   },
   'GET /v1/account/:accountId/metrics': {
     tag: 'Accounts',

@@ -158,6 +158,8 @@ describe('API client', () => {
   it.each([
     [{ code: 'demo_read_only', message: 'Demo account is read-only' }, 'demo-forbidden'],
     [{ code: 'household_read_only', message: 'Viewers have read-only access.' }, 'household-read-only'],
+    [{ code: 'account_read_only', message: 'You can view this account but not change it.' }, 'account-read-only'],
+    [{ code: 'account_share_manager_required', message: 'Only the owner can change sharing.' }, 'account-share-manager-required'],
     [{ code: 'email_verification_required', message: 'Verify your email address first.' }, 'email-verification-required'],
     [{ code: 'ai_allowance_exhausted', message: 'Daily allowance used up.' }, 'ai-allowance-exhausted'],
     // The code decides, never the prose: an unlabelled or unknown 403 is a plain http error.

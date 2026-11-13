@@ -9,6 +9,13 @@ import api from "../api";
 
 export type SyncStaleness = "error" | "fresh" | "stale" | "very_stale";
 
+/**
+ * The caller's access to an account: its owner, or a member who may edit it (`write`) or only
+ * see it (`read`). A household viewer always reads. `lib/account/account-access.ts` holds the
+ * checks the screens use.
+ */
+export type AccountAccess = "owner" | "read" | "write";
+
 export interface SyncStatus {
   staleness: SyncStaleness;
   lastSyncedAt: string | null;
@@ -39,6 +46,8 @@ export interface Account {
   isPrivate: boolean;
   isOwnedByViewer: boolean;
   ownerFirstName: string | null;
+  /** The caller's access; every edit action is hidden when it is `read`. */
+  myAccess: AccountAccess;
   /** Current balance net of pending transactions. Null when unknown. */
   availableBalance: number | null;
   appuserCurrencyAvailableBalance: number | null;
@@ -90,6 +99,7 @@ export interface AccountWire {
   isPrivate?: boolean;
   isOwnedByViewer?: boolean;
   ownerFirstName?: string | null;
+  myAccess?: string | null;
 }
 
 export interface GetAccountsWireResponse {
@@ -129,6 +139,18 @@ function normalizeCurrencyCode(value: unknown): string {
 
 function normalizeAccountCurrencyCode(value: unknown): SupportedCurrencyCodes {
   return normalizeCurrencyCode(value) as SupportedCurrencyCodes;
+}
+
+const VALID_ACCESS = new Set<AccountAccess>(["owner", "read", "write"]);
+
+// Lenient: an API from before per-account sharing sends no `myAccess`, and then every account
+// the caller sees is theirs or editable, as it was.
+function normalizeAccess(
+  value: unknown,
+  isOwnedByViewer: boolean,
+): AccountAccess {
+  if (VALID_ACCESS.has(value as AccountAccess)) return value as AccountAccess;
+  return isOwnedByViewer ? "owner" : "write";
 }
 
 const VALID_FX_STATUS = new Set<FxStatus>(["exact", "missing", "provisional"]);
@@ -271,6 +293,10 @@ function normalizeAccount(account: unknown): Account {
     isPrivate: account.isPrivate === true,
     isOwnedByViewer: account.isOwnedByViewer === true,
     ownerFirstName: normalizeNullableString(account.ownerFirstName),
+    myAccess: normalizeAccess(
+      account.myAccess,
+      account.isOwnedByViewer === true,
+    ),
     availableBalance: normalizeNullableBalance(account.availableBalance),
     appuserCurrencyAvailableBalance: normalizeNullableBalance(
       account.appuserCurrencyAvailableBalance,

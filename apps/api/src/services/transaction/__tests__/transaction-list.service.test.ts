@@ -15,6 +15,7 @@ const db = vi.hoisted(() => ({
   one: new Map(),
 }));
 
+vi.mock('@service/account/account-access', async (importOriginal) => (await import('@app/__tests__/__helpers__/account-access-double')).allAccountsWritable(await importOriginal()));
 vi.mock('@app/app', () => ({ DI: { em: { count: db.count, find: db.find, findOne: db.findOne } } }));
 vi.mock('@app/database/di', () => ({ DI: { em: { count: db.count, find: db.find, findOne: db.findOne } } }));
 // The count and sum run as SQL (`transaction-totals.ts`, tested against a real database); here the

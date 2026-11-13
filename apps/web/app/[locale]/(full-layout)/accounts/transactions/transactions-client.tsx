@@ -19,6 +19,10 @@ import { TransactionsReportScope } from "@/components/account/TransactionsReport
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import {
+  readOnlyAccountKeys,
+  writableAccounts,
+} from "@/lib/account/account-access";
 import type { TransactionReportScope } from "@/lib/account/transaction-report-scope";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
@@ -259,6 +263,11 @@ export default function AccountsTransactionsClient({
   const isLoading =
     isLoadingAccountsData || isLoadingTransactions || isLoadingConfigs;
 
+  // Transactions go only into accounts the person may change; rows of a view-only account
+  // keep their edit actions off.
+  const editableAccounts = writableAccounts(accountsData?.accounts ?? []);
+  const viewOnlyAccountKeys = readOnlyAccountKeys(accountsData?.accounts);
+
   const noAccounts =
     !isLoadingAccountsData &&
     accountsData?.accounts &&
@@ -312,30 +321,34 @@ export default function AccountsTransactionsClient({
           onAddAccount={() => setAccountAddModalIsOpen(true)}
           onAddTransaction={openAddManualTransactionModal}
         />
-        <AccountTransactionAddModal
-          isOpen={isAddManualTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeAddManualTransactionModal();
-            } else {
-              openAddManualTransactionModal();
-            }
-          }}
-          accounts={accountsData?.accounts ?? []}
-          trigger={null}
-        />
-        <AccountTransactionImportModal
-          isOpen={isImportTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeImportTransactionModal();
-            } else {
-              openImportTransactionModal();
-            }
-          }}
-          accounts={accountsData?.accounts ?? []}
-          trigger={null}
-        />
+        {editableAccounts.length > 0 ? (
+          <>
+            <AccountTransactionAddModal
+              isOpen={isAddManualTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeAddManualTransactionModal();
+                } else {
+                  openAddManualTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={null}
+            />
+            <AccountTransactionImportModal
+              isOpen={isImportTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeImportTransactionModal();
+                } else {
+                  openImportTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={null}
+            />
+          </>
+        ) : null}
       </>
     );
   }
@@ -357,42 +370,44 @@ export default function AccountsTransactionsClient({
               exactly like a quiet spending day. */}
           <AccountsFreshness accounts={accountsData?.accounts} />
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <AccountTransactionImportModal
-            isOpen={isImportTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeImportTransactionModal();
-              } else {
-                openImportTransactionModal();
+        {editableAccounts.length > 0 ? (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <AccountTransactionImportModal
+              isOpen={isImportTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeImportTransactionModal();
+                } else {
+                  openImportTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Download className="size-4" />
+                  {t("import-transactions")}
+                </Button>
               }
-            }}
-            accounts={accountsData?.accounts ?? []}
-            trigger={
-              <Button variant="outline" className="w-full sm:w-auto">
-                <Download className="size-4" />
-                {t("import-transactions")}
-              </Button>
-            }
-          />
-          <AccountTransactionAddModal
-            isOpen={isAddManualTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeAddManualTransactionModal();
-              } else {
-                openAddManualTransactionModal();
+            />
+            <AccountTransactionAddModal
+              isOpen={isAddManualTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeAddManualTransactionModal();
+                } else {
+                  openAddManualTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={
+                <Button className="w-full sm:w-auto">
+                  <Plus className="size-4" />
+                  {t("add-transaction")}
+                </Button>
               }
-            }}
-            accounts={accountsData?.accounts ?? []}
-            trigger={
-              <Button className="w-full sm:w-auto">
-                <Plus className="size-4" />
-                {t("add-transaction")}
-              </Button>
-            }
-          />
-        </div>
+            />
+          </div>
+        ) : null}
       </div>
 
       {reportScope ? (
@@ -437,6 +452,7 @@ export default function AccountsTransactionsClient({
         onShowHiddenTransactionsChange={setShowHiddenTransactions}
         withSelectRow
         withMultiSelectRow
+        readOnlyAccountKeys={viewOnlyAccountKeys}
       />
     </div>
   );

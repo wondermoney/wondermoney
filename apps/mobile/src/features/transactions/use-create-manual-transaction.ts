@@ -6,7 +6,7 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 
 import { createManualTransactionEndpoint, type FrozenManualTransaction } from './manual-transaction-contract'
 
-export type ManualTransactionFailure = 'unknown' | 'demo' | 'read-only' | 'access' | 'mfa' | 'validation' | 'cancelled'
+export type ManualTransactionFailure = 'unknown' | 'demo' | 'read-only' | 'account-read-only' | 'access' | 'mfa' | 'validation' | 'cancelled'
 
 export const isManualTransactionAffectedQuery = (queryKey: QueryKey, epochId: number): boolean => (
   (queryKey[0] === 'transactions' && queryKey[1] === epochId)
@@ -22,6 +22,7 @@ export function classifyManualTransactionFailure(error: unknown): ManualTransact
   if (!(error instanceof ApiError)) return 'validation'
   if (error.code === 'demo-forbidden') return 'demo'
   if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'http' && error.status !== undefined && error.status >= 400 && error.status < 500) return 'validation'

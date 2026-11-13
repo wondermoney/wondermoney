@@ -141,6 +141,7 @@ function account(
     isPrivate: false,
     isOwnedByViewer: true,
     ownerFirstName: null,
+    myAccess: "owner",
     availableBalance: 0,
     appuserCurrencyAvailableBalance: 0,
     syncStatus: null,

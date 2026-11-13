@@ -1,12 +1,12 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
-import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
 import { Rule } from '@entity/Rule';
 import { Tag } from '@entity/Tag';
 import { Tenant } from '@entity/Tenant';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError } from '@utils/errors';
 
@@ -211,7 +211,7 @@ export function parseImportFile(file: unknown): RulesExportFile {
 async function loadLookups(em: EntityManager, actor: Actor): Promise<Lookups> {
   const tenant = getRef(em, Tenant, actor.tenantKey);
   const [accounts, categories, merchants, tags] = await Promise.all([
-    em.find(Account, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: getRef(em, Appuser, actor.appuserKey) }], deletedAt: null, tenantKey: tenant }),
+    em.find(Account, { ...visibleAccountWhere(actor.appuserKey), deletedAt: null, tenantKey: tenant }),
     em.find(Category, { $or: [{ tenantKey: tenant }, { tenantKey: null }], deletedAt: null }),
     em.find(TransactionMerchant, { deletedAt: null, tenantKey: tenant }),
     em.find(Tag, { deletedAt: null, tenantKey: tenant }),

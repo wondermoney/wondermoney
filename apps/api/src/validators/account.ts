@@ -251,6 +251,24 @@ export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ ba
 export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
+export const getAccountSharesRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
+/**
+ * `PUT /v1/account/:accountId/shares`: who sees and who changes the account, replaced as a whole.
+ * `isPrivate: false` shares it with the whole household (everyone can edit) and takes no shares;
+ * `isPrivate: true` shows it to the owner and the members listed, each `read` or `write`.
+ */
+export const putAccountSharesRequestSchema = z.object({
+  body: z
+    .object({
+      isPrivate: z.boolean(),
+      shares: z
+        .array(z.object({ access: z.enum(['read', 'write']), appuserKey: positiveIntId }))
+        .max(50)
+        .refine((shares) => new Set(shares.map((share) => share.appuserKey)).size === shares.length, { message: 'Each member may appear only once' }),
+    })
+    .refine((body) => body.isPrivate || body.shares.length === 0, { message: 'A shared account takes no shares', path: ['shares'] }),
+  params: z.object({ accountId: positiveIntId }),
+});
 export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });
 /**
  * `GET /v1/account/forecast`: the next `days` days of projected balances. The window is bounded

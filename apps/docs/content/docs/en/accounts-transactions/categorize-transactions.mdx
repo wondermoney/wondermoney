@@ -30,7 +30,7 @@ WonderMoney can suggest a category without sending anything to an AI service. It
 
 It only suggests a category when it is confident; otherwise it stays quiet and the transaction is left for you to categorize or, if AI is configured, for an AI suggestion. The local suggestion runs before any AI step and needs no AI provider. It never sends your data anywhere, so it also runs when you have hidden AI in your settings. Withdrawals and transfers are never labelled this way, because their description does not say what the money was for.
 
-The more transactions you confirm, the better the local suggestions get. A household member's private accounts never train another member's suggestions.
+The more transactions you confirm, the better the local suggestions get. Private accounts you can't see never train your suggestions.
 
 If your household has rules, they run first on every new transaction, whether it comes from bank sync, a file import, a receipt or one you add by hand. A category a rule sets wins over the learned mapping, and such a transaction is not sent for an AI suggestion. Rules never change a category you chose yourself, nor a description or merchant you typed or edited, and they run once, when the transaction arrives: a later sync does not undo your changes. A transaction's activity history names the rule that changed it.
 
@@ -108,7 +108,7 @@ The switch applies to your household only: everyone in it sees the same setting,
 
 WonderMoney recognizes a transfer between two of your own accounts when it finds both sides: the money leaving one account and the same amount arriving on the other a few days later at most. Both rows are then left out of income and spending. A payment to a broker, or to an account you have not connected, has no other side, so it stays a payment until you mark it.
 
-Between two accounts in different currencies the amounts differ. WonderMoney converts the amount that left at the exchange rate for that day and pairs the two when the amount that arrived is within 2 percent of it, which leaves room for the bank's exchange margin and fees. With no exchange rate for that day, or with two equally likely matches, it leaves both rows as they are, and you can mark the transfer yourself. It never pairs a shared account with a private one, or private accounts of two different members.
+Between two accounts in different currencies the amounts differ. WonderMoney converts the amount that left at the exchange rate for that day and pairs the two when the amount that arrived is within 2 percent of it, which leaves room for the bank's exchange margin and fees. With no exchange rate for that day, or with two equally likely matches, it leaves both rows as they are, and you can mark the transfer yourself. It pairs two accounts only when exactly the same people can see both: never a shared account with a private one, or two private accounts shared with different people.
 
 - **On the web**, open the transaction's menu, choose **Edit** and turn on **Mark as transfer**.
 - **In the mobile app**, open the row's menu and choose **Mark as transfer**.

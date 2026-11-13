@@ -4,6 +4,7 @@ import { sql } from 'kysely';
 
 import { sqlQuery } from '@app/database/sql';
 import { authedContext } from '@middleware/authed-context';
+import { visibleAccountSql } from '@service/account/account-visibility-sql';
 import { transactionDateRangeExpression } from '@service/transaction/transaction-date-range';
 import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
 import { buildEffectiveAmountSql } from '@utils/account-amounts';
@@ -95,11 +96,11 @@ export async function getAccountMetrics(req: Request, res: Response) {
              FILTER (WHERE ${inPastPeriod}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
         ])
         // Household-scoped (raw SQL bypasses the tenant filter) + per-account
-        // privacy carve-out — a private account's metrics are visible only to its owner.
+        // privacy carve-out — a private account's metrics are visible only to the members who see it.
         .where('a.tenant_key', '=', tenantKey)
         .where('a.deleted_at', 'is', null)
         .where('a.account_key', '=', accountId)
-        .where((eb) => eb.or([eb('a.is_private', '=', false), eb('a.account_owner_appuser_key', '=', appuserKey)]))
+        .where(sql<boolean>`${sql.raw(visibleAccountSql('a', appuserKey))}`)
         .groupBy(sql`a.account_key, a.account_name, c.code`),
     )
     .selectFrom('c')
@@ -176,10 +177,10 @@ export async function getAccountsMetrics(req: Request, res: Response) {
              FILTER (WHERE ${inPastPeriod}), 0) AS INTEGER)`.as('transactionCountPastPeriod'),
         ])
         // Household-scoped (raw SQL bypasses the tenant filter) + per-account
-        // privacy carve-out — private accounts are visible only to their owner.
+        // privacy carve-out — private accounts are visible only to the members who see them.
         .where('a.tenant_key', '=', tenantKey)
         .where('a.deleted_at', 'is', null)
-        .where((eb) => eb.or([eb('a.is_private', '=', false), eb('a.account_owner_appuser_key', '=', appuserKey)]))
+        .where(sql<boolean>`${sql.raw(visibleAccountSql('a', appuserKey))}`)
         .groupBy(sql`a.account_key, a.account_name, c.code`),
     )
     .selectFrom('c')

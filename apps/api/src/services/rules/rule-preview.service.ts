@@ -2,10 +2,10 @@ import type { FilterQuery } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
-import { Appuser } from '@entity/Appuser';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { writableAccountWhere } from '@service/account/account-access';
 import { getRef } from '@utils/em-helpers';
 
 import { toTransactionFacts, TRANSACTION_FACTS_POPULATE } from './rule-application.service';
@@ -79,7 +79,6 @@ export async function previewRule(em: EntityManager, actor: Actor, draft: RuleDr
 
   const reader = em.fork();
   const tenant = getRef(reader, Tenant, actor.tenantKey);
-  const owner = getRef(reader, Appuser, actor.appuserKey);
   let matchCount = 0;
   let changeCount = 0;
   let sample: RulePreviewRow[] = [];
@@ -87,9 +86,9 @@ export async function previewRule(em: EntityManager, actor: Actor, draft: RuleDr
 
   for (;;) {
     const where: FilterQuery<Transaction> = {
-      // The engine skips the other member's private accounts too; excluding them here keeps
+      // The engine skips accounts the member may not change too; excluding them here keeps
       // their rows out of memory altogether.
-      $or: [{ accountKey: null }, { accountKey: { isPrivate: false } }, { accountKey: { accountOwnerAppuserKey: owner } }],
+      $or: [{ accountKey: null }, { accountKey: writableAccountWhere(actor.appuserKey) }],
       deletedAt: null,
       tenantKey: tenant,
       transactionKey: { $gt: after },

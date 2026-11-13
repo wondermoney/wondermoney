@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { type Kysely, type RawBuilder, sql } from 'kysely';
 
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { visibleAccountSql } from '@service/account/account-visibility-sql';
 import { buildInfo } from '@utils/constants';
 
 import { type ExportFileSource, writeExportArchive } from './export-archive';
@@ -158,6 +159,8 @@ class HouseholdExport {
   private readonly accounts = new IdMap();
   /** The exporting member's place for each account in their list, by account key. */
   private accountPositions = new Map<number, number>();
+  /** Who each private account is shared with, among the exported members: `[appuserKey, access]`. */
+  private accountShares = new Map<number, [number, string][]>();
   private readonly budgets = new IdMap();
   private readonly categories = new IdMap();
   private categoryRows: Row[] = [];
@@ -220,7 +223,7 @@ class HouseholdExport {
       left join currency c on c.currency_key = a.currency_key
       left join account_type at on at.account_type_key = a.account_type_key
       left join account_financial_institution fi on fi.account_financial_institution_key = a.account_financial_institution_key
-      where a.tenant_key = ${tenantKey} and a.deleted_at is null and (a.is_private = false or a.account_owner_appuser_key = ${appuserKey})
+      where a.tenant_key = ${tenantKey} and a.deleted_at is null and ${sql.raw(visibleAccountSql('a', appuserKey))}
       order by a.account_key`);
     for (const row of this.accountRows) {
       this.accounts.add(row['account_key']);
@@ -229,6 +232,14 @@ class HouseholdExport {
     for (const row of await rowsOf(db, sql`
       select account_key, position from appuser_account_position
       where appuser_key = ${appuserKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by appuser_account_position_key`)) this.accountPositions.set(Number(row['account_key']), Number(row['position']));
+    for (const row of await rowsOf(db, sql`
+      select account_key, appuser_key, access from account_share
+      where tenant_key = ${tenantKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by account_key, appuser_key`)) {
+      // A share for someone no longer in the household is not exported: they have no member id.
+      if (!this.members.has(row['appuser_key'])) continue;
+      const key = Number(row['account_key']);
+      this.accountShares.set(key, [...(this.accountShares.get(key) ?? []), [Number(row['appuser_key']), String(row['access'])]]);
+    }
 
     // The household's own categories and the global system ones a restore resolves by name.
     this.categoryRows = await rowsOf(db, sql`
@@ -372,6 +383,8 @@ class HouseholdExport {
         ownerMemberId: this.members.get(row['account_owner_appuser_key']),
         // The exporting member's place for the account in their list; null when unordered.
         position: this.accountPositions.get(Number(row['account_key'])) ?? null,
+        // Who else sees a private account, and whether they may change it. Empty for a shared one.
+        shares: bool(row['is_private']) ? (this.accountShares.get(Number(row['account_key'])) ?? []).map(([appuserKey, access]) => ({ access, memberId: this.members.get(appuserKey) })) : [],
         type: str(row['account_type']),
       };
     }

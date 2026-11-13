@@ -14,6 +14,7 @@ const account = (accountKey: number, accountName: string | null, currency: strin
   isPrivate: false,
   refreshedAt: null,
   source: 'manual' as const,
+  myAccess: 'owner' as const,
 })
 
 describe('report filter options', () => {

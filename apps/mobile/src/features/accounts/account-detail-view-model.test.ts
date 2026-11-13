@@ -12,6 +12,7 @@ const dto: AccountSummaryDto = {
   isOwnedByViewer: true,
   isPrivate: false,
   refreshedAt: '2026-07-17T10:00:00.000Z',
+  myAccess: 'owner',
   source: 'open_banking',
 }
 
@@ -37,6 +38,7 @@ describe('account detail view model', () => {
       institutionLogoUrl: null,
       accountType: null,
       creditCard: null,
+      myAccess: 'owner',
       fx: { status: 'exact' },
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')

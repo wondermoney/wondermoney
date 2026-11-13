@@ -6,6 +6,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
+import { loadAccountAudiences } from '@service/account/account-access';
 import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { getRef } from '@utils/em-helpers';
 import { big, roundMoney, toNumber } from '@utils/money';
@@ -161,8 +162,11 @@ export interface TransferRow {
   day: null | number;
   deleted: boolean;
   hidden: boolean;
-  /** Who may see the row's account: null for the whole household, else its owner (0: no owner). */
-  privateTo: null | number;
+  /**
+   * Who may see the row's account: null for the whole household, else the account's audience (its
+   * owner and the members it is shared with, `accountAudience` in `account-access.ts`).
+   */
+  privateTo: null | string;
   synced: boolean;
   transactionKey: number;
   /** The stored `transferExchangeRate`. */
@@ -182,7 +186,8 @@ export async function reconcileTransfers(em: EntityManager, input: TransferRecon
   // A row with no owner cannot be audited, so it is never changed (and never pairs).
   const entities = (await loadRows(em, input)).filter((entity) => entity.appuserKey != null);
   const userTyped = await loadUserTypedKeys(em, input.tenantKey);
-  const rows = entities.map((entity) => toTransferRow(entity, userTyped));
+  const audiences = await loadAccountAudiences(em, entities.flatMap((entity) => (entity.accountKey ? [entity.accountKey.accountKey] : [])));
+  const rows = entities.map((entity) => toTransferRow(entity, userTyped, audiences));
   const plan = planTransfers(rows, { fxTolerance: transferMatchFxTolerance(), rateOn: await loadRates(em, rows, input.tenantKey) });
   const result: TransferReconciliationResult = {
     pairsDissolved: plan.pairsDissolved,
@@ -375,7 +380,7 @@ function isValidPair(row: TransferRow, partner: TransferRow, options: TransferPl
   return row.cents < 0 ? acceptsAcrossCurrencies(row, partner, options) : acceptsAcrossCurrencies(partner, row, options);
 }
 
-/** Whether the same people can see both accounts: both shared, or both private to the same member. */
+/** Whether the same people can see both accounts: both shared, or both private and seen by exactly the same members. */
 function sameVisibility(a: TransferRow, b: TransferRow): boolean {
   return a.privateTo === b.privateTo;
 }
@@ -498,7 +503,7 @@ async function loadUserTypedKeys(em: EntityManager, tenantKey: number): Promise<
   return new Set(entries.filter((entry) => entry.changes != null && Object.hasOwn(entry.changes, 'transactionTypeKey')).map((entry) => entry.transactionKey.transactionKey));
 }
 
-function toTransferRow(entity: Transaction, userTyped: Set<number>): TransferRow {
+function toTransferRow(entity: Transaction, userTyped: Set<number>, audiences: ReadonlyMap<number, string>): TransferRow {
   const amount = entity.settlementAmount == null ? 0 : toNumber(entity.settlementAmount);
   const account = entity.accountKey;
   return {
@@ -510,7 +515,7 @@ function toTransferRow(entity: Transaction, userTyped: Set<number>): TransferRow
     day: entity.transactionDate ? Math.floor(new Date(entity.transactionDate).getTime() / MS_PER_DAY) : null,
     deleted: entity.deletedAt != null,
     hidden: entity.hidden,
-    privateTo: account?.isPrivate ? (account.accountOwnerAppuserKey?.appuserKey ?? 0) : null,
+    privateTo: account?.isPrivate ? (audiences.get(account.accountKey) ?? '') : null,
     synced: entity.enableBankingTransactionId != null || entity.nordigenInternalTransactionId != null,
     transactionKey: entity.transactionKey,
     transferRate: entity.transferExchangeRate == null ? null : toNumber(entity.transferExchangeRate, 8),

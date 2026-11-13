@@ -21,7 +21,11 @@ import {
   useUploadTransactionAttachment,
 } from './use-transaction-attachments'
 
-type Props = Readonly<{ transactionId: number }>
+type Props = Readonly<{
+  transactionId: number
+  /** On an account the caller can only view (#95): the files open, nothing is added or deleted. */
+  readOnly?: boolean
+}>
 
 function failureMessageKey(reason: AttachmentFailure): string {
   switch (reason) {
@@ -38,7 +42,7 @@ function failureMessageKey(reason: AttachmentFailure): string {
  * The files kept with a transaction, inside its expanded row: take a photo, choose files, tap to
  * open, delete. Hidden on a server without file storage (`GET /v1/instance`).
  */
-export function TransactionAttachmentsSection({ transactionId }: Props) {
+export function TransactionAttachmentsSection({ transactionId, readOnly = false }: Props) {
   const { t } = useTranslation()
   const palette = usePalette()
   const storageAvailable = useConfirmedFeature((features) => features.fileStorage)
@@ -80,6 +84,8 @@ export function TransactionAttachmentsSection({ transactionId }: Props) {
   }, [remove])
 
   if (!storageAvailable) return null
+  // Nothing to show and nothing to add: a view-only row carries no empty section.
+  if (readOnly && (attachments.data?.attachments.length ?? 0) === 0) return null
 
   const list = attachments.data?.attachments ?? []
   const atLimit = list.length >= TRANSACTION_ATTACHMENT_MAX_FILES
@@ -103,19 +109,21 @@ export function TransactionAttachmentsSection({ transactionId }: Props) {
                 <Icon color={palette.mutedForeground} name={attachment.contentType === 'application/pdf' ? 'file-text' : 'paperclip'} size={16} />
                 <Text numberOfLines={1} style={styles.name} variant="meta">{attachment.fileName}</Text>
               </Pressable>
-              <Pressable
-                accessibilityLabel={t('transactions.attachments.delete', { name: attachment.fileName })}
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={() => { void removeAttachment(attachment) }}
-              >
-                <Icon color={palette.mutedForeground} name="trash" size={16} />
-              </Pressable>
+              {readOnly ? null : (
+                <Pressable
+                  accessibilityLabel={t('transactions.attachments.delete', { name: attachment.fileName })}
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  onPress={() => { void removeAttachment(attachment) }}
+                >
+                  <Icon color={palette.mutedForeground} name="trash" size={16} />
+                </Pressable>
+              )}
             </View>
           ))}
         </View>
       )}
-      <View style={styles.actions}>
+      {readOnly ? null : <View style={styles.actions}>
         <UiButton
           disabled={busy || atLimit}
           icon="camera"
@@ -132,8 +140,8 @@ export function TransactionAttachmentsSection({ transactionId }: Props) {
           size="sm"
           variant="secondary"
         />
-      </View>
-      {atLimit ? <Text tone="muted" variant="meta">{t('transactions.attachments.limit')}</Text> : null}
+      </View>}
+      {atLimit && !readOnly ? <Text tone="muted" variant="meta">{t('transactions.attachments.limit')}</Text> : null}
       {failure ? <FormNotice tone="destructive">{t(failureMessageKey(failure))}</FormNotice> : null}
     </View>
   )

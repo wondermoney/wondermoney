@@ -15,6 +15,7 @@ const mocked = vi.hoisted(() => ({
 }));
 
 // Splits are covered by transaction-split.test.ts; none of these transactions is split.
+vi.mock('@service/account/account-access', async (importOriginal) => (await import('@app/__tests__/__helpers__/account-access-double')).allAccountsWritable(await importOriginal()));
 vi.mock('@service/transaction/transaction-split.service', () => ({
   reconcileSplitsWithAmount: vi.fn().mockResolvedValue('none'),
   removeSplitsBeforeCategorizing: vi.fn().mockResolvedValue(undefined),

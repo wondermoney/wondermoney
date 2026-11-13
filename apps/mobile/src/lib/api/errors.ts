@@ -1,6 +1,8 @@
 export type ApiErrorCode =
   | 'demo-forbidden'
   | 'household-read-only'
+  | 'account-read-only'
+  | 'account-share-manager-required'
   | 'email-verification-required'
   | 'ai-allowance-exhausted'
   | 'portfolio-link-held'
@@ -28,6 +30,8 @@ export type ApiErrorOptions = Readonly<{
 const diagnosticMessages: Record<ApiErrorCode, string> = {
   'demo-forbidden': 'This action is unavailable in demo mode.',
   'household-read-only': 'This household member has view-only access.',
+  'account-read-only': 'This account is shared with this member to view only.',
+  'account-share-manager-required': "Only the account's owner or the household owner can change its sharing.",
   'email-verification-required': 'This action requires a verified email address.',
   'ai-allowance-exhausted': "Today's allowance for this AI feature is used up.",
   'portfolio-link-held': 'The portfolio is linked to an account only another household member can see.',

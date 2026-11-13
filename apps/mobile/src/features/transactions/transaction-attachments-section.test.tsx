@@ -33,11 +33,11 @@ jest.mock('./use-transaction-attachments', () => ({
   useUploadTransactionAttachment: () => ({ mutateAsync: mockState.uploadAsync }),
 }))
 
-async function renderSection() {
+async function renderSection(readOnly = false) {
   const i18n = await initMobileI18n('en')
   return render(
     <I18nextProvider i18n={i18n}>
-      <TransactionAttachmentsSection transactionId={7} />
+      <TransactionAttachmentsSection readOnly={readOnly} transactionId={7} />
     </I18nextProvider>,
   )
 }
@@ -50,6 +50,17 @@ describe('TransactionAttachmentsSection', () => {
     mockState.pickFiles.mockReset().mockResolvedValue([])
     mockState.storage = true
     mockState.uploadAsync.mockReset().mockResolvedValue({})
+  })
+
+  it('on an account the caller can only view, opens the files and offers nothing to add or delete', async () => {
+    mockState.attachments = [{ transactionAttachmentKey: 1, fileName: 'receipt.pdf', contentType: 'application/pdf', sizeBytes: 10, createdAt: '2026-07-17T10:00:00Z', url: 'https://files.example/receipt.pdf' }]
+    const view = await renderSection(true)
+    expect(view.getByRole('link', { name: /receipt\.pdf/ })).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /Delete/ })).toBeNull()
+    expect(view.queryByRole('button', { name: /Add photo|Choose files/ })).toBeNull()
+    mockState.attachments = []
+    const empty = await renderSection(true)
+    expect(empty.queryByText('Attachments')).toBeNull()
   })
 
   it('is hidden on a server without file storage', async () => {

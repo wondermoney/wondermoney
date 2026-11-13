@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
+import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
@@ -144,6 +145,13 @@ export async function addAccount(em: EntityManager, household: Household, input:
   }, { partial: true });
   await em.flush();
   return account;
+}
+
+/** Share a private account with a member, at `access` (default read). */
+export async function addShare(em: EntityManager, household: Household, account: Account, member: Appuser, access: 'read' | 'write' = 'read'): Promise<AccountShare> {
+  const share = em.create(AccountShare, { access: access === 'write' ? AccountShareAccess.WRITE : AccountShareAccess.READ, accountKey: account, appuserKey: member, tenantKey: household.tenant }, { partial: true });
+  await em.flush();
+  return share;
 }
 
 /** One row per status the rule distinguishes, all on the same day, so a test can see which ones count. */

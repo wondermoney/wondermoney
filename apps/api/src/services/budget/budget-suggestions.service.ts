@@ -4,6 +4,7 @@ import { DI } from '@app/app';
 import { Account } from '@entity/Account';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { NotFoundError } from '@utils/errors';
 
 import {
@@ -52,7 +53,7 @@ export async function suggestBudgetAmounts(
   const accountKeys = input.accountKeys.length > 0
     ? input.accountKeys
     : (await em.find(Account, {
-        $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: input.viewerAppuserKey } }],
+        ...visibleAccountWhere(input.viewerAppuserKey),
         closed: false,
         deletedAt: undefined,
         tenantKey: { tenantKey: input.tenantKey },

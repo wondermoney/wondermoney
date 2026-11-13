@@ -77,8 +77,10 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * `data/budgets.json`, `rolloverEnabled` to `data/budget-categories.json`, `amortizationMethod` and
  * `firstPaymentDate` to `data/loans.json`, `costBasisMethod` to `data/portfolios.json`, and
  * `creditCardDueReminders` to the email notifications in `data/preferences.json`.
+ * 1.9 added `shares` to `data/accounts.json`: for a private account, the members it is shared with
+ * (`memberId`) and whether each may only view it (`read`) or also change it (`write`).
  */
-export const EXPORT_FORMAT_VERSION = '1.8';
+export const EXPORT_FORMAT_VERSION = '1.9';
 
 export interface ExportManifest {
   appVersion: string;

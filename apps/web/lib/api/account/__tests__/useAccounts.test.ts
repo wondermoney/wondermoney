@@ -34,6 +34,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     isPrivate: false,
     isOwnedByViewer: false,
     ownerFirstName: null,
+    myAccess: "write",
     availableBalance: null,
     appuserCurrencyAvailableBalance: null,
     syncStatus: null,
@@ -42,6 +43,23 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     creditCard: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
+});
+
+test("reads the caller's access, and derives it for an API that does not send it", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), myAccess: "read" },
+      { ...requiredAccountFields(2), myAccess: "write" },
+      { ...requiredAccountFields(3), isOwnedByViewer: true },
+      { ...requiredAccountFields(4) },
+      { ...requiredAccountFields(5), myAccess: "admin" },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.myAccess),
+    ["read", "write", "owner", "write", "write"],
+  );
 });
 
 test("derives transitional source when legacy source is null", () => {

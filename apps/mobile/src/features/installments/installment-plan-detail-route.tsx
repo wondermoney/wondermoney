@@ -3,7 +3,9 @@ import { useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
+import { readOnlyAccountKeys } from '@/features/accounts/account-access'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
+import { useAccounts } from '@/features/accounts/use-accounts'
 
 import { InstallmentPlanDetailScreen, type InstallmentPlanDetailViewState } from './installment-plan-detail-screen'
 import { parseInstallmentPlanId } from './installments-contract'
@@ -24,6 +26,9 @@ export function InstallmentPlanDetailRoute() {
   // The plan knows its card; the route's account only stands in until it has loaded.
   const accountId = query.data?.installmentPlan.accountKey ?? routeAccountId
   const accountHref = accountId === null ? '/accounts' as const : `/accounts/${accountId}` as const
+  // A card the caller can only view (#95): its plan shows, with no delete and no linking.
+  const accounts = useAccounts()
+  const readOnly = accountId !== null && readOnlyAccountKeys(accounts.data?.accounts).has(accountId)
 
   let state: InstallmentPlanDetailViewState
   if (query.isInvalidId) state = { status: 'invalid-id' }
@@ -41,9 +46,9 @@ export function InstallmentPlanDetailRoute() {
       backHref={accountHref}
       deleteFailure={deleteFailure}
       deleting={remove.isPending}
-      linking={query.data ? linking : undefined}
+      linking={query.data && !readOnly ? linking : undefined}
       onBack={leave}
-      onDelete={planId === null || accountId === null ? undefined : async () => {
+      onDelete={planId === null || accountId === null || readOnly ? undefined : async () => {
         setDeleteFailure(null)
         try {
           await remove.mutateAsync({ planId, accountId })

@@ -78,8 +78,13 @@ account joins at signup (`inviteToken` rides into `/v1/auth/callback`); a signed
 only by pressing Join on `/join`, which calls `POST /v1/household/invites/:token/accept` and reloads
 the app. A viewer's writes answer `household_read_only`, explained by
 `components/household/HouseholdReadOnlyNotifier.tsx`.
-Private accounts: the owner-only "Private account" switch sends `isPrivate` only when the
-viewer owns the account; members never receive private accounts from the API.
+Per-account sharing: the account edit sheet lists every member as Hidden, Can view or Can edit
+(a viewer never edits) and saves it with `PUT /v1/account/:accountId/shares`
+(`lib/account/account-sharing.ts` maps the control to the body); only the account owner or the
+household owner gets the controls (`canManage`). Accounts carry `myAccess`; every edit action
+is hidden when it is `read` (`lib/account/account-access.ts`; transaction lists look each
+row's account up by `accountKey`), and a write that slips through answers `account_read_only`,
+explained by the same notifier. Members never receive accounts hidden from them.
 
 ## Tests
 

@@ -8,6 +8,7 @@ import { AssistantProposal, AssistantProposalKind, AssistantProposalSource, Assi
 import type { Category } from '@entity/Category';
 import type { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { onlyWritableTransactions } from '@service/account/account-access';
 import { isAiHidden } from '@service/ai/ai-availability';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
@@ -282,6 +283,9 @@ async function checkTargets(em: EntityManager, viewer: ProposalViewer, parsed: P
     if (error instanceof NotFoundError) return { ok: false, reason: 'transaction_unavailable' };
     throw error;
   }
+  // A row on an account the member may only view is not theirs to change.
+  const actor = { appuserKey: viewer.appuser.appuserKey, tenantKey: viewer.tenant.tenantKey };
+  if ((await onlyWritableTransactions(em, transactions, actor)).length !== transactions.length) return { ok: false, reason: 'transaction_unavailable' };
   if (parsed.kind !== AssistantProposalKind.CATEGORIZE_TRANSACTIONS) return { category: null, ok: true, transactions };
   const category = await findAssignableCategory(em, viewer.tenant, parsed.payload.categoryId);
   if (!category) return { ok: false, reason: 'category_unavailable' };

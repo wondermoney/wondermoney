@@ -64,10 +64,13 @@ export default function InstallmentPlanDetail({
   plan,
   categories,
   onDeleted,
+  readOnly = false,
 }: {
   plan: InstallmentPlanDetailData;
   categories: Category[];
   onDeleted?: () => void;
+  /** The card was shared to view only: the plan shows, nothing on it changes. */
+  readOnly?: boolean;
 }) {
   const t = useTranslations();
   const formatPlanDay = useFormatPlanDay();
@@ -138,16 +141,18 @@ export default function InstallmentPlanDetail({
         currency={plan.currency}
         valueLabel={t("installments.total")}
         actions={
-          <>
-            <Button variant="secondary" onClick={() => setEditOpen(true)}>
-              <Pencil className="size-4" aria-hidden="true" />
-              {t("installments.edit")}
-            </Button>
-            <Button variant="ghost" onClick={() => setDeleteOpen(true)}>
-              <Trash2 className="size-4" aria-hidden="true" />
-              {t("installments.delete")}
-            </Button>
-          </>
+          readOnly ? undefined : (
+            <>
+              <Button variant="secondary" onClick={() => setEditOpen(true)}>
+                <Pencil className="size-4" aria-hidden="true" />
+                {t("installments.edit")}
+              </Button>
+              <Button variant="ghost" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="size-4" aria-hidden="true" />
+                {t("installments.delete")}
+              </Button>
+            </>
+          )
         }
       />
 
@@ -199,6 +204,7 @@ export default function InstallmentPlanDetail({
               installment={installment}
               installmentCount={plan.installmentCount}
               currency={plan.currency}
+              readOnly={readOnly}
               onLink={() => setLinkTarget(installment)}
               onUnlink={() => setUnlinkTarget(installment)}
             />
@@ -290,12 +296,14 @@ function InstallmentRow({
   installment,
   installmentCount,
   currency,
+  readOnly,
   onLink,
   onUnlink,
 }: {
   installment: Installment;
   installmentCount: number;
   currency: string;
+  readOnly: boolean;
   onLink: () => void;
   onUnlink: () => void;
 }) {
@@ -370,7 +378,7 @@ function InstallmentRow({
             projected ? "text-muted-foreground" : "text-foreground",
           )}
         />
-        {installment.status === "paid" ? (
+        {readOnly ? null : installment.status === "paid" ? (
           <Button
             variant="ghost"
             size="sm"

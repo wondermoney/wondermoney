@@ -14,9 +14,13 @@
 
 /** Mirrors `ERROR_CODE` in the API's `utils/errors.ts`. */
 export const API_ERROR_CODE = {
+  /** A write on an account, or its transactions, that the caller may only view (403). */
+  ACCOUNT_READ_ONLY: "account_read_only",
   /** The account's balances were recalculated less than a minute ago (429, with `Retry-After`). */
   ACCOUNT_RECALCULATION_TOO_SOON: "account_recalculation_too_soon",
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
+  /** Changing an account's sharing without being its owner or the household owner (403). */
+  ACCOUNT_SHARE_MANAGER_REQUIRED: "account_share_manager_required",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   /** Inviting, or accepting an invite for, someone already in that household (409). */
   ALREADY_HOUSEHOLD_MEMBER: "already_household_member",
@@ -249,6 +253,16 @@ export function isPortfolioLinkRefusal(error: unknown): boolean {
     code === API_ERROR_CODE.PORTFOLIO_LINK_HELD_BY_MEMBER ||
     code === API_ERROR_CODE.FORBIDDEN
   );
+}
+
+/** A change to an account, or its transactions, that was shared with the caller to view only. */
+export function isAccountReadOnlyError(error: unknown): boolean {
+  return hasCode(error, API_ERROR_CODE.ACCOUNT_READ_ONLY);
+}
+
+/** A change to an account's sharing by someone who is neither its owner nor the household owner. */
+export function isAccountShareManagerRequiredError(error: unknown): boolean {
+  return hasCode(error, API_ERROR_CODE.ACCOUNT_SHARE_MANAGER_REQUIRED);
 }
 
 /** A change to shared data by a viewer, whose role only lets them read it. */

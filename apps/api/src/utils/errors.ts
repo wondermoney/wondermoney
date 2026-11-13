@@ -48,6 +48,15 @@ export const ERROR_CODE = {
   // --- Specific: a client can and should behave differently for each of these ---
   /** Account-level action reserved to the owner (privacy toggle), not the partner. */
   ACCOUNT_OWNER_REQUIRED: 'account_owner_required',
+  /**
+   * A change to an account or its data (its transactions, tags, splits, imports...) by a member
+   * who can only view it (403): a read-only share on a private account, or a household viewer.
+   */
+  ACCOUNT_READ_ONLY: 'account_read_only',
+  /** Changing who an account is shared with, by someone other than its owner or the household owner (403). */
+  ACCOUNT_SHARE_MANAGER_REQUIRED: 'account_share_manager_required',
+  /** A share for someone who is not a member of the household, or for the account's own owner (400). */
+  ACCOUNT_SHARE_INVALID: 'account_share_invalid',
   /** Changing whether a manual asset is private, by the member who does not own it (403). */
   MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
   /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */

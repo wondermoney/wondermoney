@@ -9,6 +9,7 @@ import { Currency } from '@entity/Currency';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionOCRImport, TransactionOCRImportStatus } from '@entity/TransactionOCRImport';
 import { authedContext, authedUser } from '@middleware/authed-context';
+import { accountActor, assertAccountWritable } from '@service/account/account-access';
 import { aiCapabilities } from '@service/ai/ai-provider';
 import { completeJson } from '@service/ai/complete-json';
 import s3Service from '@service/storage/s3';
@@ -87,6 +88,7 @@ export async function confirmTransactionOCRImportAndCreateTransaction(req: Reque
     next(new NotFoundError('Account not found'));
     return;
   }
+  await assertAccountWritable(DI.em, account, accountActor(req));
 
   try {
     const transaction = await transactionCreationService.createTransaction({

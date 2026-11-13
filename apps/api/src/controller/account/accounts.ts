@@ -15,16 +15,18 @@ import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { Currency } from '@entity/Currency';
 import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
+import { type AccountAccess, accountActor, loadAccountAccess } from '@service/account/account-access';
 import { computeAvailableBalance } from '@service/account/account-available-balance.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
+import { getAccountShares, setAccountPrivacy, setAccountShares } from '@service/account/account-share.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
 import { mapCreditCardDetail } from '@service/account/credit-card-statement.service';
 import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
-import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
+import { BadRequestError, ERROR_CODE, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
  * The "not found" branches below are 404s, not 500s: each is a client supplying an id that does
@@ -36,7 +38,7 @@ import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFo
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
+import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, getAccountSharesRequestSchema, putAccountSharesRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
@@ -147,13 +149,14 @@ export async function getAccount(req: Request, res: Response) {
     throw new NotFoundError('Account not found');
   }
 
-  const [syncIncidentContext, pendingSumsByAccount, [fx]] = await Promise.all([
+  const [syncIncidentContext, pendingSumsByAccount, [fx], accessByAccount] = await Promise.all([
     loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount([account.accountKey]),
     describeAccountsFx([account], rateScope(req.tenant)),
+    loadAccountAccess(DI.em, [account.accountKey], accountActor(req)),
   ]);
   const creditCard = await DI.em.findOne(CreditCardDetail, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined });
-  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
+  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, accessByAccount, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -195,10 +198,11 @@ export async function getAccounts(req: Request, res: Response) {
       ],
     },
   );
-  const [syncIncidentContext, pendingSumsByAccount, fx] = await Promise.all([
+  const [syncIncidentContext, pendingSumsByAccount, fx, accessByAccount] = await Promise.all([
     loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
     describeAccountsFx(accounts, rateScope(req.tenant)),
+    loadAccountAccess(DI.em, accounts.map((account) => account.accountKey), accountActor(req)),
   ]);
   const positions = await DI.em.find(AppuserAccountPosition, { appuserKey: req.user });
   const positionByAccount = new Map<number, number>();
@@ -210,7 +214,7 @@ export async function getAccounts(req: Request, res: Response) {
   // An account this member has not placed (a new one) sorts after every placed one.
   accounts.sort((a, b) => (positionByAccount.get(a.accountKey) ?? Number.MAX_SAFE_INTEGER) - (positionByAccount.get(b.accountKey) ?? Number.MAX_SAFE_INTEGER));
   const creditCards = await loadCreditCardDetailsByAccount(accounts.map((account) => account.accountKey));
-  const syncContext = { ...syncIncidentContext, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
+  const syncContext = { ...syncIncidentContext, accessByAccount, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
   const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index], creditCards.get(account.accountKey) ?? null));
   return res.json({ accounts: transformedData });
 }
@@ -297,6 +301,8 @@ export interface AccountSyncContext {
   pendingSumsByAccount?: Map<number, PendingSums>;
   /** The requesting member's appuserKey — drives per-account ownership flags. */
   viewerAppuserKey?: number;
+  /** The requesting member's access to each account (`account-access.ts`), for `myAccess`. */
+  accessByAccount?: Map<number, AccountAccess>;
 }
 
 /**
@@ -356,6 +362,10 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
       syncContext?.viewerAppuserKey != null &&
       account.accountOwnerAppuserKey?.appuserKey === syncContext.viewerAppuserKey,
     isPrivate: account.isPrivate,
+    // The viewer's access ('owner', 'write' or 'read'), so a client hides what it cannot do. Without
+    // the loaded access a private account the viewer does not own reads as view-only.
+    myAccess: syncContext?.accessByAccount?.get(account.accountKey)
+      ?? (account.accountOwnerAppuserKey?.appuserKey === syncContext?.viewerAppuserKey ? 'owner' : account.isPrivate ? 'read' : 'write'),
     ownerFirstName: account.accountOwnerAppuserKey?.firstName ?? null,
     refreshedAt: account.refreshedAt?.toISOString() ?? null,
     source,
@@ -405,15 +415,10 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
     account.accountName = accountName;
   }
   if (isPrivate !== undefined) {
-    // Only the account owner controls its privacy (hiding it from
-    // other household members). Other members may rename a shared account but not
-    // change whether it's private.
-    const ownerAppuserKey = (account.accountOwnerAppuserKey as unknown as undefined | { appuserKey: number })?.appuserKey;
-    if (ownerAppuserKey !== user.appuserKey) {
-      next(new ForbiddenError('Only the account owner can change its privacy.', ERROR_CODE.ACCOUNT_OWNER_REQUIRED));
-      return;
-    }
-    account.isPrivate = isPrivate;
+    // The account owner or the household owner controls whether it is private (hidden from the
+    // members it is not shared with). Other members may rename a shared account but not change
+    // who sees it. `PUT /v1/account/:accountId/shares` is the full control.
+    await setAccountPrivacy(DI.em, account, accountActor(req), isPrivate);
   }
   const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
   if (opensDifferently) {
@@ -432,6 +437,26 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
   // not rate-limited. Committed first: a run that starts from here on reads it.
   const { operationId } = await startAccountRecalculation(DI.em, { accountKey: account.accountKey, appuserKey: user.appuserKey, tenantKey: account.tenantKey.tenantKey }, { enqueue: req.enqueue }, { rateLimited: false });
   return res.status(200).json({ operationId });
+}
+
+/** `GET /v1/account/:accountId/shares`: who sees and who changes the account (404 when the caller cannot see it). */
+export async function getAccountSharesController(req: Request, res: Response) {
+  const {
+    params: { accountId },
+  } = await zParse(getAccountSharesRequestSchema, req);
+  return res.json(await getAccountShares(DI.em, accountId, accountActor(req)));
+}
+
+/**
+ * `PUT /v1/account/:accountId/shares`: replace who sees and who changes the account. Only the
+ * account owner or the household owner (403 `account_share_manager_required`).
+ */
+export async function putAccountSharesController(req: Request, res: Response) {
+  const {
+    body,
+    params: { accountId },
+  } = await zParse(putAccountSharesRequestSchema, req);
+  return res.json(await setAccountShares(DI.em, accountId, accountActor(req), body));
 }
 
 /**
