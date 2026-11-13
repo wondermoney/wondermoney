@@ -146,8 +146,18 @@ const mapHttpFailure = (response: HttpResponse): never => {
   }
   // A 4xx keeps the API's code (a snake_case word from a fixed list), so a screen can tell
   // "the amount is too large" from "these are already linked" though both are a 400 or 409.
-  const code = response.status >= 400 && response.status < 500 ? parseCommonErrorEnvelope(response.body)?.code : undefined
-  throw new ApiError('http', response.status, code !== undefined && SERVER_CODE.test(code) ? { serverCode: code } : undefined)
+  const envelope = response.status >= 400 && response.status < 500 ? parseCommonErrorEnvelope(response.body) : undefined
+  const code = envelope?.code
+  const serverCode = code !== undefined && SERVER_CODE.test(code) ? code : undefined
+  // A crypto wallet write names the address it refused; the API's error details are strings ("0").
+  const index = envelope?.details?.addressIndex
+  const indexValue = typeof index === 'string' && /^\d{1,6}$/.test(index) ? Number(index) : index
+  const addressIndex = typeof indexValue === 'number' && Number.isSafeInteger(indexValue) && indexValue >= 0 ? indexValue : undefined
+  if (serverCode === undefined && addressIndex === undefined) throw new ApiError('http', response.status)
+  throw new ApiError('http', response.status, {
+    ...(serverCode === undefined ? {} : { serverCode }),
+    ...(addressIndex === undefined ? {} : { addressIndex }),
+  })
 }
 
 export const createApiClient = ({

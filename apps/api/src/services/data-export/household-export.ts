@@ -27,8 +27,9 @@ import { EXPORT_FORMAT, EXPORT_FORMAT_VERSION, type ExportManifest } from './exp
  * - Merchants: only those the member can reach (on a visible transaction, in their own merchant
  *   categories or in a rule), never the household's whole merchant table, whose names would
  *   describe the other member's private spending.
- * - Manual assets (homes, vehicles): the household's shared ones and the member's own private ones
- *   (`ManualAsset.isPrivate`), each with its valuations. The other member's private assets are absent.
+ * - Manual assets (homes, vehicles, crypto wallets): the household's shared ones and the member's
+ *   own private ones (`ManualAsset.isPrivate`), each with its valuations, and a wallet with its
+ *   public addresses and their tokens. The other member's private assets are absent.
  * - Loans and the watchlist are personal in the app, so only the member's own.
  * - Categories, category settings, tags, budgets, goals and portfolios are household-wide.
  *
@@ -164,6 +165,7 @@ class HouseholdExport {
   private readonly series = new IdMap();
   private readonly tags = new IdMap();
   private readonly transactions = new IdMap();
+  private readonly walletAddresses = new IdMap();
 
   constructor(em: EntityManager, private readonly scope: ExportScope, private readonly deps: HouseholdExportDeps = {}) {
     this.db = sqlQuery(em);
@@ -290,6 +292,8 @@ class HouseholdExport {
       { format: 'json', path: 'data/loan-repayments.json', rows: () => this.loanRepayments() },
       { format: 'json', path: 'data/manual-assets.json', rows: () => this.manualAssetJson() },
       { format: 'json', path: 'data/manual-asset-valuations.json', rows: () => this.manualAssetValuations() },
+      { format: 'json', path: 'data/crypto-wallet-addresses.json', rows: () => this.walletAddressJson() },
+      { format: 'json', path: 'data/crypto-wallet-tokens.json', rows: () => this.walletTokens() },
       { format: 'json', path: 'data/portfolios.json', rows: () => this.portfolioJson() },
       { format: 'json', path: 'data/portfolio-transactions.json', rows: () => this.portfolioTransactionJson() },
       { format: 'json', path: 'data/watchlist.json', rows: () => this.watchlist() },
@@ -898,6 +902,43 @@ class HouseholdExport {
       where deleted_at is null and tenant_key = ${this.scope.tenantKey} and manual_asset_key = any(${this.manualAssets.keys()})
       order by manual_asset_key, valuation_date, manual_asset_valuation_key`);
     for (const row of rows) yield { date: str(row['valuation_date']), manualAssetId: this.manualAssets.get(row['manual_asset_key']), note: str(row['note']), value: dec(row['value']) };
+  }
+
+  /** A crypto wallet's public addresses (never anything secret: only public values are ever stored). */
+  private async* walletAddressJson() {
+    const rows = await rowsOf(this.db, sql`
+      select crypto_wallet_address_key, manual_asset_key, chain, address_kind, address, label from crypto_wallet_address
+      where deleted_at is null and tenant_key = ${this.scope.tenantKey} and manual_asset_key = any(${this.manualAssets.keys()})
+      order by crypto_wallet_address_key`);
+    for (const row of rows) {
+      yield {
+        address: str(row['address']),
+        chain: str(row['chain']),
+        id: this.walletAddresses.add(row['crypto_wallet_address_key']),
+        kind: str(row['address_kind']),
+        label: str(row['label']),
+        manualAssetId: this.manualAssets.get(row['manual_asset_key']),
+      };
+    }
+  }
+
+  /** The coins and tokens each address held at its last sync, and whether they count. */
+  private async* walletTokens() {
+    const rows = await rowsOf(this.db, sql`
+      select crypto_wallet_address_key, token_ref, symbol, name, decimals, raw_balance::text as raw_balance, tracked from crypto_wallet_token
+      where deleted_at is null and tenant_key = ${this.scope.tenantKey} and crypto_wallet_address_key = any(${this.walletAddresses.keys()})
+      order by crypto_wallet_address_key, crypto_wallet_token_key`);
+    for (const row of rows) {
+      yield {
+        addressId: this.walletAddresses.get(row['crypto_wallet_address_key']),
+        balance: str(row['raw_balance']),
+        contractAddress: row['token_ref'] === 'native' ? null : str(row['token_ref']),
+        decimals: Number(row['decimals']),
+        name: str(row['name']),
+        symbol: str(row['symbol']),
+        tracked: bool(row['tracked']),
+      };
+    }
   }
 
   // --- portfolios ---

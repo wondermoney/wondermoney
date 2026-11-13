@@ -2944,6 +2944,138 @@
         }
       }
     },
+    "/v1/manual-assets/crypto-wallets": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/manual-assets/{manualAssetId}/addresses": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "manualAssetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/manual-assets/{manualAssetId}/addresses/{addressId}": {
+      "patch": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "manualAssetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "manualAssetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/manual-assets/{manualAssetId}/tokens/{tokenId}": {
+      "patch": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "manualAssetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tokenId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/manual-assets/{manualAssetId}/sync": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "manualAssetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/manual-assets/{manualAssetId}/valuations": {
       "get": {
         "description": "",

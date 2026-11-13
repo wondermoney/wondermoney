@@ -74,6 +74,7 @@ export const featureScreens = [
   // Manually valued assets
   'assets',
   'asset_create',
+  'crypto_wallet_create',
   'asset_detail',
   'asset_value',
   // Goals

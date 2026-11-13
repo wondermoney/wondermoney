@@ -5,7 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addCategory, addMerchant, addPartner, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addCategory, addMerchant, addPartner, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { seedPortfolio } from '@app/__tests__/__helpers__/portfolio-fixtures';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
@@ -14,6 +14,8 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source } from '@entity/AppuserMerchantCategory';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
+import { CryptoWalletAddress } from '@entity/CryptoWalletAddress';
+import { CryptoWalletToken } from '@entity/CryptoWalletToken';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
@@ -244,6 +246,23 @@ describe('household export', () => {
         { date: '2026-02-01', manualAssetId: 2, note: 'SECRET-APPRAISAL', value: '4000' },
       ]);
       expect(archive.text).not.toContain('DELETED');
+    });
+
+    it('holds a crypto wallet\'s public addresses and tokens, and leaves a private wallet out of the other member\'s', async () => {
+      const { owner, partner } = await households();
+      const em = db.em();
+      const wallet = em.create(ManualAsset, { currencyKey: await currencyFor(em, 'USD'), isPrivate: true, kind: ManualAssetKind.CRYPTO_WALLET, name: 'SECRET-WALLET', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+      const address = em.create(CryptoWalletAddress, { address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', addressKind: 'address', chain: 'bitcoin', label: 'Cold', manualAssetKey: wallet, tenantKey: owner.tenant }, { partial: true });
+      em.create(CryptoWalletToken, { cryptoWalletAddressKey: address, decimals: 8, manualAssetKey: wallet, name: 'Bitcoin', rawBalance: '125000000', symbol: 'BTC', tenantKey: owner.tenant, tokenRef: 'native', tracked: true }, { partial: true });
+      await em.flush();
+
+      const archive = await exportFor(scopeOf(owner));
+      expect(archive.data['crypto-wallet-addresses']).toEqual([{ address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', chain: 'bitcoin', id: 1, kind: 'address', label: 'Cold', manualAssetId: 3 }]);
+      expect(archive.data['crypto-wallet-tokens']).toEqual([{ addressId: 1, balance: '125000000', contractAddress: null, decimals: 8, name: 'Bitcoin', symbol: 'BTC', tracked: true }]);
+
+      const theirs = await exportFor(scopeOf(owner, partner));
+      expect(theirs.data['crypto-wallet-addresses']).toEqual([]);
+      expect(theirs.text).not.toContain('bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq');
     });
 
     it('names the asset a loan is secured against by its export id', async () => {

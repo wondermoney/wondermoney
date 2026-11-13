@@ -20,7 +20,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'CRYPTO_BTC_EXPLORER_URL', 'CRYPTO_ETH_EXPLORER_URL', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -45,6 +45,7 @@ describe('GET /v1/instance', () => {
         bankSyncCredentials: 'user',
         bankSyncProviders: ['enable_banking'],
         contactForm: false,
+        cryptoWalletChains: [],
         demo: false,
         email: false,
         feedback: false,
@@ -89,6 +90,15 @@ describe('GET /v1/instance', () => {
       sponsorUrl: 'https://opencollective.com/example',
       supportEmail: 'help@example.com',
     });
+  });
+
+  it('offers crypto wallets only on the chains whose explorer the operator set', () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('CRYPTO_ETH_EXPLORER_URL', 'https://blockscout.example.org');
+    expect(describeInstance()).toMatchObject({ features: { cryptoWalletChains: ['ethereum'] } });
+
+    vi.stubEnv('CRYPTO_BTC_EXPLORER_URL', 'https://mempool.example.org/api');
+    expect(describeInstance()).toMatchObject({ features: { cryptoWalletChains: ['bitcoin', 'ethereum'] } });
   });
 
   it('reports market data from free providers an operator listed, and only what they can do', () => {

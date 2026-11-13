@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 
+import { enabledCryptoChains } from '@config/crypto-explorers';
 import { isDemoSignInEnabled } from '@config/demo';
 import { instanceName } from '@config/instance-name';
 import { isMcpEnabled } from '@config/mcp';
@@ -42,6 +43,9 @@ export function getInstance(_req: Request, res: Response) {
       /** The providers this instance enabled through `BANK_PROVIDERS`. */
       bankSyncProviders: bankSync.bankSyncProviders,
       contactForm: supportInbox() !== null,
+      // Crypto wallets from public addresses: the chains whose block explorer the operator set
+      // (`CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL`). Empty: off.
+      cryptoWalletChains: enabledCryptoChains(),
       // One-click sign-in to the shared read-only demo (`POST /v1/auth/demo`, `DEMO_SIGN_IN_ENABLED`).
       demo: isDemoSignInEnabled(),
       // False when mail only goes to the log.

@@ -8,6 +8,7 @@ import api from "../api";
 import { reportsKeys } from "../reports/keys";
 import type {
   CreateManualAssetRequest,
+  EditableManualAssetKind,
   ManualAsset,
   ManualAssetValuation,
   SaveValuationRequest,
@@ -136,7 +137,7 @@ export function useDeleteValuation() {
 /** One row of a manual-assets file, as the import endpoint takes it. */
 export interface ImportManualAssetRequestRow {
   name: string;
-  kind: ManualAsset["kind"];
+  kind: EditableManualAssetKind;
   value: number;
   valuationDate?: string;
   currencyCode: string;

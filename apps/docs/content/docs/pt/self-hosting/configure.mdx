@@ -94,6 +94,21 @@ A Stooq e a CoinGecko são serviços externos com os seus próprios termos de ut
 
 Cada cotação guardada regista o fornecedor de onde veio. O histórico de cotações de uma posição mostra-o, e os administradores veem os fornecedores e as cotações recentes de cada um em `GET /v1/admin/market-data/sources`.
 
+## Carteiras de criptomoedas
+
+As [carteiras de criptomoedas](/pt/docs/portfolio-investments/crypto-wallets) avaliam a Bitcoin e a Ethereum que os teus utilizadores guardam em endereços públicos. Estão desligadas por omissão: nenhum explorador é contactado, e as aplicações não as oferecem. Cada rede liga-se quando indicas o explorador de blocos de onde o servidor lê os saldos.
+
+| Definição | O que leva |
+|---|---|
+| `CRYPTO_BTC_EXPLORER_URL` | A raiz REST de uma API compatível com mempool.space ou Esplora, por exemplo `https://mempool.example.org/api`. O servidor pede `<url>/address/<address>` para cada endereço Bitcoin, incluindo cada um derivado de uma chave pública estendida |
+| `CRYPTO_ETH_EXPLORER_URL` | A raiz de uma instância Blockscout, por exemplo `https://blockscout.example.org`. O servidor pede `<url>/api/v2/addresses/<address>` e `<url>/api/v2/addresses/<address>/token-balances` para cada endereço Ethereum |
+
+Cada uma tem de ser um endereço `https` sem nome de utilizador, palavra-passe, query nem fragmento; qualquer outra coisa impede a API e o worker de arrancar. Define-as em ambos. A API só oferece carteiras para as redes que têm explorador, e `GET /v1/instance` indica-as em `features.cryptoWalletChains`. O worker sincroniza todas as carteiras uma vez por dia às 04:30 UTC, e de novo quando um membro cria uma carteira, adiciona um endereço, marca um token ou escolhe Sincronizar agora. Faz um pedido de cada vez a cada explorador, espaçados, com um limite de 15 segundos, e tenta até três vezes após um limite de tempo esgotado, um erro do servidor ou um `429` (esperando o que `Retry-After` pedir, até 30 segundos).
+
+O explorador vê cada endereço pelo qual é questionado e o endereço IP do teu servidor, e como é um só servidor a perguntar por todos os endereços de um agregado, consegue ligá-los entre si. Nada mais é enviado: nem nomes, nem montantes, nem identificadores de utilizadores. A escolha privada é um nó Bitcoin ou Ethereum teu com um explorador à frente: [mempool](https://github.com/mempool/mempool) ou [Esplora](https://github.com/Blockstream/esplora) para Bitcoin, [Blockscout](https://github.com/blockscout/blockscout) para Ethereum. Há instâncias públicas, como `https://mempool.space/api` e `https://eth.blockscout.com`. São serviços externos com os seus próprios termos de utilização e limites de pedidos: usar uma é escolha tua, cumprir os seus termos é responsabilidade tua, e a tua política de privacidade deve dizer que os endereços dos teus utilizadores lhe são enviados. O serviço alojado da WonderMoney não liga as carteiras de criptomoedas.
+
+Os preços vêm dos fornecedores em `MARKET_DATA_PROVIDERS` ([Dados de mercado](#dados-de-mercado)): cada token é procurado pelo símbolo face ao dólar americano, como `<SYMBOL>-USD.CC`. A EODHD e a CoinGecko dão ambas preços de criptomoedas. Sem um fornecedor que os dê, as carteiras mostram os saldos mas não têm valor. Os tokens ERC-20 têm preço pelo símbolo, por isso um token pode fazer-se passar por outro; os membros marcam os tokens que querem contar, e a aplicação diz-lhes para marcarem só os que reconhecem.
+
 ## Logótipos de comerciantes
 
 Os logótipos de comerciantes estão desligados por omissão. Cada comerciante mostra então a primeira letra do nome num círculo de cor, e nada sobre os comerciantes dos teus utilizadores sai do servidor.
@@ -235,6 +250,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
 | Dados de mercado (Stooq) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `stooq` em `MARKET_DATA_PROVIDERS` |
 | Dados de mercado (CoinGecko) | A API e o worker, com símbolos de moedas e texto de pesquisa, não dados de utilizadores | `coingecko` em `MARKET_DATA_PROVIDERS` |
+| Carteiras de criptomoedas (os exploradores de blocos que escolheres) | O worker, com os endereços públicos das carteiras de criptomoedas dos teus utilizadores, sem nomes nem montantes ([Carteiras de criptomoedas](#carteiras-de-criptomoedas)) | `CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL` |
 | Logótipos de comerciantes (o serviço que escolheres) | A API, com o domínio do site de um comerciante, não dados de utilizadores ([Logótipos de comerciantes](#logótipos-de-comerciantes)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |

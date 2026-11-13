@@ -42,6 +42,7 @@ import {
   useUpdateManualAsset,
 } from "@/lib/api/manual-asset/useManualAssetMutations";
 import { calendarDay, dayString } from "@/lib/manual-assets/asset-view";
+import { isCryptoWallet } from "@/lib/manual-assets/crypto-wallet";
 import {
   formatLocaleNumberInput,
   zLocaleNumber,
@@ -93,6 +94,10 @@ type FormValues = z.output<ReturnType<typeof buildSchema>>;
  * when adding: afterwards the value changes through "Update value", which
  * keeps the history. The currency is fixed once the asset exists, since every
  * valuation is in it.
+ *
+ * A crypto wallet is edited here too, for its name, notes and privacy only: its
+ * value comes from its balances, and its kind never changes to or from a
+ * wallet, so neither the kind nor any value field is offered or sent.
  */
 export default function ManualAssetFormDrawer({
   open,
@@ -122,10 +127,13 @@ export default function ManualAssetFormDrawer({
     (currency) => currency.code === userCurrency,
   )?.currencyKey;
 
+  const wallet = asset ? isCryptoWallet(asset) : false;
   const defaultValues = useMemo<FormInput>(
     () => ({
       name: asset?.name ?? "",
-      kind: asset?.kind ?? "property",
+      // A wallet's kind is not part of this form; "property" only satisfies the
+      // schema and is never sent.
+      kind: !asset || asset.kind === "crypto_wallet" ? "property" : asset.kind,
       // A new asset starts in the viewer's currency once the list has loaded
       // (the effect below); never a guessed one in the meantime.
       currencyKey: asset?.currencyKey ?? "",
@@ -186,7 +194,16 @@ export default function ManualAssetFormDrawer({
       ...(canChangePrivacy ? { isPrivate: values.isPrivate } : {}),
     };
     try {
-      if (asset) {
+      if (asset && wallet) {
+        await updateMutation.mutateAsync({
+          manualAssetId: asset.manualAssetKey,
+          payload: {
+            name: shared.name,
+            notes: shared.notes,
+            ...(canChangePrivacy ? { isPrivate: values.isPrivate } : {}),
+          },
+        });
+      } else if (asset) {
         await updateMutation.mutateAsync({
           manualAssetId: asset.manualAssetKey,
           payload: shared,
@@ -243,30 +260,32 @@ export default function ManualAssetFormDrawer({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="kind"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("fields.kind")}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {MANUAL_ASSET_KINDS.map((kind) => (
-                      <SelectItem key={kind} value={kind}>
-                        {t(`kinds.${kind}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!wallet && (
+            <FormField
+              control={form.control}
+              name="kind"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("fields.kind")}</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {MANUAL_ASSET_KINDS.map((kind) => (
+                        <SelectItem key={kind} value={kind}>
+                          {t(`kinds.${kind}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           {!asset && (
             <>
               <FormField
@@ -324,85 +343,93 @@ export default function ManualAssetFormDrawer({
               />
             </>
           )}
-          <FormField
-            control={form.control}
-            name="purchasePrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("fields.purchasePrice")}</FormLabel>
-                <FormControl>
-                  <MoneyInput
-                    {...field}
-                    currency={currencyCode}
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="purchaseDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>{t("fields.purchaseDate")}</FormLabel>
-                <DatePicker
-                  form
-                  inModal
-                  disabled={{ after: new Date() }}
-                  value={field.value ? calendarDay(field.value) : undefined}
-                  onSelect={(date) => field.onChange(dayString(date))}
-                  placeholder={t("fields.datePlaceholder")}
-                />
-                {!asset && (
-                  <FormDescription>{t("fields.purchaseHint")}</FormDescription>
+          {!wallet && (
+            <>
+              <FormField
+                control={form.control}
+                name="purchasePrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("fields.purchasePrice")}</FormLabel>
+                    <FormControl>
+                      <MoneyInput
+                        {...field}
+                        currency={currencyCode}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="growthRatePercent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("fields.growthRate")}</FormLabel>
-                <FormControl>
-                  <Input
-                    inputMode="decimal"
-                    placeholder="0"
-                    className="text-right font-mono"
-                    endAdornment={<span className="font-mono">%</span>}
-                    {...field}
-                    value={formatLocaleNumberInput(field.value, locale)}
-                  />
-                </FormControl>
-                <FormDescription>{t("fields.growthRateHint")}</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="growthStartDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>{t("fields.growthStartDate")}</FormLabel>
-                <DatePicker
-                  form
-                  inModal
-                  value={field.value ? calendarDay(field.value) : undefined}
-                  onSelect={(date) => field.onChange(dayString(date))}
-                  placeholder={t("fields.datePlaceholder")}
-                />
-                <FormDescription>
-                  {t("fields.growthStartDateHint")}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              />
+              <FormField
+                control={form.control}
+                name="purchaseDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t("fields.purchaseDate")}</FormLabel>
+                    <DatePicker
+                      form
+                      inModal
+                      disabled={{ after: new Date() }}
+                      value={field.value ? calendarDay(field.value) : undefined}
+                      onSelect={(date) => field.onChange(dayString(date))}
+                      placeholder={t("fields.datePlaceholder")}
+                    />
+                    {!asset && (
+                      <FormDescription>
+                        {t("fields.purchaseHint")}
+                      </FormDescription>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="growthRatePercent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("fields.growthRate")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        inputMode="decimal"
+                        placeholder="0"
+                        className="text-right font-mono"
+                        endAdornment={<span className="font-mono">%</span>}
+                        {...field}
+                        value={formatLocaleNumberInput(field.value, locale)}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("fields.growthRateHint")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="growthStartDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t("fields.growthStartDate")}</FormLabel>
+                    <DatePicker
+                      form
+                      inModal
+                      value={field.value ? calendarDay(field.value) : undefined}
+                      onSelect={(date) => field.onChange(dayString(date))}
+                      placeholder={t("fields.datePlaceholder")}
+                    />
+                    <FormDescription>
+                      {t("fields.growthStartDateHint")}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
           {canChangePrivacy ? (
             <FormField
               control={form.control}

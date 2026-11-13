@@ -20,6 +20,8 @@ import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
 import { Category } from '@entity/Category';
+import { CryptoWalletAddress } from '@entity/CryptoWalletAddress';
+import { CryptoWalletToken } from '@entity/CryptoWalletToken';
 import { EmailNotificationPreference } from '@entity/EmailNotificationPreference';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
@@ -163,6 +165,12 @@ export async function richHousehold(em: EntityManager) {
   em.create(ManualAssetValuation, { manualAssetKey: car, tenantKey: owner.tenant, valuationDate: new Date('2025-01-15'), value: 7000 }, { partial: true });
   // The car loan financed the car.
   loan.securedAssetKey = car;
+  // A crypto wallet: one public Ethereum address holding ETH (counted) and a detected token (not ticked).
+  const wallet = em.create(ManualAsset, { currencyKey: usd, isPrivate: false, kind: ManualAssetKind.CRYPTO_WALLET, name: 'Cold wallet', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+  em.create(ManualAssetValuation, { manualAssetKey: wallet, tenantKey: owner.tenant, valuationDate: new Date('2026-06-02'), value: 4500 }, { partial: true });
+  const walletAddress = em.create(CryptoWalletAddress, { address: '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed', addressKind: 'address', chain: 'ethereum', label: 'Ledger', manualAssetKey: wallet, tenantKey: owner.tenant }, { partial: true });
+  em.create(CryptoWalletToken, { cryptoWalletAddressKey: walletAddress, decimals: 18, manualAssetKey: wallet, name: 'Ether', rawBalance: '1500000000000000000', symbol: 'ETH', tenantKey: owner.tenant, tokenRef: 'native', tracked: true }, { partial: true });
+  em.create(CryptoWalletToken, { cryptoWalletAddressKey: walletAddress, decimals: 6, manualAssetKey: wallet, name: 'USD Coin', rawBalance: '250000000', symbol: 'USDC', tenantKey: owner.tenant, tokenRef: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', tracked: false }, { partial: true });
 
   em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'MSFT', tenantKey: owner.tenant }, { partial: true });
   em.create(EmailNotificationPreference, { appuserKey: owner.appuser, budgetAlertsEnabled: false, weeklyInsightsEnabled: false }, { partial: true });
@@ -208,7 +216,7 @@ export function dataFiles(bytes: Uint8Array): Record<string, Record<string, unkn
 }
 
 /** Tables a restore writes, with the column that says which household a row is in. */
-const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_reimbursement', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
+const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'crypto_wallet_address', 'crypto_wallet_token', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_reimbursement', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
 
 /** How many rows of each household table belong to `tenantKey`. */
 export async function householdRowCounts(em: EntityManager, tenantKey: number): Promise<Record<string, number>> {

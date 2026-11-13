@@ -17,6 +17,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import { currencyList, kindGlyph } from './assets-screen'
+import { CryptoWalletManage, CryptoWalletSection, type CryptoWalletActions } from './crypto-wallet-section'
 import type { ManualAssetDto, ManualAssetResponse } from './manual-assets-contract'
 import { changeSincePurchase, formatDay, isEstimated, monthlyChartPoints, shownValue } from './manual-assets-view-model'
 
@@ -35,12 +36,17 @@ export type AssetDetailViewState =
  * asset's mark, name and kind; today's value as the headline figure (and in the viewer's currency
  * when it is in another one); Update value as the one control; the value over time; the
  * valuations, newest first; then the details. Editing, archiving and deleting are on the web.
+ *
+ * A crypto wallet is valued by its daily sync, not by hand: it has no Update value and no list of
+ * valuations, and shows its addresses and tokens (`CryptoWalletSection`) instead.
  */
-export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
+export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wallet: walletActions }: {
   state: AssetDetailViewState
   onBack: () => void
   onUpdateValue: () => void
   onRefresh: () => void | Promise<void>
+  /** A crypto wallet's writes; without them its section is read-only. */
+  wallet?: CryptoWalletActions
 }) {
   const { t, i18n } = useTranslation()
   const formatMoney = useFormatMoney()
@@ -52,7 +58,8 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
     const key = state.status === 'invalid-response' ? 'invalid' : state.status === 'not-found' ? 'notFound' : state.status === 'invalid-id' ? 'invalidId' : 'error'
     return <Failure title={t(`manualAssetDetail.${key}Title`)} message={t(`manualAssetDetail.${key}Message`)} onRetry={state.status === 'invalid-id' || state.status === 'not-found' ? undefined : onRefresh} onBack={onBack} fallback="/assets" backLabel={t('manualAssetDetail.back')} />
   }
-  const { asset, valuations, history } = state.data
+  const { asset, valuations, history, wallet } = state.data
+  const isWallet = asset.kind === 'crypto_wallet'
   const money = (value: number) => formatMoney(value, { locale, currency: asset.currency })
   const value = shownValue(asset)
   const foreign = asset.currency !== asset.userCurrency
@@ -93,12 +100,21 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
             />
             {noRate ? <Text accessibilityRole="alert" tone="muted" variant="meta">{t('manualAssets.unconverted', { count: 1, currencies: currencyList([asset.currency], locale) })}</Text> : null}
             {state.status === 'refresh-error' ? <Alert label={t('manualAssetDetail.stale')} /> : null}
-            {!asset.archived ? (
+            {isWallet && asset.value === null && !asset.archived ? <Text tone="muted" variant="meta">{t('cryptoWallet.detail.notValuedYet')}</Text> : null}
+            {!asset.archived && !isWallet ? (
               <View style={styles.actions}>
                 <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} />
               </View>
             ) : null}
           </View>
+
+          {isWallet && wallet ? (
+            <CryptoWalletSection
+              actions={walletActions ?? READ_ONLY_WALLET}
+              readOnly={asset.archived || walletActions === undefined}
+              wallet={wallet}
+            />
+          ) : null}
 
           {asset.linkedLoans.length > 0 ? <AssetEquity asset={asset} locale={locale} /> : null}
 
@@ -113,7 +129,7 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
             </Section>
           ) : null}
 
-          <Section title={t('manualAssetDetail.valuationsTitle')} variant="open" testID="asset-valuations">
+          {!isWallet ? <Section title={t('manualAssetDetail.valuationsTitle')} variant="open" testID="asset-valuations">
             <View>
               {valuations.map((valuation, index) => (
                 <ListRow
@@ -126,7 +142,7 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
                 />
               ))}
             </View>
-          </Section>
+          </Section> : null}
 
           <Section title={t('manualAssetDetail.facts.title')} variant="open" testID="asset-facts">
             <View>
@@ -158,7 +174,8 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
               {!asset.isOwner && asset.ownerFirstName ? <Fact label={t('manualAssetDetail.facts.owner')} value={asset.ownerFirstName} /> : null}
               {asset.notes ? <Fact label={t('manualAssetDetail.facts.notes')} value={asset.notes} /> : null}
             </View>
-            <Text style={styles.webNote} tone="muted" variant="meta">{t('manualAssetDetail.manageOnWeb')}</Text>
+            {isWallet && walletActions && !asset.archived ? <CryptoWalletManage actions={walletActions} asset={asset} /> : null}
+            <Text style={styles.webNote} tone="muted" variant="meta">{t(isWallet ? 'cryptoWallet.detail.manageOnWeb' : 'manualAssetDetail.manageOnWeb')}</Text>
           </Section>
         </View>
       </ScrollView>
@@ -210,6 +227,19 @@ function AssetEquity({ asset, locale }: { asset: ManualAssetDto; locale: string 
       </View>
     </Section>
   )
+}
+
+const noWrite = async () => null
+const READ_ONLY_WALLET: CryptoWalletActions = {
+  chains: [],
+  pending: false,
+  onToggleToken: noWrite,
+  onAddAddress: noWrite,
+  onSetLabel: noWrite,
+  onRemoveAddress: noWrite,
+  onSyncNow: noWrite,
+  onUpdateWallet: noWrite,
+  onDeleteWallet: noWrite,
 }
 
 function Fact({ label, value, detail, figure = false, first = false }: { label: string; value: string; detail?: string; figure?: boolean; first?: boolean }) {

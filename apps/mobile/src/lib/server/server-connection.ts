@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import { z } from 'zod'
 
-import { tolerantEnum } from '@/lib/api/runtime-schema'
+import { knownValues, tolerantEnum } from '@/lib/api/runtime-schema'
 
 /**
  * Which WonderMoney server the app talks to. The build has a default (EXPO_PUBLIC_API_BASE_URL);
@@ -51,6 +51,10 @@ const instanceSchema = z.object({
     // server, which reads as `user` (everyone adds their own key).
     bankSyncCredentials: tolerantEnum(['instance', 'user'], 'user').optional(),
     contactForm: z.boolean(),
+    // The chains whose crypto wallets the server can read (an explorer is configured for each);
+    // empty when the feature is off. A chain this build doesn't know is dropped; an older server,
+    // or a malformed value, reads as none.
+    cryptoWalletChains: knownValues(['bitcoin', 'ethereum']).optional().catch(undefined),
     // The public read-only demo ("Try the demo" on the sign-in screen). Optional so an older
     // server that doesn't report it still parses; missing reads as off.
     demo: z.boolean().optional(),

@@ -33,6 +33,17 @@ describe('isOlderVersion', () => {
 })
 
 describe('checkServer', () => {
+  it('reads the crypto wallet chains, dropping unknown ones, and none from an older server or a malformed value', async () => {
+    const check = async (features: Record<string, unknown>) => {
+      const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, ...features } })) })
+      return result.status === 'ok' ? result.instance.features.cryptoWalletChains : 'rejected'
+    }
+    await expect(check({ cryptoWalletChains: ['bitcoin', 'solana', 'ethereum'] })).resolves.toEqual(['bitcoin', 'ethereum'])
+    await expect(check({ cryptoWalletChains: [] })).resolves.toEqual([])
+    await expect(check({})).resolves.toBeUndefined()
+    await expect(check({ cryptoWalletChains: 'bitcoin' })).resolves.toBeUndefined()
+  })
+
   it('accepts a WonderMoney server and returns its description', async () => {
     const fetchImpl = respond(instance())
     await expect(checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl })).resolves.toEqual({ instance: expect.objectContaining({ name: 'Casa' }), status: 'ok' })

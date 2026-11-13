@@ -99,6 +99,9 @@ export const manualAssetValuationTenantCond = (args?: TenantFilterArgs): Diction
       }
     : {};
 
+/** A crypto wallet's addresses and tokens follow their wallet (a manual asset), like its valuations. */
+export const cryptoWalletPartTenantCond = manualAssetValuationTenantCond;
+
 /**
  * RecurringSeries privacy: a recurring series carries the source account,
  * so a series detected from a private account stays owner-only — same shape as Transaction.

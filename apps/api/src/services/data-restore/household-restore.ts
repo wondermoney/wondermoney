@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { type Kysely, sql } from 'kysely';
 
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { classifyWalletInput } from '@service/crypto-wallet/address';
 import { ruleActionsSchema, ruleConditionsSchema } from '@service/rules/rule-schema';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 
@@ -259,6 +260,7 @@ class HouseholdRestore {
   private readonly series = new Keys();
   private readonly tags = new Keys();
   private readonly transactions = new Keys();
+  private readonly walletAddresses = new Keys();
   private readonly warnings = new Warnings();
 
   constructor(
@@ -687,8 +689,14 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'manual_asset_valuation', valuations);
     this.count('manual-asset-valuations', valuations.length);
+    await this.walletRows();
   }
 
+  /**
+   * A crypto wallet's addresses and tokens. Each address is checked again as a public one for its
+   * chain: one that is not (an edited file could hold a private key) is left out with its tokens,
+   * never written. Restored addresses sync again from the start.
+   */
   private async portfolioRows(): Promise<void> {
     const list = this.rows.portfolios;
     const keys = await allocateKeys(this.db, 'portfolio', 'portfolio_key', list.length);
@@ -713,6 +721,45 @@ class HouseholdRestore {
       };
     }));
     this.count('portfolios', list.length);
+  }
+
+  private async walletRows(): Promise<void> {
+    const addresses = this.rows['crypto-wallet-addresses'].flatMap((row) => {
+      const asset = this.manualAssets.get(row.manualAssetId);
+      const parsed = classifyWalletInput(row.chain, row.address);
+      if (asset === null || !parsed.ok || parsed.kind !== row.kind) return [];
+      return [{ address: parsed.address, asset, row }];
+    });
+    const keys = await allocateKeys(this.db, 'crypto_wallet_address', 'crypto_wallet_address_key', addresses.length);
+    await insertRows(this.db, 'crypto_wallet_address', addresses.map(({ address, asset, row }, index) => {
+      this.walletAddresses.set(row.id, keys[index]!);
+      return { address, address_kind: row.kind, chain: row.chain, crypto_wallet_address_key: keys[index], label: row.label, manual_asset_key: asset, sync_status: 'pending', tenant_key: this.target.tenantKey, ...this.stamp() };
+    }));
+    this.count('crypto-wallet-addresses', addresses.length);
+
+    const assetOf = new Map(addresses.map(({ asset, row }) => [row.id, asset]));
+    const seen = new Set<string>();
+    const tokens = this.rows['crypto-wallet-tokens'].flatMap((row) => {
+      const address = this.walletAddresses.get(row.addressId);
+      const tokenRef = row.contractAddress ?? 'native';
+      if (address === null || seen.has(`${address}:${tokenRef}`)) return [];
+      seen.add(`${address}:${tokenRef}`);
+      return [{
+        crypto_wallet_address_key: address,
+        decimals: row.decimals,
+        manual_asset_key: assetOf.get(row.addressId),
+        name: row.name,
+        price_missing: false,
+        raw_balance: row.balance,
+        symbol: row.symbol,
+        tenant_key: this.target.tenantKey,
+        token_ref: tokenRef,
+        tracked: row.tracked,
+        ...this.stamp(),
+      }];
+    });
+    await insertRows(this.db, 'crypto_wallet_token', tokens);
+    this.count('crypto-wallet-tokens', tokens.length);
   }
 
   // --- transactions ---

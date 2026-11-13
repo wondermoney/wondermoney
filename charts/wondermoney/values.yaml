@@ -133,6 +133,14 @@ config:
   ENABLE_BANKING_APP_ID: ""
   ENABLE_BANKING_PRODUCTION_CONTRACT: ""
 
+  # ─── Crypto wallets (optional, off by default) ───────────────────────────────
+  # The https block explorer each chain reads wallet balances from: a mempool.space/Esplora API
+  # root (https://mempool.example.org/api) and a Blockscout root (https://blockscout.example.org).
+  # The explorer sees every address it is asked about and your server's IP; prefer your own node.
+  # Empty: no explorer is called and wallets are hidden. Prices come from MARKET_DATA_PROVIDERS.
+  CRYPTO_BTC_EXPLORER_URL: ""
+  CRYPTO_ETH_EXPLORER_URL: ""
+
   # ─── Merchant logos (optional, off by default) ───────────────────────────────
   # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.
   # The API fetches the logos itself, so the service never sees your users. Empty: no lookup.

@@ -94,6 +94,21 @@ Stooq and CoinGecko are outside services with their own terms of use, and they s
 
 Each stored price records the provider it came from. A holding's price history shows it, and administrators see the providers and the recent prices from each at `GET /v1/admin/market-data/sources`.
 
+## Crypto wallets
+
+[Crypto wallets](/en/docs/portfolio-investments/crypto-wallets) value the Bitcoin and Ethereum your users hold at public addresses. They are off by default: no explorer is called, and the apps do not offer them. Each chain turns on when you name the block explorer the server reads its balances from.
+
+| Setting | What it takes |
+|---|---|
+| `CRYPTO_BTC_EXPLORER_URL` | The REST root of a mempool.space or Esplora compatible API, such as `https://mempool.example.org/api`. The server asks `<url>/address/<address>` for each Bitcoin address, including each one derived from an extended public key |
+| `CRYPTO_ETH_EXPLORER_URL` | The root of a Blockscout instance, such as `https://blockscout.example.org`. The server asks `<url>/api/v2/addresses/<address>` and `<url>/api/v2/addresses/<address>/token-balances` for each Ethereum address |
+
+Each must be an `https` address with no user name, password, query or fragment; anything else stops the API and the worker at start-up. Set them on both. The API offers wallets only for the chains it has an explorer for, and `GET /v1/instance` lists them in `features.cryptoWalletChains`. The worker syncs every wallet once a day at 04:30 UTC, and again when a member creates a wallet, adds an address, ticks a token or chooses Sync now. It asks each explorer one request at a time, spaced out, with a 15-second timeout, and tries up to three times after a timeout, a server error or a `429` (waiting as long as `Retry-After` asks, up to 30 seconds).
+
+The explorer sees every address it is asked about and your server's IP address, and since one server asks about all of a household's addresses, it can link them together. Nothing else is sent: no names, amounts or user IDs. The private choice is your own Bitcoin or Ethereum node with an explorer in front of it: [mempool](https://github.com/mempool/mempool) or [Esplora](https://github.com/Blockstream/esplora) for Bitcoin, [Blockscout](https://github.com/blockscout/blockscout) for Ethereum. Public instances exist, such as `https://mempool.space/api` and `https://eth.blockscout.com`. They are outside services with their own terms of use and request limits: using one is your choice, following its terms is your responsibility, and your privacy policy should say that your users' addresses go to it. WonderMoney's hosted service does not turn crypto wallets on.
+
+Prices come from the providers in `MARKET_DATA_PROVIDERS` ([Market data](#market-data)): each token is looked up by its symbol against the US dollar, as `<SYMBOL>-USD.CC`. EODHD and CoinGecko both price crypto. Without a provider that does, wallets show their balances but have no value. ERC-20 tokens are priced by symbol, so a token can pass itself off as another; members tick the tokens they want counted, and are told to tick only those they recognise.
+
 ## Merchant logos
 
 Merchant logos are off by default. Each merchant then shows the first letter of its name in a colored circle, and nothing about your users' merchants leaves the server.
@@ -235,6 +250,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Market data (EODHD) | The API and the worker, with ticker symbols, not user data | `EODHD_API_KEY` |
 | Market data (Stooq) | The API and the worker, with ticker symbols, not user data | `stooq` in `MARKET_DATA_PROVIDERS` |
 | Market data (CoinGecko) | The API and the worker, with coin symbols and search text, not user data | `coingecko` in `MARKET_DATA_PROVIDERS` |
+| Crypto wallets (the block explorers you choose) | The worker, with the public addresses in your users' crypto wallets, not names or amounts ([Crypto wallets](#crypto-wallets)) | `CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL` |
 | Merchant logos (the service you choose) | The API, with the domain of a merchant's website, not user data ([Merchant logos](#merchant-logos)) | `MERCHANT_LOGO_URL_TEMPLATE` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |

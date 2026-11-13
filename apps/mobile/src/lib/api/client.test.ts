@@ -206,6 +206,25 @@ describe('API client', () => {
     expect(Object.keys(error as object)).not.toContain('serverCode')
   })
 
+  it('keeps the API code and the crypto wallet address index of a 400, never its message', async () => {
+    const { client } = setup(async () => ({ status: 400, body: { code: 'crypto_wallet_address_invalid', message: 'Not an address: bc1qnope', details: { addressIndex: '1' } } }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ name: 'ApiError', code: 'http', status: 400, serverCode: 'crypto_wallet_address_invalid', addressIndex: 1 })
+    expect((error as Error).message).not.toContain('bc1qnope')
+    expect(Object.keys(error as object)).not.toContain('serverCode')
+  })
+
+  it.each([
+    ['a code that is not an identifier', { code: 'Not An Identifier', details: { addressIndex: 'x' } }],
+    ['no envelope', 'Bad request'],
+  ])('keeps no API code or address index for %s', async (_label, body) => {
+    const { client } = setup(async () => ({ status: 400, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'http', status: 400 })
+    expect((error as ApiError).serverCode).toBeUndefined()
+    expect((error as ApiError).addressIndex).toBeUndefined()
+  })
+
   it('uses the coordinator shared refresh promise and replays each concurrent GET once', async () => {
     let resolveRefresh!: (value: ReturnType<typeof token>) => void
     const sharedRefresh = new Promise<ReturnType<typeof token>>((resolve) => { resolveRefresh = resolve })

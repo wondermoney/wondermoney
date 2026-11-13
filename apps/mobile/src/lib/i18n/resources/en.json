@@ -2055,7 +2055,8 @@
       "property": "Property",
       "vehicle": "Vehicle",
       "valuable": "Valuable",
-      "other": "Other"
+      "other": "Other",
+      "crypto_wallet": "Crypto wallet"
     },
     "failures": {
       "demo": "The demo is read-only, so nothing was saved.",
@@ -2156,6 +2157,107 @@
     "noteOptional": "Note, optional",
     "notePlaceholder": "e.g. Agent estimate",
     "description": "Recording a value never creates a transaction. A value already recorded for the same date is replaced."
+  },
+  "cryptoWallet": {
+    "add": "Add crypto wallet",
+    "notValuedYet": "Not valued yet",
+    "publicOnly": "Only public addresses are accepted: a Bitcoin or Ethereum address, or an xpub, ypub or zpub for Bitcoin. Never enter a private key or a recovery phrase. Anyone who has one can spend your coins.",
+    "secretBlocked": "That looked like a private key or a recovery phrase, so it was cleared and not sent. Enter a public address instead.",
+    "chain": "Network",
+    "address": "Address",
+    "label": "Label",
+    "labelOptional": "Label, optional",
+    "chains": {
+      "bitcoin": "Bitcoin",
+      "ethereum": "Ethereum",
+      "unknown": "Other network"
+    },
+    "kinds": {
+      "address": "Address",
+      "xpub": "Extended public key"
+    },
+    "status": {
+      "pending": "Pending",
+      "ok": "Synced",
+      "failed": "Failed"
+    },
+    "errors": {
+      "timeout": "The explorer took too long to answer.",
+      "rate_limited": "The explorer is limiting requests. It will be tried again later.",
+      "unavailable": "The explorer could not be reached.",
+      "rejected": "The explorer did not accept this address.",
+      "invalid_response": "The explorer sent an answer that could not be read.",
+      "disabled": "This network is no longer turned on on this server.",
+      "unknown": "The last read failed."
+    },
+    "addressHints": {
+      "bitcoin": "An address starting with 1, 3 or bc1, or an xpub, ypub or zpub.",
+      "ethereum": "An address starting with 0x. ETH and its tokens are read."
+    },
+    "fieldErrors": {
+      "address": "Enter an address",
+      "name": "Enter a name"
+    },
+    "failures": {
+      "secret-rejected": "That looked like a private key or a recovery phrase, so it was not accepted. Enter a public address instead.",
+      "address-invalid": "This is not a valid address for the chosen network.",
+      "address-exists": "This address is already on the wallet.",
+      "feature-disabled": "Crypto wallets are not turned on for this network on this server.",
+      "demo": "The demo is read-only, so nothing was saved.",
+      "access": "You can no longer change this wallet. Sign in again or check with your household.",
+      "mfa": "Confirm it is you to continue.",
+      "not-found": "This wallet no longer exists, or it is private to the other member of your household.",
+      "invalid": "Something entered is not valid. Check the fields and try again.",
+      "invalid-response": "It may have been saved, but the server's answer could not be read. Refresh before trying again.",
+      "network-ambiguous": "The connection dropped, so it is not known whether it was saved. Refresh before trying again.",
+      "general": "It could not be saved. Try again."
+    },
+    "create": {
+      "title": "Add crypto wallet",
+      "save": "Add wallet",
+      "saving": "Adding",
+      "name": "Name",
+      "namePlaceholder": "e.g. Hardware wallet",
+      "private": "Private wallet",
+      "addressHeading": "Address {{number}}",
+      "removeAddress": "Remove",
+      "removeAddressNumber": "Remove address {{number}}",
+      "addAddress": "Add another address",
+      "numbered": "{{label}}, address {{number}}"
+    },
+    "detail": {
+      "title": "Addresses",
+      "lastSynced": "Balances read {{time}}. They are read again every day.",
+      "neverSynced": "The balances have not been read yet. The first read is on its way.",
+      "tickHint": "Only ticked tokens count towards the value. Tokens found on an address are ignored until you tick them.",
+      "unpriced": "No price for {{symbols}}, so today's value was not updated. Untick a token to leave it out.",
+      "removeTitle": "Remove this address?",
+      "removeMessage": "{{address}} and its tokens stop counting towards this wallet.",
+      "remove": "Remove",
+      "removeFor": "Remove {{address}}",
+      "addAddress": "Add address",
+      "adding": "Adding",
+      "syncNow": "Sync now",
+      "syncQueued": "Sync requested. Pull to refresh in a moment to see the balances.",
+      "synced": "Synced {{time}}",
+      "balancesAsOf": "Balances as of {{time}}.",
+      "pending": "Waiting for the first read",
+      "editLabel": "Edit label",
+      "editLabelFor": "Edit label of {{address}}",
+      "saveLabel": "Save label",
+      "noPrice": "No price",
+      "countToken": "Count {{symbol}}",
+      "notValuedYet": "Not valued yet: the value appears after the first sync.",
+      "manageOnWeb": "Archive this wallet or edit its notes in WonderMoney on the web."
+    },
+    "manage": {
+      "edit": "Edit wallet",
+      "editTitle": "Edit wallet",
+      "save": "Save",
+      "remove": "Remove wallet",
+      "removeTitle": "Remove this wallet?",
+      "removeMessage": "{{name}}, its addresses and its value history are deleted. This cannot be undone."
+    }
   },
   "budgets": {
     "title": "Budgets",

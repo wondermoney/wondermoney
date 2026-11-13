@@ -4,6 +4,7 @@ import { enqueueAccountAutoSyncRequisitionJob } from '../account-auto-sync.queue
 import { enqueueAccountInitialSyncJob } from '../account-initial-sync.queue';
 import { enqueueAccountRecalculateJob } from '../account-recalculate.queue';
 import { enqueueBankRecoveryAfter } from '../bank-recovery.queue';
+import { enqueueCryptoWalletSyncJob } from '../crypto-wallet-sync.queue';
 import { enqueueDataExportCleanupJob, enqueueDataExportJob } from '../data-export.queue';
 import { enqueueDataRestoreCleanupJob, enqueueDataRestoreJob } from '../data-restore.queue';
 import { enqueueDemoDataRefreshJob } from '../demo-data-refresh.queue';
@@ -181,6 +182,10 @@ const ENQUEUE_HELPERS: { invoke: (recorder: Recorder) => Promise<unknown>; name:
   {
     invoke: (r) => enqueueAccountRecalculateJob({ correlationId: 'account.recalculate:1' }, asEnqueueDeps(r)),
     name: 'enqueueAccountRecalculateJob',
+  },
+  {
+    invoke: (r) => enqueueCryptoWalletSyncJob({ manualAssetKey: 1 }, asEnqueueDeps(r)),
+    name: 'enqueueCryptoWalletSyncJob',
   },
   {
     invoke: (r) =>

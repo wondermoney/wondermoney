@@ -18,6 +18,8 @@ export type ApiErrorOptions = Readonly<{
   linkedBy?: string
   /** `http` 4xx only: the API's machine-readable `code` (`reimbursement_amount_exceeded`). */
   serverCode?: string
+  /** `http` only: `details.addressIndex`, which address of a crypto wallet write the error is about. */
+  addressIndex?: number
 }>
 
 const diagnosticMessages: Record<ApiErrorCode, string> = {
@@ -51,6 +53,8 @@ export class ApiError extends Error {
    * `linkedBy`, so equality checks and serialized reports see the same error as before.
    */
   readonly serverCode?: string
+  /** `http` only: the index of the crypto wallet address a 400 is about (`details.addressIndex`). */
+  readonly addressIndex?: number
 
   constructor(code: ApiErrorCode, status?: number, options?: ApiErrorOptions) {
     super(diagnosticMessages[code])
@@ -60,6 +64,7 @@ export class ApiError extends Error {
     if (options?.writeDispatchState !== undefined) this.writeDispatchState = options.writeDispatchState
     if (options?.linkedBy !== undefined) Object.defineProperty(this, 'linkedBy', { value: options.linkedBy, enumerable: false, configurable: true })
     if (options?.serverCode !== undefined) Object.defineProperty(this, 'serverCode', { value: options.serverCode, enumerable: false, configurable: true })
+    if (options?.addressIndex !== undefined) Object.defineProperty(this, 'addressIndex', { value: options.addressIndex, enumerable: false, configurable: true })
   }
 }
 

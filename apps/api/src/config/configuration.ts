@@ -34,6 +34,7 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
+import { CRYPTO_EXPLORER_ENV, isCryptoExplorerUrl } from './crypto-explorers';
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
 import { parseMarketDataProviders } from './market-data-providers';
 import { isMerchantLogoTemplate } from './merchant-logo-template';
@@ -72,6 +73,10 @@ const base64Key = (bytes: number, description: string) => z.string({ error: desc
     return Buffer.from(value, 'base64').length === bytes;
   }, `${description} (must be base64 decoding to exactly ${bytes} bytes; generate with \`openssl rand -base64 ${bytes}\`)`);
 
+/** An explorer base URL: https only, no credentials, query or fragment. */
+const cryptoExplorerUrl = (name: string, example: string) => z.string().trim()
+  .refine(isCryptoExplorerUrl, `${name} must be an https URL without credentials, query or fragment (${example})`)
+  .optional();
 const httpUrl = (description: string) => z.string().trim().pipe(z.url(description))
   .refine((v) => v.startsWith('http://') || v.startsWith('https://'), `${description} (must be http or https)`);
 
@@ -214,6 +219,10 @@ const sharedSchema = z.object({
   AZURE_OPENAI_OCR_DEPLOYMENT: z.string().trim().optional(),
   AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT: z.string().trim().optional(),
   EODHD_API_KEY: z.string().trim().optional(),
+  // Crypto wallets (`config/crypto-explorers.ts`): the block explorer each chain reads balances
+  // from. Read by the API (the feature is on) and the worker (the sync). Unset: off, nothing sent.
+  CRYPTO_BTC_EXPLORER_URL: cryptoExplorerUrl(CRYPTO_EXPLORER_ENV.bitcoin, 'mempool.space / Esplora API root, such as https://mempool.example.org/api'),
+  CRYPTO_ETH_EXPLORER_URL: cryptoExplorerUrl(CRYPTO_EXPLORER_ENV.ethereum, 'Blockscout root, such as https://blockscout.example.org'),
   // The market-data providers to ask, in order (`services/market-data/registry.ts`). Read by the
   // API and the worker's price jobs; unset means EODHD alone.
   MARKET_DATA_PROVIDERS: z.string().superRefine((value, ctx) => {

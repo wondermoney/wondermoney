@@ -6,6 +6,7 @@ import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 
 import ConfirmAssetAction from "@/components/manual-asset/ConfirmAssetAction";
+import CryptoWalletSection from "@/components/manual-asset/CryptoWalletSection";
 import ManualAssetFormDrawer from "@/components/manual-asset/ManualAssetFormDrawer";
 import ManualAssetValueChart from "@/components/manual-asset/ManualAssetValueChart";
 import ValuationDrawer from "@/components/manual-asset/ValuationDrawer";
@@ -22,10 +23,12 @@ import {
   getApiErrorMessage,
   isDemoReadOnlyError,
 } from "@/lib/api/errors";
+import { useCryptoWalletChains } from "@/lib/api/instance/useInstance";
 import type {
   ManualAsset,
   ManualAssetValuation,
 } from "@/lib/api/manual-asset/types";
+import { useSyncCryptoWallet } from "@/lib/api/manual-asset/useCryptoWalletMutations";
 import useManualAsset from "@/lib/api/manual-asset/useManualAsset";
 import {
   useDeleteManualAsset,
@@ -37,6 +40,10 @@ import {
   changeSincePurchase,
   isEstimated,
 } from "@/lib/manual-assets/asset-view";
+import {
+  isCryptoWallet,
+  walletErrorKey,
+} from "@/lib/manual-assets/crypto-wallet";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
@@ -148,13 +155,32 @@ function AssetEquity({ asset }: { asset: ManualAsset }) {
   );
 }
 
+/** How often, and for how long after "Sync now", a wallet's page looks for new balances. */
+const SYNC_POLL_MS = 5_000;
+const SYNC_WATCH_MS = 120_000;
+
 export default function AssetDetailClient({ assetId }: { assetId: string }) {
   const t = useTranslations("assets");
   const tCommon = useTranslations();
   const router = useRouter();
   const formatShortDate = useFormatShortDate();
   const formatPercentage = useFormatPercentage();
-  const { data, isPending, isError } = useManualAsset(assetId);
+  // A wallet reads its balances in the background: while an address waits for
+  // its first read, or just after "Sync now", look again every few seconds.
+  const [syncRequestedAt, setSyncRequestedAt] = useState<number | null>(null);
+  const { data, isPending, isError } = useManualAsset(assetId, {
+    refetchInterval: (query) => {
+      const wallet = query.state.data?.wallet;
+      if (!wallet) return false;
+      const waiting =
+        wallet.addresses.some((address) => address.status === "pending") ||
+        (syncRequestedAt !== null &&
+          Date.now() - syncRequestedAt < SYNC_WATCH_MS);
+      return waiting ? SYNC_POLL_MS : false;
+    },
+  });
+  const walletChains = useCryptoWalletChains();
+  const syncMutation = useSyncCryptoWallet();
   const updateMutation = useUpdateManualAsset();
   const deleteMutation = useDeleteManualAsset();
   const deleteValuationMutation = useDeleteValuation();
@@ -201,6 +227,9 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
     );
 
   const { asset, valuations, history } = data;
+  const wallet = data.wallet ?? null;
+  // A wallet's value comes from its balances: no valuation is typed or edited.
+  const isWallet = isCryptoWallet(asset);
   const day = (iso: string) =>
     formatShortDate(calendarDay(iso), { alwaysShowYear: true });
   const change = changeSincePurchase(asset);
@@ -219,11 +248,24 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
       });
       return;
     }
+    const walletKey = walletErrorKey(error);
     toast.error(
       getApiErrorCode(error) === API_ERROR_CODE.MANUAL_ASSET_LAST_VALUATION
         ? t("detail.valuations.lastOne")
-        : (getApiErrorMessage(error) ?? tCommon("server-error")),
+        : walletKey
+          ? t(`wallet.errors.${walletKey}`)
+          : (getApiErrorMessage(error) ?? tCommon("server-error")),
     );
+  };
+
+  const syncNow = async () => {
+    try {
+      await syncMutation.mutateAsync(asset.manualAssetKey);
+      setSyncRequestedAt(Date.now());
+      toast.success(t("wallet.syncQueued"));
+    } catch (error) {
+      fail(error);
+    }
   };
 
   const setArchived = async (archived: boolean) => {
@@ -302,10 +344,19 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
           : {})}
         actions={
           <>
-            {!asset.archived && (
+            {!asset.archived && !isWallet && (
               <Button onClick={() => openValuation(null)}>
                 <RefreshCw className="size-4" />
                 {t("actions.updateValue")}
+              </Button>
+            )}
+            {!asset.archived && isWallet && (
+              <Button
+                onClick={() => void syncNow()}
+                loading={syncMutation.isPending}
+              >
+                <RefreshCw className="size-4" />
+                {t("wallet.actions.syncNow")}
               </Button>
             )}
             <Button variant="secondary" onClick={() => setEditOpen(true)}>
@@ -320,6 +371,21 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
             {t("detail.estimated", { date: day(asset.lastValuation.date) })}
           </p>
         ) : null}
+        {isWallet && !asset.archived && asset.value === null ? (
+          <p className="text-muted-foreground text-sm">
+            {t("wallet.detail.noValueYet")}
+          </p>
+        ) : null}
+        {isWallet && wallet?.lastSyncedAt ? (
+          <p className="text-muted-foreground text-sm">
+            {t("wallet.detail.lastSynced", {
+              date: formatShortDate(wallet.lastSyncedAt, {
+                alwaysShowYear: true,
+                withTime: true,
+              }),
+            })}
+          </p>
+        ) : null}
         {!asset.archived &&
         inOtherCurrency &&
         asset.value !== null &&
@@ -332,6 +398,14 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
           </p>
         ) : null}
       </ObjectHeader>
+
+      {isWallet && wallet && (
+        <CryptoWalletSection
+          asset={asset}
+          wallet={wallet}
+          chains={walletChains}
+        />
+      )}
 
       {asset.linkedLoans.length > 0 && <AssetEquity asset={asset} />}
 
@@ -390,13 +464,15 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
                       {valuation.note ?? ""}
                     </td>
                     <td className="py-2 text-right whitespace-nowrap">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openValuation(valuation)}
-                      >
-                        {t("detail.valuations.edit")}
-                      </Button>
+                      {!isWallet && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openValuation(valuation)}
+                        >
+                          {t("detail.valuations.edit")}
+                        </Button>
+                      )}
                       {valuations.length > 1 && (
                         <Button
                           variant="ghost"
@@ -414,6 +490,11 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
               </tbody>
             </table>
           </div>
+          {isWallet && valuations.length === 0 ? (
+            <p className="text-muted-foreground mt-3 text-sm">
+              {t("wallet.detail.noValuations")}
+            </p>
+          ) : null}
         </Section>
 
         <Section id="asset-facts-heading" title={t("detail.facts.title")}>
@@ -561,15 +642,17 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
         onOpenChange={setEditOpen}
         asset={asset}
       />
-      <ValuationDrawer
-        open={valuationOpen}
-        onOpenChange={(open) => {
-          setValuationOpen(open);
-          if (!open) setEditingValuation(null);
-        }}
-        asset={asset}
-        valuation={editingValuation}
-      />
+      {!isWallet && (
+        <ValuationDrawer
+          open={valuationOpen}
+          onOpenChange={(open) => {
+            setValuationOpen(open);
+            if (!open) setEditingValuation(null);
+          }}
+          asset={asset}
+          valuation={editingValuation}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 
+import type { CryptoChain } from "../manual-asset/types";
+
 /** `GET /v1/instance`: what this server offers. See the API's `controller/instance.ts`. */
 export interface InstanceDescription {
   apiVersion: number;
@@ -18,6 +20,11 @@ export interface InstanceDescription {
      */
     bankSyncCredentials?: "instance" | "user";
     contactForm: boolean;
+    /**
+     * The chains whose explorer the operator configured, so crypto wallets can be tracked on
+     * them. Empty when the feature is off; absent on an API older than crypto wallets.
+     */
+    cryptoWalletChains?: CryptoChain[];
     /**
      * One-click sign-in to the shared read-only demo account (`POST /v1/auth/demo`,
      * `DEMO_SIGN_IN_ENABLED`). Absent on an API older than this field, which reads as off.
@@ -170,6 +177,20 @@ export function useInstanceBankSyncCredentials(): "instance" | "user" | undefine
   const hydrated = useHydrated();
   if (!hydrated || !data) return undefined;
   return data.features.bankSyncCredentials ?? "user";
+}
+
+const NO_CHAINS: CryptoChain[] = [];
+
+/**
+ * The chains a crypto wallet can be tracked on, once the server has said so; empty while the
+ * description loads, on a server without the feature and on an older API, so "Add crypto
+ * wallet" never shows where it would fail.
+ */
+export function useCryptoWalletChains(): CryptoChain[] {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated) return NO_CHAINS;
+  return data?.features.cryptoWalletChains ?? NO_CHAINS;
 }
 
 /** Where users can write for help, or null: no support links are shown then. */

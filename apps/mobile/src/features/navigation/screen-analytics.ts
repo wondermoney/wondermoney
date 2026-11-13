@@ -61,6 +61,7 @@ const routePatterns: readonly RoutePattern[] = [
   [['loans', WILDCARD, 'edit'], 'loan_edit'],
   [['assets'], 'assets'],
   [['assets', 'create'], 'asset_create'],
+  [['assets', 'crypto-wallet'], 'crypto_wallet_create'],
   [['assets', WILDCARD], 'asset_detail'],
   [['assets', WILDCARD, 'value'], 'asset_value'],
 
