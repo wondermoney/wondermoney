@@ -194,6 +194,8 @@ export async function richHousehold(em: EntityManager) {
   for (const row of buildInstallmentSchedule({ cycle, installmentCount: 3, purchaseDate: new Date('2026-01-20T00:00:00Z'), totalAmount: 300 })) em.create(Installment, { ...row, installmentPlanKey: sofa, tenantKey: owner.tenant }, { partial: true });
   groceryRun.installmentPlanKey = sofa;
   groceryRun.installmentNumber = 2;
+  // The pending purchase was unlinked from the sofa by hand, so the automatic linker leaves the pair alone.
+  globalRun.installmentUnlinkedPlanKey = sofa;
   // The pending purchase counts in the March statement, whatever its date.
   globalRun.statementDateOverride = new Date('2026-03-01');
   // The member's own account order, and a saved entry naming a merchant nothing else reaches.

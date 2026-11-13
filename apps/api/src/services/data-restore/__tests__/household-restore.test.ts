@@ -295,7 +295,8 @@ describe('household restore', () => {
       `select p.description, p.installment_count, p.total_amount::text as total, to_char(p.purchase_date, 'YYYY-MM-DD') as purchase_date, a.account_name as card, c.name as category,
          (select string_agg(i.installment_number || '=' || i.amount::text || '@' || to_char(i.scheduled_date, 'YYYY-MM-DD') || '/' || coalesce(to_char(i.statement_date, 'YYYY-MM-DD'), '-') || '/' || coalesce(to_char(i.due_date, 'YYYY-MM-DD'), '-'), ',' order by i.installment_number)
           from installment i where i.installment_plan_key = p.installment_plan_key and i.tenant_key = p.tenant_key) as schedule,
-         (select string_agg(t.description || '#' || t.installment_number, ',') from "transaction" t where t.installment_plan_key = p.installment_plan_key and t.account_key = p.account_key) as paid_by
+         (select string_agg(t.description || '#' || t.installment_number, ',') from "transaction" t where t.installment_plan_key = p.installment_plan_key and t.account_key = p.account_key) as paid_by,
+         (select string_agg(t.description, ',') from "transaction" t where t.installment_unlinked_plan_key = p.installment_plan_key and t.account_key = p.account_key) as unlinked_by_hand
        from installment_plan p join account a on a.account_key = p.account_key and a.tenant_key = p.tenant_key left join category c on c.category_key = p.category_key
        where p.tenant_key = ?`, [tenantKey]);
 
@@ -308,7 +309,7 @@ describe('household restore', () => {
       expect(summary.counts).toEqual(expect.objectContaining({ 'credit-cards': 1, 'installment-plans': 1, installments: 3 }));
       const restored = await planRows(target.tenant.tenantKey);
       expect(restored).toEqual(await planRows(owner.tenant.tenantKey));
-      expect(restored).toEqual([expect.objectContaining({ card: 'Current account', category: 'Home', description: 'Sofa', installment_count: 3, paid_by: expect.stringMatching(/#2$/u) })]);
+      expect(restored).toEqual([expect.objectContaining({ card: 'Current account', category: 'Home', description: 'Sofa', installment_count: 3, paid_by: expect.stringMatching(/#2$/u), unlinked_by_hand: expect.any(String) })]);
       const [card] = await db.em().getConnection().execute<Record<string, unknown>[]>(
         'select a.account_name, d.statement_close_day, d.payment_due_day, d.credit_limit::text as credit_limit, d.minimum_payment_percent::text as minimum from credit_card_detail d join account a using (account_key) where d.tenant_key = ?', [target.tenant.tenantKey]);
       expect(card).toEqual({ account_name: 'Current account', credit_limit: '1500.0000', minimum: '5.00', payment_due_day: 10, statement_close_day: 25 });
@@ -385,7 +386,7 @@ describe('household restore', () => {
       const newFiles: DataFileName[] = ['credit-cards', 'exchange-rate-overrides', 'installment-plans', 'installments', 'price-overrides', 'transaction-templates'];
       const newFields: Partial<Record<DataFileName, string[]>> = {
         accounts: ['position'], 'budget-categories': ['rolloverEnabled'], budgets: ['rolloverCarriesOverspend'], loans: ['amortizationMethod', 'firstPaymentDate'], portfolios: ['costBasisMethod'],
-        transactions: ['installmentNumber', 'installmentPlanId', 'statementDateOverride', 'transferExchangeRate'],
+        transactions: ['installmentNumber', 'installmentPlanId', 'installmentUnlinkedPlanId', 'statementDateOverride', 'transferExchangeRate'],
       };
       const rows = { ...parsed.rows } as Record<DataFileName, Record<string, unknown>[]>;
       for (const name of newFiles) rows[name] = [];
@@ -411,7 +412,7 @@ describe('household restore', () => {
         `select (select rollover_carries_overspend from budget where tenant_key = ?) as carries,
            (select bool_or(rollover_enabled) from budget_template_category btc join budget b using (budget_key) where b.tenant_key = ?) as rollover,
            (select amortization_method from loan where tenant_key = ?) as amortization, (select cost_basis_method from portfolio where tenant_key = ?) as cost_basis,
-           (select count(*)::int from "transaction" where tenant_key = ? and (installment_plan_key is not null or statement_date_override is not null)) as linked,
+           (select count(*)::int from "transaction" where tenant_key = ? and (installment_plan_key is not null or installment_unlinked_plan_key is not null or statement_date_override is not null)) as linked,
            (select credit_card_due_reminders_enabled from email_notification_preference where appuser_key = ?) as reminders`,
         [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey]);
       expect(settings).toEqual({ amortization: 'FRENCH', carries: true, cost_basis: 'FIFO', linked: 0, reminders: true, rollover: false });

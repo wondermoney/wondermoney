@@ -330,12 +330,15 @@ async function assignTransaction(em: EntityManager, plan: InstallmentPlan, insta
   if (holder && holder.transactionKey !== transaction.transactionKey) throw new ConflictError(`Installment ${installmentNumber} is already paid by another transaction`);
   transaction.installmentPlanKey = plan;
   transaction.installmentNumber = installmentNumber;
+  // Linking by hand takes back an earlier manual unlink from this plan.
+  if (transaction.installmentUnlinkedPlanKey?.installmentPlanKey === plan.installmentPlanKey) transaction.installmentUnlinkedPlanKey = null;
 }
 
-/** Delete a plan and its schedule. Its posted transactions stay, no longer linked. */
+/** Delete a plan and its schedule. Its posted transactions stay, no longer linked, and forget being unlinked from it. */
 export async function deleteInstallmentPlan(em: EntityManager, plan: InstallmentPlan): Promise<void> {
   await em.transactional(async (tx) => {
     await tx.nativeUpdate(Transaction, { installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { installmentNumber: null, installmentPlanKey: null }, { filters: false });
+    await tx.nativeUpdate(Transaction, { installmentUnlinkedPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { installmentUnlinkedPlanKey: null }, { filters: false });
     await tx.nativeDelete(Installment, { installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { filters: false });
     plan.deletedAt = new Date();
     tx.persist(plan);
@@ -348,11 +351,17 @@ export async function linkInstallment(em: EntityManager, plan: InstallmentPlan, 
   await em.flush();
 }
 
+/**
+ * The installment is no longer paid by the row linked to it. The row remembers the plan it was
+ * unlinked from, so the automatic linker does not link it to that plan again on the next sync;
+ * {@link linkInstallment} to the same plan clears that.
+ */
 export async function unlinkInstallment(em: EntityManager, plan: InstallmentPlan, installmentNumber: number): Promise<void> {
   const rows = await em.find(Transaction, { installmentNumber, installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { filters: { [HIDDEN_FILTER]: false } });
   for (const row of rows) {
     row.installmentPlanKey = null;
     row.installmentNumber = null;
+    row.installmentUnlinkedPlanKey = plan;
   }
   await em.flush();
 }
@@ -429,7 +438,8 @@ export async function listSuggestions(em: EntityManager, input: { accountKey?: n
  * within a cent per installment (banks put the rounding on different installments), and whose date
  * is within the plan's schedule give or take two months (some banks date every installment on the
  * purchase day). When two plans fit, the purchase name in the description must pick one; when it
- * cannot, the row is left for the user to link.
+ * cannot, the row is left for the user to link. A row a member unlinked from a plan by hand is never
+ * linked to that plan again (`Transaction.installmentUnlinkedPlanKey`).
  *
  * `tenantKey` is explicit, so the same code runs in a request and in the sync worker.
  */
@@ -488,6 +498,7 @@ export async function linkPostedInstallments(em: EntityManager, input: { account
     const time = candidate.transactionDate.getTime();
     const fitting = plans.filter((plan) => {
       if (plan.accountKey.accountKey !== candidate.accountKey?.accountKey) return false;
+      if (candidate.installmentUnlinkedPlanKey?.installmentPlanKey === plan.installmentPlanKey) return false;
       if (plan.installmentCount !== marker.installmentCount) return false;
       if (taken.has(`${plan.installmentPlanKey}:${marker.installmentNumber}`)) return false;
       const row = rowsByPlan.get(plan.installmentPlanKey)?.get(marker.installmentNumber);

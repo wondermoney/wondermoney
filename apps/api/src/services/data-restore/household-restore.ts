@@ -49,7 +49,8 @@ import { type ParsedExport, RestoreError } from './restore-reader';
  *   connection or credential is restored, and the summary lists them for reconnecting.
  * - The member's preferences (currency, language, email notifications) and account order are applied.
  * - Installment plans come back on their card with the schedule as exported, and each posted
- *   transaction pays the installment it paid. A schedule that is not whole is drawn again from the
+ *   transaction pays the installment it paid; a transaction unlinked from a plan by hand stays
+ *   unlinked from it. A schedule that is not whole is drawn again from the
  *   plan and the card's restored cycle, as editing the plan in the app would.
  * - The household's exchange-rate overrides are written as the restoring member's, each with its
  *   audit entry as when it is added in the app; price overrides go on the catalogue's asset (found
@@ -898,6 +899,7 @@ class HouseholdRestore {
         hidden: row.hidden,
         installment_number: row.installmentNumber ?? null,
         installment_plan_key: this.plans.get(row.installmentPlanId),
+        installment_unlinked_plan_key: this.plans.get(row.installmentUnlinkedPlanId),
         merchant_edited_by_user: row.merchantEditedByUser,
         notes: row.notes,
         original_amount: row.originalAmount,

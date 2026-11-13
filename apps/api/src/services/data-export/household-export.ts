@@ -516,6 +516,8 @@ class HouseholdExport {
         // The plan installment this posted row pays, set together; both null on every other row.
         installmentNumber: this.plans.has(row['installment_plan_key']) ? int(row['installment_number']) : null,
         installmentPlanId: this.plans.get(row['installment_plan_key']),
+        // The plan a member unlinked this row from by hand, which the automatic linker leaves alone.
+        installmentUnlinkedPlanId: this.plans.get(row['installment_unlinked_plan_key']),
         memberId: this.members.get(row['appuser_key']),
         merchantEditedByUser: bool(row['merchant_edited_by_user']),
         merchantId: this.merchants.get(row['transaction_merchant_key']),
@@ -553,7 +555,7 @@ class HouseholdExport {
         t.appuser_settlement_amount::text as appuser_settlement_amount, ac.code as appuser_currency, t.appuser_currency_exchange_rate::text as appuser_currency_exchange_rate,
         t.balance::text as balance, t.hidden, t.reviewed, t.description_edited_by_user, t.merchant_edited_by_user,
         t.transfer_counterpart_key, t.transfer_destination_account_key, t.transfer_destination_goal_key, t.transfer_destination_portfolio_key,
-        t.transfer_exchange_rate::text as transfer_exchange_rate, t.installment_plan_key, t.installment_number, ${sql.raw(dx('t.statement_date_override'))} as statement_date_override,
+        t.transfer_exchange_rate::text as transfer_exchange_rate, t.installment_plan_key, t.installment_number, t.installment_unlinked_plan_key, ${sql.raw(dx('t.statement_date_override'))} as statement_date_override,
         (t.enable_banking_transaction_id is not null or t.nordigen_internal_transaction_id is not null) as bank_synced,
         ${sql.raw(tsx('t.created_at'))} as created_at
       from "transaction" t

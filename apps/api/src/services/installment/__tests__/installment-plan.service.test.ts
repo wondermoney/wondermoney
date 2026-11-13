@@ -9,8 +9,18 @@ import type { Account } from '@entity/Account';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { InstallmentPlan } from '@entity/InstallmentPlan';
 import { Transaction } from '@entity/Transaction';
+import { linkInstallmentsAfterImport } from '@service/account/account-statement-transaction';
 
-import { createInstallmentPlan, describePlan, linkPostedInstallments, listCommitments, updateInstallmentPlan } from '../installment-plan.service';
+import {
+  createInstallmentPlan,
+  deleteInstallmentPlan,
+  describePlan,
+  linkInstallment,
+  linkPostedInstallments,
+  listCommitments,
+  unlinkInstallment,
+  updateInstallmentPlan,
+} from '../installment-plan.service';
 
 const utc = (day: string) => new Date(`${day}T12:00:00.000Z`);
 
@@ -160,5 +170,82 @@ describe('installment plans', () => {
     await em.flush();
 
     expect((await describePlan(em, created, utc('2026-01-01'))).installments[0]?.status).toBe('upcoming');
+  });
+
+  describe('a manual unlink', () => {
+    /** The row as stored: which installment it pays, and the plan it was unlinked from by hand. */
+    const stored = async (em: EntityManager, row: Transaction) => {
+      const fresh = await em.fork().findOneOrFail(Transaction, { transactionKey: row.transactionKey }, { filters: false });
+      return { installmentNumber: fresh.installmentNumber ?? null, planKey: fresh.installmentPlanKey?.installmentPlanKey ?? null, unlinkedFrom: fresh.installmentUnlinkedPlanKey?.installmentPlanKey ?? null };
+    };
+
+    /** Every way the automatic linker runs: after a sync (the whole household), an import or a hand entry (the card), and a reschedule. */
+    async function everyAutomaticLink(em: EntityManager, owner: Household, created: InstallmentPlan) {
+      await linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey });
+      await linkInstallmentsAfterImport(em, owner.account, [utc('2026-01-10')]);
+      await linkPostedInstallments(em, { accountKeys: [owner.account.accountKey], tenantKey: owner.tenant.tenantKey });
+      await updateInstallmentPlan(em, created, { totalAmount: 100 }, { tenant: owner.tenant, tenantKey: owner.tenant.tenantKey, user: owner.appuser });
+      em.clear();
+    }
+
+    it('is not undone by the next sync, import, hand entry or reschedule', async () => {
+      const { em, owner } = await household();
+      const created = await plan(em, owner);
+      const first = await charge(em, owner, 'LOJAS X PARC 01/03', -33.33, '2026-01-10');
+      await linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey });
+      expect(await stored(em, first)).toMatchObject({ installmentNumber: 1, planKey: created.installmentPlanKey });
+
+      await unlinkInstallment(em, created, 1);
+      await everyAutomaticLink(em, owner, created);
+
+      expect(await stored(em, first)).toEqual({ installmentNumber: null, planKey: null, unlinkedFrom: created.installmentPlanKey });
+      expect((await describePlan(em, created, utc('2026-01-20'))).installments[0]).toMatchObject({ status: 'unmatched', transactionKey: null });
+    });
+
+    it('still links the plan’s other rows, and the household’s other plans', async () => {
+      const { em, owner } = await household();
+      const created = await plan(em, owner);
+      const sofa = await plan(em, owner, { count: 2, description: 'Sofa', total: 50 });
+      const first = await charge(em, owner, 'LOJAS X PARC 01/03', -33.33, '2026-01-10');
+      await linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey });
+      await unlinkInstallment(em, created, 1);
+
+      const second = await charge(em, owner, 'LOJAS X PARC 02/03', -33.33, '2026-02-10');
+      const sofaRow = await charge(em, owner, 'SOFA PARC 1/2', -25, '2026-01-10');
+      await expect(linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey })).resolves.toBe(2);
+
+      expect(await stored(em, first)).toMatchObject({ planKey: null });
+      expect(await stored(em, second)).toEqual({ installmentNumber: 2, planKey: created.installmentPlanKey, unlinkedFrom: null });
+      expect(await stored(em, sofaRow)).toEqual({ installmentNumber: 1, planKey: sofa.installmentPlanKey, unlinkedFrom: null });
+    });
+
+    it('is taken back by linking the row to that plan by hand, and recorded again by the next unlink', async () => {
+      const { em, owner } = await household();
+      const created = await plan(em, owner);
+      const first = await charge(em, owner, 'LOJAS X PARC 01/03', -33.33, '2026-01-10');
+      await linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey });
+      await unlinkInstallment(em, created, 1);
+
+      await linkInstallment(em, created, 1, first.transactionKey);
+
+      expect(await stored(em, first)).toEqual({ installmentNumber: 1, planKey: created.installmentPlanKey, unlinkedFrom: null });
+      expect((await describePlan(em, created, utc('2026-01-20'))).installments[0]).toMatchObject({ status: 'paid', transactionKey: first.transactionKey });
+
+      await unlinkInstallment(em, created, 1);
+      await everyAutomaticLink(em, owner, created);
+      expect(await stored(em, first)).toEqual({ installmentNumber: null, planKey: null, unlinkedFrom: created.installmentPlanKey });
+    });
+
+    it('is forgotten when the plan is deleted', async () => {
+      const { em, owner } = await household();
+      const created = await plan(em, owner);
+      const first = await charge(em, owner, 'LOJAS X PARC 01/03', -33.33, '2026-01-10');
+      await linkPostedInstallments(em, { tenantKey: owner.tenant.tenantKey });
+      await unlinkInstallment(em, created, 1);
+
+      await deleteInstallmentPlan(em, created);
+
+      expect(await stored(em, first)).toEqual({ installmentNumber: null, planKey: null, unlinkedFrom: null });
+    });
   });
 });

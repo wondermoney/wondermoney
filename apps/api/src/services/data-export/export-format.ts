@@ -71,7 +71,8 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * and each one's scheduled day and amount), `data/transaction-templates.json` (the member's saved
  * entries), `data/exchange-rate-overrides.json` and `data/price-overrides.json` (the household's own
  * rates per pair and day, and its own prices per security and day). It also added `installmentPlanId`,
- * `installmentNumber`, `statementDateOverride` and `transferExchangeRate` to `data/transactions.json`,
+ * `installmentNumber`, `installmentUnlinkedPlanId` (the plan a member unlinked the row from by hand),
+ * `statementDateOverride` and `transferExchangeRate` to `data/transactions.json`,
  * `position` to `data/accounts.json` (the member's order), `rolloverCarriesOverspend` to
  * `data/budgets.json`, `rolloverEnabled` to `data/budget-categories.json`, `amortizationMethod` and
  * `firstPaymentDate` to `data/loans.json`, `costBasisMethod` to `data/portfolios.json`, and

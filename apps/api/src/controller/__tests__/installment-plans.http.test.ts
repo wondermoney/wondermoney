@@ -12,10 +12,12 @@ import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tena
 import type { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
+import { Transaction } from '@entity/Transaction';
 import accountRoutes from '@route/account';
 import installmentPlanRoutes from '@route/installment-plan';
 import netWorthRoutes from '@route/net-worth';
 import recurringRoutes from '@route/recurring';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 
 const DAY_MS = 86_400_000;
 const today = () => {
@@ -239,5 +241,37 @@ describe('installment plans over HTTP', () => {
     expect((await plans.as(owner.appuser).get(`/v1/installment-plans/${planKey}`)).status).toBe(404);
     const list = await accounts.as(owner.appuser).get(`/v1/account/${owner.account.accountKey}/transaction`);
     expect(list.body.transactions.map((row: { installment: unknown; transactionKey: number }) => [row.transactionKey, row.installment])).toEqual([[posted.transactionKey, null]]);
+  });
+
+  it('keeps a charge unlinked by hand off its plan through the next sync, until it is linked by hand, and only in the caller’s household', async () => {
+    const { em, neighbour, owner, partner, privateCard } = await household();
+    const sharedPlan = (await create(owner.appuser, owner.account)).body.installmentPlan.installmentPlanKey;
+    const privatePlan = (await create(owner.appuser, privateCard)).body.installmentPlan.installmentPlanKey;
+    const shared = await charge(em, owner, owner.account, 'LAPTOP STORE PARC 1/3', -33.33, daysFromToday(0));
+    const hidden = await charge(em, owner, privateCard, 'LAPTOP STORE PARC 1/3', -33.33, daysFromToday(0));
+    const sync = () => linkPostedInstallments(db.em().fork(), { tenantKey: owner.tenant.tenantKey });
+    const stored = async (row: Transaction) => {
+      const fresh = await db.em().fork().findOneOrFail(Transaction, { transactionKey: row.transactionKey }, { filters: false });
+      return { planKey: fresh.installmentPlanKey?.installmentPlanKey ?? null, unlinkedFrom: fresh.installmentUnlinkedPlanKey?.installmentPlanKey ?? null };
+    };
+    const unlink = (user: Appuser, planKey: number) => plans.as(user).delete(`/v1/installment-plans/${planKey}/installments/1/link`);
+    await sync();
+
+    // Neither the other member (on a private card's plan) nor another household can unlink, so nothing is remembered.
+    expect([(await unlink(partner, privatePlan)).status, (await unlink(neighbour.appuser, sharedPlan)).status]).toEqual([404, 404]);
+    expect(await stored(hidden)).toEqual({ planKey: privatePlan, unlinkedFrom: null });
+    expect(await stored(shared)).toEqual({ planKey: sharedPlan, unlinkedFrom: null });
+
+    const unlinked = await unlink(partner, sharedPlan);
+    await sync();
+    expect(unlinked.status).toBe(200);
+    expect(unlinked.body.installmentPlan.installments[0]).toMatchObject({ transactionKey: null });
+    expect(await stored(shared)).toEqual({ planKey: null, unlinkedFrom: sharedPlan });
+    expect((await plans.as(owner.appuser).get(`/v1/installment-plans/${sharedPlan}`)).body.installmentPlan.installments[0]).toMatchObject({ transactionKey: null });
+
+    const relinked = await plans.as(owner.appuser).post(`/v1/installment-plans/${sharedPlan}/installments/1/link`).send({ transactionKey: shared.transactionKey });
+    expect(relinked.status).toBe(200);
+    expect(relinked.body.installmentPlan.installments[0]).toMatchObject({ status: 'paid', transactionKey: shared.transactionKey });
+    expect(await stored(shared)).toEqual({ planKey: sharedPlan, unlinkedFrom: null });
   });
 });
