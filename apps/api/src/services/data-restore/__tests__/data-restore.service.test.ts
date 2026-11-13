@@ -106,6 +106,10 @@ describe('data restore service', () => {
       expect((await householdRowCounts(db.em(), target.tenant.tenantKey))['transaction']).toBe(6);
       expect(ctx.objects.size).toBe(0);
       expect(ctx.sent.map((entry) => entry.queue)).toEqual(expect.arrayContaining(['fx.reconvert', 'portfolio.snapshot.manual', 'user.data-restore.cleanup']));
+      // The restored exchange-rate override's pair is converted again, as after adding it in the app,
+      // and each portfolio's history is rebuilt from its start, which takes in the restored prices.
+      expect(ctx.sent.filter((entry) => entry.queue === 'fx.reconvert').map((entry) => (entry.data as { override?: unknown }).override)).toEqual(expect.arrayContaining([{ fromCurrency: 'USD', tenantKey: target.tenant.tenantKey, toCurrency: 'EUR' }]));
+      expect(ctx.sent.filter((entry) => entry.queue === 'portfolio.snapshot.manual').map((entry) => (entry.data as { startDate?: string }).startDate)).toEqual([undefined]);
     });
 
     it('treats a second commit as the first, and runs the restore once', async () => {

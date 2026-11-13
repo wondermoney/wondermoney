@@ -324,6 +324,7 @@
   "privacy-data-restore-error-internal": "The restore failed and nothing was changed. Please try again.",
   "privacy-data-restore-warning-bank_linked_accounts": "{count, plural, one {# account was} other {# accounts were}} linked to a bank and come back as manual accounts with their history: {values}. Reconnect them in Settings.",
   "privacy-data-restore-warning-members_merged": "The export includes data your partner shared with you. It is restored as yours; invite your partner again to share the household.",
+  "privacy-data-restore-warning-price_overrides_skipped": "{count, plural, one {# manual price is} other {# manual prices are}} left out, because this server does not know the investment or prices it in another currency: {values}. You can set them again afterwards.",
   "privacy-data-restore-warning-currency_changed": "Your currency changes to {values}, the one the export uses.",
   "privacy-data-restore-warning-assets_left_out": "{count, plural, one {# investment is} other {# investments are}} not known to this server or its market data, so {count, plural, one {its trades are} other {their trades are}} left out: {values}. You can add them yourself afterwards.",
   "privacy-data-restore-warning-categories_created": "Some categories are not on this server and are restored as your own: {values}.",

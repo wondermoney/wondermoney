@@ -66,8 +66,18 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * 1.7 added `data/crypto-wallet-addresses.json` and `data/crypto-wallet-tokens.json`: a crypto
  * wallet's (manual asset of kind `crypto_wallet`) public addresses, and the coins and tokens each held
  * at its last sync (`balance` in the token's smallest unit) and whether they count.
+ * 1.8 added `data/credit-cards.json` (a card account's statement close and due days, limit and minimum
+ * payment), `data/installment-plans.json` and `data/installments.json` (purchases paid in installments
+ * and each one's scheduled day and amount), `data/transaction-templates.json` (the member's saved
+ * entries), `data/exchange-rate-overrides.json` and `data/price-overrides.json` (the household's own
+ * rates per pair and day, and its own prices per security and day). It also added `installmentPlanId`,
+ * `installmentNumber`, `statementDateOverride` and `transferExchangeRate` to `data/transactions.json`,
+ * `position` to `data/accounts.json` (the member's order), `rolloverCarriesOverspend` to
+ * `data/budgets.json`, `rolloverEnabled` to `data/budget-categories.json`, `amortizationMethod` and
+ * `firstPaymentDate` to `data/loans.json`, `costBasisMethod` to `data/portfolios.json`, and
+ * `creditCardDueReminders` to the email notifications in `data/preferences.json`.
  */
-export const EXPORT_FORMAT_VERSION = '1.7';
+export const EXPORT_FORMAT_VERSION = '1.8';
 
 export interface ExportManifest {
   appVersion: string;

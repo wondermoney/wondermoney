@@ -182,6 +182,61 @@ describe('restore reader', () => {
     });
   });
 
+  describe('card settings, installment plans and overrides', () => {
+    const card = { accountId: 1, creditLimit: '1500', minimumPaymentPercent: null, paymentDueDay: 10, statementCloseDay: 25 };
+    const plan = { accountId: 1, categoryId: null, createdAt: null, createdByMemberId: 1, description: 'Sofa', id: 1, installmentCount: 3, purchaseDate: '2026-01-20', totalAmount: '300' };
+    const installment = { amount: '100', dueDate: null, installmentNumber: 1, planId: 1, scheduledDate: '2026-01-20', statementDate: null };
+    const rate = { createdByMemberId: 1, date: '2026-02-06', fromCurrency: 'USD', rate: '0.92', toCurrency: 'EUR' };
+    const price = { asset: { currency: 'USD', exchange: null, isin: null, name: 'Apple', symbol: 'AAPL', type: 'Stock' }, createdByMemberId: 1, currency: 'USD', date: '2026-03-31', note: null, price: '158.4' };
+    const linked = { ...transaction, installmentNumber: 2, installmentPlanId: 1 };
+    const tomorrowPlusOne = new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10);
+
+    it('reads a plan, its schedule, the transaction that pays it, the card and the overrides', async () => {
+      const files = sources({ 'credit-cards': [card], 'exchange-rate-overrides': [rate], 'installment-plans': [plan], installments: [installment], 'price-overrides': [price], transactions: [linked] });
+
+      const parsed = await readRestoreArchive(await archive({ files }));
+
+      expect(parsed.rows.transactions[0]).toMatchObject({ installmentNumber: 2, installmentPlanId: 1 });
+      expect(parsed.rows['credit-cards']).toEqual([card]);
+      expect(parsed.rows['installment-plans']).toEqual([plan]);
+      expect(parsed.rows['exchange-rate-overrides']).toEqual([rate]);
+      expect(parsed.rows['price-overrides']).toEqual([price]);
+    });
+
+    it.each([
+      ['an installment past its plan\'s count', { 'installment-plans': [plan], installments: [{ ...installment, installmentNumber: 4 }] }, { field: 'installmentNumber', file: 'data/installments.json' }],
+      ['the same installment twice', { 'installment-plans': [plan], installments: [installment, installment] }, { file: 'data/installments.json', row: 2 }],
+      ['a transaction paying an installment on another card', { accounts: [account, { ...account, id: 2 }], 'installment-plans': [{ ...plan, accountId: 2 }], transactions: [linked] }, { field: 'accountId', file: 'data/transactions.json' }],
+      ['two transactions paying one installment', { 'installment-plans': [plan], transactions: [linked, { ...transaction, id: 2 }, { ...linked, id: 3 }] }, { file: 'data/transactions.json', row: 3 }],
+      ['an installment number without its plan', { transactions: [{ ...transaction, installmentNumber: 2 }] }, { file: 'data/transactions.json' }],
+      ['a plan of one installment', { 'installment-plans': [{ ...plan, installmentCount: 1 }] }, { field: 'installmentCount', file: 'data/installment-plans.json' }],
+      ['a card statement closing on day 32', { 'credit-cards': [{ ...card, statementCloseDay: 32 }] }, { field: 'statementCloseDay', file: 'data/credit-cards.json' }],
+      ['two settings for one card', { 'credit-cards': [card, card] }, { file: 'data/credit-cards.json', row: 2 }],
+      ['a rate from a currency to itself', { 'exchange-rate-overrides': [{ ...rate, toCurrency: 'USD' }] }, { file: 'data/exchange-rate-overrides.json' }],
+      ['a rate of zero', { 'exchange-rate-overrides': [{ ...rate, rate: '0' }] }, { field: 'rate', file: 'data/exchange-rate-overrides.json' }],
+      ['a rate for a day after tomorrow', { 'exchange-rate-overrides': [{ ...rate, date: tomorrowPlusOne }] }, { field: 'date', file: 'data/exchange-rate-overrides.json' }],
+      ['two rates for one pair and day', { 'exchange-rate-overrides': [rate, rate] }, { file: 'data/exchange-rate-overrides.json', row: 2 }],
+      ['a negative price', { 'price-overrides': [{ ...price, price: '-1' }] }, { field: 'price', file: 'data/price-overrides.json' }],
+      ['two prices for one security and day', { 'price-overrides': [price, price] }, { file: 'data/price-overrides.json', row: 2 }],
+    ])('refuses %s, before anything is written', async (_case, overrides, detail) => {
+      await expect(readRestoreArchive(await archive({ files: sources(overrides) }))).rejects.toMatchObject({ code: 'invalid_data', detail });
+    });
+
+    it('reads a 1.7 export, which has none of them, with what the app gives a new row', async () => {
+      const budget = { currency: 'EUR', description: null, id: 1, memberId: 1, name: 'Home', numAdults: 1, numDependents: 0 };
+      const files = sources({ budgets: [budget] });
+
+      const parsed = await readRestoreArchive(await archive({ files, manifest: { formatVersion: '1.7' } as unknown as Partial<ExportManifest> }));
+
+      expect(parsed.rows['installment-plans']).toEqual([]);
+      expect(parsed.rows['credit-cards']).toEqual([]);
+      expect(parsed.rows['exchange-rate-overrides']).toEqual([]);
+      expect(parsed.rows.budgets[0]).toMatchObject({ rolloverCarriesOverspend: true });
+      expect(parsed.rows.transactions[0]?.installmentPlanId ?? null).toBeNull();
+      expect(parsed.rows.accounts[0]?.position ?? null).toBeNull();
+    });
+  });
+
   describe('size', () => {
     it('refuses an archive, a file or a row count over the limits', async () => {
       const bytes = await archive();

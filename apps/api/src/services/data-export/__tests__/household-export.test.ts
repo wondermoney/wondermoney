@@ -14,16 +14,20 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source } from '@entity/AppuserMerchantCategory';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
+import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { CryptoWalletAddress } from '@entity/CryptoWalletAddress';
 import { CryptoWalletToken } from '@entity/CryptoWalletToken';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { Goal } from '@entity/Goal';
 import { GoalAccountLink } from '@entity/GoalAccountLink';
 import { GoalActivity, GoalActivityType } from '@entity/GoalActivity';
 import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
+import { Installment } from '@entity/Installment';
+import { InstallmentPlan } from '@entity/InstallmentPlan';
 import { Loan } from '@entity/Loan';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { ManualAsset } from '@entity/ManualAsset';
@@ -36,6 +40,7 @@ import { Tag } from '@entity/Tag';
 import { Transaction } from '@entity/Transaction';
 import { TransactionSplit } from '@entity/TransactionSplit';
 import { TransactionTag } from '@entity/TransactionTag';
+import { TransactionTemplate, TransactionTemplateDirection } from '@entity/TransactionTemplate';
 import { Watchlist } from '@entity/Watchlist';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
 import { ManualAssetKind } from '@service/manual-asset/manual-asset-types';
@@ -98,6 +103,13 @@ describe('household export', () => {
     const series = em.create(RecurringSeries, { accountKey: account, displayName: `${prefix}-SERIES`, normalizedMerchantKey: `${prefix.toLowerCase()}-series`, tenantKey: household.tenant }, { partial: true });
     em.create(RecurringOccurrence, { amount: -42.5, occurrenceDate: new Date('2026-07-11T12:00:00Z'), recurringSeriesKey: series, transactionKey: transaction }, { partial: true });
     em.create(Rule, { actions: [{ categoryId: category.categoryKey, type: 'set_category' }], conditions: [{ field: 'account', operator: 'in', values: [account.accountKey] }], name: `${prefix}-RULE`, position: await nextRulePosition(em, household), tenantKey: household.tenant }, { partial: true });
+    // The account is a card with a purchase in two installments, the first paid by the transaction.
+    em.create(CreditCardDetail, { accountKey: account, paymentDueDay: 10, statementCloseDay: 25, tenantKey: household.tenant }, { partial: true });
+    const plan = em.create(InstallmentPlan, { accountKey: account, description: `${prefix}-PLAN`, installmentCount: 2, purchaseDate: new Date('2026-07-11T00:00:00Z'), tenantKey: household.tenant, totalAmount: 85 }, { partial: true });
+    em.create(Installment, { amount: 42.5, installmentNumber: 1, installmentPlanKey: plan, scheduledDate: new Date('2026-07-11'), tenantKey: household.tenant }, { partial: true });
+    em.create(Installment, { amount: 42.5, installmentNumber: 2, installmentPlanKey: plan, scheduledDate: new Date('2026-08-11'), tenantKey: household.tenant }, { partial: true });
+    transaction.installmentPlanKey = plan;
+    transaction.installmentNumber = 1;
     await em.flush();
     return { category, merchant, series, tag, transaction };
   }
@@ -139,6 +151,10 @@ describe('household export', () => {
     const loan = em.create(Loan, { currencyKey: owner.currency, name: 'OWNER-LOAN', openingBalanceDate: new Date('2026-01-01'), openingPrincipalBalance: 5000, ownerAppuserKey: owner.appuser, paymentFrequency: LoanPaymentFrequency.MONTHLY, rateType: LoanRateType.FIXED, status: LoanStatus.ACTIVE, tenantKey: owner.tenant, type: LoanType.PERSONAL_LOAN }, { partial: true });
     em.create(LoanRepaymentLink, { allocationSource: LoanAllocationSource.MANUAL, feeAmount: 0, interestAmount: 2.5, linkedByAppuserKey: owner.appuser, loanKey: loan, paymentDate: new Date('2026-07-11'), principalAmount: 40, tenantKey: owner.tenant, totalPaymentAmount: 42.5, transactionKey: secret.transaction }, { partial: true });
     em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'OWNERWATCH', tenantKey: owner.tenant }, { partial: true });
+    em.create(TransactionTemplate, { accountKey: sharedAccount, direction: TransactionTemplateDirection.OUT, name: 'OWNER-TEMPLATE', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    // A household rate either member set: both see it.
+    const usd = await currencyFor(em, 'USD');
+    em.create(ExchangeRateOverride, { createdByAppuserKey: partner, date: new Date('2026-07-01T00:00:00Z'), fromCurrency: usd, rate: 0.92, tenantKey: owner.tenant, toCurrency: owner.currency }, { partial: true });
     em.create(AppuserMerchantCategory, { appuserKey: owner.appuser, categoryKey: secret.category, source: Source.MANUAL, transactionMerchantKey: secret.merchant }, { partial: true });
 
     // A shared home with two valuations, and a watch only the owner knows about.
@@ -164,6 +180,8 @@ describe('household export', () => {
     em.create(Goal, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-GOAL', targetAmount: 1, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Budget, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-BUDGET', numAdults: 1, numDependents: 0, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Portfolio, { currencyKey: neighbour.currency, name: 'NEIGHBOUR-PORTFOLIO', portfolioOwnerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    em.create(TransactionTemplate, { direction: TransactionTemplateDirection.IN, name: 'NEIGHBOUR-TEMPLATE', ownerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    em.create(ExchangeRateOverride, { date: new Date('2026-07-01T00:00:00Z'), fromCurrency: usd, rate: 7.7777, tenantKey: neighbour.tenant, toCurrency: neighbour.currency }, { partial: true });
     const flat = em.create(ManualAsset, { currencyKey: neighbour.currency, isPrivate: false, kind: ManualAssetKind.PROPERTY, name: 'NEIGHBOUR-FLAT', ownerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
     em.create(ManualAssetValuation, { manualAssetKey: flat, note: 'NEIGHBOUR-ESTIMATE', tenantKey: neighbour.tenant, valuationDate: new Date('2026-02-01'), value: 90_000 }, { partial: true });
     await em.flush();
@@ -187,6 +205,11 @@ describe('household export', () => {
       expect(archive.data['recurring-occurrences']).toHaveLength(1);
       expect(archive.data['rules']!.map((row) => row['name'])).toEqual(['SHARED-RULE']);
       expect(archive.data['goal-transaction-fundings']).toHaveLength(1);
+      // The private card's settings and plans go with it.
+      expect(archive.data['credit-cards']).toHaveLength(1);
+      expect(archive.data['installment-plans']!.map((row) => row['description'])).toEqual(['SHARED-PLAN']);
+      expect(archive.data['installments']).toHaveLength(2);
+      expect(archive.data['transactions']!.filter((row) => row['installmentPlanId'] !== null)).toEqual([expect.objectContaining({ description: 'SHARED-DESCRIPTION', installmentNumber: 1, installmentPlanId: 1 })]);
     });
 
     it('keeps household rows that link to it, without the link', async () => {
@@ -225,9 +248,23 @@ describe('household export', () => {
 
     expect(archive.text).not.toContain('OWNER-LOAN');
     expect(archive.text).not.toContain('OWNERWATCH');
+    expect(archive.text).not.toContain('OWNER-TEMPLATE');
     expect(archive.data['loans']).toEqual([]);
     expect(archive.data['loan-repayments']).toEqual([]);
     expect(archive.data['watchlist']).toEqual([]);
+    expect(archive.data['transaction-templates']).toEqual([]);
+  });
+
+  it("holds the household's own exchange rates and the member's own templates, never a neighbour's", async () => {
+    const { owner, partner } = await households();
+
+    const archive = await exportFor(scopeOf(owner));
+
+    expect(archive.data['transaction-templates']).toEqual([expect.objectContaining({ accountId: 1, direction: 'out', name: 'OWNER-TEMPLATE' })]);
+    const expected = [{ createdByMemberId: 2, date: '2026-07-01', fromCurrency: 'USD', rate: '0.92', toCurrency: 'EUR' }];
+    expect(archive.data['exchange-rate-overrides']).toEqual(expected);
+    // The partner sees the same household rate, set by themselves (member 1 of their export).
+    expect((await exportFor(scopeOf(owner, partner))).data['exchange-rate-overrides']).toEqual([{ ...expected[0], createdByMemberId: 1 }]);
   });
 
   describe('manual assets', () => {
