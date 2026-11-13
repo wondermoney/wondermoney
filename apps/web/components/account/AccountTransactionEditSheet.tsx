@@ -13,6 +13,7 @@ import { SaveTransactionAsTemplateDialog } from "@/components/account/SaveTransa
 import TransactionActivity from "@/components/account/TransactionActivity";
 import { TransactionAttachments } from "@/components/account/TransactionAttachments";
 import { TransactionReimbursementField } from "@/components/account/TransactionReimbursementField";
+import { TransactionSpentByField } from "@/components/account/TransactionSpentByField";
 import {
   splitSaveErrorKey,
   TransactionSplitField,
@@ -371,6 +372,11 @@ export function AccountTransactionEditSheet({
             />
             {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
             <TransactionReimbursementField
+              transaction={transaction}
+              disabled={isSubmitting}
+            />
+            {/* Whose spending it counts as, in a household of more than one. Saves at once. */}
+            <TransactionSpentByField
               transaction={transaction}
               disabled={isSubmitting}
             />

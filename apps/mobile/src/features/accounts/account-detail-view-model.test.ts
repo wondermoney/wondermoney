@@ -21,6 +21,7 @@ describe('account detail view model', () => {
     expect(mapAccountDetail(dto)).toEqual({
       accountId: 42,
       accountName: null,
+      attribution: null,
       institutionDisplayName: 'Wonder Bank',
       isOwnedByViewer: true,
       isPrivate: false,

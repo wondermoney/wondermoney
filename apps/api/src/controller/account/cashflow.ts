@@ -22,7 +22,7 @@ import { DI } from '../../app.js';
  */
 export async function getAccountsCashflow(req: Request, res: Response) {
   const {
-    query: { fromDate, timezone, toDate },
+    query: { fromDate, memberKeys, timezone, toDate },
   } = await zParse(getAccountsCashflowRequestSchema, req);
 
   if (!req.user || !req.tenant) throw new Error('User not found');
@@ -30,7 +30,8 @@ export async function getAccountsCashflow(req: Request, res: Response) {
   if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
   const tenantKey = req.tenant.tenantKey;
 
-  const scope = dashboardScope({ dateRange: { from: fromDate, timeZone: timezone, to: toDate }, tenantKey, viewerAppuserKey: viewer.appuserKey });
+  // `memberKeys`: one member's part of the month, or Shared (`member-attribution.ts`).
+  const scope = dashboardScope({ dateRange: { from: fromDate, timeZone: timezone, to: toDate }, members: memberKeys, tenantKey, viewerAppuserKey: viewer.appuserKey });
   const { completeness, months } = await getTransactionTotals(DI.em, {
     byMonth: { timeZone: timezone },
     currency: { code: viewer.currencyKey.code, currencyKey: viewer.currencyKey.currencyKey },

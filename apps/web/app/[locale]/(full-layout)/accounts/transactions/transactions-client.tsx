@@ -16,6 +16,7 @@ import AccountTransactionImportModal from "@/components/account/AccountTransacti
 import TransactionsTable from "@/components/account/AccountTransactionsTable";
 import { TransactionsLead } from "@/components/account/TransactionsLead";
 import { TransactionsReportScope } from "@/components/account/TransactionsReportScope";
+import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -33,6 +34,7 @@ import type {
 import { useInfiniteTransactions } from "@/lib/api/account/useTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import { serverSeed } from "@/lib/query/server-seed";
 
 interface AccountsTransactionsClientProps {
@@ -135,9 +137,13 @@ export default function AccountsTransactionsClient({
 
   const [showHiddenTransactions, setShowHiddenTransactions] = useState(false);
 
+  // One member's (or Shared) rows, from the URL's `member`; a report's member filter arrives there.
+  const { memberKeys } = useMemberFilter();
+
   // True only while the visible query matches what the server rendered.
   const isServerRenderedQuery =
     !reportScope &&
+    !memberKeys &&
     !showHiddenTransactions &&
     transactionDateRange?.from?.getTime() === defaultDateRange.from.getTime() &&
     transactionDateRange?.to?.getTime() === defaultDateRange.to.getTime();
@@ -217,6 +223,7 @@ export default function AccountsTransactionsClient({
         ? tableFilters.tagKeys
         : reportScope?.tagKeys,
     transactionTypes: tableFilters.transactionTypes,
+    ...(memberKeys ? { memberKeys } : {}),
     ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
     ...(reportScope
       ? {
@@ -278,8 +285,9 @@ export default function AccountsTransactionsClient({
     transactionsData?.transactions &&
     transactionsData.transactions.length === 0;
 
-  // Only show empty state for transactions if user hasn't filtered by date
-  const showTransactionsEmptyState = noTransactions && !hasUsedDateFilter;
+  // Only show empty state for transactions if user hasn't filtered by date or member
+  const showTransactionsEmptyState =
+    noTransactions && !hasUsedDateFilter && !memberKeys;
 
   if (isLoading) {
     return <Spinner />;
@@ -370,44 +378,48 @@ export default function AccountsTransactionsClient({
               exactly like a quiet spending day. */}
           <AccountsFreshness accounts={accountsData?.accounts} />
         </div>
-        {editableAccounts.length > 0 ? (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <AccountTransactionImportModal
-              isOpen={isImportTransactionModalOpen}
-              setOpen={(open) => {
-                if (!open) {
-                  closeImportTransactionModal();
-                } else {
-                  openImportTransactionModal();
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
+          <MemberFilterControl />
+          {editableAccounts.length > 0 ? (
+            <>
+              <AccountTransactionImportModal
+                isOpen={isImportTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeImportTransactionModal();
+                  } else {
+                    openImportTransactionModal();
+                  }
+                }}
+                accounts={editableAccounts}
+                trigger={
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Download className="size-4" />
+                    {t("import-transactions")}
+                  </Button>
                 }
-              }}
-              accounts={editableAccounts}
-              trigger={
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <Download className="size-4" />
-                  {t("import-transactions")}
-                </Button>
-              }
-            />
-            <AccountTransactionAddModal
-              isOpen={isAddManualTransactionModalOpen}
-              setOpen={(open) => {
-                if (!open) {
-                  closeAddManualTransactionModal();
-                } else {
-                  openAddManualTransactionModal();
+              />
+              <AccountTransactionAddModal
+                isOpen={isAddManualTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeAddManualTransactionModal();
+                  } else {
+                    openAddManualTransactionModal();
+                  }
+                }}
+                accounts={editableAccounts}
+                trigger={
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="size-4" />
+                    {t("add-transaction")}
+                  </Button>
                 }
-              }}
-              accounts={editableAccounts}
-              trigger={
-                <Button className="w-full sm:w-auto">
-                  <Plus className="size-4" />
-                  {t("add-transaction")}
-                </Button>
-              }
-            />
-          </div>
-        ) : null}
+              />
+            </>
+          ) : null}
+        </div>
       </div>
 
       {reportScope ? (

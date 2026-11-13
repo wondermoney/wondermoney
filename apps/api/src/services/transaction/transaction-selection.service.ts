@@ -22,8 +22,8 @@ export type TransactionSelection = { filter: TransactionListFilter; transactionI
 
 /** The list's parsed filters as `buildTransactionWhere` takes them, named as `GET /v1/account/transaction` maps them. */
 export function toTransactionFilterInput(filter: TransactionListFilter): TransactionFilterInput {
-  const { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrency, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly } = filter;
-  return { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly };
+  const { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrency, memberKeys, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly } = filter;
+  return { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, members: memberKeys, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly };
 }
 
 /**

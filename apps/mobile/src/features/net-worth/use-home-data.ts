@@ -59,7 +59,7 @@ export function useHomeBudgetMonths(months: readonly Readonly<{ budgetId: number
 }
 
 /** Net cash flow per month over the last six months, the endpoint web's home reads. */
-export function useHomeCashflow(today: Date) {
+export function useHomeCashflow(today: Date, memberKeys?: string) {
   const scope = useMemo<DateScope>(() => ({
     fromDate: cashflowFromDate(today, CASHFLOW_MONTHS).toISOString(),
     // Month-to-date: a future-dated row must not make this month's figures
@@ -68,11 +68,11 @@ export function useHomeCashflow(today: Date) {
   }), [today])
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useHomeCashflow requires an authenticated runtime')
-  return useInsightQuery(createCashflowEndpoint(scope), cashflowKey(runtime.epochId, scope))
+  return useInsightQuery(createCashflowEndpoint(scope, memberKeys), cashflowKey(runtime.epochId, scope, memberKeys))
 }
 
 /** The same days of last month, for this month's change figures. */
-export function useHomeCashflowComparison(today: Date) {
+export function useHomeCashflowComparison(today: Date, memberKeys?: string) {
   const range = useMemo(() => monthComparisonRange(today), [today])
   const scope = useMemo<DateScope>(() => ({
     fromDate: range.from.toISOString(),
@@ -80,7 +80,7 @@ export function useHomeCashflowComparison(today: Date) {
   }), [range])
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useHomeCashflowComparison requires an authenticated runtime')
-  return useInsightQuery(createCashflowEndpoint(scope), cashflowKey(runtime.epochId, scope))
+  return useInsightQuery(createCashflowEndpoint(scope, memberKeys), cashflowKey(runtime.epochId, scope, memberKeys))
 }
 
 /** The household's portfolios list, for the setup checklist's "Track your investments" step. */

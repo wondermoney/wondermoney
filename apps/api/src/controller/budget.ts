@@ -28,6 +28,7 @@ import {
   deleteBudgetRequestSchema,
   getBudgetForecastRequestSchema,
   getBudgetRequestSchema,
+  getBudgetsFullRequestSchema,
   getBudgetSuggestionsRequestSchema,
   getBudgetTemplateByYearAndMonthRequestSchema,
   getBudgetTemplateByYearRequestSchema,
@@ -375,6 +376,9 @@ export async function getBudgets(_req: Request, res: Response) {
 
 export async function getBudgetsFull(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
+  const {
+    query: { memberKeys },
+  } = await zParse(getBudgetsFullRequestSchema, req);
   // Each budget is shown in the budget month today is in, which its start day decides.
   const now = new Date();
 
@@ -444,6 +448,7 @@ export async function getBudgetsFull(req: Request, res: Response) {
     const { categories, completeness } = await getBudgetSpending({
       accountKeys: accounts.map((account) => account.accountKey),
       currency: budget.currencyKey,
+      members: memberKeys,
       period: 'monthly',
       periodStartDay: budget.periodStartDay,
       templateKeys: currentMonthBudgetTemplates.map((template) => template.budgetTemplateCategoryKey),

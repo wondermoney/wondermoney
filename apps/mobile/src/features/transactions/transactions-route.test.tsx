@@ -42,6 +42,8 @@ jest.mock('./use-delete-transactions', () => ({
 }))
 jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: () => ({ mutateAsync: mockMutateAmountAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
+jest.mock('./use-edit-transaction-attribution', () => ({ useEditTransactionAttribution: () => ({ mutateAsync: jest.fn(), isPending: false }) }))
+jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS }))
 jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
 jest.mock('./use-transaction-reimbursements', () => ({ useUnlinkReimbursement: () => ({ mutateAsync: mockUnlinkAsync, isPending: false }) }))
 jest.mock('./transaction-reimbursement-screen', () => ({ TransactionReimbursementScreen: (props: { transaction: { id: number } }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{`reimburse ${props.transaction.id}`}</Native.Text> } }))

@@ -58,6 +58,12 @@ export const categorySchema = open('Category', {
   parentCategoryKey: nullableNumber,
 });
 
+/** Whose money a row is, for reporting and the member filter: a member's key and name, both null for Shared. */
+const attributionFields = {
+  appuserKey: nullableNumber.openapi({ description: 'The member the money is attributed to; null for Shared (a joint account, or someone no longer in the household).' }),
+  displayName: nullableString,
+};
+
 export const accountSchema = open('Account', {
   accountFinancialInstitutionKey: z
     .object({ displayName: nullableString, logoUrl: nullableString })
@@ -67,14 +73,17 @@ export const accountSchema = open('Account', {
   accountType: nullableString,
   appuserCurrencyAvailableBalance: nullableNumber,
   appuserCurrencyBalance: nullableNumber,
+  attribution: z.object(attributionFields).openapi({ description: 'The account\u2019s attribution: its owner, or Shared when joint.' }),
   availableBalance: nullableNumber,
   balance: nullableNumber,
   creditCard: z.record(z.string(), z.unknown()).nullable(),
   currencyKey: z.object({ code: z.string() }),
   fxStatus: z.string(),
+  isJoint: z.boolean().openapi({ description: 'A joint account: its money is Shared in reports and the member filter.' }),
   isOwnedByViewer: z.boolean(),
   isPrivate: z.boolean(),
   myAccess: z.enum(['owner', 'write', 'read']),
+  ownerAppuserKey: nullableNumber,
   ownerFirstName: nullableString,
   refreshedAt: nullableString,
   source: z.enum(['manual', 'open_banking']),
@@ -172,6 +181,9 @@ export const reimbursementSuggestionSchema = linkedTransactionSchema.extend({
 export const transactionSchema = open('Transaction', {
   accountKey: z.union([id, z.object({ accountKey: id })]).optional(),
   amount: money,
+  attribution: z
+    .object({ ...attributionFields, overridden: z.boolean().openapi({ description: 'True when the transaction sets its own attribution ("Spent by"); false when it follows its account.' }) })
+    .optional(),
   categoryKey: nullableNumber,
   currencyKey: z.object({ code: z.string() }).optional(),
   description: nullableString,

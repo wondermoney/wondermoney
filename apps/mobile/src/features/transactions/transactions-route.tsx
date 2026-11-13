@@ -1,9 +1,11 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { mapCategories } from '@/features/categories/categories-view-model'
 import { useCategories } from '@/features/categories/use-categories'
+import { effectiveMemberFilter, type AccountAttributionDto, type SpentByValue } from '@/features/household/member-attribution'
+import { useHouseholdMembers } from '@/features/household/use-household-members'
 import { useAiHiddenPreference } from '@/features/preferences/use-ai-hidden'
 import { RuleApplyOffer } from '@/features/rules/rule-apply-offer'
 import { RuleEditorSheet } from '@/features/rules/rule-editor-sheet'
@@ -27,6 +29,7 @@ import { DEFAULT_RANGE_DAYS, presetRange } from './transactions-date-range'
 import { type BulkDeleteOutcome, type BulkScope, type DeleteOneResult, TransactionsScreen, type ReviewResult, type TransactionsFreshness, type TransactionsViewState, type UnlinkReimbursementResult } from './transactions-screen'
 import { mapTransactions } from './transactions-view-model'
 import { useEditTransactionAmount } from './use-edit-transaction-amount'
+import { useEditTransactionAttribution } from './use-edit-transaction-attribution'
 import { useEditTransactionTransfer } from './use-edit-transaction-transfer'
 import { skippedBankSyncedIds, useDeleteTransactions } from './use-delete-transactions'
 import { useTransactionBulkActions, type TransactionBulkAction, type TransactionBulkSelection } from './use-mark-reviewed'
@@ -112,14 +115,22 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const reviewOnly = !perAccount && firstParam(params.filter) === 'unreviewed'
   // Web opens both ledgers on the last 60 days (`subDays(new Date(), 60)`).
   const [filters, setFilters] = useState<TransactionFilters>(() => initialFilters(params, reviewOnly))
-  const query = useTransactions(filters, perAccount ? accountId : null)
+  const members = useHouseholdMembers()
+  // The member filter applies to the all-accounts ledger only, and never names someone who left.
+  const memberFilter = perAccount ? null : effectiveMemberFilter(filters.memberKeys?.[0] ?? null, members)
+  const requestFilters = useMemo<TransactionFilters>(() => ({ ...filters, memberKeys: memberFilter === null ? undefined : [memberFilter] }), [filters, memberFilter])
+  const query = useTransactions(requestFilters, perAccount ? accountId : null)
   const accountsQuery = useAccounts()
+  const accountAttributions = useMemo(() => new Map<number, AccountAttributionDto>((accountsQuery.data?.accounts ?? []).flatMap((account) => (
+    account.attribution ? [[account.accountKey, account.attribution] as const] : []
+  ))), [accountsQuery.data])
   const lead = useTransactionsLead({ fromDate: filters.fromDate, toDate: filters.toDate }, !perAccount)
   const categoriesQuery = useCategories()
   const mutation = useTransactionBulkActions()
   const deletion = useDeleteTransactions()
   const amountMutation = useEditTransactionAmount()
   const transferMutation = useEditTransactionTransfer()
+  const attributionMutation = useEditTransactionAttribution()
   const setSplits = useSetTransactionSplits()
   const removeSplits = useRemoveTransactionSplits()
   const unlinkReimbursement = useUnlinkReimbursement()
@@ -179,7 +190,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   }
 
   // "Every matching row" is the list's own server filters, and on one account's ledger that account.
-  const selectionOf = (scope: BulkScope): TransactionBulkSelection => (scope === 'matching' ? { filter: filters, accountId: perAccount ? accountId : null } : { transactionIds: scope })
+  const selectionOf = (scope: BulkScope): TransactionBulkSelection => (scope === 'matching' ? { filter: requestFilters, accountId: perAccount ? accountId : null } : { transactionIds: scope })
 
   const runBulkDelete = async (scope: BulkScope): Promise<BulkDeleteOutcome> => {
     try {
@@ -213,6 +224,15 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const runSetTransfer = async (draft: TransferEditDraft): Promise<ReviewResult> => {
     try {
       await transferMutation.mutateAsync(draft)
+      return 'success'
+    } catch (error) {
+      return classifyResult(error, blockAccess)
+    }
+  }
+
+  const runSetSpentBy = async (transactionId: number, attributedAppuserKey: SpentByValue): Promise<ReviewResult> => {
+    try {
+      await attributionMutation.mutateAsync({ transactionId, attributedAppuserKey })
       return 'success'
     } catch (error) {
       return classifyResult(error, blockAccess)
@@ -271,12 +291,12 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   return <>
   <TransactionsScreen
     state={state}
-    filters={filters}
+    filters={requestFilters}
     total={query.data?.total ?? null}
     hasMore={query.data?.hasMore}
     categories={categoryState}
     accountCount={accountsQuery.data?.accounts.length}
-    pending={mutation.isPending || deletion.bulk.isPending || deletion.single.isPending || amountMutation.isPending || transferMutation.isPending || setSplits.isPending || removeSplits.isPending || unlinkReimbursement.isPending}
+    pending={mutation.isPending || deletion.bulk.isPending || deletion.single.isPending || amountMutation.isPending || transferMutation.isPending || attributionMutation.isPending || setSplits.isPending || removeSplits.isPending || unlinkReimbursement.isPending}
     accountName={accountName}
     perAccount={perAccount}
     lead={perAccount ? undefined : lead}
@@ -313,6 +333,9 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onOpenTransaction={(linked) => router.push(linkedTransactionHref(linked))}
     focusTransactionId={focusTransactionId}
     readOnlyAccountIds={readOnlyAccountIds}
+    members={members}
+    accountAttributions={accountAttributions}
+    onSetSpentBy={members.multiMember && !members.readOnly ? runSetSpentBy : undefined}
   />
   {reimburseRow ? (
     <TransactionReimbursementScreen

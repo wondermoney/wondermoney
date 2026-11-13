@@ -48,6 +48,15 @@ export interface Account {
   ownerFirstName: string | null;
   /** The caller's access; every edit action is hidden when it is `read`. */
   myAccess: AccountAccess;
+  /**
+   * Member attribution (issue #96). Optional so fixtures written before it still type-check;
+   * `normalizeAccount` always fills them. A joint account's spending counts as Shared; it does
+   * not change who can see the account.
+   */
+  isJoint?: boolean;
+  ownerAppuserKey?: number | null;
+  /** Whose money the account is by default: a member, or Shared (`appuserKey` null). */
+  attribution?: AccountAttribution;
   /** Current balance net of pending transactions. Null when unknown. */
   availableBalance: number | null;
   appuserCurrencyAvailableBalance: number | null;
@@ -65,6 +74,12 @@ export interface Account {
 }
 
 export type AccountCsvImportFormat = "bank" | "generic";
+
+/** A member (their key and name), or Shared when `appuserKey` is null. */
+export interface AccountAttribution {
+  appuserKey: number | null;
+  displayName: string | null;
+}
 
 /**
  * A credit card's cycle and limit, as the API stores it. Present only on an account the user (or
@@ -100,6 +115,9 @@ export interface AccountWire {
   isOwnedByViewer?: boolean;
   ownerFirstName?: string | null;
   myAccess?: string | null;
+  isJoint?: boolean;
+  ownerAppuserKey?: number | null;
+  attribution?: { appuserKey?: number | null; displayName?: string | null } | null;
 }
 
 export interface GetAccountsWireResponse {
@@ -177,6 +195,22 @@ function normalizeSyncStatus(value: unknown): SyncStatus | null {  if (!isRecord
     lastSyncedAt:
       typeof value.lastSyncedAt === "string" ? value.lastSyncedAt : null,
     hasOpenIncident: value.hasOpenIncident === true,
+  };
+}
+
+function normalizeMemberKey(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+// Lenient, like the sync status: an older API sends no attribution, which reads as Shared.
+function normalizeAttribution(value: unknown): AccountAttribution {
+  if (!isRecord(value)) return { appuserKey: null, displayName: null };
+  return {
+    appuserKey: normalizeMemberKey(value.appuserKey),
+    displayName:
+      typeof value.displayName === "string" ? value.displayName : null,
   };
 }
 
@@ -297,6 +331,9 @@ function normalizeAccount(account: unknown): Account {
       account.myAccess,
       account.isOwnedByViewer === true,
     ),
+    isJoint: account.isJoint === true,
+    ownerAppuserKey: normalizeMemberKey(account.ownerAppuserKey),
+    attribution: normalizeAttribution(account.attribution),
     availableBalance: normalizeNullableBalance(account.availableBalance),
     appuserCurrencyAvailableBalance: normalizeNullableBalance(
       account.appuserCurrencyAvailableBalance,

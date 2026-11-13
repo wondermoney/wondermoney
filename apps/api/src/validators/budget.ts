@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
 import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
+import { parseMemberFilter } from '@service/household/member-attribution';
 import { Recurrency } from '@utils/budget';
+import { memberKeysFilter } from '@validators/reports';
 
 // Matches the existing income-amount ceiling below (createBudgetRequestSchema.incomes[].amount) so
 // every budget-domain money field shares one sanity cap. Generous enough for any real household
@@ -22,6 +24,14 @@ export const updateBudgetRequestSchema = z.object({
   params: z.object({
     budgetKey: z.coerce.number().positive(),
   }),
+});
+
+/**
+ * `GET /v1/budget/full`: every budget's current month. `memberKeys` measures only what those members
+ * spent, or Shared (`member-attribution.ts`); the budgeted amounts stay the household's.
+ */
+export const getBudgetsFullRequestSchema = z.object({
+  query: z.object({ memberKeys: memberKeysFilter.transform((keys) => parseMemberFilter(keys)) }),
 });
 
 export const getBudgetRequestSchema = z.object({

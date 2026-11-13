@@ -140,6 +140,11 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
   route and `hidden-account-aggregates.http.test.ts` every aggregate. Shares are changed by the
   account owner or the household owner (`PUT /v1/account/:accountId/shares`); a removed member's
   shares stay, and nobody else gains access to their private accounts.
+- **Member attribution** (`services/household/member-attribution.ts`) is who money belongs to for
+  reporting, never who sees it: a transaction's own "Spent by" (`attributedAppuserKey`,
+  `attributedToShared`), else its account's owner, or Shared on a joint account (`isJoint`) or
+  for someone who left. The `memberKeys` filter (`TransactionScope.members`) only narrows rows
+  the visibility rule already allows.
 - **Invites**: `HouseholdInvite` is a 7-day single-use token carrying the role to join with; a
   pending one holds a seat. The seat count and the write run under the tenant row lock
   (`lockTenant`). A new signup joins through the auth callback's `inviteToken`; an existing,

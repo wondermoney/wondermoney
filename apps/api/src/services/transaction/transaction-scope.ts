@@ -2,6 +2,7 @@ import { raw } from '@mikro-orm/core';
 import { type Expression, sql, type SqlBool } from 'kysely';
 
 import { visibleAccountSql } from '@service/account/account-visibility-sql';
+import { type MemberFilter, memberFilterSql, transactionAttributionSql } from '@service/household/member-attribution';
 
 import { hasSpendingLineSql } from './category-lines';
 import { type TransactionDateRange, transactionDateRangeSql } from './transaction-date-range';
@@ -40,6 +41,9 @@ import { notExpiredTransactionSql } from './transaction-status';
  * - `includeNonSpending`: false leaves out a row none of whose category lines counts as spending
  *   (`category-spending.ts`). A split row with some spending lines stays; a total then adds only
  *   those lines (`transaction-totals.ts`, `spendingLinesOf`).
+ * - `members`: only rows attributed to these members, or to Shared (`member-attribution.ts`). It
+ *   narrows the rows the tenant and privacy rules leave, so it never brings in a row the viewer
+ *   could not already see.
  */
 export type TransactionStatusName = 'BOOKED' | 'PENDING';
 
@@ -55,6 +59,8 @@ export interface TransactionScope {
   includeHidden: boolean;
   includeNonSpending: boolean;
   includeTransfers: boolean;
+  /** Only rows attributed to these members or to Shared (absent: every row). */
+  members?: MemberFilter;
   /** Only rows stored in this member currency (`appuserCurrencyKey`, by code). */
   memberCurrencyCode?: string;
   /** Only rows with one of these merchants. */
@@ -128,6 +134,7 @@ export function transactionScopeSql(alias: string, scope: TransactionScope): Sql
     visibleAccountSql('scope_account', Number(viewer)),
     ...(scope.openAccountsOnly ? ['scope_account."closed" = false'] : []),
     ...(scope.accountKeys && scope.accountKeys.length > 0 ? [`scope_account."account_key" = any(${integerList(scope.accountKeys, 'accountKeys')})`] : []),
+    ...(scope.members ? [memberFilterSql(transactionAttributionSql(alias, 'scope_account', scope.tenantKey), scope.members)] : []),
   ];
   const conditions = [
     `${row}."tenant_key" = ${tenantKey}`,
@@ -183,6 +190,6 @@ export function transactionScopeExpression(alias: string, scope: TransactionScop
  * categories that count as spending. The transaction list shows the same rows with
  * `excludeTransfers` and `excludeNonSpending`.
  */
-export function dashboardScope(input: Pick<TransactionScope, 'dateRange' | 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
+export function dashboardScope(input: Pick<TransactionScope, 'dateRange' | 'members' | 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
   return { ...input, includeHidden: false, includeNonSpending: false, includeTransfers: false, statuses: 'not-expired' };
 }

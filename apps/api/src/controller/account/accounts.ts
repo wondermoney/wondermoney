@@ -25,8 +25,9 @@ import { mapCreditCardDetail } from '@service/account/credit-card-statement.serv
 import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
+import { accountAttributionDto, loadActiveMembers } from '@service/household/member-attribution';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
-import { BadRequestError, ERROR_CODE, InternalServerError, NotFoundError } from '@utils/errors';
+import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
  * The "not found" branches below are 404s, not 500s: each is a client supplying an id that does
@@ -149,14 +150,15 @@ export async function getAccount(req: Request, res: Response) {
     throw new NotFoundError('Account not found');
   }
 
-  const [syncIncidentContext, pendingSumsByAccount, [fx], accessByAccount] = await Promise.all([
+  const [syncIncidentContext, pendingSumsByAccount, [fx], accessByAccount, members] = await Promise.all([
     loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount([account.accountKey]),
     describeAccountsFx([account], rateScope(req.tenant)),
     loadAccountAccess(DI.em, [account.accountKey], accountActor(req)),
+    loadActiveMembers(DI.em, req.tenant.tenantKey),
   ]);
   const creditCard = await DI.em.findOne(CreditCardDetail, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined });
-  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, accessByAccount, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
+  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, accessByAccount, members, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -198,11 +200,12 @@ export async function getAccounts(req: Request, res: Response) {
       ],
     },
   );
-  const [syncIncidentContext, pendingSumsByAccount, fx, accessByAccount] = await Promise.all([
+  const [syncIncidentContext, pendingSumsByAccount, fx, accessByAccount, members] = await Promise.all([
     loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
     describeAccountsFx(accounts, rateScope(req.tenant)),
     loadAccountAccess(DI.em, accounts.map((account) => account.accountKey), accountActor(req)),
+    loadActiveMembers(DI.em, req.tenant.tenantKey),
   ]);
   const positions = await DI.em.find(AppuserAccountPosition, { appuserKey: req.user });
   const positionByAccount = new Map<number, number>();
@@ -214,7 +217,7 @@ export async function getAccounts(req: Request, res: Response) {
   // An account this member has not placed (a new one) sorts after every placed one.
   accounts.sort((a, b) => (positionByAccount.get(a.accountKey) ?? Number.MAX_SAFE_INTEGER) - (positionByAccount.get(b.accountKey) ?? Number.MAX_SAFE_INTEGER));
   const creditCards = await loadCreditCardDetailsByAccount(accounts.map((account) => account.accountKey));
-  const syncContext = { ...syncIncidentContext, accessByAccount, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
+  const syncContext = { ...syncIncidentContext, accessByAccount, members, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
   const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index], creditCards.get(account.accountKey) ?? null));
   return res.json({ accounts: transformedData });
 }
@@ -303,6 +306,8 @@ export interface AccountSyncContext {
   viewerAppuserKey?: number;
   /** The requesting member's access to each account (`account-access.ts`), for `myAccess`. */
   accessByAccount?: Map<number, AccountAccess>;
+  /** The household's active members by key, for the account's attribution (`member-attribution.ts`). */
+  members?: ReadonlyMap<number, string>;
 }
 
 /**
@@ -366,6 +371,11 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     // the loaded access a private account the viewer does not own reads as view-only.
     myAccess: syncContext?.accessByAccount?.get(account.accountKey)
       ?? (account.accountOwnerAppuserKey?.appuserKey === syncContext?.viewerAppuserKey ? 'owner' : account.isPrivate ? 'read' : 'write'),
+    // Whose money the account is for reporting: its owner, or Shared (null) when joint or when its
+    // owner has left the household. Not who can see it.
+    attribution: accountAttributionDto(account, syncContext?.members ?? new Map()),
+    isJoint: account.isJoint,
+    ownerAppuserKey: account.accountOwnerAppuserKey?.appuserKey ?? null,
     ownerFirstName: account.accountOwnerAppuserKey?.firstName ?? null,
     refreshedAt: account.refreshedAt?.toISOString() ?? null,
     source,
@@ -400,7 +410,7 @@ function accountRequisitionId(account: Account): string | undefined {
 export async function updateAccount(req: Request, res: Response, next: NextFunction) {
   const user = authedUser(req);
   const {
-    body: { accountName, isPrivate, openingBalance, openingBalanceDate },
+    body: { accountName, isJoint, isPrivate, openingBalance, openingBalanceDate },
     params: { accountId },
   } = await zParse(updateAccountRequestSchema, req);
   const account = await DI.em.findOne(Account, {
@@ -419,6 +429,16 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
     // members it is not shared with). Other members may rename a shared account but not change
     // who sees it. `PUT /v1/account/:accountId/shares` is the full control.
     await setAccountPrivacy(DI.em, account, accountActor(req), isPrivate);
+  }
+  if (isJoint !== undefined) {
+    // Joint is the owner's to say, like privacy: it moves the account's money from them to Shared
+    // in every report and member filter (`member-attribution.ts`). It changes nobody's access.
+    const ownerAppuserKey = (account.accountOwnerAppuserKey as unknown as undefined | { appuserKey: number })?.appuserKey;
+    if (ownerAppuserKey !== user.appuserKey) {
+      next(new ForbiddenError('Only the account owner can mark it as joint.', ERROR_CODE.ACCOUNT_OWNER_REQUIRED));
+      return;
+    }
+    account.isJoint = isJoint;
   }
   const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
   if (opensDifferently) {

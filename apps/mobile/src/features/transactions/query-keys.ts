@@ -6,6 +6,7 @@ const normalized = (filters: TransactionFilters) => ({
   needsReview: filters.needsReview === true,
   includeHidden: filters.includeHidden === true,
   tagIds: [...(filters.tagIds ?? [])].sort((left, right) => left - right).join(','),
+  memberKeys: (filters.memberKeys ?? []).join(','),
   limit: filters.limit ?? 100,
 })
 

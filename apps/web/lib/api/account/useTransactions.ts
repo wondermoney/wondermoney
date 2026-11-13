@@ -101,6 +101,21 @@ export interface Transaction extends FxFields {
   bankSynced?: boolean;
   categorizationConfidence?: "high" | "medium" | "low" | "none" | null;
   categorizationReason?: string | null;
+  /**
+   * Whose spending the row counts as: a member, or Shared (`appuserKey` null). Optional because an
+   * older API does not send it.
+   */
+  attribution?: TransactionAttribution;
+}
+
+/**
+ * `overridden` is true when the row sets its own "Spent by"; false when it follows its account
+ * (the account's owner, or Shared for a joint account).
+ */
+export interface TransactionAttribution {
+  appuserKey: number | null;
+  displayName: string | null;
+  overridden: boolean;
 }
 
 export interface GetTransactionsResponse {
@@ -179,6 +194,11 @@ export interface GetTransactionRequest {
   merchantKeys?: string[];
   memberCurrency?: string;
   /**
+   * The member filter: member appuser keys or `shared` (`lib/household/member-attribution.ts`).
+   * Absent or empty for everyone.
+   */
+  memberKeys?: string[];
+  /**
    * Continuation token from the previous page's `nextCursor`. Omit for page one.
    *
    * Keyset, not offset: the cursor names the last row seen, so inserts and
@@ -219,6 +239,7 @@ export function transactionListParams(params: GetTransactionRequest) {
     transactionTypes: list(params.transactionTypes),
     statuses: list(params.statuses),
     merchantKeys: list(params.merchantKeys),
+    memberKeys: list(params.memberKeys),
   };
 }
 

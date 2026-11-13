@@ -15,6 +15,7 @@ import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
 import { accountActor, assertTransactionsWritable, loadSharedAccountKeys, onlyWritableTransactions } from '@service/account/account-access';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { loadActiveMembers, transactionAttributionDto } from '@service/household/member-attribution';
 import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
 import { type RuleSuggestion, suggestRuleAfterRecategorization } from '@service/rules/rule-suggestion.service';
@@ -25,6 +26,7 @@ import { findAssignableCategory } from '@service/transaction/household-category'
 import { toMerchantDto } from '@service/transaction/merchant-logo';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 import { findMerchantsSeenOnlyOnOthersPrivateAccounts } from '@service/transaction/merchant-visibility';
+import { updateTransactionAttribution } from '@service/transaction/transaction-attribution.service';
 import { MANUAL_CATEGORIZATION_SOURCE, TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
@@ -189,14 +191,14 @@ export async function getAccountTransactions(req: Request, res: Response) {
 export async function getCategorySpending(req: Request, res: Response, _next: NextFunction) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { fromDate, limit, timezone, toDate },
+    query: { fromDate, limit, memberKeys, timezone, toDate },
   } = await zParse(getCategorySpendingRequestSchema, req);
 
   // The dashboard's rows (`dashboardScope`), money out only: pending counts, EXPIRED rows
   // never moved money, a transfer between own accounts is not spending, and a row wholly in
   // categories that are not spending is left out. A row with no converted amount is read by the
   // sign of its own amount, so it is counted as left out below.
-  const scope = dashboardScope({ dateRange: { from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
+  const scope = dashboardScope({ dateRange: { from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }, members: memberKeys, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
   const expenseTransactions = await DI.em.find(Transaction, transactionScopeWhere({ ...scope, direction: 'out' }), {
     populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE],
   });
@@ -336,12 +338,12 @@ export async function getTransactionMerchants(req: Request, res: Response) {
 
 export async function getTransactions(req: Request, res: Response) {
   const {
-    query: { accountKeys, categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
+    query: { accountKeys, categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, memberKeys, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getTransactionsRequestSchema, req);
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
+    filters: { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, members: memberKeys, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: 'all-accounts',
     tenantKey: tenant.tenantKey,
@@ -371,7 +373,7 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryKey, notes, statementDateOverride, transactionType, transferDestination, updatedAmount },
+    body: { attributedAppuserKey, categoryKey, notes, statementDateOverride, transactionType, transferDestination, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
   // Authorize before any database access — a missing user or unresolved tenant must never
@@ -438,6 +440,10 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
   // `null` (or an empty note) clears it.
   if (notes !== undefined) {
     await updateTransactionNote(DI.em, { appuser: user, tenant }, transaction, notes);
+  }
+  // "Spent by": a member of the household, `shared`, or null for the account's default.
+  if (attributedAppuserKey !== undefined) {
+    await updateTransactionAttribution(DI.em, { appuser: user, tenant }, transaction, attributedAppuserKey);
   }
   // `!== undefined`, not truthiness: an edit to 0 is an edit.
   if (updatedAmount !== undefined) {
@@ -590,7 +596,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
 
   const merchant = transaction.transactionMerchantKey ? { transactionMerchantKey: toMerchantDto(transaction.transactionMerchantKey) } : {};
   const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: user.appuserKey, tenantKey: authedContext(req).tenantKey });
-  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, transferDestination: transferDestinationOf(transaction, user.appuserKey, sharedAccountKeys) } });
+  const attribution = transactionAttributionDto(transaction, await loadActiveMembers(DI.em, tenant.tenantKey));
+  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, attribution, transferDestination: transferDestinationOf(transaction, user.appuserKey, sharedAccountKeys) } });
 }
 
 /**

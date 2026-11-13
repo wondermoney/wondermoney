@@ -1,3 +1,4 @@
+import { parseMemberFilter } from '@service/household/member-attribution';
 import netWorthService from '@service/net-worth/net-worth.service';
 
 import { round2, toCsv } from './csv';
@@ -29,6 +30,7 @@ export function buildNetWorthHistoryCsv(rows: NetWorthHistoryRow[]): string {
 export async function getNetWorthHistoryReport(input: ReportServiceInput): Promise<NetWorthHistoryRow[]> {
   const summary = await netWorthService.getNetWorthHistory(input.user, {
     granularity: 'monthly',
+    members: parseMemberFilter(input.filters.memberKeys),
     months: HISTORY_MONTHS,
     toDate: input.filters.toDate ? new Date(input.filters.toDate) : undefined,
   });

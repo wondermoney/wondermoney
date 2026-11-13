@@ -7,14 +7,14 @@ import { ApiError } from '@/lib/api/errors'
 import { createNetWorthHistoryEndpoint, NET_WORTH_HISTORY_MONTHS } from './net-worth-contract'
 import { netWorthHistoryKey } from './query-keys'
 
-export function useNetWorthHistory(months: number = NET_WORTH_HISTORY_MONTHS) {
+export function useNetWorthHistory(months: number = NET_WORTH_HISTORY_MONTHS, member?: string) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('useNetWorthHistory requires an authenticated runtime')
 
   const handledError = useRef<unknown>(null)
   const query = useQuery({
-    queryKey: netWorthHistoryKey(runtime.epochId, months),
-    queryFn: () => runtime.apiClient.read(createNetWorthHistoryEndpoint(months)),
+    queryKey: netWorthHistoryKey(runtime.epochId, months, member),
+    queryFn: () => runtime.apiClient.read(createNetWorthHistoryEndpoint(months, member)),
     retry: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

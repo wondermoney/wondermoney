@@ -16,6 +16,12 @@ vi.mock("@/lib/api/user-preferences/useUserPreferences", () => ({
   default: () => state.preferences,
 }));
 vi.mock("@/lib/utils/useHydrated", () => ({ useHydrated: () => true }));
+vi.mock("@/lib/household/useMemberFilter", () => ({
+  useMemberFilter: () => ({ filter: null, memberKeys: undefined, setFilter: () => {} }),
+}));
+vi.mock("@/components/household/MemberFilterSelect", () => ({
+  MemberFilterControl: () => null,
+}));
 vi.mock("./BankAlertsBanner", () => ({ BankAlertsBanner: () => null }));
 vi.mock("./CustomizeHomeSheet", () => ({ CustomizeHomeSheet: () => null }));
 vi.mock("@/components/dashboard/NetWorthViewedEvent", () => ({

@@ -39,6 +39,8 @@ export type AccountEditModel = Readonly<{
   name: string
   isPrivate: boolean
   isOwnedByViewer: boolean
+  /** Joint: its spending counts as Shared. Absent when the API doesn't say (older servers). */
+  isJoint?: boolean
   /** The card's cycle and limit, or null when the account is not a credit card. */
   creditCard?: CreditCardSettingsDto | null
   /** The caller's access. `read`: the account's details can't change; only its sharing shows. */
@@ -69,6 +71,8 @@ type Props = Readonly<{
   onSaveSharing?: (value: AccountSharesWrite) => Promise<void>
   onRetrySharing?: () => void
   sharingPending?: boolean
+  /** The household has more than one member: only then is "Joint account" offered. */
+  multiMember?: boolean
 }>
 
 
@@ -111,14 +115,21 @@ export function createCreditCardChanges(
 }
 
 export function createAccountMetadataChanges(
-  original: Pick<AccountEditModel, 'name' | 'isPrivate' | 'isOwnedByViewer'>,
-  current: { name: string; isPrivate: boolean },
+  original: Pick<AccountEditModel, 'name' | 'isPrivate' | 'isOwnedByViewer' | 'isJoint'>,
+  current: { name: string; isPrivate: boolean; isJoint?: boolean },
 ): AccountUpdateWrite | null {
   const changes: AccountUpdateWrite = {}
   if (current.name !== original.name) changes.accountName = current.name
   if (original.isOwnedByViewer && current.isPrivate !== original.isPrivate) changes.isPrivate = current.isPrivate
+  // Owner only, like privacy; an account whose joint state the API didn't send is never changed.
+  if (original.isOwnedByViewer && original.isJoint !== undefined && current.isJoint !== undefined && current.isJoint !== original.isJoint) changes.isJoint = current.isJoint
   return Object.keys(changes).length > 0 ? changes : null
 }
+
+/** "Joint account" is the owner's to set, in a household of more than one, on an API that reports it. */
+export const canSetJointAccount = (model: Pick<AccountEditModel, 'isOwnedByViewer' | 'isJoint'>, multiMember: boolean): boolean => (
+  model.isOwnedByViewer && multiMember && model.isJoint !== undefined
+)
 
 const confirmDiscard = (title: string, message: string, cancel: string, proceed: string) => new Promise<boolean>((resolve) => {
   Alert.alert(title, message, [
@@ -136,7 +147,7 @@ export function AccountEditScreen(props: Props) {
   return <AccountEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
 }
 
-function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard, onDeleteAccount, pending, creditCardPending, deletePending, sharing = { status: 'unsupported' }, onSaveSharing, onRetrySharing, sharingPending = false, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
+function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard, onDeleteAccount, pending, creditCardPending, deletePending, sharing = { status: 'unsupported' }, onSaveSharing, onRetrySharing, sharingPending = false, multiMember = false, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
   const { t } = useTranslation()
   // A member who can only view the account sees its sharing and nothing to change on it.
   const readOnly = !canWriteAccount(model)
@@ -156,6 +167,8 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard
   const [saved, setSaved] = useState(model)
   const [name, setName] = useState(model.name)
   const [isPrivate, setIsPrivate] = useState(model.isPrivate)
+  const [isJoint, setIsJoint] = useState(model.isJoint)
+  const showJoint = canSetJointAccount(model, multiMember)
   const [cardEnabled, setCardEnabled] = useState(Boolean(model.creditCard))
   const [statementCloseDay, setStatementCloseDay] = useState(String(model.creditCard?.statementCloseDay ?? 1))
   const [paymentDueDay, setPaymentDueDay] = useState(String(model.creditCard?.paymentDueDay ?? 1))
@@ -163,7 +176,7 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard
   const [minimumPaymentPercent, setMinimumPaymentPercent] = useState(model.creditCard?.minimumPaymentPercent == null ? '' : String(model.creditCard.minimumPaymentPercent))
   const [failure, setFailure] = useState<AccountWriteFailure | null>(null)
   const [deleteFailure, setDeleteFailure] = useState<AccountDeleteFailure | null>(null)
-  const changes = readOnly ? null : createAccountMetadataChanges(saved, { name, isPrivate: legacyPrivacy ? isPrivate : saved.isPrivate })
+  const changes = readOnly ? null : createAccountMetadataChanges(saved, { name, isPrivate: legacyPrivacy ? isPrivate : saved.isPrivate, isJoint: showJoint ? isJoint : saved.isJoint })
   const cardForm: CreditCardForm = { creditLimit, enabled: cardEnabled, minimumPaymentPercent, paymentDueDay, statementCloseDay }
   const cardChanges = readOnly ? null : createCreditCardChanges(saved.creditCard ?? null, cardForm)
   const dirty = changes !== null || cardChanges !== null || sharingChanges !== null
@@ -207,6 +220,7 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard
         ...current,
         name,
         isPrivate: legacyPrivacy ? isPrivate : current.isPrivate,
+        isJoint: changes?.isJoint ?? current.isJoint,
         creditCard: cardChanges
           ? {
               statementCloseDay: cardChanges.statementCloseDay,
@@ -311,6 +325,18 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard
                   label={t('accountEdit.privacyTitle')}
                   onValueChange={setIsPrivate}
                   value={isPrivate}
+                />
+              ) : null}
+              {showJoint ? (
+                <FormSwitchRow
+                  key="joint"
+                  accessibilityLabel={t('memberAttribution.jointTitle')}
+                  disabled={locked}
+                  hint={t('memberAttribution.jointHelper')}
+                  label={t('memberAttribution.jointTitle')}
+                  onValueChange={setIsJoint}
+                  testID="account-joint-switch"
+                  value={isJoint === true}
                 />
               ) : null}
             </FormGroup>

@@ -208,7 +208,9 @@ export interface TransactionAggregationRow {
   appuserKey: number;
   assignmentAppuserKey: null | number;
   assignmentDeleted: boolean | null;
+  /** Whose money the transaction is (`member-attribution.ts`): a member's key, null for Shared. */
   assignmentKey: null | number;
+  attribution?: null | number;
   categoryDeleted: boolean | null;
   categoryHasActiveChildren: boolean | null;
   categoryKey: null | number;

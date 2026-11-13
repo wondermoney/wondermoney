@@ -22,6 +22,7 @@ import React, {
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 
+import { MemberBadge } from "@/components/household/MemberBadge";
 import { useRuleSuggestionPrompt } from "@/components/rules/useRuleSuggestionPrompt";
 import DatePickerRange from "@/components/ui/DatePickerRange";
 import { Table } from "@/components/ui/Table";
@@ -46,6 +47,7 @@ import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useTags from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { transactionFxView } from "@/lib/fx/fx-status";
+import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
 import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -221,6 +223,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           !readOnlyAccountKeys.has(transaction.accountKey.accountKey),
         [readOnlyAccountKeys],
       );
+      // Whose spending each row is, shown only when there is more than one person to tell apart.
+      const showMembers = useHouseholdMembers().members.length > 1;
 
       // Edit transaction modal
       const [transactionData, setTransactionData] =
@@ -673,11 +677,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-muted-foreground truncate text-xs">
+                      <p className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                        {showMembers && transaction.attribution ? (
+                          <MemberBadge
+                            appuserKey={transaction.attribution.appuserKey}
+                            displayName={transaction.attribution.displayName}
+                          />
+                        ) : null}
+                        <span className="truncate">
                         {transaction.accountKey.accountName} ·{" "}
                         {formatShortDate(
                           transactionDisplayDate(transaction.transactionDate),
                         )}
+                        </span>
                       </p>
                       {categoryLabel ? (
                         <p className="text-muted-foreground truncate text-xs">
@@ -936,6 +948,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         ) : null}
                       </div>
                       <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                        {/* Whose spending it is, in a household of more than one. */}
+                        {showMembers && info.row.original.attribution ? (
+                          <MemberBadge
+                            appuserKey={info.row.original.attribution.appuserKey}
+                            displayName={
+                              info.row.original.attribution.displayName
+                            }
+                          />
+                        ) : null}
                         {/* The account is supporting context: a small, desaturated
                           logo so the bank's colours don't outshine the merchant. */}
                         {logoUrl ? (
@@ -1218,6 +1239,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           isLedger,
           openLinkedTransaction,
           canEditRow,
+          showMembers,
         ],
       );
 

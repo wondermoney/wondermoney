@@ -14,6 +14,7 @@ import { TransactionAttachment } from '@entity/TransactionAttachment';
 import { loadSharedAccountKeys, visibleAccountWhere } from '@service/account/account-access';
 import { type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
+import { accountAttributionDto, loadActiveMembers, transactionAttributionDto, type TransactionAttributionDto } from '@service/household/member-attribution';
 import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
@@ -118,9 +119,10 @@ export async function listTransactions(request: TransactionListRequest) {
   const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: viewerAppuserKey, tenantKey });
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const fx = await describeTransactionsFx(transactions, rateScope(tenantKey));
+  const members = await loadActiveMembers(DI.em, tenantKey);
   const rows = transactions.map((transaction, index) => {
     const row = {
-      ...toTransactionRow(transaction, viewerAppuserKey, sharedAccountKeys, spendingFlags),
+      ...toTransactionRow(transaction, viewerAppuserKey, sharedAccountKeys, spendingFlags, members),
       ...(fx[index] ?? UNKNOWN_FX),
       // The ledger shows a paperclip only when there is something behind it.
       attachmentCount: attachmentCounts.get(transaction.transactionKey) ?? 0,
@@ -135,7 +137,7 @@ export async function listTransactions(request: TransactionListRequest) {
   // Null when this page is the end of the set, so a client can stop without a second call.
   const nextCursor = lastRow && transactions.length >= limit ? encodeTransactionCursor(lastRow) : null;
 
-  const syntheticRows = await syntheticOpeningBalanceRows(accounts, filters, viewer.currencyKey.code, rateScope(tenantKey));
+  const syntheticRows = await syntheticOpeningBalanceRows(accounts, filters, viewer.currencyKey.code, rateScope(tenantKey), members);
   const pageSyntheticRows = syntheticRows.filter((row) => onThisPage(row.transactionDate, cursorTime(cursor), nextCursor ? lastRow?.transactionDate : undefined));
 
   const recurringSeries = await loadRecurringSeries(transactions, tenantKey);
@@ -270,9 +272,11 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
  * `appuserTransactionCategories` is the largest line's category; clients show the lines instead.
  * An outgoing transfer carries where it went, when the user said so.
  */
-function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, sharedAccountKeys: ReadonlySet<number>, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
+function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, sharedAccountKeys: ReadonlySet<number>, spendingFlags: CategorySpendingFlags, members: ReadonlyMap<number, string>): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { attribution: TransactionAttributionDto; bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
   return {
     ...pickTransactionRow(transaction, spendingFlags),
+    // Who the money is attributed to ("Spent by"), for the member badge and the editor (`member-attribution.ts`).
+    attribution: transactionAttributionDto(transaction, members),
     // The bank sent it, so it cannot be deleted (`transaction-deletion.service.ts`): a client says so before asking.
     bankSynced: isBankSyncedTransaction(transaction),
     splits: toSplitLineDtos(transaction),
@@ -384,7 +388,7 @@ async function loadRecurringSeries(transactions: Transaction[], tenantKey: numbe
   return bySeries;
 }
 
-async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string, scope: RateScope): Promise<(FxDisplay & TransactionRow)[]> {
+async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string, scope: RateScope, members: ReadonlyMap<number, string>): Promise<(FxDisplay & TransactionRow)[]> {
   const { accountKeys, categoryKeys, fromDate, tagKeys, toDate, transactionTypes, unreviewedOnly } = filters;
   const namedCategoriesOnly = categoryKeys !== undefined && categoryKeys.keys.length > 0 && !categoryKeys.includeUncategorized;
   const tagged = tagKeys !== undefined && tagKeys.length > 0;
@@ -426,6 +430,7 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       appuserSettlementAmount: account.appuserCurrencyBalance,
       appuserTransactionCategories: [],
       attachmentCount: 0,
+      attribution: { ...accountAttributionDto(account, members), overridden: false },
       balance: account.balance,
       bankSynced: false,
       description: 'Initial balance',

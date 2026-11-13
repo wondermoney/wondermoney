@@ -5349,5 +5349,18 @@
       "signUp": "Create your account",
       "selfHost": "Self-host WonderMoney"
     }
+  },
+  "memberAttribution": {
+    "everyone": "Everyone",
+    "shared": "Shared",
+    "filterTitle": "Member",
+    "filterNamed": "Member: {{name}}",
+    "attributedTo": "Attributed to {{name}}",
+    "spentBy": "Spent by",
+    "spentByAction": "Change spent by",
+    "accountDefault": "Account default ({{name}})",
+    "accountDefaultUnnamed": "Account default",
+    "jointTitle": "Joint account",
+    "jointHelper": "Its spending counts as Shared. It doesn't change who can see it."
   }
 }

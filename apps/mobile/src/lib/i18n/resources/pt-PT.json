@@ -5349,5 +5349,18 @@
       "signUp": "Criar a tua conta",
       "selfHost": "Alojar o WonderMoney no teu servidor"
     }
+  },
+  "memberAttribution": {
+    "everyone": "Todos",
+    "shared": "Partilhado",
+    "filterTitle": "Membro",
+    "filterNamed": "Membro: {{name}}",
+    "attributedTo": "Atribuído a {{name}}",
+    "spentBy": "Gasto por",
+    "spentByAction": "Alterar quem gastou",
+    "accountDefault": "Predefinição da conta ({{name}})",
+    "accountDefaultUnnamed": "Predefinição da conta",
+    "jointTitle": "Conta conjunta",
+    "jointHelper": "Os gastos desta conta contam como partilhados. Não muda quem a pode ver."
   }
 }

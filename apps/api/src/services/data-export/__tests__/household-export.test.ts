@@ -349,7 +349,7 @@ describe('household export', () => {
       expect((await exportFor(scope)).text.toUpperCase()).not.toContain('NEIGHBOUR');
     }
     const theirs = await exportFor(scopeOf(neighbour));
-    expect(theirs.text.toUpperCase()).not.toContain('SHARED');
+    expect(theirs.text.toUpperCase()).not.toContain('SHARED-');
     expect(theirs.text.toUpperCase()).not.toContain('SECRET');
     expect(theirs.data['accounts']!.map((row) => row['name'])).toEqual(['NEIGHBOUR-ACCOUNT']);
   });

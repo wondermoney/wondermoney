@@ -45,6 +45,7 @@ export enum FxStatus {
 }
 
 @Check({ expression: `num_nonnulls("transfer_destination_account_key", "transfer_destination_portfolio_key", "transfer_destination_goal_key") <= 1`, name: 'transaction_transfer_destination_single_check' })
+@Check({ expression: `not ("attributed_to_shared" and "attributed_appuser_key" is not null)`, name: 'transaction_attribution_single_check' })
 @Entity()
 @Filter({ args: false, cond: transactionTenantCond, default: true, name: TENANT_FILTER })
 @Filter({ cond: hiddenTransactionCond, default: true, name: HIDDEN_FILTER })
@@ -74,6 +75,19 @@ export class Transaction extends Base {
 
   @ManyToOne({ cascade: [], entity: () => Tenant, fieldName: 'tenant_key', nullable: true })
   tenantKey?: Rel<Tenant>;
+
+  /**
+   * Who the money is attributed to when it is not the account's default: a member of the household
+   * ("Spent by"). Null follows the account: its owner, or Shared on a joint account. Never set
+   * together with `attributedToShared`. Attribution is for reporting and the member filter only;
+   * it changes nobody's access to the row (`services/household/member-attribution.ts`).
+   */
+  @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'attributed_appuser_key', nullable: true })
+  attributedAppuserKey?: null | Rel<Appuser>;
+
+  /** The row is attributed to the household as a whole (Shared), whatever its account's default. */
+  @Property({ default: false })
+  attributedToShared = false;
 
   @Index()
   @Property({ columnType: 'timestamptz', nullable: true })

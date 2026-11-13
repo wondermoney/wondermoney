@@ -79,8 +79,11 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * `creditCardDueReminders` to the email notifications in `data/preferences.json`.
  * 1.9 added `shares` to `data/accounts.json`: for a private account, the members it is shared with
  * (`memberId`) and whether each may only view it (`read`) or also change it (`write`).
+ * 1.10 added `isJoint` to `data/accounts.json` (a joint account's money counts as Shared) and
+ * `attributedMemberId` and `attributedToShared` to `data/transactions.json` (who the row's money is
+ * attributed to, "Spent by", when not its account's default; at most one is set).
  */
-export const EXPORT_FORMAT_VERSION = '1.9';
+export const EXPORT_FORMAT_VERSION = '1.10';
 
 export interface ExportManifest {
   appVersion: string;

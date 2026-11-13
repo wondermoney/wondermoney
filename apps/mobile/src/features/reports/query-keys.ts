@@ -9,6 +9,7 @@ const filtersTuple = (filters: ReportFilters) => [
   filters.currencyKey ?? null,
   filters.includePending ?? false,
   filters.includeTransfers ?? false,
+  filters.memberKeys?.join(',') ?? null,
 ] as const
 
 export const budgetVsActualReportKey = (epochId: number, filters: ReportFilters) => (

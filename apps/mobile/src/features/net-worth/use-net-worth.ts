@@ -4,17 +4,18 @@ import { useEffect, useRef } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
 
-import { netWorthEndpoint } from './net-worth-contract'
-import { netWorthKey } from './query-keys'
+import { createNetWorthEndpoint } from './net-worth-contract'
+import { memberNetWorthKey } from './query-keys'
 
-export function useNetWorth() {
+/** The household's net worth, or one member's (or Shared's) with `member` (a key or `shared`). */
+export function useNetWorth(member?: string) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('useNetWorth requires an authenticated runtime')
 
   const handledError = useRef<unknown>(null)
   const query = useQuery({
-    queryKey: netWorthKey(runtime.epochId),
-    queryFn: () => runtime.apiClient.read(netWorthEndpoint),
+    queryKey: memberNetWorthKey(runtime.epochId, member),
+    queryFn: () => runtime.apiClient.read(createNetWorthEndpoint(member)),
     retry: false,
   })
 

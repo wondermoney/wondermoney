@@ -1,4 +1,5 @@
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
+import type { TransactionAttributionDto } from '@/features/household/member-attribution'
 import type { MerchantAvatarSource } from '@/features/merchants/merchant-avatar'
 import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
@@ -46,6 +47,8 @@ export type TransactionViewModel = Readonly<{
   installment: TransactionInstallmentDto | null
   /** Refund-to-expense links on the row, either role; empty when none (or an older server). */
   reimbursements: readonly ReimbursementLinkDto[]
+  /** Who the money is attributed to ("Spent by"); null when the server did not say. */
+  attribution?: TransactionAttributionDto | null
   reviewed: boolean
   hidden: boolean
   /** The bank sent it: it can be hidden, never deleted. */
@@ -123,6 +126,7 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       isSplit: (transaction.splits?.length ?? 0) > 0,
       installment: transaction.installment ?? null,
       reimbursements: transaction.reimbursements ?? [],
+      attribution: transaction.attribution ?? null,
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
       bankSynced: transaction.bankSynced === true,

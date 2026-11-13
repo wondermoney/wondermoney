@@ -40,6 +40,7 @@ describe('accounts view model', () => {
       accountType: null,
       creditCard: null,
       myAccess: 'owner',
+      attribution: null,
       fx: { status: 'exact' },
     })
     expect('logoUrl' in result).toBe(false)

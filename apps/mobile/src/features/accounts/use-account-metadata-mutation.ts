@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { isTransferEditAffectedQuery } from '@/features/transactions/use-edit-transaction-transfer'
 import { ApiError } from '@/lib/api/errors'
 
 import { accountUpdateWriteSchema, createUpdateAccountEndpoint, type AccountUpdateWrite } from './accounts-contract'
@@ -37,6 +38,10 @@ export function useAccountMetadataMutation() {
           void Promise.all([
             queryClient.invalidateQueries({ queryKey: accountsKey(runtime.epochId), exact: true }),
             queryClient.invalidateQueries({ queryKey: accountKey(runtime.epochId, accountId), exact: true }),
+            // A joint account's money is Shared: every member-filtered list, total and report moves.
+            ...(body.isJoint !== undefined
+              ? [queryClient.invalidateQueries({ predicate: (query) => isTransferEditAffectedQuery(query.queryKey, runtime.epochId) })]
+              : []),
           ])
         },
       })

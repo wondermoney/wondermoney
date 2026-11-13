@@ -1,6 +1,7 @@
 import { fireEvent, render, renderHook } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
+import { householdMembersModel } from '@/features/household/member-attribution'
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
 
@@ -11,12 +12,23 @@ import { useReportFilters } from './use-report-filters'
 const palette = themeTokens.colors.light
 const filterOptions = { accounts: [{ id: '1', label: 'Checking' }], categories: [{ id: '9', label: 'Groceries' }], merchants: [{ id: '5', label: 'Amazon' }], currencies: ['EUR', 'USD'] }
 
-async function renderPanel() {
+const householdOf = (count: number) => householdMembersModel({
+  members: [
+    { appuserKey: 11, emailAddress: 'ana@example.test', firstName: 'Ana', role: 'owner' as const },
+    { appuserKey: 12, emailAddress: 'bruno@example.test', firstName: 'Bruno', role: 'member' as const },
+  ].slice(0, count),
+  maxMembers: 6,
+  pendingInvites: [],
+  viewerAppuserKey: 11,
+})
+const twoMembers = householdOf(2)
+
+async function renderPanel(options: React.ComponentProps<typeof ReportFilterPanel>['filterOptions'] = filterOptions) {
   const i18n = await initMobileI18n('en')
   const filterStateHook = await renderHook(() => useReportFilters())
   const view = await render(
     <I18nextProvider i18n={i18n}>
-      <ReportFilterPanel filterState={filterStateHook.result.current} filterOptions={filterOptions} palette={palette} />
+      <ReportFilterPanel filterState={filterStateHook.result.current} filterOptions={options} palette={palette} />
     </I18nextProvider>,
   )
   return { view, filterStateHook }
@@ -38,6 +50,21 @@ describe('ReportFilterPanel', () => {
     expect(view.getByRole('button', { name: /^Currency,/ })).toBeTruthy()
     expect(view.getByRole('switch', { name: 'Include pending transactions' })).toBeTruthy()
     expect(view.getByRole('switch', { name: 'Include transfers' })).toBeTruthy()
+  })
+
+  it('offers no member filter in a household of one', async () => {
+    const { view } = await renderPanel({ ...filterOptions, members: householdOf(1) })
+    await fireEvent.press(view.getByRole('button', { name: 'Filters' }))
+    expect(view.queryByRole('button', { name: /^Member,/ })).toBeNull()
+  })
+
+  it('filters every report by one member or Shared', async () => {
+    const { view, filterStateHook } = await renderPanel({ ...filterOptions, members: twoMembers })
+    await fireEvent.press(view.getByRole('button', { name: 'Filters' }))
+    await fireEvent.press(view.getByRole('button', { name: /^Member, Everyone/ }))
+    await fireEvent.press(view.getByRole('radio', { name: 'Shared' }))
+    expect(filterStateHook.result.current.filters.memberKeys).toEqual(['shared'])
+    expect(filterStateHook.result.current.activeFilterCount).toBe(1)
   })
 
   it('toggling include-pending updates the underlying filter state', async () => {

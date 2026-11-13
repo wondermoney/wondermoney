@@ -116,6 +116,19 @@
       "left": "You've left the household",
       "error": "Something went wrong. Please try again."
     },
-    "loadError": "We couldn't load your household. Please try again."
+    "loadError": "We couldn't load your household. Please try again.",
+    "attribution": {
+      "filterLabel": "Member",
+      "everyone": "Everyone",
+      "shared": "Shared",
+      "spentBy": "Spent by",
+      "spentByDescription": "Whose spending this counts as in reports, budgets and the member filter.",
+      "accountDefault": "Account default ({name})",
+      "accountDefaultPlain": "Account default",
+      "spentBySaved": "Spent by updated",
+      "spentByError": "Couldn't change who this was spent by",
+      "jointAccount": "Joint account",
+      "jointAccountDescription": "Its spending counts as Shared. This doesn't change who can see it."
+    }
   }
 }

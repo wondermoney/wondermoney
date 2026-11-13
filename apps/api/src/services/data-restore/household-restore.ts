@@ -453,6 +453,7 @@ class HouseholdRestore {
         currency_key: this.currency(row.currency),
         fx_status: own ? null : 'missing',
         holder_name: row.holderName,
+        is_joint: row.isJoint ?? false,
         is_private: row.isPrivate,
         opening_balance: row.openingBalance,
         opening_balance_date: row.openingBalanceDate,
@@ -889,6 +890,10 @@ class HouseholdRestore {
         appuser_currency_key: this.currency(row.userCurrency),
         appuser_key: this.member(row.memberId),
         appuser_settlement_amount: row.userAmount,
+        // Every member merges into the restoring one, so a row another member spent stays a
+        // member's (not Shared), and Shared stays Shared.
+        attributed_appuser_key: this.member(row.attributedMemberId ?? null),
+        attributed_to_shared: row.attributedToShared ?? false,
         balance: row.balance,
         description: row.description,
         description_dirty: row.descriptionRaw,

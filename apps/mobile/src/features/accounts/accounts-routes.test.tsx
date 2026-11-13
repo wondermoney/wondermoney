@@ -22,6 +22,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: jest.fn() }),
 }))
 jest.mock('./use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
+jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS }))
 jest.mock('./use-reorder-accounts', () => ({ useReorderAccounts: () => ({ mutateAsync: jest.fn() }) }))
 jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAccount(id) }))
 jest.mock('./use-account-recalculation', () => ({ useAccountRecalculation: () => ({ state: { phase: 'idle' }, start: jest.fn(), reset: jest.fn() }) }))

@@ -98,6 +98,15 @@ export class Account extends Base {
   /** Who else may see (and, with `write`, change) the account while it is private. */
   @OneToMany(() => AccountShare, (share) => share.accountKey)
   shares = new Collection<AccountShare>(this);
+  /**
+   * A joint account: its money is the household's, not one member's. Reporting counts its
+   * transactions as Shared, unless a transaction names a member (`Transaction.attributedAppuserKey`),
+   * and a member's own net worth leaves it out. Attribution only, never visibility: who sees the
+   * account is `isPrivate`'s rule. False by default, so an account belongs to its owner
+   * (`services/household/member-attribution.ts`).
+   */
+  @Property({ default: false })
+  isJoint = false;
 
   // The provider-agnostic connection. New sync paths read this; `enableBankingConnectionKey`
   // and `nordigenRequisitionKey` stay for rows linked before the provider interface existed.

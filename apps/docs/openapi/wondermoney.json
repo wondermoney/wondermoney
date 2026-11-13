@@ -172,6 +172,29 @@
               "null"
             ]
           },
+          "attribution": {
+            "type": "object",
+            "properties": {
+              "appuserKey": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The member the money is attributed to; null for Shared (a joint account, or someone no longer in the household)."
+              },
+              "displayName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "appuserKey",
+              "displayName"
+            ],
+            "description": "The account’s attribution: its owner, or Shared when joint."
+          },
           "availableBalance": {
             "type": [
               "number",
@@ -205,6 +228,10 @@
           "fxStatus": {
             "type": "string"
           },
+          "isJoint": {
+            "type": "boolean",
+            "description": "A joint account: its money is Shared in reports and the member filter."
+          },
           "isOwnedByViewer": {
             "type": "boolean"
           },
@@ -217,6 +244,12 @@
               "owner",
               "write",
               "read"
+            ]
+          },
+          "ownerAppuserKey": {
+            "type": [
+              "number",
+              "null"
             ]
           },
           "ownerFirstName": {
@@ -246,14 +279,17 @@
           "accountType",
           "appuserCurrencyAvailableBalance",
           "appuserCurrencyBalance",
+          "attribution",
           "availableBalance",
           "balance",
           "creditCard",
           "currencyKey",
           "fxStatus",
+          "isJoint",
           "isOwnedByViewer",
           "isPrivate",
           "myAccess",
+          "ownerAppuserKey",
           "ownerFirstName",
           "refreshedAt",
           "source"
@@ -5116,6 +5152,33 @@
           "amount": {
             "type": "number"
           },
+          "attribution": {
+            "type": "object",
+            "properties": {
+              "appuserKey": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "The member the money is attributed to; null for Shared (a joint account, or someone no longer in the household)."
+              },
+              "displayName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "overridden": {
+                "type": "boolean",
+                "description": "True when the transaction sets its own attribution (\"Spent by\"); false when it follows its account."
+              }
+            },
+            "required": [
+              "appuserKey",
+              "displayName",
+              "overridden"
+            ]
+          },
           "categoryKey": {
             "type": [
               "number",
@@ -5822,6 +5885,34 @@
             },
             "required": false,
             "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -6648,6 +6739,34 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "required": false,
             "name": "tagKeys",
             "in": "query"
           },
@@ -6994,6 +7113,29 @@
                           },
                           {
                             "type": "string"
+                          }
+                        ]
+                      },
+                      "memberKeys": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
                           }
                         ]
                       },
@@ -7499,6 +7641,34 @@
           },
           {
             "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "string"
             },
             "required": false,
@@ -7758,6 +7928,30 @@
                     "required": [
                       "key",
                       "type"
+                    ]
+                  },
+                  "attributedAppuserKey": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "shared"
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[1-9]\\d*$"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
                     ]
                   },
                   "statementDateOverride": {
@@ -8736,6 +8930,9 @@
                     "maxLength": 100
                   },
                   "isPrivate": {
+                    "type": "boolean"
+                  },
+                  "isJoint": {
                     "type": "boolean"
                   },
                   "openingBalance": {
@@ -16268,6 +16465,15 @@
           },
           {
             "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]\\d*|shared)$/u"
+            },
+            "required": false,
+            "name": "member",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "integer",
               "minimum": 2,
               "maximum": 12,
@@ -19379,6 +19585,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -19584,6 +19808,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -19823,6 +20065,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -20045,6 +20305,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -20250,6 +20528,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -20507,6 +20803,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -20747,6 +21061,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -20952,6 +21284,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -21191,6 +21541,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -21396,6 +21764,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -21635,6 +22021,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -21840,6 +22244,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -22079,6 +22501,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -22284,6 +22724,24 @@
             },
             "required": false,
             "name": "includeTransfers",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -22523,6 +22981,24 @@
               ]
             },
             "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
             "name": "merchantKeys",
             "in": "query"
           },
@@ -22655,6 +23131,19 @@
                             }
                           ],
                           "default": false
+                        },
+                        "memberKeys": {
+                          "anyOf": [
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            {
+                              "type": "string"
+                            }
+                          ]
                         },
                         "merchantKeys": {
                           "anyOf": [

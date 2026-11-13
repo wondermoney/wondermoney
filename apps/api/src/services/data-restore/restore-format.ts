@@ -16,11 +16,12 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.8 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
+ * 1.10 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
  * and tokens, card settings, installment plans and schedules, transaction templates, exchange-rate
  * and price overrides), a loan rate type, a manual asset kind and optional fields (a loan's secured
  * asset, a budget's month start day, which defaults to the 1st, a merchant's website and logo URL,
- * and the 1.8 fields, each defaulting to what the app gives a row created without it), which an
+ * the 1.8 fields, 1.9's account shares, and 1.10's joint accounts and transaction attribution, each defaulting to what the
+ * app gives a row created without it), which an
  * older export simply does not have, so there is nothing to migrate yet. Another major version is
  * refused.
  */
@@ -88,6 +89,8 @@ const account = z.object({
   holderName: text(255),
   id,
   institution: text(255),
+  /** A joint account (1.10); absent: not joint, the account is its owner's. */
+  isJoint: z.boolean().optional(),
   isPrivate: z.boolean(),
   name: text(255),
   openingBalance: optionalDecimal,
@@ -137,6 +140,9 @@ const tag = z.object({ color: z.string().regex(/^#[0-9a-f]{3,6}$/iu), createdByM
 
 const transaction = z.object({
   accountId: ref,
+  /** "Spent by" (1.10): a member, or Shared; absent or neither: the account's default. */
+  attributedMemberId: ref.optional(),
+  attributedToShared: z.boolean().optional(),
   balance: optionalDecimal,
   bankSynced: z.boolean(),
   createdAt: optionalTimestamp,
@@ -177,7 +183,8 @@ const transaction = z.object({
   userCurrency: currency.nullable(),
   userExchangeRate: optionalDecimal,
 }).refine((row) => [row.transferDestinationAccountId, row.transferDestinationGoalId, row.transferDestinationPortfolioId].filter((value) => value !== null).length <= 1, { message: 'at most one transfer destination' })
-  .refine((row) => (row.installmentPlanId == null) === (row.installmentNumber == null), { message: 'an installment plan and number together', path: ['installmentNumber'] });
+  .refine((row) => (row.installmentPlanId == null) === (row.installmentNumber == null), { message: 'an installment plan and number together', path: ['installmentNumber'] })
+  .refine((row) => !(row.attributedToShared === true && row.attributedMemberId != null), { message: 'a member or Shared, not both', path: ['attributedToShared'] });
 
 const transactionCategory = z.object({ categoryId: id, memberId: ref, source: z.enum(['deterministic', 'manual', 'openai', 'rule', 'user']), transactionId: id });
 /** A refund linked to the expense it offsets (1.6); `amount` is positive, in the expense's currency. */
