@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronsUpDown,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 import { Link } from "@/components/ui/Link";
@@ -26,9 +24,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "@/i18n/navigation";
-import { authClient } from "@/lib/auth/client";
+import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { useUser } from "@/lib/auth/user-context";
+import { useSignOut } from "@/lib/auth/useSignOut";
 import { instanceConfig } from "@/lib/instance";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
@@ -76,10 +74,9 @@ export default function AccountMenu({
   placement: "sidebar" | "bar";
 }) {
   const t = useTranslations();
-  const posthog = usePostHog();
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const signOut = useSignOut();
   const user = useUser();
+  const isDemoProfile = useIsDemoProfile({ fetch: false });
   const [open, setOpen] = useState(false);
   const handle = user?.email?.split("@")[0];
   const displayName = user?.name?.trim() || handle;
@@ -94,19 +91,12 @@ export default function AccountMenu({
       : handle?.slice(0, 2)
   )?.toUpperCase();
   const isDemo =
-    instanceConfig.demoEmail !== null &&
-    user?.email === instanceConfig.demoEmail;
+    isDemoProfile ||
+    (instanceConfig.demoEmail !== null &&
+      user?.email === instanceConfig.demoEmail);
   const inSidebar = placement === "sidebar";
 
-  const logout = async () => {
-    await queryClient.cancelQueries();
-    queryClient.removeQueries();
-    await authClient.signOut().catch((signOutError) => {
-      console.error("Error logging out", signOutError);
-    });
-    posthog.reset();
-    router.push("/auth/login");
-  };
+  const logout = () => signOut("/auth/login");
 
   const avatar = (
     <Avatar className="bg-muted text-foreground border-input flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold">

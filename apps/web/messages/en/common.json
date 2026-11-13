@@ -2599,6 +2599,17 @@
     "q6Title": "I have more questions.",
     "q6Body": "Reach out any time at {email}. We read everything."
   },
+  "demo": {
+    "sign-in": "Try the demo",
+    "sign-in-hint": "Look around a sample household without creating an account.",
+    "sign-in-unavailable": "The demo isn't available on this server.",
+    "sign-in-rate-limited": "Too many demo sign-ins. Wait a few minutes and try again.",
+    "sign-in-failed": "The demo could not start. Please try again.",
+    "banner-label": "Demo account",
+    "banner-message": "This is a shared demo. Its data is read-only and resets every day.",
+    "banner-sign-up": "Create your own account",
+    "banner-self-host": "Host your own"
+  },
   "pivotBanner": {
     "message": "WonderMoney is now free and open source. Bank connections use your own Enable Banking key.",
     "cta": "Read the FAQ",

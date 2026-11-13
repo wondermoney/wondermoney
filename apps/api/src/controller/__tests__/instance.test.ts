@@ -5,7 +5,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -29,6 +29,7 @@ describe('GET /v1/instance', () => {
         bankSync: true,
         bankSyncProviders: ['enable_banking'],
         contactForm: false,
+        demo: false,
         email: false,
         feedback: false,
         fileStorage: false,
@@ -81,6 +82,17 @@ describe('GET /v1/instance', () => {
     expect(describeInstance()).toMatchObject({
       features: { marketData: true, marketDataCapabilities: ['quote', 'dailyHistory'], marketDataProviders: ['stooq'] },
     });
+  });
+
+  it('reports the one-click demo only when the operator turned it on', () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    expect(describeInstance()).toMatchObject({ features: { demo: false } });
+
+    vi.stubEnv('DEMO_SIGN_IN_ENABLED', 'false');
+    expect(describeInstance()).toMatchObject({ features: { demo: false } });
+
+    vi.stubEnv('DEMO_SIGN_IN_ENABLED', 'true');
+    expect(describeInstance()).toMatchObject({ features: { demo: true } });
   });
 
   it('reports the AI features as enabled for an Anthropic setup', () => {

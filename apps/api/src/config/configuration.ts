@@ -246,6 +246,8 @@ const apiSchema = sharedSchema.extend({
   AI_DAILY_LIMIT_OCR: wholeNumber('Daily receipt scans per household').optional(),
   AI_DAILY_LIMIT_STATEMENT_IMPORT: wholeNumber('Daily PDF statement imports per household').optional(),
   AI_REQUIRES_VERIFIED_EMAIL: boolFlag('AI verified-email requirement').optional(),
+  // One-click sign-in to the read-only demo account (`config/demo.ts`). Off unless set.
+  DEMO_SIGN_IN_ENABLED: boolFlag('Demo sign-in flag').optional(),
   INTERNAL_SERVICE_API_KEY: nonEmpty('Internal service key is required'),
   // Merchant logo lookup (`services/transaction/merchant-logo.ts`): an https URL with `{domain}`,
   // fetched by the API (never by clients) for a merchant's website domain. Unset: off.

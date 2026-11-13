@@ -59,12 +59,23 @@ describe('user controller', () => {
       profile: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         aiProviders: { statementImport: null },
+        demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',
         mfaEnabled: false,
       },
     });
+  });
+
+  it('tells the shared demo account apart, so clients show the demo banner', async () => {
+    const { getCurrentUserProfile } = await import('../user');
+    const json = vi.fn();
+    const user = { accountType: 'demo', appuserKey: 1, emailAddress: 'demo@wonder.money', firstName: 'Sofia', lastName: 'Martins', preferences: {} };
+
+    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+
+    expect(json).toHaveBeenCalledWith({ profile: expect.objectContaining({ demo: true }) });
   });
 
   it('reports every AI feature off once the person hid AI', async () => {
@@ -144,6 +155,7 @@ describe('user controller', () => {
       profile: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         aiProviders: { statementImport: null },
+        demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',

@@ -152,7 +152,37 @@ Se a aplicação web mudar para outro domínio, as chaves de acesso existentes d
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |
 | `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en` ou `pt`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |
 | `MCP_ENABLED` | O servidor MCP só de leitura em `POST /v1/mcp`, que permite a um cliente de IA perguntar pelas finanças do próprio utilizador com um token de API pessoal com `mcp:read` (consulta [Ligar um cliente de IA](/pt/docs/settings-security-privacy/connect-ai-client)). Ligado por omissão; define `false` para responder `404` e reportar `features.mcp: false` em `GET /v1/instance` |
+| `DEMO_SIGN_IN_ENABLED` | `true` liga uma demonstração pública só de leitura: um botão **Experimentar a demonstração** que inicia a sessão de qualquer pessoa numa conta de demonstração partilhada. Desligado por omissão; consulta [Demonstração pública](#demonstração-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | A diferença aceite entre os dois lados de uma transferência entre contas em moedas diferentes, depois de converter o valor que saiu à taxa de câmbio desse dia, como fração do valor que chegou: `0.02` (por omissão) é 2 por cento. Aumenta-a se a margem cambial e as comissões do teu banco forem maiores; no máximo `0.25`. Define-a na API e no worker |
+
+## Demonstração pública
+
+Se a tua instância ligar a demonstração, as pessoas podem experimentar o WonderMoney sem criar conta. Define `DEMO_SIGN_IN_ENABLED=true` na API: a página de início de sessão, na web e na app móvel, passa a mostrar **Experimentar a demonstração**, que inicia a sessão do visitante num agregado de demonstração partilhado, sem palavra-passe, e `GET /v1/instance` reporta `features.demo: true`. Com a definição desligada, `POST /v1/auth/demo` responde `404` e o botão fica escondido.
+
+Todos os visitantes partilham a demonstração, por isso é só de leitura:
+
+- Qualquer alteração é recusada com a mensagem de só leitura: os dados do agregado e a própria conta (nome, email, palavra-passe, autenticador, chaves de acesso e terminar a sessão de outros visitantes).
+- Uma sessão de demonstração termina duas horas depois de começar. Os inícios de sessão na demonstração têm um limite por endereço IP, como os inícios de sessão com palavra-passe.
+- Uma faixa em todos os ecrãs diz que os dados são uma demonstração partilhada que é reposta todos os dias, com ligações para criar conta (só quando `SIGNUP_MODE` é `open`) e para estes guias de alojamento próprio.
+- A conta de demonstração não tem palavra-passe nem autenticador. O início de sessão na demonstração recusa uma conta com autenticador e nunca inicia a sessão noutra conta.
+
+Cria a conta de demonstração e o agregado antes de ligares a definição:
+
+```sh
+docker compose exec api node dist/database/scripts/seed-demo-household.js
+```
+
+Em Kubernetes, corre o mesmo comando no pod da API. Só escreve a conta de demonstração (`demo@wonder.money`) e o agregado dela, não mexe em mais nenhuma conta e pode ser corrido de novo; corre-o outra vez para repor a demonstração como estava. Recusa, sem alterar nada, quando esse endereço pertence a uma conta que não é a de demonstração. Num servidor sem dados de mercado, dá também um histórico de preços às seis ações da demonstração, mas só a uma ação que não tenha nenhum preço.
+
+Definições recomendadas para uma instância de demonstração:
+
+| Definição | Recomendado | Porquê |
+|---|---|---|
+| `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE` | Vazias | Os visitantes são desconhecidos: nada sobre eles deve ser registado (consulta [Analytics](#analytics)) |
+| IA (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Vazias, ou limitadas com `AI_DAILY_LIMIT_*` | A conta de demonstração não pode usar o assistente, a leitura de recibos nem o mapeamento de colunas por IA, porque todos guardam alguma coisa. Com a IA desligada, a app esconde-os. Todos os visitantes partilham um agregado, por isso os limites diários também são partilhados |
+| `BANK_PROVIDERS` | `none` | Esconde a sincronização bancária. A conta de demonstração também não consegue ligar um banco |
+| `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Avança as transações da demonstração todos os dias às 01:15 UTC, para continuarem recentes |
+| `SIGNUP_MODE` | `closed` num servidor só de demonstração, `open` para deixar os visitantes criar conta | A faixa só mostra a ligação para criar conta quando é `open` |
 
 ## Analytics
 

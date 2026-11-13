@@ -71,6 +71,11 @@ export const ERROR_CODE = {
   FEATURE_DISABLED: 'feature_disabled',
   /** The demo account attempted a mutation. Show the read-only affordance. */
   DEMO_READ_ONLY: 'demo_read_only',
+  /**
+   * `POST /v1/auth/demo` on a server that enabled the demo but has no usable demo account (not
+   * seeded yet, or it failed a safety check) (503). Nobody was signed in.
+   */
+  DEMO_UNAVAILABLE: 'demo_unavailable',
   /** A per-user Enable Banking credential is missing, invalid or undecryptable. */
   BANK_CREDENTIAL_INVALID: 'bank_credential_invalid',
   /** A personal API token lacks the scope this route needs (403). */

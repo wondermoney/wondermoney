@@ -152,7 +152,37 @@ If the web app moves to another hostname, existing passkeys stop working and you
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |
 | `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en` or `pt`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |
 | `MCP_ENABLED` | The read-only MCP server at `POST /v1/mcp`, which lets an AI client ask about a user's own finances with a personal API token carrying `mcp:read` (see [Connect an AI client](/en/docs/settings-security-privacy/connect-ai-client)). On by default; set it to `false` to answer `404` and report `features.mcp: false` in `GET /v1/instance` |
+| `DEMO_SIGN_IN_ENABLED` | `true` turns on a public read-only demo: a **Try the demo** button that signs anyone in to one shared demo account. Off by default; see [Public demo](#public-demo) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | How far apart the two halves of a transfer between accounts in different currencies may be once the amount that left is converted at that day's exchange rate, as a fraction of the amount that arrived: `0.02` (the default) is 2 percent. Raise it if your bank's exchange margin and fees are larger; at most `0.25`. Set it on the API and the worker |
+
+## Public demo
+
+If your instance enables the demo, people can try WonderMoney there without an account. Set `DEMO_SIGN_IN_ENABLED=true` on the API: the sign-in page, on the web and in the mobile app, then shows **Try the demo**, which signs the visitor in to one shared demo household without a password, and `GET /v1/instance` reports `features.demo: true`. While the setting is off, `POST /v1/auth/demo` answers `404` and the button is hidden.
+
+Everyone who uses the demo shares it, so it is read-only:
+
+- Every change is refused with the read-only message: the household's data, and the account itself (name, email, password, authenticator, passkeys, and signing out other visitors).
+- A demo session ends two hours after it starts. Demo sign-ins are limited per IP address, like password sign-ins.
+- A banner on every screen says the data is a shared demo that resets daily, and links to sign-up (only when `SIGNUP_MODE` is `open`) and to these self-hosting guides.
+- The demo account has no password and no authenticator. The demo sign-in refuses an account with an authenticator, and never signs in any other account.
+
+Create the demo account and its household before you turn the setting on:
+
+```sh
+docker compose exec api node dist/database/scripts/seed-demo-household.js
+```
+
+On Kubernetes, run the same command in the API pod. It writes only the demo account (`demo@wonder.money`) and its household, leaves every other account alone, and is safe to run again; run it again to put the demo back as it was. It refuses, changing nothing, when that address belongs to an account that is not the demo account. On a server without market data it also gives the demo's six stocks a price history, but only a stock that has no price at all.
+
+Recommended settings for a demo instance:
+
+| Setting | Recommended | Why |
+|---|---|---|
+| `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE` | Empty | Visitors are strangers: nothing about them should be tracked (see [Analytics](#analytics)) |
+| AI (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Empty, or limited with `AI_DAILY_LIMIT_*` | The demo account cannot use the assistant, receipt scanning or AI column mapping, which all save something. With AI off the app hides them instead. Every visitor shares one household, so daily limits are shared too |
+| `BANK_PROVIDERS` | `none` | Hides bank sync. The demo account cannot connect a bank either way |
+| `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Moves the demo's transactions forward every day at 01:15 UTC, so they stay recent |
+| `SIGNUP_MODE` | `closed` on a demo-only server, `open` to let visitors sign up | The banner links to sign-up only when it is `open` |
 
 ## Analytics
 

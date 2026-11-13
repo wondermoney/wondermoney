@@ -17,6 +17,7 @@ import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
 import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
+import { capDemoSessionRefresh, isExpiredDemoSession } from '@service/auth/demo-session';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
 import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
 import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
@@ -175,6 +176,14 @@ const auth = betterAuth({
   // Defaults to the API's own address (API_URL): better-auth lives inside the API.
   baseURL: authConfig.betterAuthUrl ?? BACKEND_URL,
   database: betterAuthPool,
+  databaseHooks: {
+    session: {
+      update: {
+        // A refresh never moves a demo session past its two hours (services/auth/demo-session.ts).
+        before: (session, context) => Promise.resolve(capDemoSessionRefresh(session, context) as undefined | { data: typeof session & { expiresAt: Date } }),
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // Legacy bcrypt hashes verify through the shim; new and reset passwords use
@@ -298,6 +307,12 @@ export interface AuthedUser {
 export const getAuthSession = async (headers: IncomingHttpHeaders): Promise<AuthContext | null> => {
   const result = await auth.api.getSession({ headers: fromNodeHeaders(headers) });
   if (!result) return null;
+  // The demo account's sessions end two hours after they start, whatever better-auth's own expiry
+  // says (services/auth/demo-session.ts). One past it is deleted, so its cookie stops everywhere.
+  if (isExpiredDemoSession({ createdAt: result.session.createdAt, email: result.user.email })) {
+    await deleteAuthSession(result.session.id);
+    return null;
+  }
   return {
     session: { createdAt: result.session.createdAt, id: result.session.id },
     user: {
@@ -376,6 +391,45 @@ export interface AuthSessionSummary {
   userAgent?: null | string;
 }
 
+/** How the session cookie is set on this deployment, for a route that hands out a session itself. */
+export interface SessionCookieAttributes {
+  domain?: string;
+  httpOnly: boolean;
+  path: string;
+  sameSite?: 'lax' | 'none' | 'strict';
+  secure: boolean;
+}
+
+/** A session created outside a sign-in endpoint, with its cookie attributes so a route can set it. */
+export interface IssuedSession extends PairedSession {
+  cookieAttributes: SessionCookieAttributes;
+}
+
+type BetterAuthContext = Awaited<typeof auth.$context>;
+
+async function issueSession(
+  context: BetterAuthContext,
+  session: { expiresAt: Date; id: string; token: string },
+): Promise<IssuedSession> {
+  const cookie = context.authCookies.sessionToken;
+  const signature = await makeSignature(session.token, context.secret);
+  const sameSite = cookie.attributes.sameSite?.toLowerCase();
+  return {
+    cookieAttributes: {
+      ...(cookie.attributes.domain ? { domain: cookie.attributes.domain } : {}),
+      httpOnly: cookie.attributes.httpOnly ?? true,
+      path: cookie.attributes.path ?? '/',
+      ...(sameSite === 'lax' || sameSite === 'none' || sameSite === 'strict' ? { sameSite } : {}),
+      secure: cookie.attributes.secure ?? false,
+    },
+    cookieName: cookie.name,
+    cookieValue: encodeURIComponent(`${session.token}.${signature}`),
+    expiresAt: session.expiresAt,
+    sessionId: session.id,
+    token: session.token,
+  };
+}
+
 /**
  * Create a full better-auth session for `userId` without a password or a second factor.
  *
@@ -394,15 +448,82 @@ export const createPairedSession = async (input: {
     ipAddress: input.ipAddress ?? '',
     userAgent: input.userAgent ?? '',
   });
-  const cookie = context.authCookies.sessionToken;
-  const signature = await makeSignature(session.token, context.secret);
-  return {
-    cookieName: cookie.name,
-    cookieValue: encodeURIComponent(`${session.token}.${signature}`),
-    expiresAt: session.expiresAt,
-    sessionId: session.id,
-    token: session.token,
-  };
+  const { cookieAttributes: _cookieAttributes, ...paired } = await issueSession(context, session);
+  return paired;
+};
+
+/**
+ * Create a session for the shared demo account, ending at `expiresAt`.
+ *
+ * Only `POST /v1/auth/demo` calls this, after `signInToDemo` has checked that `userId` is the demo
+ * account and that it has no TOTP. No IP address or user agent is stored: the demo's visitors are
+ * strangers to each other. better-auth's create hooks run as for any session; the expiry is set
+ * outright (`overrideAll`), since its default is the seven days an ordinary sign-in gets.
+ */
+export const createDemoSession = async (input: { expiresAt: Date; userId: string }): Promise<IssuedSession> => {
+  const context = await auth.$context;
+  const session = await context.internalAdapter.createSession(
+    input.userId,
+    false,
+    { expiresAt: input.expiresAt, ipAddress: '', userAgent: '' },
+    true,
+  );
+  return issueSession(context, session);
+};
+
+/** One better-auth user's identity and TOTP state, or null when there is none with this id. */
+export const findBetterAuthUser = async (
+  userId: string,
+): Promise<null | { email: string; id: string; twoFactorEnabled: boolean | null }> => {
+  const { rows } = await betterAuthPool.query<{ email: string; id: string; twoFactorEnabled: boolean | null }>(
+    `select id, email, "twoFactorEnabled" from "${BETTER_AUTH_SCHEMA}"."user" where id = $1`,
+    [userId],
+  );
+  return rows[0] ?? null;
+};
+
+/** Delete a user's sessions that are already past their expiry. Live sessions are untouched. */
+export const deleteExpiredAuthSessions = async (userId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where "userId" = $1 and "expiresAt" <= now()`, [userId]);
+};
+
+/**
+ * Create the demo account's better-auth user if there is none, then put it back in its demo state:
+ * its name, a verified address, no TOTP, no passkeys and no linked social logins. Touches that one
+ * user's rows only. A user created here has no password: the one-click sign-in needs none.
+ *
+ * Written against the pool rather than `signUpEmail` on purpose: a demo server usually runs with
+ * sign-up closed, and the sign-up policy hook would refuse the seeder too.
+ */
+export const ensureDemoAuthUser = async (input: { email: string; name: string }): Promise<{ created: boolean; id: string }> => {
+  const client = await betterAuthPool.connect();
+  try {
+    await client.query('begin');
+    const existing = await client.query<{ id: string }>(`select id from "${BETTER_AUTH_SCHEMA}"."user" where lower(email) = lower($1) for update`, [input.email]);
+    const found = existing.rows[0]?.id;
+    const id = found ?? randomUUID();
+    if (found) {
+      await client.query(
+        `update "${BETTER_AUTH_SCHEMA}"."user" set name = $2, "emailVerified" = true, "twoFactorEnabled" = false, "updatedAt" = now() where id = $1`,
+        [id, input.name],
+      );
+    } else {
+      await client.query(
+        `insert into "${BETTER_AUTH_SCHEMA}"."user" (id, name, email, "emailVerified", "twoFactorEnabled", "createdAt", "updatedAt") values ($1, $2, $3, true, false, now(), now())`,
+        [id, input.name, input.email],
+      );
+    }
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."twoFactor" where "userId" = $1`, [id]);
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."passkey" where "userId" = $1`, [id]);
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."account" where "userId" = $1 and "providerId" <> 'credential'`, [id]);
+    await client.query('commit');
+    return { created: !found, id };
+  } catch (error) {
+    await client.query('rollback');
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /** Session rows for the device list, newest first. Unknown ids are simply absent. */

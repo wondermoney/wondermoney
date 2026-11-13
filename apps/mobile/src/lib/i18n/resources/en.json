@@ -191,6 +191,16 @@
         "invalidCode": "That code has expired or was already used. Show a new one on the web.",
         "unavailable": "Couldn't connect to that server. Try again."
       }
+    },
+    "demo": {
+      "button": "Try the demo",
+      "signingIn": "Opening the demo…",
+      "errors": {
+        "disabled": "This server doesn't offer the demo.",
+        "rateLimited": "Too many demo sign-ins. Try again in a few minutes.",
+        "unavailable": "The demo isn't available right now. Try again later.",
+        "unreachable": "Couldn't reach the server. Check your connection and try again."
+      }
     }
   },
   "access": {
@@ -4951,5 +4961,12 @@
     "installed_one": "{{count}} rule added",
     "installed_other": "{{count}} rules added",
     "installError": "The rules could not be added."
+  },
+  "demo": {
+    "banner": {
+      "message": "You're exploring a shared, read-only demo. Its data resets every day.",
+      "signUp": "Create your account",
+      "selfHost": "Self-host WonderMoney"
+    }
   }
 }

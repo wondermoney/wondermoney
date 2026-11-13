@@ -133,7 +133,11 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 - Verify scripts in `database/scripts/`: `verify-tenant-filter.ts`, `verify-household-invite.ts`,
   `e2e-household-flow.sh`.
 - `blockDemoMutation` keeps the demo account read-only; demo is recognised by
-  `Appuser.accountType` / `tenantType === DEMO`.
+  `Appuser.accountType` / `tenantType === DEMO`. `blockDemoAuthAccountChanges` does the same on
+  better-auth's own `/api/auth` routes. `POST /v1/auth/demo` (`DEMO_SIGN_IN_ENABLED`, off by
+  default) signs in the one demo account without a password after the checks in
+  `services/auth/demo-sign-in.service.ts`; every demo session ends two hours after it starts
+  (`services/auth/demo-session.ts`). `pnpm demo:seed` creates the account on a real database.
 - **Rate limits** are named families in `middleware/rate-limit.ts`. An auth or credential family
   is never `relaxable` and is keyed on IP only. `TRUST_PROXY` sets Express `trust proxy`;
   `configureClientIp` copies the resolved `req.ip` into `x-wondermoney-client-ip`, the header

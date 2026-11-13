@@ -2599,6 +2599,17 @@
     "q6Title": "Tengo más preguntas.",
     "q6Body": "Escríbenos cuando quieras a {email}. Leemos todos los mensajes."
   },
+  "demo": {
+    "sign-in": "Probar la demo",
+    "sign-in-hint": "Explora un hogar de ejemplo sin crear una cuenta.",
+    "sign-in-unavailable": "La demo no está disponible en este servidor.",
+    "sign-in-rate-limited": "Demasiados accesos a la demo. Espera unos minutos y vuelve a intentarlo.",
+    "sign-in-failed": "No se pudo abrir la demo. Vuelve a intentarlo.",
+    "banner-label": "Cuenta demo",
+    "banner-message": "Esta es una demo compartida. Sus datos son de solo lectura y se restablecen cada día.",
+    "banner-sign-up": "Crear tu propia cuenta",
+    "banner-self-host": "Alojar tu propia instancia"
+  },
   "pivotBanner": {
     "message": "WonderMoney ahora es gratis y de código abierto. Las conexiones bancarias usan tu propia clave de Enable Banking.",
     "cta": "Leer las preguntas frecuentes",

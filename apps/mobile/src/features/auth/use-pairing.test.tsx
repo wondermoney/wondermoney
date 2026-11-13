@@ -3,7 +3,8 @@ import { act, renderHook } from '@testing-library/react-native'
 import { usePairing } from './use-pairing'
 
 const mockServerSwitch = {
-  apiBaseUrl: 'https://api.example.test',
+  // The build's default; the QR points at another server.
+  apiBaseUrl: 'https://default.example.test',
   switchServer: jest.fn(),
   usesDefaultServer: true,
 }

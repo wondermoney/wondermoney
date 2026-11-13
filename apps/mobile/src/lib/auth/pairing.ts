@@ -109,11 +109,20 @@ export async function exchangePairingCode(
   if (response.status === 404) return { status: 'invalid-code' }
   if (!response.ok) return { status: 'unavailable' }
 
+  const session = await readSessionResponse(response)
+  return session ? { session, status: 'paired' } : { status: 'unavailable' }
+}
+
+/**
+ * The `{ session: { cookieName, cookieValue, expiresAt } }` body the API answers a session
+ * hand-over with (`POST /v1/auth/pair`, `POST /v1/auth/demo`), or null when it is anything else.
+ */
+export async function readSessionResponse(response: Response): Promise<PairingSession | null> {
   let body: unknown
   try {
     body = await response.json()
   } catch {
-    return { status: 'unavailable' }
+    return null
   }
 
   const session = (body as { session?: Partial<PairingSession> } | null)?.session
@@ -123,11 +132,8 @@ export async function exchangePairingCode(
     || typeof session.cookieValue !== 'string'
     || typeof session.expiresAt !== 'string'
   ) {
-    return { status: 'unavailable' }
+    return null
   }
 
-  return {
-    session: { cookieName: session.cookieName, cookieValue: session.cookieValue, expiresAt: session.expiresAt },
-    status: 'paired',
-  }
+  return { cookieName: session.cookieName, cookieValue: session.cookieValue, expiresAt: session.expiresAt }
 }

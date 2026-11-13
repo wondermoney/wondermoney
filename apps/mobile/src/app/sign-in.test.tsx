@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
+import { requestSignUpAfterSignOut, takeSignUpAfterSignOut } from '@/lib/auth/sign-up-after-sign-out'
 import { initMobileI18n } from '@/lib/i18n'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
@@ -12,12 +13,14 @@ const mockParams: { notice?: string; pairCode?: string; pairServer?: string } = 
 const mockPair = jest.fn()
 const mockSignInWithSso = jest.fn()
 const mockBlockAccess = jest.fn()
-const mockServer: { oidc: { name: string } | null; passwordSignIn: boolean } = { oidc: null, passwordSignIn: true }
+const mockServer: { demo: boolean; oidc: { name: string } | null; passwordSignIn: boolean } = { demo: false, oidc: null, passwordSignIn: true }
+const mockReplace = jest.fn()
 jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
 const captured = jest.mocked(captureAnalyticsEvent)
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockParams,
+  useRouter: () => ({ replace: mockReplace }),
   Link: ({ children }: { children: React.ReactNode }) => children,
 }))
 
@@ -36,6 +39,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
 }))
 
 jest.mock('@/lib/server/use-instance', () => ({
+  useConfirmedFeature: (select: (features: { demo?: boolean }) => boolean | undefined) => select({ demo: mockServer.demo }) === true,
   useOidcProvider: () => mockServer.oidc,
   usePasswordSignIn: () => mockServer.passwordSignIn,
 }))
@@ -69,6 +73,9 @@ describe('SignInRoute', () => {
     delete mockParams.pairServer
     mockServer.oidc = null
     mockServer.passwordSignIn = true
+    mockServer.demo = false
+    mockReplace.mockReset()
+    takeSignUpAfterSignOut()
     mockSignInWithSso.mockReset()
     mockBlockAccess.mockReset()
   })
@@ -104,6 +111,31 @@ describe('SignInRoute', () => {
     expect(view.getByRole('link', { name: 'Forgot your password?' })).toBeOnTheScreen()
     expect(view.getByText('Not a member?')).toBeOnTheScreen()
     expect(view.getByRole('link', { name: 'Create an account' })).toBeOnTheScreen()
+  })
+
+  it('offers the demo only when the server does', async () => {
+    const i18n = await initMobileI18n('en')
+    const without = await renderRoute()
+    expect(without.queryByRole('button', { name: i18n.t('auth.demo.button') })).toBeNull()
+    await without.unmount()
+
+    mockServer.demo = true
+    const view = await renderRoute()
+    expect(view.getByRole('button', { name: i18n.t('auth.demo.button') })).toBeOnTheScreen()
+  })
+
+  it('carries on to sign-up when signing out of the demo was to create an account', async () => {
+    requestSignUpAfterSignOut()
+    await renderRoute()
+
+    expect(mockReplace).toHaveBeenCalledWith('/sign-up')
+    expect(takeSignUpAfterSignOut()).toBe(false)
+  })
+
+  it('stays on sign-in after an ordinary sign-out', async () => {
+    await renderRoute()
+
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('offers to scan a pairing QR code', async () => {

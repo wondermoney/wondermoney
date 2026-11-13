@@ -36,6 +36,7 @@ import {
   FormMessage,
 } from "../ui/Form";
 import { Input } from "../ui/input";
+import { DemoSignInButton } from "./DemoSignInButton";
 import { OidcSignInButton } from "./OidcSignInButton";
 
 const formSchema = z.object({
@@ -74,6 +75,8 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   const passwordSignIn = useFeature(
     (features) => features.passwordSignIn !== false,
   );
+  // The shared read-only demo account, only on a server that has said it offers one.
+  const demoSignIn = useConfirmedFeature((features) => features.demo === true);
   const [isNavigating, setIsNavigating] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -355,6 +358,14 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
             )}
           </div>
         </div>
+      )}
+
+      {demoSignIn && (
+        <DemoSignInButton
+          disabled={isLoading}
+          locale={locale}
+          nextParam={nextParam}
+        />
       )}
     </div>
   );
