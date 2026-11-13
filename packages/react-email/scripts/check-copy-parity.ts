@@ -13,6 +13,11 @@
  * (the Spanish copy arrived) or when a template is missing Spanish without
  * being listed, so the list cannot outlive the gap or hide a new one.
  *
+ * Portuguese copy addresses the reader as "tu" ("Recebes este email…"), never
+ * as "você" or in the formal third person (CONTRIBUTING.md has the rule), so
+ * the pt entries also fail on "você" or a formal imperative opening a sentence.
+ * The same patterns guard the web and mobile copy.
+ *
  *   tsx scripts/check-copy-parity.ts
  */
 import { COPY as accountConnected } from "../src/templates/account-connected";
@@ -53,6 +58,11 @@ const SPANISH_COPY_GAP = new Set([
 ]);
 
 const LOCALES = ["en", "pt", "es"] as const;
+
+const FORMAL_ADDRESS = [
+  /(?<!\p{L})[Vv]ocê(?!\p{L})/u,
+  /(?:^|[.!?:…]\s+|\n|`)(?:Clique|Toque|Adicione|Escolha|Selecione|Digite|Escreva|Insira|Introduza|Confirme|Verifique|Tente|Utilize|Aceda|Experimente|Certifique-se|Inicie|Registe-se|Contacte|Aguarde|Reveja|Volte|Abra|Crie|Guarde|Ligue|Faça|Veja|Consulte|Descarregue|Elimine|Mantenha)(?![\p{L}-])/u,
+];
 
 const failures: string[] = [];
 const knownGaps: string[] = [];
@@ -143,7 +153,24 @@ function compare(
   }
 }
 
+/** Every string in a copy entry, and the source of every copy function (its template literal). */
+function copyText(value: unknown, path: string): Array<[string, string]> {
+  if (typeof value === "string") return [[path, value]];
+  if (typeof value === "function") return [[path, value.toString()]];
+  if (Array.isArray(value)) return value.flatMap((item, index) => copyText(item, `${path}[${index}]`));
+  if (value && typeof value === "object") {
+    return Object.entries(value).flatMap(([key, child]) => copyText(child, `${path}.${key}`));
+  }
+  return [];
+}
+
 for (const { file, copy } of templates) {
+  for (const [path, text] of copyText(copy.pt, "pt")) {
+    if (FORMAL_ADDRESS.some((pattern) => pattern.test(text))) {
+      failures.push(`${file}: ${path} addresses the reader formally; use the "tu" form (CONTRIBUTING.md).`);
+    }
+  }
+
   if (!copy.en) {
     failures.push(`${file}: no English copy to compare against.`);
     continue;

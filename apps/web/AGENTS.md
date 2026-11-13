@@ -53,6 +53,10 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 - `@/*` imports. Merge classes with `cn()`; variants with `cva`.
 - All customer-facing copy goes through next-intl, in **en, pt and es**; the
   i18n-message-key check in `pnpm test` enforces key parity.
+- pt is European Portuguese and addresses the reader as **tu** ("Introduz o teu email",
+  "Podes alterar isto mais tarde"), never "você" or the formal third person; labels stay
+  infinitive. `CONTRIBUTING.md` has the rule and examples; `i18n/pt-form-of-address.test.ts`
+  enforces it.
 - Financial values: `font-mono`, locale-aware formatting (`lib/utils/formatCurrency.ts`,
   `formatDate.ts`), and a non-color cue beside every gain/loss color.
 - Calm, data-first UI: semantic tokens only; no emoji, promotional badges, generic

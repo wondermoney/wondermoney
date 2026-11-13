@@ -1,7 +1,7 @@
 {
   "reports": {
     "title": "Relatórios",
-    "subtitle": "Compreenda o seu dinheiro com informação calma e focada.",
+    "subtitle": "Compreende o teu dinheiro com informação calma e focada.",
     "filters": {
       "title": "Filtros",
       "accounts": "Contas",
@@ -36,7 +36,7 @@
       "csv": "Exportar CSV",
       "downloading": "A preparar a transferência…",
       "success": "Transferência iniciada",
-      "error": "Não foi possível gerar a exportação. Tente novamente."
+      "error": "Não foi possível gerar a exportação. Tenta novamente."
     },
     "trend": {
       "up": "Subiu",
@@ -47,12 +47,12 @@
     "reports": {
       "spendingByCategory": {
         "title": "Despesa por categoria",
-        "subtitle": "Para onde foi o seu dinheiro no período.",
+        "subtitle": "Para onde foi o teu dinheiro no período.",
         "total": "Total gasto",
         "viewTransactions": "Ver as transações por trás deste total",
         "noData": {
           "title": "Sem despesas neste período",
-          "description": "Experimente um período mais alargado ou verifique se as contas estão ligadas."
+          "description": "Experimenta um período mais alargado ou verifica se as contas estão ligadas."
         }
       },
       "cashflow": {
@@ -88,7 +88,7 @@
         "mobileTableValue": "Valor",
         "noData": {
           "title": "Atividade insuficiente",
-          "description": "Adicione mais transações para ver o fluxo do seu dinheiro."
+          "description": "Adiciona mais transações para ver o fluxo do teu dinheiro."
         }
       },
       "netWorthHistory": {
@@ -104,7 +104,7 @@
       },
       "budgetVsActual": {
         "title": "Orçamento vs realizado",
-        "subtitle": "Como a sua despesa acompanhou o orçamento.",
+        "subtitle": "Como a tua despesa acompanhou o orçamento.",
         "budgeted": "Orçamentado",
         "actual": "Realizado",
         "variance": "Desvio",
@@ -114,7 +114,7 @@
         "category": "Categoria",
         "noBudget": {
           "title": "Sem orçamentos definidos",
-          "description": "Defina um orçamento para ver como a sua despesa se compara."
+          "description": "Define um orçamento para ver como a tua despesa se compara."
         },
         "noData": {
           "title": "Nada para comparar",
@@ -135,15 +135,15 @@
         "noExchangeRate": "Ainda sem taxa de câmbio",
         "timeWeighted": "Ponderado pelo tempo",
         "moneyWeighted": "Ponderado pelo dinheiro",
-        "timeWeightedDescription": "Como correram os investimentos, independentemente do que investiu ou retirou.",
-        "moneyWeightedDescription": "Como correu o seu dinheiro, tendo em conta quando investiu ou retirou. Uma taxa por ano em períodos de um ano ou mais.",
+        "timeWeightedDescription": "Como correram os investimentos, independentemente do que investiste ou retiraste.",
+        "moneyWeightedDescription": "Como correu o teu dinheiro, tendo em conta quando investiste ou retiraste. Uma taxa por ano em períodos de um ano ou mais.",
         "perYear": "por ano",
         "returnUnavailable": "Sem histórico suficiente para medir",
         "notCombined": "Não combinado entre carteiras",
         "missingSnapshots": "{count, plural, one {# dia sem snapshot, valor mantido} other {# dias sem snapshot, valor mantido}}",
         "noData": {
           "title": "Sem carteiras para mostrar",
-          "description": "Adicione uma carteira para ver a sua performance aqui."
+          "description": "Adiciona uma carteira para ver a sua performance aqui."
         }
       },
       "monthComparison": {
@@ -162,7 +162,7 @@
         "largestChanges": "O gráfico mostra as {count} maiores variações; a tabela lista todas as categorias.",
         "noData": {
           "title": "Sem despesas em nenhum dos meses",
-          "description": "Experimente outros dois meses ou verifique se as contas estão ligadas."
+          "description": "Experimenta outros dois meses ou verifica se as contas estão ligadas."
         }
       },
       "spendingVsNormal": {
@@ -178,20 +178,20 @@
         "aboveNormal": "acima do normal",
         "belowNormal": "abaixo do normal",
         "nearNormal": "perto do normal",
-        "hoverHint": "Aponte para um bloco, ou use a tabela, para ver o gasto, o normal e a variação.",
+        "hoverHint": "Aponta para um bloco, ou usa a tabela, para ver o gasto, o normal e a variação.",
         "tableCaption": "Despesa por categoria em {month}, comparada com os mesmos dias dos três meses anteriores.",
         "subcategoryOf": "Subcategoria de {parent}",
         "viewTransactions": "Ver as transações por trás deste valor",
         "noData": {
           "title": "Sem despesas neste mês",
-          "description": "Experimente outro mês ou verifique se as contas estão ligadas."
+          "description": "Experimenta outro mês ou verifica se as contas estão ligadas."
         }
       }
     },
     "common": {
       "loading": "A carregar…",
       "error": "Ocorreu um erro.",
-      "errorDescription": "Não foi possível carregar o relatório. Verifique a ligação e tente de novo.",
+      "errorDescription": "Não foi possível carregar o relatório. Verifica a ligação e tenta de novo.",
       "retry": "Tentar novamente",
       "currencyUnknown": "—",
       "other": "Outros"

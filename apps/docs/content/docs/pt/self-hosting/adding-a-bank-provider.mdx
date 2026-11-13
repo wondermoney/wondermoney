@@ -1,6 +1,6 @@
 ---
 title: Adicionar um fornecedor bancário
-description: Implemente um novo agregador bancário atrás da interface BankProvider, registe-o e mantenha a sincronização independente do fornecedor.
+description: Implementa um novo agregador bancário atrás da interface BankProvider, regista-o e mantém a sincronização independente do fornecedor.
 ---
 
 O WonderMoney sincroniza contas através de uma interface de fornecedor, por isso adicionar um
@@ -16,42 +16,42 @@ Tudo vive em `apps/api/src/services/bank-providers/`:
 - `errors.ts` — as falhas tipadas que um fornecedor lança: `RateLimitedError`,
   `ConsentExpiredError`, `UserActionRequiredError`, `UnavailableError`. Mapeiam para os códigos de
   incidente (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), por
-  isso os serviços de sincronização nunca conhecem a forma de erro do seu fornecedor.
+  isso os serviços de sincronização nunca conhecem a forma de erro do teu fornecedor.
 - `registry.ts` — os fornecedores compilados e o filtro de ativação `BANK_PROVIDERS`.
 - `enable-banking.provider.ts` — a implementação de referência.
 
 Os serviços de sincronização importam apenas `types.ts`. Nunca importam o cliente ou a entidade
 de um fornecedor e nunca ramificam pelo nome do fornecedor.
 
-## 1. Implemente `BankProvider`
+## 1. Implementa `BankProvider`
 
-Crie `my-provider.provider.ts` e implemente:
+Cria `my-provider.provider.ts` e implementa:
 
 | Método | O que a sincronização precisa |
 |---|---|
 | `listInstitutions` | O seletor de bancos: um id estável, nome, país e logótipo. |
-| `startConnection` | Inicia o fluxo de consentimento e devolve o URL que o navegador abre. Persiste a sua linha de ligação aqui. |
+| `startConnection` | Inicia o fluxo de consentimento e devolve o URL que o navegador abre. Persiste a tua linha de ligação aqui. |
 | `completeConnection` | Troca o código do callback, marca a ligação como ativa e persiste as contas. Devolve `bankConnectionKey`, `accountsCreated` e o destino do navegador. |
 | `getSessionStatus` | Se o consentimento ainda é válido (`active`, `ended`, `unknown`), usado depois de todas as contas serem rejeitadas. |
 | `listAccounts` | As contas da ligação com moeda, IBAN, titular e id da instituição. |
 | `getBalances` | Os saldos da conta, com um `balanceType` que a lista de preferências entende (`closingBooked`, `interimBooked`, `expected`, …). |
-| `getTransactions` | A janela completa, já dividida em `booked`, `pending` e `voided`. Pagine internamente; a sincronização chama isto uma vez por conta. |
+| `getTransactions` | A janela completa, já dividida em `booked`, `pending` e `voided`. Pagina internamente; a sincronização chama isto uma vez por conta. |
 
-Declare também duas capacidades:
+Declara também duas capacidades:
 
-- `transactionIdentity` — a coluna de `Transaction` que guarda o id do seu fornecedor e o prefixo
+- `transactionIdentity` — a coluna de `Transaction` que guarda o id do teu fornecedor e o prefixo
   do id estável para linhas sem id. Um novo fornecedor deve usar a sua própria coluna; as duas
   existentes são do Enable Banking e do GoCardless legado.
-- `institutionProvider` — o valor de `AccountFinancialInstitution.provider` das suas contas.
+- `institutionProvider` — o valor de `AccountFinancialInstitution.provider` das tuas contas.
   `other` existe para novos fornecedores.
 
-Lance os erros tipados de `errors.ts` em todas as chamadas. Não deixe escapar a forma de erro do
-seu SDK: as verificações de limite de pedidos e de consentimento leem os erros tipados (e o
+Lança os erros tipados de `errors.ts` em todas as chamadas. Não deixes escapar a forma de erro do
+teu SDK: as verificações de limite de pedidos e de consentimento leem os erros tipados (e o
 `status` que transportam).
 
-## 2. Registe-o
+## 2. Regista-o
 
-Adicione o fornecedor a `PROVIDERS` em `registry.ts` e exporte o seu id. O operador ativa-o com
+Adiciona o fornecedor a `PROVIDERS` em `registry.ts` e exporta o seu id. O operador ativa-o com
 uma variável de ambiente separada por vírgulas:
 
 ```bash
@@ -60,31 +60,31 @@ BANK_PROVIDERS=enable_banking,my_provider
 
 Sem valor, ficam ativos todos os fornecedores compilados. `GET /v1/instance` reporta a lista em
 `features.bankSyncProviders`, e `features.bankSync` é falso quando nenhum está ativo. Os clientes
-escondem a funcionalidade a partir dessa lista, por isso mantenha os ids estáveis.
+escondem a funcionalidade a partir dessa lista, por isso mantém os ids estáveis.
 
-## 3. Persista a ligação
+## 3. Persiste a ligação
 
 A sincronização lê `BankConnection` (a linha independente do fornecedor: fornecedor, id externo,
-estado, `accessValidUntil`, referência da credencial, marcas de sincronização). Mantenha os campos
-específicos do fornecedor (nome do ASPSP, FK da credencial, id da sessão) na sua própria linha de
-detalhe e ligue-a um-para-um através de `bankConnectionKey`, como faz a
+estado, `accessValidUntil`, referência da credencial, marcas de sincronização). Mantém os campos
+específicos do fornecedor (nome do ASPSP, FK da credencial, id da sessão) na tua própria linha de
+detalhe e liga-a um-para-um através de `bankConnectionKey`, como faz a
 `EnableBankingConnection`.
 
 As migrações neste repositório são **apenas DDL**. Se linhas existentes tiverem de passar para
-uma nova tabela ou coluna, escreva um backfill de arranque idempotente e transacional (ver
+uma nova tabela ou coluna, escreve um backfill de arranque idempotente e transacional (ver
 `bank-connection-backfill.service.ts` e a chamada em `migrate.ts`), não uma migração de dados.
 Tem de ser seguro correr em cada arranque e uma segunda execução não pode alterar nada.
 
-## 4. Teste o ponto de extensão
+## 4. Testa o ponto de extensão
 
-- Teste unitariamente o mapeamento e a tradução de erros do fornecedor.
-- Corra uma sincronização completa através da interface com um fornecedor falso:
+- Testa unitariamente o mapeamento e a tradução de erros do fornecedor.
+- Corre uma sincronização completa através da interface com um fornecedor falso:
   `services/bank-providers/__tests__/fake-provider-sync.test.ts` cria uma ligação, chama
   `runBankSyncPhases` e verifica as linhas de conta e transação.
-- Se adicionar um backfill, teste-o com dados com a forma real e confirme que uma segunda execução
+- Se adicionares um backfill, testa-o com dados com a forma real e confirma que uma segunda execução
   não faz nada (`bank-connection-backfill.service.test.ts`).
 
-Corra os testes afetados com um Postgres descartável:
+Corre os testes afetados com um Postgres descartável:
 
 ```bash
 cd apps/api

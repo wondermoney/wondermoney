@@ -2,15 +2,15 @@
   "global": {
     "mainCta": "Começa grátis",
     "mainCtaMicrocopy": "Gratuito e open source. Usa-o aqui ou no teu próprio servidor.",
-    "secondaryCta": "Veja como funciona",
-    "financialDisclaimer": "Esta calculadora tem fins meramente ilustrativos e não constitui aconselhamento financeiro, de investimento ou fiscal. Os valores apresentados são estimativas — consulte um consultor financeiro qualificado antes de tomar decisões financeiras.",
+    "secondaryCta": "Vê como funciona",
+    "financialDisclaimer": "Esta calculadora tem fins meramente ilustrativos e não constitui aconselhamento financeiro, de investimento ou fiscal. Os valores apresentados são estimativas — consulta um consultor financeiro qualificado antes de tomares decisões financeiras.",
     "ctaBanner": {
-      "headline": "Acompanhe as suas finanças automaticamente",
-      "description": "O WonderMoney liga-se às suas contas bancárias, acompanha o seu orçamento e monitoriza os seus investimentos — tudo num só lugar."
+      "headline": "Acompanha as tuas finanças automaticamente",
+      "description": "O WonderMoney liga-se às tuas contas bancárias, acompanha o teu orçamento e monitoriza os teus investimentos — tudo num só lugar."
     },
     "consent": {
       "title": "Escolhas de privacidade",
-      "description": "Usamos armazenamento necessário para manter este site a funcionar. Também pode escolher se podemos usar dados de análise e publicidade.",
+      "description": "Usamos armazenamento necessário para manter este site a funcionar. Também podes escolher se podemos usar dados de análise e publicidade.",
       "privacyLink": "Ler a política de privacidade",
       "necessaryOnly": "Usar apenas o necessário",
       "customize": "Personalizar",
@@ -18,20 +18,20 @@
       "customizeTitle": "Gerir escolhas de privacidade",
       "back": "Voltar",
       "necessaryTitle": "Necessário",
-      "necessaryDescription": "Mantém o site seguro e memoriza as suas escolhas. Está sempre ativo.",
+      "necessaryDescription": "Mantém o site seguro e memoriza as tuas escolhas. Está sempre ativo.",
       "analyticsTitle": "Análise",
       "analyticsDescription": "Ajuda-nos a perceber como o site é usado para o podermos melhorar.",
       "adsTitle": "Publicidade",
       "adsDescription": "Permite identificadores de campanha e da Meta para medir resultados de publicidade.",
       "save": "Guardar escolhas",
-      "saved": "As suas escolhas de privacidade foram guardadas",
+      "saved": "As tuas escolhas de privacidade foram guardadas",
       "privacyChoices": "Escolhas de privacidade",
-      "saveError": "Não foi possível guardar as suas escolhas. Continuam inalteradas.",
+      "saveError": "Não foi possível guardar as tuas escolhas. Continuam inalteradas.",
       "tryAgain": "Tentar novamente"
     },
     "search": {
       "placeholder": "Pesquisar...",
-      "noResults": "Nenhum resultado encontrado. Tente outro termo de pesquisa."
+      "noResults": "Nenhum resultado encontrado. Tenta outro termo de pesquisa."
     },
     "relatedContent": {
       "title": "Conteúdo relacionado",
@@ -54,10 +54,10 @@
   },
   "homepage": {
     "metaTitle": "App de finanças pessoais para a Europa — WonderMoney",
-    "metaDescription": "Acompanhe o seu património líquido, orçamento e investimentos num só lugar. Ligue contas bancárias europeias via Open Banking. Gratuito e open source.",
+    "metaDescription": "Acompanha o teu património líquido, orçamento e investimentos num só lugar. Liga contas bancárias europeias via Open Banking. Gratuito e open source.",
     "hero": {
-      "headline": "Todas as suas finanças. Uma só app.",
-      "subheadline": "Liga-se ao seu banco, organiza tudo e dá-lhe a visão completa das suas finanças. Automático e seguro.",
+      "headline": "Todas as tuas finanças. Uma só app.",
+      "subheadline": "Liga-se ao teu banco, organiza tudo e dá-te a visão completa das tuas finanças. Automático e seguro.",
       "newHeadline": "Bancos, orçamentos e investimentos. Num só lugar.",
       "newSubheadline": "Liga o teu banco com Open Banking só de leitura. O WonderMoney organiza o resto.",
       "newCta": "Começa grátis"
@@ -87,21 +87,21 @@
     },
     "features": {
       "headline": "Uma app em vez de cinco",
-      "subheadline": "De orçamentos inteligentes a rastreamento de despesas, temos tudo o que precisa.",
+      "subheadline": "De orçamentos inteligentes a rastreamento de despesas, temos tudo o que precisas.",
       "item1": {
         "title": "Chega de saltar entre apps",
-        "description": "Ligue as suas contas bancárias num só lugar. As transações sincronizam sozinhas - sem meter nada à mão.",
+        "description": "Liga as tuas contas bancárias num só lugar. As transações sincronizam sozinhas - sem meter nada à mão.",
         "status": "",
         "banksLabel": "Bancos, por Open Banking só de leitura",
         "brokersLabel": "Corretoras, por importação de ficheiro"
       },
       "item2": {
-        "title": "Saiba para onde vai cada euro",
-        "description": "Categorização automática e orçamentos à medida mostram para onde vai o seu dinheiro - sem surpresas ao fim do mês.",
+        "title": "Sabe para onde vai cada euro",
+        "description": "Categorização automática e orçamentos à medida mostram para onde vai o teu dinheiro - sem surpresas ao fim do mês.",
         "status": ""
       },
       "item3": {
-        "title": "Os seus investimentos, sem spreadsheets",
+        "title": "Os teus investimentos, sem spreadsheets",
         "description": "Acompanha ações, ETFs e outros ativos com valores de mercado atualizados regularmente, conforme os dados ficam disponíveis.",
         "status": ""
       },
@@ -197,7 +197,7 @@
     },
     "previewLabel": "Pré-visualização",
     "midCta": {
-      "headline": "As suas finanças, todas num só lugar",
+      "headline": "As tuas finanças, todas num só lugar",
       "subheadline": "Junta-te a quem procura uma visão mais clara das suas finanças.",
       "microcopy": "Grátis e open source"
     },
@@ -206,7 +206,7 @@
       "subtitle": "Pensado ao detalhe.",
       "card1": {
         "title": "Feito para a Europa",
-        "description": "Feito para bancos europeus e para a forma como realmente gere o seu dinheiro - não é uma app americana adaptada."
+        "description": "Feito para bancos europeus e para a forma como realmente geres o teu dinheiro - não é uma app americana adaptada."
       },
       "card2": {
         "title": "Tudo-em-Um",
@@ -238,13 +238,13 @@
       },
       "faq5": {
         "question": "Posso acompanhar investimentos também?",
-        "answer": "Sim. O WonderMoney acompanha ações, ETFs e outros ativos ao lado das suas contas bancárias - para uma visão completa do seu património."
+        "answer": "Sim. O WonderMoney acompanha ações, ETFs e outros ativos ao lado das tuas contas bancárias - para uma visão completa do teu património."
       }
     }
   },
   "about": {
     "hero": {
-      "title": "Redefinindo a forma como gere o seu dinheiro",
+      "title": "Redefinindo a forma como geres o teu dinheiro",
       "subtitle": "Acreditamos que todos merecem uma forma simples, segura e poderosa de assumir o controlo do futuro financeiro."
     },
     "mission": {
@@ -260,15 +260,15 @@
     },
     "vision": {
       "title": "A nossa visão",
-      "headline": "Todas as suas finanças, numa aplicação simples",
+      "headline": "Todas as tuas finanças, numa aplicação simples",
       "item1": "Uma aplicação prática para quem quer controlo financeiro",
       "item1desc": "Imaginamos um mundo onde gerir dinheiro é simples, com ferramentas criadas para quem quer assumir o controlo do futuro financeiro.",
       "item2": "Insights automáticos de investimentos",
       "item2desc": "Acompanha ações, ETFs e outros ativos com valores de mercado atualizados regularmente, conforme os dados ficam disponíveis.",
       "item3": "Orçamento inteligente e simples",
-      "item3desc": "Crie e monitorize orçamentos com metodologias fáceis de usar que o guiam até aos seus objetivos.",
-      "item4": "Uma visão holística das suas finanças",
-      "item4desc": "Veja toda a sua vida financeira, consolidada numa aplicação poderosa."
+      "item3desc": "Cria e monitoriza orçamentos com metodologias fáceis de usar que te guiam até aos teus objetivos.",
+      "item4": "Uma visão holística das tuas finanças",
+      "item4desc": "Vê toda a tua vida financeira, consolidada numa aplicação poderosa."
     },
     "values": {
       "learnMore": "Saber mais",
@@ -280,7 +280,7 @@
         "description": "Estamos empenhados em tornar ferramentas financeiras poderosas acessíveis a todos, independentemente da sua experiência ou conhecimentos financeiros."
       },
       "value2": {
-        "title": "A sua privacidade é a nossa prioridade",
+        "title": "A tua privacidade é a nossa prioridade",
         "description": "As ligações bancárias usam Open Banking só de leitura através da Enable Banking. O WonderMoney não pode iniciar transferências. Introduzes as credenciais junto do banco ou fornecedor, e o WonderMoney não as vê."
       },
       "value3": {
@@ -290,9 +290,9 @@
     }
   },
   "contact": {
-    "pretitle": "Fale connosco",
-    "title": "Questões? Entre em contacto com a nossa equipa",
-    "description": "Tem dúvidas, precisa de ajuda ou quer partilhar o seu feedback? A nossa equipa está pronta para ajudá-lo a tomar o controlo das suas finanças e alcançar as suas metas. Vamos crescer juntos.",
+    "pretitle": "Fala connosco",
+    "title": "Questões? Entra em contacto com a nossa equipa",
+    "description": "Tens dúvidas, precisas de ajuda ou queres partilhar o teu feedback? A nossa equipa está pronta para te ajudar a tomar o controlo das tuas finanças e alcançar as tuas metas. Vamos crescer juntos.",
     "form": {
       "name": "Nome",
       "email": "Email",
@@ -303,31 +303,31 @@
   "emailCapture": {
     "footer": {
       "pretitle": "",
-      "title": "Receba o guia gratuito",
-      "description": "O guia de verificação do património de dez minutos — acompanhe o seu património em todas as contas e moedas. Direto para o seu email."
+      "title": "Recebe o guia gratuito",
+      "description": "O guia de verificação do património de dez minutos — acompanha o teu património em todas as contas e moedas. Direto para o teu email."
     },
     "inline": {
       "pretitle": "Guia gratuito",
-      "title": "Quer o guia de verificação do património de dez minutos?",
-      "description": "Obtenha o nosso guia rápido para acompanhar o seu património em todas as contas e moedas — sem folhas de cálculo."
+      "title": "Queres o guia de verificação do património de dez minutos?",
+      "description": "Obtém o nosso guia rápido para acompanhares o teu património em todas as contas e moedas — sem folhas de cálculo."
     },
     "form": {
       "emailLabel": "Endereço de email",
-      "emailPlaceholder": "o.seu@email.com",
+      "emailPlaceholder": "o.teu@email.com",
       "submit": "Enviar-me o guia",
       "submitting": "A enviar...",
-      "success": "Está feito! O seu guia gratuito está pronto.",
+      "success": "Está feito! O teu guia gratuito está pronto.",
       "successCta": "Ler o guia agora",
-      "error": "Não foi possível concluir o registo. Tente novamente em breve.",
-      "captchaError": "A verificação falhou. Tente novamente.",
-      "captchaNotReady": "A verificação ainda não está pronta. Tente novamente.",
-      "privacyNote": "Sem spam. Cancele quando quiser."
+      "error": "Não foi possível concluir o registo. Tenta novamente em breve.",
+      "captchaError": "A verificação falhou. Tenta novamente.",
+      "captchaNotReady": "A verificação ainda não está pronta. Tenta novamente.",
+      "privacyNote": "Sem spam. Cancela quando quiseres."
     }
   },
   "leadMagnetGuide": {
     "breadcrumbLabel": "Guia gratuito",
     "metaTitle": "Guia de verificação do património de dez minutos — guia gratuito — WonderMoney",
-    "metaDescription": "Um guia curto e prático, de dez minutos, para verificar o seu património em todas as contas e moedas, sem folhas de cálculo.",
+    "metaDescription": "Um guia curto e prático, de dez minutos, para verificar o teu património em todas as contas e moedas, sem folhas de cálculo.",
     "keyTakeawaysTitle": "Pontos-chave",
     "faqTitle": "Perguntas frequentes",
     "backToLearn": "Voltar a todos os guias"
@@ -363,7 +363,7 @@
     "learn": "Aprender",
     "glossary": "Glossário",
     "login": "Entrar",
-    "getStarted": "Comece agora",
+    "getStarted": "Começa agora",
     "openMainMenu": "Abrir menu principal",
     "closeMenu": "Fechar menu",
     "nav": {
@@ -415,16 +415,16 @@
   "tools": {
     "hub": {
       "title": "Ferramentas e calculadoras financeiras",
-      "description": "Calculadoras interativas gratuitas para planear o seu futuro financeiro. Sem registo necessário.",
+      "description": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Sem registo necessário.",
       "pageTitle": "Ferramentas e calculadoras financeiras — WonderMoney",
-      "pageDescription": "Calculadoras interativas gratuitas para planear o seu futuro financeiro. Juros compostos, património líquido, taxa de poupança e mais.",
+      "pageDescription": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Juros compostos, património líquido, taxa de poupança e mais.",
       "badge": "Calculadora",
       "comingSoon": "Em breve",
       "openCalculator": "Abrir calculadora"
     },
     "compoundInterest": {
       "title": "Calculadora de juros compostos",
-      "description": "Veja como o seu dinheiro cresce ao longo do tempo com contribuições mensais e juros compostos.",
+      "description": "Vê como o teu dinheiro cresce ao longo do tempo com contribuições mensais e juros compostos.",
       "initialInvestment": "Investimento inicial",
       "monthlyContribution": "Contribuição mensal",
       "annualReturn": "Retorno anual esperado",
@@ -438,8 +438,8 @@
       "contributions": "Contribuições",
       "interestEarned": "Juros acumulados",
       "pageTitle": "Calculadora de juros compostos — WonderMoney",
-      "pageDescription": "Calculadora de juros compostos gratuita. Veja como o seu dinheiro cresce ao longo do tempo com contribuições mensais e retornos compostos. Planeie o seu futuro de investimento.",
-      "subtitle": "Veja como os seus investimentos podem crescer ao longo do tempo com o poder dos juros compostos. Ajuste os valores abaixo para modelar diferentes cenários.",
+      "pageDescription": "Calculadora de juros compostos gratuita. Vê como o teu dinheiro cresce ao longo do tempo com contribuições mensais e retornos compostos. Planeia o teu futuro de investimento.",
+      "subtitle": "Vê como os teus investimentos podem crescer ao longo do tempo com o poder dos juros compostos. Ajusta os valores abaixo para modelar diferentes cenários.",
       "articleH2_1": "O que são juros compostos?",
       "articleH2_2": "Como funciona esta calculadora",
       "articleH2_3": "Que taxa de retorno devo usar?",
@@ -447,7 +447,7 @@
     },
     "netWorth": {
       "title": "Calculadora de património líquido",
-      "description": "Calcule o seu património líquido total somando todos os ativos e subtraindo os passivos.",
+      "description": "Calcula o teu património líquido total somando todos os ativos e subtraindo os passivos.",
       "assets": "Ativos",
       "liabilities": "Passivos",
       "cashSavings": "Dinheiro e poupanças",
@@ -465,12 +465,12 @@
       "assetsLabel": "Ativos",
       "liabilitiesLabel": "Passivos",
       "pageTitle": "Calculadora de património líquido — WonderMoney",
-      "pageDescription": "Calculadora de património líquido gratuita. Some os seus ativos, subtraia os passivos e veja o seu património líquido total. Acompanhe o seu progresso financeiro ao longo do tempo.",
-      "subtitle": "Calcule o seu património líquido total somando todos os seus ativos e subtraindo os passivos. Use este instantâneo para acompanhar o seu progresso financeiro ao longo do tempo."
+      "pageDescription": "Calculadora de património líquido gratuita. Soma os teus ativos, subtrai os passivos e vê o teu património líquido total. Acompanha o teu progresso financeiro ao longo do tempo.",
+      "subtitle": "Calcula o teu património líquido total somando todos os teus ativos e subtraindo os passivos. Usa este instantâneo para acompanhar o teu progresso financeiro ao longo do tempo."
     },
     "savingsRate": {
       "title": "Calculadora de taxa de poupança",
-      "description": "Descubra que percentagem do seu rendimento está a poupar cada mês e como melhorá-la.",
+      "description": "Descobre que percentagem do teu rendimento estás a poupar cada mês e como melhorá-la.",
       "monthlyIncome": "Rendimento mensal (após impostos)",
       "monthlyExpenses": "Despesas mensais",
       "monthlyDeductions": "Deduções mensais adicionais",
@@ -479,22 +479,22 @@
       "monthlySavings": "Poupança mensal",
       "savingsRate": "Taxa de poupança",
       "annualSavings": "Poupança anual",
-      "incomeHelp": "O seu rendimento líquido após impostos e deduções",
+      "incomeHelp": "O teu rendimento líquido após impostos e deduções",
       "expensesHelp": "Total de despesas mensais incluindo renda, alimentação, contas, etc.",
-      "deductionsHelp": "Deduções mensais extra a subtrair ao seu rendimento líquido de base",
+      "deductionsHelp": "Deduções mensais extra a subtrair ao teu rendimento líquido de base",
       "duodecimosHelp": "Se ativado, um duodécimo do montante anual de duodécimos é adicionado ao rendimento mensal",
       "labelExcellent": "Excelente — território FIRE",
       "labelGreat": "Ótimo — no caminho da liberdade financeira",
       "labelGood": "Bom — margem para melhorar",
-      "labelLow": "Baixo — tente reduzir despesas",
+      "labelLow": "Baixo — tenta reduzir despesas",
       "labelNone": "Sem poupança — despesas igualam ou excedem o rendimento",
       "pageTitle": "Calculadora de taxa de poupança — WonderMoney",
-      "pageDescription": "Calculadora de taxa de poupança gratuita. Descubra que percentagem do seu rendimento poupa cada mês. Compare com a regra 50/30/20 e os objetivos do movimento FIRE.",
-      "subtitle": "Descubra que percentagem do seu rendimento está a poupar cada mês. A sua taxa de poupança é um dos números mais importantes nas finanças pessoais — determina a rapidez com que constrói riqueza."
+      "pageDescription": "Calculadora de taxa de poupança gratuita. Descobre que percentagem do teu rendimento poupas cada mês. Compara com a regra 50/30/20 e os objetivos do movimento FIRE.",
+      "subtitle": "Descobre que percentagem do teu rendimento estás a poupar cada mês. A tua taxa de poupança é um dos números mais importantes nas finanças pessoais — determina a rapidez com que constróis riqueza."
     },
     "investmentReturn": {
       "title": "Calculadora de retorno de investimento",
-      "description": "Calcule o retorno anualizado de qualquer investimento dado um valor inicial, valor final e período de tempo.",
+      "description": "Calcula o retorno anualizado de qualquer investimento dado um valor inicial, valor final e período de tempo.",
       "initialInvestment": "Investimento inicial",
       "currentValue": "Valor atual",
       "investmentPeriod": "Período de investimento (anos)",
@@ -502,14 +502,14 @@
       "totalReturn": "Retorno total",
       "totalReturnPct": "Retorno total (%)",
       "annualizedReturn": "Retorno anualizado",
-      "periodHelp": "Número de anos em que manteve o investimento",
+      "periodHelp": "Número de anos em que mantiveste o investimento",
       "pageTitle": "Calculadora de retorno de investimento — WonderMoney",
-      "pageDescription": "Calculadora de retorno de investimento gratuita. Calcule o retorno total e anualizado de qualquer investimento. Compare o desempenho em diferentes períodos de tempo.",
-      "subtitle": "Calcule o retorno total e anualizado de qualquer investimento. Introduza o valor investido, o valor atual e há quanto tempo mantém o investimento."
+      "pageDescription": "Calculadora de retorno de investimento gratuita. Calcula o retorno total e anualizado de qualquer investimento. Compara o desempenho em diferentes períodos de tempo.",
+      "subtitle": "Calcula o retorno total e anualizado de qualquer investimento. Introduz o valor investido, o valor atual e há quanto tempo manténs o investimento."
     },
     "mortgage": {
       "title": "Calculadora de hipoteca",
-      "description": "Calcule a prestação mensal da hipoteca, o total de juros e veja como os custos se distribuem ao longo do tempo.",
+      "description": "Calcula a prestação mensal da hipoteca, o total de juros e vê como os custos se distribuem ao longo do tempo.",
       "propertyPrice": "Preço do imóvel",
       "downPayment": "Entrada",
       "interestRate": "Taxa de juro",
@@ -524,13 +524,13 @@
       "interest": "Juros",
       "year": "Ano",
       "pageTitle": "Calculadora de hipoteca — WonderMoney",
-      "pageDescription": "Calculadora de hipoteca gratuita. Calcule a sua prestação mensal, o total de juros e o custo total. Veja como o capital e os juros se distribuem ao longo da vida do empréstimo.",
-      "subtitle": "Calcule a sua prestação mensal de hipoteca e veja quanto pagará em juros ao longo da vida do empréstimo. Ajuste o preço do imóvel, a entrada, a taxa e o prazo para comparar cenários."
+      "pageDescription": "Calculadora de hipoteca gratuita. Calcula a tua prestação mensal, o total de juros e o custo total. Vê como o capital e os juros se distribuem ao longo da vida do empréstimo.",
+      "subtitle": "Calcula a tua prestação mensal de hipoteca e vê quanto pagarás em juros ao longo da vida do empréstimo. Ajusta o preço do imóvel, a entrada, a taxa e o prazo para comparar cenários."
     }
   },
   "learn": {
     "hub": {
-      "pageTitle": "Aprenda — guias de finanças pessoais — WonderMoney",
+      "pageTitle": "Aprende — guias de finanças pessoais — WonderMoney",
       "pageDescription": "Guias e artigos aprofundados sobre finanças pessoais, investimento e gestão de dinheiro.",
       "title": "Guias de finanças pessoais",
       "description": "Artigos e guias aprofundados para ajudar-te a tomar melhores decisões financeiras.",
@@ -564,7 +564,7 @@
   "glossary": {
     "hub": {
       "pageTitle": "Glossário financeiro — WonderMoney",
-      "pageDescription": "Glossário completo de termos financeiros e de investimento. Aprenda o significado de cada conceito.",
+      "pageDescription": "Glossário completo de termos financeiros e de investimento. Aprende o significado de cada conceito.",
       "title": "Glossário financeiro",
       "schemaDescription": "Glossário completo de termos financeiros e de investimento.",
       "description": "Todos os termos financeiros e de investimento explicados de forma simples.",
@@ -1008,7 +1008,7 @@
       "eyebrow": "Orçamento por envelopes",
       "metaTitle": "App de orçamento por envelopes para a Europa — WonderMoney",
       "metaDescription": "Orçamento por envelopes de base zero com importação automática de transações. O WonderMoney traz o orçamento ao estilo YNAB para contas bancárias europeias via Open Banking.",
-      "heroTitle": "Dá a cada euro um destino antes de gastar",
+      "heroTitle": "Dá a cada euro um destino antes de gastares",
       "heroSubtitle": "Orçamento por envelopes: o método que te diz exatamente para onde vai o teu dinheiro. O WonderMoney dá a cada euro um propósito antes do mês começar.",
       "whatTitle": "O que é o orçamento por envelopes?",
       "whatBody": "O orçamento por envelopes (também chamado de base zero) significa alocar todo o teu rendimento a categorias antes do mês começar, até cada euro estar atribuído. Quando uma categoria se esgota, paras de gastar aí, ou conscientemente moves dinheiro de outro envelope. É o método de orçamento mais eficaz porque força decisões intencionais sobre cada euro.",
@@ -1365,7 +1365,7 @@
       "row7Wm": "Open Banking só de leitura",
       "featuresTitle": "Tudo o que a tua folha de cálculo faz, automatizado",
       "feat1Title": "Importa os teus dados existentes",
-      "feat1Body": "Já tens histórico financeiro em Excel? O WonderMoney liga-se ao teu banco e começa a importar transações automaticamente. Sem precisar de migrar ficheiros antigos.",
+      "feat1Body": "Já tens histórico financeiro em Excel? O WonderMoney liga-se ao teu banco e começa a importar transações automaticamente. Sem precisares de migrar ficheiros antigos.",
       "feat2Title": "Categorização automática substitui fórmulas",
       "feat2Body": "Acabaram-se os PROCV ou SE para classificar categorias de gastos. O WonderMoney categoriza transações com regras que defines uma vez.",
       "feat3Title": "Vê os teus dados financeiros ligados num só lugar. Os dados bancários atualizam quando os fornecedores os disponibilizam e os valores de mercado são atualizados regularmente, conforme disponíveis.",
