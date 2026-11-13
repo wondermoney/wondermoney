@@ -3174,7 +3174,25 @@
     "view-only-description": "Puedes ver esta cuenta, pero no cambiarla.",
     "errors": {
       "account_read_only": "Puedes ver esta cuenta, pero no cambiarla.",
-      "account_share_manager_required": "Solo el titular de la cuenta o el titular del hogar pueden cambiar quién tiene acceso."
+      "account_share_manager_required": "Solo el titular de la cuenta o el titular del hogar pueden cambiar quién tiene acceso.",
+      "account_ownership_manager_required": "Solo el titular de la cuenta o el titular del hogar pueden cambiar la titularidad de esta cuenta."
     }
+  },
+  "accountOwnership": {
+    "title": "Titularidad",
+    "description": "Qué parte de esta cuenta entra en el patrimonio neto de cada miembro. Los informes de gastos no se dividen.",
+    "split": "Dividir entre miembros",
+    "split-description": "Desactivado: la cuenta suma entera al patrimonio neto de su titular.",
+    "split-description-joint": "Desactivado: esta cuenta conjunta cuenta como Compartido.",
+    "percent-label": "Parte de {name}, en porcentaje",
+    "total": "Total: {total} de 100 %",
+    "invalid": "Introduce cada parte como un porcentaje de 0 a 100, con hasta dos decimales.",
+    "not-split": "Sin dividir: suma entera al patrimonio neto de {name}.",
+    "not-split-joint": "Sin dividir: esta cuenta conjunta cuenta como Compartido.",
+    "former-members": "El {percent} pertenece a personas que han dejado el hogar y cuenta como Compartido. Al guardar nuevas partes, pasa a los miembros de arriba.",
+    "manager-only": "Solo el titular de la cuenta o el titular del hogar pueden cambiar esto.",
+    "load-error": "No se ha podido cargar la titularidad. Puedes guardar los demás cambios.",
+    "save-error": "No se ha podido guardar la titularidad. Inténtalo de nuevo.",
+    "save-invalid": "Las partes deben sumar 100 %."
   }
 }

@@ -378,7 +378,8 @@
         "manualAssets": "Inmuebles y otros bienes",
         "loans": "Préstamos"
       },
-      "countedIn": "Incluida en {{account}}"
+      "countedIn": "Incluida en {{account}}",
+      "shareOfAccount": "{{percent}} de esta cuenta"
     },
     "cashflow": {
       "title": "Flujo de caja neto por mes",

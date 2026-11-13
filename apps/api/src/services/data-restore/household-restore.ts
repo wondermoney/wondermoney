@@ -474,6 +474,11 @@ class HouseholdRestore {
     // The member's own order of their account list.
     const positions = list.flatMap((row) => (row.position == null ? [] : [{ account_key: this.accounts.get(row.id), appuser_key: this.target.appuserKey, position: row.position, ...this.stamp() }]));
     await insertRows(this.db, 'appuser_account_position', positions);
+    // A split account (1.13): every member of the export is the restoring member now, so it is wholly theirs.
+    const ownership = list.flatMap((row) => ((row.ownership ?? []).some((share) => share.basisPoints > 0)
+      ? [{ account_key: this.accounts.get(row.id), appuser_key: this.target.appuserKey, basis_points: 10_000, tenant_key: this.target.tenantKey, ...this.stamp() }]
+      : []));
+    await insertRows(this.db, 'account_ownership', ownership);
     this.count('accounts', values.length);
   }
 

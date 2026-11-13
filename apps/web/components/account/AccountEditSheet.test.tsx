@@ -19,6 +19,10 @@ import {
 } from "vitest";
 
 import type {
+  AccountOwnershipMember,
+  AccountOwnershipResponse,
+} from "@/lib/api/account/useAccountOwnership";
+import type {
   AccountShareMember,
   AccountSharesResponse,
 } from "@/lib/api/account/useAccountShares";
@@ -30,11 +34,17 @@ import AccountEditSheet from "./AccountEditSheet";
 
 const api = vi.hoisted(() => ({
   shares: undefined as AccountSharesResponse | undefined,
+  ownership: undefined as AccountOwnershipResponse | undefined,
   editAccount: vi.fn(),
   updateShares: vi.fn(),
+  updateOwnership: vi.fn(),
+  toastError: vi.fn(),
   householdMembers: [] as HouseholdMember[],
 }));
 
+vi.mock("sonner", () => ({
+  toast: { error: api.toastError, success: () => {} },
+}));
 vi.mock("posthog-js/react", () => ({
   usePostHog: () => ({ capture: () => {} }),
 }));
@@ -61,6 +71,14 @@ vi.mock("@/lib/api/account/useAccountShares", () => ({
   }),
   useUpdateAccountShares: () => ({ mutateAsync: api.updateShares }),
 }));
+vi.mock("@/lib/api/account/useAccountOwnership", () => ({
+  default: () => ({
+    data: api.ownership,
+    isLoading: false,
+    isError: api.ownership === undefined,
+  }),
+  useUpdateAccountOwnership: () => ({ mutateAsync: api.updateOwnership }),
+}));
 
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
@@ -72,6 +90,8 @@ beforeAll(() => {
 beforeEach(() => {
   api.editAccount.mockReset().mockResolvedValue(undefined);
   api.updateShares.mockReset().mockResolvedValue(undefined);
+  api.updateOwnership.mockReset().mockResolvedValue(undefined);
+  api.ownership = undefined;
   api.householdMembers = [];
 });
 afterEach(cleanup);
@@ -390,5 +410,128 @@ describe("the joint account switch", () => {
     renderOwnership({ isOwner: true });
 
     expect(screen.queryByRole("switch", { name: jointLabel })).toBeNull();
+  });
+});
+
+const ownedBy = (
+  appuserKey: number,
+  firstName: string,
+  overrides: Partial<AccountOwnershipMember> = {},
+): AccountOwnershipMember => ({
+  appuserKey,
+  canSee: true,
+  displayName: firstName,
+  firstName,
+  isAccountOwner: appuserKey === 3,
+  lastName: null,
+  percent: 0,
+  role: appuserKey === 3 ? "owner" : "member",
+  ...overrides,
+});
+
+function ownership(
+  overrides: Partial<AccountOwnershipResponse> = {},
+): AccountOwnershipResponse {
+  return {
+    accountKey: 7,
+    canManage: true,
+    formerMembersPercent: 0,
+    isJoint: false,
+    isSplit: false,
+    members: [ownedBy(3, "Ana"), ownedBy(4, "Rui")],
+    ...overrides,
+  };
+}
+
+const shareFor = (name: string) =>
+  screen.getByRole("textbox", { name: `Share for ${name}, in percent` }) as HTMLInputElement;
+
+describe("ownership in the account edit sheet", () => {
+  beforeEach(() => {
+    api.shares = shares();
+    api.householdMembers = [householdMember(3, "Ana"), householdMember(4, "Rui")];
+  });
+
+  test("splits the account between members and saves the percentages", async () => {
+    api.ownership = ownership();
+    renderOwnership({ isOwner: true });
+
+    const region = screen.getByRole("region", { name: "Ownership" });
+    fireEvent.click(within(region).getByRole("switch", { name: "Split between members" }));
+    expect(shareFor("Ana").value).toBe("100");
+    fireEvent.change(shareFor("Ana"), { target: { value: "60" } });
+    fireEvent.change(shareFor("Rui"), { target: { value: "40" } });
+    expect(within(region).getByRole("status").textContent).toBe("Total: 100% of 100%");
+    save();
+
+    await waitFor(() =>
+      expect(api.updateOwnership).toHaveBeenCalledWith([
+        { appuserKey: 3, percent: 60 },
+        { appuserKey: 4, percent: 40 },
+      ]),
+    );
+  });
+
+  test("refuses to save shares that do not add up to 100%", async () => {
+    api.ownership = ownership({
+      isSplit: true,
+      members: [ownedBy(3, "Ana", { percent: 50 }), ownedBy(4, "Rui", { percent: 50 })],
+    });
+    renderOwnership({ isOwner: true });
+
+    fireEvent.change(shareFor("Rui"), { target: { value: "40" } });
+    expect(screen.getByRole("status").textContent).toBe("Total: 90% of 100%");
+    save();
+
+    await waitFor(() => expect(api.toastError).toHaveBeenCalledWith("The shares must add up to 100%."));
+    expect(api.updateOwnership).not.toHaveBeenCalled();
+    expect(api.editAccount).not.toHaveBeenCalled();
+  });
+
+  test("switching the split off stops splitting the account", async () => {
+    api.ownership = ownership({
+      isSplit: true,
+      members: [ownedBy(3, "Ana", { percent: 50 }), ownedBy(4, "Rui", { percent: 50 })],
+    });
+    renderOwnership({ isOwner: true });
+
+    fireEvent.click(screen.getByRole("switch", { name: "Split between members" }));
+    save();
+
+    await waitFor(() => expect(api.updateOwnership).toHaveBeenCalledWith([]));
+  });
+
+  test("saving without touching it sends no ownership change", async () => {
+    api.ownership = ownership();
+    renderOwnership({ isOwner: true });
+
+    save();
+
+    await waitFor(() => expect(api.editAccount).toHaveBeenCalled());
+    expect(api.updateOwnership).not.toHaveBeenCalled();
+  });
+
+  test("someone who cannot change it sees the shares without the controls", () => {
+    api.ownership = ownership({
+      canManage: false,
+      formerMembersPercent: 10,
+      isSplit: true,
+      members: [ownedBy(3, "Ana", { percent: 60 }), ownedBy(4, "Rui", { percent: 30 })],
+    });
+    renderOwnership({ isOwner: false });
+
+    const region = screen.getByRole("region", { name: "Ownership" });
+    expect(within(region).queryByRole("switch")).toBeNull();
+    expect(within(region).queryAllByRole("textbox")).toHaveLength(0);
+    expect(within(region).getByText("60%")).toBeTruthy();
+    expect(within(region).getByText(/10% belongs to people who have left/)).toBeTruthy();
+  });
+
+  test("a household of one has no ownership section", () => {
+    api.householdMembers = [householdMember(3, "Ana")];
+    api.ownership = ownership();
+    renderOwnership({ isOwner: true });
+
+    expect(screen.queryByRole("region", { name: "Ownership" })).toBeNull();
   });
 });

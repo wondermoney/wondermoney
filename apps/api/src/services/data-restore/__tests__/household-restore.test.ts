@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addOwnership, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { allRowCounts, dataFiles, emptyHousehold, exportBytes, householdRowCounts, linkToBank, richHousehold, type Scope, scopeOf } from '@app/__tests__/__helpers__/restore-fixtures';
 import { Appuser, SupportedLanguages } from '@entity/Appuser';
@@ -422,6 +422,34 @@ describe('household restore', () => {
       });
       return { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.7' }, rows: rows as unknown as ParsedExport['rows'] };
     }
+
+    it('restores a split account wholly the restoring member\'s, and an older export with no shares', async () => {
+      const { dollars, owner } = await richHousehold(db.em());
+      const partner = await addPartner(db.em(), owner);
+      await addOwnership(db.em(), owner, dollars, [[owner.appuser, 6000], [partner, 4000]]);
+      const target = await emptyHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+
+      await restore(scopeOf(target), parsed);
+
+      const ownership = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select a.account_name as name, o.appuser_key as member, o.basis_points as share from account_ownership o join account a using (account_key) where o.tenant_key = ?`,
+        [target.tenant.tenantKey]);
+      expect(ownership).toEqual([{ member: target.appuser.appuserKey, name: 'Dollar account', share: 10_000 }]);
+
+      const older = await emptyHousehold(db.em());
+      const rows = { ...parsed.rows, accounts: parsed.rows.accounts.map(({ ownership: _ownership, ...row }) => row) };
+      await restore(scopeOf(older), { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.10' }, rows });
+      const [count] = await db.em().getConnection().execute<Record<string, unknown>[]>(`select count(*)::int as n from account_ownership where tenant_key = ?`, [older.tenant.tenantKey]);
+      expect(count).toEqual({ n: 0 });
+    });
+
+    it('refuses an export whose shares of an account do not add up to the whole', () => {
+      const account = { accountNumber: null, balance: '1', bankLinked: false, closed: false, createdAt: null, currency: 'EUR', holderName: null, id: 1, institution: null, isPrivate: false, name: 'A', openingBalance: null, openingBalanceDate: null, ownerMemberId: 1, type: null };
+
+      expect(DATA_FILES.accounts.safeParse({ ...account, ownership: [{ basisPoints: 6000, memberId: 1 }, { basisPoints: 3000, memberId: 2 }] }).success).toBe(false);
+      expect(DATA_FILES.accounts.safeParse({ ...account, ownership: [{ basisPoints: 6000, memberId: 1 }, { basisPoints: 4000, memberId: null }] }).success).toBe(true);
+    });
 
     it('restores a 1.9 export with no joint account and every transaction following its account', async () => {
       const { owner } = await richHousehold(db.em());

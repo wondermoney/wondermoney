@@ -21,6 +21,10 @@ export const API_ERROR_CODE = {
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
   /** Changing an account's sharing without being its owner or the household owner (403). */
   ACCOUNT_SHARE_MANAGER_REQUIRED: "account_share_manager_required",
+  /** Changing who owns what share of an account without being its owner or the household owner (403). */
+  ACCOUNT_OWNERSHIP_MANAGER_REQUIRED: "account_ownership_manager_required",
+  /** Ownership shares that do not add up to 100% or name someone who cannot hold one (400). */
+  ACCOUNT_OWNERSHIP_INVALID: "account_ownership_invalid",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
   /** Inviting, or accepting an invite for, someone already in that household (409). */
   ALREADY_HOUSEHOLD_MEMBER: "already_household_member",

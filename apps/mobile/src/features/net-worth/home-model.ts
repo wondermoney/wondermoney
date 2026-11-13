@@ -99,7 +99,7 @@ export type BalanceSheetType = 'accounts' | 'portfolios' | 'manualAssets' | 'loa
  * `id` is the account, portfolio or loan key when the API sends it, so the row can wear its record's mark.
  * `countedInAccountId` marks a portfolio already inside that account's balance: listed, never added.
  */
-export type BalanceSheetRow = Readonly<{ key: string; label: string; amount: number; id?: number; countedInAccountId?: number }>
+export type BalanceSheetRow = Readonly<{ key: string; label: string; amount: number; id?: number; countedInAccountId?: number; sharePercent?: number }>
 
 const totalOf = (rows: readonly BalanceSheetRow[]) => rows.filter((row) => row.countedInAccountId === undefined).reduce((sum, row) => sum + row.amount, 0)
 export type BalanceSheetGroup = Readonly<{ type: BalanceSheetType; rows: readonly BalanceSheetRow[]; total: number }>
@@ -116,12 +116,13 @@ const GROUP_ORDER: readonly BalanceSheetType[] = ['accounts', 'portfolios', 'man
 
 function groupRows(rows: readonly (BalanceSheetRow & { type: BalanceSheetType })[]): BalanceSheetGroup[] {
   return GROUP_ORDER.flatMap((type) => {
-    const members = rows.filter((row) => row.type === type).map(({ key, label, amount, id, countedInAccountId }) => ({
+    const members = rows.filter((row) => row.type === type).map(({ key, label, amount, id, countedInAccountId, sharePercent }) => ({
       key,
       label,
       amount,
       ...(id === undefined ? {} : { id }),
       ...(countedInAccountId === undefined ? {} : { countedInAccountId }),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }))
     if (members.length === 0) return []
     return [{ type, rows: members, total: totalOf(members) }]
@@ -140,6 +141,7 @@ export function balanceSheet(rows: readonly NetWorthRowDto[] | null | undefined)
     amount: row.balance,
     id: row.id,
     countedInAccountId: row.countedInAccountId,
+    sharePercent: row.sharePercent,
     isLiability: row.type === 'loans' || row.balance < 0,
   }))
   const owned = keyed.filter((row) => !row.isLiability)

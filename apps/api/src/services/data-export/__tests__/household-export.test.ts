@@ -5,13 +5,14 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addCategory, addMerchant, addPartner, addShare, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addCategory, addMerchant, addOwnership, addPartner, addShare, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { seedPortfolio } from '@app/__tests__/__helpers__/portfolio-fixtures';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import type { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source } from '@entity/AppuserMerchantCategory';
+import { AppuserTenant } from '@entity/AppuserTenant';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
@@ -279,6 +280,22 @@ describe('household export', () => {
     expect(partnerExport.data['budgets']!.map((row) => ({ name: row['name'], ownerMemberId: row['ownerMemberId'] }))).toEqual([{ name: 'Home', ownerMemberId: null }]);
     expect(partnerExport.data['budget-categories']).toHaveLength(1);
     expect(partnerExport.data['budget-incomes']).toEqual([]);
+  });
+
+  it('carries each member\'s ownership share of an account, a former member\'s as Shared', async () => {
+    const { owner, partner, privateAccount } = await households();
+    const former = await addPartner(db.em(), owner);
+    await addOwnership(db.em(), owner, owner.account, [[owner.appuser, 5000], [partner, 3000], [former, 2000]]);
+    await db.em().nativeUpdate(AppuserTenant, { appuserKey: former }, { recordActive: false });
+
+    const mine = await exportFor(scopeOf(owner));
+    const ownerId = mine.manifest.exportedBy.memberId;
+    const partnerId = mine.data['members']!.find((row) => row['id'] !== ownerId)!['id'];
+
+    expect(Object.fromEntries(mine.data['accounts']!.map((row) => [row['name'], row['ownership']]))).toEqual({
+      'Joint current account': [{ basisPoints: 5000, memberId: ownerId }, { basisPoints: 3000, memberId: partnerId }, { basisPoints: 2000, memberId: null }],
+      [privateAccount.accountName!]: [],
+    });
   });
 
   it("leaves out the other member's personal loans and watchlist", async () => {

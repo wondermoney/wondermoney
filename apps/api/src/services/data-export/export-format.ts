@@ -89,8 +89,11 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * 1.12 added `ownerMemberId` to `data/budgets.json`: the member a personal budget belongs to, or null
  * for a household budget. An export holds the household's budgets and the exporting member's own
  * personal ones, never another member's.
+ * 1.13 added `ownership` to `data/accounts.json`: each member's share of the account in per-member net
+ * worth (`memberId`, `basisPoints` with 10000 for 100%), adding up to 10000, or empty when the account
+ * is not split. The shares of people no longer in the household are one entry with `memberId: null`.
  */
-export const EXPORT_FORMAT_VERSION = '1.12';
+export const EXPORT_FORMAT_VERSION = '1.13';
 
 export interface ExportManifest {
   appVersion: string;

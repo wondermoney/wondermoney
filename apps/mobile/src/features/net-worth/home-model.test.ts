@@ -84,6 +84,15 @@ describe('home model', () => {
     expect(sheet.own[1]).toEqual({ type: 'portfolios', total: 0, rows: [{ key: 'portfolios:1', label: 'Shares', amount: 8000, id: 7, countedInAccountId: 5 }] })
   })
 
+  it("carries a member's share of a split account on either side", () => {
+    const sheet = balanceSheet([
+      { type: 'accounts', id: 5, name: 'House fund', balance: 600, sharePercent: 60 },
+      { type: 'accounts', id: 6, name: 'Card', balance: -100, sharePercent: 50 },
+    ])
+    expect(sheet.own[0]?.rows).toEqual([{ key: 'accounts:0', label: 'House fund', amount: 600, id: 5, sharePercent: 60 }])
+    expect(sheet.owe[0]?.rows).toEqual([{ key: 'accounts:1', label: 'Card', amount: 100, id: 6, sharePercent: 50 }])
+  })
+
   it('diverges cash-flow bars from one zero line, oldest first', () => {
     const scale = cashflowScale([{ date: '2026-11-01T00:00:00.000Z', amount: 300 }, { date: '2026-10-01T00:00:00.000Z', amount: -100 }])
     expect(scale.zero).toBe(25)

@@ -15,6 +15,7 @@ import {
   getAccount,
   getAccountFinancialInstitutions,
   getAccountMetrics,
+  getAccountOwnershipController,
   getAccounts,
   getAccountsCashflow,
   getAccountsForecast,
@@ -34,6 +35,7 @@ import {
   getTransactions,
   getTransactionTypes,
   previewAccountCsvImport,
+  putAccountOwnershipController,
   putAccountSharesController,
   recalculateAccount,
   rejectTransactionOCRImport,
@@ -100,6 +102,8 @@ router.get('/:accountId/statements', getCreditCardStatementsHandler);
 router.get('/:accountId/statements/:statementDate', getCreditCardStatementDetailHandler);
 router.get('/:accountId/shares', getAccountSharesController);
 router.put('/:accountId/shares', putAccountSharesController);
+router.get('/:accountId/ownership', getAccountOwnershipController);
+router.put('/:accountId/ownership', putAccountOwnershipController);
 router.post('/:accountId/recalculate', requireWritableAccount, recalculateAccount);
 router.get('/:accountId/recent-transactions', getRecentTransactions);
 router.get('/:accountId/transaction', getAccountTransactions);

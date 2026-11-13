@@ -163,6 +163,8 @@ class HouseholdExport {
   private accountPositions = new Map<number, number>();
   /** Who each private account is shared with, among the exported members: `[appuserKey, access]`. */
   private accountShares = new Map<number, [number, string][]>();
+  /** Each split account's ownership shares, `[appuserKey, basisPoints]`, in key order. */
+  private accountOwnership = new Map<number, [number, number][]>();
   private readonly budgets = new IdMap();
   private readonly categories = new IdMap();
   private categoryRows: Row[] = [];
@@ -243,6 +245,13 @@ class HouseholdExport {
       if (!this.members.has(row['appuser_key'])) continue;
       const key = Number(row['account_key']);
       this.accountShares.set(key, [...(this.accountShares.get(key) ?? []), [Number(row['appuser_key']), String(row['access'])]]);
+    }
+
+    for (const row of await rowsOf(db, sql`
+      select account_key, appuser_key, basis_points from account_ownership
+      where tenant_key = ${tenantKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by account_key, appuser_key`)) {
+      const key = Number(row['account_key']);
+      this.accountOwnership.set(key, [...(this.accountOwnership.get(key) ?? []), [Number(row['appuser_key']), Number(row['basis_points'])]]);
     }
 
     // The household's own categories and the global system ones a restore resolves by name.
@@ -396,11 +405,26 @@ class HouseholdExport {
         ownerMemberId: this.members.get(row['account_owner_appuser_key']),
         // The exporting member's place for the account in their list; null when unordered.
         position: this.accountPositions.get(Number(row['account_key'])) ?? null,
+        // Each member's share of the account in per-member net worth (1.13); empty when it has none.
+        ownership: this.ownershipOf(Number(row['account_key'])),
         // Who else sees a private account, and whether they may change it. Empty for a shared one.
         shares: bool(row['is_private']) ? (this.accountShares.get(Number(row['account_key'])) ?? []).map(([appuserKey, access]) => ({ access, memberId: this.members.get(appuserKey) })) : [],
         type: str(row['account_type']),
       };
     }
+  }
+
+  /**
+   * An account's ownership shares by member id. The shares of people no longer in the household have
+   * no member id: they are one entry with `memberId: null`, Shared, so the shares still add up to 10000.
+   */
+  private ownershipOf(accountKey: number): { basisPoints: number; memberId: null | number }[] {
+    const byMember = new Map<null | number, number>();
+    for (const [appuserKey, basisPoints] of this.accountOwnership.get(accountKey) ?? []) {
+      const memberId = this.members.get(appuserKey);
+      byMember.set(memberId, (byMember.get(memberId) ?? 0) + basisPoints);
+    }
+    return [...byMember].map(([memberId, basisPoints]) => ({ basisPoints, memberId }));
   }
 
   /** The statement cycle, limit and minimum payment of every exported card account. */

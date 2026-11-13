@@ -378,7 +378,8 @@
         "manualAssets": "Imóveis e outros bens",
         "loans": "Empréstimos"
       },
-      "countedIn": "Incluído em {{account}}"
+      "countedIn": "Incluído em {{account}}",
+      "shareOfAccount": "{{percent}} desta conta"
     },
     "cashflow": {
       "title": "Fluxo de caixa líquido por mês",

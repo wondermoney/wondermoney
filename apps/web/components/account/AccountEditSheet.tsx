@@ -19,11 +19,20 @@ import {
 } from "@/components/ui/Form";
 import { accountAccessErrorKey } from "@/lib/account/access-error-messages";
 import {
+  initialOwnershipState,
+  ownershipChanged,
+  ownershipRequest,
+  type OwnershipState,
+} from "@/lib/account/account-ownership";
+import {
   initialSharingState,
   sharesRequest,
   sharingChanged,
   type SharingState,
 } from "@/lib/account/account-sharing";
+import useAccountOwnership, {
+  useUpdateAccountOwnership,
+} from "@/lib/api/account/useAccountOwnership";
 import type { CreditCardSettings } from "@/lib/api/account/useAccounts";
 import useAccountShares, {
   useUpdateAccountShares,
@@ -31,6 +40,8 @@ import useAccountShares, {
 import useEditAccount from "@/lib/api/account/useEditAccount";
 import useUpdateCreditCard from "@/lib/api/account/useUpdateCreditCard";
 import {
+  API_ERROR_CODE,
+  getApiErrorCode,
   isDemoReadOnlyError,
   isHouseholdReadOnlyError,
 } from "@/lib/api/errors";
@@ -48,6 +59,7 @@ import {
   SheetTitle,
 } from "../ui/sheet";
 import { Switch } from "../ui/switch";
+import { AccountOwnershipField } from "./AccountOwnershipField";
 import { AccountSharingField } from "./AccountSharingField";
 
 interface AccountEditSheetProps {
@@ -115,6 +127,26 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
     setSharing(start);
   }
 
+  // Who owns what share, for each member's net worth. Only a household with someone to split
+  // with shows it; saved with the rest of the sheet, after the sharing (a share needs access).
+  const hasOtherMembers = members.length > 1;
+  const ownershipQuery = useAccountOwnership(accountKey, {
+    enabled: isOpen && hasOtherMembers,
+  });
+  const updateOwnership = useUpdateAccountOwnership(accountKey);
+  const ownership = ownershipQuery.data;
+  const [ownershipStart, setOwnershipStart] = useState<OwnershipState | null>(
+    null,
+  );
+  const [ownershipState, setOwnershipState] = useState<OwnershipState | null>(
+    null,
+  );
+  if (ownership && ownershipStart === null) {
+    const start = initialOwnershipState(ownership);
+    setOwnershipStart(start);
+    setOwnershipState(start);
+  }
+
   // A card cannot be un-marked: there is no endpoint that removes the cycle, and the account type
   // stays CREDIT_CARD. Once set, the toggle is checked and locked.
   const [isCreditCard, setIsCreditCard] = useState(Boolean(creditCard));
@@ -174,6 +206,17 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
       const saved = await saveCreditCard();
       if (!saved) return;
     }
+    const ownershipCheck =
+      ownership?.canManage &&
+      ownershipState &&
+      ownershipStart &&
+      ownershipChanged(ownership.members, ownershipStart, ownershipState)
+        ? ownershipRequest(ownership.members, ownershipState)
+        : null;
+    if (ownershipCheck && !ownershipCheck.ok) {
+      toast.error(t("accountOwnership.save-invalid"));
+      return;
+    }
     const sharesBody =
       shares?.canManage &&
       sharing &&
@@ -183,7 +226,7 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
         : null;
     // Sent only when it changed: who the spending belongs to moves every member total.
     const jointChanged = canSetJoint && data.isJoint !== isJoint;
-    let step: "account" | "sharing" = "account";
+    let step: "account" | "ownership" | "sharing" = "account";
     let accountSaved = false;
     try {
       await editAccountMutation.mutateAsync({
@@ -195,6 +238,10 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
       if (sharesBody) {
         step = "sharing";
         await updateShares.mutateAsync(sharesBody);
+      }
+      if (ownershipCheck?.ok) {
+        step = "ownership";
+        await updateOwnership.mutateAsync(ownershipCheck.body);
       }
       toast.success(t("account-updated"));
       onOpenChange(false);
@@ -208,11 +255,20 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
         });
         return;
       }
+      if (
+        step === "ownership" &&
+        getApiErrorCode(error) === API_ERROR_CODE.ACCOUNT_OWNERSHIP_INVALID
+      ) {
+        toast.error(t("accountOwnership.save-invalid"));
+        return;
+      }
       toast.error(
         t(
           step === "sharing"
             ? "accountSharing.save-error"
-            : "account-update-error",
+            : step === "ownership"
+              ? "accountOwnership.save-error"
+              : "account-update-error",
         ),
       );
     } finally {
@@ -288,6 +344,16 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
               />
             )}
 
+            {hasOtherMembers && (
+              <AccountOwnershipField
+                ownership={ownership}
+                isLoading={ownershipQuery.isLoading}
+                isError={ownershipQuery.isError}
+                state={ownershipState}
+                onChange={setOwnershipState}
+                disabled={isSubmitting}
+              />
+            )}
             <div className="border-border mt-8 border-t pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">

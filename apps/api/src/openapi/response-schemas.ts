@@ -108,6 +108,27 @@ export const accountSharesSchema = open('AccountShares', {
   ),
 });
 
+/** `GET /v1/account/:accountId/ownership`: each member's share of the account in per-member net worth. */
+export const accountOwnershipSchema = open('AccountOwnership', {
+  accountKey: id,
+  canManage: z.boolean(),
+  formerMembersPercent: z.number().openapi({ description: 'The part held by people no longer in the household, which counts as Shared.' }),
+  isJoint: z.boolean(),
+  isSplit: z.boolean().openapi({ description: 'False when the account has no shares: it is its owner\u2019s, or Shared when joint.' }),
+  members: z.array(
+    z.object({
+      appuserKey: id,
+      canSee: z.boolean(),
+      displayName: z.string(),
+      firstName: nullableString,
+      isAccountOwner: z.boolean(),
+      lastName: nullableString,
+      percent: z.number().openapi({ description: 'The member\u2019s share, 0 to 100 with up to two decimals.' }),
+      role: z.enum(['owner', 'admin', 'member', 'viewer']),
+    }),
+  ),
+});
+
 export const accountTypeSchema = open('AccountType', {
   accountTypeKey: id,
   description: z.string(),

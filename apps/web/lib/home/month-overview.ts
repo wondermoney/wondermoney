@@ -180,6 +180,8 @@ export interface BalanceSheetRow {
    * every total so the money counts once.
    */
   countedInAccountId?: number;
+  /** One member's figure: their share of a split account, in percent, when not all of it. */
+  sharePercent?: number;
 }
 
 const counted = (row: BalanceSheetRow) => row.countedInAccountId === undefined;
@@ -263,20 +265,22 @@ export function balanceSheet(
   const rows = netWorth.rows ?? [];
   const owned = rows
     .filter((row) => !row.isLiability)
-    .map(({ key, recordId, label, amount, countedInAccountId }) => ({
+    .map(({ key, recordId, label, amount, countedInAccountId, sharePercent }) => ({
       key,
       recordId,
       label,
       amount,
       ...(countedInAccountId === undefined ? {} : { countedInAccountId }),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }));
   const owed = rows
     .filter((row) => row.isLiability)
-    .map(({ key, recordId, label, amount }) => ({
+    .map(({ key, recordId, label, amount, sharePercent }) => ({
       key,
       recordId,
       label,
       amount: Math.abs(amount),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }));
 
   const ownTotal = totalOf(owned);

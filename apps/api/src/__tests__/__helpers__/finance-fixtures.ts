@@ -9,6 +9,7 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
+import { AccountOwnership } from '@entity/AccountOwnership';
 import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
@@ -152,6 +153,12 @@ export async function addShare(em: EntityManager, household: Household, account:
   const share = em.create(AccountShare, { access: access === 'write' ? AccountShareAccess.WRITE : AccountShareAccess.READ, accountKey: account, appuserKey: member, tenantKey: household.tenant }, { partial: true });
   await em.flush();
   return share;
+}
+
+/** Give an account ownership shares, as `[member, basis points]` pairs (written as given, unchecked). */
+export async function addOwnership(em: EntityManager, household: Household, account: Account, shares: readonly (readonly [Appuser, number])[]): Promise<void> {
+  for (const [member, basisPoints] of shares) em.create(AccountOwnership, { accountKey: account, appuserKey: member, basisPoints, tenantKey: household.tenant }, { partial: true });
+  await em.flush();
 }
 
 /** One row per status the rule distinguishes, all on the same day, so a test can see which ones count. */

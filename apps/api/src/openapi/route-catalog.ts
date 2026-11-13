@@ -7,6 +7,7 @@ import {
   createTransactionRequestSchema,
   getAccountMetricsRequestSchema,
   getAccountRequestSchema,
+  getAccountOwnershipRequestSchema,
   getAccountSharesRequestSchema,
   getAccountsCashflowRequestSchema,
   getAccountsForecastRequestSchema,
@@ -67,7 +68,7 @@ import { getInstallmentPlanRequestSchema, listInstallmentCommitmentsRequestSchem
 import { loanAdjustmentListSchema, loanIdParamSchema, loanProjectionSchema, loanRatePeriodsSchema, repaymentCandidatesSchema } from '@validators/loan';
 import { manualAssetParamsSchema } from '@validators/manual-asset';
 import { getTransactionMerchantLogoRequestSchema } from '@validators/merchant';
-import { netWorthHistoryQuerySchema } from '@validators/net-worth';
+import { netWorthHistoryQuerySchema, netWorthQuerySchema } from '@validators/net-worth';
 import {
   getAggregateAllocationRequestSchema,
   getAggregateDashboardRequestSchema,
@@ -100,6 +101,7 @@ import { setTransactionSplitsRequestSchema } from '@validators/transaction-split
 
 import {
   accountSchema,
+  accountOwnershipSchema,
   accountSharesSchema,
   accountTypeSchema,
   allocationSchema,
@@ -297,6 +299,12 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
     summary: 'Get who sees and who may change an account',
     request: getAccountSharesRequestSchema,
     response: accountSharesSchema,
+  },
+  'GET /v1/account/:accountId/ownership': {
+    tag: 'Accounts',
+    summary: 'Get each member\u2019s share of an account in per-member net worth',
+    request: getAccountOwnershipRequestSchema,
+    response: accountOwnershipSchema,
   },
   'GET /v1/account/:accountId/metrics': {
     tag: 'Accounts',
@@ -769,6 +777,8 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'GET /v1/net-worth': {
     tag: 'Net worth',
     summary: 'Get the current net worth',
+    description: 'With `member`, one member\u2019s net worth (or `shared`): each account they hold a share of counts at that share (`rows[].sharePercent` when it is not all of it), an account with no shares counts wholly for its owner, or for Shared when joint. The members\u2019 figures and Shared add up to the household\u2019s.',
+    request: netWorthQuerySchema,
     response: netWorthSchema,
   },
   'GET /v1/net-worth/history': {

@@ -287,6 +287,17 @@ export const putAccountSharesRequestSchema = z.object({
     .refine((body) => body.isPrivate || body.shares.length === 0, { message: 'A shared account takes no shares', path: ['shares'] }),
   params: z.object({ accountId: positiveIntId }),
 });
+export const getAccountOwnershipRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
+/**
+ * `PUT /v1/account/:accountId/ownership`: each member's share of the account, in percent, replaced
+ * as a whole. The shares add up to 100, each with at most two decimals, for active members who can
+ * see the account (checked by the service, 400 `account_ownership_invalid`). An empty list removes
+ * them: the account is its owner's again, or Shared when joint. Net worth only.
+ */
+export const putAccountOwnershipRequestSchema = z.object({
+  body: z.array(z.object({ appuserKey: positiveIntId, percent: z.number().min(0).max(100) })).max(50),
+  params: z.object({ accountId: positiveIntId }),
+});
 export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), memberKeys: csvMemberList, timezone: viewerTimeZone, toDate: validDate.optional() }) });
 /**
  * `GET /v1/account/forecast`: the next `days` days of projected balances. The window is bounded
