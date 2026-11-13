@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, RefreshControl, StyleSheet, Switch, View } from 'react-native'
 
@@ -31,6 +31,7 @@ export function RulesScreen({
   onOpenRule,
   onToggleActive,
   onDelete,
+  offer,
 }: {
   state: RulesViewState
   writeBlocked?: boolean
@@ -41,6 +42,8 @@ export function RulesScreen({
   onOpenRule: (rule: RuleListItem) => void
   onToggleActive: (ruleId: number, active: boolean) => void
   onDelete: (ruleId: number) => void
+  /** Shown above the list once it has loaded: the locale rule preset offer. */
+  offer?: ReactNode
 }) {
   const { t } = useTranslation()
   const palette = usePalette()
@@ -82,6 +85,7 @@ export function RulesScreen({
           />
         ) : null}
         {loaded ? <>
+          {offer}
           {state.status === 'refresh-error' ? (
             <SettingsNotice
               action={<Button label={t('common.retry')} onPress={() => void onRetry()} size="sm" variant="outline" />}

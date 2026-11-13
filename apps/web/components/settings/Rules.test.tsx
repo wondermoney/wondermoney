@@ -44,6 +44,12 @@ vi.mock("@/lib/api/rule/useRules", async (importOriginal) => {
   };
 });
 
+// The preset offer has its own tests; here it would only reach for the network.
+vi.mock("@/components/rules/RulePresetOffer", () => ({
+  RulePresetOffer: () => null,
+  RulePresetsButton: () => null,
+}));
+
 vi.mock("@/components/rules/useRuleLookups", () => ({
   useRuleLookups: () => ({
     categories: [],

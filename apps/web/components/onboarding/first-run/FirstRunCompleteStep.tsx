@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
 
+import { RulePresetOffer } from "@/components/rules/RulePresetOffer";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import useCompleteVersionedOnboarding from "@/lib/api/user/useCompleteVersionedOnboarding";
@@ -148,6 +149,9 @@ export default function FirstRunCompleteStep() {
             </li>
           ))}
         </ul>
+
+        {/* Offered, never installed: only the preview's confirm adds rules. */}
+        <RulePresetOffer className="mt-6 w-full text-left" />
       </div>
     </FirstRunCentered>
   );

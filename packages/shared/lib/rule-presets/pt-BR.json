@@ -1,0 +1,420 @@
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "preset": {
+    "code": "pt-BR",
+    "countries": [
+      "BR"
+    ],
+    "language": "pt",
+    "revision": 1
+  },
+  "rules": [
+    {
+      "name": "Carrefour",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Carrefour"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Carrefour"
+        }
+      ]
+    },
+    {
+      "name": "Pão de Açúcar",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Pão de Açúcar"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Pão de Açúcar"
+        }
+      ]
+    },
+    {
+      "name": "Assaí Atacadista",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Assaí Atacadista"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Assaí Atacadista"
+        }
+      ]
+    },
+    {
+      "name": "Atacadão",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Atacadão"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Atacadão"
+        }
+      ]
+    },
+    {
+      "name": "CPFL",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "CPFL"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "CPFL"
+        }
+      ]
+    },
+    {
+      "name": "Cemig",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Cemig"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Cemig"
+        }
+      ]
+    },
+    {
+      "name": "Sabesp",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Sabesp"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "WATER"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Sabesp"
+        }
+      ]
+    },
+    {
+      "name": "Comgás",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Comgás"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GAS"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Comgás"
+        }
+      ]
+    },
+    {
+      "name": "iFood",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "iFood"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "iFood"
+        }
+      ]
+    },
+    {
+      "name": "Rappi",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Rappi"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Rappi"
+        }
+      ]
+    },
+    {
+      "name": "Netflix",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Netflix"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Netflix"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Spotify"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Spotify"
+        }
+      ]
+    },
+    {
+      "name": "Drogasil",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Drogasil"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Drogasil"
+        }
+      ]
+    },
+    {
+      "name": "Droga Raia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Droga Raia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Droga Raia"
+        }
+      ]
+    }
+  ]
+}

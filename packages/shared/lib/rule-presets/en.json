@@ -1,0 +1,700 @@
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "preset": {
+    "code": "en",
+    "countries": [
+      "GB",
+      "US"
+    ],
+    "language": "en",
+    "revision": 1
+  },
+  "rules": [
+    {
+      "name": "Tesco",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Tesco"
+        },
+        {
+          "field": "description",
+          "operator": "not_contains",
+          "source": "raw",
+          "value": "Bank"
+        },
+        {
+          "field": "description",
+          "operator": "not_contains",
+          "source": "raw",
+          "value": "Mobile"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Tesco"
+        }
+      ]
+    },
+    {
+      "name": "Sainsbury's",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Sainsbury"
+        },
+        {
+          "field": "description",
+          "operator": "not_contains",
+          "source": "raw",
+          "value": "Bank"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Sainsbury's"
+        }
+      ]
+    },
+    {
+      "name": "Asda",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Asda"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Asda"
+        }
+      ]
+    },
+    {
+      "name": "Morrisons",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Morrisons"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Morrisons"
+        }
+      ]
+    },
+    {
+      "name": "Waitrose",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Waitrose"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Waitrose"
+        }
+      ]
+    },
+    {
+      "name": "Lidl",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Lidl"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Lidl"
+        }
+      ]
+    },
+    {
+      "name": "Kroger",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Kroger"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Kroger"
+        }
+      ]
+    },
+    {
+      "name": "Whole Foods",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Whole Foods"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Whole Foods"
+        }
+      ]
+    },
+    {
+      "name": "Trader Joe's",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Trader Joe"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Trader Joe's"
+        }
+      ]
+    },
+    {
+      "name": "Thames Water",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Thames Water"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "WATER"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Thames Water"
+        }
+      ]
+    },
+    {
+      "name": "Virgin Media",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Virgin Media"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Virgin Media"
+        }
+      ]
+    },
+    {
+      "name": "Comcast",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Comcast"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Comcast"
+        }
+      ]
+    },
+    {
+      "name": "Verizon",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Verizon"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Verizon"
+        }
+      ]
+    },
+    {
+      "name": "TfL Travel",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "TfL Travel"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Transport for London"
+        }
+      ]
+    },
+    {
+      "name": "Trainline",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Trainline"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Trainline"
+        }
+      ]
+    },
+    {
+      "name": "Deliveroo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Deliveroo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Deliveroo"
+        }
+      ]
+    },
+    {
+      "name": "Uber Eats",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Uber Eats"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Uber Eats"
+        }
+      ]
+    },
+    {
+      "name": "DoorDash",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "DoorDash"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "DoorDash"
+        }
+      ]
+    },
+    {
+      "name": "Just Eat",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Just Eat"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Just Eat"
+        }
+      ]
+    },
+    {
+      "name": "Netflix",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Netflix"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Netflix"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Spotify"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Spotify"
+        }
+      ]
+    },
+    {
+      "name": "Boots",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Boots"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Boots"
+        }
+      ]
+    },
+    {
+      "name": "Walgreens",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Walgreens"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Walgreens"
+        }
+      ]
+    }
+  ]
+}

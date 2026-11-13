@@ -4231,6 +4231,103 @@
         ],
         "additionalProperties": {}
       },
+      "RulePresetList": {
+        "type": "object",
+        "properties": {
+          "presets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RulePresetSummary"
+            }
+          },
+          "suggested": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The preset matching the person's language and country, if any."
+          }
+        },
+        "required": [
+          "presets",
+          "suggested"
+        ]
+      },
+      "RulePresetPreview": {
+        "type": "object",
+        "properties": {
+          "preset": {
+            "$ref": "#/components/schemas/RulePresetSummary"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "installed",
+                    "new",
+                    "unavailable"
+                  ]
+                }
+              },
+              "required": [
+                "status"
+              ],
+              "additionalProperties": {}
+            },
+            "description": "Every rule in the preset, in the rules export format, with what installing would do with it."
+          }
+        },
+        "required": [
+          "preset",
+          "rules"
+        ]
+      },
+      "RulePresetSummary": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "The preset code, such as pt-PT."
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Countries (ISO 3166-1 alpha-2) whose merchants the preset knows."
+          },
+          "installed": {
+            "type": "boolean",
+            "description": "Whether the household already has every rule in the preset."
+          },
+          "installedCount": {
+            "type": "integer",
+            "description": "Preset rules the household already has a rule of the same name for."
+          },
+          "language": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "ruleCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "countries",
+          "installed",
+          "installedCount",
+          "language",
+          "revision",
+          "ruleCount"
+        ]
+      },
       "RuleSuggestion": {
         "type": [
           "object",
@@ -21811,6 +21908,175 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RuleExport"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rule/presets": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List locale rule presets",
+        "tags": [
+          "Rules"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}(?:[-_][a-z]{2})?$/i"
+            },
+            "required": false,
+            "name": "language",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}$/i"
+            },
+            "required": false,
+            "name": "region",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulePresetList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/rule/presets/{code}": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Show what a locale rule preset would add",
+        "tags": [
+          "Rules"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}(?:-[a-z]{2})?$/i"
+            },
+            "required": true,
+            "name": "code",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulePresetPreview"
                 }
               }
             }
