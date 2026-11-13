@@ -1,9 +1,13 @@
-import { budgetAccountsResponseSchema, budgetAccountsWriteSchema, budgetAddCategoryWriteSchema, budgetCreateResponseSchema, budgetCreateWriteSchema, budgetCategoryWriteSchema, budgetDetailResponseSchema, budgetInventoryEndpoint, budgetInventoryResponseSchema, budgetMetadataWriteSchema, budgetMonthResponseSchema, budgetsEndpoint, budgetsResponseSchema, budgetYearResponseSchema, createBudgetAccountsEndpoint, createBudgetAddCategoryEndpoint, createBudgetCategoryEndpoint, createBudgetDetailEndpoint, createBudgetEndpoint, createBudgetMetadataEndpoint, createBudgetMonthEndpoint, createBudgetYearEndpoint, createBudgetYearUntilMonthEndpoint, createDeleteBudgetCategoryForMonthEndpoint, createDeleteBudgetEndpoint, createRemoveBudgetCategoryEndpoint, createUpdateBudgetAccountsEndpoint, parseBudgetId } from './budgets-contract'
+import { budgetAccountsResponseSchema, budgetAccountsWriteSchema, budgetAddCategoryWriteSchema, budgetCreateResponseSchema, budgetCreateWriteSchema, budgetCategoryWriteSchema, budgetDetailResponseSchema, budgetInventoryEndpoint, budgetInventoryResponseSchema, budgetMetadataWriteSchema, budgetMonthResponseSchema, budgetsEndpoint, budgetsResponseSchema, createBudgetsEndpoint, budgetYearResponseSchema, createBudgetAccountsEndpoint, createBudgetAddCategoryEndpoint, createBudgetCategoryEndpoint, createBudgetDetailEndpoint, createBudgetEndpoint, createBudgetMetadataEndpoint, createBudgetMonthEndpoint, createBudgetYearEndpoint, createBudgetYearUntilMonthEndpoint, createDeleteBudgetCategoryForMonthEndpoint, createDeleteBudgetEndpoint, createRemoveBudgetCategoryEndpoint, createUpdateBudgetAccountsEndpoint, parseBudgetId } from './budgets-contract'
 import { budgetFixture, budgetYearFixture, childRow, parentRow } from './test-fixtures'
 
 describe('budgets contracts', () => {
   it('pins both read-only endpoints and accepts documented nullable fields and raw income extras', () => {
     expect(budgetsEndpoint).toMatchObject({ method: 'GET', path: '/v1/budget/full' })
+    // The member filter: one member's (or Shared) part of each budget; nothing sent for everyone.
+    expect(createBudgetsEndpoint()).toMatchObject({ method: 'GET', path: '/v1/budget/full' })
+    expect(createBudgetsEndpoint('12')).toMatchObject({ method: 'GET', path: '/v1/budget/full?memberKeys=12' })
+    expect(createBudgetsEndpoint('shared').path).toBe('/v1/budget/full?memberKeys=shared')
     expect(createBudgetMonthEndpoint(7, 2026, 1)).toMatchObject({ method: 'GET', path: '/v1/budget/7/2026/1' })
     const parsed = budgetsResponseSchema.parse({ budgets: [{ ...budgetFixture, incomes: [{ ...budgetFixture.incomes[0], budgetKey: { budgetKey: 7 } }] }] })
     expect(parsed.budgets[0].categories[0]).toMatchObject({ child_category_name: null, category_recurrency: null })

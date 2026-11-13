@@ -7,6 +7,9 @@ import { formatPercentagePoints } from '@/lib/formatters/financial'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
+
 import type { PortfolioPerformanceReportViewModel, PortfolioPerformanceTotals } from './portfolio-performance-report-view-model'
 import type { ReportDatePreset } from './report-date-presets'
 import { ReportFiltersBar } from './report-filters-bar'
@@ -40,12 +43,15 @@ export type PortfolioPerformanceReportBodyProps = {
 
 /**
  * The report covers every household portfolio over the period, so the standalone screen offers the
- * period only: the account and transaction filters of the other reports don't apply to it.
+ * period and the member filter only: the account and transaction filters of the other reports
+ * don't apply to it.
  */
 export type PortfolioPerformanceReportScreenProps = PortfolioPerformanceReportBodyProps & {
   preset: ReportDatePreset
   onSelectPreset: (preset: ReportDatePreset) => void
   onBack: () => void
+  /** Whose portfolios: everyone, one member or Shared. Omitted (a household of one), not shown. */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 type Figures = Readonly<{
@@ -202,11 +208,21 @@ export function PortfolioPerformanceReportBody({ state, currencyCode, exportStat
   )
 }
 
-export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, exportState, onSelectPreset, onExport, onRefresh, onBack }: PortfolioPerformanceReportScreenProps) {
+export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, exportState, onSelectPreset, onExport, onRefresh, onBack, memberFilter }: PortfolioPerformanceReportScreenProps) {
   if (state.status === 'access-transition') return null
+  const controls = (
+    <View style={styles.controls}>
+      <ReportFiltersBar onSelectPreset={onSelectPreset} preset={preset} />
+      {memberFilter ? (
+        <View style={styles.memberFilter}>
+          <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} />
+        </View>
+      ) : null}
+    </View>
+  )
   return (
     <ReportStandalonePage
-      controls={<ReportFiltersBar onSelectPreset={onSelectPreset} preset={preset} />}
+      controls={controls}
       onBack={onBack}
       onRefresh={onRefresh}
       refreshing={Boolean(state.status === 'loaded' && state.refreshing)}
@@ -217,6 +233,9 @@ export function PortfolioPerformanceReportScreen({ state, preset, currencyCode, 
 }
 
 const styles = StyleSheet.create({
+  controls: { gap: themeTokens.spacing[2] },
+  // The member filter sits under the period, at the start of the row, sized to its label.
+  memberFilter: { flexDirection: 'row' },
   change: { alignItems: 'flex-end', gap: themeTokens.spacing[1] },
   name: { gap: 2 },
   stack: { gap: themeTokens.spacing[3] },

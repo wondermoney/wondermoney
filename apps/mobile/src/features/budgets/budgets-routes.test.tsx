@@ -14,6 +14,9 @@ const mockCategoryMutation = { isPending: false, mutateAsync: jest.fn() }
 const mockCategoryDeleteMutation = { isPending: false, mutateAsync: jest.fn() }
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: mockReplace }), usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented), useLocalSearchParams: () => mockParams }))
 jest.mock('./use-budgets', () => ({ useBudgets: () => mockUseBudgets() }))
+jest.mock('@/features/household/use-household-members', () => ({
+  useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS,
+}))
 jest.mock('./use-budget-month', () => ({ useBudgetMonth: (...args: unknown[]) => mockUseBudgetMonth(...args) }))
 jest.mock('./use-budget-year', () => ({ useBudgetYear: () => ({ data: undefined, refetch: jest.fn() }) }))
 jest.mock('./use-budget-suggestions', () => ({ useBudgetSuggestions: () => ({ data: undefined }) }))

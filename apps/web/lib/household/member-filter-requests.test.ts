@@ -1,6 +1,6 @@
 /**
  * Every surface the member filter applies to sends it the way its endpoint reads it: `memberKeys`
- * on lists, reports, cash flow and budgets, `member` on net worth. Without a filter, nothing is
+ * on lists, reports, cash flow, category spending and budgets, `member` on net worth. Without a filter, nothing is
  * sent, so an unfiltered request is the same as before the filter existed.
  */
 import assert from "node:assert/strict";
@@ -18,13 +18,15 @@ import {
   getTransactions,
   transactionSelectionFilter,
 } from "@/lib/api/account/useTransactions";
+import { getTransactionsCategorySpending } from "@/lib/api/account/useTransactionsCategorySpending";
 import { getBudgetsFull } from "@/lib/api/budget/useBudgetsFull";
 import { getNetWorth } from "@/lib/api/net-worth/useNetWorth";
 import { getCashflow } from "@/lib/api/reports/cashflow";
 
 /** A client that records the params of every GET and answers with `data`. */
 function recordingClient(data: unknown) {
-  const sent: { url: string; params: Record<string, unknown> | undefined }[] = [];
+  const sent: { url: string; params: Record<string, unknown> | undefined }[] =
+    [];
   const client = {
     get: async (url: string, config?: { params?: Record<string, unknown> }) => {
       sent.push({ url, params: config?.params });
@@ -59,7 +61,10 @@ test("the transaction list, its bulk selection and cash flow send memberKeys", a
   const list = recordingClient({ transactions: [] });
   await getTransactions({ memberKeys: ["shared"] }, list.client);
   assert.equal(list.sent[0].params?.memberKeys, "shared");
-  assert.equal(transactionSelectionFilter({ memberKeys: ["4"] }).memberKeys, "4");
+  assert.equal(
+    transactionSelectionFilter({ memberKeys: ["4"] }).memberKeys,
+    "4",
+  );
   assert.equal("memberKeys" in transactionSelectionFilter({}), false);
 
   const cashflow = recordingClient({ cashflow: [] });
@@ -67,6 +72,19 @@ test("the transaction list, its bulk selection and cash flow send memberKeys", a
   await getAccountsCashflow({}, cashflow.client);
   assert.equal(cashflow.sent[0].params?.memberKeys, "4");
   assert.equal("memberKeys" in (cashflow.sent[1].params ?? {}), false);
+});
+
+test("the accounts overview's category spending sends memberKeys only when filtered", async () => {
+  const { client, sent } = recordingClient({ categorySpending: [] });
+  await getTransactionsCategorySpending(
+    { limit: 6, memberKeys: ["4"] },
+    client,
+  );
+  await getTransactionsCategorySpending({ limit: 6 }, client);
+
+  assert.equal(sent[0].url, "/v1/account/transaction/category-spending");
+  assert.equal(sent[0].params?.memberKeys, "4");
+  assert.equal("memberKeys" in (sent[1].params ?? {}), false);
 });
 
 test("budgets send memberKeys only when filtered", async () => {
@@ -100,6 +118,9 @@ test("a report's URL member reaches its request and its CSV, and its drill-throu
 
   const scope = reportTransactionScope(filters, "out");
   assert.ok(scope);
-  const href = new URL(transactionReportScopeHref(scope), "https://example.com");
+  const href = new URL(
+    transactionReportScopeHref(scope),
+    "https://example.com",
+  );
   assert.equal(href.searchParams.get("member"), "4");
 });

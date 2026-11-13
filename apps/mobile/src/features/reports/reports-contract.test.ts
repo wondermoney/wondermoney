@@ -111,6 +111,17 @@ describe('reports contract', () => {
     }
   })
 
+  it('sends the member filter for portfolio performance, as JSON and as CSV: it narrows the report to that member\'s portfolios', () => {
+    const filters = { ...baseFilters, accountKeys: ['acc-1'], memberKeys: ['12'] }
+    for (const path of [createPortfolioPerformanceReportEndpoint(filters).path, createReportCsvEndpoint('portfolio-performance', filters).path]) {
+      const query = new URLSearchParams(path.split('?')[1])
+      expect([...query.keys()].sort()).toEqual(['fromDate', 'memberKeys', 'toDate'])
+      expect(query.get('memberKeys')).toBe('12')
+    }
+    const shared = new URLSearchParams(createPortfolioPerformanceReportEndpoint({ ...baseFilters, memberKeys: ['shared'] }).path.split('?')[1])
+    expect(shared.get('memberKeys')).toBe('shared')
+  })
+
   it('reads each portfolio\'s time- and money-weighted returns, and still parses rows from APIs that send none', () => {
     const row = { portfolioKey: '7', name: 'Long-term', currency: 'EUR', startValue: 1000, netContributions: 0, change: 100, changePercent: 10, dividends: 0, endValue: 1100 }
     const returns = { timeWeightedReturn: 9.87, moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, missingSnapshotDates: ['2026-06-01'] }

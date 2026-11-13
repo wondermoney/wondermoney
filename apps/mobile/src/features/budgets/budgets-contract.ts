@@ -269,6 +269,21 @@ export const budgetsEndpoint = readEndpoint({
   schema: budgetsResponseSchema,
 })
 
+/**
+ * The budgets list with the member filter (`memberKeys`: a member's key or `shared`): each budget
+ * counts only that member's part of its spending. It never changes which budgets are listed, so a
+ * personal budget stays its owner's whoever they filter by (the API's rule, #89). Without a member,
+ * the plain list.
+ */
+export function createBudgetsEndpoint(member?: string) {
+  if (member === undefined) return budgetsEndpoint
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/budget/full?${new URLSearchParams({ memberKeys: member }).toString()}`,
+    schema: budgetsResponseSchema,
+  })
+}
+
 export const budgetInventoryEndpoint = readEndpoint({
   method: 'GET',
   path: '/v1/budget',

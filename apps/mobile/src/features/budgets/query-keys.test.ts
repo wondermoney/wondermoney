@@ -2,6 +2,9 @@ import { budgetAccountsKey, budgetDetailKey, budgetInventoryKey, budgetMonthKey,
 
 it('isolates budget resources by epoch and authoritative route period', () => {
   expect(budgetsKey(8)).toEqual(['budgets', 'list', 8])
+  // A member filter is its own entry under the list, so invalidating the list refreshes every one.
+  expect(budgetsKey(8, '12')).toEqual(['budgets', 'list', 8, '12'])
+  expect(budgetsKey(8, 'shared')).toEqual(['budgets', 'list', 8, 'shared'])
   expect(budgetInventoryKey(8)).toEqual(['budgets', 'inventory', 8])
   expect(budgetDetailKey(8, 7)).toEqual(['budgets', 'detail', 8, 7])
   expect(budgetMonthKey(8, 7, 2026, 12)).toEqual(['budgets', 'month', 8, 7, 2026, 12])
