@@ -340,6 +340,7 @@
   "privacy-data-restore-error-internal": "La restauración falló y no se cambió nada. Inténtalo de nuevo.",
   "privacy-data-restore-warning-bank_linked_accounts": "{count, plural, one {# cuenta estaba vinculada a un banco y vuelve como cuenta manual} other {# cuentas estaban vinculadas a un banco y vuelven como cuentas manuales}}, con su historial: {values}. Vuelve a conectarlas en Ajustes.",
   "privacy-data-restore-warning-members_merged": "La exportación incluye datos que tu pareja compartió contigo. Se restauran como tuyos; invita de nuevo a tu pareja para compartir el hogar.",
+  "privacy-data-restore-warning-price_overrides_skipped": "{count, plural, one {# precio manual se queda} other {# precios manuales se quedan}} fuera, porque este servidor no conoce la inversión o la cotiza en otra moneda: {values}. Puedes volver a fijarlos después.",
   "privacy-data-restore-warning-currency_changed": "Tu moneda pasa a ser {values}, la que usa la exportación.",
   "privacy-data-restore-warning-assets_left_out": "Este servidor y sus datos de mercado no conocen {count, plural, one {# inversión} other {# inversiones}}, así que sus operaciones se quedan fuera: {values}. Puedes añadirlas tú después.",
   "privacy-data-restore-warning-categories_created": "Algunas categorías no existen en este servidor y se restauran como tuyas: {values}.",

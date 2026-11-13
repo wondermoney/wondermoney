@@ -45,15 +45,16 @@ While the switch is on, the server refuses the assistant, receipt scanning, PDF 
 
 **Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
 
-- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
 - `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
 - `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
 
 What is not included:
 
-- Your partner's private accounts, and their transactions, splits, tags, recurring payments and rules. Their private assets, and their own loans and watchlist, stay out too.
+- Your partner's private accounts, and their transactions, splits, tags, recurring payments, rules, card settings and installment plans. Their private assets, and their own loans, transaction templates and watchlist, stay out too.
 - Passwords, sessions, two-factor secrets, bank credentials and connection tokens. An account that was connected to a bank says so, without any of its connection details.
 - Audit logs, AI usage and analytics data.
+- Files attached to transactions, such as receipts.
 
 When the server has file storage, the export is prepared in the background. You get an email when it is ready, and the file can be downloaded from the same place for 24 hours, after which it is deleted. On a self-hosted server without file storage, the zip is built while it downloads, from the web app. You can start up to three exports a day.
 
@@ -82,7 +83,7 @@ What to expect afterwards:
 - Accounts that were connected to a bank come back as manual accounts with their full history. No bank credentials are restored, so reconnect them in **Settings > Connections** if you want them to sync again.
 - Everything in the export becomes yours, including what a partner shared with you. Invite your partner again to share the household.
 - Your currency, language and email preferences are set to the ones in the export.
-- Investments are matched to this server's list by ISIN or symbol, and one it does not know is looked up in its market data. The trades of an investment neither knows are left out, and the check lists them before you restore: add them again yourself afterwards. Account balances are restored as exported; balances in other currencies and portfolio history are recalculated in the background shortly after.
+- Investments are matched to this server's list by ISIN or symbol, and one it does not know is looked up in its market data. The trades of an investment neither knows are left out, and the check lists them before you restore: add them again yourself afterwards. A manual price for an investment this server does not know, or prices in another currency, is left out the same way. Account balances are restored as exported; balances in other currencies (with your own exchange rates) and portfolio history (with your manual prices) are recalculated in the background shortly after.
 
 The password of a protected export is sent once, when the file is checked, and kept encrypted only until the restore finishes. It is never logged. The uploaded file is deleted when the restore ends, and within a day in any case. You can start up to ten restores a day.
 

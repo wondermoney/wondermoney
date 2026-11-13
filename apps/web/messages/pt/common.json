@@ -324,6 +324,7 @@
   "privacy-data-restore-error-internal": "O restauro falhou e nada foi alterado. Tenta novamente.",
   "privacy-data-restore-warning-bank_linked_accounts": "{count, plural, one {# conta estava ligada a um banco e volta como conta manual} other {# contas estavam ligadas a um banco e voltam como contas manuais}}, com o histórico: {values}. Volta a ligá-las nas Definições.",
   "privacy-data-restore-warning-members_merged": "A exportação inclui dados que o teu parceiro partilhou contigo. São restaurados como teus; convida o teu parceiro novamente para partilhar o agregado.",
+  "privacy-data-restore-warning-price_overrides_skipped": "{count, plural, one {# preço manual fica} other {# preços manuais ficam}} de fora, porque este servidor não conhece o investimento ou cota-o noutra moeda: {values}. Podes defini-los novamente depois.",
   "privacy-data-restore-warning-currency_changed": "A tua moeda passa a {values}, a que a exportação usa.",
   "privacy-data-restore-warning-assets_left_out": "{count, plural, one {# investimento não é conhecido} other {# investimentos não são conhecidos}} por este servidor nem pelos seus dados de mercado, por isso as suas transações ficam de fora: {values}. Podes acrescentá-las tu depois.",
   "privacy-data-restore-warning-categories_created": "Algumas categorias não existem neste servidor e são restauradas como tuas: {values}.",

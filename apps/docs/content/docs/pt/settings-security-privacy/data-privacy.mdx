@@ -45,15 +45,16 @@ Enquanto a opção estiver ativa, o servidor recusa o assistente, a leitura de r
 
 **Definições > Privacidade > Exportar todos os dados** (ou **Definições > Segurança** na aplicação móvel) descarrega tudo o que vês no teu agregado familiar, num ficheiro zip chamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, carteiras e as suas transações, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
+- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, carteiras e as suas transações, definições de extrato dos cartões de crédito, compras em prestações e os seus planos, as taxas de câmbio e os preços manuais do agregado, os teus modelos de transação, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
 - `csv/`: transações, contas, transações de carteira e posições atuais, para folhas de cálculo. Os valores usam o ponto como separador decimal e as datas estão no formato `AAAA-MM-DD`.
 - `manifest.json`: a versão do formato, quando a exportação foi feita e o número de linhas e uma soma de verificação SHA-256 de cada ficheiro.
 
 O que não é incluído:
 
-- As contas privadas do teu parceiro, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes e regras. Os ativos privados, os empréstimos e a lista de observação dele também ficam de fora.
+- As contas privadas do teu parceiro, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes, regras, definições de cartão e compras em prestações. Os ativos privados, os empréstimos, os modelos de transação e a lista de observação dele também ficam de fora.
 - Palavras-passe, sessões, segredos de autenticação de dois fatores, credenciais bancárias e tokens de ligação. Uma conta que esteve ligada a um banco indica-o, sem nenhum dos dados da ligação.
 - Registos de auditoria, utilização de IA e dados de análise.
+- Ficheiros anexados a transações, como recibos.
 
 Quando o servidor tem armazenamento de ficheiros, a exportação é preparada em segundo plano. Recebes um email quando estiver pronta e podes descarregar o ficheiro no mesmo sítio durante 24 horas; depois disso é apagado. Num servidor próprio sem armazenamento de ficheiros, o zip é criado enquanto é descarregado, a partir da aplicação web. Podes pedir até três exportações por dia.
 
@@ -82,7 +83,7 @@ O que esperar depois:
 - As contas que estavam ligadas a um banco voltam como contas manuais, com todo o histórico. Nenhuma credencial bancária é restaurada, por isso volta a ligá-las em **Definições > Ligações** se quiseres que voltem a sincronizar.
 - Tudo o que está na exportação passa a ser teu, incluindo o que um parceiro partilhou contigo. Convida o teu parceiro novamente para partilhar o agregado.
 - A tua moeda, idioma e preferências de email passam a ser os da exportação.
-- Os investimentos são associados à lista deste servidor pelo ISIN ou pelo símbolo, e um que não conheça é procurado nos seus dados de mercado. As transações de um investimento que nenhum dos dois conheça ficam de fora, e a verificação lista-as antes de restaurares: acrescenta-as tu depois. Os saldos das contas são restaurados como foram exportados; os saldos noutras moedas e o histórico das carteiras são recalculados em segundo plano pouco depois.
+- Os investimentos são associados à lista deste servidor pelo ISIN ou pelo símbolo, e um que não conheça é procurado nos seus dados de mercado. As transações de um investimento que nenhum dos dois conheça ficam de fora, e a verificação lista-as antes de restaurares: acrescenta-as tu depois. Um preço manual de um investimento que este servidor não conheça, ou que cote noutra moeda, também fica de fora. Os saldos das contas são restaurados como foram exportados; os saldos noutras moedas (com as tuas taxas de câmbio) e o histórico das carteiras (com os teus preços manuais) são recalculados em segundo plano pouco depois.
 
 A palavra-passe de uma exportação protegida é enviada uma vez, quando o ficheiro é verificado, e guardada cifrada apenas até o restauro terminar. Nunca é registada. O ficheiro enviado é apagado quando o restauro termina e, em qualquer caso, no prazo de um dia. Podes iniciar até dez restauros por dia.
 

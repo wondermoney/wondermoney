@@ -12,8 +12,10 @@ import { DATA_FILES, type DataFileName, type DataRows, manifestSchema, MINOR_MIG
  * In order: the archive opens (and the password, when it is protected, is right); `manifest.json`
  * is a WonderMoney export of a major version this server reads; the archive holds exactly the
  * files the manifest lists, each with the listed size, SHA-256 and row count; every row of every
- * data file matches its schema (`restore-format.ts`); ids are unique within a file; and every
- * reference between files points at a row that is there. Anything else fails with a
+ * data file matches its schema (`restore-format.ts`); ids are unique within a file; every
+ * reference between files points at a row that is there; and the rows the app keeps one of (a card's
+ * settings, a plan's installment, an override per day) are not there twice, with every installment
+ * inside its plan and paid only by a transaction on the plan's card. Anything else fails with a
  * {@link RestoreError} whose code says what to tell the person.
  */
 export interface ParsedExport {
@@ -95,6 +97,8 @@ export async function readRestoreArchive(source: Uint8Array, options: { limits?:
     const rows = checkRows(raw);
     checkIds(rows);
     checkReferences(rows);
+    checkUnique(rows);
+    checkInstallments(rows);
     if (!rows.members.some((member) => member.id === manifest.exportedBy.memberId)) {
       throw new RestoreError('invalid_data', 'The member who made the export is not in members.json', { field: 'exportedBy', file: MANIFEST_PATH });
     }
@@ -136,6 +140,41 @@ function checkReferences(rows: DataRows): void {
       }
     });
   }
+}
+
+/** What the app holds one of: a card's settings, a plan's installment, a household override per day. */
+function checkUnique(rows: DataRows): void {
+  const once = <Row>(name: DataFileName, list: Row[], keyOf: (row: Row) => null | string, field: string) => {
+    const seen = new Set<string>();
+    list.forEach((row, index) => {
+      const key = keyOf(row);
+      if (key === null) return;
+      if (seen.has(key)) throw new RestoreError('invalid_data', `data/${name}.json row ${index + 1} repeats an earlier row`, { field, file: `data/${name}.json`, row: index + 1 });
+      seen.add(key);
+    });
+  };
+  once('credit-cards', rows['credit-cards'], (row) => String(row.accountId), 'accountId');
+  once('installments', rows.installments, (row) => `${row.planId}:${row.installmentNumber}`, 'installmentNumber');
+  once('exchange-rate-overrides', rows['exchange-rate-overrides'], (row) => `${row.fromCurrency}:${row.toCurrency}:${row.date}`, 'date');
+  once('price-overrides', rows['price-overrides'], (row) => `${row.asset.symbol}\u0000${row.asset.isin ?? ''}\u0000${row.date}`, 'date');
+  once('transactions', rows.transactions, (row) => (row.installmentPlanId == null ? null : `${row.installmentPlanId}:${row.installmentNumber}`), 'installmentNumber');
+}
+
+/**
+ * The rules a plan's installments and links follow in the app (`installment-plan.service.ts`): each
+ * installment is within the plan's count, and a transaction pays one only on the plan's own card.
+ */
+function checkInstallments(rows: DataRows): void {
+  const plans = new Map(rows['installment-plans'].map((plan) => [plan.id, plan]));
+  rows.installments.forEach((row, index) => {
+    if (row.installmentNumber > plans.get(row.planId)!.installmentCount) throw new RestoreError('invalid_data', `data/installments.json row ${index + 1} is past its plan's last installment`, { field: 'installmentNumber', file: 'data/installments.json', row: index + 1 });
+  });
+  rows.transactions.forEach((row, index) => {
+    if (row.installmentPlanId == null) return;
+    const plan = plans.get(row.installmentPlanId)!;
+    const fault = row.accountId !== plan.accountId ? 'accountId' : (row.installmentNumber ?? 0) > plan.installmentCount ? 'installmentNumber' : null;
+    if (fault) throw new RestoreError('invalid_data', `data/transactions.json row ${index + 1} pays an installment it cannot pay`, { field: fault, file: 'data/transactions.json', row: index + 1 });
+  });
 }
 
 function checkRows(raw: Partial<Record<DataFileName, unknown[]>>): DataRows {

@@ -11,7 +11,7 @@ import { Goal } from '@entity/Goal';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 
 import { restoreHousehold } from '../household-restore';
-import { DATA_FILES, REFERENCES } from '../restore-format';
+import { DATA_FILES, type DataFileName, REFERENCES } from '../restore-format';
 import { type ParsedExport, readRestoreArchive } from '../restore-reader';
 
 /*
@@ -287,6 +287,134 @@ describe('household restore', () => {
       const loans = await db.em().getConnection().execute<Record<string, unknown>[]>(
         'select l.name, a.name as asset, a.tenant_key = l.tenant_key as same_household from loan l left join manual_asset a on a.manual_asset_key = l.secured_asset_key where l.tenant_key = ?', [target.tenant.tenantKey]);
       expect(loans).toEqual([{ asset: 'Old car', name: 'Car loan', same_household: true }]);
+    });
+  });
+
+  describe('installment plans and card cycles', () => {
+    const planRows = (tenantKey: number) => db.em().getConnection().execute<Record<string, unknown>[]>(
+      `select p.description, p.installment_count, p.total_amount::text as total, to_char(p.purchase_date, 'YYYY-MM-DD') as purchase_date, a.account_name as card, c.name as category,
+         (select string_agg(i.installment_number || '=' || i.amount::text || '@' || to_char(i.scheduled_date, 'YYYY-MM-DD') || '/' || coalesce(to_char(i.statement_date, 'YYYY-MM-DD'), '-') || '/' || coalesce(to_char(i.due_date, 'YYYY-MM-DD'), '-'), ',' order by i.installment_number)
+          from installment i where i.installment_plan_key = p.installment_plan_key and i.tenant_key = p.tenant_key) as schedule,
+         (select string_agg(t.description || '#' || t.installment_number, ',') from "transaction" t where t.installment_plan_key = p.installment_plan_key and t.account_key = p.account_key) as paid_by
+       from installment_plan p join account a on a.account_key = p.account_key and a.tenant_key = p.tenant_key left join category c on c.category_key = p.category_key
+       where p.tenant_key = ?`, [tenantKey]);
+
+    it('restores each plan on its card with its schedule and the transactions that paid it', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      expect(summary.counts).toEqual(expect.objectContaining({ 'credit-cards': 1, 'installment-plans': 1, installments: 3 }));
+      const restored = await planRows(target.tenant.tenantKey);
+      expect(restored).toEqual(await planRows(owner.tenant.tenantKey));
+      expect(restored).toEqual([expect.objectContaining({ card: 'Current account', category: 'Home', description: 'Sofa', installment_count: 3, paid_by: expect.stringMatching(/#2$/u) })]);
+      const [card] = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        'select a.account_name, d.statement_close_day, d.payment_due_day, d.credit_limit::text as credit_limit, d.minimum_payment_percent::text as minimum from credit_card_detail d join account a using (account_key) where d.tenant_key = ?', [target.tenant.tenantKey]);
+      expect(card).toEqual({ account_name: 'Current account', credit_limit: '1500.0000', minimum: '5.00', payment_due_day: 10, statement_close_day: 25 });
+    });
+
+    it('draws a schedule that is not whole again from the plan and the restored card cycle', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      parsed.rows.installments = parsed.rows.installments.slice(0, 1);
+      const target = await emptyHousehold(db.em());
+
+      await restore(scopeOf(target), parsed);
+
+      // The same schedule the app draws for the plan on that card.
+      expect((await planRows(target.tenant.tenantKey))[0]!['schedule']).toBe((await planRows(owner.tenant.tenantKey))[0]!['schedule']);
+    });
+  });
+
+  describe('exchange-rate and price overrides', () => {
+    it('restores the household\'s rates as added by the restoring member, audited, and names the pairs to convert again', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const outcome = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      expect(outcome.fxOverridePairs).toEqual([{ fromCurrency: 'USD', toCurrency: 'EUR' }]);
+      const connection = db.em().getConnection();
+      const rates = await connection.execute<Record<string, unknown>[]>(
+        `select f.code as from_code, t.code as to_code, to_char(o.date at time zone 'UTC', 'YYYY-MM-DD') as date, o.rate::text as rate, o.created_by_appuser_key as member,
+           (select count(*)::int from exchange_rate_override_audit_log l where l.exchange_rate_override_key = o.exchange_rate_override_key and l.tenant_key = o.tenant_key and l.action = 'created' and l.actor_appuser_key = o.created_by_appuser_key) as audits
+         from exchange_rate_override o join currency f on f.currency_key = o.from_currency_key join currency t on t.currency_key = o.to_currency_key where o.tenant_key = ?`, [target.tenant.tenantKey]);
+      expect(rates).toEqual([{ audits: 1, date: '2026-02-06', from_code: 'USD', member: target.appuser.appuserKey, rate: '0.9166', to_code: 'EUR' }]);
+    });
+
+    it('keeps a rate the household already set for the same day', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const target = await emptyHousehold(db.em());
+      await db.em().getConnection().execute(
+        `insert into exchange_rate_override (created_at, updated_at, date, from_currency_key, to_currency_key, rate, tenant_key)
+         select now(), now(), '2026-02-06T00:00:00Z', f.currency_key, t.currency_key, 0.5, ? from currency f, currency t where f.code = 'USD' and t.code = 'EUR'`, [target.tenant.tenantKey]);
+
+      const { summary } = await restore(scopeOf(target), parsed);
+
+      expect(summary.counts['exchange-rate-overrides']).toBe(0);
+      const rates = await db.em().getConnection().execute<{ rate: string }[]>('select rate::text from exchange_rate_override where tenant_key = ?', [target.tenant.tenantKey]);
+      expect(rates).toEqual([{ rate: '0.5' }]);
+    });
+
+    it('puts each price on the catalogue\'s asset in its currency, and leaves out and lists one it cannot', async () => {
+      const { asset, owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const [price] = parsed.rows['price-overrides'];
+      // The same asset priced in another currency, and an asset nobody knows.
+      parsed.rows['price-overrides'].push({ ...price!, currency: 'EUR', date: '2026-03-30' }, { ...price!, asset: { ...price!.asset, isin: null, symbol: 'GONE' } });
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), parsed, { deps: { resolveAsset: () => Promise.resolve(null) } });
+
+      expect(summary.counts['price-overrides']).toBe(1);
+      expect(summary.warnings).toContainEqual({ code: 'price_overrides_skipped', count: 2, values: ['AAPL', 'GONE'] });
+      // Only traded assets are reported as left out with their trades.
+      expect(summary.warnings.map((warning) => warning.code)).not.toContain('assets_left_out');
+      const prices = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select o.financial_asset_key as asset, c.code as currency, to_char(o.date at time zone 'UTC', 'YYYY-MM-DD') as date, o.price::text as price, o.note
+         from financial_asset_price_override o join currency c on c.currency_key = o.currency_key where o.tenant_key = ?`, [target.tenant.tenantKey]);
+      expect(prices).toEqual([{ asset: asset.financialAssetKey, currency: 'USD', date: '2026-03-31', note: 'broker quote', price: '158.4' }]);
+    });
+  });
+
+  describe('older exports', () => {
+    /** What the reader makes of `parsed` once the 1.8 files and fields are taken out, as in a 1.7 export. */
+    function asVersion17(parsed: ParsedExport): ParsedExport {
+      const newFiles: DataFileName[] = ['credit-cards', 'exchange-rate-overrides', 'installment-plans', 'installments', 'price-overrides', 'transaction-templates'];
+      const newFields: Partial<Record<DataFileName, string[]>> = {
+        accounts: ['position'], 'budget-categories': ['rolloverEnabled'], budgets: ['rolloverCarriesOverspend'], loans: ['amortizationMethod', 'firstPaymentDate'], portfolios: ['costBasisMethod'],
+        transactions: ['installmentNumber', 'installmentPlanId', 'statementDateOverride', 'transferExchangeRate'],
+      };
+      const rows = { ...parsed.rows } as Record<DataFileName, Record<string, unknown>[]>;
+      for (const name of newFiles) rows[name] = [];
+      for (const [name, fields] of Object.entries(newFields) as [DataFileName, string[]][]) {
+        rows[name] = rows[name].map((row) => DATA_FILES[name].parse(Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key)))) as Record<string, unknown>);
+      }
+      rows.preferences = rows.preferences.map((row) => {
+        const { bankSyncAlerts: _bank, creditCardDueReminders: _card, ...emailNotifications } = row['emailNotifications'] as Record<string, unknown>;
+        return DATA_FILES.preferences.parse({ ...row, emailNotifications });
+      });
+      return { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.7' }, rows: rows as unknown as ParsedExport['rows'] };
+    }
+
+    it('restores a 1.7 export, giving every 1.8 field what the app gives a new row', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), asVersion17(await parsedExportOf(scopeOf(owner))));
+
+      expect(summary.counts).toEqual(expect.objectContaining({ accounts: 3, 'credit-cards': 0, 'installment-plans': 0, transactions: 6 }));
+      const connection = db.em().getConnection();
+      const [settings] = await connection.execute<Record<string, unknown>[]>(
+        `select (select rollover_carries_overspend from budget where tenant_key = ?) as carries,
+           (select bool_or(rollover_enabled) from budget_template_category btc join budget b using (budget_key) where b.tenant_key = ?) as rollover,
+           (select amortization_method from loan where tenant_key = ?) as amortization, (select cost_basis_method from portfolio where tenant_key = ?) as cost_basis,
+           (select count(*)::int from "transaction" where tenant_key = ? and (installment_plan_key is not null or statement_date_override is not null)) as linked,
+           (select credit_card_due_reminders_enabled from email_notification_preference where appuser_key = ?) as reminders`,
+        [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey]);
+      expect(settings).toEqual({ amortization: 'FRENCH', carries: true, cost_basis: 'FIFO', linked: 0, reminders: true, rollover: false });
     });
   });
 
