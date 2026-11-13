@@ -45,6 +45,9 @@ import { type ParsedExport, RestoreError } from './restore-reader';
  *   portfolio itself is restored.
  * - System categories by name (and parent's name), else created as the household's own.
  * - Tags, merchants and category settings reuse a matching row the household already has.
+ * - Expense groups come back with their people: a person of the household becomes the restoring
+ *   member, anyone else keeps their name and email; shared expenses keep their per-person split
+ *   lines, and settlements stay linked to their transaction when the export holds it.
  * - Formerly bank-linked accounts come back as manual accounts with their full history; no
  *   connection or credential is restored, and the summary lists them for reconnecting.
  * - The member's preferences (currency, language, email notifications) and account order are applied.
@@ -271,6 +274,8 @@ class HouseholdRestore {
   private readonly counts: Partial<Record<DataFileName, number>> = {};
   private currencies = new Map<string, number>();
   private readonly goals = new Keys();
+  private readonly groupMembers = new Keys();
+  private readonly groups = new Keys();
   private readonly loans = new Keys();
   private readonly manualAssets = new Keys();
   private memberCurrency: null | string = null;
@@ -314,7 +319,9 @@ class HouseholdRestore {
     await this.installmentPlans();
     await this.transactionRows();
     await this.transactionCategories();
+    await this.expenseGroups();
     await this.transactionSplits();
+    await this.expenseGroupActivity();
     await this.transactionReimbursements();
     await this.transactionTags();
     await this.ruleRows();
@@ -374,6 +381,8 @@ class HouseholdRestore {
     for (const row of rows.portfolios) add(row.currency);
     for (const row of rows['portfolio-transactions']) [row.feeCurrency, row.originalCurrency, row.settlementCurrency].forEach(add);
     for (const row of rows['exchange-rate-overrides']) [row.fromCurrency, row.toCurrency].forEach(add);
+    for (const row of rows['expense-groups']) add(row.currency);
+    for (const row of rows['expense-group-settlements']) add(row.currency);
     const known = await lookup(this.db, sql`select currency_key as k, code as name from currency where code = any(${[...codes]})`);
     const missing = [...codes].filter((code) => !known.has(code)).sort();
     if (missing.length > 0) throw new RestoreError('unknown_currency', `Unknown currencies: ${missing.join(', ')}`, { values: missing });
@@ -945,6 +954,7 @@ class HouseholdRestore {
     const values = this.rows['transaction-splits'].map((row) => ({
       amount: row.amount,
       category_key: this.categories.get(row.categoryId),
+      expense_group_member_key: this.groupMembers.get(row.memberId),
       notes: row.notes,
       position: row.position,
       tenant_key: this.target.tenantKey,
@@ -953,6 +963,68 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'transaction_split', values);
     this.count('transaction-splits', values.length);
+  }
+
+  /**
+   * Expense groups and their people, before the split lines that name them. A person of the
+   * household becomes the restoring member, as every member of the export does; anyone else keeps
+   * only a name and email.
+   */
+  private async expenseGroups(): Promise<void> {
+    const groups = this.rows['expense-groups'];
+    const groupKeys = await allocateKeys(this.db, 'expense_group', 'expense_group_key', groups.length);
+    await insertRows(this.db, 'expense_group', groups.map((row, index) => {
+      this.groups.set(row.id, groupKeys[index]!);
+      return { archived: row.archived, created_by_appuser_key: this.target.appuserKey, currency_key: this.currency(row.currency), expense_group_key: groupKeys[index], name: row.name, tenant_key: this.target.tenantKey, ...this.stamp(row.createdAt) };
+    }));
+    this.count('expense-groups', groups.length);
+
+    const members = this.rows['expense-group-members'];
+    const memberKeys = await allocateKeys(this.db, 'expense_group_member', 'expense_group_member_key', members.length);
+    await insertRows(this.db, 'expense_group_member', members.map((row, index) => {
+      this.groupMembers.set(row.id, memberKeys[index]!);
+      return {
+        appuser_key: row.householdMemberId === null ? null : this.target.appuserKey,
+        email: row.email,
+        expense_group_key: this.groups.get(row.groupId),
+        expense_group_member_key: memberKeys[index],
+        name: row.name,
+        position: row.position,
+        tenant_key: this.target.tenantKey,
+        ...this.stamp(),
+      };
+    }));
+    this.count('expense-group-members', members.length);
+  }
+
+  /** Who paid each shared expense, and the settlements, linked to their transaction when the export holds it. */
+  private async expenseGroupActivity(): Promise<void> {
+    const expenses = this.rows['expense-group-expenses'];
+    await insertRows(this.db, 'expense_group_expense', expenses.map((row) => ({
+      expense_group_key: this.groups.get(row.groupId),
+      paid_by_member_key: this.groupMembers.get(row.paidByMemberId),
+      split_method: row.splitMethod,
+      tenant_key: this.target.tenantKey,
+      transaction_key: this.transactions.get(row.transactionId),
+      ...this.stamp(),
+    })));
+    this.count('expense-group-expenses', expenses.length);
+
+    const settlements = this.rows['expense-group-settlements'];
+    await insertRows(this.db, 'expense_group_settlement', settlements.map((row) => ({
+      amount: row.amount,
+      currency_key: this.currency(row.currency),
+      expense_group_key: this.groups.get(row.groupId),
+      from_member_key: this.groupMembers.get(row.fromMemberId),
+      notes: row.notes,
+      recorded_by_appuser_key: this.target.appuserKey,
+      settled_on: row.settledOn,
+      tenant_key: this.target.tenantKey,
+      to_member_key: this.groupMembers.get(row.toMemberId),
+      transaction_key: this.transactions.get(row.transactionId),
+      ...this.stamp(row.createdAt),
+    })));
+    this.count('expense-group-settlements', settlements.length);
   }
 
   /** Reimbursement links, made by the restoring member. The export kept only live links whose sides it holds. */

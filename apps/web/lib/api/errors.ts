@@ -51,6 +51,25 @@ export const API_ERROR_CODE = {
   /** `POST /v1/auth/demo` on a server that has the demo on but no demo account set up (503). */
   DEMO_UNAVAILABLE: "demo_unavailable",
   EMAIL_VERIFICATION_REQUIRED: "email_verification_required",
+  /** Deleting a group that has shared expenses or settlements (409); archive it instead. */
+  EXPENSE_GROUP_NOT_EMPTY: "expense_group_not_empty",
+  /** A settlement larger than what is left to link on its transaction (400). */
+  EXPENSE_GROUP_AMOUNT_EXCEEDED: "expense_group_amount_exceeded",
+  /** A settlement in a different currency from its linked transaction (400). */
+  EXPENSE_GROUP_CURRENCY_MISMATCH: "expense_group_currency_mismatch",
+  /** Removing a person who has shares or settlements in the group (409). */
+  EXPENSE_GROUP_MEMBER_IN_USE: "expense_group_member_in_use",
+  /** A person who is not in the group, or a household member added twice (400). */
+  EXPENSE_GROUP_MEMBER_INVALID: "expense_group_member_invalid",
+  /** A settlement between the same person, or a link that does not fit its direction (400). */
+  EXPENSE_GROUP_SETTLEMENT_INVALID: "expense_group_settlement_invalid",
+  /** Shares that do not add up, make 100, or name someone twice; a payer outside the household (400). */
+  EXPENSE_GROUP_SHARES_INVALID: "expense_group_shares_invalid",
+  /**
+   * The transaction already plays another part: a transfer, a loan repayment, a reimbursement
+   * link, a settlement, or shared in another group (409).
+   */
+  EXPENSE_GROUP_TRANSACTION_CONFLICT: "expense_group_transaction_conflict",
   /** The operator has not set this feature up, such as a chain with no explorer configured (501). */
   FEATURE_DISABLED: "feature_disabled",
   FORBIDDEN: "forbidden",
@@ -110,6 +129,11 @@ export const API_ERROR_CODE = {
   /** The split's lines do not add up, mix signs, include a zero or are fewer than two (400). */
   SPLIT_INVALID: "split_invalid",
   TAG_NAME_TAKEN: "tag_name_taken",
+  /**
+   * Editing or removing the split of a transaction shared in an expense group, or linking a
+   * reimbursement to one (409); its shares are changed in the group.
+   */
+  TRANSACTION_IN_EXPENSE_GROUP: "transaction_in_expense_group",
   /** Deleting a transaction the bank sent (409); hide it instead. A bulk delete skips such rows. */
   TRANSACTION_BANK_SYNCED: "transaction_bank_synced",
   /** A bulk change whose filter matches more than 5,000 transactions (400). */

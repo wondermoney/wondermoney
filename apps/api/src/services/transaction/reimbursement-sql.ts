@@ -1,3 +1,5 @@
+import { groupTakenOffOfSql, groupTakenOffRowsSql } from '@service/expense-group/expense-group-sql';
+
 import { accountAudienceSql } from '../account/account-visibility-sql';
 
 import { notExpiredTransactionSql } from './transaction-status';
@@ -19,6 +21,12 @@ import { notExpiredTransactionSql } from './transaction-status';
  * checks it again, so a link whose side was deleted, expired or moved behind a private account
  * afterwards simply stops counting (on both sides at once) instead of leaking or double counting.
  * None of it depends on who is looking, so a total is the same for every member who can see it.
+ *
+ * ## Expense groups
+ *
+ * The "reimbursed amount" these helpers hand to the totals also holds what expense groups take off
+ * a transaction (`expense-group/expense-group-sql.ts`): the shares of people outside the household
+ * and the settlements linked to it. Totals read both as one amount, so they stay in step.
  */
 
 /** SQL: the link aliased `link` counts (see the module comment). `link` is an alias written by the caller. */
@@ -40,19 +48,20 @@ export function countingReimbursementLinkSql(link: string): string {
 /**
  * SQL: the reimbursed amount of the transaction whose key is `transactionKeySql`, as a positive
  * amount in its settlement currency: what the counting links on it add up to, on either side
- * (a transaction is an expense or a reimbursement by its sign). 0 when it has none.
+ * (a transaction is an expense or a reimbursement by its sign), plus what expense groups take off
+ * it (see "Expense groups" above). 0 when it has none.
  */
 export function reimbursedAmountOfSql(transactionKeySql: string): string {
-  return `coalesce((select sum(reimbursed_link.amount) from "transaction_reimbursement" reimbursed_link
+  return `(coalesce((select sum(reimbursed_link.amount) from "transaction_reimbursement" reimbursed_link
     where (reimbursed_link.expense_transaction_key = ${transactionKeySql} or reimbursed_link.reimbursement_transaction_key = ${transactionKeySql})
-      and ${countingReimbursementLinkSql('reimbursed_link')}), 0)`;
+      and ${countingReimbursementLinkSql('reimbursed_link')}), 0) + ${groupTakenOffOfSql(transactionKeySql)})`;
 }
 
 /**
  * The household's reimbursed amounts as a derived table with columns `transaction_key` and
  * `reimbursed_amount` (positive, in the transaction's settlement currency), one row per
- * transaction with a counting link. For joining in totals that read many rows at once.
- * `tenantKey` is inlined, validated as an integer.
+ * transaction with a counting link or an amount expense groups take off. For joining in totals
+ * that read many rows at once. `tenantKey` is inlined, validated as an integer.
  */
 export function reimbursedAmountsSql(tenantKey: number): string {
   if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
@@ -63,6 +72,8 @@ export function reimbursedAmountsSql(tenantKey: number): string {
       ${side('expense_transaction_key')}
       union all
       ${side('reimbursement_transaction_key')}
+      union all
+      ${groupTakenOffRowsSql(tenantKey)}
     ) side group by side.transaction_key)`;
 }
 

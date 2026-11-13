@@ -76,6 +76,7 @@ const NAV_KEYWORDS: Record<string, string[]> = {
   "navigation.bills-subscriptions": ["bills", "subscriptions", "recurring"],
   "navigation.loans": ["loans", "debt", "credit", "borrow"],
   "navigation.budgets": ["budgets", "budget", "spending plan", "envelope"],
+  "navigation.groups": ["groups", "shared expenses", "split", "settle up", "friends"],
   "navigation.portfolio": ["portfolio", "investments", "broker", "holdings"],
   "navigation.assets": ["assets", "property", "home", "vehicle", "valuables"],
   "navigation.financial-markets": ["financial markets", "markets", "stocks", "etf", "prices"],

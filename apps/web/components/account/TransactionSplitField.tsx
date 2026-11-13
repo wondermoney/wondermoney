@@ -41,6 +41,7 @@ import {
   getApiErrorCode,
   isDemoReadOnlyError,
 } from "@/lib/api/errors";
+import { sharedGroupOf } from "@/lib/expense-group/expense-group";
 
 import { TransactionSplitEditor } from "./TransactionSplitEditor";
 import { useSplitCategoryLabel } from "./TransactionSplitLines";
@@ -63,6 +64,11 @@ function draftFromSplits(
 export interface SplitDraft {
   /** The transaction was split when the sheet opened. */
   wasSplit: boolean;
+  /**
+   * It is shared in an expense group: its split is the group's, changed there (the split
+   * endpoints answer 409 `transaction_in_expense_group`), so the editor never opens.
+   */
+  shared: boolean;
   /** The editor is showing (a split, or one being started). */
   editing: boolean;
   lines: SplitDraftLine[];
@@ -87,10 +93,11 @@ export function useSplitDraft(
 ): SplitDraft {
   const locale = useLocale();
   const wasSplit = isSplitTransaction(transaction);
+  const shared = sharedGroupOf(transaction) !== null;
   const [initial] = useState(() =>
-    wasSplit ? draftFromSplits(transaction, locale) : [],
+    wasSplit && !shared ? draftFromSplits(transaction, locale) : [],
   );
-  const [editing, setEditing] = useState(wasSplit);
+  const [editing, setEditing] = useState(wasSplit && !shared);
   const [lines, setLines] = useState<SplitDraftLine[]>(initial);
   const summary = useMemo(
     () => summarizeSplit(lines, totalUnits, locale),
@@ -100,6 +107,7 @@ export function useSplitDraft(
 
   return {
     wasSplit,
+    shared,
     editing,
     lines,
     setLines,
@@ -109,6 +117,7 @@ export function useSplitDraft(
     blocked: changed && summary.problem !== null,
     // Two lines to start: the current category with the whole amount, and an empty one.
     start: () => {
+      if (shared) return;
       const current = transaction.appuserTransactionCategories[0];
       setLines([
         {
@@ -123,7 +132,7 @@ export function useSplitDraft(
     },
     cancel: () => {
       setLines(initial);
-      setEditing(wasSplit);
+      setEditing(wasSplit && !shared);
     },
   };
 }
@@ -172,7 +181,7 @@ export function TransactionSplitField({
 
   const current = transaction.appuserTransactionCategories[0];
   const isLoanRepayment = Boolean(transaction.loanRepayment);
-  const canSplit = !isLoanRepayment && split.totalUnits !== 0n;
+  const canSplit = !isLoanRepayment && !split.shared && split.totalUnits !== 0n;
 
   // The API keeps the largest line's category when a split is removed.
   const largestLine = [...(transaction.splits ?? [])].sort(
@@ -217,7 +226,7 @@ export function TransactionSplitField({
             {t("cancel")}
           </Button>
         ) : null}
-        {split.wasSplit ? (
+        {split.wasSplit && !split.shared ? (
           <Button
             type="button"
             variant="ghost"
@@ -275,7 +284,11 @@ export function TransactionSplitField({
             ) : null}
           </div>
           <p className="text-muted-foreground text-xs">
-            {isLoanRepayment ? t("loan-repayment") : t("split-hint")}
+            {split.shared
+              ? tRoot("expenseGroups.share.split-locked")
+              : isLoanRepayment
+                ? t("loan-repayment")
+                : t("split-hint")}
           </p>
         </>
       )}

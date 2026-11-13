@@ -82,8 +82,12 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * 1.10 added `isJoint` to `data/accounts.json` (a joint account's money counts as Shared) and
  * `attributedMemberId` and `attributedToShared` to `data/transactions.json` (who the row's money is
  * attributed to, "Spent by", when not its account's default; at most one is set).
+ * 1.11 added expense groups: `data/expense-groups.json`, `data/expense-group-members.json` (a person
+ * of the household carries `householdMemberId`, anyone else null), `data/expense-group-expenses.json`
+ * (a transaction shared in a group and who paid it) and `data/expense-group-settlements.json`, and
+ * `memberId` to `data/transaction-splits.json`: the group member whose share the line is, or null.
  */
-export const EXPORT_FORMAT_VERSION = '1.10';
+export const EXPORT_FORMAT_VERSION = '1.11';
 
 export interface ExportManifest {
   appVersion: string;

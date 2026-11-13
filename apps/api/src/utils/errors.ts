@@ -206,6 +206,38 @@ export const ERROR_CODE = {
   /** Splitting a transaction linked as a loan repayment, which already splits principal from interest (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
   /**
+   * The transaction is shared in an expense group: its split is the group's (change the shares
+   * there), and it cannot also be a reimbursement or a settlement (409).
+   */
+  TRANSACTION_IN_EXPENSE_GROUP: 'transaction_in_expense_group',
+  /**
+   * Sharing a transaction in an expense group: the shares do not add up to its amount, one is zero
+   * or has too many decimals, percentages do not make 100, a person appears twice or is not in the
+   * group, or the payer is not someone of the household (400).
+   */
+  EXPENSE_GROUP_SHARES_INVALID: 'expense_group_shares_invalid',
+  /**
+   * The transaction already plays another part that would count it twice: it is a reimbursement
+   * or has reimbursements, settles a group debt, is a loan repayment or a transfer between own
+   * accounts, or is shared in another group (409).
+   */
+  EXPENSE_GROUP_TRANSACTION_CONFLICT: 'expense_group_transaction_conflict',
+  /**
+   * Recording a settlement: the same person on both sides, or a linked transaction that does not
+   * move money between someone of the household and someone outside it the right way (400).
+   */
+  EXPENSE_GROUP_SETTLEMENT_INVALID: 'expense_group_settlement_invalid',
+  /** Linking a settlement to a transaction settled in another currency than the settlement (400). */
+  EXPENSE_GROUP_CURRENCY_MISMATCH: 'expense_group_currency_mismatch',
+  /** Linking settlements for more than the linked transaction's amount (400). */
+  EXPENSE_GROUP_AMOUNT_EXCEEDED: 'expense_group_amount_exceeded',
+  /** Adding a group member: the household member is not in this household, or is already in the group (400). */
+  EXPENSE_GROUP_MEMBER_INVALID: 'expense_group_member_invalid',
+  /** Removing a group member who has shares, payments or settlements (409). */
+  EXPENSE_GROUP_MEMBER_IN_USE: 'expense_group_member_in_use',
+  /** Deleting a group that still has shared expenses or settlements; archive it instead (409). */
+  EXPENSE_GROUP_NOT_EMPTY: 'expense_group_not_empty',
+  /**
    * Linking a reimbursement: the refund is not money in, the expense is not money out, they are
    * the same transaction, or either is a transfer or a loan repayment (400).
    */

@@ -8,6 +8,7 @@ import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionReimbursement } from '@entity/TransactionReimbursement';
 import { type AccountActor, assertAccountsWritable, isAccountVisibleTo, loadAccountAudiences, loadSharedAccountKeys, visibleAccountWhere } from '@service/account/account-access';
+import { transactionsInExpenseGroups } from '@service/expense-group/expense-group-roles';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { big, toNumber } from '@utils/money';
@@ -37,6 +38,9 @@ import { excludeExpired, isExpiredStatusName } from './transaction-status';
  *   visible to the same members: both on shared accounts, or both on private accounts of the same
  *   owner. So a link never shows, or changes a total, for someone who cannot see both sides.
  *   Anything the member cannot see is "not found".
+ * - **Expense groups.** Neither side is shared in an expense group or linked to a group
+ *   settlement (409 `transaction_in_expense_group`): those already take their amount off the
+ *   totals (`expense-group/expense-group-sql.ts`), and a reimbursement on top would count it twice.
  * - **One live link per pair.** Changing an amount is unlink then link.
  *
  * Linking and unlinking write a `user_edit` audit entry on both transactions. Deleting either
@@ -236,6 +240,10 @@ export async function linkReimbursement(em: EntityManager, actor: Actor, reimbur
     if (reimbursementRoleOf(expense) !== 'expense') throw invalid('Only money going out can be reimbursed');
     if (isTransfer(reimbursement) || isTransfer(expense)) throw invalid('A transfer between your own accounts cannot be a reimbursement');
     if (await tx.count(LoanRepaymentLink, { deletedAt: null, transactionKey: expense }) > 0) throw invalid('A loan repayment cannot be reimbursed');
+    // A shared expense's other people are paid back through settlements, never a reimbursement too.
+    if ((await transactionsInExpenseGroups(tx, [expense.transactionKey, reimbursement.transactionKey])).size > 0) {
+      throw new ConflictError('A transaction shared in an expense group or settling one cannot be a reimbursement', ERROR_CODE.TRANSACTION_IN_EXPENSE_GROUP);
+    }
     if (!expense.settlementCurrencyKey || expense.settlementCurrencyKey.currencyKey !== reimbursement.settlementCurrencyKey?.currencyKey) {
       throw new BadRequestError('A reimbursement can only be linked to an expense in the same currency', ERROR_CODE.REIMBURSEMENT_CURRENCY_MISMATCH);
     }

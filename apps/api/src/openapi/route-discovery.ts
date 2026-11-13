@@ -20,6 +20,7 @@ export const AUTHED_MOUNTS: Record<string, () => Promise<Router>> = {
   '/v1/category': async () => (await import('@route/category')).default,
   '/v1/configs': async () => (await import('@route/configs')).default,
   '/v1/currency': async () => (await import('@route/currency')).default,
+  '/v1/expense-groups': async () => (await import('@route/expense-group')).default,
   '/v1/feedback': async () => (await import('@route/feedback')).default,
   '/v1/financial-markets': async () => (await import('@route/financial-markets')).default,
   '/v1/goals': async () => (await import('@route/goal')).default,

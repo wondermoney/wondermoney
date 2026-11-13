@@ -38,6 +38,7 @@ import {
 import type { Transaction } from "@/lib/api/account/useTransactions";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import { sharedGroupOf } from "@/lib/expense-group/expense-group";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
@@ -490,7 +491,9 @@ export function TransactionReimbursementField({
   disabled?: boolean;
 }) {
   const role = reimbursementRoleOf(transaction);
-  if (!role) return null;
+  // A transaction shared in an expense group plays that part only (the API answers 409
+  // `transaction_in_expense_group` to a link).
+  if (!role || sharedGroupOf(transaction) !== null) return null;
   return (
     <ReimbursementSection
       transaction={transaction}

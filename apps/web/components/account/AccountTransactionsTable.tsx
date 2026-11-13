@@ -59,6 +59,7 @@ import {
   getCategoryTranslationKey,
 } from "../../lib/utils/categories";
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
+import { TransactionSharedBadge } from "../expense-group/TransactionSharedBadge";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
 import { InstallmentBadge } from "../installments/InstallmentBadge";
 import { TransactionInstallmentLinkAction } from "../installments/TransactionInstallmentLink";
@@ -706,6 +707,11 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         }
                         onShowLinks={() => setInspectedTransaction(transaction)}
                       />
+                      <TransactionSharedBadge
+                        transaction={transaction}
+                        // A 20px chip with a 44px hit area, the touch floor.
+                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                      />
                       {isLedger && transaction.reviewed === false ? (
                         <p className="text-warning-text text-xs font-medium">
                           {t("transaction-review-filter")}
@@ -927,6 +933,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                           onShowLinks={() =>
                             setInspectedTransaction(info.row.original)
                           }
+                        />
+                        {/* Shared in an expense group: opens the group. */}
+                        <TransactionSharedBadge
+                          transaction={info.row.original}
                         />
                         {/* A receipt or invoice is attached: the row says so without opening it. */}
                         {(info.row.original.attachmentCount ?? 0) > 0 ? (

@@ -17,6 +17,8 @@ import { ApiError } from '@/lib/api/errors'
 import { canWriteAccount, readOnlyAccountKeys } from '@/features/accounts/account-access'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
+import { SplitWithGroupScreen } from '@/features/expense-groups/split-with-group-screen'
+import { useGroupAccess } from '@/features/expense-groups/use-group-access'
 import { useTranslation } from 'react-i18next'
 
 import { localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
@@ -47,6 +49,8 @@ function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => 
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network'
   if (error.code === 'mfa-required') { blockAccess('mfa-required'); return 'mfa' }
+  // The transaction is shared in an expense group, whose shares are its split.
+  if (error.code === 'http' && error.serverCode === 'transaction_in_expense_group') return 'in-group'
   return 'error'
 }
 
@@ -135,6 +139,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const removeSplits = useRemoveTransactionSplits()
   const unlinkReimbursement = useUnlinkReimbursement()
   const [reimburseId, setReimburseId] = useState<number | null>(null)
+  const [groupShareId, setGroupShareId] = useState<number | null>(null)
+  const groupAccess = useGroupAccess()
   const [focusTransactionId] = useState(() => focusParam(params))
   const transferDestinations = useTransferDestinations(accountsQuery.data?.accounts)
   const tagsQuery = useTags()
@@ -283,6 +289,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
 
   // Read from the list each render, so the screen follows the row as its links change.
   const reimburseRow = reimburseId === null || !('transactions' in state) ? null : state.transactions.find((row) => row.id === reimburseId) ?? null
+  const groupShareRow = groupShareId === null || !('transactions' in state) ? null : state.transactions.find((row) => row.id === groupShareId) ?? null
 
   const ruleCategories = categoryState.status === 'loaded'
     ? categoryState.categories.flatMap((category) => [category, ...category.children]).map((category) => ({ id: category.id, name: category.name }))
@@ -329,6 +336,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     onSaveSplit={runSaveSplit}
     onRemoveSplit={runRemoveSplit}
     onMarkReimbursement={(row) => setReimburseId(row.id)}
+    onSplitWithGroup={groupAccess.canWrite ? (row) => setGroupShareId(row.id) : undefined}
     onUnlinkReimbursement={runUnlinkReimbursement}
     onOpenTransaction={(linked) => router.push(linkedTransactionHref(linked))}
     focusTransactionId={focusTransactionId}
@@ -342,6 +350,14 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
       locale={i18n.resolvedLanguage ?? i18n.language ?? 'en'}
       onClose={() => setReimburseId(null)}
       transaction={reimburseRow}
+    />
+  ) : null}
+  {groupShareRow ? (
+    <SplitWithGroupScreen
+      canWrite={groupAccess.canWrite}
+      locale={i18n.resolvedLanguage ?? i18n.language ?? 'en'}
+      onClose={() => setGroupShareId(null)}
+      transaction={groupShareRow}
     />
   ) : null}
   <RuleEditorSheet

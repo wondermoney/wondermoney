@@ -75,6 +75,10 @@ export const featureScreens = [
   'loan_create',
   'loan_detail',
   'loan_edit',
+  // Expense groups
+  'expense_groups',
+  'expense_group_create',
+  'expense_group_detail',
   // Manually valued assets
   'assets',
   'asset_create',

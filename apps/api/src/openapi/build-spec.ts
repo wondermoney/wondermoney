@@ -27,6 +27,7 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
   Categories: 'Transaction categories.',
   Config: 'Client configuration: brokers, currencies, categories and transaction types.',
   Currency: 'Exchange-rate overrides.',
+  'Expense groups': 'People who share costs: their shared expenses (each person’s share is a line of the transaction’s split), balances and settlements. Only the household’s own people’s shares count in its totals.',
   'Financial markets': 'Quotes, fundamentals and news from the configured market-data provider.',
   Goals: 'Savings goals and the money assigned to them.',
   'Import sessions': 'Read the state of a CSV or portfolio import session.',

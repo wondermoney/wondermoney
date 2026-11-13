@@ -20,6 +20,7 @@ const mockPush = jest.fn()
 const mockUseAccounts = jest.fn()
 let mockCapturedProps: Record<string, unknown> = {}
 let mockAiHidden = false
+let mockCanWriteGroups = true
 jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: jest.fn(), push: mockPush }) }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', resolvedLanguage: 'en' } }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ blockAccess: mockBlockAccess }) }))
@@ -47,6 +48,8 @@ jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMem
 jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
 jest.mock('./use-transaction-reimbursements', () => ({ useUnlinkReimbursement: () => ({ mutateAsync: mockUnlinkAsync, isPending: false }) }))
 jest.mock('./transaction-reimbursement-screen', () => ({ TransactionReimbursementScreen: (props: { transaction: { id: number } }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{`reimburse ${props.transaction.id}`}</Native.Text> } }))
+jest.mock('@/features/expense-groups/use-group-access', () => ({ useGroupAccess: () => ({ canWrite: mockCanWriteGroups, household: null, candidates: [] }) }))
+jest.mock('@/features/expense-groups/split-with-group-screen', () => ({ SplitWithGroupScreen: (props: { transaction: { id: number }; canWrite: boolean }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{`share ${props.transaction.id} ${props.canWrite ? 'write' : 'read'}`}</Native.Text> } }))
 jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () => ({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] }) }))
 type MockPromptProps = { suggestion: { fingerprint: string }; onCreate: (suggestion: unknown) => void }
 const mockRuleSheets: { prompt: MockPromptProps | null; seed: unknown } = { prompt: null, seed: null }
@@ -313,6 +316,34 @@ describe('TransactionsRoute', () => {
     await expect(removeSplit(41)).resolves.toBe('success')
     expect(mockRemoveSplitsAsync).toHaveBeenCalledWith(41)
     await expect(removeSplit(41)).resolves.toBe('network')
+  })
+
+  it('maps a split refused because the transaction is shared in a group', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockSetSplitsAsync.mockRejectedValueOnce(new ApiError('http', 409, { serverCode: 'transaction_in_expense_group' }))
+    await render(<TransactionsRoute />)
+    const saveSplit = mockCapturedProps.onSaveSplit as (id: number, lines: readonly object[]) => Promise<string>
+    await expect(saveSplit(41, [])).resolves.toBe('in-group')
+  })
+
+  it('opens "Split with group" over the list for the chosen row', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [{ ...transactionFixture, transactionKey: 41 }] }, refetch: jest.fn() })
+    const view = await render(<TransactionsRoute />)
+    expect(view.queryByText('share 41 write')).not.toBeOnTheScreen()
+    await act(async () => { (mockCapturedProps.onSplitWithGroup as (row: { id: number }) => void)({ id: 41 }) })
+    expect(view.getByText('share 41 write')).toBeOnTheScreen()
+  })
+
+  it('offers no "Split with group" to a household viewer', async () => {
+    mockCanWriteGroups = false
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    try {
+      await render(<TransactionsRoute />)
+      expect(mockCapturedProps.onSplitWithGroup).toBeUndefined()
+      expect(mockCapturedProps.onMarkReimbursement).toEqual(expect.any(Function))
+    } finally {
+      mockCanWriteGroups = true
+    }
   })
 
   it('maps an unlink to its result, by the API’s reason', async () => {

@@ -22,8 +22,9 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * asset, a budget's month start day, which defaults to the 1st, a merchant's website and logo URL,
  * the 1.8 fields, 1.9's account shares, and 1.10's joint accounts and transaction attribution, each defaulting to what the
  * app gives a row created without it), which an
- * older export simply does not have, so there is nothing to migrate yet. Another major version is
- * refused.
+ * older export simply does not have, so there is nothing to migrate yet. 1.11 added the expense
+ * group files and a split line's `memberId`, likewise absent from older exports. Another major
+ * version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -189,7 +190,25 @@ const transaction = z.object({
 const transactionCategory = z.object({ categoryId: id, memberId: ref, source: z.enum(['deterministic', 'manual', 'openai', 'rule', 'user']), transactionId: id });
 /** A refund linked to the expense it offsets (1.6); `amount` is positive, in the expense's currency. */
 const transactionReimbursement = z.object({ amount: decimal.refine((value) => Number(value) > 0, 'a positive amount'), createdAt: optionalTimestamp, expenseTransactionId: id, id, reimbursementTransactionId: id });
-const transactionSplit = z.object({ amount: decimal, categoryId: ref, id, notes: text(500), position: z.number().int().min(0).max(10_000), transactionId: id });
+/** `memberId` (1.11): the expense group member whose share the line is. */
+const transactionSplit = z.object({ amount: decimal, categoryId: ref, id, memberId: ref.optional().default(null), notes: text(500), position: z.number().int().min(0).max(10_000), transactionId: id });
+
+/** Expense groups (1.11): people sharing costs, their shared expenses and settlements. */
+const expenseGroup = z.object({ archived: z.boolean(), createdAt: optionalTimestamp, currency, id, name: name(100) });
+/** `householdMemberId` names a member of the export for a person of the household; null for anyone else. */
+const expenseGroupMember = z.object({ email: text(254), groupId: id, householdMemberId: ref, id, name: name(100), position: z.number().int().min(0).max(10_000) });
+const expenseGroupExpense = z.object({ groupId: id, paidByMemberId: id, splitMethod: z.enum(['amounts', 'equal', 'percentages']), transactionId: id });
+const expenseGroupSettlement = z.object({
+  amount: decimal.refine((value) => Number(value) > 0, 'a positive amount'),
+  createdAt: optionalTimestamp,
+  currency,
+  fromMemberId: id,
+  groupId: id,
+  notes: text(500),
+  settledOn: day,
+  toMemberId: id,
+  transactionId: ref,
+}).refine((row) => row.fromMemberId !== row.toMemberId, { message: 'two different people', path: ['toMemberId'] });
 const transactionTag = z.object({ tagId: id, transactionId: id });
 
 /** A purchase paid in installments (1.8), within the bounds a plan is created with (`validators/installment-plan.ts`). */
@@ -466,6 +485,10 @@ export const DATA_FILES = {
   'crypto-wallet-addresses': cryptoWalletAddress,
   'crypto-wallet-tokens': cryptoWalletToken,
   'exchange-rate-overrides': exchangeRateOverride,
+  'expense-group-expenses': expenseGroupExpense,
+  'expense-group-members': expenseGroupMember,
+  'expense-group-settlements': expenseGroupSettlement,
+  'expense-groups': expenseGroup,
   'goal-account-links': goalAccountLink,
   'goal-activities': goalActivity,
   'goal-transaction-fundings': goalFunding,
@@ -540,6 +563,16 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'reimbursementTransactionId', file: 'transaction-reimbursements', target: 'transactions' },
   { field: 'categoryId', file: 'transaction-splits', target: 'categories' },
   { field: 'transactionId', file: 'transaction-splits', target: 'transactions' },
+  { field: 'memberId', file: 'transaction-splits', target: 'expense-group-members' },
+  { field: 'groupId', file: 'expense-group-members', target: 'expense-groups' },
+  { field: 'householdMemberId', file: 'expense-group-members', target: 'members' },
+  { field: 'groupId', file: 'expense-group-expenses', target: 'expense-groups' },
+  { field: 'paidByMemberId', file: 'expense-group-expenses', target: 'expense-group-members' },
+  { field: 'transactionId', file: 'expense-group-expenses', target: 'transactions' },
+  { field: 'groupId', file: 'expense-group-settlements', target: 'expense-groups' },
+  { field: 'fromMemberId', file: 'expense-group-settlements', target: 'expense-group-members' },
+  { field: 'toMemberId', file: 'expense-group-settlements', target: 'expense-group-members' },
+  { field: 'transactionId', file: 'expense-group-settlements', target: 'transactions' },
   { field: 'tagId', file: 'transaction-tags', target: 'tags' },
   { field: 'transactionId', file: 'transaction-tags', target: 'transactions' },
   { field: 'ownerMemberId', file: 'rules', target: 'members' },

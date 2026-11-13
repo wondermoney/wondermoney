@@ -9,6 +9,7 @@ import {
   PieChart,
   ReceiptText,
   Target,
+  Users,
 } from "lucide-react";
 
 /**
@@ -86,6 +87,13 @@ export const NAVIGATION: NavigationItem[] = [
     labelKey: "navigation.budgets",
     href: "/budgets",
     icon: PieChart,
+    group: "day-to-day",
+  },
+  {
+    id: "groups",
+    labelKey: "navigation.groups",
+    href: "/groups",
+    icon: Users,
     group: "day-to-day",
   },
   {

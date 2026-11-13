@@ -11566,6 +11566,1098 @@
       "comment": null
     },
     {
+      "name": "expense_group",
+      "schema": "public",
+      "columns": {
+        "archived": {
+          "name": "archived",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "created_by_appuser_key": {
+          "name": "created_by_appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "currency_key": {
+          "name": "currency_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "expense_group_key": {
+          "name": "expense_group_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 100,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "expense_group_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_tenant_key_index",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "expense_group_created_by_appuser_key_foreign": {
+          "columnNames": [
+            "created_by_appuser_key"
+          ],
+          "constraintName": "expense_group_created_by_appuser_key_foreign",
+          "localTableName": "public.expense_group",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "set null"
+        },
+        "expense_group_currency_key_foreign": {
+          "columnNames": [
+            "currency_key"
+          ],
+          "constraintName": "expense_group_currency_key_foreign",
+          "localTableName": "public.expense_group",
+          "referencedColumnNames": [
+            "currency_key"
+          ],
+          "referencedTableName": "public.currency"
+        },
+        "expense_group_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "expense_group_tenant_key_foreign",
+          "localTableName": "public.expense_group",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "expense_group_expense",
+      "schema": "public",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "expense_group_expense_key": {
+          "name": "expense_group_expense_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "expense_group_key": {
+          "name": "expense_group_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "paid_by_member_key": {
+          "name": "paid_by_member_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "split_method": {
+          "name": "split_method",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "amounts",
+            "equal",
+            "percentages"
+          ],
+          "mappedType": "enum"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "transaction_key": {
+          "name": "transaction_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_expense_expense_group_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "expense_group_expense_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "expense_group_expense_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_expense_transaction_live_unique",
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX expense_group_expense_transaction_live_unique ON expense_group_expense (transaction_key) WHERE deleted_at IS NULL"
+        }
+      ],
+      "checks": [
+        {
+          "name": "expense_group_expense_split_method_check",
+          "expression": "\"split_method\" in ('amounts', 'equal', 'percentages')",
+          "definition": "check (\"split_method\" in ('amounts', 'equal', 'percentages'))",
+          "columnName": "split_method"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "expense_group_expense_expense_group_key_foreign": {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "constraintName": "expense_group_expense_expense_group_key_foreign",
+          "localTableName": "public.expense_group_expense",
+          "referencedColumnNames": [
+            "expense_group_key"
+          ],
+          "referencedTableName": "public.expense_group",
+          "deleteRule": "cascade"
+        },
+        "expense_group_expense_paid_by_member_key_foreign": {
+          "columnNames": [
+            "paid_by_member_key"
+          ],
+          "constraintName": "expense_group_expense_paid_by_member_key_foreign",
+          "localTableName": "public.expense_group_expense",
+          "referencedColumnNames": [
+            "expense_group_member_key"
+          ],
+          "referencedTableName": "public.expense_group_member"
+        },
+        "expense_group_expense_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "expense_group_expense_tenant_key_foreign",
+          "localTableName": "public.expense_group_expense",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        },
+        "expense_group_expense_transaction_key_foreign": {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "constraintName": "expense_group_expense_transaction_key_foreign",
+          "localTableName": "public.expense_group_expense",
+          "referencedColumnNames": [
+            "transaction_key"
+          ],
+          "referencedTableName": "public.transaction",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "expense_group_member",
+      "schema": "public",
+      "columns": {
+        "appuser_key": {
+          "name": "appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(254)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 254,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "expense_group_key": {
+          "name": "expense_group_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "expense_group_member_key": {
+          "name": "expense_group_member_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 100,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "position": {
+          "name": "position",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "0",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_member_expense_group_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "expense_group_member_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "expense_group_member_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "expense_group_member_appuser_key_foreign": {
+          "columnNames": [
+            "appuser_key"
+          ],
+          "constraintName": "expense_group_member_appuser_key_foreign",
+          "localTableName": "public.expense_group_member",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "set null"
+        },
+        "expense_group_member_expense_group_key_foreign": {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "constraintName": "expense_group_member_expense_group_key_foreign",
+          "localTableName": "public.expense_group_member",
+          "referencedColumnNames": [
+            "expense_group_key"
+          ],
+          "referencedTableName": "public.expense_group",
+          "deleteRule": "cascade"
+        },
+        "expense_group_member_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "expense_group_member_tenant_key_foreign",
+          "localTableName": "public.expense_group_member",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "expense_group_settlement",
+      "schema": "public",
+      "columns": {
+        "amount": {
+          "name": "amount",
+          "type": "numeric(18,4)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 18,
+          "scale": 4,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "currency_key": {
+          "name": "currency_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "expense_group_key": {
+          "name": "expense_group_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "expense_group_settlement_key": {
+          "name": "expense_group_settlement_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "from_member_key": {
+          "name": "from_member_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "varchar(500)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 500,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "recorded_by_appuser_key": {
+          "name": "recorded_by_appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "settled_on": {
+          "name": "settled_on",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "date"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "to_member_key": {
+          "name": "to_member_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "transaction_key": {
+          "name": "transaction_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_settlement_expense_group_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "expense_group_settlement_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "expense_group_settlement_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_settlement_tenant_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_settlement_transaction_key_index",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "expense_group_settlement_amount_positive_check",
+          "expression": "\"amount\" > 0",
+          "definition": "check (\"amount\" > 0)"
+        },
+        {
+          "name": "expense_group_settlement_distinct_members_check",
+          "expression": "\"from_member_key\" <> \"to_member_key\"",
+          "definition": "check (\"from_member_key\" <> \"to_member_key\")"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "expense_group_settlement_currency_key_foreign": {
+          "columnNames": [
+            "currency_key"
+          ],
+          "constraintName": "expense_group_settlement_currency_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "currency_key"
+          ],
+          "referencedTableName": "public.currency"
+        },
+        "expense_group_settlement_expense_group_key_foreign": {
+          "columnNames": [
+            "expense_group_key"
+          ],
+          "constraintName": "expense_group_settlement_expense_group_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "expense_group_key"
+          ],
+          "referencedTableName": "public.expense_group",
+          "deleteRule": "cascade"
+        },
+        "expense_group_settlement_from_member_key_foreign": {
+          "columnNames": [
+            "from_member_key"
+          ],
+          "constraintName": "expense_group_settlement_from_member_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "expense_group_member_key"
+          ],
+          "referencedTableName": "public.expense_group_member"
+        },
+        "expense_group_settlement_recorded_by_appuser_key_foreign": {
+          "columnNames": [
+            "recorded_by_appuser_key"
+          ],
+          "constraintName": "expense_group_settlement_recorded_by_appuser_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "set null"
+        },
+        "expense_group_settlement_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "expense_group_settlement_tenant_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        },
+        "expense_group_settlement_to_member_key_foreign": {
+          "columnNames": [
+            "to_member_key"
+          ],
+          "constraintName": "expense_group_settlement_to_member_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "expense_group_member_key"
+          ],
+          "referencedTableName": "public.expense_group_member"
+        },
+        "expense_group_settlement_transaction_key_foreign": {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "constraintName": "expense_group_settlement_transaction_key_foreign",
+          "localTableName": "public.expense_group_settlement",
+          "referencedColumnNames": [
+            "transaction_key"
+          ],
+          "referencedTableName": "public.transaction",
+          "deleteRule": "set null"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "financial_asset",
       "schema": "public",
       "columns": {
@@ -29969,6 +31061,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "expense_group_member_key": {
+          "name": "expense_group_member_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "notes": {
           "name": "notes",
           "type": "varchar(500)",
@@ -30075,6 +31184,16 @@
       "indexes": [
         {
           "columnNames": [
+            "expense_group_member_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_split_expense_group_member_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transaction_split_key"
           ],
           "composite": false,
@@ -30107,6 +31226,18 @@
             "category_key"
           ],
           "referencedTableName": "public.category",
+          "deleteRule": "set null"
+        },
+        "transaction_split_expense_group_member_key_foreign": {
+          "columnNames": [
+            "expense_group_member_key"
+          ],
+          "constraintName": "transaction_split_expense_group_member_key_foreign",
+          "localTableName": "public.transaction_split",
+          "referencedColumnNames": [
+            "expense_group_member_key"
+          ],
+          "referencedTableName": "public.expense_group_member",
           "deleteRule": "set null"
         },
         "transaction_split_tenant_key_foreign": {
