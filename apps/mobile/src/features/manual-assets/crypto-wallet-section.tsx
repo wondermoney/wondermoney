@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, StyleSheet, Switch, View } from 'react-native'
+import { StyleSheet, Switch, View } from 'react-native'
 
 import { Badge, type BadgeTone } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { formatRelativeTime } from '@/lib/formatters/relative-time'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { archiveOrBringBack, confirmAction } from './asset-archive'
 import { AddressFields } from './crypto-wallet-create-screen'
 import type { CryptoChain, CryptoWalletAddressDto, CryptoWalletAddressWrite, CryptoWalletDto, CryptoWalletTokenDto } from './crypto-wallet-contract'
 import { buildCryptoWalletAddressPayload, formatTokenQuantity, shortAddress, walletSecretIndexes, type CryptoWalletAddressDraft } from './crypto-wallet-forms-model'
@@ -32,20 +33,15 @@ export type CryptoWalletActions = Readonly<{
   onSetLabel: (addressId: number, label: string | null) => Outcome
   onRemoveAddress: (addressId: number) => Outcome
   onSyncNow: () => Outcome
-  /** Rename the wallet, or change its privacy (the owner only). */
+  /** Rename the wallet, edit its notes, or change its privacy (the owner only). */
   onUpdateWallet: (value: CryptoWalletUpdateWrite) => Outcome
+  /** Archive (once confirmed) or Bring back. */
+  onSetArchived: (archived: boolean) => Outcome
   /** Remove the wallet; on success the route leaves the page. */
   onDeleteWallet: () => Outcome
 }>
 
 const STATUS_TONES: Record<CryptoWalletAddressDto['status'], BadgeTone> = { pending: 'muted', ok: 'outline', failed: 'destructive' }
-
-export const confirmRemove = (title: string, message: string, cancel: string, proceed: string) => new Promise<boolean>((resolve) => {
-  Alert.alert(title, message, [
-    { text: cancel, style: 'cancel', onPress: () => resolve(false) },
-    { text: proceed, style: 'destructive', onPress: () => resolve(true) },
-  ], { cancelable: true, onDismiss: () => resolve(false) })
-})
 
 /**
  * A crypto wallet's addresses: per address its chain, kind, label, the start and end of the
@@ -88,7 +84,7 @@ export function CryptoWalletSection({ wallet, actions, readOnly }: { wallet: Cry
             onEditLabel={() => setLabelling(address)}
             onRemove={async () => {
               const label = address.label ?? shortAddress(address.address)
-              const confirmed = await confirmRemove(t('cryptoWallet.detail.removeTitle'), t('cryptoWallet.detail.removeMessage', { address: label }), t('common.cancel'), t('cryptoWallet.detail.remove'))
+              const confirmed = await confirmAction(t('cryptoWallet.detail.removeTitle'), t('cryptoWallet.detail.removeMessage', { address: label }), t('common.cancel'), t('cryptoWallet.detail.remove'), true)
               if (confirmed) await run(() => actions.onRemoveAddress(address.cryptoWalletAddressKey))
             }}
             onToggle={(token, tracked) => void run(() => actions.onToggleToken(token.cryptoWalletTokenKey, tracked))}
@@ -304,24 +300,32 @@ function LabelSheet({ address, pending, onClose, onSave }: { address: CryptoWall
 }
 
 /**
- * Edit wallet (its name, and its privacy for the owner) and Remove wallet, with a confirmation
- * first. Kind, value and valuations are not editable on a wallet: the sync values it.
+ * Web's wallet controls under the details: Edit wallet (its name, its notes, and its privacy for
+ * the owner), Archive or Bring back (archiving asks first, as for any asset), and Remove wallet,
+ * with a confirmation first. Kind, value and valuations are not editable on a wallet: the sync
+ * values it.
  */
-export function CryptoWalletManage({ asset, actions }: { asset: Pick<ManualAssetDto, 'name' | 'isPrivate' | 'isOwner'>; actions: CryptoWalletActions }) {
+export function CryptoWalletManage({ asset, actions }: { asset: Pick<ManualAssetDto, 'name' | 'notes' | 'isPrivate' | 'isOwner' | 'archived'>; actions: CryptoWalletActions }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState<string | null>(null)
+  const [notes, setNotes] = useState<string | null>(null)
   const [isPrivate, setIsPrivate] = useState<boolean | null>(null)
   const [failure, setFailure] = useState<CryptoWalletWriteFailure | null>(null)
+  const [archiving, setArchiving] = useState(false)
   const shownName = name ?? asset.name
+  const shownNotes = notes ?? asset.notes ?? ''
   const shownPrivate = isPrivate ?? asset.isPrivate
+  // As on Edit asset: trimmed, and a cleared note is sent as null.
+  const nextNotes = shownNotes.trim() === '' ? null : shownNotes.trim()
   const change: CryptoWalletUpdateWrite = {
     ...(shownName.trim() !== asset.name ? { name: shownName.trim() } : {}),
+    ...(nextNotes !== (asset.notes?.trim() || null) ? { notes: nextNotes } : {}),
     ...(asset.isOwner && shownPrivate !== asset.isPrivate ? { isPrivate: shownPrivate } : {}),
   }
   const changed = Object.keys(change).length > 0
   const nameValid = shownName.trim().length > 0
-  const close = () => { setEditing(false); setName(null); setIsPrivate(null) }
+  const close = () => { setEditing(false); setName(null); setNotes(null); setIsPrivate(null) }
   const save = async () => {
     if (!changed || !nameValid || actions.pending) return
     setFailure(null)
@@ -329,9 +333,21 @@ export function CryptoWalletManage({ asset, actions }: { asset: Pick<ManualAsset
     if (outcome === null) close()
     else setFailure(outcome)
   }
+  const archive = async () => {
+    if (actions.pending) return
+    setFailure(null)
+    await archiveOrBringBack(asset.archived, t, async (next) => {
+      setArchiving(true)
+      try {
+        setFailure(await actions.onSetArchived(next))
+      } finally {
+        setArchiving(false)
+      }
+    })
+  }
   const remove = async () => {
     setFailure(null)
-    const confirmed = await confirmRemove(t('cryptoWallet.manage.removeTitle'), t('cryptoWallet.manage.removeMessage', { name: asset.name }), t('common.cancel'), t('cryptoWallet.manage.remove'))
+    const confirmed = await confirmAction(t('cryptoWallet.manage.removeTitle'), t('cryptoWallet.manage.removeMessage', { name: asset.name }), t('common.cancel'), t('cryptoWallet.manage.remove'), true)
     if (!confirmed) return
     setFailure(await actions.onDeleteWallet())
   }
@@ -339,9 +355,10 @@ export function CryptoWalletManage({ asset, actions }: { asset: Pick<ManualAsset
     <View style={styles.manage} testID="wallet-manage">
       <View style={styles.actions}>
         <Button disabled={actions.pending} icon="pencil" label={t('cryptoWallet.manage.edit')} onPress={() => setEditing(true)} variant="outline" />
+        <Button disabled={actions.pending} icon="archive" label={asset.archived ? t('manualAssetDetail.manage.unarchive') : t('manualAssetDetail.manage.archive')} loading={archiving} onPress={archive} variant="outline" />
         <Button disabled={actions.pending} icon="trash" label={t('cryptoWallet.manage.remove')} onPress={remove} variant="outline" />
       </View>
-      {failure && !editing ? <Notice message={t(`cryptoWallet.failures.${failure.kind}`)} tone="destructive" /> : null}
+      {failure && !editing ? <Notice message={t(`cryptoWallet.failures.${failure.kind}`)} tone="destructive" testID="wallet-manage-failure" /> : null}
       <Sheet
         closeLabel={t('common.close')}
         footer={<Button disabled={!changed || !nameValid || actions.pending} label={t('cryptoWallet.manage.save')} loading={actions.pending} onPress={save} />}
@@ -352,9 +369,10 @@ export function CryptoWalletManage({ asset, actions }: { asset: Pick<ManualAsset
       >
         <View style={styles.sheet}>
           <FormGroup>
-            <FormTextRow editable={!actions.pending} error={nameValid ? null : t('cryptoWallet.fieldErrors.name')} label={t('cryptoWallet.create.name')} maxLength={255} onChangeText={setName} value={shownName} />
+            <FormTextRow key="name" editable={!actions.pending} error={nameValid ? null : t('cryptoWallet.fieldErrors.name')} label={t('cryptoWallet.create.name')} maxLength={255} onChangeText={setName} value={shownName} />
             {/* Only the owner decides who sees it. */}
-            {asset.isOwner ? <FormSwitchRow disabled={actions.pending} hint={t('manualAssetCreate.privateDescription')} label={t('cryptoWallet.create.private')} onValueChange={setIsPrivate} value={shownPrivate} /> : null}
+            {asset.isOwner ? <FormSwitchRow key="private" disabled={actions.pending} hint={t('manualAssetCreate.privateDescription')} label={t('cryptoWallet.create.private')} onValueChange={setIsPrivate} value={shownPrivate} /> : null}
+            <FormTextRow key="notes" accessibilityLabel={t('manualAssetCreate.notesOptional')} editable={!actions.pending} label={t('manualAssetCreate.notes')} maxLength={10_000} multiline onChangeText={setNotes} placeholder={t('manualAssetCreate.optional')} value={shownNotes} />
           </FormGroup>
           {failure ? <Notice message={t(`cryptoWallet.failures.${failure.kind}`)} tone="destructive" /> : null}
         </View>

@@ -212,6 +212,22 @@ describe('Add asset', () => {
     expect(view.getByRole('button', { name: 'Adicionar bem' })).toBeDisabled()
   })
 
+  it('sends the growth start date with the yearly change, and flags one that is not a day', async () => {
+    const onCreate = jest.fn().mockResolvedValue(undefined)
+    const view = await renderScreen(<AssetCreateScreen currencies={currencies} userCurrency="EUR" loading={false} metadataError={false} pending={false} outcome={null} onBack={jest.fn()} onCreate={onCreate} />)
+    await fireEvent.changeText(view.getByLabelText('Name'), 'Flat')
+    await fireEvent.changeText(view.getByLabelText('Current value'), '300000')
+    await fireEvent.changeText(view.getByLabelText('Yearly change in percent, optional'), '2')
+    expect(view.getByText('The value stays as it is until this date.')).toBeOnTheScreen()
+    await fireEvent.changeText(view.getByLabelText('Changes from'), 'soon')
+    expect(view.getByText('Enter a valid date (YYYY-MM-DD).')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Add asset' })).toBeDisabled()
+    await fireEvent.changeText(view.getByLabelText('Changes from'), '2027-01-01')
+    expect(view.queryByText('Enter a valid date (YYYY-MM-DD).')).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Add asset' }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ growthRule: { annualRatePercent: 2, startDate: '2027-01-01' } })))
+  })
+
   it('shows why a save failed', async () => {
     const view = await renderScreen(<AssetCreateScreen currencies={currencies} userCurrency="EUR" loading={false} metadataError={false} pending={false} outcome="demo" onBack={jest.fn()} onCreate={jest.fn()} />)
     expect(view.getByText('The demo is read-only, so nothing was saved.')).toBeOnTheScreen()

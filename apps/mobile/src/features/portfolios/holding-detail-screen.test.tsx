@@ -14,8 +14,8 @@ const holding = {
   gain: 200, gainPercent: 22.2, id: 8, isInvalid: false, name: 'Apple Inc.', quantity: 10, symbol: 'AAPL', type: 'Stock',
 }
 
-async function renderScreen(state: HoldingDetailViewState, overrides: Partial<React.ComponentProps<typeof HoldingDetailScreen>> = {}) {
-  const i18n = await initMobileI18n('en')
+async function renderScreen(state: HoldingDetailViewState, overrides: Partial<React.ComponentProps<typeof HoldingDetailScreen>> = {}, language = 'en') {
+  const i18n = await initMobileI18n(language)
   const props: React.ComponentProps<typeof HoldingDetailScreen> = { state, onBack: jest.fn(), onRefresh: jest.fn(), onLogout: jest.fn(), ...overrides }
   const view = await render(<I18nextProvider i18n={i18n}><HoldingDetailScreen {...props} /></I18nextProvider>)
   return { view, props }
@@ -70,10 +70,20 @@ describe('HoldingDetailScreen', () => {
     expect(never.view.getByLabelText('Realized gain, €0.00')).toBeOnTheScreen()
   })
 
+  it('names the open position\'s gain as unrealized, beside the realized one, in every language', async () => {
+    const labels = { en: ['Unrealized gain or loss', 'Realized gain'], es: ['Ganancia o pérdida no realizada', 'Ganancia realizada'], 'pt-PT': ['Ganho ou perda não realizado', 'Ganho realizado'] }
+    for (const [language, [unrealized, realized]] of Object.entries(labels)) {
+      const { view } = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain: 35 }, activity: [], refreshing: false }, {}, language)
+      expect(view.getByText(unrealized)).toBeOnTheScreen()
+      expect(view.getByText(realized)).toBeOnTheScreen()
+      view.unmount()
+    }
+  })
+
   it('hides the realized gain when there is no figure for it', async () => {
     for (const realizedGain of [null, undefined]) {
       const { view } = await renderScreen({ status: 'loaded', holding: { ...holding, realizedGain }, activity: [], refreshing: false })
-      expect(view.getByLabelText(/^Gain or loss, /)).toBeOnTheScreen()
+      expect(view.getByLabelText(/^Unrealized gain or loss, /)).toBeOnTheScreen()
       expect(view.queryByLabelText(/^Realized gain/)).not.toBeOnTheScreen()
       view.unmount()
     }

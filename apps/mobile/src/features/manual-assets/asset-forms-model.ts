@@ -21,11 +21,13 @@ export type ManualAssetCreateDraft = Readonly<{
   purchasePrice: string
   purchaseDate: string
   growthRatePercent: string
+  /** The day the yearly change starts from ("" for none); it counts only with a yearly change. */
+  growthStartDate: string
   isPrivate: boolean
   notes: string
 }>
 
-export type ManualAssetCreateField = 'name' | 'kind' | 'currencyId' | 'value' | 'valuationDate' | 'purchasePrice' | 'purchaseDate' | 'growthRatePercent'
+export type ManualAssetCreateField = 'name' | 'kind' | 'currencyId' | 'value' | 'valuationDate' | 'purchasePrice' | 'purchaseDate' | 'growthRatePercent' | 'growthStartDate'
 
 export type FormResult<Payload, Field extends string> =
   | { success: true; payload: Payload }
@@ -46,7 +48,9 @@ const number = (wire: string) => (wire === '' ? undefined : Number(wire))
 
 /**
  * The Add asset payload, or every field that is wrong in one pass. An unreadable amount is an
- * error, never another number; an empty optional field is left out.
+ * error, never another number; an empty optional field is left out. As on Edit asset and the web,
+ * a growth start date counts only with a yearly change, so without one it is neither checked nor
+ * sent.
  */
 export function buildManualAssetCreatePayload(draft: ManualAssetCreateDraft): FormResult<ManualAssetCreateWrite, ManualAssetCreateField> {
   const invalidFields = new Set<ManualAssetCreateField>()
@@ -65,13 +69,17 @@ export function buildManualAssetCreatePayload(draft: ManualAssetCreateDraft): Fo
   if (purchasePrice !== undefined) payload.purchasePrice = purchasePrice
   if (draft.purchaseDate) payload.purchaseDate = draft.purchaseDate
   const rate = number(draft.growthRatePercent)
-  if (rate !== undefined) payload.growthRule = { annualRatePercent: rate }
+  if (rate !== undefined) payload.growthRule = draft.growthStartDate ? { annualRatePercent: rate, startDate: draft.growthStartDate } : { annualRatePercent: rate }
   const notes = draft.notes.trim()
   if (notes) payload.notes = notes
 
   const parsed = manualAssetCreateWriteSchema.safeParse(payload)
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
+      if (issue.path[0] === 'growthRule' && issue.path[1] === 'startDate') {
+        invalidFields.add('growthStartDate')
+        continue
+      }
       const field = typeof issue.path[0] === 'string' ? ZOD_TO_FIELD[issue.path[0]] : undefined
       if (field) invalidFields.add(field)
     }

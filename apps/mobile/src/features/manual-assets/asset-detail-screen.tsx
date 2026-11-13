@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert as NativeAlert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
 import { Amount, MISSING } from '@/components/ui/amount'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { archiveOrBringBack, confirmAction } from './asset-archive'
 import { currencyList, kindGlyph } from './assets-screen'
 import { CryptoWalletManage, CryptoWalletSection, type CryptoWalletActions } from './crypto-wallet-section'
 import type { ManualAssetDto, ManualAssetResponse } from './manual-assets-contract'
@@ -56,7 +57,8 @@ export type AssetDetailViewState =
  * Edit sits beside Update value, as on the web; correcting or removing a valuation stays on the web.
  *
  * A crypto wallet is valued by its daily sync, not by hand: it has no Update value and no list of
- * valuations, and shows its addresses and tokens (`CryptoWalletSection`) instead.
+ * valuations, and shows its addresses and tokens (`CryptoWalletSection`) instead. Its own Edit
+ * wallet, Archive (or Bring back) and Remove wallet sit under the details (`CryptoWalletManage`).
  */
 export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wallet: walletActions, manage }: {
   state: AssetDetailViewState
@@ -195,9 +197,9 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wal
               {!asset.isOwner && asset.ownerFirstName ? <Fact label={t('manualAssetDetail.facts.owner')} value={asset.ownerFirstName} /> : null}
               {asset.notes ? <Fact label={t('manualAssetDetail.facts.notes')} value={asset.notes} /> : null}
             </View>
-            {isWallet && walletActions && !asset.archived ? <CryptoWalletManage actions={walletActions} asset={asset} /> : null}
+            {isWallet && walletActions ? <CryptoWalletManage actions={walletActions} asset={asset} /> : null}
             {!isWallet && manage ? <AssetManage actions={manage} archived={asset.archived} /> : null}
-            <Text style={styles.webNote} tone="muted" variant="meta">{t(isWallet ? 'cryptoWallet.detail.manageOnWeb' : 'manualAssetDetail.valuationsOnWeb')}</Text>
+            {!isWallet ? <Text style={styles.webNote} tone="muted" variant="meta">{t('manualAssetDetail.valuationsOnWeb')}</Text> : null}
           </Section>
         </View>
       </ScrollView>
@@ -251,13 +253,6 @@ function AssetEquity({ asset, locale }: { asset: ManualAssetDto; locale: string 
   )
 }
 
-const confirm = (title: string, message: string, cancel: string, proceed: string, destructive: boolean) => new Promise<boolean>((resolve) => {
-  NativeAlert.alert(title, message, [
-    { text: cancel, style: 'cancel', onPress: () => resolve(false) },
-    { text: proceed, style: destructive ? 'destructive' : 'default', onPress: () => resolve(true) },
-  ], { cancelable: true, onDismiss: () => resolve(false) })
-})
-
 /**
  * Web's Archive / Bring back and Delete asset, under the details. Archiving asks first (it stops
  * counting in net worth from today; the history stays); bringing it back does not. Deleting asks
@@ -278,13 +273,11 @@ function AssetManage({ actions, archived }: { actions: ManualAssetManageActions;
   }
   const archive = async () => {
     if (actions.pending) return
-    if (archived) return run('archive', () => actions.onSetArchived(false))
-    const confirmed = await confirm(t('manualAssetDetail.manage.archiveTitle'), t('manualAssetDetail.manage.archiveMessage'), t('common.cancel'), t('manualAssetDetail.manage.archive'), false)
-    if (confirmed) await run('archive', () => actions.onSetArchived(true))
+    await archiveOrBringBack(archived, t, (next) => run('archive', () => actions.onSetArchived(next)))
   }
   const remove = async () => {
     if (actions.pending) return
-    const confirmed = await confirm(t('manualAssetDetail.manage.deleteTitle'), t('manualAssetDetail.manage.deleteMessage'), t('common.cancel'), t('manualAssetDetail.manage.delete'), true)
+    const confirmed = await confirmAction(t('manualAssetDetail.manage.deleteTitle'), t('manualAssetDetail.manage.deleteMessage'), t('common.cancel'), t('manualAssetDetail.manage.delete'), true)
     if (confirmed) await run('delete', actions.onDelete)
   }
   return (
@@ -308,6 +301,7 @@ const READ_ONLY_WALLET: CryptoWalletActions = {
   onRemoveAddress: noWrite,
   onSyncNow: noWrite,
   onUpdateWallet: noWrite,
+  onSetArchived: noWrite,
   onDeleteWallet: noWrite,
 }
 

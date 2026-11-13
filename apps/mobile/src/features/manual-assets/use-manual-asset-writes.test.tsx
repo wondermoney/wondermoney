@@ -35,6 +35,18 @@ describe('manual asset writes', () => {
     await hook.unmount(); client.clear()
   })
 
+  it('sends a yearly change with its start date when adding an asset', async () => {
+    const { client, wrapper } = setup()
+    mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(undefined); return { asset: assetFixture } })
+    const hook = await renderHook(() => useCreateManualAsset(), { wrapper })
+    const growing = { ...payload, growthRule: { annualRatePercent: 2, startDate: '2027-01-01' } }
+    await act(async () => { await hook.result.current.mutateAsync(growing) })
+    expect(mockWrite.mock.calls[0][1].body).toEqual(growing)
+    await act(async () => { await expect(hook.result.current.mutateAsync({ ...payload, growthRule: { annualRatePercent: 2, startDate: 'soon' } })).rejects.toThrow() })
+    expect(mockWrite).toHaveBeenCalledTimes(1)
+    await hook.unmount(); client.clear()
+  })
+
   it('records a valuation on the asset and refreshes that asset too, never touching transactions', async () => {
     const { client, wrapper } = setup()
     const invalidate = jest.spyOn(client, 'invalidateQueries')

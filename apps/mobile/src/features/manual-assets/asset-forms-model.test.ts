@@ -10,6 +10,7 @@ const draft: ManualAssetCreateDraft = {
   purchasePrice: '',
   purchaseDate: '',
   growthRatePercent: '',
+  growthStartDate: '',
   isPrivate: false,
   notes: '',
 }
@@ -32,6 +33,24 @@ describe('asset forms', () => {
     expect(result.success).toBe(false)
     if (result.success) return
     expect([...result.invalidFields].sort()).toEqual(['currencyId', 'growthRatePercent', 'kind', 'name', 'purchasePrice', 'value'])
+  })
+
+  it('sends a yearly change with its start date, and a start date only with a change', () => {
+    expect(buildManualAssetCreatePayload({ ...draft, growthRatePercent: '3', growthStartDate: '2027-01-01' })).toMatchObject({
+      success: true, payload: { growthRule: { annualRatePercent: 3, startDate: '2027-01-01' } },
+    })
+    // Without a yearly change the date is neither sent nor checked, as on Edit asset and the web.
+    for (const growthStartDate of ['2027-01-01', 'soon']) {
+      const result = buildManualAssetCreatePayload({ ...draft, growthStartDate })
+      expect(result.success).toBe(true)
+      if (result.success) expect(result.payload).not.toHaveProperty('growthRule')
+    }
+  })
+
+  it('flags a growth start date that is not a day', () => {
+    const result = buildManualAssetCreatePayload({ ...draft, growthRatePercent: '3', growthStartDate: '2027-02-30' })
+    expect(result.success).toBe(false)
+    if (!result.success) expect([...result.invalidFields]).toEqual(['growthStartDate'])
   })
 
   it('needs a value to add an asset', () => {

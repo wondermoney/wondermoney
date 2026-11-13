@@ -15,6 +15,7 @@ const mockRecord = jest.fn()
 const mockCreateWallet = jest.fn()
 const mockToggle = jest.fn()
 const mockDeleteWallet = jest.fn()
+const mockUpdateWallet = jest.fn()
 const mockUpdate = jest.fn()
 const mockDelete = jest.fn()
 let mockChains: string[] = []
@@ -29,7 +30,7 @@ jest.mock('./use-crypto-wallet-writes', () => {
     useSetCryptoWalletAddressLabel: idle,
     useRemoveCryptoWalletAddress: idle,
     useSyncCryptoWallet: idle,
-    useUpdateCryptoWallet: idle,
+    useUpdateCryptoWallet: () => ({ mutateAsync: mockUpdateWallet, isPending: false }),
     useDeleteCryptoWallet: () => ({ mutateAsync: mockDeleteWallet, isPending: false }),
   }
 })
@@ -49,10 +50,10 @@ const pressable = (label: string, onPress: () => void) => {
 }
 jest.mock('./assets-screen', () => ({ AssetsScreen: ({ state, onOpenAsset, onCreateAsset, onCreateWallet }: { state: { status: string }; onOpenAsset: (id: number) => void; onCreateAsset: () => void; onCreateWallet?: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{state.status}</Native.Text>{pressable('Asset row', () => onOpenAsset(7))}{pressable('Add', onCreateAsset)}{onCreateWallet ? pressable('Add wallet', onCreateWallet) : null}</> } }))
 type MockManage = { onEdit: () => void; onSetArchived: (archived: boolean) => Promise<string | null>; onDelete: () => Promise<string | null> }
-jest.mock('./asset-detail-screen', () => ({ AssetDetailScreen: ({ state, onBack, onUpdateValue, wallet, manage }: { state: { status: string }; onBack: () => void; onUpdateValue: () => void; wallet?: { onToggleToken: (id: number, tracked: boolean) => Promise<unknown>; onDeleteWallet: () => Promise<unknown> }; manage?: MockManage }) => {
+jest.mock('./asset-detail-screen', () => ({ AssetDetailScreen: ({ state, onBack, onUpdateValue, wallet, manage }: { state: { status: string }; onBack: () => void; onUpdateValue: () => void; wallet?: { onToggleToken: (id: number, tracked: boolean) => Promise<unknown>; onDeleteWallet: () => Promise<unknown>; onSetArchived: (archived: boolean) => Promise<unknown>; onUpdateWallet: (value: unknown) => Promise<unknown> }; manage?: MockManage }) => {
   const Native = jest.requireActual<typeof import('react-native')>('react-native')
   const [result, setResult] = jest.requireActual<typeof import('react')>('react').useState('none')
-  return <><Native.Text>{state.status}</Native.Text><Native.Text>{`result:${result}`}</Native.Text>{pressable('Back', onBack)}{pressable('Update value', onUpdateValue)}{wallet ? pressable('Tick XYZ', () => void wallet.onToggleToken(44, true)) : null}{wallet ? pressable('Remove wallet', () => void wallet.onDeleteWallet()) : null}{manage ? <>{pressable('Edit', manage.onEdit)}{pressable('Archive', () => void manage.onSetArchived(true).then((outcome) => setResult(String(outcome))))}{pressable('Delete', () => void manage.onDelete().then((outcome) => setResult(String(outcome))))}</> : null}</>
+  return <><Native.Text>{state.status}</Native.Text><Native.Text>{`result:${result}`}</Native.Text>{pressable('Back', onBack)}{pressable('Update value', onUpdateValue)}{wallet ? pressable('Tick XYZ', () => void wallet.onToggleToken(44, true)) : null}{wallet ? pressable('Remove wallet', () => void wallet.onDeleteWallet()) : null}{wallet ? pressable('Archive wallet', () => void wallet.onSetArchived(true).then((outcome) => setResult(JSON.stringify(outcome)))) : null}{wallet ? pressable('Bring back wallet', () => void wallet.onSetArchived(false).then((outcome) => setResult(JSON.stringify(outcome)))) : null}{wallet ? pressable('Save wallet notes', () => void wallet.onUpdateWallet({ notes: 'Kept in the safe' }).then((outcome) => setResult(JSON.stringify(outcome)))) : null}{manage ? <>{pressable('Edit', manage.onEdit)}{pressable('Archive', () => void manage.onSetArchived(true).then((outcome) => setResult(String(outcome))))}{pressable('Delete', () => void manage.onDelete().then((outcome) => setResult(String(outcome))))}</> : null}</>
 } }))
 jest.mock('./asset-edit-screen', () => ({ AssetEditScreen: ({ state, outcome, onSave, onBack }: { state: { status: string; asset?: { name: string } }; outcome: string | null; onSave: (value: unknown) => Promise<void>; onBack: () => void }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <><Native.Text>{`${state.status}:${state.asset?.name ?? ''}`}</Native.Text><Native.Text>{`outcome:${outcome}`}</Native.Text>{pressable('Save', () => void onSave({ name: 'Beach house' }))}{pressable('Close', onBack)}</> } }))
 jest.mock('./crypto-wallet-create-screen', () => ({ CryptoWalletCreateScreen: ({ chains, onCreate }: { chains: string[]; onCreate: (value: unknown) => Promise<unknown> }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); const [result, setResult] = jest.requireActual<typeof import('react')>('react').useState('none'); return <><Native.Text>{`chains:${chains.join(',')}`}</Native.Text><Native.Text>{`result:${result}`}</Native.Text>{pressable('Create wallet', () => void onCreate({ name: 'Cold storage' }).then((outcome) => setResult(JSON.stringify(outcome))))}</> } }))
@@ -62,7 +63,7 @@ jest.mock('./valuation-screen', () => ({ ValuationScreen: ({ assetName, outcome,
 const loaded = (data: unknown) => ({ isInvalidId: false, isAccessTransition: false, isLoading: false, isNotFound: false, data, isRefreshFailure: false, isRefreshing: false, refetch: jest.fn() })
 
 describe('asset routes', () => {
-  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseAssets.mockReset(); mockUseAsset.mockReset(); mockCreate.mockReset(); mockRecord.mockReset(); mockCreateWallet.mockReset(); mockToggle.mockReset(); mockDeleteWallet.mockReset(); mockUpdate.mockReset(); mockDelete.mockReset(); mockChains = []; mockParams = {} })
+  beforeEach(() => { mockPush.mockReset(); mockReplace.mockReset(); mockUseAssets.mockReset(); mockUseAsset.mockReset(); mockCreate.mockReset(); mockRecord.mockReset(); mockCreateWallet.mockReset(); mockToggle.mockReset(); mockDeleteWallet.mockReset(); mockUpdateWallet.mockReset(); mockUpdate.mockReset(); mockDelete.mockReset(); mockChains = []; mockParams = {} })
 
   it('opens an asset and the add form from the list', async () => {
     mockUseAssets.mockReturnValue(loaded(assetsFixture()))
@@ -162,6 +163,23 @@ describe('asset routes', () => {
     expect(mockReplace).not.toHaveBeenCalled()
     await fireEvent.press(view.getByRole('button', { name: 'Remove wallet' }))
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/assets'))
+  })
+
+  it("archives, brings back and edits a wallet's notes through the asset PATCH, and answers the demo with its own reason", async () => {
+    mockParams = { assetId: '21' }
+    mockUseAsset.mockReturnValue(loaded(walletDetailFixture()))
+    mockUpdateWallet.mockResolvedValueOnce({ asset: walletAssetFixture }).mockRejectedValueOnce(new ApiError('demo-forbidden')).mockResolvedValue({ asset: walletAssetFixture })
+    const view = await render(<AssetDetailRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Archive wallet' }))
+    await waitFor(() => expect(mockUpdateWallet).toHaveBeenCalledWith({ assetId: 21, value: { archived: true } }))
+    await waitFor(() => expect(view.getByText('result:null')).toBeOnTheScreen())
+    await fireEvent.press(view.getByRole('button', { name: 'Archive wallet' }))
+    await waitFor(() => expect(view.getByText('result:{"kind":"demo","addressIndex":null}')).toBeOnTheScreen())
+    await fireEvent.press(view.getByRole('button', { name: 'Bring back wallet' }))
+    await waitFor(() => expect(mockUpdateWallet).toHaveBeenLastCalledWith({ assetId: 21, value: { archived: false } }))
+    await fireEvent.press(view.getByRole('button', { name: 'Save wallet notes' }))
+    await waitFor(() => expect(mockUpdateWallet).toHaveBeenLastCalledWith({ assetId: 21, value: { notes: 'Kept in the safe' } }))
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('opens Edit asset from the asset page', async () => {

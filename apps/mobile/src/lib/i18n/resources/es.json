@@ -2154,7 +2154,8 @@
     "fieldErrors": {
       "value": "Introduce cero o más",
       "amount": "Introduce cero o más",
-      "growthRate": "Introduce un porcentaje mayor que -100 y hasta 1000"
+      "growthRate": "Introduce un porcentaje mayor que -100 y hasta 1000",
+      "date": "Introduce una fecha válida (AAAA-MM-DD)."
     }
   },
   "manualAssetEdit": {
@@ -2272,8 +2273,7 @@
       "saveLabel": "Guardar etiqueta",
       "noPrice": "Sin precio",
       "countToken": "Contar {{symbol}}",
-      "notValuedYet": "Aún sin valorar: el valor aparece tras la primera sincronización.",
-      "manageOnWeb": "Archiva este monedero o edita sus notas en WonderMoney en la web."
+      "notValuedYet": "Aún sin valorar: el valor aparece tras la primera sincronización."
     },
     "manage": {
       "edit": "Editar monedero",
@@ -4293,7 +4293,7 @@
     "loading": "Cargando detalles del activo",
     "unavailable": "No disponible",
     "currentValue": "Valor actual",
-    "gainLoss": "Ganancia o pérdida",
+    "gainLoss": "Ganancia o pérdida no realizada",
     "realizedGain": "Ganancia realizada",
     "portfolioWeight": "Peso en la cartera",
     "quantity": "Cantidad",

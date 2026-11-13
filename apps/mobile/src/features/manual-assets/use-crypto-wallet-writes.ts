@@ -24,7 +24,7 @@ import {
   cryptoWalletUpdateWriteSchema,
   type CryptoWalletUpdateWrite,
 } from './manual-assets-contract'
-import { classifyManualAssetWriteFailure, refreshAfterWrite, type ManualAssetWriteFailure } from './use-manual-asset-writes'
+import { classifyManualAssetWriteFailure, isLoanQueryOfEpoch, refreshAfterWrite, type ManualAssetWriteFailure } from './use-manual-asset-writes'
 
 export type CryptoWalletWriteFailureKind =
   | ManualAssetWriteFailure
@@ -165,7 +165,11 @@ export function useSyncCryptoWallet() {
   })
 }
 
-/** Rename the wallet, or (the owner only) make it private or shared. */
+/**
+ * Edit wallet (its name, its notes, and for the owner its privacy), and Archive or Bring back
+ * (`{ archived }`), all through the asset PATCH. The wallet, the list, net worth and the loans
+ * refresh once it commits: a loan secured against the wallet shows its name and value.
+ */
 export function useUpdateCryptoWallet() {
   const { runtime, queryClient, onError } = useWalletRuntime('useUpdateCryptoWallet')
   return useMutation({
@@ -173,15 +177,21 @@ export function useUpdateCryptoWallet() {
     networkMode: 'always',
     mutationFn: ({ assetId, value }: { assetId: number; value: CryptoWalletUpdateWrite }) => {
       const body = cryptoWalletUpdateWriteSchema.parse(value)
-      return runtime.apiClient.write(createManualAssetUpdateEndpoint(assetId), { body, commit: () => refreshAfterWrite(queryClient, runtime.epochId, assetId) })
+      return runtime.apiClient.write(createManualAssetUpdateEndpoint(assetId), {
+        body,
+        commit: () => {
+          refreshAfterWrite(queryClient, runtime.epochId, assetId)
+          void queryClient.invalidateQueries({ predicate: isLoanQueryOfEpoch(runtime.epochId) })
+        },
+      })
     },
     onError,
   })
 }
 
 /**
- * Remove the wallet. The list and net worth refresh; the wallet's own page is not refetched, since
- * it would only answer 404 now (as on the web).
+ * Remove the wallet. The list, net worth and the loans (which lose any link to it) refresh; the
+ * wallet's own page is not refetched, since it would only answer 404 now (as on the web).
  */
 export function useDeleteCryptoWallet() {
   const { runtime, queryClient, onError } = useWalletRuntime('useDeleteCryptoWallet')
@@ -189,7 +199,12 @@ export function useDeleteCryptoWallet() {
     retry: false,
     networkMode: 'always',
     mutationFn: ({ assetId }: { assetId: number }) => (
-      runtime.apiClient.write(createManualAssetDeleteEndpoint(assetId), { commit: () => refreshAfterWrite(queryClient, runtime.epochId) })
+      runtime.apiClient.write(createManualAssetDeleteEndpoint(assetId), {
+        commit: () => {
+          refreshAfterWrite(queryClient, runtime.epochId)
+          void queryClient.invalidateQueries({ predicate: isLoanQueryOfEpoch(runtime.epochId) })
+        },
+      })
     ),
     onError,
   })

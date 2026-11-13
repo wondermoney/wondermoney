@@ -83,7 +83,7 @@ export function useRecordValuation() {
  * against, by name and value, so renaming, archiving or deleting the asset changes the loans too;
  * a delete also clears their link to it.
  */
-const isLoanQueryOfEpoch = (epochId: number) => (query: { queryKey: readonly unknown[] }) =>
+export const isLoanQueryOfEpoch = (epochId: number) => (query: { queryKey: readonly unknown[] }) =>
   query.queryKey[0] === 'loans' && query.queryKey[2] === epochId
 
 /**
