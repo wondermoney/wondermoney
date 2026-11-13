@@ -45,8 +45,8 @@ export default function RetentionRenewBankConnection({
       ctaUrl={ctaUrl}
       unsubscribeUrl={unsubscribeUrl}
     >
-      <p className="m-0">A renovação volta a confirmar que autorizas a consulta dos dados selecionados. Não permite à WonderMoney movimentar dinheiro ou iniciar pagamentos.</p>
-      <p className="m-0 mt-[10px]">Os dados que já tens na WonderMoney não desaparecem por a autorização terminar. Sem renovação, deixam apenas de receber novas atualizações dessa ligação.</p>
+      <p className="m-0">A renovação volta a confirmar que autorizas a consulta dos dados selecionados. Não permite ao WonderMoney movimentar dinheiro ou iniciar pagamentos.</p>
+      <p className="m-0 mt-[10px]">Os dados que já tens no WonderMoney não desaparecem por a autorização terminar. Sem renovação, deixam apenas de receber novas atualizações dessa ligação.</p>
     </LifecycleEmailLayout>
   );
 }

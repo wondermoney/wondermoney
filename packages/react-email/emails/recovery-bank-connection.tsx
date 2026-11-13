@@ -44,7 +44,7 @@ export default function RecoveryBankConnection({
       unsubscribeUrl={unsubscribeUrl}
     >
       <p className="m-0">Isto pode acontecer se a janela do banco for fechada, a autorização expirar ou o processo não chegar ao fim.</p>
-      <p className="m-0 mt-[10px]">Ao tentares novamente, a ligação continua a ser apenas de leitura. A WonderMoney não movimenta dinheiro nem conclui ações no teu banco.</p>
+      <p className="m-0 mt-[10px]">Ao tentares novamente, a ligação continua a ser apenas de leitura. O WonderMoney não movimenta dinheiro nem conclui ações no teu banco.</p>
     </LifecycleEmailLayout>
   );
 }

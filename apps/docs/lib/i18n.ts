@@ -49,7 +49,7 @@ const translations = i18n
       sidebarOpen: 'Abrir menu',
       sidebarCollapse: 'Recolher menu',
       notFoundTitle: 'Página não encontrada',
-      notFoundDescription: 'A página que procura não existe.',
+      notFoundDescription: 'A página que procuras não existe.',
       notFoundLink: 'Voltar à documentação',
     },
     es: {

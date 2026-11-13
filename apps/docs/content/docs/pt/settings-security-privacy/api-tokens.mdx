@@ -3,7 +3,7 @@ title: Tokens de API
 description: Dá a um script, folha de cálculo ou dashboard acesso de leitura ou escrita às tuas finanças sem partilhares a palavra-passe.
 ---
 
-Um token de API permite que um script, folha de cálculo, dashboard em casa ou ferramenta de IA use a API da WonderMoney como tu. É uma alternativa ao início de sessão com palavra-passe: a ferramenta envia o token num cabeçalho `Authorization: Bearer`.
+Um token de API permite que um script, folha de cálculo, dashboard em casa ou ferramenta de IA use a API do WonderMoney como tu. É uma alternativa ao início de sessão com palavra-passe: a ferramenta envia o token num cabeçalho `Authorization: Bearer`.
 
 Um token não é uma conta separada. Vê os mesmos dados do agregado que a tua sessão — incluindo as tuas contas privadas, e apenas as que podes ver — e fica ligado ao agregado em que foi criado.
 
@@ -14,7 +14,7 @@ Um token não é uma conta separada. Vê os mesmos dados do agregado que a tua s
 3. Escolhe as permissões e quanto tempo deve durar.
 4. Seleciona **Criar token** e copia o valor imediatamente.
 
-O token é mostrado uma única vez. A WonderMoney guarda apenas um hash SHA-256, por isso ninguém — incluindo o suporte — o pode mostrar novamente. Se o perderes, revoga-o e cria outro.
+O token é mostrado uma única vez. O WonderMoney guarda apenas um hash SHA-256, por isso ninguém — incluindo o suporte — o pode mostrar novamente. Se o perderes, revoga-o e cria outro.
 
 Criar um token exige um início de sessão recente. Se usares autenticação de dois fatores, introduz também o código do autenticador.
 
@@ -27,7 +27,7 @@ Nenhuma permissão permite apagar, importar, recalcular, gerir o agregado ou a l
 
 ## Expiração
 
-Todos os tokens expiram. Escolhe 30, 90 ou 365 dias. Se o email estiver configurado no servidor, a WonderMoney envia um lembrete sete dias antes de o token expirar. Um token expirado é rejeitado com `401 Unauthorized`.
+Todos os tokens expiram. Escolhe 30, 90 ou 365 dias. Se o email estiver configurado no servidor, o WonderMoney envia um lembrete sete dias antes de o token expirar. Um token expirado é rejeitado com `401 Unauthorized`.
 
 ## Revogar um token
 
