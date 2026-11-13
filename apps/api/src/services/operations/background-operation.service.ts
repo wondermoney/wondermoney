@@ -279,7 +279,7 @@ class BackgroundOperationService {
     );
   }
 
-  async retryAdminOperation(correlationId: string, _reason?: string, deps: { createRuntime?: () => OwnedProducerRuntime } = {}) {
+  async retryAdminOperation(correlationId: string, reason?: string, deps: { createRuntime?: () => OwnedProducerRuntime } = {}) {
     const operation = await this.getAdminOperation(correlationId);
     if (!operation.retryable) throw new ConflictError('Operation is not retryable');
     if (![BackgroundOperationStatus.FAILED, BackgroundOperationStatus.NEEDS_ACTION, BackgroundOperationStatus.PARTIAL, BackgroundOperationStatus.STALE].includes(operation.status)) throw new ConflictError('Operation cannot be retried');
@@ -314,6 +314,7 @@ class BackgroundOperationService {
           throw new ConflictError('Operation cannot be retried');
         }
 
+        logger.info({ correlationId, operationType: operation.operationType, queueJobId: jobId, reason: reason ?? null }, 'Admin retried background operation');
         const queued = await this.getAdminOperation(correlationId);
         return { jobId, operation: queued };
       } catch (error) {
