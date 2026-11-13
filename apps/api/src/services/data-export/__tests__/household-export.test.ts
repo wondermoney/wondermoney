@@ -38,6 +38,7 @@ import { Watchlist } from '@entity/Watchlist';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
 import { ManualAssetKind } from '@service/manual-asset/manual-asset-types';
 
+import { EXPORT_FORMAT_VERSION } from '../export-format';
 import { type ExportScope, writeHouseholdExport } from '../household-export';
 
 /*
@@ -318,7 +319,7 @@ describe('household export', () => {
 
       const archive = await exportFor(scopeOf(owner));
 
-      expect(archive.manifest.formatVersion).toBe('1.5');
+      expect(archive.manifest.formatVersion).toBe(EXPORT_FORMAT_VERSION);
       const paths = Object.keys(archive.entries).filter((path) => path !== 'manifest.json').sort();
       expect(archive.manifest.files.map((file) => file.path).sort()).toEqual(paths);
       for (const file of archive.manifest.files) {

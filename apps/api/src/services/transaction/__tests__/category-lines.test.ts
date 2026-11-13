@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { big } from '@utils/money';
 
-import { allocateProRata } from '../category-lines';
+import { allocateProRata, netOfReimbursements } from '../category-lines';
 
 const sum = (parts: number[]) => parts.reduce((total, part) => total.plus(big(part)), big(0));
 
@@ -52,5 +52,36 @@ describe('allocateProRata', () => {
         expect(sum(parts).eq(big(total))).toBe(true);
       }
     }
+  });
+});
+
+/*
+ * A transaction's amount net of the refunds linked to it: in its settlement currency exactly the
+ * amount less what is linked, in another currency the same share of its converted amount, and
+ * never past zero (an amount edited below what was linked).
+ */
+describe('netOfReimbursements', () => {
+  const row = (settlementAmount: number, reimbursedAmount: number, editedSettlementAmount?: number) => ({ editedSettlementAmount, reimbursedAmount, settlementAmount });
+
+  it('takes the linked amount off an expense and off a refund', () => {
+    expect(netOfReimbursements(row(-50, 20), -50)).toBe(-30);
+    expect(netOfReimbursements(row(20, 20), 20)).toBe(0);
+    expect(netOfReimbursements(row(-33.33, 10), -33.33)).toBe(-23.33);
+  });
+
+  it('takes the same share off the amount in another currency', () => {
+    // 50 USD stored as 45.6789 EUR, 20 USD reimbursed.
+    expect(netOfReimbursements(row(-50, 20), -45.6789)).toBe(-27.4073);
+  });
+
+  it('reads the user\'s amount edit, and stops at zero', () => {
+    expect(netOfReimbursements(row(-50, 20, -40), -40)).toBe(-20);
+    expect(netOfReimbursements(row(-50, 20, -10), -10)).toBe(0);
+  });
+
+  it('leaves an amount nothing reimburses, or none, alone', () => {
+    expect(netOfReimbursements(row(-50, 0), -50)).toBe(-50);
+    expect(netOfReimbursements(row(-50, 20), null)).toBeNull();
+    expect(netOfReimbursements({ editedSettlementAmount: undefined, reimbursedAmount: undefined, settlementAmount: -50 }, -50)).toBe(-50);
   });
 });

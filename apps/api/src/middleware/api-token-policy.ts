@@ -93,6 +93,8 @@ export const API_TOKEN_WRITE_ROUTES: readonly WriteRoute[] = [
   { method: 'PATCH', mount: '/v1/account', path: '/transaction/:transactionId' },
   { method: 'PUT', mount: '/v1/account', path: '/transaction/:transactionId/tags' },
   { method: 'PUT', mount: '/v1/account', path: '/transaction/:transactionId/splits' },
+  // Linking a refund to an expense edits two transactions' totals, nothing else; unlinking is a delete.
+  { method: 'POST', mount: '/v1/account', path: '/transaction/:transactionId/reimbursements' },
   { method: 'PATCH', mount: '/v1/account', path: '/:accountId' },
   { method: 'POST', mount: '/v1/account', path: '/:accountId/transaction' },
 

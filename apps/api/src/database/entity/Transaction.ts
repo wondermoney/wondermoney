@@ -1,6 +1,8 @@
 import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
-import { Check, Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Check, Entity, Enum, Filter, Formula, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+
+import { reimbursedAmountOfSql } from '@service/transaction/reimbursement-sql.js';
 
 import { HIDDEN_FILTER, hiddenTransactionCond, TENANT_FILTER, transactionTenantCond } from '../filters/tenant-filter';
 
@@ -245,6 +247,15 @@ export class Transaction extends Base {
    */
   @OneToMany({ cascade: [], entity: () => TransactionSplit, mappedBy: 'transactionKey', orderBy: { position: 'ASC' } })
   splits = new Collection<TransactionSplit>(this);
+
+  /**
+   * What the reimbursement links on this transaction take off it, positive, in its settlement
+   * currency (`TransactionReimbursement`; only the links that count, `reimbursement-sql.ts`).
+   * Lazy: loaded only when populated (`CATEGORY_LINE_POPULATE` in `category-lines.ts`), and read
+   * only there.
+   */
+  @Formula((columns) => reimbursedAmountOfSql(columns.transactionKey), { lazy: true, type: 'float' })
+  reimbursedAmount?: number;
 
   /** How confident the categorizer was (or 'high'/user_edit when the user set it). Null = never evaluated. */
   @Enum({ items: () => CategorizationConfidence, nullable: true })

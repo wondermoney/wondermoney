@@ -12,6 +12,7 @@ import * as z from "zod";
 import { SaveTransactionAsTemplateDialog } from "@/components/account/SaveTransactionAsTemplateDialog";
 import TransactionActivity from "@/components/account/TransactionActivity";
 import { TransactionAttachments } from "@/components/account/TransactionAttachments";
+import { TransactionReimbursementField } from "@/components/account/TransactionReimbursementField";
 import {
   splitSaveErrorKey,
   TransactionSplitField,
@@ -367,6 +368,11 @@ export function AccountTransactionEditSheet({
               amountChanged={amountFieldChanged}
               disabled={isSubmitting}
               onRemoved={() => onOpenChange(false)}
+            />
+            {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
+            <TransactionReimbursementField
+              transaction={transaction}
+              disabled={isSubmitting}
             />
             {/* The transaction's tags, with "create tag" inline. */}
             <div className="space-y-2">

@@ -62,8 +62,9 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * `data/budgets.json`: the day of the month the budget's months start on, 1 to 28.
  * 1.5 added `website` and `logoUrl` to `data/merchants.json`: the https addresses the household set for the
  * merchant, or null.
+ * 1.6 added `data/transaction-reimbursements.json`: refunds linked to the expenses they offset.
  */
-export const EXPORT_FORMAT_VERSION = '1.5';
+export const EXPORT_FORMAT_VERSION = '1.6';
 
 export interface ExportManifest {
   appVersion: string;

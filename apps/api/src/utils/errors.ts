@@ -153,6 +153,19 @@ export const ERROR_CODE = {
   SPLIT_INVALID: 'split_invalid',
   /** Splitting a transaction linked as a loan repayment, which already splits principal from interest (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
+  /**
+   * Linking a reimbursement: the refund is not money in, the expense is not money out, they are
+   * the same transaction, or either is a transfer or a loan repayment (400).
+   */
+  REIMBURSEMENT_INVALID: 'reimbursement_invalid',
+  /** Linking a reimbursement to an expense settled in another currency; v1 links one currency only (400). */
+  REIMBURSEMENT_CURRENCY_MISMATCH: 'reimbursement_currency_mismatch',
+  /** Linking more than what is left to link on the expense or on the reimbursement (400). */
+  REIMBURSEMENT_AMOUNT_EXCEEDED: 'reimbursement_amount_exceeded',
+  /** Linking a private-account transaction to one the other member can see, or to another member's private one (400). */
+  REIMBURSEMENT_VISIBILITY_MISMATCH: 'reimbursement_visibility_mismatch',
+  /** The reimbursement and the expense are already linked; unlink first to change the amount (409). */
+  REIMBURSEMENT_LINK_EXISTS: 'reimbursement_link_exists',
   /** A loan schedule needs a principal, an interest rate and a term (422). */
   LOAN_SCHEDULE_UNAVAILABLE: 'loan_schedule_unavailable',
   /** A loan payoff projection needs a principal, an interest rate and a term (422). */

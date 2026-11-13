@@ -857,6 +857,61 @@
         "remove": "No se pudo quitar la división."
       }
     },
+    "reimbursement": {
+      "action": "Marcar como reembolso",
+      "title": "Marcar como reembolso",
+      "close": "Cerrar",
+      "save": "Vincular al gasto",
+      "amountIn": "Reembolso",
+      "left": "Pendiente de vincular",
+      "currencyHint": "Por ahora solo se pueden vincular gastos en {{currency}}.",
+      "reimbursedBy": "Reembolsado por",
+      "reimburses": "Reembolsa",
+      "searchLabel": "Buscar gastos",
+      "searchPlaceholder": "Comercio o descripción",
+      "suggested": "Gastos sugeridos",
+      "results": "Gastos que coinciden",
+      "loading": "Cargando gastos",
+      "loadError": "No se pudieron cargar los gastos.",
+      "empty": "No hay gastos que sugerir. Busca por comercio o descripción.",
+      "emptySearch": "Ningún gasto coincide con «{{search}}».",
+      "sameMerchant": "Mismo comercio",
+      "notYetReimbursed": "{{amount}} aún sin reembolsar",
+      "chooseFirst": "Elige el gasto que esto reembolsa.",
+      "fullyLinked": "Este reembolso ya está vinculado por completo. Desvincula un gasto para vincular otro.",
+      "amount": "Importe",
+      "amountLabel": "Importe a vincular",
+      "amountHint": "Hasta {{amount}}: lo que queda de este reembolso y del gasto.",
+      "amountErrors": {
+        "invalid": "Introduce un importe.",
+        "too-precise": "Usa como máximo 4 decimales.",
+        "zero": "El importe no puede ser cero.",
+        "over": "Se pueden vincular como máximo {{amount}}."
+      },
+      "unlink": "Desvincular",
+      "unlinkNamed": "Desvincular {{name}}",
+      "unlinkTitle": "¿Desvincular este reembolso?",
+      "unlinkDescription": "Los {{amount}} vinculados con {{name}} vuelven a contar como gasto e ingreso.",
+      "open": "Abrir {{name}}",
+      "badges": {
+        "reimbursed": "Reembolsado",
+        "partly-reimbursed": "Reembolsado en parte",
+        "reimbursement": "Reembolso"
+      },
+      "errors": {
+        "currency-mismatch": "Por ahora solo se pueden vincular transacciones en la misma divisa.",
+        "amount-exceeded": "Es más de lo que queda del gasto o de este reembolso.",
+        "visibility-mismatch": "Las dos transacciones deben estar en cuentas compartidas, o en cuentas privadas de la misma persona.",
+        "invalid": "Solo un ingreso puede reembolsar un gasto, y ninguno puede ser una transferencia ni el pago de un préstamo.",
+        "exists": "Estas dos ya están vinculadas. Desvincúlalas primero para cambiar el importe.",
+        "not-found": "Esa transacción o vínculo ya no está disponible. Actualiza e inténtalo de nuevo.",
+        "demo": "Los perfiles de demostración son de solo lectura. No se ha cambiado nada.",
+        "mfa": "Se requiere autenticación multifactor. No se ha cambiado nada.",
+        "cancelled": "El cambio se canceló porque tu sesión cambió. No se ha cambiado nada.",
+        "network": "La solicitud tuvo un resultado de red incierto. Revisa la transacción antes de volver a intentarlo.",
+        "error": "No se pudo guardar el cambio. Inténtalo de nuevo."
+      }
+    },
     "transfer": {
       "mark": "Marcar como transferencia",
       "unmark": "No es una transferencia",

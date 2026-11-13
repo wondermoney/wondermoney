@@ -289,6 +289,7 @@ class HouseholdRestore {
     await this.transactionRows();
     await this.transactionCategories();
     await this.transactionSplits();
+    await this.transactionReimbursements();
     await this.transactionTags();
     await this.ruleRows();
     await this.recurring();
@@ -803,6 +804,20 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'transaction_split', values);
     this.count('transaction-splits', values.length);
+  }
+
+  /** Reimbursement links, made by the restoring member. The export kept only live links whose sides it holds. */
+  private async transactionReimbursements(): Promise<void> {
+    const values = this.rows['transaction-reimbursements'].map((row) => ({
+      amount: row.amount,
+      expense_transaction_key: this.transactions.get(row.expenseTransactionId),
+      linked_by_appuser_key: this.target.appuserKey,
+      reimbursement_transaction_key: this.transactions.get(row.reimbursementTransactionId),
+      tenant_key: this.target.tenantKey,
+      ...this.stamp(row.createdAt),
+    }));
+    await insertRows(this.db, 'transaction_reimbursement', values);
+    this.count('transaction-reimbursements', values.length);
   }
 
   private async transactionTags(): Promise<void> {

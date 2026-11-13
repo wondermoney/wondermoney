@@ -51,6 +51,19 @@ export const API_ERROR_CODE = {
    * it for that reason; normalising it needs a coordinated release.
    */
   RATE_LIMITED: "RATE_LIMITED",
+  /** Linking a reimbursement whose two transactions are already linked (409); unlink first. */
+  REIMBURSEMENT_LINK_EXISTS: "reimbursement_link_exists",
+  /** A reimbursement link larger than what is left on the expense or on the reimbursement (400). */
+  REIMBURSEMENT_AMOUNT_EXCEEDED: "reimbursement_amount_exceeded",
+  /** The reimbursement and the expense are in different currencies; v1 links one currency only (400). */
+  REIMBURSEMENT_CURRENCY_MISMATCH: "reimbursement_currency_mismatch",
+  /**
+   * Not money in against money out: the same transaction, a transfer or a loan repayment on
+   * either side (400).
+   */
+  REIMBURSEMENT_INVALID: "reimbursement_invalid",
+  /** One side is on a private account and the other is not, or they have different owners (400). */
+  REIMBURSEMENT_VISIBILITY_MISMATCH: "reimbursement_visibility_mismatch",
   RULE_ORDER_STALE: "rule_order_stale",
   /** The household already has rules being applied to its transactions (409). */
   RULE_APPLY_IN_PROGRESS: "rule_apply_in_progress",

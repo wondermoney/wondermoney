@@ -857,6 +857,61 @@
         "remove": "Não foi possível remover a divisão."
       }
     },
+    "reimbursement": {
+      "action": "Marcar como reembolso",
+      "title": "Marcar como reembolso",
+      "close": "Fechar",
+      "save": "Associar à despesa",
+      "amountIn": "Reembolso",
+      "left": "Por associar",
+      "currencyHint": "Por agora só é possível associar despesas em {{currency}}.",
+      "reimbursedBy": "Reembolsada por",
+      "reimburses": "Reembolsa",
+      "searchLabel": "Pesquisar despesas",
+      "searchPlaceholder": "Comerciante ou descrição",
+      "suggested": "Despesas sugeridas",
+      "results": "Despesas correspondentes",
+      "loading": "A carregar despesas",
+      "loadError": "Não foi possível carregar as despesas.",
+      "empty": "Não há despesas a sugerir. Pesquise por comerciante ou descrição.",
+      "emptySearch": "Nenhuma despesa corresponde a «{{search}}».",
+      "sameMerchant": "Mesmo comerciante",
+      "notYetReimbursed": "{{amount}} ainda por reembolsar",
+      "chooseFirst": "Escolha a despesa que isto reembolsa.",
+      "fullyLinked": "Este reembolso já está totalmente associado. Desassocie uma despesa para associar outra.",
+      "amount": "Montante",
+      "amountLabel": "Montante a associar",
+      "amountHint": "Até {{amount}}: o que resta deste reembolso e da despesa.",
+      "amountErrors": {
+        "invalid": "Introduza um montante.",
+        "too-precise": "Use no máximo 4 casas decimais.",
+        "zero": "O montante não pode ser zero.",
+        "over": "Só é possível associar até {{amount}}."
+      },
+      "unlink": "Desassociar",
+      "unlinkNamed": "Desassociar {{name}}",
+      "unlinkTitle": "Desassociar este reembolso?",
+      "unlinkDescription": "Os {{amount}} associados a {{name}} voltam a contar como despesa e rendimento.",
+      "open": "Abrir {{name}}",
+      "badges": {
+        "reimbursed": "Reembolsada",
+        "partly-reimbursed": "Reembolsada em parte",
+        "reimbursement": "Reembolso"
+      },
+      "errors": {
+        "currency-mismatch": "Por agora só é possível associar transações na mesma moeda.",
+        "amount-exceeded": "É mais do que resta da despesa ou deste reembolso.",
+        "visibility-mismatch": "As duas transações têm de estar em contas partilhadas, ou em contas privadas da mesma pessoa.",
+        "invalid": "Só um rendimento pode reembolsar uma despesa, e nenhum pode ser uma transferência ou o pagamento de um empréstimo.",
+        "exists": "Estas duas já estão associadas. Desassocie-as primeiro para alterar o montante.",
+        "not-found": "Essa transação ou associação já não está disponível. Atualize e tente novamente.",
+        "demo": "Os perfis de demonstração são só de leitura. Nada foi alterado.",
+        "mfa": "É necessária autenticação multifator. Nada foi alterado.",
+        "cancelled": "A alteração foi cancelada porque a sua sessão mudou. Nada foi alterado.",
+        "network": "O pedido teve um resultado de rede incerto. Verifique a transação antes de tentar novamente.",
+        "error": "Não foi possível guardar a alteração. Tente novamente."
+      }
+    },
     "transfer": {
       "mark": "Marcar como transferência",
       "unmark": "Não é uma transferência",

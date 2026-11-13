@@ -44,6 +44,7 @@ import { Tenant } from '@entity/Tenant';
 import { TenantCategorySetting } from '@entity/TenantCategorySetting';
 import { TenantStatus } from '@entity/TenantStatus';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { TransactionReimbursement } from '@entity/TransactionReimbursement';
 import { TransactionSplit } from '@entity/TransactionSplit';
 import { TransactionTag } from '@entity/TransactionTag';
 import { TransactionType } from '@entity/TransactionType';
@@ -115,6 +116,8 @@ export async function richHousehold(em: EntityManager) {
   em.create(TransactionSplit, { amount: -40, categoryKey: organic, notes: 'food', position: 0, tenantKey: owner.tenant, transactionKey: groceryRun }, { partial: true });
   em.create(TransactionSplit, { amount: -2.5, notes: 'bag', position: 1, tenantKey: owner.tenant, transactionKey: groceryRun }, { partial: true });
   em.create(TransactionTag, { tagKey: tag, tenantKey: owner.tenant, transactionKey: groceryRun }, { partial: true });
+  // Part of the salary reimburses the pending purchase (a refund linked to the expense it offsets).
+  em.create(TransactionReimbursement, { amount: 7.5, expenseTransactionKey: globalRun, linkedByAppuserKey: owner.appuser, reimbursementTransactionKey: salary, tenantKey: owner.tenant }, { partial: true });
 
   // A transfer between two accounts, each side pointing at the other.
   const transferType = (await em.findOne(TransactionType, { name: 'TRANSFER_OUT' })) ?? em.create(TransactionType, { displayName: 'Transfer out', name: 'TRANSFER_OUT' }, { partial: true });
@@ -205,7 +208,7 @@ export function dataFiles(bytes: Uint8Array): Record<string, Record<string, unkn
 }
 
 /** Tables a restore writes, with the column that says which household a row is in. */
-const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
+const TENANT_TABLES = ['account', 'budget', 'category', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_reimbursement', 'transaction_split', 'transaction_tag', 'watchlist'] as const;
 
 /** How many rows of each household table belong to `tenantKey`. */
 export async function householdRowCounts(em: EntityManager, tenantKey: number): Promise<Record<string, number>> {

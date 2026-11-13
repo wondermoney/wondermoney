@@ -13,7 +13,8 @@ const mockSetSplitsAsync = jest.fn()
 const mockRemoveSplitsAsync = jest.fn()
 const mockBulkDeleteAsync = jest.fn()
 const mockDeleteOneAsync = jest.fn()
-let mockParams: { accountId?: string; filter?: string } = {}
+const mockUnlinkAsync = jest.fn()
+let mockParams: { accountId?: string; filter?: string; focus?: string; fromDate?: string; toDate?: string } = {}
 const mockBlockAccess = jest.fn()
 const mockPush = jest.fn()
 const mockUseAccounts = jest.fn()
@@ -42,6 +43,8 @@ jest.mock('./use-delete-transactions', () => ({
 jest.mock('./use-edit-transaction-amount', () => ({ useEditTransactionAmount: () => ({ mutateAsync: mockMutateAmountAsync, isPending: false }) }))
 jest.mock('./use-edit-transaction-transfer', () => ({ useEditTransactionTransfer: () => ({ mutateAsync: mockMutateTransferAsync, isPending: false }) }))
 jest.mock('./use-transaction-splits', () => ({ useSetTransactionSplits: () => ({ mutateAsync: mockSetSplitsAsync, isPending: false }), useRemoveTransactionSplits: () => ({ mutateAsync: mockRemoveSplitsAsync, isPending: false }) }))
+jest.mock('./use-transaction-reimbursements', () => ({ useUnlinkReimbursement: () => ({ mutateAsync: mockUnlinkAsync, isPending: false }) }))
+jest.mock('./transaction-reimbursement-screen', () => ({ TransactionReimbursementScreen: (props: { transaction: { id: number } }) => { const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{`reimburse ${props.transaction.id}`}</Native.Text> } }))
 jest.mock('./use-transfer-destinations', () => ({ useTransferDestinations: () => ({ accounts: [], portfolios: [{ key: 3, name: 'ETFs' }], goals: [] }) }))
 type MockPromptProps = { suggestion: { fingerprint: string }; onCreate: (suggestion: unknown) => void }
 const mockRuleSheets: { prompt: MockPromptProps | null; seed: unknown } = { prompt: null, seed: null }
@@ -51,7 +54,7 @@ jest.mock('@/features/rules/rule-editor-sheet', () => ({ RuleEditorSheet: (props
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
-  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockSetSplitsAsync.mockReset(); mockRemoveSplitsAsync.mockReset(); mockPush.mockReset() })
+  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockSetSplitsAsync.mockReset(); mockRemoveSplitsAsync.mockReset(); mockUnlinkAsync.mockReset(); mockPush.mockReset() })
 
   it('navigates to the import screen, carrying the current account id when present', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
@@ -284,5 +287,48 @@ describe('TransactionsRoute', () => {
     await expect(removeSplit(41)).resolves.toBe('success')
     expect(mockRemoveSplitsAsync).toHaveBeenCalledWith(41)
     await expect(removeSplit(41)).resolves.toBe('network')
+  })
+
+  it('maps an unlink to its result, by the API’s reason', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockUnlinkAsync
+      .mockResolvedValueOnce({ transactionReimbursementKey: 5 })
+      .mockRejectedValueOnce(new ApiError('http', 404, { serverCode: 'not_found' }))
+      .mockRejectedValueOnce(new ApiError('demo-forbidden', 403))
+    await render(<TransactionsRoute />)
+    const unlink = mockCapturedProps.onUnlinkReimbursement as (transactionId: number, linkId: number) => Promise<string>
+    await expect(unlink(41, 5)).resolves.toBe('success')
+    expect(mockUnlinkAsync).toHaveBeenCalledWith({ transactionId: 41, transactionReimbursementKey: 5 })
+    await expect(unlink(41, 5)).resolves.toBe('not-found')
+    await expect(unlink(41, 5)).resolves.toBe('demo')
+  })
+
+  it('opens "Mark as reimbursement" over the list for the chosen row', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: false, data: { transactions: [{ ...transactionFixture, transactionKey: 90 }] }, refetch: jest.fn() })
+    const view = await render(<TransactionsRoute />)
+    expect(view.queryByText('reimburse 90')).not.toBeOnTheScreen()
+    await act(async () => { (mockCapturedProps.onMarkReimbursement as (row: { id: number }) => void)({ id: 90 }) })
+    expect(view.getByText('reimburse 90')).toBeOnTheScreen()
+  })
+
+  it('follows a link to a row that is not loaded into its account’s ledger, on its own day', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    await render(<TransactionsRoute />)
+    const open = mockCapturedProps.onOpenTransaction as (linked: object) => void
+    open({ transactionKey: 90, accountKey: 8, accountName: 'Card', description: null, merchantName: 'Shop', transactionDate: '2026-07-18T10:00:00.000Z', settlementAmount: 20, currencyCode: 'EUR' })
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/accounts/[accountId]/transactions',
+      params: expect.objectContaining({ accountId: '8', focus: '90', fromDate: expect.any(String), toDate: expect.any(String) }),
+    })
+    open({ transactionKey: 91, accountKey: null, accountName: null, description: null, merchantName: null, transactionDate: null, settlementAmount: null, currencyCode: null })
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/accounts/transactions', params: { focus: '91' } })
+  })
+
+  it('opens on a followed link’s day, in both directions, with that row expanded', async () => {
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    mockParams = { accountId: '8', focus: '90', fromDate: '2026-07-17T23:00:00.000Z', toDate: '2026-07-18T22:59:59.999Z' }
+    await render(<TransactionsRoute perAccount />)
+    expect(mockUseTransactions).toHaveBeenCalledWith({ fromDate: '2026-07-17T23:00:00.000Z', toDate: '2026-07-18T22:59:59.999Z', limit: 100 }, 8)
+    expect(mockCapturedProps.focusTransactionId).toBe(90)
   })
 })
