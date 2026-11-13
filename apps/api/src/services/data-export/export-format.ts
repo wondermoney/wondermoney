@@ -110,11 +110,11 @@ encrypted archives. A forgotten password cannot be recovered: start a new export
 
 Exportação de dados WonderMoney (protegida por palavra-passe)
 
-Os ficheiros deste arquivo estão cifrados com AES-256 (WinZip AES). Abra-o com o 7-Zip
-(Windows, Linux), o Keka (macOS), o WinRAR ou o restauro do WonderMoney, e introduza a
-palavra-passe que escolheu ao iniciar a exportação. As ferramentas de zip integradas de alguns
+Os ficheiros deste arquivo estão cifrados com AES-256 (WinZip AES). Abre-o com o 7-Zip
+(Windows, Linux), o Keka (macOS), o WinRAR ou o restauro do WonderMoney, e introduz a
+palavra-passe que escolheste ao iniciar a exportação. As ferramentas de zip integradas de alguns
 sistemas não abrem arquivos cifrados. Uma palavra-passe esquecida não pode ser recuperada:
-inicie uma nova exportação.
+inicia uma nova exportação.
 
 ---
 

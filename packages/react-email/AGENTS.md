@@ -36,6 +36,8 @@ Run `pnpm run check` before calling a template change done.
   belongs in `dependencies`.
 - Copy is PT-PT, some templates also EN. Keep terminology consistent with the docs site
   glossary (`apps/docs/content/docs/pt/glossary.mdx`). Never promise a feature that is not live.
+- PT copy addresses the reader as **tu** ("Recebes este email porque…", "a tua conta"), never
+  "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples).
 - `PreviewProps` use fictional names and values only.
 - Placeholders such as `[[UNSUB_LINK_PT]]` are resolved by the API before sending.
 - CTA, settings, privacy and unsubscribe URLs are absolute `https:` links.

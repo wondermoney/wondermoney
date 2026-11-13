@@ -216,7 +216,7 @@ describe('bank recovery email provider seam', () => {
 
   it.each([
     { heading: 'finish connecting your bank', language: 'EN' as const, subject: 'Your bank connection needs another try' },
-    { heading: 'Vamos concluir a liga', language: 'PT' as const, subject: 'A sua ligação bancária precisa de nova tentativa' },
+    { heading: 'Vamos concluir a liga', language: 'PT' as const, subject: 'A tua ligação bancária precisa de nova tentativa' },
   ])('renders the $language bank-recovery nudge as branded HTML with a List-Unsubscribe header + idempotency key', async ({ heading, language, subject }) => {
     resendSendMock.mockResolvedValue({ data: { id: ACCEPTED_ID }, error: null });
     const { sendBankRecoveryEmail } = await loadModule('staging');

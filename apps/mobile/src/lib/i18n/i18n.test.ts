@@ -112,7 +112,7 @@ describe('mobile product i18n', () => {
     expect(enI18n.t('goals.assignedThisMonth')).toBe('Assigned this month')
     expect(pt.t('goals.linkedAccounts')).toBe('Contexto das contas associadas')
     expect(esI18n.t('goals.hideDetails', { name: 'Viaje' })).toBe('Ocultar detalles de Viaje')
-    expect(pt.t('goals.empty')).toBe('Crie um objetivo para reservar dinheiro orçamentado para algo específico, como um fundo de emergência, férias, impostos ou a entrada de uma casa.')
+    expect(pt.t('goals.empty')).toBe('Cria um objetivo para reservar dinheiro orçamentado para algo específico, como um fundo de emergência, férias, impostos ou a entrada de uma casa.')
     expect(esI18n.t('goals.empty')).toBe('Crea un objetivo para reservar dinero presupuestado para algo específico, como un fondo de emergencia, vacaciones, impuestos o la entrada de una vivienda.')
     expect(enI18n.t('profile.notFoundTitle')).toBe('Profile not available')
   })
@@ -214,7 +214,7 @@ describe('mobile product i18n', () => {
     const pt = await initMobileI18n('pt-PT')
     const esI18n = await initMobileI18n('es')
     expect(enI18n.t('budgetAddCategory.reconciliation.duplicate-unknown')).toBe('The category state could not be confirmed. Refresh the current month again before starting any new attempt')
-    expect(pt.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Atualize novamente o mês atual')
+    expect(pt.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Atualiza novamente o mês atual')
     expect(esI18n.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Actualiza de nuevo el mes actual')
   })
 

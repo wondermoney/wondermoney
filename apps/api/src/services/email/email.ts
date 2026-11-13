@@ -256,17 +256,17 @@ const BANK_RECOVERY_COPY = {
   },
   PT: {
     body: [
-      (brand: string) => `A sua ligação bancária não ficou concluída, por isso as suas contas podem não estar atualizadas na ${brand}.`,
-      (brand: string) => `Volte a abrir a ${brand} e tente novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responda a este email e ajudamos.`,
+      (brand: string) => `A tua ligação bancária não ficou concluída, por isso as tuas contas podem não estar atualizadas na ${brand}.`,
+      (brand: string) => `Volta a abrir a ${brand} e tenta novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responde a este email e ajudamos.`,
     ],
     cta: 'Tentar novamente',
-    heading: 'Vamos concluir a ligação ao seu banco',
+    heading: 'Vamos concluir a ligação ao teu banco',
     step1DetailFallback: 'A última tentativa não chegou ao estado ligado',
     step1DetailWithBank: (bankName: string) => `Tentativa com ${bankName}`,
     step1Label: 'Tentativa interrompida',
-    step2Detail: 'Volte a confirmar a autorização junto do banco',
+    step2Detail: 'Volta a confirmar a autorização junto do banco',
     step2Label: 'Retomar a ligação',
-    subject: 'A sua ligação bancária precisa de nova tentativa',
+    subject: 'A tua ligação bancária precisa de nova tentativa',
   },
 } as const;
 
@@ -314,10 +314,10 @@ const API_TOKEN_EXPIRY_COPY = {
   },
   PT: {
     body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
-      `Olá ${name},<p>O token de API <strong>${tokenName}</strong> que criou na ${brand} expira a ${expiresOn}.</p><p>Se um script, folha de cálculo ou dashboard o utiliza, crie um substituto em Definições → Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.</p><p>Se já não precisa dele, pode revogá-lo agora no mesmo sítio.</p>`,
-    subject: (brand: string) => `O seu token de API da ${brand} expira em breve`,
+      `Olá ${name},<p>O token de API <strong>${tokenName}</strong> que criaste na ${brand} expira a ${expiresOn}.</p><p>Se um script, folha de cálculo ou dashboard o utiliza, cria um substituto em Definições → Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.</p><p>Se já não precisas dele, podes revogá-lo agora no mesmo sítio.</p>`,
+    subject: (brand: string) => `O teu token de API da ${brand} expira em breve`,
     text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
-      `Olá ${name},\n\nO token de API "${tokenName}" que criou na ${brand} expira a ${expiresOn}.\n\nSe um script, folha de cálculo ou dashboard o utiliza, crie um substituto em Definições -> Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.\n\nSe já não precisa dele, pode revogá-lo agora no mesmo sítio.`,
+      `Olá ${name},\n\nO token de API "${tokenName}" que criaste na ${brand} expira a ${expiresOn}.\n\nSe um script, folha de cálculo ou dashboard o utiliza, cria um substituto em Definições -> Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.\n\nSe já não precisas dele, podes revogá-lo agora no mesmo sítio.`,
   },
 } as const;
 

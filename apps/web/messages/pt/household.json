@@ -1,19 +1,19 @@
 {
   "household": {
     "title": "Agregado familiar",
-    "description": "Partilhe contas, orçamentos e objetivos com o seu parceiro.",
+    "description": "Partilha contas, orçamentos e objetivos com o teu parceiro.",
     "members": {
       "heading": "Membros",
-      "you": "Você",
+      "you": "Tu",
       "roleOwner": "Titular",
       "roleMember": "Parceiro"
     },
     "invite": {
-      "heading": "Convide o seu parceiro",
-      "description": "Ele terá o seu próprio acesso e vê as finanças partilhadas. As contas que marcar como privadas permanecem privadas.",
+      "heading": "Convida o teu parceiro",
+      "description": "Ele terá o seu próprio acesso e vê as finanças partilhadas. As contas que marcares como privadas permanecem privadas.",
       "emailLabel": "Email do parceiro",
       "emailPlaceholder": "parceiro@exemplo.com",
-      "invalidEmail": "Introduza um email válido",
+      "invalidEmail": "Introduz um email válido",
       "submit": "Enviar convite"
     },
     "pending": {
@@ -29,24 +29,24 @@
     },
     "removeDialog": {
       "title": "Remover {name}?",
-      "description": "Perde o acesso a este agregado de imediato. Os dados partilhados ficam consigo e as ligações bancárias associadas são desligadas.",
+      "description": "Perde o acesso a este agregado de imediato. Os dados partilhados ficam contigo e as ligações bancárias associadas são desligadas.",
       "confirm": "Remover parceiro"
     },
     "leaveDialog": {
       "title": "Sair deste agregado?",
-      "description": "Perde o acesso às contas, orçamentos e objetivos partilhados, e as suas ligações bancárias são desligadas. Esta ação não pode ser anulada.",
+      "description": "Perdes o acesso às contas, orçamentos e objetivos partilhados, e as tuas ligações bancárias são desligadas. Esta ação não pode ser anulada.",
       "confirm": "Sair do agregado"
     },
     "cancel": "Cancelar",
     "join": {
-      "greetingNamed": "{name} convidou-o para o seu agregado em {instanceName}",
-      "greetingGeneric": "Foi convidado para um agregado em {instanceName}",
-      "subtitle": "Crie a sua conta para partilhar contas, orçamentos e objetivos.",
+      "greetingNamed": "{name} convidou-te para o seu agregado em {instanceName}",
+      "greetingGeneric": "Foste convidado para um agregado em {instanceName}",
+      "subtitle": "Cria a tua conta para partilhar contas, orçamentos e objetivos.",
       "emailLockedHint": "Este convite é para {email}",
       "invalidTitle": "Este link de convite não é válido",
-      "invalidBody": "Pode já ter sido usado, anulado ou expirado. Peça ao seu parceiro para enviar um novo convite.",
-      "loggedInTitle": "Já tem sessão iniciada",
-      "loggedInBody": "Os convites de agregado só podem ser aceites com uma conta nova. Termine a sessão e crie uma com o email convidado para entrar.",
+      "invalidBody": "Pode já ter sido usado, anulado ou expirado. Pede ao teu parceiro para enviar um novo convite.",
+      "loggedInTitle": "Já tens sessão iniciada",
+      "loggedInBody": "Os convites de agregado só podem ser aceites com uma conta nova. Termina a sessão e cria uma com o email convidado para entrar.",
       "logoutAndJoin": "Terminar sessão e criar conta",
       "backToApp": "Ir para {instanceName}"
     },
@@ -55,9 +55,9 @@
       "inviteResent": "Convite reenviado",
       "inviteRevoked": "Convite anulado",
       "memberRemoved": "Parceiro removido",
-      "left": "Saiu do agregado",
-      "error": "Algo correu mal. Tente novamente."
+      "left": "Saíste do agregado",
+      "error": "Algo correu mal. Tenta novamente."
     },
-    "loadError": "Não foi possível carregar o seu agregado. Tente novamente."
+    "loadError": "Não foi possível carregar o teu agregado. Tenta novamente."
   }
 }

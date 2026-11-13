@@ -87,6 +87,26 @@ mobile i18n tests, the transactional-email copy check and the docs locale-parity
 fail with the locale, file and key to fix. If you can't translate, add the English text
 to all three locales and say so in the pull request.
 
+Portuguese copy is European Portuguese (pt-PT) and addresses the reader as **tu**, in the
+web app, the mobile app, emails, the docs and the marketing site. Write the verb in the
+second person singular, the possessive as teu/tua and the pronoun as te/ti/contigo; never
+"você" or the formal third person:
+
+| Not this | This |
+|---|---|
+| Introduza o seu email | Introduz o teu email |
+| Tem a certeza de que pretende eliminar esta conta? | Tens a certeza de que queres eliminar esta conta? |
+| Clique em Guardar para continuar | Clica em Guardar para continuar |
+| Não feche esta janela | Não feches esta janela |
+| Enviamos-lhe uma ligação | Enviamos-te uma ligação |
+
+Buttons and menu items stay in the infinitive ("Guardar", "Adicionar conta"), and "seu/sua"
+is still right for someone else's things ("{name} convidou-te para o seu agregado"), as is
+"vocês" for more than one person. The
+legal pages (terms, privacy, cookies) keep their formal "o utilizador" register, and
+Brazilian Portuguese, if it is ever added, uses "você". The web, mobile and email checks
+fail on "você" and on formal imperatives such as "Clique" or "Introduza" in pt copy.
+
 ## Shipping a feature behind preview features
 
 A feature that is not ready for everyone can ship behind the per-user preview toggle

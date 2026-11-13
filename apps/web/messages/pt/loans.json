@@ -2,7 +2,7 @@
   "loans": {
     "page": {
       "title": "Empréstimos",
-      "description": "Acompanhe empréstimos, planos de pagamento e saldos num só lugar."
+      "description": "Acompanha empréstimos, planos de pagamento e saldos num só lugar."
     },
     "actions": {
       "add": "Adicionar empréstimo",
@@ -24,7 +24,7 @@
       "status": "Estado",
       "principal": "Capital",
       "originalPrincipal": "Valor original do empréstimo",
-      "originalPrincipalHint": "Opcional. O valor originalmente emprestado, se diferente do capital acima (por exemplo, ao adicionar um empréstimo que já está a pagar). Usado para calcular o progresso do pagamento.",
+      "originalPrincipalHint": "Opcional. O valor originalmente emprestado, se diferente do capital acima (por exemplo, ao adicionar um empréstimo que já estás a pagar). Usado para calcular o progresso do pagamento.",
       "balance": "Saldo",
       "interestRate": "Taxa de juro",
       "installment": "Prestação mensal",
@@ -38,10 +38,10 @@
       "namePlaceholder": "Ex.: Crédito habitação",
       "interestRatePlaceholder": "0,00",
       "termMonthsPlaceholder": "Ex.: 360",
-      "startDatePlaceholder": "Escolha a data de início",
+      "startDatePlaceholder": "Escolhe a data de início",
       "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo",
       "rateType": "Tipo de taxa",
-      "rateTypeVariableHelp": "Introduza a taxa com que o empréstimo começou. Adicione cada alteração posterior no histórico de taxas, na página do empréstimo.",
+      "rateTypeVariableHelp": "Introduz a taxa com que o empréstimo começou. Adiciona cada alteração posterior no histórico de taxas, na página do empréstimo.",
       "securedAsset": "Garantido por",
       "securedAssetNone": "Nenhum",
       "securedAssetHint": "Opcional. O bem que garante este empréstimo, como a casa comprada com um crédito habitação. A página do bem passa a mostrar o capital próprio: o que vale menos o que ainda está em dívida."
@@ -66,23 +66,23 @@
     },
     "repayment": {
       "title": "Associação de pagamentos",
-      "description": "Associe os pagamentos a movimentos da conta para um acompanhamento correto do saldo."
+      "description": "Associa os pagamentos a movimentos da conta para um acompanhamento correto do saldo."
     },
     "validation": {
       "required": "Este campo é obrigatório.",
-      "positiveAmount": "Introduza um valor positivo.",
-      "validRate": "Introduza uma taxa de juro válida.",
+      "positiveAmount": "Introduz um valor positivo.",
+      "validRate": "Introduz uma taxa de juro válida.",
       "originalPrincipalTooLow": "O valor original do empréstimo deve ser, no mínimo, igual ao capital."
     },
     "errors": {
       "loadFailed": "Não foi possível carregar os empréstimos.",
-      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente.",
       "saveFailed": "Não foi possível guardar o empréstimo.",
       "deleteFailed": "Não foi possível eliminar o empréstimo."
     },
     "empty": {
       "title": "Ainda sem empréstimos",
-      "description": "Adicione o primeiro empréstimo para acompanhar saldos e pagamentos.",
+      "description": "Adiciona o primeiro empréstimo para acompanhar saldos e pagamentos.",
       "noData": "—"
     },
     "summary": {
@@ -113,9 +113,9 @@
       "loading": "A carregar detalhes do empréstimo...",
       "errors": {
         "loadFailed": "Não foi possível carregar o empréstimo.",
-        "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente."
+        "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente."
       },
-      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente.",
       "assumptions": {
         "title": "Premissas do empréstimo"
       },
@@ -134,9 +134,9 @@
         "empty": "Ainda não existem pagamentos associados.",
         "noCandidates": "Não existem candidatos a pagamento.",
         "candidatesTitle": "Associar pagamentos",
-        "candidatesDescription": "Escolha uma transação para rever e alocar.",
+        "candidatesDescription": "Escolhe uma transação para rever e alocar.",
         "reviewTitle": "Rever alocação",
-        "reviewDescription": "Confirme a repartição do pagamento antes de guardar.",
+        "reviewDescription": "Confirma a repartição do pagamento antes de guardar.",
         "linked": "Associado",
         "candidateConfidence": "Confiança: {value}",
         "confidenceValue": "{value}%",
@@ -158,7 +158,7 @@
         "title": "Plano de amortização",
         "subtitle": "Cada pagamento dividido em juros e capital, e o saldo que resta depois.",
         "unavailable": "O plano de amortização está indisponível neste momento.",
-        "missingInputs": "Adicione a taxa de juro e o prazo para ver o plano contratual.",
+        "missingInputs": "Adiciona a taxa de juro e o prazo para ver o plano contratual.",
         "empty": "Não há linhas de amortização para mostrar.",
         "totalInterest": "Juros totais",
         "totalPaid": "Total pago",
@@ -201,7 +201,7 @@
       "adjustment": {
         "title": "Ajustar saldo",
         "editTitle": "Editar ajuste",
-        "description": "Registe o saldo indicado pelo credor ou outra alteração do empréstimo. O saldo, o plano e a projeção de liquidação seguem-no a partir da sua data.",
+        "description": "Regista o saldo indicado pelo credor ou outra alteração do empréstimo. O saldo, o plano e a projeção de liquidação seguem-no a partir da sua data.",
         "type": "Tipo de ajuste",
         "date": "Data de efeito",
         "amount": "Montante",
@@ -211,15 +211,15 @@
         "loadError": "Não foi possível carregar os ajustes.",
         "saveError": "Não foi possível guardar esta alteração.",
         "empty": "Sem ajustes de saldo",
-        "emptyBody": "Quando o saldo do credor for diferente do apresentado aqui, registe o valor dele. Substitui o saldo calculado a partir da sua data, e os pagamentos seguintes reduzem-no a partir daí.",
+        "emptyBody": "Quando o saldo do credor for diferente do apresentado aqui, regista o valor dele. Substitui o saldo calculado a partir da sua data, e os pagamentos seguintes reduzem-no a partir daí.",
         "add": "Adicionar ajuste",
         "save": "Guardar ajuste",
         "edit": "Editar ajuste",
         "delete": "Eliminar ajuste",
         "deleteConfirm": "Eliminar este ajuste? O saldo é recalculado sem ele.",
-        "invalidAmount": "Introduza um montante válido.",
-        "amountPositive": "Introduza um montante superior a zero.",
-        "invalidDate": "Escolha a data em que entra em vigor.",
+        "invalidAmount": "Introduz um montante válido.",
+        "amountPositive": "Introduz um montante superior a zero.",
+        "invalidDate": "Escolhe a data em que entra em vigor.",
         "setTo": "Definido para <amount></amount>",
         "increases": "Aumenta o saldo em",
         "decreases": "Reduz o saldo em",
@@ -242,7 +242,7 @@
       },
       "rateHistory": {
         "title": "Histórico de taxas",
-        "description": "Cada taxa aplica-se desde a sua data até à seguinte. As taxas não são obtidas nem previstas: adicione cada alteração quando o credor a anunciar.",
+        "description": "Cada taxa aplica-se desde a sua data até à seguinte. As taxas não são obtidas nem previstas: adiciona cada alteração quando o credor a anunciar.",
         "effectiveDate": "Data de efeito",
         "apr": "Taxa de juro anual (TAEG)",
         "loadError": "Não foi possível carregar o histórico de taxas.",
@@ -256,9 +256,9 @@
         "edit": "Editar alteração de taxa",
         "delete": "Eliminar alteração de taxa",
         "deleteConfirm": "Eliminar esta alteração de taxa?",
-        "invalidRate": "Introduza uma taxa válida.",
+        "invalidRate": "Introduz uma taxa válida.",
         "maxRate": "A taxa deve estar entre 0 e 100%.",
-        "invalidDate": "Escolha a data em que entra em vigor."
+        "invalidDate": "Escolhe a data em que entra em vigor."
       }
     },
     "table": {
