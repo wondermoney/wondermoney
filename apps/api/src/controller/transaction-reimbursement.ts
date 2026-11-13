@@ -26,7 +26,7 @@ export async function getReimbursementSuggestions(req: Request, res: Response) {
 export async function linkReimbursement(req: Request, res: Response) {
   const { appuserKey, tenantKey } = authedContext(req);
   const { body: { amount, expenseTransactionId }, params: { transactionId } } = await zParse(linkReimbursementRequestSchema, req);
-  const link = await linkReimbursementService(DI.em, { appuserKey, tenantKey }, transactionId, { amount, expenseTransactionKey: expenseTransactionId });
+  const link = await linkReimbursementService(DI.em, { appuserKey, householdRole: req.householdRole, tenantKey }, transactionId, { amount, expenseTransactionKey: expenseTransactionId });
   return res.status(201).json({ link });
 }
 
@@ -34,6 +34,6 @@ export async function linkReimbursement(req: Request, res: Response) {
 export async function unlinkReimbursement(req: Request, res: Response) {
   const { appuserKey, tenantKey } = authedContext(req);
   const { params: { reimbursementId, transactionId } } = await zParse(unlinkReimbursementRequestSchema, req);
-  await unlinkReimbursementService(DI.em, { appuserKey, tenantKey }, transactionId, reimbursementId);
+  await unlinkReimbursementService(DI.em, { appuserKey, householdRole: req.householdRole, tenantKey }, transactionId, reimbursementId);
   return res.json({ transactionReimbursementKey: reimbursementId });
 }

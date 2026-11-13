@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { Account } from '@entity/Account';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { RecurringSeries } from '@entity/RecurringSeries';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { loadUpcomingInstallments } from '@service/installment/installment-plan.service';
 import { buildRecurringSchedule, type RecurringScheduleSeries } from '@service/recurring/recurring-schedule';
 import { RecurringAmountType, RecurringSeriesStatus } from '@service/recurring/recurring-types';
@@ -158,7 +159,7 @@ export async function forecastBalances(em: EntityManager, request: BalanceForeca
     {
       $and: [
         { tenantKey: { tenantKey: request.tenantKey } },
-        { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: request.viewerAppuserKey } }] },
+        visibleAccountWhere(request.viewerAppuserKey),
         ...(request.accountKeys && request.accountKeys.length > 0 ? [{ accountKey: { $in: request.accountKeys } }] : []),
       ],
       deletedAt: null,

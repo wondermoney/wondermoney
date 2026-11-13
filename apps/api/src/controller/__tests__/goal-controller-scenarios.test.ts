@@ -38,6 +38,7 @@ const mocked = vi.hoisted(() => ({
   zParse: vi.fn(),
 }));
 
+vi.mock('@service/account/account-access', async (importOriginal) => (await import('@app/__tests__/__helpers__/account-access-double')).allAccountsWritable(await importOriginal()));
 vi.mock('@validators/parser', () => ({ zParse: mocked.zParse }));
 vi.mock('@app/app', () => ({ DI: { em: { getReference: vi.fn(), getRepository: vi.fn(() => mocked.appuserTenantRepo) } } }));
 vi.mock('@service/goal/goal.service', () => ({

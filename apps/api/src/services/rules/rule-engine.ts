@@ -28,7 +28,13 @@ import { type RuleAction, type RuleCondition, type RuleMatch, UNCATEGORIZED } fr
 /** What the engine needs to know about one transaction. */
 export interface TransactionFacts {
   /** Null for a transaction without an account. */
-  account: null | { accountKey: number; isPrivate: boolean; ownerAppuserKey: null | number };
+  account: null | {
+    accountKey: number;
+    isPrivate: boolean;
+    ownerAppuserKey: null | number;
+    /** The members a private account is shared with for `write` (an empty list: none, or not loaded). */
+    writerAppuserKeys?: readonly number[];
+  };
   /** Signed settlement amount, in the account's currency: negative is money out. */
   amount: null | number;
   categoryKey: null | number;
@@ -131,11 +137,13 @@ function ruleMatches(rule: EvaluableRule, facts: TransactionFacts): boolean {
   return rule.match === 'any' ? rule.conditions.some(test) : rule.conditions.every(test);
 }
 
+/** A rule changes a row on a private account only when its owner may change that account: they own it, or it is shared with them for `write`. */
 function ruleMaySee(rule: EvaluableRule, facts: TransactionFacts): boolean {
   if (rule.tenantKey !== facts.tenantKey) return false;
   const account = facts.account;
   if (!account?.isPrivate) return true;
-  return rule.ownerAppuserKey !== null && account.ownerAppuserKey === rule.ownerAppuserKey;
+  if (rule.ownerAppuserKey === null) return false;
+  return account.ownerAppuserKey === rule.ownerAppuserKey || (account.writerAppuserKeys ?? []).includes(rule.ownerAppuserKey);
 }
 
 /** Lower case, accents removed, spaces collapsed: "  Café  CENTRAL " and "cafe central" are equal. */

@@ -74,9 +74,28 @@ export const accountSchema = open('Account', {
   fxStatus: z.string(),
   isOwnedByViewer: z.boolean(),
   isPrivate: z.boolean(),
+  myAccess: z.enum(['owner', 'write', 'read']),
   ownerFirstName: nullableString,
   refreshedAt: nullableString,
   source: z.enum(['manual', 'open_banking']),
+});
+
+/** `GET /v1/account/:accountId/shares`: who sees the account and who may change it. */
+export const accountSharesSchema = open('AccountShares', {
+  accountKey: id,
+  canManage: z.boolean(),
+  isPrivate: z.boolean(),
+  members: z.array(
+    z.object({
+      access: z.enum(['owner', 'write', 'read', 'hidden']),
+      appuserKey: id,
+      firstName: nullableString,
+      isAccountOwner: z.boolean(),
+      lastName: nullableString,
+      role: z.enum(['owner', 'admin', 'member', 'viewer']),
+      share: z.enum(['read', 'write']).nullable(),
+    }),
+  ),
 });
 
 export const accountTypeSchema = open('AccountType', {

@@ -13,6 +13,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { visibleAccountSql } from '@service/account/account-visibility-sql';
 import { MANUAL_CATEGORIZATION_SOURCE } from '@service/transaction/transaction-audit.service';
 import { learnedMappingRecognises } from '@service/transaction/transaction-deterministic-categorization.service';
 import { getRef } from '@utils/em-helpers';
@@ -172,7 +173,7 @@ async function loadHistory(em: EntityManager, input: RuleSuggestionInput): Promi
      where latest.to_category = ${String(category.categoryKey)}
        and t.tenant_key = ${tenantKey}
        and t.deleted_at is null
-       and (t.account_key is null or (a.deleted_at is null and (a.is_private = false or a.account_owner_appuser_key = ${appuserKey})))
+       and (t.account_key is null or (a.deleted_at is null and ${sql.raw(visibleAccountSql('a', appuserKey))}))
        and exists (
          select 1 from appuser_transaction_category atc
           where atc.transaction_key = t.transaction_key and atc.category_key = ${category.categoryKey} and atc.deleted_at is null

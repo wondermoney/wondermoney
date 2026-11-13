@@ -131,5 +131,6 @@ test("supports finalized detail payloads", async () => {
     fxStatus: null,
     fxRateDate: null,
     creditCard: null,
+    myAccess: "write",
   });
 });

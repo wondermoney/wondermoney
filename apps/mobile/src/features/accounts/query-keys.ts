@@ -15,3 +15,7 @@ export const accountCreditCardStatementsKey = (epochId: number, accountId: numbe
 export const accountCreditCardStatementDetailKey = (epochId: number, accountId: number, statementDate: string) => (
   ['account', epochId, accountId, 'credit-card-statement', statementDate] as const
 )
+/** Who an account is shared with (#95). Under the account's family, so a sign-out or epoch change drops it too. */
+export const accountSharesKey = (epochId: number, accountId: number) => (
+  ['account', epochId, accountId, 'shares'] as const
+)

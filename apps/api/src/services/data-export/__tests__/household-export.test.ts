@@ -5,7 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addCategory, addMerchant, addPartner, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addCategory, addMerchant, addPartner, addShare, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { seedPortfolio } from '@app/__tests__/__helpers__/portfolio-fixtures';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
@@ -238,6 +238,24 @@ describe('household export', () => {
       expect(archive.data['loan-repayments']).toHaveLength(1);
       expect(archive.data['merchant-categories']).toHaveLength(1);
       expect(archive.data['portfolios']).toEqual([expect.objectContaining({ accountBalanceMode: 'includes_holdings', linkedAccountId: 2 })]);
+    });
+  });
+
+  describe('a private account shared with the member', () => {
+    it('is in their export with its transactions, and the owner\'s export says who it is shared with', async () => {
+      const { owner, partner, privateAccount } = await households();
+      await addShare(db.em(), owner, privateAccount, partner, 'read');
+
+      const theirs = await exportFor(scopeOf(owner, partner));
+      expect(theirs.data['accounts']!.map((row) => row['name'])).toEqual(['Joint current account', 'SECRET-ACCOUNT']);
+      expect(theirs.data['transactions']!.map((row) => row['description'])).toContain('SECRET-DESCRIPTION');
+
+      const mine = await exportFor(scopeOf(owner));
+      const partnerId = mine.data['members']!.find((row) => row['id'] !== mine.manifest.exportedBy.memberId)!['id'];
+      expect(mine.data['accounts']!.map((row) => ({ name: row['name'], shares: row['shares'] }))).toEqual([
+        { name: 'Joint current account', shares: [] },
+        { name: 'SECRET-ACCOUNT', shares: [{ access: 'read', memberId: partnerId }] },
+      ]);
     });
   });
 

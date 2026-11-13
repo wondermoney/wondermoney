@@ -32,6 +32,7 @@ import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
 import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { useRouter } from "@/i18n/navigation";
+import { writableAccounts } from "@/lib/account/account-access";
 import { getAggregateFreshness } from "@/lib/account/accounts-freshness";
 import { aggregateMetrics } from "@/lib/account/accounts-metrics";
 import {
@@ -419,6 +420,9 @@ export default function AccountsClient({
     !isLoadingAccountsData &&
     accountsData?.accounts &&
     accountsData.accounts.length > 0;
+  // Transactions go only into accounts the person may change, not ones shared to view.
+  const editableAccounts = writableAccounts(accountsData?.accounts ?? []);
+  const hasEditableAccounts = editableAccounts.length > 0;
 
   const recoveryBanner =
     bankConnection === "error" ? (
@@ -507,7 +511,7 @@ export default function AccountsClient({
             setTimeframe={(value) => setTimeframe(value as AccountsTimeframe)}
           />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            {hasAccounts ? (
+            {hasEditableAccounts ? (
               <AccountTransactionAddModal
                 isOpen={isAddManualTransactionModalOpen}
                 setOpen={(open) =>
@@ -515,7 +519,7 @@ export default function AccountsClient({
                     ? openAddManualTransactionModal()
                     : closeAddManualTransactionModal()
                 }
-                accounts={accountsData?.accounts ?? []}
+                accounts={editableAccounts}
                 trigger={
                   <Button className="w-full">
                     <Plus className="size-4" />
@@ -801,7 +805,7 @@ export default function AccountsClient({
                   <p className="text-muted-foreground text-sm">
                     {t("empty-transactions-description")}
                   </p>
-                  {hasAccounts ? (
+                  {hasEditableAccounts ? (
                     <Button onClick={openAddManualTransactionModal}>
                       <Plus className="size-4" />
                       {t("add-transaction")}
@@ -852,11 +856,11 @@ export default function AccountsClient({
           setIsRecoveryCsvImport(false);
         }}
       />
-      {hasAccounts ? (
+      {hasEditableAccounts ? (
         <AccountTransactionImportModal
           isOpen={isImportModalOpen}
           setOpen={setRecoveryImportModalOpen}
-          accounts={accountsData?.accounts ?? []}
+          accounts={editableAccounts}
           onImportSuccess={handleCsvImportSuccess}
         />
       ) : null}

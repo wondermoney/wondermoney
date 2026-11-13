@@ -48,7 +48,8 @@
     },
     "close": "Fechar",
     "moreActions": "Mais ações",
-    "householdReadOnly": "Tens acesso só de leitura a este agregado, por isso nada foi alterado. Pede a um titular ou administrador se precisares de fazer alterações."
+    "householdReadOnly": "Tens acesso só de leitura a este agregado, por isso nada foi alterado. Pede a um titular ou administrador se precisares de fazer alterações.",
+    "accountReadOnly": "Podes ver esta conta, mas não a podes alterar."
   },
   "navigation": {
     "home": "Início",
@@ -561,6 +562,7 @@
     "stale": "Não foi possível atualizar. A mostrar os dados da conta carregados anteriormente",
     "viewTransactions": "Ver transações da conta",
     "edit": "Editar conta",
+    "sharing": "Partilha",
     "error": {
       "title": "Não foi possível carregar a conta",
       "message": "Verifica a ligação e tenta novamente"
@@ -602,6 +604,7 @@
       "too-soon": "Esta conta foi recalculada há menos de um minuto. Tenta de novo daqui a pouco.",
       "demo": "Recalcular não está disponível na demonstração.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Volta a iniciar sessão para recalcular esta conta.",
       "not-found": "Esta conta já não está disponível.",
       "network": "Não foi possível contactar o servidor. Verifica a ligação e tenta de novo.",
@@ -624,12 +627,45 @@
     "privacyTitle": "Conta privada",
     "privacyHelper": "Só tu vês esta conta e as suas transações. As outras pessoas do teu agregado não a verão em lado nenhum.",
     "privacySwitch": "Conta privada",
+    "sharing": {
+      "title": "Partilha",
+      "screenTitle": "Partilha da conta",
+      "helper": "Escolhe o que cada pessoa do teu agregado pode fazer com esta conta.",
+      "readOnlyHelper": "Só o titular da conta ou o titular do agregado pode mudar com quem ela é partilhada.",
+      "owner": "Titular",
+      "choices": {
+        "hidden": "Oculta",
+        "read": "Pode ver",
+        "write": "Pode editar"
+      },
+      "memberAccess": "Acesso de {{name}}",
+      "viewerHint": "Os observadores só podem ver, nunca editar.",
+      "unnamedMember": "Membro do agregado",
+      "laterShared": "Quem entrar no agregado mais tarde também a pode ver e editar.",
+      "laterPrivate": "Quem entrar no agregado mais tarde não a vê até alguém a partilhar com essa pessoa.",
+      "alone": "Ainda não há mais ninguém no teu agregado com quem a partilhar.",
+      "loading": "A carregar quem pode ver esta conta…",
+      "error": "Não foi possível carregar com quem esta conta está partilhada.",
+      "failures": {
+        "demo": "O modo de demonstração é só de leitura. A partilha não foi alterada.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "manager-required": "Só o titular da conta ou o titular do agregado pode mudar com quem ela é partilhada.",
+        "access": "Já não tens acesso para alterar a partilha desta conta.",
+        "cancelled": "A gravação foi cancelada porque o teu contexto de sessão mudou.",
+        "not-found": "Esta conta já não existe.",
+        "invalid": "Alguém entrou ou saiu do agregado desde que esta lista foi carregada. Atualiza e tenta novamente.",
+        "network-ambiguous": "A ligação foi perdida ao guardar. O resultado é desconhecido, pelo que esta aplicação não tentará novamente automaticamente. Atualiza antes de tentares novamente.",
+        "general": "Não foi possível guardar a partilha."
+      }
+    },
     "discardTitle": "Descartar alterações não guardadas?",
     "discardMessage": "As tuas alterações à conta não guardadas serão perdidas.",
     "discard": "Descartar alterações",
     "failures": {
       "demo": "O modo de demonstração é só de leitura. Nenhuma alteração foi guardada.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Já não tens acesso para alterar esta conta.",
       "cancelled": "A gravação foi cancelada porque o teu contexto de sessão mudou. Revê o formulário atual antes de tentares novamente.",
       "not-found": "Esta conta já não existe. O teu formulário não foi limpo.",
@@ -647,6 +683,7 @@
     "deleteFailures": {
       "demo": "O modo de demonstração é só de leitura. Esta conta não foi eliminada.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Já não tens acesso para eliminar esta conta.",
       "cancelled": "A eliminação foi cancelada porque o teu contexto de sessão mudou.",
       "not-found": "Esta conta já não existe.",
@@ -807,6 +844,7 @@
     "reviewResult": {
       "demo": "Os perfis de demonstração são apenas de leitura. As transações selecionadas não foram alteradas",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "É necessária autenticação multifator. As transações selecionadas não foram alteradas",
       "cancelled": "A alteração foi cancelada porque a tua sessão mudou. As transações selecionadas não foram alteradas",
       "network": "O resultado do pedido na rede é incerto. Verifica as transações selecionadas antes de tentares novamente",
@@ -923,6 +961,7 @@
         "not-found": "Essa transação ou associação já não está disponível. Atualiza e tenta novamente.",
         "demo": "Os perfis de demonstração são só de leitura. Nada foi alterado.",
         "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "mfa": "É necessária autenticação multifator. Nada foi alterado.",
         "cancelled": "A alteração foi cancelada porque a tua sessão mudou. Nada foi alterado.",
         "network": "O pedido teve um resultado de rede incerto. Verifica a transação antes de tentares novamente.",
@@ -1092,6 +1131,7 @@
     "result": {
       "demo": "Os perfis de demonstração são apenas de leitura. Nada foi registado.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Não tens acesso para registar esta transação. Nada foi registado.",
       "mfa": "É necessária verificação adicional. Nada foi registado.",
       "validation": "Estes dados foram rejeitados. Edita-os antes de voltares a submeter.",
@@ -1177,6 +1217,7 @@
     "failures": {
       "demo": "A importação de transações não está disponível no modo de demonstração.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "O teu acesso foi alterado. Tenta novamente.",
       "mfa": "É necessária verificação adicional.",
       "cancelled": "A importação foi cancelada antes de ser enviada.",
@@ -1285,6 +1326,7 @@
     "failures": {
       "demo": "Digitalizar recibos não está disponível no modo de demonstração.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "allowance": "O teu agregado familiar já utilizou a quota diária de digitalização de recibos. A quota é reposta à meia-noite UTC.",
       "unverified": "Verifica o teu endereço de email para digitalizar recibos.",
       "access": "O teu acesso foi alterado. Tenta novamente.",
@@ -1338,6 +1380,7 @@
     "actionResult": {
       "demo": "Os perfis de demonstração são apenas de leitura. Nada foi alterado",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "É necessária uma verificação adicional. Nada foi alterado",
       "cancelled": "A alteração foi cancelada porque a sessão mudou",
       "network": "O resultado é incerto porque a ligação foi perdida. Verifica a lista antes de tentares novamente",
@@ -4082,6 +4125,7 @@
       "failures": {
         "demo": "Esta ação não está disponível no modo de demonstração.",
         "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "access": "Não tens acesso para importar um extrato.",
         "mfa": "É necessária verificação adicional antes de poderes importar um extrato.",
         "cancelled": "A importação foi cancelada.",
@@ -4648,6 +4692,7 @@
     "accountBalance": "Saldo da conta",
     "available": "Disponível",
     "private": "Privada",
+    "viewOnly": "Só de leitura",
     "sharedBy": "Partilhada por {{name}}",
     "edit": "Editar",
     "delete": "Eliminar",
@@ -4987,6 +5032,7 @@
     "failures": {
       "demo": "Isto não está disponível no modo de demonstração.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Não tens acesso aos planos deste cartão.",
       "invalid": "O plano foi recusado. Verifica os dados e tenta novamente.",
       "conflict": "Uma destas transações já está ligada a outra prestação.",
@@ -5257,6 +5303,7 @@
       "gone": "Essa alteração já não pode ser aplicada: expirou, já foi decidida, ou uma transação ou categoria já não existe. A lista está atualizada.",
       "demo": "As alterações estão desativadas na demonstração.",
       "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "general": "Não foi possível guardar. Tenta novamente."
     }
   },

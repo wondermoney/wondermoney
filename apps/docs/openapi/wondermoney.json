@@ -211,6 +211,14 @@
           "isPrivate": {
             "type": "boolean"
           },
+          "myAccess": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "write",
+              "read"
+            ]
+          },
           "ownerFirstName": {
             "type": [
               "string",
@@ -245,6 +253,7 @@
           "fxStatus",
           "isOwnedByViewer",
           "isPrivate",
+          "myAccess",
           "ownerFirstName",
           "refreshedAt",
           "source"
@@ -275,6 +284,91 @@
         },
         "required": [
           "account"
+        ],
+        "additionalProperties": {}
+      },
+      "AccountShares": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "isPrivate": {
+            "type": "boolean"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "access": {
+                  "type": "string",
+                  "enum": [
+                    "owner",
+                    "write",
+                    "read",
+                    "hidden"
+                  ]
+                },
+                "appuserKey": {
+                  "type": "integer"
+                },
+                "firstName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isAccountOwner": {
+                  "type": "boolean"
+                },
+                "lastName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "owner",
+                    "admin",
+                    "member",
+                    "viewer"
+                  ]
+                },
+                "share": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "read",
+                    "write",
+                    null
+                  ]
+                }
+              },
+              "required": [
+                "access",
+                "appuserKey",
+                "firstName",
+                "isAccountOwner",
+                "lastName",
+                "role",
+                "share"
+              ]
+            }
+          }
+        },
+        "required": [
+          "accountKey",
+          "canManage",
+          "isPrivate",
+          "members"
         ],
         "additionalProperties": {}
       },
@@ -8884,6 +8978,94 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TransactionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account/{accountId}/shares": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get who sees and who may change an account",
+        "tags": [
+          "Accounts"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "accountId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountShares"
                 }
               }
             }

@@ -45,13 +45,13 @@ Mientras el ajuste esté activo, el servidor rechaza el asistente, la lectura de
 
 **Configuración > Privacidad > Exportar todos los datos** (o **Ajustes > Seguridad** en la aplicación móvil) descarga todo lo que ves en tu hogar, en un archivo zip llamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: un archivo JSON por tipo de datos: cuentas, transacciones, categorías y su configuración, comercios, etiquetas, divisiones de transacciones, reglas, pagos recurrentes, presupuestos, objetivos, préstamos, activos valorados manualmente y sus valoraciones, carteras y sus transacciones, la configuración de extracto de las tarjetas de crédito, las compras a plazos y sus calendarios, los tipos de cambio y precios manuales del hogar, tus plantillas de transacción, tu lista de seguimiento y tus preferencias. Las filas se refieren entre sí mediante identificadores que solo tienen sentido dentro de la exportación.
+- `data/`: un archivo JSON por tipo de datos: cuentas (con cómo se comparten: con el hogar, o privadas y quién puede verlas o editarlas), transacciones, categorías y su configuración, comercios, etiquetas, divisiones de transacciones, reglas, pagos recurrentes, presupuestos, objetivos, préstamos, activos valorados manualmente y sus valoraciones, carteras y sus transacciones, la configuración de extracto de las tarjetas de crédito, las compras a plazos y sus calendarios, los tipos de cambio y precios manuales del hogar, tus plantillas de transacción, tu lista de seguimiento y tus preferencias. Las filas se refieren entre sí mediante identificadores que solo tienen sentido dentro de la exportación.
 - `csv/`: transacciones, cuentas, transacciones de cartera y posiciones actuales, para hojas de cálculo. Los importes usan el punto como separador decimal y las fechas tienen el formato `AAAA-MM-DD`.
 - `manifest.json`: la versión del formato, cuándo se hizo la exportación y el número de filas y una suma de comprobación SHA-256 de cada archivo.
 
 Qué no se incluye:
 
-- Las cuentas privadas de los demás miembros, ni sus transacciones, divisiones, etiquetas, pagos recurrentes, reglas, configuración de tarjeta y compras a plazos. Sus activos privados, sus préstamos, sus plantillas de transacción y su lista de seguimiento tampoco se incluyen.
+- Las cuentas privadas de los demás miembros que no están compartidas contigo, ni sus transacciones, divisiones, etiquetas, pagos recurrentes, reglas, configuración de tarjeta y compras a plazos. Los activos privados de los demás miembros, sus préstamos, sus plantillas de transacción y su lista de seguimiento tampoco se incluyen.
 - Contraseñas, sesiones, secretos de autenticación en dos pasos, credenciales bancarias y tokens de conexión. Una cuenta que estuvo conectada a un banco lo indica, sin ninguno de los datos de la conexión.
 - Registros de auditoría, uso de IA y datos de analítica.
 - Archivos adjuntos a transacciones, como recibos.

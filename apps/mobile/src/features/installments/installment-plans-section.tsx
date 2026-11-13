@@ -26,8 +26,9 @@ export type InstallmentPlansSectionProps = Readonly<{
   state: InstallmentPlansSectionState
   locale: string
   onOpenPlan: (planId: number) => void
-  onCreatePlan: () => void
-  onAcceptSuggestion: (suggestionKey: string) => void
+  /** Omitted (an account the caller can only view), plans and suggestions only show. */
+  onCreatePlan?: () => void
+  onAcceptSuggestion?: (suggestionKey: string) => void
 }>
 
 /**
@@ -39,11 +40,12 @@ export type InstallmentPlansSectionProps = Readonly<{
 export function InstallmentPlansSection({ state, locale, onOpenPlan, onCreatePlan, onAcceptSuggestion }: InstallmentPlansSectionProps) {
   const { t } = useTranslation()
   const plans = state.plans.status === 'loaded' ? state.plans.data : null
-  const suggestions = state.suggestions.status === 'loaded' ? state.suggestions.data : []
+  // Suggestions are offers to add a plan, so a view-only account shows none.
+  const suggestions = state.suggestions.status === 'loaded' && onAcceptSuggestion ? state.suggestions.data : []
 
   return (
     <Section
-      action={<Button label={t('installments.create.action')} onPress={onCreatePlan} size="sm" variant="link" />}
+      action={onCreatePlan ? <Button label={t('installments.create.action')} onPress={onCreatePlan} size="sm" variant="link" /> : undefined}
       testID="installment-plans"
       title={t('installments.title')}
       variant="open"
@@ -62,7 +64,7 @@ export function InstallmentPlansSection({ state, locale, onOpenPlan, onCreatePla
           <Text tone="muted" variant="meta">{t('installments.empty')}</Text>
         ) : null}
 
-        {suggestions.length > 0 ? (
+        {suggestions.length > 0 && onAcceptSuggestion ? (
           <View style={styles.suggestions} testID="installment-suggestions">
             <Text accessibilityRole="header" variant="metaStrong">{t('installments.suggestions.title')}</Text>
             <Text tone="muted" variant="label">{t('installments.suggestions.helper')}</Text>

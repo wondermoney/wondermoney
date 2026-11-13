@@ -3,7 +3,7 @@ import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { addAccount, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addShare, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { ApiToken } from '@entity/ApiToken';
@@ -140,6 +140,20 @@ describe('POST /v1/mcp', () => {
     const names = data.accounts.map((account) => account.name);
     expect(names).not.toContain('Partner private');
     expect(names).not.toContain('Other household');
+  });
+
+  it('lists a partner\'s private account once it is shared with the token\'s member', async () => {
+    const em = db.em();
+    const { household, partner, token } = await seedToken();
+    const shared = await addAccount(em, household, { appuserCurrencyBalance: 900, isPrivate: true, name: 'Shared with me', owner: partner });
+    await addAccount(em, household, { appuserCurrencyBalance: 800, isPrivate: true, name: 'Still hidden', owner: partner });
+    await addShare(em, household, shared, household.appuser, 'read');
+
+    const response = await post(token, { id: 5, jsonrpc: '2.0', method: 'tools/call', params: { arguments: {}, name: 'list_accounts' } });
+
+    const names = (JSON.parse(response.body.result.content[0].text) as { accounts: { name: string }[] }).accounts.map((account) => account.name);
+    expect(names).toContain('Shared with me');
+    expect(names).not.toContain('Still hidden');
   });
 
   it('rejects a revoked token with 401', async () => {

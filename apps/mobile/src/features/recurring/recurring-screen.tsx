@@ -36,7 +36,7 @@ import type { RecurringAgendaEntry, RecurringRowViewModel, RecurringSummaryViewM
 export type RecurringViewState =
   | { status: 'loading' | 'error' | 'invalid-response' | 'access-transition' | 'no-account' }
   | { status: 'loaded' | 'refresh-error'; rows: readonly RecurringRowViewModel[]; summary: RecurringSummaryViewModel | null; refreshing: boolean; itemsUnavailable?: boolean; summaryUnavailable?: boolean; agenda?: readonly RecurringAgendaGroup[]; agendaMonth?: string; agendaLoading?: boolean; agendaUnavailable?: boolean }
-export type RecurringActionResult = 'success' | 'unknown' | 'demo' | 'read-only' | 'mfa' | 'cancelled' | 'network' | 'invalid' | 'access' | 'category' | 'error'
+export type RecurringActionResult = 'success' | 'unknown' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'invalid' | 'access' | 'category' | 'error'
 export type RecurringScanResult = RecurringActionResult | { status: 'success'; counts: RecurringDetectionResult }
 type CategoryOption = Readonly<{ id: number; name: string }>
 type Props = Readonly<{

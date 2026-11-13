@@ -43,7 +43,23 @@ export const creditCardSettingsSchema = z.object({
 
 export type CreditCardSettingsDto = z.infer<typeof creditCardSettingsSchema>
 
-export const accountSummarySchema = z.object({
+/**
+ * The caller's access to an account (#95): `owner` owns it, `write` may change it and its
+ * transactions, `read` only sees them. A value this build doesn't know reads as `null` and then
+ * falls back as a missing one does (the server enforces writes either way).
+ */
+export const accountAccessSchema = tolerantEnum(['owner', 'write', 'read'], null)
+export type AccountAccess = 'owner' | 'write' | 'read'
+
+/**
+ * An older API sends no `myAccess`: before per-member sharing every account a member could see,
+ * they could edit, so it reads as `owner` for their own and `write` for anyone else's.
+ */
+export const resolveAccountAccess = (account: { isOwnedByViewer: boolean; myAccess?: AccountAccess | null }): AccountAccess => (
+  account.myAccess ?? (account.isOwnedByViewer ? 'owner' : 'write')
+)
+
+const accountSummaryObjectSchema = z.object({
   accountFinancialInstitutionKey: z.object({
     displayName: z.string().max(255).nullable(),
     logoUrl: z.string().nullable(),
@@ -56,8 +72,8 @@ export const accountSummarySchema = z.object({
   appuserCurrencyBalance: z.number().finite().nullable(),
   balance: z.number().finite().nullable(),
   currencyKey: currencySchema,
-  // Household privacy state + whether the viewer owns the account, driving the
-  // owner-only privacy toggle on mobile's account edit screen.
+  // Household privacy state + whether the viewer owns the account. Who else sees it, and how,
+  // is the account's sharing (`GET /v1/account/:id/shares`); `myAccess` is the caller's part.
   isOwnedByViewer: z.boolean(),
   isPrivate: z.boolean(),
   refreshedAt: z.iso.datetime().nullable(),
@@ -77,7 +93,13 @@ export const accountSummarySchema = z.object({
   // The card's cycle and limit, or null when the account is not a credit card. Optional: an
   // older API does not send it.
   creditCard: creditCardSettingsSchema.nullish().catch(null),
+  myAccess: accountAccessSchema.optional(),
 })
+
+export const accountSummarySchema = accountSummaryObjectSchema.transform((account) => ({
+  ...account,
+  myAccess: resolveAccountAccess(account),
+}))
 
 export const accountUpdateWriteSchema = z.object({
   accountName: z.string().min(1).max(100).optional(),

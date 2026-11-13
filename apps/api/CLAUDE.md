@@ -128,10 +128,18 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 - **Tenant filter** (`database/filters/tenant-filter.ts`): a global default-deny MikroORM
   filter. With no tenant context set (workers, invite provisioning) it is a deliberate system
   bypass. `assertTenantResolved` throws when `req.user` is set but `req.tenant` is not.
-- **Privacy**: `Account.isPrivate` hides an account, its transactions, its `RecurringSeries`
-  and every aggregate from the other member. Raw SQL, Kysely and QueryBuilder paths (account
-  metrics, cashflow, budget spending, portfolio) bypass the ORM filter, so they carry explicit
-  tenant and privacy predicates. Any new raw query needs both.
+- **Privacy and sharing** (`services/account/account-access.ts` holds the rule): a shared account
+  (`isPrivate = false`) is seen and changed by every member; a private one by its owner and the
+  members with an `AccountShare` (`read` or `write`), and by nobody else, in any list, detail or
+  aggregate (a 404, never a 403). A viewer reads only. The tenant filter applies it through
+  `visibleAccountCond`; raw SQL, Kysely and QueryBuilder paths (account metrics, cashflow, budget
+  spending, portfolio, exports) bypass the filter, so they carry explicit tenant predicates and
+  `visibleAccountSql`. Any new raw query needs both. Writes to an account's data go through
+  `assertAccountWritable` (403 `account_read_only`), or the `requireWritableAccount` /
+  `requireWritableTransaction` route guards; `account-write-guard.http.test.ts` walks every write
+  route and `hidden-account-aggregates.http.test.ts` every aggregate. Shares are changed by the
+  account owner or the household owner (`PUT /v1/account/:accountId/shares`); a removed member's
+  shares stay, and nobody else gains access to their private accounts.
 - **Invites**: `HouseholdInvite` is a 7-day single-use token carrying the role to join with; a
   pending one holds a seat. The seat count and the write run under the tenant row lock
   (`lockTenant`). A new signup joins through the auth callback's `inviteToken`; an existing,

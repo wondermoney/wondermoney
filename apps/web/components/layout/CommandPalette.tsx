@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRouter } from "@/i18n/navigation";
+import { writableAccounts } from "@/lib/account/account-access";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useBudgetsFull from "@/lib/api/budget/useBudgetsFull";
 import useGoals from "@/lib/api/goals/useGoals";
@@ -232,6 +233,8 @@ export default function CommandPalette() {
   }, []);
 
   const accounts = accountsQuery.data?.accounts ?? [];
+  // Transactions are added and imported only into accounts the person may change.
+  const editableAccounts = writableAccounts(accounts);
   const budgets = budgetsQuery.data?.budgets ?? [];
   const goals = goalsQuery.data?.goals ?? [];
   const portfolios = portfoliosQuery.data?.portfolios ?? [];
@@ -332,7 +335,7 @@ export default function CommandPalette() {
   };
 
   const actionItems: PaletteItem[] = [];
-  if (accounts.length > 0) {
+  if (editableAccounts.length > 0) {
     actionItems.push({
       id: "action:add-transaction",
       group: "actions",
@@ -519,19 +522,19 @@ export default function CommandPalette() {
 
       {/* The shell-level action dialogs — the same components the pages open
           from their buttons, driven here through their own isOpen/setOpen. */}
-      {accounts.length > 0 ? (
+      {editableAccounts.length > 0 ? (
         <AccountTransactionAddModal
           isOpen={addTransactionOpen}
           setOpen={setAddTransactionOpen}
-          accounts={accounts}
+          accounts={editableAccounts}
           trigger={null}
         />
       ) : null}
-      {accounts.length > 0 && canImportFiles ? (
+      {editableAccounts.length > 0 && canImportFiles ? (
         <AccountTransactionImportModal
           isOpen={importOpen}
           setOpen={setImportOpen}
-          accounts={accounts}
+          accounts={editableAccounts}
           trigger={null}
         />
       ) : null}

@@ -1,40 +1,103 @@
 ---
 title: Account privacy
-description: Control which accounts are shared with the household and which are visible only to you.
+description: Share an account with the whole household, or keep it private and choose, for each member, whether they can't see it, can view it or can edit it.
 ---
 
-Every account in a household has a privacy setting. A shared account is visible to everyone in the household; a private account is visible only to the person who owns it, whatever the other people's roles.
+Every account in a household is either shared with the household or private. A shared account is visible to everyone and everyone can change it. A private account is visible only to its owner and to the members it is shared with, and for each of them you choose whether they can only view it or can also edit it.
 
-By default, an account is shared with the household. Change the setting on the account when you want it to stay private.
+By default, an account is shared with the household. Nothing changes for an account until you change its sharing.
 
-<DocsImage
-  src="/images/docs/household/account-privacy-privacy-toggle.png"
-  alt="Account details with the privacy toggle set, switching the account between shared and private."
-  caption="The privacy toggle decides whether an account is shared with the household."
-  width={384}
-  height={380}
-/>
+## Shared with the household
 
-## Setting account privacy
+A shared account, with its transactions and balance, appears in everyone's view: their accounts list, totals, net worth, reports and budgets. Everyone in the household can edit it and its transactions, except viewers, who only see it.
 
-Open the account and choose its privacy setting:
+People who join the household later get the same access to a shared account as everyone else.
 
-- **Shared** — everyone in the household sees the account, its transactions, and its balance. Viewers see it but can't change it.
-- **Private** — only the person who owns the account sees it, including when the others are the owner or admins. Everyone else's views, including net worth, exclude the account.
+## Private, with access per member
 
-Private accounts keep a person's personal spending out of the shared view, while shared accounts stay part of the household's common picture.
+A private account sets access for each person in the household, one by one:
 
-## Recurring series privacy
+- **Hidden**: they don't see the account at all.
+- **Can view**: they see the account, its transactions and its balance, and it counts in their totals, but they can't change anything on it.
+- **Can edit**: they see the account and can change it and its transactions, as on a shared account.
 
-The owner can also set privacy for recurring series. A private recurring series is visible only to the person who owns it; a shared one appears in everyone's view. This works separately from the account-level setting.
+The account's owner always has full access. Giving everyone the most access they can have (**Can edit**, or **Can view** for a viewer) makes the account shared with the household again.
 
-## Privacy by data type
+Someone who joins the household later doesn't see a private account until it is shared with them.
 
-Privacy applies per data type. Accounts, transactions, categories, goals, budgets, portfolio, cash flow, and net worth follow the same household rules, and the owner decides which of these stay visible to everyone and which are limited to one person.
+### Changing the sharing
+
+Open the account's edit screen: on the web, choose **Edit** on the account in the accounts list; in the mobile app, open the account and edit it. The sharing section lists everyone in the household with **Hidden**, **Can view** or **Can edit** next to each name. Pick the access for each person and save.
+
+When you are the only person in the household, there is nobody to share with yet, and you can only mark the account as private. People who join later then don't see it until you share it with them.
+
+Members who can see the account but can't change its sharing see how it is shared, without the choices.
+
+### What "Can view" allows
+
+A member who can view an account sees it as everyone else does: the account and its balance, its transactions with their categories, tags, splits and files, and its place in totals, net worth, reports and budgets.
+
+They can't change anything on it. On that account they can't:
+
+- edit, recalculate or delete the account;
+- add, import, edit or delete transactions;
+- change a transaction's category, tags or notes, split it, attach files or link a reimbursement;
+- change the credit card settings or installment plans.
+
+The app hides these actions on an account you can only view. If a change is attempted anyway, for example from an older version of the app, it is refused with a message saying that you can view the account but not change it.
+
+### Viewers
+
+A viewer in the household only ever views, whatever the account's sharing says. For a viewer, a private account offers only **Hidden** and **Can view**.
+
+## What "Hidden" means
+
+For a member who can't see it, a private account and its transactions don't exist. They are left out of everything that member sees:
+
+- the accounts and transactions lists, and searches;
+- totals, net worth, cash flow and reports;
+- budgets, recurring payments, forecasts and insights;
+- the calendar feed and emails, such as the monthly story;
+- the data export;
+- the assistant, MCP clients and API tokens.
+
+## Who can change the sharing
+
+Two people can change an account's sharing:
+
+- the account's owner;
+- the household's owner, for accounts they can see.
+
+The household's owner does not see the other members' private accounts automatically: a private account that is not shared with them stays hidden from them too, and they can't change its sharing. Admins can change the sharing only of their own accounts.
+
+## When someone leaves or is removed
+
+When a member leaves the household or is removed from it, their private accounts stay in the household, shared as they were:
+
+- The members an account was shared with keep their access, view or edit.
+- Nobody else gains access, not even the household's owner.
+- If the person joins the household again, they see their accounts again, with full access.
+
+See [Leave or remove a member](/en/docs/household/leave-or-remove).
+
+## Links between accounts
+
+A transfer or a reimbursement that links two accounts counts only when the same people can see both accounts, so nobody sees half of a link. See [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions) and [Understand transactions](/en/docs/accounts-transactions/understand-transactions).
+
+## What follows the account
+
+Recurring payments, forecasts and calendar feed bills follow the sharing of their account: whoever can see the account sees them. Portfolios are shared with the household; see [Link a portfolio to its account](/en/docs/portfolio-investments/link-portfolio-account#private-accounts-in-a-household). Manually valued assets have their own private setting; see [Private assets in a household](/en/docs/portfolio-investments/manual-assets#private-assets-in-a-household).
+
+## Exports
+
+The data export includes the accounts you can see, with their sharing: whether each one is shared with the household or private, and who can view or edit it. See [Data and privacy](/en/docs/settings-security-privacy/data-privacy#export-your-data).
+
+Restoring an export brings every account back as yours, since the people it was shared with are not matched to the people in your household. A private account comes back private to you, ready to share again.
 
 ## Related pages
 
 - [Household and multi-user support](/en/docs/household)
+- [What is a household](/en/docs/household/what-is-a-household)
 - [Shared context](/en/docs/household/shared-context)
-- [Connect bank account](/en/docs/accounts-transactions/connect-bank-account)
+- [Leave or remove a member](/en/docs/household/leave-or-remove)
 - [Data privacy](/en/docs/settings-security-privacy/data-privacy)

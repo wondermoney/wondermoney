@@ -35,7 +35,7 @@ When you keep fixing the same kind of transaction, WonderMoney offers a rule tha
 
 - **Like this** means the same merchant, or the same start of the description once references and numbers are left out. "TRF MB WAY 912345678 JOAO" and "TRF MB WAY 913333333 ANA" both start with "TRF MB WAY". A card header such as "COMPRA 1192" is skipped, so "COMPRA 1192 CONTINENTE" counts as "CONTINENTE".
 - Changing several transactions at once counts each of them, and each transaction counts once.
-- Only the changes you make yourself count. Other members' changes, an assistant proposal you confirm, and categories set by a rule, by learned categorization or by an import do not. Transactions on other members' private accounts never count.
+- Only the changes you make yourself count. Other members' changes, an assistant proposal you confirm, and categories set by a rule, by learned categorization or by an import do not. Transactions on private accounts you can't see never count.
 - Choose **Create rule** to open the rule editor already filled in, with its preview, and check it before you save. Choose **Don't suggest again** to stop that suggestion for good. If you do neither, it may come back the next time.
 
 No suggestion appears when an active rule already gives those transactions that category, or when WonderMoney already recognises them by the category you chose for their merchant. That learned category is reused only when a new transaction's description is exactly the merchant's name, so a rule is still suggested for descriptions with more in them.
@@ -44,7 +44,7 @@ No suggestion appears when an active rule already gives those transactions that 
 
 While you edit, the preview beside the form shows how many of your transactions the rule matches, how many of them it would change, and the 50 most recent matches with the change each would get. It updates a moment after you stop typing.
 
-The preview judges the rule on its own and covers the household's transactions you can see, hidden ones included. It never shows other members' private accounts. A match can show **No change** when the transaction already has those values, or when you set that value yourself (see below).
+The preview judges the rule on its own and covers the household's transactions you can see, hidden ones included. It never shows private accounts you can't see. A match can show **No change** when the transaction already has those values, or when you set that value yourself (see below).
 
 Saving a rule does not change the transactions you already have. To change them too, apply the rule (see below).
 
@@ -56,7 +56,7 @@ To run every active rule over the transactions you already have (for example aft
 
 - The count you confirm is exactly what applying changes.
 - Applying runs in the background: the dialog shows its progress, and you can close it while it runs. A message tells you how many transactions changed when it finishes.
-- It covers the household's transactions you can see, hidden ones included, but not deleted ones or other members' private accounts. Everything listed under "What rules never change" still holds.
+- It covers the household's transactions you can see, hidden ones included, but not deleted ones or private accounts you can't see. Everything listed under "What rules never change" still holds.
 - Applying the same rule again changes nothing more. Each change is recorded in the transaction's activity.
 - Only one run at a time per household: wait for one to finish before starting another.
 
@@ -64,7 +64,7 @@ To run every active rule over the transactions you already have (for example aft
 
 - Anything you set by hand: a category you chose, a merchant or description you edited, and notes you wrote. The rule still counts as a match, but leaves those fields alone.
 - The transaction type. Only transfer matching marks a transaction as a transfer.
-- Transactions on other members' private accounts. A rule acts for the member who last changed its conditions or actions, and only on transactions that member can see.
+- Transactions on accounts the rule's member can't edit. A rule acts for the member who last changed its conditions or actions, and only on transactions that member can see and edit: never on private accounts hidden from them or that they can only view.
 
 ## Order
 

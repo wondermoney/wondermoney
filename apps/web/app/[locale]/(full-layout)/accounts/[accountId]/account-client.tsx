@@ -1,7 +1,7 @@
 "use client";
 
 import { startOfDay, subDays } from "date-fns";
-import { Lock, Plus, Upload, Users } from "lucide-react";
+import { Eye, Lock, Plus, Upload, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -27,6 +27,10 @@ import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  canEditAccount,
+  readOnlyAccountKeys,
+} from "@/lib/account/account-access";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
 import type { GetAccountForecastResponse } from "@/lib/api/account/useAccountForecast";
@@ -180,6 +184,8 @@ export default function AccountClient({
     (candidate) => candidate.accountKey === account.accountKey,
   );
   const accountName = account.accountName ?? t("unknown");
+  // Shared to view only (or a household viewer): the page shows everything and changes nothing.
+  const canEdit = canEditAccount(account);
   // `?? t("unknown")` printed "Unknown" under the title of every manual
   // account — a placeholder posing as a fact about the bank. A manual account
   // has no institution; the honest rendering is no line at all. § 9 rule 4.
@@ -231,6 +237,7 @@ export default function AccountClient({
           accountKey={account.accountKey}
           currency={account.currencyKey.code}
           categories={configsData?.categories ?? []}
+          readOnly={!canEdit}
         />
       ) : null}
 
@@ -308,6 +315,7 @@ export default function AccountClient({
                 withFilters={false}
                 withPagination={false}
                 sticky={false}
+                readOnlyAccountKeys={readOnlyAccountKeys([account])}
                 transactionDateRange={transactionDateRange}
                 setTransactionDateRange={(dataRange) =>
                   setTransactionDateRange(dataRange)
@@ -319,10 +327,12 @@ export default function AccountClient({
               <p className="text-muted-foreground text-sm">
                 {t("empty-transactions-description")}
               </p>
-              <Button onClick={openAddManualTransactionModal}>
-                <Plus className="size-4" />
-                {t("add-transaction")}
-              </Button>
+              {canEdit ? (
+                <Button onClick={openAddManualTransactionModal}>
+                  <Plus className="size-4" />
+                  {t("add-transaction")}
+                </Button>
+              ) : null}
             </div>
           )}
         </div>
@@ -349,6 +359,12 @@ export default function AccountClient({
               <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
                 <Lock className="size-3" />
                 {t("account-private")}
+              </span>
+            )}
+            {!canEdit && (
+              <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+                <Eye className="size-3" />
+                {t("accountSharing.view-only")}
               </span>
             )}
             {!account.isOwnedByViewer && account.ownerFirstName && (
@@ -381,7 +397,7 @@ export default function AccountClient({
           />
         }
         actions={
-          transactionAccount ? (
+          transactionAccount && canEdit ? (
             <>
               <AccountTransactionImportModal
                 isOpen={isImportTransactionModalOpen}

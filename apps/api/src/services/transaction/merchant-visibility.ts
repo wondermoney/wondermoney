@@ -2,6 +2,7 @@ import { sql } from 'kysely';
 
 import { DI } from '@app/app';
 import { sqlQuery } from '@app/database/sql';
+import { visibleAccountSql } from '@service/account/account-visibility-sql';
 
 /**
  * Merchants the household knows only from transactions on another member's private accounts.
@@ -23,7 +24,7 @@ export async function findMerchantsSeenOnlyOnOthersPrivateAccounts(tenantKey: nu
   if (merchantKey !== undefined) query = query.where('t.transaction_merchant_key', '=', merchantKey);
   const rows = await query
     .groupBy('t.transaction_merchant_key')
-    .having(sql<boolean>`bool_and(coalesce(a.is_private and a.account_owner_appuser_key <> ${viewerAppuserKey}, false))`)
+    .having(sql<boolean>`bool_and(coalesce(not ${sql.raw(visibleAccountSql('a', viewerAppuserKey))}, false))`)
     .execute();
   return rows.map((row) => row.merchantKey as number);
 }

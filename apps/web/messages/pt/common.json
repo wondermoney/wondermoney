@@ -217,6 +217,7 @@
   "edit-account": "Editar Conta",
   "edit-account-description": "Edita as informações da conta. Clica em guardar quando estiveres pronto.",
   "account-updated": "Conta atualizada",
+  "account-update-error": "Não foi possível guardar a conta. Tenta novamente.",
   "credit-card-account": "Conta de cartão de crédito",
   "credit-card-account-description": "Acompanha o ciclo do extrato deste cartão: quando fecha, quando vence e quanto crédito resta.",
   "credit-card-close-day": "O extrato fecha a",
@@ -3154,5 +3155,26 @@
     },
     "link-installment-more": "Mais {amount} do que esta transação",
     "link-installment-less": "Menos {amount} do que esta transação"
+  },
+  "accountSharing": {
+    "title": "Partilha",
+    "description": "Escolhe quem do teu agregado vê esta conta e as suas transações, e quem as pode alterar.",
+    "owner": "Titular",
+    "hidden": "Oculta",
+    "can-view": "Pode ver",
+    "can-edit": "Pode editar",
+    "access-label": "Acesso de {name}",
+    "unnamed-member": "Membro do agregado",
+    "later-members": "Quem entrar no teu agregado mais tarde pode editar uma conta partilhada com todos. Uma conta privada só lhe aparece quando alguém a partilhar.",
+    "nobody-yet": "Ainda não há mais ninguém no teu agregado com quem partilhar esta conta.",
+    "manager-only": "Só o titular da conta ou o titular do agregado podem alterar quem tem acesso.",
+    "load-error": "Não foi possível carregar a partilha. Podes guardar as outras alterações na mesma.",
+    "save-error": "Não foi possível guardar a partilha. Tenta novamente.",
+    "view-only": "Só de leitura",
+    "view-only-description": "Podes ver esta conta, mas não alterá-la.",
+    "errors": {
+      "account_read_only": "Podes ver esta conta, mas não alterá-la.",
+      "account_share_manager_required": "Só o titular da conta ou o titular do agregado podem alterar quem tem acesso."
+    }
   }
 }

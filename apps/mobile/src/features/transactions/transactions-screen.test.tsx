@@ -250,6 +250,32 @@ describe('TransactionsScreen', () => {
     expect(view.getByRole('checkbox', { name: 'Select Corner shop' })).toBeChecked()
   })
 
+  it('offers no change on a row of an account the caller can only view, only its details', async () => {
+    const other = { ...transactionFixture, transactionKey: 42, transactionMerchantKey: { ...transactionFixture.transactionMerchantKey, name: 'Bakery' }, accountKey: { ...transactionFixture.accountKey, accountKey: 8, accountName: 'Mine' } }
+    const extra = { onSetTags: jest.fn(), onCreateTag: jest.fn(), onSaveSplit: jest.fn(), onDeleteOne: jest.fn(), onCreateRule: jest.fn(), onMarkReimbursement: jest.fn(), onSetTransfer: jest.fn(), readOnlyAccountIds: new Set([7]) }
+    const { view } = await renderLoaded([transactionFixture, other], {}, extra)
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    expect(view.getAllByRole('menuitem').map((item) => item.props.accessibilityLabel)).toEqual(['Show details'])
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Show details' }))
+    expect(view.queryByRole('button', { name: 'Mark as reviewed' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit amount' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit tags' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Create rule' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Split/ })).not.toBeOnTheScreen()
+    // The writable account's row keeps its actions, and is the only one selection can reach.
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bakery' }))
+    expect(view.getByRole('menuitem', { name: 'Edit amount' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Select' }))
+    expect(view.getByRole('checkbox', { name: 'Select Bakery' })).toBeChecked()
+    expect(view.queryByRole('checkbox', { name: 'Select Corner shop' })).not.toBeOnTheScreen()
+  })
+
+  it('offers no selection at all when every row is on a view-only account', async () => {
+    const { view } = await renderLoaded([transactionFixture], {}, { readOnlyAccountIds: new Set([7]) })
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    expect(view.queryByRole('menuitem', { name: 'Select' })).not.toBeOnTheScreen()
+  })
+
   it('leads with one row of figures and one review line that sends "Review them" to the needs-review filter', async () => {
     const lead = { flows: { status: 'loaded' as const, value: { moneyIn: 8724, moneyOut: 5778.93 } }, reviewCount: { status: 'loaded' as const, value: 7 } }
     const { view, changeFilters } = await renderLoaded([transactionFixture], { limit: 100 }, { lead, leadCurrency: 'EUR', total: 95, freshness: { kind: 'updated', at: new Date(Date.now() - 86_400_000).toISOString() } })

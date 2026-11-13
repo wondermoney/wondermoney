@@ -22,7 +22,7 @@ WonderMoney puede sugerir una categoría sin enviar nada a un servicio de IA. Ap
 
 Solo sugiere una categoría cuando está segura; si no, se queda callada y la transacción queda para que la categorices tú o, si la IA está configurada, para una sugerencia de IA. La sugerencia local se ejecuta antes de cualquier paso de IA y no necesita ningún proveedor de IA. Nunca envía tus datos a ningún sitio, así que también se ejecuta cuando has ocultado la IA en tus ajustes. Los reintegros y las transferencias nunca se etiquetan así, porque su descripción no dice para qué fue el dinero.
 
-Cuantas más transacciones confirmes, mejores serán las sugerencias locales. Las cuentas privadas de un miembro del hogar nunca entrenan las sugerencias de otro miembro.
+Cuantas más transacciones confirmes, mejores serán las sugerencias locales. Las cuentas privadas que no ves nunca entrenan tus sugerencias.
 
 Si tu hogar tiene reglas, se aplican primero a cada transacción nueva, venga de la sincronización bancaria, de un archivo importado, de un recibo o de una que añades a mano. Una categoría fijada por una regla prevalece sobre la correspondencia aprendida, y esa transacción no se envía para una sugerencia de IA. Las reglas nunca cambian una categoría que elegiste tú, ni una descripción o comercio que escribiste o editaste, y se aplican una sola vez, cuando llega la transacción: una sincronización posterior no deshace tus cambios. El historial de actividad de la transacción indica la regla que la cambió.
 
@@ -100,7 +100,7 @@ El interruptor solo afecta a tu hogar: todas las personas del hogar ven el mismo
 
 WonderMoney reconoce una transferencia entre dos de tus cuentas cuando encuentra los dos lados: el dinero que sale de una cuenta y el mismo importe que llega a la otra, como mucho unos días después. Las dos filas quedan entonces fuera de los ingresos y del gasto. Un pago a un bróker, o a una cuenta que no has conectado, no tiene el otro lado, así que sigue siendo un pago hasta que lo marques.
 
-Entre dos cuentas en monedas distintas, los importes no coinciden. WonderMoney convierte el importe que salió al tipo de cambio de ese día y empareja los dos cuando el importe que llegó está a menos de un 2 por ciento de él, lo que cubre el margen de cambio y las comisiones del banco. Si no hay tipo de cambio para ese día, o hay dos coincidencias igual de probables, deja las dos filas como están y puedes marcar tú la transferencia. Nunca empareja una cuenta compartida con una cuenta privada, ni cuentas privadas de dos miembros distintos.
+Entre dos cuentas en monedas distintas, los importes no coinciden. WonderMoney convierte el importe que salió al tipo de cambio de ese día y empareja los dos cuando el importe que llegó está a menos de un 2 por ciento de él, lo que cubre el margen de cambio y las comisiones del banco. Si no hay tipo de cambio para ese día, o hay dos coincidencias igual de probables, deja las dos filas como están y puedes marcar tú la transferencia. Solo empareja dos cuentas cuando las ven exactamente las mismas personas: nunca una cuenta compartida con una privada, ni dos cuentas privadas compartidas con personas distintas.
 
 - **En la web**, abre el menú de la transacción, elige **Editar** y activa **Marcar como transferencia**.
 - **En la aplicación móvil**, abre el menú de la fila y elige **Marcar como transferencia**.

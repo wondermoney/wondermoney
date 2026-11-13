@@ -47,15 +47,18 @@ export function suggestionDraft(
  * A credit card's installment purchases on its page: what is still to be charged, the card's
  * plans (each opening its schedule), and the rows that look like a purchase in installments.
  * Upcoming installments are projections only, so nothing here moves the card's balance.
+ * On a card shared to view only (`readOnly`) the plans show but none can be created.
  */
 export default function CardInstallments({
   accountKey,
   currency,
   categories,
+  readOnly = false,
 }: {
   accountKey: number;
   currency: string;
   categories: Category[];
+  readOnly?: boolean;
 }) {
   const t = useTranslations();
   const formatPlanDay = useFormatPlanDay();
@@ -86,10 +89,12 @@ export default function CardInstallments({
       title={t("installments.title")}
       busy={isLoading}
       aside={
-        <Button variant="secondary" size="sm" onClick={() => openForm()}>
-          <Plus className="size-4" aria-hidden="true" />
-          {t("installments.new-plan")}
-        </Button>
+        readOnly ? undefined : (
+          <Button variant="secondary" size="sm" onClick={() => openForm()}>
+            <Plus className="size-4" aria-hidden="true" />
+            {t("installments.new-plan")}
+          </Button>
+        )
       }
     >
       {isLoading ? (
@@ -158,7 +163,7 @@ export default function CardInstallments({
             </p>
           )}
 
-          {suggestions.length > 0 ? (
+          {suggestions.length > 0 && !readOnly ? (
             <section
               aria-labelledby="installment-suggestions-heading"
               className="flex flex-col gap-3"

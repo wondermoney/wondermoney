@@ -6,6 +6,7 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
+import { accountActor, assertAccountWritable } from '@service/account/account-access';
 import { toCalendarDate } from '@service/account/credit-card-cycle';
 import { loadUpcomingInstallments } from '@service/installment/installment-plan.service';
 import { startOfUtcDay } from '@service/installment/installment-schedule';
@@ -38,8 +39,9 @@ interface SummaryTotals {
   variableMinTotal: number;
 }
 
+/** A series follows its account: changing it needs write access to that account. */
 export async function confirmRecurringSeries(req: AuthedRequest, res: Response) {
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   recurringSeries.status = RecurringSeriesStatus.confirmed;
   await DI.em.flush();
   return res.sendStatus(200);
@@ -52,7 +54,7 @@ export async function detectRecurring(req: AuthedRequest, res: Response) {
 }
 
 export async function dismissRecurringSeries(req: AuthedRequest, res: Response) {
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   recurringSeries.status = RecurringSeriesStatus.dismissed;
   await DI.em.flush();
   return res.sendStatus(200);
@@ -171,7 +173,7 @@ export async function updateRecurringSeries(req: AuthedRequest, res: Response) {
   const {
     body: { categoryKey, ...updates },
   } = await zParse(updateRecurringSchema, req);
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   Object.assign(recurringSeries, updates);
   if (categoryKey !== undefined) {
     recurringSeries.categoryKey =
@@ -239,6 +241,12 @@ async function getRecurringSeriesOrFail(req: AuthedRequest) {
   if (!recurringSeries) {
     throw new NotFoundError('Recurring payment not found');
   }
+  return recurringSeries;
+}
+
+async function getWritableRecurringSeriesOrFail(req: AuthedRequest) {
+  const recurringSeries = await getRecurringSeriesOrFail(req);
+  if (recurringSeries.accountKey) await assertAccountWritable(DI.em, recurringSeries.accountKey, accountActor(req));
   return recurringSeries;
 }
 

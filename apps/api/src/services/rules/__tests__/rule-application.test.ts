@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 vi.mock('@service/recurring/post-transaction-ingestion-detection.service', () => ({ triggerRecurringDetectionAfterTransactionIngestion: vi.fn().mockResolvedValue(undefined) }));
 
-import { addAccount, addCategory, addMerchant, addPartner, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addCategory, addMerchant, addPartner, addShare, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import type { Appuser } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
@@ -224,6 +224,17 @@ describe('applyRulesToTransactions', () => {
       expect(await reload(shared)).toMatchObject({ notes: 'partner rule' });
       expect(await reload(secret)).toMatchObject({ notes: null });
       expect(await db.em().count(TransactionAuditLog, { transactionKey: secret }, { filters: false })).toBe(0);
+    });
+
+    it.each([['write', 'partner rule'], ['read', null]] as const)('applies the partner\'s rule to a private account shared with them for %s: notes %s', async (access, notes) => {
+      const { owner, partner, privateAccount } = await households();
+      await addShare(db.em(), owner, privateAccount, partner, access);
+      await addRule(owner, partner, [{ type: 'set_notes', value: 'partner rule' }]);
+      const secret = await netflixPayment(owner, { account: privateAccount });
+
+      await apply(owner, [secret]);
+
+      expect(await reload(secret)).toMatchObject({ notes });
     });
 
     it('applies the owner\'s own rule to their private account', async () => {

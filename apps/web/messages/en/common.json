@@ -217,6 +217,7 @@
   "edit-account": "Edit Account",
   "edit-account-description": "Edit the account information. Click save when you're done.",
   "account-updated": "Account updated",
+  "account-update-error": "The account could not be saved. Try again.",
   "credit-card-account": "Credit card account",
   "credit-card-account-description": "Track this account's statement cycle: when it closes, when it is due and how much credit is left.",
   "credit-card-close-day": "Statement closes on",
@@ -3154,5 +3155,26 @@
     },
     "link-installment-more": "{amount} more than this transaction",
     "link-installment-less": "{amount} less than this transaction"
+  },
+  "accountSharing": {
+    "title": "Sharing",
+    "description": "Choose who in your household sees this account and its transactions, and who can change them.",
+    "owner": "Owner",
+    "hidden": "Hidden",
+    "can-view": "Can view",
+    "can-edit": "Can edit",
+    "access-label": "Access for {name}",
+    "unnamed-member": "Household member",
+    "later-members": "People who join your household later can edit an account shared with everyone. They don't see a private account until someone shares it with them.",
+    "nobody-yet": "There's nobody else in your household to share this account with yet.",
+    "manager-only": "Only the account's owner or the household owner can change who has access.",
+    "load-error": "Sharing could not be loaded. Your other changes can still be saved.",
+    "save-error": "Sharing could not be saved. Try again.",
+    "view-only": "View only",
+    "view-only-description": "You can view this account but not change it.",
+    "errors": {
+      "account_read_only": "You can view this account but not change it.",
+      "account_share_manager_required": "Only the account's owner or the household owner can change who has access."
+    }
   }
 }

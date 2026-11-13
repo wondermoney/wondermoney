@@ -12,6 +12,7 @@ import { LoanRatePeriod } from '@entity/LoanRatePeriod';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { accountActor, assertTransactionWritable } from '@service/account/account-access';
 import { convertAtLatestRate, rateScope } from '@service/currency/exchange-rate';
 import { addMonthsClamped, buildAmortizationSchedule } from '@service/loan/amortization-schedule';
 import {
@@ -199,6 +200,8 @@ export async function deleteLoanRepayment(req: Request, res: Response) {
   if (!loan) return res.sendStatus(404);
   const repayment = await DI.em.findOne(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, loanRepaymentLinkKey: repaymentLinkId, tenantKey: tenant });
   if (!repayment) return res.sendStatus(404);
+  // A repayment splits its transaction into principal, interest and fees: a change to that transaction.
+  await assertTransactionWritable(DI.em, repayment.transactionKey.transactionKey, accountActor(req));
   repayment.deletedAt = new Date();
   await DI.em.persist(repayment).flush();
   return res.sendStatus(204);
@@ -356,6 +359,7 @@ export async function linkLoanRepayment(req: Request, res: Response) {
   if (!loan) return res.sendStatus(404);
   const transaction = await loadOwnedOutflowTransaction(transactionKey, tenant);
   if (!transaction) return res.sendStatus(404);
+  await assertTransactionWritable(DI.em, transaction.transactionKey, accountActor(req));
   const duplicate = await DI.em.findOne(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, transactionKey: transaction });
   if (duplicate) throw new ConflictError('Repayment already linked');
   // A split already shares the payment out over categories; counting its interest on top would
@@ -536,6 +540,7 @@ export async function updateLoanRepayment(req: Request, res: Response) {
   if (!loan) return res.sendStatus(404);
   const repayment = await DI.em.findOne(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, loanRepaymentLinkKey: repaymentLinkId, tenantKey: tenant }, { populate: ['loanKey', 'transactionKey'] });
   if (!repayment) return res.sendStatus(404);
+  await assertTransactionWritable(DI.em, repayment.transactionKey.transactionKey, accountActor(req));
   const mergedAllocation = {
     feeAmount: body.feeAmount ?? repayment.feeAmount,
     interestAmount: body.interestAmount ?? repayment.interestAmount,

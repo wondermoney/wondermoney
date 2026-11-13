@@ -18,6 +18,8 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, back: mockBack, canGoBack: () => false }),
 }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ signOut: jest.fn() }) }))
+const mockUseAccounts = jest.fn()
+jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('./use-installment-plans', () => ({ useInstallmentPlan: (planId: number | null) => mockUsePlan(planId) }))
 jest.mock('./use-installment-plan-mutations', () => ({
   ...jest.requireActual('./use-installment-plan-mutations'),
@@ -42,6 +44,7 @@ describe('InstallmentPlanDetailRoute', () => {
     mockUsePlan.mockReset()
     mockReplace.mockReset()
     mockDelete.mockReset()
+    mockUseAccounts.mockReset().mockReturnValue({ data: { accounts: [{ accountKey: 7, myAccess: 'owner' }] } })
     captured = null
   })
 
@@ -58,6 +61,15 @@ describe('InstallmentPlanDetailRoute', () => {
     await captured?.onDelete?.()
     expect(mockDelete).toHaveBeenCalledWith({ planId: 11, accountId: 7 })
     expect(mockReplace).toHaveBeenCalledWith('/accounts/7')
+  })
+
+  it('offers no delete and no linking on a card the caller can only view', async () => {
+    mockUseAccounts.mockReturnValue({ data: { accounts: [{ accountKey: 7, myAccess: 'read' }] } })
+    mockUsePlan.mockReturnValue({ ...query, data: { installmentPlan: planDetailFixture } })
+    const view = await render(<InstallmentPlanDetailRoute />)
+    expect(view.getByText('loaded')).toBeOnTheScreen()
+    expect(captured?.onDelete).toBeUndefined()
+    expect(captured?.linking).toBeUndefined()
   })
 
   it('stays on the plan and says why when deleting fails', async () => {

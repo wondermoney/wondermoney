@@ -95,6 +95,12 @@ const account = z.object({
   ownerMemberId: ref,
   /** The member's place for the account in their list (1.8); absent or null: unordered. */
   position: z.number().int().min(-2_147_483_648).max(2_147_483_647).nullable().optional(),
+  /**
+   * Who a private account was shared with (1.9). Read and checked, not restored: every member of
+   * the export becomes the restoring member, so a restored private account is theirs alone, to share
+   * again with the people in their household now.
+   */
+  shares: z.array(z.object({ access: z.enum(['read', 'write']), memberId: ref })).max(50).optional(),
   type: text(255),
 });
 

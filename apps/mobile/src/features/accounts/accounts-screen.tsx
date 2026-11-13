@@ -34,6 +34,7 @@ import type { CashflowRow, CategoryRow } from '@/features/account-insights/insig
 import { MetricsStats, type MetricsSectionState } from '@/features/account-insights/metrics-stats'
 import type { TransactionViewModel } from '@/features/transactions/transactions-view-model'
 
+import { canWriteAccount } from './account-access'
 import { aggregateFreshness } from './account-freshness'
 import { freshnessStatus } from './balances-provenance'
 import type { AccountSummaryViewModel } from './accounts-view-model'
@@ -263,8 +264,11 @@ export function AccountsScreen({
           }}
           options={[
             { value: 'details', label: t('accountsOverview.accountDetails') },
-            { value: 'edit', label: t('accountsOverview.edit') },
-            { value: 'delete', label: t('accountsOverview.delete'), destructive: true },
+            // An account the caller can only view (#95) can't be edited or deleted.
+            ...(canWriteAccount(menuAccount) ? [
+              { value: 'edit', label: t('accountsOverview.edit') },
+              { value: 'delete', label: t('accountsOverview.delete'), destructive: true },
+            ] : []),
           ]}
           title={menuAccount?.accountName ?? t('accounts.unnamed')}
           visible={menuAccount !== null}
@@ -482,9 +486,11 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   const available = account.convertedAvailableBalance != null && account.convertedBalance !== null && account.convertedAvailableBalance !== account.convertedBalance
     ? money(account.convertedAvailableBalance, account.primaryCurrencyCode)
     : null
+  const viewOnly = !canWriteAccount(account)
   const accessibilityLabel = [
     name,
     account.isPrivate ? t('accountsOverview.private') : null,
+    viewOnly ? t('accountsOverview.viewOnly') : null,
     shared,
     account.institutionDisplayName,
     primary,
@@ -497,7 +503,12 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   return (
     <ListRow
       accessibilityLabel={accessibilityLabel}
-      badge={account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : undefined}
+      badge={account.isPrivate || viewOnly ? (
+        <View style={styles.badges}>
+          {account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : null}
+          {viewOnly ? <Badge label={t('accountsOverview.viewOnly')} testID="account-view-only" tone="outline" /> : null}
+        </View>
+      ) : undefined}
       figure={unconverted
         ? <Amount currency={account.originalCurrencyCode} locale={locale} value={account.originalBalance} />
         : <Amount currency={account.primaryCurrencyCode} locale={locale} value={account.convertedBalance} />}
@@ -588,6 +599,7 @@ function AccountPreview({ locale }: { locale: string }) {
 }
 
 const styles = StyleSheet.create({
+  badges: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   safeArea: { flex: 1 },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },

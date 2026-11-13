@@ -15,6 +15,14 @@ const mocks = vi.hoisted(() => ({
   uploadFile: vi.fn(),
 }));
 
+// Account access reads the database directly; these controller tests run on a mocked EntityManager.
+vi.mock('@service/account/account-access', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/account/account-access')>()),
+  accountActor: (req: Request) => ({ appuserKey: req.user?.appuserKey ?? 0, householdRole: req.householdRole, tenantKey: req.tenant?.tenantKey ?? 0 }),
+  assertAccountWritable: vi.fn(async () => undefined),
+  loadAccountAccess: vi.fn(async () => new Map()),
+}));
+
 vi.mock('../../../app.js', () => ({
   DI: {
     em: {

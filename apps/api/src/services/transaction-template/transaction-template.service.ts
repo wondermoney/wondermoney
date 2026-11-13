@@ -7,6 +7,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionTemplate, TransactionTemplateDirection } from '@entity/TransactionTemplate';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -238,7 +239,7 @@ function normalizedText(value: null | string | undefined): null | string {
 /** An account the member can see: the household's shared one, or their own private one. */
 async function visibleAccountOrThrow(em: EntityManager, actor: TransactionTemplateActor, accountKey: number): Promise<Account> {
   const account = await em.findOne(Account, {
-    $or: [{ isPrivate: false }, { accountOwnerAppuserKey: getRef(em, Appuser, actor.appuserKey) }],
+    ...visibleAccountWhere(actor.appuserKey),
     accountKey,
     deletedAt: null,
     tenantKey: getRef(em, Tenant, actor.tenantKey),

@@ -233,6 +233,7 @@
   "edit-account": "Editar cuenta",
   "edit-account-description": "Edita la información de la cuenta. Haz clic en guardar cuando termines.",
   "account-updated": "Cuenta actualizada",
+  "account-update-error": "No se pudo guardar la cuenta. Inténtalo de nuevo.",
   "credit-card-account": "Cuenta de tarjeta de crédito",
   "credit-card-account-description": "Sigue el ciclo del extracto de esta tarjeta: cuándo cierra, cuándo vence y cuánto crédito queda.",
   "credit-card-close-day": "El extracto cierra el",
@@ -3154,5 +3155,26 @@
     },
     "link-installment-more": "{amount} más que esta transacción",
     "link-installment-less": "{amount} menos que esta transacción"
+  },
+  "accountSharing": {
+    "title": "Compartir",
+    "description": "Elige quién de tu hogar ve esta cuenta y sus transacciones, y quién puede cambiarlas.",
+    "owner": "Titular",
+    "hidden": "Oculta",
+    "can-view": "Puede ver",
+    "can-edit": "Puede editar",
+    "access-label": "Acceso de {name}",
+    "unnamed-member": "Miembro del hogar",
+    "later-members": "Quien se una a tu hogar más adelante puede editar una cuenta compartida con todos. No verá una cuenta privada hasta que alguien se la comparta.",
+    "nobody-yet": "Todavía no hay nadie más en tu hogar con quien compartir esta cuenta.",
+    "manager-only": "Solo el titular de la cuenta o el titular del hogar pueden cambiar quién tiene acceso.",
+    "load-error": "No se pudo cargar el uso compartido. Puedes guardar los demás cambios igualmente.",
+    "save-error": "No se pudo guardar el uso compartido. Inténtalo de nuevo.",
+    "view-only": "Solo lectura",
+    "view-only-description": "Puedes ver esta cuenta, pero no cambiarla.",
+    "errors": {
+      "account_read_only": "Puedes ver esta cuenta, pero no cambiarla.",
+      "account_share_manager_required": "Solo el titular de la cuenta o el titular del hogar pueden cambiar quién tiene acceso."
+    }
   }
 }

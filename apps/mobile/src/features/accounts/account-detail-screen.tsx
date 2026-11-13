@@ -29,6 +29,7 @@ import type { RecentTransactionsSectionState } from '@/features/transactions/rec
 import type { RecentTransactionRow } from '@/features/transactions/recent-transactions-view-model'
 import { InstallmentPlansSection, type InstallmentPlansSectionState } from '@/features/installments/installment-plans-section'
 
+import { canWriteAccount } from './account-access'
 import { accountFreshness } from './account-freshness'
 import type { AccountDetailViewModel } from './account-detail-view-model'
 import { CreditCardStatementSection, type CreditCardStatementState } from './credit-card-statement-section'
@@ -69,6 +70,10 @@ export type AccountDetailScreenProps = {
   onViewTransactions: () => void
   onCreateTransaction?: () => void
   onImportTransactions?: () => void
+  /**
+   * Opens the account's edit screen. On an account the caller can only view (`myAccess: 'read'`)
+   * it is offered as "Sharing" instead, and every other change on this screen is left out.
+   */
   onEdit: () => void
   /** "Recalculate balances" in the overflow menu, after a confirmation; its progress and result show below the header. */
   onRecalculate?: () => void
@@ -90,7 +95,24 @@ const LAST_TRANSACTIONS = 5
  * Outflow / Savings rate, then Balance growth and Last transactions as open
  * sections. Adding a transaction is the floating "+".
  */
-export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit, onRecalculate, recalculation, onDismissRecalculation, onOpenInstallmentPlan, onCreateInstallmentPlan, onAcceptInstallmentSuggestion }: AccountDetailScreenProps) {
+export function AccountDetailScreen(props: AccountDetailScreenProps) {
+  const { state } = props
+  // A member who can only view the account (#95) gets no way to change it or its transactions.
+  const writable = state.status !== 'loaded' && state.status !== 'refresh-error' ? true : canWriteAccount(state.data)
+  return writable ? <AccountDetailContent {...props} writable /> : (
+    <AccountDetailContent
+      {...props}
+      onAcceptInstallmentSuggestion={undefined}
+      onCreateInstallmentPlan={undefined}
+      onCreateTransaction={undefined}
+      onImportTransactions={undefined}
+      onRecalculate={undefined}
+      writable={false}
+    />
+  )
+}
+
+function AccountDetailContent({ state, recentTransactions, onBack, onRetry, onRetryRecent, onLogout, onViewTransactions, onCreateTransaction, onImportTransactions, onEdit, onRecalculate, recalculation, onDismissRecalculation, onOpenInstallmentPlan, onCreateInstallmentPlan, onAcceptInstallmentSuggestion, writable }: AccountDetailScreenProps & { writable: boolean }) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
   const palette = usePalette()
@@ -130,7 +152,7 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
   const shared = !data.isOwnedByViewer && data.ownerFirstName ? t('accountsOverview.sharedBy', { name: data.ownerFirstName }) : null
 
   const moreActions = [
-    { value: 'edit' as const, label: t('accountDetail.edit') },
+    writable ? { value: 'edit' as const, label: t('accountDetail.edit') } : { value: 'edit' as const, label: t('accountDetail.sharing') },
     ...(onImportTransactions ? [{ value: 'import' as const, label: t('accountsOverview.importTransactions') }] : []),
     ...(onRecalculate ? [{ value: 'recalculate' as const, label: t('accountRecalculate.action') }] : []),
   ]
@@ -151,14 +173,15 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
           <View style={styles.headerBlock}>
             {back}
             <ObjectHeader
-              action={moreActions.length > 1 ? (
+              action={moreActions.length > 1 || !writable ? (
                 <IconButton accessibilityLabel={t('common.moreActions')} icon="more-vertical" onPress={() => setMoreOpen(true)} style={styles.overflow} />
               ) : (
                 <IconButton accessibilityLabel={t('accountDetail.edit')} icon="pencil" onPress={onEdit} style={styles.overflow} />
               )}
-              badge={data.isPrivate || shared ? (
+              badge={data.isPrivate || shared || !writable ? (
                 <View style={styles.badges}>
                   {data.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : null}
+                  {writable ? null : <Badge label={t('accountsOverview.viewOnly')} testID="account-view-only" tone="outline" />}
                   {shared ? <Text tone="muted" variant="label">{shared}</Text> : null}
                 </View>
               ) : undefined}
@@ -198,7 +221,7 @@ export function AccountDetailScreen({ state, recentTransactions, onBack, onRetry
             <CreditCardStatementSection accountId={data.accountId} currency={data.originalCurrencyCode} locale={locale} state={data.creditCardStatement} />
           ) : null}
 
-          {data.installmentPlans && onOpenInstallmentPlan && onCreateInstallmentPlan && onAcceptInstallmentSuggestion ? (
+          {data.installmentPlans && onOpenInstallmentPlan ? (
             <InstallmentPlansSection
               locale={locale}
               onAcceptSuggestion={onAcceptInstallmentSuggestion}

@@ -20,6 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   ArrowDown,
   ArrowUp,
+  Eye,
   GripVertical,
   Lock,
   MoreHorizontal,
@@ -58,6 +59,7 @@ import {
 import { InspectorDrawer, PropertyList } from "@/components/ui/InspectorDrawer";
 import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
 import { useRouter } from "@/i18n/navigation";
+import { canEditAccount } from "@/lib/account/account-access";
 import type { Account } from "@/lib/api/account/useAccounts";
 import { useReorderAccounts } from "@/lib/api/account/useAccounts";
 import { accountFxView } from "@/lib/fx/fx-status";
@@ -84,14 +86,10 @@ export default function AccountsList({
   const [accountData, setAccountData] = useState<{
     name: string | null;
     key: number | null;
-    isPrivate: boolean;
-    isOwnedByViewer: boolean;
     creditCard: Account["creditCard"];
   }>({
     name: null,
     key: null,
-    isPrivate: false,
-    isOwnedByViewer: false,
     creditCard: null,
   });
   const [editAccModalIsOpen, setEditAccModalIsOpen] = useState(false);
@@ -163,8 +161,6 @@ export default function AccountsList({
       setAccountData({
         name: account.accountName ?? t("unknown"),
         key: account.accountKey,
-        isPrivate: account.isPrivate,
-        isOwnedByViewer: account.isOwnedByViewer,
         creditCard: account.creditCard ?? null,
       });
       setEditAccModalIsOpen(true);
@@ -178,8 +174,6 @@ export default function AccountsList({
       setAccountData({
         name: account.accountName ?? t("unknown"),
         key: account.accountKey,
-        isPrivate: account.isPrivate,
-        isOwnedByViewer: account.isOwnedByViewer,
         creditCard: account.creditCard ?? null,
       });
       setDeleteAccModalIsOpen(true);
@@ -250,6 +244,12 @@ export default function AccountsList({
                 <Lock
                   className="text-muted-foreground size-3"
                   aria-label={t("account-private")}
+                />
+              )}
+              {!canEditAccount(account) && (
+                <Eye
+                  className="text-muted-foreground size-3"
+                  aria-label={t("accountSharing.view-only")}
                 />
               )}
             </div>
@@ -353,7 +353,7 @@ export default function AccountsList({
                 <ArrowDown className="size-4" />
               </Button>
             </div>
-          ) : (
+          ) : canEditAccount(account) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -400,6 +400,10 @@ export default function AccountsList({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            // A view-only account has nothing to edit, delete or recalculate; the gap keeps the
+            // balances in line with the rows that have a menu.
+            <span aria-hidden="true" className="size-8 shrink-0" />
           )}
         </div>
       </div>
@@ -479,6 +483,9 @@ export default function AccountsList({
             {inspectedAccount?.isPrivate ? (
               <Badge variant="secondary">{t("private-account")}</Badge>
             ) : null}
+            {inspectedAccount && !canEditAccount(inspectedAccount) ? (
+              <Badge variant="secondary">{t("accountSharing.view-only")}</Badge>
+            ) : null}
             {inspectedAccount &&
             (inspectedAccount.syncStatus || inspectedAccount.refreshedAt) ? (
               <AccountSyncBadge
@@ -543,8 +550,6 @@ export default function AccountsList({
             accountKey={accountData.key}
             accountName={accountData.name}
             isOpen={editAccModalIsOpen}
-            isOwnedByViewer={accountData.isOwnedByViewer}
-            isPrivate={accountData.isPrivate}
             creditCard={accountData.creditCard}
             onOpenChange={(open) => {
               if (!open) {
@@ -552,8 +557,6 @@ export default function AccountsList({
                 setAccountData({
                   name: null,
                   key: null,
-                  isPrivate: false,
-                  isOwnedByViewer: false,
                   creditCard: null,
                 });
                 posthog.capture("edit_account_modal", { action: "closed" });
@@ -567,8 +570,6 @@ export default function AccountsList({
               setAccountData({
                 name: null,
                 key: null,
-                isPrivate: false,
-                isOwnedByViewer: false,
                 creditCard: null,
               });
               posthog.capture("delete_account_modal", { action: "closed" });

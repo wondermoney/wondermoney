@@ -45,13 +45,13 @@ Enquanto a opção estiver ativa, o servidor recusa o assistente, a leitura de r
 
 **Definições > Privacidade > Exportar todos os dados** (ou **Definições > Segurança** na aplicação móvel) descarrega tudo o que vês no teu agregado familiar, num ficheiro zip chamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: um ficheiro JSON por tipo de dados: contas, transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, carteiras e as suas transações, definições de extrato dos cartões de crédito, compras em prestações e os seus planos, as taxas de câmbio e os preços manuais do agregado, os teus modelos de transação, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
+- `data/`: um ficheiro JSON por tipo de dados: contas (com a sua partilha: partilhadas com o agregado, ou privadas e quem as pode ver ou editar), transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, carteiras e as suas transações, definições de extrato dos cartões de crédito, compras em prestações e os seus planos, as taxas de câmbio e os preços manuais do agregado, os teus modelos de transação, a tua lista de observação e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
 - `csv/`: transações, contas, transações de carteira e posições atuais, para folhas de cálculo. Os valores usam o ponto como separador decimal e as datas estão no formato `AAAA-MM-DD`.
 - `manifest.json`: a versão do formato, quando a exportação foi feita e o número de linhas e uma soma de verificação SHA-256 de cada ficheiro.
 
 O que não é incluído:
 
-- As contas privadas dos outros membros, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes, regras, definições de cartão e compras em prestações. Os ativos privados, os empréstimos, os modelos de transação e a lista de observação deles também ficam de fora.
+- As contas privadas dos outros membros que não estão partilhadas contigo, e as respetivas transações, divisões, etiquetas, pagamentos recorrentes, regras, definições de cartão e compras em prestações. Os ativos privados dos outros membros, e os seus empréstimos, modelos de transação e lista de observação, também ficam de fora.
 - Palavras-passe, sessões, segredos de autenticação de dois fatores, credenciais bancárias e tokens de ligação. Uma conta que esteve ligada a um banco indica-o, sem nenhum dos dados da ligação.
 - Registos de auditoria, utilização de IA e dados de análise.
 - Ficheiros anexados a transações, como recibos.

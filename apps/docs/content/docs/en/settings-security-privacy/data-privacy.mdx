@@ -45,13 +45,13 @@ While the switch is on, the server refuses the assistant, receipt scanning, PDF 
 
 **Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
 
-- `data/`: one JSON file per kind of data: accounts, transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `data/`: one JSON file per kind of data: accounts (with their sharing: shared with the household, or private and who can view or edit them), transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
 - `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
 - `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
 
 What is not included:
 
-- Other members' private accounts, and their transactions, splits, tags, recurring payments, rules, card settings and installment plans. Their private assets, and their own loans, transaction templates and watchlist, stay out too.
+- Other members' private accounts that are not shared with you, and their transactions, splits, tags, recurring payments, rules, card settings and installment plans. Other members' private assets, and their own loans, transaction templates and watchlist, stay out too.
 - Passwords, sessions, two-factor secrets, bank credentials and connection tokens. An account that was connected to a bank says so, without any of its connection details.
 - Audit logs, AI usage and analytics data.
 - Files attached to transactions, such as receipts.

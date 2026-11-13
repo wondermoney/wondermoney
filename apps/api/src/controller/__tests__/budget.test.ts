@@ -77,7 +77,7 @@ describe('budget account assignments', () => {
     expect(mocked.find).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: 42 } }],
+        $or: [{ isPrivate: false }, { accountOwnerAppuserKey: 42 }, { shares: { $some: { appuserKey: 42 } } }],
         accountKey: { $in: [91] },
         closed: false,
         deletedAt: undefined,

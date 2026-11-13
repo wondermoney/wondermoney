@@ -15,6 +15,14 @@ const mocks = vi.hoisted(() => ({
   persist: vi.fn(),
 }));
 
+// Account access reads the database directly; these controller tests run on a mocked EntityManager.
+vi.mock('@service/account/account-access', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/account/account-access')>()),
+  accountActor: (req: Request) => ({ appuserKey: req.user?.appuserKey ?? 0, householdRole: req.householdRole, tenantKey: req.tenant?.tenantKey ?? 0 }),
+  assertAccountWritable: vi.fn(async () => undefined),
+  loadAccountAccess: vi.fn(async () => new Map()),
+}));
+
 vi.mock('../../../app.js', () => ({
   DI: {
     em: {
@@ -157,6 +165,7 @@ describe('getAccount', () => {
         fxStatus: 'missing',
         isOwnedByViewer: false,
         isPrivate: false,
+        myAccess: 'write',
         ownerFirstName: null,
         refreshedAt: '2026-07-18T10:15:00.000Z',
         source: 'open_banking',
@@ -322,6 +331,7 @@ describe('getAccounts', () => {
           fxStatus: 'exact',
           isOwnedByViewer: false,
           isPrivate: false,
+          myAccess: 'write',
           ownerFirstName: null,
           refreshedAt: '2026-07-17T09:30:00.000Z',
           source: 'open_banking',
@@ -344,6 +354,7 @@ describe('getAccounts', () => {
           fxStatus: 'exact',
           isOwnedByViewer: false,
           isPrivate: false,
+          myAccess: 'write',
           ownerFirstName: null,
           refreshedAt: null,
           source: 'manual',
@@ -538,13 +549,11 @@ describe('updateAccount privacy', () => {
     mocks.findOne.mockResolvedValue(account);
     const next = vi.fn();
 
-    await updateAccount(
+    await expect(updateAccount(
       { body: { isPrivate: true }, params: { accountId: '5' }, user: { appuserKey: 2 } } as unknown as Request,
       { sendStatus: vi.fn() } as unknown as Response,
       next,
-    );
-
-    expect(next).toHaveBeenCalledWith(expect.any(ForbiddenError));
+    )).rejects.toBeInstanceOf(ForbiddenError);
     expect(account.isPrivate).toBe(false);
   });
 });

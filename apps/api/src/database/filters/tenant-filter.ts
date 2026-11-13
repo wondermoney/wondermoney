@@ -56,31 +56,28 @@ export const tenantOrGlobalCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args) ? { $or: [{ tenantKey: args.tenantKey }, { tenantKey: null }] } : {};
 
 /**
- * Transaction scope: tenant + privacy carve-out via the linked account. A transaction
- * on a private account is visible only to that account's owner; account-less
- * transactions are tenant-scoped only.
+ * Who may see an account, as a condition on the account: it is shared with the household
+ * (`isPrivate = false`), or the member owns it, or it is private and shared with them
+ * (`AccountShare`). The same rule as `visibleAccountSql` (`services/account/account-access.ts`),
+ * which the hand-written SQL paths use.
+ */
+export const visibleAccountCond = (appuserKey: number): Dictionary => ({
+  $or: [{ isPrivate: false }, { accountOwnerAppuserKey: appuserKey }, { shares: { $some: { appuserKey } } }],
+});
+
+/**
+ * Transaction scope: tenant + privacy carve-out via the linked account. A transaction on a
+ * private account is visible only to the members who see that account (its owner and the members
+ * it is shared with); account-less transactions are tenant-scoped only.
  */
 export const transactionTenantCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args)
-    ? {
-        $and: [
-          { tenantKey: args.tenantKey },
-          {
-            $or: [
-              { accountKey: null },
-              { accountKey: { isPrivate: false } },
-              { accountKey: { accountOwnerAppuserKey: args.appuserKey } },
-            ],
-          },
-        ],
-      }
+    ? { $and: [{ tenantKey: args.tenantKey }, { $or: [{ accountKey: null }, { accountKey: visibleAccountCond(args.appuserKey) }] }] }
     : {};
 
-/** Account scope + per-account privacy carve-out: private accounts are visible only to their owner. */
+/** Account scope + per-account privacy carve-out: a private account is visible only to its owner and the members it is shared with. */
 export const accountTenantCond = (args?: TenantFilterArgs): Dictionary =>
-  hasTenant(args)
-    ? { $and: [{ tenantKey: args.tenantKey }, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: args.appuserKey }] }] }
-    : {};
+  hasTenant(args) ? { $and: [{ tenantKey: args.tenantKey }, visibleAccountCond(args.appuserKey)] } : {};
 
 /** Manual asset scope + privacy carve-out: a private asset is visible only to its owner. */
 export const manualAssetTenantCond = (args?: TenantFilterArgs): Dictionary =>
@@ -104,7 +101,8 @@ export const cryptoWalletPartTenantCond = manualAssetValuationTenantCond;
 
 /**
  * RecurringSeries privacy: a recurring series carries the source account,
- * so a series detected from a private account stays owner-only — same shape as Transaction.
+ * so a series detected from a private account is seen only by the members who see that account —
+ * same shape as Transaction.
  * Prevents the tenant-wide recurring detection from leaking a private account's recurring
  * spend to other household members.
  */
@@ -112,33 +110,14 @@ export const recurringSeriesTenantCond = transactionTenantCond;
 
 /**
  * An installment plan follows its card: tenant-scoped, and a plan on a private account is visible
- * only to that account's owner, like the account's transactions.
+ * only to the members who see that account, like the account's transactions.
  */
 export const installmentPlanTenantCond = (args?: TenantFilterArgs): Dictionary =>
-  hasTenant(args)
-    ? {
-        $and: [
-          { tenantKey: args.tenantKey },
-          { $or: [{ accountKey: { isPrivate: false } }, { accountKey: { accountOwnerAppuserKey: args.appuserKey } }] },
-        ],
-      }
-    : {};
+  hasTenant(args) ? { $and: [{ tenantKey: args.tenantKey }, { accountKey: visibleAccountCond(args.appuserKey) }] } : {};
 
 /** One installment of a plan follows the plan's card, the same way. */
 export const installmentTenantCond = (args?: TenantFilterArgs): Dictionary =>
-  hasTenant(args)
-    ? {
-        $and: [
-          { tenantKey: args.tenantKey },
-          {
-            $or: [
-              { installmentPlanKey: { accountKey: { isPrivate: false } } },
-              { installmentPlanKey: { accountKey: { accountOwnerAppuserKey: args.appuserKey } } },
-            ],
-          },
-        ],
-      }
-    : {};
+  hasTenant(args) ? { $and: [{ tenantKey: args.tenantKey }, { installmentPlanKey: { accountKey: visibleAccountCond(args.appuserKey) } }] } : {};
 
 /**
  * User-toggled visibility flag. Unconditional (no tenant/user args, no
