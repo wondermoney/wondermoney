@@ -2392,7 +2392,7 @@
       "off": "Off"
     },
     "pauseReason": {
-      "delivery": "Delivery for this email stream is currently available only in Portuguese (Portugal).",
+      "delivery": "We can't send these emails to your account's address. Check that it's a valid email address.",
       "marketingOptOut": "This preference is on, but you're unsubscribed from all marketing emails.",
       "generic": "This preference is on, but email delivery is currently paused."
     },

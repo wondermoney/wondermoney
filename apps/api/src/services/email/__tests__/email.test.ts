@@ -431,13 +431,13 @@ describe('instance name in user emails', () => {
     const { sendAccountSyncEmail, sendEmailVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } = await loadModule('production');
     vi.stubEnv('INSTANCE_NAME', 'Casa Finance');
 
-    await sendPasswordResetEmail({ email: 'ada@example.com', name: 'Ada' }, 'https://money.example.com/reset?token=t');
+    await sendPasswordResetEmail({ email: 'ada@example.com', name: 'Ada' }, 'https://money.example.com/reset?token=t', 'EN');
     const reset = lastPayload();
-    expect(reset.subject).toBe('Reset your Casa Finance password');
-    expect(reset.text).toContain('— The Casa Finance team');
+    expect(reset.subject).toContain('Casa Finance');
+    expect(reset.text).toContain('Casa Finance');
 
-    await sendEmailVerificationEmail({ email: 'ada@example.com' }, 'https://money.example.com/verify?token=t');
-    expect(lastPayload().subject).toBe('Verify your Casa Finance email');
+    await sendEmailVerificationEmail({ email: 'ada@example.com' }, 'https://money.example.com/verify?token=t', 'EN');
+    expect(lastPayload().subject).toContain('Casa Finance');
 
     await sendWelcomeEmail({ appuserKey: 42, emailAddress: 'ada@example.com', language: 'EN' });
     expect(lastPayload().subject).toContain('Welcome to Casa Finance');
@@ -454,9 +454,57 @@ describe('instance name in user emails', () => {
     const { sendPasswordResetEmail } = await loadModule('production');
     vi.stubEnv('INSTANCE_NAME', '');
 
-    await sendPasswordResetEmail({ email: 'ada@example.com' }, 'https://app.example.test/reset?token=t');
-    expect(lastPayload().subject).toBe('Reset your WonderMoney password');
-    expect(lastPayload().text).toContain('— The WonderMoney team');
+    await sendPasswordResetEmail({ email: 'ada@example.com' }, 'https://app.example.test/reset?token=t', 'EN');
+    expect(lastPayload().subject).toContain('WonderMoney');
+  });
+});
+
+describe('password reset and email verification in the account language', () => {
+  beforeEach(() => {
+    resendCtor.mockClear();
+    resendSendMock.mockReset();
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+    vi.unstubAllEnvs();
+  });
+
+  const lastPayload = () => resendSendMock.mock.calls.at(-1)?.[0] as { html: string; subject: string; text: string; to: string };
+  const languageOf = (payload: { html: string }) => /<html[^>]*lang="([a-z]+)"/u.exec(payload.html)?.[1];
+  const resetUrl = 'https://api.example.test/api/auth/reset-password/T0K3N?callbackURL=https%3A%2F%2Fapp.example.test%2Fes%2Fauth%2Freset';
+  const verificationUrl = 'https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=https%3A%2F%2Fapp.example.test%2Fes';
+
+  it.each([['PT', 'pt'], ['ES', 'es'], ['EN', 'en']] as const)('writes a %s account its emails in %s, carrying the link as given', async (language, locale) => {
+    const { sendEmailVerificationEmail, sendPasswordResetEmail } = await loadModule('production');
+
+    await sendPasswordResetEmail({ email: 'ana@example.test', name: 'Ana' }, resetUrl, language);
+    const reset = lastPayload();
+    await sendEmailVerificationEmail({ email: 'ana@example.test' }, verificationUrl, language);
+    const verification = lastPayload();
+
+    expect(languageOf(reset)).toBe(locale);
+    expect(reset.to).toBe('Ana <ana@example.test>');
+    expect(reset.text).toContain(resetUrl);
+    expect(reset.html).toContain(`href="${resetUrl}"`);
+    expect(languageOf(verification)).toBe(locale);
+    expect(verification.text).toContain(verificationUrl);
+  });
+
+  it('gives each language its own subject', async () => {
+    const { sendEmailVerificationEmail, sendPasswordResetEmail } = await loadModule('production');
+
+    for (const language of ['EN', 'PT', 'ES'] as const) {
+      await sendPasswordResetEmail({ email: 'ana@example.test' }, resetUrl, language);
+      await sendEmailVerificationEmail({ email: 'ana@example.test' }, verificationUrl, language);
+    }
+
+    expect(new Set(resendSendMock.mock.calls.map(([payload]) => (payload as { subject: string }).subject)).size).toBe(6);
+  });
+
+  it('reads English for a language it has no copy in', async () => {
+    const { sendPasswordResetEmail } = await loadModule('production');
+
+    await sendPasswordResetEmail({ email: 'ana@example.test' }, resetUrl, 'FR' as 'EN');
+
+    expect(languageOf(lastPayload())).toBe('en');
   });
 });
 

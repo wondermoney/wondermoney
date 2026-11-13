@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { EntityManager } from '@mikro-orm/core';
+import { renderHouseholdInviteEmail } from '@wondermoney/react-email';
 
 import { instanceName } from '@config/instance-name';
 import { Appuser } from '@entity/Appuser';
@@ -9,6 +10,7 @@ import { HouseholdInvite, HouseholdInviteStatus } from '@entity/HouseholdInvite'
 import { Tenant } from '@entity/Tenant';
 import { sendRenderedEmail } from '@service/email/email';
 import { supportInbox } from '@service/email/email-transport';
+import { accountLocale, copyLocale } from '@utils/account-language';
 import { FRONTEND_URL } from '@utils/constants';
 import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { fireAndForget } from '@utils/fire-and-forget';
@@ -16,17 +18,16 @@ import logger from '@utils/logger';
 
 /** Owner + one partner. A pending invite consumes the open seat. */
 export const HOUSEHOLD_MAX_MEMBERS = 2;
-const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITE_TTL_DAYS = 7;
+const INVITE_TTL_MS = INVITE_TTL_DAYS * 24 * 60 * 60 * 1000;
+/** The invite email is written in English, Portuguese and Spanish. */
+const INVITE_EMAIL_LOCALES = ['en', 'pt', 'es'] as const;
 
 /**
- * Minimal HTML entity escape for values interpolated into hand-built email bodies.
- *
- * The invite email is assembled as a string here rather than rendered through the
- * `@wondermoney/react-email` pipeline (which escapes by default), and the recipient is
- * fully attacker-chosen, so any interpolated value — an inviter's display name, an email
- * address — must be escaped before it reaches the markup. Without this, a display name of
- * `<a href="https://evil.tld">Security Alert</a>` ships as a DKIM-signed phishing email
- * from WonderMoney's own sending domain.
+ * Minimal HTML entity escape for values interpolated into hand-built email bodies (the internal
+ * alert below). The invite email itself renders through `@wondermoney/react-email`, which
+ * escapes by default: its recipient is attacker-chosen, so an inviter's display name of
+ * `<a href="https://evil.tld">Security Alert</a>` must never reach the markup.
  */
 export function escapeHtml(value: string): string {
   return value
@@ -37,7 +38,6 @@ export function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
-const inviteLink = (token: string) => `${FRONTEND_URL.replace(/\/$/u, '')}/join?token=${token}`;
 const normalizeEmail = (email: string) => email.toLowerCase().trim();
 // 64 hex chars — opaque, unguessable, single-use.
 const generateToken = () => `${randomUUID().replaceAll('-', '')}${randomUUID().replaceAll('-', '')}`;
@@ -155,19 +155,22 @@ async function seatsTaken(em: EntityManager, tenant: Tenant): Promise<number> {
   return activeMembers + (pending ? 1 : 0);
 }
 
+/**
+ * The invitee has no account yet, so the email is in the inviter's language (`Appuser.language`),
+ * and its link opens the join page in the inviter's locale.
+ */
 function sendInviteEmail(email: string, inviter: Appuser, token: string): void {
-  const label = inviterLabel(inviter);
-  const link = inviteLink(token);
-  // The subject is plain text (no markup), so it carries the raw label; the HTML body and every
-  // attribute value are escaped. The link is built from FRONTEND_URL + a generated hex token,
-  // so it carries no caller-controlled input, but it is escaped for uniformity.
-  const brand = instanceName();
-  const subject = `${label} invited you to their ${brand} household`;
-  const html = `<p>${escapeHtml(label)} invited you to share their household on ${escapeHtml(brand)} — both partners, real-time shared finances.</p>`
-    + `<p><a href="${escapeHtml(link)}">Accept the invitation</a></p>`
-    + `<p>This link expires in 7 days. If you weren't expecting this, you can ignore this email.</p>`;
-  const text = `${label} invited you to share their ${brand} household.\n\nAccept: ${link}\n\nThis link expires in 7 days.`;
-  fireAndForget(sendRenderedEmail({ headers: {}, html, subject, text, to: { email } }), { email, scope: 'household-invite' });
+  const send = async () => {
+    const rendered = await renderHouseholdInviteEmail({
+      acceptUrl: `${FRONTEND_URL.replace(/\/$/u, '')}/${accountLocale(inviter.language)}/join?token=${token}`,
+      brandName: instanceName(),
+      expiresInDays: INVITE_TTL_DAYS,
+      inviterName: inviterLabel(inviter),
+      language: copyLocale(inviter.language, INVITE_EMAIL_LOCALES),
+    });
+    return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: { email } });
+  };
+  fireAndForget(send(), { email, scope: 'household-invite' });
 }
 
 /**

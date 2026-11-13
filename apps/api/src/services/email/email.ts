@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import { renderAccountConnectedEmail, renderInternalAlertEmail, renderLifecycleNudgeEmail } from '@wondermoney/react-email';
+import {
+  renderAccountConnectedEmail,
+  renderEmailVerificationEmail,
+  renderInternalAlertEmail,
+  renderLifecycleNudgeEmail,
+  renderPasswordResetEmail,
+} from '@wondermoney/react-email';
 import dotenv from 'dotenv';
 import { type CreateEmailOptions, type CreateEmailRequestOptions, type CreateEmailResponse, type CreateEmailResponseSuccess, Resend } from 'resend';
 
@@ -14,9 +20,9 @@ import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
 /**
- * Minimal HTML escape for interpolating user-controlled values into inline email HTML
- * (the better-auth password-reset / email-verification callbacks). Newline-preserving,
- * double-quote/escape-safe; intentionally not a general-purpose escaper.
+ * Minimal HTML escape for interpolating user-controlled values into inline email HTML (the API
+ * token expiry email). Newline-preserving, double-quote/escape-safe; intentionally not a
+ * general-purpose escaper.
  */
 function escapeHtml(value: string): string {
   return value
@@ -368,48 +374,37 @@ export function sendApiTokenExpiryEmail(
   });
 }
 
-export function sendPasswordResetEmail(to: { email: string; name?: string }, resetUrl: string) {
-  const name = to.name ?? to.email.split('@')[0] ?? '';
-  const brand = instanceName();
-  return sendRenderedEmail({
-    headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>We received a request to reset your ${escapeHtml(brand)} password. Click the link below to choose a new one:</p><p><a href="${escapeHtml(resetUrl)}">${escapeHtml(resetUrl)}</a></p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p><p>— The ${escapeHtml(brand)} team</p>`,
-    subject: `Reset your ${brand} password`,
-    text: `Hi ${name},
+const displayName = (to: { email: string; name?: null | string }) => to.name?.trim() || to.email.split('@')[0] || undefined;
+const recipient = (to: { email: string; name?: null | string }) => ({ email: to.email, ...(to.name ? { name: to.name } : {}) });
 
-We received a request to reset your ${brand} password. Click the link below to choose a new one:
-
-${resetUrl}
-
-If you didn't request this, you can safely ignore this email — your password won't change.
-
-— The ${brand} team`,
-    to,
+/**
+ * Password-reset email for better-auth's `sendResetPassword` callback, in the account's language.
+ * `resetUrl` is better-auth's link, carrying the single-use token.
+ */
+export async function sendPasswordResetEmail(to: { email: string; name?: null | string }, resetUrl: string, language: LANGUAGE) {
+  const firstName = displayName(to);
+  const rendered = await renderPasswordResetEmail({
+    brandName: instanceName(),
+    ...(firstName ? { firstName } : {}),
+    language: copyLang(language),
+    resetUrl,
   });
+  return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: recipient(to) });
 }
 
 /**
- * Email-verification email for better-auth's `sendVerificationEmail` callback (branded,
- * in-process, plain-text, carrying the verification link).
+ * Email-verification email for better-auth's `sendVerificationEmail` callback, in the account's
+ * language. `verificationUrl` is better-auth's link, carrying the token.
  */
-export function sendEmailVerificationEmail(to: { email: string; name?: string }, verificationUrl: string) {
-  const name = to.name ?? to.email.split('@')[0] ?? '';
-  const brand = instanceName();
-  return sendRenderedEmail({
-    headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>Welcome to ${escapeHtml(brand)}! Please confirm your email address by clicking the link below:</p><p><a href="${escapeHtml(verificationUrl)}">${escapeHtml(verificationUrl)}</a></p><p>If you didn't create a ${escapeHtml(brand)} account, you can safely ignore this email.</p><p>— The ${escapeHtml(brand)} team</p>`,
-    subject: `Verify your ${brand} email`,
-    text: `Hi ${name},
-
-Welcome to ${brand}! Please confirm your email address by clicking the link below:
-
-${verificationUrl}
-
-If you didn't create a ${brand} account, you can safely ignore this email.
-
-— The ${brand} team`,
-    to,
+export async function sendEmailVerificationEmail(to: { email: string; name?: null | string }, verificationUrl: string, language: LANGUAGE) {
+  const firstName = displayName(to);
+  const rendered = await renderEmailVerificationEmail({
+    brandName: instanceName(),
+    ...(firstName ? { firstName } : {}),
+    language: copyLang(language),
+    verificationUrl,
   });
+  return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: recipient(to) });
 }
 
 /**

@@ -263,3 +263,37 @@ export interface LifecycleNudgeEmailProps {
   /** Overrides the default "you're receiving this as part of your account" footer line (e.g. for a recipient without an account). */
   footerNote?: string;
 }
+
+/** A password-reset link. Transactional: sent whatever the person's email preferences. */
+export interface PasswordResetEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  firstName?: string;
+  language: TransactionalEmailLanguage;
+  /** Absolute link that opens the reset (better-auth's, carrying the single-use token). */
+  resetUrl: string;
+}
+
+/** An email-verification link. Transactional: sent whatever the person's email preferences. */
+export interface EmailVerificationEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  firstName?: string;
+  language: TransactionalEmailLanguage;
+  /** Absolute link that verifies the address (better-auth's, carrying the token). */
+  verificationUrl: string;
+}
+
+/** An invitation to join someone's household, sent to an address that has no account yet. */
+export interface HouseholdInviteEmailProps {
+  /** Absolute link to the join page, carrying the invite token. */
+  acceptUrl: string;
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  /** Days until the invite expires, as the email states it. */
+  expiresInDays: number;
+  /** How the inviter is named: their first name, or their email address. */
+  inviterName: string;
+  /** The inviter's language: the recipient has no account, so none of their own. */
+  language: TransactionalEmailLanguage;
+}

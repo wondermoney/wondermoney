@@ -28,7 +28,7 @@ import {
   SIGNUP_FUNNEL_EVENTS,
 } from "@/lib/utils/analytics";
 import { SENTRY_CLIENT_ENABLED } from "@/lib/utils/sentry-enabled";
-import { getCallbackURL } from "@/lib/utils/url";
+import { getCallbackURL, getEmailVerificationCallbackURL } from "@/lib/utils/url";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
@@ -159,6 +159,7 @@ export default function SignupForm({
       email: values.email,
       password: values.password,
       name: deriveNameFromEmail(values.email),
+      callbackURL: getEmailVerificationCallbackURL(locale),
     });
 
     if (error || !data?.user) {

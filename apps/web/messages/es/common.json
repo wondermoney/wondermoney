@@ -2392,7 +2392,7 @@
       "off": "Envío desactivado"
     },
     "pauseReason": {
-      "delivery": "La entrega de este tipo de correo está disponible actualmente solo en portugués (Portugal).",
+      "delivery": "No podemos enviar estos correos a la dirección de tu cuenta. Comprueba que sea una dirección de correo válida.",
       "marketingOptOut": "Esta preferencia está activada, pero has cancelado la suscripción a todos los correos de marketing.",
       "generic": "Esta preferencia está activada, pero la entrega por correo está en pausa."
     },

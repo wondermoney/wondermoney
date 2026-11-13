@@ -2392,7 +2392,7 @@
       "off": "Envio desativado"
     },
     "pauseReason": {
-      "delivery": "A entrega deste tipo de email está atualmente disponível apenas em português (Portugal).",
+      "delivery": "Não conseguimos enviar estes emails para o endereço da tua conta. Confirma que é um endereço de email válido.",
       "marketingOptOut": "Esta preferência está ativa, mas cancelaste a subscrição de todos os emails de marketing.",
       "generic": "Esta preferência está ativa, mas a entrega por email encontra-se em pausa."
     },

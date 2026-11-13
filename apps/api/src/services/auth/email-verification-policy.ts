@@ -16,13 +16,14 @@ export function aiRequiresVerifiedEmail(env: Env = process.env): boolean {
 
 /**
  * better-auth's verification link redirects to its `callbackURL` once followed, and falls back to
- * `/` (the API's own root) when the client sent none. Neither app sends one at sign-up, so point
- * those links at the web app instead; a callback the client did choose is kept.
+ * `/` (the API's own root) when the client sent none. The mobile app sends none, nor does a resend
+ * from the web, so point those links at the web app instead: at its page in `locale` when the
+ * account's locale is known. A callback the client did choose is kept.
  */
-export function verificationLinkLandingOnApp(link: string, appUrl: string): string {
+export function verificationLinkLandingOnApp(link: string, appUrl: string, locale?: string): string {
   const url = new URL(link);
   const callback = url.searchParams.get('callbackURL');
   if (callback && callback !== '/') return link;
-  url.searchParams.set('callbackURL', appUrl);
+  url.searchParams.set('callbackURL', locale ? `${appUrl.replace(/\/$/u, '')}/${locale}` : appUrl);
   return url.toString();
 }

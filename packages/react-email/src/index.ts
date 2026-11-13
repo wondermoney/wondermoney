@@ -13,6 +13,18 @@ import BudgetThresholdAlert, {
   getBudgetThresholdPreheader,
   getBudgetThresholdSubject,
 } from "./templates/budget-threshold-alert.js";
+import EmailVerificationEmail, {
+  getEmailVerificationPreheader,
+  getEmailVerificationSubject,
+} from "./templates/email-verification.js";
+import HouseholdInviteEmail, {
+  getHouseholdInvitePreheader,
+  getHouseholdInviteSubject,
+} from "./templates/household-invite.js";
+import PasswordResetEmail, {
+  getPasswordResetPreheader,
+  getPasswordResetSubject,
+} from "./templates/password-reset.js";
 import CreditCardDueReminderEmail, {
   getCreditCardDueReminderPreheader,
   getCreditCardDueReminderSubject,
@@ -35,14 +47,17 @@ import type {
   BankSyncAlertEmailProps,
   BudgetThresholdAlertProps,
   CreditCardDueReminderEmailProps,
+  EmailVerificationEmailProps,
+  HouseholdInviteEmailProps,
   InternalAlertEmailProps,
   LifecycleNudgeEmailProps,
   MonthlyStoryProps,
+  PasswordResetEmailProps,
   WeeklyInsightsProps,
 } from "./types.js";
 import { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 
-export type { AccountConnectedEmailProps, AppLocale, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, CreditCardDueReminderEmailProps, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
+export type { AccountConnectedEmailProps, AppLocale, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, CreditCardDueReminderEmailProps, EmailVerificationEmailProps, HouseholdInviteEmailProps, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, PasswordResetEmailProps, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
 export { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 export { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
 
@@ -206,4 +221,31 @@ export async function renderLifecycleNudgeEmail(
     preheader: getLifecycleNudgePreheader(props),
     ...output,
   };
+}
+
+export async function renderPasswordResetEmail(
+  props: PasswordResetEmailProps,
+): Promise<RenderedEmail> {
+  assertWebUrl("resetUrl", props.resetUrl);
+  const output = await renderElement(createElement(PasswordResetEmail, props));
+
+  return { subject: getPasswordResetSubject(props), preheader: getPasswordResetPreheader(props), ...output };
+}
+
+export async function renderEmailVerificationEmail(
+  props: EmailVerificationEmailProps,
+): Promise<RenderedEmail> {
+  assertWebUrl("verificationUrl", props.verificationUrl);
+  const output = await renderElement(createElement(EmailVerificationEmail, props));
+
+  return { subject: getEmailVerificationSubject(props), preheader: getEmailVerificationPreheader(props), ...output };
+}
+
+export async function renderHouseholdInviteEmail(
+  props: HouseholdInviteEmailProps,
+): Promise<RenderedEmail> {
+  assertWebUrl("acceptUrl", props.acceptUrl);
+  const output = await renderElement(createElement(HouseholdInviteEmail, props));
+
+  return { subject: getHouseholdInviteSubject(props), preheader: getHouseholdInvitePreheader(props), ...output };
 }

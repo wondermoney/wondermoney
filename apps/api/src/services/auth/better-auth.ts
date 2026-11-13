@@ -13,8 +13,10 @@ import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
+import { SupportedLanguages } from '@entity/Appuser';
 import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
+import { type AccountLanguageLookup, authEmailLanguage, linkInAccountLocale } from '@service/auth/auth-email-language';
 import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { capDemoSessionRefresh, isExpiredDemoSession } from '@service/auth/demo-session';
@@ -26,6 +28,7 @@ import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
 import { removePushDevicesForSession } from '@service/push/push-session-cleanup';
+import { accountLocale } from '@utils/account-language';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
@@ -155,6 +158,21 @@ const signupPolicyDeps: SignupPolicyDeps = {
   },
 };
 
+/**
+ * The account language of a better-auth user: its own account first, then one with its address
+ * (an account from before better-auth, which the auth callback reconnects). On the better-auth
+ * pool, which better-auth's own hooks already run beside, outside any MikroORM request context.
+ */
+const accountLanguageOf: AccountLanguageLookup = async (user) => {
+  const { rows } = await betterAuthPool.query<{ language: string }>(
+    `select language from public.appuser
+     where record_active and deleted_at is null and (external_user_id = $1 or lower(email_address) = lower($2))
+     order by (external_user_id = $1) desc limit 1`,
+    [user.id, user.email],
+  );
+  return rows[0]?.language ?? null;
+};
+
 // `auth` is kept module-internal on purpose: its fully-inferred type transitively
 // names zod's `zod/v4` subpath, which isn't portable in the emitted .d.ts (TS2742).
 // Consumers get portable-typed exports instead (`authHandler` here; a session-lookup
@@ -195,17 +213,25 @@ const auth = betterAuth({
     // Legacy bcrypt hashes verify through the shim; new and reset passwords use
     // better-auth's own default hasher.
     password: { hash: hashPasswordShim, verify: verifyPasswordShim },
-    // In-process (no cross-service call) branded WonderMoney reset email via Mailjet.
+    // In-process, in the account's language, landing on the reset page in its locale. better-auth
+    // calls this only for an address with an account and answers the same either way, so the
+    // language lookup never throws (services/auth/auth-email-language.ts).
     sendResetPassword: async ({ url, user }) => {
-      await sendPasswordResetEmail({ email: user.email, name: user.name }, url);
+      const language = await authEmailLanguage({ appUrl: FRONTEND_URL, link: url, user }, accountLanguageOf);
+      const link = language ? linkInAccountLocale(url, FRONTEND_URL, language) : url;
+      await sendPasswordResetEmail({ email: user.email, name: user.name }, link, language ?? SupportedLanguages.EN);
     },
   },
   emailVerification: {
     // A server that keeps AI to verified accounts mails the link at sign-up; otherwise nothing
     // asks for verification, so nothing is sent.
     sendOnSignUp: aiRequiresVerifiedEmail(),
+    // In the account's language, or the sign-up page's before the account exists, as above.
     sendVerificationEmail: async ({ url, user }) => {
-      await sendEmailVerificationEmail({ email: user.email, name: user.name }, verificationLinkLandingOnApp(url, FRONTEND_URL));
+      const language = await authEmailLanguage({ appUrl: FRONTEND_URL, link: url, user }, accountLanguageOf);
+      const landing = verificationLinkLandingOnApp(url, FRONTEND_URL, language && accountLocale(language));
+      const link = language ? linkInAccountLocale(landing, FRONTEND_URL, language) : landing;
+      await sendEmailVerificationEmail({ email: user.email, name: user.name }, link, language ?? SupportedLanguages.EN);
     },
   },
   // twoFactor (TOTP + backup codes), jwt (JWKS at /api/auth/jwks for web's local
