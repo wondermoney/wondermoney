@@ -380,3 +380,54 @@ describe('app auth adapter — session signal', () => {
     expect(callback).toHaveBeenCalledWith('SESSION_CHANGED', null)
   })
 })
+
+const PASSWORD = 'pw12345678'
+
+describe('app auth adapter — email sign-up', () => {
+  it.each([
+    ['pt', 'pt'],
+    ['es', 'es'],
+    ['en', 'en'],
+  ] as const)('sends a %s sign-up its language as Accept-Language, with the name better-auth requires', async (locale, header) => {
+    const signUpEmail = jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+    const adapter = createAppAuthAdapter(createPort({ signUpEmail }))
+
+    await expect(adapter.signUp('ana.silva@example.com', PASSWORD, locale)).resolves.toEqual({ status: 'accepted' })
+
+    expect(signUpEmail).toHaveBeenCalledWith({
+      email: 'ana.silva@example.com',
+      password: PASSWORD,
+      name: 'ana.silva',
+      fetchOptions: { headers: { 'Accept-Language': header } },
+    })
+  })
+
+  it('names no callback page, so the verification link keeps its usual landing', async () => {
+    const signUpEmail = jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+    const adapter = createAppAuthAdapter(createPort({ signUpEmail }))
+
+    await adapter.signUp('ana@example.com', PASSWORD, 'pt')
+
+    expect(signUpEmail.mock.calls[0][0]).not.toHaveProperty('callbackURL')
+  })
+
+  it('sends no language when it has none, and the API falls back to English', async () => {
+    const signUpEmail = jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+    const adapter = createAppAuthAdapter(createPort({ signUpEmail }))
+
+    await adapter.signUp('ana@example.com', PASSWORD)
+
+    expect(signUpEmail).toHaveBeenCalledWith({ email: 'ana@example.com', password: PASSWORD, name: 'ana' })
+  })
+
+  it.each([
+    ['USER_ALREADY_EXISTS', 'email-taken'],
+    ['PASSWORD_TOO_SHORT', 'weak-password'],
+    ['VALIDATION_ERROR', 'unavailable'],
+  ])('classifies %s as %s', async (code, status) => {
+    const signUpEmail = jest.fn().mockResolvedValue({ data: null, error: errorLike(400, code) })
+    const adapter = createAppAuthAdapter(createPort({ signUpEmail }))
+
+    await expect(adapter.signUp('ana@example.com', PASSWORD, 'es')).resolves.toEqual({ status })
+  })
+})

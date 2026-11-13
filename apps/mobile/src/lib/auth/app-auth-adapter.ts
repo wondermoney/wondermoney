@@ -51,7 +51,12 @@ export type BetterAuthClientPort = Readonly<{
     }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signUp: Readonly<{
-    email: (input: { email: string; password: string; name?: string }) => Promise<AuthResult<Record<string, unknown>>>
+    email: (input: {
+      email: string
+      password: string
+      name: string
+      fetchOptions?: { headers?: Record<string, string> }
+    }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signOut: () => Promise<AuthResult<unknown>>
   sendVerificationEmail: (input: { email: string }) => Promise<AuthResult<unknown>>
@@ -331,9 +336,17 @@ export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapt
       }
     },
 
-    signUp: async (email, password): Promise<SignUpOutcome> => {
+    signUp: async (email, password, locale): Promise<SignUpOutcome> => {
       try {
-        const { data, error } = await client.signUp.email({ email, password })
+        // better-auth requires a name; like the web form, the address's local part stands in.
+        // The app sends no callback page, so the API reads the sign-up's language from
+        // Accept-Language: its verification email goes out before the account exists.
+        const { data, error } = await client.signUp.email({
+          email,
+          password,
+          name: email.split('@')[0] || email,
+          ...(locale ? { fetchOptions: { headers: { 'Accept-Language': locale } } } : {}),
+        })
         if (error) {
           const code = errorCode(error)
           if (code !== null && EMAIL_TAKEN_CODES.has(code)) return { status: 'email-taken' }
