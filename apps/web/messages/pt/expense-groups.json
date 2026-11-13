@@ -39,6 +39,13 @@
       "created": "Grupo criado"
     },
     "add-person": "Adicionar pessoa",
+    "edit": {
+      "action": "Editar grupo",
+      "title": "Editar grupo",
+      "description": "Muda o nome do grupo ou a moeda.",
+      "currency-hint": "Os novos acertos usam-na. As despesas partilhadas e os acertos já registados mantêm a sua moeda, e os saldos continuam por moeda.",
+      "saved": "Grupo atualizado"
+    },
     "detail": {
       "back": "Todos os grupos",
       "people": "Pessoas",

@@ -39,6 +39,13 @@
       "created": "Group created"
     },
     "add-person": "Add person",
+    "edit": {
+      "action": "Edit group",
+      "title": "Edit group",
+      "description": "Rename the group or change its currency.",
+      "currency-hint": "New settlements use it. Shared expenses and settlements already recorded keep their own currency, and balances stay per currency.",
+      "saved": "Group updated"
+    },
     "detail": {
       "back": "All groups",
       "people": "People",

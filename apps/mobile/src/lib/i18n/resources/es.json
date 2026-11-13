@@ -2141,6 +2141,12 @@
       "remove": "Quitar",
       "removePerson": "Quitar a {{name}}"
     },
+    "edit": {
+      "action": "Editar grupo",
+      "title": "Editar grupo",
+      "save": "Guardar",
+      "currencyHint": "Las nuevas liquidaciones usan esta divisa por defecto. Los gastos compartidos y las liquidaciones ya registrados mantienen su propia divisa, y los saldos se siguen llevando por divisa."
+    },
     "detail": {
       "notFoundTitle": "Grupo no encontrado",
       "notFoundMessage": "Este grupo se eliminó o no es de tu hogar.",

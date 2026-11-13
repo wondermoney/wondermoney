@@ -20,6 +20,7 @@ import type {
   GroupExpense,
   ShareInput,
   SuggestedPayment,
+  UpdateExpenseGroupInput,
 } from "@/lib/api/expense-group/types";
 import { formatWireDecimalInput } from "@/lib/utils/number";
 
@@ -407,6 +408,29 @@ export function shareTotalUnits(
   return amountToUnits(
     Number(transaction.editedSettlementAmount ?? transaction.settlementAmount),
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Editing a group
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * What an "Edit group" draft changes, as the `PATCH` body: only the fields that differ, the name
+ * trimmed and the currency upper-cased as the API stores them; null when nothing changes. The
+ * name must not be blank (the form checks it first). The API takes any known currency at any
+ * time: it only sets what new settlements default to, and recorded ones keep their own.
+ */
+export function groupEditChanges(
+  group: Pick<ExpenseGroup, "name" | "currencyCode">,
+  draft: { name: string; currencyCode: string },
+): UpdateExpenseGroupInput | null {
+  const name = draft.name.trim();
+  const currencyCode = draft.currencyCode.trim().toUpperCase();
+  const changes: UpdateExpenseGroupInput = {
+    ...(name !== group.name ? { name } : {}),
+    ...(currencyCode !== group.currencyCode ? { currencyCode } : {}),
+  };
+  return Object.keys(changes).length > 0 ? changes : null;
 }
 
 // ---------------------------------------------------------------------------------------------

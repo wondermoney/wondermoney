@@ -17,6 +17,7 @@ import {
   freezeCreateGroup,
   freezeRecordSettlement,
   freezeShareExpense,
+  freezeUpdateGroup,
   groupBalancesSchema,
   groupExpenseSchema,
   groupSettlementSchema,
@@ -111,6 +112,17 @@ describe('expense group request bodies', () => {
     expect(() => freezeCreateGroup({ name: 'Trip', currencyCode: 'EURO', people: [], householdMemberIds: [] })).toThrow()
     expect(() => freezeCreateGroup({ name: 'Trip', currencyCode: 'EUR', people: [{ name: '' }], householdMemberIds: [] })).toThrow()
     expect(() => freezeCreateGroup({ name: 'Trip', currencyCode: 'EUR', people: [{ name: 'Sam', email: 'not-an-email' }], householdMemberIds: [] })).toThrow()
+  })
+
+  it('freezes a group edit: only what changed, the name trimmed and the currency upper-cased', () => {
+    const group = { name: 'Lisbon trip', currencyCode: 'EUR' }
+    expect(freezeUpdateGroup(group, { name: '  Porto trip ', currencyCode: 'EUR' })).toEqual({ name: 'Porto trip' })
+    expect(freezeUpdateGroup(group, { name: 'Lisbon trip', currencyCode: 'usd' })).toEqual({ currencyCode: 'USD' })
+    expect(freezeUpdateGroup(group, { name: 'Porto trip', currencyCode: 'GBP' })).toEqual({ name: 'Porto trip', currencyCode: 'GBP' })
+    expect(freezeUpdateGroup(group, { name: ' Lisbon trip ', currencyCode: 'eur' })).toBeNull()
+    expect(() => freezeUpdateGroup(group, { name: ' ', currencyCode: 'EUR' })).toThrow()
+    expect(() => freezeUpdateGroup(group, { name: 'x'.repeat(101), currencyCode: 'EUR' })).toThrow()
+    expect(() => freezeUpdateGroup(group, { name: 'Trip', currencyCode: 'EURO' })).toThrow()
   })
 
   it('freezes shares by method: people only, positive amounts, or percentages', () => {

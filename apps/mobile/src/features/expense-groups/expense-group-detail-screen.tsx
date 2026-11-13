@@ -31,6 +31,7 @@ import {
   MEMBER_NAME_MAX,
 } from './expense-groups-contract'
 import { balanceStanding, classifyGroupFailure, describePayment, memberName } from './expense-groups-view-model'
+import { ExpenseGroupEditSheet } from './expense-group-edit-sheet'
 import { RecordSettlementScreen, type SettlementPrefill } from './record-settlement-screen'
 import { useAddGroupMember, useDeleteExpenseGroup, useDeleteSettlement, useRemoveGroupMember, useUpdateExpenseGroup } from './use-expense-groups'
 
@@ -55,6 +56,8 @@ type Props = Readonly<{
   canWrite: boolean
   /** Household members not yet in the group. */
   candidates: readonly Readonly<{ appuserKey: number; name: string }>[]
+  /** Currency codes the group's currency can change to (the API's currency list). */
+  currencies: readonly string[]
   onBack: () => void
   onDeleted: () => void
   onRefresh: () => void | Promise<void>
@@ -63,10 +66,11 @@ type Props = Readonly<{
 /**
  * One group: where everyone stands per currency, in "X owes Y" words, with the payments that
  * would settle it; the people; the shared expenses and the settlements. Writers can record a
- * settlement (from a suggested payment or from scratch), add and remove people, archive, and
- * delete a group with no history. A viewer sees the same page without any of those.
+ * settlement (from a suggested payment or from scratch), edit the group's name and currency, add
+ * and remove people, archive, and delete a group with no history. A viewer sees the same page
+ * without any of those.
  */
-export function ExpenseGroupDetailScreen({ state, canWrite, candidates, onBack, onDeleted, onRefresh }: Props) {
+export function ExpenseGroupDetailScreen({ state, canWrite, candidates, currencies, onBack, onDeleted, onRefresh }: Props) {
   const { t } = useTranslation()
   if (state.status === 'loading') return <Loading label={t('expenseGroups.loading')} />
   if (state.status === 'not-found' || state.status === 'error') {
@@ -81,10 +85,10 @@ export function ExpenseGroupDetailScreen({ state, canWrite, candidates, onBack, 
       />
     )
   }
-  return <LoadedGroup canWrite={canWrite} candidates={candidates} onBack={onBack} onDeleted={onDeleted} onRefresh={onRefresh} state={state} />
+  return <LoadedGroup canWrite={canWrite} candidates={candidates} currencies={currencies} onBack={onBack} onDeleted={onDeleted} onRefresh={onRefresh} state={state} />
 }
 
-function LoadedGroup({ state, canWrite, candidates, onBack, onDeleted, onRefresh }: Omit<Props, 'state'> & Readonly<{ state: Extract<ExpenseGroupDetailState, { status: 'loaded' }> }>) {
+function LoadedGroup({ state, canWrite, candidates, currencies: currencyChoices, onBack, onDeleted, onRefresh }: Omit<Props, 'state'> & Readonly<{ state: Extract<ExpenseGroupDetailState, { status: 'loaded' }> }>) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const formatMoney = useFormatMoney()
@@ -98,6 +102,7 @@ function LoadedGroup({ state, canWrite, candidates, onBack, onDeleted, onRefresh
   const deleteSettlement = useDeleteSettlement()
   const [settling, setSettling] = useState<{ prefill: SettlementPrefill | null } | null>(null)
   const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const pending = update.isPending || remove.isPending || addMember.isPending || removeMember.isPending || deleteSettlement.isPending
   const someone = t('expenseGroups.someone')
@@ -170,6 +175,7 @@ function LoadedGroup({ state, canWrite, candidates, onBack, onDeleted, onRefresh
           {canWrite ? (
             <View style={styles.actions}>
               <Button disabled={pending || members.length < 2} icon="hand-coins" label={t('expenseGroups.detail.recordSettlement')} onPress={() => setSettling({ prefill: null })} size="sm" />
+              <Button disabled={pending} icon="pencil" label={t('expenseGroups.edit.action')} onPress={() => { setError(null); setEditing(true) }} size="sm" variant="secondary" />
               <Button
                 disabled={pending}
                 icon="archive"
@@ -332,6 +338,15 @@ function LoadedGroup({ state, canWrite, candidates, onBack, onDeleted, onRefresh
 
       {settling ? (
         <RecordSettlementScreen currencies={currencies} group={group} locale={locale} onClose={() => setSettling(null)} prefill={settling.prefill} />
+      ) : null}
+      {editing ? (
+        <ExpenseGroupEditSheet
+          currencies={currencyChoices}
+          group={group}
+          onClose={() => setEditing(false)}
+          onSave={(payload) => update.mutateAsync({ groupId: group.expenseGroupKey, ...payload })}
+          visible
+        />
       ) : null}
       <AddPersonSheet
         candidates={candidates}
