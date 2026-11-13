@@ -19,6 +19,8 @@ documentation and features.
 
 ## Finding something to work on
 
+- The public [roadmap](https://github.com/orgs/wondermoney/projects/1) groups the epics and
+  issues into Now, Next and Later. Maintainers move items as plans change.
 - Issues labelled [`good first issue`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22)
   are small and self-contained, a good way to learn the codebase.
 - Issues labelled [`help wanted`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22)
@@ -144,6 +146,9 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
   household and account-privacy conditions. Add a test that another household's data stays out.
 
 ## Releasing (maintainers)
+
+There is no fixed release cadence: a release ships when enough has landed on `develop`, and a
+patch release when a security or data bug needs it.
 
 1. Use the open pull request titled "Release: develop → main". A workflow
    (`.github/workflows/release-pr.yml`) opens it on a push to `develop` and keeps its list of

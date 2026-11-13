@@ -14,6 +14,8 @@ and Android.
   first for what it asks for, what it costs and where your data lives.
 
   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wondermoney/wondermoney)
+- **See what's coming:** the public [roadmap](https://github.com/orgs/wondermoney/projects/1)
+  shows what we're working on now, next and later.
 - **Hack on it:** read on, then [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Help keep it running:** the hosted instance's servers, AI and market data cost money.
   [Sponsor the project on GitHub](https://github.com/sponsors/wondermoney) if you'd like to chip in.
