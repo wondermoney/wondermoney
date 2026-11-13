@@ -160,6 +160,15 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
    release's version, to `oci://ghcr.io/wondermoney/charts/wondermoney`. To edit the notes
    before anyone sees them, create the release as a draft instead (see
    [Release notes](#release-notes)).
+5. Once that workflow has published the images, bump the Render Blueprint in a pull request
+   against `develop` (the one that adds the "What's new" page will do): set the three image tags
+   in [`render.yaml`](render.yaml) (`wondermoney-api`, `wondermoney-worker`, `wondermoney-web`)
+   to the new version, without the `v`. Not before: a Render instance whose Blueprint has Auto Sync
+   on can pick up the new tag as soon as it reaches `develop`, which the "Deploy to Render" button
+   deploys from. CI's "API extras" job warns on every run while the tag is behind the latest
+   release, and fails if it names no release. The same check fails a pull request that makes a
+   setting required without adding it to `render.yaml`
+   (`pnpm --filter @wondermoney/api render:check`).
 
 ## Release notes
 

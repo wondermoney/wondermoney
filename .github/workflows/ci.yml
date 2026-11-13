@@ -552,6 +552,22 @@ jobs:
       - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
       - name: Check the public token OpenAPI document is current
         run: pnpm run openapi -- --check
+      # The Render Blueprint (render.yaml) against Render's published schema, then against what
+      # the API, the worker and the web app need to start (scripts/render-blueprint.ts). Its pinned
+      # images must be a published release; a newer release only warns, as the reminder to bump
+      # them (CONTRIBUTING.md, "Releasing").
+      - name: Check the Render Blueprint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pipx run check-jsonschema==0.39.0 --schemafile https://render.com/schema/render.yaml.json ../../render.yaml
+          if WM_RELEASES=$(gh release list --repo wondermoney/wondermoney --exclude-drafts --exclude-pre-releases \
+            --json tagName,isLatest --jq '(map(select(.isLatest)) + map(select(.isLatest | not))) | map(.tagName)'); then
+            export WM_RELEASES
+          else
+            echo "::warning::Could not list the releases; skipping the check of the pinned version."
+          fi
+          pnpm run render:check
       - name: Check the OpenAPI spec is not stale
         run: |
           pnpm run swagger
