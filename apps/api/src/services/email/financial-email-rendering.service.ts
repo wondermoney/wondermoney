@@ -21,13 +21,13 @@ export type RenderedEmailAdapter = (input: RenderedEmailInput) => Promise<Render
 type FinancialLanguage = SupportedLanguages;
 
 /**
- * The financial emails ship in EN and PT; every other account language (Spanish) reads English.
- * Each renderer keeps three things apart: the copy language (`lang`, which the react-email
- * template and the formatting follow), its `Intl` locale, and the account's own web locale
- * (`link`), which every link into the app carries.
+ * The financial emails ship in EN, PT and ES; an account language outside that list reads
+ * English. Each renderer keeps three things apart: the copy language (`lang`, which the
+ * react-email template and the formatting follow), its `Intl` locale, and the account's own web
+ * locale (`link`), which every link into the app carries.
  */
-type CopyLang = 'en' | 'pt';
-const COPY_LOCALES = ['en', 'pt'] as const;
+const COPY_LOCALES = ['en', 'pt', 'es'] as const;
+type CopyLang = (typeof COPY_LOCALES)[number];
 const languagesFor = (language: FinancialLanguage) => {
   const lang: CopyLang = copyLocale(language, COPY_LOCALES);
   return { lang, link: accountLocale(language), locale: INTL_LOCALE[lang] };
@@ -45,6 +45,17 @@ const COPY = {
     dataContext: 'Based on the transactions currently available.',
     noChange: 'no change',
   },
+  es: {
+    above: 'por encima',
+    below: 'por debajo',
+    budgetPressure: {
+      near: { detail: 'Estás cerca de los límites de tu presupuesto este mes.', status: 'Cerca del presupuesto' },
+      over: { detail: 'Superaste el presupuesto en una o más categorías este mes.', status: 'Por encima del presupuesto' },
+    },
+    comparisonText: 'Comparado con la semana anterior',
+    dataContext: 'Según las transacciones disponibles actualmente.',
+    noChange: 'sin cambios',
+  },
   pt: {
     above: 'acima',
     below: 'abaixo',
@@ -56,7 +67,7 @@ const COPY = {
     dataContext: 'Com base nas transações atualmente disponíveis.',
     noChange: 'sem alteração',
   },
-} as const;
+} as const satisfies Record<CopyLang, unknown>;
 
 
 export class FinancialEmailRenderingService {
@@ -259,6 +270,12 @@ function formatWeekRange(range: { end: Date; start: Date }, language: CopyLang) 
     if (sameMonth) return `${day(range.start)} a ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     if (sameYear) return `${day(range.start)} de ${month(range.start)} a ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     return `${day(range.start)} de ${month(range.start)} de ${year(range.start)} a ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
+  }
+  // Spanish reads "Semana completa del 6 al 12 de julio de 2026": the template supplies "del".
+  if (language === 'es') {
+    if (sameMonth) return `${day(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
+    if (sameYear) return `${day(range.start)} de ${month(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
+    return `${day(range.start)} de ${month(range.start)} de ${year(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
   }
   if (sameMonth) return `${day(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
   if (sameYear) return `${day(range.start)} ${month(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;

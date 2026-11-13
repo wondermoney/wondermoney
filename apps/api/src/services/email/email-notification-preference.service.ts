@@ -242,8 +242,7 @@ export class EmailNotificationPreferenceService {
 
   private gates(appuser: GateAppuser) {
     const active = appuser.recordActive && !appuser.deletedAt;
-    // Every account language gets the financial emails: EN and PT have their own copy, and a
-    // Spanish account reads the English copy until the Spanish lands.
+    // Every account language gets the financial emails, each in its own copy (EN, PT, ES).
     const localized = (Object.values(SupportedLanguages) as string[]).includes(appuser.language);
     return {
       deliverySupported: active && localized && emailSchema.safeParse(appuser.emailAddress).success,

@@ -53,6 +53,18 @@ describe('MonthlyStoryNarrativeService', () => {
     expect(result.sentences.length).toBeGreaterThan(0);
   });
 
+  it.each([['en', 'English'], ['pt', 'European Portuguese'], ['es', 'Spanish']] as const)('asks the model to polish a %s story in %s', async (language, name) => {
+    completeJson.mockRejectedValue(new Error('boom'));
+    await service.generate(factsWithOneDriver(), null, 'julio de 2026', language);
+    expect(completeJson.mock.calls[0]?.[0].user).toContain(`Respond in ${name}.`);
+  });
+
+  it('produces the Spanish skeleton fallback when language is es', async () => {
+    completeJson.mockRejectedValue(new Error('boom'));
+    const result = await service.generate(factsWithOneDriver(), null, 'julio de 2026', 'es');
+    expect(result).toEqual({ sentences: ['En julio de 2026 gastaste 420.00 € más de lo habitual: 1820.00 € en total.'], source: 'skeleton' });
+  });
+
   it('produces the English skeleton fallback when language is en', async () => {
     completeJson.mockRejectedValue(new Error('boom'));
     const result = await service.generate(factsWithOneDriver(), null, 'July 2026', 'en');

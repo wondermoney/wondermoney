@@ -15,8 +15,8 @@ export type BudgetThresholdItem =
 export interface BudgetThresholdAlertProps {
   /**
    * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
-   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
-   * its own locale. Defaults to `language`.
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
    */
   appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
@@ -46,8 +46,8 @@ export interface WeeklyBudgetSummary {
 export interface WeeklyInsightsProps {
   /**
    * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
-   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
-   * its own locale. Defaults to `language`.
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
    */
   appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
@@ -99,8 +99,8 @@ export interface MonthlyStoryMetric {
 export interface MonthlyStoryDataSufficientProps {
   /**
    * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
-   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
-   * its own locale. Defaults to `language`.
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
    */
   appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
@@ -129,8 +129,8 @@ export interface MonthlyStoryDataSufficientProps {
 export interface MonthlyStoryInsufficientDataProps {
   /**
    * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
-   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
-   * its own locale. Defaults to `language`.
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
    */
   appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
@@ -152,7 +152,7 @@ export interface MonthlyStoryInsufficientDataProps {
 
 export type MonthlyStoryProps = MonthlyStoryDataSufficientProps | MonthlyStoryInsufficientDataProps;
 
-export type TransactionalEmailLanguage = "en" | "pt";
+export type TransactionalEmailLanguage = "en" | "pt" | "es";
 
 /** The web app's locales: the first segment of every app path. */
 export type AppLocale = "en" | "es" | "pt";
@@ -185,7 +185,7 @@ export interface CreditCardDueReminderEmailProps {
   /** Days from today to the due date; 1 reads as "tomorrow". */
   daysUntilDue: number;
   firstName?: string;
-  language: "en" | "pt" | "es";
+  language: TransactionalEmailLanguage;
   /** The statement's period, formatted in `language` (for example "1 – 31 October"). */
   periodLabel: string;
   /** Absolute link to the notification settings, where reminders are turned off. */

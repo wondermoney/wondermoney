@@ -2,7 +2,7 @@ import { Link, Text } from "react-email";
 
 import { TransactionalEmailLayout } from "../../emails/components/TransactionalEmail";
 import { resolveBrandName } from "../components/Brand";
-import type { BankSyncAlertEmailProps, BankSyncAlertKind } from "../types";
+import type { BankSyncAlertEmailProps, BankSyncAlertKind, TransactionalEmailLanguage } from "../types";
 
 export type { BankSyncAlertEmailProps, BankSyncAlertKind } from "../types";
 
@@ -21,7 +21,7 @@ interface LanguageCopy {
   footer: (brand: string) => string;
 }
 
-export const COPY: Record<"en" | "pt", LanguageCopy> = {
+export const COPY: Record<TransactionalEmailLanguage, LanguageCopy> = {
   en: {
     kinds: {
       consent_expiring_7d: {
@@ -93,6 +93,42 @@ export const COPY: Record<"en" | "pt", LanguageCopy> = {
     settingsNote: "Podes desligar os alertas de ligação bancária nas",
     settingsLink: "definições de notificações",
     footer: (brand) => `Recebes este email porque tens um banco ligado à tua conta ${brand}.`,
+  },
+  es: {
+    kinds: {
+      consent_expiring_7d: {
+        subject: (bank, _brand, date) => `Tu conexión con ${bank} termina el ${date}`,
+        preheader: (bank, date) => `Vuelve a conectar ${bank} antes del ${date} para que siga sincronizándose.`,
+        heading: "Es hora de renovar la conexión con tu banco",
+        intro: (bank, brand, date) =>
+          `${brand} puede leer ${bank} hasta el ${date}. Después, las nuevas transacciones y los saldos dejarán de sincronizarse. Volver a conectar lleva un minuto y conserva tus cuentas y tu historial.`,
+      },
+      consent_expiring_1d: {
+        subject: (bank) => `Tu conexión con ${bank} termina en menos de un día`,
+        preheader: (bank, date) => `El acceso a ${bank} termina el ${date}. Vuelve a conectar ahora para que siga sincronizándose.`,
+        heading: "La conexión con tu banco termina pronto",
+        intro: (bank, _brand, date) =>
+          `El acceso a ${bank} termina el ${date}. Vuelve a conectar ahora para que las nuevas transacciones y los saldos se sigan sincronizando. Tus cuentas y tu historial se quedan como están.`,
+      },
+      consent_revoked: {
+        subject: (bank, brand) => `${bank} ha dejado de compartir datos con ${brand}`,
+        preheader: (bank) => `${bank} terminó la conexión antes de tiempo. Vuelve a conectar para reanudar la sincronización.`,
+        heading: "Tu banco terminó la conexión",
+        intro: (bank, brand) =>
+          `${bank} terminó el acceso de ${brand} antes de que caducara, así que tus cuentas de ese banco ya no se actualizan. Vuelve a conectar para reanudar la sincronización. Tus cuentas y tu historial se quedan como están.`,
+      },
+      sync_failing: {
+        subject: (bank) => `No podemos actualizar ${bank}`,
+        preheader: (bank, date) => `${bank} no se actualiza desde el ${date}. Volver a conectar suele solucionarlo.`,
+        heading: "Tu banco no se está sincronizando",
+        intro: (bank, _brand, date) =>
+          `No hemos podido actualizar tus cuentas de ${bank} desde el ${date}. Volver a conectar el banco suele solucionarlo. Si sigue fallando, revisa tu clave de Enable Banking en la configuración.`,
+      },
+    },
+    cta: "Volver a conectar el banco",
+    settingsNote: "Puedes desactivar las alertas de conexión bancaria en los",
+    settingsLink: "ajustes de notificaciones",
+    footer: (brand) => `Recibes este correo porque tienes un banco conectado a tu cuenta de ${brand}.`,
   },
 };
 

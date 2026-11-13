@@ -14,7 +14,7 @@ const baseFacts = () => ({
   spendingSubject: '1400',
 });
 
-const LANGUAGES: NarrativeLanguage[] = ['en', 'pt'];
+const LANGUAGES: NarrativeLanguage[] = ['en', 'pt', 'es'];
 
 describe('buildNarrativeSkeleton', () => {
   describe.each(LANGUAGES)('language=%s', (language) => {
@@ -93,11 +93,11 @@ describe('buildNarrativeSkeleton', () => {
   // which still occupies a slot per the brief's inherited "zero-score driver" behavior, but
   // that's harmless here since only 2-3 total candidates exist, well under the cap) so
   // savingsRate/netWorth are guaranteed to appear in `sentences`, genuinely asserting their
-  // EN/PT copy rather than relying on it "theoretically" being defined.
+  // EN/PT/ES copy rather than relying on it "theoretically" being defined.
   describe.each(LANGUAGES)('language=%s — isolated low-score drivers actually asserted', (language) => {
-    const savingsRateWord = language === 'pt' ? /poupança/i : /savings/i;
-    const netWorthWord = language === 'pt' ? /património/i : /net worth/i;
-    const monthLabel = language === 'pt' ? 'julho de 2026' : 'July 2026';
+    const savingsRateWord = { en: /savings/i, es: /tasa de ahorro/i, pt: /poupança/i }[language];
+    const netWorthWord = { en: /net worth/i, es: /patrimonio neto/i, pt: /património/i }[language];
+    const monthLabel = { en: 'July 2026', es: 'julio de 2026', pt: 'julho de 2026' }[language];
 
     it('produces the savings-rate-up sentence in the correct language when savingsRate is the only material change', () => {
       const facts = { ...baseFacts(), savingsRateBaseline: '20.00', savingsRateSubject: '25.00' };
@@ -126,5 +126,17 @@ describe('buildNarrativeSkeleton', () => {
       expect(skeleton.sentences.some((s) => netWorthWord.test(s))).toBe(true);
       expect(skeleton.sentences.join(' ')).toMatch(/5000/);
     });
+  });
+
+  it('writes the Spanish sentences in Spanish, with the same figures as the other languages', () => {
+    const facts = { ...baseFacts(), budgetPressure: 'over' as const, incomeSubject: '1800', savingsRateBaseline: '28.00', savingsRateSubject: '19.00', spendingSubject: '1820' };
+    const spanish = buildNarrativeSkeleton(facts, null, 'julio de 2026', 'es').sentences;
+    expect(spanish).toEqual(expect.arrayContaining([
+      'Algunas categorías superaron el presupuesto planificado.',
+      'Tu tasa de ahorro bajó del 28.00% al 19.00%.',
+    ]));
+    expect(spanish.find((sentence) => sentence.startsWith('En julio de 2026 gastaste'))).toMatch(/^En julio de 2026 gastaste [\d.]+ € más de lo habitual: 1820\.00 € en total\.$/u);
+    expect(spanish.find((sentence) => sentence.startsWith('Tus ingresos'))).toMatch(/^Tus ingresos bajaron [\d.]+ € respecto a lo habitual\.$/u);
+    expect(spanish.map((sentence) => sentence.match(/\d+(?:\.\d+)?/gu))).toEqual(buildNarrativeSkeleton(facts, null, 'julio de 2026', 'pt').sentences.map((sentence) => sentence.match(/\d+(?:\.\d+)?/gu)));
   });
 });
