@@ -3,11 +3,11 @@ import Big from 'big.js';
 
 import { DI } from '@app/database/di';
 import { BUDGET_EMAIL_MAX_AGE_SECONDS, MONTHLY_STORY_EMAIL_MAX_AGE_SECONDS, WEEKLY_EMAIL_MAX_AGE_SECONDS } from '@app/jobs/financial-emails.queue';
-import { Appuser, SupportedLanguages } from '@entity/Appuser';
+import { Appuser, type SupportedLanguages } from '@entity/Appuser';
 import { isAiHidden } from '@service/ai/ai-availability';
 import type { LisbonWeeklyPeriod } from '@service/budget/aggregation-periods';
 import type { AggregationSuppressedResult, BudgetAggregationResult, MonthlyStoryAggregationResult, MonthlyStoryFacts, MonthlyStoryInsufficientResult, WeeklyAggregationResult, WeeklyInsightFacts } from '@service/budget/aggregation-types';
-import type { NarrativeLanguage, NetWorthDriverInput } from '@service/budget/monthly-story-narrative-skeleton';
+import { NARRATIVE_LANGUAGES, type NarrativeLanguage, type NetWorthDriverInput } from '@service/budget/monthly-story-narrative-skeleton';
 import { MonthlyStoryNarrativeService } from '@service/budget/monthly-story-narrative.service';
 import { computeMonthlyRecurringChanges } from '@service/budget/monthly-story-recurring-changes';
 import { TenantFinancialAggregationService } from '@service/budget/tenant-financial-aggregation.service';
@@ -18,6 +18,7 @@ import { FinancialEmailOrchestrationService } from '@service/email/financial-ema
 import { FinancialEmailRenderingService } from '@service/email/financial-email-rendering.service';
 import { NetWorthService } from '@service/net-worth/net-worth.service';
 import type { BudgetPushNotifier } from '@service/push/budget-push';
+import { copyLocale, INTL_LOCALE } from '@utils/account-language';
 
 type FinancialEmailStream = 'budget' | 'monthlyStory' | 'weekly';
 
@@ -126,7 +127,7 @@ export class FinancialEmailUserWorkerService {
       const recurringChanges = (await Promise.all(tenantKeys.map((tenantKey) => computeMonthlyRecurringChanges(this.em, tenantKey, combined.period.monthRange)))).flat();
       const factsWithRecurring: MonthlyStoryFacts = { ...combined.facts, recurringChanges };
       const monthLabel = monthLabelFor(combined.period, fresh.language);
-      const narrativeLanguage: NarrativeLanguage = fresh.language === SupportedLanguages.PT ? 'pt' : 'en';
+      const narrativeLanguage: NarrativeLanguage = copyLocale(fresh.language, NARRATIVE_LANGUAGES);
       const narrative = await this.narrative.generate(factsWithRecurring, netWorthInput, monthLabel, narrativeLanguage, { allowModel: !isAiHidden(appuser) });
 
       const delivered = await this.orchestration.deliverMonthlyStory({
@@ -237,9 +238,9 @@ function budgetPeriodsAgree(results: BudgetAggregationResult[]) {
   return results.every((result) => result.period.localDate === first.period.localDate && result.period.month === first.period.month && result.period.year === first.period.year && result.period.day.start.getTime() === first.period.day.start.getTime() && result.period.day.end.getTime() === first.period.day.end.getTime() && result.period.monthRange.start.getTime() === first.period.monthRange.start.getTime() && result.period.monthRange.end.getTime() === first.period.monthRange.end.getTime());
 }
 
-/** The financial emails ship in EN and PT; everything else falls back to EN — same convention as `financial-email-rendering.service.ts`'s `intlLocale`. */
+/** In the monthly story's copy language: EN or PT, so a Spanish account reads an English month, like the rest of the email. */
 function monthLabelFor(period: { month: number; year: number }, language: SupportedLanguages): string {
-  const locale = language === SupportedLanguages.PT ? 'pt-PT' : 'en-GB';
+  const locale = INTL_LOCALE[copyLocale(language, NARRATIVE_LANGUAGES)];
   return new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC', year: 'numeric' }).format(new Date(Date.UTC(period.year, period.month - 1, 1)));
 }
 

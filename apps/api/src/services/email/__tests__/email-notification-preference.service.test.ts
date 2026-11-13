@@ -128,7 +128,7 @@ describe('EmailNotificationPreferenceService', () => {
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: false, effectiveEnabled: false, storedEnabled: true });
   });
 
-  it.each([SupportedLanguages.EN, SupportedLanguages.PT])('supports delivery (and returns the language) for %s locale', async (language) => {
+  it.each([SupportedLanguages.EN, SupportedLanguages.PT, SupportedLanguages.ES])('supports delivery (and returns the language) for %s locale', async (language) => {
     execute.mockResolvedValue(freshRow({ budgetAlertsEnabled: true, language }));
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: true, effectiveEnabled: true, language, storedEnabled: true });
   });

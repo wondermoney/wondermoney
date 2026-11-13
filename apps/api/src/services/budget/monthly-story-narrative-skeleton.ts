@@ -12,9 +12,10 @@ export interface NetWorthDriverInput {
  * (Task 15's caller). This skeleton is not just an LLM input — it is also the ungated
  * fallback text shipped verbatim when the LLM polish call fails or is guardrail-rejected,
  * so every driver sentence must exist in both languages. Never add a driver whose sentence
- * is only defined for one language.
+ * is only defined for one language. An account in any other language (Spanish) reads English.
  */
-export type NarrativeLanguage = 'en' | 'pt';
+export const NARRATIVE_LANGUAGES = ['en', 'pt'] as const;
+export type NarrativeLanguage = (typeof NARRATIVE_LANGUAGES)[number];
 
 interface ScoredDriver {
   score: number;

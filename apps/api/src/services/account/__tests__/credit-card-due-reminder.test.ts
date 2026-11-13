@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { addAccount, addPartner, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { handleCreditCardDueReminderJob } from '@app/jobs/credit-card-due-reminder.worker';
+import { SupportedLanguages } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { CreditCardDueReminderChannel, CreditCardDueReminderDelivery, CreditCardDueReminderStatus } from '@entity/CreditCardDueReminderDelivery';
@@ -123,6 +124,24 @@ describe('credit card due reminders', () => {
     expect(pushed).toHaveLength(0);
     const push = (await deliveries()).find((delivery) => delivery.channel === CreditCardDueReminderChannel.PUSH);
     expect(push).toMatchObject({ outcomeCode: 'push_credit_card_due_reminders_disabled', status: CreditCardDueReminderStatus.SUPPRESSED });
+  });
+
+  it('writes to a Spanish account in Spanish, dates and links included', async () => {
+    const em = db.em();
+    const english = await seedCard(em);
+    const spanish = await seedCard(em);
+    em.assign(spanish.appuser, { language: SupportedLanguages.ES });
+    await em.flush();
+    for (const household of [english, spanish]) await addTransaction(em, household, { amount: -120, date: utc('2026-01-04'), status: 'BOOKED' });
+
+    const { run, sent } = harness();
+    await run(utc('2026-01-22'));
+
+    const to = (household: Household) => sent.find((email) => email.to.email === household.appuser.emailAddress);
+    expect(to(spanish)?.subject).not.toBe(to(english)?.subject);
+    expect(to(spanish)?.text).toContain('25 de enero');
+    expect(to(spanish)?.html).toContain(`/es/accounts/${spanish.account.accountKey}?tab=statements`);
+    expect(to(english)?.text).toContain('25 January');
   });
 
   it('sends nothing on a second run the same day', async () => {

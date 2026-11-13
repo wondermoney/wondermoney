@@ -97,6 +97,39 @@ describe('installed React Email package rendering', () => {
     expect(rendered.html).toContain('next=%2Fen');
   });
 
+  // These emails have no Spanish copy yet: a Spanish account reads the English email, never the
+  // Portuguese one, and its links still open the app and the docs in Spanish.
+  it('renders the budget alert for a Spanish account in English, with /es links', async () => {
+    const input = { appuserKey: 7, facts: [budgetFact], firstName: 'Lucía', recipient: 'user@example.com' };
+    const english = await rendering.renderBudget({ ...input, language: SupportedLanguages.EN });
+    const spanish = await rendering.renderBudget({ ...input, language: SupportedLanguages.ES });
+
+    expect(spanish.subject).toBe(english.subject);
+    expect(spanish.preheader).toBe(english.preheader);
+    expect(spanish.html).toContain('July 2026');
+    expect(spanish.html).toContain('/es/settings?tab=notifications');
+    expect(spanish.html).toContain('https://docs.wonder.money/es/about/privacy-policy');
+    expect(spanish.html).toContain('next=%2Fes%2Fbudgets');
+    expect(spanish.html).not.toContain('/en/settings');
+  });
+
+  it('renders the weekly summary and the monthly story for a Spanish account in English, with /es links', async () => {
+    const weekly = (language: SupportedLanguages) => rendering.renderWeekly({
+      appuserKey: 7, currencyCode: 'EUR',
+      facts: { activeBudgetStatus: null, comparisonPercentage: '-12.5', comparisonWeekTotal: '80', isoWeek: 29, isoWeekYear: 2026, subjectWeekTotal: '90', topCategory: { amount: '50', categoryKey: 4, displayName: 'Groceries' } },
+      language,
+      recipient: 'user@example.com',
+      subjectWeek: { end: new Date('2026-07-12T23:00:00Z'), start: new Date('2026-07-05T23:00:00Z') },
+    });
+    const story = (language: SupportedLanguages) => rendering.renderMonthlyStoryInsufficient({ appuserKey: 7, language, monthLabel: 'July 2026', monthsAvailable: 1, monthsNeeded: 3, reason: 'insufficient_history', recipient: 'user@example.com' });
+
+    for (const [english, spanish] of [[await weekly(SupportedLanguages.EN), await weekly(SupportedLanguages.ES)], [await story(SupportedLanguages.EN), await story(SupportedLanguages.ES)]] as const) {
+      expect(spanish.subject).toBe(english.subject);
+      expect(spanish.text.replaceAll('/es', '/en').replaceAll('%2Fes', '%2Fen')).toBe(english.text);
+      expect(spanish.html).toContain('/es/settings?tab=notifications');
+    }
+  });
+
   it('renders production weekly props without preview/sample values', async () => {
     const rendered = await rendering.renderWeekly({
       appuserKey: 7, currencyCode: 'EUR',

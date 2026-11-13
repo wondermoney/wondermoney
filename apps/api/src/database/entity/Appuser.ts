@@ -15,8 +15,14 @@ export enum AppuserAccountType {
   REGULAR = 'regular',
 }
 
+/**
+ * An account's language: the language of its emails and of every other text the server writes for
+ * it (notifications, the calendar feed, the assistant's default). A text without copy in the
+ * account's language falls back to English (`@utils/account-language`).
+ */
 export enum SupportedLanguages {
   EN = 'EN',
+  ES = 'ES',
   PT = 'PT',
 }
 @Entity({ repository: () => AppuserRepository })

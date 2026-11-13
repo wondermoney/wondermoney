@@ -13,6 +13,12 @@ export type BudgetThresholdItem =
   | (BudgetThresholdItemBase & { state: "over"; threshold: 100 });
 
 export interface BudgetThresholdAlertProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
+   * its own locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
@@ -38,6 +44,12 @@ export interface WeeklyBudgetSummary {
 }
 
 export interface WeeklyInsightsProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
+   * its own locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
@@ -85,6 +97,12 @@ export interface MonthlyStoryMetric {
 }
 
 export interface MonthlyStoryDataSufficientProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
+   * its own locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   budgetPressureDetail?: string;
@@ -109,6 +127,12 @@ export interface MonthlyStoryDataSufficientProps {
 }
 
 export interface MonthlyStoryInsufficientDataProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here yet (Spanish) reads English but opens the app in
+   * its own locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   ctaUrl: string;
@@ -129,6 +153,9 @@ export interface MonthlyStoryInsufficientDataProps {
 export type MonthlyStoryProps = MonthlyStoryDataSufficientProps | MonthlyStoryInsufficientDataProps;
 
 export type TransactionalEmailLanguage = "en" | "pt";
+
+/** The web app's locales: the first segment of every app path. */
+export type AppLocale = "en" | "es" | "pt";
 
 /** "New bank connected" confirmation sent after an account sync links a bank. Transactional. */
 export interface AccountConnectedEmailProps {

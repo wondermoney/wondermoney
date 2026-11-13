@@ -42,7 +42,7 @@ import type {
 } from "./types.js";
 import { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 
-export type { AccountConnectedEmailProps, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, CreditCardDueReminderEmailProps, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
+export type { AccountConnectedEmailProps, AppLocale, BankSyncAlertEmailProps, BankSyncAlertKind, BudgetThresholdAlertProps, BudgetThresholdItem, CreditCardDueReminderEmailProps, InternalAlertDetail, InternalAlertEmailProps, LifecycleNudgeEmailProps, MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange, TransactionalEmailLanguage, WeeklyBudgetSummary, WeeklyInsightsProps } from "./types.js";
 export { getWeeklyInsightsPreheader } from "./weekly-insights-preheader.js";
 export { DEFAULT_BRAND_NAME, resolveBrandName } from "./components/Brand.js";
 

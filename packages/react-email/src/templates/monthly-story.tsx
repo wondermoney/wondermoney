@@ -85,10 +85,10 @@ function metricDetail(metric: { detail?: string; formattedBaseline?: string }, p
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 
-function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps) {
+function SufficientBody({ language, appLocale = language, ...props }: MonthlyStoryDataSufficientProps) {
   const t = COPY[language];
   const brand = resolveBrandName(props.brandName);
-  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story" });
+  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${appLocale}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story" });
   const [incomeBaselineWidth, incomeSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedIncomeBaseline, language), parseFormattedAmount(props.formattedIncomeSubject, language));
   const [spendingBaselineWidth, spendingSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedSpendingBaseline, language), parseFormattedAmount(props.formattedSpendingSubject, language));
 
@@ -161,10 +161,10 @@ function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps)
   );
 }
 
-function InsufficientBody({ language, ...props }: MonthlyStoryInsufficientDataProps) {
+function InsufficientBody({ language, appLocale = language, ...props }: MonthlyStoryInsufficientDataProps) {
   const t = COPY[language];
   const brand = resolveBrandName(props.brandName);
-  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story_insufficient" });
+  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${appLocale}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story_insufficient" });
   const body = props.reason === "zero_activity" ? t.zeroActivityBody : t.insufficientBody(props.monthsNeeded);
 
   return (

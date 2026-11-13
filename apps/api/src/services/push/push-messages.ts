@@ -51,8 +51,8 @@ export function pushCategoryOf(notification: PushNotification): null | PushCateg
 
 /**
  * The recipient's language, picked as the emails pick it: from the person's account language,
- * English for anything without a translation. The texts exist in Spanish too, for when accounts can
- * be set to it.
+ * English for anything without a translation. Every push text has English, Portuguese and Spanish
+ * copy, so an `ES` account reads Spanish.
  */
 interface Copy {
   bank: { body: Record<BankSyncAlertEventType, string>; title: string };

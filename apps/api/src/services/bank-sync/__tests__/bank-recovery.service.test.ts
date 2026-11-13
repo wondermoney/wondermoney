@@ -170,7 +170,7 @@ describe('BankRecoveryService', () => {
   // Rollout-based suppression (off / allowlist exclusion / live-outside-prod) is
   // gone; the surviving pre-send suppressions are identity- and consent-based.
   it.each([
-    ['an unsupported locale', { user: { language: 'ES' } }, 'unsupported_language'],
+    ['an unsupported locale', { user: { language: 'FR' } }, 'unsupported_language'],
     ['an owner with no external identity', { incident: { distinctId: undefined } }, 'rollout_ineligible'],
   ])('suppresses %s without invoking the callback', async (_name, overrides, reason) => {
     const h = harness({ ...overrides, delivery: { claimToken: 'token', status: BankRecoveryDeliveryStatus.CLAIMED } }, {});

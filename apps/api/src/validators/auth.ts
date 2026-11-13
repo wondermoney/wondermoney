@@ -15,7 +15,7 @@ export const authCallbackRequestSchema = z.object({
 
 const EMAIL_LANGUAGE_BY_ROUTE_LOCALE: Readonly<Record<SignupRouteLocale, SupportedLanguages>> = {
   en: SupportedLanguages.EN,
-  es: SupportedLanguages.EN,
+  es: SupportedLanguages.ES,
   pt: SupportedLanguages.PT,
 };
 

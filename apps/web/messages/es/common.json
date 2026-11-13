@@ -1527,6 +1527,8 @@
   "monthly-total": "Total mensual",
   "appearance-title": "Apariencia",
   "appearance-description": "Cambia el aspecto de la aplicación.",
+  "language-email-hint": "Tus correos siguen este idioma cuando ya están traducidos; si no, llegan en inglés.",
+  "language-email-save-error": "No se pudo cambiar el idioma de tus correos. Vuelve a elegirlo para intentarlo de nuevo.",
   "locale": "{locale, select, pt {🇵🇹 Portugués} en {🇺🇸 Inglés} es {🇪🇸 Español} other {Desconocido}}",
   "current-month": "Mes actual",
   "last-month": "Mes pasado",

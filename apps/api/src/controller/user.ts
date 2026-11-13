@@ -83,7 +83,7 @@ export async function getCurrentUserProfile(req: Request, res: Response) {
 export async function updateData(req: Request, res: Response, next: NextFunction) {
   const authedUser_ = authedUser(req);
   const {
-    body: { firstName, lastName, mobileNumber, mobileNumberPrefix },
+    body: { firstName, language, lastName, mobileNumber, mobileNumberPrefix },
   } = await zParse(updateUserDataRequestSchema, req);
   const user = await DI.em.getRepository(Appuser).getUserById(authedUser_.appuserKey);
   if (!user) {
@@ -92,6 +92,9 @@ export async function updateData(req: Request, res: Response, next: NextFunction
   }
   if (firstName) {
     user.firstName = firstName;
+  }
+  if (language) {
+    user.language = language;
   }
   if (lastName) {
     user.lastName = lastName;

@@ -1571,7 +1571,7 @@
       "pt-PT": "Português (Portugal)",
       "es": "Español"
     },
-    "languageScope": "O idioma altera apenas a interface da aplicação. Não altera o idioma do email nem do perfil da conta."
+    "languageScope": "O idioma altera a interface da aplicação neste dispositivo e o idioma dos teus emails. Os emails que ainda não estão traduzidos chegam em inglês."
   },
   "categories": {
     "title": "Categorias",
