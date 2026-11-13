@@ -185,12 +185,12 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
       return false;
     }
     if (phases.status === 'failed') {
-      const errorCode = phases.failedAt === 'account' ? 'account_phase_failed' : 'transaction_phase_failed';
+      const errorCode = phases.reportedErrorCode ?? (phases.failedAt === 'account' ? 'account_phase_failed' : 'transaction_phase_failed');
       if (await finalize('failed', errorCode, false, phases.account)) return false;
       throw new AccountAutoSyncOutcomeError('account.auto-sync.requisition:failed');
     }
     if (phases.status === 'partial') {
-      if (await finalize('partial', 'data_validation', false, phases.account)) return false;
+      if (await finalize('partial', phases.reportedErrorCode ?? 'data_validation', false, phases.account)) return false;
       throw new AccountAutoSyncOutcomeError('account.auto-sync.requisition:partial');
     }
     await finalize('full_success', undefined, false, phases.account);

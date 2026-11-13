@@ -29,7 +29,11 @@ const mockRefetch = jest.fn()
 const mockMutateAsync = jest.fn()
 let mockParams: { justStarted?: string; connection?: string } = {}
 let mockIsPending = false
-let mockVariables: number | undefined
+let mockVariables: { connectionId: number; provider: string } | undefined
+let mockFeatures: { bankSyncProviders?: string[] } = {}
+jest.mock('@/lib/server/use-instance', () => ({
+  useConfirmedFeature: (select: (features: { bankSyncProviders?: string[] }) => boolean | undefined) => select(mockFeatures) === true,
+}))
 
 const mockStartMutate = jest.fn()
 let mockStartPending = false
@@ -71,11 +75,13 @@ jest.mock('../connections-screen', () => ({
     justStarted: boolean
     connectionResult: string | null
     onConnectBank: () => void
+    onConnectSimplefin?: () => void
     onBack: () => void
     onRefresh: () => void
-    onDisconnect: (connectionId: number) => Promise<void>
-    disconnectingConnectionId: number | null
-    disconnectFailure: { connectionId: number; failure: string } | null
+    onDisconnect: (target: { connectionId: number; provider: string }) => Promise<void>
+    onViewHistory: (target: { connectionId: number; provider: string }, institutionName: string | null) => void
+    disconnectingConnection: { connectionId: number; provider: string } | null
+    disconnectFailure: { connectionId: number; provider: string; failure: string } | null
     onImportStatement: () => void
     onReconnect: (bankId: string) => void
     reconnectingBankId: string | null
@@ -86,11 +92,17 @@ jest.mock('../connections-screen', () => ({
       <>
         <Native.Text testID="justStarted">{String(props.justStarted)}</Native.Text>
         <Native.Text testID="connectionResult">{String(props.connectionResult)}</Native.Text>
-        <Native.Text testID="disconnecting">{String(props.disconnectingConnectionId)}</Native.Text>
-        <Native.Text testID="disconnectFailure">{props.disconnectFailure ? `${props.disconnectFailure.connectionId}:${props.disconnectFailure.failure}` : 'none'}</Native.Text>
+        <Native.Text testID="disconnecting">{props.disconnectingConnection ? `${props.disconnectingConnection.provider}:${props.disconnectingConnection.connectionId}` : 'null'}</Native.Text>
+        <Native.Text testID="disconnectFailure">{props.disconnectFailure ? `${props.disconnectFailure.provider}:${props.disconnectFailure.connectionId}:${props.disconnectFailure.failure}` : 'none'}</Native.Text>
+        {props.onConnectSimplefin ? (
+          <Native.Pressable accessibilityRole="button" accessibilityLabel="ConnectSimplefin" onPress={props.onConnectSimplefin}><Native.Text>Connect SimpleFIN</Native.Text></Native.Pressable>
+        ) : null}
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="SimplefinHistory" onPress={() => props.onViewHistory({ connectionId: 7, provider: 'SimpleFIN' }, 'Credit Union')}><Native.Text>SimpleFIN history</Native.Text></Native.Pressable>
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="EnableBankingHistory" onPress={() => props.onViewHistory({ connectionId: 7, provider: 'EnableBanking' }, null)}><Native.Text>Enable Banking history</Native.Text></Native.Pressable>
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="DisconnectSimplefin" onPress={() => void props.onDisconnect({ connectionId: 7, provider: 'SimpleFIN' })}><Native.Text>Disconnect SimpleFIN</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="ConnectBank" onPress={props.onConnectBank}><Native.Text>Connect</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Refresh" onPress={props.onRefresh}><Native.Text>Refresh</Native.Text></Native.Pressable>
-        <Native.Pressable accessibilityRole="button" accessibilityLabel="Disconnect" onPress={() => void props.onDisconnect(42)}><Native.Text>Disconnect</Native.Text></Native.Pressable>
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="Disconnect" onPress={() => void props.onDisconnect({ connectionId: 42, provider: 'EnableBanking' })}><Native.Text>Disconnect</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="ImportStatement" onPress={props.onImportStatement}><Native.Text>Import statement</Native.Text></Native.Pressable>
         <Native.Text testID="reconnecting">{String(props.reconnectingBankId)}</Native.Text>
         <Native.Text testID="reconnectFailure">{props.reconnectFailure ? `${props.reconnectFailure.bankId}:${props.reconnectFailure.failure}` : 'none'}</Native.Text>
@@ -104,7 +116,7 @@ describe('ConnectionsRoute', () => {
   beforeEach(() => {
     mockReplace.mockClear(); mockPush.mockClear(); mockBack.mockClear(); mockCanGoBack.mockReset().mockReturnValue(true)
     mockRefetch.mockClear(); mockParams = {}
-    mockMutateAsync.mockReset(); mockIsPending = false; mockVariables = undefined
+    mockMutateAsync.mockReset(); mockIsPending = false; mockVariables = undefined; mockFeatures = {}
     mockConnections = []; captured.mockClear()
     mockStartMutate.mockReset(); mockStartPending = false; mockStartVariables = undefined
     mockOpenAuthSessionAsync.mockReset()
@@ -243,7 +255,7 @@ describe('ConnectionsRoute', () => {
     mockMutateAsync.mockResolvedValue(undefined)
     const view = await render(<ConnectionsRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'Disconnect' }))
-    expect(mockMutateAsync).toHaveBeenCalledWith(42)
+    expect(mockMutateAsync).toHaveBeenCalledWith({ connectionId: 42, provider: 'EnableBanking' })
     expect(view.getByTestId('disconnectFailure')).toHaveTextContent('none')
   })
 
@@ -251,19 +263,55 @@ describe('ConnectionsRoute', () => {
     mockMutateAsync.mockRejectedValue(new ApiError('http', 404))
     const view = await render(<ConnectionsRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'Disconnect' }))
-    expect(view.getByTestId('disconnectFailure')).toHaveTextContent('42:not-found')
+    expect(view.getByTestId('disconnectFailure')).toHaveTextContent('EnableBanking:42:not-found')
   })
 
   it('passes through the pending connection id while disconnecting', async () => {
     mockIsPending = true
-    mockVariables = 42
+    mockVariables = { connectionId: 42, provider: 'EnableBanking' }
     const view = await render(<ConnectionsRoute />)
-    expect(view.getByTestId('disconnecting')).toHaveTextContent('42')
+    expect(view.getByTestId('disconnecting')).toHaveTextContent('EnableBanking:42')
   })
 
   it('navigates to the statement import entry point', async () => {
     const view = await render(<ConnectionsRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'ImportStatement' }))
     expect(mockPush).toHaveBeenCalledWith('/more/banking/import')
+  })
+
+  describe('SimpleFIN', () => {
+    it('hides Connect with SimpleFIN unless the server lists the simplefin provider', async () => {
+      mockFeatures = { bankSyncProviders: ['enable_banking'] }
+      const without = await render(<ConnectionsRoute />)
+      expect(without.queryByRole('button', { name: 'ConnectSimplefin' })).not.toBeOnTheScreen()
+      await without.unmount()
+
+      mockFeatures = {}
+      const older = await render(<ConnectionsRoute />)
+      expect(older.queryByRole('button', { name: 'ConnectSimplefin' })).not.toBeOnTheScreen()
+    })
+
+    it('offers Connect with SimpleFIN when the server enables it, and opens its token screen', async () => {
+      mockFeatures = { bankSyncProviders: ['enable_banking', 'simplefin'] }
+      const view = await render(<ConnectionsRoute />)
+      await fireEvent.press(view.getByRole('button', { name: 'ConnectSimplefin' }))
+      expect(mockPush).toHaveBeenCalledWith('/more/banking/simplefin/connect')
+    })
+
+    it('carries the SimpleFIN provider into the history route, and leaves it out for Enable Banking', async () => {
+      const view = await render(<ConnectionsRoute />)
+      await fireEvent.press(view.getByRole('button', { name: 'SimplefinHistory' }))
+      expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/more/banking/history', params: { connectionId: '7', provider: 'SimpleFIN', institutionName: 'Credit Union' } })
+      await fireEvent.press(view.getByRole('button', { name: 'EnableBankingHistory' }))
+      expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/more/banking/history', params: { connectionId: '7' } })
+    })
+
+    it('disconnects a SimpleFIN connection with its provider and keys the failure by it', async () => {
+      mockMutateAsync.mockRejectedValue(new ApiError('http', 404))
+      const view = await render(<ConnectionsRoute />)
+      await fireEvent.press(view.getByRole('button', { name: 'DisconnectSimplefin' }))
+      expect(mockMutateAsync).toHaveBeenCalledWith({ connectionId: 7, provider: 'SimpleFIN' })
+      expect(view.getByTestId('disconnectFailure')).toHaveTextContent('SimpleFIN:7:not-found')
+    })
   })
 })

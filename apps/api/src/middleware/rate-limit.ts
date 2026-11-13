@@ -118,6 +118,12 @@ export const RATE_LIMIT_FAMILIES = {
    */
   dataRestore: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
 
+  /**
+   * Connecting a bank with a pasted credential (a SimpleFIN setup token): each request makes the
+   * server call out to the aggregator, and a token is a secret worth guessing. Never relaxed.
+   */
+  bankConnect: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
+
   /** `/v1/feedback` — each request sends an email to the operator's inbox. */
   feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
@@ -400,6 +406,9 @@ export const pairingRateLimit = (): RequestHandler => createRateLimiter({ family
 
 /** `/v1/marketing` — public opt-out and lead endpoints. */
 export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicMarketing' });
+
+/** Connecting a bank with a pasted credential (SimpleFIN setup token). */
+export const bankConnectRateLimit = (): RequestHandler => createRateLimiter({ family: 'bankConnect' });
 
 /** `/v1/feedback` — sends email. */
 export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });

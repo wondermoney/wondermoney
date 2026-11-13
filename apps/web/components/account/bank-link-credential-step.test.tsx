@@ -73,8 +73,11 @@ afterEach(() => {
 
 type Credentials = "instance" | "user";
 
-function renderWith(node: React.ReactNode, { household, instance }: { household: Credentials; instance: Credentials }) {
-  const client = queryClientWithInstance(instanceFeatures({ bankSyncCredentials: instance }));
+function renderWith(
+  node: React.ReactNode,
+  { bankSyncProviders, household, instance }: { bankSyncProviders?: string[]; household: Credentials; instance: Credentials },
+) {
+  const client = queryClientWithInstance(instanceFeatures({ bankSyncCredentials: instance, bankSyncProviders }));
   client.setQueryData(profileQueryKey, { bankSyncCredentials: household });
   return render(
     <QueryClientProvider client={client}>
@@ -125,6 +128,28 @@ test("the add-account chooser offers a linked account when the shared credential
 
   assert.ok(await screen.findByText(enCommon.linked));
   assert.equal(screen.queryByText(credentialStepTitle), null);
+});
+
+test("the add-account chooser leaves Enable Banking out, and offers SimpleFIN, on a SimpleFIN-only server", async () => {
+  renderWith(
+    <AccountCreateModal isOpen setOpen={() => {}} onAddOfflineAccountClick={() => {}} onAddSyncAccountClick={() => {}} trigger={false} />,
+    { bankSyncProviders: ["simplefin"], household: "user", instance: "user" },
+  );
+
+  assert.ok(await screen.findByText(enCommon.simplefin.offer));
+  assert.ok(screen.getByText(enCommon.unlinked));
+  assert.equal(screen.queryByText(enCommon.linked), null);
+  assert.equal(screen.queryByText(credentialStepTitle), null);
+});
+
+test("the add-account chooser offers both providers when both are on", async () => {
+  renderWith(
+    <AccountCreateModal isOpen setOpen={() => {}} onAddOfflineAccountClick={() => {}} onAddSyncAccountClick={() => {}} trigger={false} />,
+    { bankSyncProviders: ["enable_banking", "simplefin"], household: "instance", instance: "instance" },
+  );
+
+  assert.ok(await screen.findByText(enCommon.linked));
+  assert.ok(screen.getByText(enCommon.simplefin.offer));
 });
 
 test("first-run onboarding lists banks when the shared credential covers the household", async () => {

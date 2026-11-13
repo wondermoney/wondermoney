@@ -17,6 +17,7 @@
  *  - {@link runBankSyncPhases}: runs account + transaction phases with an
  *    optional pre-phase hook (the credential check used by auto-sync).
  */
+import type { BankReportedErrorCode } from '@service/bank-providers/errors';
 import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
 
 import { providerIncidentCodeOf, type ProviderRateLimit, providerRateLimitOf } from './provider-failure';
@@ -32,6 +33,8 @@ export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
 export interface BankSyncPhaseSignals {
   everyAccountRejected?: boolean;
   rateLimited?: ProviderRateLimit;
+  /** What the aggregator itself reported (SimpleFIN's error list); the run is recorded under it. */
+  reportedErrorCode?: BankReportedErrorCode;
 }
 
 /**
@@ -219,7 +222,8 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
     return { account, failedAt: 'transaction', rateLimited: transaction.rateLimited, status: 'partial', transaction };
   }
   if (account.status === 'partial' || transaction.status === 'partial') {
-    return { account, failedAt: undefined, status: 'partial', transaction };
+    const reportedErrorCode = account.reportedErrorCode ?? transaction.reportedErrorCode;
+    return { account, failedAt: undefined, ...(reportedErrorCode ? { reportedErrorCode } : {}), status: 'partial', transaction };
   }
   return { account, failedAt: undefined, status: 'full_success', transaction };
 }
@@ -228,5 +232,6 @@ function signalsOf(phase: BankSyncPhaseResult): BankSyncPhaseSignals {
   return {
     ...(phase.everyAccountRejected ? { everyAccountRejected: true } : {}),
     ...(phase.rateLimited ? { rateLimited: phase.rateLimited } : {}),
+    ...(phase.reportedErrorCode ? { reportedErrorCode: phase.reportedErrorCode } : {}),
   };
 }

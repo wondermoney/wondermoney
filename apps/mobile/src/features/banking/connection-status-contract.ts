@@ -7,8 +7,8 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
  * `accessType` read an unknown value as 'unknown' rather than failing the
  * list. Nulls are explicit and never inferred.
  *
- * `provider` covers both providers whose connections the backend's
- * `GET /v1/banking/connections` can list, discriminated by this field. Both
+ * `provider` covers every provider whose connections the backend's
+ * `GET /v1/banking/connections` can list, discriminated by this field. All
  * map onto the same `status` vocabulary.
  *
  * Not `.strict()`, same as `start-connection-contract.ts`: this validates a
@@ -20,7 +20,12 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
  * (`getBankConnections` / `mapRequisition` / `mapEnableBankingConnection` in
  * api's `banking-connections.ts`) sends the Enable Banking connection key, so a
  * row can offer its sync history and its disconnect action. Legacy GoCardless
- * rows send `null`: they have no history endpoint.
+ * rows send `null`: they have no history endpoint. A SimpleFIN row sends its
+ * SimpleFIN connection key, a separate id space with its own history and
+ * disconnect routes (`/v1/banking/simplefin/connections/:connectionId`), so a
+ * connection is named by its id and its provider together
+ * (`BankConnectionTarget`). SimpleFIN has no consent end date (`expiresAt`,
+ * `daysUntilExpiry` and `bankId` are null) and no reconnect.
  */
 
 // A status, provider or access type this build doesn't know reads as 'unknown', so one new value
@@ -28,7 +33,7 @@ import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-sch
 // `expiring`: the consent ends within 14 days. `revoked`: the bank ended the consent early.
 export const connectionStatusSchema = tolerantEnum(['connected', 'error', 'expired', 'expiring', 'processing', 'revoked'], 'unknown')
 
-export const bankConnectionProviderSchema = tolerantEnum(['GoCardless', 'EnableBanking'], 'unknown')
+export const bankConnectionProviderSchema = tolerantEnum(['GoCardless', 'EnableBanking', 'SimpleFIN'], 'unknown')
 
 /**
  * The newest failure for a connection. `code` is the shared bank-sync vocabulary
@@ -61,6 +66,17 @@ export const bankConnectionsResponseSchema = z.object({
 })
 
 export type ConnectionStatus = z.infer<typeof connectionStatusSchema>
+export type BankConnectionProvider = z.infer<typeof bankConnectionProviderSchema>
+
+/**
+ * One connection's id together with its provider: a SimpleFIN `connectionId` and an Enable
+ * Banking one can be the same number, so the id alone names no connection.
+ */
+export type BankConnectionTarget = Readonly<{ connectionId: number; provider: BankConnectionProvider }>
+
+export const isSameBankConnection = (a: BankConnectionTarget | null | undefined, b: BankConnectionTarget | null | undefined): boolean => (
+  Boolean(a && b && a.connectionId === b.connectionId && a.provider === b.provider)
+)
 export type BankConnectionDto = z.infer<typeof bankConnectionSchema>
 export type BankConnectionsResponseDto = z.infer<typeof bankConnectionsResponseSchema>
 
@@ -77,17 +93,21 @@ export const isValidBankConnectionId = (connectionId: number): boolean => (
 )
 
 /**
- * Disconnect (unsync) a linked bank. The API's only delete route is
+ * Disconnect (unsync) a linked bank. A SimpleFIN connection has its own route,
+ * `DELETE /v1/banking/simplefin/connections/:connectionId`, which also destroys
+ * the stored access. Every other row goes to
  * `DELETE /v1/banking/requisition/:requisitionId`; despite the legacy name, the
  * parameter is the Enable Banking connection key (`unlinkRequisition` resolves
  * an `EnableBankingConnection` by it). Web's `useDeleteRequisition` uses the
- * same route.
+ * same route. Both answer 200 with no body the app reads.
  */
-export function createDisconnectBankConnectionEndpoint(connectionId: number) {
+export function createDisconnectBankConnectionEndpoint(connectionId: number, provider: BankConnectionProvider = 'EnableBanking') {
   if (!isValidBankConnectionId(connectionId)) throw new Error('A positive safe connection id is required.')
   return writeEndpoint({
     method: 'DELETE',
-    path: `/v1/banking/requisition/${connectionId}`,
+    path: provider === 'SimpleFIN'
+      ? `/v1/banking/simplefin/connections/${connectionId}`
+      : `/v1/banking/requisition/${connectionId}`,
     schema: z.undefined(),
   })
 }

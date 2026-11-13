@@ -7,7 +7,14 @@
  * interface existed (`provider-failure.ts` reads 429 as a rate limit and 400/401 as a
  * rejection), so Enable Banking's first implementation is behaviour-preserving.
  */
-export type BankProviderIncidentCode = 'authentication' | 'consent_expired' | 'provider_unavailable' | 'rate_limited';
+export type BankProviderIncidentCode = 'authentication' | 'consent_expired' | 'provider_unavailable' | 'rate_limited' | BankReportedErrorCode;
+
+/**
+ * What an aggregator can report about a run that otherwise answered: its own error list
+ * (SimpleFIN's `errlist`), or an account the sync cannot take. Each is a code the clients
+ * translate (`@wondermoney/shared/bank-sync`), never the aggregator's own text.
+ */
+export type BankReportedErrorCode = 'authentication' | 'institution_action_required' | 'institution_unavailable' | 'provider_unavailable' | 'rate_limited' | 'unsupported_currency';
 
 export class BankProviderError extends Error {
   /** The incident error code this failure maps to (`analytics/bank-sync-contract.ts`). */
@@ -53,5 +60,19 @@ export class UserActionRequiredError extends BankProviderError {
 export class UnavailableError extends BankProviderError {
   constructor(message = 'Bank provider is temporarily unavailable') {
     super(message, 'provider_unavailable', 502);
+  }
+}
+
+/**
+ * The aggregator answered, but reported a problem with this account or with the bank behind it.
+ * The sync phases count the account as failed and keep the code, so the run's history shows what
+ * the aggregator said instead of a generic partial-sync code.
+ */
+export class ProviderReportedError extends BankProviderError {
+  readonly reportedCode: BankReportedErrorCode;
+
+  constructor(reportedCode: BankReportedErrorCode, message = 'The bank provider reported a problem with this account') {
+    super(message, reportedCode, reportedCode === 'authentication' ? 400 : 502);
+    this.reportedCode = reportedCode;
   }
 }

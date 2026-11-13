@@ -67,6 +67,15 @@ describe('checkServer', () => {
     expect(result.status === 'ok' && result.instance).not.toHaveProperty('region')
   })
 
+  it('reads the enabled bank-data providers, and still parses a server that sends none or a malformed list', async () => {
+    const withProviders = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, bankSyncProviders: ['enable_banking', 'simplefin'] } })) })
+    expect(withProviders).toMatchObject({ status: 'ok', instance: { features: { bankSyncProviders: ['enable_banking', 'simplefin'] } } })
+    const without = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance()) })
+    expect(without.status === 'ok' && without.instance.features.bankSyncProviders).toBeUndefined()
+    const malformed = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, bankSyncProviders: 'simplefin' } })) })
+    expect(malformed.status === 'ok' && malformed.instance.features.bankSyncProviders).toBeUndefined()
+  })
+
   it('asks for an app update when the server needs a newer version', async () => {
     await expect(checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ minAppVersion: '1.2.0' })) })).resolves.toEqual({ minAppVersion: '1.2.0', status: 'update-required' })
   })

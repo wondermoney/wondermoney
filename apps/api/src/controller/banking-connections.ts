@@ -3,8 +3,10 @@ import type { Request, Response } from 'express';
 
 import { bankConnectionSyncsRequestSchema } from '@app/validators/banking';
 import { zParse } from '@app/validators/parser';
+import { BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
+import { SimplefinConnection } from '@entity/SimplefinConnection';
 import { authedUser } from '@middleware/authed-context';
 import { BankSyncHistoryService, type BankSyncLastError, connectionRequisitionId } from '@service/bank-sync/bank-sync-history.service';
 import { daysUntil, enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
@@ -15,6 +17,7 @@ import { DI } from '../app.js';
 
 const PROVIDER = 'GoCardless' as const;
 const ENABLE_BANKING_PROVIDER = 'EnableBanking' as const;
+const SIMPLEFIN_PROVIDER = 'SimpleFIN' as const;
 const ACCESS_TYPE = 'open_banking' as const;
 
 interface AccountWithInstitution {
@@ -35,8 +38,10 @@ interface BankConnectionDto {
    */
   bankId: null | string;
   /**
-   * The local connection id `GET /v1/banking/connections/:connectionId/syncs` takes. Null for the
-   * legacy provider, whose history is not exposed.
+   * The local connection id `GET /v1/banking/connections/:connectionId/syncs` takes, or for a
+   * SimpleFIN connection the one `/v1/banking/simplefin/connections/:connectionId` routes take
+   * (the two are separate id spaces; `provider` tells them apart). Null for the legacy provider,
+   * whose history is not exposed.
    */
   connectionId: null | number;
   dataFreshAsOf: null | string;
@@ -46,7 +51,7 @@ interface BankConnectionDto {
   institutionName: null | string;
   /** The newest failure for this connection, or null when it has never failed. */
   lastError: BankSyncLastError | null;
-  provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER;
+  provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER | typeof SIMPLEFIN_PROVIDER;
   status: ConnectionStatus;
 }
 
@@ -229,6 +234,12 @@ function mapRequisition(req: OwnedRequisition & { requisitionId?: null | string 
  * own registry, not a raw upstream id, so a direct (blank-guarded) mapping is
  * enough.
  */
+interface OwnedSimplefinConnection {
+  bankConnectionKey: { accounts: { getItems: () => AccountWithInstitution[] }; status: BankConnectionStatus };
+  institutionName?: null | string;
+  simplefinConnectionKey: number;
+}
+
 function mapEnableBankingConnection(connection: OwnedEnableBankingConnection, lastError: BankSyncLastError | null = null): BankConnectionDto {
   const accounts = connection.accounts.getItems();
   return {
@@ -244,6 +255,30 @@ function mapEnableBankingConnection(connection: OwnedEnableBankingConnection, la
     lastError,
     provider: ENABLE_BANKING_PROVIDER,
     status: computeEnableBankingStatus(connection, accounts),
+  };
+}
+
+/**
+ * A SimpleFIN connection has no consent end date: it is `revoked` once SimpleFIN refused the
+ * stored access (403), and otherwise follows the same account-freshness rules as the others.
+ * Nothing about the access URL, its host or its credentials is in the DTO.
+ */
+function mapSimplefinConnection(connection: OwnedSimplefinConnection, lastError: BankSyncLastError | null = null): BankConnectionDto {
+  const accounts = connection.bankConnectionKey.accounts.getItems().filter((account) => !account.deletedAt);
+  const status = connection.bankConnectionKey.status;
+  return {
+    accessType: ACCESS_TYPE,
+    bankId: null,
+    connectionId: connection.simplefinConnectionKey,
+    dataFreshAsOf: computeFreshnessAsOf(accounts),
+    daysUntilExpiry: null,
+    expiresAt: null,
+    institutionName: isNullOrBlank(connection.institutionName) ? null : (connection.institutionName?.trim() ?? null),
+    lastError,
+    provider: SIMPLEFIN_PROVIDER,
+    status: status === BankConnectionStatus.REVOKED ? 'revoked'
+      : status === BankConnectionStatus.LINKED ? (areAllAccountsRefreshed(accounts) ? 'connected' : 'processing')
+        : status === BankConnectionStatus.EXPIRED ? 'expired' : 'error',
   };
 }
 
@@ -275,7 +310,7 @@ export async function getBankConnections(req: Request, res: Response) {
   if (!req.tenant || !Number.isInteger(req.tenant.tenantKey) || req.tenant.tenantKey <= 0) {
     throw new InternalServerError('Authenticated tenant is required to read bank connections');
   }
-  const [requisitions, enableBankingConnections] = await Promise.all([
+  const [requisitions, enableBankingConnections, simplefinConnections] = await Promise.all([
     DI.em.find(
       NordigenRequisition,
       {
@@ -300,12 +335,25 @@ export async function getBankConnections(req: Request, res: Response) {
         populate: ['accounts'],
       },
     ),
+    DI.em.find(
+      SimplefinConnection,
+      {
+        appuserKey: user,
+        deletedAt: undefined,
+        tenantKey: req.tenant,
+      },
+      {
+        orderBy: { createdAt: QueryOrder.DESC },
+        populate: ['bankConnectionKey.accounts'],
+      },
+    ),
   ]);
   const history = new BankSyncHistoryService(DI.em);
   const lastErrorByRequisitionId = await history
     .getLastErrorByRequisitionId(user, [
       ...requisitions.map((requisition) => requisition.requisitionId).filter((id): id is string => Boolean(id)),
       ...enableBankingConnections.map((connection) => connectionRequisitionId(connection)),
+      ...simplefinConnections.map((connection) => connection.bankConnectionKey.externalId ?? ''),
     ])
     .catch(() => new Map<string, BankSyncLastError>());
   return res.json({
@@ -318,6 +366,10 @@ export async function getBankConnections(req: Request, res: Response) {
       ...enableBankingConnections.map((connection) => mapEnableBankingConnection(
         connection,
         lastErrorByRequisitionId.get(connectionRequisitionId(connection)) ?? null,
+      )),
+      ...simplefinConnections.map((connection) => mapSimplefinConnection(
+        connection,
+        lastErrorByRequisitionId.get(connection.bankConnectionKey.externalId ?? '') ?? null,
       )),
     ],
   });
@@ -353,10 +405,12 @@ export const __testOnly = {
   isProviderIdPlaceholder,
   mapEnableBankingConnection,
   mapRequisition,
+  mapSimplefinConnection,
   PROVIDER,
   resolveInstitutionName,
   resolveLinkedConnectionStatus,
+  SIMPLEFIN_PROVIDER,
   toIso,
 };
 
-export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, OwnedEnableBankingConnection, OwnedRequisition };
+export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, OwnedEnableBankingConnection, OwnedRequisition, OwnedSimplefinConnection };

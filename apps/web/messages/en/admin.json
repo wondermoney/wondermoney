@@ -8,6 +8,7 @@
     "failing": "Failing for more than {hours} hours",
     "status-linked": "Linked",
     "status-expired": "Expired",
+    "status-revoked": "Revoked",
     "status-error": "Error",
     "status-authorized": "Authorized",
     "status-created": "Started, not linked",

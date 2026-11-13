@@ -4,8 +4,8 @@ description: Implement a new bank aggregator behind the BankProvider interface, 
 ---
 
 WonderMoney syncs bank accounts through a provider interface, so adding an aggregator does not
-touch the sync services. Enable Banking is the first implementation; this page is the checklist
-for a second one.
+touch the sync services. Enable Banking is the reference implementation and SimpleFIN a second,
+token-based one; this page is the checklist for the next.
 
 ## The seam
 
@@ -17,8 +17,13 @@ Everything lives in `apps/api/src/services/bank-providers/`:
   `UserActionRequiredError`, `UnavailableError`. They map to the bank-sync incident codes
   (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), so the sync
   services and the incident record never learn your provider's error shape.
+  `ProviderReportedError` carries a problem the aggregator reported for one account (a
+  `BankReportedErrorCode`, such as `unsupported_currency`).
 - `registry.ts` — the compiled-in providers and the `BANK_PROVIDERS` enablement filter.
-- `enable-banking.provider.ts` — the reference implementation.
+- `enable-banking.provider.ts` — the reference implementation, with a consent redirect.
+- `simplefin.provider.ts` — a provider connected with a setup token instead of a redirect. It
+  refuses the consent-flow methods, connects through its own route (`services/simplefin/`), and
+  reads every account in one request per sync.
 
 The sync services (`account-initial-sync-account.service.ts`,
 `account-initial-sync-transaction.service.ts`) import only `types.ts`. They never import a
@@ -34,17 +39,22 @@ Create `my-provider.provider.ts` and implement:
 | `startConnection` | Start the consent flow and return the URL the browser opens. Persist your connection row here. |
 | `completeConnection` | Exchange the callback code, mark the connection linked, and persist its accounts. Return `bankConnectionKey`, `accountsCreated` and where the browser should go. |
 | `getSessionStatus` | Whether the consent still holds (`active`, `ended`, `unknown`), used after every account was rejected. |
-| `listAccounts` | The connection's accounts with currency, IBAN, holder name and institution id. |
+| `listAccounts` | The connection's accounts with currency, IBAN, holder name and institution id. Set `reportedErrorCode` for a problem the aggregator reported while still answering, such as SimpleFIN's error list: the run is then recorded as partial under that code. |
 | `getBalances` | The account's balances, with a `balanceType` the sync's preference list understands (`closingBooked`, `interimBooked`, `expected`, …). |
 | `getTransactions` | The full window, already split into `booked`, `pending` and `voided`. Page internally; the sync calls this once per account. |
 
-Also declare two capabilities:
+Also declare these capabilities:
 
 - `transactionIdentity` — which `Transaction` column stores your provider id and the stable-id
-  prefix for rows without one. A new provider should use its own column; the two existing
-  columns are Enable Banking's and the legacy GoCardless one.
+  prefix for rows without one. A provider whose ids are stable and unique within an account can
+  use the generic `nordigenInternalTransactionId` column with ids namespaced by provider, as
+  SimpleFIN does (`simplefin:<id>`). Enable Banking keeps its own column, for its unstable-id
+  rules.
 - `institutionProvider` — the `AccountFinancialInstitution.provider` value your accounts use.
   `other` exists for new providers.
+- `consentExpires` — set it to `false` when access has no end date, as with SimpleFIN: the
+  connection keeps `accessValidUntil` empty and the scheduler still syncs it. Omitted means the
+  consent expires.
 
 Throw the typed errors from `errors.ts` from every provider call. Do not leak your SDK's error
 shape: the sync path's rate-limit and consent checks read the typed errors (and the `status`
@@ -59,7 +69,9 @@ a comma-separated environment variable:
 BANK_PROVIDERS=enable_banking,my_provider
 ```
 
-Unset means every compiled-in provider. `GET /v1/instance` reports the enabled list in
+Unset or empty means every compiled-in provider except the opt-in ones in `OPT_IN_PROVIDERS`, today
+SimpleFIN. Make a provider opt-in when it reaches a paid or regional service on the user's behalf.
+`GET /v1/instance` reports the enabled list in
 `features.bankSyncProviders`, and `features.bankSync` is false when none is enabled. Clients hide
 the feature from that list, so keep the ids stable.
 

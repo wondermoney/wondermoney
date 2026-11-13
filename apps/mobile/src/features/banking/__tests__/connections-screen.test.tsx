@@ -64,7 +64,7 @@ describe('ConnectionsScreen disconnect', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Disconnect Real Bank' }))
     const buttons = alert.mock.calls[0]![2]!
     await act(async () => { buttons[1]?.onPress?.(); await Promise.resolve() })
-    expect(onDisconnect).toHaveBeenCalledWith(42)
+    expect(onDisconnect).toHaveBeenCalledWith({ connectionId: 42, provider: 'GoCardless' })
   })
 
   it('does not disconnect when the confirmation is cancelled', async () => {
@@ -79,7 +79,7 @@ describe('ConnectionsScreen disconnect', () => {
 
   it('disables the disconnect action and shows a busy label while pending for that row', async () => {
     const onDisconnect = jest.fn().mockResolvedValue(undefined)
-    const view = await renderScreen({ state: loadedState([row()]), onDisconnect, disconnectingConnectionId: 42 })
+    const view = await renderScreen({ state: loadedState([row()]), onDisconnect, disconnectingConnection: { connectionId: 42, provider: 'GoCardless' } })
     expect(view.getByRole('button', { name: 'Disconnect Real Bank' })).toBeDisabled()
     expect(view.getByText('Disconnecting…')).toBeOnTheScreen()
   })
@@ -89,7 +89,7 @@ describe('ConnectionsScreen disconnect', () => {
     const view = await renderScreen({
       state: loadedState([row(), row({ connectionId: 43, institutionName: 'Other Bank' })]),
       onDisconnect,
-      disconnectFailure: { connectionId: 42, failure: 'not-found' },
+      disconnectFailure: { connectionId: 42, provider: 'GoCardless', failure: 'not-found' },
     })
     expect(view.getByText('That connection is no longer available.')).toBeOnTheScreen()
   })
@@ -207,5 +207,61 @@ describe('ConnectionsScreen row title', () => {
   it('shows a back control instead of a plain text link', async () => {
     const view = await renderScreen({ state: loadedState([row()]) })
     expect(view.getByRole('button', { name: 'Back to More' })).toBeOnTheScreen()
+  })
+})
+
+describe('ConnectionsScreen with SimpleFIN', () => {
+  const simplefin = (over: Partial<BankConnectionRow> = {}) => row({ connectionId: 7, institutionName: 'Credit Union', provider: 'SimpleFIN', ...over })
+
+  it('offers Connect with SimpleFIN only when the route passes the handler', async () => {
+    const hidden = await renderScreen({ state: loadedState([]), onConnectBank: jest.fn() })
+    expect(hidden.queryByRole('button', { name: /simplefin/i })).not.toBeOnTheScreen()
+
+    const onConnectSimplefin = jest.fn()
+    const shown = await renderScreen({ state: loadedState([]), onConnectBank: jest.fn(), onConnectSimplefin })
+    await fireEvent.press(shown.getByRole('button', { name: /simplefin/i }))
+    expect(onConnectSimplefin).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens the history and disconnects with the SimpleFIN provider, so the SimpleFIN routes are used', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+    const onViewHistory = jest.fn()
+    const onDisconnect = jest.fn().mockResolvedValue(undefined)
+    const view = await renderScreen({ state: loadedState([simplefin()]), onViewHistory, onDisconnect })
+
+    await fireEvent.press(view.getByRole('button', { name: 'Sync history for Credit Union' }))
+    expect(onViewHistory).toHaveBeenCalledWith({ connectionId: 7, provider: 'SimpleFIN' }, 'Credit Union')
+
+    await fireEvent.press(view.getByRole('button', { name: 'Disconnect Credit Union' }))
+    await act(async () => { alert.mock.calls[0]![2]![1]?.onPress?.(); await Promise.resolve() })
+    expect(onDisconnect).toHaveBeenCalledWith({ connectionId: 7, provider: 'SimpleFIN' })
+    alert.mockRestore()
+  })
+
+  it('keeps a SimpleFIN row and an Enable Banking row with the same id apart', async () => {
+    const view = await renderScreen({
+      state: loadedState([simplefin(), row({ connectionId: 7, institutionName: 'Euro Bank', provider: 'EnableBanking' })]),
+      onDisconnect: jest.fn().mockResolvedValue(undefined),
+      disconnectingConnection: { connectionId: 7, provider: 'SimpleFIN' },
+      disconnectFailure: { connectionId: 7, provider: 'SimpleFIN', failure: 'not-found' },
+    })
+    expect(view.getByRole('button', { name: 'Disconnect Credit Union' })).toBeDisabled()
+    expect(view.getByRole('button', { name: 'Disconnect Euro Bank' })).not.toBeDisabled()
+    expect(view.getAllByText('That connection is no longer available.')).toHaveLength(1)
+  })
+
+  it('names an unnamed SimpleFIN connection by the provider and shows no consent expiry', async () => {
+    const i18n = await initMobileI18n('en')
+    const view = await renderScreen({ state: loadedState([simplefin({ institutionName: null })]) })
+    expect(view.getByText(/SimpleFIN/)).toBeOnTheScreen()
+    expect(view.queryByText(i18n.t('banking.connections.expiresOn', { date: i18n.t('banking.connections.unavailableDate') }))).not.toBeOnTheScreen()
+  })
+
+  it('offers no Reconnect on a revoked SimpleFIN connection and says to connect again with a new token', async () => {
+    const i18n = await initMobileI18n('en')
+    const view = await renderScreen({ state: loadedState([simplefin({ bankId: 'ignored', status: 'revoked' })]), onReconnect: jest.fn() })
+    expect(view.queryByRole('button', { name: /^reconnect/i })).not.toBeOnTheScreen()
+    expect(view.getByText(i18n.t('banking.connections.simplefin.accessEnded'))).toBeOnTheScreen()
+    expect(view.queryByText(i18n.t('banking.connections.consent.revoked'))).not.toBeOnTheScreen()
   })
 })

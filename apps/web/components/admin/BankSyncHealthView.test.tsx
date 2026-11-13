@@ -20,9 +20,16 @@ const copy = enAdmin.adminBankSync;
 function health(overrides: Partial<BankSyncHealth> = {}): BankSyncHealth {
   return {
     connections: {
-      byStatus: { authorized: 0, created: 1, error: 1, expired: 2, linked: 9 },
+      byStatus: {
+        authorized: 0,
+        created: 1,
+        error: 1,
+        expired: 2,
+        linked: 9,
+        revoked: 4,
+      },
       failing: 3,
-      total: 13,
+      total: 17,
     },
     failingThresholdHours: 48,
     generatedAt: "2026-11-12T12:00:00.000Z",
@@ -118,8 +125,10 @@ test("shows the page title and the connection counts", () => {
   screen.getByRole("heading", { level: 1, name: copy.title });
   const connections = section(copy["connections-title"]);
   within(connections).getByText(copy.total);
-  within(connections).getByText("13");
+  within(connections).getByText("17");
   within(connections).getByText(copy["status-expired"]);
+  within(connections).getByText(copy["status-revoked"]);
+  within(connections).getByText("4");
 });
 
 test("puts the institution needing attention first, with a labelled badge, and only it", () => {

@@ -121,7 +121,22 @@ Um endereço de logótipo que um membro escreva ele próprio tem prioridade sobr
 
 ## Sincronização bancária
 
-A sincronização bancária não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
+A sincronização com bancos europeus não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
+
+`BANK_PROVIDERS` lista os fornecedores bancários que a tua instância oferece, separados por vírgulas. Não definida ou vazia significa todos os fornecedores incluídos exceto os opcionais, o que hoje é só `enable_banking`. Define-a na API e no worker.
+
+| Fornecedor | O que liga | Precisa de |
+|---|---|---|
+| `enable_banking` | Bancos na Europa, através da aplicação Enable Banking de cada pessoa ou da do servidor | Nada no servidor, ou uma aplicação Enable Banking para todo o servidor ([abaixo](#uma-aplicação-enable-banking-para-o-servidor)). Ligado, a não ser que `BANK_PROVIDERS` o deixe de fora |
+| `simplefin` | Bancos dos Estados Unidos e do Canadá, através do SimpleFIN Bridge, um serviço pago que cada pessoa subscreve | Opcional: desligado até estar na lista, como em `BANK_PROVIDERS=enable_banking,simplefin`. Vê [SimpleFIN](/pt/docs/self-hosting/simplefin) |
+
+Um identificador que esta versão não tenha é ignorado, por isso `BANK_PROVIDERS=none` desliga a sincronização bancária. `GET /v1/instance` indica os fornecedores ligados em `features.bankSyncProviders`, e as aplicações só oferecem esses.
+
+| Definição | O que faz |
+|---|---|
+| `SIMPLEFIN_BRIDGE_HOSTS` | Os anfitriões que o servidor pode contactar para o SimpleFIN, separados por vírgulas. Vazio significa o SimpleFIN Bridge, `bridge.simplefin.org` e `beta-bridge.simplefin.org`. Define-a só para outro servidor que fale o protocolo SimpleFIN; substitui a lista por omissão. Cada endereço SimpleFIN tem de ser `https` na porta 443, estar num destes anfitriões e resolver só para endereços públicos ([SimpleFIN](/pt/docs/self-hosting/simplefin#privacidade-e-segurança)). Define-a na API e no worker |
+
+O worker sincroniza cada ligação bancária no máximo uma vez a cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por omissão. Ao abrigo da PSD2, um banco pode limitar o acesso não assistido a quatro chamadas por dia por conta, por isso define-a como `6` ou mais para ficares dentro desse limite. O SimpleFIN Bridge espera cerca de 24 pedidos por dia ou menos por ligação, por isso não a baixes muito se ofereceres o SimpleFIN. Uma sincronização falhada espera o mesmo intervalo antes da tentativa seguinte. Define-a no worker; um valor que não seja um número positivo impede o worker de arrancar.
 
 ### Uma aplicação Enable Banking para o servidor
 
@@ -149,8 +164,6 @@ Uma aplicação Enable Banking nova funciona em modo Restricted Production, em q
 - Se um segundo agregado se registar antes de alguém ligar um banco, nenhum agregado recebe a aplicação do servidor até definires `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
 
 A conta de demonstração nunca conta. A própria Enable Banking também aplica o limite: em modo Restricted Production, recusa contas que não sejam do dono da aplicação, incluindo as de um parceiro. Confirma no Control Panel da Enable Banking a que contas a tua aplicação pode aceder.
-
-O worker sincroniza cada ligação bancária no máximo uma vez a cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por omissão. Ao abrigo da PSD2, um banco pode limitar o acesso não assistido a quatro chamadas por dia por conta, por isso define-a como `6` ou mais para ficares dentro desse limite. Uma sincronização falhada espera o mesmo intervalo antes da tentativa seguinte. Define-a no worker; um valor que não seja um número positivo impede o worker de arrancar.
 
 ## Início de sessão com Google
 
@@ -257,6 +270,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |
 | Analytics (Google Tag Manager, PostHog) | Consulta [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições, ou a aplicação do servidor (`ENABLE_BANKING_APP_ID`) |
+| Sincronização bancária (SimpleFIN) | A API, para trocar o token de configuração de um utilizador, e o worker, para sincronizar, no SimpleFIN Bridge ou nos anfitriões de `SIMPLEFIN_BRIDGE_HOSTS`. Desligada por omissão | `simplefin` em `BANK_PROVIDERS`, e depois o token de configuração de cada utilizador |
 | Início de sessão com Google | Os navegadores e a API, quando um utilizador escolhe "Continuar com Google" | `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` |
 | O teu fornecedor de identidade (OIDC) | Os navegadores e a API, quando um utilizador escolhe `Iniciar sessão com <nome>`. A API obtém o documento de descoberta e as chaves do fornecedor, e troca o código de início de sessão | `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |

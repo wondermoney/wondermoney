@@ -9,8 +9,9 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankConnectionStatus } from '@entity/BankConnection';
 import { Currency } from '@entity/Currency';
 import { FxStatus } from '@entity/Transaction';
+import type { BankReportedErrorCode } from '@service/bank-providers/errors';
 import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
-import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
+import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
 import { convertWithStatus, type FxConversion, rateScope } from '@service/currency/exchange-rate';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
@@ -37,6 +38,8 @@ export interface AccountInitialSyncAccountsResult {
   everyAccountRejected?: boolean;
   /** The provider rate-limited a call; the phase stopped there. */
   rateLimited?: ProviderRateLimit;
+  /** What the aggregator reported about this run (its own error list); the run is then partial at best. */
+  reportedErrorCode?: BankReportedErrorCode;
   requisitionId: string;
   requisitionKey: number;
   status: 'completed' | 'failed' | 'partial';
@@ -92,6 +95,7 @@ export function selectProviderBalanceAmount(response: AccountBalanceResponseLike
 
 const DUPLICATE_ERROR_CODES = new Set(['23505']);
 
+/** The date the provider gave the chosen balance, when it gave a valid one. */
 interface SyncTarget {
   appuserRef: number;
   client: BankProvider;
@@ -145,6 +149,7 @@ class AccountInitialSyncAccountService {
         appuserKey: getAppuserKey(appuserRef),
         failedAccountIds: [],
         institutionIds: [...institutionIds],
+        ...(providerAccounts.reportedErrorCode ? { reportedErrorCode: providerAccounts.reportedErrorCode } : {}),
         requisitionId,
         requisitionKey,
         status: 'failed',
@@ -155,6 +160,7 @@ class AccountInitialSyncAccountService {
     const failedAccountIds: string[] = [];
     let rateLimited: ProviderRateLimit | undefined;
     let rejectedCount = 0;
+    let reportedErrorCode = providerAccounts.reportedErrorCode;
     for (const [index, providerAccount] of providerAccounts.accounts.entries()) {
       const accountId = providerAccount.externalId;
       try {
@@ -213,7 +219,7 @@ class AccountInitialSyncAccountService {
       // backfill instead (`backfillAccountOpeningBalances`), which can derive it from its rows.
       if (account.openingBalance == null && account.balance == null) {
         account.openingBalance = balance;
-        account.openingBalanceDate = new Date();
+        account.openingBalanceDate = balanceReferenceDate(balances) ?? new Date();
       }
       account.balance = balance;
       const converted = await resolveAppuserCurrencyBalance(em, currency, tenant, balance);
@@ -257,6 +263,7 @@ class AccountInitialSyncAccountService {
       } catch (error) {
         failedAccountIds.push(accountId);
         if (isProviderRejection(error)) rejectedCount += 1;
+        reportedErrorCode ??= providerReportedCodeOf(error);
         rateLimited = providerRateLimitOf(error);
         if (rateLimited) {
           // Every further call spends quota the provider has just refused. The accounts not yet
@@ -285,9 +292,11 @@ class AccountInitialSyncAccountService {
       institutionIds: [...institutionIds],
       requisitionId,
       requisitionKey,
-      status: accountIds.length === 0 || accountsFetched === 0 ? 'failed' : failedAccountIds.length === 0 ? 'completed' : 'partial',
+      // An aggregator's own error report keeps an otherwise complete run partial, so it is recorded.
+      status: accountIds.length === 0 || accountsFetched === 0 ? 'failed' : failedAccountIds.length === 0 && !reportedErrorCode ? 'completed' : 'partial',
       ...(accountsFetched === 0 && rejectedCount === accountIds.length ? { everyAccountRejected: true } : {}),
       ...(rateLimited ? { rateLimited } : {}),
+      ...(reportedErrorCode ? { reportedErrorCode } : {}),
     };
 
     if (input.correlationId && input.queueJobId) {
@@ -314,6 +323,12 @@ class AccountInitialSyncAccountService {
       requisitionKey: input.connection.bankConnectionKey,
     };
   }
+}
+
+function balanceReferenceDate(balances: { referenceDate?: string }[]): Date | undefined {
+  const value = balances.find((item) => item.referenceDate)?.referenceDate;
+  const date = value ? new Date(value) : undefined;
+  return date && !Number.isNaN(date.getTime()) ? date : undefined;
 }
 
 function getAppuserKey(appuserKey?: unknown): number {

@@ -10,6 +10,7 @@ import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import type { BankConnectionResult } from './bank-connection-return'
+import { type BankConnectionTarget, isSameBankConnection } from './connection-status-contract'
 import type { BankConnectionDisconnectFailure } from './use-bank-connection-disconnect-mutation'
 import type { BankConnectionRow } from './connection-status-view-model'
 import { startBankConnectionFailureMessageKey, type StartBankConnectionFailure } from './use-start-bank-connection'
@@ -23,15 +24,23 @@ export type ConnectionsScreenState =
   | { status: 'error' }
   | { status: 'loaded'; rows: readonly BankConnectionRow[] }
 
-export type ConnectionDisconnectFailureState = Readonly<{ connectionId: number; failure: BankConnectionDisconnectFailure }>
+export type ConnectionDisconnectFailureState = Readonly<{ connectionId: number; provider: BankConnectionTarget['provider']; failure: BankConnectionDisconnectFailure }>
 
 export type ConnectionReconnectFailureState = Readonly<{ bankId: string; failure: StartBankConnectionFailure }>
 
 /** Rows whose consent has ended, or ends soon, offer "Reconnect". */
 const RECONNECTABLE_STATUSES: ReadonlySet<BankConnectionRow['status']> = new Set(['expiring', 'expired', 'revoked'])
 
+/** SimpleFIN has no consent to renew: an ended connection is connected again with a new setup token. */
 function canReconnectRow(row: BankConnectionRow): boolean {
-  return row.bankId !== null && RECONNECTABLE_STATUSES.has(row.status)
+  return row.provider !== 'SimpleFIN' && row.bankId !== null && RECONNECTABLE_STATUSES.has(row.status)
+}
+
+/** Providers whose connections have a sync history the API exposes. */
+const HISTORY_PROVIDERS: ReadonlySet<BankConnectionRow['provider']> = new Set(['EnableBanking', 'SimpleFIN'])
+
+function targetOf(row: BankConnectionRow): BankConnectionTarget | null {
+  return row.connectionId === null ? null : { connectionId: row.connectionId, provider: row.provider }
 }
 
 export type ConnectionsScreenProps = {
@@ -44,12 +53,14 @@ export type ConnectionsScreenProps = {
   onRetry: () => void | Promise<void>
   onRefresh?: () => void | Promise<void>
   onConnectBank?: () => void
-  onDisconnect?: (connectionId: number) => Promise<void>
-  disconnectingConnectionId?: null | number
+  /** Present only when the server offers SimpleFIN (`features.bankSyncProviders`). */
+  onConnectSimplefin?: () => void
+  onDisconnect?: (target: BankConnectionTarget) => Promise<void>
+  disconnectingConnection?: BankConnectionTarget | null
   disconnectFailure?: ConnectionDisconnectFailureState | null
   onImportStatement?: () => void
   /** Opens the last 20 sync runs for a connection. */
-  onViewHistory?: (connectionId: number, institutionName: null | string) => void
+  onViewHistory?: (target: BankConnectionTarget, institutionName: null | string) => void
   /** Starts a new connection to the row's bank; the API keeps the existing accounts. */
   onReconnect?: (bankId: string) => void
   reconnectingBankId?: null | string
@@ -62,7 +73,7 @@ export type ConnectionsScreenProps = {
  * status badge, expiry, freshness, its actions), flat on the canvas with hairlines.
  * Mobile keeps its read-only note, the connect button and the callback notices.
  */
-export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onDisconnect, disconnectingConnectionId, disconnectFailure, onImportStatement, onReconnect, onViewHistory, reconnectingBankId, reconnectFailure }: ConnectionsScreenProps) {
+export function ConnectionsScreen({ state, justStarted, connectionResult, refreshing, onBack, onRetry, onRefresh, onConnectBank, onConnectSimplefin, onDisconnect, disconnectingConnection, disconnectFailure, onImportStatement, onReconnect, onViewHistory, reconnectingBankId, reconnectFailure }: ConnectionsScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
 
@@ -82,6 +93,13 @@ export function ConnectionsScreen({ state, justStarted, connectionResult, refres
 
         {onConnectBank ? (
           <Button block icon="plus" label={t('banking.connections.connectCta')} onPress={onConnectBank} />
+        ) : null}
+
+        {onConnectSimplefin ? (
+          <View style={styles.simplefin}>
+            <Button block icon="link" label={t('banking.connections.simplefinCta')} onPress={onConnectSimplefin} variant="outline" />
+            <Text tone="muted" variant="label">{t('banking.connections.simplefinHint')}</Text>
+          </View>
         ) : null}
 
         {connectionResult ? (
@@ -128,13 +146,13 @@ export function ConnectionsScreen({ state, justStarted, connectionResult, refres
             <View style={[styles.list, { borderColor: palette.border }]}>
               {state.rows.map((row, index) => (
                 <ConnectionRow
-                  key={row.connectionId ?? `${row.provider}-${row.expiresAt ?? index}`}
+                  key={row.connectionId !== null ? `${row.provider}-${row.connectionId}` : `${row.provider}-${row.expiresAt ?? index}`}
                   row={row}
                   palette={palette}
                   separated={index > 0}
                   onDisconnect={onDisconnect}
-                  disconnecting={row.connectionId !== null && row.connectionId === disconnectingConnectionId}
-                  failure={row.connectionId !== null && disconnectFailure?.connectionId === row.connectionId ? disconnectFailure.failure : null}
+                  disconnecting={isSameBankConnection(targetOf(row), disconnectingConnection)}
+                  failure={disconnectFailure && isSameBankConnection(targetOf(row), disconnectFailure) ? disconnectFailure.failure : null}
                   onImportStatement={onImportStatement}
                   onReconnect={onReconnect}
                   onViewHistory={onViewHistory}
@@ -165,12 +183,12 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   row: BankConnectionRow
   palette: Palette
   separated: boolean
-  onDisconnect?: (connectionId: number) => Promise<void>
+  onDisconnect?: (target: BankConnectionTarget) => Promise<void>
   disconnecting: boolean
   failure: BankConnectionDisconnectFailure | null
   onImportStatement?: () => void
   onReconnect?: (bankId: string) => void
-  onViewHistory?: (connectionId: number, institutionName: null | string) => void
+  onViewHistory?: (target: BankConnectionTarget, institutionName: null | string) => void
   reconnecting: boolean
   reconnectBlocked: boolean
   reconnectFailure: StartBankConnectionFailure | null
@@ -180,27 +198,35 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
   const providerName = PROVIDER_NAMES[row.provider]
   const institution = row.institutionName?.trim()
     || (providerName ? t('banking.connections.providerConnection', { provider: providerName }) : t('banking.connections.unnamedInstitution'))
-  const statusLabel = t(`banking.connections.status.${row.status}`)
+  // SimpleFIN access has no consent end date, so its rows leave the expiry out, and an ended
+  // one says it was revoked rather than "ended by bank".
+  const isSimplefin = row.provider === 'SimpleFIN'
+  const statusLabel = isSimplefin && row.status === 'revoked'
+    ? t('banking.connections.simplefin.statusRevoked')
+    : t(`banking.connections.status.${row.status}`)
   const dateFormatter = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' })
   const expiry = row.expiresAt ? dateFormatter.format(new Date(row.expiresAt)) : t('banking.connections.unavailableDate')
+  const showsExpiry = !isSimplefin
   const freshness = row.dataFreshAsOf
     ? t('banking.connections.freshnessOn', { date: dateFormatter.format(new Date(row.dataFreshAsOf)) })
     : t('banking.connections.freshnessUnknown')
-  const canDisconnect = onDisconnect !== undefined && row.connectionId !== null
-  const connectionId = row.connectionId
+  const target = targetOf(row)
+  const canDisconnect = onDisconnect !== undefined && target !== null
   const bankId = row.bankId
   const canReconnect = onReconnect !== undefined && canReconnectRow(row)
-  const canViewHistory = onViewHistory !== undefined && connectionId !== null && row.provider === 'EnableBanking'
-  const consentNotice = row.status === 'expiring'
-    ? t('banking.connections.consent.expiring', { count: row.daysUntilExpiry ?? 0 })
-    : row.status === 'revoked'
-      ? t('banking.connections.consent.revoked')
-      : row.status === 'expired'
-        ? t('banking.connections.consent.expired')
-        : null
+  const canViewHistory = onViewHistory !== undefined && target !== null && HISTORY_PROVIDERS.has(row.provider)
+  const consentNotice = isSimplefin
+    ? (row.status === 'revoked' || row.status === 'expired' ? t('banking.connections.simplefin.accessEnded') : null)
+    : row.status === 'expiring'
+      ? t('banking.connections.consent.expiring', { count: row.daysUntilExpiry ?? 0 })
+      : row.status === 'revoked'
+        ? t('banking.connections.consent.revoked')
+        : row.status === 'expired'
+          ? t('banking.connections.consent.expired')
+          : null
 
   const requestDisconnect = () => {
-    if (!canDisconnect || disconnecting || connectionId === null) return
+    if (!canDisconnect || disconnecting || target === null) return
     Alert.alert(
       t('banking.connections.disconnect.confirmTitle', { institution }),
       t('banking.connections.disconnect.confirmMessage', { institution }),
@@ -209,7 +235,7 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
         {
           text: t('banking.connections.disconnect.confirmAction'),
           style: 'destructive',
-          onPress: () => void onDisconnect(connectionId),
+          onPress: () => void onDisconnect(target),
         },
       ],
       { cancelable: true },
@@ -220,7 +246,9 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
     <View style={[styles.row, separated && { borderTopWidth: 1, borderTopColor: palette.border }]}>
       <View
         accessible
-        accessibilityLabel={t('banking.connections.rowLabel', { institution, status: statusLabel, expiry, freshness })}
+        accessibilityLabel={showsExpiry
+          ? t('banking.connections.rowLabel', { institution, status: statusLabel, expiry, freshness })
+          : t('banking.connections.rowLabelNoExpiry', { institution, status: statusLabel, freshness })}
         accessibilityRole="text"
         style={styles.rowSummary}
       >
@@ -228,7 +256,7 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
           <Text style={styles.institution} variant="metaStrong">{institution}</Text>
           <Badge label={statusLabel} tone={STATUS_TONE[row.status] ?? 'outline'} />
         </View>
-        <Text tone="muted" variant="label">{t('banking.connections.expiresOn', { date: expiry })}</Text>
+        {showsExpiry ? <Text tone="muted" variant="label">{t('banking.connections.expiresOn', { date: expiry })}</Text> : null}
         <Text tone="muted" variant="label">{freshness}</Text>
       </View>
 
@@ -253,11 +281,11 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
 
       {(row.status === 'error' && onImportStatement) || canDisconnect || canReconnect || canViewHistory ? (
         <View style={styles.actions}>
-          {canViewHistory && connectionId !== null ? (
+          {canViewHistory && target !== null ? (
             <Button
               accessibilityLabel={t('bank-sync.history.actionLabel', { institution })}
               label={t('bank-sync.history.action')}
-              onPress={() => onViewHistory(connectionId, row.institutionName)}
+              onPress={() => onViewHistory(target, row.institutionName)}
               size="sm"
               variant="ghost"
             />
@@ -308,12 +336,14 @@ function ConnectionRow({ row, palette, separated, onDisconnect, disconnecting, f
 const PROVIDER_NAMES: Partial<Record<BankConnectionRow['provider'], string>> = {
   GoCardless: 'GoCardless',
   EnableBanking: 'Enable Banking',
+  SimpleFIN: 'SimpleFIN',
 }
 
 
 const styles = StyleSheet.create({
   notice: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4], gap: themeTokens.spacing[2], alignItems: 'flex-start' },
   empty: { gap: themeTokens.spacing[1] },
+  simplefin: { gap: themeTokens.spacing[1] },
   list: { borderTopWidth: 1, borderBottomWidth: 1 },
   row: { paddingVertical: themeTokens.spacing[3], gap: themeTokens.spacing[2] },
   rowSummary: { gap: 2 },

@@ -82,6 +82,12 @@ export const API_ERROR_CODE = {
   /** One side is on a private account and the other is not, or they have different owners (400). */
   REIMBURSEMENT_VISIBILITY_MISMATCH: "reimbursement_visibility_mismatch",
   RULE_ORDER_STALE: "rule_order_stale",
+  /** A SimpleFIN setup token that is not one (not base64 of an https claim URL) (400). */
+  SIMPLEFIN_TOKEN_INVALID: "simplefin_token_invalid",
+  /** A SimpleFIN setup token that was already claimed; it may be compromised (400). */
+  SIMPLEFIN_TOKEN_ALREADY_CLAIMED: "simplefin_token_already_claimed",
+  /** A SimpleFIN setup token for a server this instance does not allow (400). */
+  SIMPLEFIN_SERVER_NOT_ALLOWED: "simplefin_server_not_allowed",
   /** The household already has rules being applied to its transactions (409). */
   RULE_APPLY_IN_PROGRESS: "rule_apply_in_progress",
   /** The split's lines do not add up, mix signs, include a zero or are fewer than two (400). */

@@ -2,7 +2,7 @@ import { DI } from '@app/database/di';
 import { ACCOUNT_AUTO_SYNC_REQUISITION_OPERATION_TYPE, type AccountAutoSyncRequisitionJobPayload, buildAccountAutoSyncRequisitionCorrelationId, enqueueAccountAutoSyncRequisitionJob } from '@app/jobs/account-auto-sync.queue';
 import type { Appuser } from '@entity/Appuser';
 import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
-import { enabledBankProviderIds } from '@service/bank-providers/registry';
+import { enabledBankProviderIds, nonExpiringBankProviderIds } from '@service/bank-providers/registry';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
@@ -53,12 +53,15 @@ export default {
     // `nextEligibleSyncAt`, which a rate-limited sync sets from the provider's `Retry-After`.
     // One row per connection, whichever provider it belongs to: the scheduler never branches on
     // provider, it only reads the generic `BankConnection`.
+    // A provider whose access never expires (SimpleFIN) leaves `accessValidUntil` null.
+    const nonExpiring = nonExpiringBankProviderIds();
     const connections = await DI.em.find(BankConnection, {
       $and: [
         { $or: [{ lastSyncAttemptAt: null }, { lastSyncAttemptAt: { $lte: staleBefore } }] },
         { $or: [{ nextEligibleSyncAt: null }, { nextEligibleSyncAt: { $lte: now } }] },
+        ...(nonExpiring.length > 0 ? [{ $or: [{ accessValidUntil: { $gt: now } }, { accessValidUntil: null, provider: { $in: nonExpiring } }] }] : []),
       ],
-      accessValidUntil: { $gt: now },
+      ...(nonExpiring.length > 0 ? {} : { accessValidUntil: { $gt: now } }),
       accounts: { $some: { $and: [{ $or: staleOr }, { closed: false }, { deletedAt: undefined }] } },
       appuserKey: { $ne: null },
       deletedAt: undefined,

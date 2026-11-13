@@ -11,6 +11,7 @@ import { InspectorDrawer } from "@/components/ui/InspectorDrawer";
 import { Spinner } from "@/components/ui/Spinner";
 import { Text } from "@/components/ui/Typography";
 import useBankSyncHistory, {
+  type BankSyncHistoryProvider,
   type BankSyncHistoryRun,
 } from "@/lib/api/banking/useBankSyncHistory";
 
@@ -44,15 +45,18 @@ export default function SyncHistoryDrawer({
   onOpenChange,
   connectionId,
   institutionName,
+  provider = "EnableBanking",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   connectionId: number | null;
   institutionName: string | null;
+  /** Which provider's id space `connectionId` belongs to. */
+  provider?: BankSyncHistoryProvider;
 }) {
   const t = useTranslations();
   const locale = useLocale();
-  const query = useBankSyncHistory(connectionId, { enabled: open });
+  const query = useBankSyncHistory(connectionId, { enabled: open, provider });
   const runs = query.data?.syncs ?? [];
 
   return (

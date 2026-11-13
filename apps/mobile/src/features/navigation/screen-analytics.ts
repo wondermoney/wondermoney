@@ -76,6 +76,7 @@ const routePatterns: readonly RoutePattern[] = [
 
   [['more', 'banking'], 'bank_connections'],
   [['more', 'banking', 'connect'], 'bank_connect'],
+  [['more', 'banking', 'simplefin', 'connect'], 'bank_connect_simplefin'],
   [['more', 'banking', 'import'], 'bank_statement_import'],
 
   [['net-worth', 'history'], 'net_worth_history'],

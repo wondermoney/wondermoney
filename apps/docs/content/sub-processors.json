@@ -120,7 +120,7 @@
       "evidence": "api src/services/enable-banking/enable-banking-client.service.ts calls https://api.enablebanking.com; src/controller/enable-banking-credential.ts stores each user's own Application ID and encrypted private key; src/controller/enable-banking-callback.ts and app.ts wire up the /v1/banking/enable-banking/callback route; src/services/enable-banking/enable-banking-jwt.service.ts signs API requests locally with the user's key (the raw private key itself is never sent to Enable Banking).",
       "personalData": "Bank account identifiers, balances and transaction history, on user instruction, plus the user's own Enable Banking Application ID (used to identify which application is calling). The user's private key is encrypted at rest with AES-256-GCM and is used only to sign requests in our backend — it is not transmitted to Enable Banking.",
       "location": "Finland (European Union)",
-      "notes": "Enable Banking Oy is a Registered Account Information Service Provider regulated by the Finnish Financial Supervisory Authority (FIN-FSA). Added alongside the BYOK bank-provider rollout (2026-09), which replaced WonderMoney's own shared GoCardless connection; it is now the only bank provider."
+      "notes": "Enable Banking Oy is a Registered Account Information Service Provider regulated by the Finnish Financial Supervisory Authority (FIN-FSA). Added alongside the BYOK bank-provider rollout (2026-09), which replaced WonderMoney's own shared GoCardless connection; it is the only bank provider the hosted instance enables (SimpleFIN is listed under outOfScope)."
     },
     {
       "id": "aws-s3",
@@ -200,6 +200,10 @@
     {
       "id": "ethereum-explorer",
       "reason": "Ethereum block explorer for crypto wallets (api config/crypto-explorers.ts, services/crypto-wallet/), the Blockscout instance a self-hosting operator names in CRYPTO_ETH_EXPLORER_URL, and off unless set. The hosted instance does not enable it. It would receive public Ethereum addresses only and the server's IP, no names, amounts or user ids. Addresses it can link to one household count as personal data, so add it to the policy before ever enabling it on the hosted instance."
+    },
+    {
+      "id": "simplefin",
+      "reason": "SimpleFIN Bridge, a paid read-only aggregator for US and Canadian banks (api services/bank-providers/simplefin.provider.ts, services/simplefin/), off unless a self-hosting operator lists simplefin in BANK_PROVIDERS. The hosted instance does not enable it. Where enabled, the API claims each user's setup token and the worker reads that user's accounts, balances and transactions with the access URL it returns, stored AES-256-GCM encrypted. Add it to the policy, with SimpleFIN's location, before ever enabling it on the hosted instance."
     }
   ]
 }

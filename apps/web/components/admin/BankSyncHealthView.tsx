@@ -27,6 +27,7 @@ import { formatPercentageForLocale } from "@/lib/utils/formatPercentage";
 const STATUSES: readonly BankConnectionStatus[] = [
   "linked",
   "expired",
+  "revoked",
   "error",
   "authorized",
   "created",
@@ -75,7 +76,7 @@ export function BankSyncHealthView({
             <Figure
               key={status}
               label={t(`status-${status}`)}
-              value={health.connections.byStatus[status]}
+              value={health.connections.byStatus[status] ?? 0}
             />
           ))}
         </dl>

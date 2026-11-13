@@ -2868,6 +2868,7 @@
       "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
       "consent-expired": "O teu acesso a este banco expirou.",
       "data-validation": "O teu banco enviou dados que não conseguimos ler.",
+      "institution-action-required": "Um dos teus bancos precisa de atenção no teu fornecedor de dados bancários.",
       "institution-unavailable": "O teu banco não está disponível neste momento.",
       "internal": "Algo falhou do nosso lado.",
       "invalid-requisition": "Esta ligação ao banco já não é válida.",
@@ -2876,10 +2877,12 @@
       "rate-limited": "O banco limitou a frequência com que podemos sincronizar.",
       "timeout": "O teu banco demorou demasiado a responder.",
       "transaction-phase-failed": "O teu banco não enviou as transações.",
-      "unknown": "A sincronização falhou."
+      "unknown": "A sincronização falhou.",
+      "unsupported-currency": "Uma conta usa uma moeda que o WonderMoney não consegue acompanhar, por isso ficou de fora."
     },
     "actions": {
       "contact-support": "Contactar o suporte",
+      "fix-at-provider": "Resolver no teu fornecedor de dados bancários",
       "reconnect": "Voltar a ligar o banco",
       "wait": "Vamos tentar novamente automaticamente"
     },
@@ -2906,6 +2909,41 @@
         "partial": "Parcialmente concluída"
       }
     }
+  },
+  "simplefin": {
+    "name": "SimpleFIN",
+    "connect": "Ligar com SimpleFIN",
+    "offer": "Tens conta num banco dos EUA ou do Canadá? Liga-o através do SimpleFIN Bridge.",
+    "intro": "O SimpleFIN Bridge liga bancos dos EUA e do Canadá. Dá-te um token de configuração: um código de utilização única que permite ao WonderMoney ler as tuas contas.",
+    "get-token": "Obtém um token de configuração na tua conta SimpleFIN Bridge",
+    "token-label": "Token de configuração",
+    "token-placeholder": "Cola o teu token de configuração",
+    "token-required": "Cola o teu token de configuração.",
+    "token-hint": "Um token de configuração só funciona uma vez. O WonderMoney troca-o por um acesso só de leitura e guarda esse acesso encriptado.",
+    "submit": "Ligar",
+    "success": "O SimpleFIN está ligado. As tuas contas aparecem depois da primeira sincronização.",
+    "error-generic": "Não foi possível ligar o SimpleFIN. Tenta novamente.",
+    "error-token-invalid": "Isto não é um token de configuração SimpleFIN. Copia o token completo da tua conta SimpleFIN Bridge e cola-o novamente.",
+    "error-token-already-claimed": "Este token de configuração já foi usado. Se não o usaste, desativa-o no SimpleFIN Bridge, porque outra pessoa pode tê-lo, e cria um novo.",
+    "error-server-not-allowed": "Este token de configuração aponta para um servidor a que esta instância não se liga. Cria um token no SimpleFIN Bridge.",
+    "error-unreachable": "O SimpleFIN não respondeu. Tenta novamente dentro de alguns minutos.",
+    "error-disabled": "O SimpleFIN não está disponível neste servidor.",
+    "connections-title": "Ligações SimpleFIN",
+    "updated": "Atualizado",
+    "never-synced": "Ainda não sincronizado",
+    "revoked-help": "O SimpleFIN revogou este acesso. Volta a ligar com um novo token de configuração para continuar a sincronizar.",
+    "status": {
+      "connected": "Ligada",
+      "processing": "Primeira sincronização em curso",
+      "revoked": "Acesso revogado",
+      "error": "Erro",
+      "expired": "Expirada"
+    },
+    "disconnect": "Desligar",
+    "disconnect-title": "Desligar o SimpleFIN?",
+    "disconnect-body": "O WonderMoney deixa de sincronizar esta ligação e apaga o acesso SimpleFIN guardado. Para voltar a sincronizar mais tarde, precisas de um novo token de configuração.",
+    "disconnect-success": "O SimpleFIN foi desligado.",
+    "disconnect-error": "Não foi possível desligar o SimpleFIN. Tenta novamente."
   },
   "version": {
     "app": "WonderMoney {version}",

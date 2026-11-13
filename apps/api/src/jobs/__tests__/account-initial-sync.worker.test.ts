@@ -100,6 +100,14 @@ describe('account initial sync producer contract worker', () => {
     expect(h.order.at(-1)).toBe('finalize');
   });
 
+  it('records the aggregator\'s reported code on a partial first sync', async () => {
+    const h = harness();
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    vi.mocked(h.account.syncAccountsForRequisition).mockResolvedValueOnce({ ...accountsResult('partial'), reportedErrorCode: 'institution_action_required' });
+    await expect(handleAccountInitialSyncJob(job(payload, 'job-2', 1), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).rejects.toThrow('partial');
+    expect(h.incident.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'institution_action_required', result: 'partial' }));
+  });
+
   it('makes an exhausted failure terminal and snapshots live treatment', async () => {
     vi.stubEnv('BANK_RECOVERY_MODE', 'live');
     vi.stubEnv('APP_ENV', 'production');
