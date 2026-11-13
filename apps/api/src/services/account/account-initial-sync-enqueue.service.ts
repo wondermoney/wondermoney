@@ -8,6 +8,7 @@ import { BackgroundOperation } from '@entity/BackgroundOperation';
 import { BankConnection } from '@entity/BankConnection';
 import { BankSyncFlow, BankSyncIncident, BankSyncProducer } from '@entity/BankSyncIncident';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
+import { bankConnectionResourceId, bankSyncConnectionId, buildAccountInitialSyncJobPayload } from '@service/bank-sync/bank-sync-job-payload';
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -141,17 +142,16 @@ class AccountInitialSyncEnqueueService {
     if (!Number.isSafeInteger(connection.bankConnectionKey) || connection.bankConnectionKey <= 0) {
       throw new AccountInitialSyncQueueError('Account initial sync connection identifiers are invalid', false);
     }
-    const bankConnectionKey = String(connection.bankConnectionKey);
-    const correlationId = buildAccountInitialSyncCorrelationId(bankConnectionKey);
-    // The provider-issued session/consent id is the analytics identity; fall back to the
-    // pre-link correlation `state` (defensive — only a linked connection reaches this call).
-    const requisitionIdForAnalytics = connection.externalId ?? connection.state ?? bankConnectionKey;
+    const correlationId = buildAccountInitialSyncCorrelationId(String(connection.bankConnectionKey));
+    // The provider-issued session/consent id is the analytics identity; `bankSyncConnectionId`
+    // falls back to the pre-link correlation `state` (defensive — only a linked connection
+    // reaches this call). The admin retry rebuilds the job with the same builder.
     return {
       appuser: connection.appuserKey,
-      buildJobPayload: (incidentId) => ({ bankConnectionKey, connectionId: requisitionIdForAnalytics, correlationId, incidentId, provider: connection.provider }),
+      buildJobPayload: (incidentId) => buildAccountInitialSyncJobPayload(connection, incidentId),
       correlationId,
-      requisitionIdForAnalytics,
-      resourceId: `bank-connection:${bankConnectionKey}`,
+      requisitionIdForAnalytics: bankSyncConnectionId(connection),
+      resourceId: bankConnectionResourceId(connection.bankConnectionKey),
       tenantKey: connection.tenantKey?.tenantKey,
     };
   }

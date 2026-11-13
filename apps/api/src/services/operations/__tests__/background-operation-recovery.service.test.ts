@@ -53,25 +53,25 @@ describe('background operation recovery service', () => {
 
   it('re-enqueues retryable account initial sync ops with full payload', async () => {
     recoverableOperationService.findRecoveryCandidates.mockResolvedValueOnce([
-      { correlationId: 'corr-a', operationType: 'account.initial-sync', queueJobId: 'job-old-a', resourceId: 'enable-banking-connection:12', retryable: true, status: 'running' },
+      { correlationId: 'account.initial-sync:12', operationType: 'account.initial-sync', queueJobId: 'job-old-a', resourceId: 'bank-connection:12', retryable: true, status: 'running' },
     ]);
     boss.findJobs.mockResolvedValueOnce([{ state: 'failed' }]);
-    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
     recoverableOperationService.claimForRecovery.mockResolvedValueOnce(true);
     boss.send.mockResolvedValueOnce('job-new-a');
     recoverableOperationService.attachRecoveredQueueJob.mockResolvedValueOnce(true);
 
     await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
 
-    expect(boss.send).toHaveBeenCalledWith('account.initial-sync', expect.objectContaining({ connectionId: 'connection-12', correlationId: 'corr-a', enableBankingConnectionKey: '12', incidentId: 'incident-recovered', provider: 'enable_banking' }), { singletonKey: 'corr-a' });
+    expect(boss.send).toHaveBeenCalledWith('account.initial-sync', expect.objectContaining({ bankConnectionKey: '12', connectionId: 'connection-12', correlationId: 'account.initial-sync:12', incidentId: 'incident-recovered', provider: 'enable_banking' }), { singletonKey: 'account.initial-sync:12' });
   });
 
   it('re-enqueues account auto sync connections with the connection singleton key', async () => {
     recoverableOperationService.findRecoveryCandidates.mockResolvedValueOnce([
-      { correlationId: 'account.auto-sync.requisition:run-1:12', operationType: 'account.auto-sync.requisition', queueJobId: null, resourceId: 'enable-banking-connection:12', retryable: true, status: 'queued' },
+      { correlationId: 'account.auto-sync.requisition:run-1:12', operationType: 'account.auto-sync.requisition', queueJobId: null, resourceId: 'bank-connection:12', retryable: true, status: 'queued' },
     ]);
     boss.findJobs.mockResolvedValueOnce([]);
-    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
     recoverableOperationService.claimForRecovery.mockResolvedValueOnce(true);
     boss.send.mockResolvedValueOnce('job-new-auto');
     recoverableOperationService.attachRecoveredQueueJob.mockResolvedValueOnce(true);
@@ -79,13 +79,13 @@ describe('background operation recovery service', () => {
     await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
 
     expect(boss.findJobs).toHaveBeenCalledWith('account.auto-sync.requisition', { key: 'account.auto-sync.connection:12' });
-    expect(boss.send).toHaveBeenCalledWith('account.auto-sync.requisition', expect.objectContaining({ connectionId: 'connection-12', correlationId: 'account.auto-sync.requisition:run-1:12', enableBankingConnectionKey: '12', incidentId: 'incident-recovered', provider: 'enable_banking', scheduleRunId: 'run-1' }), { singletonKey: 'account.auto-sync.connection:12' });
+    expect(boss.send).toHaveBeenCalledWith('account.auto-sync.requisition', expect.objectContaining({ bankConnectionKey: '12', connectionId: 'connection-12', correlationId: 'account.auto-sync.requisition:run-1:12', incidentId: 'incident-recovered', provider: 'enable_banking', scheduleRunId: 'run-1' }), { singletonKey: 'account.auto-sync.connection:12' });
   });
 
   it('retries a new schedule run after the connection singleton completes and null dedupe clears', async () => {
-    const candidate = { correlationId: 'account.auto-sync.requisition:new-run:12', operationType: 'account.auto-sync.requisition', queueJobId: null, resourceId: 'enable-banking-connection:12', retryable: true, status: 'queued' };
+    const candidate = { correlationId: 'account.auto-sync.requisition:new-run:12', operationType: 'account.auto-sync.requisition', queueJobId: null, resourceId: 'bank-connection:12', retryable: true, status: 'queued' };
     recoverableOperationService.findRecoveryCandidates.mockResolvedValue([candidate]);
-    em.findOne.mockResolvedValue({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValue({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
 
     boss.findJobs.mockResolvedValueOnce([{ state: 'active' }]);
     const live = await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
@@ -109,47 +109,47 @@ describe('background operation recovery service', () => {
     const attached = await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:02:00Z') });
 
     expect(attached.reenqueued).toBe(1);
-    expect(boss.send).toHaveBeenLastCalledWith('account.auto-sync.requisition', expect.objectContaining({ connectionId: 'connection-12', correlationId: candidate.correlationId, enableBankingConnectionKey: '12', incidentId: 'incident-recovered', provider: 'enable_banking', scheduleRunId: 'new-run' }), { singletonKey: 'account.auto-sync.connection:12' });
+    expect(boss.send).toHaveBeenLastCalledWith('account.auto-sync.requisition', expect.objectContaining({ bankConnectionKey: '12', connectionId: 'connection-12', correlationId: candidate.correlationId, incidentId: 'incident-recovered', provider: 'enable_banking', scheduleRunId: 'new-run' }), { singletonKey: 'account.auto-sync.connection:12' });
     expect(recoverableOperationService.attachRecoveredQueueJob).toHaveBeenCalledWith(candidate.correlationId, null, 'job-new-run', expect.any(String));
   });
 
   it('marks needs action when ensureQueue throws after claim', async () => {
     recoverableOperationService.findRecoveryCandidates.mockResolvedValueOnce([
-      { correlationId: 'corr-q', operationType: 'account.initial-sync', queueJobId: 'job-q', resourceId: 'enable-banking-connection:12', retryable: true, status: 'running' },
+      { correlationId: 'account.initial-sync:12', operationType: 'account.initial-sync', queueJobId: 'job-q', resourceId: 'bank-connection:12', retryable: true, status: 'running' },
     ]);
     boss.findJobs.mockResolvedValueOnce([{ state: 'missing' }]);
-    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
     recoverableOperationService.claimForRecovery.mockResolvedValueOnce(true);
     boss.createQueue.mockRejectedValueOnce(new Error('queue boom'));
 
     const result = await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
 
     expect(result.needsAction).toBe(1);
-    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('corr-q', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
+    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('account.initial-sync:12', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
     expect(boss.send).not.toHaveBeenCalled();
   });
 
   it('marks needs action when send throws after claim', async () => {
     recoverableOperationService.findRecoveryCandidates.mockResolvedValueOnce([
-      { correlationId: 'corr-s', operationType: 'account.initial-sync', queueJobId: 'job-s', resourceId: 'enable-banking-connection:12', retryable: true, status: 'running' },
+      { correlationId: 'account.initial-sync:12', operationType: 'account.initial-sync', queueJobId: 'job-s', resourceId: 'bank-connection:12', retryable: true, status: 'running' },
     ]);
     boss.findJobs.mockResolvedValueOnce([{ state: 'missing' }]);
-    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
     recoverableOperationService.claimForRecovery.mockResolvedValueOnce(true);
     boss.send.mockRejectedValueOnce(new Error('send boom'));
 
     const result = await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
 
     expect(result.needsAction).toBe(1);
-    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('corr-s', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
+    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('account.initial-sync:12', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
   });
 
   it('marks needs action when attach throws after claim', async () => {
     recoverableOperationService.findRecoveryCandidates.mockResolvedValueOnce([
-      { correlationId: 'corr-t', operationType: 'account.initial-sync', queueJobId: 'job-t', resourceId: 'enable-banking-connection:12', retryable: true, status: 'running' },
+      { correlationId: 'account.initial-sync:12', operationType: 'account.initial-sync', queueJobId: 'job-t', resourceId: 'bank-connection:12', retryable: true, status: 'running' },
     ]);
     boss.findJobs.mockResolvedValueOnce([{ state: 'missing' }]);
-    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'connection-12', state: 'state-12', status: 'linked' });
+    em.findOne.mockResolvedValueOnce({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, bankConnectionKey: 12, externalId: 'connection-12', provider: 'enable_banking', state: 'state-12', status: 'linked' });
     recoverableOperationService.claimForRecovery.mockResolvedValueOnce(true);
     boss.send.mockResolvedValueOnce('job-new-t');
     recoverableOperationService.attachRecoveredQueueJob.mockRejectedValueOnce(new Error('attach boom'));
@@ -157,7 +157,7 @@ describe('background operation recovery service', () => {
     const result = await recoveryService.recoverOnce({ boss, limit: 10, logger, now: new Date('2026-01-01T00:00:00Z') });
 
     expect(result.needsAction).toBe(1);
-    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('corr-t', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
+    expect(recoverableOperationService.markClaimedRecoveryNeedsAction).toHaveBeenCalledWith('account.initial-sync:12', expect.any(String), 'recovery:enqueue-failed', 'recovery:enqueue-failed');
   });
 
   it('re-enqueues queued recoverable ops with missing pg-boss job', async () => {

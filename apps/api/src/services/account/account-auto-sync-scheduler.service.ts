@@ -4,6 +4,7 @@ import type { Appuser } from '@entity/Appuser';
 import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { enabledBankProviderIds, nonExpiringBankProviderIds } from '@service/bank-providers/registry';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
+import { accountAutoSyncConnectionSingletonKey, bankConnectionResourceId, bankSyncConnectionId, buildAccountAutoSyncRequisitionJobPayload } from '@service/bank-sync/bank-sync-job-payload';
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
 
@@ -77,23 +78,15 @@ export default {
       if (eligible.has(mapKey)) continue;
       const owner = connection.appuserKey as undefined | { externalUserId?: string };
       const correlationId = buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, String(connectionKey));
-      const connectionId = connection.externalId ?? connection.state ?? String(connectionKey);
+      // The admin retry rebuilds the job with the same builders (`bank-sync-job-payload.ts`).
       eligible.set(mapKey, {
         appuserKey: connection.appuserKey,
-        buildJobPayload: (incidentId) => ({
-          appuserKey: getAppuserKeyNumber(connection.appuserKey),
-          bankConnectionKey: String(connectionKey),
-          connectionId,
-          correlationId,
-          incidentId,
-          provider: connection.provider,
-          scheduleRunId,
-        }),
+        buildJobPayload: (incidentId) => buildAccountAutoSyncRequisitionJobPayload(connection, { incidentId, scheduleRunId }),
         correlationId,
         distinctId: canonicalBankSyncDistinctId(owner?.externalUserId),
-        requisitionId: connectionId,
-        resourceId: `bank-connection:${connectionKey}`,
-        singletonKey: `account.auto-sync.connection:${connectionKey}`,
+        requisitionId: bankSyncConnectionId(connection),
+        resourceId: bankConnectionResourceId(connectionKey),
+        singletonKey: accountAutoSyncConnectionSingletonKey(connectionKey),
       });
     }
     const failures: { error: unknown; requisitionId: string }[] = [];
@@ -139,9 +132,3 @@ export default {
     return { enqueued, failed: failures.length, failures, rateLimited, skipped: connections.length - eligible.size + rateLimited, total: connections.length };
   },
 };
-
-function getAppuserKeyNumber(appuserKey: unknown): number {
-  if (typeof appuserKey === 'number') return appuserKey;
-  if (appuserKey && typeof appuserKey === 'object' && typeof (appuserKey as { appuserKey?: unknown }).appuserKey === 'number') return (appuserKey as { appuserKey: number }).appuserKey;
-  return 0;
-}
