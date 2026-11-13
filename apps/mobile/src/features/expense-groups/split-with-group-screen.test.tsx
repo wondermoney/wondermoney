@@ -155,8 +155,10 @@ describe('Split with group', () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
     const { view, onClose, client } = await renderScreen(sharedDinner)
     expect(view.getByText('Current shares')).toBeOnTheScreen()
-    expect(view.getByText('Not in the household')).toBeOnTheScreen()
     expect(await view.findByText('Paid by Rui · Lisbon trip')).toBeOnTheScreen()
+    // The label shows in the current shares and again in the form once the group has loaded,
+    // so wait for the form first and accept more than one.
+    expect(view.getAllByText('Not in the household').length).toBeGreaterThan(0)
     // The form starts from the saved shares, and the group cannot change.
     expect(view.getByRole('tab', { name: 'By amount' })).toBeSelected()
     expect(view.getByLabelText('Amount for Sam')).toHaveDisplayValue('20')
