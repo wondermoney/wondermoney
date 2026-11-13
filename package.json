@@ -13,6 +13,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
+    "verify:changed": "node scripts/verify-changed.mjs",
     "dev:api": "pnpm --filter @wondermoney/api dev",
     "dev:worker": "pnpm --filter @wondermoney/api worker:dev",
     "dev:web": "pnpm --filter @wondermoney/web dev",

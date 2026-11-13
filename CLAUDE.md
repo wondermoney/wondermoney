@@ -33,6 +33,15 @@ pnpm --filter @wondermoney/api <script>   # anything app-specific
 
 Turborepo runs a task only in packages that define it. `build` depends on `build:lib`.
 
+## Verifying a change
+
+Before pushing, run `pnpm verify:changed` once, after rebasing onto develop: it runs the related
+tests, type-check, lint and the CI-only checks (leak check, gitleaks, docs build, OpenAPI,
+migrations) for the packages the branch touches. CI runs the full suites. The
+`verify-changed` skill (`.claude/skills/verify-changed/SKILL.md`) has the loop, the test-worker
+budget for parallel worktrees, and the conventions that otherwise fail late: migration order,
+the export format version, pt-PT copy, MDX placeholders, IP addresses and pg-boss names.
+
 ## Workspace rules
 
 - **One React for everything: 19.3.0**, pinned by a `pnpm-workspace.yaml` override. The
