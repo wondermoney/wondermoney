@@ -50,6 +50,17 @@ const transactionSplitLine = z.object({
   category: category.nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
   position: z.number().int().nonnegative(),
+  /**
+   * The person whose share this line is, when the transaction is shared in an expense group
+   * (#98); such a split is the group's, and the split endpoints refuse it. Optional: an older
+   * server omits it. A malformed value reads as none rather than failing the ledger.
+   */
+  expenseGroupMember: z.object({
+    expenseGroupKey: positiveId,
+    expenseGroupMemberKey: positiveId,
+    isHouseholdMember: z.boolean(),
+    name: z.string().max(255),
+  }).nullable().optional().catch(null),
 })
 
 const recurringSeries = z.object({

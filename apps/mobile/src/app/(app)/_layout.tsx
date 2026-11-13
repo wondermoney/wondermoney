@@ -72,6 +72,9 @@ function Shell({ demo }: { demo: boolean }) {
           <Stack.Screen name="loans/index" />
           <Stack.Screen name="loans/[loanId]" />
           <Stack.Screen name="loans/[loanId]/edit" />
+          <Stack.Screen name="groups/index" />
+          <Stack.Screen name="groups/create" />
+          <Stack.Screen name="groups/[groupId]" />
           <Stack.Screen name="assets/index" />
           <Stack.Screen name="assets/[assetId]" />
           <Stack.Screen name="assets/[assetId]/value" />

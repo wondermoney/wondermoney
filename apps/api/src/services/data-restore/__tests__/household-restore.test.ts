@@ -176,6 +176,14 @@ describe('household restore', () => {
       expect(restored['manual_asset_valuation']).toBe(4);
       expect(restored['crypto_wallet_address']).toBe(1);
       expect(restored['crypto_wallet_token']).toBe(2);
+      // The expense group comes back whole: its people (the household's one is the restoring member),
+      // the shared expense with one line per person, and the settlement.
+      expect([restored['expense_group'], restored['expense_group_member'], restored['expense_group_expense'], restored['expense_group_settlement']]).toEqual([1, 2, 1, 1]);
+      const shares = await connection.execute<{ amount: string; appuser_key: null | number }[]>(
+        'select s.amount::text as amount, m.appuser_key from transaction_split s join expense_group_member m on m.expense_group_member_key = s.expense_group_member_key where s.tenant_key = ? and s.deleted_at is null order by s.position',
+        [target.tenant.tenantKey],
+      );
+      expect(shares.map((share) => [Number(share.amount), share.appuser_key])).toEqual([[-6, target.appuser.appuserKey], [-6, null]]);
       // References stay inside the household: every restored transaction's account is the household's.
       const crossed = await connection.execute<{ n: number }[]>(
         'select count(*)::int as n from "transaction" t join account a on a.account_key = t.account_key where t.tenant_key = ? and a.tenant_key <> ?',

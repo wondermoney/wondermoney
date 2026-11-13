@@ -20,6 +20,7 @@ import {
   useSplitDraft,
 } from "@/components/account/TransactionSplitField";
 import { TransactionTransferFields } from "@/components/account/TransactionTransferFields";
+import { TransactionExpenseGroupField } from "@/components/expense-group/TransactionExpenseGroupField";
 import { ApplyRulesDialog } from "@/components/rules/ApplyRulesDialog";
 import { RuleEditorDialog } from "@/components/rules/RuleEditorDialog";
 import { TagPicker } from "@/components/tags/TagPicker";
@@ -369,6 +370,13 @@ export function AccountTransactionEditSheet({
               amountChanged={amountFieldChanged}
               disabled={isSubmitting}
               onRemoved={() => onOpenChange(false)}
+            />
+            {/* Shared with an expense group: who paid and each person's share. Saves at once. */}
+            <TransactionExpenseGroupField
+              transaction={transaction}
+              categories={categories}
+              disabled={isSubmitting}
+              onChanged={() => onOpenChange(false)}
             />
             {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
             <TransactionReimbursementField

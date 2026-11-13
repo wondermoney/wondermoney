@@ -133,6 +133,46 @@ describe('TransactionsScreen', () => {
     expect(view.getByTestId('transaction-split-save')).toBeDisabled()
   })
 
+  describe('expense groups', () => {
+    const groupLine = (key: number, memberKey: number, name: string, position: number) => ({
+      transactionSplitKey: key, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: null, position,
+      expenseGroupMember: { expenseGroupKey: 4, expenseGroupMemberKey: memberKey, isHouseholdMember: memberKey === 1, name },
+    })
+    const sharedRow = { ...transactionFixture, splits: [groupLine(1, 1, 'Ana', 0), groupLine(2, 3, 'Sam', 1)] }
+
+    it('offers "Split with group" on an ordinary row', async () => {
+      const onSplitWithGroup = jest.fn()
+      const { view } = await renderLoaded([transactionFixture], {}, { onSplitWithGroup, onSaveSplit: jest.fn() })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByRole('button', { name: 'Split' })).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Split with group' }))
+      expect(onSplitWithGroup).toHaveBeenCalledWith(expect.objectContaining({ id: 41 }))
+    })
+
+    it('shows a shared row’s shares read-only, with "Edit shares" and no split editor', async () => {
+      const onSplitWithGroup = jest.fn()
+      const { view } = await renderLoaded([sharedRow], {}, { onSplitWithGroup, onSaveSplit: jest.fn() })
+      expect(view.getByText('Shared in a group')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByTestId('transaction-group-shares')).toBeOnTheScreen()
+      expect(view.getByText('Sam')).toBeOnTheScreen()
+      expect(view.getByText('Not in the household')).toBeOnTheScreen()
+      // The split is the group's: the split editor is not offered.
+      expect(view.queryByRole('button', { name: 'Edit split' })).not.toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Split' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Edit shares' }))
+      expect(onSplitWithGroup).toHaveBeenCalledWith(expect.objectContaining({ id: 41 }))
+    })
+
+    it('shows a viewer the shares and no group action', async () => {
+      const { view } = await renderLoaded([sharedRow])
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByTestId('transaction-group-shares')).toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Edit shares' })).not.toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Split with group' })).not.toBeOnTheScreen()
+    })
+  })
+
   describe('reimbursements', () => {
     const expenseRow = { ...transactionFixture, transactionKey: 41, settlementAmount: -50, appuserSettlementAmount: -50 }
     const refundRow = { ...transactionFixture, transactionKey: 90, transactionTypeKey: { name: 'credit' }, transactionMerchantKey: { name: 'Refund desk' }, settlementAmount: 20, appuserSettlementAmount: 20 }

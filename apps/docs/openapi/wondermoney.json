@@ -48,6 +48,10 @@
       "name": "Currency"
     },
     {
+      "description": "People who share costs: their shared expenses (each person’s share is a line of the transaction’s split), balances and settlements. Only the household’s own people’s shares count in its totals.",
+      "name": "Expense groups"
+    },
+    {
       "description": "Quotes, fundamentals and news from the configured market-data provider.",
       "name": "Financial markets"
     },
@@ -1950,6 +1954,133 @@
         ],
         "additionalProperties": {}
       },
+      "ExpenseGroup": {
+        "type": "object",
+        "properties": {
+          "expenseGroupKey": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "The default currency for settlements. Balances are kept per currency."
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseGroupMember"
+            }
+          },
+          "yourBalances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number"
+                },
+                "currencyCode": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "amount",
+                "currencyCode"
+              ]
+            },
+            "description": "The viewer’s balance per currency: positive when they are owed. Empty when they are not in the group."
+          }
+        },
+        "required": [
+          "expenseGroupKey",
+          "name",
+          "currencyCode",
+          "archived",
+          "createdAt",
+          "members",
+          "yourBalances"
+        ],
+        "additionalProperties": {}
+      },
+      "ExpenseGroupList": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseGroup"
+            }
+          }
+        },
+        "required": [
+          "groups"
+        ],
+        "additionalProperties": {}
+      },
+      "ExpenseGroupMember": {
+        "type": "object",
+        "properties": {
+          "expenseGroupMemberKey": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "appuserKey": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The household member this person is; null for someone outside the household."
+          },
+          "isHouseholdMember": {
+            "type": "boolean",
+            "description": "Whether their shares count in the household’s totals. A share of anyone else is money owed to the household and counts nowhere."
+          },
+          "isYou": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expenseGroupMemberKey",
+          "name",
+          "email",
+          "appuserKey",
+          "isHouseholdMember",
+          "isYou",
+          "position"
+        ],
+        "additionalProperties": {}
+      },
+      "ExpenseGroupResponse": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/ExpenseGroup"
+          }
+        },
+        "required": [
+          "group"
+        ],
+        "additionalProperties": {}
+      },
       "FinancialInstitution": {
         "type": "object",
         "properties": {
@@ -2357,6 +2488,331 @@
         },
         "required": [
           "goal"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupBalances": {
+        "type": "object",
+        "properties": {
+          "expenseGroupKey": {
+            "type": "integer"
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "currencyCode": {
+                  "type": "string"
+                },
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "memberKey": {
+                        "type": "integer"
+                      },
+                      "paid": {
+                        "type": "number"
+                      },
+                      "share": {
+                        "type": "number"
+                      },
+                      "settlementsPaid": {
+                        "type": "number"
+                      },
+                      "settlementsReceived": {
+                        "type": "number"
+                      },
+                      "balance": {
+                        "type": "number",
+                        "description": "Paid less share plus settlements paid less settlements received: positive when the group owes them. A currency’s balances add up to zero."
+                      }
+                    },
+                    "required": [
+                      "memberKey",
+                      "paid",
+                      "share",
+                      "settlementsPaid",
+                      "settlementsReceived",
+                      "balance"
+                    ]
+                  }
+                },
+                "payments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "number"
+                      },
+                      "fromMemberKey": {
+                        "type": "integer"
+                      },
+                      "toMemberKey": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "fromMemberKey",
+                      "toMemberKey"
+                    ]
+                  },
+                  "description": "Payments that would clear every balance in this currency."
+                }
+              },
+              "required": [
+                "currencyCode",
+                "members",
+                "payments"
+              ]
+            }
+          }
+        },
+        "required": [
+          "expenseGroupKey",
+          "currencies"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupExpense": {
+        "type": "object",
+        "properties": {
+          "expenseGroupExpenseKey": {
+            "type": "integer"
+          },
+          "expenseGroupKey": {
+            "type": "integer"
+          },
+          "categoryKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currencyCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paidByMemberKey": {
+            "type": "integer"
+          },
+          "splitMethod": {
+            "type": "string",
+            "enum": [
+              "equal",
+              "amounts",
+              "percentages"
+            ]
+          },
+          "shares": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number"
+                },
+                "expenseGroupMemberKey": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "amount",
+                "expenseGroupMemberKey"
+              ]
+            },
+            "description": "One per person, signed like the transaction (money out is negative); they add up to its amount. Each is a line of the transaction’s split."
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/GroupTransaction"
+          }
+        },
+        "required": [
+          "expenseGroupExpenseKey",
+          "expenseGroupKey",
+          "categoryKey",
+          "currencyCode",
+          "paidByMemberKey",
+          "splitMethod",
+          "shares",
+          "transaction"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupExpenseList": {
+        "type": "object",
+        "properties": {
+          "expenses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupExpense"
+            }
+          }
+        },
+        "required": [
+          "expenses"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupExpenseResponse": {
+        "type": "object",
+        "properties": {
+          "expense": {
+            "$ref": "#/components/schemas/GroupExpense"
+          }
+        },
+        "required": [
+          "expense"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupSettlement": {
+        "type": "object",
+        "properties": {
+          "expenseGroupSettlementKey": {
+            "type": "integer"
+          },
+          "expenseGroupKey": {
+            "type": "integer"
+          },
+          "fromMemberKey": {
+            "type": "integer"
+          },
+          "toMemberKey": {
+            "type": "integer"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Positive, in `currencyCode`."
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "settledOn": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isLinked": {
+            "type": "boolean"
+          },
+          "transaction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GroupTransaction"
+              },
+              {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "The linked transaction, when the viewer may see it."
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expenseGroupSettlementKey",
+          "expenseGroupKey",
+          "fromMemberKey",
+          "toMemberKey",
+          "amount",
+          "currencyCode",
+          "settledOn",
+          "notes",
+          "isLinked",
+          "transaction",
+          "createdAt"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupSettlementList": {
+        "type": "object",
+        "properties": {
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupSettlement"
+            }
+          }
+        },
+        "required": [
+          "settlements"
+        ],
+        "additionalProperties": {}
+      },
+      "GroupTransaction": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "accountName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currencyCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "merchantName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "settlementAmount": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Signed, in `currencyCode`; the user’s edit when there is one."
+          },
+          "transactionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "transactionKey": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountKey",
+          "accountName",
+          "currencyCode",
+          "description",
+          "merchantName",
+          "settlementAmount",
+          "transactionDate",
+          "transactionKey"
         ],
         "additionalProperties": {}
       },
@@ -4930,6 +5386,40 @@
         ],
         "additionalProperties": {}
       },
+      "SettlementSuggestion": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GroupTransaction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "remainingAmount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "remainingAmount"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      },
+      "SettlementSuggestionList": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettlementSuggestion"
+            }
+          }
+        },
+        "required": [
+          "suggestions"
+        ],
+        "additionalProperties": {}
+      },
       "SpendingVsNormalCompleteness": {
         "type": "object",
         "properties": {
@@ -5559,6 +6049,33 @@
               "number",
               "null"
             ]
+          },
+          "expenseGroupMember": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "expenseGroupKey": {
+                "type": "integer"
+              },
+              "expenseGroupMemberKey": {
+                "type": "integer"
+              },
+              "isHouseholdMember": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "expenseGroupKey",
+              "expenseGroupMemberKey",
+              "isHouseholdMember",
+              "name"
+            ],
+            "description": "The person whose share this line is, for a transaction shared in an expense group."
           },
           "description": {
             "type": [
@@ -12268,6 +12785,680 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CurrencyRates"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nThe household’s groups, newest first, with their members and the viewer’s balance per currency.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List expense groups",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseGroupList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get an expense group",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseGroupResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}/balances": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nPer currency, never converted, from the shared expenses the viewer can see and every settlement, with the payments that would clear the balances. An expense on another member’s private account is left out.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get who owes whom in a group",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupBalances"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}/settlements": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nWho paid whom back, newest first. A linked transaction stops counting as income or spending for the linked amount.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a group’s settlements",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupSettlementList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}/settlements/suggestions": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nMoney in when someone outside the household pays the household back, money out when the household pays someone; in the settlement’s currency, from the last 120 days or matching `search`, not a transfer, reimbursement, loan repayment or shared expense, with something left to link.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Suggest the transaction behind a settlement",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{3}$/i"
+            },
+            "required": false,
+            "name": "currencyCode",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "fromMemberId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+$"
+                }
+              ],
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "toMemberId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementSuggestionList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}/shares": {
+      "get": {
+        "description": "**Required scope:** `read`.\n\nEach is a household transaction split by person, newest first. Sharing, changing and unsharing need a session: a token cannot write here.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List a group’s shared expenses",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupExpenseList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/expense-groups/{groupId}/shares/{transactionId}": {
+      "get": {
+        "description": "**Required scope:** `read`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get how a transaction is shared",
+        "tags": [
+          "Expense groups"
+        ],
+        "x-required-scopes": [
+          "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "transactionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupExpenseResponse"
                 }
               }
             }

@@ -44,6 +44,7 @@ export const API_TOKEN_READ_MOUNTS: ReadonlySet<string> = new Set([
   '/v1/category',
   '/v1/configs',
   '/v1/currency',
+  '/v1/expense-groups',
   '/v1/financial-markets',
   '/v1/goals',
   '/v1/installment-plans',

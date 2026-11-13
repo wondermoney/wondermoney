@@ -24,6 +24,21 @@ export interface TransactionSplitLine {
   > | null;
   notes: string | null;
   position: number;
+  /**
+   * The person this line is the share of, when the transaction is shared in an expense group
+   * (`lib/api/expense-group`); null for an ordinary split line. Such a split is the group's: the
+   * split endpoints refuse it (409 `transaction_in_expense_group`). Optional because an older API
+   * does not send it.
+   */
+  expenseGroupMember?: TransactionSplitGroupMember | null;
+}
+
+export interface TransactionSplitGroupMember {
+  expenseGroupKey: number;
+  expenseGroupMemberKey: number;
+  /** Whether this share counts in the household's totals. */
+  isHouseholdMember: boolean;
+  name: string;
 }
 
 /** One line of a `PUT .../splits` request. */

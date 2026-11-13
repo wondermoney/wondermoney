@@ -48,6 +48,8 @@ import { usePrivacyMode } from '@/lib/privacy/privacy-mode'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { canSplitWithGroup, groupShareOf } from '@/features/expense-groups/expense-groups-view-model'
+
 import { FormNotice, TextField } from './form-field'
 import type { LinkedTransactionDto, ReimbursementLinkDto } from './reimbursements-contract'
 import { canMarkAsReimbursement, linkedSide, linkedTitle, reimbursementBadge, reimbursementRoleOf, type ReimbursementFailure } from './reimbursements-view-model'
@@ -61,7 +63,7 @@ import { canSplitTransaction, splitCategoryCount } from './transactions-split-vi
 import type { TransactionViewModel } from './transactions-view-model'
 import type { TransactionsLeadData } from './use-transactions-lead'
 
-export type ReviewResult = 'success' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'error'
+export type ReviewResult = 'success' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'in-group' | 'error'
 export type TransactionCategoryState =
   | { status: 'loading' | 'error' }
   | { status: 'loaded'; categories: readonly CategoryViewModel[] }
@@ -151,6 +153,11 @@ type Props = Readonly<{
   onOpenInstallmentPlan?: (transaction: TransactionViewModel) => void
   /** Open "Mark as reimbursement" for an incoming row. Omitted, the action is not offered. */
   onMarkReimbursement?: (transaction: TransactionViewModel) => void
+  /**
+   * Open "Split with group" (or, for a row already shared in a group, its shares). Omitted (a
+   * household viewer), the action is not offered; a shared row still shows its shares.
+   */
+  onSplitWithGroup?: (transaction: TransactionViewModel) => void
   /** Remove one reimbursement link from a row's detail. Omitted, links show without Unlink. */
   onUnlinkReimbursement?: (transactionId: number, transactionReimbursementKey: number) => Promise<UnlinkReimbursementResult>
   /**
@@ -236,6 +243,7 @@ function TransactionsContent({
   onSaveSplit,
   onRemoveSplit,
   onMarkReimbursement,
+  onSplitWithGroup,
   onUnlinkReimbursement,
   onOpenTransaction,
   focusTransactionId = null,
@@ -723,6 +731,7 @@ function TransactionsContent({
       onSplit={openSplit}
       canSplit={Boolean(onSaveSplit) && categories.status === 'loaded'}
       onMarkReimbursement={onMarkReimbursement}
+      onSplitWithGroup={onSplitWithGroup}
       onUnlinkReimbursement={onUnlinkReimbursement ? confirmUnlink : undefined}
       onOpenLinked={openLinked}
       unlinkPending={unlinkingKey !== null}
@@ -1263,6 +1272,8 @@ type TransactionRowProps = Readonly<{
   canSplit: boolean
   /** Opens "Mark as reimbursement"; offered only on ordinary money in. */
   onMarkReimbursement?: (item: TransactionViewModel) => void
+  /** Opens "Split with group", or a shared row's shares. */
+  onSplitWithGroup?: (item: TransactionViewModel) => void
   /** Asks to remove one link (the screen confirms first). Omitted, links show without Unlink. */
   onUnlinkReimbursement?: (item: TransactionViewModel, link: ReimbursementLinkDto) => void
   onOpenLinked: (linked: LinkedTransactionDto) => void
@@ -1311,6 +1322,7 @@ const TransactionRow = memo(function TransactionRow({
   onSplit,
   canSplit,
   onMarkReimbursement,
+  onSplitWithGroup,
   onUnlinkReimbursement,
   onOpenLinked,
   unlinkPending,
@@ -1343,8 +1355,12 @@ const TransactionRow = memo(function TransactionRow({
   const stored = isSelectable(item)
   const editable = stored && !readOnly
   const selectable = selecting && editable
+  // A row shared in an expense group: its split is the group's, one line per person.
+  const groupShare = groupShareOf(item)
   // A split row shows its count in place of the one category, as web's ledger does.
-  const splitLabel = item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
+  const splitLabel = groupShare
+    ? t('expenseGroups.split.sharedIn')
+    : item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
   const installment = item.installment ? installmentLabel(item.installment) : null
   const categoryLabel = item.category ? formatCategoryName(item.category) : null
   const badgeKind = reimbursementBadge(item)
@@ -1414,7 +1430,22 @@ const TransactionRow = memo(function TransactionRow({
           {!item.isTransfer && !item.categoryCountsAsSpending ? <Detail label={t('transactions.transfer.spendingLabel')} value={t('transactions.transfer.notSpending')} /> : null}
           {item.installment ? <Detail label={t('installments.transactionDetail')} value={installment ?? ''} /> : null}
           {item.recurring ? <Detail label={t('transactions.recurring')} value={`${item.recurring.displayName} · ${t(`transactions.recurringType.${item.recurring.type}`)}`} /> : null}
-          {item.isSplit ? (
+          {groupShare ? (
+            <View style={styles.detail} testID="transaction-group-shares">
+              <Text tone="muted" variant="label">{t('expenseGroups.split.shares')}</Text>
+              <View style={styles.splitLines}>
+                {groupShare.shares.map((line) => (
+                  <View key={line.memberKey} style={styles.splitLine}>
+                    <View style={styles.flex}>
+                      <Text variant="meta">{line.name}</Text>
+                      {!line.isHouseholdMember ? <Text tone="muted" variant="label">{t('expenseGroups.outsideHousehold')}</Text> : null}
+                    </View>
+                    <Amount currency={item.settlementCurrency} locale={locale} size="amountSmall" value={line.amount} />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : item.isSplit ? (
             <View style={styles.detail}>
               <Text tone="muted" variant="label">{t('transactions.split.lines')}</Text>
               <View style={styles.splitLines}>
@@ -1538,11 +1569,15 @@ const TransactionRow = memo(function TransactionRow({
               {editable && onCreateRule ? (
                 <UiButton disabled={mutationPending} icon="sliders-horizontal" label={t('rules.createFromTransaction')} onPress={() => onCreateRule(item)} size="sm" variant="secondary" />
               ) : null}
-              {editable && canSplit && onSplit && canSplitTransaction(item) ? (
+              {/* A shared row's split is the group's: it is edited from "Edit shares", never here. */}
+              {editable && canSplit && onSplit && !groupShare && canSplitTransaction(item) ? (
                 <UiButton disabled={mutationPending} icon="split" label={item.isSplit ? t('transactions.split.edit') : t('transactions.split.action')} onPress={() => onSplit(item.id)} size="sm" variant="secondary" />
               ) : null}
-              {editable && onMarkReimbursement && canMarkAsReimbursement(item) ? (
+              {editable && onMarkReimbursement && !groupShare && canMarkAsReimbursement(item) ? (
                 <UiButton disabled={mutationPending} icon="link" label={t('transactions.reimbursement.action')} onPress={() => onMarkReimbursement(item)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onSplitWithGroup && (groupShare || canSplitWithGroup(item)) ? (
+                <UiButton disabled={mutationPending} icon="users" label={groupShare ? t('expenseGroups.split.editShares') : t('expenseGroups.split.action')} onPress={() => onSplitWithGroup(item)} size="sm" variant="secondary" />
               ) : null}
             </View>
           )}

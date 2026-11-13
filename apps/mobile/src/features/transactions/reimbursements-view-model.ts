@@ -94,6 +94,7 @@ export type ReimbursementFailure =
   | 'invalid'
   | 'exists'
   | 'not-found'
+  | 'in-group'
   | 'demo' | 'read-only' | 'account-read-only'
   | 'mfa'
   | 'cancelled'
@@ -107,6 +108,8 @@ const SERVER_FAILURES: Readonly<Record<string, ReimbursementFailure>> = {
   reimbursement_invalid: 'invalid',
   reimbursement_link_exists: 'exists',
   not_found: 'not-found',
+  // A transaction shared in an expense group, or settling one, plays that part only.
+  transaction_in_expense_group: 'in-group',
 }
 
 /** Why a link or unlink was refused, in the terms the screens word (`transactions.reimbursement.errors.*`). */

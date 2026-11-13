@@ -40,6 +40,7 @@ import {
   updateBudgetTemplateRequestSchema,
 } from '@validators/budget';
 import { createCategoryRequestSchema, updateCategoryRequestSchema } from '@validators/category';
+import { expenseGroupRequestSchema, groupExpenseRequestSchema, settlementSuggestionsRequestSchema } from '@validators/expense-group';
 import {
   getCompanyInfoRequestSchema,
   getEarningsRequestSchema,
@@ -157,11 +158,16 @@ import {
   recurringInstallmentSchema,
   recurringOccurrenceSchema,
   recurringSeriesSchema,
+  expenseGroupSchema,
+  groupBalancesSchema,
+  groupExpenseSchema,
+  groupSettlementSchema,
   reimbursementLinkSchema,
   reimbursementSuggestionSchema,
   reportSchema,
   ruleSchema,
   ruleSuggestionSchema,
+  settlementSuggestionSchema,
   spendingVsNormalCompletenessSchema,
   spendingVsNormalDataSchema,
   tagSchema,
@@ -1146,6 +1152,56 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   // ---------------------------------------------------------------------------
   // Tags
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Expense groups
+  // ---------------------------------------------------------------------------
+  'GET /v1/expense-groups': {
+    tag: 'Expense groups',
+    summary: 'List expense groups',
+    description: 'The household’s groups, newest first, with their members and the viewer’s balance per currency.',
+    response: listResponse('ExpenseGroupList', 'groups', expenseGroupSchema),
+  },
+  'GET /v1/expense-groups/:groupId': {
+    tag: 'Expense groups',
+    summary: 'Get an expense group',
+    request: expenseGroupRequestSchema,
+    response: itemResponse('ExpenseGroupResponse', 'group', expenseGroupSchema),
+  },
+  'GET /v1/expense-groups/:groupId/balances': {
+    tag: 'Expense groups',
+    summary: 'Get who owes whom in a group',
+    description: 'Per currency, never converted, from the shared expenses the viewer can see and every settlement, with the payments that would clear the balances. An expense on another member’s private account is left out.',
+    request: expenseGroupRequestSchema,
+    response: groupBalancesSchema,
+  },
+  'GET /v1/expense-groups/:groupId/shares': {
+    tag: 'Expense groups',
+    summary: 'List a group’s shared expenses',
+    description: 'Each is a household transaction split by person, newest first. Sharing, changing and unsharing need a session: a token cannot write here.',
+    request: expenseGroupRequestSchema,
+    response: listResponse('GroupExpenseList', 'expenses', groupExpenseSchema),
+  },
+  'GET /v1/expense-groups/:groupId/shares/:transactionId': {
+    tag: 'Expense groups',
+    summary: 'Get how a transaction is shared',
+    request: groupExpenseRequestSchema,
+    response: itemResponse('GroupExpenseResponse', 'expense', groupExpenseSchema),
+  },
+  'GET /v1/expense-groups/:groupId/settlements': {
+    tag: 'Expense groups',
+    summary: 'List a group’s settlements',
+    description: 'Who paid whom back, newest first. A linked transaction stops counting as income or spending for the linked amount.',
+    request: expenseGroupRequestSchema,
+    response: listResponse('GroupSettlementList', 'settlements', groupSettlementSchema),
+  },
+  'GET /v1/expense-groups/:groupId/settlements/suggestions': {
+    tag: 'Expense groups',
+    summary: 'Suggest the transaction behind a settlement',
+    description: 'Money in when someone outside the household pays the household back, money out when the household pays someone; in the settlement’s currency, from the last 120 days or matching `search`, not a transfer, reimbursement, loan repayment or shared expense, with something left to link.',
+    request: settlementSuggestionsRequestSchema,
+    response: listResponse('SettlementSuggestionList', 'suggestions', settlementSuggestionSchema),
+  },
+
   'GET /v1/tag': {
     tag: 'Tags',
     summary: 'List tags',

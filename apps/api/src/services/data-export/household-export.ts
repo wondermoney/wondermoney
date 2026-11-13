@@ -167,6 +167,8 @@ class HouseholdExport {
   private currency: null | string = null;
   private readonly db: Db;
   private readonly goals = new IdMap();
+  private readonly groupMembers = new IdMap();
+  private readonly groups = new IdMap();
   private readonly loans = new IdMap();
   private readonly manualAssets = new IdMap();
   private memberRows: Row[] = [];
@@ -305,7 +307,11 @@ class HouseholdExport {
       { format: 'json', path: 'data/tags.json', rows: () => this.tagJson() },
       { format: 'json', path: 'data/transactions.json', rows: () => this.transactionJson() },
       { format: 'json', path: 'data/transaction-categories.json', rows: () => this.transactionCategories() },
+      { format: 'json', path: 'data/expense-groups.json', rows: () => this.expenseGroups() },
+      { format: 'json', path: 'data/expense-group-members.json', rows: () => this.expenseGroupMembers() },
       { format: 'json', path: 'data/transaction-splits.json', rows: () => this.transactionSplits() },
+      { format: 'json', path: 'data/expense-group-expenses.json', rows: () => this.expenseGroupExpenses() },
+      { format: 'json', path: 'data/expense-group-settlements.json', rows: () => this.expenseGroupSettlements() },
       { format: 'json', path: 'data/transaction-reimbursements.json', rows: () => this.transactionReimbursements() },
       { format: 'json', path: 'data/transaction-tags.json', rows: () => this.transactionTags() },
       { format: 'json', path: 'data/installment-plans.json', rows: () => this.installmentPlans() },
@@ -588,13 +594,82 @@ class HouseholdExport {
 
   private async* transactionSplits() {
     const rows = paged(this.db, (after) => sql`
-      select s.transaction_split_key as k, s.transaction_key, s.category_key, s.amount::text as amount, s.notes, s.position
+      select s.transaction_split_key as k, s.transaction_key, s.category_key, s.amount::text as amount, s.notes, s.position, s.expense_group_member_key
       from transaction_split s join "transaction" t on t.transaction_key = s.transaction_key
       where s.deleted_at is null and s.tenant_key = ${this.scope.tenantKey} and ${this.visibleTransaction('t')} ${limit(after, 's.transaction_split_key')}`);
     let id = 0;
     for await (const row of rows) {
       id += 1;
-      yield { amount: dec(row['amount']), categoryId: this.categories.get(row['category_key']), id, notes: str(row['notes']), position: int(row['position']), transactionId: this.transactions.get(row['transaction_key']) };
+      yield { amount: dec(row['amount']), categoryId: this.categories.get(row['category_key']), id, memberId: this.groupMembers.get(row['expense_group_member_key']), notes: str(row['notes']), position: int(row['position']), transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  // --- expense groups ---
+
+  /** The household's live groups. Read before the split lines, which name their members. */
+  private async* expenseGroups() {
+    const rows = await rowsOf(this.db, sql`
+      select g.expense_group_key, g.name, g.archived, c.code as currency, ${sql.raw(tsx('g.created_at'))} as created_at
+      from expense_group g join currency c on c.currency_key = g.currency_key
+      where g.tenant_key = ${this.scope.tenantKey} and g.deleted_at is null order by g.expense_group_key`);
+    for (const row of rows) yield { archived: bool(row['archived']), createdAt: str(row['created_at']), currency: str(row['currency']), id: this.groups.add(row['expense_group_key']), name: str(row['name']) };
+  }
+
+  /** The groups' live members; a person of the household names their member, anyone else none. */
+  private async* expenseGroupMembers() {
+    const rows = await rowsOf(this.db, sql`
+      select m.expense_group_member_key, m.expense_group_key, m.name, m.email, m.appuser_key, m.position
+      from expense_group_member m join expense_group g on g.expense_group_key = m.expense_group_key
+      where m.tenant_key = ${this.scope.tenantKey} and m.deleted_at is null and g.deleted_at is null order by m.expense_group_member_key`);
+    for (const row of rows) {
+      yield {
+        email: str(row['email']),
+        groupId: this.groups.get(row['expense_group_key']),
+        householdMemberId: this.members.get(row['appuser_key']),
+        id: this.groupMembers.add(row['expense_group_member_key']),
+        name: str(row['name']),
+        position: int(row['position']),
+      };
+    }
+  }
+
+  /** Shared expenses whose transaction is in the export (one on a private account left out is left out too). */
+  private async* expenseGroupExpenses() {
+    const rows = await rowsOf(this.db, sql`
+      select e.expense_group_key, e.transaction_key, e.paid_by_member_key, e.split_method
+      from expense_group_expense e join "transaction" t on t.transaction_key = e.transaction_key
+      where e.tenant_key = ${this.scope.tenantKey} and e.deleted_at is null and ${this.visibleTransaction('t')} order by e.expense_group_expense_key`);
+    for (const row of rows) {
+      const groupId = this.groups.get(row['expense_group_key']);
+      const paidByMemberId = this.groupMembers.get(row['paid_by_member_key']);
+      if (groupId === null || paidByMemberId === null) continue;
+      yield { groupId, paidByMemberId, splitMethod: str(row['split_method']), transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  /** Every live settlement; the link to a transaction only when that transaction is in the export. */
+  private async* expenseGroupSettlements() {
+    const rows = await rowsOf(this.db, sql`
+      select s.expense_group_key, s.from_member_key, s.to_member_key, s.amount::text as amount, c.code as currency, ${sql.raw(dx('s.settled_on'))} as settled_on,
+        s.notes, s.transaction_key, ${sql.raw(tsx('s.created_at'))} as created_at
+      from expense_group_settlement s join currency c on c.currency_key = s.currency_key
+      where s.tenant_key = ${this.scope.tenantKey} and s.deleted_at is null order by s.expense_group_settlement_key`);
+    for (const row of rows) {
+      const groupId = this.groups.get(row['expense_group_key']);
+      const fromMemberId = this.groupMembers.get(row['from_member_key']);
+      const toMemberId = this.groupMembers.get(row['to_member_key']);
+      if (groupId === null || fromMemberId === null || toMemberId === null) continue;
+      yield {
+        amount: dec(row['amount']),
+        createdAt: str(row['created_at']),
+        currency: str(row['currency']),
+        fromMemberId,
+        groupId,
+        notes: str(row['notes']),
+        settledOn: str(row['settled_on']),
+        toMemberId,
+        transactionId: this.transactions.get(row['transaction_key']),
+      };
     }
   }
 

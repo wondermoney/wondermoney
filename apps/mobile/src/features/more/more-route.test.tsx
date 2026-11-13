@@ -68,6 +68,8 @@ describe('MoreRoute', () => {
     expect(mockPush).toHaveBeenLastCalledWith('/markets')
     await fireEvent.press(view.getByRole('button', { name: 'Loans, opens in the app' }))
     expect(mockPush).toHaveBeenLastCalledWith('/loans')
+    await fireEvent.press(view.getByRole('button', { name: 'Groups, opens in the app' }))
+    expect(mockPush).toHaveBeenLastCalledWith('/groups')
     await fireEvent.press(view.getByRole('button', { name: 'Goals, opens in the app' }))
     expect(mockPush).toHaveBeenLastCalledWith('/goals')
     await fireEvent.press(view.getByRole('button', { name: 'Reports, opens in the app' }))

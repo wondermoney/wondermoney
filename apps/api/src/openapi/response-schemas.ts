@@ -129,9 +129,84 @@ export const financialInstitutionSchema = open('FinancialInstitution', {
 export const transactionSplitSchema = open('TransactionSplit', {
   amount: money,
   categoryKey: nullableNumber,
+  expenseGroupMember: z.object({ expenseGroupKey: id, expenseGroupMemberKey: id, isHouseholdMember: z.boolean(), name: z.string() }).nullable().optional().openapi({ description: 'The person whose share this line is, for a transaction shared in an expense group.' }),
   description: nullableString,
   splitKey: id,
 });
+
+export const expenseGroupMemberSchema = open('ExpenseGroupMember', {
+  expenseGroupMemberKey: id,
+  name: z.string(),
+  email: nullableString,
+  appuserKey: nullableNumber.openapi({ description: 'The household member this person is; null for someone outside the household.' }),
+  isHouseholdMember: z.boolean().openapi({ description: 'Whether their shares count in the household’s totals. A share of anyone else is money owed to the household and counts nowhere.' }),
+  isYou: z.boolean(),
+  position: z.number().int(),
+});
+
+export const expenseGroupSchema = open('ExpenseGroup', {
+  expenseGroupKey: id,
+  name: z.string(),
+  currencyCode: z.string().openapi({ description: 'The default currency for settlements. Balances are kept per currency.' }),
+  archived: z.boolean(),
+  createdAt: dateTime,
+  members: z.array(expenseGroupMemberSchema),
+  yourBalances: z.array(z.object({ amount: money, currencyCode: z.string() })).openapi({ description: 'The viewer’s balance per currency: positive when they are owed. Empty when they are not in the group.' }),
+});
+
+export const groupTransactionSchema = open('GroupTransaction', {
+  accountKey: nullableNumber,
+  accountName: nullableString,
+  currencyCode: nullableString,
+  description: nullableString,
+  merchantName: nullableString,
+  settlementAmount: nullableNumber.openapi({ description: 'Signed, in `currencyCode`; the user’s edit when there is one.' }),
+  transactionDate: dateTime.nullable(),
+  transactionKey: id,
+});
+
+export const groupExpenseSchema = open('GroupExpense', {
+  expenseGroupExpenseKey: id,
+  expenseGroupKey: id,
+  categoryKey: nullableNumber,
+  currencyCode: nullableString,
+  paidByMemberKey: id,
+  splitMethod: z.enum(['equal', 'amounts', 'percentages']),
+  shares: z.array(z.object({ amount: money, expenseGroupMemberKey: id })).openapi({ description: 'One per person, signed like the transaction (money out is negative); they add up to its amount. Each is a line of the transaction’s split.' }),
+  transaction: groupTransactionSchema,
+});
+
+export const groupSettlementSchema = open('GroupSettlement', {
+  expenseGroupSettlementKey: id,
+  expenseGroupKey: id,
+  fromMemberKey: id,
+  toMemberKey: id,
+  amount: money.openapi({ description: 'Positive, in `currencyCode`.' }),
+  currencyCode: z.string(),
+  settledOn: date,
+  notes: nullableString,
+  isLinked: z.boolean(),
+  transaction: groupTransactionSchema.nullable().openapi({ description: 'The linked transaction, when the viewer may see it.' }),
+  createdAt: dateTime,
+});
+
+export const groupBalancesSchema = open('GroupBalances', {
+  expenseGroupKey: id,
+  currencies: z.array(z.object({
+    currencyCode: z.string(),
+    members: z.array(z.object({
+      memberKey: id,
+      paid: money,
+      share: money,
+      settlementsPaid: money,
+      settlementsReceived: money,
+      balance: money.openapi({ description: 'Paid less share plus settlements paid less settlements received: positive when the group owes them. A currency’s balances add up to zero.' }),
+    })),
+    payments: z.array(z.object({ amount: money, fromMemberKey: id, toMemberKey: id })).openapi({ description: 'Payments that would clear every balance in this currency.' }),
+  })),
+});
+
+export const settlementSuggestionSchema = groupTransactionSchema.extend({ remainingAmount: money }).openapi('SettlementSuggestion');
 
 export const transactionMerchantSchema = open('TransactionMerchant', {
   transactionMerchantKey: id,

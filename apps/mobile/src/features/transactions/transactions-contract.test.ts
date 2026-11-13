@@ -296,6 +296,18 @@ describe('split transactions', () => {
     expect(row!.splits?.[0]?.appuserAmount).toBeNull()
   })
 
+  it('reads whose share an expense group line is, and treats a malformed one as none', () => {
+    const person = { expenseGroupKey: 4, expenseGroupMemberKey: 3, isHouseholdMember: false, name: 'Sam' }
+    const [shared, malformed, plain] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: person }] },
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: { name: 'Sam' } }] },
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: null }] },
+    ] }).transactions
+    expect(shared!.splits?.[0]?.expenseGroupMember).toEqual(person)
+    expect(malformed!.splits?.[0]?.expenseGroupMember).toBeNull()
+    expect(plain!.splits?.[0]?.expenseGroupMember).toBeNull()
+  })
+
   it('rejects a line without a finite amount or with a non-positive key', () => {
     expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, amount: Number.NaN }] }] }).success).toBe(false)
     expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, transactionSplitKey: 0 }] }] }).success).toBe(false)

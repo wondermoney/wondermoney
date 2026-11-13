@@ -100,8 +100,12 @@ const GUARDED: Record<string, WriteCase> = {
 const SERVICE_CHECKED = new Set([
   'DELETE /v1/banking/requisition/:requisitionId', // the connection's own member only
   'DELETE /v1/banking/simplefin/connections/:connectionId', // the connection's own member only
+  'DELETE /v1/expense-groups/:groupId/settlements/:settlementId', // a linked transaction's account must be writable (expense-group.service.ts)
+  'DELETE /v1/expense-groups/:groupId/shares/:transactionId', // the shared transaction's account must be writable
   'PATCH /v1/transaction-import-sessions/:importId/account-mapping', // the member's own accounts only
   'POST /v1/assistant/proposals/:proposalId/apply', // fails on a view-only row (assistant-proposal.service.ts)
+  'POST /v1/expense-groups/:groupId/settlements', // a linked transaction's account must be writable
+  'POST /v1/expense-groups/:groupId/shares', // the shared transaction's account must be writable
   'POST /v1/portfolio', // linking an account needs write access (portfolio-account-link.ts)
   'POST /v1/rule/:ruleId/apply', // view-only rows are left alone (ruleRunTransactionsWhere)
   'POST /v1/rule/apply-all',
@@ -112,6 +116,9 @@ const SERVICE_CHECKED = new Set([
 
 /** Writes in mounts that also hold account routes, which change no account's data. */
 const NOT_ACCOUNT_DATA = new Set([
+  // An expense group, its people and its archive state hold no account data.
+  'DELETE /v1/expense-groups/:groupId',
+  'DELETE /v1/expense-groups/:groupId/members/:memberId',
   'DELETE /v1/goals/:goalKey',
   'DELETE /v1/goals/:goalKey/accounts/:accountKey',
   'DELETE /v1/goals/:goalKey/fund-transaction/:fundingKey',
@@ -123,6 +130,8 @@ const NOT_ACCOUNT_DATA = new Set([
   'DELETE /v1/portfolio/holding/:financialAssetKey/prices/:date',
   'DELETE /v1/rule/:ruleId',
   'PATCH /v1/account/transaction-merchants/:merchantId', // a household merchant, not an account's
+  'PATCH /v1/expense-groups/:groupId',
+  'PATCH /v1/expense-groups/:groupId/members/:memberId',
   'PATCH /v1/goals/:goalKey',
   'PATCH /v1/loan/:loanId',
   'PATCH /v1/loan/:loanId/adjustments/:adjustmentId',
@@ -137,6 +146,8 @@ const NOT_ACCOUNT_DATA = new Set([
   'POST /v1/assistant/disable',
   'POST /v1/assistant/proposals/:proposalId/reject',
   'POST /v1/banking/simplefin/connections', // a new connection makes the member's own accounts
+  'POST /v1/expense-groups',
+  'POST /v1/expense-groups/:groupId/members',
   'POST /v1/goals',
   'POST /v1/goals/:goalKey/accounts',
   'POST /v1/goals/:goalKey/assign',

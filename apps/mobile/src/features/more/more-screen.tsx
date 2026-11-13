@@ -41,6 +41,8 @@ export type MoreScreenProps = {
   onOpenSettings: () => void
   onOpenMarkets: () => void
   onOpenLoans: () => void
+  /** Expense groups: shared costs, balances and settlements. */
+  onOpenGroups: () => void
   onOpenAssets: () => void
   onOpenGoals: () => void
   onOpenReports: () => void
@@ -55,8 +57,8 @@ export type MoreScreenProps = {
 
 /**
  * Web's mobile "More" sheet (`components/layout/BottomNavMoreSheet.tsx`) as a settings
- * list: the person, the Accounts pages, the other destinations (Financial Markets, Loans, Assets,
- * Goals, Reports), then Settings / Help / Feedback / What's new. Each group is one subtle
+ * list: the person, the Accounts pages, the other destinations (Financial Markets, Loans, Groups,
+ * Assets, Goals, Reports), then Settings / Help / Feedback / What's new. Each group is one subtle
  * rounded container of 56pt rows (glyph, label, chevron), with space between groups. The
  * hosted instance's legal pages and support inbox are mobile-only and sit last, above
  * sign out and the version.
@@ -76,6 +78,7 @@ export function MoreScreen({
   onOpenSettings,
   onOpenMarkets,
   onOpenLoans,
+  onOpenGroups,
   onOpenAssets,
   onOpenGoals,
   onOpenReports,
@@ -169,6 +172,7 @@ export function MoreScreen({
           <Group>
             <MoreRow announcement={inside} icon="bar-chart" label={t('navigation.financialMarkets')} onPress={onOpenMarkets} />
             <MoreRow announcement={inside} icon="hand-coins" label={t('navigation.loans')} onPress={onOpenLoans} />
+            <MoreRow announcement={inside} icon="users" label={t('navigation.groups')} onPress={onOpenGroups} />
             <MoreRow announcement={inside} icon="home" label={t('navigation.assets')} onPress={onOpenAssets} />
             <MoreRow announcement={inside} icon="target" label={t('navigation.goals')} onPress={onOpenGoals} />
             <MoreRow announcement={inside} icon="book-open" label={t('navigation.reports')} onPress={onOpenReports} />

@@ -29,6 +29,10 @@ import { EmailNotificationPreference } from '@entity/EmailNotificationPreference
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
+import { ExpenseGroup } from '@entity/ExpenseGroup';
+import { ExpenseGroupExpense, ExpenseGroupSplitMethod } from '@entity/ExpenseGroupExpense';
+import { ExpenseGroupMember } from '@entity/ExpenseGroupMember';
+import { ExpenseGroupSettlement } from '@entity/ExpenseGroupSettlement';
 import { FinancialAssetPriceOverride } from '@entity/FinancialAssetPriceOverride';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
@@ -146,6 +150,15 @@ export async function richHousehold(em: EntityManager) {
   dollarSpend.appuserSettlementAmount = -11;
   dollarSpend.appuserCurrencyExchangeRate = 0.9166;
 
+  // The dollar spend is shared with a friend outside the household, who paid half of it back.
+  const trip = em.create(ExpenseGroup, { archived: false, createdByAppuserKey: owner.appuser, currencyKey: eur, name: 'Trip', tenantKey: owner.tenant }, { partial: true });
+  const self = em.create(ExpenseGroupMember, { appuserKey: owner.appuser, expenseGroupKey: trip, name: 'Me', position: 0, tenantKey: owner.tenant }, { partial: true });
+  const friend = em.create(ExpenseGroupMember, { email: 'friend@example.test', expenseGroupKey: trip, name: 'Friend', position: 1, tenantKey: owner.tenant }, { partial: true });
+  em.create(TransactionSplit, { amount: -6, expenseGroupMemberKey: self, position: 0, tenantKey: owner.tenant, transactionKey: dollarSpend }, { partial: true });
+  em.create(TransactionSplit, { amount: -6, expenseGroupMemberKey: friend, position: 1, tenantKey: owner.tenant, transactionKey: dollarSpend }, { partial: true });
+  em.create(ExpenseGroupExpense, { expenseGroupKey: trip, paidByMemberKey: self, splitMethod: ExpenseGroupSplitMethod.EQUAL, tenantKey: owner.tenant, transactionKey: dollarSpend }, { partial: true });
+  em.create(ExpenseGroupSettlement, { amount: 3, currencyKey: usd, expenseGroupKey: trip, fromMemberKey: friend, notes: 'half', settledOn: '2026-02-07', tenantKey: owner.tenant, toMemberKey: self }, { partial: true });
+
   em.create(Rule, { actions: [{ categoryId: organic.categoryKey, type: 'set_category' }, { tagIds: [tag.tagKey], type: 'add_tags' }], conditions: [{ field: 'account', operator: 'in', values: [current.accountKey] }, { field: 'merchant', operator: 'contains', value: 'corner' }], name: 'Groceries rule', ownerAppuserKey: owner.appuser, position: 0, tenantKey: owner.tenant }, { partial: true });
   em.create(Rule, { actions: [{ merchantId: shop.transactionMerchantKey, type: 'set_merchant' }], conditions: [{ field: 'description', operator: 'contains', source: 'cleaned', value: 'shop' }], name: 'Merchant rule', position: 1, tenantKey: owner.tenant }, { partial: true });
 
@@ -255,7 +268,7 @@ export function dataFiles(bytes: Uint8Array): Record<string, Record<string, unkn
 }
 
 /** Tables a restore writes, with the column that says which household a row is in. */
-const TENANT_TABLES = ['account', 'budget', 'category', 'credit_card_detail', 'exchange_rate_override', 'exchange_rate_override_audit_log', 'financial_asset_price_override', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'installment', 'installment_plan', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'crypto_wallet_address', 'crypto_wallet_token', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_reimbursement', 'transaction_split', 'transaction_tag', 'transaction_template', 'watchlist'] as const;
+const TENANT_TABLES = ['account', 'budget', 'category', 'credit_card_detail', 'exchange_rate_override', 'exchange_rate_override_audit_log', 'expense_group', 'expense_group_expense', 'expense_group_member', 'expense_group_settlement', 'financial_asset_price_override', 'financial_transaction', 'goal', 'goal_account_link', 'goal_activity', 'goal_transaction_funding', 'installment', 'installment_plan', 'loan', 'loan_adjustment', 'loan_rate_period', 'loan_repayment_link', 'manual_asset', 'manual_asset_valuation', 'crypto_wallet_address', 'crypto_wallet_token', 'portfolio', 'recurring_series', 'rule', 'tag', 'tenant_category_setting', 'transaction', 'transaction_merchant', 'transaction_reimbursement', 'transaction_split', 'transaction_tag', 'transaction_template', 'watchlist'] as const;
 
 /** How many rows of each household table belong to `tenantKey`. */
 export async function householdRowCounts(em: EntityManager, tenantKey: number): Promise<Record<string, number>> {

@@ -14,6 +14,7 @@ import {
   ReceiptText,
   SettingsIcon,
   Target,
+  Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -173,6 +174,12 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
             >
               <HandCoins className="size-5 shrink-0" strokeWidth={1.5} />
               {t("navigation.loans")}
+            </Link>
+          </li>
+          <li>
+            <Link href="/groups" onClick={close} className={itemClass}>
+              <Users className="size-5 shrink-0" strokeWidth={1.5} />
+              {t("navigation.groups")}
             </Link>
           </li>
           <li>
