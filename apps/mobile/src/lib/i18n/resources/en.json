@@ -4891,6 +4891,32 @@
       "accept": "Create plan",
       "acceptNamed": "Create plan for {{name}}",
       "unavailable": "This suggestion is no longer available. You can still create the plan yourself."
+    },
+    "link": {
+      "action": "Link transaction",
+      "unlink": "Unlink",
+      "actionsLabel": "Actions for installment {{number}} of {{total}}",
+      "title": "Link installment {{number}} of {{total}}",
+      "helper": "Posted charges on this card within a month of {{date}}, for about {{amount}}.",
+      "helperAll": "Posted charges on this card within a month of {{date}}, any amount.",
+      "showOther": "Show other amounts",
+      "showClose": "Show close amounts only",
+      "searching": "Looking for transactions…",
+      "loadFailed": "Could not load the transactions.",
+      "empty": "No posted charge on this card fits this installment.",
+      "emptyHint": "Show other amounts to see every charge in this period.",
+      "more": "{{amount}} more than the installment",
+      "less": "{{amount}} less than the installment",
+      "confirm": "Link",
+      "unlinkConfirmTitle": "Unlink installment {{number}} of {{total}}?",
+      "unlinkConfirmMessage": "The installment no longer counts as paid. Its transaction stays on the card as an ordinary row.",
+      "failures": {
+        "wrongCard": "That transaction is not on this plan’s card.",
+        "alreadyLinked": "That transaction already pays an installment, or this installment is already paid by another transaction. The plan has been refreshed.",
+        "notFound": "That transaction or plan no longer exists. The plan has been refreshed.",
+        "linkFailed": "Could not link the transaction. Try again.",
+        "unlinkFailed": "Could not unlink the installment. Try again."
+      }
     }
   },
   "rules": {

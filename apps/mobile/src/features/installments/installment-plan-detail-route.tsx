@@ -7,6 +7,7 @@ import { parseAccountId } from '@/features/accounts/accounts-contract'
 
 import { InstallmentPlanDetailScreen, type InstallmentPlanDetailViewState } from './installment-plan-detail-screen'
 import { parseInstallmentPlanId } from './installments-contract'
+import { useInstallmentLinking } from './use-installment-linking'
 import { classifyInstallmentWriteFailure, useDeleteInstallmentPlan, type InstallmentWriteFailure } from './use-installment-plan-mutations'
 import { useInstallmentPlan } from './use-installment-plans'
 
@@ -19,6 +20,7 @@ export function InstallmentPlanDetailRoute() {
   const [deleteFailure, setDeleteFailure] = useState<InstallmentWriteFailure | null>(null)
   const router = useRouter()
   const { signOut } = useProductRuntime()
+  const linking = useInstallmentLinking(query.data?.installmentPlan ?? null)
   // The plan knows its card; the route's account only stands in until it has loaded.
   const accountId = query.data?.installmentPlan.accountKey ?? routeAccountId
   const accountHref = accountId === null ? '/accounts' as const : `/accounts/${accountId}` as const
@@ -39,6 +41,7 @@ export function InstallmentPlanDetailRoute() {
       backHref={accountHref}
       deleteFailure={deleteFailure}
       deleting={remove.isPending}
+      linking={query.data ? linking : undefined}
       onBack={leave}
       onDelete={planId === null || accountId === null ? undefined : async () => {
         setDeleteFailure(null)

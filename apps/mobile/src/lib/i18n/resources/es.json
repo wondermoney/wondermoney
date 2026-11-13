@@ -4891,6 +4891,32 @@
       "accept": "Crear plan",
       "acceptNamed": "Crear plan para {{name}}",
       "unavailable": "Esta sugerencia ya no está disponible. Aún puedes crear el plan tú mismo."
+    },
+    "link": {
+      "action": "Vincular transacción",
+      "unlink": "Desvincular",
+      "actionsLabel": "Acciones de la cuota {{number}} de {{total}}",
+      "title": "Vincular la cuota {{number}} de {{total}}",
+      "helper": "Cargos registrados en esta tarjeta hasta un mes antes o después del {{date}}, de unos {{amount}}.",
+      "helperAll": "Cargos registrados en esta tarjeta hasta un mes antes o después del {{date}}, de cualquier importe.",
+      "showOther": "Mostrar otros importes",
+      "showClose": "Mostrar solo importes cercanos",
+      "searching": "Buscando transacciones…",
+      "loadFailed": "No se pudieron cargar las transacciones.",
+      "empty": "Ningún cargo registrado en esta tarjeta coincide con esta cuota.",
+      "emptyHint": "Muestra otros importes para ver todos los cargos de este periodo.",
+      "more": "{{amount}} más que la cuota",
+      "less": "{{amount}} menos que la cuota",
+      "confirm": "Vincular",
+      "unlinkConfirmTitle": "¿Desvincular la cuota {{number}} de {{total}}?",
+      "unlinkConfirmMessage": "La cuota deja de contar como pagada. Su transacción se queda en la tarjeta como un movimiento normal.",
+      "failures": {
+        "wrongCard": "Esa transacción no es de la tarjeta de este plan.",
+        "alreadyLinked": "Esa transacción ya paga una cuota, o esta cuota ya está pagada por otra transacción. El plan se ha actualizado.",
+        "notFound": "Esa transacción o este plan ya no existe. El plan se ha actualizado.",
+        "linkFailed": "No se pudo vincular la transacción. Inténtalo de nuevo.",
+        "unlinkFailed": "No se pudo desvincular la cuota. Inténtalo de nuevo."
+      }
     }
   },
   "rules": {

@@ -23,6 +23,9 @@ jest.mock('./use-installment-plan-mutations', () => ({
   ...jest.requireActual('./use-installment-plan-mutations'),
   useDeleteInstallmentPlan: () => ({ mutateAsync: mockDelete, isPending: false }),
 }))
+const mockLinking = { target: null }
+const mockUseLinking = jest.fn((_plan: unknown) => mockLinking)
+jest.mock('./use-installment-linking', () => ({ useInstallmentLinking: (plan: unknown) => mockUseLinking(plan) }))
 jest.mock('./installment-plan-detail-screen', () => ({
   InstallmentPlanDetailScreen: (props: InstallmentPlanDetailScreenProps) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
@@ -49,6 +52,9 @@ describe('InstallmentPlanDetailRoute', () => {
     expect(mockUsePlan).toHaveBeenCalledWith(11)
     expect(view.getByText('loaded')).toBeOnTheScreen()
     expect(captured?.backHref).toBe('/accounts/7')
+    // The loaded plan's links are managed on its page.
+    expect(mockUseLinking).toHaveBeenCalledWith(planDetailFixture)
+    expect(captured?.linking).toBe(mockLinking)
     await captured?.onDelete?.()
     expect(mockDelete).toHaveBeenCalledWith({ planId: 11, accountId: 7 })
     expect(mockReplace).toHaveBeenCalledWith('/accounts/7')

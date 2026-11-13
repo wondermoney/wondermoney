@@ -215,3 +215,34 @@ export function splitInstallments(totalAmount: number, installmentCount: number)
   if (!Number.isFinite(totalAmount)) return []
   return splitInstallmentCents(centsOf(totalAmount), installmentCount).map((cents) => cents / 100)
 }
+
+const MAX_INSTALLMENT_NUMBER = MAX_INSTALLMENTS
+
+function installmentLinkPath(planId: number, installmentNumber: number): string {
+  if (!isValidInstallmentPlanId(planId)) throw new Error('A positive safe installment plan id is required.')
+  if (!Number.isInteger(installmentNumber) || installmentNumber < 1 || installmentNumber > MAX_INSTALLMENT_NUMBER) {
+    throw new Error('An installment number from 1 to 120 is required.')
+  }
+  return `/v1/installment-plans/${planId}/installments/${installmentNumber}/link`
+}
+
+/**
+ * `POST …/installments/:n/link` with `{ transactionKey }`: the posted transaction pays installment
+ * `n`. The API refuses a transaction on another card (400), one that already pays an installment
+ * or an installment already paid by another transaction (409), and a plan or transaction that is
+ * gone (404). Answers with the plan as it now stands.
+ */
+export const createInstallmentLinkEndpoint = (planId: number, installmentNumber: number) => writeEndpoint({
+  method: 'POST',
+  path: installmentLinkPath(planId, installmentNumber),
+  schema: installmentPlanDetailResponseSchema,
+})
+
+/** `DELETE …/installments/:n/link`: the installment is no longer paid; its transaction stays. */
+export const createInstallmentUnlinkEndpoint = (planId: number, installmentNumber: number) => writeEndpoint({
+  method: 'DELETE',
+  path: installmentLinkPath(planId, installmentNumber),
+  schema: installmentPlanDetailResponseSchema,
+})
+
+export const installmentLinkBodySchema = z.object({ transactionKey: positiveId }).strict()
