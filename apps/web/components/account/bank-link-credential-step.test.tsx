@@ -2,12 +2,14 @@
 import assert from "node:assert/strict";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import { instanceFeatures, queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
 import { profileQueryKey } from "@/lib/api/user/useProfile";
+import { getFirstRunState } from "@/lib/onboarding/firstRunOnboarding";
 
 import enCommon from "../../messages/en/common.json";
 import enOnboarding from "../../messages/en/onboarding.json";
@@ -23,18 +25,22 @@ import AccountCreateSyncModal from "./AccountCreateSyncModal";
 const server = vi.hoisted(() => ({
   bankListRequests: 0,
   ownCredential: null as null | { status: string },
+  post: vi.fn(),
+  push: vi.fn(),
 }));
 
 vi.mock("@/lib/api/api", () => ({
   default: {
     get: (url: string) => {
       if (url === "/v1/user/enable-banking-credential") return Promise.resolve({ data: server.ownCredential });
+      if (url === "/v1/banking/connections") return Promise.resolve({ data: { connections: [] } });
       if (url === "/v1/banking/bank") {
         server.bankListRequests += 1;
         return Promise.resolve({ data: [{ country: "PT", id: "BANK_1", logo: null, name: "Banco Exemplo" }] });
       }
       return Promise.reject(new Error(`unexpected GET ${url}`));
     },
+    post: server.post,
   },
 }));
 vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: () => {} }) }));
@@ -42,7 +48,7 @@ vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams()
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
   usePathname: () => "/onboarding/account",
-  useRouter: () => ({ push: () => {}, refresh: () => {}, replace: () => {} }),
+  useRouter: () => ({ push: server.push, refresh: () => {}, replace: () => {} }),
 }));
 vi.mock("@/lib/auth/user-context", () => ({ useUser: () => ({ id: "user-1" }) }));
 vi.mock("../onboarding/first-run/FirstRunOnboardingRouteShell", () => ({ useFirstRunOnboardingFooter: () => () => {} }));
@@ -69,6 +75,8 @@ afterEach(() => {
   cleanup();
   server.bankListRequests = 0;
   server.ownCredential = null;
+  server.post.mockReset();
+  server.push.mockReset();
 });
 
 type Credentials = "instance" | "user";
@@ -164,4 +172,48 @@ test("first-run onboarding explains the missing key when the shared credential s
 
   assert.ok(await screen.findByText(enOnboarding.onboarding.firstRun.account.credentialRequired.title));
   assert.ok(screen.getByText(sharedUnavailable));
+});
+
+const onboarding = enOnboarding.onboarding.firstRun;
+
+test("first-run onboarding offers SimpleFIN only on a server that enables it", async () => {
+  renderWith(<FirstRunAccountStep />, { bankSyncProviders: ["enable_banking"], household: "instance", instance: "instance" });
+
+  assert.ok(await screen.findByText("Banco Exemplo"));
+  assert.equal(screen.queryByText(enCommon.simplefin.offer), null);
+  assert.equal(screen.queryByRole("button", { name: enCommon.simplefin.connect }), null);
+});
+
+test("first-run onboarding offers SimpleFIN beside the bank list when both providers are on", async () => {
+  renderWith(<FirstRunAccountStep />, { bankSyncProviders: ["enable_banking", "simplefin"], household: "instance", instance: "instance" });
+
+  assert.ok(await screen.findByText("Banco Exemplo"));
+  assert.ok(screen.getByText(enCommon.simplefin.offer));
+  assert.ok(screen.getByRole("button", { name: enCommon.simplefin.connect }));
+});
+
+test("first-run onboarding leaves Enable Banking out on a SimpleFIN-only server", async () => {
+  renderWith(<FirstRunAccountStep />, { bankSyncProviders: ["simplefin"], household: "user", instance: "user" });
+
+  assert.ok(await screen.findByText(enCommon.simplefin.offer));
+  assert.ok(screen.getByRole("button", { name: onboarding.account.manualCta }));
+  assert.equal(screen.queryByLabelText(onboarding.connect.countryLabel), null);
+  assert.equal(screen.queryByText(onboarding.account.credentialRequired.title), null);
+  assert.equal(server.bankListRequests, 0);
+});
+
+test("connecting SimpleFIN in first-run onboarding records a connected account and moves to the sync step", async () => {
+  server.post.mockResolvedValue({ data: { connectionId: 7, incidentId: "incident-1" } });
+  renderWith(<FirstRunAccountStep />, { bankSyncProviders: ["simplefin"], household: "user", instance: "user" });
+  const user = userEvent.setup();
+
+  await user.click(await screen.findByRole("button", { name: enCommon.simplefin.connect }));
+  await user.click(await screen.findByLabelText(enCommon.simplefin["token-label"]));
+  // A synthetic setup token: base64 of a made-up claim URL, built here so no token-shaped literal is committed.
+  await user.paste(btoa("https://bridge.simplefin.org/simplefin/claim/TEST"));
+  await user.click(screen.getByRole("button", { name: enCommon.simplefin.submit }));
+
+  await waitFor(() => assert.deepEqual(server.push.mock.calls, [["/onboarding/sync"]]));
+  assert.equal(server.post.mock.calls[0]?.[0], "/v1/banking/simplefin/connections");
+  assert.equal(getFirstRunState("user-1").accountStep, "connected");
 });

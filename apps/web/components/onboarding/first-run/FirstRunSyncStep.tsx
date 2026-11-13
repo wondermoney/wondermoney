@@ -20,6 +20,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import useBankConnections, {
   latestEnableBankingConnection,
+  simplefinConnections,
 } from "@/lib/api/banking/useBankConnections";
 import { useUser } from "@/lib/auth/user-context";
 import {
@@ -127,9 +128,10 @@ export default function FirstRunSyncStep() {
   const { data: connectionsData } = useBankConnections({
     enabled: isConnected,
   });
-  const latestConnection = latestEnableBankingConnection(
-    connectionsData?.connections,
-  );
+  // The bank just connected: Enable Banking's newest, or on a SimpleFIN-only path SimpleFIN's.
+  const latestConnection =
+    latestEnableBankingConnection(connectionsData?.connections) ??
+    simplefinConnections(connectionsData?.connections)[0];
 
   useEffect(() => {
     setFooter(<FirstRunSyncFooter />);
@@ -144,8 +146,8 @@ export default function FirstRunSyncStep() {
     : t("syncValue.connectedDescription");
 
   // Honest live status line for the connected path. While the list is loading
-  // the import is assumed to be running; a loaded list with no Enable Banking
-  // connection in it has nothing to report.
+  // the import is assumed to be running; a loaded list with neither an Enable Banking
+  // nor a SimpleFIN connection in it has nothing to report.
   let statusLine: string | null = null;
   let statusKind: SyncStatusKind | null = null;
   if (isConnected && (!connectionsData || latestConnection)) {

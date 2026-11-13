@@ -1,11 +1,13 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import AccountAddModal from "@/components/account/AccountCreateModal";
 import AccountAddOfflineModal from "@/components/account/AccountCreateOfflineModal";
 import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import useBankConnections, {
   simplefinConnections,
@@ -65,22 +67,10 @@ export default function Connections() {
               <Text variant="mutedText" className="mt-1 text-sm">
                 {t("no-connections")}
               </Text>
-              <AccountAddModal
-                isOpen={isAddAccountModalOpen}
-                setOpen={setIsAddAccountModalOpen}
-                onAddSyncAccountClick={() => setIsAddSyncAccountModalOpen(true)}
-                onAddOfflineAccountClick={() =>
-                  setIsAddOfflineAccountModalOpen(true)
-                }
-              />
-              <AccountAddSyncModal
-                isOpen={isAddSyncAccountModalOpen}
-                setOpen={setIsAddSyncAccountModalOpen}
-              />
-              <AccountAddOfflineModal
-                isOpen={isAddOfflineAccountModalOpen}
-                closeModal={() => setIsAddOfflineAccountModalOpen(false)}
-              />
+              <Button onClick={() => setIsAddAccountModalOpen(true)}>
+                <Plus className="size-4" aria-hidden="true" />
+                {t("add-account")}
+              </Button>
             </div>
           ) : (
             <>
@@ -111,6 +101,24 @@ export default function Connections() {
           )}
         </div>
       </div>
+      {/* Outside the empty state on purpose: connecting swaps it for the table as soon as the new
+          connection is listed, and the dialogs (and the SimpleFIN one's first-sync watch) have to
+          outlive that. */}
+      <AccountAddModal
+        isOpen={isAddAccountModalOpen}
+        setOpen={setIsAddAccountModalOpen}
+        onAddSyncAccountClick={() => setIsAddSyncAccountModalOpen(true)}
+        onAddOfflineAccountClick={() => setIsAddOfflineAccountModalOpen(true)}
+        trigger={false}
+      />
+      <AccountAddSyncModal
+        isOpen={isAddSyncAccountModalOpen}
+        setOpen={setIsAddSyncAccountModalOpen}
+      />
+      <AccountAddOfflineModal
+        isOpen={isAddOfflineAccountModalOpen}
+        closeModal={() => setIsAddOfflineAccountModalOpen(false)}
+      />
     </div>
   );
 }

@@ -90,6 +90,33 @@ test("names a connection without an institution SimpleFIN, and offers no reconne
   );
 });
 
+test("lists the accounts each connection feeds by name", () => {
+  renderTable([
+    connection({
+      accounts: [
+        { accountKey: 11, accountName: "Everyday checking" },
+        { accountKey: 12, accountName: "Rewards card" },
+      ],
+    }),
+    connection({ accounts: [], connectionId: 8, status: "processing" }),
+  ]);
+
+  const [, first, second] = screen.getAllByRole("row");
+  assert.deepEqual(
+    within(first!)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent),
+    ["Everyday checking", "Rewards card"],
+  );
+  within(second!).getByText(m["no-accounts"]);
+});
+
+test("says there are no accounts yet on an API that does not list them", () => {
+  renderTable([connection()]);
+
+  within(screen.getAllByRole("row")[1]!).getByText(m["no-accounts"]);
+});
+
 test("says a revoked access needs a new setup token", () => {
   renderTable([connection({ status: "revoked" })]);
 

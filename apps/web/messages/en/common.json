@@ -2934,6 +2934,7 @@
     "connections-title": "SimpleFIN connections",
     "updated": "Updated",
     "never-synced": "Not synced yet",
+    "no-accounts": "No accounts yet",
     "revoked-help": "SimpleFIN revoked this access. Connect again with a new setup token to keep syncing.",
     "status": {
       "connected": "Connected",
