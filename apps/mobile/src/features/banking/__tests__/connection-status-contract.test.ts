@@ -34,6 +34,13 @@ describe('banking connection-status contract', () => {
     expect(bankConnectionSchema.safeParse({ ...newConnection, daysUntilExpiry: -1 }).success).toBe(false)
   })
 
+  it("reads a SimpleFIN row's account names, and a row from an API that sends none", () => {
+    const simplefin = { ...newConnection, provider: 'SimpleFIN', accounts: [{ accountKey: 3, accountName: 'Everyday checking' }, { accountKey: 4, accountName: null }] }
+    expect(bankConnectionSchema.parse(simplefin).accounts).toEqual([{ accountKey: 3, accountName: 'Everyday checking' }, { accountKey: 4, accountName: null }])
+    expect(bankConnectionSchema.parse({ ...newConnection, provider: 'SimpleFIN' }).accounts).toBeUndefined()
+    expect(bankConnectionSchema.safeParse({ ...simplefin, accounts: [{ accountKey: 0, accountName: 'x' }] }).success).toBe(false)
+  })
+
   it('reads a status this build does not know as unknown, and still rejects a non-string', () => {
     expect(connectionStatusSchema.parse('pending')).toBe('unknown')
     expect(connectionStatusSchema.parse('linked')).toBe('unknown')

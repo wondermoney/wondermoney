@@ -45,9 +45,21 @@ export const bankSyncLastErrorSchema = z.object({
   occurredAt: z.string().datetime(),
 })
 
+/**
+ * An account a SimpleFIN connection feeds, as its owner named it. The API lists only the ones the
+ * viewer can see (same household, not deleted, not the other member's private account).
+ */
+export const bankConnectionAccountSchema = z.object({
+  accountKey: z.number().int().positive(),
+  accountName: z.string().nullable(),
+})
+
 export const bankConnectionSchema = z
   .object({
     accessType: tolerantEnum(['open_banking'], 'unknown'),
+    // SimpleFIN rows only. Optional: an older API does not send it, and then the row names no
+    // accounts at all (rather than saying it has none).
+    accounts: z.array(bankConnectionAccountSchema).optional(),
     // The id `GET /v1/banking/bank/:bankId/start` takes, so the row can offer "Reconnect".
     // Optional: an older API does not send it, and then the row has no reconnect action.
     bankId: z.string().min(1).nullable().optional(),

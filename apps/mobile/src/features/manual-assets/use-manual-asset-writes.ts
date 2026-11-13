@@ -4,11 +4,15 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
 import { ApiError } from '@/lib/api/errors'
 
 import {
+  createManualAssetDeleteEndpoint,
+  createManualAssetUpdateEndpoint,
   createManualAssetValuationEndpoint,
   manualAssetCreateEndpoint,
   manualAssetCreateWriteSchema,
+  manualAssetUpdateWriteSchema,
   manualAssetValuationWriteSchema,
   type ManualAssetCreateWrite,
+  type ManualAssetUpdateWrite,
   type ManualAssetValuationWrite,
 } from './manual-assets-contract'
 import { manualAssetKey, manualAssetsKey } from './query-keys'
@@ -68,6 +72,65 @@ export function useRecordValuation() {
       const body = manualAssetValuationWriteSchema.parse(value)
       return runtime.apiClient.write(createManualAssetValuationEndpoint(assetId), { body, commit: () => refreshAfterWrite(queryClient, runtime.epochId, assetId) })
     },
+    onError: (error) => {
+      if (error instanceof ApiError && error.code === 'mfa-required') blockAccess('mfa-required')
+    },
+  })
+}
+
+/**
+ * Every loan query (list, overview, details) of one epoch. A loan shows the asset it is secured
+ * against, by name and value, so renaming, archiving or deleting the asset changes the loans too;
+ * a delete also clears their link to it.
+ */
+const isLoanQueryOfEpoch = (epochId: number) => (query: { queryKey: readonly unknown[] }) =>
+  query.queryKey[0] === 'loans' && query.queryKey[2] === epochId
+
+/**
+ * Edit asset, and Archive or Bring back (`{ archived }`). The asset, the list, net worth and the
+ * loans secured against it refresh once the write commits.
+ */
+export function useUpdateManualAsset() {
+  const { runtime, blockAccess } = useProductRuntime()
+  if (!runtime) throw new Error('useUpdateManualAsset requires an authenticated runtime')
+  const queryClient = useQueryClient()
+  return useMutation({
+    retry: false,
+    networkMode: 'always',
+    mutationFn: ({ assetId, value }: { assetId: number; value: ManualAssetUpdateWrite }) => {
+      const body = manualAssetUpdateWriteSchema.parse(value)
+      return runtime.apiClient.write(createManualAssetUpdateEndpoint(assetId), {
+        body,
+        commit: () => {
+          refreshAfterWrite(queryClient, runtime.epochId, assetId)
+          void queryClient.invalidateQueries({ predicate: isLoanQueryOfEpoch(runtime.epochId) })
+        },
+      })
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.code === 'mfa-required') blockAccess('mfa-required')
+    },
+  })
+}
+
+/**
+ * Delete asset: it goes with its valuations, and any loan secured against it loses the link (the
+ * loan itself stays). The list, net worth and the loans refresh; the asset's own page is not
+ * refetched, since it would only answer 404 now (as for a wallet, and on the web).
+ */
+export function useDeleteManualAsset() {
+  const { runtime, blockAccess } = useProductRuntime()
+  if (!runtime) throw new Error('useDeleteManualAsset requires an authenticated runtime')
+  const queryClient = useQueryClient()
+  return useMutation({
+    retry: false,
+    networkMode: 'always',
+    mutationFn: ({ assetId }: { assetId: number }) => runtime.apiClient.write(createManualAssetDeleteEndpoint(assetId), {
+      commit: () => {
+        refreshAfterWrite(queryClient, runtime.epochId)
+        void queryClient.invalidateQueries({ predicate: isLoanQueryOfEpoch(runtime.epochId) })
+      },
+    }),
     onError: (error) => {
       if (error instanceof ApiError && error.code === 'mfa-required') blockAccess('mfa-required')
     },

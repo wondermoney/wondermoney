@@ -20,6 +20,7 @@ describe('mapBankConnections', () => {
     expect(rows).toEqual([
       {
         accessType: 'open_banking',
+        accountNames: null,
         bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
@@ -32,6 +33,7 @@ describe('mapBankConnections', () => {
       },
       {
         accessType: 'open_banking',
+        accountNames: null,
         bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
@@ -67,6 +69,21 @@ describe('mapBankConnections', () => {
   it('normalizes an explicit null connectionId to null', () => {
     const [row] = mapBankConnections([dto({ connectionId: null })])
     expect(row!.connectionId).toBeNull()
+  })
+
+  it("names a SimpleFIN connection's accounts, leaving blank names out", () => {
+    const [row] = mapBankConnections([dto({
+      provider: 'SimpleFIN',
+      accounts: [{ accountKey: 3, accountName: ' Everyday checking ' }, { accountKey: 4, accountName: null }, { accountKey: 5, accountName: '  ' }, { accountKey: 6, accountName: 'Savings' }],
+    })])
+    expect(row!.accountNames).toEqual(['Everyday checking', 'Savings'])
+  })
+
+  it('reads an empty account list as no accounts yet, and a missing one (an older API) as unknown', () => {
+    const [none] = mapBankConnections([dto({ provider: 'SimpleFIN', accounts: [] })])
+    expect(none!.accountNames).toEqual([])
+    const [older] = mapBankConnections([dto({ provider: 'SimpleFIN' })])
+    expect(older!.accountNames).toBeNull()
   })
 
   it('carries the newest failure so the row can say what went wrong', () => {
