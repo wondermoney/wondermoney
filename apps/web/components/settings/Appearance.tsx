@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useTransition } from "react";
+import { toast } from "sonner";
 
 import { usePathname } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import useUpdateAccountLanguage from "@/lib/api/user/useUpdateAccountLanguage";
 import useUserData from "@/lib/api/user/useUserData";
 import { useUser } from "@/lib/auth/user-context";
 import { useHydrated } from "@/lib/utils/useHydrated";
@@ -34,12 +36,17 @@ export default function Appearance() {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const params = useParams();
+  const accountLanguage = useUpdateAccountLanguage(user?.id);
 
   if (!mounted) {
     return null;
   }
 
   function onLocaleChange(newLocale: string) {
+    // The account language follows the pick, so emails switch with the interface.
+    accountLanguage.mutate(newLocale, {
+      onError: () => toast.error(t("language-email-save-error")),
+    });
     startTransition(() => {
       router.replace(
         // @ts-expect-error -- TypeScript will validate that only known `params`
@@ -112,6 +119,9 @@ export default function Appearance() {
                   </SelectContent>
                 </Select>
               </div>
+              <Text variant="mutedText" className="mt-2">
+                {t("language-email-hint")}
+              </Text>
             </div>
           </div>
         </div>

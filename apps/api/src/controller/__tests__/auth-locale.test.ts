@@ -84,9 +84,9 @@ describe('auth callback locale', () => {
     expect(mocked.sendSignupEmail).toHaveBeenCalledWith(expect.anything(), SupportedLanguages.PT);
   });
 
-  it.each(['en', 'es'] as const)('maps %s OAuth signup to English email', async (locale) => {
+  it.each([['en', SupportedLanguages.EN], ['es', SupportedLanguages.ES]] as const)('maps %s OAuth signup to the %s account language', async (locale, language) => {
     // Given
-    const appuser = { appuserKey: 23, emailAddress: `${locale}@example.com`, externalUserId: '017e067c-7e26-4711-b72e-efb5546d59ac', firstName: 'Demo', language: SupportedLanguages.EN, lastName: 'User' };
+    const appuser = { appuserKey: 23, emailAddress: `${locale}@example.com`, externalUserId: '017e067c-7e26-4711-b72e-efb5546d59ac', firstName: 'Demo', language, lastName: 'User' };
     mocked.zParse.mockResolvedValueOnce({ body: { locale } });
     mocked.getUserByExternalId.mockResolvedValueOnce(null);
     mocked.getUserByEmail.mockResolvedValueOnce(null);
@@ -98,6 +98,6 @@ describe('auth callback locale', () => {
     await authCallback(makeAuthUser(appuser.externalUserId, appuser.emailAddress), makeResponse().res);
 
     // Then
-    expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ language: SupportedLanguages.EN, method: 'google' }));
+    expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ language, method: 'google' }));
   });
 });

@@ -1756,6 +1756,7 @@
           "collation": null,
           "enumItems": [
             "EN",
+            "ES",
             "PT"
           ],
           "mappedType": "enum"
@@ -1999,8 +2000,8 @@
         },
         {
           "name": "appuser_language_check",
-          "expression": "\"language\" in ('EN', 'PT')",
-          "definition": "check (\"language\" in ('EN', 'PT'))",
+          "expression": "\"language\" in ('EN', 'ES', 'PT')",
+          "definition": "check (\"language\" in ('EN', 'ES', 'PT'))",
           "columnName": "language"
         }
       ],
@@ -5050,6 +5051,7 @@
           "collation": null,
           "enumItems": [
             "EN",
+            "ES",
             "PT"
           ],
           "mappedType": "enum"
@@ -5268,8 +5270,8 @@
         },
         {
           "name": "bank_recovery_delivery_language_at_send_check",
-          "expression": "\"language_at_send\" in ('EN', 'PT')",
-          "definition": "check (\"language_at_send\" in ('EN', 'PT'))",
+          "expression": "\"language_at_send\" in ('EN', 'ES', 'PT')",
+          "definition": "check (\"language_at_send\" in ('EN', 'ES', 'PT'))",
           "columnName": "language_at_send"
         },
         {

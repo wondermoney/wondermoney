@@ -87,6 +87,7 @@ function getBudgetCountDetail(summary: WeeklyBudgetSummary, language: Transactio
 
 export default function WeeklyInsights({
   language = "pt",
+  appLocale = language,
   firstName,
   weekDateRange,
   formattedTotalSpending,
@@ -115,7 +116,7 @@ export default function WeeklyInsights({
       : undefined;
   const trackedCtaUrl = buildCampaignUrl({
     destinationUrl: ctaUrl,
-    nextPath: `/${language}`,
+    nextPath: `/${appLocale}`,
     utmSource,
     utmMedium,
     utmCampaign,

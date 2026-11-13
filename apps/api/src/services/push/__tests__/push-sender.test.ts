@@ -14,6 +14,7 @@ import type { Enqueue } from '@service/queue/enqueue';
 
 import { ExpoPushClient } from '../expo-push-client';
 import { PushDeviceService } from '../push-device.service';
+import { renderPush } from '../push-messages';
 import { queuePushNotification } from '../push-notifier';
 import { checkPushReceipts, sendPushNotification } from '../push-sender';
 import { removePushDevicesForSession } from '../push-session-cleanup';
@@ -146,6 +147,32 @@ describe('push sending', () => {
     // Receipts are read about 15 minutes later.
     expect(later).toHaveLength(1);
     expect(later[0]?.at.getTime()).toBe(NOW.getTime() + 15 * 60 * 1000);
+  });
+
+  it('writes to a Spanish account in Spanish', async () => {
+    const em = db.em();
+    const household = await seedHousehold(em);
+    await em.nativeUpdate(Appuser, { appuserKey: household.appuser.appuserKey }, { language: SupportedLanguages.ES });
+    await device(em, household, await session(em, household));
+    const requests: unknown[][] = [];
+    const fetch = vi.fn((_url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as unknown[];
+      requests.push(body);
+      return Promise.resolve(new Response(JSON.stringify({ data: body.map(() => ({ id: randomUUID(), status: 'ok' })) }), { status: 200 }));
+    });
+
+    await handlePushSendJob(testJob(household), {
+      client: new ExpoPushClient({ accessToken: null, fetch: fetch as unknown as typeof globalThis.fetch }),
+      em,
+      enabled: () => true,
+      enqueue: queue().enqueue,
+      logger: { info: () => undefined, warn: () => undefined },
+      now: () => NOW,
+    });
+
+    const spanish = renderPush({ kind: 'test' }, 'es');
+    expect(spanish.title).not.toBe(renderPush({ kind: 'test' }, 'en').title);
+    expect(requests[0]).toEqual([expect.objectContaining({ body: spanish.body, title: spanish.title })]);
   });
 
   it('batches at most 100 messages per request', async () => {

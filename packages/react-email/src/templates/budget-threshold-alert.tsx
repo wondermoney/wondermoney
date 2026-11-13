@@ -154,6 +154,7 @@ function BudgetItemRow({ item, language }: { item: BudgetThresholdItem; language
 
 export default function BudgetThresholdAlert({
   language = "pt",
+  appLocale = language,
   firstName,
   periodLabel,
   items,
@@ -189,7 +190,7 @@ export default function BudgetThresholdAlert({
   const adaptivePreheader = getBudgetThresholdPreheader(items, language);
   const trackedCtaUrl = buildCampaignUrl({
     destinationUrl: ctaUrl,
-    nextPath: `/${language}/budgets`,
+    nextPath: `/${appLocale}/budgets`,
     utmSource,
     utmMedium,
     utmCampaign,

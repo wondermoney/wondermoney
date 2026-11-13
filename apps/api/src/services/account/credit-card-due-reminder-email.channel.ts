@@ -1,11 +1,11 @@
 import { renderCreditCardDueReminderEmail } from '@wondermoney/react-email';
 
 import { instanceName } from '@config/instance-name';
-import { SupportedLanguages } from '@entity/Appuser';
 import { type RenderedEmailInput, type RenderedEmailOutcome, sendRenderedEmail } from '@service/email/email';
 import { EmailGlobalOptOutService } from '@service/email/email-global-opt-out.service';
 import { categoryEnabled, EmailCategory, isRecipientReachable } from '@service/email/email-preferences';
 import { isEmailConfigured } from '@service/email/email-transport';
+import { accountLocale, copyLocale, INTL_LOCALE } from '@utils/account-language';
 import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 
 import type { CreditCardDueReminderChannelHandler, CreditCardDueReminderChannelOutcome, CreditCardDueReminderMessage } from './credit-card-due-reminder.service';
@@ -19,8 +19,12 @@ interface EmailChannelDependencies {
 
 const trimSlash = (url: string) => url.replace(/\/$/u, '');
 
+/** What the email calls a card that has no name. */
+const CARD_FALLBACK_NAME = { en: 'card', es: 'tarjeta', pt: 'cartão' } as const;
+
 /**
- * Payment-due reminders by email, in the owner's language (EN or PT, the languages emails support).
+ * Payment-due reminders by email, in the owner's language: EN, PT or ES, the languages the template
+ * is written in.
  * Optional mail: the credit-card-due-reminders category and the account-wide unsubscribe both stop
  * it, and every message carries a one-click unsubscribe for its category. With no email provider
  * configured (`EMAIL_DRIVER=log` or nothing set) the channel is unavailable and nothing is sent: a
@@ -34,12 +38,13 @@ export function createCreditCardDueReminderEmailChannel(dependencies: EmailChann
   return {
     available: configured,
     async deliver(message: CreditCardDueReminderMessage): Promise<CreditCardDueReminderChannelOutcome> {
-      const lang = message.recipient.language === SupportedLanguages.PT ? 'pt' : 'en';
-      const intlLocale = lang === 'pt' ? 'pt-PT' : 'en-GB';
+      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es']);
+      const link = accountLocale(message.recipient.language);
+      const intlLocale = INTL_LOCALE[lang];
       const app = trimSlash(FRONTEND_URL);
       const formatDate = (value: string) => new Intl.DateTimeFormat(intlLocale, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00.000Z`));
       const rendered = await renderCreditCardDueReminderEmail({
-        accountName: message.accountName?.trim() || (lang === 'pt' ? 'cartão' : 'card'),
+        accountName: message.accountName?.trim() || CARD_FALLBACK_NAME[lang],
         amountDue: new Intl.NumberFormat(intlLocale, { currency: message.currencyCode, currencyDisplay: 'symbol', style: 'currency' }).format(message.amountDue),
         brandName: instanceName(),
         daysUntilDue: message.daysUntilDue,
@@ -47,8 +52,8 @@ export function createCreditCardDueReminderEmailChannel(dependencies: EmailChann
         firstName: message.recipient.firstName ?? undefined,
         language: lang,
         periodLabel: `${formatDate(message.periodStart)} – ${formatDate(message.periodEnd)}`,
-        settingsUrl: `${app}/${lang}/settings?tab=notifications`,
-        statementUrl: `${app}/${lang}/accounts/${message.accountKey}?tab=statements`,
+        settingsUrl: `${app}/${link}/settings?tab=notifications`,
+        statementUrl: `${app}/${link}/accounts/${message.accountKey}?tab=statements`,
       });
       const token = optOut.generateCategoryToken(message.recipient.appuserKey, EmailCategory.CREDIT_CARD_DUE_REMINDERS);
       const unsubscribeUrl = `${trimSlash(BACKEND_URL)}/v1/marketing/email-opt-out?token=${encodeURIComponent(token)}`;

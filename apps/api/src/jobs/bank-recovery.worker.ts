@@ -4,11 +4,11 @@ import type { Logger } from 'pino';
 import { DI } from '@app/database/di';
 import { parseBankRecoveryPayload } from '@app/jobs/bank-recovery.queue';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
-import { SupportedLanguages } from '@entity/Appuser';
 import { type BankRecoveryProviderOutcome, BankRecoveryService } from '@service/bank-sync/bank-recovery.service';
 import { type BankRecoveryEmailOutcome, sendBankRecoveryEmail } from '@service/email/email';
 import { EmailGlobalOptOutService } from '@service/email/email-global-opt-out.service';
 import { EmailCategory } from '@service/email/email-preferences';
+import { accountLocale } from '@utils/account-language';
 import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
@@ -60,14 +60,14 @@ export async function handleBankRecoveryJob(
       claimToken: claim.claimToken,
       deliveryKey: payload.deliveryKey,
       send: async ({ appuser, signal }) => {
-        const language = appuser.language === SupportedLanguages.PT ? 'PT' : 'EN';
+        const language = appuser.language;
         const unsubscribeToken = optOutService.generateCategoryToken(appuser.appuserKey, EmailCategory.ACCOUNT_RECOVERY);
         const emailOutcome = await (dependencies.sendEmail ?? sendBankRecoveryEmail)({
           bankName,
           incidentId: payload.incidentId,
           language,
           recipient: appuser.emailAddress,
-          recoveryUrl: `${FRONTEND_URL.replace(/\/$/, '')}/${language.toLowerCase()}/accounts`,
+          recoveryUrl: `${FRONTEND_URL.replace(/\/$/, '')}/${accountLocale(language)}/accounts`,
           signal,
           templateVersion: payload.templateVersion,
           unsubscribeUrl: `${backendBaseUrl()}/v1/marketing/email-opt-out?token=${encodeURIComponent(unsubscribeToken)}`,

@@ -1,9 +1,9 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import type { Appuser } from '@entity/Appuser';
-import { SupportedLanguages } from '@entity/Appuser';
 import type { Tenant } from '@entity/Tenant';
 import { loadRecurringSchedule } from '@service/recurring/recurring-schedule.service';
+import { copyLocale } from '@utils/account-language';
 
 import { formatIcsDate, type IcsEvent, renderIcsCalendar } from './ics';
 
@@ -103,7 +103,7 @@ function calendarEventUid(seriesKey: number, date: Date): string {
 
 /** The account language, which is the only locale the API knows without a hint. */
 function calendarLocaleFor(appuser: Pick<Appuser, 'language'>): CalendarLocale {
-  return appuser.language === SupportedLanguages.PT ? 'pt' : 'en';
+  return copyLocale(appuser.language, CALENDAR_LOCALES);
 }
 
 /**

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { SupportedLanguages } from '@entity/Appuser';
 import { positiveIntId } from '@validators/shared';
 
 /**
@@ -32,6 +33,11 @@ export const updateUserDataRequestSchema = z.object({
     // Email changes must go through Supabase's verified change-email flow; `Appuser.emailAddress`
     // is reconciled from the verified token on the next `/v1/auth/callback`.
     firstName: personNameSchema.optional(),
+    /**
+     * The account language: what the emails and the other server-written texts go out in. The
+     * web and mobile language pickers send it when the person picks a language (`es` → `ES`).
+     */
+    language: z.enum(SupportedLanguages).optional(),
     lastName: personNameSchema.optional(),
     mobileNumber: z.string().max(20).optional(),
     mobileNumberPrefix: z.string().max(10).optional(),

@@ -229,8 +229,8 @@ export class BankRecoveryService {
     if (appuser.marketingOptOut) return this.suppress(em, delivery, 'marketing_opt_out');
     const prefs = await em.findOne(EmailNotificationPreference, { appuserKey: appuser, deletedAt: null });
     if (!categoryEnabled(prefs, EmailCategory.ACCOUNT_RECOVERY)) return this.suppress(em, delivery, 'account_recovery_disabled');
-    const language = appuser.language as string;
-    if (language !== 'EN' && language !== 'PT') return this.suppress(em, delivery, 'unsupported_language');
+    // Every account language sends: Spanish reads the English copy (`sendBankRecoveryEmail`).
+    if (!(Object.values(SupportedLanguages) as string[]).includes(appuser.language)) return this.suppress(em, delivery, 'unsupported_language');
     // Re-resolved under the send locks: this is the mode that actually
     // authorizes the provider call, not the historical enrollment treatment.
     delivery.rolloutModeAtClaim = rolloutMode;

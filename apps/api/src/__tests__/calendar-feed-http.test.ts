@@ -10,7 +10,7 @@ import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tena
 import { DI } from '@app/database/di';
 import type { Account } from '@entity/Account';
 import { ApiToken } from '@entity/ApiToken';
-import type { Appuser } from '@entity/Appuser';
+import { type Appuser, SupportedLanguages } from '@entity/Appuser';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { errorHandler } from '@middleware/error-handler';
@@ -245,6 +245,18 @@ describe('GET /v1/calendar/bills.ics', () => {
     expect(english.text).toContain('Rent - €1\\,234.56');
     expect(portuguese.text).toContain('Rent - 1234\\,56');
     expect(spanish.text).toContain('Rent - 1234\\,56');
+  });
+
+  it('writes in the account language when the calendar app sends no locale', async () => {
+    await addSeries({ amount: 1234.56, displayName: 'Rent' });
+    em.assign(household.appuser, { language: SupportedLanguages.ES });
+    await em.flush();
+    const token = await calendarTokenFor();
+
+    const events = async (extra = '') => icsLines((await feed(token, extra)).text).filter((line) => !line.startsWith('DTSTAMP:'));
+
+    expect(await events()).toEqual(await events('&locale=es'));
+    expect(await events()).not.toEqual(await events('&locale=en'));
   });
 });
 

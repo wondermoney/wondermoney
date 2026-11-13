@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { addAccount, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { allRowCounts, dataFiles, emptyHousehold, exportBytes, householdRowCounts, linkToBank, richHousehold, type Scope, scopeOf } from '@app/__tests__/__helpers__/restore-fixtures';
-import { Appuser } from '@entity/Appuser';
+import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
 import { Category } from '@entity/Category';
 import { Goal } from '@entity/Goal';
@@ -487,6 +487,42 @@ describe('household restore', () => {
       expect(appuser.currencyKey.code).toBe('EUR');
       const [preference] = await db.em().getConnection().execute<{ budget_alerts_enabled: boolean; weekly_insights_enabled: boolean }[]>('select budget_alerts_enabled, weekly_insights_enabled from email_notification_preference where appuser_key = ?', [target.appuser.appuserKey]);
       expect(preference).toEqual({ budget_alerts_enabled: false, weekly_insights_enabled: false });
+    });
+
+    describe('account language', () => {
+      async function restoredLanguage(language: (parsed: ParsedExport) => void, owner?: { language: SupportedLanguages }) {
+        const em = db.em();
+        const source = await seedHousehold(em);
+        if (owner) {
+          em.assign(source.appuser, owner);
+          await em.flush();
+        }
+        const parsed = await parsedExportOf(scopeOf(source));
+        language(parsed);
+        const target = await emptyHousehold(db.em());
+        await restore(scopeOf(target), parsed);
+        return (await db.em().findOneOrFail(Appuser, { appuserKey: target.appuser.appuserKey }, { filters: false })).language;
+      }
+
+      it('carries a Spanish account language across', async () => {
+        expect(await restoredLanguage(() => undefined, { language: SupportedLanguages.ES })).toBe(SupportedLanguages.ES);
+      });
+
+      // Exports from before Spanish name EN or PT, in either case; the export shape is the same.
+      it.each([['PT', SupportedLanguages.PT], ['pt', SupportedLanguages.PT], ['EN', SupportedLanguages.EN]])('restores the %s an older export names', async (exported, restored) => {
+        const language = await restoredLanguage((parsed) => {
+          parsed.manifest.formatVersion = '1.0';
+          for (const row of parsed.rows.preferences) row.language = exported;
+        });
+        expect(language).toBe(restored);
+      });
+
+      it('keeps the member\'s own language for one this server does not have', async () => {
+        const language = await restoredLanguage((parsed) => {
+          for (const row of parsed.rows.preferences) row.language = 'FR';
+        });
+        expect(language).toBe(SupportedLanguages.EN);
+      });
     });
 
     it('refuses an export in a currency this server does not have, before writing', async () => {

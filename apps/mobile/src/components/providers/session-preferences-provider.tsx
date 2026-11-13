@@ -12,6 +12,8 @@ type SessionPreferences = Readonly<{
   languagePreference: LanguagePreference
   resolvedTheme: 'light' | 'dark'
   resolvedLocale: SupportedLocale
+  /** The device's own locale tag, which the "Device language" choice follows. */
+  deviceLocale: string
   /** Amounts are masked on this device (`usePrivacyMode`). */
   privacyMode: boolean
   setThemePreference: (value: ThemePreference) => void
@@ -114,6 +116,7 @@ function SessionPreferencesValueProvider({
     languagePreference,
     resolvedTheme: resolveTheme(themePreference, deviceTheme),
     resolvedLocale: resolveLocale(languagePreference, deviceLocale),
+    deviceLocale,
     privacyMode,
     setThemePreference,
     setLanguagePreference,

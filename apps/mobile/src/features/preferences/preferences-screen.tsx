@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import {
   type LanguagePreference,
+  resolveLocale,
   type ThemePreference,
   useSessionPreferences,
 } from '@/components/providers/session-preferences-provider'
@@ -13,6 +14,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 import { SettingsField, SettingsPage, SettingsSection } from '@/features/more/settings-ui'
 
+import { useAccountLanguageSync } from './account-language'
 import { AiHiddenSection } from './ai-hidden-section'
 import { PreviewFeaturesSection } from './preview-features-section'
 
@@ -30,6 +32,12 @@ export function PreferencesScreen() {
   const preferences = useSessionPreferences()
   const themeLabel = (value: ThemePreference) => t(`preferences.theme.${value}`)
   const languageLabel = (value: LanguagePreference) => t(`preferences.locale.${value}`)
+  const syncAccountLanguage = useAccountLanguageSync()
+  // The account language follows the pick ("Device language" counts as the language it resolves to), so emails switch with the app.
+  const chooseLanguage = (value: LanguagePreference) => {
+    preferences.setLanguagePreference(value)
+    syncAccountLanguage(resolveLocale(value, preferences.deviceLocale))
+  }
 
   return (
     <SettingsPage backLabel={t('preferences.back')} section="appearance">
@@ -46,7 +54,7 @@ export function PreferencesScreen() {
           <FormGroup>
             <FormSelectRow
               label={t('settings.appearance.language')}
-              onChange={preferences.setLanguagePreference}
+              onChange={chooseLanguage}
               options={LANGUAGES.map((value) => ({ value, label: languageLabel(value) }))}
               placeholder={languageLabel('device')}
               testID="preferences-language"

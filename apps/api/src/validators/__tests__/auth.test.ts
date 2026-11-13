@@ -18,7 +18,7 @@ describe('auth callback request boundary', () => {
 
   it.each([
     ['en', SupportedLanguages.EN],
-    ['es', SupportedLanguages.EN],
+    ['es', SupportedLanguages.ES],
     ['pt', SupportedLanguages.PT],
   ] as const)('maps route locale %s to supported email language %s', (locale, language) => {
     expect(mapRouteLocaleToEmailLanguage(locale)).toBe(language);

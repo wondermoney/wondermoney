@@ -242,9 +242,9 @@ export class EmailNotificationPreferenceService {
 
   private gates(appuser: GateAppuser) {
     const active = appuser.recordActive && !appuser.deletedAt;
-    // Financial lifecycle emails are localized for EN and PT (the only supported
-    // languages); delivery is gated to those rather than PT-only.
-    const localized = [SupportedLanguages.EN, SupportedLanguages.PT].includes(appuser.language);
+    // Every account language gets the financial emails: EN and PT have their own copy, and a
+    // Spanish account reads the English copy until the Spanish lands.
+    const localized = (Object.values(SupportedLanguages) as string[]).includes(appuser.language);
     return {
       deliverySupported: active && localized && emailSchema.safeParse(appuser.emailAddress).success,
     };

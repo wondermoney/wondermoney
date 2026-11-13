@@ -3,13 +3,14 @@ import { randomUUID } from 'node:crypto';
 import type { Request, Response } from 'express';
 
 import { DI } from '@app/app';
-import { SupportedLanguages } from '@entity/Appuser';
+import type { SupportedLanguages } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditLog } from '@entity/AssistantAuditLog';
 import { AssistantChatRetentionMode, AssistantConsent } from '@entity/AssistantConsent';
 import { AssistantService } from '@service/assistant/assistant.service';
+import { copyLocale } from '@utils/account-language';
 import { BadRequestError, ERROR_CODE } from '@utils/errors';
-import { assistantAuditLogQuerySchema, assistantChatSchema, assistantConsentUpdateSchema, type AssistantLocale } from '@validators/assistant';
+import { ASSISTANT_LOCALES, assistantAuditLogQuerySchema, assistantChatSchema, assistantConsentUpdateSchema, type AssistantLocale } from '@validators/assistant';
 import { zParse } from '@validators/parser';
 
 export async function chatWithAssistant(req: Request, res: Response) {
@@ -101,7 +102,7 @@ export async function updateAssistantConsent(req: Request, res: Response) {
 }
 
 function accountLocale(language: SupportedLanguages): AssistantLocale {
-  return language === SupportedLanguages.PT ? 'pt' : 'en';
+  return copyLocale(language, ASSISTANT_LOCALES);
 }
 
 function buildAuditEventResponse(event: AssistantAuditLog) {

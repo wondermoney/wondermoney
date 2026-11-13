@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { type Kysely, sql } from 'kysely';
 
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { SupportedLanguages } from '@entity/Appuser';
 import { ExchangeRateOverrideAuditAction } from '@entity/ExchangeRateOverrideAuditLog';
 import { classifyWalletInput } from '@service/crypto-wallet/address';
 import { buildInstallmentSchedule } from '@service/installment/installment-schedule';
@@ -125,7 +126,8 @@ const BATCH = 500;
 const MAX_WARNING_VALUES = 10;
 /** Advisory-lock namespace that serialises restores into one household (any constant int4). */
 const RESTORE_LOCK_NAMESPACE = 650_067;
-const LANGUAGES = new Set(['EN', 'PT']);
+/** Every account language. An older export carries EN or PT; one this server cannot hold keeps the member's own. */
+const LANGUAGES = new Set<string>(Object.values(SupportedLanguages));
 
 class DryRunRollback extends Error {
   constructor(readonly outcome: RestoreOutcome) {
