@@ -24,10 +24,10 @@ import { useProductRuntime } from '@/components/providers/product-runtime-provid
  * network round-trip time. Caught in production testing as a sustained
  * ~15-20 req/s flood against the live API the moment the dashboard mounted.
  */
-export function useTopSpendingCategory(now?: Date) {
+export function useTopSpendingCategory(now?: Date, memberKeys?: string) {
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('Account insights require an authenticated runtime')
   const fallbackNow = useMemo(() => new Date(), [])
   const scope = createInsightDateScope('month', now ?? fallbackNow)
-  return useInsightQuery(createCategorySpendingEndpoint(scope, 1), categorySpendingKey(runtime.epochId, scope, 1))
+  return useInsightQuery(createCategorySpendingEndpoint(scope, 1, memberKeys), categorySpendingKey(runtime.epochId, scope, 1, memberKeys))
 }

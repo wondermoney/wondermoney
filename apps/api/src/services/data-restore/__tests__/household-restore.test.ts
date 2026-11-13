@@ -400,6 +400,22 @@ describe('household restore', () => {
       return { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.7' }, rows: rows as unknown as ParsedExport['rows'] };
     }
 
+    it('restores a 1.9 export with no joint account and every transaction following its account', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const without = (rows: Record<string, unknown>[], fields: string[]) => rows.map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key))));
+      const rows = { ...parsed.rows, accounts: without(parsed.rows.accounts, ['isJoint']), transactions: without(parsed.rows.transactions, ['attributedMemberId', 'attributedToShared']) } as unknown as ParsedExport['rows'];
+
+      await restore(scopeOf(target), { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.9' }, rows });
+
+      const [counts] = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select (select count(*)::int from account where tenant_key = ? and is_joint) as joint,
+           (select count(*)::int from "transaction" where tenant_key = ? and (attributed_appuser_key is not null or attributed_to_shared)) as attributed`,
+        [target.tenant.tenantKey, target.tenant.tenantKey]);
+      expect(counts).toEqual({ attributed: 0, joint: 0 });
+    });
+
     it('restores a 1.7 export, giving every 1.8 field what the app gives a new row', async () => {
       const { owner } = await richHousehold(db.em());
       const target = await emptyHousehold(db.em());

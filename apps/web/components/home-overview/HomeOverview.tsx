@@ -10,6 +10,7 @@ import { Fragment, type ReactNode, useState } from "react";
 
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
 import { NetWorthViewedEvent } from "@/components/dashboard/NetWorthViewedEvent";
+import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { Button } from "@/components/ui/button";
 import useAccounts, { type Account } from "@/lib/api/account/useAccounts";
 import useTransactions from "@/lib/api/account/useTransactions";
@@ -17,6 +18,7 @@ import useBudgetsFull from "@/lib/api/budget/useBudgetsFull";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import useUserPreferences from "@/lib/api/user-preferences/useUserPreferences";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import { isValidFirstNetWorthState } from "@/lib/utils/analytics";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
@@ -116,6 +118,9 @@ export function HomeOverview() {
   const preferences = useUserPreferences();
   const [customizing, setCustomizing] = useState(false);
   const layout = mergeDashboardLayout(preferences.data?.dashboardLayout);
+  // One member's (or Shared) home, from the URL's `member`. The budget month and loans stay the
+  // household's: their figures come from endpoints that do not take the filter.
+  const { filter: member } = useMemberFilter();
 
   const sections: Record<
     Exclude<DashboardSectionId, "net-worth">,
@@ -123,10 +128,10 @@ export function HomeOverview() {
   > = {
     insights: <InsightsSection />,
     "this-month": <ThisMonthSection />,
-    "balance-sheet": <BalanceSheetSection />,
-    cashflow: <CashflowSection />,
+    "balance-sheet": <BalanceSheetSection member={member} />,
+    cashflow: <CashflowSection member={member} />,
     loans: <LoansSection />,
-    "latest-transactions": <LatestTransactionsSection />,
+    "latest-transactions": <LatestTransactionsSection member={member} />,
   };
 
   return (
@@ -134,7 +139,8 @@ export function HomeOverview() {
       {hydrated ? <BankAlertsBanner /> : null}
 
       <div className="flex flex-col gap-2">
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <MemberFilterControl className="w-40 sm:w-44" />
           <Button
             size="sm"
             variant="ghost"
@@ -144,7 +150,7 @@ export function HomeOverview() {
             {t("action")}
           </Button>
         </div>
-        <NetWorthHero />
+        <NetWorthHero member={member} />
       </div>
 
       {hydrated ? <HomeActivation /> : null}

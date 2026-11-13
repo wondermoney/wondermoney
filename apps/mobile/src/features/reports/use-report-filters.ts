@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import type { MemberFilter } from '@/features/household/member-attribution'
 import { deviceTimeZone } from '@/lib/dates/transaction-date'
 
 import { DEFAULT_REPORT_DATE_PRESET, type ReportDatePreset, reportPresetDateRange } from './report-date-presets'
@@ -12,10 +13,12 @@ export type ReportFilterFields = Readonly<{
   currencyKey: string | undefined
   includePending: boolean
   includeTransfers: boolean
+  /** One member or Shared; null is everyone. */
+  member: MemberFilter
 }>
 
 const EMPTY_FIELDS: ReportFilterFields = {
-  accountKeys: [], categoryKeys: [], merchantKeys: [], currencyKey: undefined, includePending: false, includeTransfers: false,
+  accountKeys: [], categoryKeys: [], merchantKeys: [], currencyKey: undefined, includePending: false, includeTransfers: false, member: null,
 }
 
 /**
@@ -38,6 +41,7 @@ export function useReportFilters(initialPreset: ReportDatePreset = DEFAULT_REPOR
       currencyKey: fields.currencyKey,
       includePending: fields.includePending,
       includeTransfers: fields.includeTransfers,
+      ...(fields.member === null ? {} : { memberKeys: [String(fields.member)] }),
       // The calendar the presets are computed in, so months and bank bookings land on the same days.
       timezone: deviceTimeZone(),
     }
@@ -50,6 +54,7 @@ export function useReportFilters(initialPreset: ReportDatePreset = DEFAULT_REPOR
     + (fields.currencyKey ? 1 : 0)
     + (fields.includePending ? 1 : 0)
     + (fields.includeTransfers ? 1 : 0)
+    + (fields.member !== null ? 1 : 0)
   ), [fields])
 
   const selectPreset = useCallback((next: ReportDatePreset) => setPreset(next), [])
@@ -59,10 +64,11 @@ export function useReportFilters(initialPreset: ReportDatePreset = DEFAULT_REPOR
   const setCurrencyKey = useCallback((currencyKey: string | undefined) => setFields((prev) => ({ ...prev, currencyKey })), [])
   const setIncludePending = useCallback((includePending: boolean) => setFields((prev) => ({ ...prev, includePending })), [])
   const setIncludeTransfers = useCallback((includeTransfers: boolean) => setFields((prev) => ({ ...prev, includeTransfers })), [])
+  const setMember = useCallback((member: MemberFilter) => setFields((prev) => ({ ...prev, member })), [])
   const resetFields = useCallback(() => setFields(EMPTY_FIELDS), [])
 
   return {
     preset, filters, fields, activeFilterCount,
-    selectPreset, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers, resetFields,
+    selectPreset, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers, setMember, resetFields,
   }
 }

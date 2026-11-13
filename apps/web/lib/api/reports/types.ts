@@ -24,6 +24,11 @@ export interface ReportFilters {
   merchantKeys?: string[];
   /** Tag keys; a transaction counts when it carries any of them. */
   tagKeys?: string[];
+  /**
+   * One household member's appuser key, or `shared` (the household as a whole); absent for
+   * everyone. Sent repeated, like the other arrays.
+   */
+  memberKeys?: string[];
   currencyKey?: string;
   includePending?: boolean;
   includeTransfers?: boolean;

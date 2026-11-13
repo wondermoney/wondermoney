@@ -4,6 +4,7 @@ import { Filter, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
+import { MemberFilterSelect } from "@/components/household/MemberFilterSelect";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip, FilterChipBar } from "@/components/ui/FilterChip";
@@ -19,6 +20,7 @@ import useAccounts from "@/lib/api/account/useAccounts";
 import useTransactionMerchants from "@/lib/api/account/useTransactionMerchants";
 import useCategories from "@/lib/api/category/useCategories";
 import useTags from "@/lib/api/tag/useTags";
+import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
 import { cn } from "@/lib/utils";
 import {
   getCategoryTranslationKey,
@@ -44,6 +46,7 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
   const { data: categoriesData } = useCategories();
   const { data: merchantsData } = useTransactionMerchants();
   const { data: tagsData } = useTags();
+  const { members } = useHouseholdMembers();
 
   const accounts = useMemo(
     () =>
@@ -105,6 +108,8 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
     setCurrencyKey,
     setIncludePending,
     setIncludeTransfers,
+    member,
+    setMember,
     resetFilters,
   } = useReportFilters();
 
@@ -255,6 +260,12 @@ export function ReportFiltersBar({ className }: ReportFiltersBarProps) {
       data-testid="report-filters-bar"
     >
       <DateRangePicker value={dateRange} onChange={setDateRange} />
+      {/* Beside the period, not in the panel: whose money a report covers frames every figure. */}
+      <MemberFilterSelect
+        members={members}
+        value={member}
+        onChange={setMember}
+      />
 
       {activeChips.length > 0 ? (
         <FilterChipBar className="order-last w-full">

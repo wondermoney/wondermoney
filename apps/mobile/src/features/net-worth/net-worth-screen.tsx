@@ -28,6 +28,8 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import type { BankAlertBannerModel } from '@/features/banking/bank-alerts-view-model'
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
 
 import { BankAlertBanner } from './bank-alert-banner'
 import {
@@ -125,6 +127,8 @@ export type NetWorthScreenProps = {
   onLinkPortfolio?: (portfolioId: number, accountLink: PortfolioAccountLinkInput) => Promise<PortfolioLinkSaveResult>
   /** Opens "Customize home"; omitted where the affordance should not show. */
   onCustomize?: () => void
+  /** Whose home this is: everyone, one member or Shared. Omitted (a household of one), not shown. */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 /**
@@ -137,7 +141,7 @@ export type NetWorthScreenProps = {
  * one section, not the page.
  */
 export function NetWorthScreen(props: NetWorthScreenProps) {
-  const { state, sections, today, onRefresh, layout = defaultDashboardLayout(), onCustomize } = props
+  const { state, sections, today, onRefresh, layout = defaultDashboardLayout(), onCustomize, memberFilter } = props
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -205,6 +209,11 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
               )}
               title={t('navigation.home')}
             />
+            {memberFilter ? (
+              <View style={styles.memberFilter}>
+                <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} />
+              </View>
+            ) : null}
             <NetWorthHero {...props} locale={locale} />
           </View>
 
@@ -419,6 +428,8 @@ function pointsInRange(points: readonly ResolvedHistoryPoint[], range: ChartRang
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  // The member filter sits under the title, at the start of the row, sized to its label.
+  memberFilter: { flexDirection: 'row' },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
   // Space, not rules, between Home's sections: 40pt and a strong heading.
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },

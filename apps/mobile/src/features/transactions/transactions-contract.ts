@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { parseRuleSuggestion } from '@/features/rules/rules-contract'
 import { transactionRowMerchantSchema } from '@/features/merchants/merchant-contract'
+import { SHARED_MEMBER, transactionAttributionSchema, type SpentByValue } from '@/features/household/member-attribution'
 import { tagSchema } from '@/features/tags/tags-contract'
 import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
@@ -114,6 +115,9 @@ const transactionBaseShape = {
   // Optional: a server from before them omits the field, and the row reads as unlinked. A
   // malformed list reads as none rather than failing the whole ledger.
   reimbursements: z.array(reimbursementLinkSchema).optional().catch([]),
+  // Who the money is attributed to ("Spent by"). Optional: an older API omits it, and a malformed
+  // value reads as none rather than failing the ledger.
+  attribution: transactionAttributionSchema.nullable().optional().catch(null),
 } as const
 
 const accountTransactionSchema = z.object(transactionBaseShape)
@@ -178,6 +182,8 @@ export type TransactionFilters = Readonly<{
   excludeNonSpending?: boolean
   /** The statuses that count; omitted leaves the API's default. */
   statuses?: readonly ('BOOKED' | 'PENDING')[]
+  /** Members' appuser keys or `shared`: only the rows attributed to them (the member filter). */
+  memberKeys?: readonly (number | typeof SHARED_MEMBER)[]
   limit?: 100 | 500
 }>
 export type TransactionDto = z.infer<typeof aggregateTransactionSchema>
@@ -204,6 +210,7 @@ export const transactionFilterParams = (filters: TransactionFilters, timeZone: s
   if (filters.excludeTransfers) values.excludeTransfers = 'true'
   if (filters.excludeNonSpending) values.excludeNonSpending = 'true'
   if (filters.statuses && filters.statuses.length > 0) values.statuses = filters.statuses.join(',')
+  if (filters.memberKeys && filters.memberKeys.length > 0) values.memberKeys = filters.memberKeys.join(',')
   return values
 }
 
@@ -302,6 +309,20 @@ export function createEditTransactionAmountEndpoint(transactionId: number) {
     method: 'PATCH',
     path: `/v1/account/transaction/${positiveId.parse(transactionId)}`,
     schema: z.unknown(),
+  })
+}
+
+/** "Spent by": a member, Shared, or `null` to follow the account again. */
+export type SpentByDraft = Readonly<{ transactionId: number; attributedAppuserKey: SpentByValue }>
+export type FrozenSpentBy = Readonly<{ transactionId: number; payload: Readonly<{ attributedAppuserKey: SpentByValue }> }>
+
+const spentByValue = z.union([z.literal(SHARED_MEMBER), positiveId]).nullable()
+
+/** The exact `PATCH /v1/account/transaction/:id` body that sets (or clears) "Spent by". */
+export function freezeSpentBy(draft: SpentByDraft): FrozenSpentBy {
+  return Object.freeze({
+    transactionId: positiveId.parse(draft.transactionId),
+    payload: Object.freeze({ attributedAppuserKey: spentByValue.parse(draft.attributedAppuserKey) }),
   })
 }
 

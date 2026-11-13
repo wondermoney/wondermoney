@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import Big from 'big.js';
 
 import { DI } from '@app/database/di';
+import { transactionAttributionSql } from '@service/household/member-attribution';
 import { categoryLinesSql } from '@service/transaction/category-lines';
 import { netOfReimbursementsSql, reimbursedAmountsSql } from '@service/transaction/reimbursement-sql';
 import { notExpiredTransactionSql } from '@service/transaction/transaction-status';
@@ -108,6 +109,7 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          account."account_key" as "accountKey", account."tenant_key" as "accountTenantKey",
          account."account_owner_appuser_key" as "accountOwnerAppuserKey", account."closed" as "accountClosed",
          (account."deleted_at" is not null) as "accountDeleted",
+         ${transactionAttributionSql('tx', 'account', tenantKey)} as "attribution",
          -- One row per category line: a split transaction's lines, or an unsplit one's assignment.
          line."appuser_transaction_category_key" as "assignmentKey", line."transaction_split_key" as "splitKey",
          line."appuser_settlement_amount"::text as "lineAmount",

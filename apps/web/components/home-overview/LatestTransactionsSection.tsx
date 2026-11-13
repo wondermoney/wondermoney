@@ -16,6 +16,7 @@ import useTransactionReviewSummary from "@/lib/api/account/useTransactionReviewS
 import useTransactions, {
   type Transaction,
 } from "@/lib/api/account/useTransactions";
+import { type MemberFilter, memberKeysFor } from "@/lib/household/member-attribution";
 import { cn } from "@/lib/utils";
 import { getCategoryDisplayName } from "@/lib/utils/categories";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
@@ -139,9 +140,17 @@ function ReviewStatusRow() {
   );
 }
 
-export function LatestTransactionsSection() {
+export function LatestTransactionsSection({
+  member = null,
+}: {
+  /** One member's transactions, or Shared's; null for everyone's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.latest");
-  const latest = useTransactions(LATEST);
+  const memberKeys = memberKeysFor(member);
+  const latest = useTransactions(
+    memberKeys ? { ...LATEST, memberKeys } : LATEST,
+  );
 
   if (latest.isPending) {
     return (

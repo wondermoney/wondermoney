@@ -3,6 +3,7 @@ import { type Expression, type Kysely, sql, type SqlBool } from 'kysely';
 import { DI } from '@app/app';
 import { anyOf, type SqlDatabase, sqlQuery } from '@app/database/sql';
 import { rateScope } from '@service/currency/exchange-rate';
+import type { MemberFilter } from '@service/household/member-attribution';
 import { completenessFromCounts, loadDailyRates, needsRateSql, type ReportCompleteness, transactionDaySql, type UnconvertedCount } from '@service/reports/report-currency';
 import { categoryLinesSql } from '@service/transaction/category-lines';
 import { type TransactionScope, transactionScopeExpression } from '@service/transaction/transaction-scope';
@@ -30,6 +31,8 @@ export interface BudgetSpendingInput {
   accountKeys: number[];
   /** The budget's currency: what its budgeted amounts are in, and what its spending is shown in. */
   currency: { code: string; currencyKey: number };
+  /** Only what these members spent, or Shared (`member-attribution.ts`); absent: the household's. */
+  members?: MemberFilter;
   period: 'annual' | 'monthly';
   /** The budget's `periodStartDay`: which days each row's month covers (`budget-period.ts`). */
   periodStartDay: number;
@@ -236,8 +239,8 @@ function categoryLines(input: BudgetRowsInput) {
  * open. Categories that are not spending are left out line by line (`category_line.counts_as_spending`),
  * so the row-level rule is off here.
  */
-export function budgetScope(input: Pick<BudgetRowsInput, 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
-  return { includeHidden: false, includeNonSpending: true, includeTransfers: false, openAccountsOnly: true, statuses: 'not-expired', tenantKey: input.tenantKey, viewerAppuserKey: input.viewerAppuserKey };
+export function budgetScope(input: Pick<BudgetRowsInput, 'members' | 'tenantKey' | 'viewerAppuserKey'>): TransactionScope {
+  return { includeHidden: false, includeNonSpending: true, includeTransfers: false, members: input.members, openAccountsOnly: true, statuses: 'not-expired', tenantKey: input.tenantKey, viewerAppuserKey: input.viewerAppuserKey };
 }
 
 /**

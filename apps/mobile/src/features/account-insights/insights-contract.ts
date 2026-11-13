@@ -76,9 +76,12 @@ const dateQuery = (scope: DateScope, includeTo = true, timeZone = deviceTimeZone
   return values.join('&')
 }
 const withQuery = (path: string, query: string) => (query ? `${path}?${query}` : path)
+/** The member filter (`memberKeys`), which the cash flow and spending endpoints take; absent is everyone. */
+const memberQuery = (memberKeys?: string) => (memberKeys ? `memberKeys=${encodeURIComponent(memberKeys)}` : '')
+const joinQuery = (...parts: string[]) => parts.filter(Boolean).join('&')
 
 export const createAggregateMetricsEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: withQuery('/v1/account/metrics', dateQuery(scope)), schema: metricsResponseSchema })
 /** Without `fromDate` the API uses its own default period, as web's account page does. */
 export const createAccountMetricsEndpoint = (accountId: number, fromDate?: string) => readEndpoint({ method: 'GET', path: withQuery(`/v1/account/${accountId}/metrics`, fromDate ? dateQuery({ fromDate, toDate: fromDate }, false) : ''), schema: metricsResponseSchema })
-export const createCashflowEndpoint = (scope: DateScope) => readEndpoint({ method: 'GET', path: withQuery('/v1/account/cashflow', dateQuery(scope)), schema: cashflowResponseSchema })
-export const createCategorySpendingEndpoint = (scope: DateScope, limit: number) => readEndpoint({ method: 'GET', path: `/v1/account/transaction/category-spending?${[dateQuery(scope), `limit=${limit}`].filter(Boolean).join('&')}`, schema: categorySpendingResponseSchema })
+export const createCashflowEndpoint = (scope: DateScope, memberKeys?: string) => readEndpoint({ method: 'GET', path: withQuery('/v1/account/cashflow', joinQuery(dateQuery(scope), memberQuery(memberKeys))), schema: cashflowResponseSchema })
+export const createCategorySpendingEndpoint = (scope: DateScope, limit: number, memberKeys?: string) => readEndpoint({ method: 'GET', path: `/v1/account/transaction/category-spending?${joinQuery(dateQuery(scope), `limit=${limit}`, memberQuery(memberKeys))}`, schema: categorySpendingResponseSchema })

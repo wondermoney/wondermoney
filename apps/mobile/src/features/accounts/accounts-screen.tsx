@@ -11,6 +11,8 @@ import { accountMark, EntityMark } from '@/components/ui/entity-mark'
 import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { IconButton } from '@/components/ui/icon-button'
 import { List, ListRow } from '@/components/ui/list-row'
+import { attributionMark, attributionName, NO_HOUSEHOLD_MEMBERS, type HouseholdMembersModel } from '@/features/household/member-attribution'
+import { MemberBadge } from '@/features/household/member-badge'
 import { Notice } from '@/components/ui/notice'
 import { PageHeader } from '@/components/ui/page-header'
 import { PreviewLabel } from '@/components/ui/preview-label'
@@ -84,6 +86,8 @@ export type AccountsScreenProps = {
   onImportTransactions?: () => void
   /** Saves this member's account order. Absent, the reorder control is hidden. */
   onReorderAccounts?: (accountIds: number[]) => void | Promise<void>
+  /** The household; with more than one member each account row says whose it is (or Shared). */
+  members?: HouseholdMembersModel
 }
 
 const LAST_TRANSACTIONS = 8
@@ -109,6 +113,7 @@ export function AccountsScreen({
   onTimeframeChange,
   onImportTransactions,
   onReorderAccounts,
+  members = NO_HOUSEHOLD_MEMBERS,
 }: AccountsScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
@@ -380,6 +385,7 @@ export function AccountsScreen({
                     account={account}
                     key={account.accountId}
                     locale={locale}
+                    members={members}
                     onMore={reorderOpen || !onEditAccount ? undefined : setMenuAccount}
                     onSelect={reorderOpen ? undefined : selectAccount}
                     reorder={reorderOpen ? {
@@ -452,10 +458,11 @@ function SectionBody<T>({ state, render }: { state: SectionState<T>; render: (da
  * differ, and the "…" menu. Memoized so a period change doesn't re-format
  * every row.
  */
-const AccountRow = memo(function AccountRow({ account, separated, locale, onSelect, onMore, reorder }: {
+const AccountRow = memo(function AccountRow({ account, separated, locale, members, onSelect, onMore, reorder }: {
   account: AccountSummaryViewModel
   separated: boolean
   locale: string
+  members: HouseholdMembersModel
   onSelect?: (accountId: number) => void
   onMore?: (account: AccountSummaryViewModel) => void
   reorder?: {
@@ -473,6 +480,7 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   const updated = synced ? t('accounts.updated', { date: synced }) : null
   const shared = !account.isOwnedByViewer && account.ownerFirstName ? t('accountsOverview.sharedBy', { name: account.ownerFirstName }) : null
   const metaLine = [shared, account.institutionDisplayName, updated].filter(Boolean).join(' · ')
+  const memberMark = attributionMark(account.attribution, members)
   const money = (value: number, currency: string) => formatMoney(value, { locale, currency })
   const fx = account.fx ?? { status: 'exact' as const }
   const fxCopy = describeFxState(fx, t, locale)
@@ -491,6 +499,7 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
     name,
     account.isPrivate ? t('accountsOverview.private') : null,
     viewOnly ? t('accountsOverview.viewOnly') : null,
+    memberMark ? attributionName(memberMark, t) : null,
     shared,
     account.institutionDisplayName,
     primary,
@@ -503,10 +512,11 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   return (
     <ListRow
       accessibilityLabel={accessibilityLabel}
-      badge={account.isPrivate || viewOnly ? (
+      badge={account.isPrivate || viewOnly || memberMark ? (
         <View style={styles.badges}>
           {account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : null}
           {viewOnly ? <Badge label={t('accountsOverview.viewOnly')} testID="account-view-only" tone="outline" /> : null}
+          <MemberBadge mark={memberMark} testID="account-member-badge" />
         </View>
       ) : undefined}
       figure={unconverted

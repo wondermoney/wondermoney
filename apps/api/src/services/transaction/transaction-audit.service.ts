@@ -150,6 +150,7 @@ const ALLOWED_CHANGE_FIELDS = new Set([
   'appuserCurrencyBalance',
   'appuserCurrencyExchangeRate',
   'appuserSettlementAmount',
+  'attribution',
   'balance',
   'categoryKey',
   'description',

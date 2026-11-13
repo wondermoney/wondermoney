@@ -116,6 +116,19 @@
       "left": "Has salido del hogar",
       "error": "Algo salió mal. Inténtalo de nuevo."
     },
-    "loadError": "No pudimos cargar tu hogar. Inténtalo de nuevo."
+    "loadError": "No pudimos cargar tu hogar. Inténtalo de nuevo.",
+    "attribution": {
+      "filterLabel": "Miembro",
+      "everyone": "Todos",
+      "shared": "Compartido",
+      "spentBy": "Gastado por",
+      "spentByDescription": "A quién se atribuye este gasto en los informes, los presupuestos y el filtro por miembro.",
+      "accountDefault": "Predeterminado de la cuenta ({name})",
+      "accountDefaultPlain": "Predeterminado de la cuenta",
+      "spentBySaved": "Gastado por actualizado",
+      "spentByError": "No se ha podido cambiar quién hizo este gasto",
+      "jointAccount": "Cuenta conjunta",
+      "jointAccountDescription": "Sus gastos cuentan como Compartido. Esto no cambia quién puede verla."
+    }
   }
 }

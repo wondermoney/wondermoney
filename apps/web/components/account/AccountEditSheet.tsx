@@ -34,6 +34,8 @@ import {
   isDemoReadOnlyError,
   isHouseholdReadOnlyError,
 } from "@/lib/api/errors";
+import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
+import { invalidateSpendingTotals } from "@/lib/utils/queryInvalidation";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -52,6 +54,10 @@ interface AccountEditSheetProps {
   accountName: string;
   accountKey: number;
   isOpen: boolean;
+  /** The caller owns the account (`myAccess` `owner`): only the owner may mark it joint. */
+  isOwner?: boolean;
+  /** Its spending counts as Shared. Only the owner of a multi-member household sees the switch. */
+  isJoint?: boolean;
   /** The card's cycle and limit, or null when the account is not a credit card. */
   creditCard?: CreditCardSettings | null;
   onOpenChange: (open: boolean) => void;
@@ -59,6 +65,7 @@ interface AccountEditSheetProps {
 
 const formSchema = z.object({
   accountName: z.string(),
+  isJoint: z.boolean(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -72,14 +79,20 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   accountName,
   accountKey,
   isOpen,
+  isOwner = false,
+  isJoint = false,
   creditCard = null,
   onOpenChange,
 }) => {
   const t = useTranslations();
   const posthog = usePostHog();
+  const { members } = useHouseholdMembers();
+  // Attribution only means something with someone to attribute to; the API also refuses it
+  // (403 `account_owner_required`) from anyone but the owner.
+  const canSetJoint = isOwner && members.length > 1;
   const methods = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { accountName },
+    defaultValues: { accountName, isJoint },
   });
   const {
     handleSubmit,
@@ -168,12 +181,17 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
       sharingChanged(shares.members, sharingStart, sharing)
         ? sharesRequest(shares.members, sharing)
         : null;
+    // Sent only when it changed: who the spending belongs to moves every member total.
+    const jointChanged = canSetJoint && data.isJoint !== isJoint;
     let step: "account" | "sharing" = "account";
+    let accountSaved = false;
     try {
       await editAccountMutation.mutateAsync({
         accountKey,
         accountName: data.accountName,
+        ...(jointChanged ? { isJoint: data.isJoint } : {}),
       });
+      accountSaved = true;
       if (sharesBody) {
         step = "sharing";
         await updateShares.mutateAsync(sharesBody);
@@ -198,6 +216,12 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
         ),
       );
     } finally {
+      if (jointChanged && accountSaved) {
+        await Promise.all([
+          invalidateSpendingTotals(qc),
+          qc.invalidateQueries({ queryKey: ["net-worth"] }),
+        ]);
+      }
       await qc.invalidateQueries({ queryKey: ["accounts"], exact: true });
       await qc.invalidateQueries({ queryKey: ["account", accountKey] });
       await qc.invalidateQueries({
@@ -240,6 +264,29 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
               onChange={setSharing}
               disabled={isSubmitting}
             />
+            {canSetJoint && (
+              <FormField
+                control={methods.control}
+                name="isJoint"
+                render={({ field }) => (
+                  <FormItem className="mt-6 flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <FormLabel>{t("household.attribution.jointAccount")}</FormLabel>
+                      <p className="text-muted-foreground text-xs">
+                        {t("household.attribution.jointAccountDescription")}
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="border-border mt-8 border-t pt-6">
               <div className="flex items-start justify-between gap-4">

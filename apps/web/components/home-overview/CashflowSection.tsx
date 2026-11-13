@@ -22,6 +22,7 @@ import {
   type SavingsSummary,
   savingsSummary,
 } from "@/lib/home/month-overview";
+import { type MemberFilter, memberKeysFor } from "@/lib/household/member-attribution";
 import { cn } from "@/lib/utils";
 import { formatPercentageForLocale } from "@/lib/utils/formatPercentage";
 
@@ -201,7 +202,12 @@ function ThisMonthSummary({
  * Above them, this month's income, spending and savings rate, each with its
  * change from the comparison period.
  */
-export function CashflowSection() {
+export function CashflowSection({
+  member = null,
+}: {
+  /** One member's money in and out, or Shared's; null for the household's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.cashflow");
   const locale = useLocale();
   const today = useMemo(() => new Date(), []);
@@ -213,9 +219,11 @@ export function CashflowSection() {
   const comparisonRange = useMemo(() => monthComparisonRange(today), [today]);
   // The current month is month-to-date: bound the read at today, so a
   // future-dated row cannot make the summary claim more than has happened.
+  const memberKeys = memberKeysFor(member);
   const { data, isPending, error, refetch } = useAccountsCashflow({
     fromDate,
     toDate: today,
+    ...(memberKeys ? { memberKeys } : {}),
   });
   // The same-point comparison is a second, bounded read of the same endpoint,
   // and only worth making when this month has a row to compare.
@@ -225,11 +233,12 @@ export function CashflowSection() {
     {
       fromDate: comparisonRange.from,
       toDate: comparisonRange.to,
+      ...(memberKeys ? { memberKeys } : {}),
     },
     { enabled: hasCurrentMonth },
   );
   // The cash flow is summed in the user's currency, which net worth reports.
-  const { data: netWorthData } = useNetWorth();
+  const { data: netWorthData } = useNetWorth(undefined, member);
   const currency = netWorthData?.netWorth.currencyCode;
 
   if (isPending) {

@@ -18,6 +18,8 @@ export type ReportFilters = Readonly<{
   currencyKey?: string
   includePending?: boolean
   includeTransfers?: boolean
+  /** Members' appuser keys or `shared` (the member filter); the household's when absent. */
+  memberKeys?: readonly string[]
   /** IANA time zone the period's days and months are in; the API's default when absent. */
   timezone?: string
   /** Month-comparison only: the month examined (`YYYY-MM`). */
@@ -36,6 +38,7 @@ function reportQuery(filters: ReportFilters): string {
   if (filters.currencyKey !== undefined) params.set('currencyKey', filters.currencyKey)
   if (filters.includePending) params.set('includePending', 'true')
   if (filters.includeTransfers) params.set('includeTransfers', 'true')
+  if (filters.memberKeys?.length) params.set('memberKeys', filters.memberKeys.join(','))
   if (filters.timezone) params.set('timezone', filters.timezone)
   if (filters.base) params.set('base', filters.base)
   if (filters.compare) params.set('compare', filters.compare)

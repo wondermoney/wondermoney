@@ -8,6 +8,9 @@ import { Text } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { NO_HOUSEHOLD_MEMBERS } from '@/features/household/member-attribution'
+import { MemberFilterField } from '@/features/household/member-filter-control'
+
 import { ReportCurrencyPicker } from './report-currency-picker'
 import { Icon } from '@/components/ui/icon'
 import { ReportMultiSelectPicker } from './report-multi-select-picker'
@@ -32,7 +35,9 @@ export function ReportFilterPanel({ filterState, filterOptions }: ReportFilterPa
   const { t } = useTranslation()
   const palette = usePalette()
   const [open, setOpen] = useState(false)
-  const { fields, activeFilterCount, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers } = filterState
+  const { fields, activeFilterCount, setAccountKeys, setCategoryKeys, setMerchantKeys, setCurrencyKey, setIncludePending, setIncludeTransfers, setMember } = filterState
+  // Older callers and test doubles may not carry the household; it then reads as one member.
+  const members = filterOptions.members ?? NO_HOUSEHOLD_MEMBERS
 
   const triggerLabel = t('reports.filters.openLabel', { suffix: activeFilterCount > 0 ? t('reports.filters.activeCount', { count: activeFilterCount }) : '' })
   const title = t('reports.filters.title')
@@ -55,6 +60,7 @@ export function ReportFilterPanel({ filterState, filterOptions }: ReportFilterPa
           </View>
           <ScrollView contentContainerStyle={styles.sheetBody} keyboardShouldPersistTaps="handled">
             <View style={styles.fields}>
+              <MemberFilterField model={members} onChange={setMember} value={fields.member ?? null} />
               <ReportMultiSelectPicker label={t('reports.filters.accounts')} options={filterOptions.accounts} selected={fields.accountKeys} onChange={setAccountKeys} palette={palette} />
               <ReportMultiSelectPicker label={t('reports.filters.categories')} options={filterOptions.categories} selected={fields.categoryKeys} onChange={setCategoryKeys} palette={palette} />
               <ReportMultiSelectPicker label={t('reports.filters.merchants')} options={filterOptions.merchants} selected={fields.merchantKeys} onChange={setMerchantKeys} palette={palette} />

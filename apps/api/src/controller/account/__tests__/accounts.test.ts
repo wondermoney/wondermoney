@@ -23,6 +23,8 @@ vi.mock('@service/account/account-access', async (importOriginal) => ({
   loadAccountAccess: vi.fn(async () => new Map()),
 }));
 
+// The household's members name each account's attribution; this EM double holds none.
+vi.mock('@service/household/member-attribution', async (original) => ({ ...(await original<object>()), loadActiveMembers: vi.fn().mockResolvedValue(new Map()) }));
 vi.mock('../../../app.js', () => ({
   DI: {
     em: {
@@ -63,6 +65,7 @@ const account = (overrides: AccountFixtureOverrides = {}) => ({
   appuserCurrencyBalance: 0,
   balance: 0,
   currencyKey: { code: 'EUR' },
+  isJoint: false,
   isPrivate: false,
   nordigenRequisitionKey: undefined,
   refreshedAt: undefined,
@@ -161,11 +164,14 @@ describe('getAccount', () => {
         csvImportFormat: 'generic',
         currencyKey: { code: 'GBP' },
         // A foreign balance with no converted amount was not converted.
+        attribution: { appuserKey: null, displayName: null },
         fxRateDate: null,
         fxStatus: 'missing',
+        isJoint: false,
         isOwnedByViewer: false,
         isPrivate: false,
         myAccess: 'write',
+        ownerAppuserKey: null,
         ownerFirstName: null,
         refreshedAt: '2026-07-18T10:15:00.000Z',
         source: 'open_banking',
@@ -322,6 +328,7 @@ describe('getAccounts', () => {
           accountType: null,
           appuserCurrencyAvailableBalance: 0,
           appuserCurrencyBalance: 0,
+          attribution: { appuserKey: null, displayName: null },
           availableBalance: 0,
           balance: 0,
           creditCard: null,
@@ -329,9 +336,11 @@ describe('getAccounts', () => {
           currencyKey: { code: 'EUR' },
           fxRateDate: null,
           fxStatus: 'exact',
+          isJoint: false,
           isOwnedByViewer: false,
           isPrivate: false,
           myAccess: 'write',
+          ownerAppuserKey: null,
           ownerFirstName: null,
           refreshedAt: '2026-07-17T09:30:00.000Z',
           source: 'open_banking',
@@ -345,6 +354,7 @@ describe('getAccounts', () => {
           accountType: null,
           appuserCurrencyAvailableBalance: null,
           appuserCurrencyBalance: null,
+          attribution: { appuserKey: null, displayName: null },
           availableBalance: null,
           balance: null,
           creditCard: null,
@@ -352,9 +362,11 @@ describe('getAccounts', () => {
           currencyKey: { code: 'EUR' },
           fxRateDate: null,
           fxStatus: 'exact',
+          isJoint: false,
           isOwnedByViewer: false,
           isPrivate: false,
           myAccess: 'write',
+          ownerAppuserKey: null,
           ownerFirstName: null,
           refreshedAt: null,
           source: 'manual',

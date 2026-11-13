@@ -301,6 +301,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "is_joint": {
+          "name": "is_joint",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "is_private": {
           "name": "is_private",
           "type": "boolean",
@@ -25482,6 +25499,40 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "attributed_appuser_key": {
+          "name": "attributed_appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "attributed_to_shared": {
+          "name": "attributed_to_shared",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "balance": {
           "name": "balance",
           "type": "numeric(18,4)",
@@ -26316,6 +26367,11 @@
       ],
       "checks": [
         {
+          "name": "transaction_attribution_single_check",
+          "expression": "not (\"attributed_to_shared\" and \"attributed_appuser_key\" is not null)",
+          "definition": "check (not (\"attributed_to_shared\" and \"attributed_appuser_key\" is not null))"
+        },
+        {
           "name": "transaction_categorization_confidence_check",
           "expression": "\"categorization_confidence\" in ('high', 'low', 'medium', 'none')",
           "definition": "check (\"categorization_confidence\" in ('high', 'low', 'medium', 'none'))",
@@ -26364,6 +26420,18 @@
             "appuser_key"
           ],
           "constraintName": "transaction_appuser_key_foreign",
+          "localTableName": "public.transaction",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "set null"
+        },
+        "transaction_attributed_appuser_key_foreign": {
+          "columnNames": [
+            "attributed_appuser_key"
+          ],
+          "constraintName": "transaction_attributed_appuser_key_foreign",
           "localTableName": "public.transaction",
           "referencedColumnNames": [
             "appuser_key"

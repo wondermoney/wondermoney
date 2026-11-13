@@ -1,4 +1,5 @@
 import type { ReportFilters } from "@/lib/api/reports/types";
+import { MEMBER_FILTER_PARAM } from "@/lib/household/member-attribution";
 
 /**
  * The rows behind a report total, as the transaction list asks the API for them.
@@ -26,6 +27,12 @@ export interface TransactionReportScope {
   merchantKeys: string[];
   /** The report's currency filter: rows stored in this member currency. */
   memberCurrency?: string;
+  /**
+   * The report's member filter. It travels as the transactions page's own `member` filter
+   * (`lib/household/useMemberFilter.ts`), not as part of the scope, so the page reads it from
+   * there and the list's member control shows it.
+   */
+  memberKeys?: string[];
 }
 
 const TRANSACTIONS_PATH = "/accounts/transactions";
@@ -48,6 +55,7 @@ export function reportTransactionScope(
     tagKeys: filters.tagKeys ?? [],
     merchantKeys: filters.merchantKeys ?? [],
     memberCurrency: filters.currencyKey,
+    ...(filters.memberKeys?.length ? { memberKeys: filters.memberKeys } : {}),
   };
 }
 
@@ -68,6 +76,8 @@ export function transactionReportScopeHref(scope: TransactionReportScope): strin
   list("tagKeys", scope.tagKeys);
   list("merchantKeys", scope.merchantKeys);
   if (scope.memberCurrency) params.set("memberCurrency", scope.memberCurrency);
+  const member = scope.memberKeys?.[0];
+  if (member) params.set(MEMBER_FILTER_PARAM, member);
   return `${TRANSACTIONS_PATH}?${params.toString()}`;
 }
 

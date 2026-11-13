@@ -62,7 +62,8 @@ export function sortByAbsoluteChangeDesc(
 /**
  * The report covers every household portfolio over the period; the account,
  * category, merchant and transaction filters don't apply to it, so they are
- * not sent (and changing them does not refetch it).
+ * not sent (and changing them does not refetch it). The member filter does: it
+ * narrows the report to that member's portfolios.
  */
 export function portfolioPerformanceFilters(
   filters: ReportFilters,
@@ -71,5 +72,6 @@ export function portfolioPerformanceFilters(
     ...(filters.fromDate ? { fromDate: filters.fromDate } : {}),
     ...(filters.toDate ? { toDate: filters.toDate } : {}),
     ...(filters.timezone ? { timezone: filters.timezone } : {}),
+    ...(filters.memberKeys?.length ? { memberKeys: filters.memberKeys } : {}),
   };
 }

@@ -3,6 +3,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { classifyTransactions, createDiagnostics } from '@service/budget/aggregation-classifier';
 import type { TenantAggregationRepository, TransactionAggregationRow } from '@service/budget/aggregation-types';
 import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
+import { matchesMemberFilter, parseMemberFilter } from '@service/household/member-attribution';
 import { INSIGHTS } from '@service/insights/insights.constants';
 import { compareSpendingToNormal, type SpendingComparison } from '@service/insights/insights.generators';
 import type { SpendingBaselineMonth, SpendingVsNormalInput } from '@service/insights/insights.types';
@@ -30,7 +31,7 @@ import { monthRange, resolveReportTimeZone } from './report-months';
  * The rows come through the aggregation repository the weekly and monthly emails use, so the
  * viewer's currency, the transfer and non-spending exclusions and the privacy rule are #108's.
  * The report filters it applies on top are the ones that are expressible on those rows: the
- * account filter and the category filter. `includePending`, `includeTransfers`, `merchantKeys`,
+ * account filter, the category filter and the member filter. `includePending`, `includeTransfers`, `merchantKeys`,
  * `tagKeys` and `currencyKey` are not applied: the insight's definition counts a pending row as
  * committed, never counts a transfer or a non-spending category, and values every row in the
  * viewer's currency. Applying them here would make the report disagree with the insight it
@@ -134,7 +135,10 @@ export class SpendingVsNormalReportService {
       start: new Date(oldestBaseline.fromDate),
     });
     const diagnostics = createDiagnostics();
-    const transactions = classifyTransactions(rows, user.appuserKey, tenant.tenantKey, diagnostics);
+    // A member filter keeps those members' rows (`member-attribution.ts`); whether the baseline is
+    // complete is still read from every row, below.
+    const members = parseMemberFilter(filters.memberKeys);
+    const transactions = classifyTransactions(rows.filter((row) => matchesMemberFilter(row.attribution ?? null, members)), user.appuserKey, tenant.tenantKey, diagnostics);
 
     const accountKeys = numberFilter(filters.accountKeys);
     const categoryKeys = numberFilter(filters.categoryKeys);

@@ -28,23 +28,29 @@ const mockDismiss = jest.fn()
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ signOut: jest.fn() }) }))
-jest.mock('./use-net-worth', () => ({ useNetWorth: () => mocks.netWorth }))
-jest.mock('./use-net-worth-history', () => ({ useNetWorthHistory: () => mocks.history }))
+// The member each hook was last asked for (the member filter), by hook.
+const mockMemberArgs: Record<string, unknown> = {}
+let mockHouseholdMembers: unknown = null
+jest.mock('@/features/household/use-household-members', () => ({
+  useHouseholdMembers: () => mockHouseholdMembers ?? jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS,
+}))
+jest.mock('./use-net-worth', () => ({ useNetWorth: (member?: string) => { mockMemberArgs.netWorth = member; return mocks.netWorth } }))
+jest.mock('./use-net-worth-history', () => ({ useNetWorthHistory: (_months: number, member?: string) => { mockMemberArgs.history = member; return mocks.history } }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mocks.accounts }))
 jest.mock('@/features/budgets/use-budgets', () => ({ useBudgets: () => mocks.budgets }))
 jest.mock('@/features/loans/use-loans', () => ({ useLoans: () => mocks.loans }))
 jest.mock('@/features/transactions/use-transactions', () => ({
-  useTransactions: () => mocks.latest,
+  useTransactions: (filters: unknown) => { mockMemberArgs.latest = filters; return mocks.latest },
 }))
 jest.mock('@/features/transactions/use-transaction-review-summary', () => ({
   useTransactionReviewSummary: () => mocks.reviewSummary,
 }))
-jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: () => mocks.insight }))
+jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: (_now: unknown, member?: string) => { mockMemberArgs.insight = member; return mocks.insight } }))
 jest.mock('@/features/insights/use-insights', () => ({ useInsights: () => mocks.insights }))
 jest.mock('./use-home-data', () => ({
   useHomeBudgetMonths: () => mockMonths,
-  useHomeCashflow: () => mocks.cashflow,
-  useHomeCashflowComparison: () => mocks.cashflowComparison,
+  useHomeCashflow: (_today: Date, member?: string) => { mockMemberArgs.cashflow = member; return mocks.cashflow },
+  useHomeCashflowComparison: (_today: Date, member?: string) => { mockMemberArgs.cashflowComparison = member; return mocks.cashflowComparison },
   useHomePortfolios: () => mocks.portfolios,
 }))
 let mockBankAlertBanner: unknown = null
@@ -102,6 +108,7 @@ describe('NetWorthRoute', () => {
     mockDismissLink.mockClear()
     mockLinkMutate.mockReset()
     mockMonths = []
+    mockHouseholdMembers = null
     mocks = {
       netWorth: loaded(netWorthData),
       history: loaded({ currencyCode: 'EUR', granularity: 'monthly', readiness: 'ready', points: [] }),
@@ -116,6 +123,32 @@ describe('NetWorthRoute', () => {
       cashflowComparison: loaded({ cashflow: [] }),
       portfolios: loaded({ portfolios: [] }),
     }
+  })
+
+  it('offers no member filter in a household of one', async () => {
+    const view = await renderRoute()
+    expect(view.queryByTestId('member-filter')).toBeNull()
+    expect(mockMemberArgs.netWorth).toBeUndefined()
+  })
+
+  it('narrows net worth, cash flow, spending and the latest transactions to the chosen member', async () => {
+    const { householdMembersModel } = jest.requireActual<typeof import('@/features/household/member-attribution')>('@/features/household/member-attribution')
+    mockHouseholdMembers = householdMembersModel({
+      members: [
+        { appuserKey: 11, emailAddress: 'ana@example.test', firstName: 'Ana', role: 'owner' },
+        { appuserKey: 12, emailAddress: 'bruno@example.test', firstName: 'Bruno', role: 'member' },
+      ],
+      maxMembers: 6,
+      pendingInvites: [],
+      viewerAppuserKey: 11,
+    })
+    const view = await renderRoute()
+    await fireEvent.press(view.getByTestId('member-filter'))
+    await fireEvent.press(view.getByRole('radio', { name: 'Bruno' }))
+    expect(mockMemberArgs).toMatchObject({ netWorth: '12', history: '12', cashflow: '12', cashflowComparison: '12', insight: '12', latest: { memberKeys: [12] } })
+    await fireEvent.press(view.getByTestId('member-filter'))
+    await fireEvent.press(view.getByRole('radio', { name: 'Shared' }))
+    expect(mockMemberArgs).toMatchObject({ netWorth: 'shared', cashflow: 'shared', latest: { memberKeys: ['shared'] } })
   })
 
   it('renders Home with the figure and the oldest balance refresh', async () => {

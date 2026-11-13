@@ -18,6 +18,7 @@ jest.mock('./use-account-metadata-mutation', () => ({ useAccountMetadataMutation
 jest.mock('./use-account-delete-mutation', () => ({ useAccountDeleteMutation: () => mockDeleteMutation }))
 jest.mock('./use-account-shares', () => ({ useAccountShares: (...args: unknown[]) => mockUseAccountShares(...args), useAccountSharesMutation: () => mockSharesMutation }))
 jest.mock('./use-credit-card-mutation', () => ({ useCreditCardMutation: () => ({ isPending: false, mutateAsync: jest.fn() }) }))
+jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS }))
 jest.mock('./account-edit-screen', () => ({
   AccountEditScreen: ({ state, sharing, onSaveAccount, onSaveSharing, onDeleteAccount }: { state: { status: string; model?: { name: string; myAccess?: string } }; sharing: { status: string }; onSaveAccount: (value: { accountName?: string; isPrivate?: boolean }) => Promise<void>; onSaveSharing: (value: { isPrivate: boolean; shares: { appuserKey: number; access: 'read' | 'write' }[] }) => Promise<void>; onDeleteAccount: () => Promise<void> }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')

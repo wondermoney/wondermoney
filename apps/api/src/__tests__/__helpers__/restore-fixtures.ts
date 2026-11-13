@@ -198,6 +198,10 @@ export async function richHousehold(em: EntityManager) {
   globalRun.installmentUnlinkedPlanKey = sofa;
   // The pending purchase counts in the March statement, whatever its date.
   globalRun.statementDateOverride = new Date('2026-03-01');
+  // The dollar account is joint; the salary is marked Shared and the grocery run names its member.
+  dollars.isJoint = true;
+  salary.attributedToShared = true;
+  groceryRun.attributedAppuserKey = owner.appuser;
   // The member's own account order, and a saved entry naming a merchant nothing else reaches.
   em.create(AppuserAccountPosition, { accountKey: savings, appuserKey: owner.appuser, position: 0 }, { partial: true });
   em.create(AppuserAccountPosition, { accountKey: current, appuserKey: owner.appuser, position: 1 }, { partial: true });

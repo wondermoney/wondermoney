@@ -100,6 +100,7 @@ const ICONS = {
   // Privacy mode: amounts shown / hidden.
   eye: { ios: 'eye', android: 'visibility', web: 'visibility' },
   'eye-off': { ios: 'eye.slash', android: 'visibility_off', web: 'visibility_off' },
+  users: { ios: 'person.2', android: 'group', web: 'group' },
 } as const satisfies Record<string, SymbolName>
 
 export type IconName = keyof typeof ICONS

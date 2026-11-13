@@ -13,6 +13,7 @@ import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
 import { type CurrencyPair, loadRateTable, rateScope, type RateTable } from '@service/currency/exchange-rate';
+import { accountAttributionOf, loadActiveMembers, matchesMemberFilter, type MemberFilter } from '@service/household/member-attribution';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
 import { assetValueFor, currentAssetValueFor, loadAssetRates, type LoadedManualAsset, loadVisibleManualAssets, manualAssetRatePairs } from '@service/manual-asset/manual-asset.service';
 import { portfolioCountedInAccount, type PortfolioLinkFields, shouldSuggestPortfolioLink } from '@service/portfolio/portfolio-account-link';
@@ -106,21 +107,36 @@ interface NetWorthSourceRow extends NetWorthInputRow {
   supportedCurrency?: boolean;
 }
 
+/** Which members' net worth to count (`member-attribution.ts`); absent: the household's. */
+export interface NetWorthOptions {
+  members?: MemberFilter;
+}
+
+type OwnerRef = null | undefined | { appuserKey: number };
+
+/**
+ * The part of the household's net worth a member filter keeps, from what the viewer already sees:
+ * an account by its attribution (its owner, or Shared when joint), a portfolio and a manual asset by
+ * their owner, and the viewer's loans only when the viewer is one of the members asked for (another
+ * member's loans are never the viewer's to see). An owner who has left the household counts as
+ * Shared. With no filter, everything.
+ */
 export class NetWorthService {
-  async getNetWorth(appuser: Appuser): Promise<NetWorthSummary> {
+  async getNetWorth(appuser: Appuser, options: NetWorthOptions = {}): Promise<NetWorthSummary> {
     const currencyCode = await this.resolveCurrencyCode(appuser);
     const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser);
     if (!appuserTenant) {
       throw new Error("User doesn't have AppuserTenant");
     }
+    const selection = await memberSelection(resolveTenantKeyNumber(appuserTenant.tenantKey), appuser.appuserKey, options.members);
 
-    const [accounts, portfolioRows, manualAssets, loans] = await Promise.all([
+    const [allAccounts, portfolioRows, allManualAssets, allLoans] = await Promise.all([
       DI.em.find(
         Account,
         { deletedAt: undefined, tenantKey: appuserTenant.tenantKey },
         { orderBy: { createdAt: 'DESC' }, populate: [...ACCOUNT_BALANCE_POPULATE, 'accountTypeKey'] },
       ),
-      this.getPortfolioRows(appuser, appuserTenant.tenantKey),
+      this.getPortfolioRows(appuser, appuserTenant.tenantKey, selection.owner),
       // Carries the tenant and the privacy rule itself: the other member's private asset is never loaded.
       loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(
@@ -129,6 +145,9 @@ export class NetWorthService {
         { populate: ['currencyKey'] },
       ),
     ]);
+    const accounts = allAccounts.filter(selection.account);
+    const manualAssets = allManualAssets.filter(({ asset }) => selection.owner(asset.ownerAppuserKey as OwnerRef));
+    const loans = selection.loans ? allLoans : [];
 
     const asOf = new Date();
     const loanRows = await Promise.all(
@@ -201,14 +220,15 @@ export class NetWorthService {
 
     return {
       ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, manualAssets: manualAssetRows, portfolios, unconvertedCurrencies: [...unconvertedCurrencies, ...unconvertedAssetCurrencies], unsupportedCurrencies }),
-      suggestPortfolioLink: shouldSuggestPortfolioLink(accounts, portfolioRows.map((row) => row.link)),
+      suggestPortfolioLink: shouldSuggestPortfolioLink(allAccounts, portfolioRows.map((row) => row.link)),
     };
   }
 
-  async getNetWorthHistory(appuser: Appuser, options?: { granularity?: NetWorthHistoryGranularity; months?: number; toDate?: Date }): Promise<NetWorthHistorySummary> {
+  async getNetWorthHistory(appuser: Appuser, options?: NetWorthOptions & { granularity?: NetWorthHistoryGranularity; months?: number; toDate?: Date }): Promise<NetWorthHistorySummary> {
     const currencyCode = await this.resolveCurrencyCode(appuser);
     const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser);
     if (!appuserTenant) throw new Error("User doesn't have AppuserTenant");
+    const selection = await memberSelection(resolveTenantKeyNumber(appuserTenant.tenantKey), appuser.appuserKey, options?.members);
 
     const months = clampHistoryMonths(options?.months);
     const now = new Date();
@@ -216,12 +236,16 @@ export class NetWorthService {
     const basePoints = buildMonthlyHistoryPointDates(months, toDate);
     const today = startOfUtcDay(now);
 
-    const [accounts, portfolios, manualAssets, loans] = await Promise.all([
+    const [allAccounts, allPortfolios, allManualAssets, allLoans] = await Promise.all([
       DI.em.find(Account, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ACCOUNT_BALANCE_POPULATE }),
       DI.em.find(Portfolio, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ['portfolioOwnerAppuserKey.currencyKey'] }),
       loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(Loan, { deletedAt: undefined, includeInNetWorth: true, ownerAppuserKey: appuser, tenantKey: appuserTenant.tenantKey }, { populate: ['currencyKey'] }),
     ]);
+    const accounts = allAccounts.filter(selection.account);
+    const portfolios = allPortfolios.filter((portfolio) => selection.owner(portfolio.portfolioOwnerAppuserKey));
+    const manualAssets = allManualAssets.filter(({ asset }) => selection.owner(asset.ownerAppuserKey as OwnerRef));
+    const loans = selection.loans ? allLoans : [];
 
     const pointDates = await buildHistoryPointDates({ accounts, appuser, basePoints, manualAssets, tenantKey: appuserTenant.tenantKey, toDate });
 
@@ -238,7 +262,7 @@ export class NetWorthService {
     // Today's point is the figure Home shows: `getNetWorth` values portfolios live, while
     // snapshots lag (yesterday's misses today's trades). Earlier points stay on snapshots.
     const currentSummary = pointDates.some((pointDate) => isCurrentHistoryPoint(pointDate, today))
-      ? await this.getNetWorth(appuser)
+      ? await this.getNetWorth(appuser, { members: options?.members })
       : undefined;
 
     const pointSummaries = await Promise.all(pointDates.map(async (pointDate) => {
@@ -261,12 +285,12 @@ export class NetWorthService {
     return { currencyCode, granularity: 'monthly', points: pointSummaries, readiness: calculateHistoryReadiness(pointSummaries) };
   }
 
-  private async getPortfolioRows(appuser: Appuser, tenantKey: AppuserTenant['tenantKey']) {
-    const portfolios = await DI.em.find(
+  private async getPortfolioRows(appuser: Appuser, tenantKey: AppuserTenant['tenantKey'], keepOwner: (owner: OwnerRef) => boolean) {
+    const portfolios = (await DI.em.find(
       Portfolio,
       { deletedAt: undefined, tenantKey },
       { populate: ['currencyKey'] },
-    );
+    )).filter((portfolio) => keepOwner(portfolio.portfolioOwnerAppuserKey));
 
     // Each portfolio at its current value, the figure the portfolio screens show
     // (`valuePortfolioHoldings`), not the latest daily snapshot, which misses today's trades.
@@ -341,6 +365,17 @@ export function calculateHistoryReadiness(points: Pick<NetWorthHistoryPoint, 'to
 
 export function clampHistoryMonths(months?: number): number {
   return clamp(months ?? 6, 2, 12);
+}
+
+async function memberSelection(tenantKey: number, viewerAppuserKey: number, members: MemberFilter | undefined) {
+  if (!members) return { account: () => true, loans: true, owner: () => true };
+  const active = new Set((await loadActiveMembers(DI.em, tenantKey)).keys());
+  const keeps = (owner: OwnerRef, isJoint: boolean) => matchesMemberFilter(accountAttributionOf({ isJoint, ownerAppuserKey: owner?.appuserKey }, active), members);
+  return {
+    account: (account: Pick<Account, 'isJoint'> & { accountOwnerAppuserKey?: OwnerRef }) => keeps(account.accountOwnerAppuserKey, account.isJoint),
+    loans: members.appuserKeys.includes(viewerAppuserKey),
+    owner: (owner: OwnerRef) => keeps(owner, false),
+  };
 }
 
 /**

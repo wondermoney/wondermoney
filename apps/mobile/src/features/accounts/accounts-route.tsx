@@ -9,6 +9,7 @@ import { mapCashflow, mapCategorySpending } from '@/features/account-insights/in
 import type { MetricsSectionState } from '@/features/account-insights/metrics-stats'
 import { summarizeMetrics } from '@/features/account-insights/metrics-summary'
 import { useAccountInsights } from '@/features/account-insights/use-account-insights'
+import { useHouseholdMembers } from '@/features/household/use-household-members'
 import { mapTransactions } from '@/features/transactions/transactions-view-model'
 import { useTransactions } from '@/features/transactions/use-transactions'
 
@@ -35,6 +36,7 @@ export function AccountsRoute() {
   const transactionFilters = useMemo(() => ({ fromDate: scope.fromDate, toDate: scope.toDate }), [scope])
   const transactions = useTransactions(transactionFilters)
   const { signOut } = useProductRuntime()
+  const members = useHouseholdMembers()
   const router = useRouter()
   let state: AccountsViewState
 
@@ -72,6 +74,7 @@ export function AccountsRoute() {
 
   return (
     <AccountsScreen
+      members={members}
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onCreateAccount={() => router.push('/accounts/create' as Href)}
       onCreateTransaction={() => router.push('/accounts/transactions/create' as Href)}

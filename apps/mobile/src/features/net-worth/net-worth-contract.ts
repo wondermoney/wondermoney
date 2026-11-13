@@ -63,6 +63,12 @@ export const netWorthEndpoint = readEndpoint({
   schema: netWorthDtoSchema,
 })
 
+/** One member's net worth, or Shared's (`member`: an appuser key or `shared`); absent, the household's. */
+export function createNetWorthEndpoint(member?: string) {
+  if (!member) return netWorthEndpoint
+  return readEndpoint({ method: 'GET', path: `/v1/net-worth?member=${encodeURIComponent(member)}`, schema: netWorthDtoSchema })
+}
+
 /**
  * Net-worth history (monthly trend). Totals are nullable per point because a month's
  * value is only known when every contributing source resolves; the client must never
@@ -96,11 +102,11 @@ export type NetWorthHistorySummaryDto = z.infer<typeof netWorthHistorySummarySch
 /** Server bounds: monthly granularity, months in [2, 12]. */
 export const NET_WORTH_HISTORY_MONTHS = 6
 
-export function createNetWorthHistoryEndpoint(months: number = NET_WORTH_HISTORY_MONTHS) {
+export function createNetWorthHistoryEndpoint(months: number = NET_WORTH_HISTORY_MONTHS, member?: string) {
   const bounded = Math.min(12, Math.max(2, Math.trunc(months)))
   return readEndpoint({
     method: 'GET',
-    path: `/v1/net-worth/history?granularity=monthly&months=${bounded}`,
+    path: `/v1/net-worth/history?granularity=monthly&months=${bounded}${member ? `&member=${encodeURIComponent(member)}` : ''}`,
     schema: netWorthHistorySummarySchema,
   })
 }

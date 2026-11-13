@@ -22,6 +22,7 @@ import type {
   AccountShareMember,
   AccountSharesResponse,
 } from "@/lib/api/account/useAccountShares";
+import type { HouseholdMember } from "@/lib/api/household/types";
 
 import commonMessages from "../../messages/en/common.json";
 import householdMessages from "../../messages/en/household.json";
@@ -31,6 +32,7 @@ const api = vi.hoisted(() => ({
   shares: undefined as AccountSharesResponse | undefined,
   editAccount: vi.fn(),
   updateShares: vi.fn(),
+  householdMembers: [] as HouseholdMember[],
 }));
 
 vi.mock("posthog-js/react", () => ({
@@ -44,6 +46,12 @@ vi.mock("@/lib/api/account/useEditAccount", () => ({
 }));
 vi.mock("@/lib/api/account/useUpdateCreditCard", () => ({
   default: () => ({ mutateAsync: vi.fn() }),
+}));
+vi.mock("@/lib/household/useHouseholdMembers", () => ({
+  useHouseholdMembers: () => ({
+    members: api.householdMembers.length > 1 ? api.householdMembers : [],
+    viewerAppuserKey: api.householdMembers[0]?.appuserKey ?? null,
+  }),
 }));
 vi.mock("@/lib/api/account/useAccountShares", () => ({
   default: () => ({
@@ -64,6 +72,7 @@ beforeAll(() => {
 beforeEach(() => {
   api.editAccount.mockReset().mockResolvedValue(undefined);
   api.updateShares.mockReset().mockResolvedValue(undefined);
+  api.householdMembers = [];
 });
 afterEach(cleanup);
 
@@ -298,5 +307,88 @@ describe("sharing in the account edit sheet", () => {
         shares: [],
       }),
     );
+  });
+});
+
+const householdMember = (
+  appuserKey: number,
+  firstName: string,
+): HouseholdMember => ({
+  appuserKey,
+  emailAddress: `member${appuserKey}@example.com`,
+  firstName,
+  role: appuserKey === 3 ? "owner" : "member",
+});
+
+const jointLabel = householdMessages.household.attribution.jointAccount;
+
+function renderOwnership({
+  isOwner,
+  isJoint = false,
+}: {
+  isOwner: boolean;
+  isJoint?: boolean;
+}) {
+  return render(
+    <NextIntlClientProvider
+      locale="en"
+      messages={{ ...commonMessages, ...householdMessages }}
+    >
+      <AccountEditSheet
+        accountKey={7}
+        accountName="Everyday card"
+        isOpen
+        isOwner={isOwner}
+        isJoint={isJoint}
+        onOpenChange={() => {}}
+      />
+    </NextIntlClientProvider>,
+  );
+}
+
+describe("the joint account switch", () => {
+  beforeEach(() => {
+    api.shares = shares();
+    api.householdMembers = [householdMember(3, "Ana"), householdMember(4, "Rui")];
+  });
+
+  test("the owner of a multi-member household can mark the account joint, and saving sends it", async () => {
+    renderOwnership({ isOwner: true });
+
+    const toggle = screen.getByRole("switch", { name: jointLabel });
+    expect(toggle.getAttribute("aria-checked")).toBe("false");
+    fireEvent.click(toggle);
+    save();
+
+    await waitFor(() => expect(api.editAccount).toHaveBeenCalled());
+    expect(api.editAccount.mock.calls[0][0]).toMatchObject({
+      accountKey: 7,
+      isJoint: true,
+    });
+  });
+
+  test("saving without touching it does not send isJoint", async () => {
+    renderOwnership({ isOwner: true, isJoint: true });
+
+    expect(
+      screen.getByRole("switch", { name: jointLabel }).getAttribute("aria-checked"),
+    ).toBe("true");
+    save();
+
+    await waitFor(() => expect(api.editAccount).toHaveBeenCalled());
+    expect("isJoint" in api.editAccount.mock.calls[0][0]).toBe(false);
+  });
+
+  test("someone who does not own the account does not get the switch", () => {
+    renderOwnership({ isOwner: false });
+
+    expect(screen.queryByRole("switch", { name: jointLabel })).toBeNull();
+  });
+
+  test("a household of one has no switch, even for the owner", () => {
+    api.householdMembers = [householdMember(3, "Ana")];
+    renderOwnership({ isOwner: true });
+
+    expect(screen.queryByRole("switch", { name: jointLabel })).toBeNull();
   });
 });

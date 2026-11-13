@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { accountAttributionSchema } from '../household/member-attribution'
 import { fxRateDateSchema, fxStatusSchema } from '../../lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '../../lib/api/runtime-schema'
 
@@ -94,6 +95,11 @@ const accountSummaryObjectSchema = z.object({
   // older API does not send it.
   creditCard: creditCardSettingsSchema.nullish().catch(null),
   myAccess: accountAccessSchema.optional(),
+  // Who the account's money is attributed to (issue #96): a joint account's is Shared. Each is
+  // optional and lenient: an older API omits them and the app shows no member UI for the account.
+  isJoint: z.boolean().optional().catch(undefined),
+  ownerAppuserKey: z.number().int().positive().nullish().catch(null),
+  attribution: accountAttributionSchema.nullish().catch(null),
 })
 
 export const accountSummarySchema = accountSummaryObjectSchema.transform((account) => ({
@@ -104,6 +110,8 @@ export const accountSummarySchema = accountSummaryObjectSchema.transform((accoun
 export const accountUpdateWriteSchema = z.object({
   accountName: z.string().min(1).max(100).optional(),
   isPrivate: z.boolean().optional(),
+  /** Owner only: a joint account's spending counts as Shared. */
+  isJoint: z.boolean().optional(),
 }).strict()
 
 /** The member's accounts in their new display order, each once. */

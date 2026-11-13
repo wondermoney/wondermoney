@@ -116,6 +116,19 @@
       "left": "Saíste do agregado",
       "error": "Algo correu mal. Tenta novamente."
     },
-    "loadError": "Não foi possível carregar o teu agregado. Tenta novamente."
+    "loadError": "Não foi possível carregar o teu agregado. Tenta novamente.",
+    "attribution": {
+      "filterLabel": "Membro",
+      "everyone": "Todos",
+      "shared": "Partilhado",
+      "spentBy": "Gasto por",
+      "spentByDescription": "A quem conta este gasto nos relatórios, nos orçamentos e no filtro por membro.",
+      "accountDefault": "Predefinição da conta ({name})",
+      "accountDefaultPlain": "Predefinição da conta",
+      "spentBySaved": "Gasto por atualizado",
+      "spentByError": "Não foi possível alterar quem fez este gasto",
+      "jointAccount": "Conta conjunta",
+      "jointAccountDescription": "Os gastos desta conta contam como Partilhado. Isto não altera quem a pode ver."
+    }
   }
 }

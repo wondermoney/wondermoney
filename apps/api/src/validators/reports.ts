@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MEMBER_FILTER_VALUE } from '@service/household/member-attribution';
 import { isSupportedTimeZone, REPORT_DEFAULT_TIME_ZONE } from '@service/reports/report-months';
 
 /**
@@ -42,6 +43,12 @@ const querySwitch = z
  */
 export const MAX_REPORT_RANGE_DAYS = 10 * 366;
 
+/**
+ * Members' appuser keys, or `shared` for the household's joint money (`member-attribution.ts`); a
+ * row counts when it is attributed to any of them.
+ */
+export const memberKeysFilter = optionalStringArray.refine((keys) => keys === undefined || keys.every((key) => MEMBER_FILTER_VALUE.test(key)), { message: 'Member keys must be positive integers or "shared"' });
+
 export const reportFiltersSchema = z.object({
   accountKeys: optionalStringArray,
   categoryKeys: optionalStringArray,
@@ -49,6 +56,8 @@ export const reportFiltersSchema = z.object({
   fromDate: z.iso.datetime({ offset: true }).optional(),
   includePending: querySwitch,
   includeTransfers: querySwitch,
+  /** Only what these members spent and earned, or Shared; see `memberKeysFilter`. */
+  memberKeys: memberKeysFilter,
   merchantKeys: optionalStringArray,
   /** Tag keys; a transaction counts when it carries any of them. */
   tagKeys: optionalKeyArray,

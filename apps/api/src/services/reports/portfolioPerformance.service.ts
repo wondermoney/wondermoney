@@ -1,5 +1,6 @@
 import { DI } from '@app/database/di';
 import { Portfolio } from '@entity/Portfolio';
+import { accountAttributionOf, loadActiveMembers, matchesMemberFilter, parseMemberFilter } from '@service/household/member-attribution';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 import {
   findSnapshotPointOnOrBefore,
@@ -101,12 +102,15 @@ export async function getPortfolioPerformanceReport(input: ReportServiceInput, n
   const endIsLive = toDate.getTime() >= now.getTime();
   const currency = user.currencyKey.code || 'EUR';
 
-  // Portfolios belong to the household: every one of the tenant's, never another tenant's.
-  const portfolios = await DI.em.find(
+  // Portfolios belong to the household: every one of the tenant's, never another tenant's. A member
+  // filter keeps the portfolios those members own; one whose owner left is Shared (`member-attribution.ts`).
+  const members = parseMemberFilter(input.filters.memberKeys);
+  const active = members ? new Set((await loadActiveMembers(DI.em, tenant.tenantKey)).keys()) : new Set<number>();
+  const portfolios = (await DI.em.find(
     Portfolio,
     { deletedAt: undefined, tenantKey: { tenantKey: tenant.tenantKey } },
     { orderBy: { name: 'ASC' } },
-  );
+  )).filter((portfolio) => !members || matchesMemberFilter(accountAttributionOf({ isJoint: false, ownerAppuserKey: portfolio.portfolioOwnerAppuserKey.appuserKey }, active), members));
   if (portfolios.length === 0) return [];
 
   const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);

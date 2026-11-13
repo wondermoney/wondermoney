@@ -22,6 +22,19 @@ import { OptionSheet, Sheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
 import { displayCategoryName } from '@/features/categories/categories-view-model'
+import {
+  attributionMark,
+  attributionName,
+  NO_HOUSEHOLD_MEMBERS,
+  parseSpentByToken,
+  spentByOptions,
+  spentByToken,
+  type AccountAttributionDto,
+  type HouseholdMembersModel,
+  type SpentByValue,
+} from '@/features/household/member-attribution'
+import { MemberBadge } from '@/features/household/member-badge'
+import { MemberFilterField } from '@/features/household/member-filter-control'
 import { MerchantAvatar } from '@/features/merchants/merchant-avatar'
 import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
@@ -153,13 +166,19 @@ type Props = Readonly<{
    * selection. An account not in the set stays writable (the server enforces it anyway).
    */
   readOnlyAccountIds?: ReadonlySet<number>
+  /** The household's members: with more than one, rows carry whose they are and the list filters by member. */
+  members?: HouseholdMembersModel
+  /** Each account's own attribution, by account key, to name "Account default" in "Spent by". */
+  accountAttributions?: ReadonlyMap<number, AccountAttributionDto>
+  /** Set a row's "Spent by" (null: back to its account's default). Omitted, it is not offered. */
+  onSetSpentBy?: (transactionId: number, value: SpentByValue) => Promise<ReviewResult>
 }>
 
 const NO_READ_ONLY_ACCOUNTS: ReadonlySet<number> = new Set()
 
 export function TransactionsScreen(props: Props) {
   const { filters } = props
-  const serverScope = `${filters.fromDate ?? ''}|${filters.toDate ?? ''}|${filters.needsReview ?? false}|${filters.includeHidden ?? false}|${(filters.tagIds ?? []).join(',')}|${filters.limit ?? 100}`
+  const serverScope = `${filters.fromDate ?? ''}|${filters.toDate ?? ''}|${filters.needsReview ?? false}|${filters.includeHidden ?? false}|${(filters.tagIds ?? []).join(',')}|${(filters.memberKeys ?? []).join(',')}|${filters.limit ?? 100}`
   // Held above the keyed content so changing a server filter from inside the
   // sheet (which remounts the content) does not snap the sheet shut.
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -221,6 +240,9 @@ function TransactionsContent({
   onOpenTransaction,
   focusTransactionId = null,
   readOnlyAccountIds = NO_READ_ONLY_ACCOUNTS,
+  members = NO_HOUSEHOLD_MEMBERS,
+  accountAttributions,
+  onSetSpentBy,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
@@ -245,7 +267,10 @@ function TransactionsContent({
   const period = presetFor(filters)
   /** How many filters in the sheet are doing something. The date range has its own control. */
   const tagFilter = filters.tagIds ?? []
-  const advancedFilterCount = [filters.needsReview === true, filters.includeHidden === true, tagFilter.length > 0, accountFilter !== null, categoryFilter !== null, typeFilter !== null, merchantFilter.trim() !== ''].filter(Boolean).length
+  // One member or Shared; only the all-accounts ledger filters by member.
+  const memberFilterAvailable = members.multiMember && !perAccount
+  const memberFilter = memberFilterAvailable ? filters.memberKeys?.[0] ?? null : null
+  const advancedFilterCount = [filters.needsReview === true, filters.includeHidden === true, tagFilter.length > 0, memberFilter !== null, accountFilter !== null, categoryFilter !== null, typeFilter !== null, merchantFilter.trim() !== ''].filter(Boolean).length
   const [rangeOpen, setRangeOpen] = useState(false)
   // A custom range is whole local days, so it reopens on the local days its bounds fall on.
   const [customFromDraft, setCustomFromDraft] = useState<string | null>(period === 'custom' && filters.fromDate && filters.toDate ? localCalendarDay(filters.fromDate) : null)
@@ -264,6 +289,8 @@ function TransactionsContent({
   const [tagNotice, setTagNotice] = useState<string | null>(null)
   const [destinationId, setDestinationId] = useState<number | null>(null)
   const [transferPending, setTransferPending] = useState(false)
+  const [spentById, setSpentById] = useState<number | null>(null)
+  const [spentByPending, setSpentByPending] = useState(false)
   const [splitId, setSplitId] = useState<number | null>(null)
   const [splitSaving, setSplitSaving] = useState(false)
   const [splitError, setSplitError] = useState<string | null>(null)
@@ -337,6 +364,7 @@ function TransactionsContent({
   }, [onEditAmount, amountWire, descriptionDraft])
   const openRowMenu = useCallback((id: number) => setRowMenuId(id), [])
   const openTagEditor = useCallback((id: number) => { setTagNotice(null); setTagEditId(id) }, [])
+  const openSpentBy = useCallback((id: number) => setSpentById(id), [])
 
   if (state.status === 'access-transition') return null
   if (state.status === 'loading') return <Loading palette={palette} label={t('transactions.loading')} onBack={onBack} perAccount={perAccount} accountName={accountName} />
@@ -396,7 +424,7 @@ function TransactionsContent({
   const allSelectedVisible = matchingSelected || (selectedRows.length > 0 && selectedRows.every((row) => !row.hidden))
   const allSelectedHidden = matchingSelected ? filters.includeHidden === true : selectedRows.length > 0 && selectedRows.every((row) => row.hidden)
   const selectedSynced = selectedRows.filter((row) => row.bankSynced).map((row) => row.id)
-  const mutationPending = pending || submittedAction !== null || transferPending
+  const mutationPending = pending || submittedAction !== null || transferPending || spentByPending
   const scopeLocked = mutationPending || confirmation !== null
   const completeAction = async (submitted: FrozenBulkAction, action: () => Promise<ReviewResult>) => {
     setReviewResult(null)
@@ -488,7 +516,7 @@ function TransactionsContent({
     }
     if (onAssignCategory) await completeAction(confirmation, () => onAssignCategory(confirmation.transactionIds, confirmation.category.id))
   }
-  const rest: TransactionFilters = { needsReview: filters.needsReview, includeHidden: filters.includeHidden, tagIds: filters.tagIds, limit: filters.limit }
+  const rest: TransactionFilters = { needsReview: filters.needsReview, includeHidden: filters.includeHidden, tagIds: filters.tagIds, memberKeys: filters.memberKeys, limit: filters.limit }
   const choosePeriod = (next: RangePreset | 'all') => {
     setRangeOpen(false)
     if (scopeLocked || next === period) return
@@ -511,7 +539,7 @@ function TransactionsContent({
     setTypeFilter(null)
     setMerchantFilter('')
     setVisibleCount(50)
-    if (filters.needsReview || filters.includeHidden || tagFilter.length > 0) onFiltersChange({ fromDate: filters.fromDate, toDate: filters.toDate, limit: filters.limit })
+    if (filters.needsReview || filters.includeHidden || tagFilter.length > 0 || (filters.memberKeys?.length ?? 0) > 0) onFiltersChange({ fromDate: filters.fromDate, toDate: filters.toDate, limit: filters.limit })
   }
   const toggleTagFilter = (tagKey: number) => {
     onFiltersChange({ ...filters, tagIds: tagFilter.includes(tagKey) ? tagFilter.filter((key) => key !== tagKey) : [...tagFilter, tagKey] })
@@ -560,6 +588,25 @@ function TransactionsContent({
     const [type, key] = value.split(':')
     const destination = value === 'none' ? null : { type: type as TransferDestinationType, key: Number(key) }
     void runTransferEdit({ transactionId: destinationRow.id, direction: 'debit', transfer: true, destination })
+  }
+
+  // "Spent by": a member, Shared, or back to the account's default. Read-only viewers aren't offered it.
+  const canSetSpentBy = Boolean(onSetSpentBy) && members.multiMember && !members.readOnly
+  const spentByRow = spentById === null ? null : loaded.find((row) => row.id === spentById) ?? null
+  const chooseSpentBy = (token: string) => {
+    if (!onSetSpentBy || !spentByRow) return
+    const transactionId = spentByRow.id
+    void (async () => {
+      setSpentByPending(true)
+      setReviewResult(null)
+      try {
+        const result = await onSetSpentBy(transactionId, parseSpentByToken(token))
+        setReviewResult(result)
+        if (result === 'success') setSpentById(null)
+      } finally {
+        setSpentByPending(false)
+      }
+    })()
   }
 
   const splitRow = splitId === null ? null : loaded.find((row) => row.id === splitId) ?? null
@@ -680,6 +727,8 @@ function TransactionsContent({
       onOpenLinked={openLinked}
       unlinkPending={unlinkingKey !== null}
       unlinkError={unlinkError?.transactionId === item.id ? unlinkError.message : null}
+      members={members}
+      onSpentBy={canSetSpentBy ? openSpentBy : undefined}
       palette={palette}
       locale={locale}
     />
@@ -727,13 +776,14 @@ function TransactionsContent({
 
   const menuRow = rowMenuId === null ? null : loaded.find((row) => row.id === rowMenuId) ?? null
   const menuEditable = menuRow ? isWritable(menuRow) : false
-  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'transfer' | 'notTransfer' | 'destination' | 'select' | 'delete'
+  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'spentBy' | 'transfer' | 'notTransfer' | 'destination' | 'select' | 'delete'
   const canRetype = Boolean(onSetTransfer) && menuRow !== null && menuEditable && menuRow.direction !== 'unknown' && !mutationPending
   const rowActions: { value: RowAction; label: string }[] = menuRow ? [
     { value: 'details', label: expandedId === menuRow.id ? t('transactions.hideDetails') : t('transactions.showDetails') },
     ...(menuEditable && !menuRow.reviewed && !mutationPending ? [{ value: 'review' as const, label: t('transactions.markReviewed') }] : []),
     ...(menuEditable && canEditAmount && !mutationPending ? [{ value: 'edit' as const, label: t('transactions.editAmount') }] : []),
     ...(menuEditable && canEditTags && !mutationPending ? [{ value: 'tags' as const, label: t('tags.edit') }] : []),
+    ...(menuEditable && canSetSpentBy && !mutationPending ? [{ value: 'spentBy' as const, label: t('memberAttribution.spentByAction') }] : []),
     ...(canRetype && !menuRow.isTransfer ? [{ value: 'transfer' as const, label: t('transactions.transfer.mark') }] : []),
     ...(canRetype && menuRow.isTransfer && menuRow.direction === 'debit' ? [{ value: 'destination' as const, label: t('transactions.transfer.chooseDestination') }] : []),
     ...(canRetype && menuRow.isTransfer ? [{ value: 'notTransfer' as const, label: t('transactions.transfer.unmark') }] : []),
@@ -746,6 +796,7 @@ function TransactionsContent({
     else if (action === 'review') markReviewed(menuRow.id)
     else if (action === 'edit') startEditAmount(menuRow)
     else if (action === 'tags') openTagEditor(menuRow.id)
+    else if (action === 'spentBy') openSpentBy(menuRow.id)
     // Money going out is asked where it went (or nowhere in particular) in the same step.
     else if (action === 'transfer' && menuRow.direction === 'debit') setDestinationId(menuRow.id)
     else if (action === 'transfer') void runTransferEdit({ transactionId: menuRow.id, direction: 'credit', transfer: true })
@@ -886,6 +937,16 @@ function TransactionsContent({
         title={t('transactions.filtersTitle')}
         visible={filtersOpen}
       >
+        {memberFilterAvailable ? (
+          <View style={styles.sheetSection}>
+            <MemberFilterField
+              disabled={scopeLocked}
+              model={members}
+              onChange={(value) => onFiltersChange({ ...filters, memberKeys: value === null ? undefined : [value] })}
+              value={memberFilter}
+            />
+          </View>
+        ) : null}
         <View>
           <ToggleRow disabled={scopeLocked} label={t('transactions.needsReview')} value={filters.needsReview === true} palette={palette} onChange={(value) => onFiltersChange({ ...filters, needsReview: value })} />
           <ToggleRow disabled={scopeLocked} label={t('transactions.showHidden')} value={filters.includeHidden === true} palette={palette} onChange={(value) => onFiltersChange({ ...filters, includeHidden: value })} />
@@ -952,6 +1013,16 @@ function TransactionsContent({
         title={t('transactions.transfer.destinationTitle')}
         value={destinationRow?.transferDestination ? destinationValue(destinationRow.transferDestination.type, destinationRow.transferDestination.key) : destinationRow?.isTransfer ? 'none' : null}
         visible={destinationRow !== null}
+      />
+
+      <OptionSheet
+        onClose={() => { if (!spentByPending) setSpentById(null) }}
+        onSelect={chooseSpentBy}
+        options={spentByRow ? spentByOptions(members, accountAttributions?.get(spentByRow.accountId), t) : []}
+        testID="spent-by-sheet"
+        title={t('memberAttribution.spentBy')}
+        value={spentByRow ? spentByToken(spentByRow.attribution) : null}
+        visible={spentByRow !== null && canSetSpentBy && isWritable(spentByRow)}
       />
 
       {tagEditRow && onCreateTag ? (
@@ -1198,6 +1269,10 @@ type TransactionRowProps = Readonly<{
   unlinkPending: boolean
   /** Why the last unlink on this row failed. */
   unlinkError: string | null
+  /** The household; with more than one member the row says whose it is. */
+  members: HouseholdMembersModel
+  /** Opens "Spent by" for this row. Omitted, it is not offered. */
+  onSpentBy?: (id: number) => void
   palette: Palette
   locale: string
 }>
@@ -1240,6 +1315,8 @@ const TransactionRow = memo(function TransactionRow({
   onOpenLinked,
   unlinkPending,
   unlinkError,
+  members,
+  onSpentBy,
   palette,
   locale,
 }: TransactionRowProps) {
@@ -1273,6 +1350,8 @@ const TransactionRow = memo(function TransactionRow({
   const badgeKind = reimbursementBadge(item)
   const badgeLabel = badgeKind ? t(`transactions.reimbursement.badges.${badgeKind}`) : null
   const role = reimbursementRoleOf(item)
+  const memberMark = attributionMark(item.attribution, members)
+  const memberName = memberMark ? attributionName(memberMark, t) : null
   const figure = shownValue !== null && shownCurrency !== null
     ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
     : <Text variant="amountBase">{amount}</Text>
@@ -1282,11 +1361,12 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, badgeLabel, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, badgeLabel, memberName ? `${t('memberAttribution.spentBy')}: ${memberName}` : null, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
         badge={(
           <>
             <InstallmentBadge installment={item.installment} />
             {badgeLabel ? <Badge label={badgeLabel} testID="transaction-reimbursement-badge" tone="outline" /> : null}
+            <MemberBadge mark={memberMark} testID="transaction-member-badge" />
           </>
         )}
         density="comfortable"
@@ -1329,6 +1409,7 @@ const TransactionRow = memo(function TransactionRow({
           <Detail label={t('transactions.settlement')} value={formatAvailableMoney(item.settlementAmount, item.settlementCurrency, locale, t, amountsHidden)} data />
           <Detail label={t('transactions.balanceAfter')} value={formatAvailableMoney(item.balance, item.balanceCurrency, locale, t, amountsHidden)} data />
           <Detail label={t('transactions.convertedBalanceAfter')} value={formatAvailableMoney(item.convertedBalance, item.convertedBalanceCurrency, locale, t, amountsHidden)} data />
+          {memberName ? <Detail label={t('memberAttribution.spentBy')} value={memberName} /> : null}
           {item.isTransfer ? <Detail label={t('transactions.transfer.label')} value={transferDetail(item, t)} /> : null}
           {!item.isTransfer && !item.categoryCountsAsSpending ? <Detail label={t('transactions.transfer.spendingLabel')} value={t('transactions.transfer.notSpending')} /> : null}
           {item.installment ? <Detail label={t('installments.transactionDetail')} value={installment ?? ''} /> : null}
@@ -1447,6 +1528,9 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && canEditTags ? (
                 <UiButton disabled={mutationPending} icon="tag" label={t('tags.edit')} onPress={() => onEditTags(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onSpentBy ? (
+                <UiButton disabled={mutationPending} icon="users" label={t('memberAttribution.spentBy')} onPress={() => onSpentBy(item.id)} size="sm" variant="secondary" />
               ) : null}
               {stored && item.installment && onOpenInstallmentPlan ? (
                 <UiButton disabled={mutationPending} icon="calendar" label={t('installments.viewPlan')} onPress={() => onOpenInstallmentPlan(item)} size="sm" variant="secondary" />

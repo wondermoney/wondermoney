@@ -37,16 +37,31 @@ export interface GetBudgetsFullResponse {
   budgets: BudgetFull[];
 }
 
+export interface GetBudgetsFullRequest {
+  /**
+   * The member filter (`lib/household/member-attribution.ts`): spending counts only that
+   * member's (or Shared) transactions. Absent for everyone.
+   */
+  memberKeys?: string[];
+}
+
 /**
  * Fetches all budgets with full details from the API.
  * Can be used in both Server Components and Client Components.
  *
  * @param apiClient - Optional Axios instance. Defaults to client-side API.
+ * @param params - Optional member filter.
  */
 export async function getBudgetsFull(
   apiClient: AxiosInstance = api,
+  params: GetBudgetsFullRequest = {},
 ): Promise<GetBudgetsFullResponse> {
-  const { data } = await apiClient.get<GetBudgetsFullResponse>(`/v1/budget/full`);
+  const { data } = await apiClient.get<GetBudgetsFullResponse>(
+    `/v1/budget/full`,
+    params.memberKeys?.length
+      ? { params: { memberKeys: params.memberKeys.join(",") } }
+      : undefined,
+  );
   return data;
 }
 
@@ -55,10 +70,13 @@ export default function useBudgetsFull<R = GetBudgetsFullResponse>(
     UseQueryOptions<GetBudgetsFullResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  params: GetBudgetsFullRequest = {},
 ) {
+  const memberKeys = params.memberKeys?.length ? params.memberKeys : undefined;
   return useQuery({
-    queryKey: ["budgets-full"],
-    queryFn: () => getBudgetsFull(),
+    // Everyone keeps the plain key, so its cache and invalidation are as before.
+    queryKey: memberKeys ? ["budgets-full", { memberKeys }] : ["budgets-full"],
+    queryFn: () => getBudgetsFull(undefined, { memberKeys }),
     ...options,
   });
 }

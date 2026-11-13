@@ -48,6 +48,7 @@ import AccountEditSheet from "@/components/account/AccountEditSheet";
 import { AccountMark } from "@/components/account/AccountMark";
 import { AccountRecalculateDialog } from "@/components/account/AccountRecalculateDialog";
 import AccountSyncBadge from "@/components/account/AccountSyncBadge";
+import { MemberBadge } from "@/components/household/MemberBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,6 +64,7 @@ import { canEditAccount } from "@/lib/account/account-access";
 import type { Account } from "@/lib/api/account/useAccounts";
 import { useReorderAccounts } from "@/lib/api/account/useAccounts";
 import { accountFxView } from "@/lib/fx/fx-status";
+import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
 import { cn } from "@/lib/utils";
 import { CurrencyMismatchError, sumMoney } from "@/lib/utils/money";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -82,14 +84,20 @@ export default function AccountsList({
   const posthog = usePostHog();
   const router = useRouter();
   const reorderAccounts = useReorderAccounts();
+  // Whose each account is, shown only when there is more than one person to tell apart.
+  const showMembers = useHouseholdMembers().members.length > 1;
 
   const [accountData, setAccountData] = useState<{
     name: string | null;
     key: number | null;
+    isOwner: boolean;
+    isJoint: boolean;
     creditCard: Account["creditCard"];
   }>({
     name: null,
     key: null,
+    isOwner: false,
+    isJoint: false,
     creditCard: null,
   });
   const [editAccModalIsOpen, setEditAccModalIsOpen] = useState(false);
@@ -161,6 +169,8 @@ export default function AccountsList({
       setAccountData({
         name: account.accountName ?? t("unknown"),
         key: account.accountKey,
+        isOwner: account.myAccess === "owner",
+        isJoint: account.isJoint === true,
         creditCard: account.creditCard ?? null,
       });
       setEditAccModalIsOpen(true);
@@ -174,6 +184,8 @@ export default function AccountsList({
       setAccountData({
         name: account.accountName ?? t("unknown"),
         key: account.accountKey,
+        isOwner: account.myAccess === "owner",
+        isJoint: account.isJoint === true,
         creditCard: account.creditCard ?? null,
       });
       setDeleteAccModalIsOpen(true);
@@ -240,6 +252,12 @@ export default function AccountsList({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="text-foreground text-sm font-medium">{name}</p>
+              {showMembers && account.attribution ? (
+                <MemberBadge
+                  appuserKey={account.attribution.appuserKey}
+                  displayName={account.attribution.displayName}
+                />
+              ) : null}
               {account.isPrivate && (
                 <Lock
                   className="text-muted-foreground size-3"
@@ -550,6 +568,8 @@ export default function AccountsList({
             accountKey={accountData.key}
             accountName={accountData.name}
             isOpen={editAccModalIsOpen}
+            isOwner={accountData.isOwner}
+            isJoint={accountData.isJoint}
             creditCard={accountData.creditCard}
             onOpenChange={(open) => {
               if (!open) {
@@ -557,6 +577,8 @@ export default function AccountsList({
                 setAccountData({
                   name: null,
                   key: null,
+                  isOwner: false,
+                  isJoint: false,
                   creditCard: null,
                 });
                 posthog.capture("edit_account_modal", { action: "closed" });
@@ -570,6 +592,8 @@ export default function AccountsList({
               setAccountData({
                 name: null,
                 key: null,
+                isOwner: false,
+                isJoint: false,
                 creditCard: null,
               });
               posthog.capture("delete_account_modal", { action: "closed" });

@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { CategorizationConfidence } from '@entity/Transaction';
 import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
+import { MEMBER_FILTER_VALUE, parseMemberFilter, SHARED_MEMBER } from '@service/household/member-attribution';
 import { isSupportedTimeZone } from '@service/reports/report-months';
 import { TRANSFER_DESTINATION_TYPES, USER_SETTABLE_TYPES } from '@service/transaction/transaction-transfer.service';
 import { bytesMatchContentType } from '@utils/file-signature';
@@ -30,6 +31,12 @@ export const updateTransactionRequestSchema = z.object({
     transactionType: z.enum(USER_SETTABLE_TYPES).optional(),
     /** Where an outgoing transfer went; null clears it. */
     transferDestination: z.object({ key: positiveIntId, type: z.enum(TRANSFER_DESTINATION_TYPES) }).nullable().optional(),
+    /**
+     * "Spent by": the member the money is attributed to, `shared` for the household, or null to
+     * follow the account again (its owner, or Shared on a joint account). A member must belong to
+     * the transaction's household.
+     */
+    attributedAppuserKey: z.union([z.literal(SHARED_MEMBER), positiveIntId]).nullable().optional(),
     /** Moves the row to the credit-card statement containing this date; null uses the transaction date. */
     statementDateOverride: validDate.nullable().optional(),
     updatedAmount: finiteAmount.optional(),
@@ -72,6 +79,14 @@ const csvCategoryList = csvList.transform((parts) =>
       }
     : undefined,
 );
+/**
+ * The member filter (`member-attribution.ts`): members' appuser keys, or `shared` for the household's
+ * joint money; a row matches when it is attributed to any of them. Absent or empty: no filter.
+ */
+const csvMemberList = csvList
+  .refine((parts) => parts === undefined || parts.every((part) => MEMBER_FILTER_VALUE.test(part)), { message: 'Member keys must be positive integers or "shared"' })
+  .transform((parts) => parseMemberFilter(parts));
+
 /** `true`/`false` from a query string (any other value reads as false); absent stays undefined. */
 const queryBoolean = z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true'));
 
@@ -101,6 +116,7 @@ const transactionListFilterFields = {
   confidence: z.enum(CategorizationConfidence).optional(),
   fromDate: validDate.optional(),
   includeHidden: queryBoolean,
+  memberKeys: csvMemberList,
   tagKeys: csvIntList,
   timezone: viewerTimeZone,
   toDate: validDate.optional(),
@@ -206,6 +222,8 @@ export const updateAccountRequestSchema = z.object({
   body: z.object({
     accountName: z.string().min(1).max(100).optional(),
     isPrivate: z.boolean().optional(),
+    /** A joint account's money is Shared in reports and the member filter; owner only. */
+    isJoint: z.boolean().optional(),
     openingBalance: finiteAmount.refine((value) => Math.abs(value) <= 999_999_999_999, { message: 'openingBalance is too large' }).optional(),
     openingBalanceDate: openingBalanceDate.optional(),
   }),
@@ -249,7 +267,7 @@ export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ 
 export const getAccountPresignedUrlForUploadRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ bankName: z.string().optional(), correlationId: z.string().optional(), fileName: importFileNameInput.optional(), key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
-export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
+export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), memberKeys: csvMemberList, timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountSharesRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 /**
@@ -269,7 +287,7 @@ export const putAccountSharesRequestSchema = z.object({
     .refine((body) => body.isPrivate || body.shares.length === 0, { message: 'A shared account takes no shares', path: ['shares'] }),
   params: z.object({ accountId: positiveIntId }),
 });
-export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone, toDate: validDate.optional() }) });
+export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), memberKeys: csvMemberList, timezone: viewerTimeZone, toDate: validDate.optional() }) });
 /**
  * `GET /v1/account/forecast`: the next `days` days of projected balances. The window is bounded
  * (30..90) so one request cannot expand years of a weekly series; `accountKeys` is filtered by the

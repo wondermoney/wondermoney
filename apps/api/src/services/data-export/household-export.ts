@@ -214,7 +214,7 @@ class HouseholdExport {
     for (const row of this.memberRows) this.members.add(row['appuser_key']);
 
     this.accountRows = await rowsOf(db, sql`
-      select a.account_key, a.account_name, a.account_number, a.holder_name, a.account_owner_appuser_key, a.is_private, a.closed,
+      select a.account_key, a.account_name, a.account_number, a.holder_name, a.account_owner_appuser_key, a.is_private, a.is_joint, a.closed,
         a.balance::text as balance, a.opening_balance::text as opening_balance, ${sql.raw(tsx('a.opening_balance_date'))} as opening_balance_date,
         ${sql.raw(tsx('a.created_at'))} as created_at,
         c.code as currency, at.description as account_type, fi.name as institution,
@@ -376,6 +376,8 @@ class HouseholdExport {
         holderName: str(row['holder_name']),
         id: this.accounts.get(row['account_key']),
         institution: str(row['institution']),
+        // A joint account's money is Shared in reports (1.10).
+        isJoint: bool(row['is_joint']),
         isPrivate: bool(row['is_private']),
         name: str(row['account_name']),
         openingBalance: dec(row['opening_balance']),
@@ -516,6 +518,10 @@ class HouseholdExport {
     for await (const row of this.transactionRows()) {
       yield {
         accountId: this.accounts.get(row['account_key']),
+        // "Spent by" (1.10): the member the row is attributed to, or Shared; neither follows the account.
+        // Someone no longer in the household is not in `members.json` and reads as none.
+        attributedMemberId: this.members.get(row['attributed_appuser_key']),
+        attributedToShared: bool(row['attributed_to_shared']),
         balance: dec(row['balance']),
         bankSynced: bool(row['bank_synced']),
         createdAt: str(row['created_at']),
@@ -566,7 +572,7 @@ class HouseholdExport {
         t.settlement_amount::text as settlement_amount, sc.code as settlement_currency, t.settlement_exchange_rate::text as settlement_exchange_rate,
         t.edited_settlement_amount::text as edited_settlement_amount, t.unedited_settlement_amount::text as unedited_settlement_amount,
         t.appuser_settlement_amount::text as appuser_settlement_amount, ac.code as appuser_currency, t.appuser_currency_exchange_rate::text as appuser_currency_exchange_rate,
-        t.balance::text as balance, t.hidden, t.reviewed, t.description_edited_by_user, t.merchant_edited_by_user,
+        t.balance::text as balance, t.hidden, t.reviewed, t.description_edited_by_user, t.merchant_edited_by_user, t.attributed_appuser_key, t.attributed_to_shared,
         t.transfer_counterpart_key, t.transfer_destination_account_key, t.transfer_destination_goal_key, t.transfer_destination_portfolio_key,
         t.transfer_exchange_rate::text as transfer_exchange_rate, t.installment_plan_key, t.installment_number, t.installment_unlinked_plan_key, ${sql.raw(dx('t.statement_date_override'))} as statement_date_override,
         (t.enable_banking_transaction_id is not null or t.nordigen_internal_transaction_id is not null) as bank_synced,

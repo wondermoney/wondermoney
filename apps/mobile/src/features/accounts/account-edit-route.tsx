@@ -1,5 +1,6 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
 
+import { useHouseholdMembers } from '@/features/household/use-household-members'
 import { ApiError } from '@/lib/api/errors'
 
 import { AccountEditScreen, type AccountEditViewState } from './account-edit-screen'
@@ -20,6 +21,7 @@ export function AccountEditRoute() {
   const deleteMutation = useAccountDeleteMutation()
   const shares = useAccountShares(accountId)
   const sharesMutation = useAccountSharesMutation()
+  const members = useHouseholdMembers()
   const router = useRouter()
   let state: AccountEditViewState
 
@@ -34,6 +36,7 @@ export function AccountEditRoute() {
         name: detail.data.account.accountName ?? '',
         isPrivate: detail.data.account.isPrivate,
         isOwnedByViewer: detail.data.account.isOwnedByViewer,
+        ...(detail.data.account.isJoint === undefined ? {} : { isJoint: detail.data.account.isJoint }),
         creditCard: detail.data.account.creditCard ?? null,
         myAccess: detail.data.account.myAccess,
       },
@@ -63,6 +66,7 @@ export function AccountEditRoute() {
     sharingPending={sharesMutation.isPending}
     onRetrySharing={() => { void shares.refetch() }}
     onSaveSharing={async (value) => { if (accountId === null) return; await sharesMutation.mutateAsync({ accountId, value }) }}
+    multiMember={members.multiMember}
     onSaveAccount={async (value) => { if (accountId === null) return; await mutation.mutateAsync({ accountId, value }) }}
     onSaveCreditCard={async (value) => { if (accountId === null) return; await creditCardMutation.mutateAsync({ accountId, value }) }}
     onDeleteAccount={async () => { if (accountId === null) return; await deleteMutation.mutateAsync(accountId); router.replace('/accounts' as Href) }}

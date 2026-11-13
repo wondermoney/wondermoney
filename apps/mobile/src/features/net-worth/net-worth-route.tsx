@@ -1,5 +1,5 @@
 import { type Href, useRouter } from 'expo-router'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { accountMark, portfolioMark } from '@/components/ui/entity-mark'
@@ -10,6 +10,8 @@ import { useInsights } from '@/features/insights/use-insights'
 import { useBankAlertBanner } from '@/features/banking/use-bank-alerts'
 import { mapBudget } from '@/features/budgets/budgets-view-model'
 import { useBudgets } from '@/features/budgets/use-budgets'
+import { effectiveMemberFilter, memberKeysParam, type MemberFilter } from '@/features/household/member-attribution'
+import { useHouseholdMembers } from '@/features/household/use-household-members'
 import { useLoans } from '@/features/loans/use-loans'
 import { classifyPortfolioLinkFailure, useLinkPortfolioAccount } from '@/features/portfolios/use-portfolio-account-link'
 import { useDashboardLayout } from '@/features/preferences/use-dashboard-layout'
@@ -59,22 +61,29 @@ export function NetWorthRoute() {
   const { signOut } = useProductRuntime()
   // One "today" per mount, so the month windows and keys stay stable.
   const today = useMemo(() => new Date(), [])
+  // The member filter (households of more than one): net worth, its history, cash flow, the top
+  // category and the latest transactions follow it; budgets stay the household's.
+  const members = useHouseholdMembers()
+  const [memberChoice, setMemberChoice] = useState<MemberFilter>(null)
+  const memberFilter = effectiveMemberFilter(memberChoice, members)
+  const member = memberKeysParam(memberFilter)
+  const latestFilters = useMemo(() => (memberFilter === null ? ALL_TRANSACTIONS : { memberKeys: [memberFilter] }), [memberFilter])
 
-  const query = useNetWorth()
-  const history = useNetWorthHistory(HOME_HISTORY_MONTHS)
+  const query = useNetWorth(member)
+  const history = useNetWorthHistory(HOME_HISTORY_MONTHS, member)
   const accounts = useAccounts()
   const budgets = useBudgets()
   const budgetList = useMemo(() => budgets.data?.budgets ?? [], [budgets.data])
   // Each budget in its own current month, which its start day decides: the budget list says which.
   const budgetMonths = useHomeBudgetMonths(budgetList.map((budget) => ({ budgetId: budget.budgetKey, year: budget.year, month: budget.month })))
-  const cashflow = useHomeCashflow(today)
-  const cashflowComparison = useHomeCashflowComparison(today)
+  const cashflow = useHomeCashflow(today, member)
+  const cashflowComparison = useHomeCashflowComparison(today, member)
   const comparisonRange = useMemo(() => monthComparisonRange(today), [today])
   const loans = useLoans()
-  const latest = useTransactions(ALL_TRANSACTIONS)
+  const latest = useTransactions(latestFilters)
   const reviewSummary = useTransactionReviewSummary()
   const portfolios = useHomePortfolios()
-  const insight = useTopSpendingCategory()
+  const insight = useTopSpendingCategory(undefined, member)
   const insights = useInsights()
   const setupDismissal = useSetupChecklistDismissal()
   const linkDismissal = usePortfolioLinkSuggestionDismissal()
@@ -237,6 +246,7 @@ export function NetWorthRoute() {
       sections={sections}
       state={state}
       today={today}
+      memberFilter={members.multiMember ? { model: members, value: memberFilter, onChange: setMemberChoice } : undefined}
     />
   )
 }

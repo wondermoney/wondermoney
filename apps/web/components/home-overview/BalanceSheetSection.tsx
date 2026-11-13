@@ -17,6 +17,7 @@ import {
   type BalanceSheetRow,
   type BalanceSheetType,
 } from "@/lib/home/month-overview";
+import type { MemberFilter } from "@/lib/household/member-attribution";
 
 import { PortfolioLinkSuggestion } from "./PortfolioLinkSuggestion";
 
@@ -110,9 +111,14 @@ function Side({
  * What makes up net worth: each side of the balance sheet itemised by kind,
  * with its total. The hero above carries the two totals and the net figure.
  */
-export function BalanceSheetSection() {
+export function BalanceSheetSection({
+  member = null,
+}: {
+  /** One member's balance sheet, or Shared's; null for the household's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.sheet");
-  const { data, isPending, error, refetch } = useNetWorth();
+  const { data, isPending, error, refetch } = useNetWorth(undefined, member);
   const { data: accountsData } = useAccounts();
 
   if (isPending) {
