@@ -17,6 +17,7 @@ import { FinancialEmailReservationService } from '@service/email/financial-email
 import { FinancialEmailOrchestrationService } from '@service/email/financial-email-orchestration.service';
 import { FinancialEmailRenderingService } from '@service/email/financial-email-rendering.service';
 import { NetWorthService } from '@service/net-worth/net-worth.service';
+import type { BudgetPushNotifier } from '@service/push/budget-push';
 
 type FinancialEmailStream = 'budget' | 'monthlyStory' | 'weekly';
 
@@ -26,6 +27,8 @@ const STALE_REASON_BY_STREAM = { budget: 'stale_budget_job', monthlyStory: 'stal
 
 export class FinancialEmailUserWorkerService {
   private readonly aggregation: TenantFinancialAggregationService;
+  /** Budget alerts as push (`services/push/budget-push.ts`); absent, the budget stream is email only. */
+  private readonly budgetPush: BudgetPushNotifier | undefined;
   private readonly em: EntityManager;
   private readonly narrative: MonthlyStoryNarrativeService;
   private readonly now: () => Date;
@@ -34,9 +37,10 @@ export class FinancialEmailUserWorkerService {
   private readonly rendering: FinancialEmailRenderingService;
   private readonly reservations: FinancialEmailReservationService;
 
-  constructor(deps: { aggregation?: TenantFinancialAggregationService; em?: EntityManager; narrative?: MonthlyStoryNarrativeService; now?: () => Date; orchestration?: FinancialEmailOrchestrationService; preferences?: EmailNotificationPreferenceService; rendering?: FinancialEmailRenderingService; reservations?: FinancialEmailReservationService } = {}) {
+  constructor(deps: { aggregation?: TenantFinancialAggregationService; budgetPush?: BudgetPushNotifier; em?: EntityManager; narrative?: MonthlyStoryNarrativeService; now?: () => Date; orchestration?: FinancialEmailOrchestrationService; preferences?: EmailNotificationPreferenceService; rendering?: FinancialEmailRenderingService; reservations?: FinancialEmailReservationService } = {}) {
     this.em = deps.em ?? DI.em;
     this.aggregation = deps.aggregation ?? new TenantFinancialAggregationService();
+    this.budgetPush = deps.budgetPush;
     this.narrative = deps.narrative ?? new MonthlyStoryNarrativeService();
     this.preferences = deps.preferences ?? new EmailNotificationPreferenceService(this.em);
     this.rendering = deps.rendering ?? new FinancialEmailRenderingService();
@@ -53,7 +57,12 @@ export class FinancialEmailUserWorkerService {
     if (scheduledAt.getTime() - this.now().getTime() > 5 * 60 * 1000) return result('suppressed', 'future_scheduled_job');
     if (this.now().getTime() - scheduledAt.getTime() > maxAge) return result('suppressed', STALE_REASON_BY_STREAM[input.stream]);
     const preference = await this.preferences.getFreshWorkerEligibility(input.appuserKey, PREFERENCE_STREAM_BY_INPUT_STREAM[input.stream]);
-    if (!preference?.effectiveEnabled) return result('suppressed', preference ? 'preference_disabled' : 'user_unavailable');
+    if (!preference) return result('suppressed', 'user_unavailable');
+    // Budget alerts also go out as push, on its own switch: a person with the email off but the
+    // push on still needs the facts.
+    const pushBudget = input.stream === 'budget' && !input.dryRun && this.budgetPush ? this.budgetPush : undefined;
+    const wantsPush = pushBudget ? await pushBudget.wants(input.appuserKey) : false;
+    if (!preference.effectiveEnabled && !wantsPush) return result('suppressed', 'preference_disabled');
     const tenantKeys = await this.loadTenantKeys(input.appuserKey);
     if (!tenantKeys.length) return result('suppressed', 'no_active_memberships');
 
@@ -67,6 +76,8 @@ export class FinancialEmailUserWorkerService {
       const firstSuccess = tenantResults.find((tenant): tenant is BudgetAggregationResult => tenant.status === 'ok');
       if (!firstSuccess) return result('suppressed', 'no_facts');
       const localDate = firstSuccess.period.localDate;
+      if (wantsPush && pushBudget) await pushBudget.notify(input.appuserKey, facts);
+      if (!preference.effectiveEnabled) return result('suppressed', 'preference_disabled', { facts: facts.length, memberships: tenantKeys.length });
       if (input.dryRun) {
         const fresh = await this.revalidate(input.appuserKey, 'budget', tenantKeys);
         if (!fresh) return result('suppressed', 'eligibility_changed');

@@ -119,6 +119,14 @@ Cuando un miembro añade un sitio web a un comercio, la API pide al servicio el 
 
 Una dirección de logotipo que un miembro escriba él mismo tiene prioridad sobre la plantilla. Las aplicaciones cargan esa imagen directamente desde la dirección que eligió el miembro, sin referente, así que ese sitio ve la dirección de cada miembro del hogar que la ve. Solo se aceptan direcciones `https` con un nombre de host.
 
+## Notificaciones push
+
+Las notificaciones push están desactivadas por defecto. Define `PUSH_ENABLED=true` en la API y en el worker para que la aplicación móvil pueda registrar teléfonos y recibir notificaciones a través del servicio de push de Expo: alertas de presupuesto, recordatorios de pago de la tarjeta, alertas de conexiones bancarias y una notificación de prueba. Cada categoría queda desactivada hasta que la persona la activa en la aplicación, y solo entonces el teléfono pide permiso.
+
+El texto dice qué ha pasado, nunca cuánto: "Tu presupuesto Supermercado ha superado lo previsto" o "Un pago de tarjeta vence dentro de 3 días". Los importes, saldos y comercios se quedan en la aplicación. Expo recibe el token de push de cada teléfono registrado, el título y el texto de la notificación y la pantalla de la aplicación que abre.
+
+Si el proyecto de Expo con el que se compiló la aplicación exige un token de acceso en las peticiones de push, define `EXPO_ACCESS_TOKEN` en la API y en el worker. Las versiones de la aplicación que tu servidor puede alcanzar dependen de ese proyecto; consulta [Notificaciones push](/es/docs/self-hosting/mobile-app#notificaciones-push).
+
 ## Sincronización bancaria
 
 La sincronización con bancos europeos no necesita configuración en el servidor. Cada persona añade su propia clave de aplicación de Enable Banking en la Configuración, así que las credenciales bancarias nunca se comparten entre usuarios.
@@ -265,6 +273,7 @@ No se envía nada al proyecto WonderMoney. Cada servicio externo que tu instanci
 | Datos de mercado (CoinGecko) | La API y el worker, con símbolos de monedas y texto de búsqueda, no datos de usuarios | `coingecko` en `MARKET_DATA_PROVIDERS` |
 | Monederos de criptomonedas (los exploradores de bloques que elijas) | El worker, con las direcciones públicas de los monederos de criptomonedas de tus usuarios, sin nombres ni importes ([Monederos de criptomonedas](#monederos-de-criptomonedas)) | `CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL` |
 | Logotipos de comercios (el servicio que elijas) | La API, con el dominio del sitio web de un comercio, no datos de usuarios ([Logotipos de comercios](#logotipos-de-comercios)) | `MERCHANT_LOGO_URL_TEMPLATE` |
+| Notificaciones push (servicio de push de Expo) | La API y el worker, con el token de push de cada teléfono registrado y el texto de la notificación, que nunca incluye importes ni comercios ([Notificaciones push](#notificaciones-push)) | `PUSH_ENABLED=true` |
 | Almacenamiento de archivos (tu almacenamiento compatible con S3) | La API y los navegadores, para importaciones de CSV y copias de recibos | `S3_ENDPOINT` y `S3_BUCKET` |
 | Copias de seguridad fuera del servidor (tu destino de rclone) | El servicio `backup-offsite`, una vez al día, con las copias de la base de datos y de los archivos | El perfil `backup-offsite` y `BACKUP_DESTINATION` ([Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup#copias-fuera-del-servidor)) |
 | Registro de errores (Sentry) | La API, el worker y la aplicación web, con informes de errores | `SENTRY_DSN` (API y worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicación web) |

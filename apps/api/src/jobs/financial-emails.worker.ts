@@ -5,6 +5,8 @@ import type { FinancialEmailCoordinatorPayload, FinancialEmailUserPayload } from
 import { validateFinancialEmailUserPayload } from '@app/jobs/financial-emails.queue';
 import { parseScheduledFor } from '@service/budget/aggregation-periods';
 import { FinancialEmailUserWorkerService } from '@service/email/financial-email-user-worker.service';
+import { BudgetPushNotifier } from '@service/push/budget-push';
+import type { Enqueue } from '@service/queue/enqueue';
 import type { PartialBossLike } from '@service/queue/enqueue';
 
 type BossSend = Pick<PartialBossLike, 'send' | 'sendAfter'>;
@@ -20,3 +22,7 @@ export async function handleFinancialEmailUser(job: Job<FinancialEmailUserPayloa
   if (result.result === 'retryable_failed') throw new Error('financial_email_retryable_failed');
   return result;
 }
+
+/** The budget stream, which also pushes budget alerts to the people who turned that on. */
+export const handleBudgetEmailUser = (job: Job<FinancialEmailUserPayload>, enqueue: Enqueue) =>
+  handleFinancialEmailUser(job, 'budget', new FinancialEmailUserWorkerService({ budgetPush: new BudgetPushNotifier({ enqueue }) }));

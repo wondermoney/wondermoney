@@ -22,6 +22,13 @@ jest.mock('expo-router', () => ({
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: mockSignOut }),
 }))
+// A server without push: the push section is not shown (see notifications-push-route.test.tsx).
+jest.mock('@/lib/server/use-instance', () => ({ useConfirmedFeature: () => false }))
+jest.mock('./use-push-notifications', () => ({
+  usePushPreferences: () => ({ data: undefined }),
+  useSendTestPush: () => ({ isPending: false, mutate: jest.fn() }),
+  useTogglePushCategory: () => ({ isPending: false, mutate: jest.fn() }),
+}))
 jest.mock('./use-notification-preferences', () => {
   const actual = jest.requireActual('./use-notification-preferences')
   return {

@@ -2374,7 +2374,7 @@
     "creditCardDueReminders": {
       "title": "Card payment reminders",
       "description": "An email a few days before a closed credit card statement is due, if it still has a balance to pay.",
-      "detail": "Sent by email only. At most one reminder per statement."
+      "detail": "At most one email per statement."
     },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",

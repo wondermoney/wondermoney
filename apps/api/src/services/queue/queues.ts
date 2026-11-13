@@ -30,6 +30,7 @@ export type QueueName =
   | 'portfolio.csv-parse-preview'
   | 'portfolio.snapshot.auto'
   | 'portfolio.snapshot.manual'
+  | 'push-send'
   | 'rule.apply'
   | 'transaction-import'
   | 'transaction.enrichment.gpt'

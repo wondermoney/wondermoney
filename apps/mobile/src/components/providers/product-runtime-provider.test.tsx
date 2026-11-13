@@ -81,6 +81,7 @@ type HarnessOptions = {
   createRuntime?: (input: Parameters<NonNullable<React.ComponentProps<typeof ProductRuntimeProvider>['createRuntime']>>[0]) => ProductRuntime
   boundaryChild?: React.ReactNode
   withBoundary?: boolean
+  beforeSignOut?: (runtime: ProductRuntime) => Promise<void>
 }
 
 async function createHarness(initialSession = session('a'), options: HarnessOptions = {}) {
@@ -96,6 +97,7 @@ async function createHarness(initialSession = session('a'), options: HarnessOpti
           auth={auth as never}
           transport={{ request: jest.fn() } as never}
           operationScope={options.operationScope}
+          beforeSignOut={options.beforeSignOut}
           createRuntime={options.createRuntime}
         >
           <Probe capture={(next) => { latest = next }} />
@@ -377,6 +379,35 @@ describe('ProductRuntimeProvider integration', () => {
     await act(async () => { await pendingA.promise })
     expect(harness.view.getByText('value-b')).toBeOnTheScreen()
     expect(harness.queryClient.getQueryData(['shared-financial'])).toBe('value-b')
+    await harness.cleanup()
+  })
+
+  it('removes the push device while the session still works, before signing out', async () => {
+    const events: string[] = []
+    const auth = createAuth()
+    auth.signOutLocal.mockImplementation(async () => { events.push('sign-out'); return { error: null } })
+    const beforeSignOut = jest.fn(async (runtime: ProductRuntime) => { events.push(`unregister:${runtime.principalId}`) })
+    const harness = await createHarness(session('a'), { auth, beforeSignOut, withBoundary: false })
+
+    let logout!: Promise<void>
+    await act(() => { logout = harness.current().signOut() })
+    await act(async () => { await logout })
+
+    expect(events).toEqual(['unregister:a', 'sign-out'])
+    expect(harness.current().routeState.status).toBe('signed-out')
+    await harness.cleanup()
+  })
+
+  it('still signs out when removing the push device fails', async () => {
+    const beforeSignOut = jest.fn(() => Promise.reject(new Error('offline')))
+    const harness = await createHarness(session('a'), { beforeSignOut, withBoundary: false })
+
+    let logout!: Promise<void>
+    await act(() => { logout = harness.current().signOut() })
+    await act(async () => { await logout })
+
+    expect(beforeSignOut).toHaveBeenCalledTimes(1)
+    expect(harness.current().routeState.status).toBe('signed-out')
     await harness.cleanup()
   })
 

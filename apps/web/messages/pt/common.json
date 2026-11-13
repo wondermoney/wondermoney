@@ -2374,7 +2374,7 @@
     "creditCardDueReminders": {
       "title": "Lembretes de pagamento do cartão",
       "description": "Um email alguns dias antes do vencimento de um extrato de cartão de crédito fechado, se ainda tiver saldo por pagar.",
-      "detail": "Enviado apenas por email. No máximo um lembrete por extrato."
+      "detail": "No máximo um email por extrato."
     },
     "marketingOptOut": {
       "title": "Cancelar subscrição de todos os emails de marketing",

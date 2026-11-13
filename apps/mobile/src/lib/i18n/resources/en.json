@@ -3601,7 +3601,7 @@
     "creditCardDueReminders": {
       "title": "Card payment reminders",
       "description": "Get an email a few days before a closed credit card statement is due, if it still has a balance to pay.",
-      "detail": "Sent by email only. At most one reminder per statement."
+      "detail": "At most one email per statement."
     },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",
@@ -3633,7 +3633,32 @@
     },
     "retry": "Try again",
     "saving": "Saving change…",
-    "saveError": "This change could not be confirmed. Your preferences are being refreshed from the server."
+    "saveError": "This change could not be confirmed. Your preferences are being refreshed from the server.",
+    "push": {
+      "title": "Push notifications",
+      "description": "Get alerts on this phone. Each one is off until you turn it on, and the phone asks for permission the first time.",
+      "budgetAlerts": {
+        "title": "Budget alerts",
+        "description": "When a budget category reaches 80% or 100% of its plan."
+      },
+      "creditCardDueReminders": {
+        "title": "Card payment reminders",
+        "description": "A few days before a closed card statement is due."
+      },
+      "bankSyncAlerts": {
+        "title": "Bank connection alerts",
+        "description": "When a bank connection is about to expire, was ended by the bank, or keeps failing to sync."
+      },
+      "privacy": "Notifications never show amounts or merchants. Open the app to see the figures.",
+      "denied": "Notifications are turned off for WonderMoney in your phone's settings. Turn them on there, then try again.",
+      "unavailable": "This phone can't receive push notifications from this version of the app.",
+      "saveError": "This change could not be saved. Try again.",
+      "sendTest": "Send test notification",
+      "sendingTest": "Sending…",
+      "testSent": "Test notification sent. It should arrive in a few seconds.",
+      "testNoDevice": "Turn on a push notification first, so this phone is registered.",
+      "testError": "The test notification could not be sent. Try again."
+    }
   },
   "onboarding": {
     "firstRun": {

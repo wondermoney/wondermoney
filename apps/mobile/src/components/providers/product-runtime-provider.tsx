@@ -18,6 +18,8 @@ import { validateHouseholdInviteToken, type ValidateInviteOutcome } from '@/lib/
 import { takePendingInviteToken } from '@/lib/auth/invite-token-store'
 import { provisionAppUser } from '@/lib/auth/provision-app-user'
 import { resolveSignupLocale } from '@/lib/auth/resolve-signup-locale'
+import { securePushTokenStore } from '@/lib/push/push-token-store'
+import { unregisterPushDevice } from '@/lib/push/push-sign-out'
 import {
   createSessionOperationScope,
   createTransitionAuthenticatedContext,
@@ -155,6 +157,8 @@ export type ProductRuntimeProviderProps = Readonly<{
   transport: HttpTransport
   children: ReactNode
   operationScope?: SessionOperationScope
+  /** Runs before a sign-out tears the session down, while the API still accepts it (push device removal). */
+  beforeSignOut?: (runtime: ProductRuntime) => Promise<void>
   createRuntime?: (input: {
     epochId: AuthEpochId
     principalId: string
@@ -187,11 +191,15 @@ export const createDefaultProductRuntime: NonNullable<ProductRuntimeProviderProp
   }
 }
 
+/** Signing out removes this phone's push token from the account first (`lib/push/push-sign-out.ts`). */
+const defaultBeforeSignOut = (runtime: ProductRuntime) => unregisterPushDevice({ api: runtime.apiClient, store: securePushTokenStore })
+
 export function ProductRuntimeProvider({
   auth,
   transport,
   children,
   operationScope: injectedScope,
+  beforeSignOut = defaultBeforeSignOut,
   createRuntime = createDefaultProductRuntime,
 }: ProductRuntimeProviderProps) {
   const { session } = useAppSession<AuthSession>()
@@ -240,6 +248,8 @@ export function ProductRuntimeProvider({
     // reenter through auth/query observers.
     terminalFlight.current = flight
     const run = async () => {
+      const signingOut = reason === 'logout' ? runtimeRef.current : null
+      if (signingOut) await beforeSignOut(signingOut).catch(() => undefined)
       try {
         await transition(reason)
       } catch {
@@ -272,7 +282,7 @@ export function ProductRuntimeProvider({
       resolveFlight()
     })
     return flight
-  }, [auth, transition])
+  }, [auth, beforeSignOut, transition])
 
   const activate = useCallback(async (nextSession: AuthSession) => {
     const startVersion = activationVersion.current

@@ -3601,7 +3601,7 @@
     "creditCardDueReminders": {
       "title": "Recordatorios de pago de la tarjeta",
       "description": "Recibe un correo unos días antes del vencimiento de un extracto de tarjeta de crédito cerrado, si aún tiene saldo pendiente.",
-      "detail": "Solo se envía por correo. Como máximo un recordatorio por extracto."
+      "detail": "Como máximo un correo por extracto."
     },
     "marketingOptOut": {
       "title": "Cancelar la suscripción a todos los correos de marketing",
@@ -3633,7 +3633,32 @@
     },
     "retry": "Intentar de nuevo",
     "saving": "Guardando cambio…",
-    "saveError": "No se pudo confirmar este cambio. Tus preferencias se están actualizando desde el servidor."
+    "saveError": "No se pudo confirmar este cambio. Tus preferencias se están actualizando desde el servidor.",
+    "push": {
+      "title": "Notificaciones push",
+      "description": "Recibe avisos en este teléfono. Cada uno está desactivado hasta que lo activas, y el teléfono pide permiso la primera vez.",
+      "budgetAlerts": {
+        "title": "Alertas de presupuesto",
+        "description": "Cuando una categoría del presupuesto alcanza el 80% o el 100% de lo planificado."
+      },
+      "creditCardDueReminders": {
+        "title": "Recordatorios de pago de la tarjeta",
+        "description": "Unos días antes de que venza un extracto cerrado de la tarjeta."
+      },
+      "bankSyncAlerts": {
+        "title": "Alertas de conexiones bancarias",
+        "description": "Cuando una conexión bancaria está a punto de caducar, el banco la ha cerrado o sigue sin sincronizarse."
+      },
+      "privacy": "Las notificaciones nunca muestran importes ni comercios. Abre la aplicación para ver las cifras.",
+      "denied": "Las notificaciones de WonderMoney están desactivadas en los ajustes del teléfono. Actívalas allí y vuelve a intentarlo.",
+      "unavailable": "Este teléfono no puede recibir notificaciones push de esta versión de la aplicación.",
+      "saveError": "No se pudo guardar este cambio. Inténtalo de nuevo.",
+      "sendTest": "Enviar notificación de prueba",
+      "sendingTest": "Enviando…",
+      "testSent": "Notificación de prueba enviada. Debería llegar en unos segundos.",
+      "testNoDevice": "Activa primero una notificación push para registrar este teléfono.",
+      "testError": "No se pudo enviar la notificación de prueba. Inténtalo de nuevo."
+    }
   },
   "onboarding": {
     "firstRun": {

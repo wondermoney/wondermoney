@@ -20,7 +20,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'CRYPTO_BTC_EXPLORER_URL', 'CRYPTO_ETH_EXPLORER_URL', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'CRYPTO_BTC_EXPLORER_URL', 'CRYPTO_ETH_EXPLORER_URL', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'PUSH_ENABLED', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -58,6 +58,7 @@ describe('GET /v1/instance', () => {
         oidc: null,
         passkey: true,
         passwordSignIn: true,
+        push: false,
         statementImport: null,
       },
       minAppVersion: null,
@@ -70,6 +71,7 @@ describe('GET /v1/instance', () => {
 
   it('reports what the operator configured', () => {
     for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('PUSH_ENABLED', 'true');
     vi.stubEnv('AI_BASE_URL', 'http://localhost:11434/v1');
     vi.stubEnv('AI_MODEL', 'llama3.1');
     vi.stubEnv('EODHD_API_KEY', 'key');
@@ -83,7 +85,7 @@ describe('GET /v1/instance', () => {
     vi.stubEnv('SUPPORT_EMAIL', 'help@example.com');
 
     expect(describeInstance()).toMatchObject({
-      features: { ai: { assistant: true, ocr: true }, contactForm: true, email: true, feedback: true, googleSignIn: true, marketData: true, marketDataCapabilities: ['search', 'quote', 'dailyHistory', 'dividends', 'splits'], marketDataProviders: ['eodhd'] },
+      features: { ai: { assistant: true, ocr: true }, contactForm: true, email: true, feedback: true, googleSignIn: true, marketData: true, marketDataCapabilities: ['search', 'quote', 'dailyHistory', 'dividends', 'splits'], marketDataProviders: ['eodhd'], push: true },
       minAppVersion: '2.1.0',
       name: 'Casa',
       signupMode: 'invite',

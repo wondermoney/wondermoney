@@ -190,6 +190,9 @@ const sharedSchema = z.object({
   ENABLE_BANKING_PRIVATE_KEY_FILE: z.string().trim().optional(),
   // Lifts the single-household limit on the instance credential (`instance-credential-policy.ts`).
   ENABLE_BANKING_PRODUCTION_CONTRACT: boolFlag('Enable Banking production contract flag').optional(),
+  // Mobile push through the Expo push service (`config/push.ts`). Off unless set.
+  EXPO_ACCESS_TOKEN: z.string().trim().optional(),
+  PUSH_ENABLED: boolFlag('Push notifications flag').optional(),
   S3_BUCKET: z.string().trim().optional(),
   S3_ENDPOINT: httpUrl('S3 endpoint').optional(),
   S3_FORCE_PATH_STYLE: boolFlag('S3 path-style flag').optional(),

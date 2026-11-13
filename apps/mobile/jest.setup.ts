@@ -39,3 +39,14 @@ timeoutManager.setTimeoutProvider({
   setInterval: (callback, delay) => unref(setInterval(callback, delay)),
   clearInterval: (timer) => clearInterval(timer),
 })
+
+// expo-notifications' native emitter has no jest stand-in: its listeners come back without
+// `remove`. The signed-in shell subscribes to notification taps (features/notifications), so
+// every test that renders it gets inert listeners; a test of that wiring mocks the module itself.
+jest.mock('expo-notifications', () => ({
+  ...jest.requireActual('expo-notifications'),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
+  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
+  setNotificationHandler: jest.fn(),
+}))

@@ -30,6 +30,18 @@ The app checks the address before saving it. If the server can't be reached, isn
 
 **Settings → Security → Devices** lists the phones connected to your account, with when each was last seen. **Revoke** signs that phone out immediately; it has to scan a new code to connect again.
 
+## Push notifications
+
+The app can show budget alerts, card payment reminders and bank connection alerts as push notifications once your server has push turned on (`PUSH_ENABLED=true`, see [Configure](/en/docs/self-hosting/configure#push-notifications)). Open **Settings → Notifications** in the app: each push category is off until you turn it on, and the phone asks for permission the first time you do. **Send test notification** checks the whole path. Tapping a notification opens the screen it is about. Signing out removes the phone, and so does revoking it under **Devices**.
+
+### Which app builds your server can reach
+
+Notifications go through Expo's push service. A phone's push token belongs to the Expo project the app was built from, and that project holds the Apple and Google push credentials. For the published WonderMoney app, that is the WonderMoney maintainers' project, not yours.
+
+By default, Expo accepts a push request for a token without checking who sends it. The project's owner can turn on enhanced security for push notifications, and from then on Expo refuses push requests that do not carry a valid access token for that project. So your server reaches phones running the published app only while that project leaves enhanced security off, or if its owner gives you an access token to set as `EXPO_ACCESS_TOKEN`. Either can change without notice to you.
+
+To be independent of it, build the app from source with your own Expo project and your own Apple and Firebase push credentials (`apps/mobile/README.md`, "EAS configuration"). Your server then sends to your own build; set `EXPO_ACCESS_TOKEN` if you turn on enhanced security in your Expo account.
+
 ## Requirements
 
 - The phone must be able to reach the API. In practice that means HTTPS on a public hostname; see [HTTPS and domains](/en/docs/self-hosting/https-and-domains).

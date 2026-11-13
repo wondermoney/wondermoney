@@ -119,6 +119,14 @@ When a member adds a website to a merchant, the API asks the service for that do
 
 A logo address a member types in themselves wins over the template. The apps load that image directly from the address the member chose, without a referrer, so that site sees the address of each household member who views it. Only `https` addresses on a named host are accepted.
 
+## Push notifications
+
+Push notifications are off by default. Set `PUSH_ENABLED=true` on the API and the worker to let the mobile app register phones and receive notifications through the Expo push service: budget alerts, card payment reminders, bank connection alerts and a test notification. Every category stays off until a person turns it on in the app, and the phone asks for permission only then.
+
+The text says what happened, never how much: "Your budget Groceries is over plan" or "A card payment is due in 3 days". Amounts, balances and merchants stay in the app. Expo receives each registered phone's push token, the notification's title and text, and the screen of the app it opens.
+
+If the Expo project the app was built from requires an access token on push requests, set `EXPO_ACCESS_TOKEN` on the API and the worker. Which app builds your server can reach depends on that project; see [Push notifications](/en/docs/self-hosting/mobile-app#push-notifications).
+
 ## Bank sync
 
 Bank sync with European banks needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
@@ -265,6 +273,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Market data (CoinGecko) | The API and the worker, with coin symbols and search text, not user data | `coingecko` in `MARKET_DATA_PROVIDERS` |
 | Crypto wallets (the block explorers you choose) | The worker, with the public addresses in your users' crypto wallets, not names or amounts ([Crypto wallets](#crypto-wallets)) | `CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL` |
 | Merchant logos (the service you choose) | The API, with the domain of a merchant's website, not user data ([Merchant logos](#merchant-logos)) | `MERCHANT_LOGO_URL_TEMPLATE` |
+| Push notifications (Expo push service) | The API and the worker, with each registered phone's push token and the notification's text, which never holds an amount or a merchant ([Push notifications](#push-notifications)) | `PUSH_ENABLED=true` |
 | File storage (your S3-compatible store) | The API and browsers, for CSV imports and receipt copies | `S3_ENDPOINT` and `S3_BUCKET` |
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |

@@ -6,6 +6,7 @@ import { Base } from './BaseEntity';
 
 export enum CreditCardDueReminderChannel {
   EMAIL = 'email',
+  PUSH = 'push',
 }
 
 export enum CreditCardDueReminderStatus {

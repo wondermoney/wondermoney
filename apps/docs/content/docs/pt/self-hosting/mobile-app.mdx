@@ -30,6 +30,18 @@ A aplicação verifica o endereço antes de o guardar. Se não conseguir chegar 
 
 **Definições → Segurança → Dispositivos** lista os telemóveis ligados à tua conta, com a última vez que cada um foi visto. **Revogar** termina a sessão desse telemóvel de imediato; tem de ler um novo código para se ligar outra vez.
 
+## Notificações push
+
+A aplicação pode mostrar alertas de orçamento, lembretes de pagamento do cartão e alertas de ligações bancárias como notificações push, depois de o teu servidor ligar o push (`PUSH_ENABLED=true`, consulta [Configurar](/pt/docs/self-hosting/configure#notificações-push)). Abre **Definições → Notificações** na aplicação: cada categoria de push fica desligada até a ligares, e o telemóvel pede autorização na primeira vez que o fazes. **Enviar notificação de teste** verifica o caminho todo. Tocar numa notificação abre o ecrã a que ela se refere. Terminar a sessão remove o telemóvel, tal como revogá-lo em **Dispositivos**.
+
+### Que versões da aplicação o teu servidor consegue alcançar
+
+As notificações passam pelo serviço de push da Expo. O token de push de um telemóvel pertence ao projeto Expo a partir do qual a aplicação foi compilada, e é esse projeto que guarda as credenciais de push da Apple e da Google. Na aplicação WonderMoney publicada, esse é o projeto dos responsáveis pelo WonderMoney, não o teu.
+
+Por predefinição, a Expo aceita um pedido de push para um token sem verificar quem o envia. O dono do projeto pode ligar a segurança reforçada das notificações push e, a partir daí, a Expo recusa os pedidos de push que não tragam um token de acesso válido para esse projeto. Por isso, o teu servidor só alcança os telemóveis com a aplicação publicada enquanto esse projeto mantiver a segurança reforçada desligada, ou se o dono te der um token de acesso para definires como `EXPO_ACCESS_TOKEN`. Qualquer das duas coisas pode mudar sem aviso.
+
+Para não dependeres disso, compila a aplicação a partir do código com o teu próprio projeto Expo e as tuas próprias credenciais de push da Apple e do Firebase (`apps/mobile/README.md`, "EAS configuration"). O teu servidor envia então para a tua versão; define `EXPO_ACCESS_TOKEN` se ligares a segurança reforçada na tua conta Expo.
+
 ## Requisitos
 
 - O telemóvel tem de conseguir chegar à API. Na prática, isso significa HTTPS num domínio público; consulta [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains).

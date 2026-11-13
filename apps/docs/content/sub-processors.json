@@ -204,6 +204,10 @@
     {
       "id": "simplefin",
       "reason": "SimpleFIN Bridge, a paid read-only aggregator for US and Canadian banks (api services/bank-providers/simplefin.provider.ts, services/simplefin/), off unless a self-hosting operator lists simplefin in BANK_PROVIDERS. The hosted instance does not enable it. Where enabled, the API claims each user's setup token and the worker reads that user's accounts, balances and transactions with the access URL it returns, stored AES-256-GCM encrypted. Add it to the policy, with SimpleFIN's location, before ever enabling it on the hosted instance."
+    },
+    {
+      "id": "expo-push",
+      "reason": "Mobile push notifications through the Expo push service (api services/push/expo-push-client.ts, exp.host), off unless an operator sets PUSH_ENABLED=true. It would receive each registered phone's Expo push token and the notification's title, text and in-app path, never an amount or a merchant. Add it to the policy before enabling push on the hosted instance."
     }
   ]
 }
