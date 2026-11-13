@@ -115,6 +115,32 @@ describe("installment link mutations", () => {
     );
     assert.equal(invalidated.length, 0);
 
+    // A pending charge is not a stale page: nothing to refetch.
+    server.post.mockRejectedValueOnce(refusal(400, "transaction_pending"));
+    await act(() =>
+      result.current
+        .mutateAsync({
+          installmentPlanKey: 9,
+          installmentNumber: 2,
+          transactionKey: 5,
+        })
+        .catch(() => undefined),
+    );
+    assert.equal(invalidated.length, 0);
+
+    server.post.mockRejectedValueOnce(refusal(409, "installment_already_paid"));
+    await act(() =>
+      result.current
+        .mutateAsync({
+          installmentPlanKey: 9,
+          installmentNumber: 2,
+          transactionKey: 5,
+        })
+        .catch(() => undefined),
+    );
+    assert.ok(refreshed(invalidated));
+    invalidated.length = 0;
+
     server.post.mockRejectedValueOnce(refusal(409, "conflict"));
     await act(() =>
       result.current
@@ -130,11 +156,23 @@ describe("installment link mutations", () => {
 });
 
 test("installmentLinkError names each refusal of the link endpoint", () => {
-  assert.equal(installmentLinkError(refusal(400, "bad_request")), "wrong-card");
   assert.equal(
-    installmentLinkError(refusal(409, "conflict")),
-    "already-linked",
+    installmentLinkError(refusal(400, "transaction_pending")),
+    "pending",
   );
+  assert.equal(
+    installmentLinkError(refusal(400, "transaction_expired")),
+    "expired",
+  );
+  assert.equal(
+    installmentLinkError(refusal(409, "transaction_already_linked")),
+    "transaction-linked",
+  );
+  assert.equal(
+    installmentLinkError(refusal(409, "installment_already_paid")),
+    "installment-paid",
+  );
+  assert.equal(installmentLinkError(refusal(400, "bad_request")), "wrong-card");
   assert.equal(installmentLinkError(refusal(404, "not_found")), "not-found");
   assert.equal(installmentLinkError(refusal(403, "demo_read_only")), "demo");
   assert.equal(
@@ -142,4 +180,12 @@ test("installmentLinkError names each refusal of the link endpoint", () => {
     "failed",
   );
   assert.equal(installmentLinkError(new Error("offline")), "failed");
+});
+
+test("installmentLinkError falls back to the status for an API without the specific codes", () => {
+  assert.equal(installmentLinkError(refusal(400, "bad_request")), "wrong-card");
+  assert.equal(
+    installmentLinkError(refusal(409, "conflict")),
+    "already-linked",
+  );
 });

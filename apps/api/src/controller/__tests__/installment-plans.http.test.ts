@@ -64,8 +64,8 @@ describe('installment plans over HTTP', () => {
       ...body,
     });
 
-  async function charge(em: EntityManager, owner: Household, account: Account, description: string, amount: number, date: Date) {
-    const row = await addTransaction(em, owner, { account, amount, date, status: 'BOOKED' });
+  async function charge(em: EntityManager, owner: Household, account: Account, description: string, amount: number, date: Date, status: 'BOOKED' | 'EXPIRED' | 'PENDING' | null = 'BOOKED') {
+    const row = await addTransaction(em, owner, { account, amount, date, status });
     row.description = description;
     await em.flush();
     return row;
@@ -130,6 +130,63 @@ describe('installment plans over HTTP', () => {
     expect((await link(1, posted.transactionKey)).status).toBe(200);
     expect((await link(2, posted.transactionKey)).status).toBe(409);
     expect((await link(1, elsewhere.transactionKey)).status).toBe(400);
+  });
+
+  it('names each link conflict: the row already pays an installment, or the installment is already paid', async () => {
+    const { em, owner } = await household();
+    const planKey = (await create(owner.appuser, owner.account)).body.installmentPlan.installmentPlanKey;
+    const first = await charge(em, owner, owner.account, 'LAPTOP STORE 1/3', -33.33, daysFromToday(0));
+    const second = await charge(em, owner, owner.account, 'LAPTOP STORE 2/3', -33.33, daysFromToday(0));
+    const link = (number: number, transactionKey: number) => plans.as(owner.appuser).post(`/v1/installment-plans/${planKey}/installments/${number}/link`).send({ transactionKey });
+    expect((await link(1, first.transactionKey)).status).toBe(200);
+
+    const rowTaken = await link(2, first.transactionKey);
+    const installmentTaken = await link(1, second.transactionKey);
+    // Linking the same row to the same installment again changes nothing.
+    const again = await link(1, first.transactionKey);
+
+    expect([rowTaken.status, rowTaken.body.code]).toEqual([409, 'transaction_already_linked']);
+    expect([installmentTaken.status, installmentTaken.body.code]).toEqual([409, 'installment_already_paid']);
+    expect(again.status).toBe(200);
+    expect(again.body.installmentPlan.installments.map((row: { transactionKey: null | number }) => row.transactionKey)).toEqual([first.transactionKey, null, null]);
+  });
+
+  it('refuses a pending charge, and one the bank dropped, but links a posted one', async () => {
+    const { em, owner } = await household();
+    const planKey = (await create(owner.appuser, owner.account)).body.installmentPlan.installmentPlanKey;
+    const pending = await charge(em, owner, owner.account, 'LAPTOP STORE 1/3', -33.33, daysFromToday(0), 'PENDING');
+    const dropped = await charge(em, owner, owner.account, 'LAPTOP STORE 1/3', -33.33, daysFromToday(0), 'EXPIRED');
+    const booked = await charge(em, owner, owner.account, 'LAPTOP STORE 1/3', -33.33, daysFromToday(0), 'BOOKED');
+    // Manual and older rows carry no status; they are posted.
+    const unstated = await charge(em, owner, owner.account, 'LAPTOP STORE 2/3', -33.33, daysFromToday(0), null);
+    const link = (number: number, transactionKey: number) => plans.as(owner.appuser).post(`/v1/installment-plans/${planKey}/installments/${number}/link`).send({ transactionKey });
+
+    const refusedPending = await link(1, pending.transactionKey);
+    const refusedDropped = await link(1, dropped.transactionKey);
+    expect([refusedPending.status, refusedPending.body.code]).toEqual([400, 'transaction_pending']);
+    expect([refusedDropped.status, refusedDropped.body.code]).toEqual([400, 'transaction_expired']);
+    expect((await plans.as(owner.appuser).get(`/v1/installment-plans/${planKey}`)).body.installmentPlan.paidCount).toBe(0);
+
+    const linked = await link(1, booked.transactionKey);
+    const linkedUnstated = await link(2, unstated.transactionKey);
+    expect(linked.status).toBe(200);
+    expect(linkedUnstated.status).toBe(200);
+    expect(linkedUnstated.body.installmentPlan.installments.slice(0, 2)).toEqual([
+      expect.objectContaining({ status: 'paid', transactionKey: booked.transactionKey }),
+      expect.objectContaining({ status: 'paid', transactionKey: unstated.transactionKey }),
+    ]);
+  });
+
+  it('links a posted row whose amount differs from the installment’s', async () => {
+    const { em, owner } = await household();
+    const planKey = (await create(owner.appuser, owner.account)).body.installmentPlan.installmentPlanKey;
+    // Banks round installments differently, and the last one absorbs the rounding: the amount is not checked.
+    const posted = await charge(em, owner, owner.account, 'LAPTOP STORE 3/3', -40, daysFromToday(0));
+
+    const linked = await plans.as(owner.appuser).post(`/v1/installment-plans/${planKey}/installments/3/link`).send({ transactionKey: posted.transactionKey });
+
+    expect(linked.status).toBe(200);
+    expect(linked.body.installmentPlan.installments[2]).toMatchObject({ amount: 33.34, postedAmount: 40, status: 'paid' });
   });
 
   it('suggests a plan from posted installments and accepts it only when asked', async () => {
@@ -228,6 +285,17 @@ describe('installment plans over HTTP', () => {
     expect(neighbourList.body.installmentPlans).toEqual([]);
     // The owner still has the private plan and its suggestion.
     expect((await plans.as(owner.appuser).get('/v1/installment-plans/suggestions')).body.suggestions).toHaveLength(1);
+
+    // A row the caller cannot see is not found, whatever its status: its existence and state stay hidden.
+    const partnerPlan = (await create(partner, owner.account)).body.installmentPlan.installmentPlanKey;
+    const privatePending = await charge(em, owner, privateCard, 'SHOP', -10, daysFromToday(0), 'PENDING');
+    const neighbourRow = await charge(em, neighbour, neighbour.account, 'SHOP', -10, daysFromToday(0));
+    const unseen = await Promise.all([
+      plans.as(partner).post(`/v1/installment-plans/${partnerPlan}/installments/1/link`).send({ transactionKey: privateRow.transactionKey }),
+      plans.as(partner).post(`/v1/installment-plans/${partnerPlan}/installments/1/link`).send({ transactionKey: privatePending.transactionKey }),
+      plans.as(owner.appuser).post(`/v1/installment-plans/${sharedPlan}/installments/1/link`).send({ transactionKey: neighbourRow.transactionKey }),
+    ]);
+    expect(unseen.map((response): [number, unknown] => [response.status, response.body.code])).toEqual([[404, 'not_found'], [404, 'not_found'], [404, 'not_found']]);
   });
 
   it('deletes a plan and keeps its posted transactions, unlinked', async () => {

@@ -3143,6 +3143,10 @@
     "link-installment-option": "{description}, installment {number} of {count}",
     "link-errors": {
       "wrong-card": "That transaction is not on this plan's card.",
+      "pending": "That transaction is still pending. Link it once the bank posts it.",
+      "expired": "The bank dropped that transaction, so it paid nothing.",
+      "transaction-linked": "That transaction already pays another installment. Unlink it there first. The plan has been refreshed.",
+      "installment-paid": "This installment is already paid by another transaction. Unlink that one first. The plan has been refreshed.",
       "already-linked": "That transaction already pays an installment, or this installment is already paid by another transaction. The plan has been refreshed.",
       "not-found": "That transaction or plan no longer exists. The plan has been refreshed.",
       "failed": "The transaction could not be linked.",

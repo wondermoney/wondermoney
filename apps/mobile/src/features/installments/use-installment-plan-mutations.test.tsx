@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { ApiError } from '@/lib/api/errors'
 
 import {
+  classifyInstallmentLinkFailure,
   classifyInstallmentWriteFailure,
   installmentLinkFailureMessage,
   useCreateInstallmentPlan,
@@ -113,13 +114,39 @@ describe('installment plan mutations', () => {
     mockWrite.mockRejectedValueOnce(new ApiError('http', 400))
     await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
     expect(invalidate).not.toHaveBeenCalled()
+    // A pending charge is not a stale page either.
+    mockWrite.mockRejectedValueOnce(new ApiError('http', 400, { serverCode: 'transaction_pending' }))
+    await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
+    expect(invalidate).not.toHaveBeenCalled()
+    mockWrite.mockRejectedValueOnce(new ApiError('http', 409, { serverCode: 'installment_already_paid' }))
+    await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['transactions', 8] })
+    invalidate.mockClear()
     mockWrite.mockRejectedValueOnce(new ApiError('http', 409))
     await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['transactions', 8] })
     await hook.unmount(); client.clear()
   })
 
+  it('reads the link endpoint’s own reasons, and the status from an API without them', () => {
+    const refusal = (status: number, serverCode?: string) => new ApiError('http', status, serverCode ? { serverCode } : undefined)
+    expect(classifyInstallmentLinkFailure(refusal(400, 'transaction_pending'))).toBe('pending')
+    expect(classifyInstallmentLinkFailure(refusal(400, 'transaction_expired'))).toBe('expired')
+    expect(classifyInstallmentLinkFailure(refusal(409, 'transaction_already_linked'))).toBe('transaction-linked')
+    expect(classifyInstallmentLinkFailure(refusal(409, 'installment_already_paid'))).toBe('installment-paid')
+    expect(classifyInstallmentLinkFailure(refusal(400, 'bad_request'))).toBe('invalid')
+    expect(classifyInstallmentLinkFailure(refusal(409, 'conflict'))).toBe('conflict')
+    expect(classifyInstallmentLinkFailure(refusal(409))).toBe('conflict')
+    expect(classifyInstallmentLinkFailure(refusal(404, 'not_found'))).toBe('not-found')
+    expect(classifyInstallmentLinkFailure(new ApiError('demo-forbidden'))).toBe('demo')
+    expect(classifyInstallmentLinkFailure(new Error('boom'))).toBe('general')
+  })
+
   it('names each refusal of the link endpoint', () => {
+    expect(installmentLinkFailureMessage('pending', 'link')).toBe('installments.link.failures.pending')
+    expect(installmentLinkFailureMessage('expired', 'link')).toBe('installments.link.failures.expired')
+    expect(installmentLinkFailureMessage('transaction-linked', 'link')).toBe('installments.link.failures.transactionLinked')
+    expect(installmentLinkFailureMessage('installment-paid', 'link')).toBe('installments.link.failures.installmentPaid')
     expect(installmentLinkFailureMessage('invalid', 'link')).toBe('installments.link.failures.wrongCard')
     expect(installmentLinkFailureMessage('conflict', 'link')).toBe('installments.link.failures.alreadyLinked')
     expect(installmentLinkFailureMessage('not-found', 'unlink')).toBe('installments.link.failures.notFound')

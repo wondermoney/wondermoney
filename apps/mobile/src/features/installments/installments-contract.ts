@@ -228,9 +228,11 @@ function installmentLinkPath(planId: number, installmentNumber: number): string 
 
 /**
  * `POST …/installments/:n/link` with `{ transactionKey }`: the posted transaction pays installment
- * `n`. The API refuses a transaction on another card (400), one that already pays an installment
- * or an installment already paid by another transaction (409), and a plan or transaction that is
- * gone (404). Answers with the plan as it now stands.
+ * `n`. The API refuses a pending charge (400 `transaction_pending`), one the bank dropped (400
+ * `transaction_expired`), a transaction on another card (400), one that already pays an installment
+ * (409 `transaction_already_linked`) or an installment already paid by another transaction (409
+ * `installment_already_paid`), and a plan or transaction that is gone (404). Answers with the plan
+ * as it now stands.
  */
 export const createInstallmentLinkEndpoint = (planId: number, installmentNumber: number) => writeEndpoint({
   method: 'POST',

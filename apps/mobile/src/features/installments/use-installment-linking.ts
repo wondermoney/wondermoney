@@ -8,7 +8,7 @@ import { createAccountTransactionsEndpoint } from '@/features/transactions/trans
 import { linkCandidates, linkSearchFilters, type LinkCandidate } from './installment-link-candidates'
 import type { InstallmentPlanDetailDto } from './installments-contract'
 import {
-  classifyInstallmentWriteFailure,
+  classifyInstallmentLinkFailure,
   installmentLinkFailureMessage,
   useLinkInstallment,
   useUnlinkInstallment,
@@ -90,7 +90,7 @@ export function useInstallmentLinking(plan: InstallmentPlanDetailDto | null): In
         await linkWrite.mutateAsync({ planId: plan.installmentPlanKey, accountId: plan.accountKey, installmentNumber: target, transactionKey })
         setTarget(null)
       } catch (error) {
-        setFailure(installmentLinkFailureMessage(classifyInstallmentWriteFailure(error), 'link'))
+        setFailure(installmentLinkFailureMessage(classifyInstallmentLinkFailure(error), 'link'))
       }
     },
     unlink: async (installmentNumber) => {
@@ -99,7 +99,7 @@ export function useInstallmentLinking(plan: InstallmentPlanDetailDto | null): In
       try {
         await unlinkWrite.mutateAsync({ planId: plan.installmentPlanKey, accountId: plan.accountKey, installmentNumber })
       } catch (error) {
-        setFailure(installmentLinkFailureMessage(classifyInstallmentWriteFailure(error), 'unlink'))
+        setFailure(installmentLinkFailureMessage(classifyInstallmentLinkFailure(error), 'unlink'))
       }
     },
   }

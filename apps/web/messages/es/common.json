@@ -3143,6 +3143,10 @@
     "link-installment-option": "{description}, cuota {number} de {count}",
     "link-errors": {
       "wrong-card": "Esa transacción no es de la tarjeta de este plan.",
+      "pending": "Esa transacción aún está pendiente. Vincúlala cuando el banco la contabilice.",
+      "expired": "El banco anuló esa transacción, así que no pagó nada.",
+      "transaction-linked": "Esa transacción ya paga otra cuota. Desvincúlala de esa cuota primero. El plan se ha actualizado.",
+      "installment-paid": "Esta cuota ya está pagada por otra transacción. Desvincula esa transacción primero. El plan se ha actualizado.",
       "already-linked": "Esa transacción ya paga una cuota, o esta cuota ya está pagada por otra transacción. El plan se ha actualizado.",
       "not-found": "Esa transacción o este plan ya no existe. El plan se ha actualizado.",
       "failed": "No se pudo vincular la transacción.",

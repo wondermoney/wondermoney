@@ -10,8 +10,8 @@ import { InstallmentPlan } from '@entity/InstallmentPlan';
 import type { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { type CreditCardCycle, toCalendarDate, utcDayNumber } from '@service/account/credit-card-cycle';
-import { EXPIRED_TRANSACTION_STATUS } from '@service/transaction/transaction-status';
-import { BadRequestError, ConflictError, NotFoundError } from '@utils/errors';
+import { EXPIRED_TRANSACTION_STATUS, isExpiredStatusName, isPendingStatusName } from '@service/transaction/transaction-status';
+import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
 import { roundDisplay, toNumber } from '@utils/money';
 
 import { normalizeInstallmentStem, parseInstallmentMarker } from './installment-description';
@@ -250,20 +250,6 @@ async function findCategoryOrFail(em: EntityManager, categoryKey: number, tenant
 }
 
 /** Rewrite a plan's schedule from its amount, count, purchase date and its card's cycle. */
-async function writeSchedule(em: EntityManager, plan: InstallmentPlan): Promise<void> {
-  await em.nativeDelete(Installment, { installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { filters: false });
-  const cycle = await cycleFor(em, plan.accountKey.accountKey);
-  for (const row of buildInstallmentSchedule({ cycle, installmentCount: plan.installmentCount, purchaseDate: plan.purchaseDate, totalAmount: toNumber(plan.totalAmount) })) {
-    em.create(Installment, { ...row, installmentPlanKey: plan, tenantKey: plan.tenantKey }, { partial: true });
-  }
-  await em.flush();
-}
-
-/**
- * Link a posted transaction to installment `installmentNumber` of `plan`. The transaction must be a
- * live row the caller can see, on the plan's card, and not already paying an installment; the
- * installment must not already be paid. Flushes nothing.
- */
 export async function createInstallmentPlan(em: EntityManager, input: CreateInstallmentPlanInput, context: InstallmentPlanContext): Promise<InstallmentPlan> {
   const account = await findAccountOrFail(em, input.accountKey, context.tenantKey);
   const category = input.categoryKey == null ? null : await findCategoryOrFail(em, input.categoryKey, context.tenantKey);
@@ -317,6 +303,22 @@ export async function updateInstallmentPlan(em: EntityManager, plan: Installment
   });
 }
 
+async function writeSchedule(em: EntityManager, plan: InstallmentPlan): Promise<void> {
+  await em.nativeDelete(Installment, { installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { filters: false });
+  const cycle = await cycleFor(em, plan.accountKey.accountKey);
+  for (const row of buildInstallmentSchedule({ cycle, installmentCount: plan.installmentCount, purchaseDate: plan.purchaseDate, totalAmount: toNumber(plan.totalAmount) })) {
+    em.create(Installment, { ...row, installmentPlanKey: plan, tenantKey: plan.tenantKey }, { partial: true });
+  }
+  await em.flush();
+}
+
+/**
+ * Link a posted transaction to installment `installmentNumber` of `plan`. The transaction must be a
+ * live row the caller can see, on the plan's card, and not already paying an installment; the
+ * installment must not already be paid. Flushes nothing.
+ * The two 409s carry their own codes, so a client can word them: `transaction_already_linked` and
+ * `installment_already_paid`.
+ */
 async function assignTransaction(em: EntityManager, plan: InstallmentPlan, installmentNumber: number, transactionKey: number): Promise<void> {
   if (installmentNumber > plan.installmentCount) throw new BadRequestError(`Installment ${installmentNumber} is past the plan's ${plan.installmentCount}`);
   const transaction = await em.findOne(Transaction, { deletedAt: null, transactionKey }, { filters: { [HIDDEN_FILTER]: false } });
@@ -324,10 +326,10 @@ async function assignTransaction(em: EntityManager, plan: InstallmentPlan, insta
   if (transaction.accountKey?.accountKey !== plan.accountKey.accountKey) throw new BadRequestError('The transaction is not on the plan\'s account');
   const current = transaction.installmentPlanKey?.installmentPlanKey;
   if (current != null && (current !== plan.installmentPlanKey || transaction.installmentNumber !== installmentNumber)) {
-    throw new ConflictError('The transaction already pays another installment');
+    throw new ConflictError('The transaction already pays another installment', ERROR_CODE.TRANSACTION_ALREADY_LINKED);
   }
   const holder = await em.findOne(Transaction, { deletedAt: null, installmentNumber, installmentPlanKey: { installmentPlanKey: plan.installmentPlanKey } }, { filters: { [HIDDEN_FILTER]: false } });
-  if (holder && holder.transactionKey !== transaction.transactionKey) throw new ConflictError(`Installment ${installmentNumber} is already paid by another transaction`);
+  if (holder && holder.transactionKey !== transaction.transactionKey) throw new ConflictError(`Installment ${installmentNumber} is already paid by another transaction`, ERROR_CODE.INSTALLMENT_ALREADY_PAID);
   transaction.installmentPlanKey = plan;
   transaction.installmentNumber = installmentNumber;
   // Linking by hand takes back an earlier manual unlink from this plan.
@@ -346,7 +348,21 @@ export async function deleteInstallmentPlan(em: EntityManager, plan: Installment
   });
 }
 
+/**
+ * Link a posted transaction to one installment by hand. The row must be posted: a pending charge can
+ * still change or drop out (400 `transaction_pending`), and an EXPIRED one never moved money (400
+ * `transaction_expired`). A row with no status (manual and older rows) is posted, as everywhere else.
+ *
+ * The amount is deliberately not compared with the installment's: banks round installments
+ * differently and the last one absorbs the rounding, so a mismatch is not a reason to refuse a link
+ * the person chose. The detail shows the posted amount beside the scheduled one.
+ */
 export async function linkInstallment(em: EntityManager, plan: InstallmentPlan, installmentNumber: number, transactionKey: number): Promise<void> {
+  const transaction = await em.findOne(Transaction, { deletedAt: null, transactionKey }, { filters: { [HIDDEN_FILTER]: false }, populate: ['transactionStatusKey'] });
+  if (!transaction) throw new NotFoundError(`Transaction not found: ${transactionKey}`);
+  const status = transaction.transactionStatusKey?.name;
+  if (isPendingStatusName(status)) throw new BadRequestError('The transaction is still pending; link it once it is posted', ERROR_CODE.TRANSACTION_PENDING);
+  if (isExpiredStatusName(status)) throw new BadRequestError('The transaction expired and never moved money', ERROR_CODE.TRANSACTION_EXPIRED);
   await assignTransaction(em, plan, installmentNumber, transactionKey);
   await em.flush();
 }
