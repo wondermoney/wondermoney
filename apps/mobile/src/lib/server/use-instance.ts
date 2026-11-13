@@ -71,3 +71,12 @@ export function useServerBuildInfo(): { commit: string | null; version: string |
   const { data } = useInstance()
   return { commit: data?.commit ?? null, version: data?.version ?? null }
 }
+
+/**
+ * Whether the server has a shared Enable Banking credential (`features.bankSyncCredentials`).
+ * Undefined while the description loads or when it can't be fetched.
+ */
+export function useInstanceBankSyncCredentials(): 'instance' | 'user' | undefined {
+  const { data } = useInstance()
+  return data ? (data.features.bankSyncCredentials ?? 'user') : undefined
+}

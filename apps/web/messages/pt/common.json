@@ -2579,7 +2579,8 @@
   "bankProviderCredentialRequired": {
     "title": "Adicione primeiro a sua chave da Enable Banking",
     "body": "Para ligar um banco é agora preciso o seu próprio ID de aplicação e chave da Enable Banking. Adicione-os em Definições e volte depois aqui.",
-    "cta": "Ir para as definições do fornecedor bancário"
+    "cta": "Ir para as definições do fornecedor bancário",
+    "sharedUnavailable": "A ligação bancária partilhada deste servidor só serve um agregado, por isso o seu precisa da sua própria chave."
   },
   "faq": {
     "title": "O que mudou na WonderMoney",
@@ -2652,7 +2653,8 @@
       "privateKeyInvalidFormat": "Isto não parece uma chave privada. Deve começar por \"-----BEGIN\".",
       "submit": "Testar e guardar",
       "genericError": "Não foi possível verificar esta chave. Verifique-a e tente novamente."
-    }
+    },
+    "sharedAvailable": "Este servidor tem uma ligação partilhada à Enable Banking para o seu agregado, por isso pode ligar bancos sem uma chave sua. Se adicionar uma, as novas ligações passam a usá-la."
   },
   "emailVerification": {
     "message": "Verifique o seu email para usar esta funcionalidade. Enviámos um link para {email}.",

@@ -41,8 +41,8 @@ vi.mock("@/i18n/navigation", () => ({
 vi.mock("@/lib/auth/user-context", () => ({ useUser: () => ({ id: "user-1" }) }));
 vi.mock("./FirstRunOnboardingRouteShell", () => ({ useFirstRunOnboardingFooter: () => () => {} }));
 vi.mock("@/lib/utils/bank-connections-paused", () => ({ isBankConnectionsPaused: () => false }));
-vi.mock("@/lib/api/user/useEnableBankingCredential", () => ({
-  default: () => ({ data: { status: "active" }, isLoading: false }),
+vi.mock("@/lib/api/user/useBankLinkCredential", () => ({
+  default: () => ({ canLink: true, credentialRequired: false, loading: false, sharedCredentialUnavailable: false }),
 }));
 vi.mock("@/lib/api/banking/useBankList", () => ({
   default: () => ({ data: [{ id: "BANK_1", name: "Test Bank", logo: "" }], isLoading: false }),

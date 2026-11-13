@@ -108,6 +108,33 @@ Um endereço de logótipo que um membro escreva ele próprio tem prioridade sobr
 
 A sincronização bancária não precisa de configuração no servidor. Cada pessoa adiciona a sua própria chave de aplicação Enable Banking nas Definições, por isso as credenciais bancárias nunca são partilhadas entre utilizadores.
 
+### Uma aplicação Enable Banking para o servidor
+
+Para que o teu agregado possa ligar bancos sem que cada pessoa registe uma aplicação, regista tu uma na Enable Banking e indica ao servidor o ID da aplicação e a chave privada:
+
+| Definição | O que faz |
+|---|---|
+| `ENABLE_BANKING_APP_ID` | O ID da aplicação. Liga a aplicação do servidor em conjunto com o ficheiro da chave |
+| `ENABLE_BANKING_PRIVATE_KEY_FILE` | A chave privada da aplicação (o ficheiro `.pem` que geraste ao registá-la, não o certificado). Com Docker Compose, o caminho no servidor, como `./enable-banking.pem` ao lado de `docker-compose.yml`: a API e o worker leem-no como um segredo Docker. Noutros casos, o caminho de onde a API e o worker o leem |
+| `ENABLE_BANKING_PRODUCTION_CONTRACT` | `true` levanta o limite de um agregado descrito abaixo. Define-a só depois de a Enable Banking te dar um contrato de produção completo |
+
+Os contentores correm como o utilizador `1000`, por isso esse utilizador tem de conseguir ler o ficheiro da chave: `chmod 644 enable-banking.pem` ou `chown 1000 enable-banking.pem`. No Kubernetes, guarda a chave num Secret e indica-o em `enableBanking.privateKeySecret` nos valores do chart. Define as três na API e no worker.
+
+Ambos verificam a chave ao arrancar: um ficheiro que não conseguem ler, ou que não seja uma chave privada RSA, impede-os de arrancar com um erro que indica o ficheiro. A chave nunca é registada nos logs, guardada na base de dados nem enviada às aplicações. `GET /v1/instance` indica `features.bankSyncCredentials: "instance"` (`"user"` sem ela), e as aplicações web e móvel saltam o passo "adiciona a tua chave" para todos os que a aplicação abrange.
+
+Quem adicionar a sua própria chave nas Definições continua a ligar bancos com a sua. Cada ligação mantém a aplicação com que foi feita: se removeres ou substituíres a aplicação do servidor, as ligações feitas com ela deixam de sincronizar e os seus donos voltam a ligar-se.
+
+### O limite da licença: um agregado
+
+Uma aplicação Enable Banking nova funciona em modo Restricted Production, em que só pode ligar as contas de quem a registou. Sem um contrato de produção completo, a aplicação do servidor serve por isso um agregado:
+
+- Enquanto o servidor tiver um único agregado, todos os seus membros podem ligar bancos com ela.
+- O primeiro agregado a ligar um banco com ela mantém-na, para novas ligações e para voltar a ligar, depois de outros agregados se registarem. As suas ligações continuam a sincronizar.
+- Os outros agregados veem o passo habitual "adiciona a tua própria chave", com uma linha a explicar que a ligação partilhada do servidor só serve um agregado.
+- Se um segundo agregado se registar antes de alguém ligar um banco, nenhum agregado recebe a aplicação do servidor até definires `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
+
+A conta de demonstração nunca conta. A própria Enable Banking também aplica o limite: em modo Restricted Production, recusa contas que não sejam do dono da aplicação, incluindo as de um parceiro. Confirma no Control Panel da Enable Banking a que contas a tua aplicação pode aceder.
+
 O worker sincroniza cada ligação bancária no máximo uma vez a cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por omissão. Ao abrigo da PSD2, um banco pode limitar o acesso não assistido a quatro chamadas por dia por conta, por isso define-a como `6` ou mais para ficares dentro desse limite. Uma sincronização falhada espera o mesmo intervalo antes da tentativa seguinte. Define-a no worker; um valor que não seja um número positivo impede o worker de arrancar.
 
 ## Início de sessão com Google
@@ -213,7 +240,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |
 | Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |
 | Analytics (Google Tag Manager, PostHog) | Consulta [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
-| Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições |
+| Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições, ou a aplicação do servidor (`ENABLE_BANKING_APP_ID`) |
 | Início de sessão com Google | Os navegadores e a API, quando um utilizador escolhe "Continuar com Google" | `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` |
 | O teu fornecedor de identidade (OIDC) | Os navegadores e a API, quando um utilizador escolhe `Iniciar sessão com <nome>`. A API obtém o documento de descoberta e as chaves do fornecedor, e troca o código de início de sessão | `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |

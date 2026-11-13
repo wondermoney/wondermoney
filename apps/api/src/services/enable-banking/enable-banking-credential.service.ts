@@ -8,11 +8,18 @@ import type { Tenant } from '@entity/Tenant';
 import { decryptSecret, encryptSecret } from '@service/crypto/secret-encryption.service';
 import { getRef } from '@utils/em-helpers';
 
+import { instanceEnableBankingCredential } from './instance-credential';
+import { mayUseInstanceEnableBankingCredential } from './instance-credential-policy';
+
 export interface DecryptedEnableBankingCredential {
   applicationId: string;
   privateKeyPem: string;
 }
 
+/**
+ * The credential a new link uses: the user's own (`entity` is the row the connection will point
+ * at), or the instance-wide one (`entity` null).
+ */
 export interface EnableBankingCredentialStatusDto {
   applicationId: string;
   lastValidatedAt: null | string;
@@ -20,11 +27,23 @@ export interface EnableBankingCredentialStatusDto {
   status: EnableBankingCredentialStatus;
 }
 
+export type ResolvedEnableBankingCredential =
+  | { credential: DecryptedEnableBankingCredential; entity: EnableBankingCredential; source: 'user' }
+  | { credential: DecryptedEnableBankingCredential; entity: null; source: 'instance' };
+
 export interface SaveValidatedEnableBankingCredentialParams {
   applicationId: string;
   appuser: Appuser;
   privateKeyPem: string;
   tenant?: Tenant;
+}
+
+/** A connection made with the instance credential after the operator removed it. */
+export class InstanceEnableBankingCredentialUnavailableError extends Error {
+  constructor() {
+    super('This bank connection was made with the server\'s Enable Banking credential, which is no longer configured');
+    this.name = 'InstanceEnableBankingCredentialUnavailableError';
+  }
 }
 
 function toStatusDto(credential: EnableBankingCredential): EnableBankingCredentialStatusDto {
@@ -69,6 +88,18 @@ export class EnableBankingCredentialService {
     return { applicationId: credential.applicationId, privateKeyPem };
   }
 
+  /**
+   * The credential a stored connection was made with: its own credential row, or the instance
+   * credential when it has none. A connection never switches credential: an Enable Banking
+   * session belongs to the application that created it.
+   */
+  decryptForConnection(connection: { enableBankingCredentialKey?: EnableBankingCredential | null }): DecryptedEnableBankingCredential {
+    if (connection.enableBankingCredentialKey) return this.decryptCredentialEntity(connection.enableBankingCredentialKey);
+    const instance = instanceEnableBankingCredential();
+    if (!instance) throw new InstanceEnableBankingCredentialUnavailableError();
+    return instance;
+  }
+
   async deleteForAppuser(appuserKey: number): Promise<void> {
     const credential = await this.findCurrentRow(appuserKey);
     if (!credential || credential.deletedAt) {
@@ -93,6 +124,20 @@ export class EnableBankingCredentialService {
     const credential = await this.findActiveCredential(appuserKey);
     if (!credential) return null;
     return this.decryptCredentialEntity(credential);
+  }
+
+  /**
+   * The credential a new link by this user in this household uses. Their own active credential
+   * always wins; without one, the instance credential when `instance-credential-policy.ts` lets
+   * this household use it; otherwise null. Without a household (`tenantKey` undefined) only the
+   * user's own credential counts.
+   */
+  async resolveForNewLink(appuserKey: number, tenantKey: number | undefined): Promise<null | ResolvedEnableBankingCredential> {
+    const own = await this.findActiveCredential(appuserKey);
+    if (own) return { credential: this.decryptCredentialEntity(own), entity: own, source: 'user' };
+    if (tenantKey === undefined || !(await mayUseInstanceEnableBankingCredential(this.em, tenantKey))) return null;
+    const instance = instanceEnableBankingCredential();
+    return instance ? { credential: instance, entity: null, source: 'instance' } : null;
   }
 
   /** Current credential's status, for the Settings UI. `null` when the user has never registered one. */

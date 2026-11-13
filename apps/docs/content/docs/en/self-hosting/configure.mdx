@@ -108,6 +108,33 @@ A logo address a member types in themselves wins over the template. The apps loa
 
 Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
 
+### One Enable Banking application for the server
+
+To let your household link banks without each person registering an application, register one yourself with Enable Banking and give the server its application ID and private key:
+
+| Setting | What it does |
+|---|---|
+| `ENABLE_BANKING_APP_ID` | The application's ID. Turns the server's application on together with the key file |
+| `ENABLE_BANKING_PRIVATE_KEY_FILE` | The application's private key (the `.pem` file you generated when registering it, not its certificate). With Docker Compose, its path on the server, such as `./enable-banking.pem` beside `docker-compose.yml`: the API and the worker read it as a Docker secret. Elsewhere, the path the API and the worker read it from |
+| `ENABLE_BANKING_PRODUCTION_CONTRACT` | `true` lifts the one-household limit below. Set it only once Enable Banking has given you a full production contract |
+
+The containers run as user `1000`, so that user must be able to read the key file: `chmod 644 enable-banking.pem`, or `chown 1000 enable-banking.pem`. On Kubernetes, put the key in a Secret and name it in `enableBanking.privateKeySecret` in the chart's values. Set all three on the API and the worker.
+
+Both check the key when they start: a file they can't read, or one that is not an RSA private key, stops them with an error that names the file. The key is never logged, stored in the database or sent to the apps. `GET /v1/instance` reports `features.bankSyncCredentials: "instance"` (`"user"` without it), and the web and mobile apps skip the "add your key" step for everyone the application covers.
+
+A person who adds their own key in Settings still links with theirs. Each connection keeps the application it was made with: if you remove or replace the server's application, the connections made with it stop syncing and their owners connect again.
+
+### The licence limit: one household
+
+A new Enable Banking application runs in Restricted Production mode, in which it may only link the accounts of the person who registered it. Without a full production contract, the server's application therefore serves one household:
+
+- While the server has a single household, every member can link with it.
+- The first household to link a bank with it keeps it, for new links and for reconnecting, after other households sign up. Its connections keep syncing.
+- Every other household sees the usual "add your own key" step, with a line saying the server's shared connection covers one household only.
+- If a second household signs up before anyone has linked a bank, no household gets the server's application until you set `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
+
+The demo account never counts. Enable Banking also enforces the limit itself: in Restricted Production mode, it refuses accounts that don't belong to the application's owner, a partner's included. Check what your application may reach in the Enable Banking Control Panel.
+
 The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours, 20 by default. Under PSD2 a bank may limit unattended access to four calls a day per account, so set it to `6` or more to stay inside that limit. A failed sync waits the same interval before the next try. Set it on the worker; a value that is not a positive number stops the worker at start-up.
 
 ## Google sign-in
@@ -213,7 +240,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Off-site backups (your rclone remote) | The `backup-offsite` service, once a day, with the database and file backups | The `backup-offsite` profile and `BACKUP_DESTINATION` ([Updates and backups](/en/docs/self-hosting/upgrade-and-backup#off-site-copies)) |
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |
 | Analytics (Google Tag Manager, PostHog) | See [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
-| Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings |
+| Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings, or the server's application (`ENABLE_BANKING_APP_ID`) |
 | Google sign-in | Browsers and the API, when a user chooses "Continue with Google" | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` |
 | Your identity provider (OIDC) | Browsers and the API, when a user chooses `Sign in with <name>`. The API fetches the provider's discovery document and keys, and exchanges the sign-in code | `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Browsers on the contact form, and the web app to check the answer | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` |

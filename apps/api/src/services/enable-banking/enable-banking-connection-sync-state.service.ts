@@ -91,7 +91,7 @@ export class EnableBankingConnectionSyncState {
 }
 
 function defaultClientFor(connection: EnableBankingConnection) {
-  return createEnableBankingClient(enableBankingCredentialService.decryptCredentialEntity(connection.enableBankingCredentialKey));
+  return createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
 }
 
 export const enableBankingConnectionSyncState = new EnableBankingConnectionSyncState();

@@ -195,6 +195,11 @@ both, two give the API its own.
 {{- end }}
 {{- end }}
 
+{{/* Where the API and the worker read the instance-wide Enable Banking key, from `enableBanking.privateKeySecret`. */}}
+{{- define "wondermoney.enableBankingKeyDir" -}}
+/etc/wondermoney/enable-banking
+{{- end }}
+
 {{- define "wondermoney.podSecurityContext" -}}
 runAsNonRoot: true
 runAsUser: 1000
@@ -227,6 +232,12 @@ capabilities:
 {{- $apiHost := (urlParse (include "wondermoney.apiUrl" .)).hostname }}
 {{- if and (ne $appHost $apiHost) (or (not .Values.config.AUTH_COOKIE_DOMAIN) (not .Values.config.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN)) }}
 {{- fail "Two hostnames (the web app and the API on different hosts) need config.AUTH_COOKIE_DOMAIN and config.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN, both the shared parent domain with a leading dot (such as .example.com), so the web app can read the session cookie the API sets." }}
+{{- end }}
+{{- if and .Values.config.ENABLE_BANKING_APP_ID (not .Values.enableBanking.privateKeySecret) }}
+{{- fail "config.ENABLE_BANKING_APP_ID needs enableBanking.privateKeySecret, the Secret holding the Enable Banking application's private key." }}
+{{- end }}
+{{- if and .Values.enableBanking.privateKeySecret (not .Values.config.ENABLE_BANKING_APP_ID) }}
+{{- fail "enableBanking.privateKeySecret needs config.ENABLE_BANKING_APP_ID, the Enable Banking application's id." }}
 {{- end }}
 {{- if and (not .Values.generatedSecrets.enabled) (not .Values.existingSecret) }}
 {{- range $key := list "BETTER_AUTH_SECRET" "CREDENTIAL_ENCRYPTION_KEY_V1" "EMAIL_OPT_OUT_SIGNING_SECRET" "ADMIN_API_KEY" "INTERNAL_SERVICE_API_KEY" }}

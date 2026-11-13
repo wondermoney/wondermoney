@@ -21,6 +21,9 @@ export enum EnableBankingConnectionStatus {
   LINKED = 'linked',
 }
 
+/** `BankConnection.credentialReference` of a connection made with the instance-wide credential. */
+export const INSTANCE_CREDENTIAL_REFERENCE = 'instance';
+
 /**
  * An Enable Banking bank connection, shaped around its real two-step flow
  * (`POST /auth` → `POST /sessions`). `state` is the correlation value sent on
@@ -68,8 +71,15 @@ export class EnableBankingConnection extends Base {
   @PrimaryKey()
   enableBankingConnectionKey!: number;
 
-  @ManyToOne({ cascade: [], entity: () => EnableBankingCredential, fieldName: 'enable_banking_credential_key', nullable: false })
-  enableBankingCredentialKey!: Rel<EnableBankingCredential>;
+  /**
+   * The user's own credential this connection was made with, or null when it was made with the
+   * instance-wide credential (`ENABLE_BANKING_APP_ID`, `services/enable-banking/instance-credential.ts`).
+   * A connection keeps the credential it started with: replacing or adding a key later changes
+   * only new links. `no action` on delete, so removing a credential row can never turn its
+   * connections into instance ones.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'no action', entity: () => EnableBankingCredential, fieldName: 'enable_banking_credential_key', nullable: true })
+  enableBankingCredentialKey?: null | Rel<EnableBankingCredential>;
 
   [EntityRepositoryType]: EnableBankingConnectionRepository;
 

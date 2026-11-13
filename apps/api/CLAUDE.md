@@ -150,8 +150,13 @@ Every integration is optional and fails closed: unconfigured, its feature report
 (`GET /v1/instance`, HTTP 501 `feature_disabled`) instead of failing at boot.
 
 - **Bank sync: Enable Banking, bring-your-own-key.** Each user supplies their own Enable
-  Banking application credential. There is no sandbox bank; testing the connect flow needs a
-  real credential. Legacy `nordigen*` names (`NordigenRequisition`,
+  Banking application credential, unless the operator sets an instance-wide one
+  (`ENABLE_BANKING_APP_ID`, `ENABLE_BANKING_PRIVATE_KEY_FILE`; the rule is in
+  `services/enable-banking/instance-credential-policy.ts`). A user's own credential always wins;
+  without `ENABLE_BANKING_PRODUCTION_CONTRACT` the instance one serves a single household
+  (Restricted Production mode). A connection keeps the credential it was made with
+  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). There is no
+  sandbox bank; testing the connect flow needs a real credential. Legacy `nordigen*` names (`NordigenRequisition`,
   `Account.nordigenRequisitionKey`, `Transaction.nordigenInternalTransactionId`, the
   `DELETE /v1/banking/requisition/:requisitionId` route) are from the removed GoCardless
   integration. They stay: the unique constraint on `nordigenInternalTransactionId` deduplicates

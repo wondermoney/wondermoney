@@ -11,3 +11,6 @@ export const bankAlertsKey = (epochId: number) =>
 
 export const bankSyncHistoryKey = (epochId: number, connectionId: number) =>
   [...bankingRootKey(epochId), 'sync-history', connectionId] as const
+
+export const enableBankingCredentialKey = (epochId: number) =>
+  [...bankingRootKey(epochId), 'enable-banking-credential'] as const

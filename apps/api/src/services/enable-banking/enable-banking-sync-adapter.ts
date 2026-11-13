@@ -232,9 +232,9 @@ export function classifyStatus(status: string | undefined): EnableBankingStatusC
  * `Account` rows for identity/discovery (see the module docblock above for why).
  *
  * `deps.client` / `deps.em` are injectable for tests; production callers omit both and get a real
- * `createEnableBankingClient(...)` (decrypting `connection.enableBankingCredentialKey`, which must
- * already be populated/loaded — see `EnableBankingConnectionRepository.findByState`'s populate for
- * the pattern) and `DI.em`.
+ * `createEnableBankingClient(...)` with the connection's credential (`connection.enableBankingCredentialKey`,
+ * which must already be populated/loaded, see `EnableBankingConnectionRepository.findByState`'s
+ * populate for the pattern; the instance credential when it is null) and `DI.em`.
  */
 export function createEnableBankingSyncAdapter(connection: EnableBankingConnection, deps: EnableBankingSyncAdapterDeps = {}): EnableBankingSyncClient {
   const em = deps.em ?? getDefaultEm();
@@ -304,8 +304,7 @@ export function createEnableBankingSyncAdapter(connection: EnableBankingConnecti
  * real MikroORM entity graph at all.
  */
 function buildDefaultClient(connection: EnableBankingConnection): EnableBankingClient {
-  const credential = enableBankingCredentialService.decryptCredentialEntity(connection.enableBankingCredentialKey);
-  return createEnableBankingClient(credential);
+  return createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
 }
 
 async function fetchAllTransactionPages(client: EnableBankingClient, accountId: string, input?: { dateFrom?: string; dateTo?: string }): Promise<RawEnableBankingTransaction[]> {

@@ -1,6 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import {
+  type Profile,
+  type StatementImportProvider,
+  useProfileField,
+} from "./useProfile";
 
-import api from "../api";
+export type { StatementImportProvider };
+
+const selectStatementImportProvider = (
+  profile: Profile,
+): StatementImportProvider | null =>
+  profile.aiProviders?.statementImport ?? null;
 
 /**
  * Who PDF statement pages go to, from the signed-in profile (`GET /v1/user/me/profile`), for the
@@ -8,28 +17,6 @@ import api from "../api";
  * endpoint: the server never sends its address, which may be an internal host, so the consent line
  * names it as the AI provider this server is set up with.
  */
-export interface StatementImportProvider {
-  kind: "anthropic" | "azure-openai" | "openai-compatible";
-  name: string | null;
-}
-
-interface ProfileResponse {
-  profile: {
-    aiProviders?: { statementImport?: StatementImportProvider | null };
-  };
-}
-
 export default function useStatementImportProvider(enabled: boolean) {
-  return useQuery({
-    enabled,
-    queryKey: ["user", "me", "profile"],
-    queryFn: () =>
-      api
-        .get<ProfileResponse>("/v1/user/me/profile")
-        .then(
-          (response) =>
-            response.data.profile.aiProviders?.statementImport ?? null,
-        ),
-    staleTime: 5 * 60 * 1000,
-  });
+  return useProfileField(selectStatementImportProvider, { enabled });
 }

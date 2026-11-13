@@ -2,8 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createConnection = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const em = vi.hoisted(() => ({ findOne: vi.fn(), findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ createConnection })) }));
-const getActiveCredentialEntity = vi.hoisted(() => vi.fn());
-const decryptCredentialEntity = vi.hoisted(() => vi.fn());
+const resolveForNewLink = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
 const listInstitutions = vi.hoisted(() => vi.fn());
 const startAuthorization = vi.hoisted(() => vi.fn());
@@ -12,7 +11,7 @@ vi.mock('@app/app', () => ({ DI: { em } }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 vi.mock('@service/enable-banking/enable-banking-client.service', () => ({ createEnableBankingClient }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({
-  enableBankingCredentialService: { decryptCredentialEntity, getActiveCredentialEntity },
+  enableBankingCredentialService: { resolveForNewLink },
 }));
 
 import { ENABLE_BANKING_CALLBACK_URL } from '@utils/constants';
@@ -35,8 +34,7 @@ describe('startBankConnection (Enable Banking)', () => {
     em.getRepository.mockReset().mockReturnValue({ createConnection });
     em.findOne.mockReset().mockResolvedValue({ tenantKey: 113 });
     em.findOneOrFail.mockReset().mockResolvedValue({ appuserKey: 1 });
-    getActiveCredentialEntity.mockReset().mockResolvedValue(credentialEntity);
-    decryptCredentialEntity.mockReset().mockReturnValue(decryptedCredential);
+    resolveForNewLink.mockReset().mockResolvedValue({ credential: decryptedCredential, entity: credentialEntity, source: 'user' });
     createEnableBankingClient.mockReset().mockReturnValue({ listInstitutions, startAuthorization });
     listInstitutions.mockReset();
     startAuthorization.mockReset().mockResolvedValue({ authorizationId: 'auth-1', psuIdHash: 'hash', url: 'https://bank.example/consent' });
@@ -49,7 +47,7 @@ describe('startBankConnection (Enable Banking)', () => {
     const error = await startBankConnection(createReq(bankId, null), res).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(InternalServerError);
-    expect(getActiveCredentialEntity).not.toHaveBeenCalled();
+    expect(resolveForNewLink).not.toHaveBeenCalled();
   });
 
   it('rejects a malformed institution id', async () => {
@@ -58,11 +56,11 @@ describe('startBankConnection (Enable Banking)', () => {
     const error = await startBankConnection(createReq('not-a-valid-id'), res).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(BadRequestError);
-    expect(getActiveCredentialEntity).not.toHaveBeenCalled();
+    expect(resolveForNewLink).not.toHaveBeenCalled();
   });
 
   it('throws a typed 400 when the user has no Enable Banking credential configured', async () => {
-    getActiveCredentialEntity.mockResolvedValueOnce(null);
+    resolveForNewLink.mockResolvedValueOnce(null);
     const bankId = encodeEnableBankingInstitutionId({ country: 'PT', name: 'Bank A' });
     const res = createRes();
 

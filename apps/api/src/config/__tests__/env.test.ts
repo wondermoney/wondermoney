@@ -1,3 +1,4 @@
+import { generateKeyPairSync } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -189,6 +190,76 @@ describe('CREDENTIAL_ENCRYPTION_KEY_V1 format', () => {
 
   it('rejects a 16-byte key — right encoding, wrong strength', () => {
     expect(() => loadEnv({ role: 'worker', source: withKey(Buffer.alloc(16).toString('base64')) })).toThrow();
+  });
+});
+
+describe('the instance-wide Enable Banking credential at start-up', () => {
+  const KEY_FILE = '/run/secrets/enable_banking_private_key';
+  const PEM = generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.export({ format: 'pem', type: 'pkcs8' });
+  const withInstanceCredential = (overrides: NodeJS.ProcessEnv = {}) => validEnv({ ENABLE_BANKING_APP_ID: 'app-123', ENABLE_BANKING_PRIVATE_KEY_FILE: KEY_FILE, ...overrides });
+  const readable = (path: string) => {
+    if (path !== KEY_FILE) throw Object.assign(new Error(`ENOENT: ${path}`), { code: 'ENOENT' });
+    return PEM;
+  };
+  const problemsOf = (run: () => unknown): string[] => {
+    try {
+      run();
+    } catch (error) {
+      if (error instanceof EnvValidationError) return error.problems;
+      throw error;
+    }
+    return [];
+  };
+
+  it('boots both roles with a readable RSA key', () => {
+    for (const role of ['api', 'worker'] as const) {
+      expect(() => loadEnv({ readFile: readable, role, source: withInstanceCredential() })).not.toThrow();
+    }
+  });
+
+  it('stops both roles when the key file cannot be read, naming the file', () => {
+    const unreadable = () => { throw Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }); };
+    for (const role of ['api', 'worker'] as const) {
+      const problems = problemsOf(() => loadEnv({ readFile: unreadable, role, source: withInstanceCredential() }));
+      expect(problems).toEqual([expect.stringContaining(KEY_FILE)]);
+      expect(problems[0]).toContain('EACCES');
+    }
+  });
+
+  it('stops the process when the file is not a private key', () => {
+    const problems = problemsOf(() => loadEnv({ readFile: () => 'not a key', role: 'api', source: withInstanceCredential() }));
+
+    expect(problems).toEqual([expect.stringContaining('ENABLE_BANKING_PRIVATE_KEY_FILE')]);
+  });
+
+  it('stops the process when only one of the two variables is set', () => {
+    const problems = problemsOf(() => loadEnv({ readFile: readable, role: 'api', source: withInstanceCredential({ ENABLE_BANKING_PRIVATE_KEY_FILE: undefined }) }));
+
+    expect(problems).toEqual([expect.stringContaining('ENABLE_BANKING_PRIVATE_KEY_FILE')]);
+  });
+
+  it('lists a bad key next to every other problem, in one error', () => {
+    const problems = problemsOf(() => loadEnv({ readFile: () => 'not a key', role: 'api', source: withInstanceCredential({ ADMIN_API_KEY: undefined }) }));
+
+    expect(problems).toHaveLength(2);
+  });
+
+  it('rejects a production-contract flag that is not a boolean', () => {
+    expect(problemsOf(() => loadEnv({ readFile: readable, role: 'worker', source: withInstanceCredential({ ENABLE_BANKING_PRODUCTION_CONTRACT: 'maybe' }) }))).toHaveLength(1);
+    expect(() => loadEnv({ readFile: readable, role: 'worker', source: withInstanceCredential({ ENABLE_BANKING_PRODUCTION_CONTRACT: 'true' }) })).not.toThrow();
+  });
+
+  it('logs the problem without the key', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const corrupted = PEM.replace('BEGIN PRIVATE KEY', 'BEGIN PRIVATE KEX');
+
+    expect(() => { assertEnv('api', withInstanceCredential()); }).toThrow();
+    // assertEnv reads the real file system; a key that is not there is reported by its path.
+    const logged = String(consoleError.mock.calls[0]?.[0]);
+    expect(logged).toContain(KEY_FILE);
+    expect(problemsOf(() => loadEnv({ readFile: () => corrupted, role: 'api', source: withInstanceCredential() })).join('\n')).not.toContain(PEM.split('\n')[5]);
+
+    consoleError.mockRestore();
   });
 });
 

@@ -34,8 +34,11 @@ export function getInstance(_req: Request, res: Response) {
     commit,
     features: {
       ai: aiCapabilities(),
-      // Enable Banking is bring-your-own-key: each user adds their own credentials.
       bankSync: bankSync.bankSync,
+      // `instance` when the operator set an instance-wide Enable Banking credential, `user` when
+      // each user adds their own. Whether the caller's household may use the instance one is on
+      // the signed-in profile (`GET /v1/user/me/profile`, `bankSyncCredentials`).
+      bankSyncCredentials: bankSync.bankSyncCredentials,
       /** The providers this instance enabled through `BANK_PROVIDERS`. */
       bankSyncProviders: bankSync.bankSyncProviders,
       contactForm: supportInbox() !== null,

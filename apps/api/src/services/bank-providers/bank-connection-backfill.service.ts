@@ -2,7 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
 import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
-import { EnableBankingConnection } from '@entity/EnableBankingConnection';
+import { EnableBankingConnection, INSTANCE_CREDENTIAL_REFERENCE } from '@entity/EnableBankingConnection';
 
 /**
  * Move existing Enable Banking connections onto the provider-agnostic `BankConnection` table.
@@ -75,14 +75,16 @@ export async function backfillBankConnections(em: EntityManager): Promise<BankCo
 
 /**
  * The credential row's key as a string. `credentialReference` is provider-specific by design:
- * Enable Banking stores the `EnableBankingCredential` key, and the provider implementation
- * resolves the row itself.
+ * Enable Banking stores the `EnableBankingCredential` key, or `instance` for a connection made
+ * with the instance-wide credential, and the provider implementation resolves the row itself.
  */
 function credentialReferenceOf(connection: EnableBankingConnection): string | undefined {
   const credential = connection.enableBankingCredentialKey as unknown as
+    | null
     | number
     | undefined
     | { enableBankingCredentialKey?: number; id?: number };
+  if (credential === null) return INSTANCE_CREDENTIAL_REFERENCE;
   if (typeof credential === 'number') return String(credential);
   const key = credential?.enableBankingCredentialKey ?? credential?.id;
   return key === undefined ? undefined : String(key);
