@@ -25,6 +25,9 @@ const HEARTBEAT_BUDGET_MS = 60_000;
 /*
  * A YNAB budget of 5,000 rows over three accounts, with transfers and categories, commits in full
  * within the job's heartbeat budget, on a real Postgres server.
+ *
+ * A perf test (`pnpm test:perf`), outside the default run: its timing only means something on a
+ * machine that is not also running other suites.
  */
 describe.runIf(process.env['TEST_POSTGRES_URL'])('committing a large YNAB export', () => {
   const db = useTestDatabase({ postgresUrl: process.env['TEST_POSTGRES_URL'] });

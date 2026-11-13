@@ -27,10 +27,11 @@
  *
  * PGlite is one backend, so it cannot show two sessions contending (a lock, a race). A test of
  * that asks for `useTestDatabase({ postgresUrl: process.env.TEST_POSTGRES_URL })`: it then gets
- * its own throwaway database on that server, created on start and dropped on close, with a pool
- * of several connections. CI points `TEST_POSTGRES_URL` at its disposable service; locally the
- * variable is unset and such a test is skipped (`describe.runIf`). Never point it at a database
- * that matters: only the database the harness creates is written, but it is created there.
+ * its own throwaway database on that server, copied from a template built once per schema, dropped
+ * on close, with a pool of several connections. CI points `TEST_POSTGRES_URL` at its disposable
+ * service; locally, set it to a throwaway server or such a test is skipped (`describe.runIf`).
+ * Never point it at a server that matters: the run creates databases there and sweeps the ones
+ * under its prefix (`WM_TEST_DB_PREFIX`) that it finds abandoned (`pg-test-run.ts`).
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -47,9 +48,10 @@ import { type Constructor, GeneratedCacheAdapter } from '@mikro-orm/core';
 import { type Migration, Migrator } from '@mikro-orm/migrations';
 import { type EntityManager, MikroORM, type Options } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
-import pg, { types } from 'pg';
-import { afterAll, beforeAll, beforeEach } from 'vitest';
+import { types } from 'pg';
+import { afterAll, beforeAll, beforeEach, inject } from 'vitest';
 
+import { cloneTemplate, dropTestDatabaseInBackground, fileDatabaseName, templateDatabaseName, type TestRun } from '@app/__tests__/__helpers__/pg-test-run';
 import { DI } from '@app/database/di';
 
 const API_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
@@ -318,44 +320,65 @@ function migrationOptions() {
   return { extensions: [Migrator], migrations: { migrationsList, snapshot: false } };
 }
 
-/** A fresh database on a real server, with a pool of several connections, dropped on close. */
-async function startServerDatabase(postgresUrl: string, options: TestDatabaseOptions): Promise<TestDatabase> {
+function serverConnection(postgresUrl: string, dbName: string) {
   const server = new URL(postgresUrl);
-  const dbName = `wm_test_${process.pid}_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
-  const admin = async (sql: string) => {
-    const client = new pg.Client({ connectionString: postgresUrl });
-    await client.connect();
-    try {
-      await client.query(sql);
-    } finally {
-      await client.end();
-    }
-  };
-  await admin(`create database "${dbName}"`);
-
-  const orm = await MikroORM.init({
-    ...ormOptions(),
+  return {
     dbName,
     host: server.hostname,
     password: decodeURIComponent(server.password),
-    pool: { max: 8, min: 0 },
     port: Number(server.port || 5432),
     user: decodeURIComponent(server.username),
+  };
+}
+
+/**
+ * A fresh database on a real server, with a pool of several connections, dropped on close.
+ *
+ * Building the schema is the slow part (one to several seconds, more under load), so it is built
+ * once into a template database and each test file gets a copy of that (`CREATE DATABASE ...
+ * TEMPLATE`, tens of milliseconds), which is as isolated as building it afresh. The template is
+ * named after the same hash as the PGlite cache, so it is reused until an entity, a migration or
+ * this harness changes. `pg-test-run.ts` owns the naming, the locking and the clean-up.
+ */
+async function startServerDatabase(postgresUrl: string, options: TestDatabaseOptions): Promise<TestDatabase> {
+  const run = testRun(postgresUrl);
+  const schema = options.schema ?? 'entities';
+  const dbName = fileDatabaseName(run);
+  await cloneTemplate(postgresUrl, templateDatabaseName(schema, hashOf(['entity', 'migrations', 'harness', 'lockfile'])), dbName, async (url, template) => {
+    const orm = await MikroORM.init({ ...ormOptions(), ...serverConnection(url, template), pool: { max: 1, min: 0 } });
+    try {
+      await orm.em.getConnection().execute('create extension if not exists pg_trgm');
+      await createSchema(orm, schema);
+    } finally {
+      await orm.close(true);
+    }
   });
-  await orm.em.getConnection().execute('create extension if not exists pg_trgm');
-  await createSchema(orm, options.schema ?? 'entities');
+
+  const orm = await MikroORM.init({ ...ormOptions(), ...serverConnection(postgresUrl, dbName), pool: { max: 8, min: 0 } });
   const reset = await resetter(orm);
 
   return {
     async close() {
       await orm.close(true);
-      await admin(`drop database if exists "${dbName}"`);
+      // Not waited for: a slow drop must never fail a file whose tests passed.
+      await dropTestDatabaseInBackground(postgresUrl, dbName).catch(() => undefined);
     },
     em: () => orm.em.fork(),
     orm,
     reset,
   };
 }
+
+function testRun(postgresUrl: string): TestRun {
+  const run = inject('wmTestRun');
+  if (!run) throw new Error('No test run owns the test Postgres: run this file through vitest.config.ts, whose "db" and "perf" projects register one (pg-test-run.ts) when TEST_POSTGRES_URL is set.');
+  if (run.url !== postgresUrl) throw new Error('useTestDatabase({ postgresUrl }) must be TEST_POSTGRES_URL, the server the test run registered on.');
+  return run;
+}
+
+/** Generous, because a busy machine (several agents and their test runs) slows both down. */
+const START_TIMEOUT_MS = 120_000;
+const CLOSE_TIMEOUT_MS = 60_000;
 
 /** Start a database for this test file, empty it before every test, and install it as `DI.em`. */
 export function useTestDatabase(options: TestDatabaseOptions = {}): TestDatabase {
@@ -375,7 +398,7 @@ export function useTestDatabase(options: TestDatabaseOptions = {}): TestDatabase
 
   beforeAll(async () => {
     database = await startTestDatabase(options);
-  }, 60_000);
+  }, START_TIMEOUT_MS);
   beforeEach(async () => {
     await handle.reset();
     DI.em = handle.em();
@@ -384,7 +407,7 @@ export function useTestDatabase(options: TestDatabaseOptions = {}): TestDatabase
   afterAll(async () => {
     DI.orm = null;
     await handle.close();
-  });
+  }, CLOSE_TIMEOUT_MS);
 
   return handle;
 }

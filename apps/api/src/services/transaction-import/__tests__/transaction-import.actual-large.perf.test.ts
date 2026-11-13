@@ -28,6 +28,9 @@ const HEARTBEAT_BUDGET_MS = 60_000;
  * An Actual Budget export of 10,000 lines over three accounts, with transfers, splits and
  * categories, commits in full on a real Postgres server, with its progress readable from the
  * session while it runs.
+ *
+ * A perf test (`pnpm test:perf`), outside the default run: its timing only means something on a
+ * machine that is not also running other suites.
  */
 describe.runIf(process.env['TEST_POSTGRES_URL'])('committing a large Actual Budget export', () => {
   const db = useTestDatabase({ postgresUrl: process.env['TEST_POSTGRES_URL'] });
