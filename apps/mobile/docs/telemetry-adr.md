@@ -11,6 +11,17 @@ only the environment gate widened. This means the App Privacy / Data Safety answ
 `secrets/store-compliance-answers.md` that declared "no diagnostics/usage data collected" are now
 stale and must be corrected before the next store submission — PostHog is live in production.
 
+**Record (2026-11-13), no change to the decision:** the `screen` enum of `feature_screen_viewed`
+is the `featureScreens` list in `src/lib/telemetry/analytics.ts`, and
+`src/features/navigation/screen-analytics.ts` maps each route pattern to one of its identifiers.
+A new route gets a snake_case identifier named for the screen (`asset_edit`, never
+`/assets/abc123/edit`); that adds a value to the approved property, not an event or a property.
+`screen-analytics.test.tsx` walks `src/app` and fails when a route has no identifier, when an
+identifier has no route, or when a dynamic segment reaches the payload. Identifiers added on this
+date for screens that had none: `asset_edit`, `installment_plan_create`,
+`installment_plan_detail`, `home_customize`, `bank_sync_history`, `pending_changes` and
+`settings_rules`.
+
 ## Why this exists
 
 Earlier mobile tickets, and this document's own companion Sentry work, all cite the same
