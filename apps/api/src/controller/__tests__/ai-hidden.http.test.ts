@@ -53,15 +53,18 @@ describe('AI endpoints for a person who hid AI', () => {
     expect(response.body.code).toBe('feature_disabled');
   });
 
-  it('refuses the AI column-mapping suggestion', async () => {
+  // The column-mapping suggestion is not refused: it still answers from a saved spec or the
+  // column names, and only skips the model (portfolio-import-suggest-without-ai.http.test.ts).
+  it('does not refuse the column-mapping suggestion', async () => {
     const household = await seed(true);
 
     const response = await portfolioImport
       .as(household.appuser)
       .post('/v1/portfolio-import-sessions/1/column-mapping/suggest');
 
-    expect(response.status).toBe(403);
-    expect(response.body.code).toBe('feature_disabled');
+    // The gate passed; the controller looks the (absent) session up.
+    expect(response.status).toBe(404);
+    expect(response.body.code).not.toBe('feature_disabled');
   });
 
   it('lets the assistant through again once the switch is off', async () => {

@@ -44,7 +44,10 @@ export interface ConfirmPortfolioColumnMappingInput {
 }
 
 export interface SuggestPortfolioColumnMappingInput {
-  /** False when this account may not use AI (unverified email, see `canUseAi`): no model fallback. */
+  /**
+   * False when the model may not be asked: no provider for `csvMapping`, AI hidden, or an email
+   * that must be verified first. A saved spec and the local heuristic still answer.
+   */
   allowModel?: boolean;
   appuser: Appuser;
   importSessionId: number;

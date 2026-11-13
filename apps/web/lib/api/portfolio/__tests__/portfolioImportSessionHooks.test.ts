@@ -23,6 +23,7 @@ import {
 import {
   buildSuggestPortfolioImportColumnMappingPayload,
   buildSuggestPortfolioImportColumnMappingUrl,
+  isSuggestionRefusedWithoutAi,
 } from "../useSuggestPortfolioImportColumnMapping";
 import { buildTriggerPortfolioImportSessionParseUrl } from "../useTriggerPortfolioImportSessionParse";
 
@@ -68,6 +69,26 @@ test("builds the suggest column mapping url", () => {
 
 test("builds an empty suggest column mapping payload", () => {
   assert.deepEqual(buildSuggestPortfolioImportColumnMappingPayload(), {});
+});
+
+const apiError = (status: number, code?: string) => ({ response: { data: code ? { code, message: "refused" } : {}, status } });
+
+test("reads an older API's 501 on the suggest route as no suggestion, so the person maps the columns", () => {
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(501, "feature_disabled")), true);
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(501)), true);
+});
+
+test("reads an older API's 403 feature_disabled (AI hidden) on the suggest route as no suggestion", () => {
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(403, "feature_disabled")), true);
+});
+
+test("keeps every other suggest failure an error to retry", () => {
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(403, "demo_read_only")), false);
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(403)), false);
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(409)), false);
+  assert.equal(isSuggestionRefusedWithoutAi(apiError(500)), false);
+  assert.equal(isSuggestionRefusedWithoutAi(new Error("Network Error")), false);
+  assert.equal(isSuggestionRefusedWithoutAi(undefined), false);
 });
 
 test("builds the confirm column mapping url", () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
   confirmColumnMapping: vi.fn(),
@@ -25,7 +25,11 @@ describe('portfolio import session column mapping controller', () => {
     mocked.isExpired.mockClear().mockImplementation((session: { expiresAt?: Date }) => Boolean(session.expiresAt && session.expiresAt.getTime() <= Date.now()));
     mocked.session.expiresAt = new Date('2030-01-01T00:00:00.000Z');
     mocked.zParse.mockReset();
+    vi.stubEnv('AI_BASE_URL', 'http://localhost:11434/v1');
+    vi.stubEnv('AI_MODEL', 'llama3.1');
   });
+
+  afterEach(() => vi.unstubAllEnvs());
 
   it('suggest requires user', async () => {
     mocked.zParse.mockResolvedValueOnce({ body: {}, params: { importSessionId: 11 } });
@@ -45,6 +49,27 @@ describe('portfolio import session column mapping controller', () => {
     expect(mocked.suggestColumnMapping).toHaveBeenCalledWith({ allowModel: true, appuser: { appuserKey: 2 }, importSessionId: 11, spendModelCall: expect.any(Function), tenant: { tenantKey: 1 } });
     expect(status).toHaveBeenCalledWith(200);
     expect(json).toHaveBeenCalledWith({ columnMapping: expect.any(Object), importSessionId: 11, mappingSource: 'llm', status: 'needs_column_mapping', warning: 'low confidence' });
+  });
+
+  it('suggest still runs, without the model, on a server with no AI provider', async () => {
+    vi.stubEnv('AI_BASE_URL', '');
+    vi.stubEnv('AI_MODEL', '');
+    mocked.zParse.mockResolvedValueOnce({ body: {}, params: { importSessionId: 11 } });
+    mocked.suggestColumnMapping.mockResolvedValueOnce({ columnMapping: { columnMapping: {}, confidence: 0.6, transformations: {}, warnings: [] }, importSessionId: 11, mappingSource: 'local_heuristic', status: 'needs_column_mapping' });
+    const status = vi.fn().mockReturnThis(); const json = vi.fn();
+    await suggestPortfolioImportSessionColumnMapping(Object.assign(mockReq({ params: { importSessionId: '11' } }), { tenant: { tenantKey: 1 }, user: { appuserKey: 2 } }), mockRes({ json, status }));
+    expect(mocked.suggestColumnMapping).toHaveBeenCalledWith(expect.objectContaining({ allowModel: false }));
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ mappingSource: 'local_heuristic' }));
+  });
+
+  it('suggest still runs, without the model, for a person who hid AI', async () => {
+    mocked.zParse.mockResolvedValueOnce({ body: {}, params: { importSessionId: 11 } });
+    mocked.suggestColumnMapping.mockResolvedValueOnce({ importSessionId: 11, mappingSource: 'disabled', status: 'needs_column_mapping', warning: 'Automatic column mapping suggestion is unavailable' });
+    const status = vi.fn().mockReturnThis(); const json = vi.fn();
+    await suggestPortfolioImportSessionColumnMapping(Object.assign(mockReq({ params: { importSessionId: '11' } }), { tenant: { tenantKey: 1 }, user: { appuserKey: 2, preferences: { aiHidden: true } } }), mockRes({ json, status }));
+    expect(mocked.suggestColumnMapping).toHaveBeenCalledWith(expect.objectContaining({ allowModel: false }));
+    expect(status).toHaveBeenCalledWith(200);
   });
 
   it('confirm rejects expired sessions', async () => {

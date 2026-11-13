@@ -5,6 +5,7 @@ import { zParse } from '@app/validators/parser';
 import { confirmPortfolioImportAssetMappingsRequestSchema, confirmPortfolioImportColumnMappingRequestSchema, confirmPortfolioImportSessionRequestSchema, getPortfolioImportSessionPreviewRequestSchema, parsePortfolioImportSessionRequestSchema, suggestPortfolioImportColumnMappingRequestSchema, updatePortfolioImportRowInclusionRequestSchema } from '@app/validators/portfolio';
 import { canUseAi } from '@middleware/email-verification';
 import { spendAiAllowance } from '@service/ai/ai-allowance.service';
+import { isAiAllowedFor } from '@service/ai/ai-availability';
 import portfolioCsvColumnMappingService from '@service/portfolio/portfolio-csv-column-mapping.service';
 import portfolioImportAssetMappingService from '@service/portfolio/portfolio-import-asset-mapping.service';
 import { updatePositionRowInclusion } from '@service/portfolio/portfolio-import-positions';
@@ -63,7 +64,11 @@ export async function suggestPortfolioImportSessionColumnMapping(req: Request, r
   const { tenant } = req;
   if (!tenant) throw new NotFoundError('Tenant not found');
 
-  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ allowModel: canUseAi(req), appuser: req.user, importSessionId, spendModelCall: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping'), tenant });
+  // A saved spec and the column names need no model, so this route is open without AI. The model
+  // is asked only when the server has a provider for it, the person has not hidden AI and, where
+  // required, has verified their email; the allowance is spent only when it is asked.
+  const allowModel = canUseAi(req) && isAiAllowedFor(req.user, 'csvMapping');
+  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ allowModel, appuser: req.user, importSessionId, spendModelCall: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping'), tenant });
   return res.status(200).json({ columnMapping: result.columnMapping, importSessionId: result.importSessionId, mappingSource: result.mappingSource, status: result.status, warning: result.warning });
 }
 
