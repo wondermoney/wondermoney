@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
+import { Badge } from '@/components/ui/badge'
 import { BackControl } from '@/components/ui/back-control'
 import { Icon } from '@/components/ui/icon'
 import { IconButton } from '@/components/ui/icon-button'
@@ -38,6 +39,7 @@ export function BudgetDetailHeader({
   onManageAccounts,
   onEdit,
   onChangeView,
+  personal = false,
   disabled = false,
 }: {
   name: string
@@ -53,6 +55,8 @@ export function BudgetDetailHeader({
   /** Edit the budget's details; listed with the linked accounts on the title row. */
   onEdit?: () => void
   onChangeView?: (view: BudgetView) => void
+  /** A personal budget, which only its creator sees: labelled beside the name. */
+  personal?: boolean
   disabled?: boolean
 }) {
   const { t } = useTranslation()
@@ -82,7 +86,7 @@ export function BudgetDetailHeader({
         <View style={styles.titleRow}>
           <EntityMark glyph="wallet-cards" />
           <View style={styles.titleMain}>
-            <PageHeader action={titleAction} helpLabel={false} helpText={helpText} title={name} />
+            <PageHeader action={titleAction} badge={personal ? <Badge label={t('budgets.personal')} tone="outline" /> : undefined} helpLabel={false} helpText={helpText} title={name} />
           </View>
         </View>
       </View>

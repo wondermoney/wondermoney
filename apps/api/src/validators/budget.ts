@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
+import { BUDGET_VISIBILITIES } from '@service/budget/budget-visibility';
 import { parseMemberFilter } from '@service/household/member-attribution';
 import { Recurrency } from '@utils/budget';
 import { memberKeysFilter } from '@validators/reports';
@@ -68,6 +69,12 @@ export const createBudgetRequestSchema = z.object({
           }),
       )
       .optional(),
+    /**
+     * `household` (the default) shares the budget with the whole household; `personal` makes it the
+     * creator's own, which no other member sees, the household's owner and admins included. Fixed
+     * once the budget exists.
+     */
+    visibility: z.enum(BUDGET_VISIBILITIES).default('household'),
   }),
 });
 

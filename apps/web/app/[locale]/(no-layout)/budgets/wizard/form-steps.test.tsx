@@ -6,10 +6,12 @@ import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
+import budgetMessages from "../../../../../messages/en/budget.json";
 import enMessages from "../../../../../messages/en/common.json";
 import DependentsPage from "./dependents/page";
 import HouseholdPage from "./household/page";
 import { useBudgetWizardStore } from "./store";
+import VisibilityPage from "./visibility/page";
 
 const navigation = vi.hoisted(() => {
   const push = vi.fn();
@@ -38,11 +40,39 @@ afterEach(() => {
 
 function renderStep(step: React.ReactNode) {
   render(
-    <NextIntlClientProvider locale="en" messages={enMessages}>
+    <NextIntlClientProvider
+      locale="en"
+      messages={{ ...enMessages, ...budgetMessages }}
+    >
       {step}
     </NextIntlClientProvider>,
   );
 }
+
+const visibilityLabels = budgetMessages.budgetVisibility;
+
+test("a new budget is a household budget unless the user picks personal", async () => {
+  renderStep(<VisibilityPage />);
+
+  assert.equal(
+    (screen.getByRole("radio", { name: new RegExp(visibilityLabels.household) }) as HTMLInputElement).checked,
+    true,
+  );
+  await userEvent.click(screen.getByRole("button", { name: enMessages.continue }));
+
+  await vi.waitFor(() => assert.deepEqual(navigation.push.mock.calls, [["/budgets/wizard/household"]]));
+  assert.equal(useBudgetWizardStore.getState().visibility, "household");
+});
+
+test("picking personal on the first step is what the wizard keeps", async () => {
+  renderStep(<VisibilityPage />);
+
+  await userEvent.click(screen.getByRole("radio", { name: new RegExp(visibilityLabels.personal) }));
+  await userEvent.click(screen.getByRole("button", { name: enMessages.continue }));
+
+  await vi.waitFor(() => assert.equal(navigation.push.mock.calls.length, 1));
+  assert.equal(useBudgetWizardStore.getState().visibility, "personal");
+});
 
 test("Continue on the household step saves the size and moves to dependents", async () => {
   renderStep(<HouseholdPage />);

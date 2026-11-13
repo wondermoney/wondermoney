@@ -81,6 +81,7 @@ export function BudgetYearScreen({ state, onBack, onRetry, onManageAccounts, onV
             onBack={onBack}
             onChangeView={onChangeView}
             onManageAccounts={onManageAccounts}
+            personal={full.visibility === 'personal'}
             view="year"
           />
 

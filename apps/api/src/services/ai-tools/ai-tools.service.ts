@@ -9,6 +9,7 @@ import { Category } from '@entity/Category';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { type BudgetMonth, budgetMonthOf, budgetPeriodRange, type BudgetPeriodSettings, shiftBudgetMonth } from '@service/budget/budget-period';
+import { budgetVisibilityOf, HOUSEHOLD_BUDGETS_FIRST } from '@service/budget/budget-visibility';
 import { MikroOrmTenantAggregationRepository } from '@service/budget/tenant-aggregation.repository';
 import { rateScope } from '@service/currency/exchange-rate';
 import { GoalService } from '@service/goal/goal.service';
@@ -313,9 +314,9 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ accounts: [], currency: context.currency }, 'accounts'))),
 
-  defineTool('list_budgets', 'List the household budgets: name, currency and household size.', z.object({}), async (_input, context) =>
+  defineTool('list_budgets', 'List the budgets the caller can see: the household\'s shared budgets and the caller\'s own personal ones (another member\'s personal budgets are never included). Name, currency, household size and visibility.', z.object({}), async (_input, context) =>
     withViewer(context, async (viewer) => {
-      const budgets = await DI.em.find(Budget, { deletedAt: undefined }, { populate: ['currencyKey'] });
+      const budgets = await DI.em.find(Budget, { deletedAt: undefined }, { orderBy: HOUSEHOLD_BUDGETS_FIRST, populate: ['currencyKey'] });
       const rows = budgets.map((budget) => ({
         currency: budget.currencyKey.code || baseCurrency(viewer, context),
         id: budget.budgetKey,
@@ -324,6 +325,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
         numDependents: budget.numDependents,
         periodStartDay: budget.periodStartDay,
         rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
+        visibility: budgetVisibilityOf(budget),
       }));
       return result(
         { budgets: rows, currency: baseCurrency(viewer, context) },
@@ -416,7 +418,7 @@ async function budgetStatusFor(viewer: AiToolViewer, period: PeriodInput): Promi
   const now = new Date();
   const resolved = AiToolPeriodService.resolve(period, now);
   const currency = viewer.appuser.currencyKey.code || 'EUR';
-  const budget = await DI.em.findOne(Budget, { deletedAt: undefined }, { populate: ['currencyKey'] });
+  const budget = await DI.em.findOne(Budget, { deletedAt: undefined }, { orderBy: HOUSEHOLD_BUDGETS_FIRST, populate: ['currencyKey'] });
   if (!budget) {
     return { budgeted: 0, currency, period: resolved.key, recordCount: 0, remaining: 0, spent: 0, status: 'no_budget' };
   }

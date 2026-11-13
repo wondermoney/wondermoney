@@ -51,6 +51,16 @@ export const ownerScopedCond = (args?: TenantFilterArgs): Dictionary => (hasTena
 export const ownerAppuserScopedCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args) ? { ownerAppuserKey: args.appuserKey, tenantKey: args.tenantKey } : {};
 
+/**
+ * Budget scope: tenant + personal carve-out. A household budget (`ownerAppuserKey` null) is shared
+ * with the whole household; a personal budget is visible to its owner only, never to the other
+ * members, the household's owner and admins included.
+ */
+export const budgetTenantCond = (args?: TenantFilterArgs): Dictionary =>
+  hasTenant(args)
+    ? { $and: [{ tenantKey: args.tenantKey }, { $or: [{ ownerAppuserKey: null }, { ownerAppuserKey: args.appuserKey }] }] }
+    : {};
+
 /** tenantKey = current tenant OR NULL — NULL-tenant rows are global/system and shared across tenants. */
 export const tenantOrGlobalCond = (args?: TenantFilterArgs): Dictionary =>
   hasTenant(args) ? { $or: [{ tenantKey: args.tenantKey }, { tenantKey: null }] } : {};

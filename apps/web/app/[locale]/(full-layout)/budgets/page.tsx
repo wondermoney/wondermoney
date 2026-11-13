@@ -1,11 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
-import BudgetsTable from "@/components/budget/BudgetsTable";
+import { BudgetsSections } from "@/components/budget/BudgetsSections";
 import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageShell } from "@/components/layout/PageShell";
-import { SectionHeader } from "@/components/layout/SectionHeader";
-import { Card } from "@/components/ui/card";
 import { getServerApi } from "@/lib/api/api-server";
 import { getBudgetsFull } from "@/lib/api/budget/useBudgetsFull";
 import { getHousehold } from "@/lib/api/household/useHousehold";
@@ -62,20 +60,15 @@ export default async function BudgetsOverview({
       <PageHeader
         title={t("budgets-overview")}
       />
-      <section className="flex flex-col gap-2">
-        <SectionHeader
-          title={t("budgets")}
-          actions={
-            <>
-              <MemberFilterControl className="w-36 sm:w-44" />
-              <CreateBudgetButton />
-            </>
-          }
-        />
-        <Card className="border-none">
-          <BudgetsTable budgets={budgets} />
-        </Card>
-      </section>
+      <BudgetsSections
+        budgets={budgets}
+        actions={
+          <>
+            <MemberFilterControl className="w-36 sm:w-44" />
+            <CreateBudgetButton />
+          </>
+        }
+      />
     </PageShell>
   );
 }

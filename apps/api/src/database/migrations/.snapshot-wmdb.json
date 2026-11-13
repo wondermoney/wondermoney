@@ -7074,6 +7074,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "owner_appuser_key": {
+          "name": "owner_appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "period_start_day": {
           "name": "period_start_day",
           "type": "int",
@@ -7153,6 +7170,17 @@
           "keyName": "budget_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "tenant_key",
+            "owner_appuser_key"
+          ],
+          "composite": true,
+          "constraint": false,
+          "keyName": "budget_tenant_key_owner_appuser_key_idx",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [
@@ -7185,6 +7213,17 @@
             "currency_key"
           ],
           "referencedTableName": "public.currency"
+        },
+        "budget_owner_appuser_key_foreign": {
+          "columnNames": [
+            "owner_appuser_key"
+          ],
+          "constraintName": "budget_owner_appuser_key_foreign",
+          "localTableName": "public.budget",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser"
         },
         "budget_tenant_key_foreign": {
           "columnNames": [

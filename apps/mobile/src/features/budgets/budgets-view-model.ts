@@ -1,6 +1,6 @@
 import { parseSafeCategoryColor } from '@/features/categories/categories-view-model'
 import { formatCategoryName } from '@/lib/formatters/category-name'
-import type { BudgetCategoryRowDto, BudgetDto, BudgetPeriodDto, BudgetRecurrence, BudgetYearDto } from './budgets-contract'
+import type { BudgetCategoryRowDto, BudgetDto, BudgetPeriodDto, BudgetRecurrence, BudgetVisibility, BudgetYearDto } from './budgets-contract'
 
 export type BudgetTotals = Readonly<{
   planned: number
@@ -64,6 +64,8 @@ export type BudgetViewModel = Readonly<{
   period: BudgetPeriodDto | null
   /** Off: only unspent money rolls over, an overspend is dropped. */
   rolloverCarriesOverspend: boolean
+  /** Personal: only the member who created it sees it. */
+  visibility: BudgetVisibility
 }>
 
 export type BudgetYearViewModel = Readonly<{
@@ -76,6 +78,7 @@ export type BudgetYearViewModel = Readonly<{
   totals: BudgetTotals
   categories: readonly BudgetCategoryGroupViewModel[]
   accounts: readonly Readonly<{ id: number; name: string | null }>[]
+  visibility: BudgetVisibility
 }>
 
 const occurrencesPerYear: Readonly<Record<BudgetRecurrence, number>> = {
@@ -188,6 +191,7 @@ export function mapBudget(dto: BudgetDto, authoritativePeriod?: { year: number; 
     periodStartDay: dto.periodStartDay,
     period: dto.period ?? null,
     rolloverCarriesOverspend: dto.rolloverCarriesOverspend,
+    visibility: dto.visibility,
   }
 }
 
@@ -213,8 +217,36 @@ export function mapBudgetYear(dto: BudgetYearDto, authoritativeYear?: number): B
     totals,
     categories,
     accounts: mapBudgetAccounts(dto.accounts),
+    visibility: dto.visibility,
   }
 }
+
+export type BudgetGroup = Readonly<{
+  /** The group's heading; null when every budget is the same kind and the list needs none. */
+  visibility: BudgetVisibility | null
+  budgets: readonly BudgetViewModel[]
+}>
+
+/**
+ * The budgets list in a Household group then a Personal one, each in the API's order, when both
+ * kinds exist. With one kind the list is a single group without a heading (each personal row
+ * still carries its own label).
+ */
+export function groupBudgetsByVisibility(budgets: readonly BudgetViewModel[]): readonly BudgetGroup[] {
+  if (budgets.length === 0) return []
+  const household = budgets.filter((budget) => budget.visibility !== 'personal')
+  const personal = budgets.filter((budget) => budget.visibility === 'personal')
+  if (household.length === 0 || personal.length === 0) return [{ visibility: null, budgets }]
+  return [{ visibility: 'household', budgets: household }, { visibility: 'personal', budgets: personal }]
+}
+
+/**
+ * The accounts a budget may link: a household budget only accounts the household shares (the API
+ * refuses a private one), a personal budget every account the member sees, their private ones too.
+ */
+export const linkableBudgetAccounts = <Account extends Readonly<{ isPrivate: boolean }>>(accounts: readonly Account[], visibility: BudgetVisibility): Account[] => (
+  visibility === 'personal' ? [...accounts] : accounts.filter((account) => !account.isPrivate)
+)
 
 /**
  * The last month the "Year to date" comparison covers for a budget year, read in the device's

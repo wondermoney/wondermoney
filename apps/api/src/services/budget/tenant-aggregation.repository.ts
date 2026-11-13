@@ -38,15 +38,17 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
 
   /**
    * The member's budget rows of one budget month per budget (`selector`), each with the days that
-   * month covers. Each row with rollover on carries `amountAvailable`: its budget plus last month's
+   * month covers. The member's own budgets only (those they created), and never a personal budget
+   * of someone else: a personal budget reaches its owner alone. Each row with rollover on carries `amountAvailable`: its budget plus last month's
    * rollover.
    */
   async loadBudgetAllocations(appuserKey: number, selector: BudgetMonthSelector): Promise<BudgetAllocationRow[]> {
     const budgets = await this.em.getConnection().execute<{ budgetKey: number; periodStartDay: number }[]>(
       `select budget."budget_key" as "budgetKey", budget."period_start_day" as "periodStartDay"
        from "budget" budget where budget."appuser_key" = ? and budget."deleted_at" is null
+         and (budget."owner_appuser_key" is null or budget."owner_appuser_key" = ?)
        order by budget."budget_key"`,
-      [appuserKey],
+      [appuserKey, appuserKey],
     );
     const months = budgets.map((budget) => ({ ...budget, ...('day' in selector ? budgetMonthOf(budget, selector.day) : selector) }));
     if (months.length === 0) return [];
@@ -74,6 +76,7 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          on pivot."budget_template_category_budget_template_category_key" = template."budget_template_category_key"
        left join "account" account on account."account_key" = pivot."account_account_key"
        where budget."appuser_key" = ? and budget."deleted_at" is null
+         and (budget."owner_appuser_key" is null or budget."owner_appuser_key" = ?)
          and (budget."budget_key", template."year", template."month") in (${months.map(() => '(?, ?, ?)').join(', ')})
          and template."amount_budgeted" > 0
          and category."deleted_at" is null and category."parent_category_category_key" is not null and parent."deleted_at" is null
@@ -81,7 +84,7 @@ export class MikroOrmTenantAggregationRepository implements TenantAggregationRep
          and (category."is_system_category" = true or category."owner_appuser_key" = ?)
          and (parent."is_system_category" = true or parent."owner_appuser_key" = ?)
        order by budget."budget_key", template."budget_template_category_key", account."account_key"`,
-      [appuserKey, ...months.flatMap((budget) => [budget.budgetKey, budget.year, budget.month]), appuserKey, appuserKey],
+      [appuserKey, appuserKey, ...months.flatMap((budget) => [budget.budgetKey, budget.year, budget.month]), appuserKey, appuserKey],
     );
     const available = new Map<number, number>();
     for (const budget of months) {

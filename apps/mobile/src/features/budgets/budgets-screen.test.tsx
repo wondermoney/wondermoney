@@ -5,9 +5,10 @@ import { Alert, StyleSheet } from 'react-native'
 import { initMobileI18n } from '@/lib/i18n'
 
 import { BudgetMonthScreen } from './budget-month-screen'
+import { BudgetYearScreen } from './budget-year-screen'
 import { BudgetsScreen } from './budgets-screen'
-import { mapBudget } from './budgets-view-model'
-import { budgetFixture, childRow, parentRow, rolloverChildRow } from './test-fixtures'
+import { mapBudget, mapBudgetYear } from './budgets-view-model'
+import { budgetFixture, budgetYearFixture, childRow, parentRow, rolloverChildRow } from './test-fixtures'
 
 const renderWithI18n = async (node: React.ReactElement) => {
   const i18n = await initMobileI18n('en')
@@ -36,6 +37,44 @@ describe('budget screens', () => {
     const row = view.getByRole('button', { name: /Household plan.*Planned.*Spent.*Over budget/ })
     await fireEvent.press(row)
     expect(onOpenBudget).toHaveBeenCalledWith(7, 2026, 7)
+  })
+
+  it('labels a personal budget and groups the list into household and personal only when both kinds exist', async () => {
+    const i18n = await initMobileI18n('en')
+    const household = mapBudget(budgetFixture)
+    const personal = mapBudget({ ...budgetFixture, budgetKey: 8, name: 'My plan', visibility: 'personal' })
+    const props = { onOpenBudget: jest.fn(), onRefresh: jest.fn(), onBack: jest.fn() }
+    const mixed = await renderWithI18n(<BudgetsScreen state={{ status: 'loaded', budgets: [personal, household] }} {...props} />)
+    const headings = mixed.getAllByRole('header').map((node) => node.props.children)
+    expect(headings).toEqual(expect.arrayContaining([i18n.t('budgets.groupHousehold'), i18n.t('budgets.groupPersonal')]))
+    expect(headings.indexOf(i18n.t('budgets.groupHousehold'))).toBeLessThan(headings.indexOf(i18n.t('budgets.groupPersonal')))
+    // The heading labels the group; each personal row still says so to a screen reader.
+    expect(mixed.queryByTestId('budget-personal-8')).not.toBeOnTheScreen()
+    expect(mixed.getByRole('button', { name: new RegExp(`^My plan, ${i18n.t('budgets.personal')},`) })).toBeOnTheScreen()
+    expect(mixed.getByRole('button', { name: /^Household plan/ }).props.accessibilityLabel).not.toContain(i18n.t('budgets.personal'))
+    mixed.unmount()
+
+    const onlyPersonal = await renderWithI18n(<BudgetsScreen state={{ status: 'loaded', budgets: [personal] }} {...props} />)
+    expect(onlyPersonal.queryByRole('header', { name: i18n.t('budgets.groupPersonal') })).not.toBeOnTheScreen()
+    expect(onlyPersonal.getByTestId('budget-personal-8')).toHaveTextContent(i18n.t('budgets.personal'))
+    onlyPersonal.unmount()
+
+    const onlyHousehold = await renderWithI18n(<BudgetsScreen state={{ status: 'loaded', budgets: [household] }} {...props} />)
+    expect(onlyHousehold.queryByRole('header', { name: i18n.t('budgets.groupHousehold') })).not.toBeOnTheScreen()
+    expect(onlyHousehold.queryByTestId('budget-personal-7')).not.toBeOnTheScreen()
+  })
+
+  it('marks a personal budget in the month and year heads', async () => {
+    const i18n = await initMobileI18n('en')
+    const personal = await renderWithI18n(<BudgetMonthScreen state={{ status: 'loaded', budget: mapBudget({ ...budgetFixture, visibility: 'personal' }), hasPrevious: false, hasNext: false }} onBack={jest.fn()} onRetry={jest.fn()} onPrevious={jest.fn()} onNext={jest.fn()} />)
+    expect(personal.getByText(i18n.t('budgets.personal'))).toBeOnTheScreen()
+    personal.unmount()
+    const household = await renderWithI18n(<BudgetMonthScreen state={{ status: 'loaded', budget: mapBudget(budgetFixture), hasPrevious: false, hasNext: false }} onBack={jest.fn()} onRetry={jest.fn()} onPrevious={jest.fn()} onNext={jest.fn()} />)
+    expect(household.queryByText(i18n.t('budgets.personal'))).not.toBeOnTheScreen()
+    household.unmount()
+    const year = mapBudgetYear({ ...budgetYearFixture, visibility: 'personal' })
+    const personalYear = await renderWithI18n(<BudgetYearScreen state={{ status: 'loaded', year, toDate: year }} onBack={jest.fn()} onRetry={jest.fn()} />)
+    expect(personalYear.getByText(i18n.t('budgets.personal'))).toBeOnTheScreen()
   })
 
   it('exposes the editor from the list row menu and from month detail with named buttons', async () => {

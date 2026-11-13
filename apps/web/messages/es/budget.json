@@ -43,5 +43,17 @@
       "quarterly": "trimestral",
       "yearly": "anual"
     }
+  },
+  "budgetVisibility": {
+    "household": "Hogar",
+    "personal": "Personal",
+    "household-budgets": "Presupuestos del hogar",
+    "personal-budgets": "Presupuestos personales",
+    "personal-hint": "Solo tú ves este presupuesto",
+    "wizard-title": "¿Para quién es este presupuesto?",
+    "wizard-description": "Lo eliges una vez: después, un presupuesto no puede pasar de hogar a personal, ni al revés.",
+    "household-description": "Todas las personas de tu hogar lo ven.",
+    "personal-description": "Solo tú lo ves. Las demás personas de tu hogar no lo verán, ni el titular ni los administradores.",
+    "private-accounts-excluded": "Las cuentas privadas solo se pueden vincular a un presupuesto personal."
   }
 }

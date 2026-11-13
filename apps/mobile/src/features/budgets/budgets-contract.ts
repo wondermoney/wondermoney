@@ -12,6 +12,19 @@ const yearSchema = z.number().int().min(MIN_BUDGET_YEAR).max(MAX_BUDGET_YEAR)
 const monthSchema = z.number().int().min(1).max(12)
 const emptyWriteResponseSchema = z.undefined()
 
+/**
+ * Who sees a budget: everyone in the household, or only the member who created it (not even the
+ * household's owner or admins). Chosen at creation only; the budget PATCH does not take it.
+ */
+export const BUDGET_VISIBILITIES = ['household', 'personal'] as const
+export type BudgetVisibility = (typeof BUDGET_VISIBILITIES)[number]
+export const budgetVisibilitySchema = z.enum(BUDGET_VISIBILITIES)
+
+// Read side: a server without personal budgets leaves the field out, and every budget it has is a
+// household one. A kind this build doesn't know reads as household too, so the stricter account
+// rule applies to it, instead of failing the whole response.
+const budgetVisibilityResponseSchema = tolerantEnum(BUDGET_VISIBILITIES, 'household').default('household')
+
 export const budgetCreateIncomeSchema = z.discriminatedUnion('isRecurrent', [
   z.object({
     amount: z.number().finite().nonnegative().max(999999999),
@@ -30,6 +43,7 @@ export const budgetCreateWriteSchema = z.object({
   dependentsNum: z.number().int().min(0).max(9),
   houseHoldSize: z.number().int().min(1).max(10),
   incomes: z.array(budgetCreateIncomeSchema),
+  visibility: budgetVisibilitySchema.optional(),
 }).strict().refine((value) => value.dependentsNum < value.houseHoldSize, { path: ['dependentsNum'] })
 
 export const budgetCreateResponseSchema = z.object({
@@ -44,6 +58,7 @@ const budgetInventoryItemSchema = z.object({
   budgetTemplates: z.array(z.object({ budgetTemplateCategoryKey: positiveSafeIdSchema })),
   description: z.string().nullable().optional(),
   name: z.string(),
+  visibility: budgetVisibilityResponseSchema,
 })
 
 export const budgetInventoryResponseSchema = z.object({ budgets: z.array(budgetInventoryItemSchema) })
@@ -115,6 +130,7 @@ const budgetDetailSchema = z.object({
   periodStartDay: budgetPeriodStartDaySchema.optional(),
   /** Absent from servers without rollover: the setting is then not offered. */
   rolloverCarriesOverspend: z.boolean().optional(),
+  visibility: budgetVisibilityResponseSchema,
 })
 
 export const budgetDetailResponseSchema = z.object({
@@ -208,6 +224,7 @@ export const budgetSchema = z.object({
   rolloverCarriesOverspend: z.boolean().default(true),
   /** `/v1/budget/full` only; the month endpoint reports it at the top level. */
   rolloverComplete: z.boolean().optional(),
+  visibility: budgetVisibilityResponseSchema,
   year: yearSchema,
 })
 
@@ -233,6 +250,7 @@ export const budgetYearSchema = z.object({
   description: z.string().nullable().optional(),
   incomes: z.array(budgetIncomeSchema),
   name: z.string(),
+  visibility: budgetVisibilityResponseSchema,
   year: yearSchema,
 })
 

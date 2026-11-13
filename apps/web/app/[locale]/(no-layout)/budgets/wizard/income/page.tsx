@@ -30,6 +30,8 @@ import { useRouter } from "@/i18n/navigation";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useCreateBudget from "@/lib/api/budget/useCreateBudget";
 import useEditBudgetTemplateAccounts from "@/lib/api/budget/useEditBudgetTemplateAccounts";
+import { isHouseholdReadOnlyError } from "@/lib/api/errors";
+import { linkableAccountsFor } from "@/lib/budget/visibility";
 import {
   calculateAnnualIncome,
   calculateAverageMonthlyIncome,
@@ -47,17 +49,25 @@ export default function IncomePage() {
   const formatAmountText = useFormatCurrency();
   const router = useRouter();
 
-  const { setIncome, income, household, dependents, budgetId, setBudgetId } =
-    useBudgetWizardStore(
-      useShallow((state) => ({
-        setIncome: state.setIncome,
-        income: state.income,
-        household: state.household,
-        dependents: state.dependents,
-        budgetId: state.budgetId,
-        setBudgetId: state.setBudgetId,
-      })),
-    );
+  const {
+    setIncome,
+    income,
+    visibility,
+    household,
+    dependents,
+    budgetId,
+    setBudgetId,
+  } = useBudgetWizardStore(
+    useShallow((state) => ({
+      setIncome: state.setIncome,
+      visibility: state.visibility,
+      income: state.income,
+      household: state.household,
+      dependents: state.dependents,
+      budgetId: state.budgetId,
+      setBudgetId: state.setBudgetId,
+    })),
+  );
 
   // Redirect if missing previous steps
   useEffect(() => {
@@ -161,6 +171,7 @@ export default function IncomePage() {
         houseHoldSize: household.householdSize,
         dependentsNum: dependents.dependentsNum,
         incomes: toBudgetCreateIncomes(data.incomes),
+        visibility,
       });
 
       posthog.capture("budget_created", {
@@ -169,6 +180,7 @@ export default function IncomePage() {
         dependents_count: dependents.dependentsNum,
         incomes_count: data.incomes.length,
         source: "wizard",
+        visibility,
       });
       setBudgetId(response.data.budgetKey);
 
@@ -184,9 +196,13 @@ export default function IncomePage() {
       // of them. This is best-effort: a failure here must not block the
       // wizard, since the budget itself was already created successfully;
       // the user can still link accounts manually from the budget page.
-      const accountKeys = accountsData?.accounts.map(
-        (account) => account.accountKey,
-      );
+      // A household budget takes no private account (the API refuses the
+      // whole list), so those are left out of it.
+      const accountKeys = accountsData
+        ? linkableAccountsFor(accountsData.accounts, visibility).map(
+            (account) => account.accountKey,
+          )
+        : undefined;
       if (accountKeys && accountKeys.length > 0) {
         try {
           await editBudgetAccountsMutation.mutateAsync({
@@ -200,6 +216,9 @@ export default function IncomePage() {
 
       router.push("/budgets/wizard/categories");
     } catch (error) {
+      // A viewer cannot create budgets: HouseholdReadOnlyNotifier already
+      // says why, so a second, vaguer toast would only repeat it.
+      if (isHouseholdReadOnlyError(error)) return;
       toast.error(t("toast-create-budget-error"), { duration: 9000 });
     }
   };

@@ -6,6 +6,7 @@ import './zod-openapi';
 import { z } from 'zod';
 
 import { MARKET_DATA_PROVIDER_IDS } from '@config/market-data-providers';
+import { BUDGET_VISIBILITIES } from '@service/budget/budget-visibility';
 import {
   companyInformationResponseSchema,
   earningsResponseSchema,
@@ -360,6 +361,9 @@ const budgetPeriod = z.object({
 const periodStartDay = z.number().int().min(1).max(28)
   .describe('The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in.');
 
+const budgetVisibility = z.enum(BUDGET_VISIBILITIES)
+  .describe('`household`: shared with every member of the household. `personal`: the caller\'s own budget, which no other member sees, the household\'s owner and admins included (another member\'s personal budget is never returned).');
+
 export const budgetSchema = open('Budget', {
   budgetKey: id,
   categories: z.array(z.record(z.string(), z.unknown())).optional(),
@@ -367,6 +371,7 @@ export const budgetSchema = open('Budget', {
   name: z.string(),
   period: budgetPeriod.optional(),
   periodStartDay: periodStartDay.optional(),
+  visibility: budgetVisibility,
 });
 
 export const budgetTemplateSchema = open('BudgetTemplate', {
@@ -375,6 +380,7 @@ export const budgetTemplateSchema = open('BudgetTemplate', {
   month: z.number().int().nullable(),
   period: budgetPeriod.optional(),
   periodStartDay: periodStartDay.optional(),
+  visibility: budgetVisibility,
   year: z.number().int(),
 });
 

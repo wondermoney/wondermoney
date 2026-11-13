@@ -35,6 +35,7 @@ import {
 } from "../ui/dropdown-menu";
 import BudgetDeleteModal from "./BudgetDeleteModal";
 import BudgetEditModal from "./BudgetEditModal";
+import { PersonalBudgetLabel } from "./PersonalBudgetLabel";
 
 interface BudgetsTableProps {
   budgets: BudgetFull[];
@@ -268,12 +269,15 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
         header: t("name"),
         cell: ({ row }) => (
           <div className="flex max-w-40 min-w-0 flex-col gap-1 sm:max-w-xs">
-            <Text
-              variant="smallText"
-              className="text-foreground block truncate font-medium"
-            >
-              {row.original.name}
-            </Text>
+            <div className="flex min-w-0 items-center gap-2">
+              <Text
+                variant="smallText"
+                className="text-foreground block truncate font-medium"
+              >
+                {row.original.name}
+              </Text>
+              <PersonalBudgetLabel budget={row.original} />
+            </div>
             <Text
               variant="smallText"
               className="text-muted-foreground block truncate text-xs"

@@ -1,7 +1,16 @@
 import { z } from "zod";
 import { create } from "zustand";
 
+import {
+  BUDGET_VISIBILITIES,
+  type BudgetVisibility,
+} from "@/lib/budget/visibility";
 import type { BudgetStarterProfileKey } from "@/lib/utils/budget-wizard";
+
+// Who sees the budget: chosen once, at creation
+export const visibilitySchema = z.object({
+  visibility: z.enum(BUDGET_VISIBILITIES),
+});
 
 // Base schema for household
 export const householdSchema = z.object({
@@ -36,6 +45,7 @@ export const incomeSchema = z.object({
     .min(1),
 });
 
+export type VisibilityData = z.infer<typeof visibilitySchema>;
 export type HouseholdData = z.infer<typeof householdSchema>;
 export type DependentsData = z.infer<typeof dependentsSchema>;
 export type IncomeData = z.infer<typeof incomeSchema>;
@@ -66,6 +76,8 @@ export function buildDependentsSchema(
 
 export interface BudgetWizardState {
   // Form Data
+  /** Chosen on the first step; the budget keeps it for good. */
+  visibility: BudgetVisibility;
   household?: HouseholdData;
   dependents?: DependentsData;
   income?: IncomeData;
@@ -73,6 +85,7 @@ export interface BudgetWizardState {
   starterProfileKey?: BudgetStarterProfileKey;
 
   // Actions
+  setVisibility: (visibility: BudgetVisibility) => void;
   setHousehold: (data: HouseholdData) => void;
   setDependents: (data: DependentsData) => void;
   setIncome: (data: IncomeData) => void;
@@ -83,6 +96,7 @@ export interface BudgetWizardState {
 
 export const useBudgetWizardStore = create<BudgetWizardState>((set) => ({
   // Initial state
+  visibility: "household",
   household: undefined,
   dependents: undefined,
   income: undefined,
@@ -90,6 +104,7 @@ export const useBudgetWizardStore = create<BudgetWizardState>((set) => ({
   starterProfileKey: undefined,
 
   // Actions
+  setVisibility: (visibility) => set({ visibility }),
   setHousehold: (data) => set({ household: data }),
   setDependents: (data) => set({ dependents: data }),
   setIncome: (data) => set({ income: data }),
@@ -100,6 +115,7 @@ export const useBudgetWizardStore = create<BudgetWizardState>((set) => ({
     }),
   reset: () =>
     set({
+      visibility: "household",
       household: undefined,
       dependents: undefined,
       income: undefined,

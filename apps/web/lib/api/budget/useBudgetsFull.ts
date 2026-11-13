@@ -2,6 +2,7 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import type { BudgetPeriod } from "@/lib/budget/period";
+import type { BudgetVisibility } from "@/lib/budget/visibility";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -31,6 +32,8 @@ export interface BudgetFull {
   rolloverCarriesOverspend: boolean;
   /** False when a carried amount rests on spending that could not be converted. */
   rolloverComplete: boolean;
+  /** Missing from older servers: read it through `budgetVisibilityOf`. */
+  visibility?: BudgetVisibility;
 }
 
 export interface GetBudgetsFullResponse {

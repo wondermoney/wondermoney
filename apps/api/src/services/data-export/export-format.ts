@@ -86,8 +86,11 @@ export const EXPORT_FORMAT = 'wondermoney-export';
  * of the household carries `householdMemberId`, anyone else null), `data/expense-group-expenses.json`
  * (a transaction shared in a group and who paid it) and `data/expense-group-settlements.json`, and
  * `memberId` to `data/transaction-splits.json`: the group member whose share the line is, or null.
+ * 1.12 added `ownerMemberId` to `data/budgets.json`: the member a personal budget belongs to, or null
+ * for a household budget. An export holds the household's budgets and the exporting member's own
+ * personal ones, never another member's.
  */
-export const EXPORT_FORMAT_VERSION = '1.11';
+export const EXPORT_FORMAT_VERSION = '1.12';
 
 export interface ExportManifest {
   appVersion: string;

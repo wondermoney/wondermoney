@@ -1,4 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
+import type { AxiosInstance } from "axios";
+
+import type { BudgetVisibility } from "@/lib/budget/visibility";
 
 import api from "../api";
 
@@ -13,16 +16,36 @@ export interface BudgetCreateRequest {
   houseHoldSize: number;
   dependentsNum: number;
   incomes: Income[];
+  /** Chosen once, here: the budget cannot change it later. Defaults to `household`. */
+  visibility?: BudgetVisibility;
+}
+
+export interface BudgetCreateResponse {
+  budgetKey: number;
+}
+
+export type BudgetCreateClient = Pick<AxiosInstance, "post">;
+
+export function createBudget(
+  {
+    houseHoldSize,
+    dependentsNum,
+    incomes,
+    visibility = "household",
+  }: BudgetCreateRequest,
+  apiClient: BudgetCreateClient = api,
+) {
+  return apiClient.post<BudgetCreateResponse>(`/v1/budget`, {
+    houseHoldSize,
+    dependentsNum,
+    incomes,
+    visibility,
+  });
 }
 
 const useCreateBudget = () => {
   return useMutation({
-    mutationFn: ({
-      houseHoldSize,
-      dependentsNum,
-      incomes,
-    }: BudgetCreateRequest) =>
-      api.post(`/v1/budget`, { houseHoldSize, dependentsNum, incomes }),
+    mutationFn: (request: BudgetCreateRequest) => createBudget(request),
   });
 };
 

@@ -2,7 +2,13 @@ import { usePathname } from "next/navigation";
 
 import { useRouter } from "@/i18n/navigation";
 
-const steps = ["household", "dependents", "income", "categories"] as const;
+const steps = [
+  "visibility",
+  "household",
+  "dependents",
+  "income",
+  "categories",
+] as const;
 
 export function useWizardProgress() {
   const router = useRouter();
