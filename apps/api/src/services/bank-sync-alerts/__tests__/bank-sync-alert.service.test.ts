@@ -245,22 +245,23 @@ describe('bank sync alerts', () => {
     expect(sent[0]?.html).toContain('/pt/settings?tab=connections');
   });
 
-  it('writes to a Spanish account in English, which this alert has copy in, with links that open the app in Spanish', async () => {
+  it('writes to a Spanish account in Spanish, with an es-ES date and links that open the app in Spanish', async () => {
     const em = db.em();
-    const english = await seedHousehold(em);
     const spanish = await seedHousehold(em);
     em.assign(spanish.appuser, { language: SupportedLanguages.ES });
     await em.flush();
-    await connection(em, english, { accessValidUntil: day(5) });
     await connection(em, spanish, { accessValidUntil: day(5) });
     const { run, sent } = harness();
 
     await run(day(0));
 
-    const to = (household: Household) => sent.find((email) => email.to.email === household.appuser.emailAddress);
-    expect(to(spanish)?.subject).toBe(to(english)?.subject);
-    expect(to(spanish)?.html).toContain('/es/settings?tab=connections');
-    expect(to(spanish)?.html).not.toContain('/en/settings');
+    const date = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', timeZone: 'Europe/Lisbon' }).format(day(5));
+    expect(date).toMatch(/^\d{1,2} de \p{Ll}+$/u);
+    expect(sent[0]?.subject).toMatch(new RegExp(`^Tu conexión con .+ termina el ${date}$`, 'u'));
+    expect(sent[0]?.text).toContain('Volver a conectar el banco');
+    expect(sent[0]?.text).toContain('ajustes de notificaciones');
+    expect(sent[0]?.html).toContain('/es/settings?tab=connections');
+    expect(sent[0]?.html).not.toContain('/en/settings');
   });
 
   it('drops an alert that no longer applies by the time it is sent', async () => {

@@ -97,37 +97,86 @@ describe('installed React Email package rendering', () => {
     expect(rendered.html).toContain('next=%2Fen');
   });
 
-  // These emails have no Spanish copy yet: a Spanish account reads the English email, never the
-  // Portuguese one, and its links still open the app and the docs in Spanish.
-  it('renders the budget alert for a Spanish account in English, with /es links', async () => {
-    const input = { appuserKey: 7, facts: [budgetFact], firstName: 'Lucía', recipient: 'user@example.com' };
-    const english = await rendering.renderBudget({ ...input, language: SupportedLanguages.EN });
-    const spanish = await rendering.renderBudget({ ...input, language: SupportedLanguages.ES });
+  // A Spanish account reads Spanish: es-ES money, percentages and dates, and links into the app
+  // and the docs in /es. (es-ES puts a no-break space before % and € and leaves 4-digit amounts ungrouped.)
+  it('renders the budget alert for a Spanish account in Spanish, with es-ES formatting and /es links', async () => {
+    const spanish = await rendering.renderBudget({ appuserKey: 7, facts: [budgetFact], firstName: 'Lucía', language: SupportedLanguages.ES, recipient: 'user@example.com' });
 
-    expect(spanish.subject).toBe(english.subject);
-    expect(spanish.preheader).toBe(english.preheader);
-    expect(spanish.html).toContain('July 2026');
+    expect(spanish.subject).toBe('Hay categorías que alcanzaron el importe fijado');
+    expect(spanish.preheader).toBe('Algunas categorías alcanzaron el importe fijado para este mes.');
+    expect(spanish.text).toContain('Hola Lucía,');
+    expect(spanish.text).toContain('Este es el resumen agregado de julio de 2026.');
+    expect(spanish.text).toContain('100\u00a0% · importe fijado alcanzado');
+    expect(spanish.text).toContain('100,00\u00a0€ / 100,00\u00a0€');
+    expect(spanish.text).toContain('Recibes este resumen porque activaste las alertas de presupuesto en WonderMoney.');
     expect(spanish.html).toContain('/es/settings?tab=notifications');
     expect(spanish.html).toContain('https://docs.wonder.money/es/about/privacy-policy');
     expect(spanish.html).toContain('next=%2Fes%2Fbudgets');
-    expect(spanish.html).not.toContain('/en/settings');
+    expect(spanish.html).not.toContain('/en/');
+    expect(spanish.html).not.toContain('/pt/');
   });
 
-  it('renders the weekly summary and the monthly story for a Spanish account in English, with /es links', async () => {
-    const weekly = (language: SupportedLanguages) => rendering.renderWeekly({
+  it('renders the weekly summary for a Spanish account in Spanish, week range and comparison included', async () => {
+    const weekly = (subjectWeek: { end: Date; start: Date }) => rendering.renderWeekly({
       appuserKey: 7, currencyCode: 'EUR',
-      facts: { activeBudgetStatus: null, comparisonPercentage: '-12.5', comparisonWeekTotal: '80', isoWeek: 29, isoWeekYear: 2026, subjectWeekTotal: '90', topCategory: { amount: '50', categoryKey: 4, displayName: 'Groceries' } },
-      language,
+      facts: { activeBudgetStatus: 'near', comparisonPercentage: '-12.5', comparisonWeekTotal: '80', isoWeek: 29, isoWeekYear: 2026, subjectWeekTotal: '1820', topCategory: { amount: '50', categoryKey: 4, displayName: 'Supermercado' } },
+      language: SupportedLanguages.ES,
       recipient: 'user@example.com',
-      subjectWeek: { end: new Date('2026-07-12T23:00:00Z'), start: new Date('2026-07-05T23:00:00Z') },
+      subjectWeek,
     });
-    const story = (language: SupportedLanguages) => rendering.renderMonthlyStoryInsufficient({ appuserKey: 7, language, monthLabel: 'July 2026', monthsAvailable: 1, monthsNeeded: 3, reason: 'insufficient_history', recipient: 'user@example.com' });
+    const spanish = await weekly({ end: new Date('2026-07-12T23:00:00Z'), start: new Date('2026-07-05T23:00:00Z') });
 
-    for (const [english, spanish] of [[await weekly(SupportedLanguages.EN), await weekly(SupportedLanguages.ES)], [await story(SupportedLanguages.EN), await story(SupportedLanguages.ES)]] as const) {
-      expect(spanish.subject).toBe(english.subject);
-      expect(spanish.text.replaceAll('/es', '/en').replaceAll('%2Fes', '%2Fen')).toBe(english.text);
-      expect(spanish.html).toContain('/es/settings?tab=notifications');
+    expect(spanish.subject).toBe('Tu resumen financiero semanal');
+    expect(spanish.preheader).toBe('Gastos, categoría principal y estado de los presupuestos de la semana completa.');
+    expect(spanish.text).toContain('Semana completa del 6 al 12 de julio de 2026.');
+    expect(spanish.text).toContain('Comparado con la semana anterior: 12,5\u00a0% por debajo');
+    expect(spanish.text).toContain('1820,00\u00a0€');
+    expect(spanish.text).toContain('Hay categorías cerca del importe fijado');
+    expect(spanish.text).toContain('Según las transacciones disponibles actualmente.');
+    expect(spanish.html).toContain('/es/settings?tab=notifications');
+    expect(spanish.html).toContain('next=%2Fes');
+    expect(spanish.html).not.toContain('/en/');
+
+    expect((await weekly({ end: new Date('2026-07-05T23:00:00Z'), start: new Date('2026-06-28T23:00:00Z') })).text).toContain('Semana completa del 29 de junio al 5 de julio de 2026.');
+    expect((await weekly({ end: new Date('2026-01-05T00:00:00Z'), start: new Date('2025-12-29T00:00:00Z') })).text).toContain('Semana completa del 29 de diciembre de 2025 al 4 de enero de 2026.');
+  });
+
+  it('renders the monthly story for a Spanish account in Spanish, both variants', async () => {
+    const story = await rendering.renderMonthlyStory({
+      appuserKey: 7,
+      currencyCode: 'EUR',
+      facts: {
+        budgetPressure: 'over',
+        categoryDeltas: [{ baselineAmount: '100', categoryKey: 4, direction: 'increase', displayName: 'Restaurantes', percentOfBaseline: '420.00', subjectAmount: '520' }],
+        incomeBaseline: '2000',
+        incomeSubject: '2000',
+        recurringChanges: [],
+        savingsRateBaseline: '28',
+        savingsRateSubject: '19',
+        spendingBaseline: '1400',
+        spendingSubject: '1820',
+      },
+      firstName: 'Lucía',
+      language: SupportedLanguages.ES,
+      monthLabel: 'julio de 2026',
+      narrativeSentences: ['En julio de 2026 gastaste 420.00 € más de lo habitual: 1820.00 € en total.'],
+      netWorth: { subject: '50100', tone: 'positive' },
+      recipient: 'lucia@example.com',
+    });
+    expect(story.subject).toBe('Tu resumen financiero del mes: julio de 2026');
+    expect(story.preheader).toBe('En julio de 2026 gastaste 420.00 € más de lo habitual: 1820.00 € en total.');
+    for (const fragment of ['Hola Lucía,', 'Ingresos vs. lo habitual', 'Gastos vs. lo habitual', '1820,00\u00a0€', 'Lo que más cambió', 'Por encima del presupuesto', 'Superaste el presupuesto en una o más categorías este mes.', 'Tasa de ahorro', 'antes 28%', 'Patrimonio neto', '50.100,00\u00a0€', 'Ver tus informes']) {
+      expect(story.text).toContain(fragment);
     }
+    expect(story.html).toContain('next=%2Fes%2Freports');
+    expect(story.html).toContain('https://docs.wonder.money/es/about/privacy-policy');
+    expect(story.html).not.toContain('/en/');
+
+    const thin = await rendering.renderMonthlyStoryInsufficient({ appuserKey: 7, currencyCode: 'EUR', incomeSubject: '1200', language: SupportedLanguages.ES, monthLabel: 'julio de 2026', monthsAvailable: 1, monthsNeeded: 2, reason: 'insufficient_history', recipient: 'user@example.com' });
+    expect(thin.subject).toBe('Preparando tu resumen financiero');
+    expect(thin.text).toContain('Necesitamos 2 meses más de historial antes de poder comparar este mes con lo habitual.');
+    expect(thin.text).toContain('1200,00\u00a0€');
+    expect(thin.html).toContain('/es/settings?tab=notifications');
   });
 
   it('renders production weekly props without preview/sample values', async () => {

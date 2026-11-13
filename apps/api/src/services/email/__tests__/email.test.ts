@@ -217,8 +217,7 @@ describe('bank recovery email provider seam', () => {
   it.each([
     { heading: 'finish connecting your bank', language: 'EN' as const, subject: 'Your bank connection needs another try' },
     { heading: 'Vamos concluir a liga', language: 'PT' as const, subject: 'A tua ligação bancária precisa de nova tentativa' },
-    // No Spanish copy yet: a Spanish account reads the English nudge, not the Portuguese one.
-    { heading: 'finish connecting your bank', language: 'ES' as const, subject: 'Your bank connection needs another try' },
+    { heading: 'Terminemos de conectar tu banco', language: 'ES' as const, subject: 'Tu conexión bancaria necesita otro intento' },
   ])('renders the $language bank-recovery nudge as branded HTML with a List-Unsubscribe header + idempotency key', async ({ heading, language, subject }) => {
     resendSendMock.mockResolvedValue({ data: { id: ACCEPTED_ID }, error: null });
     const { sendBankRecoveryEmail } = await loadModule('staging');
@@ -363,10 +362,58 @@ describe('transactional user emails (welcome)', () => {
     expect(payload.html).toContain('https://app.example.test/pt');
   });
 
+  it('renders the welcome email in Spanish when the user language is ES', async () => {
+    const { sendWelcomeEmail } = await loadModule('production');
+    await sendWelcomeEmail({ ...user, firstName: 'Lucía', language: 'ES' });
+    const payload = resendSendMock.mock.calls[0]?.[0];
+    expect(payload.subject).toBe('Te damos la bienvenida a WonderMoney 🎉');
+    expect(payload.html).toContain('Hola Lucía,');
+    expect(payload.text).toContain('Gracias por registrarte: tu cuenta ya está lista.');
+    expect(payload.text).toContain('Ajustes de notificaciones');
+    expect(payload.html).toContain('https://app.example.test/es/settings');
+    expect(payload.html).not.toContain('https://app.example.test/en');
+  });
+
   it('omits the recipient name when the user has no first name', async () => {
     const { sendWelcomeEmail } = await loadModule('production');
     await sendWelcomeEmail({ ...user, firstName: undefined });
     expect(resendSendMock.mock.calls[0]?.[0].to).toBe('user@example.com');
+  });
+});
+
+describe('account emails for a Spanish account', () => {
+  beforeEach(() => {
+    resendCtor.mockClear();
+    resendSendMock.mockReset();
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+    vi.unstubAllEnvs();
+  });
+
+  const lastPayload = () => resendSendMock.mock.calls.at(-1)?.[0] as { html: string; subject: string; text: string };
+
+  it('confirms a connected bank in Spanish, linking to the Spanish accounts page', async () => {
+    const { sendAccountSyncEmail } = await loadModule('production');
+    await sendAccountSyncEmail({ email: 'lucia@example.com', name: 'Lucía' }, { bankName: 'Banco Ejemplo' }, 'ES');
+    expect(lastPayload().subject).toBe('Banco Ejemplo está conectado a WonderMoney');
+    expect(lastPayload().text).toContain('Banco Ejemplo ya está vinculado a WonderMoney.');
+    expect(lastPayload().html).toContain('https://app.example.test/es/accounts');
+  });
+
+  it('warns about an expiring API token in Spanish', async () => {
+    const { sendApiTokenExpiryEmail } = await loadModule('production');
+    await sendApiTokenExpiryEmail({ email: 'lucia@example.com', name: 'Lucía' }, { expiresAt: new Date('2026-11-20T10:00:00Z'), language: 'ES', tokenName: 'Hoja <de> gastos' });
+    expect(lastPayload().subject).toBe('Tu token de API de WonderMoney caduca pronto');
+    expect(lastPayload().html).toContain('Hola Lucía,<p>El token de API <strong>Hoja &lt;de&gt; gastos</strong> que creaste en WonderMoney caduca el 2026-11-20.</p>');
+    expect(lastPayload().text).toContain('crea uno nuevo en Configuración -> Tokens de API');
+  });
+
+  it('says a data export is ready in Spanish, linking to the Spanish privacy settings', async () => {
+    const { sendDataExportReadyEmail } = await loadModule('production');
+    await sendDataExportReadyEmail({ appuserKey: 42, emailAddress: 'lucia@example.com', language: 'ES' });
+    expect(lastPayload().subject).toBe('La exportación de tus datos de WonderMoney está lista');
+    expect(lastPayload().text).toContain('Descárgala en Configuración > Privacidad en las próximas 24 horas.');
+    expect(lastPayload().text).toContain('Descargar tus datos');
+    expect(lastPayload().html).toContain('https://app.example.test/es/settings?tab=privacy');
   });
 });
 

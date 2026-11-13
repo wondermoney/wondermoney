@@ -30,11 +30,11 @@ function escapeHtml(value: string): string {
 dotenv.config({ quiet: true });
 
 /**
- * The copy language of the texts in this file and of the react-email shells they render
- * (`TransactionalEmailLanguage`): English and Portuguese, so a Spanish account reads English.
- * Links into the app use the account's own locale (`accountLocale`) either way.
+ * The copy languages of the texts in this file and of the react-email shells they render
+ * (`TransactionalEmailLanguage`): English, Portuguese and Spanish. An account language outside
+ * this list reads English. Links into the app use the account's own locale (`accountLocale`).
  */
-const COPY_LOCALES = ['en', 'pt'] as const;
+const COPY_LOCALES = ['en', 'pt', 'es'] as const;
 const copyLang = (language: LANGUAGE) => copyLocale(language, COPY_LOCALES);
 const appBase = () => FRONTEND_URL.replace(/\/$/u, '');
 const backendBase = () => BACKEND_URL.replace(/\/$/u, '');
@@ -261,6 +261,20 @@ const BANK_RECOVERY_COPY = {
     step2Label: 'Resume the connection',
     subject: 'Your bank connection needs another try',
   },
+  es: {
+    body: [
+      (brand: string) => `Tu conexión bancaria no llegó a completarse, así que es posible que tus cuentas no estén al día en ${brand}.`,
+      (brand: string) => `Vuelve a abrir ${brand} e intenta de nuevo la conexión desde la aplicación. Solo lleva un momento. Si sigue sin funcionar, responde a este correo y te ayudamos.`,
+    ],
+    cta: 'Reintentar la conexión',
+    heading: 'Terminemos de conectar tu banco',
+    step1DetailFallback: 'El último intento no llegó a quedar conectado',
+    step1DetailWithBank: (bankName: string) => `Intento con ${bankName}`,
+    step1Label: 'Intento interrumpido',
+    step2Detail: 'Vuelve a confirmar la autorización con tu banco',
+    step2Label: 'Retomar la conexión',
+    subject: 'Tu conexión bancaria necesita otro intento',
+  },
   pt: {
     body: [
       (brand: string) => `A tua ligação bancária não ficou concluída, por isso as tuas contas podem não estar atualizadas na ${brand}.`,
@@ -318,6 +332,13 @@ const API_TOKEN_EXPIRY_COPY = {
     subject: (brand: string) => `Your ${brand} API token expires soon`,
     text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
       `Hi ${name},\n\nThe API token "${tokenName}" you created in ${brand} expires on ${expiresOn}.\n\nIf a script, spreadsheet or dashboard uses it, create a replacement in Settings -> API tokens before then. The old token stops working on its expiry date.\n\nIf you no longer need it, you can revoke it now in the same place.`,
+  },
+  es: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hola ${name},<p>El token de API <strong>${tokenName}</strong> que creaste en ${brand} caduca el ${expiresOn}.</p><p>Si un script, una hoja de cálculo o un panel lo usa, crea uno nuevo en Configuración → Tokens de API antes de esa fecha. El token antiguo deja de funcionar el día que caduca.</p><p>Si ya no lo necesitas, puedes revocarlo ahora en el mismo sitio.</p>`,
+    subject: (brand: string) => `Tu token de API de ${brand} caduca pronto`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hola ${name},\n\nEl token de API "${tokenName}" que creaste en ${brand} caduca el ${expiresOn}.\n\nSi un script, una hoja de cálculo o un panel lo usa, crea uno nuevo en Configuración -> Tokens de API antes de esa fecha. El token antiguo deja de funcionar el día que caduca.\n\nSi ya no lo necesitas, puedes revocarlo ahora en el mismo sitio.`,
   },
   pt: {
     body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
@@ -534,8 +555,8 @@ function toBankRecoveryOutcome(outcome: RenderedEmailOutcome): BankRecoveryEmail
  * `lifecycle-nudge` shell, which renders an unsubscribe/settings footer — so `unsubscribeUrl` points at
  * a real account-wide opt-out (honest: it turns off optional email, never these transactional sends) and
  * `settingsUrl` at the relevant page. Footer-free transactional templates would need a separate
- * react-email publish (out of scope; noted in the handoff). Copy is EN + PT, selected by `language`;
- * a Spanish account reads the English copy. */
+ * react-email publish (out of scope; noted in the handoff). Copy is EN, PT and ES, selected by
+ * `language`. */
 
 /** Minimal user identity every transactional sender needs. */
 export interface TransactionalUserEmailInput {
@@ -600,6 +621,17 @@ const welcomeCopy = (brand: string): Record<(typeof COPY_LOCALES)[number], Trans
     preheader: 'Your account is ready — here is how to get started.',
     subject: `Welcome to ${brand} 🎉`,
   },
+  es: {
+    body: [
+      'Gracias por registrarte: tu cuenta ya está lista.',
+      `${brand} reúne tus cuentas, presupuestos e inversiones en un solo lugar. Conecta tu primera cuenta para ver cómo todo cobra vida.`,
+      '¿Tienes alguna pregunta? Responde a este correo: lo lee una persona de verdad.',
+    ],
+    ctaLabel: `Abrir ${brand}`,
+    heading: `Te damos la bienvenida a ${brand}`,
+    preheader: 'Tu cuenta está lista: así puedes empezar.',
+    subject: `Te damos la bienvenida a ${brand} 🎉`,
+  },
   pt: {
     body: [
       'Obrigado por te registares — a tua conta está pronta.',
@@ -634,6 +666,17 @@ const dataExportReadyCopy = (brand: string): Record<(typeof COPY_LOCALES)[number
     heading: 'Your data export is ready',
     preheader: 'Download it within 24 hours.',
     subject: `Your ${brand} data export is ready`,
+  },
+  es: {
+    body: [
+      `La exportación de tus datos de ${brand} que pediste está lista.`,
+      'Descárgala en Configuración > Privacidad en las próximas 24 horas. Después, el archivo se elimina y puedes pedir una nueva exportación.',
+      'Si no pediste esta exportación, cambia tu contraseña y revisa los dispositivos con sesión iniciada en tu cuenta.',
+    ],
+    ctaLabel: 'Descargar tus datos',
+    heading: 'La exportación de tus datos está lista',
+    preheader: 'Descárgala en las próximas 24 horas.',
+    subject: `La exportación de tus datos de ${brand} está lista`,
   },
   pt: {
     body: [

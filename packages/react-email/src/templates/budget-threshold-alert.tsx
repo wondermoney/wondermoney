@@ -68,6 +68,36 @@ export const COPY = {
       "Categorias de diferentes orçamentos podem aparecer juntas neste email para evitar várias notificações no mesmo dia.",
     ],
   },
+  es: {
+    subject: {
+      empty: "Novedades sobre tus presupuestos",
+      over: "Hay categorías por encima de lo planificado",
+      atLimit: "Hay categorías que alcanzaron el importe fijado",
+      near: "Hay categorías cerca del importe fijado",
+    },
+    preheader: {
+      empty: "Revisa los importes y las transacciones incluidos en tus presupuestos.",
+      over: "Algunas categorías superan el importe planificado para este mes.",
+      atLimit: "Algunas categorías alcanzaron el importe fijado para este mes.",
+      near: "Algunas categorías están cerca del importe fijado para este mes.",
+    },
+    status: {
+      near: { suffix: "cerca del límite", secondaryLabel: "Aún disponible", ariaState: "cerca del importe fijado" },
+      at_limit: { suffix: "importe fijado alcanzado", secondaryLabel: "Disponible", ariaState: "importe fijado alcanzado" },
+      over: { suffix: "por encima de lo planificado", secondaryLabel: "Excedido", ariaState: "por encima del importe planificado" },
+    },
+    usedOverPlanned: "Usado / planificado",
+    ariaOf: "de",
+    ariaCategoriesIncluded: (count: number) => `${count} categorías incluidas`,
+    heading: "Categorías para revisar en tus presupuestos",
+    intro: (periodLabel: string) => `Este es el resumen agregado de ${periodLabel}. Muestra las categorías que llegaron al 80% o al 100% del importe fijado.`,
+    ctaLabel: "Ver presupuestos",
+    marketingFooterText: (brand: string) => `Recibes este resumen porque activaste las alertas de presupuesto en ${brand}.`,
+    bodyParagraphs: [
+      "Los importes se basan en las transacciones disponibles actualmente. Revisa las transacciones incluidas en cada categoría para confirmar que el resumen coincide con lo que esperabas.",
+      "Este correo puede reunir categorías de distintos presupuestos para evitar varias notificaciones el mismo día.",
+    ],
+  },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
 export function getBudgetThresholdSubject(

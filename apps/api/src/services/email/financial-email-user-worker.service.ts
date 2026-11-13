@@ -238,7 +238,7 @@ function budgetPeriodsAgree(results: BudgetAggregationResult[]) {
   return results.every((result) => result.period.localDate === first.period.localDate && result.period.month === first.period.month && result.period.year === first.period.year && result.period.day.start.getTime() === first.period.day.start.getTime() && result.period.day.end.getTime() === first.period.day.end.getTime() && result.period.monthRange.start.getTime() === first.period.monthRange.start.getTime() && result.period.monthRange.end.getTime() === first.period.monthRange.end.getTime());
 }
 
-/** In the monthly story's copy language: EN or PT, so a Spanish account reads an English month, like the rest of the email. */
+/** In the monthly story's copy language (EN, PT or ES), like the rest of the email; any other account language reads an English month. */
 function monthLabelFor(period: { month: number; year: number }, language: SupportedLanguages): string {
   const locale = INTL_LOCALE[copyLocale(language, NARRATIVE_LANGUAGES)];
   return new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC', year: 'numeric' }).format(new Date(Date.UTC(period.year, period.month - 1, 1)));

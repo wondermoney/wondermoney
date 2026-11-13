@@ -10,6 +10,9 @@ interface PromptClient {
   completeJson: typeof completeJson;
 }
 
+/** The language the polish is asked for, named for the model; every narrative language has one. */
+const LANGUAGE_NAME: Readonly<Record<NarrativeLanguage, string>> = { en: 'English', es: 'Spanish', pt: 'European Portuguese' };
+
 const NARRATIVE_SCHEMA = jsonSchema({
   additionalProperties: false,
   properties: { sentences: { items: { type: 'string' }, type: 'array' } },
@@ -36,7 +39,7 @@ export class MonthlyStoryNarrativeService {
         schema: NARRATIVE_SCHEMA,
         schemaName: 'monthly_story_narrative',
         temperature: 0.4,
-        user: `Rephrase these factual sentences about a household's monthly finances for natural flow and a factual, non-judgmental tone. Do not introduce, drop, or alter any number, category name, or claim not present in the input. Keep the same number of sentences. Respond in ${language === 'pt' ? 'European Portuguese' : 'English'}.\n\nSentences:\n${skeleton.sentences.map((sentence) => `- ${sentence}`).join('\n')}`,
+        user: `Rephrase these factual sentences about a household's monthly finances for natural flow and a factual, non-judgmental tone. Do not introduce, drop, or alter any number, category name, or claim not present in the input. Keep the same number of sentences. Respond in ${LANGUAGE_NAME[language]}.\n\nSentences:\n${skeleton.sentences.map((sentence) => `- ${sentence}`).join('\n')}`,
         // The Azure deployment. Off Azure, `AI_MODEL_MONTHLY_STORY` decides.
         azureDeployment: 'gpt-5.4-nano',
       });

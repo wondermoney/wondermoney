@@ -18,8 +18,9 @@ interface EmailChannelDependencies {
 const trimSlash = (url: string) => url.replace(/\/$/u, '');
 
 /**
- * Bank sync alerts by email, in the owner's language: EN or PT, the languages this template is
- * written in, so a Spanish account reads English (its links still open the app in Spanish).
+ * Bank sync alerts by email, in the owner's language: EN, PT or ES, the languages this template is
+ * written in. Any other account language reads English, with links that open the app in its own
+ * locale.
  * Optional mail: the bank-sync-alerts category and the account-wide unsubscribe both stop it, and
  * every message carries a one-click unsubscribe for its category.
  */
@@ -29,7 +30,7 @@ export function createBankSyncAlertEmailChannel(dependencies: EmailChannelDepend
 
   return {
     async deliver(message: BankSyncAlertMessage): Promise<BankSyncAlertChannelOutcome> {
-      const lang = copyLocale(message.recipient.language, ['en', 'pt']);
+      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es']);
       const link = accountLocale(message.recipient.language);
       const date = (value: Date | null) => (value
         ? new Intl.DateTimeFormat(INTL_LOCALE[lang], { day: 'numeric', month: 'long', timeZone: FINANCIAL_EMAIL_TIME_ZONE }).format(value)
