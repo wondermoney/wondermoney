@@ -51,6 +51,7 @@
     "start": "NODE_ENV=production node dist/server.js",
     "swagger": "tsx scripts/swagger.ts",
     "openapi": "tsx scripts/openapi.ts",
+    "render:check": "tsx scripts/render-blueprint.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
@@ -163,7 +164,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "8.72.2",
     "vitest": "^5.0.5",
-    "vitest-mock-extended": "^5.1.1"
+    "vitest-mock-extended": "^5.1.1",
+    "yaml": "2.9.1"
   },
   "mikro-orm": {
     "configPaths": [

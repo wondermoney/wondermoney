@@ -4,6 +4,7 @@
     "index",
     "install",
     "kubernetes",
+    "managed-hosting",
     "configure",
     "https-and-domains",
     "single-sign-on",
