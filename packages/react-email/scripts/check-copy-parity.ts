@@ -23,8 +23,11 @@ import { COPY as accountConnected } from "../src/templates/account-connected";
 import { COPY as bankSyncAlert } from "../src/templates/bank-sync-alert";
 import { COPY as budgetThresholdAlert } from "../src/templates/budget-threshold-alert";
 import { COPY as creditCardDueReminder } from "../src/templates/credit-card-due-reminder";
+import { COPY as emailVerification } from "../src/templates/email-verification";
+import { COPY as householdInvite } from "../src/templates/household-invite";
 import { FOOTER as lifecycleNudge } from "../src/templates/lifecycle-nudge";
 import { COPY as monthlyStory } from "../src/templates/monthly-story";
+import { COPY as passwordReset } from "../src/templates/password-reset";
 import { COPY as weeklyInsights } from "../src/templates/weekly-insights";
 import { COPY as weeklyInsightsPreheader } from "../src/weekly-insights-preheader";
 
@@ -36,8 +39,11 @@ const templates: Array<{ file: string; copy: CopyTable }> = [
   { file: "src/templates/budget-threshold-alert.tsx", copy: budgetThresholdAlert },
   { file: "src/templates/credit-card-due-reminder.tsx", copy: creditCardDueReminder },
   { file: "emails/components/LifecycleEmail.tsx", copy: lifecycleShell },
+  { file: "src/templates/email-verification.tsx", copy: emailVerification },
+  { file: "src/templates/household-invite.tsx", copy: householdInvite },
   { file: "src/templates/lifecycle-nudge.tsx", copy: lifecycleNudge },
   { file: "src/templates/monthly-story.tsx", copy: monthlyStory },
+  { file: "src/templates/password-reset.tsx", copy: passwordReset },
   { file: "src/templates/weekly-insights.tsx", copy: weeklyInsights },
   { file: "src/weekly-insights-preheader.ts", copy: weeklyInsightsPreheader },
 ];

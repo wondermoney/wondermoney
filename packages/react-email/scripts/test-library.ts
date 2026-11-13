@@ -6,9 +6,12 @@ import {
   renderBankSyncAlertEmail,
   renderBudgetThresholdAlert,
   renderCreditCardDueReminderEmail,
+  renderEmailVerificationEmail,
+  renderHouseholdInviteEmail,
   renderInternalAlertEmail,
   renderLifecycleNudgeEmail,
   renderMonthlyStory,
+  renderPasswordResetEmail,
   renderWeeklyInsights,
   type BudgetThresholdAlertProps,
   type BudgetThresholdItem,
@@ -400,6 +403,44 @@ await assert.rejects(
     }),
     /statementUrl must be an absolute http\(s\) URL/,
   );
+}
+
+// Account emails (password reset, email verification, household invite): each language has its own
+// subject and copy, the action link is both the button and written out, and nothing tracks or
+// offers an unsubscribe. A name with markup in it arrives as text.
+{
+  const resetUrl = "https://api.example.test/api/auth/reset-password/T0K3N?callbackURL=https%3A%2F%2Fapp.example.test%2Fes%2Fauth%2Freset";
+  const verificationUrl = "https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=https%3A%2F%2Fapp.example.test%2Fes";
+  const acceptUrl = "https://app.example.test/es/join?token=T0K3N";
+  const words = { en: /password/i, pt: /palavra-passe/i, es: /contraseña/i } as const;
+  const subjects = new Set<string>();
+  for (const language of ["en", "pt", "es"] as const) {
+    const reset = await renderPasswordResetEmail({ language, firstName: "Ada", resetUrl });
+    const verification = await renderEmailVerificationEmail({ language, firstName: "Ada", verificationUrl });
+    const invite = await renderHouseholdInviteEmail({ language, inviterName: "Ada", acceptUrl, expiresInDays: 7 });
+    assert.ok(words[language].test(reset.subject), `password-reset subject must be in ${language}`);
+    assert.ok(invite.subject.includes("Ada"), `household-invite subject must name the inviter in ${language}`);
+    assert.ok(invite.text.includes("7"), `household-invite must state the expiry in ${language}`);
+    assert.ok(new RegExp(`<html[^>]*lang="${language}"`).test(reset.html), `password-reset must declare ${language}`);
+    for (const [name, email, url] of [["password-reset", reset, resetUrl], ["email-verification", verification, verificationUrl], ["household-invite", invite, acceptUrl]] as const) {
+      const href = url.replaceAll("&", "&amp;");
+      assert.ok(email.html.split(`href="${href}"`).length - 1 >= 2, `${name} must link the button and the written-out link in ${language}`);
+      assert.ok(email.text.includes(url), `${name} plain text must carry the link in ${language}`);
+      assert.ok(!/utm_|unsubscribe/i.test(email.html), `${name} must not carry tracking or an unsubscribe`);
+      subjects.add(email.subject);
+    }
+  }
+  assert.equal(subjects.size, 9, "each account email and language needs its own subject");
+
+  const marked = await renderHouseholdInviteEmail({ language: "en", inviterName: '<a href="https://evil.test">Ada</a>', acceptUrl, expiresInDays: 7 });
+  assert.ok(!marked.html.includes('<a href="https://evil.test">'), "an inviter name must not become markup");
+  for (const render of [
+    () => renderPasswordResetEmail({ language: "en", resetUrl: "javascript:alert(1)" }),
+    () => renderEmailVerificationEmail({ language: "en", verificationUrl: "/verify" }),
+    () => renderHouseholdInviteEmail({ language: "en", inviterName: "Ada", acceptUrl: "data:text/html,x", expiresInDays: 7 }),
+  ]) {
+    await assert.rejects(render(), /must be an absolute http\(s\) URL/);
+  }
 }
 
 // A self-hosted instance on a LAN address sends plain-http links.

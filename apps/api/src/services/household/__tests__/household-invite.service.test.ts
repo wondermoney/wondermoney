@@ -9,13 +9,13 @@ const mocked = vi.hoisted(() => ({
 vi.mock('@service/email/email', () => ({ sendRenderedEmail: mocked.sendRenderedEmail }));
 vi.mock('@utils/fire-and-forget', () => ({ fireAndForget: mocked.fireAndForget }));
 
-import { Appuser } from '@entity/Appuser';
+import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { HouseholdInvite, HouseholdInviteStatus } from '@entity/HouseholdInvite';
 import { Tenant } from '@entity/Tenant';
 import { BadRequestError, ConflictError, ERROR_CODE } from '@utils/errors';
 
-import { consumeInvite, createHouseholdInvite, escapeHtml, HOUSEHOLD_MAX_MEMBERS, notifyExistingUserInviteAttempt, validateInviteForSignup } from '../household-invite.service';
+import { consumeInvite, createHouseholdInvite, escapeHtml, HOUSEHOLD_MAX_MEMBERS, notifyExistingUserInviteAttempt, resendHouseholdInvite, validateInviteForSignup } from '../household-invite.service';
 
 function em({
   activeMembers = 1,
@@ -84,6 +84,47 @@ describe('createHouseholdInvite', () => {
   });
 });
 
+/** The invitee has no account, so the invite goes out in the inviter's language. */
+describe('invite email language', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const sentEmail = async () => {
+    await Promise.all(mocked.fireAndForget.mock.calls.map((call: unknown[]) => call[0] as Promise<unknown>));
+    return mocked.sendRenderedEmail.mock.calls[0]?.[0] as { html: string; subject: string; text: string };
+  };
+
+  it.each([
+    [SupportedLanguages.PT, 'pt'],
+    [SupportedLanguages.ES, 'es'],
+    [SupportedLanguages.EN, 'en'],
+  ])('writes an invite from a %s account in %s and opens the join page in that locale', async (language, locale) => {
+    const { em: mockEm } = em({ existingUser: null });
+
+    const invite = await createHouseholdInvite(mockEm, inviter({ firstName: 'Ada', language }), tenant(), 'partner@example.com');
+
+    const { html, subject, text } = await sentEmail();
+    expect(html).toMatch(new RegExp(`<html[^>]*lang="${locale}"`, 'u'));
+    expect(text).toContain(`/${locale}/join?token=${invite.token}`);
+    expect(subject).toContain('Ada');
+  });
+
+  it('resends in the language of the inviter who resends it', async () => {
+    const pending = Object.assign(new HouseholdInvite(), { emailAddress: 'partner@example.com', householdInviteKey: 5, status: HouseholdInviteStatus.PENDING, token: 'old' });
+    const flush = vi.fn().mockResolvedValue(undefined);
+    const mockEm = {
+      getRepository: vi.fn(() => ({ findOne: vi.fn().mockResolvedValue(pending) })),
+      persist: vi.fn().mockReturnValue({ flush }),
+    } as unknown as EntityManager;
+
+    const invite = await resendHouseholdInvite(mockEm, inviter({ language: SupportedLanguages.ES }), tenant(), 5);
+
+    const { html, text } = await sentEmail();
+    expect(html).toMatch(/<html[^>]*lang="es"/u);
+    expect(text).toContain(`/es/join?token=${invite.token}`);
+    expect(text).not.toContain('token=old');
+  });
+});
+
 /**
  * The invite recipient is fully attacker-chosen and the mail is DKIM-signed by WonderMoney's own
  * domain, so an unescaped display name is a phishing primitive, not a cosmetic bug.
@@ -91,7 +132,11 @@ describe('createHouseholdInvite', () => {
 describe('invite email HTML escaping', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  const sentEmail = () => mocked.sendRenderedEmail.mock.calls[0]?.[0] as { html: string; subject: string; text: string };
+  /** The email the invite sent, once its fire-and-forget send has run. */
+  const sentEmail = async () => {
+    await Promise.all(mocked.fireAndForget.mock.calls.map((call: unknown[]) => call[0] as Promise<unknown>));
+    return mocked.sendRenderedEmail.mock.calls[0]?.[0] as { html: string; subject: string; text: string; to: { email: string } };
+  };
 
   it('escapes markup in the inviter display name instead of shipping it into the email body', async () => {
     const { em: mockEm } = em({ existingUser: null });
@@ -99,20 +144,25 @@ describe('invite email HTML escaping', () => {
 
     await createHouseholdInvite(mockEm, attacker, tenant(), 'victim@example.com');
 
-    const { html } = sentEmail();
+    const { html } = await sentEmail();
     expect(html).not.toContain('<a href="https://evil.tld/login">');
     expect(html).toContain('&lt;a href=&quot;https://evil.tld/login&quot;&gt;Security Alert&lt;/a&gt;');
+    expect(html).not.toContain('href="https://evil.tld');
   });
 
-  it('keeps the invite link intact and still renders a single anchor', async () => {
+  it('keeps the invite link intact, and links nowhere the invite does not', async () => {
     const { em: mockEm } = em({ existingUser: null });
 
     const invite = await createHouseholdInvite(mockEm, inviter({ firstName: 'Ada' }), tenant(), 'partner@example.com');
 
-    const { html, text } = sentEmail();
+    const { html, text, to } = await sentEmail();
+    expect(to.email).toBe('partner@example.com');
     expect(html).toContain(`/join?token=${invite.token}`);
-    expect(html.match(/<a /gu)).toHaveLength(1);
     expect(text).toContain(`/join?token=${invite.token}`);
+    const appOrigin = new URL(process.env['APP_URL'] ?? '').origin;
+    const hrefs = [...html.matchAll(/href="([^"]+)"/gu)].map(([, href = '']) => new URL(href.replaceAll('&amp;', '&')));
+    expect(hrefs.filter((href) => href.searchParams.has('token')).every((href) => href.searchParams.get('token') === invite.token)).toBe(true);
+    expect(hrefs.filter((href) => href.searchParams.has('token')).every((href) => href.origin === appOrigin)).toBe(true);
   });
 
   it('falls back to the inviter email address and escapes that too', async () => {
@@ -121,16 +171,17 @@ describe('invite email HTML escaping', () => {
 
     await createHouseholdInvite(mockEm, attacker, tenant(), 'victim@example.com');
 
-    expect(sentEmail().html).not.toContain('<script>');
+    expect((await sentEmail()).html).not.toContain('<script>');
   });
 
-  it('escapes the email address in the internal existing-user alert', () => {
+  it('escapes the email address in the internal existing-user alert', async () => {
     vi.stubEnv('SUPPORT_EMAIL', 'team@example.com');
     notifyExistingUserInviteAttempt('<img src=x onerror=alert(1)>@example.com', 42);
     vi.unstubAllEnvs();
 
-    expect(sentEmail().html).not.toContain('<img');
-    expect(sentEmail().html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    const { html } = await sentEmail();
+    expect(html).not.toContain('<img');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
   });
 
   it('sends no existing-user alert when there is no team inbox to send it to', () => {

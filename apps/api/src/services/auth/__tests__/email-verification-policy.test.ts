@@ -27,6 +27,11 @@ describe('verificationLinkLandingOnApp', () => {
     expect(url.searchParams.get('callbackURL')).toBe(appUrl);
   });
 
+  it("lands a link with no client callback on the web app's page in the account's locale", () => {
+    const link = verificationLinkLandingOnApp('https://api.example.test/api/auth/verify-email?token=abc&callbackURL=%2F', `${appUrl}/`, 'es');
+    expect(new URL(link).searchParams.get('callbackURL')).toBe(`${appUrl}/es`);
+  });
+
   it('keeps a callback the client chose', () => {
     const original = `https://api.example.test/api/auth/verify-email?token=abc&callbackURL=${encodeURIComponent(`${appUrl}/en/auth/login`)}`;
     expect(new URL(verificationLinkLandingOnApp(original, appUrl)).searchParams.get('callbackURL')).toBe(`${appUrl}/en/auth/login`);
