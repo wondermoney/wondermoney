@@ -169,6 +169,7 @@ import {
   PORTFOLIO_SNAPSHOT_MANUAL_QUEUE,
   schedulePortfolioSnapshotAutoJob,
 } from '@app/jobs/portfolio-snapshot.queue';
+import { ensurePushSendQueue, PUSH_SEND_QUEUE } from '@app/jobs/push-send.queue';
 import { ensureFoundationQueue, FOUNDATION_QUEUE } from '@app/jobs/queue';
 import {
   ensureQueueDepthMonitorQueue,
@@ -315,6 +316,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     ...FINANCIAL_EMAIL_QUEUES,
     BANK_RECOVERY_QUEUE,
     BANK_SYNC_ALERT_SEND_QUEUE,
+    PUSH_SEND_QUEUE,
   ];
 
   const start = async () => {
@@ -364,6 +366,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureBankSyncAlertSweepQueue(boss);
     await ensureBankSyncAlertSendQueue(boss);
     await ensureCreditCardDueReminderQueue(boss);
+    await ensurePushSendQueue(boss);
     await ensureTransactionEnrichmentGptQueue(boss);
     await ensureQueueDepthMonitorQueue(boss);
     if (schedulerEnabled()) {
@@ -737,14 +740,18 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     ));
     await boss.work(BANK_SYNC_ALERT_SEND_QUEUE, workJobs<Job<unknown>>(BANK_SYNC_ALERT_SEND_QUEUE, async (job) => {
       const { handleBankSyncAlertSendJob } = await import('@app/jobs/bank-sync-alert.worker');
-      await runInRequestContext(() => handleBankSyncAlertSendJob(job, { logger: log }));
+      await runInRequestContext(() => handleBankSyncAlertSendJob(job, { enqueue, logger: log }));
+    }));
+    await boss.work(PUSH_SEND_QUEUE, workJobs<Job<unknown>>(PUSH_SEND_QUEUE, async (job) => {
+      const { handlePushSendJob } = await import('@app/jobs/push-send.worker');
+      await runInRequestContext(() => handlePushSendJob(job, { enqueue, logger: log }));
     }));
     await boss.work(CREDIT_CARD_DUE_REMINDER_QUEUE, workCronJobs<Job<unknown>>(
       CREDIT_CARD_DUE_REMINDER_QUEUE,
       { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: CREDIT_CARD_DUE_REMINDER_QUEUE, schedule: CREDIT_CARD_DUE_REMINDER_CRON },
       async () => {
         const { handleCreditCardDueReminderJob } = await import('@app/jobs/credit-card-due-reminder.worker');
-        await runInRequestContext(() => handleCreditCardDueReminderJob({ logger: log }));
+        await runInRequestContext(() => handleCreditCardDueReminderJob({ enqueue, logger: log }));
       },
     ));
 
@@ -771,8 +778,8 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       ));
     }
     await boss.work(BUDGET_EMAIL_DELIVERY_QUEUE, workJobs<Job<FinancialEmailUserPayload>>(BUDGET_EMAIL_DELIVERY_QUEUE, async (job) => {
-      const { handleFinancialEmailUser } = await import('@app/jobs/financial-emails.worker');
-      await runInRequestContext(() => handleFinancialEmailUser(job, 'budget'));
+      const { handleBudgetEmailUser } = await import('@app/jobs/financial-emails.worker');
+      await runInRequestContext(() => handleBudgetEmailUser(job, enqueue));
     }));
     await boss.work(WEEKLY_EMAIL_DELIVERY_QUEUE, workJobs<Job<FinancialEmailUserPayload>>(WEEKLY_EMAIL_DELIVERY_QUEUE, async (job) => {
       const { handleFinancialEmailUser } = await import('@app/jobs/financial-emails.worker');

@@ -72,6 +72,8 @@ const instanceSchema = z.object({
     oidc: z.object({ name: z.string().min(1) }).nullable().optional(),
     // False under OIDC_ONLY: no password sign-in or sign-up. Absent on an older server (on).
     passwordSignIn: z.boolean().optional(),
+    // Mobile push notifications (`PUSH_ENABLED`). Absent on an older server: off.
+    push: z.boolean().optional(),
   }),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),

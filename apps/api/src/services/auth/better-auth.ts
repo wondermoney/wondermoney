@@ -25,6 +25,7 @@ import { passkeyPlugins } from '@service/auth/passkey';
 import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
+import { removePushDevicesForSession } from '@service/push/push-session-cleanup';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
@@ -178,6 +179,11 @@ const auth = betterAuth({
   database: betterAuthPool,
   databaseHooks: {
     session: {
+      // A session that ends (sign-out, revoke, password change, account deletion) takes its push
+      // devices with it, so that phone gets no more notifications (services/push/push-device.service.ts).
+      delete: {
+        after: (session) => removePushDevicesForSession(session.id, (sql, params) => betterAuthPool.query(sql, params)),
+      },
       update: {
         // A refresh never moves a demo session past its two hours (services/auth/demo-session.ts).
         before: (session, context) => Promise.resolve(capDemoSessionRefresh(session, context) as undefined | { data: typeof session & { expiresAt: Date } }),

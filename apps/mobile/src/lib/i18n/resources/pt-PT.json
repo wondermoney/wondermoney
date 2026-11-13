@@ -3601,7 +3601,7 @@
     "creditCardDueReminders": {
       "title": "Lembretes de pagamento do cartão",
       "description": "Recebe um email alguns dias antes do vencimento de um extrato de cartão de crédito fechado, se ainda tiveres saldo por pagar.",
-      "detail": "Enviado apenas por email. No máximo um lembrete por extrato."
+      "detail": "No máximo um email por extrato."
     },
     "marketingOptOut": {
       "title": "Cancelar subscrição de todos os emails de marketing",
@@ -3633,7 +3633,32 @@
     },
     "retry": "Tentar novamente",
     "saving": "A guardar alteração…",
-    "saveError": "Não foi possível confirmar esta alteração. As tuas preferências estão a ser atualizadas a partir do servidor."
+    "saveError": "Não foi possível confirmar esta alteração. As tuas preferências estão a ser atualizadas a partir do servidor.",
+    "push": {
+      "title": "Notificações push",
+      "description": "Recebe alertas neste telemóvel. Cada um fica desligado até o ligares, e o telemóvel pede autorização na primeira vez.",
+      "budgetAlerts": {
+        "title": "Alertas de orçamento",
+        "description": "Quando uma categoria do orçamento atinge 80% ou 100% do valor planeado."
+      },
+      "creditCardDueReminders": {
+        "title": "Lembretes de pagamento do cartão",
+        "description": "Alguns dias antes de vencer um extrato fechado do cartão."
+      },
+      "bankSyncAlerts": {
+        "title": "Alertas de ligações bancárias",
+        "description": "Quando uma ligação bancária está prestes a expirar, foi terminada pelo banco ou continua sem sincronizar."
+      },
+      "privacy": "As notificações nunca mostram valores nem comerciantes. Abre a aplicação para ver os números.",
+      "denied": "As notificações do WonderMoney estão desligadas nas definições do telemóvel. Liga-as aí e tenta novamente.",
+      "unavailable": "Este telemóvel não pode receber notificações push desta versão da aplicação.",
+      "saveError": "Não foi possível guardar esta alteração. Tenta novamente.",
+      "sendTest": "Enviar notificação de teste",
+      "sendingTest": "A enviar…",
+      "testSent": "Notificação de teste enviada. Deve chegar dentro de alguns segundos.",
+      "testNoDevice": "Liga primeiro uma notificação push, para registar este telemóvel.",
+      "testError": "Não foi possível enviar a notificação de teste. Tenta novamente."
+    }
   },
   "onboarding": {
     "firstRun": {

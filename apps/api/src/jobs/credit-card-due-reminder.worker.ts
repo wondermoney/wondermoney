@@ -4,7 +4,9 @@ import type { Logger } from 'pino';
 import { DI } from '@app/database/di';
 import { creditCardDueReminderDays } from '@app/jobs/credit-card-due-reminder.queue';
 import { createCreditCardDueReminderEmailChannel } from '@service/account/credit-card-due-reminder-email.channel';
+import { createCreditCardDueReminderPushChannel } from '@service/account/credit-card-due-reminder-push.channel';
 import { type CreditCardDueReminderChannels, sendCreditCardDueReminders } from '@service/account/credit-card-due-reminder.service';
+import type { Enqueue } from '@service/queue/enqueue';
 import logger from '@utils/logger';
 
 /**
@@ -18,13 +20,27 @@ export async function handleCreditCardDueReminderJob(deps: {
   channels?: CreditCardDueReminderChannels;
   daysBeforeDue?: number;
   em?: EntityManager;
+  /** The push channel's queue; without one, reminders go by email only. */
+  enqueue?: Enqueue;
   logger?: Pick<Logger, 'info'>;
   now?: Date;
 } = {}) {
+  const em = deps.em ?? DI.em;
+  const { enqueue } = deps;
   const result = await sendCreditCardDueReminders({
-    channels: deps.channels ?? { email: createCreditCardDueReminderEmailChannel() },
+    channels: deps.channels ?? {
+      email: createCreditCardDueReminderEmailChannel(),
+      push: createCreditCardDueReminderPushChannel({
+        em,
+        enabled: enqueue ? undefined : () => false,
+        enqueue: () => {
+          if (!enqueue) throw new Error('No queue for push reminders');
+          return enqueue;
+        },
+      }),
+    },
     daysBeforeDue: deps.daysBeforeDue ?? creditCardDueReminderDays(),
-    em: deps.em ?? DI.em,
+    em,
     now: deps.now ?? new Date(),
   });
   (deps.logger ?? logger).info({ ...result, queue: 'credit-card-due-reminder.sweep' }, 'Credit card due reminder sweep finished');

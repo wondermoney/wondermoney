@@ -9,6 +9,7 @@ import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBa
 import { listMcpCalls } from '@controller/mcp';
 import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
+import { getPushPreferences, patchPushPreferences, registerPushDevice, sendTestPush, unregisterPushDevice } from '@controller/push';
 import {
   completeOnboardingStep,
   deleteCurrentUserAccount,
@@ -20,7 +21,7 @@ import {
   updateData,
 } from '@controller/user';
 import { getPreferences, patchPreferences } from '@controller/user-preferences';
-import { dataExportRateLimit, dataRestoreRateLimit } from '@middleware/rate-limit';
+import { dataExportRateLimit, dataRestoreRateLimit, pushTestRateLimit } from '@middleware/rate-limit';
 import { requireSensitiveSession } from '@middleware/sensitive-session';
 
 const router = express.Router();
@@ -48,6 +49,13 @@ router.get('/devices', listDevices);
 router.delete('/devices/:sessionId', revokeDevice);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
+// Mobile push (`services/push`). The device routes need a signed-in session, which the device ends
+// with; the demo account cannot register one (`blockDemoMutation` on this mount).
+router.get('/me/push-preferences', getPushPreferences);
+router.patch('/me/push-preferences', patchPushPreferences);
+router.post('/me/push-devices', registerPushDevice);
+router.delete('/me/push-devices/:token', unregisterPushDevice);
+router.post('/me/push-test', pushTestRateLimit(), sendTestPush);
 router.get('/me/preferences', getPreferences);
 router.patch('/me/preferences', patchPreferences);
 router.get('/me/onboarding', getOnboardingBootstrap);

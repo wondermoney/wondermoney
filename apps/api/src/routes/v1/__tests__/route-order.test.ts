@@ -80,6 +80,9 @@ vi.mock('@middleware/rate-limit', () => ({
     res.setHeader('x-market-data-limiter', 'applied');
     next();
   },
+  pushTestRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
 }));
 
 const mount = async (modulePath: string) => {

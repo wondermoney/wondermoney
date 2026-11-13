@@ -8,11 +8,14 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { handleCreditCardDueReminderJob } from '@app/jobs/credit-card-due-reminder.worker';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
-import { CreditCardDueReminderDelivery, CreditCardDueReminderStatus } from '@entity/CreditCardDueReminderDelivery';
+import { CreditCardDueReminderChannel, CreditCardDueReminderDelivery, CreditCardDueReminderStatus } from '@entity/CreditCardDueReminderDelivery';
 import { EmailNotificationPreference } from '@entity/EmailNotificationPreference';
+import { PushDevice, PushDevicePlatform } from '@entity/PushDevice';
 import type { RenderedEmailInput, RenderedEmailOutcome } from '@service/email/email';
+import { renderPush } from '@service/push/push-messages';
 
 import { createCreditCardDueReminderEmailChannel } from '../credit-card-due-reminder-email.channel';
+import { createCreditCardDueReminderPushChannel } from '../credit-card-due-reminder-push.channel';
 import { sendCreditCardDueReminders } from '../credit-card-due-reminder.service';
 
 const utc = (value: string) => new Date(`${value}T12:00:00.000Z`);
@@ -40,9 +43,18 @@ describe('credit card due reminders', () => {
 
   function harness(
     provider: (input: RenderedEmailInput) => RenderedEmailOutcome = () => ({ providerMessageIds: [randomUUID()], type: 'accepted' }),
-    options: { emailConfigured?: () => boolean } = {},
+    options: { emailConfigured?: () => boolean; pushEnabled?: boolean } = {},
   ) {
     const sent: RenderedEmailInput[] = [];
+    const pushed: unknown[] = [];
+    const push = createCreditCardDueReminderPushChannel({
+      em: db.em(),
+      enabled: () => options.pushEnabled ?? false,
+      enqueue: () => ({
+        send: (_queue: string, payload: unknown) => { pushed.push(payload); return Promise.resolve('job'); },
+        sendAfter: () => Promise.resolve('job'),
+      }),
+    });
     const channel = createCreditCardDueReminderEmailChannel({
       isEmailConfigured: options.emailConfigured ?? (() => true),
       optOut: { generateCategoryToken: () => 'token' },
@@ -53,12 +65,12 @@ describe('credit card due reminders', () => {
       },
     });
     const run = (now: Date, daysBeforeDue = 3) => sendCreditCardDueReminders({
-      channels: { email: channel },
+      channels: { email: channel, push },
       daysBeforeDue,
       em: db.em(),
       now,
     });
-    return { channel, run, sent };
+    return { channel, push, pushed, run, sent };
   }
 
   const deliveries = () => db.em().find(CreditCardDueReminderDelivery, {}, { orderBy: { creditCardDueReminderDeliveryKey: 'asc' } });
@@ -77,6 +89,40 @@ describe('credit card due reminders', () => {
     const [delivery] = await deliveries();
     expect(delivery).toMatchObject({ channel: 'email', status: CreditCardDueReminderStatus.SENT });
     expect(delivery?.periodEnd.toISOString().slice(0, 10)).toBe('2026-01-05');
+  });
+
+  it('pushes once, without the amount or the card, to an owner who turned card-reminder push on', async () => {
+    const em = db.em();
+    const household = await seedCard(em);
+    await addTransaction(em, household, { amount: -120, date: utc('2026-01-04'), status: 'BOOKED' });
+    em.create(EmailNotificationPreference, { appuserKey: household.appuser, pushCreditCardDueRemindersEnabled: true }, { partial: true });
+    em.create(PushDevice, { appuserKey: household.appuser, platform: PushDevicePlatform.IOS, sessionId: 'session-1', token: 'ExponentPushToken[card-owner-1]' }, { partial: true });
+    await em.flush();
+
+    const { pushed, run, sent } = harness(undefined, { pushEnabled: true });
+    expect(await run(utc('2026-01-22'))).toEqual({ reminded: 1, retryable: 0, sent: 2 });
+    expect(await run(utc('2026-01-22'))).toEqual({ reminded: 1, retryable: 0, sent: 0 });
+
+    expect(sent).toHaveLength(1);
+    expect(pushed).toEqual([{ appuserKey: household.appuser.appuserKey, notification: { accountKey: household.account.accountKey, daysUntilDue: 3, kind: 'credit_card_due' }, type: 'send' }]);
+    const rendered = renderPush({ accountKey: household.account.accountKey, daysUntilDue: 3, kind: 'credit_card_due' }, 'en');
+    expect(`${rendered.title} ${rendered.body}`).not.toMatch(/120|Current account/u);
+    expect((await deliveries()).map((delivery) => delivery.channel).sort()).toEqual(['email', 'push']);
+  });
+
+  it('records no push delivery while push is off on the server, and suppresses it for an owner who left it off', async () => {
+    const em = db.em();
+    const household = await seedCard(em);
+    await addTransaction(em, household, { amount: -120, date: utc('2026-01-04'), status: 'BOOKED' });
+
+    expect(await harness().run(utc('2026-01-22'))).toEqual({ reminded: 1, retryable: 0, sent: 1 });
+    await expect(deliveries()).resolves.toHaveLength(1);
+
+    const { pushed, run } = harness(undefined, { pushEnabled: true });
+    await run(utc('2026-01-22'));
+    expect(pushed).toHaveLength(0);
+    const push = (await deliveries()).find((delivery) => delivery.channel === CreditCardDueReminderChannel.PUSH);
+    expect(push).toMatchObject({ outcomeCode: 'push_credit_card_due_reminders_disabled', status: CreditCardDueReminderStatus.SUPPRESSED });
   });
 
   it('sends nothing on a second run the same day', async () => {
@@ -302,9 +348,9 @@ describe('credit card due reminders', () => {
     const em = db.em();
     const household = await seedCard(em);
     await addTransaction(em, household, { amount: -120, date: utc('2026-01-04'), status: 'BOOKED' });
-    const { channel } = harness(() => ({ errorCode: 'rate_limited', retryable: true, type: 'rejected' }));
+    const { channel, push } = harness(() => ({ errorCode: 'rate_limited', retryable: true, type: 'rejected' }));
 
-    await expect(handleCreditCardDueReminderJob({ channels: { email: channel }, daysBeforeDue: 3, em: db.em(), logger: { info: () => undefined }, now: utc('2026-01-22') }))
+    await expect(handleCreditCardDueReminderJob({ channels: { email: channel, push }, daysBeforeDue: 3, em: db.em(), logger: { info: () => undefined }, now: utc('2026-01-22') }))
       .rejects.toThrow(/retry/u);
   });
 

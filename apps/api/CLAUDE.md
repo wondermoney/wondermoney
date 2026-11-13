@@ -195,6 +195,12 @@ Every integration is optional and fails closed: unconfigured, its feature report
   the log. `EMAIL_DRIVER` overrides; `EMAIL_FROM`/`EMAIL_FROM_NAME` set the sender (`RESEND_FROM_*`
   are deprecated fallbacks; don't document them). Templates come from `@wondermoney/react-email`. Sends run as
   pg-boss jobs.
+- **Mobile push** (`services/push`): off unless `PUSH_ENABLED=true`; sends through the Expo push
+  service over HTTP (`expo-push-client.ts`, optional `EXPO_ACCESS_TOKEN`) from the `push-send`
+  queue, which also reads Expo's receipts and disables tokens reported as `DeviceNotRegistered`.
+  A `PushDevice` belongs to the better-auth session it registered with and ends with it. Push
+  categories are separate `push*` switches on `EmailNotificationPreference`, all off by default.
+  Notification text never carries an amount or a merchant (`push-messages.ts`).
 - **File storage** (`services/storage/s3.ts`): AWS S3 or any S3-compatible store (`S3_ENDPOINT`,
   `S3_PUBLIC_ENDPOINT`, `S3_BUCKET`).
 - **Merchant logos** (`services/transaction/merchant-logo.ts`): off unless

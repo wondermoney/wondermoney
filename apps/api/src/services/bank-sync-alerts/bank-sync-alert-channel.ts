@@ -5,9 +5,8 @@ import type { EmailNotificationPreference } from '@entity/EmailNotificationPrefe
 /**
  * A way of telling the user about a bank sync alert. The decision (what, when, dedupe) is made
  * once in `bank-sync-alert-policy.ts` and recorded per channel in `BankSyncAlertDelivery`; a channel
- * only checks that its recipient wants and can receive it, and delivers. Email is the one channel
- * today. Mobile push plugs in here as a second channel with its own gate (a registered device and
- * its own preference) and its own delivery rows.
+ * only checks that its recipient wants and can receive it, and delivers. Email and mobile push
+ * (`bank-sync-alert-push.channel.ts`) are the channels, each with its own gate and delivery rows.
  */
 export interface BankSyncAlertChannelHandler {
   deliver(message: BankSyncAlertMessage): Promise<BankSyncAlertChannelOutcome>;

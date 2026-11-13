@@ -1,9 +1,10 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/database/di';
+import { isPushEnabled } from '@config/push';
 
 export class FinancialEmailCandidateRepository {
-  constructor(private readonly em: EntityManager = DI.em) {}
+  constructor(private readonly em: EntityManager = DI.em, private readonly pushEnabled: () => boolean = () => isPushEnabled()) {}
 
   async page(stream: 'budget' | 'monthlyStory' | 'weekly', cursor = 0, limit = 250): Promise<number[]> {
     const columnByStream: Record<'budget' | 'monthlyStory' | 'weekly', string> = {
@@ -12,6 +13,13 @@ export class FinancialEmailCandidateRepository {
       weekly: 'weekly_insights_enabled',
     };
     const column = columnByStream[stream];
+    // Budget alerts also go out as push (`services/push/budget-push.ts`), on their own switch, off by
+    // default: someone who turned the email off but the push on, with a phone registered, is a
+    // candidate too. The stranded-ledger rule below applies to them all the same.
+    const pushCandidate = stream === 'budget' && this.pushEnabled()
+      ? `or (preference."push_budget_alerts_enabled" = true
+             and exists (select 1 from "push_device" device where device."appuser_key" = owner."appuser_key" and device."disabled_at" is null))`
+      : '';
     // Notifications are opted-in by default: a user with no preference row (or a
     // soft-deleted one) is a candidate unless they explicitly disabled the stream.
     //
@@ -43,8 +51,8 @@ export class FinancialEmailCandidateRepository {
          on preference."appuser_key" = owner."appuser_key" and preference."deleted_at" is null
        where owner."appuser_key" > ?
           and owner."record_active" = true and owner."deleted_at" is null
-          and position('@' in owner."email_address") > 1
-          and coalesce(preference."${column}", true) = true
+          and ((position('@' in owner."email_address") > 1 and coalesce(preference."${column}", true) = true)
+               ${pushCandidate})
           and not exists (
             select 1
             from "appuser_tenant" membership

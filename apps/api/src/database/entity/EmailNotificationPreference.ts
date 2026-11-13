@@ -4,6 +4,10 @@ import { Entity, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/deco
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
 
+/**
+ * One person's notification switches. Despite the name it holds the push categories too, so every
+ * notification preference lives in one row.
+ */
 @Entity({ tableName: 'email_notification_preference' })
 export class EmailNotificationPreference extends Base {
   @Property({ default: true })
@@ -32,6 +36,19 @@ export class EmailNotificationPreference extends Base {
 
   @Property({ default: true })
   monthlyStoryEnabled = true;
+
+  /**
+   * Push categories (`services/push`). Off unless the person turns them on in the mobile app, which
+   * asks the phone for permission at that moment. Email and push are separate switches.
+   */
+  @Property({ default: false })
+  pushBankSyncAlertsEnabled = false;
+
+  @Property({ default: false })
+  pushBudgetAlertsEnabled = false;
+
+  @Property({ default: false })
+  pushCreditCardDueRemindersEnabled = false;
 
   @Property({ default: true })
   weeklyInsightsEnabled = true;

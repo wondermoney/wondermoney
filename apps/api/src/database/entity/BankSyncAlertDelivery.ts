@@ -7,6 +7,7 @@ import { EnableBankingConnection } from './EnableBankingConnection';
 
 export enum BankSyncAlertChannel {
   EMAIL = 'email',
+  PUSH = 'push',
 }
 
 export enum BankSyncAlertDeliveryStatus {

@@ -6,6 +6,8 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantConsent } from '@entity/AssistantConsent';
 import { EmailNotificationPreference } from '@entity/EmailNotificationPreference';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
+import { PushDevice } from '@entity/PushDevice';
+import { PushNotificationClaim } from '@entity/PushNotificationClaim';
 import { SentEmail } from '@entity/SentEmail';
 import logger from '@utils/logger';
 
@@ -67,6 +69,9 @@ export async function deleteWonderMoneyAccount(appuser: Account, deps: Deps = {}
     const foundRequisitions = await txEm.find(NordigenRequisition, { appuserKey: appuser });
     const foundAssistantConsents = await txEm.find(AssistantConsent, { appuserKey: appuser });
     await txEm.nativeDelete(EmailNotificationPreference, { appuserKey: appuser });
+    // A deleted account's phones get nothing more; its push dedupe has nothing left to dedupe.
+    await txEm.nativeDelete(PushDevice, { appuserKey: appuser });
+    await txEm.nativeDelete(PushNotificationClaim, { appuserKey: appuser });
     const foundSentEmails = await txEm.find(SentEmail, {
       $or: [
         { status: { $in: ['sending', 'failed', 'unknown'] } },

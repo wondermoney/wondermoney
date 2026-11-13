@@ -256,6 +256,7 @@ describe('createWorker', () => {
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
+      'push-send',
       'transaction.enrichment.gpt.dlq',
       'transaction.enrichment.gpt',
     ]));
@@ -325,6 +326,7 @@ describe('createWorker', () => {
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
+      'push-send',
       'email.monthly_story.user',
       'account.auto-sync.requisition',
       'background-operation.recovery',

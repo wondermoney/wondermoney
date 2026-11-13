@@ -29,9 +29,9 @@ const withReleaseGradleProperties: ConfigPlugin = (expoConfig) =>
   })
 
 // The Expo CLI loads .env files before evaluating this config, but EAS CLI turns that off
-// (EXPO_NO_DOTENV), so read these two keys from the gitignored .env.local here. A value already
+// (EXPO_NO_DOTENV), so read these keys from the gitignored .env.local here. A value already
 // in the environment (an EAS Build worker, or the shell) wins.
-const EAS_PROJECT_KEYS = ['WONDERMONEY_EXPO_OWNER', 'WONDERMONEY_EAS_PROJECT_ID'] as const
+const EAS_PROJECT_KEYS = ['WONDERMONEY_EXPO_OWNER', 'WONDERMONEY_EAS_PROJECT_ID', 'WONDERMONEY_GOOGLE_SERVICES_FILE'] as const
 const localEnvFile = join(__dirname, '.env.local')
 if (existsSync(localEnvFile)) {
   const localEnv = parseEnv(readFileSync(localEnvFile, 'utf8'))
@@ -42,6 +42,10 @@ if (existsSync(localEnvFile)) {
 
 const EXPO_OWNER = process.env.WONDERMONEY_EXPO_OWNER
 const EAS_PROJECT_ID = process.env.WONDERMONEY_EAS_PROJECT_ID
+// Android push goes through Firebase Cloud Messaging, which needs the Firebase project's
+// google-services.json in the build. A path (an EAS file environment variable, or a local file
+// kept out of the repository); without it the app builds and runs, but Android gets no push token.
+const GOOGLE_SERVICES_FILE = process.env.WONDERMONEY_GOOGLE_SERVICES_FILE
 
 const config: ExpoConfig = {
   name: 'WonderMoney',
@@ -80,6 +84,7 @@ const config: ExpoConfig = {
     // break the RN dev menu/error overlay on-device, delete this line -- it's a one-line
     // revert, not a rebuild-from-scratch.
     blockedPermissions: ['android.permission.SYSTEM_ALERT_WINDOW'],
+    ...(GOOGLE_SERVICES_FILE ? { googleServicesFile: GOOGLE_SERVICES_FILE } : {}),
   },
   web: {
     output: 'static',
@@ -135,6 +140,9 @@ const config: ExpoConfig = {
     'expo-image',
     'expo-web-browser',
     'expo-sharing',
+    // Push notifications (features/notifications). The app asks for permission only when a
+    // person turns a push category on. `default` is the Android channel the API sends to.
+    ['expo-notifications', { defaultChannel: 'default' }],
     // The QR pairing scanner. The plugin writes iOS's NSCameraUsageDescription and Android's
     // CAMERA permission; without it the camera module has no usage string and iOS rejects the
     // request at runtime.

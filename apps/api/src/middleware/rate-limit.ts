@@ -174,6 +174,9 @@ export const RATE_LIMIT_FAMILIES = {
    */
   publicRead: { limit: 300, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
+  /** `POST /v1/user/me/push-test` — each request sends a notification through the Expo push service. */
+  pushTest: { limit: 10, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
+
   /**
    * Ordinary authenticated GET/HEAD traffic — the family the ticket is about. A budget page
    * costs on the order of 15 requests, so 1200 is roughly eighty page loads in fifteen
@@ -420,6 +423,8 @@ export const dataExportRateLimit = (): RequestHandler => createRateLimiter({ fam
 export const dataRestoreRateLimit = (): RequestHandler => createRateLimiter({ family: 'dataRestore' });
 
 /** `/v1/support` — sends email. */
+export const pushTestRateLimit = (): RequestHandler => createRateLimiter({ family: 'pushTest' });
+
 export const supportRateLimit = (): RequestHandler => createRateLimiter({ family: 'support' });
 
 /** Unauthenticated reads with no secret in them. */

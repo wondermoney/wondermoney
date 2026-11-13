@@ -4,6 +4,7 @@ import { enabledCryptoChains } from '@config/crypto-explorers';
 import { isDemoSignInEnabled } from '@config/demo';
 import { instanceName } from '@config/instance-name';
 import { isMcpEnabled } from '@config/mcp';
+import { isPushEnabled } from '@config/push';
 import { statementImportLimits } from '@config/statement-import';
 import { aiCapabilities, aiProviderLabel } from '@service/ai/ai-provider';
 import { signInMethods } from '@service/auth/oidc-provider';
@@ -67,6 +68,8 @@ export function getInstance(_req: Request, res: Response) {
       passkey: true,
       // False under OIDC_ONLY: the server refuses password sign-in, sign-up and reset.
       passwordSignIn: signIn.passwordSignIn,
+      // Mobile push notifications through the Expo push service (`PUSH_ENABLED`, off by default).
+      push: isPushEnabled(),
       // PDF statement import: the largest PDF it takes and the provider's family. Null when no
       // model for it is configured. This document is public, so it never names the provider's
       // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.

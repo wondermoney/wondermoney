@@ -30,10 +30,10 @@ import { getCreditCardStatements } from './credit-card-statement.service';
  * view of the household's cards, so they get no reminder about one either. A private card is
  * visible only to its owner, who is the only person reminded.
  *
- * The channel seam mirrors `services/bank-sync-alerts`: email is the only channel today, and
- * mobile push joins the list with its own gate once push delivery exists. A channel that is not
- * `available` (email with no provider configured) is skipped without recording anything, so the
- * reminder still goes out once it is configured.
+ * The channel seam mirrors `services/bank-sync-alerts`: email and mobile push, each with its own
+ * gate. A channel that is not `available` (email with no provider configured, push off on this
+ * server) is skipped without recording anything, so the reminder still goes out once it is
+ * configured.
  */
 
 const MS_PER_DAY = 86_400_000;
@@ -42,8 +42,8 @@ const calendarDayNumber = (day: string) => utcDayNumber(new Date(`${day}T00:00:0
 /** How far either side of today the statement window is read. A due date is at most ~a month out. */
 const WINDOW_DAYS = 40;
 
-/** The channels a reminder goes out on. Push joins this list once mobile push exists. */
-export const CREDIT_CARD_DUE_REMINDER_CHANNELS: readonly CreditCardDueReminderChannel[] = [CreditCardDueReminderChannel.EMAIL];
+/** The channels a reminder goes out on. */
+export const CREDIT_CARD_DUE_REMINDER_CHANNELS: readonly CreditCardDueReminderChannel[] = [CreditCardDueReminderChannel.EMAIL, CreditCardDueReminderChannel.PUSH];
 
 export interface CreditCardDueReminderChannelHandler {
   /** Whether the channel can deliver at all on this instance (email: a provider is configured). */

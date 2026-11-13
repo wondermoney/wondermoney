@@ -6,9 +6,14 @@ import { useOptionalProductRuntime } from '@/components/providers/product-runtim
 import { showsTopBar } from '@/components/shell/navigation'
 import { UnderTopBarProvider } from '@/components/ui/screen-safe-area'
 import { DemoBanner, useIsDemoAccount } from '@/features/navigation/demo-banner'
+import { usePushNotificationNavigation, usePushRegistrationRefresh } from '@/features/notifications/use-push-lifecycle'
+import { installForegroundNotificationHandler } from '@/lib/push/push-device'
 import { ShellTopBar } from '@/features/navigation/shell-top-bar'
 import { OnboardingGate } from '@/features/onboarding/onboarding-gate'
 import { AppLockGate } from '@/features/security/app-lock-gate'
+
+// A notification that arrives while the app is open shows as a banner, as it would outside it.
+installForegroundNotificationHandler()
 
 export default function AuthenticatedLayout() {
   return (
@@ -31,6 +36,9 @@ function ProductShell() {
 }
 
 function SignedInShell() {
+  // A tapped notification opens its screen; an opted-in phone stays registered (features/notifications).
+  usePushNotificationNavigation()
+  usePushRegistrationRefresh()
   return <Shell demo={useIsDemoAccount()} />
 }
 
