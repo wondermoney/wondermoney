@@ -55,6 +55,10 @@ export enum FxStatus {
     'CREATE UNIQUE INDEX transaction_installment_unique ON "transaction" (installment_plan_key, installment_number) WHERE installment_plan_key IS NOT NULL AND deleted_at IS NULL',
   name: 'transaction_installment_unique',
 })
+@Index({
+  expression: 'CREATE INDEX transaction_installment_unlinked_plan_index ON "transaction" (installment_unlinked_plan_key) WHERE installment_unlinked_plan_key IS NOT NULL',
+  name: 'transaction_installment_unlinked_plan_index',
+})
 @Unique({ properties: ['transactionKey', 'internalTransactionId'] })
 @Unique({ properties: ['accountKey', 'nordigenInternalTransactionId'] })
 @Unique({ properties: ['accountKey', 'enableBankingTransactionId'] })
@@ -101,6 +105,15 @@ export class Transaction extends Base {
 
   @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => InstallmentPlan, fieldName: 'installment_plan_key', filters: { [TENANT_FILTER]: false }, nullable: true })
   installmentPlanKey?: null | Rel<InstallmentPlan>;
+
+  /**
+   * The plan a member unlinked this row from by hand. The automatic linker
+   * (`linkPostedInstallments`) never links the row to that plan again, so the next sync or import
+   * does not undo the unlink; linking the row to that plan by hand clears it. Null on every other
+   * row, and cleared when the plan is deleted. Tenant filter off, as on `installmentPlanKey`.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => InstallmentPlan, fieldName: 'installment_unlinked_plan_key', filters: { [TENANT_FILTER]: false }, nullable: true })
+  installmentUnlinkedPlanKey?: null | Rel<InstallmentPlan>;
 
   @ManyToOne({ cascade: [], entity: () => TransactionMerchant, fieldName: 'transaction_merchant_key', nullable: true })
   transactionMerchantKey?: Rel<TransactionMerchant>;

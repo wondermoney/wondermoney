@@ -144,6 +144,8 @@ const transaction = z.object({
   /** The plan installment this row pays (1.8), set together with `installmentPlanId`. */
   installmentNumber: z.number().int().min(1).max(MAX_INSTALLMENT_COUNT).nullable().optional(),
   installmentPlanId: ref.optional(),
+  /** The plan a member unlinked this row from by hand, which the automatic linker leaves alone (1.8). */
+  installmentUnlinkedPlanId: ref.optional(),
   memberId: ref,
   merchantEditedByUser: z.boolean(),
   merchantId: ref,
@@ -509,6 +511,7 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'transferDestinationGoalId', file: 'transactions', target: 'goals' },
   { field: 'transferDestinationPortfolioId', file: 'transactions', target: 'portfolios' },
   { field: 'installmentPlanId', file: 'transactions', target: 'installment-plans' },
+  { field: 'installmentUnlinkedPlanId', file: 'transactions', target: 'installment-plans' },
   { field: 'accountId', file: 'installment-plans', target: 'accounts' },
   { field: 'categoryId', file: 'installment-plans', target: 'categories' },
   { field: 'createdByMemberId', file: 'installment-plans', target: 'members' },

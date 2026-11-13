@@ -25491,6 +25491,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "installment_unlinked_plan_key": {
+          "name": "installment_unlinked_plan_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "internal_transaction_id": {
           "name": "internal_transaction_id",
           "type": "varchar(255)",
@@ -25992,6 +26009,15 @@
           "expression": "CREATE UNIQUE INDEX transaction_installment_unique ON \"transaction\" (installment_plan_key, installment_number) WHERE installment_plan_key IS NOT NULL AND deleted_at IS NULL"
         },
         {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_installment_unlinked_plan_index",
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX transaction_installment_unlinked_plan_index ON \"transaction\" (installment_unlinked_plan_key) WHERE installment_unlinked_plan_key IS NOT NULL"
+        },
+        {
           "columnNames": [
             "transaction_key"
           ],
@@ -26095,6 +26121,18 @@
             "installment_plan_key"
           ],
           "constraintName": "transaction_installment_plan_key_foreign",
+          "localTableName": "public.transaction",
+          "referencedColumnNames": [
+            "installment_plan_key"
+          ],
+          "referencedTableName": "public.installment_plan",
+          "deleteRule": "set null"
+        },
+        "transaction_installment_unlinked_plan_key_foreign": {
+          "columnNames": [
+            "installment_unlinked_plan_key"
+          ],
+          "constraintName": "transaction_installment_unlinked_plan_key_foreign",
           "localTableName": "public.transaction",
           "referencedColumnNames": [
             "installment_plan_key"
