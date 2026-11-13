@@ -2574,7 +2574,10 @@
     "nothingSpent": "Nothing spent yet",
     "createFirst": "Create your first budget",
     "total": "Total",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {{name}}",
+    "personal": "Personal",
+    "groupHousehold": "Household",
+    "groupPersonal": "Personal"
   },
   "budgetMonth": {
     "back": "Back to Budgets",
@@ -2795,7 +2798,14 @@
       "question": "What is your total household income?",
       "description": "It's important that you add your current income in order to have full visibility of your finances."
     },
-    "progress": "Step {{current}} of {{total}}"
+    "progress": "Step {{current}} of {{total}}",
+    "visibility": {
+      "label": "Who can see this budget",
+      "household": "Household",
+      "personal": "Personal",
+      "householdDescription": "Everyone in your household can see this budget.",
+      "personalDescription": "Only you can see this budget. Other household members, including the household’s owner and admins, can’t."
+    }
   },
   "budgetAddCategory": {
     "title": "Add existing category",
@@ -2855,7 +2865,8 @@
       "network-ambiguous": "The connection was lost while saving. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
       "invalid": "One or more accounts don't exist or aren't yours.",
       "general": "The linked accounts could not be saved."
-    }
+    },
+    "privateHidden": "Private accounts can’t be linked to a household budget, so they aren’t listed. A personal budget can use your private accounts."
   },
   "budgetYear": {
     "helper": "{{year}} overview",

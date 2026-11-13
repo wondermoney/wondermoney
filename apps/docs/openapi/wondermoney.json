@@ -937,11 +937,20 @@
             "minimum": 1,
             "maximum": 28,
             "description": "The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in."
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "household",
+              "personal"
+            ],
+            "description": "`household`: shared with every member of the household. `personal`: the caller's own budget, which no other member sees, the household's owner and admins included (another member's personal budget is never returned)."
           }
         },
         "required": [
           "budgetKey",
-          "name"
+          "name",
+          "visibility"
         ],
         "additionalProperties": {}
       },
@@ -1096,6 +1105,14 @@
             "maximum": 28,
             "description": "The day of the month a budget month starts on, 1 to 28. With 1 a budget month is its calendar month; with a later day it is named after the month it ends in."
           },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "household",
+              "personal"
+            ],
+            "description": "`household`: shared with every member of the household. `personal`: the caller's own budget, which no other member sees, the household's owner and admins included (another member's personal budget is never returned)."
+          },
           "year": {
             "type": "integer"
           }
@@ -1104,6 +1121,7 @@
           "budgetKey",
           "categories",
           "month",
+          "visibility",
           "year"
         ],
         "additionalProperties": {}
@@ -11053,6 +11071,14 @@
                         "name"
                       ]
                     }
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": [
+                      "household",
+                      "personal"
+                    ],
+                    "default": "household"
                   }
                 }
               }

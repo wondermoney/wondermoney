@@ -17,6 +17,7 @@ import { getBudgetForecast as forecastBudget } from '@service/budget/budget-fore
 import { budgetMonthOf, budgetPeriodDays, budgetPeriodRange, shiftBudgetMonth } from '@service/budget/budget-period';
 import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
 import { suggestBudgetAmounts } from '@service/budget/budget-suggestions.service';
+import { budgetVisibilityOf } from '@service/budget/budget-visibility';
 import { ensureBudgetYear } from '@service/budget/budget-year.service';
 import { type BudgetSpendingCategory, getBudgetSpending } from '@service/budget/spending';
 import { calculateAmountBudgeted } from '@utils/budget';
@@ -104,10 +105,10 @@ export async function addBudgetCategory(req: Request, res: Response, next: NextF
 export async function createBudget(req: Request, res: Response, next: NextFunction) {
   const { user } = authedContext(req);
   const {
-    body: { dependentsNum, houseHoldSize, incomes },
+    body: { dependentsNum, houseHoldSize, incomes, visibility },
   } = await zParse(createBudgetRequestSchema, req);
 
-  // Budgets are household-shared: scope to the user's tenant.
+  // A budget belongs to the user's household: shared with it, or (personal) its creator's alone.
   const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(user);
   if (!appuserTenant) {
     next(new NotFoundError('Tenant not found')); return;
@@ -117,6 +118,7 @@ export async function createBudget(req: Request, res: Response, next: NextFuncti
   const budget = new Budget();
   budget.appuserKey = user;
   budget.tenantKey = appuserTenant.tenantKey;
+  budget.ownerAppuserKey = visibility === 'personal' ? user : null;
   budget.currencyKey = user.currencyKey;
   budget.numAdults = houseHoldSize - dependentsNum;
   budget.numDependents = dependentsNum;
@@ -269,6 +271,7 @@ export async function getBudget(req: Request, res: Response, next: NextFunction)
     name: budget.name,
     periodStartDay: budget.periodStartDay,
     rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
+    visibility: budgetVisibilityOf(budget),
   };
   return res.json({ budget: transformedData });
 }
@@ -370,6 +373,7 @@ export async function getBudgets(_req: Request, res: Response) {
     description: b.description,
     name: b.name,
     periodStartDay: b.periodStartDay,
+    visibility: budgetVisibilityOf(b),
   }));
   return res.json({ budgets: transformedData });
 }
@@ -474,6 +478,7 @@ export async function getBudgetsFull(req: Request, res: Response) {
       periodStartDay: budget.periodStartDay,
       rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
       rolloverComplete,
+      visibility: budgetVisibilityOf(budget),
       year: currentMonthBudgetTemplates[0]!.year,
     });
   }
@@ -557,6 +562,7 @@ export async function getBudgetTemplateByYear(req: Request, res: Response, next:
       description: budget.description,
       incomes: budgetIncomes,
       name: budget.name,
+      visibility: budgetVisibilityOf(budget),
       year: budget.budgetTemplatesCategory[0]!.year,
     },
     completeness,
@@ -636,6 +642,7 @@ export async function getBudgetTemplateByYearAndMonth(req: Request, res: Respons
       period: budgetPeriodDays(budgetPeriodRange(budget, year, month)),
       periodStartDay: budget.periodStartDay,
       rolloverCarriesOverspend: budget.rolloverCarriesOverspend,
+      visibility: budgetVisibilityOf(budget),
       year: monthTemplate.year,
     },
     completeness,
@@ -703,6 +710,7 @@ export async function getBudgetTemplateByYearUntilMonth(req: Request, res: Respo
       description: budget.description,
       incomes: budgetIncomes,
       name: budget.name,
+      visibility: budgetVisibilityOf(budget),
       year: budget.budgetTemplatesCategory[0]!.year,
     },
     completeness,
@@ -795,6 +803,9 @@ export async function updateBudgetAccounts(req: Request, res: Response, next: Ne
   });
   if (!budget) {
     next(new NotFoundError('Budget not found')); return;
+  }
+  if (linksPrivateAccountToHouseholdBudget(budget, accounts)) {
+    next(new BadRequestError(PRIVATE_ACCOUNT_ON_HOUSEHOLD_BUDGET)); return;
   }
 
   const budgetTemplateCategories = await DI.em.find(
@@ -899,6 +910,9 @@ export async function updateBudgetTemplateAccounts(req: Request, res: Response, 
   if (!budget) {
     next(new NotFoundError('Budget not found')); return;
   }
+  if (linksPrivateAccountToHouseholdBudget(budget, accounts)) {
+    next(new BadRequestError(PRIVATE_ACCOUNT_ON_HOUSEHOLD_BUDGET)); return;
+  }
 
   const budgetTemplateCategory = await DI.em.findOne(
     BudgetTemplateCategory,
@@ -925,6 +939,13 @@ export async function updateBudgetTemplateAccounts(req: Request, res: Response, 
   return res.sendStatus(StatusCodes.OK);
 }
 
+const PRIVATE_ACCOUNT_ON_HOUSEHOLD_BUDGET = 'A private account can only be linked to a personal budget';
+
+/**
+ * A household budget is shared with the whole household, so it links shared accounts only; a
+ * personal budget may also link its owner's private accounts (the only private ones its owner can
+ * name: the account query above already refuses another member's).
+ */
 async function getCategoriesDataForBudget(
   accounts: Account[],
   budgetTemplates: BudgetTemplateCategory[],
@@ -942,6 +963,10 @@ async function getCategoriesDataForBudget(
     viewerAppuserKey,
   });
   return { budgetAmount, completeness };
+}
+
+function linksPrivateAccountToHouseholdBudget(budget: Budget, accounts: Account[]): boolean {
+  return budgetVisibilityOf(budget) === 'household' && accounts.some((account) => account.isPrivate);
 }
 
 /**

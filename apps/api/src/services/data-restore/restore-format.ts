@@ -23,8 +23,9 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * the 1.8 fields, 1.9's account shares, and 1.10's joint accounts and transaction attribution, each defaulting to what the
  * app gives a row created without it), which an
  * older export simply does not have, so there is nothing to migrate yet. 1.11 added the expense
- * group files and a split line's `memberId`, likewise absent from older exports. Another major
- * version is refused.
+ * group files and a split line's `memberId`, likewise absent from older exports. 1.12 added a
+ * budget's owner (`ownerMemberId`); an older export has none, so every budget in it is a household
+ * budget. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -289,6 +290,8 @@ const recurringOccurrence = z.object({ amount: optionalDecimal, currency: curren
 
 const budget = z.object({
   currency, description: text(10_000), id, memberId: ref, name: name(255), numAdults: z.number().int().min(0).max(1000), numDependents: z.number().int().min(0).max(1000),
+  /** The member a personal budget belongs to (1.9); null, and in an older export, a household budget. */
+  ownerMemberId: ref.default(null),
   /** The day the budget's months start on (1.4); an older export's budgets start on the 1st. */
   periodStartDay: z.number().int().min(BUDGET_PERIOD_START_DAY_MIN).max(BUDGET_PERIOD_START_DAY_MAX).default(1),
   /** Whether rollover carries an overspend too (1.8); the app's default otherwise. */
@@ -582,6 +585,7 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'seriesId', file: 'recurring-occurrences', target: 'recurring-series' },
   { field: 'transactionId', file: 'recurring-occurrences', target: 'transactions' },
   { field: 'memberId', file: 'budgets', target: 'members' },
+  { field: 'ownerMemberId', file: 'budgets', target: 'members' },
   { field: 'accountIds', file: 'budget-categories', target: 'accounts' },
   { field: 'budgetId', file: 'budget-categories', target: 'budgets' },
   { field: 'categoryId', file: 'budget-categories', target: 'categories' },

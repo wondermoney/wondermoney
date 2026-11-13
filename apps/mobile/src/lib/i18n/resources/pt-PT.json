@@ -2574,7 +2574,10 @@
     "nothingSpent": "Ainda sem gastos",
     "createFirst": "Criar o teu primeiro orçamento",
     "total": "Total",
-    "actionsFor": "Ações para {{name}}"
+    "actionsFor": "Ações para {{name}}",
+    "personal": "Pessoal",
+    "groupHousehold": "Agregado",
+    "groupPersonal": "Pessoais"
   },
   "budgetMonth": {
     "back": "Voltar a Orçamentos",
@@ -2795,7 +2798,14 @@
       "question": "Qual é o rendimento total da tua família?",
       "description": "É importante que adiciones o teu rendimento atual para teres visibilidade total sobre as tuas finanças."
     },
-    "progress": "Passo {{current}} de {{total}}"
+    "progress": "Passo {{current}} de {{total}}",
+    "visibility": {
+      "label": "Quem pode ver este orçamento",
+      "household": "Agregado",
+      "personal": "Pessoal",
+      "householdDescription": "Todos no teu agregado podem ver este orçamento.",
+      "personalDescription": "Só tu podes ver este orçamento. Os outros membros do agregado, incluindo o titular e os administradores, não o veem."
+    }
   },
   "budgetAddCategory": {
     "title": "Adicionar categoria existente",
@@ -2855,7 +2865,8 @@
       "network-ambiguous": "A ligação perdeu-se durante a gravação. O resultado é desconhecido e a aplicação não repetirá automaticamente. Atualiza antes de tentares novamente.",
       "invalid": "Uma ou mais contas não existem ou não te pertencem.",
       "general": "Não foi possível guardar as contas associadas."
-    }
+    },
+    "privateHidden": "As contas privadas não podem ser associadas a um orçamento do agregado, por isso não aparecem. Um orçamento pessoal pode usar as tuas contas privadas."
   },
   "budgetYear": {
     "helper": "Resumo de {{year}}",

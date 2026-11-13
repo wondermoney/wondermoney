@@ -10,6 +10,7 @@ import AccountAddOfflineModal from "@/components/account/AccountCreateOfflineMod
 import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
 import BankAccountSyncStatusBanner from "@/components/account/BankAccountSyncStatusBanner";
 import BudgetAccountSelectModal from "@/components/budget/BudgetAccountSelectModal";
+import { PersonalBudgetLabel } from "@/components/budget/PersonalBudgetLabel";
 import { BudgetsMonthlyViewOnboarding } from "@/components/onboarding/BudgetsMonthlyViewOnboarding";
 import { BudgetsYearlyViewOnboarding } from "@/components/onboarding/BudgetsYearlyViewOnboarding";
 import { Spinner } from "@/components/ui/Spinner";
@@ -22,6 +23,7 @@ import useAccounts from "@/lib/api/account/useAccounts";
 import useBudget from "@/lib/api/budget/useBudget";
 import useBudgetAccounts from "@/lib/api/budget/useBudgetAccounts";
 import useEditBudgetTemplateAccounts from "@/lib/api/budget/useEditBudgetTemplateAccounts";
+import { budgetVisibilityOf } from "@/lib/budget/visibility";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 
 export default function BudgetLayout({ children }: { children: ReactNode }) {
@@ -189,6 +191,10 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
                 <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
                   {budgetData.budget.name}
                 </h1>
+                <PersonalBudgetLabel
+                  budget={budgetData.budget}
+                  variant="badge"
+                />
                 {params.month === undefined ? (
                   <BudgetsYearlyViewOnboarding />
                 ) : (
@@ -206,6 +212,7 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
               isLoadingRequisition={isLoadingAccountsData}
               accounts={accountsData?.accounts}
               budgetAccounts={budgetAccounts?.accounts}
+              budgetVisibility={budgetVisibilityOf(budgetData.budget)}
               setOpen={setAccountSelectModalIsOpen}
               onAddSyncAccountClick={onAddSyncAccountClick}
               onAddOfflineAccountClick={onAddOfflineAccountClick}

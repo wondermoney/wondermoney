@@ -31,7 +31,25 @@ describe('budget creation screens', () => {
     expect(view.getByText('No income rows will be submitted')).toBeOnTheScreen()
     expect(view.getByLabelText(/Total monthly-equivalent income/)).toBeOnTheScreen()
     await act(async () => { fireEvent.press(view.getByRole('button', { name: 'Create budget' })) })
-    expect(submit).toHaveBeenCalledWith({ houseHoldSize: 1, dependentsNum: 0, incomes: [] })
+    expect(submit).toHaveBeenCalledWith({ houseHoldSize: 1, dependentsNum: 0, incomes: [], visibility: 'household' })
+  })
+
+  it('asks who sees the budget on the review, household by default, and creates a personal one when chosen', async () => {
+    const i18n = await initMobileI18n('en')
+    const submit = jest.fn().mockResolvedValue(undefined)
+    const view = await renderI18n(<BudgetCreateScreen pending={false} failure={null} candidates={null} reconciliationFailed={false} onBack={jest.fn()} onSubmit={submit} onCreateAnother={jest.fn()} />)
+    for (let step = 0; step < 3; step += 1) await act(async () => { fireEvent.press(view.getByRole('button', { name: i18n.t('budgetCreate.continue') })) })
+    const household = view.getByRole('tab', { name: i18n.t('budgetCreate.visibility.household') })
+    const personal = view.getByRole('tab', { name: i18n.t('budgetCreate.visibility.personal') })
+    expect(household.props.accessibilityState.selected).toBe(true)
+    expect(view.getByText(i18n.t('budgetCreate.visibility.householdDescription'))).toBeOnTheScreen()
+    await act(async () => { fireEvent.press(personal) })
+    expect(view.getByRole('tab', { name: i18n.t('budgetCreate.visibility.personal') }).props.accessibilityState.selected).toBe(true)
+    // The personal explanation names who is left out: everyone else, the household's owner and admins too.
+    expect(view.getByText(i18n.t('budgetCreate.visibility.personalDescription'))).toBeOnTheScreen()
+    expect(view.queryByText(i18n.t('budgetCreate.visibility.householdDescription'))).not.toBeOnTheScreen()
+    await act(async () => { fireEvent.press(view.getByRole('button', { name: i18n.t('budgetCreate.create') })) })
+    expect(submit).toHaveBeenCalledWith({ houseHoldSize: 1, dependentsNum: 0, incomes: [], visibility: 'personal' })
   })
 
   it('keeps Continue disabled while an income row is invalid and shows the error under its field', async () => {
@@ -68,7 +86,7 @@ describe('budget creation screens', () => {
     expect(next()).toBeEnabled()
     await act(async () => { fireEvent.press(next()) })
     await act(async () => { fireEvent.press(view.getByRole('button', { name: i18n.t('budgetCreate.create') })) })
-    expect(submit).toHaveBeenCalledWith({ houseHoldSize: 1, dependentsNum: 0, incomes: [{ name: 'Salary', amount: expected, isRecurrent: true, recurrency: 'MONTHLY' }] })
+    expect(submit).toHaveBeenCalledWith({ houseHoldSize: 1, dependentsNum: 0, incomes: [{ name: 'Salary', amount: expected, isRecurrent: true, recurrency: 'MONTHLY' }], visibility: 'household' })
   })
 
   it('keeps Continue disabled for an income amount it cannot read', async () => {

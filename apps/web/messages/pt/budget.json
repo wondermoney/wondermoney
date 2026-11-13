@@ -43,5 +43,17 @@
       "quarterly": "trimestral",
       "yearly": "anual"
     }
+  },
+  "budgetVisibility": {
+    "household": "Agregado",
+    "personal": "Pessoal",
+    "household-budgets": "Orçamentos do agregado",
+    "personal-budgets": "Orçamentos pessoais",
+    "personal-hint": "Só tu vês este orçamento",
+    "wizard-title": "Para quem é este orçamento?",
+    "wizard-description": "Escolhes isto uma vez: depois, um orçamento não passa de agregado para pessoal, nem ao contrário.",
+    "household-description": "Todas as pessoas do teu agregado o veem.",
+    "personal-description": "Só tu o vês. As outras pessoas do teu agregado não o veem, nem o titular nem os administradores.",
+    "private-accounts-excluded": "As contas privadas só podem ser ligadas a um orçamento pessoal."
   }
 }

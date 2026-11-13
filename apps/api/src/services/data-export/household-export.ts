@@ -35,8 +35,10 @@ import { EXPORT_FORMAT, EXPORT_FORMAT_VERSION, type ExportManifest } from './exp
  *   A transaction names the plan installment it pays only when the plan is in the export.
  * - Loans, the watchlist, transaction templates and the account order are personal in the app, so
  *   only the member's own.
- * - Categories, category settings, tags, budgets, goals, portfolios and the household's own exchange
- *   rates and security prices are household-wide.
+ * - Budgets: the household's budgets and the member's own personal ones (`Budget.ownerAppuserKey`),
+ *   each with its lines and incomes. The other member's personal budgets are absent.
+ * - Categories, category settings, tags, goals, portfolios and the household's own exchange rates and
+ *   security prices are household-wide.
  *
  * ## Never exported
  *
@@ -269,7 +271,10 @@ class HouseholdExport {
       order by m.transaction_merchant_key`);
     for (const row of this.merchantRows) this.merchants.add(row['transaction_merchant_key']);
 
-    for (const row of await rowsOf(db, sql`select budget_key from budget where tenant_key = ${tenantKey} and deleted_at is null order by budget_key`)) this.budgets.add(row['budget_key']);
+    for (const row of await rowsOf(db, sql`
+      select budget_key from budget
+      where tenant_key = ${tenantKey} and deleted_at is null and (owner_appuser_key is null or owner_appuser_key = ${appuserKey})
+      order by budget_key`)) this.budgets.add(row['budget_key']);
     for (const row of await rowsOf(db, sql`select loan_key from loan where tenant_key = ${tenantKey} and owner_appuser_key = ${appuserKey} and deleted_at is null order by loan_key`)) this.loans.add(row['loan_key']);
     for (const row of await rowsOf(db, sql`
       select manual_asset_key from manual_asset
@@ -920,11 +925,11 @@ class HouseholdExport {
 
   private async* budgetJson() {
     const rows = await rowsOf(this.db, sql`
-      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.period_start_day, b.rollover_carries_overspend, b.appuser_key, c.code as currency
+      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.period_start_day, b.rollover_carries_overspend, b.appuser_key, b.owner_appuser_key, c.code as currency
       from budget b left join currency c on c.currency_key = b.currency_key
       where b.budget_key = any(${this.budgets.keys()}) order by b.budget_key`);
     for (const row of rows) {
-      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']), periodStartDay: int(row['period_start_day']), rolloverCarriesOverspend: bool(row['rollover_carries_overspend']) };
+      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']), ownerMemberId: this.members.get(row['owner_appuser_key']), periodStartDay: int(row['period_start_day']), rolloverCarriesOverspend: bool(row['rollover_carries_overspend']) };
     }
   }
 

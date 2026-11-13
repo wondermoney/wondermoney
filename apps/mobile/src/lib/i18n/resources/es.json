@@ -2574,7 +2574,10 @@
     "nothingSpent": "Todavía sin gastos",
     "createFirst": "Crea tu primer presupuesto",
     "total": "Total",
-    "actionsFor": "Acciones para {{name}}"
+    "actionsFor": "Acciones para {{name}}",
+    "personal": "Personal",
+    "groupHousehold": "Hogar",
+    "groupPersonal": "Personales"
   },
   "budgetMonth": {
     "back": "Volver a Presupuestos",
@@ -2795,7 +2798,14 @@
       "question": "¿Cuáles son los ingresos totales de tu hogar?",
       "description": "Es importante que añadas tus ingresos actuales para tener visibilidad completa de tus finanzas."
     },
-    "progress": "Paso {{current}} de {{total}}"
+    "progress": "Paso {{current}} de {{total}}",
+    "visibility": {
+      "label": "Quién puede ver este presupuesto",
+      "household": "Hogar",
+      "personal": "Personal",
+      "householdDescription": "Todos los miembros de tu hogar pueden ver este presupuesto.",
+      "personalDescription": "Solo tú puedes ver este presupuesto. Los demás miembros del hogar, incluidos el titular y los administradores, no pueden verlo."
+    }
   },
   "budgetAddCategory": {
     "title": "Añadir categoría existente",
@@ -2855,7 +2865,8 @@
       "network-ambiguous": "Se perdió la conexión durante el guardado. El resultado es desconocido y la aplicación no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
       "invalid": "Una o más cuentas no existen o no son tuyas.",
       "general": "No se pudieron guardar las cuentas vinculadas."
-    }
+    },
+    "privateHidden": "Las cuentas privadas no se pueden vincular a un presupuesto del hogar, así que no aparecen. Un presupuesto personal puede usar tus cuentas privadas."
   },
   "budgetYear": {
     "helper": "Resumen de {{year}}",

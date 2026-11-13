@@ -91,6 +91,7 @@ export function BudgetMonthScreen({ state, onBack, onRetry, onPrevious, onNext, 
             onChangeView={onChangeView}
             onEdit={onEdit}
             onManageAccounts={onManageAccounts}
+            personal={budget.visibility === 'personal'}
             view="month"
           />
           <Section title={t('budgetMonth.categories')} variant="open">

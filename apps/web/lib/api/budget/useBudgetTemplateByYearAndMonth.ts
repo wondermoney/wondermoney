@@ -6,6 +6,7 @@ import {
 import type { AxiosInstance } from "axios";
 
 import type { BudgetPeriod } from "@/lib/budget/period";
+import type { BudgetVisibility } from "@/lib/budget/visibility";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
@@ -69,6 +70,8 @@ export interface TemplateBudget {
   periodStartDay?: number;
   /** Overspending carries into the next month (off: only unspent money does). */
   rolloverCarriesOverspend?: boolean;
+  /** Missing from older servers: read it through `budgetVisibilityOf`. */
+  visibility?: BudgetVisibility;
 }
 
 export interface GetBudgetTemplateByYearAndMonthResponse {

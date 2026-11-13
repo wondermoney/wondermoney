@@ -6,6 +6,7 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { allRowCounts, dataFiles, emptyHousehold, exportBytes, householdRowCounts, linkToBank, richHousehold, type Scope, scopeOf } from '@app/__tests__/__helpers__/restore-fixtures';
 import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
+import { Budget } from '@entity/Budget';
 import { Category } from '@entity/Category';
 import { Goal } from '@entity/Goal';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
@@ -284,6 +285,20 @@ describe('household restore', () => {
 
       const budgets = await db.em().getConnection().execute<{ period_start_day: number }[]>('select period_start_day from budget where tenant_key = ?', [target.tenant.tenantKey]);
       expect(budgets).toEqual([{ period_start_day: 25 }]);
+    });
+
+    it('restores a personal budget as the restoring member\'s own, a household one as the household\'s, and an older export\'s as household budgets', async () => {
+      expect(DATA_FILES.budgets.parse({ currency: 'EUR', description: null, id: 1, memberId: 1, name: 'Old', numAdults: 1, numDependents: 0 })).toMatchObject({ ownerMemberId: null });
+
+      const { owner } = await richHousehold(db.em());
+      const em = db.em();
+      em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'Mine', numAdults: 1, numDependents: 0, ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+      await em.flush();
+      const target = await emptyHousehold(db.em());
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const budgets = await db.em().getConnection().execute<{ name: string; owner_appuser_key: null | number }[]>('select name, owner_appuser_key from budget where tenant_key = ? order by name', [target.tenant.tenantKey]);
+      expect(budgets).toEqual([{ name: 'Home', owner_appuser_key: null }, { name: 'Mine', owner_appuser_key: target.appuser.appuserKey }]);
     });
 
     it('restores the asset each loan is secured against', async () => {

@@ -1126,7 +1126,8 @@ class HouseholdRestore {
     const keys = await allocateKeys(this.db, 'budget', 'budget_key', list.length);
     await insertRows(this.db, 'budget', list.map((row, index) => {
       this.budgets.set(row.id, keys[index]!);
-      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, period_start_day: row.periodStartDay, rollover_carries_overspend: row.rolloverCarriesOverspend, tenant_key: this.target.tenantKey, ...this.stamp() };
+      // A personal budget stays personal: the restoring member's own, as everything personal is here.
+      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, owner_appuser_key: this.member(row.ownerMemberId), period_start_day: row.periodStartDay, rollover_carries_overspend: row.rolloverCarriesOverspend, tenant_key: this.target.tenantKey, ...this.stamp() };
     }));
     this.count('budgets', list.length);
 

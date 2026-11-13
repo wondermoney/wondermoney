@@ -1,3 +1,5 @@
+import type { BudgetVisibility } from "@/lib/budget/visibility";
+
 export interface Budget {
   budgetKey: number;
   name: string;
@@ -6,4 +8,6 @@ export interface Budget {
   periodStartDay?: number;
   /** Sent by `GET /v1/budget/:budgetKey`; not by the budget list. */
   rolloverCarriesOverspend?: boolean;
+  /** Missing from older servers: read it through `budgetVisibilityOf`. */
+  visibility?: BudgetVisibility;
 }

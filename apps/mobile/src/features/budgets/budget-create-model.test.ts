@@ -13,11 +13,17 @@ describe('budget creation income math', () => {
   it('annualizes one-time income over twelve months and totals the review values', () => {
     const rows = [income(), income({ id: '2', name: 'Bonus', isRecurrent: false, recurrency: 'ANNUALLY' })]
     expect(monthlyEquivalentTotal(rows)).toBe(1300)
-    expect(createBudgetPayload(3, 1, rows)).toEqual({ houseHoldSize: 3, dependentsNum: 1, incomes: [{ name: 'Salary', amount: 1200, isRecurrent: true, recurrency: 'MONTHLY' }, { name: 'Bonus', amount: 100, isRecurrent: false }] })
+    expect(createBudgetPayload(3, 1, rows)).toEqual({ houseHoldSize: 3, dependentsNum: 1, visibility: 'household', incomes: [{ name: 'Salary', amount: 1200, isRecurrent: true, recurrency: 'MONTHLY' }, { name: 'Bonus', amount: 100, isRecurrent: false }] })
+  })
+
+  it('sends the chosen visibility, household unless the person picks personal', () => {
+    expect(createBudgetPayload(1, 0, []).visibility).toBe('household')
+    expect(createBudgetPayload(1, 0, [], 'household').visibility).toBe('household')
+    expect(createBudgetPayload(1, 0, [], 'personal')).toEqual({ houseHoldSize: 1, dependentsNum: 0, incomes: [], visibility: 'personal' })
   })
 
   it.each([[[], 0], [[8], 1], [[8, 9], 2]] as const)('reports zero, one, or multiple new candidates without inferring success: %j', (ids, count) => {
-    const budgets = [7, ...ids].map((budgetKey) => ({ budgetKey, name: `Budget ${budgetKey}`, budgetTemplates: [] }))
+    const budgets = [7, ...ids].map((budgetKey) => ({ budgetKey, name: `Budget ${budgetKey}`, budgetTemplates: [], visibility: 'household' as const }))
     expect(newBudgetCandidates({ budgets }, new Set([7]))).toHaveLength(count)
   })
 })

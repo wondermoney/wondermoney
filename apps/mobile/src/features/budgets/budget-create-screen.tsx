@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { FormBar } from '@/components/ui/form-bar'
 import { FormGroup, FormSelectRow, FormTextRow } from '@/components/ui/form-row'
 import { Icon } from '@/components/ui/icon'
+import { SegmentedControl } from '@/components/ui/segmented-control'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { Text as UiText } from '@/components/ui/text'
 import { FormNotice } from '@/features/transactions/form-field'
@@ -14,7 +15,7 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import type { BudgetCreateWrite, BudgetRecurrence } from './budgets-contract'
+import type { BudgetCreateWrite, BudgetRecurrence, BudgetVisibility } from './budgets-contract'
 import { createBudgetPayload, invalidHouseholdFields, invalidIncomeFields, monthlyEquivalent, monthlyEquivalentTotal, type EditableIncome, type IncomeField } from './budget-create-model'
 import type { CreateBudgetFailure } from './use-create-budget'
 
@@ -44,6 +45,7 @@ export function BudgetCreateScreen({ pending, failure, candidates, reconciliatio
   const [dependents, setDependents] = useState(0)
   const [incomes, setIncomes] = useState<EditableIncome[]>([])
   const [nextId, setNextId] = useState(1)
+  const [visibility, setVisibility] = useState<BudgetVisibility>('household')
   useEffect(() => {
     if (!pending) return
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => true)
@@ -52,7 +54,7 @@ export function BudgetCreateScreen({ pending, failure, candidates, reconciliatio
 
   // Typed amounts are read in the app's language ("1.234,56" in pt and es); the model reads dot decimals.
   const wireIncomes = useMemo(() => incomes.map((income) => ({ ...income, amount: toWireDecimalInput(income.amount, locale) })), [incomes, locale])
-  const payload = useMemo(() => createBudgetPayload(household, dependents, wireIncomes), [dependents, household, wireIncomes])
+  const payload = useMemo(() => createBudgetPayload(household, dependents, wireIncomes, visibility), [dependents, household, visibility, wireIncomes])
   // Re-derived on every render (not stored) so a field's error clears the
   // moment it's fixed.
   const invalidHousehold = invalidHouseholdFields(household, dependents)
@@ -114,6 +116,7 @@ export function BudgetCreateScreen({ pending, failure, candidates, reconciliatio
     </View> : null}
     {step === 3 ? <View style={styles.step}>
       <StepHeading title={t('budgetCreate.review.title')} />
+      <VisibilityChoice disabled={locked} value={visibility} onChange={setVisibility} />
       <View style={[styles.group, { borderColor: palette.border }]}>
         <ReviewRow label={t('budgetCreate.review.household')} value={String(household)} palette={palette} />
         <ReviewRow label={t('budgetCreate.review.adults')} value={String(household - dependents)} palette={palette} separated />
@@ -135,6 +138,25 @@ function StepHeading({ title, description }: { title: string; description?: stri
   return <View style={styles.stepHeading}>
     <UiText accessibilityRole="header" align="center" variant="title">{title}</UiText>
     {description ? <UiText align="center" tone="muted" variant="meta">{description}</UiText> : null}
+  </View>
+}
+
+/**
+ * Who sees the budget, chosen once here: the API takes it only at creation. Household is the
+ * default; the line under the control says what the selected choice means.
+ */
+function VisibilityChoice({ value, disabled, onChange }: { value: BudgetVisibility; disabled: boolean; onChange: (value: BudgetVisibility) => void }) {
+  const { t } = useTranslation()
+  return <View style={styles.visibility}>
+    <UiText accessibilityRole="header" variant="bodyStrong">{t('budgetCreate.visibility.label')}</UiText>
+    <SegmentedControl<BudgetVisibility>
+      accessibilityLabel={t('budgetCreate.visibility.label')}
+      fill
+      onChange={(next) => { if (!disabled) onChange(next) }}
+      options={[{ value: 'household', label: t('budgetCreate.visibility.household') }, { value: 'personal', label: t('budgetCreate.visibility.personal') }]}
+      value={value}
+    />
+    <UiText tone="muted" variant="meta">{t(value === 'personal' ? 'budgetCreate.visibility.personalDescription' : 'budgetCreate.visibility.householdDescription')}</UiText>
   </View>
 }
 
@@ -216,6 +238,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.72 },
   disabled: { opacity: 0.5 },
   income: { gap: themeTokens.spacing[2] },
+  visibility: { gap: themeTokens.spacing[2] },
   group: { borderWidth: 1, borderRadius: themeTokens.radius.xl },
   candidate: { gap: themeTokens.spacing[1], paddingHorizontal: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3] },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },

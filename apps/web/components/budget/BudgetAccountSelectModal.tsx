@@ -2,7 +2,7 @@
 
 import { Link, Plus, Unlink } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { AccountMark } from "@/components/account/AccountMark";
@@ -16,6 +16,11 @@ import {
 } from "@/components/ui/Form";
 import type { Account } from "@/lib/api/account/useAccounts";
 import type { Account as BudgetAccount } from "@/lib/api/budget/useBudgetAccounts";
+import {
+  type BudgetVisibility,
+  linkableAccountsFor,
+  linkedAccountKeysWithin,
+} from "@/lib/budget/visibility";
 
 import {
   Accordion,
@@ -36,6 +41,8 @@ interface BudgetAccountSelectModalProps {
   isLoadingRequisition: boolean;
   accounts: Account[] | undefined;
   budgetAccounts: BudgetAccount[] | undefined;
+  /** A household budget is offered only accounts that are not private. */
+  budgetVisibility: BudgetVisibility;
   setOpen: (open: boolean) => void;
   onAccountsSelected: (accountKeys: number[]) => Promise<void>;
   onAddSyncAccountClick: () => void;
@@ -49,14 +56,24 @@ interface AccountTransactionFormData {
 const BudgetAccountSelectModal = ({
   isOpen,
   isLoadingRequisition,
-  accounts,
+  accounts: visibleAccounts,
   budgetAccounts,
+  budgetVisibility,
   setOpen,
   onAccountsSelected,
   onAddSyncAccountClick,
   onAddOfflineAccountClick,
 }: BudgetAccountSelectModalProps) => {
   const t = useTranslations();
+  const accounts = useMemo(
+    () =>
+      visibleAccounts
+        ? linkableAccountsFor(visibleAccounts, budgetVisibility)
+        : undefined,
+    [visibleAccounts, budgetVisibility],
+  );
+  const privateAccountsExcluded =
+    !!visibleAccounts && !!accounts && accounts.length < visibleAccounts.length;
   const hasAccounts = !!accounts && accounts.length > 0;
   // Linking what already exists is the usual job here; adding a new account
   // stays one click away instead of sharing the dialog with the list.
@@ -71,15 +88,20 @@ const BudgetAccountSelectModal = ({
     reset,
   } = methods;
 
+  // Only what the list offers starts checked: a link it no longer offers (a
+  // private account on a household budget) would make the API refuse the save.
   useEffect(() => {
-    if (!budgetAccounts) return;
+    if (!budgetAccounts || !accounts) return;
 
     reset();
     methods.setValue(
       "selectedAccounts",
-      budgetAccounts.map((account) => account.accountKey),
+      linkedAccountKeysWithin(
+        budgetAccounts.map((account) => account.accountKey),
+        accounts,
+      ),
     );
-  }, [budgetAccounts, isOpen, reset, methods]);
+  }, [budgetAccounts, accounts, isOpen, reset, methods]);
 
   const onAccountSelect = (accountId: number) => {
     const selectedAccounts = methods.getValues("selectedAccounts");
@@ -128,6 +150,11 @@ const BudgetAccountSelectModal = ({
         </div>
       ) : (
         <div className="space-y-6">
+          {privateAccountsExcluded ? (
+            <Text variant="smallText" className="text-muted-foreground">
+              {t("budgetVisibility.private-accounts-excluded")}
+            </Text>
+          ) : null}
           {accounts && accounts.length > 0 && (
             <>
               <div className="space-y-4">

@@ -14,6 +14,7 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source } from '@entity/AppuserMerchantCategory';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
+import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
 import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { CryptoWalletAddress } from '@entity/CryptoWalletAddress';
 import { CryptoWalletToken } from '@entity/CryptoWalletToken';
@@ -145,6 +146,10 @@ describe('household export', () => {
     const budget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'Home', numAdults: 2, numDependents: 0, tenantKey: owner.tenant }, { partial: true });
     const line = em.create(BudgetTemplateCategory, { amountBudgeted: 300, budgetKey: budget, categoryKey: shared.category, month: 7, year: 2026 }, { partial: true });
     line.accounts.add([sharedAccount, privateAccount]);
+    // The owner's personal budget is theirs alone: in their export, never in the partner's.
+    const personalBudget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'SECRET-BUDGET', numAdults: 1, numDependents: 0, ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    em.create(BudgetTemplateCategory, { amountBudgeted: 50, budgetKey: personalBudget, categoryKey: shared.category, month: 7, year: 2026 }, { partial: true });
+    em.create(BudgetTemplateIncome, { amount: 10, budgetKey: personalBudget, name: 'SECRET-INCOME' }, { partial: true });
     const portfolio = em.create(Portfolio, { accountBalanceMode: PortfolioAccountBalanceMode.INCLUDES_HOLDINGS, currencyKey: owner.currency, linkedAccountKey: privateAccount, name: 'Shares', portfolioOwnerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
 
     // The owner's loan is personal: the partner never sees it.
@@ -257,6 +262,23 @@ describe('household export', () => {
         { name: 'SECRET-ACCOUNT', shares: [{ access: 'read', memberId: partnerId }] },
       ]);
     });
+  });
+
+  it("carries the member's own personal budget, naming its owner, and never the other member's", async () => {
+    const { owner, partner } = await households();
+
+    const ownExport = await exportFor(scopeOf(owner));
+    const partnerExport = await exportFor(scopeOf(owner, partner));
+
+    expect(ownExport.data['budgets']!.map((row) => ({ name: row['name'], ownerMemberId: row['ownerMemberId'] }))).toEqual([
+      { name: 'Home', ownerMemberId: null },
+      { name: 'SECRET-BUDGET', ownerMemberId: ownExport.manifest.exportedBy.memberId },
+    ]);
+    expect(ownExport.data['budget-categories']).toHaveLength(2);
+    expect(ownExport.data['budget-incomes']!.map((row) => row['name'])).toEqual(['SECRET-INCOME']);
+    expect(partnerExport.data['budgets']!.map((row) => ({ name: row['name'], ownerMemberId: row['ownerMemberId'] }))).toEqual([{ name: 'Home', ownerMemberId: null }]);
+    expect(partnerExport.data['budget-categories']).toHaveLength(1);
+    expect(partnerExport.data['budget-incomes']).toEqual([]);
   });
 
   it("leaves out the other member's personal loans and watchlist", async () => {

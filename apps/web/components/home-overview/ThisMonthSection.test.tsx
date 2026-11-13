@@ -12,6 +12,7 @@ import type {
   GetBudgetTemplateByYearAndMonthResponse,
 } from "@/lib/api/budget/useBudgetTemplateByYearAndMonth";
 
+import budgetMessages from "../../messages/en/budget.json";
 import commonMessages from "../../messages/en/common.json";
 import homeMessages from "../../messages/en/home.json";
 import { ThisMonthSection } from "./ThisMonthSection";
@@ -65,7 +66,7 @@ vi.mock("@/lib/api/budget/useBudgetTemplateByYearAndMonth", () => ({
   },
 }));
 
-const messages = { ...commonMessages, ...homeMessages };
+const messages = { ...commonMessages, ...homeMessages, ...budgetMessages };
 
 function category(
   key: number,
@@ -175,6 +176,29 @@ test("every budget gets its own row for the current month, each linking to that 
   assert.match(
     within(section).getByText(/days of November to go/).textContent ?? "",
     /26 days of November to go/,
+  );
+});
+
+test("a personal budget's row says it is personal; a household budget's says nothing", () => {
+  state.budgets = [
+    budget(2, "Household"),
+    { ...budget(5, "Mine"), visibility: "personal" },
+  ];
+  state.months.set(2, [category(1, "Food", 500, 320)]);
+  state.months.set(5, [category(3, "Travel", 1000, 250)]);
+
+  renderSection();
+
+  const rows = within(
+    screen.getByRole("region", { name: "This month" }),
+  ).getAllByRole("listitem");
+  const personal = budgetMessages.budgetVisibility.personal;
+  assert.equal(within(rows[0]).queryByText(personal), null);
+  assert.ok(within(rows[1]).getByText(personal));
+  // The label sits beside the name, not inside its heading.
+  assert.equal(
+    within(rows[1]).getByRole("heading", { level: 3 }).textContent,
+    "Mine",
   );
 });
 
