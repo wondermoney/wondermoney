@@ -57,6 +57,13 @@ export const ERROR_CODE = {
   ACCOUNT_SHARE_MANAGER_REQUIRED: 'account_share_manager_required',
   /** A share for someone who is not a member of the household, or for the account's own owner (400). */
   ACCOUNT_SHARE_INVALID: 'account_share_invalid',
+  /** Changing who owns what share of an account, by someone other than its owner or the household owner (403). */
+  ACCOUNT_OWNERSHIP_MANAGER_REQUIRED: 'account_ownership_manager_required',
+  /**
+   * Ownership shares that do not add up to 100%, carry more than two decimals, or name someone who is
+   * not an active member of the household able to see the account (400).
+   */
+  ACCOUNT_OWNERSHIP_INVALID: 'account_ownership_invalid',
   /** Changing whether a manual asset is private, by the member who does not own it (403). */
   MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
   /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */

@@ -23,6 +23,8 @@ export interface RawNetWorthSummary {
     name: string;
     balance: number;
     countedInAccountId?: number;
+    /** Under a member filter: the percentage of a split account counted here, when not all of it. */
+    sharePercent?: number;
   }>;
   /** Ask "Is this the same money?": an investment account no portfolio is linked to, and an unlinked portfolio. */
   suggestPortfolioLink?: boolean;
@@ -52,6 +54,8 @@ export interface NetWorth {
     currencyCode?: string;
     /** Shown, but already counted in this account's balance. */
     countedInAccountId?: number;
+    /** One member's figure: their share of a split account, in percent, when not all of it. */
+    sharePercent?: number;
     subRows?: Array<{
       key: string;
       label: string;
@@ -74,9 +78,10 @@ export interface GetNetWorthResponse {
 }
 
 /**
- * @param member - One member's net worth (the accounts they own, not joint; their portfolios and
- *   manual assets; loans only when they are the viewer), or Shared's (joint accounts and a
- *   departed member's); null or absent for the household's.
+ * @param member - One member's net worth (their share of each account split between members, and
+ *   the accounts they own outright, not joint; their portfolios and manual assets; loans only when
+ *   they are the viewer), or Shared's (joint accounts with no shares, and a departed member's
+ *   accounts and shares); null or absent for the household's.
  */
 export async function getNetWorth(
   apiClient: AxiosInstance = api,
@@ -111,6 +116,9 @@ export async function getNetWorth(
         ...(row.countedInAccountId === undefined
           ? {}
           : { countedInAccountId: row.countedInAccountId }),
+        ...(row.sharePercent === undefined
+          ? {}
+          : { sharePercent: row.sharePercent }),
       })),
       suggestPortfolioLink: data.suggestPortfolioLink === true,
       unconverted: {

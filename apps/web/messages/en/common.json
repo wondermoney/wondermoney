@@ -3174,7 +3174,25 @@
     "view-only-description": "You can view this account but not change it.",
     "errors": {
       "account_read_only": "You can view this account but not change it.",
-      "account_share_manager_required": "Only the account's owner or the household owner can change who has access."
+      "account_share_manager_required": "Only the account's owner or the household owner can change who has access.",
+      "account_ownership_manager_required": "Only the account's owner or the household owner can change who owns this account."
     }
+  },
+  "accountOwnership": {
+    "title": "Ownership",
+    "description": "What part of this account counts in each member's net worth. Spending reports aren't split.",
+    "split": "Split between members",
+    "split-description": "Off: the account counts in full for its owner.",
+    "split-description-joint": "Off: this joint account counts as Shared.",
+    "percent-label": "Share for {name}, in percent",
+    "total": "Total: {total} of 100%",
+    "invalid": "Enter each share as a percentage from 0 to 100, with up to two decimals.",
+    "not-split": "Not split: it counts in full for {name}.",
+    "not-split-joint": "Not split: this joint account counts as Shared.",
+    "former-members": "{percent} belongs to people who have left the household and counts as Shared. Saving new shares gives it to the members above.",
+    "manager-only": "Only the account's owner or the household owner can change this.",
+    "load-error": "Ownership could not be loaded. Your other changes can still be saved.",
+    "save-error": "Ownership could not be saved. Try again.",
+    "save-invalid": "The shares must add up to 100%."
   }
 }

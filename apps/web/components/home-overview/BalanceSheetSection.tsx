@@ -1,7 +1,7 @@
 "use client";
 
 import { Briefcase, Building2, ReceiptText } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { AccountMark } from "@/components/account/AccountMark";
@@ -43,6 +43,7 @@ function Side({
   countedInName: CountedInName;
 }) {
   const t = useTranslations("homeOverview.sheet");
+  const format = useFormatter();
 
   return (
     <section aria-labelledby={id} className="min-w-0">
@@ -67,6 +68,16 @@ function Side({
                     {markFor(group.type, row)}
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate">{row.label}</span>
+                      {row.sharePercent !== undefined ? (
+                        <span className="text-muted-foreground truncate text-xs">
+                          {t("share-of-account", {
+                            percent: format.number(row.sharePercent / 100, {
+                              maximumFractionDigits: 2,
+                              style: "percent",
+                            }),
+                          })}
+                        </span>
+                      ) : null}
                       {row.countedInAccountId !== undefined ? (
                         <span className="text-muted-foreground truncate text-xs">
                           {t("counted-in", {

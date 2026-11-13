@@ -394,6 +394,19 @@ test("a portfolio already inside its account's balance is listed but not added",
   assert.deepEqual(portfolios?.rows.map((row) => [row.amount, row.countedInAccountId]), [[8000, 5]]);
 });
 
+test("a member's share of a split account travels with its row, on either side", () => {
+  const sheet = balanceSheet({
+    netWorth: 400,
+    rows: [
+      { key: "accounts:House fund", label: "House fund", amount: 600, sharePercent: 60 },
+      { key: "accounts:Card", label: "Card", amount: -200, isLiability: true, sharePercent: 50 },
+    ],
+  });
+
+  assert.deepEqual(sheet.own[0]?.rows.map((row) => [row.amount, row.sharePercent]), [[600, 60]]);
+  assert.deepEqual(sheet.owe[0]?.rows.map((row) => [row.amount, row.sharePercent]), [[200, 50]]);
+});
+
 test("a manually valued asset is owned, in its own group after portfolios", () => {
   const sheet = balanceSheet({
     netWorth: 259000,

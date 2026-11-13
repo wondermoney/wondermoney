@@ -12,6 +12,8 @@ export const netWorthRowSchema = z.object({
   balance: z.number().finite(),
   /** A portfolio already inside this account's balance: shown, but not part of any total. */
   countedInAccountId: z.number().int().positive().optional(),
+  /** One member's figure: their share of a split account, in percent, when not all of it. */
+  sharePercent: z.number().finite().min(0).max(100).optional(),
 })
 
 // A row of a type this build doesn't know (a new asset class, say) is dropped from the breakdown
@@ -23,6 +25,7 @@ const netWorthRowsSchema = z.array(z.object({
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
   countedInAccountId: z.number().int().positive().optional().catch(undefined),
+  sharePercent: z.number().finite().min(0).max(100).optional().catch(undefined),
 })).transform((rows) => rows.filter((row): row is NetWorthRowDto => row.type !== 'unknown'))
 
 export const netWorthDtoSchema = z.object({

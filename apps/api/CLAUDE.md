@@ -145,6 +145,14 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
   `attributedToShared`), else its account's owner, or Shared on a joint account (`isJoint`) or
   for someone who left. The `memberKeys` filter (`TransactionScope.members`) only narrows rows
   the visibility rule already allows.
+- **Ownership shares** (`services/household/account-ownership.ts`, `AccountOwnership`) split an
+  account between members in basis points, for per-member net worth only (`?member=`); spending
+  reports keep member attribution. No rows: attribution stands (owner, or Shared when joint).
+  Rows add up to 10000 (checked by the service and a deferred trigger) and replace the joint
+  switch for net worth; a former member's share counts as Shared until they rejoin. Parts are
+  split by largest remainder (`Money.allocate`), so members plus Shared equal the household total.
+  Changed by the account owner or the household owner (`PUT /v1/account/:accountId/ownership`),
+  only for active members who can see the account.
 - **Invites**: `HouseholdInvite` is a 7-day single-use token carrying the role to join with; a
   pending one holds a seat. The seat count and the write run under the tenant row lock
   (`lockTenant`). A new signup joins through the auth callback's `inviteToken`; an existing,

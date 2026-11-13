@@ -315,6 +315,92 @@
         ],
         "additionalProperties": {}
       },
+      "AccountOwnership": {
+        "type": "object",
+        "properties": {
+          "accountKey": {
+            "type": "integer"
+          },
+          "canManage": {
+            "type": "boolean"
+          },
+          "formerMembersPercent": {
+            "type": "number",
+            "description": "The part held by people no longer in the household, which counts as Shared."
+          },
+          "isJoint": {
+            "type": "boolean"
+          },
+          "isSplit": {
+            "type": "boolean",
+            "description": "False when the account has no shares: it is its owner’s, or Shared when joint."
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "appuserKey": {
+                  "type": "integer"
+                },
+                "canSee": {
+                  "type": "boolean"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "isAccountOwner": {
+                  "type": "boolean"
+                },
+                "lastName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "percent": {
+                  "type": "number",
+                  "description": "The member’s share, 0 to 100 with up to two decimals."
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "owner",
+                    "admin",
+                    "member",
+                    "viewer"
+                  ]
+                }
+              },
+              "required": [
+                "appuserKey",
+                "canSee",
+                "displayName",
+                "firstName",
+                "isAccountOwner",
+                "lastName",
+                "percent",
+                "role"
+              ]
+            }
+          }
+        },
+        "required": [
+          "accountKey",
+          "canManage",
+          "formerMembersPercent",
+          "isJoint",
+          "isSplit",
+          "members"
+        ],
+        "additionalProperties": {}
+      },
       "AccountResponse": {
         "type": "object",
         "properties": {
@@ -9669,6 +9755,94 @@
         }
       }
     },
+    "/v1/account/{accountId}/ownership": {
+      "get": {
+        "description": "**Required scope:** any of `read`, `write`.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get each member’s share of an account in per-member net worth",
+        "tags": [
+          "Accounts"
+        ],
+        "x-required-scopes": [
+          "read",
+          "write"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[1-9]\\d*$"
+                }
+              ]
+            },
+            "required": true,
+            "name": "accountId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountOwnership"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The token is missing, malformed or revoked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request did not match the endpoint’s validator.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "A rate limit was exceeded. Honour the `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/account/{accountId}/recent-transactions": {
       "get": {
         "description": "**Required scope:** any of `read`, `write`.",
@@ -17585,7 +17759,7 @@
     },
     "/v1/net-worth": {
       "get": {
-        "description": "**Required scope:** `read`.",
+        "description": "**Required scope:** `read`.\n\nWith `member`, one member’s net worth (or `shared`): each account they hold a share of counts at that share (`rows[].sharePercent` when it is not all of it), an account with no shares counts wholly for its owner, or for Shared when joint. The members’ figures and Shared add up to the household’s.",
         "security": [
           {
             "bearerAuth": []
@@ -17597,6 +17771,17 @@
         ],
         "x-required-scopes": [
           "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:[1-9]\\d*|shared)$/u"
+            },
+            "required": false,
+            "name": "member",
+            "in": "query"
+          }
         ],
         "responses": {
           "200": {

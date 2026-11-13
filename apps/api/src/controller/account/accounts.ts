@@ -25,6 +25,7 @@ import { mapCreditCardDetail } from '@service/account/credit-card-statement.serv
 import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
+import { getAccountOwnership, setAccountOwnership } from '@service/household/account-ownership';
 import { accountAttributionDto, loadActiveMembers } from '@service/household/member-attribution';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
@@ -39,7 +40,7 @@ import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFo
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, getAccountSharesRequestSchema, putAccountSharesRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
+import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountOwnershipRequestSchema, getAccountRequestSchema, getAccountSharesRequestSchema, putAccountOwnershipRequestSchema, putAccountSharesRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
@@ -477,6 +478,26 @@ export async function putAccountSharesController(req: Request, res: Response) {
     params: { accountId },
   } = await zParse(putAccountSharesRequestSchema, req);
   return res.json(await setAccountShares(DI.em, accountId, accountActor(req), body));
+}
+
+/** `GET /v1/account/:accountId/ownership`: each member's share of the account in net worth (404 when the caller cannot see it). */
+export async function getAccountOwnershipController(req: Request, res: Response) {
+  const {
+    params: { accountId },
+  } = await zParse(getAccountOwnershipRequestSchema, req);
+  return res.json(await getAccountOwnership(DI.em, accountId, accountActor(req)));
+}
+
+/**
+ * `PUT /v1/account/:accountId/ownership`: replace each member's share of the account, for net worth.
+ * Only the account owner or the household owner (403 `account_ownership_manager_required`).
+ */
+export async function putAccountOwnershipController(req: Request, res: Response) {
+  const {
+    body,
+    params: { accountId },
+  } = await zParse(putAccountOwnershipRequestSchema, req);
+  return res.json(await setAccountOwnership(DI.em, accountId, accountActor(req), body));
 }
 
 /**

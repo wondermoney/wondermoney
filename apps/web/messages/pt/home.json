@@ -111,7 +111,8 @@
         "loans": "Empréstimos",
         "other": "Outros"
       },
-      "counted-in": "Incluído em {account}"
+      "counted-in": "Incluído em {account}",
+      "share-of-account": "{percent} desta conta"
     },
     "cashflow": {
       "title": "Fluxo de caixa líquido por mês",

@@ -53,6 +53,12 @@ describe('net-worth contract', () => {
     expect(netWorthDtoSchema.parse({ ...fixture, rows }).rows).toEqual(rows)
   })
 
+  it("keeps a member's share of a split account, and drops a malformed one", () => {
+    const rows = [{ type: 'accounts', id: 7, name: 'House fund', balance: 600, sharePercent: 60 }]
+    expect(netWorthDtoSchema.parse({ ...fixture, rows }).rows).toEqual(rows)
+    expect(netWorthDtoSchema.parse({ ...fixture, rows: [{ ...rows[0], sharePercent: 'sixty' }] }).rows[0]?.sharePercent).toBeUndefined()
+  })
+
   it('accepts zeros and empty rows', () => {
     expect(netWorthDtoSchema.safeParse({
       ...fixture,

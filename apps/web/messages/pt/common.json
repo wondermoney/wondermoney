@@ -3174,7 +3174,25 @@
     "view-only-description": "Podes ver esta conta, mas não alterá-la.",
     "errors": {
       "account_read_only": "Podes ver esta conta, mas não alterá-la.",
-      "account_share_manager_required": "Só o titular da conta ou o titular do agregado podem alterar quem tem acesso."
+      "account_share_manager_required": "Só o titular da conta ou o titular do agregado podem alterar quem tem acesso.",
+      "account_ownership_manager_required": "Só o titular da conta ou o titular do agregado podem alterar a titularidade desta conta."
     }
+  },
+  "accountOwnership": {
+    "title": "Titularidade",
+    "description": "Que parte desta conta entra no património de cada membro. Os relatórios de despesas não são divididos.",
+    "split": "Dividir entre membros",
+    "split-description": "Desligado: a conta entra por inteiro no património do titular.",
+    "split-description-joint": "Desligado: esta conta conjunta conta como Partilhado.",
+    "percent-label": "Parte de {name}, em percentagem",
+    "total": "Total: {total} de 100%",
+    "invalid": "Introduz cada parte como uma percentagem de 0 a 100, com até duas casas decimais.",
+    "not-split": "Não dividida: entra por inteiro no património de {name}.",
+    "not-split-joint": "Não dividida: esta conta conjunta conta como Partilhado.",
+    "former-members": "{percent} pertence a pessoas que saíram do agregado e conta como Partilhado. Ao guardares novas partes, passa para os membros acima.",
+    "manager-only": "Só o titular da conta ou o titular do agregado podem alterar isto.",
+    "load-error": "Não foi possível carregar a titularidade. Podes guardar as outras alterações.",
+    "save-error": "Não foi possível guardar a titularidade. Tenta novamente.",
+    "save-invalid": "As partes têm de somar 100%."
   }
 }

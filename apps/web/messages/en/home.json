@@ -111,7 +111,8 @@
         "loans": "Loans",
         "other": "Other"
       },
-      "counted-in": "Counted in {account}"
+      "counted-in": "Counted in {account}",
+      "share-of-account": "{percent} of this account"
     },
     "cashflow": {
       "title": "Net cash flow by month",

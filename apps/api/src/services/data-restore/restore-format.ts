@@ -16,11 +16,12 @@ import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENG
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
  * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
- * 1.10 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
+ * 1.13 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
  * and tokens, card settings, installment plans and schedules, transaction templates, exchange-rate
  * and price overrides), a loan rate type, a manual asset kind and optional fields (a loan's secured
  * asset, a budget's month start day, which defaults to the 1st, a merchant's website and logo URL,
- * the 1.8 fields, 1.9's account shares, and 1.10's joint accounts and transaction attribution, each defaulting to what the
+ * the 1.8 fields, 1.9's account shares, 1.10's joint accounts and transaction attribution, and 1.13's
+ * ownership shares, each defaulting to what the
  * app gives a row created without it), which an
  * older export simply does not have, so there is nothing to migrate yet. 1.11 added the expense
  * group files and a split line's `memberId`, likewise absent from older exports. 1.12 added a
@@ -100,6 +101,16 @@ const account = z.object({
   ownerMemberId: ref,
   /** The member's place for the account in their list (1.8); absent or null: unordered. */
   position: z.number().int().min(-2_147_483_648).max(2_147_483_647).nullable().optional(),
+  /**
+   * Each member's share of the account in per-member net worth (1.13), adding up to 10000 basis
+   * points; null `memberId` is people who had left. Every member of the export becomes the restoring
+   * member, so a split account is restored wholly theirs: one share of 100%.
+   */
+  ownership: z
+    .array(z.object({ basisPoints: z.number().int().min(0).max(10_000), memberId: ref }))
+    .max(50)
+    .refine((shares) => shares.length === 0 || shares.reduce((total, share) => total + share.basisPoints, 0) === 10_000, 'the shares add up to 10000 basis points')
+    .optional(),
   /**
    * Who a private account was shared with (1.9). Read and checked, not restored: every member of
    * the export becomes the restoring member, so a restored private account is theirs alone, to share

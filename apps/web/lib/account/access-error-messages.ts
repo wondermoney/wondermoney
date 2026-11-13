@@ -7,6 +7,7 @@ import { API_ERROR_CODE, getApiErrorCode } from "@/lib/api/errors";
 const ACCOUNT_ACCESS_ERROR_CODES = [
   API_ERROR_CODE.ACCOUNT_READ_ONLY,
   API_ERROR_CODE.ACCOUNT_SHARE_MANAGER_REQUIRED,
+  API_ERROR_CODE.ACCOUNT_OWNERSHIP_MANAGER_REQUIRED,
 ] as const;
 
 export type AccountAccessErrorKey = (typeof ACCOUNT_ACCESS_ERROR_CODES)[number];

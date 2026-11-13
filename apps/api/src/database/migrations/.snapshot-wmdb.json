@@ -815,6 +815,227 @@
       "comment": null
     },
     {
+      "name": "account_ownership",
+      "schema": "public",
+      "columns": {
+        "account_key": {
+          "name": "account_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "account_ownership_key": {
+          "name": "account_ownership_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "appuser_key": {
+          "name": "appuser_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "basis_points": {
+          "name": "basis_points",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "tenant_key": {
+          "name": "tenant_key",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "account_key",
+            "appuser_key"
+          ],
+          "composite": true,
+          "constraint": true,
+          "keyName": "account_ownership_account_key_appuser_key_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "appuser_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "account_ownership_appuser_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "account_ownership_key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "account_ownership_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "account_ownership_basis_points_check",
+          "expression": "\"basis_points\" >= 0 and \"basis_points\" <= 10000",
+          "definition": "check (\"basis_points\" >= 0 and \"basis_points\" <= 10000)"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "account_ownership_account_key_foreign": {
+          "columnNames": [
+            "account_key"
+          ],
+          "constraintName": "account_ownership_account_key_foreign",
+          "localTableName": "public.account_ownership",
+          "referencedColumnNames": [
+            "account_key"
+          ],
+          "referencedTableName": "public.account",
+          "deleteRule": "cascade"
+        },
+        "account_ownership_appuser_key_foreign": {
+          "columnNames": [
+            "appuser_key"
+          ],
+          "constraintName": "account_ownership_appuser_key_foreign",
+          "localTableName": "public.account_ownership",
+          "referencedColumnNames": [
+            "appuser_key"
+          ],
+          "referencedTableName": "public.appuser",
+          "deleteRule": "cascade"
+        },
+        "account_ownership_tenant_key_foreign": {
+          "columnNames": [
+            "tenant_key"
+          ],
+          "constraintName": "account_ownership_tenant_key_foreign",
+          "localTableName": "public.account_ownership",
+          "referencedColumnNames": [
+            "tenant_key"
+          ],
+          "referencedTableName": "public.tenant"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "account_share",
       "schema": "public",
       "columns": {

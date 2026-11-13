@@ -349,17 +349,20 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
             const formatted = formatMoney(row.amount, { locale, currency })
             // Already inside the account's balance: shown, never added to a total.
             const countedIn = row.countedInAccountId === undefined ? null : t('home.sheet.countedIn', { account: accountNames?.get(row.countedInAccountId) ?? '' })
+            // One member's figure: their part of an account split between members (read-only here; set on the web).
+            const share = row.sharePercent === undefined ? null : t('home.sheet.shareOfAccount', { percent: new Intl.NumberFormat(locale, { maximumFractionDigits: 2, style: 'percent' }).format(row.sharePercent / 100) })
             return (
               <View
                 key={row.key}
                 accessible
-                accessibilityLabel={`${row.label}, ${formatted}, ${currency}${countedIn ? `, ${countedIn}` : ''}${liability ? `, ${t('netWorth.liabilityCue')}` : ''}`}
+                accessibilityLabel={`${row.label}, ${formatted}, ${currency}${share ? `, ${share}` : ''}${countedIn ? `, ${countedIn}` : ''}${liability ? `, ${t('netWorth.liabilityCue')}` : ''}`}
                 style={[styles.sheetRow, { borderBottomColor: palette.border }]}
               >
                 <View style={styles.sheetLabel}>
                   <EntityMark {...markFor(group.type, row.id)} size="sm" testID="balance-sheet-mark" />
                   <View style={styles.flex}>
                     <Text numberOfLines={1} variant="body">{row.label}</Text>
+                    {share ? <Text numberOfLines={1} tone="muted" variant="meta">{share}</Text> : null}
                     {countedIn ? <Text numberOfLines={1} tone="muted" variant="meta">{countedIn}</Text> : null}
                   </View>
                 </View>

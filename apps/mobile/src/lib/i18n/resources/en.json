@@ -378,7 +378,8 @@
         "manualAssets": "Property and other assets",
         "loans": "Loans"
       },
-      "countedIn": "Counted in {{account}}"
+      "countedIn": "Counted in {{account}}",
+      "shareOfAccount": "{{percent}} of this account"
     },
     "cashflow": {
       "title": "Net cash flow by month",

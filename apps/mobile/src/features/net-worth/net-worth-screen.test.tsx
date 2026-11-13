@@ -118,6 +118,15 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByLabelText(/^Car loan, €125\.00, EUR, Liability$/)).toBeOnTheScreen()
   })
 
+  it("says what share of a split account one member's figure counts, read-only", async () => {
+    const { view } = await renderScreen({ state: { status: 'loaded', data: { ...data, rows: [
+      { type: 'accounts', id: 41, name: 'House fund', balance: 600, sharePercent: 60 },
+      { type: 'accounts', id: 42, name: 'Joint card', balance: -33.33, sharePercent: 33.33 },
+    ] } } })
+    expect(view.getByLabelText(/^House fund, €600\.00, EUR, 60% of this account$/)).toBeOnTheScreen()
+    expect(view.getByLabelText(/^Joint card, €33\.33, EUR, 33\.33% of this account, Liability$/)).toBeOnTheScreen()
+  })
+
   it('keeps the month-by-month trend one tap away', async () => {
     const { view, props } = await renderScreen()
     await fireEvent.press(view.getByRole('button', { name: 'View net worth trend' }))

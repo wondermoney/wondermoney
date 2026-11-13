@@ -110,6 +110,7 @@ const SERVICE_CHECKED = new Set([
   'POST /v1/rule/:ruleId/apply', // view-only rows are left alone (ruleRunTransactionsWhere)
   'POST /v1/rule/apply-all',
   'POST /v1/transaction-import-sessions/:importId/commit', // the member's own accounts only
+  'PUT /v1/account/:accountId/ownership', // its own rule: the account owner or the household owner
   'PUT /v1/account/:accountId/shares', // its own rule: the account owner or the household owner
   'PUT /v1/portfolio/:portfolioId', // linking an account needs write access (portfolio-account-link.ts)
 ]);

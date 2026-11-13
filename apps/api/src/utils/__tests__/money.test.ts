@@ -113,6 +113,28 @@ describe('Money, an amount that carries its currency', () => {
     expect(() => Money.convert(Money.of(5, 'EUR'), { rate: 1.1, to: 'EUR' })).toThrow(RangeError);
   });
 
+  it('splits an amount by weights into parts that add back up to it exactly', () => {
+    const parts = (amount: number, weights: number[]) => Money.allocate(Money.of(amount, 'EUR'), weights).map((part) => Money.toNumber(part));
+
+    expect(parts(1000, [6000, 4000])).toEqual([600, 400]);
+    // A third each cannot be exact: the leftover ten-thousandth goes to the largest remainder, then the first.
+    expect(parts(100, [3333, 3333, 3334])).toEqual([33.33, 33.33, 33.34]);
+    expect(parts(0.0001, [5000, 5000])).toEqual([0.0001, 0]);
+    expect(parts(10, [1, 1, 1])).toEqual([3.3334, 3.3333, 3.3333]);
+    // A liability splits the same way, its parts negative.
+    expect(parts(-250.0001, [5000, 5000])).toEqual([-125.0001, -125]);
+    expect(parts(42, [0, 10000])).toEqual([0, 42]);
+    for (const [amount, weights] of [[1234.5677, [3333, 3333, 3334]], [-0.0007, [2500, 2500, 5000]], [99.99, [1, 2, 3, 4]]] as const) {
+      expect(Money.toNumber(Money.sum(Money.allocate(Money.of(amount, 'USD'), weights), 'USD'))).toBe(amount);
+    }
+  });
+
+  it('keeps the currency of the amount it splits, and refuses weights that add up to nothing', () => {
+    expect(Money.allocate(Money.of(5, 'JPY'), [1, 1]).map((part) => part.currency)).toEqual(['JPY', 'JPY']);
+    expect(() => Money.allocate(Money.of(5, 'EUR'), [0, 0])).toThrow(RangeError);
+    expect(() => Money.allocate(Money.of(5, 'EUR'), [-1, 2])).toThrow(RangeError);
+  });
+
   it('logs a mismatch in production and hands back the fallback, but throws everywhere else', () => {
     const log = vi.fn();
     const mismatch = () => Money.add(Money.of(1, 'EUR'), Money.of(1, 'USD'));
