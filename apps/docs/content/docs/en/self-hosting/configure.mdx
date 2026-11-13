@@ -121,7 +121,22 @@ A logo address a member types in themselves wins over the template. The apps loa
 
 ## Bank sync
 
-Bank sync needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
+Bank sync with European banks needs no server configuration. Each person adds their own Enable Banking application key under Settings, so bank credentials are never shared between users.
+
+`BANK_PROVIDERS` lists the bank providers your instance offers, separated by commas. Unset or empty means every built-in provider except the opt-in ones, which today is `enable_banking` alone. Set it on the API and the worker.
+
+| Provider | What it connects | Needs |
+|---|---|---|
+| `enable_banking` | Banks in Europe, through each person's own Enable Banking application or the server's | Nothing on the server, or one Enable Banking application for the whole server ([below](#one-enable-banking-application-for-the-server)). On unless `BANK_PROVIDERS` leaves it out |
+| `simplefin` | Banks in the United States and Canada, through SimpleFIN Bridge, a paid service each person subscribes to | Opt-in: off until listed, as in `BANK_PROVIDERS=enable_banking,simplefin`. See [SimpleFIN](/en/docs/self-hosting/simplefin) |
+
+An id this version does not have is ignored, so `BANK_PROVIDERS=none` turns bank sync off. `GET /v1/instance` reports the enabled providers in `features.bankSyncProviders`, and the apps offer only those.
+
+| Setting | What it does |
+|---|---|
+| `SIMPLEFIN_BRIDGE_HOSTS` | The hosts the server may call for SimpleFIN, separated by commas. Empty means SimpleFIN Bridge, `bridge.simplefin.org` and `beta-bridge.simplefin.org`. Set it only for another server that speaks the SimpleFIN protocol; it replaces the default list. Every SimpleFIN address must be `https` on port 443, on one of these hosts, and resolve only to public addresses ([SimpleFIN](/en/docs/self-hosting/simplefin#privacy-and-security)). Set it on the API and the worker |
+
+The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours, 20 by default. Under PSD2 a bank may limit unattended access to four calls a day per account, so set it to `6` or more to stay inside that limit. SimpleFIN Bridge expects about 24 requests a day or fewer for each connection, so don't lower it far if you offer SimpleFIN. A failed sync waits the same interval before the next try. Set it on the worker; a value that is not a positive number stops the worker at start-up.
 
 ### One Enable Banking application for the server
 
@@ -149,8 +164,6 @@ A new Enable Banking application runs in Restricted Production mode, in which it
 - If a second household signs up before anyone has linked a bank, no household gets the server's application until you set `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
 
 The demo account never counts. Enable Banking also enforces the limit itself: in Restricted Production mode, it refuses accounts that don't belong to the application's owner, a partner's included. Check what your application may reach in the Enable Banking Control Panel.
-
-The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours, 20 by default. Under PSD2 a bank may limit unattended access to four calls a day per account, so set it to `6` or more to stay inside that limit. A failed sync waits the same interval before the next try. Set it on the worker; a value that is not a positive number stops the worker at start-up.
 
 ## Google sign-in
 
@@ -257,6 +270,7 @@ Nothing is sent to the WonderMoney project. Each outside service your instance c
 | Error tracking (Sentry) | The API, the worker and the web app, with error reports | `SENTRY_DSN` (API and worker), `NEXT_PUBLIC_SENTRY_DSN` (web app) |
 | Analytics (Google Tag Manager, PostHog) | See [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Bank sync (Enable Banking) | The API and the worker, for the users who connect a bank | Each user's own Enable Banking key, added in Settings, or the server's application (`ENABLE_BANKING_APP_ID`) |
+| Bank sync (SimpleFIN) | The API, to claim a user's setup token, and the worker, to sync, at SimpleFIN Bridge or the hosts in `SIMPLEFIN_BRIDGE_HOSTS`. Off by default | `simplefin` in `BANK_PROVIDERS`, then each user's own setup token |
 | Google sign-in | Browsers and the API, when a user chooses "Continue with Google" | `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` |
 | Your identity provider (OIDC) | Browsers and the API, when a user chooses `Sign in with <name>`. The API fetches the provider's discovery document and keys, and exchanges the sign-in code | `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Browsers on the contact form, and the web app to check the answer | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` |

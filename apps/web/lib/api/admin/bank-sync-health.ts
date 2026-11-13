@@ -5,8 +5,9 @@ import { type AxiosInstance, isAxiosError } from "axios";
  * (`GET /v1/admin/bank-sync/health` and `/failing`). Aggregates only: the API
  * returns no person, household, account or connection identifiers.
  */
+/** `revoked`: the provider refused the stored access (a SimpleFIN connection), so it needs a new one. */
 export type BankConnectionStatus =
-  "authorized" | "created" | "error" | "expired" | "linked";
+  "authorized" | "created" | "error" | "expired" | "linked" | "revoked";
 
 export interface BankSyncInstitutionLabel {
   country: string | null;
@@ -33,7 +34,9 @@ export interface BankSyncInstitutionHealth {
 
 export interface BankSyncHealth {
   connections: {
-    byStatus: Record<BankConnectionStatus, number>;
+    /** `revoked` is absent on an API older than SimpleFIN. */
+    byStatus: Record<Exclude<BankConnectionStatus, "revoked">, number> &
+      Partial<Record<"revoked", number>>;
     failing: number;
     total: number;
   };

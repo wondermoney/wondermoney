@@ -5,6 +5,7 @@ import { BackgroundOperation } from '@entity/BackgroundOperation';
 import { BankSyncIncident } from '@entity/BankSyncIncident';
 import { BankSyncIncidentAttempt } from '@entity/BankSyncIncidentAttempt';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
+import { SimplefinConnection } from '@entity/SimplefinConnection';
 import type { Tenant } from '@entity/Tenant';
 import { NotFoundError } from '@utils/errors';
 
@@ -50,7 +51,25 @@ export class BankSyncHistoryService {
 
   async getConnectionHistory(connectionId: number, appuser: Appuser, tenant: Tenant): Promise<BankSyncHistoryRun[]> {
     const connection = await this.findOwnedConnection(connectionId, appuser, tenant);
-    const requisitionId = connectionRequisitionId(connection);
+    return this.historyFor(connectionRequisitionId(connection), appuser, connection.nextEligibleSyncAt);
+  }
+
+  /**
+   * The history of one of the caller's SimpleFIN connections. A separate id space from
+   * `getConnectionHistory`'s Enable Banking keys; incidents name it by `BankConnection.externalId`.
+   */
+  async getSimplefinConnectionHistory(connectionId: number, appuser: Appuser, tenant: Tenant): Promise<BankSyncHistoryRun[]> {
+    const connection = await this.em.findOne(
+      SimplefinConnection,
+      { appuserKey: appuser, deletedAt: undefined, simplefinConnectionKey: connectionId, tenantKey: tenant },
+      { populate: ['bankConnectionKey'] },
+    );
+    const requisitionId = connection?.bankConnectionKey.externalId;
+    if (!connection || !requisitionId) throw new NotFoundError('Bank connection not found');
+    return this.historyFor(requisitionId, appuser, connection.bankConnectionKey.nextEligibleSyncAt);
+  }
+
+  private async historyFor(requisitionId: string, appuser: Appuser, nextEligibleSyncAt: Date | undefined): Promise<BankSyncHistoryRun[]> {
 
     const attempts = await this.em.find(
       BankSyncIncidentAttempt,
@@ -66,8 +85,8 @@ export class BankSyncHistoryService {
     // did not, the connection's own `nextEligibleSyncAt` is the time the scheduler will
     // try again, which is the useful answer for the newest run.
     const newest = runs[0];
-    if (newest?.errorCode === 'rate_limited' && newest.retryAt === null && connection.nextEligibleSyncAt) {
-      newest.retryAt = connection.nextEligibleSyncAt.toISOString();
+    if (newest?.errorCode === 'rate_limited' && newest.retryAt === null && nextEligibleSyncAt) {
+      newest.retryAt = nextEligibleSyncAt.toISOString();
     }
     return runs;
   }

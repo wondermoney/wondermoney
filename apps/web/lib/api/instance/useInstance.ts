@@ -19,6 +19,11 @@ export interface InstanceDescription {
      * (`useBankLinkCredential`). Absent on an older API, which reads as `user`.
      */
     bankSyncCredentials?: "instance" | "user";
+    /**
+     * The bank-sync providers the operator enabled (`BANK_PROVIDERS`), such as `enable_banking`
+     * and `simplefin`. Absent on an API older than the field.
+     */
+    bankSyncProviders?: string[];
     contactForm: boolean;
     /**
      * The chains whose explorer the operator configured, so crypto wallets can be tracked on

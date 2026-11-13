@@ -89,6 +89,7 @@ export const featureScreens = [
   // Banking
   'bank_connections',
   'bank_connect',
+  'bank_connect_simplefin',
   'bank_statement_import',
   // Net worth
   'net_worth_history',

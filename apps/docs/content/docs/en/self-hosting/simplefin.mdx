@@ -1,0 +1,70 @@
+---
+title: SimpleFIN for US and Canadian banks
+description: Let the people on your instance sync US and Canadian bank accounts through SimpleFIN Bridge, and what the server stores and calls when they do.
+---
+
+Enable Banking connects banks in Europe. For banks in the United States and Canada, a self-hosted instance can also offer [SimpleFIN Bridge](https://bridge.simplefin.org/), a paid, read-only bank aggregator that each person subscribes to themselves. WonderMoney is not affiliated with SimpleFIN.
+
+SimpleFIN is off until an operator turns it on. WonderMoney's hosted service does not offer it.
+
+<Callout type="info" title="A new integration">
+  The integration follows the public [SimpleFIN protocol](https://www.simplefin.org/protocol.html) and is tested against recorded responses, not yet against a real SimpleFIN account. If a sync looks wrong, please [open an issue](https://github.com/wondermoney/wondermoney/issues).
+</Callout>
+
+## Turn it on
+
+Add `simplefin` to `BANK_PROVIDERS` in `.env`, and keep `enable_banking` in the list if your users also connect European banks:
+
+```sh
+BANK_PROVIDERS=enable_banking,simplefin
+```
+
+Then run `docker compose up -d`. The API and the worker both read it; on Kubernetes, set `config.BANK_PROVIDERS` in your values. `GET /v1/instance` then lists `simplefin` in `features.bankSyncProviders`, and the web and mobile apps show **Connect with SimpleFIN**. See [Bank sync](/en/docs/self-hosting/configure#bank-sync) for the setting itself.
+
+SimpleFIN also needs `CREDENTIAL_ENCRYPTION_KEY_V1`, which the install generates. Without it, connecting is refused before the setup token is used, because a token works only once.
+
+| Setting | What it does |
+|---|---|
+| `SIMPLEFIN_BRIDGE_HOSTS` | The hosts the server may call for SimpleFIN, separated by commas. Empty means SimpleFIN Bridge, `bridge.simplefin.org` and `beta-bridge.simplefin.org`. Set it only to use another server that speaks the SimpleFIN protocol: it replaces the default list, so add the Bridge hosts too if you still want them. Set it on the API and the worker |
+| `BANK_SYNC_MIN_INTERVAL_HOURS` | The fewest hours between automatic syncs of one connection, 20 by default. SimpleFIN Bridge expects about 24 requests a day or fewer for each token, and the default keeps a connection to one or two. Don't lower it far |
+
+## Connect your banks
+
+1. At [SimpleFIN Bridge](https://bridge.simplefin.org/), sign up, connect your banks and create a setup token.
+2. In WonderMoney, choose **Connect with SimpleFIN**, in Settings on the web or in banking in the mobile app, and paste the token.
+3. WonderMoney claims the token with SimpleFIN and receives a private access address, which it stores encrypted. Your accounts and transactions appear after the first sync.
+
+A setup token works once. If WonderMoney says the token has already been used and you did not use it yourself, someone else may have it: disable it in SimpleFIN Bridge and create a new one.
+
+A connection belongs to the member who made it. Only they can see its sync history or disconnect it.
+
+## How syncing works
+
+- **One request per sync.** SimpleFIN returns every account, balance and transaction on a connection in one answer, so each sync makes one request.
+- **History.** The first sync reads the last 89 days, since SimpleFIN Bridge serves at most 90 days per request. Later syncs read from a week before the last successful sync, so transactions that post late are not missed.
+- **Schedule.** The worker syncs each connection automatically, at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours.
+- **Pending transactions** arrive as pending and become posted when the bank posts them, without a duplicate.
+- **Balances** are the booked balance and the available balance SimpleFIN reports, dated by the time SimpleFIN gives for them.
+- **Problems SimpleFIN reports**, such as a bank inside SimpleFIN Bridge asking you to sign in again, appear in the connection's sync history as a plain message. Fix them in SimpleFIN Bridge, and the next sync picks the bank up again.
+
+## Revoke or disconnect
+
+- **Disabled in SimpleFIN Bridge.** SimpleFIN refuses the next sync, and the connection shows as revoked and stops syncing. To sync again, create a new setup token and connect with it.
+- **Disconnected in WonderMoney.** The stored access is destroyed straight away, so nothing can sync the connection again. WonderMoney cannot disable the token for you: disable it in SimpleFIN Bridge too.
+
+## Privacy and security
+
+- **What is stored.** The access address SimpleFIN returns, which carries the credentials for your SimpleFIN data, is encrypted with AES-256-GCM under `CREDENTIAL_ENCRYPTION_KEY_V1`, together with the name of the server it points to. It is never shown back to anyone or written to a log, and the setup token itself is not kept. The accounts, balances and transactions it brings in are stored like any other bank data.
+- **Read-only.** SimpleFIN gives read access only: it cannot move money or make payments.
+- **Who calls SimpleFIN.** The API, to claim the token when someone connects, and the worker, which runs the syncs. Each sync carries the connection's credentials and asks for its accounts and transactions; nothing about your other users is sent. See [What your instance sends](/en/docs/self-hosting/configure#what-your-instance-sends).
+- **A guard against crafted tokens.** A setup token is an encoded address chosen by whoever made it, so before every request the server checks the address: it must be `https` on port 443, its host must be on `SIMPLEFIN_BRIDGE_HOSTS` (or SimpleFIN Bridge's hosts when that is empty), it must not be an IP address, and every address the host resolves to must be public, never loopback, private, link-local or shared carrier space (CGNAT). Redirects are not followed. A token pointing anywhere else is refused, so it cannot make your server reach its own network.
+
+If you offer SimpleFIN, say so in your privacy policy: your users' bank data reaches your server through SimpleFIN Bridge, under SimpleFIN's own terms.
+
+## Limits
+
+- SimpleFIN Bridge covers banks in the United States and Canada, and it is a paid subscription each person holds with SimpleFIN.
+- The first sync goes back 89 days. Older history is not fetched.
+- Accounts in a custom currency (one without an ISO 4217 code, such as reward points) are left out, and the connection's sync history says an account was left out for its currency.
+- Investment holdings are not imported yet ([issue #22](https://github.com/wondermoney/wondermoney/issues/22)).
+- WonderMoney's hosted service does not offer SimpleFIN.

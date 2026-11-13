@@ -3,6 +3,8 @@ export const externalDestinations = {
   terms: 'https://docs.wonder.money/about/terms-of-service',
   help: 'https://docs.wonder.money/',
   whatsNew: 'https://wondermoney.canny.io/changelog',
+  // Where a person creates the one-time setup token Connect with SimpleFIN asks for.
+  simplefinBridge: 'https://bridge.simplefin.org/',
 } as const
 
 /** The self-hosting guide in each docs language (the docs site always prefixes the locale). */

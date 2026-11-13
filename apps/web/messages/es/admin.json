@@ -8,6 +8,7 @@
     "failing": "Con fallos desde hace más de {hours} horas",
     "status-linked": "Vinculada",
     "status-expired": "Caducada",
+    "status-revoked": "Revocada",
     "status-error": "Error",
     "status-authorized": "Autorizada",
     "status-created": "Iniciada, sin vincular",

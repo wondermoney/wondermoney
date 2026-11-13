@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
 
+import type { BankConnectionProvider } from './connection-status-contract'
 import { bankSyncHistoryKey } from './query-keys'
 import { createBankSyncHistoryEndpoint } from './sync-history-contract'
 
@@ -11,13 +12,14 @@ import { createBankSyncHistoryEndpoint } from './sync-history-contract'
  * the other banking reads: a history is a snapshot, and the screen offers an
  * explicit retry. A 404 means the connection is gone (or belongs to someone
  * else), which the screen reads as "not found" rather than an empty history.
+ * `provider` picks the id space: a SimpleFIN connection has its own route.
  */
-export function useBankSyncHistory(connectionId: number | null) {
+export function useBankSyncHistory(connectionId: number | null, provider: BankConnectionProvider = 'EnableBanking') {
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useBankSyncHistory requires an authenticated runtime')
   const query = useQuery({
-    queryKey: bankSyncHistoryKey(runtime.epochId, connectionId ?? 0),
-    queryFn: () => runtime.apiClient.read(createBankSyncHistoryEndpoint(connectionId as number)),
+    queryKey: bankSyncHistoryKey(runtime.epochId, connectionId ?? 0, provider),
+    queryFn: () => runtime.apiClient.read(createBankSyncHistoryEndpoint(connectionId as number, provider)),
     enabled: connectionId !== null,
     retry: false,
     refetchOnReconnect: false,

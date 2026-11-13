@@ -103,7 +103,7 @@ describe('bank sync health', () => {
 
     const health = await getBankSyncHealth(db.em(), { now: NOW });
 
-    expect(health.connections.byStatus).toEqual({ authorized: 0, created: 0, error: 1, expired: 1, linked: 2 });
+    expect(health.connections.byStatus).toEqual({ authorized: 0, created: 0, error: 1, expired: 1, linked: 2, revoked: 0 });
     expect(health.connections.total).toBe(4);
   });
 

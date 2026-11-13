@@ -157,4 +157,51 @@ describe('scheduled bank sync eligibility', () => {
     expect(result).toMatchObject({ enqueued: 1 });
     expect(enqueuedConnectionKeys).toEqual([String(eligible.bankConnectionKey)]);
   });
+
+  /** A SimpleFIN connection: its access has no end date, so `accessValidUntil` stays null. */
+  async function simplefinConnection(household: Household, input: { lastSyncAttemptAt?: Date; refreshedAt?: Date; status?: BankConnectionStatus } = {}) {
+    sequence += 1;
+    const em = db.em();
+    const bankConnection = em.create(BankConnection, {
+      appuserKey: household.appuser,
+      externalId: `simplefin:${sequence}`,
+      lastSyncAttemptAt: input.lastSyncAttemptAt,
+      provider: 'simplefin',
+      status: input.status ?? BankConnectionStatus.LINKED,
+      tenantKey: household.tenant,
+    }, { partial: true });
+    await em.flush();
+    const account = await addAccount(em, household);
+    em.assign(account, { bankConnectionKey: bankConnection, refreshedAt: input.refreshedAt });
+    await em.flush();
+    return bankConnection;
+  }
+
+  it('syncs a due SimpleFIN connection, which has no access end date, once the operator enables it', async () => {
+    vi.stubEnv('BANK_PROVIDERS', 'enable_banking,simplefin');
+    try {
+      const household = await seedHousehold(db.em());
+      const due = await simplefinConnection(household, { lastSyncAttemptAt: hoursAgo(21), refreshedAt: hoursAgo(21) });
+      await simplefinConnection(household, { lastSyncAttemptAt: hoursAgo(5), refreshedAt: hoursAgo(30) });
+      await simplefinConnection(household, { lastSyncAttemptAt: hoursAgo(30), refreshedAt: hoursAgo(30), status: BankConnectionStatus.REVOKED });
+
+      const { enqueuedConnectionKeys, result } = await scan();
+
+      expect(result).toMatchObject({ enqueued: 1 });
+      expect(enqueuedConnectionKeys).toEqual([String(due.bankConnectionKey)]);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('never syncs SimpleFIN while BANK_PROVIDERS leaves it out, and still needs an end date from the others', async () => {
+    const household = await seedHousehold(db.em());
+    await simplefinConnection(household, { lastSyncAttemptAt: hoursAgo(30), refreshedAt: hoursAgo(30) });
+    const expiring = await connection(household, { lastSyncAttemptAt: hoursAgo(30), refreshedAt: hoursAgo(30) });
+    await db.em().nativeUpdate(BankConnection, { bankConnectionKey: expiring.bankConnectionKey }, { accessValidUntil: null });
+
+    const { result } = await scan();
+
+    expect(result).toMatchObject({ enqueued: 0 });
+  });
 });

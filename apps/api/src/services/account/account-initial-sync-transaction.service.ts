@@ -16,6 +16,7 @@ import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/Tr
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
+import type { BankReportedErrorCode } from '@service/bank-providers/errors';
 import type {
   BankConnectionRef,
   BankProvider,
@@ -23,7 +24,7 @@ import type {
   BankStableIdFields,
   BankTransactionIdentity,
 } from '@service/bank-providers/types';
-import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
+import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
 import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
@@ -49,7 +50,7 @@ import { convertMoney, roundMoney, toNumber } from '@utils/money';
 
 /** See the identical note in `account-initial-sync-account.service.ts` — `requisitionId`/
  * `requisitionKey` are provider-agnostic sync-target identity fields. */
-export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
+export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; /** What the aggregator reported for an account that failed. */ reportedErrorCode?: BankReportedErrorCode; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
 
 /** One provider transaction row, re-exported under the name the sync services and tests use. */
 export type BankSyncTransaction = BankProviderTransaction;
@@ -113,7 +114,7 @@ class AccountInitialSyncTransactionService {
     const createdTransactions: Transaction[] = [];
     // See `account-initial-sync-account.service.ts`: a rate limit stops the loop, and a 400/401 on
     // every account is reported so the worker can check whether the consent ended.
-    let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0;
+    let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0; let reportedErrorCode: BankReportedErrorCode | undefined;
     for (const [index, account] of accounts.entries()) {
       let accountCreated = 0; let accountFailed = 0; let accountSkipped = 0;
       try {
@@ -174,6 +175,7 @@ class AccountInitialSyncTransactionService {
       } catch (error) {
         failedAccountIds.push(account.accountId ?? String(account.accountKey)); transactionsFailed += 1;
         if (isProviderRejection(error)) rejectedCount += 1;
+        reportedErrorCode ??= providerReportedCodeOf(error);
         rateLimited = providerRateLimitOf(error);
         if (rateLimited) {
           // The accounts not yet fetched count as failed, so their freshness marker stays put.
@@ -249,7 +251,7 @@ class AccountInitialSyncTransactionService {
     // Best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks sync.
     for (const tenantKey of affectedTenantKeys) await enqueueTransactionEnrichmentForTenant(tenantKey, 'account-initial-sync', { enqueue: deps.enqueue });
     const status = failedAccountIds.length === accounts.length ? 'failed' : failedAccountIds.length > 0 ? 'partial' : 'completed';
-    const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}) };
+    const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}), ...(reportedErrorCode ? { reportedErrorCode } : {}) };
     return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), ...signals, failedAccountIds, requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
   }
 

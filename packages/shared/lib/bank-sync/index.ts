@@ -18,6 +18,7 @@ export const BANK_SYNC_ERROR_CODES = [
   'cancelled',
   'consent_expired',
   'data_validation',
+  'institution_action_required',
   'institution_unavailable',
   'internal',
   'invalid_requisition',
@@ -27,12 +28,16 @@ export const BANK_SYNC_ERROR_CODES = [
   'timeout',
   'transaction_phase_failed',
   'unknown',
+  'unsupported_currency',
 ] as const;
 
 export type BankSyncErrorCode = (typeof BANK_SYNC_ERROR_CODES)[number];
 
-/** What the person can do about a failed run. */
-export type BankSyncErrorAction = 'contact-support' | 'reconnect' | 'wait';
+/**
+ * What the person can do about a failed run. `fix-at-provider`: the problem is at the aggregator
+ * (a bank inside SimpleFIN Bridge needs signing in again), so it is fixed there, not here.
+ */
+export type BankSyncErrorAction = 'contact-support' | 'fix-at-provider' | 'reconnect' | 'wait';
 
 export interface BankSyncErrorCopy {
   action: BankSyncErrorAction;
@@ -65,6 +70,10 @@ export const BANK_SYNC_ERROR_COPY = {
   data_validation: {
     action: 'contact-support',
     messageKey: 'bank-sync.errors.data-validation',
+  },
+  institution_action_required: {
+    action: 'fix-at-provider',
+    messageKey: 'bank-sync.errors.institution-action-required',
   },
   institution_unavailable: {
     action: 'wait',
@@ -102,11 +111,16 @@ export const BANK_SYNC_ERROR_COPY = {
     action: 'contact-support',
     messageKey: 'bank-sync.errors.unknown',
   },
+  unsupported_currency: {
+    action: 'contact-support',
+    messageKey: 'bank-sync.errors.unsupported-currency',
+  },
 } as const satisfies Record<BankSyncErrorCode, BankSyncErrorCopy>;
 
 /** Translation key for the suggested action's label. */
 export const BANK_SYNC_ERROR_ACTION_KEYS = {
   'contact-support': 'bank-sync.actions.contact-support',
+  'fix-at-provider': 'bank-sync.actions.fix-at-provider',
   reconnect: 'bank-sync.actions.reconnect',
   wait: 'bank-sync.actions.wait',
 } as const satisfies Record<BankSyncErrorAction, string>;

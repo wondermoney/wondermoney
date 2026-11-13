@@ -141,6 +141,15 @@ export const ERROR_CODE = {
   TRANSACTION_BANK_SYNCED: 'transaction_bank_synced',
   /** A bulk change or delete whose filter or id list selects more than 5,000 transactions (400). Narrow the filter. */
   BULK_SELECTION_TOO_LARGE: 'bulk_selection_too_large',
+  /** Connecting SimpleFIN: the pasted value is not a SimpleFIN setup token (400). */
+  SIMPLEFIN_TOKEN_INVALID: 'simplefin_token_invalid',
+  /**
+   * Connecting SimpleFIN: the setup token was already claimed (400). If the person did not claim
+   * it, someone else may have: they should disable it at their SimpleFIN server and make a new one.
+   */
+  SIMPLEFIN_TOKEN_ALREADY_CLAIMED: 'simplefin_token_already_claimed',
+  /** Connecting SimpleFIN: the token or the access it returned points to a server this instance does not allow (400). */
+  SIMPLEFIN_SERVER_NOT_ALLOWED: 'simplefin_server_not_allowed',
   /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
   TAG_NAME_TAKEN: 'tag_name_taken',
   /** Adding an exchange-rate override: the household already has one for this pair and day (409). Change that one instead. */

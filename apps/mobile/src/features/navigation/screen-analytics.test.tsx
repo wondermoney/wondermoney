@@ -26,6 +26,7 @@ describe('resolveFeatureScreen', () => {
     ['/more', 'more'],
     ['/more/banking', 'bank_connections'],
     ['/more/banking/connect', 'bank_connect'],
+    ['/more/banking/simplefin/connect', 'bank_connect_simplefin'],
     ['/reports/spending-by-category', 'report_spending_by_category'],
     ['/reports/month-comparison', 'report_month_comparison'],
     ['/settings/profile/edit', 'settings_profile_edit'],

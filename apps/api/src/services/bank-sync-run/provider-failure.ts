@@ -1,4 +1,4 @@
-import { BankProviderError, RateLimitedError } from '@service/bank-providers/errors';
+import { BankProviderError, type BankReportedErrorCode, ProviderReportedError, RateLimitedError } from '@service/bank-providers/errors';
 
 /**
  * Provider failure signals the sync phases read from a per-account error before they swallow it.
@@ -48,4 +48,12 @@ function statusOf(error: unknown): number | undefined {
   if (!error || typeof error !== 'object') return undefined;
   const status = (error as { status?: unknown }).status;
   return typeof status === 'number' ? status : undefined;
+}
+
+/**
+ * The code an aggregator reported for an account it answered for (`ProviderReportedError`), so
+ * a partial run is recorded under what the aggregator said rather than a generic code.
+ */
+export function providerReportedCodeOf(error: unknown): BankReportedErrorCode | undefined {
+  return error instanceof ProviderReportedError ? error.reportedCode : undefined;
 }

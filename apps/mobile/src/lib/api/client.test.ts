@@ -317,6 +317,40 @@ describe('API client', () => {
     expect(commit200).not.toHaveBeenCalled()
   })
 
+  it('keeps a 400 message only for an endpoint that opts in, and never in the enumerable fields', async () => {
+    const body = { code: 'bad_request', message: ' This setup token was already used. ' }
+    const optedIn = writeEndpoint({ method: 'POST', path: '/write', schema: z.undefined(), keepsBadRequestMessage: true })
+    const kept = await setup(async () => ({ status: 400, body })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(kept).toMatchObject({ name: 'ApiError', code: 'http', status: 400, serverMessage: 'This setup token was already used.' })
+    expect((kept as Error).message).not.toContain('setup token')
+    expect(Object.keys(kept as object)).not.toContain('serverMessage')
+    expect(JSON.stringify(kept)).not.toContain('setup token')
+    expect((kept as ApiError).serverCode).toBe('bad_request')
+    expect(Object.keys(kept as object)).not.toContain('serverCode')
+
+    const plain = writeEndpoint({ method: 'POST', path: '/write', schema: z.undefined() })
+    const dropped = await setup(async () => ({ status: 400, body })).client.write(plain, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(dropped).toMatchObject({ code: 'http', status: 400 })
+    expect((dropped as ApiError).serverMessage).toBeUndefined()
+    // Every 4xx keeps its code; only the message needs the opt-in.
+    expect((dropped as ApiError).serverCode).toBe('bad_request')
+
+    // Only a 400: another status keeps its usual classification and no text.
+    const otherStatus = await setup(async () => ({ status: 502, body })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(otherStatus).toMatchObject({ code: 'http', status: 502 })
+    expect((otherStatus as ApiError).serverMessage).toBeUndefined()
+
+    // A blank or missing message reads as absent.
+    const blank = await setup(async () => ({ status: 400, body: { message: '  ' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect((blank as ApiError).serverMessage).toBeUndefined()
+
+    // A code without a message still comes through; a malformed code does not.
+    const codeOnly = await setup(async () => ({ status: 400, body: { code: 'simplefin_token_invalid' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(codeOnly).toMatchObject({ serverCode: 'simplefin_token_invalid' })
+    const badCode = await setup(async () => ({ status: 400, body: { code: 'Not A Code!' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect((badCode as ApiError).serverCode).toBeUndefined()
+  })
+
   it('does not commit an invalid write response', async () => {
     const endpoint = writeEndpoint({ method: 'PUT', path: '/write', schema: z.object({ saved: z.boolean() }) })
     const commit = jest.fn()

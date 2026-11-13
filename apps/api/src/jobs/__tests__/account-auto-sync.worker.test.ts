@@ -185,6 +185,18 @@ describe('scheduled bank sync producer contract worker', () => {
       expect(h.connectionSyncState.checkConsent).not.toHaveBeenCalled();
     });
 
+    it('records what the aggregator reported instead of a generic code for a partial or failed run', async () => {
+      const partial = harness();
+      partial.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ reportedErrorCode: 'institution_action_required', status: 'partial' } as { status: string });
+      await expect(run(partial, 'sfin-partial')).rejects.toThrow('partial');
+      expect(partial.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'provider', errorCode: 'institution_action_required', result: 'partial' }));
+
+      const failed = harness();
+      failed.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ reportedErrorCode: 'unsupported_currency', status: 'failed' } as { status: string });
+      await expect(run(failed, 'sfin-failed')).rejects.toThrow('failed');
+      expect(failed.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'data_validation', errorCode: 'unsupported_currency', result: 'failed' }));
+    });
+
     it('records the attempt before a failing provider call, so the retry waits out the interval', async () => {
       const h = harness();
       h.accountService.syncAccountsForRequisition.mockRejectedValueOnce(Object.assign(new Error('bank unreachable'), { name: 'ProviderUnavailableError', status: 503 }));

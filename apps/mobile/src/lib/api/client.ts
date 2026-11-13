@@ -130,10 +130,25 @@ const parseSuccess = <Value>(
   }
 }
 
+/** Longest 400 message kept for a `keepsBadRequestMessage` endpoint; anything longer is dropped. */
+const MAX_SERVER_MESSAGE_LENGTH = 500
+
 /** The shape of the API's `ERROR_CODE` values; anything else is not kept. */
 const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/
 
-const mapHttpFailure = (response: HttpResponse): never => {
+const readBadRequest = (response: HttpResponse): { serverCode?: string; serverMessage?: string } | undefined => {
+  const envelope = parseCommonErrorEnvelope(response.body)
+  const message = envelope?.message?.trim()
+  const serverMessage = message && message.length <= MAX_SERVER_MESSAGE_LENGTH ? message : undefined
+  const serverCode = envelope?.code && SERVER_CODE.test(envelope.code) ? envelope.code : undefined
+  if (!serverMessage && !serverCode) return undefined
+  return { ...(serverCode ? { serverCode } : {}), ...(serverMessage ? { serverMessage } : {}) }
+}
+
+const mapHttpFailure = (response: HttpResponse, options?: { keepsBadRequestMessage?: boolean }): never => {
+  if (response.status === 400 && options?.keepsBadRequestMessage) {
+    throw new ApiError('http', 400, readBadRequest(response))
+  }
   if (response.status === 403) {
     const envelope = parseCommonErrorEnvelope(response.body)
     if (envelope?.code === 'demo_read_only') throw new ApiError('demo-forbidden', 403)
@@ -327,7 +342,7 @@ export const createApiClient = ({
             ? endpoint.successStatuses.includes(response.status)
             : response.status >= 200 && response.status < 300
           if (accepted) return parseSuccess(endpoint, response)
-          return mapHttpFailure(response)
+          return mapHttpFailure(response, endpoint)
         },
         commit,
       )

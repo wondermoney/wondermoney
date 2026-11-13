@@ -12,6 +12,7 @@
     "upgrade-and-backup",
     "monitoring",
     "bank-sync-health",
+    "simplefin",
     "adding-a-bank-provider"
   ]
 }

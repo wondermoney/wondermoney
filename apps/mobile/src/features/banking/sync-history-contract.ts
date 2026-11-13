@@ -2,11 +2,12 @@ import { z } from 'zod'
 
 import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 
-import { isValidBankConnectionId } from './connection-status-contract'
+import { type BankConnectionProvider, isValidBankConnectionId } from './connection-status-contract'
 
 /**
  * `GET /v1/banking/connections/:connectionId/syncs`: the last 20 attempts for
- * one connection, newest first. `result` and `errorCode` are null while a run is
+ * one connection, newest first. A SimpleFIN connection, a separate id space,
+ * reads the same shape from `GET /v1/banking/simplefin/connections/:connectionId/syncs`. `result` and `errorCode` are null while a run is
  * still going; `retryAt` is set only for a rate-limited run that has a next
  * attempt time.
  *
@@ -31,11 +32,13 @@ export const bankSyncHistoryResponseSchema = z.object({
 export type BankSyncHistoryRunDto = z.infer<typeof bankSyncHistoryRunSchema>
 export type BankSyncHistoryResponseDto = z.infer<typeof bankSyncHistoryResponseSchema>
 
-export function createBankSyncHistoryEndpoint(connectionId: number) {
+export function createBankSyncHistoryEndpoint(connectionId: number, provider: BankConnectionProvider = 'EnableBanking') {
   if (!isValidBankConnectionId(connectionId)) throw new Error('A positive safe connection id is required.')
   return readEndpoint({
     method: 'GET',
-    path: `/v1/banking/connections/${connectionId}/syncs`,
+    path: provider === 'SimpleFIN'
+      ? `/v1/banking/simplefin/connections/${connectionId}/syncs`
+      : `/v1/banking/connections/${connectionId}/syncs`,
     schema: bankSyncHistoryResponseSchema,
   })
 }

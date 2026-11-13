@@ -7,6 +7,7 @@ export enum AccountFinancialInstitutionProvider {
   GOCARDLESS = 'gocardless',
   /** A provider added through the `BankProvider` interface that is neither of the above. */
   OTHER = 'other',
+  SIMPLEFIN = 'simplefin',
 }
 
 /**

@@ -165,13 +165,13 @@ export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountIn
       transactionService: deps.accountInitialSyncTransactionService ?? accountInitialSyncTransactionService,
     });
     if (phases.status === 'failed') {
-      const errorCode = phases.rateLimited ? 'rate_limited' : phases.failedAt === 'account' ? 'account_phase_failed' : 'transaction_phase_failed';
+      const errorCode = phases.rateLimited ? 'rate_limited' : phases.reportedErrorCode ?? (phases.failedAt === 'account' ? 'account_phase_failed' : 'transaction_phase_failed');
       const final = await finalize('failed', errorCode, false, phases.account);
       if (final) return false;
       throw new BankSyncOutcomeError(`account.initial-sync:${phases.failedAt}-phase-failed`);
     }
     if (phases.status === 'partial') {
-      const final = await finalize('partial', phases.rateLimited ? 'rate_limited' : 'data_validation', false, phases.account);
+      const final = await finalize('partial', phases.rateLimited ? 'rate_limited' : phases.reportedErrorCode ?? 'data_validation', false, phases.account);
       if (final) return false;
       throw new BankSyncOutcomeError('account.initial-sync:partial');
     }

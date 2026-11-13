@@ -3,6 +3,8 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import type { AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
 import { BankConnectionStatus } from '@entity/BankConnection';
 
+import type { BankReportedErrorCode } from './errors';
+
 export { BankConnectionStatus };
 
 /**
@@ -32,6 +34,11 @@ export interface BankAccountsResult {
   institutionId?: string;
   /** The provider's raw connection status, surfaced in the zero-accounts log. */
   providerStatus?: string;
+  /**
+   * A problem the aggregator reported for the whole connection while still answering (SimpleFIN's
+   * error list), or an account it left out. The run is at best partial, recorded under this code.
+   */
+  reportedErrorCode?: BankReportedErrorCode;
 }
 
 export interface BankCompleteConnectionInput {
@@ -100,6 +107,8 @@ export interface BankProviderAccount {
 export interface BankProviderBalance {
   balanceAmount?: { amount?: string };
   balanceType?: string;
+  /** When the bank says the balance took this value (ISO 8601), if it says. */
+  referenceDate?: string;
 }
 
 export type BankSessionStatus = 'active' | 'ended' | 'unknown';
@@ -172,6 +181,12 @@ export interface BankProvider {
 
   /** `listInstitutions` / `startConnection` / `completeConnection` are the consent flow. */
   completeConnection(input: BankCompleteConnectionInput): Promise<BankCompleteConnectionResult>;
+
+  /**
+   * False for a provider whose access has no end date (SimpleFIN): its connections leave
+   * `accessValidUntil` null and the scheduler still syncs them. Omitted means the consent expires.
+   */
+  readonly consentExpires?: boolean;
 
   /**
    * The institution behind each of these `BankConnection` keys, read from the provider's own

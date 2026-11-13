@@ -1,0 +1,70 @@
+---
+title: SimpleFIN para bancos dos EUA e do Canadá
+description: Deixa as pessoas da tua instância sincronizar contas de bancos dos EUA e do Canadá através do SimpleFIN Bridge, e vê o que o servidor guarda e contacta quando o fazem.
+---
+
+A Enable Banking liga bancos na Europa. Para bancos dos Estados Unidos e do Canadá, uma instância alojada por ti pode também oferecer o [SimpleFIN Bridge](https://bridge.simplefin.org/), um agregador bancário pago, só de leitura, que cada pessoa subscreve por si. A WonderMoney não tem qualquer ligação ao SimpleFIN.
+
+O SimpleFIN fica desligado até um operador o ligar. O serviço alojado da WonderMoney não o oferece.
+
+<Callout type="info" title="Uma integração nova">
+  A integração segue o [protocolo SimpleFIN](https://www.simplefin.org/protocol.html) público e é testada com respostas gravadas, ainda não com uma conta SimpleFIN real. Se uma sincronização parecer errada, [abre um issue](https://github.com/wondermoney/wondermoney/issues).
+</Callout>
+
+## Ligá-lo
+
+Acrescenta `simplefin` a `BANK_PROVIDERS` no `.env`, e mantém `enable_banking` na lista se os teus utilizadores também ligam bancos europeus:
+
+```sh
+BANK_PROVIDERS=enable_banking,simplefin
+```
+
+Depois corre `docker compose up -d`. A API e o worker leem-na; em Kubernetes, define `config.BANK_PROVIDERS` nos teus values. `GET /v1/instance` passa então a listar `simplefin` em `features.bankSyncProviders`, e as aplicações web e móvel mostram **Ligar com SimpleFIN**. Vê [Sincronização bancária](/pt/docs/self-hosting/configure#sincronização-bancária) para a definição em si.
+
+O SimpleFIN precisa também de `CREDENTIAL_ENCRYPTION_KEY_V1`, que a instalação gera. Sem ela, a ligação é recusada antes de o token de configuração ser usado, porque um token só funciona uma vez.
+
+| Definição | O que faz |
+|---|---|
+| `SIMPLEFIN_BRIDGE_HOSTS` | Os anfitriões que o servidor pode contactar para o SimpleFIN, separados por vírgulas. Vazio significa o SimpleFIN Bridge, `bridge.simplefin.org` e `beta-bridge.simplefin.org`. Define-a só para usar outro servidor que fale o protocolo SimpleFIN: substitui a lista por omissão, por isso acrescenta também os anfitriões do Bridge se ainda os quiseres. Define-a na API e no worker |
+| `BANK_SYNC_MIN_INTERVAL_HOURS` | O mínimo de horas entre sincronizações automáticas de uma ligação, 20 por omissão. O SimpleFIN Bridge espera cerca de 24 pedidos por dia ou menos por token, e o valor por omissão fica-se por um ou dois por ligação. Não o baixes muito |
+
+## Ligar os teus bancos
+
+1. No [SimpleFIN Bridge](https://bridge.simplefin.org/), regista-te, liga os teus bancos e cria um token de configuração (setup token).
+2. Na WonderMoney, escolhe **Ligar com SimpleFIN**, nas Definições na web ou na área de bancos da aplicação móvel, e cola o token.
+3. A WonderMoney troca o token junto do SimpleFIN por um endereço de acesso privado, que guarda cifrado. As tuas contas e transações aparecem depois da primeira sincronização.
+
+Um token de configuração só funciona uma vez. Se a WonderMoney disser que o token já foi usado e não foste tu a usá-lo, outra pessoa pode tê-lo: desativa-o no SimpleFIN Bridge e cria um novo.
+
+Uma ligação pertence ao membro que a criou. Só esse membro vê o histórico de sincronizações e pode desligá-la.
+
+## Como funciona a sincronização
+
+- **Um pedido por sincronização.** O SimpleFIN devolve todas as contas, saldos e transações de uma ligação numa só resposta, por isso cada sincronização faz um pedido.
+- **Histórico.** A primeira sincronização lê os últimos 89 dias, já que o SimpleFIN Bridge serve no máximo 90 dias por pedido. As seguintes leem a partir de uma semana antes da última sincronização bem-sucedida, para não perder transações que entram tarde.
+- **Calendário.** O worker sincroniza cada ligação automaticamente, no máximo uma vez a cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas.
+- **Transações pendentes** chegam como pendentes e passam a lançadas quando o banco as lança, sem duplicados.
+- **Saldos** são o saldo contabilístico e o saldo disponível que o SimpleFIN indica, com a data que o SimpleFIN lhes dá.
+- **Problemas que o SimpleFIN indica**, como um banco dentro do SimpleFIN Bridge a pedir que voltes a iniciar sessão, aparecem no histórico de sincronizações da ligação como uma mensagem simples. Resolve-os no SimpleFIN Bridge, e a sincronização seguinte volta a apanhar o banco.
+
+## Revogar ou desligar
+
+- **Desativado no SimpleFIN Bridge.** O SimpleFIN recusa a sincronização seguinte, e a ligação aparece como revogada e deixa de sincronizar. Para voltar a sincronizar, cria um novo token de configuração e liga-te com ele.
+- **Desligado na WonderMoney.** O acesso guardado é destruído de imediato, por isso nada volta a sincronizar a ligação. A WonderMoney não consegue desativar o token por ti: desativa-o também no SimpleFIN Bridge.
+
+## Privacidade e segurança
+
+- **O que é guardado.** O endereço de acesso que o SimpleFIN devolve, que leva as credenciais dos teus dados SimpleFIN, é cifrado com AES-256-GCM sob `CREDENTIAL_ENCRYPTION_KEY_V1`, junto com o nome do servidor para onde aponta. Nunca é mostrado a ninguém nem escrito num registo, e o token de configuração em si não é guardado. As contas, saldos e transações que traz ficam guardados como quaisquer outros dados bancários.
+- **Só leitura.** O SimpleFIN dá apenas acesso de leitura: não pode mover dinheiro nem fazer pagamentos.
+- **Quem contacta o SimpleFIN.** A API, para trocar o token quando alguém se liga, e o worker, que corre as sincronizações. Cada sincronização leva as credenciais da ligação e pede as suas contas e transações; nada sobre os teus outros utilizadores é enviado. Vê [O que a tua instância envia](/pt/docs/self-hosting/configure#o-que-a-tua-instância-envia).
+- **Uma proteção contra tokens forjados.** Um token de configuração é um endereço codificado, escolhido por quem o criou, por isso antes de cada pedido o servidor verifica o endereço: tem de ser `https` na porta 443, o anfitrião tem de estar em `SIMPLEFIN_BRIDGE_HOSTS` (ou nos anfitriões do SimpleFIN Bridge quando está vazia), não pode ser um endereço IP, e todos os endereços para onde o anfitrião resolve têm de ser públicos, nunca loopback, privados, link-local ou de espaço partilhado de operador (CGNAT). Os redirecionamentos não são seguidos. Um token que aponte para outro lado é recusado, por isso não consegue levar o teu servidor a alcançar a sua própria rede.
+
+Se ofereceres o SimpleFIN, indica-o na tua política de privacidade: os dados bancários dos teus utilizadores chegam ao teu servidor através do SimpleFIN Bridge, ao abrigo dos termos do próprio SimpleFIN.
+
+## Limites
+
+- O SimpleFIN Bridge cobre bancos dos Estados Unidos e do Canadá, e é uma subscrição paga que cada pessoa tem com o SimpleFIN.
+- A primeira sincronização recua 89 dias. O histórico mais antigo não é obtido.
+- As contas numa moeda personalizada (sem código ISO 4217, como pontos de recompensa) ficam de fora, e o histórico de sincronizações da ligação indica que uma conta ficou de fora pela sua moeda.
+- As posições de investimento ainda não são importadas ([issue #22](https://github.com/wondermoney/wondermoney/issues/22)).
+- O serviço alojado da WonderMoney não oferece o SimpleFIN.

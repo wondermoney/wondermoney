@@ -3765,6 +3765,7 @@
       "emptyMessage": "Connect a bank to bring read-only account data into WonderMoney.",
       "readOnlyTrust": "Open Banking access is read-only. WonderMoney cannot move money or make payments.",
       "rowLabel": "{{institution}}, status {{status}}, expires {{expiry}}, data {{freshness}}",
+      "rowLabelNoExpiry": "{{institution}}, status {{status}}, data {{freshness}}",
       "expiresOn": "Consent expires {{date}}",
       "freshnessOn": "Data fresh as of {{date}}",
       "freshnessUnknown": "Data freshness unavailable",
@@ -3789,6 +3790,8 @@
         "message": "The connection status received could not be verified. Try again to load a fresh copy."
       },
       "connectCta": "Connect a bank",
+      "simplefinCta": "Connect with SimpleFIN",
+      "simplefinHint": "For banks in the US and Canada, through SimpleFIN Bridge.",
       "result": {
         "success": {
           "title": "Bank connected",
@@ -3835,6 +3838,10 @@
         "action": "Reconnect",
         "actionLabel": "Reconnect {{institution}}",
         "starting": "Opening your bank…"
+      },
+      "simplefin": {
+        "statusRevoked": "Access revoked",
+        "accessEnded": "SimpleFIN access was revoked. Connect again with a new setup token."
       }
     },
     "connect": {
@@ -3867,6 +3874,32 @@
         "title": "Add your Enable Banking key first",
         "message": "Linking a bank needs your own Enable Banking application ID and key. Add them in Settings, under Bank Provider, in the WonderMoney web app, then come back here.",
         "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
+      }
+    },
+    "simplefin": {
+      "heading": "Connect with SimpleFIN",
+      "helper": "Paste a setup token from SimpleFIN Bridge, which connects banks in the US and Canada.",
+      "tokenExplainer": "A setup token is a one-time code you create at SimpleFIN Bridge after linking your banks there. It works only once.",
+      "storageExplainer": "WonderMoney exchanges it once for read-only access to your accounts and stores that access encrypted. The token itself is not kept.",
+      "bridgeLink": "Get a setup token at SimpleFIN Bridge",
+      "bridgeLinkHint": "Opens bridge.simplefin.org in your browser",
+      "tokenLabel": "Setup token",
+      "tokenPlaceholder": "Paste your setup token",
+      "submit": "Connect",
+      "connecting": "Connecting…",
+      "failures": {
+        "token-invalid": "That isn't a valid SimpleFIN setup token. Copy the whole token from SimpleFIN Bridge and try again.",
+        "token-already-claimed": "This setup token was already used. If you didn't use it, disable it at SimpleFIN Bridge, since someone else may have claimed it, then create a new one.",
+        "server-not-allowed": "This setup token points to a SimpleFIN server this WonderMoney server doesn't allow. Create one at SimpleFIN Bridge instead.",
+        "rejected": "SimpleFIN did not accept this setup token. Create a new one at SimpleFIN Bridge and try again.",
+        "demo": "This action is unavailable in demo mode.",
+        "access": "You don't have access to connect a bank.",
+        "mfa": "Additional verification is required before you can connect a bank.",
+        "disabled": "SimpleFIN isn't turned on for this server.",
+        "unreachable": "SimpleFIN couldn't be reached. Try again in a moment.",
+        "rate-limited": "Too many attempts. Wait a moment, then try again.",
+        "network": "We couldn't confirm the connection. Check your bank connections before trying again: a setup token works only once.",
+        "general": "Something went wrong connecting SimpleFIN. Please try again."
       }
     },
     "statementImport": {
@@ -4638,6 +4671,7 @@
       "cancelled": "The bank connection was cancelled before it finished.",
       "consent-expired": "Your access to this bank has expired.",
       "data-validation": "Your bank sent data we couldn't read.",
+      "institution-action-required": "A bank inside your bank data provider needs your attention. Sign in to it again there, for example at SimpleFIN Bridge.",
       "institution-unavailable": "Your bank isn't available right now.",
       "internal": "Something went wrong on our side.",
       "invalid-requisition": "This bank connection is no longer valid.",
@@ -4646,10 +4680,12 @@
       "rate-limited": "The bank limited how often we can sync.",
       "timeout": "Your bank took too long to respond.",
       "transaction-phase-failed": "Your bank didn't send the transactions.",
-      "unknown": "The sync failed."
+      "unknown": "The sync failed.",
+      "unsupported-currency": "An account uses a currency WonderMoney can't track, so it was left out."
     },
     "actions": {
       "contact-support": "Contact support",
+      "fix-at-provider": "Fix it at your bank data provider",
       "reconnect": "Reconnect your bank",
       "wait": "We'll try again automatically"
     },

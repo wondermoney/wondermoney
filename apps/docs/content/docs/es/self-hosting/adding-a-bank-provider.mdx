@@ -4,8 +4,8 @@ description: Implementa un nuevo agregador bancario detrás de la interfaz BankP
 ---
 
 WonderMoney sincroniza cuentas a través de una interfaz de proveedor, así que añadir un agregador
-no toca los servicios de sincronización. Enable Banking es la primera implementación; esta página
-es la lista de comprobación para una segunda.
+no toca los servicios de sincronización. Enable Banking es la implementación de referencia y
+SimpleFIN una segunda, basada en token; esta página es la lista de comprobación para la siguiente.
 
 ## El punto de extensión
 
@@ -17,8 +17,14 @@ Todo vive en `apps/api/src/services/bank-providers/`:
   `ConsentExpiredError`, `UserActionRequiredError`, `UnavailableError`. Se asignan a los códigos
   de incidente (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), así
   que los servicios de sincronización nunca conocen la forma de error de tu proveedor.
+  `ProviderReportedError` lleva un problema que el agregador indicó para una cuenta (un
+  `BankReportedErrorCode`, como `unsupported_currency`).
 - `registry.ts` — los proveedores compilados y el filtro de activación `BANK_PROVIDERS`.
-- `enable-banking.provider.ts` — la implementación de referencia.
+- `enable-banking.provider.ts` — la implementación de referencia, con redirección de
+  consentimiento.
+- `simplefin.provider.ts` — un proveedor que se conecta con un token de configuración en lugar de
+  una redirección. Rechaza los métodos del flujo de consentimiento, se conecta por su propia ruta
+  (`services/simplefin/`) y lee todas las cuentas en una sola petición por sincronización.
 
 Los servicios de sincronización importan solo `types.ts`. Nunca importan el cliente o la entidad
 de un proveedor y nunca ramifican por el nombre del proveedor.
@@ -33,17 +39,22 @@ Crea `my-provider.provider.ts` e implementa:
 | `startConnection` | Inicia el flujo de consentimiento y devuelve la URL que abre el navegador. Persiste aquí tu fila de conexión. |
 | `completeConnection` | Canjea el código del callback, marca la conexión como activa y persiste sus cuentas. Devuelve `bankConnectionKey`, `accountsCreated` y el destino del navegador. |
 | `getSessionStatus` | Si el consentimiento sigue vigente (`active`, `ended`, `unknown`), usado después de que se rechacen todas las cuentas. |
-| `listAccounts` | Las cuentas de la conexión con moneda, IBAN, titular e id de la institución. |
+| `listAccounts` | Las cuentas de la conexión con moneda, IBAN, titular e id de la institución. Define `reportedErrorCode` para un problema que el agregador indicó sin dejar de responder, como la lista de errores de SimpleFIN: la ejecución queda entonces registrada como parcial con ese código. |
 | `getBalances` | Los saldos de la cuenta, con un `balanceType` que entiende la lista de preferencias (`closingBooked`, `interimBooked`, `expected`, …). |
 | `getTransactions` | La ventana completa, ya dividida en `booked`, `pending` y `voided`. Pagina internamente; la sincronización llama una vez por cuenta. |
 
-Declara también dos capacidades:
+Declara también estas capacidades:
 
 - `transactionIdentity` — la columna de `Transaction` que guarda el id de tu proveedor y el
-  prefijo del id estable para filas sin id. Un proveedor nuevo debe usar su propia columna; las
-  dos existentes son de Enable Banking y del GoCardless heredado.
+  prefijo del id estable para filas sin id. Un proveedor con ids estables y únicos dentro de cada
+  cuenta puede usar la columna genérica `nordigenInternalTransactionId` con ids prefijados por el
+  proveedor, como hace SimpleFIN (`simplefin:<id>`). Enable Banking mantiene su propia columna,
+  por sus reglas de ids inestables.
 - `institutionProvider` — el valor de `AccountFinancialInstitution.provider` de tus cuentas.
   `other` existe para proveedores nuevos.
+- `consentExpires` — ponlo en `false` cuando el acceso no tiene fecha de fin, como con SimpleFIN:
+  la conexión deja `accessValidUntil` vacío y el planificador la sigue sincronizando. Omitido
+  significa que el consentimiento caduca.
 
 Lanza los errores tipados de `errors.ts` en todas las llamadas. No dejes escapar la forma de
 error de tu SDK: las comprobaciones de límite de peticiones y de consentimiento leen los errores
@@ -58,7 +69,9 @@ variable de entorno separada por comas:
 BANK_PROVIDERS=enable_banking,my_provider
 ```
 
-Sin valor, se activan todos los proveedores compilados. `GET /v1/instance` informa la lista en
+Sin valor o vacía, se activan todos los proveedores compilados salvo los opcionales de
+`OPT_IN_PROVIDERS`, hoy SimpleFIN. Haz opcional un proveedor cuando contacta con un servicio de
+pago o regional en nombre del usuario. `GET /v1/instance` informa la lista en
 `features.bankSyncProviders`, y `features.bankSync` es falso cuando no hay ninguno activo. Los
 clientes ocultan la función a partir de esa lista, así que mantén los ids estables.
 

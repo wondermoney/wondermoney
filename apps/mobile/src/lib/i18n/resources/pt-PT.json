@@ -3765,6 +3765,7 @@
       "emptyMessage": "Associa um banco para trazer dados de contas apenas de leitura para a WonderMoney.",
       "readOnlyTrust": "O acesso Open Banking é apenas de leitura. A WonderMoney não pode movimentar dinheiro nem efetuar pagamentos.",
       "rowLabel": "{{institution}}, estado {{status}}, expira {{expiry}}, dados {{freshness}}",
+      "rowLabelNoExpiry": "{{institution}}, estado {{status}}, dados {{freshness}}",
       "expiresOn": "Consentimento expira a {{date}}",
       "freshnessOn": "Dados atualizados a {{date}}",
       "freshnessUnknown": "Atualidade dos dados indisponível",
@@ -3789,6 +3790,8 @@
         "message": "O estado das ligações recebido não pôde ser verificado. Tenta novamente para obter uma versão atualizada."
       },
       "connectCta": "Ligar um banco",
+      "simplefinCta": "Ligar com o SimpleFIN",
+      "simplefinHint": "Para bancos dos EUA e do Canadá, através do SimpleFIN Bridge.",
       "result": {
         "success": {
           "title": "Banco ligado",
@@ -3835,6 +3838,10 @@
         "action": "Voltar a ligar",
         "actionLabel": "Voltar a ligar {{institution}}",
         "starting": "A abrir o teu banco…"
+      },
+      "simplefin": {
+        "statusRevoked": "Acesso revogado",
+        "accessEnded": "O acesso do SimpleFIN foi revogado. Volta a ligar com um novo token de configuração."
       }
     },
     "connect": {
@@ -3867,6 +3874,32 @@
         "title": "Adiciona primeiro a tua chave da Enable Banking",
         "message": "Para ligar um banco precisas do teu próprio ID de aplicação e chave da Enable Banking. Adiciona-os nas Definições, em Fornecedor bancário, na aplicação web da WonderMoney e volta depois aqui.",
         "sharedUnavailable": "A ligação bancária partilhada deste servidor só serve um agregado, por isso o teu precisa da sua própria chave."
+      }
+    },
+    "simplefin": {
+      "heading": "Ligar com o SimpleFIN",
+      "helper": "Cola um token de configuração do SimpleFIN Bridge, que liga bancos dos EUA e do Canadá.",
+      "tokenExplainer": "Um token de configuração é um código de utilização única que crias no SimpleFIN Bridge depois de lá associares os teus bancos. Só funciona uma vez.",
+      "storageExplainer": "A WonderMoney troca-o uma única vez por um acesso apenas de leitura às tuas contas e guarda esse acesso encriptado. O token não é guardado.",
+      "bridgeLink": "Obter um token no SimpleFIN Bridge",
+      "bridgeLinkHint": "Abre bridge.simplefin.org no navegador",
+      "tokenLabel": "Token de configuração",
+      "tokenPlaceholder": "Cola o teu token de configuração",
+      "submit": "Ligar",
+      "connecting": "A ligar…",
+      "failures": {
+        "token-invalid": "Isso não é um token de configuração do SimpleFIN válido. Copia o token completo do SimpleFIN Bridge e tenta novamente.",
+        "token-already-claimed": "Este token de configuração já foi utilizado. Se não o utilizaste, desativa-o no SimpleFIN Bridge, pois outra pessoa pode tê-lo usado, e cria um novo.",
+        "server-not-allowed": "Este token de configuração aponta para um servidor SimpleFIN que este servidor WonderMoney não permite. Cria um no SimpleFIN Bridge.",
+        "rejected": "O SimpleFIN não aceitou este token de configuração. Cria um novo no SimpleFIN Bridge e tenta novamente.",
+        "demo": "Esta ação não está disponível no modo de demonstração.",
+        "access": "Não tens acesso para ligar um banco.",
+        "mfa": "É necessária verificação adicional antes de poderes ligar um banco.",
+        "disabled": "O SimpleFIN não está ativado neste servidor.",
+        "unreachable": "Não foi possível contactar o SimpleFIN. Tenta novamente dentro de momentos.",
+        "rate-limited": "Demasiadas tentativas. Aguarda um momento e tenta novamente.",
+        "network": "Não conseguimos confirmar a ligação. Verifica as tuas ligações bancárias antes de tentares novamente: um token de configuração só funciona uma vez.",
+        "general": "Algo correu mal ao ligar o SimpleFIN. Tenta novamente."
       }
     },
     "statementImport": {
@@ -4638,6 +4671,7 @@
       "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
       "consent-expired": "O teu acesso a este banco expirou.",
       "data-validation": "O teu banco enviou dados que não conseguimos ler.",
+      "institution-action-required": "Um banco dentro do teu fornecedor de dados bancários precisa da tua atenção. Volta a iniciar sessão nele lá, por exemplo no SimpleFIN Bridge.",
       "institution-unavailable": "O teu banco não está disponível neste momento.",
       "internal": "Algo falhou do nosso lado.",
       "invalid-requisition": "Esta ligação ao banco já não é válida.",
@@ -4646,10 +4680,12 @@
       "rate-limited": "O banco limitou a frequência com que podemos sincronizar.",
       "timeout": "O teu banco demorou demasiado a responder.",
       "transaction-phase-failed": "O teu banco não enviou as transações.",
-      "unknown": "A sincronização falhou."
+      "unknown": "A sincronização falhou.",
+      "unsupported-currency": "Uma conta usa uma moeda que a WonderMoney não consegue acompanhar, por isso ficou de fora."
     },
     "actions": {
       "contact-support": "Contactar o suporte",
+      "fix-at-provider": "Resolve no teu fornecedor de dados bancários",
       "reconnect": "Voltar a ligar o banco",
       "wait": "Vamos tentar novamente automaticamente"
     },

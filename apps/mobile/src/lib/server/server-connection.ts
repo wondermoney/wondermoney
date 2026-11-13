@@ -50,6 +50,9 @@ const instanceSchema = z.object({
     // `instance` when the operator set a shared Enable Banking credential; absent on an older
     // server, which reads as `user` (everyone adds their own key).
     bankSyncCredentials: tolerantEnum(['instance', 'user'], 'user').optional(),
+    // The bank-data providers the operator turned on (`simplefin` only when enabled). Optional,
+    // and malformed reads as absent, so an older server still parses and offers none of them.
+    bankSyncProviders: z.array(z.string()).optional().catch(undefined),
     contactForm: z.boolean(),
     // The chains whose crypto wallets the server can read (an explorer is configured for each);
     // empty when the feature is off. A chain this build doesn't know is dropped; an older server,

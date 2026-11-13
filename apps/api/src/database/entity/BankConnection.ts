@@ -23,6 +23,11 @@ export enum BankConnectionStatus {
   ERROR = 'error',
   EXPIRED = 'expired',
   LINKED = 'linked',
+  /**
+   * The provider refused the stored credential outright (SimpleFIN answers 403 once the user
+   * disables the access token). The scheduler skips it; only a new connection recovers.
+   */
+  REVOKED = 'revoked',
 }
 
 @Entity({ tableName: 'bank_connection' })

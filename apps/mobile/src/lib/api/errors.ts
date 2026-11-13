@@ -16,6 +16,8 @@ export type ApiErrorOptions = Readonly<{
   writeDispatchState?: WriteDispatchState
   /** `portfolio-link-held` only: the display name of the member who holds the link. */
   linkedBy?: string
+  /** A 400's `message`, kept only for an endpoint that opts in (`keepsBadRequestMessage`). */
+  serverMessage?: string
   /** `http` 4xx only: the API's machine-readable `code` (`reimbursement_amount_exceeded`). */
   serverCode?: string
   /** `http` only: `details.addressIndex`, which address of a crypto wallet write the error is about. */
@@ -47,6 +49,12 @@ export class ApiError extends Error {
    */
   readonly linkedBy?: string
   /**
+   * A 400's own `message`, kept only for an endpoint whose 400s the API words for the person
+   * (`WriteEndpoint.keepsBadRequestMessage`), such as a refused SimpleFIN setup token. Same rules
+   * as `linkedBy`: non-enumerable and never in `message`, so an error report does not carry it.
+   */
+  readonly serverMessage?: string
+  /**
    * `http` 4xx only: the API's stable machine-readable reason (`ERROR_CODE` in the API), for the
    * screens that word one failure differently from another with the same status. A fixed
    * vocabulary of snake_case words, never prose or a value from the request. Non-enumerable, like
@@ -63,6 +71,7 @@ export class ApiError extends Error {
     if (status !== undefined) this.status = status
     if (options?.writeDispatchState !== undefined) this.writeDispatchState = options.writeDispatchState
     if (options?.linkedBy !== undefined) Object.defineProperty(this, 'linkedBy', { value: options.linkedBy, enumerable: false, configurable: true })
+    if (options?.serverMessage !== undefined) Object.defineProperty(this, 'serverMessage', { value: options.serverMessage, enumerable: false, configurable: true })
     if (options?.serverCode !== undefined) Object.defineProperty(this, 'serverCode', { value: options.serverCode, enumerable: false, configurable: true })
     if (options?.addressIndex !== undefined) Object.defineProperty(this, 'addressIndex', { value: options.addressIndex, enumerable: false, configurable: true })
   }

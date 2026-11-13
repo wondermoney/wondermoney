@@ -5,22 +5,31 @@ import { instanceEnableBankingCredential } from '@service/enable-banking/instanc
 import { mayUseInstanceEnableBankingCredential } from '@service/enable-banking/instance-credential-policy';
 
 import { enableBankingProvider } from './enable-banking.provider';
+import { SIMPLEFIN_PROVIDER_ID, simplefinProvider } from './simplefin.provider';
 import type { BankConnectionRef, BankProvider, BankProviderId } from './types';
 
 /**
  * The provider registry. A provider is available when it is compiled in *and* enabled by the
  * operator: `BANK_PROVIDERS` is a comma-separated list of ids (default: every compiled-in
- * provider). `GET /v1/instance` reports the enabled list, so clients hide what this server
- * cannot do.
+ * provider that is not opt-in). `GET /v1/instance` reports the enabled list, so clients hide
+ * what this server cannot do.
  *
  * Adding an aggregator: implement `BankProvider`, add it to `PROVIDERS`, document its env in
  * the contributor guide under `apps/docs/content/docs/<locale>/self-hosting/adding-a-bank-provider`.
  */
 const PROVIDERS: Record<BankProviderId, BankProvider> = {
   enable_banking: enableBankingProvider,
+  [SIMPLEFIN_PROVIDER_ID]: simplefinProvider,
 };
 
+/**
+ * Compiled in, but off until the operator names them in `BANK_PROVIDERS`. SimpleFIN is a paid,
+ * US/Canada aggregator the instance reaches on the user's behalf, so it stays off by default.
+ */
+const OPT_IN_PROVIDERS: ReadonlySet<BankProviderId> = new Set([SIMPLEFIN_PROVIDER_ID]);
+
 export const ENABLE_BANKING_PROVIDER_ID = 'enable_banking';
+export { SIMPLEFIN_PROVIDER_ID };
 
 /** The providers this build can run, before the operator's `BANK_PROVIDERS` filter. */
 export function compiledBankProviderIds(): BankProviderId[] {
@@ -28,14 +37,15 @@ export function compiledBankProviderIds(): BankProviderId[] {
 }
 
 /**
- * The providers enabled on this instance. Unset `BANK_PROVIDERS` enables every compiled-in
- * provider; an explicit list is intersected with what this build actually has, so a typo or a
- * provider from a different build never yields a half-working feature.
+ * The providers enabled on this instance. Unset or empty `BANK_PROVIDERS` enables every
+ * compiled-in provider except the opt-in ones; an explicit list is intersected with what this build actually
+ * has, so a typo or a provider from a different build never yields a half-working feature.
  */
 export function enabledBankProviderIds(): BankProviderId[] {
-  const raw = process.env['BANK_PROVIDERS'];
-  if (raw === undefined) return compiledBankProviderIds();
-  const requested = raw.split(',').map((id) => id.trim()).filter(Boolean);
+  // Empty counts as unset: a compose `env_file` line `BANK_PROVIDERS=` must not turn bank sync
+  // off. An operator turns it off with an id this build does not have, such as `none`.
+  const requested = (process.env['BANK_PROVIDERS'] ?? '').split(',').map((id) => id.trim()).filter(Boolean);
+  if (requested.length === 0) return compiledBankProviderIds().filter((id) => !OPT_IN_PROVIDERS.has(id));
   return requested.filter((id) => PROVIDERS[id] !== undefined);
 }
 
@@ -51,8 +61,13 @@ export function getBankProvider(id: BankProviderId): BankProvider | undefined {
   return isBankProviderEnabled(id) ? PROVIDERS[id] : undefined;
 }
 
+/** Enabled providers whose access never expires: the scheduler syncs them with no `accessValidUntil`. */
 export function isBankProviderEnabled(id: BankProviderId): boolean {
   return enabledBankProviderIds().includes(id);
+}
+
+export function nonExpiringBankProviderIds(): BankProviderId[] {
+  return enabledBankProviderIds().filter((id) => PROVIDERS[id]?.consentExpires === false);
 }
 
 export function requireBankProvider(id: BankProviderId): BankProvider {

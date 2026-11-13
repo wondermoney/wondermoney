@@ -5,7 +5,9 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankConnection } from '@entity/BankConnection';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
+import { SimplefinConnection } from '@entity/SimplefinConnection';
 import { Tenant } from '@entity/Tenant';
+import { wipeAccessUrl } from '@service/simplefin/simplefin-credential';
 import { BadRequestError, ERROR_CODE, ForbiddenError, NotFoundError } from '@utils/errors';
 
 function ownerKeyOf(tenant: Tenant): number {
@@ -25,7 +27,10 @@ async function revokeRequisitionsFor(em: EntityManager, tenant: Tenant, targetAp
   const requisitions = await em.find(NordigenRequisition, owner);
   const connections = await em.find(EnableBankingConnection, owner);
   const bankConnections = await em.find(BankConnection, owner);
-  for (const revoked of [...requisitions, ...connections, ...bankConnections]) {
+  // The member's SimpleFIN access is their own credential: destroyed, not just unlinked.
+  const simplefinConnections = await em.find(SimplefinConnection, owner, { filters: false });
+  for (const connection of simplefinConnections) wipeAccessUrl(connection);
+  for (const revoked of [...requisitions, ...connections, ...bankConnections, ...simplefinConnections]) {
     revoked.deletedAt = now;
   }
 }

@@ -141,6 +141,15 @@ config:
   CRYPTO_BTC_EXPLORER_URL: ""
   CRYPTO_ETH_EXPLORER_URL: ""
 
+  # The bank providers to offer, comma-separated: enable_banking, simplefin. Empty: enable_banking
+  # alone; "none" turns bank sync off. SimpleFIN (US and Canadian banks, through the paid
+  # SimpleFIN Bridge each user subscribes to) is off until listed, as in "enable_banking,simplefin".
+  # Guide: https://docs.wonder.money/en/docs/self-hosting/simplefin
+  BANK_PROVIDERS: ""
+  # The hosts the server may call for SimpleFIN, comma-separated. Empty: the SimpleFIN Bridge
+  # (bridge.simplefin.org, beta-bridge.simplefin.org). Set it only for another SimpleFIN server.
+  SIMPLEFIN_BRIDGE_HOSTS: ""
+
   # ─── Merchant logos (optional, off by default) ───────────────────────────────
   # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.
   # The API fetches the logos itself, so the service never sees your users. Empty: no lookup.
