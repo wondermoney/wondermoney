@@ -37,6 +37,38 @@ describe('budget query hooks', () => {
     await hook.unmount(); client.clear()
   })
 
+  it('asks for one member\'s part of each budget under its own key', async () => {
+    const value = { budgets: [budgetFixture] }
+    mockRead.mockResolvedValue(value)
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useBudgets('12'), { wrapper })
+    await waitFor(() => expect(hook.result.current.data).toEqual(value))
+    expect(mockRead).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET', path: '/v1/budget/full?memberKeys=12' }))
+    expect(client.getQueryData(['budgets', 'list', 5, '12'])).toEqual(value)
+    expect(client.getQueryData(['budgets', 'list', 5])).toBeUndefined()
+    await hook.unmount(); client.clear()
+  })
+
+  it('keeps the list on screen while another member\'s part loads, never across sessions', async () => {
+    const everyone = { budgets: [budgetFixture] }
+    let resolveMember: (value: unknown) => void = () => {}
+    mockRead.mockResolvedValueOnce(everyone).mockImplementationOnce(() => new Promise((resolve) => { resolveMember = resolve }))
+    const { client, wrapper } = setup()
+    const hook = await renderHook(({ member }: { member?: string }) => useBudgets(member), { wrapper, initialProps: {} })
+    await waitFor(() => expect(hook.result.current.data).toEqual(everyone))
+    await hook.rerender({ member: '12' })
+    expect(hook.result.current.data).toEqual(everyone)
+    expect(hook.result.current.isLoading).toBe(false)
+    await act(async () => { resolveMember({ budgets: [] }) })
+    await waitFor(() => expect(hook.result.current.data).toEqual({ budgets: [] }))
+
+    mockEpochId = 6
+    mockRead.mockImplementationOnce(() => new Promise(() => {}))
+    await hook.rerender({ member: 'shared' })
+    expect(hook.result.current.data).toBeUndefined()
+    await hook.unmount(); client.clear()
+  })
+
   it('makes no request for an invalid month route', async () => {
     const { client, wrapper } = setup()
     const hook = await renderHook(() => useBudgetMonth(7, 2026, 13), { wrapper })

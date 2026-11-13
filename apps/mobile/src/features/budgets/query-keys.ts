@@ -1,4 +1,7 @@
-export const budgetsKey = (epochId: number) => ['budgets', 'list', epochId] as const
+/** The list, and under it one entry per member filter, so invalidating the list refreshes them all. */
+export const budgetsKey = (epochId: number, member?: string) => (
+  member === undefined ? ['budgets', 'list', epochId] as const : ['budgets', 'list', epochId, member] as const
+)
 export const budgetInventoryKey = (epochId: number) => ['budgets', 'inventory', epochId] as const
 
 export const budgetDetailKey = (epochId: number, budgetId: number) => (

@@ -16,6 +16,8 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import type { Category } from '@entity/Category';
+import { Portfolio } from '@entity/Portfolio';
+import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { getBudgetSpending } from '@service/budget/spending';
 import { type MemberFilter, parseMemberFilter, SHARED_MEMBER } from '@service/household/member-attribution';
@@ -23,6 +25,7 @@ import { NetWorthService } from '@service/net-worth/net-worth.service';
 import { getBudgetVsActualReport } from '@service/reports/budgetVsActual.service';
 import { getCashflowReport } from '@service/reports/cashflow.service';
 import { getMonthComparisonReport } from '@service/reports/monthComparison.service';
+import { getPortfolioPerformanceReport } from '@service/reports/portfolioPerformance.service';
 import { getSankeyReport } from '@service/reports/sankey.service';
 import { getSpendingByCategoryReport } from '@service/reports/spendingByCategory.service';
 import { SpendingVsNormalReportService } from '@service/reports/spendingVsNormal.service';
@@ -258,6 +261,29 @@ describe('the member filter, in every total', () => {
       const totals = await Promise.all(parts().map(food));
       expect(totals).toEqual([105, 40, 9, 90]);
       expect(sum(totals)).toBe(await food());
+    });
+
+    it('portfolio performance keeps the portfolios a member owns; a former member\'s is Shared', async () => {
+      // One portfolio each for the owner, the partner and the member who left, valued before July
+      // so July measures it. Kid owns none.
+      const em = db.em();
+      const owners = [['Owner shares', scenario.owner], ['Partner shares', scenario.partner], ['Former member shares', scenario.accounts.formerMembers.accountOwnerAppuserKey]] as const;
+      for (const [name, owner] of owners) {
+        const portfolio = em.create(Portfolio, { currencyKey: scenario.household.currency, name, portfolioOwnerAppuserKey: owner, tenantKey: scenario.household.tenant }, { partial: true });
+        em.create(PortfolioSnapshot, {
+          appuserCurrencyKey: scenario.household.currency,
+          appuserCurrencyTotalValue: 1000,
+          currencyKey: scenario.household.currency,
+          portfolioKey: portfolio,
+          snapshotDate: new Date('2026-06-30T00:00:00Z'),
+          totalValue: 1000,
+        }, { partial: true });
+      }
+      await em.flush();
+      const names = async (part?: string) => (await getPortfolioPerformanceReport(reportInput(part), new Date('2026-11-13T12:00:00Z'))).map((row) => row.name).toSorted();
+
+      expect(await Promise.all(parts().map(names))).toEqual([['Owner shares'], ['Partner shares'], [], ['Former member shares']]);
+      expect(await names()).toEqual(['Former member shares', 'Owner shares', 'Partner shares']);
     });
 
     it('never counts the partner\'s private account when the owner filters by the partner', async () => {

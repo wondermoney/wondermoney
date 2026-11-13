@@ -18,6 +18,9 @@ import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 import { usePalette } from '@/theme/use-palette'
 
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
+
 import { formatPercent } from './budget-parts'
 import { budgetedLineCount, groupBudgetsByVisibility, monthlyIncome, type BudgetViewModel } from './budgets-view-model'
 
@@ -36,10 +39,15 @@ export type BudgetsScreenProps = {
   onRefresh: () => void | Promise<void>
   onBack: () => void
   onCreateBudget?: () => void
+  /**
+   * Whose part of each budget: everyone, one member or Shared. It never changes which budgets are
+   * listed. Omitted (a household of one), not shown; nor on an empty list, which it could not fill.
+   */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 
-export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, onBack, onCreateBudget }: BudgetsScreenProps) {
+export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, onBack, onCreateBudget, memberFilter }: BudgetsScreenProps) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -73,6 +81,11 @@ export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, on
           ) : (
             <View style={[styles.page, styles.listPage]}>
               <PageHeader title={t('budgets.overviewTitle')} />
+              {memberFilter ? (
+                <View style={styles.memberFilter}>
+                  <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} />
+                </View>
+              ) : null}
               {state.status === 'refresh-error' ? <StaleBanner label={t('budgets.stale')} palette={palette} /> : null}
               <BudgetsList budgets={state.budgets} locale={locale} onEditBudget={onEditBudget} onOpenBudget={onOpenBudget} />
             </View>
@@ -231,6 +244,8 @@ export function Action({ label, onPress, palette, primary = false, disabled = fa
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  // The member filter sits under the title, at the start of the row, sized to its label.
+  memberFilter: { flexDirection: 'row' },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[8] },
   contentUnderButton: { paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[6] },

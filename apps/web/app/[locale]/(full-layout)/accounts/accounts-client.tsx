@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AccountAddModal from "@/components/account/AccountCreateModal";
 import AccountAddOfflineModal from "@/components/account/AccountCreateOfflineModal";
 import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
+import AccountsCategorySpending from "@/components/account/AccountsCategorySpending";
 import AccountsEmptyStateV2 from "@/components/account/AccountsEmptyStateV2";
 import AccountsList from "@/components/account/AccountsList";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
@@ -24,13 +25,11 @@ import TimeframeSelect from "@/components/dashboard/TimeframeSelect";
 import { AccountsOnboarding } from "@/components/onboarding/AccountsOnboarding";
 import { Amount } from "@/components/ui/Amount";
 import { Button } from "@/components/ui/button";
-import CategoryIcon from "@/components/ui/CategoryIcon";
 import { DataProvenance } from "@/components/ui/DataProvenance";
 import { Link } from "@/components/ui/Link";
 import { StatCardsSkeleton } from "@/components/ui/PageSkeleton";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
-import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
 import { useRouter } from "@/i18n/navigation";
 import { writableAccounts } from "@/lib/account/account-access";
 import { getAggregateFreshness } from "@/lib/account/accounts-freshness";
@@ -49,7 +48,6 @@ import useAccounts from "@/lib/api/account/useAccounts";
 import useAccountsCashflow from "@/lib/api/account/useAccountsCashflow";
 import useAccountsMetrics from "@/lib/api/account/useAccountsMetrics";
 import useTransactions from "@/lib/api/account/useTransactions";
-import useTransactionsCategorySpending from "@/lib/api/account/useTransactionsCategorySpending";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { useUser } from "@/lib/auth/user-context";
@@ -64,11 +62,8 @@ import {
   ACTIVATION_EVENTS,
   captureActivationEvent,
 } from "@/lib/utils/analytics";
-import { getCategoryTranslationKey } from "@/lib/utils/categories";
-import { resolveCategoryColor } from "@/lib/utils/categoryColor";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
-import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 import {
@@ -120,7 +115,6 @@ export default function AccountsClient({
   initialAccountsData,
   initialConfigsData,
 }: AccountsClientProps) {
-  const formatPercentage = useFormatPercentage();
   const t = useTranslations();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -188,9 +182,6 @@ export default function AccountsClient({
     isLoading: isLoadingAccountsMetricsData,
     isPlaceholderData: isAccountsMetricsPlaceholderData,
   } = useAccountsMetrics({ fromDate, toDate });
-
-  const { data: categorySpendingData, isLoading: isLoadingCategorySpending } =
-    useTransactionsCategorySpending({ fromDate, toDate, limit: 6 });
 
   // The new bank's accounts were created before the redirect back here.
   const handledSuccessRef = useRef(false);
@@ -631,100 +622,12 @@ export default function AccountsClient({
         </section>
       </div>
 
-      {/* Spending by category */}
-      <Section id="spending-heading" title={t("spending-by-category")}>
-        <div>
-          {isLoadingCategorySpending ? (
-            <div className="flex h-30 items-center justify-center">
-              <Spinner />
-            </div>
-          ) : categorySpendingData?.categorySpending &&
-            categorySpendingData.categorySpending.length > 0 ? (
-            <div className="divide-border divide-y">
-              {categorySpendingData.categorySpending.map((cat, catIndex) => {
-                const totalSpending =
-                  categorySpendingData.categorySpending.reduce(
-                    (sum, c) => sum + Math.abs(c.amount),
-                    0,
-                  );
-                const pct =
-                  totalSpending > 0
-                    ? (Math.abs(cat.amount) / totalSpending) * 100
-                    : 0;
-
-                return (
-                  <div
-                    key={cat.categoryKey}
-                    className="flex items-center gap-3 py-3 first:pt-0"
-                  >
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                      style={{
-                        backgroundColor: `color-mix(in oklch, ${resolveCategoryColor(cat.bgColor, catIndex)} 15%, transparent)`,
-                        // The API's category colours are pastels: painted
-                        // straight onto their own 15% tint they measured well
-                        // under 3:1 on the light canvas. Mixing toward the
-                        // foreground keeps the hue and clears 3:1 in both themes.
-                        color: `color-mix(in oklch, ${resolveCategoryColor(cat.bgColor, catIndex)} 45%, var(--foreground))`,
-                      }}
-                    >
-                      <CategoryIcon
-                        icon={cat.icon}
-                        category={!cat.icon ? cat.name : undefined}
-                        width="16px"
-                        height="16px"
-                        className="text-current"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-foreground truncate text-sm">
-                          {t(getCategoryTranslationKey(cat.name))}
-                        </span>
-                        <span className="text-foreground shrink-0 font-mono text-sm font-medium">
-                          <Amount
-                            value={Math.abs(cat.amount)}
-                            currency={cat.currency ?? userCurrency}
-                          />
-                        </span>
-                      </div>
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${pct}%`,
-                              backgroundColor: resolveCategoryColor(
-                                cat.bgColor,
-                                catIndex,
-                              ),
-                            }}
-                          />
-                        </div>
-                        <span className="text-muted-foreground w-10 text-right font-mono text-xs">
-                          {formatPercentage(pct / 100)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex h-30 items-center justify-center">
-              <p className="text-muted-foreground text-sm">
-                {t("empty-category-spending-description")}
-              </p>
-            </div>
-          )}
-          {!isLoadingCategorySpending && (
-            <UnconvertedAmountsNotice
-              completeness={categorySpendingData?.completeness}
-              className="pt-3"
-            />
-          )}
-        </div>
-      </Section>
+      {/* Spending by category: follows the member filter, its control in the section's head. */}
+      <AccountsCategorySpending
+        fromDate={fromDate}
+        toDate={toDate}
+        userCurrency={userCurrency}
+      />
 
       {/* Balance chart */}
       <Section id="balance-growth-heading" title={t("balance-growth")}>

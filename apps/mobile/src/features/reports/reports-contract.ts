@@ -253,10 +253,16 @@ export function createBudgetVsActualEndpoint(filters: ReportFilters) {
 
 /**
  * The portfolio report covers every household portfolio over the period: account, category,
- * merchant and transaction filters don't apply to it, so only the period is sent.
+ * merchant and transaction filters don't apply to it, so they are not sent (and changing them
+ * does not refetch it). The member filter does: it narrows the report to the portfolios that
+ * member owns, or to Shared (a former member's), as web's report.
  */
 export function portfolioPerformanceFilters(filters: ReportFilters): ReportFilters {
-  return { fromDate: filters.fromDate, toDate: filters.toDate }
+  return {
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
+    ...(filters.memberKeys?.length ? { memberKeys: filters.memberKeys } : {}),
+  }
 }
 
 export function createPortfolioPerformanceReportEndpoint(filters: ReportFilters) {

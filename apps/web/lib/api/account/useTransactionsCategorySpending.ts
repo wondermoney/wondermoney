@@ -32,6 +32,8 @@ export interface GetTransactionsCategorySpendingRequest {
   fromDate?: Date;
   toDate?: Date;
   limit?: number;
+  /** The member filter (`lib/household/member-attribution.ts`); absent for everyone. */
+  memberKeys?: string[];
 }
 
 /**
@@ -45,9 +47,11 @@ export async function getTransactionsCategorySpending(
   params: GetTransactionsCategorySpendingRequest = {},
   apiClient: AxiosInstance = api,
 ): Promise<GetTransactionsCategorySpendingResponse> {
+  const { memberKeys, ...rest } = params;
   const _params = {
-    ...params,
+    ...rest,
     ...transactionDateRangeParams(params),
+    ...(memberKeys?.length ? { memberKeys: memberKeys.join(",") } : {}),
   };
   const { data } = await apiClient.get<GetTransactionsCategorySpendingResponse>(
     "/v1/account/transaction/category-spending",
