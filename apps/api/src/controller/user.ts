@@ -15,6 +15,7 @@ import { authedUser } from '@middleware/authed-context';
 import { deleteWonderMoneyAccount } from '@service/account/account-deletion.service';
 import { effectiveAiCapabilities } from '@service/ai/ai-availability';
 import { aiProviderLabel } from '@service/ai/ai-provider';
+import { bankSyncCredentialsFor } from '@service/bank-providers/registry';
 import { enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { ERROR } from '@utils/constants';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -46,8 +47,9 @@ export function getUserAccountInformation(req: Request, res: Response) {
 }
 
 /** Return the authenticated user's profile using the mobile profile contract. */
-export function getCurrentUserProfile(req: Request, res: Response) {
+export async function getCurrentUserProfile(req: Request, res: Response) {
   const profile = pick(req.user, ['emailAddress', 'firstName', 'lastName']);
+  const bankSyncCredentials = req.tenant ? await bankSyncCredentialsFor(DI.em, req.tenant.tenantKey) : 'user';
   return res.json({
     profile: {
       ...profile,
@@ -58,6 +60,11 @@ export function getCurrentUserProfile(req: Request, res: Response) {
       // null while the feature is off for them. An OpenAI-compatible endpoint is named only by its
       // family: its address may be an internal host.
       aiProviders: { statementImport: effectiveAiCapabilities(req.user).statementImport ? aiProviderLabel('statementImport') : null },
+      // `instance` when this person's household may link a bank with the instance-wide Enable
+      // Banking credential, so the clients skip the credential step; `user` when they need their
+      // own (`services/enable-banking/instance-credential-policy.ts`). Their own credential, when
+      // they have one, is used either way.
+      bankSyncCredentials,
       // The shared read-only demo account: clients show the demo banner and its links.
       demo: req.user?.accountType === AppuserAccountType.DEMO,
       // better-auth is the source of truth for MFA state; `getAuthSession` copies

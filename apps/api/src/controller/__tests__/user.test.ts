@@ -53,12 +53,13 @@ describe('user controller', () => {
       preferences: {},
     };
 
-    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         aiProviders: { statementImport: null },
+        bankSyncCredentials: 'user',
         demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',
@@ -73,7 +74,7 @@ describe('user controller', () => {
     const json = vi.fn();
     const user = { accountType: 'demo', appuserKey: 1, emailAddress: 'demo@wonder.money', firstName: 'Sofia', lastName: 'Martins', preferences: {} };
 
-    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({ profile: expect.objectContaining({ demo: true }) });
   });
@@ -91,7 +92,7 @@ describe('user controller', () => {
       preferences: { aiHidden: true },
     };
 
-    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: expect.objectContaining({
@@ -107,7 +108,7 @@ describe('user controller', () => {
     const json = vi.fn();
     const user = { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences: {} };
 
-    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: expect.objectContaining({
@@ -122,7 +123,7 @@ describe('user controller', () => {
     const { getCurrentUserProfile } = await import('../user');
     const profileOf = (preferences: Record<string, unknown>) => {
       const json = vi.fn();
-      getCurrentUserProfile({ user: { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences } } as unknown as Request, { json } as unknown as Response);
+      void getCurrentUserProfile({ user: { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences } } as unknown as Request, { json } as unknown as Response);
       return (json.mock.calls[0]?.[0] as { profile: { aiProviders: unknown } }).profile;
     };
     expect(profileOf({}).aiProviders).toEqual({ statementImport: { kind: 'openai-compatible', name: null } });
@@ -149,12 +150,13 @@ describe('user controller', () => {
       },
     } as unknown as Request;
 
-    getCurrentUserProfile(req, { json } as unknown as Response);
+    await getCurrentUserProfile(req, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         aiProviders: { statementImport: null },
+        bankSyncCredentials: 'user',
         demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',

@@ -1,8 +1,11 @@
 import { z } from 'zod'
 
-import { readEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum } from '@/lib/api/runtime-schema'
 
 export const profileSchema = z.object({
+  // `instance` when this person's household may link a bank with the server's shared Enable
+  // Banking credential; `user` when they need a key of their own. Absent on an older server.
+  bankSyncCredentials: tolerantEnum(['instance', 'user'], 'user').optional(),
   emailAddress: z.string().email().max(320),
   firstName: z.string().max(255).nullable(),
   lastName: z.string().max(255).nullable(),

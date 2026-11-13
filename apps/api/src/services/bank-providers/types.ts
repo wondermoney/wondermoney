@@ -192,7 +192,8 @@ export interface BankProvider {
 
   listAccounts(connection: BankConnectionRef): Promise<BankAccountsResult>;
 
-  listInstitutions(input: { appuserId: number; country?: string }): Promise<BankInstitution[]>;
+  /** `tenantId` is the household the caller links in, when the provider's credential depends on it. */
+  listInstitutions(input: { appuserId: number; country?: string; tenantId?: number }): Promise<BankInstitution[]>;
 
   /**
    * Optional pre-flight check before a sync reaches the bank (the Enable Banking BYOK

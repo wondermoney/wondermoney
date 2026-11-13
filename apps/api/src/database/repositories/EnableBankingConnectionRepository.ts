@@ -2,7 +2,7 @@ import { QueryOrder } from '@mikro-orm/core';
 
 import { Appuser } from '../entity/Appuser';
 import { BankConnection, BankConnectionStatus } from '../entity/BankConnection';
-import { EnableBankingConnection, EnableBankingConnectionStatus } from '../entity/EnableBankingConnection';
+import { EnableBankingConnection, EnableBankingConnectionStatus, INSTANCE_CREDENTIAL_REFERENCE } from '../entity/EnableBankingConnection';
 import { EnableBankingCredential } from '../entity/EnableBankingCredential';
 import { Tenant } from '../entity/Tenant';
 
@@ -56,12 +56,13 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
    * connection: the tenant is sourced from the active tenant context
    * (`req.tenant`), never from a membership lookup, so household
    * account-sharing keeps working even though the *credential* itself is
-   * personal (BYOK, one Enable Banking application per user).
+   * personal (BYOK, one Enable Banking application per user). `credential` is null for a link
+   * made with the instance-wide credential.
    */
   public createConnection = async (
     appuser: Appuser,
     tenant: Tenant,
-    credential: EnableBankingCredential,
+    credential: EnableBankingCredential | null,
     state: EnableBankingConnection['state'],
     aspspName: EnableBankingConnection['aspspName'],
     aspspCountry: EnableBankingConnection['aspspCountry'],
@@ -88,7 +89,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
     bankConnection.provider = 'enable_banking';
     bankConnection.appuserKey = appuser;
     bankConnection.tenantKey = tenant;
-    bankConnection.credentialReference = String(credential.enableBankingCredentialKey);
+    bankConnection.credentialReference = credential ? String(credential.enableBankingCredentialKey) : INSTANCE_CREDENTIAL_REFERENCE;
     bankConnection.state = state;
     bankConnection.maxConsentValiditySeconds = maxConsentValiditySeconds;
     bankConnection.status = BankConnectionStatus.CREATED;

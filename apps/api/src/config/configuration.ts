@@ -178,6 +178,13 @@ const sharedSchema = z.object({
   DB_PORT: z.string().trim().optional(),
   DB_USERNAME: z.string().trim().optional(),
   EMAIL_OPT_OUT_SIGNING_SECRET: nonEmpty('Unsubscribe-link signing secret is required (minted by worker emails, verified by the API)'),
+  // The instance-wide Enable Banking credential (`config/enable-banking-instance.ts`), read by the
+  // API (linking) and the worker (syncing). The two turn it on together; `config/env.ts` reads the
+  // key file at start-up and refuses one that is unreadable or not an RSA private key.
+  ENABLE_BANKING_APP_ID: z.string().trim().optional(),
+  ENABLE_BANKING_PRIVATE_KEY_FILE: z.string().trim().optional(),
+  // Lifts the single-household limit on the instance credential (`instance-credential-policy.ts`).
+  ENABLE_BANKING_PRODUCTION_CONTRACT: boolFlag('Enable Banking production contract flag').optional(),
   S3_BUCKET: z.string().trim().optional(),
   S3_ENDPOINT: httpUrl('S3 endpoint').optional(),
   S3_FORCE_PATH_STYLE: boolFlag('S3 path-style flag').optional(),

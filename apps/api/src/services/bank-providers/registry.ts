@@ -1,4 +1,8 @@
+import type { EntityManager } from '@mikro-orm/postgresql';
+
 import type { BankConnection } from '@entity/BankConnection';
+import { instanceEnableBankingCredential } from '@service/enable-banking/instance-credential';
+import { mayUseInstanceEnableBankingCredential } from '@service/enable-banking/instance-credential-policy';
 
 import { enableBankingProvider } from './enable-banking.provider';
 import type { BankConnectionRef, BankProvider, BankProviderId } from './types';
@@ -57,10 +61,27 @@ export function requireBankProvider(id: BankProviderId): BankProvider {
   return provider;
 }
 
-/** What `GET /v1/instance` reports about bank sync. */
-export function bankSyncFeatures(): { bankSync: boolean; bankSyncProviders: BankProviderId[] } {
+/**
+ * Where new bank links get their Enable Banking credential: `instance` when the operator set the
+ * instance-wide one (`ENABLE_BANKING_APP_ID`), `user` when each user brings their own.
+ */
+export type BankSyncCredentials = 'instance' | 'user';
+
+/**
+ * What `GET /v1/instance` reports about bank sync. `bankSyncCredentials` is the instance's
+ * capability; whether a given household may use the shared credential is
+ * {@link bankSyncCredentialsFor}, on the signed-in profile.
+ */
+export function bankSyncFeatures(): { bankSync: boolean; bankSyncCredentials: BankSyncCredentials; bankSyncProviders: BankProviderId[] } {
   const bankSyncProviders = enabledBankProviderIds();
-  return { bankSync: bankSyncProviders.length > 0, bankSyncProviders };
+  const instanceCredential = bankSyncProviders.includes(ENABLE_BANKING_PROVIDER_ID) && instanceEnableBankingCredential() !== null;
+  return { bankSync: bankSyncProviders.length > 0, bankSyncCredentials: instanceCredential ? 'instance' : 'user', bankSyncProviders };
+}
+
+/** The per-caller answer: `instance` when this household's new links may use the shared credential. */
+export async function bankSyncCredentialsFor(em: EntityManager, tenantKey: number): Promise<BankSyncCredentials> {
+  if (!isBankProviderEnabled(ENABLE_BANKING_PROVIDER_ID)) return 'user';
+  return (await mayUseInstanceEnableBankingCredential(em, tenantKey)) ? 'instance' : 'user';
 }
 
 /** Reduce a `BankConnection` row to the provider-facing reference. */

@@ -28,6 +28,10 @@ x-api-env: &api-env
     DB_PASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
     # pg-boss creates and upgrades its own schema; it takes a lock, so both can do it.
     PGBOSS_MIGRATE: 'true'
+    # The instance-wide Enable Banking key (.env, "Bank sync"), read from the secret below.
+    ENABLE_BANKING_PRIVATE_KEY_FILE: ${ENABLE_BANKING_PRIVATE_KEY_FILE:+/run/secrets/enable_banking_private_key}
+  secrets:
+    - enable_banking_private_key
 
 services:
   postgres:
@@ -77,6 +81,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?run ./generate-env.sh first}
       PGBOSS_MIGRATE: 'true'
       PGBOSS_SCHEDULE: 'true'
+      ENABLE_BANKING_PRIVATE_KEY_FILE: ${ENABLE_BANKING_PRIVATE_KEY_FILE:+/run/secrets/enable_banking_private_key}
     depends_on:
       api:
         condition: service_healthy
@@ -275,6 +280,12 @@ services:
       - ./backup/backup.sh:/usr/local/bin/wondermoney-backup:ro
       - ${BACKUP_DIR:-./backups}:/backups
       - ./rclone:/config/rclone
+
+# The Enable Banking application's private key, from the path ENABLE_BANKING_PRIVATE_KEY_FILE names
+# on this machine. Without one, an empty placeholder is mounted and nothing reads it.
+secrets:
+  enable_banking_private_key:
+    file: ${ENABLE_BANKING_PRIVATE_KEY_FILE:-/dev/null}
 
 volumes:
   caddy-config:

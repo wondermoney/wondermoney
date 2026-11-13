@@ -14,7 +14,7 @@ import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync
 import { safelyRunDiagnostic } from "@/lib/analytics/safe-diagnostics";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
-import useEnableBankingCredential from "@/lib/api/user/useEnableBankingCredential";
+import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { getCountryCodeClient } from "@/lib/utils/countries";
 import { SUPPORTED_BANK_COUNTRY_CODES } from "@/lib/utils/countries/bank-countries";
 import { countryFlags } from "@/lib/utils/countries/country-flag";
@@ -40,10 +40,13 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
 }) => {
   const t = useTranslations();
   const posthog = usePostHog();
-  const { data: enableBankingCredential, isLoading: credentialLoading } =
-    useEnableBankingCredential();
-  const credentialRequired =
-    !credentialLoading && enableBankingCredential?.status !== "active";
+  // The user's own Enable Banking key, or the server's shared one when it covers this household.
+  const {
+    canLink,
+    credentialRequired,
+    loading: credentialLoading,
+    sharedCredentialUnavailable,
+  } = useBankLinkCredential();
   const [bankId, setBankId] = useState<string | null>(null);
   const [continueRequested, setContinueRequested] = useState(false);
   const expectationHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -53,12 +56,11 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
     isLoading: bankListLoading,
     isFetching,
   } = useBankList(country, {
-    // Only once the dialog is open and the credential is confirmed active. While
-    // the credential query was still loading, `credentialRequired` read false, so
+    // Only once the dialog is open and a credential is confirmed. While the
+    // credential query was still loading, `credentialRequired` read false, so
     // a closed dialog on /accounts asked for the bank list and the API answered
     // 400 "No Enable Banking credential configured" for every user without one.
-    enabled:
-      isOpen && !!country && enableBankingCredential?.status === "active",
+    enabled: isOpen && !!country && canLink,
     staleTime: Infinity,
   });
 
@@ -236,6 +238,11 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
             <p className="text-sm">
               {t("bankProviderCredentialRequired.body")}
             </p>
+            {sharedCredentialUnavailable ? (
+              <p className="text-sm">
+                {t("bankProviderCredentialRequired.sharedUnavailable")}
+              </p>
+            ) : null}
             <Link
               href="/settings?tab=bank-provider"
               className="text-primary text-sm font-semibold underline underline-offset-2"

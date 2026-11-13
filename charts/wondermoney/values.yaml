@@ -123,6 +123,16 @@ config:
   # until listed; their terms of use are yours to follow.
   MARKET_DATA_PROVIDERS: ""
 
+  # ─── Bank sync (optional) ────────────────────────────────────────────────────
+  # Empty: each person adds their own Enable Banking key in Settings. Your own Enable Banking
+  # application for the instance: its application id here and its private key in
+  # `enableBanking.privateKeySecret` below; the two turn it on together. In Restricted Production
+  # mode it serves one household (the only one, or the first to link a bank with it). "true" in
+  # ENABLE_BANKING_PRODUCTION_CONTRACT, only with a full production contract, lets every household
+  # use it.
+  ENABLE_BANKING_APP_ID: ""
+  ENABLE_BANKING_PRODUCTION_CONTRACT: ""
+
   # ─── Merchant logos (optional, off by default) ───────────────────────────────
   # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.
   # The API fetches the logos itself, so the service never sees your users. Empty: no lookup.
@@ -159,6 +169,14 @@ secrets:
   EODHD_API_KEY: ""
   RECAPTCHA_SECRET_KEY: ""
   POSTHOG_API_KEY: ""
+
+# The private key of the instance-wide Enable Banking application (`config.ENABLE_BANKING_APP_ID`),
+# from a Secret you manage, mounted read-only into the API and the worker:
+#   kubectl -n <namespace> create secret generic wondermoney-enable-banking \
+#     --from-file=private-key.pem=./enable-banking.pem
+enableBanking:
+  privateKeySecret: ""
+  privateKeySecretKey: private-key.pem
 
 # A Secret you manage (by hand, Sealed Secrets, External Secrets), read by the API and the
 # worker after everything above, so its keys win. Any setting can go in it, including the

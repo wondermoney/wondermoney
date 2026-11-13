@@ -8,7 +8,7 @@ import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Link } from "@/components/ui/Link";
 import { Spinner } from "@/components/ui/Spinner";
 import { Heading, Text } from "@/components/ui/Typography";
-import useEnableBankingCredential from "@/lib/api/user/useEnableBankingCredential";
+import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 
 import {
   Accordion,
@@ -35,10 +35,12 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
 }) => {
   const t = useTranslations();
   const linkedAccountsLink = t("faq-linked-accounts-link");
-  const { data: enableBankingCredential, isLoading: credentialLoading } =
-    useEnableBankingCredential();
-  const credentialRequired =
-    !credentialLoading && enableBankingCredential?.status !== "active";
+  // The user's own Enable Banking key, or the server's shared one when it covers this household.
+  const {
+    credentialRequired,
+    loading: credentialLoading,
+    sharedCredentialUnavailable,
+  } = useBankLinkCredential();
 
   return (
     <DrawerDialog
@@ -76,6 +78,11 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
               <Text variant="smallText" className="text-muted-foreground">
                 {t("bankProviderCredentialRequired.body")}
               </Text>
+              {sharedCredentialUnavailable ? (
+                <Text variant="smallText" className="text-muted-foreground">
+                  {t("bankProviderCredentialRequired.sharedUnavailable")}
+                </Text>
+              ) : null}
               <Link
                 href="/settings?tab=bank-provider"
                 className="text-primary text-xs font-semibold underline underline-offset-2"

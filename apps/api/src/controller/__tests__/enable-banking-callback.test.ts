@@ -4,7 +4,7 @@ const changeToError = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const changeToLinked = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const findByState = vi.hoisted(() => vi.fn());
 const em = vi.hoisted(() => ({ findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ changeToError, changeToLinked, findByState })) }));
-const decryptCredentialEntity = vi.hoisted(() => vi.fn());
+const decryptForConnection = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
 const exchangeSession = vi.hoisted(() => vi.fn());
 const logger = vi.hoisted(() => ({ error: vi.fn(), info: vi.fn(), warn: vi.fn() }));
@@ -25,7 +25,7 @@ vi.mock('@app/app', () => ({ DI: { em } }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 vi.mock('@service/enable-banking/enable-banking-client.service', () => ({ createEnableBankingClient }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({
-  enableBankingCredentialService: { decryptCredentialEntity },
+  enableBankingCredentialService: { decryptForConnection },
 }));
 vi.mock('@service/enable-banking/enable-banking-initial-accounts.service', () => ({ createInitialEnableBankingAccounts }));
 vi.mock('@service/account/account-initial-sync-enqueue.service', () => ({ AccountInitialSyncQueueError, default: { enqueue } }));
@@ -50,7 +50,7 @@ describe('enableBankingCallback', () => {
     findByState.mockReset();
     em.getRepository.mockReset().mockReturnValue({ changeToError, changeToLinked, findByState });
     em.findOneOrFail.mockReset().mockResolvedValue({ bankConnectionKey: 42 });
-    decryptCredentialEntity.mockReset().mockReturnValue({ applicationId: 'app-1', privateKeyPem: 'pem' });
+    decryptForConnection.mockReset().mockReturnValue({ applicationId: 'app-1', privateKeyPem: 'pem' });
     createEnableBankingClient.mockReset().mockReturnValue({ exchangeSession });
     exchangeSession.mockReset();
     createInitialEnableBankingAccounts.mockReset().mockResolvedValue({ accounts: [{ accountId: 'acc-1' }], accountsCreated: 1, accountsSkipped: 0, skippedReasons: [] });
@@ -102,7 +102,7 @@ describe('enableBankingCallback', () => {
 
     await enableBankingCallback(createReq({ code: 'code-123', state: 'state-1' }), res);
 
-    expect(decryptCredentialEntity).toHaveBeenCalledWith(credentialEntity);
+    expect(decryptForConnection).toHaveBeenCalledWith(connection);
     expect(exchangeSession).toHaveBeenCalledWith('code-123');
     expect(changeToLinked).toHaveBeenCalledWith(connection, 'session-abc', new Date('2027-06-01T00:00:00.000Z'), 7_776_000);
     expect(redirect).toHaveBeenCalledWith(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ status: 'success' }));

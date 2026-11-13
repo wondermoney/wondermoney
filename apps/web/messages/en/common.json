@@ -2579,7 +2579,8 @@
   "bankProviderCredentialRequired": {
     "title": "Add your Enable Banking key first",
     "body": "Connecting a bank now needs your own Enable Banking application ID and key. Add them in Settings, then come back here.",
-    "cta": "Go to Bank Provider settings"
+    "cta": "Go to Bank Provider settings",
+    "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
   },
   "faq": {
     "title": "What changed at WonderMoney",
@@ -2652,7 +2653,8 @@
       "privateKeyInvalidFormat": "This doesn't look like a private key. It should start with \"-----BEGIN\".",
       "submit": "Test & Save",
       "genericError": "Couldn't verify this key. Please check it and try again."
-    }
+    },
+    "sharedAvailable": "This server has a shared Enable Banking connection for your household, so you can link banks without a key of your own. If you add one, new links use yours."
   },
   "emailVerification": {
     "message": "Verify your email to use this feature. We sent a link to {email}.",

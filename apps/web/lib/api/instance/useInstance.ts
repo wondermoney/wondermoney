@@ -11,6 +11,12 @@ export interface InstanceDescription {
   features: {
     ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean; statementImport?: boolean };
     bankSync: boolean;
+    /**
+     * `instance` when the operator set a shared Enable Banking credential, `user` when everyone
+     * adds their own. Whether the signed-in household may use the shared one is on the profile
+     * (`useBankLinkCredential`). Absent on an older API, which reads as `user`.
+     */
+    bankSyncCredentials?: "instance" | "user";
     contactForm: boolean;
     /**
      * One-click sign-in to the shared read-only demo account (`POST /v1/auth/demo`,
@@ -153,6 +159,17 @@ export function useSignupMode(): InstanceDescription["signupMode"] | null {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated ? (data?.signupMode ?? null) : null;
+}
+
+/**
+ * Whether the server has a shared Enable Banking credential (`features.bankSyncCredentials`).
+ * Undefined until the description arrives.
+ */
+export function useInstanceBankSyncCredentials(): "instance" | "user" | undefined {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data) return undefined;
+  return data.features.bankSyncCredentials ?? "user";
 }
 
 /** Where users can write for help, or null: no support links are shown then. */

@@ -23,11 +23,11 @@ export async function getBankList(req: Request, res: Response) {
     query: { country },
   } = await zParse(bankListByCountryRequestSchema, req);
 
-  // BYOK: each user's own Enable Banking application, not a shared WonderMoney
-  // credential — a user who hasn't registered one in Settings yet can't list banks.
+  // The user's own Enable Banking application, or the instance-wide one when this household may
+  // use it (`instance-credential-policy.ts`). Without either, listing banks is refused.
   let institutions;
   try {
-    institutions = await requireBankProvider(ENABLE_BANKING_PROVIDER_ID).listInstitutions({ appuserId: user.appuserKey, country });
+    institutions = await requireBankProvider(ENABLE_BANKING_PROVIDER_ID).listInstitutions({ appuserId: user.appuserKey, country, tenantId: req.tenant?.tenantKey });
   } catch (error) {
     throw toHttpError(error);
   }

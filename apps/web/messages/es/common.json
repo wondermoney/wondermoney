@@ -2579,7 +2579,8 @@
   "bankProviderCredentialRequired": {
     "title": "Añade primero tu clave de Enable Banking",
     "body": "Para conectar un banco ahora hace falta tu propio ID de aplicación y clave de Enable Banking. Añádelos en Ajustes y vuelve después aquí.",
-    "cta": "Ir a los ajustes del proveedor bancario"
+    "cta": "Ir a los ajustes del proveedor bancario",
+    "sharedUnavailable": "La conexión bancaria compartida de este servidor solo sirve a un hogar, así que el tuyo necesita su propia clave."
   },
   "faq": {
     "title": "Qué ha cambiado en WonderMoney",
@@ -2652,7 +2653,8 @@
       "privateKeyInvalidFormat": "Esto no parece una clave privada. Debería empezar por \"-----BEGIN\".",
       "submit": "Probar y guardar",
       "genericError": "No se pudo verificar esta clave. Revísala e inténtalo de nuevo."
-    }
+    },
+    "sharedAvailable": "Este servidor tiene una conexión compartida con Enable Banking para tu hogar, así que puedes vincular bancos sin una clave propia. Si añades una, los nuevos vínculos usarán la tuya."
   },
   "emailVerification": {
     "message": "Verifica tu correo para usar esta función. Te enviamos un enlace a {email}.",

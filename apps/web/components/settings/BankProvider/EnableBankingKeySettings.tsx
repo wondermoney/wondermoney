@@ -22,6 +22,7 @@ import useEnableBankingCredential, {
   type EnableBankingCredentialStatus,
   useDeleteEnableBankingCredential,
 } from "@/lib/api/user/useEnableBankingCredential";
+import { useProfileField } from "@/lib/api/user/useProfile";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 
 import EnableBankingKeySetupDialog from "./EnableBankingKeySetupDialog";
@@ -73,6 +74,10 @@ export default function EnableBankingKeySettings() {
   const format = useFormatter();
   const notifyIfRateLimited = useRateLimitToast();
   const { data: credential, isLoading, error } = useEnableBankingCredential();
+  // The server's shared credential covers this household: a key of their own is optional.
+  const { data: sharedCredential } = useProfileField(
+    (profile) => profile.bankSyncCredentials === "instance",
+  );
   const deleteCredential = useDeleteEnableBankingCredential();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -116,6 +121,11 @@ export default function EnableBankingKeySettings() {
 
   return (
     <Shell>
+      {sharedCredential ? (
+        <Text variant="mutedText" className="text-sm">
+          {t("sharedAvailable")}
+        </Text>
+      ) : null}
       <div className="flex items-center gap-2">
         <Text>{t("statusLabel")}:</Text>
         <Badge variant={status ? badgeVariantForStatus(status) : "muted"}>

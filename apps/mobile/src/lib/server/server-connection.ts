@@ -47,6 +47,9 @@ const instanceSchema = z.object({
   features: z.object({
     ai: z.object({ assistant: z.boolean(), csvMapping: z.boolean(), enrichment: z.boolean(), monthlyStory: z.boolean(), ocr: z.boolean() }),
     bankSync: z.boolean(),
+    // `instance` when the operator set a shared Enable Banking credential; absent on an older
+    // server, which reads as `user` (everyone adds their own key).
+    bankSyncCredentials: tolerantEnum(['instance', 'user'], 'user').optional(),
     contactForm: z.boolean(),
     // The public read-only demo ("Try the demo" on the sign-in screen). Optional so an older
     // server that doesn't report it still parses; missing reads as off.

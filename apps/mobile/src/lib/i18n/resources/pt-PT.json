@@ -3760,6 +3760,11 @@
         "notFound": "Esse banco já não está disponível. Escolha outro.",
         "unavailable": "Isso não foi possível concluir. Verifique a sua ligação e tente novamente.",
         "general": "Algo correu mal ao iniciar essa ligação. Tente novamente."
+      },
+      "credentialRequired": {
+        "title": "Adicione primeiro a sua chave da Enable Banking",
+        "message": "Para ligar um banco precisa do seu próprio ID de aplicação e chave da Enable Banking. Adicione-os nas Definições, em Fornecedor bancário, na aplicação web da WonderMoney e volte depois aqui.",
+        "sharedUnavailable": "A ligação bancária partilhada deste servidor só serve um agregado, por isso o seu precisa da sua própria chave."
       }
     },
     "statementImport": {

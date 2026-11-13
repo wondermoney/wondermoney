@@ -18,6 +18,7 @@ export type ConnectBankScreenState =
   | { status: 'loading' }
   | { status: 'invalid-response' }
   | { status: 'error' }
+  | { sharedUnavailable: boolean; status: 'credential-required' }
   | { status: 'loaded'; rows: readonly BankInstitutionRow[] }
 
 export type ConnectBankScreenProps = {
@@ -76,6 +77,22 @@ export function ConnectBankScreen({ state, pendingBankId, startFailure, onBack, 
             >
               <View style={[styles.skeleton, { width: 260, height: 20, backgroundColor: palette.muted }]} />
               <View style={[styles.skeleton, { width: 320, height: 20, backgroundColor: palette.muted }]} />
+            </View>
+          ) : null}
+
+          {state.status === 'credential-required' ? (
+            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
+              <Text accessibilityRole="header" allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
+                {t('banking.connect.credentialRequired.title')}
+              </Text>
+              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
+                {t('banking.connect.credentialRequired.message')}
+              </Text>
+              {state.sharedUnavailable ? (
+                <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
+                  {t('banking.connect.credentialRequired.sharedUnavailable')}
+                </Text>
+              ) : null}
             </View>
           ) : null}
 

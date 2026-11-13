@@ -1,11 +1,26 @@
+import { generateKeyPairSync } from 'node:crypto';
+
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+/** The instance-wide Enable Banking key, read through the seam instead of the disk. */
+const keyFiles = vi.hoisted(() => {
+  const files: Record<string, string> = {};
+  return { files };
+});
+vi.mock('@utils/read-secret-file', () => ({
+  readSecretFile: (path: string) => {
+    const content = keyFiles.files[path];
+    if (content === undefined) throw Object.assign(new Error(`ENOENT: ${path}`), { code: 'ENOENT' });
+    return content;
+  },
+}));
 
 import { mockReq, mockRes } from '@app/__tests__/__helpers__/mock-request';
 import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -27,6 +42,7 @@ describe('GET /v1/instance', () => {
       features: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         bankSync: true,
+        bankSyncCredentials: 'user',
         bankSyncProviders: ['enable_banking'],
         contactForm: false,
         demo: false,
@@ -180,5 +196,40 @@ describe('GET /v1/instance', () => {
 
     vi.stubEnv('SUPPORT_EMAIL', 'help@example.com');
     expect(describeInstance()).toMatchObject({ features: { feedback: true } });
+  });
+
+  describe('bankSyncCredentials', () => {
+    const pem = generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.export({ format: 'pem', type: 'pkcs8' });
+    const withInstanceCredential = (file: string) => {
+      for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+      keyFiles.files = { [file]: pem };
+      vi.stubEnv('ENABLE_BANKING_APP_ID', 'instance-app');
+      vi.stubEnv('ENABLE_BANKING_PRIVATE_KEY_FILE', file);
+    };
+
+    it('reports an instance-wide credential, and never the key or the application', () => {
+      withInstanceCredential('/run/secrets/a');
+
+      const described = describeInstance();
+      expect(described).toMatchObject({ features: { bankSync: true, bankSyncCredentials: 'instance' } });
+      expect(JSON.stringify(described)).not.toContain(pem.split('\n')[5]);
+      expect(JSON.stringify(described)).not.toContain('instance-app');
+      expect(JSON.stringify(described)).not.toContain('/run/secrets/a');
+    });
+
+    it('reports user credentials when Enable Banking is not enabled on the instance', () => {
+      withInstanceCredential('/run/secrets/b');
+      vi.stubEnv('BANK_PROVIDERS', 'none');
+
+      expect(describeInstance()).toMatchObject({ features: { bankSync: false, bankSyncCredentials: 'user' } });
+    });
+
+    it('reports user credentials when the key file cannot be read', () => {
+      withInstanceCredential('/run/secrets/c');
+      keyFiles.files = {};
+      vi.stubEnv('ENABLE_BANKING_PRIVATE_KEY_FILE', '/run/secrets/missing');
+
+      expect(describeInstance()).toMatchObject({ features: { bankSyncCredentials: 'user' } });
+    });
   });
 });

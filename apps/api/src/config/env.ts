@@ -18,6 +18,7 @@ import {
   ConfigurationError,
   loadConfiguration,
 } from './configuration';
+import { instanceEnableBankingCredentialProblems } from './enable-banking-instance';
 import { parseTrustProxy, type TrustProxySetting } from './trust-proxy';
 
 export type ApiEnv = Readonly<Record<string, string>>;
@@ -59,17 +60,22 @@ export function assertEnv(role: AppRole, source: NodeJS.ProcessEnv = process.env
   }
 }
 
-export function loadEnv(options: { role: AppRole; source?: NodeJS.ProcessEnv }): AppEnv {
+/**
+ * Validate the environment for the API or the worker. Beyond the variables themselves, it reads
+ * the instance-wide Enable Banking key file when one is configured (`readFile` replaces the read
+ * in tests), so an unreadable or malformed key stops the process at start-up.
+ */
+export function loadEnv(options: { readFile?: (path: string) => string; role: AppRole; source?: NodeJS.ProcessEnv }): AppEnv {
   const flat = flatten(options.source ?? process.env);
+  const problems: string[] = [];
   try {
     loadConfiguration(options.role, flat);
   } catch (error) {
-    if (error instanceof ConfigurationError) {
-      const problems = error.issues.map((issue) => `${issue.path === '(root)' ? '' : `${issue.path}: `}${issue.message}`);
-      throw new EnvValidationError(problems, options.role);
-    }
-    throw error;
+    if (!(error instanceof ConfigurationError)) throw error;
+    problems.push(...error.issues.map((issue) => `${issue.path === '(root)' ? '' : `${issue.path}: `}${issue.message}`));
   }
+  problems.push(...instanceEnableBankingCredentialProblems(flat, options.readFile));
+  if (problems.length > 0) throw new EnvValidationError(problems, options.role);
   return flat;
 }
 

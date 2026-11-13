@@ -18,7 +18,7 @@ import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
-import useEnableBankingCredential from "@/lib/api/user/useEnableBankingCredential";
+import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { useUser } from "@/lib/auth/user-context";
 import { buildOnboardingConnectRedirectPage } from "@/lib/onboarding/first-run/connect-redirect";
 import {
@@ -65,17 +65,20 @@ export default function FirstRunAccountStep() {
   // Sent back here by the Settings landing when the bank connection failed.
   const returnedError = useBankConnectionResult() === "error";
 
-  const { data: enableBankingCredential, isLoading: credentialLoading } =
-    useEnableBankingCredential();
-  const credentialRequired =
-    !credentialLoading && enableBankingCredential?.status !== "active";
+  // The user's own Enable Banking key, or the server's shared one when it covers this household.
+  const {
+    canLink,
+    credentialRequired,
+    loading: credentialLoading,
+    sharedCredentialUnavailable,
+  } = useBankLinkCredential();
 
   const countryOptions = Object.values(countryFlags)
     .filter((c) => SUPPORTED_BANK_COUNTRY_CODES.includes(c.code))
     .map((c) => ({ label: `${c.emoji} ${c.name}`, value: c.code }));
 
   const { data: banks = [], isLoading: banksLoading } = useBankList(country, {
-    enabled: !!country && !credentialRequired,
+    enabled: !!country && canLink,
     staleTime: Infinity,
   });
   const returnPage = buildOnboardingConnectRedirectPage(locale);
@@ -283,6 +286,11 @@ export default function FirstRunAccountStep() {
                   <p className="text-muted-foreground text-[13px] leading-5">
                     {t("account.credentialRequired.body")}
                   </p>
+                  {sharedCredentialUnavailable ? (
+                    <p className="text-muted-foreground text-[13px] leading-5">
+                      {tCommon("bankProviderCredentialRequired.sharedUnavailable")}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ) : (

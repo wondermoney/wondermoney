@@ -50,8 +50,13 @@ class EnableBankingProvider implements BankProvider {
     const connection = await repository.findByState(input.state);
     if (!connection) throw new NotFoundError('Enable Banking connection not found');
 
-    const credential = enableBankingCredentialService.decryptCredentialEntity(connection.enableBankingCredentialKey);
-    const client = createEnableBankingClient(credential);
+    let client;
+    try {
+      client = createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
+    } catch (error) {
+      await repository.changeToError(connection);
+      throw mapEnableBankingError(error);
+    }
     let session;
     try {
       session = await client.exchangeSession(input.code);
@@ -156,9 +161,10 @@ class EnableBankingProvider implements BankProvider {
     };
   }
 
-  async listInstitutions(input: { appuserId: number; country?: string }): Promise<BankInstitution[]> {
-    const credential = await this.credentialFor(input.appuserId);
-    const client = createEnableBankingClient(credential);
+  async listInstitutions(input: { appuserId: number; country?: string; tenantId?: number }): Promise<BankInstitution[]> {
+    const resolved = await enableBankingCredentialService.resolveForNewLink(input.appuserId, input.tenantId);
+    if (!resolved) throw new BadRequestError('No Enable Banking credential configured');
+    const client = createEnableBankingClient(resolved.credential);
     try {
       const institutions = await client.listInstitutions({ country: input.country });
       return institutions.map((institution) => ({
@@ -176,7 +182,7 @@ class EnableBankingProvider implements BankProvider {
     const detail = await this.detailOf(connection);
     if (!detail) throw new UserActionRequiredError('Enable Banking connection not found');
     try {
-      enableBankingCredentialService.decryptCredentialEntity(detail.enableBankingCredentialKey);
+      enableBankingCredentialService.decryptForConnection(detail);
     } catch (error) {
       throw new UserActionRequiredError(error instanceof Error ? error.message : 'Enable Banking credential could not be decrypted');
     }
@@ -186,10 +192,10 @@ class EnableBankingProvider implements BankProvider {
     const institutionRef = decodeEnableBankingInstitutionId(input.institutionId);
     if (!institutionRef) throw new BadRequestError('Invalid institution id');
 
-    const credentialEntity = await enableBankingCredentialService.getActiveCredentialEntity(input.appuserId);
-    if (!credentialEntity) throw new BadRequestError('No Enable Banking credential configured');
-    const credential = enableBankingCredentialService.decryptCredentialEntity(credentialEntity);
-    const client = createEnableBankingClient(credential);
+    // The user's own credential wins; otherwise the instance one, when this household may use it.
+    const resolved = await enableBankingCredentialService.resolveForNewLink(input.appuserId, input.tenantId);
+    if (!resolved) throw new BadRequestError('No Enable Banking credential configured');
+    const client = createEnableBankingClient(resolved.credential);
 
     // `maximum_consent_validity` varies per bank and is never hardcoded.
     let institution;
@@ -225,7 +231,7 @@ class EnableBankingProvider implements BankProvider {
     await DI.em.getRepository(EnableBankingConnection).createConnection(
       appuser,
       tenant,
-      credentialEntity,
+      resolved.entity,
       state,
       institutionRef.name,
       institutionRef.country,
@@ -237,13 +243,7 @@ class EnableBankingProvider implements BankProvider {
   }
 
   private clientFor(connection: EnableBankingConnection) {
-    return createEnableBankingClient(enableBankingCredentialService.decryptCredentialEntity(connection.enableBankingCredentialKey));
-  }
-
-  private async credentialFor(appuserId: number) {
-    const credential = await enableBankingCredentialService.getDecryptedCredential(appuserId);
-    if (!credential) throw new BadRequestError('No Enable Banking credential configured');
-    return credential;
+    return createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
   }
 
   private detailOf(connection: BankConnectionRef): Promise<EnableBankingConnection | null> {

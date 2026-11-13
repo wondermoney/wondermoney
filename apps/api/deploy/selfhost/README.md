@@ -86,7 +86,7 @@ Everything lives in `.env`; it is commented section by section. After editing it
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | "Sign in with <name>" through your own identity provider (OIDC) | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` (see the single sign-on guide) |
-| Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings |
+| Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings. Or your own Enable Banking application for your household: `ENABLE_BANKING_APP_ID` and `ENABLE_BANKING_PRIVATE_KEY_FILE` (see `.env`) |
 | Analytics for your own instance (off by default) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, or `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` |
 
 To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` and set
@@ -102,7 +102,7 @@ outside call is the worker's daily download of euro exchange rates from the Euro
 Bank. Everything else is switched on by its setting: email (SMTP or Resend), AI (`AI_BASE_URL` or
 `ANTHROPIC_API_KEY`), market data (EODHD), file storage (S3), off-site backups
 (`BACKUP_DESTINATION`), error tracking (`SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`), analytics
-(above), Google sign-in, reCAPTCHA, and bank sync (Enable Banking, once a user adds their key). The docs site's self-hosting guide lists each one.
+(above), Google sign-in, reCAPTCHA, and bank sync (Enable Banking, once a user adds their key or you set `ENABLE_BANKING_APP_ID`). The docs site's self-hosting guide lists each one.
 
 ### The mobile app
 
