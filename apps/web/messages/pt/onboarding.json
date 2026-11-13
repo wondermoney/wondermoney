@@ -41,21 +41,21 @@
       "account": {
         "headline": "Liga uma conta para ver saldos reais.",
         "description": "Uma conta basta para mostrar saldos, atividade recente e o ponto de partida do teu património líquido.",
-        "cta": "Conectar conta bancária",
+        "cta": "Ligar conta bancária",
         "manualCta": "Adicionar conta manualmente",
-        "trustShort": "Acesso apenas de leitura. A WonderMoney não pode mover dinheiro nem fazer pagamentos.",
-        "trustLong": "Autenticas-te diretamente com o teu banco através da Enable Banking. A WonderMoney nunca vê os teus dados de acesso e podes revogar o acesso a qualquer momento.",
+        "trustShort": "Acesso apenas de leitura. O WonderMoney não pode mover dinheiro nem fazer pagamentos.",
+        "trustLong": "Autenticas-te diretamente com o teu banco através da Enable Banking. O WonderMoney nunca vê os teus dados de acesso e podes revogar o acesso a qualquer momento.",
         "personalized": {
-          "all_in_one": "Liga primeiro uma conta. A WonderMoney pode começar a mostrar os teus saldos e atividade recente a partir daí.",
+          "all_in_one": "Liga primeiro uma conta. O WonderMoney pode começar a mostrar os teus saldos e atividade recente a partir daí.",
           "spending": "Liga a tua conta para começar a ver gastos recentes e categorias.",
           "budget": "Começa com uma conta para que o teu orçamento reflita gastos reais.",
-          "investments_net_worth": "Liga primeiro uma conta. Ela dá à WonderMoney o lado de dinheiro do teu património líquido.",
+          "investments_net_worth": "Liga primeiro uma conta. Ela dá ao WonderMoney o lado de dinheiro do teu património líquido.",
           "financial_freedom": "Começa com uma conta para que saldos, gastos e investimentos criem uma visão fiável.",
-          "exploring": "Começa com uma conta, ou adiciona uma manualmente, e vê como a WonderMoney funciona."
+          "exploring": "Começa com uma conta, ou adiciona uma manualmente, e vê como o WonderMoney funciona."
         },
         "skipWarning": {
           "headline": "Continuar sem dados financeiros reais?",
-          "description": "Podes fazê-lo, mas a WonderMoney não conseguirá mostrar os teus saldos reais, transações, padrões de despesa ou património líquido até adicionares uma conta.",
+          "description": "Podes fazê-lo, mas o WonderMoney não conseguirá mostrar os teus saldos reais, transações, padrões de despesa ou património líquido até adicionares uma conta.",
           "primary": "Adicionar uma conta primeiro",
           "secondary": "Continuar sem conta",
           "reassurance": "Podes sempre adicionar uma mais tarde a partir de Contas."
@@ -69,7 +69,7 @@
         "countryLabel": "Onde está o teu banco?",
         "listHint": "Escolhe o teu banco para ligar em segurança.",
         "handoffTitle": "A ligar em segurança ao {bank}…",
-        "handoffBody": "Vais autenticar-te através da Enable Banking. A WonderMoney nunca vê os teus dados de acesso.",
+        "handoffBody": "Vais autenticar-te através da Enable Banking. O WonderMoney nunca vê os teus dados de acesso.",
         "handoffSecurity": "Encriptado · acesso apenas de leitura",
         "continueToBank": "Continuar para o banco",
         "handoffError": "Não foi possível iniciar a ligação. Tenta novamente ou escolhe outro banco.",
@@ -99,7 +99,7 @@
           },
           "transactions": {
             "title": "Transações",
-            "description": "As transações recentes ajudam a WonderMoney a mostrar para onde vai o teu dinheiro."
+            "description": "As transações recentes ajudam o WonderMoney a mostrar para onde vai o teu dinheiro."
           },
           "budgets": {
             "title": "Orçamentos",
@@ -121,33 +121,33 @@
       },
       "privacy": {
         "headline": "Só de leitura significa só de leitura.",
-        "description": "A WonderMoney pode mostrar saldos e transações, mas não pode mover dinheiro, fazer pagamentos ou ver os dados de acesso ao banco.",
+        "description": "O WonderMoney pode mostrar saldos e transações, mas não pode mover dinheiro, fazer pagamentos ou ver os dados de acesso ao banco.",
         "bullets": {
           "readOnly": {
             "title": "Acesso apenas de leitura",
-            "description": "A WonderMoney só pode ver saldos e transações. Não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
+            "description": "O WonderMoney só pode ver saldos e transações. Não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
           },
           "bankAuth": {
             "title": "Autenticas-te com o teu banco",
-            "description": "A autenticação é feita através da Enable Banking. A WonderMoney nunca vê os dados de acesso ao teu banco."
+            "description": "A autenticação é feita através da Enable Banking. O WonderMoney nunca vê os dados de acesso ao teu banco."
           },
           "revoke": {
             "title": "Manténs o controlo",
-            "description": "Podes revogar o acesso em qualquer momento no teu banco ou em Contas na WonderMoney."
+            "description": "Podes revogar o acesso em qualquer momento no teu banco ou em Contas no WonderMoney."
           }
         }
       },
       "budget": {
         "headline": "Dá um plano ao teu dinheiro.",
-        "description": "Um orçamento transforma as tuas despesas em categorias, limites e escolhas claras. Assim que uma conta estiver ligada e houver movimentos disponíveis, a WonderMoney pode ajudar a mantê-lo atualizado.",
-        "personalized": "Disseste-nos que o orçamento é importante para ti. É aqui que a WonderMoney ajuda a transformar os teus gastos num plano mensal.",
+        "description": "Um orçamento transforma as tuas despesas em categorias, limites e escolhas claras. Assim que uma conta estiver ligada e houver movimentos disponíveis, o WonderMoney pode ajudar a mantê-lo atualizado.",
+        "personalized": "Disseste-nos que o orçamento é importante para ti. É aqui que o WonderMoney ajuda a transformar os teus gastos num plano mensal.",
         "accountSkipped": "Podes criar um orçamento agora, mas funciona melhor quando uma conta está ligada e os movimentos estão disponíveis.",
         "cta": "Criar primeiro orçamento",
         "reassurance": "Podes começar de forma simples e ajustar depois."
       },
       "portfolio": {
         "headline": "Completa a tua visão do património líquido.",
-        "description": "Adiciona os teus investimentos para que a WonderMoney possa mostrar dinheiro, despesas e portefólio num só lugar.",
+        "description": "Adiciona os teus investimentos para que o WonderMoney possa mostrar dinheiro, despesas e portefólio num só lugar.",
         "personalized": "Disseste-nos que acompanhar investimentos e património líquido é importante para ti. Adiciona um portefólio para ligar essa parte da tua vida financeira.",
         "cta": "Criar ou importar portefólio",
         "reassurance": "Podes adicionar posições manualmente ou importar mais tarde."
@@ -179,12 +179,12 @@
         },
         "goals": {
           "eyebrow": "Configuração personalizada",
-          "title": "Algumas escolhas ajudam a WonderMoney a focar-se no que importa primeiro.",
+          "title": "Algumas escolhas ajudam o WonderMoney a focar-se no que importa primeiro.",
           "quote": "Para quem quer uma configuração alinhada com a forma como gere dinheiro."
         },
         "account": {
           "eyebrow": "Confiança e acesso",
-          "title": "Dados reais desbloqueiam o produto sem dar à WonderMoney controlo sobre o teu dinheiro.",
+          "title": "Dados reais desbloqueiam o produto sem dar ao WonderMoney controlo sobre o teu dinheiro.",
           "quote": "Para quem quer automação sem dar acesso a pagamentos."
         },
         "syncValue": {
@@ -212,7 +212,7 @@
           "facts": {
             "european": {
               "title": "Criada para a Europa",
-              "description": "A WonderMoney foi desenhada em torno de PSD2/Open Banking e dos fluxos financeiros europeus."
+              "description": "O WonderMoney foi desenhado em torno de PSD2/Open Banking e dos fluxos financeiros europeus."
             },
             "connected": {
               "title": "Contas, orçamentos e portefólio",
@@ -220,15 +220,15 @@
             },
             "readOnly": {
               "title": "Acesso apenas de leitura",
-              "description": "A WonderMoney não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
+              "description": "O WonderMoney não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
             },
             "privacy": {
               "title": "Modelo focado na privacidade",
-              "description": "A WonderMoney foi desenhada em torno de requisitos europeus de privacidade, é de código aberto e não vende dados de utilizadores."
+              "description": "O WonderMoney foi desenhado em torno de requisitos europeus de privacidade, é de código aberto e não vende dados de utilizadores."
             },
             "enableBanking": {
               "title": "Autenticação bancária através da Enable Banking",
-              "description": "Autenticas-te com o teu banco através da Enable Banking. A WonderMoney nunca vê os dados de acesso ao teu banco."
+              "description": "Autenticas-te com o teu banco através da Enable Banking. O WonderMoney nunca vê os dados de acesso ao teu banco."
             },
             "netWorth": {
               "title": "Património líquido como referência",

@@ -34,7 +34,7 @@ Tenta:
 
 ## Transações semelhantes e duplicados
 
-A WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas — por exemplo, duas compras do mesmo montante no mesmo dia — deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja alterado silenciosamente.
+O WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas — por exemplo, duas compras do mesmo montante no mesmo dia — deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja alterado silenciosamente.
 
 Uma linha do ficheiro com o mesmo montante de uma transação que já está na conta, até 3 dias de diferença, aparece na revisão como possível duplicado, ao lado da transação com que se parece. É ignorada, a não ser que a incluas; vê [Possíveis duplicados](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados).
 

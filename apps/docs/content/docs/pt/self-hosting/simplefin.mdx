@@ -3,9 +3,9 @@ title: SimpleFIN para bancos dos EUA e do Canadá
 description: Deixa as pessoas da tua instância sincronizar contas de bancos dos EUA e do Canadá através do SimpleFIN Bridge, e vê o que o servidor guarda e contacta quando o fazem.
 ---
 
-A Enable Banking liga bancos na Europa. Para bancos dos Estados Unidos e do Canadá, uma instância alojada por ti pode também oferecer o [SimpleFIN Bridge](https://bridge.simplefin.org/), um agregador bancário pago, só de leitura, que cada pessoa subscreve por si. A WonderMoney não tem qualquer ligação ao SimpleFIN.
+A Enable Banking liga bancos na Europa. Para bancos dos Estados Unidos e do Canadá, uma instância alojada por ti pode também oferecer o [SimpleFIN Bridge](https://bridge.simplefin.org/), um agregador bancário pago, só de leitura, que cada pessoa subscreve por si. O WonderMoney não tem qualquer ligação ao SimpleFIN.
 
-O SimpleFIN fica desligado até um operador o ligar. O serviço alojado da WonderMoney não o oferece.
+O SimpleFIN fica desligado até um operador o ligar. O serviço alojado do WonderMoney não o oferece.
 
 <Callout type="info" title="Uma integração nova">
   A integração segue o [protocolo SimpleFIN](https://www.simplefin.org/protocol.html) público e é testada com respostas gravadas, ainda não com uma conta SimpleFIN real. Se uma sincronização parecer errada, [abre um issue](https://github.com/wondermoney/wondermoney/issues).
@@ -31,10 +31,10 @@ O SimpleFIN precisa também de `CREDENTIAL_ENCRYPTION_KEY_V1`, que a instalaçã
 ## Ligar os teus bancos
 
 1. No [SimpleFIN Bridge](https://bridge.simplefin.org/), regista-te, liga os teus bancos e cria um token de configuração (setup token).
-2. Na WonderMoney, escolhe **Ligar com SimpleFIN**, nas Definições na web ou na área de bancos da aplicação móvel, e cola o token.
-3. A WonderMoney troca o token junto do SimpleFIN por um endereço de acesso privado, que guarda cifrado. As tuas contas e transações aparecem depois da primeira sincronização.
+2. No WonderMoney, escolhe **Ligar com SimpleFIN**, nas Definições na web ou na área de bancos da aplicação móvel, e cola o token.
+3. O WonderMoney troca o token junto do SimpleFIN por um endereço de acesso privado, que guarda cifrado. As tuas contas e transações aparecem depois da primeira sincronização.
 
-Um token de configuração só funciona uma vez. Se a WonderMoney disser que o token já foi usado e não foste tu a usá-lo, outra pessoa pode tê-lo: desativa-o no SimpleFIN Bridge e cria um novo.
+Um token de configuração só funciona uma vez. Se o WonderMoney disser que o token já foi usado e não foste tu a usá-lo, outra pessoa pode tê-lo: desativa-o no SimpleFIN Bridge e cria um novo.
 
 Uma ligação pertence ao membro que a criou. Só esse membro vê o histórico de sincronizações e pode desligá-la.
 
@@ -50,7 +50,7 @@ Uma ligação pertence ao membro que a criou. Só esse membro vê o histórico d
 ## Revogar ou desligar
 
 - **Desativado no SimpleFIN Bridge.** O SimpleFIN recusa a sincronização seguinte, e a ligação aparece como revogada e deixa de sincronizar. Para voltar a sincronizar, cria um novo token de configuração e liga-te com ele.
-- **Desligado na WonderMoney.** O acesso guardado é destruído de imediato, por isso nada volta a sincronizar a ligação. A WonderMoney não consegue desativar o token por ti: desativa-o também no SimpleFIN Bridge.
+- **Desligado no WonderMoney.** O acesso guardado é destruído de imediato, por isso nada volta a sincronizar a ligação. O WonderMoney não consegue desativar o token por ti: desativa-o também no SimpleFIN Bridge.
 
 ## Privacidade e segurança
 
@@ -67,4 +67,4 @@ Se ofereceres o SimpleFIN, indica-o na tua política de privacidade: os dados ba
 - A primeira sincronização recua 89 dias. O histórico mais antigo não é obtido.
 - As contas numa moeda personalizada (sem código ISO 4217, como pontos de recompensa) ficam de fora, e o histórico de sincronizações da ligação indica que uma conta ficou de fora pela sua moeda.
 - As posições de investimento ainda não são importadas ([issue #22](https://github.com/wondermoney/wondermoney/issues/22)).
-- O serviço alojado da WonderMoney não oferece o SimpleFIN.
+- O serviço alojado do WonderMoney não oferece o SimpleFIN.

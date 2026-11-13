@@ -330,7 +330,7 @@
     "tryAgain": "Tentar novamente",
     "errorTitle": "Erro ao carregar dados",
     "setup": {
-      "title": "Termina de configurar o teu dashboard",
+      "title": "Termina de configurar o teu painel",
       "count": "{{completed}} de {{total}} passos concluídos",
       "nudgeOne": "Estás quase: falta um passo para teres uma visão geral mais útil.",
       "nudgeMany": "Conclui estes passos para teres uma visão geral mais útil.",
@@ -520,7 +520,7 @@
     "review": "Rever conta",
     "reviewTitle": "Rever detalhes da conta",
     "manualTitle": "Manutenção manual",
-    "manualContext": "És responsável por manter o saldo desta conta atualizado. O saldo não é uma transação real e a WonderMoney não pode efetuar transações nesta conta.",
+    "manualContext": "És responsável por manter o saldo desta conta atualizado. O saldo não é uma transação real e o WonderMoney não pode efetuar transações nesta conta.",
     "conversionContext": "Se esta não for a tua moeda principal, o saldo convertido poderá ficar indisponível até existir uma taxa de câmbio.",
     "edit": "Editar detalhes",
     "confirm": "Criar conta manual",
@@ -1882,9 +1882,9 @@
     "allocateLink": "Distribuir reembolso candidato",
     "allocateEdit": "Editar distribuição do reembolso",
     "readOnlyClassification": "As notas e o estado de revisão são mostrados pelo servidor, mas esta API não permite alterá-los.",
-    "suggestionNeedsReview": "O servidor marca esta distribuição sugerida como necessitando de revisão.",
+    "suggestionNeedsReview": "O servidor marca esta distribuição sugerida como a precisar de revisão.",
     "serverNotes": "Notas do servidor: {{notes}}",
-    "serverNeedsReview": "Esta distribuição associada está marcada como necessitando de revisão.",
+    "serverNeedsReview": "Esta distribuição associada está marcada como a precisar de revisão.",
     "total": "Pagamento total",
     "validation": "Introduz montantes finitos sem sinal. Capital e total devem ser positivos, os componentes devem perfazer o total e a distribuição não pode exceder o capital em dívida nem o montante da transação.",
     "review": "Rever distribuição",
@@ -2371,7 +2371,7 @@
     "overPlanUnit_one": "linha",
     "overPlanUnit_other": "linhas",
     "monthlyRemaining": "Restante no mês",
-    "annualRemaining": "Restando no ano",
+    "annualRemaining": "Restante no ano",
     "monthlySpent": "Gasto no mês",
     "annualSpent": "Gasto no ano",
     "monthlyPlanned": "Orçamentado no mês",
@@ -2717,7 +2717,7 @@
     "debtStrategy": {
       "linkLabel": "Estratégia de quitação de dívidas",
       "title": "Estratégia de quitação de dívidas",
-      "subtitle": "Compara quão rápido ficarias sem dívidas pagando-as por ordens diferentes, com o mesmo orçamento mensal total.",
+      "subtitle": "Compara quão depressa ficarias sem dívidas se as pagasses por ordens diferentes, com o mesmo orçamento mensal total.",
       "avalanche": "Avalanche",
       "snowball": "Bola de neve",
       "avalancheHint": "Juro mais alto primeiro — paga menos juros.",
@@ -3495,7 +3495,7 @@
     },
     "appLock": {
       "heading": "Bloqueio da aplicação",
-      "helper": "Exige Face ID, Touch ID ou o código do dispositivo para abrir a WonderMoney.",
+      "helper": "Exige Face ID, Touch ID ou o código do dispositivo para abrir o WonderMoney.",
       "loading": "A verificar o estado do bloqueio da aplicação…",
       "onLabel": "O bloqueio da aplicação está ativado",
       "offLabel": "O bloqueio da aplicação está desativado",
@@ -3720,7 +3720,7 @@
         },
         "readOnly": {
           "title": "Acesso apenas de leitura",
-          "description": "A WonderMoney não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
+          "description": "O WonderMoney não pode mover dinheiro, fazer pagamentos ou iniciar transferências."
         },
         "netWorth": {
           "title": "Património líquido como referência",
@@ -3728,14 +3728,14 @@
         }
       }
     },
-    "heading": "Bem-vindo à WonderMoney",
+    "heading": "Bem-vindo ao WonderMoney",
     "helper": "Uma visão geral do que a tua conta faz e como os teus dados são tratados. Podes concluir este percurso sem ligar um banco.",
     "loading": "A carregar o percurso de início",
     "cardIndex": "Passo {{index}}",
     "steps": {
       "netWorthValue": {
         "title": "Acompanha o teu património líquido estimado",
-        "body": "A WonderMoney combina as tuas contas e carteiras numa estimativa diária do que possuis e do que deves."
+        "body": "O WonderMoney combina as tuas contas e carteiras numa estimativa diária do que possuis e do que deves."
       },
       "readOnlyBankAccess": {
         "title": "Acesso bancário apenas de leitura",
@@ -3757,7 +3757,7 @@
       "createAccount": "Criar a tua primeira conta",
       "skip": "Continuar sem ligar um banco"
     },
-    "footnote": "Ligar um banco é opcional. Podes continuar a usar a WonderMoney com contas manuais e voltar a este passo mais tarde.",
+    "footnote": "Ligar um banco é opcional. Podes continuar a usar o WonderMoney com contas manuais e voltar a este passo mais tarde.",
     "error": {
       "title": "Não foi possível carregar o percurso de início",
       "message": "Verifica a tua ligação e tenta novamente. Os teus dados estão intactos."
@@ -3787,8 +3787,8 @@
       "loading": "A carregar ligações bancárias",
       "empty": "Ainda não existem ligações bancárias ativas. Associa um banco na web para o veres aqui.",
       "emptyTitle": "Ainda não existem ligações bancárias",
-      "emptyMessage": "Associa um banco para trazer dados de contas apenas de leitura para a WonderMoney.",
-      "readOnlyTrust": "O acesso Open Banking é apenas de leitura. A WonderMoney não pode movimentar dinheiro nem efetuar pagamentos.",
+      "emptyMessage": "Associa um banco para trazer dados de contas apenas de leitura para o WonderMoney.",
+      "readOnlyTrust": "O acesso Open Banking é apenas de leitura. O WonderMoney não pode movimentar dinheiro nem efetuar pagamentos.",
       "rowLabel": "{{institution}}, estado {{status}}, expira {{expiry}}, dados {{freshness}}",
       "rowLabelNoExpiry": "{{institution}}, estado {{status}}, dados {{freshness}}",
       "expiresOn": "Consentimento expira a {{date}}",
@@ -3897,7 +3897,7 @@
       },
       "credentialRequired": {
         "title": "Adiciona primeiro a tua chave da Enable Banking",
-        "message": "Para ligar um banco precisas do teu próprio ID de aplicação e chave da Enable Banking. Adiciona-os nas Definições, em Fornecedor bancário, na aplicação web da WonderMoney e volta depois aqui.",
+        "message": "Para ligar um banco precisas do teu próprio ID de aplicação e chave da Enable Banking. Adiciona-os nas Definições, em Fornecedor bancário, na aplicação web do WonderMoney e volta depois aqui.",
         "sharedUnavailable": "A ligação bancária partilhada deste servidor só serve um agregado, por isso o teu precisa da sua própria chave."
       }
     },
@@ -3905,7 +3905,7 @@
       "heading": "Ligar com o SimpleFIN",
       "helper": "Cola um token de configuração do SimpleFIN Bridge, que liga bancos dos EUA e do Canadá.",
       "tokenExplainer": "Um token de configuração é um código de utilização única que crias no SimpleFIN Bridge depois de lá associares os teus bancos. Só funciona uma vez.",
-      "storageExplainer": "A WonderMoney troca-o uma única vez por um acesso apenas de leitura às tuas contas e guarda esse acesso encriptado. O token não é guardado.",
+      "storageExplainer": "O WonderMoney troca-o uma única vez por um acesso apenas de leitura às tuas contas e guarda esse acesso encriptado. O token não é guardado.",
       "bridgeLink": "Obter um token no SimpleFIN Bridge",
       "bridgeLinkHint": "Abre bridge.simplefin.org no navegador",
       "tokenLabel": "Token de configuração",
@@ -4286,12 +4286,12 @@
     }
   },
   "appLock": {
-    "title": "A WonderMoney está bloqueada",
+    "title": "O WonderMoney está bloqueado",
     "helper": "Utiliza Face ID, Touch ID ou o código do dispositivo para continuar.",
     "unlock": "Desbloquear",
     "unlocking": "A desbloquear…",
     "failed": "Não foi possível desbloquear. Tenta novamente.",
-    "promptMessage": "Desbloquear a WonderMoney"
+    "promptMessage": "Desbloquear o WonderMoney"
   },
   "reportsHub": {
     "title": "Relatórios",
@@ -4706,7 +4706,7 @@
       "timeout": "O teu banco demorou demasiado a responder.",
       "transaction-phase-failed": "O teu banco não enviou as transações.",
       "unknown": "A sincronização falhou.",
-      "unsupported-currency": "Uma conta usa uma moeda que a WonderMoney não consegue acompanhar, por isso ficou de fora."
+      "unsupported-currency": "Uma conta usa uma moeda que o WonderMoney não consegue acompanhar, por isso ficou de fora."
     },
     "actions": {
       "contact-support": "Contactar o suporte",

@@ -79,7 +79,7 @@
         "legendIncome": "Receitas",
         "legendCategory": "Categoria",
         "legendAccount": "Conta",
-        "ariaLabel": "Diagrama de Sankey mostrando fluxo de caixa total de {total}",
+        "ariaLabel": "Diagrama de Sankey do fluxo de caixa total de {total}",
         "linkTooltip": "{source} → {target}: {value}",
         "nodeTooltip": "{label}: {value}",
         "mobileNotice": "Este gráfico vê-se melhor num ecrã mais largo.",
