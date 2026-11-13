@@ -109,6 +109,7 @@ const routePatterns: readonly RoutePattern[] = [
   [['settings', 'categories', 'create'], 'settings_category_create'],
   [['settings', 'categories', WILDCARD, 'edit'], 'settings_category_edit'],
   [['settings', 'household'], 'settings_household'],
+  [['settings', 'household', 'join'], 'settings_household_join'],
   [['settings', 'notifications'], 'settings_notifications'],
   [['settings', 'preferences'], 'settings_preferences'],
   [['settings', 'profile'], 'settings_profile'],

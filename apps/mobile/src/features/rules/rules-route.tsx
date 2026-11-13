@@ -48,6 +48,10 @@ export function RulesRoute() {
       Alert.alert(t('rules.demoWriteBlocked'))
       return
     }
+    if (error instanceof ApiError && error.code === 'household-read-only') {
+      Alert.alert(title, t('common.householdReadOnly'))
+      return
+    }
     Alert.alert(title, message)
   }
 

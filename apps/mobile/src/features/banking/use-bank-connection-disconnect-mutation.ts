@@ -6,11 +6,12 @@ import { ApiError } from '@/lib/api/errors'
 import { type BankConnectionTarget, createDisconnectBankConnectionEndpoint, isValidBankConnectionId } from './connection-status-contract'
 import { bankConnectionsKey } from './query-keys'
 
-export type BankConnectionDisconnectFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type BankConnectionDisconnectFailure = 'demo' | 'read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyBankConnectionDisconnectFailure(error: unknown): BankConnectionDisconnectFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'

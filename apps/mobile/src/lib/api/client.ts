@@ -152,6 +152,8 @@ const mapHttpFailure = (response: HttpResponse, options?: { keepsBadRequestMessa
   if (response.status === 403) {
     const envelope = parseCommonErrorEnvelope(response.body)
     if (envelope?.code === 'demo_read_only') throw new ApiError('demo-forbidden', 403)
+    // A household viewer reads shared data only; every shared write answers this.
+    if (envelope?.code === 'household_read_only') throw new ApiError('household-read-only', 403)
     if (envelope?.code === 'email_verification_required') throw new ApiError('email-verification-required', 403)
     if (envelope?.code === 'ai_allowance_exhausted') throw new ApiError('ai-allowance-exhausted', 403)
     if (envelope?.code === 'portfolio_link_held_by_member') {

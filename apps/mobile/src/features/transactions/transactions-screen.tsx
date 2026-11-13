@@ -48,7 +48,7 @@ import { canSplitTransaction, splitCategoryCount } from './transactions-split-vi
 import type { TransactionViewModel } from './transactions-view-model'
 import type { TransactionsLeadData } from './use-transactions-lead'
 
-export type ReviewResult = 'success' | 'demo' | 'mfa' | 'cancelled' | 'network' | 'error'
+export type ReviewResult = 'success' | 'demo' | 'read-only' | 'mfa' | 'cancelled' | 'network' | 'error'
 export type TransactionCategoryState =
   | { status: 'loading' | 'error' }
   | { status: 'loaded'; categories: readonly CategoryViewModel[] }

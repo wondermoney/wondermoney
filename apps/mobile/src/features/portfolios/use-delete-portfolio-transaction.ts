@@ -6,11 +6,12 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 import { createDeletePortfolioTransactionEndpoint, isValidPortfolioId } from './portfolios-contract'
 import { isPortfolioContentQueryForEpoch } from './query-keys'
 
-export type DeletePortfolioTransactionFailure = 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
+export type DeletePortfolioTransactionFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
 
 export function classifyDeletePortfolioTransactionFailure(error: unknown): DeletePortfolioTransactionFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

@@ -48,8 +48,8 @@ import { mockReq, mockRes } from '@app/__tests__/__helpers__/mock-request';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { getInstance } from '@controller/instance';
-import type { Appuser } from '@entity/Appuser';
-import { AppuserTenant } from '@entity/AppuserTenant';
+import { Appuser } from '@entity/Appuser';
+import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { BankConnection } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { Tenant, TenantType } from '@entity/Tenant';
@@ -57,6 +57,7 @@ import bankingRoutes from '@route/banking';
 import userRoutes from '@route/user';
 import { UserActionRequiredError } from '@service/bank-providers/errors';
 import { bankConnectionRef, getBankProvider } from '@service/bank-providers/registry';
+import { getRef } from '@utils/em-helpers';
 import { encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import logger from '@utils/logger';
 
@@ -140,6 +141,34 @@ describe('instance-wide Enable Banking credentials', () => {
 
       expect((await startLink(partner)).status).toBe(200);
       expect(await credentialsFor(partner)).toBe('instance');
+    });
+
+    it('counts households, not people: a household of several members is still the one household', async () => {
+      configureInstanceCredential();
+      const household = await seedHousehold(db.em());
+      const people = [
+        await addPartner(db.em(), household, { role: HouseholdRole.ADMIN }),
+        await addPartner(db.em(), household),
+        await addPartner(db.em(), household, { role: HouseholdRole.VIEWER }),
+      ];
+
+      for (const person of [household.appuser, ...people]) {
+        expect(await credentialsFor(person)).toBe('instance');
+      }
+    });
+
+    it('stops counting a household whose only member joined another one', async () => {
+      configureInstanceCredential();
+      const household = await seedHousehold(db.em());
+      const joined = await secondHousehold();
+      expect(await credentialsFor(household.appuser)).toBe('user');
+
+      await db.em().nativeUpdate(AppuserTenant, { tenantKey: joined.tenant }, { recordActive: false });
+      const em = db.em();
+      em.create(AppuserTenant, { appuserKey: getRef(em, Appuser, joined.appuser.appuserKey), recordActive: true, role: HouseholdRole.MEMBER, tenantKey: getRef(em, Tenant, household.tenant.tenantKey) }, { partial: true });
+      await em.flush();
+
+      expect(await credentialsFor(household.appuser)).toBe('instance');
     });
 
     it('tells the client the caller can link without credentials', async () => {

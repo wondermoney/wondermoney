@@ -20,7 +20,7 @@ export type CategoryWriteInput =
   | Readonly<{ type: 'create'; payload: CategoryCreateWrite }>
   | Readonly<{ type: 'edit'; categoryId: number; payload: CategoryEditWrite }>
 export type CategoryWriteGate = Readonly<CategoryWriteInput>
-export type CategoryWriteFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'not-found' | 'request' | 'cancelled' | 'unknown' | 'general'
+export type CategoryWriteFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'request' | 'cancelled' | 'unknown' | 'general'
 
 export const categoryWriteUnknownKey = (epochId: number) => ['category-write-unknown', epochId] as const
 export const categoryWriteDemoKey = (epochId: number) => ['category-write-demo-locked', epochId] as const
@@ -35,6 +35,7 @@ class CategoryWriteBlockedError extends Error {
 export function classifyCategoryWriteFailure(error: unknown): CategoryWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

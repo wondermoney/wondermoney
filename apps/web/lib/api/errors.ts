@@ -18,6 +18,8 @@ export const API_ERROR_CODE = {
   ACCOUNT_RECALCULATION_TOO_SOON: "account_recalculation_too_soon",
   ACCOUNT_RECONNECT_EMAIL_UNVERIFIED: "account_reconnect_email_unverified",
   AI_ALLOWANCE_EXHAUSTED: "ai_allowance_exhausted",
+  /** Inviting, or accepting an invite for, someone already in that household (409). */
+  ALREADY_HOUSEHOLD_MEMBER: "already_household_member",
   ASSISTANT_NOT_ENABLED: "assistant_not_enabled",
   /** Applying a proposal past its seven days; it is now expired (409). */
   ASSISTANT_PROPOSAL_EXPIRED: "assistant_proposal_expired",
@@ -49,7 +51,18 @@ export const API_ERROR_CODE = {
   FEATURE_DISABLED: "feature_disabled",
   FORBIDDEN: "forbidden",
   HOUSEHOLD_FULL: "household_full",
+  /** Accepting an invite while the caller's own household holds accounts or transactions (409). */
+  HOUSEHOLD_HAS_DATA: "household_has_data",
+  /** Accepting an invite while the caller owns a household with other members (409). */
+  HOUSEHOLD_HAS_MEMBERS: "household_has_members",
   HOUSEHOLD_OWNER_REQUIRED: "household_owner_required",
+  /** A write on shared data by a viewer, who can only read it (403). */
+  HOUSEHOLD_READ_ONLY: "household_read_only",
+  /**
+   * A household-management action the caller's role does not allow: a member managing, an admin
+   * acting on an admin or the owner, or changing one's own role (403).
+   */
+  HOUSEHOLD_ROLE_REQUIRED: "household_role_required",
   INTERNAL_ERROR: "internal_error",
   INVITE_ALREADY_USED: "invite_already_used",
   INVITE_EMAIL_MISMATCH: "invite_email_mismatch",
@@ -236,6 +249,11 @@ export function isPortfolioLinkRefusal(error: unknown): boolean {
     code === API_ERROR_CODE.PORTFOLIO_LINK_HELD_BY_MEMBER ||
     code === API_ERROR_CODE.FORBIDDEN
   );
+}
+
+/** A change to shared data by a viewer, whose role only lets them read it. */
+export function isHouseholdReadOnlyError(error: unknown): boolean {
+  return hasCode(error, API_ERROR_CODE.HOUSEHOLD_READ_ONLY);
 }
 
 /** A household route a member reached but only the owner may use. */

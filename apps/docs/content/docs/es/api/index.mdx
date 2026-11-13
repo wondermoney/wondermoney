@@ -35,7 +35,7 @@ Cuando una solicitud supera el límite, la API devuelve `429`. Espera el periodo
 
 ## Errores
 
-La referencia documenta los códigos y esquemas de respuesta de cada operación. Los errores de autenticación y permisos pueden devolver `401` o `403`; comprueba que el token sea válido e incluya el alcance indicado para la operación. `422` indica que la solicitud no superó la validación. Para `429`, sigue `Retry-After`. Consulta el esquema de respuesta de cada operación; no supongas que todos los errores tienen el mismo cuerpo.
+La referencia documenta los códigos y esquemas de respuesta de cada operación. Los errores de autenticación y permisos pueden devolver `401` o `403`; comprueba que el token sea válido e incluya el alcance indicado para la operación. El token de un observador del hogar puede leer pero no escribir: una escritura devuelve `403` con el código `household_read_only`. `422` indica que la solicitud no superó la validación. Para `429`, sigue `Retry-After`. Consulta el esquema de respuesta de cada operación; no supongas que todos los errores tienen el mismo cuerpo.
 
 ## Paginación
 

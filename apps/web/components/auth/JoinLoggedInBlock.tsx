@@ -8,12 +8,16 @@ import { authClient } from "@/lib/auth/client";
 import { Button } from "../ui/button";
 
 /**
- * Shown on /join when someone is already signed in. Household invites are
- * new-signups-only, so the only path forward is to log out and create a fresh
- * account with the invited email — this signs out and returns to the same
- * invite link so the signup form renders.
+ * On /join while signed in: signs out and returns to the same invite link, so
+ * the visitor can sign in with (or create) the invited account instead.
  */
-export function JoinLoggedInBlock({ token }: { token?: string }) {
+export function JoinLoggedInBlock({
+  token,
+  variant = "secondary",
+}: {
+  token?: string;
+  variant?: "default" | "secondary";
+}) {
   const t = useTranslations("household");
   const [pending, setPending] = useState(false);
 
@@ -27,15 +31,14 @@ export function JoinLoggedInBlock({ token }: { token?: string }) {
   };
 
   return (
-    <div className="mt-6 flex flex-col gap-4">
-      <Button
-        className="w-full font-semibold"
-        loading={pending}
-        disabled={pending}
-        onClick={logoutAndJoin}
-      >
-        {t("join.logoutAndJoin")}
-      </Button>
-    </div>
+    <Button
+      variant={variant}
+      className="w-full font-semibold"
+      loading={pending}
+      disabled={pending}
+      onClick={logoutAndJoin}
+    >
+      {t("join.useDifferentAccount")}
+    </Button>
   );
 }

@@ -6,11 +6,12 @@ import { ApiError } from '@/lib/api/errors'
 import { createDeleteAccountEndpoint, isValidAccountId } from './accounts-contract'
 import { accountKey, accountsKey } from './query-keys'
 
-export type AccountDeleteFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type AccountDeleteFailure = 'demo' | 'read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyAccountDeleteFailure(error: unknown): AccountDeleteFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'

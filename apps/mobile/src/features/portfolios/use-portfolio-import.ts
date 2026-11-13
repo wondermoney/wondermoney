@@ -23,7 +23,7 @@ import { createPortfolioHoldingsEndpoint } from './portfolios-contract'
 import { isPortfolioContentQueryForEpoch, portfolioHoldingsKey } from './query-keys'
 import { conservativePortfolioQueryOptions } from './query-state'
 
-export type PortfolioImportFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'network' | 'upload-failed' | 'unmapped-columns' | 'processing-failed' | 'general'
+export type PortfolioImportFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'network' | 'upload-failed' | 'unmapped-columns' | 'processing-failed' | 'general'
 
 export type PortfolioImportPhase =
   | { phase: 'idle' }
@@ -47,6 +47,7 @@ const REVIEWABLE_STATUSES: ReadonlySet<string> = new Set(['needs_asset_review', 
 function classifyFailure(error: unknown): PortfolioImportFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (error.code === 'cancelled') return isPostDispatchCancellation(error) ? 'general' : 'cancelled'

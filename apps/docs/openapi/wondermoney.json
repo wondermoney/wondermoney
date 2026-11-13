@@ -3416,7 +3416,7 @@
             "items": {
               "$ref": "#/components/schemas/ManualAssetLinkedLoan"
             },
-            "description": "The viewer's loans secured against the asset. Loans are personal, so the other member's are not listed."
+            "description": "The viewer's loans secured against the asset. Loans are personal, so other members' loans are not listed."
           },
           "linkedDebt": {
             "type": [
@@ -5592,7 +5592,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -5662,7 +5662,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -5780,7 +5780,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -5850,7 +5850,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -5920,7 +5920,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -6031,7 +6031,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -6149,7 +6149,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -6269,7 +6269,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -6692,7 +6692,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7061,7 +7061,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7160,7 +7160,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7248,7 +7248,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7318,7 +7318,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7474,7 +7474,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7544,7 +7544,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7721,7 +7721,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7809,7 +7809,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7897,7 +7897,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -7985,7 +7985,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8108,7 +8108,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8222,7 +8222,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8361,7 +8361,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8478,7 +8478,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8566,7 +8566,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8696,7 +8696,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8811,7 +8811,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8899,7 +8899,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9025,7 +9025,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9122,7 +9122,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9526,7 +9526,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9739,7 +9739,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9821,7 +9821,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9890,7 +9890,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9988,7 +9988,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10058,7 +10058,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10185,7 +10185,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10255,7 +10255,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10336,7 +10336,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10443,7 +10443,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10524,7 +10524,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10623,7 +10623,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10738,7 +10738,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10840,7 +10840,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -10949,7 +10949,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11059,7 +11059,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11149,7 +11149,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11248,7 +11248,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11347,7 +11347,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11488,7 +11488,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11558,7 +11558,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11655,7 +11655,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11766,7 +11766,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11835,7 +11835,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11904,7 +11904,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -11985,7 +11985,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12067,7 +12067,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12149,7 +12149,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12231,7 +12231,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12313,7 +12313,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12426,7 +12426,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12508,7 +12508,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12620,7 +12620,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12702,7 +12702,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12771,7 +12771,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12863,7 +12863,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13071,7 +13071,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13150,7 +13150,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13230,7 +13230,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13318,7 +13318,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13541,7 +13541,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13654,7 +13654,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13776,7 +13776,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -13890,7 +13890,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14015,7 +14015,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14129,7 +14129,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14216,7 +14216,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14303,7 +14303,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14390,7 +14390,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14477,7 +14477,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14564,7 +14564,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14633,7 +14633,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14712,7 +14712,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14799,7 +14799,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14886,7 +14886,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15035,7 +15035,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15122,7 +15122,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15260,7 +15260,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15347,7 +15347,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15434,7 +15434,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15521,7 +15521,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15590,7 +15590,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15677,7 +15677,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15764,7 +15764,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15955,7 +15955,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16024,7 +16024,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16127,7 +16127,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16206,7 +16206,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16275,7 +16275,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16373,7 +16373,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16442,7 +16442,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16511,7 +16511,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16580,7 +16580,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16679,7 +16679,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16748,7 +16748,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16853,7 +16853,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -16949,7 +16949,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17041,7 +17041,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17133,7 +17133,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17202,7 +17202,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17285,7 +17285,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17373,7 +17373,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17469,7 +17469,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17565,7 +17565,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17634,7 +17634,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17749,7 +17749,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17836,7 +17836,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -17923,7 +17923,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18038,7 +18038,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18125,7 +18125,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18215,7 +18215,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18318,7 +18318,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18405,7 +18405,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18509,7 +18509,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18621,7 +18621,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18741,7 +18741,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18869,7 +18869,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18958,7 +18958,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -19037,7 +19037,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -19259,7 +19259,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -19481,7 +19481,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -19703,7 +19703,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -19925,7 +19925,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -20165,7 +20165,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -20405,7 +20405,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -20627,7 +20627,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -20849,7 +20849,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -21071,7 +21071,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -21293,7 +21293,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -21515,7 +21515,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -21737,7 +21737,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -21959,7 +21959,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22181,7 +22181,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22542,7 +22542,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22611,7 +22611,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22680,7 +22680,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22769,7 +22769,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22849,7 +22849,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -22918,7 +22918,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -23035,7 +23035,7 @@
             }
           },
           "403": {
-            "description": "The token does not carry a scope this operation accepts.",
+            "description": "The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).",
             "content": {
               "application/json": {
                 "schema": {

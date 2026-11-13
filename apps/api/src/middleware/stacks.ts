@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 
 import { requireAuth } from '@middleware/auth';
 import { blockDemoMutation } from '@middleware/demo';
+import { blockViewerWrite } from '@middleware/household';
 import { productDataRateLimit } from '@middleware/rate-limit';
 import { resolveTenantForRequest } from '@middleware/tenant';
 import { assertTenantResolved } from '@middleware/tenant-scope';
@@ -14,7 +15,8 @@ import { getUser } from '@middleware/user';
  * the fail-loud `assertTenantResolved` invariant. Expressing the stacks once means a deviation
  * is a visible, deliberate choice at the call site rather than a diff nobody reads.
  *
- * `authedTenant` — authenticated, tenant resolved and asserted, demo writes blocked.
+ * `authedTenant` — authenticated, tenant resolved and asserted, demo writes blocked, and a
+ * household viewer's writes to shared data blocked.
  */
 export const authedTenant = (limiter: () => RequestHandler = productDataRateLimit): RequestHandler[] => [
   requireAuth,
@@ -23,6 +25,7 @@ export const authedTenant = (limiter: () => RequestHandler = productDataRateLimi
   resolveTenantForRequest,
   assertTenantResolved,
   blockDemoMutation,
+  blockViewerWrite,
 ];
 
 /**

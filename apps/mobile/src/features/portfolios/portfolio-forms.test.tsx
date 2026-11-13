@@ -184,7 +184,7 @@ describe('portfolio forms', () => {
 
     it('falls back to the older refusal without a name', async () => {
       const view = await provider(<PortfolioSettingsScreen {...commonSettings} failure="link-managed" onSave={jest.fn()} />)
-      expect(view.getByText(/only the other household member can see, so only they can change the link/)).toBeOnTheScreen()
+      expect(view.getByText(/only another household member can see, so only they can change the link/)).toBeOnTheScreen()
     })
 
     it.each(['pt-PT', 'es'] as const)('names the holder in %s', async (locale) => {

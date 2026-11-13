@@ -6,11 +6,12 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 import { createEditPortfolioTransactionEndpoint, freezePortfolioTransactionEdit, isValidPortfolioId, type PortfolioTransactionEditDraft } from './portfolios-contract'
 import { isPortfolioContentQueryForEpoch } from './query-keys'
 
-export type EditPortfolioTransactionFailure = 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
+export type EditPortfolioTransactionFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general'
 
 export function classifyEditPortfolioTransactionFailure(error: unknown): EditPortfolioTransactionFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'request' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

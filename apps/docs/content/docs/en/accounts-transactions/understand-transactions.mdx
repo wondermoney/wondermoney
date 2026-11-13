@@ -34,7 +34,7 @@ Select transactions to categorize them, mark them as reviewed, hide or unhide th
 - **On the web**, tick the rows in the transactions list; the checkbox in the header selects every row on the page. A bar with the actions appears below the list.
 - **In the mobile app**, open a row's menu and choose **Select**, then tick more rows, or choose **Select all loaded transactions**.
 
-When every row on the page (in the mobile app, every loaded row) is selected and the date range and filters match more, choose **Select all matching transactions**. The action then covers every transaction the list matches, including the ones not loaded yet, and nothing outside it: never another household's transactions, nor the other member's private accounts. In the mobile app it is not offered while a filter that only narrows the loaded results (merchant, account, category or type) is on.
+When every row on the page (in the mobile app, every loaded row) is selected and the date range and filters match more, choose **Select all matching transactions**. The action then covers every transaction the list matches, including the ones not loaded yet, and nothing outside it: never another household's transactions, nor other members' private accounts. In the mobile app it is not offered while a filter that only narrows the loaded results (merchant, account, category or type) is on.
 
 One action covers at most 5,000 transactions. If the filters match more, narrow them first.
 
@@ -58,7 +58,7 @@ To give a merchant a logo on the web, open one of its transactions, and under **
 - **Website**: the merchant's own site, such as `https://example.com`. If your instance has merchant logos turned on, WonderMoney fetches the logo for that site itself and shows it to you; the logo service never learns who you are. On an instance without them, the website is only stored.
 - **Logo URL**: the address of an image to use instead. It must start with `https://`. Everyone in your household who sees the merchant loads that image from its own address, so only use one from a site you trust.
 
-Leave a field empty to remove it. The merchant's details are shared with your household, and both of you can change them. The mobile app shows the same logos and initials in its lists. When an image cannot be loaded, the first letter is shown instead.
+Leave a field empty to remove it. The merchant's details are shared with your household, and anyone in it but a viewer can change them. The mobile app shows the same logos and initials in its lists. When an image cannot be loaded, the first letter is shown instead.
 
 ## Before you start
 
@@ -89,7 +89,7 @@ The accounts page's periods follow your calendar too: **1 Month** starts on the 
 
 Every total WonderMoney shows for a period adds up transactions you can list, and each one says which:
 
-- **Money in** and **Money out** above the transactions list add up every transaction the list holds for the date range, on every account and whatever the table's filters, in your currency: the other member's transactions are converted at the exchange rate of their date.
+- **Money in** and **Money out** above the transactions list add up every transaction the list holds for the date range, on every account and whatever the table's filters, in your currency: other members' transactions are converted at the exchange rate of their date.
 - **Reports** count posted transactions only, unless you turn on **Include pending transactions**, and leave out transfers between your own accounts, unless you turn on **Include transfers**.
 - **The home page's** cash flow and spending by category count pending transactions too, and never transfers between your own accounts.
 
@@ -111,7 +111,7 @@ For example, a 20 refund linked to a 50 purchase in Groceries leaves 30 spent in
 - When the expense is split, the linked amount comes off each line in proportion.
 - The expense shows **Reimbursed** and the refund **Reimbursement**. Select the badge to open the other transaction. Open either to see its links, and choose **Unlink** to remove one; the totals go back to what they were.
 - Deleting either transaction removes its links.
-- For now, both transactions must be in the same currency. A transaction on a private account can only be linked to another one on your private accounts, so your partner never sees half of a link.
+- For now, both transactions must be in the same currency. A transaction on a private account can only be linked to another one on your private accounts, so nobody else in the household sees half of a link.
 
 ## Typing amounts
 

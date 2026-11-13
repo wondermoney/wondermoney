@@ -15,7 +15,7 @@ export enum Source {
 @Entity()
 @Unique({ properties: ['transactionMerchantKey', 'categoryKey', 'source', 'appuserKey'] })
 export class TransactionCategoryStats extends Base {
-  // Per-user scoping: a tenant is a household of up to two members and each member's
+  // Per-user scoping: a tenant is a household of several members and each member's
   // merchant→category votes must stay their own. Nullable because older rows predate the
   // dimension and are attributed to the tenant owner. New writes always set it.
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key', nullable: true })

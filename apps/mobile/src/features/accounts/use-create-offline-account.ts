@@ -10,7 +10,7 @@ import type { AccountsResponseDto } from './accounts-contract'
 import { createOfflineAccountEndpoint, offlineAccountPayloadSchema, type OfflineAccountPayload } from './offline-account-contract'
 import { accountFamilyKey, accountsKey, offlineAccountCreateGuardKey } from './query-keys'
 
-export type OfflineAccountCreateFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'general'
+export type OfflineAccountCreateFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'general'
 export type OfflineAccountUnknownGuard = Readonly<{ payload: OfflineAccountPayload }>
 
 /**
@@ -41,6 +41,7 @@ export function isFirstAccountCreation(
 export function classifyOfflineAccountCreateFailure(error: unknown): OfflineAccountCreateFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

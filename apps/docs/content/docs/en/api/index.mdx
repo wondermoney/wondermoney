@@ -35,7 +35,7 @@ If a request is rate limited, the API returns `429`. Honour the `Retry-After` re
 
 ## Errors
 
-The reference documents response codes and schemas per operation. Authentication and permission failures can return `401` or `403`; check that the token is valid and includes the operation's stated scope. A `422` indicates the request did not pass validation. For `429`, follow `Retry-After`. Use the operation-specific response schema instead of assuming every error has the same body.
+The reference documents response codes and schemas per operation. Authentication and permission failures can return `401` or `403`; check that the token is valid and includes the operation's stated scope. A token belonging to a household viewer can read but not write, and a write returns `403` with the code `household_read_only`. A `422` indicates the request did not pass validation. For `429`, follow `Retry-After`. Use the operation-specific response schema instead of assuming every error has the same body.
 
 ## Pagination
 

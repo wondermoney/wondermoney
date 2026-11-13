@@ -12,6 +12,7 @@ import {
   isDemoReadOnlyError,
   isEmailVerificationRequiredError,
   isHouseholdOwnerRequiredError,
+  isHouseholdReadOnlyError,
 } from "./errors";
 
 test("detects demo read-only api errors", () => {
@@ -54,6 +55,12 @@ test("tells the two 403s apart", () => {
   // month misattributed to a session race.
   assert.equal(isHouseholdOwnerRequiredError(forbidden("household_owner_required")), true);
   assert.equal(isHouseholdOwnerRequiredError(forbidden("demo_read_only")), false);
+});
+
+test("tells a viewer's read-only refusal from the demo's", () => {
+  assert.equal(isHouseholdReadOnlyError(forbidden("household_read_only")), true);
+  assert.equal(isHouseholdReadOnlyError(forbidden("demo_read_only")), false);
+  assert.equal(isDemoReadOnlyError(forbidden("household_read_only")), false);
 });
 
 test("classifies a 403 as auth and a 401 as auth", () => {

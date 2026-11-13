@@ -6,11 +6,12 @@ import { ApiError } from '@/lib/api/errors'
 import { createDeleteBudgetEndpoint, isValidBudgetId } from './budgets-contract'
 import { isBudgetQueryForEpoch } from './query-keys'
 
-export type BudgetDeleteFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type BudgetDeleteFailure = 'demo' | 'read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyBudgetDeleteFailure(error: unknown): BudgetDeleteFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'

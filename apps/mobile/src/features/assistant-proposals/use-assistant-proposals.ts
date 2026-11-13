@@ -70,11 +70,12 @@ export function usePendingProposalCount(): { available: boolean; count: number }
  * (expired, already decided, or a transaction or category no longer there): the list is refetched
  * and the proposal leaves it.
  */
-export type ProposalDecisionFailure = 'gone' | 'demo' | 'general'
+export type ProposalDecisionFailure = 'gone' | 'demo' | 'read-only' | 'general'
 
 export function classifyProposalDecisionFailure(error: unknown): ProposalDecisionFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'http' && (error.status === 404 || error.status === 409)) return 'gone'
   return 'general'
 }

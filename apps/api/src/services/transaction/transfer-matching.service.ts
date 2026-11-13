@@ -29,7 +29,7 @@ import { TransactionAuditService } from './transaction-audit.service';
  *   they are a pair across currencies (below);
  * - the same people can see both accounts: both shared with the household, or both private to the
  *   same member. A pair re-types both rows, so it must not turn a row one member sees into a
- *   transfer into an account only the other one sees;
+ *   transfer into an account only another member sees;
  * - their dates are at most {@link TRANSFER_MATCH_WINDOW_DAYS} calendar days apart;
  * - each is the other's unique closest candidate. A tie at the closest distance is ambiguous and is
  *   left unpaired. Pairs are accepted round by round, so once a row is taken a tie it was part of may
@@ -76,7 +76,7 @@ import { TransactionAuditService } from './transaction-audit.service';
  *   longer pointing back, or across a privacy line; across currencies, also out of tolerance at the
  *   stored rate) is dissolved. A synced side gets its direction's type back, unless a user
  *   set it; a manual side keeps its type. A private side is only ever changed on its own account,
- *   which the other member cannot see.
+ *   which no other member can see.
  * - An unpaired synced row typed TRANSFER_IN / TRANSFER_OUT is a leftover of an older sync that typed
  *   every credit TRANSFER_IN. It gets its direction's type, unless a user set it, and may then
  *   pair like any other row.

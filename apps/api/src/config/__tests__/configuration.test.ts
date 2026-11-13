@@ -124,6 +124,13 @@ describe('loadConfiguration', () => {
     expect(() => loadConfiguration('api', { ...validApi, AI_DAILY_LIMIT_STATEMENT_IMPORT: 'lots' })).toThrow(/AI_DAILY_LIMIT_STATEMENT_IMPORT/);
   });
 
+  it('takes the household member cap as a positive whole number', () => {
+    expect(() => loadConfiguration('api', { ...validApi, HOUSEHOLD_MAX_MEMBERS: '10' })).not.toThrow();
+    for (const value of ['0', '-2', 'six', '2.5']) {
+      expect(() => loadConfiguration('api', { ...validApi, HOUSEHOLD_MAX_MEMBERS: value })).toThrow(/HOUSEHOLD_MAX_MEMBERS/);
+    }
+  });
+
   it('takes the minimum unattended sync interval in hours and refuses anything that is not a positive number', () => {
     expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '6' })).not.toThrow();
     expect(() => loadConfiguration('worker', { ...validShared, BANK_SYNC_MIN_INTERVAL_HOURS: '0.5' })).not.toThrow();

@@ -13,6 +13,7 @@ export type SimplefinConnectFailureReason =
   | 'server-not-allowed'
   | 'rejected'
   | 'demo'
+  | 'read-only'
   | 'access'
   | 'mfa'
   | 'disabled'
@@ -40,6 +41,7 @@ export function classifySimplefinConnectFailure(error: unknown): SimplefinConnec
   const failure = (reason: SimplefinConnectFailureReason, serverMessage: null | string = null) => ({ reason, serverMessage })
   if (!(error instanceof ApiError)) return failure('general')
   if (error.code === 'demo-forbidden') return failure('demo')
+  if (error.code === 'household-read-only') return failure('read-only')
   if (error.code === 'mfa-required') return failure('mfa')
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return failure('access')
   if (error.code === 'network' || error.code === 'cancelled') return failure('network')

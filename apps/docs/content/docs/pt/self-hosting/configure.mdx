@@ -171,7 +171,7 @@ Uma aplicação Enable Banking nova funciona em modo Restricted Production, em q
 - Os outros agregados veem o passo habitual "adiciona a tua própria chave", com uma linha a explicar que a ligação partilhada do servidor só serve um agregado.
 - Se um segundo agregado se registar antes de alguém ligar um banco, nenhum agregado recebe a aplicação do servidor até definires `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
 
-A conta de demonstração nunca conta. A própria Enable Banking também aplica o limite: em modo Restricted Production, recusa contas que não sejam do dono da aplicação, incluindo as de um parceiro. Confirma no Control Panel da Enable Banking a que contas a tua aplicação pode aceder.
+A conta de demonstração nunca conta. A própria Enable Banking também aplica o limite: em modo Restricted Production, recusa contas que não sejam do dono da aplicação, incluindo as das outras pessoas do seu agregado. Confirma no Control Panel da Enable Banking a que contas a tua aplicação pode aceder.
 
 ## Início de sessão com Google
 
@@ -210,6 +210,7 @@ Se a aplicação web mudar para outro domínio, as chaves de acesso existentes d
 |---|---|
 | `INSTANCE_NAME` | O nome da tua instância. A aplicação web mostra-o nos títulos dos separadores do navegador, nas pré-visualizações de links e nas páginas de início de sessão e de registo, e no lugar do logótipo do WonderMoney quando o alteras. Cada email usa-o no assunto, no texto e na assinatura, e como nome do remetente se `EMAIL_FROM_NAME` não estiver definido; as aplicações de autenticação mostram-no como etiqueta. A aplicação web lê-o da API, por isso define-o só na API; uma alteração aparece na aplicação web em até cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` ou `closed` (consulta [Instalar](/pt/docs/self-hosting/install)) |
+| `HOUSEHOLD_MAX_MEMBERS` | O número máximo de pessoas num agregado, incluindo o titular. Um convite pendente ocupa um lugar até ser aceite, revogado ou expirar. Por omissão `6`; um número inteiro positivo. Define-o na API; um valor que não seja um número inteiro positivo impede-a de arrancar |
 | `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto, dos alertas de conta e do feedback na aplicação, e o endereço de suporte que a aplicação mostra; deixa vazio para os desligar e esconder as ligações de suporte. O formulário "Partilhar Feedback" também precisa de email configurado; sem ele, o formulário fica escondido |
 | `SPONSOR_URL` | Uma página onde os teus utilizadores podem contribuir para manter a instância (Open Collective, GitHub Sponsors, ...). As perguntas frequentes da aplicação web incluem a ligação quando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |

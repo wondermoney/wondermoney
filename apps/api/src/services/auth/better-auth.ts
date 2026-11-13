@@ -588,6 +588,15 @@ export const deleteAuthSession = async (sessionId: string): Promise<void> => {
 };
 
 /**
+ * End every better-auth session of one user: each device's next request gets 401. Used when a
+ * person is removed from a household, so they are signed out everywhere and sign in again to
+ * their own household.
+ */
+export const endAllAuthSessions = async (userId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where "userId" = $1`, [userId]);
+};
+
+/**
  * Email better-auth's verification link to `email`. Following it marks the address verified and
  * lands on the web login page, where signing in again reconnects the account from before
  * better-auth (see legacy-account-reconnect.service.ts).

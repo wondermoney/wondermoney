@@ -6,11 +6,12 @@ import { ApiError } from '@/lib/api/errors'
 import { budgetAccountsWriteSchema, createUpdateBudgetAccountsEndpoint, isValidBudgetId, type BudgetAccountsWrite } from './budgets-contract'
 import { isBudgetQueryForEpoch } from './query-keys'
 
-export type BudgetAccountsWriteFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type BudgetAccountsWriteFailure = 'demo' | 'read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyBudgetAccountsWriteFailure(error: unknown): BudgetAccountsWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'

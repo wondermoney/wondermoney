@@ -2,6 +2,7 @@ import type { ApiTokenScope } from '@entity/ApiToken';
 import type { AuthContext } from '@service/auth/better-auth';
 import type { McpRequestIdentity } from '@service/mcp/mcp-types';
 import { Appuser } from '../database/entity/Appuser';
+import type { HouseholdRole } from '../database/entity/AppuserTenant';
 import { Tenant } from '../database/entity/Tenant';
 import type { Enqueue } from '@service/queue/enqueue';
 
@@ -21,6 +22,8 @@ declare global {
       authUser?: AuthContext;
       user?: User;
       tenant?: Tenant;
+      /** The caller's role in `tenant`, set with it by `resolveTenantForRequest`. */
+      householdRole?: HouseholdRole;
       enqueue?: Enqueue;
       /** The token and household behind an MCP request, set by `requireMcpToken`. */
       mcpIdentity?: McpRequestIdentity;

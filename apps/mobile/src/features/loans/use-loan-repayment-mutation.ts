@@ -13,7 +13,7 @@ import {
 } from './loans-contract'
 import { loanKey, loanRepaymentCandidatesKey, loanRepaymentsKey, loanOverviewKey, loansKey } from './query-keys'
 
-export type RepaymentWriteFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'conflict' | 'invalid' | 'unknown' | 'general'
+export type RepaymentWriteFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'conflict' | 'invalid' | 'unknown' | 'general'
 
 const repaymentAffectedInsightFamilies: ReadonlySet<unknown> = new Set(['metrics', 'account', 'cashflow', 'category-spending'])
 
@@ -27,6 +27,7 @@ export const isRepaymentDerivedQueryForEpoch = (queryKey: readonly unknown[], ep
 export function classifyRepaymentWriteFailure(error: unknown): RepaymentWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return isPostDispatchCancellation(error) ? 'unknown' : 'cancelled'

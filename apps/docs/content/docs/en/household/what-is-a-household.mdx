@@ -1,30 +1,47 @@
 ---
 title: What is a household
-description: Understand the household model, the owner and member roles, and how shared data works.
+description: Understand the household model, the four roles, and how shared data works.
 ---
 
 A household is WonderMoney's multi-user model. One household holds one or more people, each with their own login. The data lives in the household, not in any single person's account.
 
-A household is useful when two people want to manage money together: shared bills, joint accounts, or a common view of the household's finances, without keeping two separate setups in sync.
+A household is useful when several people want to manage money together: shared bills, joint accounts, or a common view of the household's finances, without keeping separate setups in sync.
+
+## How many people
+
+A household holds up to 6 people by default, the owner included. The operator of your server can raise or lower that number (see [Configure your instance](/en/docs/self-hosting/configure#your-instance)). An invite that has not been accepted yet holds a seat until it is accepted, revoked or expires, so when the household is full, revoke a pending invite to free a seat.
 
 ## Roles
 
-Each person in a household has a role:
+Each person in a household has one role. The person who invites someone picks their role, and it can be changed later.
 
-- **Owner** — the person who created the household at signup. The owner generates invite links and can remove members.
-- **Member** — a person who joined through an invite link. Members can use the shared data and manage their own private accounts.
+| Role | What they can do |
+|---|---|
+| **Owner** | Everything: invite people with any role below owner, resend and revoke invites, change roles, remove anyone, and transfer ownership. There is exactly one owner, the person who created the household, unless ownership has been transferred. |
+| **Admin** | Read and change shared data, and manage the people below them: invite only as member or viewer, resend and revoke those invites, change roles between member and viewer, and remove members and viewers. An admin cannot change or remove another admin or the owner. |
+| **Member** | Read and change shared data: accounts, transactions, budgets, categories, rules, goals and the rest. Members cannot invite or remove anyone. |
+| **Viewer** | See shared data only. A viewer cannot add, change or delete anything the household shares, but their personal settings still work: profile, preferences, notifications, devices, personal API tokens, the calendar feed, data export and the assistant. |
 
-The role is set on the join between the user and the household, and is what determines who can send invites or remove members.
+Everyone except the owner can leave the household at any time. See [Leave or remove a member](/en/docs/household/leave-or-remove).
+
+## Changing a role
+
+The owner and admins change roles from the member list in the household settings. You can only give a role below your own, and only to someone below you: the owner can make anyone else an admin, a member or a viewer, and an admin can switch people between member and viewer. Nobody can change their own role.
+
+## Transferring ownership
+
+Only the owner can transfer ownership. Pick another person in the household and transfer it to them: they become the owner and you become an admin. The household always has exactly one owner.
 
 ## Shared data and privacy
 
-Data in the household is scoped to it. Accounts, transactions, categories, goals, budgets, portfolio, cash flow, and net worth all live inside the household, and each member only sees what they are allowed to.
+Data in the household is scoped to it. Accounts, transactions, categories, goals, budgets, portfolio, cash flow, and net worth all live inside the household, and each person only sees what they are allowed to.
 
-Accounts have their own privacy setting. A shared account is visible to both members; a private account is visible only to the member who owns it. The owner can also configure which recurring series are private. See [Account privacy](/en/docs/household/account-privacy) for details.
+Accounts have their own privacy setting. A shared account is visible to everyone in the household; a private account is visible only to the person who owns it, whatever the other people's roles. The owner and admins do not see someone else's private accounts either. See [Account privacy](/en/docs/household/account-privacy) for details.
 
 ## Related pages
 
 - [Household and multi-user support](/en/docs/household)
 - [Create a household](/en/docs/household/create-a-household)
+- [Invite a member](/en/docs/household/invite-a-member)
 - [Account privacy](/en/docs/household/account-privacy)
 - [Shared context](/en/docs/household/shared-context)

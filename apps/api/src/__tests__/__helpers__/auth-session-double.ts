@@ -24,6 +24,7 @@ export function mockAuthSession() {
       token: 'paired-token',
     }),
     deleteAuthSession: () => Promise.resolve(),
+    endAllAuthSessions: () => Promise.resolve(),
     listAuthSessions: () => Promise.resolve([]),
   };
 }

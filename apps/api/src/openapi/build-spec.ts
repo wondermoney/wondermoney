@@ -46,7 +46,7 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
 
 const ERROR_RESPONSES = {
   401: 'The token is missing, malformed or revoked.',
-  403: 'The token does not carry a scope this operation accepts.',
+  403: 'The token does not carry a scope this operation accepts, or, on a write, the token belongs to a household viewer, who has read-only access (`household_read_only`).',
   422: 'The request did not match the endpoint’s validator.',
   429: 'A rate limit was exceeded. Honour the `Retry-After` header.',
 } as const;

@@ -8,11 +8,12 @@ import { ApiError } from '@/lib/api/errors'
 import { loanCreateEndpoint, loanCreateWriteSchema, type LoanCreateWrite } from './loans-contract'
 import { loanOverviewKey, loansKey } from './query-keys'
 
-export type LoanCreateFailure = 'demo' | 'access' | 'mfa' | 'invalid' | 'invalid-response' | 'general'
+export type LoanCreateFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'invalid' | 'invalid-response' | 'general'
 
 export function classifyLoanCreateFailure(error: unknown): LoanCreateFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'invalid-response') return 'invalid-response'

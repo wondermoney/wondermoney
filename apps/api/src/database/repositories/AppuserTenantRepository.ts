@@ -8,7 +8,7 @@ export class AppuserTenantRepository extends ExtendedEntityRepository<AppuserTen
   public countActiveByTenant = (tenant: Tenant) =>
     this.count({ deletedAt: undefined, recordActive: true, tenantKey: tenant });
   // role defaults to OWNER (a signup links the user to their own tenant). The
-  // household invite flow passes MEMBER when linking a joining partner.
+  // household invite flow passes the invite's role when linking a joining member.
   public createAppuserTenant = (appUser: Appuser, tenant: Tenant, role: HouseholdRole = HouseholdRole.OWNER) => {
     const appuserTenant = new AppuserTenant();
     appuserTenant.appuserKey = appUser;
@@ -23,7 +23,8 @@ export class AppuserTenantRepository extends ExtendedEntityRepository<AppuserTen
         deletedAt: undefined,
         recordActive: true,
       },
-      { populate: ['tenantKey', 'appuserKey'] },
+      // A person has one active membership; the order only makes a stray second one deterministic.
+      { orderBy: { appuserTenantKey: 'ASC' }, populate: ['tenantKey', 'appuserKey'] },
     );
   };
 }

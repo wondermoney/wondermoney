@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
-  ensureAppuserTenantLink: vi.fn(),
   findOne: vi.fn(),
-  getOrCreateTenant: vi.fn(),
   getPrimaryAuthProvider: vi.fn(),
   getUserByEmail: vi.fn(),
   getUserByExternalId: vi.fn(),
+  provisionHomeTenant: vi.fn(),
   recordAnalyticsOutboxEvent: vi.fn(),
   recordSignup: vi.fn(),
   sendSignupEmail: vi.fn(),
@@ -28,9 +27,8 @@ vi.mock('@app/app', () => ({
   },
 }));
 vi.mock('@service/auth/auth-callback.service', () => ({
-  ensureAppuserTenantLink: mocked.ensureAppuserTenantLink,
-  getOrCreateTenant: mocked.getOrCreateTenant,
   isAppError: (error: unknown) => Boolean(error && typeof error === 'object' && 'message' in error),
+  provisionHomeTenant: mocked.provisionHomeTenant,
 }));
 vi.mock('@service/auth/auth-callback.utils', () => ({ getAuthUserFullName: vi.fn(() => 'Demo User') }));
 vi.mock('@service/auth/better-auth', () => ({ getPrimaryAuthProvider: mocked.getPrimaryAuthProvider }));
@@ -91,7 +89,7 @@ describe('auth callback', () => {
       appuser,
       created: true,
     });
-    mocked.getOrCreateTenant.mockResolvedValueOnce({ tenantKey: 5 });
+    mocked.provisionHomeTenant.mockResolvedValueOnce({ tenantKey: 5 });
 
     // When: the callback provisions the new account
     const res = makeRes();
@@ -118,8 +116,7 @@ describe('auth callback', () => {
 
     await authCallback(makeAuthUser('supabase-id', 'demo@wonder.money', 'session-demo'), res.res);
 
-    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
-    expect(mocked.ensureAppuserTenantLink).not.toHaveBeenCalled();
+    expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
       distinctId: 'supabase-id',
       eventId: 'login.v1:session-demo',
@@ -139,8 +136,7 @@ describe('auth callback', () => {
 
     await authCallback(makeAuthUser('supabase-id', 'demo@wonder.money'), res.res);
 
-    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
-    expect(mocked.ensureAppuserTenantLink).not.toHaveBeenCalled();
+    expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ appuserKey: 9, method: 'email', outcome: 'demo' });
   });
