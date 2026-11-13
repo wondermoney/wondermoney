@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -36,7 +35,6 @@ import {
   getApiErrorMessage,
 } from "@/lib/api/errors";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
-import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 
 const FORM_ID = "simplefin-connect-form";
 const emptyValues = { setupToken: "" };
@@ -46,6 +44,8 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   /** Rendered as the dialog's trigger; omit when the caller opens it. */
   trigger?: React.ReactNode;
+  /** After the API has claimed the token, as the dialog closes. */
+  onConnected?: (connectionId: number) => void;
 }
 
 /**
@@ -55,13 +55,15 @@ interface Props {
  * mutation drops it (`useConnectSimplefin`). A refusal is shown in place, with the API's own
  * user-safe message for a bad token, so the person can paste a new one.
  *
- * Accounts arrive with the first sync, after the dialog has closed; it keeps watching the new
- * connection and refreshes the account lists once that sync is done.
+ * Accounts arrive with the first sync, after the dialog has closed; it keeps the connection list
+ * polling until that sync is done, and the list (`useBankConnections`) refreshes the account
+ * lists then, even when this dialog is no longer mounted.
  */
 export default function SimplefinConnectDialog({
   open,
   onOpenChange,
   trigger,
+  onConnected,
 }: Props) {
   const t = useTranslations("simplefin");
   const notifyIfRateLimited = useRateLimitToast();
@@ -98,6 +100,7 @@ export default function SimplefinConnectDialog({
         toast.success(t("success"));
         setImportingConnectionId(connectionId);
         onOpenChange(false);
+        onConnected?.(connectionId);
       },
       onError: (err) => {
         if (notifyIfRateLimited(err)) return;
@@ -225,8 +228,8 @@ function connectErrorMessage(
 }
 
 /**
- * Polls the connection list (through `useBankConnections`) until the new connection's first
- * sync has finished, then refreshes everything that lists accounts.
+ * Keeps the connection list observed, so it keeps polling, until the new connection's first sync
+ * has finished; `useBankConnections` refreshes the account lists when it sees that.
  */
 function FirstSyncWatcher({
   connectionId,
@@ -235,7 +238,6 @@ function FirstSyncWatcher({
   connectionId: number;
   onDone: () => void;
 }) {
-  const queryClient = useQueryClient();
   const { data } = useBankConnections();
   const status = simplefinConnections(data?.connections).find(
     (connection) => connection.connectionId === connectionId,
@@ -243,9 +245,8 @@ function FirstSyncWatcher({
 
   useEffect(() => {
     if (!status || status === "processing") return;
-    void invalidateAccounts(queryClient);
     onDone();
-  }, [status, queryClient, onDone]);
+  }, [status, onDone]);
 
   return null;
 }

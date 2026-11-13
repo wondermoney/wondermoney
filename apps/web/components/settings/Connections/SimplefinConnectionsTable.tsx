@@ -52,6 +52,34 @@ function statusOf(connection: SimplefinBankConnection): SimplefinStatus {
   return connection.status === "expiring" ? "connected" : connection.status;
 }
 
+/** The accounts a connection feeds, by name; they arrive with its first sync. */
+function LinkedAccounts({
+  connection,
+}: {
+  connection: SimplefinBankConnection;
+}) {
+  const t = useTranslations("simplefin");
+  const named = (connection.accounts ?? []).filter(
+    (account) => account.accountName?.trim(),
+  );
+  if (named.length === 0) {
+    return (
+      <Text variant="mutedText" className="text-sm">
+        {t("no-accounts")}
+      </Text>
+    );
+  }
+  return (
+    <ul className="flex flex-col gap-1">
+      {named.map((account) => (
+        <Text as="li" variant="smallText" key={account.accountKey}>
+          {account.accountName}
+        </Text>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * The person's SimpleFIN connections, under Settings → Bank connections. SimpleFIN numbers its
  * connections apart from Enable Banking, so history and disconnect use its own routes. There is
@@ -92,6 +120,7 @@ export default function SimplefinConnectionsTable({
           <TableHeader>
             <TableRow>
               <TableHead>{t("provider")}</TableHead>
+              <TableHead>{t("accounts")}</TableHead>
               <TableHead>{t("status")}</TableHead>
               <TableHead>{t("simplefin.updated")}</TableHead>
               <TableHead>{t("actions")}</TableHead>
@@ -108,6 +137,9 @@ export default function SimplefinConnectionsTable({
                 <TableRow key={connection.connectionId}>
                   <TableCell>
                     <Text variant="smallText">{nameOf(connection)}</Text>
+                  </TableCell>
+                  <TableCell>
+                    <LinkedAccounts connection={connection} />
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col items-start gap-1">

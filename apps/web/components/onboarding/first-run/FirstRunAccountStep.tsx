@@ -6,6 +6,8 @@ import { usePostHog } from "posthog-js/react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import BankList from "@/components/account/BankList";
+import { useSimplefinAvailable } from "@/components/settings/Connections/SimplefinConnectButton";
+import SimplefinConnectDialog from "@/components/settings/Connections/SimplefinConnectDialog";
 import { Button } from "@/components/ui/button";
 import { ComboBox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,7 @@ import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
+import { useFeature } from "@/lib/api/instance/useInstance";
 import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { useUser } from "@/lib/auth/user-context";
 import { buildOnboardingConnectRedirectPage } from "@/lib/onboarding/first-run/connect-redirect";
@@ -59,6 +62,7 @@ export default function FirstRunAccountStep() {
   const [mode, setMode] = useState<Mode>("list");
   const [bankId, setBankId] = useState<string | null>(null);
   const [skipDialogOpen, setSkipDialogOpen] = useState(false);
+  const [simplefinOpen, setSimplefinOpen] = useState(false);
   const [country, setCountry] = useState<string>(
     () => getCountryCodeClient() || "PT",
   );
@@ -72,13 +76,20 @@ export default function FirstRunAccountStep() {
     loading: credentialLoading,
     sharedCredentialUnavailable,
   } = useBankLinkCredential();
+  // Off when the operator's BANK_PROVIDERS leaves Enable Banking out (SimpleFIN only, say). An
+  // older API without the list only had Enable Banking, so a missing list reads as on.
+  const enableBankingAvailable = useFeature(
+    (features) =>
+      features.bankSyncProviders?.includes("enable_banking") ?? true,
+  );
+  const simplefinAvailable = useSimplefinAvailable();
 
   const countryOptions = Object.values(countryFlags)
     .filter((c) => SUPPORTED_BANK_COUNTRY_CODES.includes(c.code))
     .map((c) => ({ label: `${c.emoji} ${c.name}`, value: c.code }));
 
   const { data: banks = [], isLoading: banksLoading } = useBankList(country, {
-    enabled: !!country && canLink,
+    enabled: !!country && canLink && enableBankingAvailable,
     staleTime: Infinity,
   });
   const returnPage = buildOnboardingConnectRedirectPage(locale);
@@ -133,6 +144,24 @@ export default function FirstRunAccountStep() {
       outcome: "error",
     });
   }, [returnedError, posthog]);
+
+  // The token is claimed and the first sync queued: the sync step shows its progress.
+  const onSimplefinConnected = () => {
+    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
+      account_step_status: "connected",
+      step: "account",
+    });
+    captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
+      method: "simplefin",
+      source: "first_run",
+    });
+    if (user?.id)
+      patchFirstRunState(
+        { accountStep: "connected", currentStep: "sync_value" },
+        user.id,
+      );
+    router.push(getFirstRunStepRoute("sync_value"));
+  };
 
   const startConnect = (id: string) => {
     setBankId(id);
@@ -257,15 +286,38 @@ export default function FirstRunAccountStep() {
               </Button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="border-border h-px flex-1 border-t" />
-              <span className="text-muted-foreground text-xs">
-                {tCommon("or")}
-              </span>
-              <div className="border-border h-px flex-1 border-t" />
-            </div>
+            {enableBankingAvailable || simplefinAvailable ? (
+              <div className="flex items-center gap-3">
+                <div className="border-border h-px flex-1 border-t" />
+                <span className="text-muted-foreground text-xs">
+                  {tCommon("or")}
+                </span>
+                <div className="border-border h-px flex-1 border-t" />
+              </div>
+            ) : null}
 
-            {credentialLoading ? (
+            {simplefinAvailable ? (
+              <div className="border-border bg-card flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 space-y-0.5">
+                  <p className="text-foreground text-sm font-medium">
+                    {tCommon("simplefin.name")}
+                  </p>
+                  <p className="text-muted-foreground text-[13px] leading-5">
+                    {tCommon("simplefin.offer")}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11 shrink-0"
+                  onClick={() => setSimplefinOpen(true)}
+                >
+                  {tCommon("simplefin.connect")}
+                </Button>
+              </div>
+            ) : null}
+
+            {!enableBankingAvailable ? null : credentialLoading ? (
               <div className="flex justify-center py-8">
                 <Spinner />
               </div>
@@ -332,6 +384,11 @@ export default function FirstRunAccountStep() {
           </div>
         }
         preview={null}
+      />
+      <SimplefinConnectDialog
+        open={simplefinOpen}
+        onOpenChange={setSimplefinOpen}
+        onConnected={onSimplefinConnected}
       />
     </>
   );

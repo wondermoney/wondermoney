@@ -22,15 +22,24 @@ const ACCESS_TYPE = 'open_banking' as const;
 
 interface AccountWithInstitution {
   accountFinancialInstitutionKey?: null | { displayName?: null | string; name?: null | string };
+  accountKey?: number;
+  accountName?: null | string;
   accountOwnerAppuserKey?: null | { appuserKey?: number };
   deletedAt?: Date | null;
   isPrivate?: boolean;
   refreshedAt?: Date | null;
+  tenantKey?: null | { tenantKey?: number };
   transactionsRefreshedAt?: Date | null;
 }
 
 interface BankConnectionDto {
   accessType: typeof ACCESS_TYPE;
+  /**
+   * SimpleFIN only: the accounts this connection feeds that the viewer can see (in their household,
+   * not deleted, and not another member's private account). The other providers' accounts come
+   * with `GET /v1/user/:id/requisitions`.
+   */
+  accounts?: LinkedAccountDto[];
   /**
    * The id `GET /v1/banking/bank/:bankId/start` takes to connect this bank again, so a client can
    * offer "Reconnect" without searching the bank list. Null for the legacy provider, which can no
@@ -53,6 +62,18 @@ interface BankConnectionDto {
   lastError: BankSyncLastError | null;
   provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER | typeof SIMPLEFIN_PROVIDER;
   status: ConnectionStatus;
+}
+
+/** An account a connection feeds, as its owner named it. */
+interface LinkedAccountDto {
+  accountKey: number;
+  accountName: null | string;
+}
+
+/** Who is reading the list: the account-name rules need both. */
+interface Viewer {
+  appuserKey: number | undefined;
+  tenantKey: number;
 }
 
 /**
@@ -128,6 +149,21 @@ function resolveInstitutionName(accounts: AccountWithInstitution[], viewerAppuse
   if (counts.size === 0) return null;
   // Map preserves first-seen order and Array#sort is stable, so ties keep it.
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name).join(', ');
+}
+
+/**
+ * The accounts a viewer may see named on a connection: in the viewer's household, not deleted, and
+ * either shared or the viewer's own. The tenant filter already scopes the populated accounts; this
+ * holds the same rule where the names leave the API, so a connection never names an account the
+ * accounts list would hide.
+ */
+function visibleLinkedAccounts(accounts: AccountWithInstitution[], viewer: Viewer): LinkedAccountDto[] {
+  return accounts
+    .filter((account) => !account.deletedAt
+      && account.tenantKey?.tenantKey === viewer.tenantKey
+      && (!account.isPrivate || isOwnedBy(account, viewer.appuserKey)))
+    .flatMap((account) => (typeof account.accountKey === 'number' ? [{ accountKey: account.accountKey, accountName: account.accountName ?? null }] : []))
+    .sort((a, b) => a.accountKey - b.accountKey);
 }
 
 /**
@@ -263,11 +299,13 @@ function mapEnableBankingConnection(connection: OwnedEnableBankingConnection, la
  * stored access (403), and otherwise follows the same account-freshness rules as the others.
  * Nothing about the access URL, its host or its credentials is in the DTO.
  */
-function mapSimplefinConnection(connection: OwnedSimplefinConnection, lastError: BankSyncLastError | null = null): BankConnectionDto {
-  const accounts = connection.bankConnectionKey.accounts.getItems().filter((account) => !account.deletedAt);
+function mapSimplefinConnection(connection: OwnedSimplefinConnection, viewer: Viewer, lastError: BankSyncLastError | null = null): BankConnectionDto {
+  const linked = connection.bankConnectionKey.accounts.getItems();
+  const accounts = linked.filter((account) => !account.deletedAt);
   const status = connection.bankConnectionKey.status;
   return {
     accessType: ACCESS_TYPE,
+    accounts: visibleLinkedAccounts(linked, viewer),
     bankId: null,
     connectionId: connection.simplefinConnectionKey,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
@@ -348,6 +386,7 @@ export async function getBankConnections(req: Request, res: Response) {
       },
     ),
   ]);
+  const viewer: Viewer = { appuserKey: user.appuserKey, tenantKey: req.tenant.tenantKey };
   const history = new BankSyncHistoryService(DI.em);
   const lastErrorByRequisitionId = await history
     .getLastErrorByRequisitionId(user, [
@@ -369,6 +408,7 @@ export async function getBankConnections(req: Request, res: Response) {
       )),
       ...simplefinConnections.map((connection) => mapSimplefinConnection(
         connection,
+        viewer,
         lastErrorByRequisitionId.get(connection.bankConnectionKey.externalId ?? '') ?? null,
       )),
     ],
@@ -413,4 +453,4 @@ export const __testOnly = {
   toIso,
 };
 
-export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, OwnedEnableBankingConnection, OwnedRequisition, OwnedSimplefinConnection };
+export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, LinkedAccountDto, OwnedEnableBankingConnection, OwnedRequisition, OwnedSimplefinConnection };

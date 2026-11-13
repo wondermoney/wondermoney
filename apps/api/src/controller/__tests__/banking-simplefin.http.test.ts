@@ -197,4 +197,37 @@ describe('SimpleFIN connections over HTTP', () => {
 
     expect(list.body.connections).toEqual([expect.objectContaining({ dataFreshAsOf: '2026-11-01T00:00:00.000Z', institutionName: 'Example Bank', provider: 'SimpleFIN', status: 'revoked' })]);
   });
+
+  it('names the linked accounts the viewer can see, and no one else\'s', async () => {
+    const household = await seedHousehold(db.em());
+    const partner = await addPartner(db.em(), household);
+    const other = await seedHousehold(db.em());
+    serve();
+    const created = await http.as(household.appuser).post('/v1/banking/simplefin/connections').send({ setupToken: SETUP_TOKEN });
+    const stored = await db.em().findOneOrFail(SimplefinConnection, { simplefinConnectionKey: created.body.connectionId }, { filters: false, populate: ['bankConnectionKey'] });
+
+    const shared = await addAccount(db.em(), household, { name: 'Everyday checking' });
+    const ownPrivate = await addAccount(db.em(), household, { isPrivate: true, name: 'Own savings' });
+    const partnerPrivate = await addAccount(db.em(), household, { isPrivate: true, name: 'Partner private', owner: partner });
+    const removed = await addAccount(db.em(), household, { name: 'Closed card' });
+    const stranger = await addAccount(db.em(), other, { name: 'Other household' });
+    const em = db.em();
+    await em.nativeUpdate(
+      Account,
+      { accountKey: { $in: [shared, ownPrivate, partnerPrivate, removed, stranger].map((account) => account.accountKey) } },
+      { bankConnectionKey: stored.bankConnectionKey },
+    );
+    await em.nativeUpdate(Account, { accountKey: removed.accountKey }, { deletedAt: new Date() });
+
+    const list = await http.as(household.appuser).get('/v1/banking/connections');
+
+    expect(list.status).toBe(200);
+    expect(list.body.connections).toHaveLength(1);
+    expect(list.body.connections[0].accounts).toEqual([
+      { accountKey: shared.accountKey, accountName: 'Everyday checking' },
+      { accountKey: ownPrivate.accountKey, accountName: 'Own savings' },
+    ]);
+    const body = JSON.stringify(list.body);
+    for (const hidden of ['Partner private', 'Closed card', 'Other household']) expect(body).not.toContain(hidden);
+  });
 });
