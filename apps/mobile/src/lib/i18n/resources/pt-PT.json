@@ -4891,6 +4891,32 @@
       "accept": "Criar plano",
       "acceptNamed": "Criar plano para {{name}}",
       "unavailable": "Esta sugestão já não está disponível. Podes ainda criar o plano manualmente."
+    },
+    "link": {
+      "action": "Ligar transação",
+      "unlink": "Desligar",
+      "actionsLabel": "Ações da prestação {{number}} de {{total}}",
+      "title": "Ligar a prestação {{number}} de {{total}}",
+      "helper": "Despesas lançadas neste cartão até um mês antes ou depois de {{date}}, de cerca de {{amount}}.",
+      "helperAll": "Despesas lançadas neste cartão até um mês antes ou depois de {{date}}, de qualquer valor.",
+      "showOther": "Mostrar outros valores",
+      "showClose": "Mostrar só valores próximos",
+      "searching": "A procurar transações…",
+      "loadFailed": "Não foi possível carregar as transações.",
+      "empty": "Nenhuma despesa lançada neste cartão corresponde a esta prestação.",
+      "emptyHint": "Mostra outros valores para veres todas as despesas deste período.",
+      "more": "Mais {{amount}} do que a prestação",
+      "less": "Menos {{amount}} do que a prestação",
+      "confirm": "Ligar",
+      "unlinkConfirmTitle": "Desligar a prestação {{number}} de {{total}}?",
+      "unlinkConfirmMessage": "A prestação deixa de contar como paga. A transação fica no cartão como um movimento normal.",
+      "failures": {
+        "wrongCard": "Essa transação não é do cartão deste plano.",
+        "alreadyLinked": "Essa transação já paga uma prestação, ou esta prestação já está paga por outra transação. O plano foi atualizado.",
+        "notFound": "Essa transação ou este plano já não existe. O plano foi atualizado.",
+        "linkFailed": "Não foi possível ligar a transação. Tenta novamente.",
+        "unlinkFailed": "Não foi possível desligar a prestação. Tenta novamente."
+      }
     }
   },
   "rules": {

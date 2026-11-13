@@ -71,7 +71,21 @@ Las cuotas que aún faltan son proyecciones, como la previsión del saldo. No so
 
 Cuando el banco registra una cuota, WonderMoney vincula la transacción registrada con su cuota, que pasa a mostrarse como **Pagada**. Nada se cuenta dos veces, porque la proyección nunca fue una transacción. Una transacción registrada se vincula cuando está en la tarjeta del plan, su descripción indica la cuota (`PARC 03/12` en un plan de 12 cuotas) y el importe coincide. En las listas, la transacción muestra la cuota como `3/12`.
 
-Una cuota pasada sin ninguna transacción registrada vinculada aparece como **Sin coincidencia**. Deja de contar en lo que la tarjeta aún tiene que cargar.
+Una cuota pasada sin ninguna transacción registrada vinculada aparece como **Sin coincidencia**. Deja de contar en lo que la tarjeta aún tiene que cargar. Puedes vincular su transacción a mano.
+
+### Vincular una transacción a mano
+
+WonderMoney vincula por sí solo una transacción registrada solo cuando su marca, su importe, su tarjeta y su fecha encajan con un único plan. Cuando el banco no escribe la marca, redondea el importe de otra forma o fecha la cuota en otro día, vincúlala tú:
+
+1. Abre el plan. Junto a una cuota **Sin coincidencia** o **Pendiente**, elige **Vincular transacción** (en el móvil, en el menú **…** de la cuota).
+2. La lista muestra los cargos registrados en la tarjeta del plan hasta un mes antes o después de la fecha de la cuota, de un importe parecido, de más a menos cercano. Un cargo con otro importe indica la diferencia. Elige **Mostrar otros importes** para ver todos los cargos de ese periodo.
+3. Elige la transacción y después **Vincular**. La cuota pasa a mostrarse como **Pagada**, y el importe **Pendiente de cargo** de la tarjeta, la previsión y las listas de transacciones se actualizan.
+
+También puedes empezar por la transacción: en la lista de transacciones de una tarjeta, abre un cargo registrado y elige **Vincular a una cuota** para elegir una de las cuotas pendientes de los planes de esa tarjeta.
+
+Una transacción paga una sola cuota, de su propia tarjeta. WonderMoney te avisa cuando eliges una transacción de otra tarjeta, una que ya paga una cuota, o una cuota que otra transacción ha pagado mientras tanto.
+
+Para deshacer un vínculo, elige **Desvincular** junto a una cuota **Pagada** y confirma. La transacción se queda en la tarjeta como una transacción normal, y la cuota vuelve a mostrarse como **Sin coincidencia** o **Pendiente**.
 
 ### Presupuestos
 

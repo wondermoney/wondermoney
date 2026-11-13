@@ -4,7 +4,14 @@ import type { ReactNode } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
 
-import { classifyInstallmentWriteFailure, useCreateInstallmentPlan, useDeleteInstallmentPlan } from './use-installment-plan-mutations'
+import {
+  classifyInstallmentWriteFailure,
+  installmentLinkFailureMessage,
+  useCreateInstallmentPlan,
+  useDeleteInstallmentPlan,
+  useLinkInstallment,
+  useUnlinkInstallment,
+} from './use-installment-plan-mutations'
 import { installmentPlanDetailKey, installmentPlansKey } from './query-keys'
 import { planDetailFixture } from './test-fixtures'
 
@@ -72,5 +79,53 @@ describe('installment plan mutations', () => {
     expect(classifyInstallmentWriteFailure(new ApiError('demo-forbidden'))).toBe('demo')
     expect(classifyInstallmentWriteFailure(new Error('boom'))).toBe('general')
     await hook.unmount(); client.clear()
+  })
+
+  it('links a transaction to an installment, puts the answer on the plan page and refreshes the card', async () => {
+    const { client, wrapper } = setup()
+    const invalidate = jest.spyOn(client, 'invalidateQueries')
+    mockWrite.mockImplementation(async (_endpoint, options) => { options.commit({ installmentPlan: planDetailFixture }); return { installmentPlan: planDetailFixture } })
+    const hook = await renderHook(() => useLinkInstallment(), { wrapper })
+    await act(async () => { await hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 }) })
+    expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'POST', path: '/v1/installment-plans/11/installments/3/link' })
+    expect(mockWrite.mock.calls[0][1].body).toEqual({ transactionKey: 904 })
+    expect(client.getQueryData(installmentPlanDetailKey(8, 11))).toEqual({ installmentPlan: planDetailFixture })
+    expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['installment-plans', 8] }))
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['transactions', 8] })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['account', 8, 7, 'forecast'] })
+    await hook.unmount(); client.clear()
+  })
+
+  it('unlinks an installment', async () => {
+    const { client, wrapper } = setup()
+    mockWrite.mockImplementation(async (_endpoint, options) => { options.commit({ installmentPlan: planDetailFixture }); return { installmentPlan: planDetailFixture } })
+    const hook = await renderHook(() => useUnlinkInstallment(), { wrapper })
+    await act(async () => { await hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 1 }) })
+    expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'DELETE', path: '/v1/installment-plans/11/installments/1/link' })
+    expect(mockWrite.mock.calls[0][1].body).toBeUndefined()
+    await hook.unmount(); client.clear()
+  })
+
+  it('refreshes after a conflict, which means the page was out of date, but not after a wrong card', async () => {
+    const { client, wrapper } = setup()
+    const invalidate = jest.spyOn(client, 'invalidateQueries')
+    const hook = await renderHook(() => useLinkInstallment(), { wrapper })
+    mockWrite.mockRejectedValueOnce(new ApiError('http', 400))
+    await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
+    expect(invalidate).not.toHaveBeenCalled()
+    mockWrite.mockRejectedValueOnce(new ApiError('http', 409))
+    await act(async () => { await expect(hook.result.current.mutateAsync({ planId: 11, accountId: 7, installmentNumber: 3, transactionKey: 904 })).rejects.toBeInstanceOf(ApiError) })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['transactions', 8] })
+    await hook.unmount(); client.clear()
+  })
+
+  it('names each refusal of the link endpoint', () => {
+    expect(installmentLinkFailureMessage('invalid', 'link')).toBe('installments.link.failures.wrongCard')
+    expect(installmentLinkFailureMessage('conflict', 'link')).toBe('installments.link.failures.alreadyLinked')
+    expect(installmentLinkFailureMessage('not-found', 'unlink')).toBe('installments.link.failures.notFound')
+    expect(installmentLinkFailureMessage('general', 'link')).toBe('installments.link.failures.linkFailed')
+    expect(installmentLinkFailureMessage('general', 'unlink')).toBe('installments.link.failures.unlinkFailed')
+    expect(installmentLinkFailureMessage('network', 'link')).toBe('installments.failures.network')
+    expect(installmentLinkFailureMessage('demo', 'unlink')).toBe('installments.failures.demo')
   })
 })

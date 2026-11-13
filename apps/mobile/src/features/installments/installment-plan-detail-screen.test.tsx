@@ -7,6 +7,7 @@ import { initMobileI18n } from '@/lib/i18n'
 
 import { InstallmentPlanDetailScreen, type InstallmentPlanDetailScreenProps } from './installment-plan-detail-screen'
 import { planDetailFixture } from './test-fixtures'
+import type { InstallmentLinking } from './use-installment-linking'
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn(), canGoBack: () => true, replace: jest.fn() }) }))
 
@@ -86,5 +87,83 @@ describe('InstallmentPlanDetailScreen', () => {
     const { view } = await renderScreen({ state: { status } })
     expect(view.getByRole('header', { name: title })).toBeOnTheScreen()
     expect(view.queryByRole('button', { name: 'Delete plan' })).not.toBeOnTheScreen()
+  })
+
+  describe('manual links', () => {
+    const linkingFor = (overrides: Partial<InstallmentLinking> = {}): InstallmentLinking => ({
+      target: null,
+      candidates: { status: 'loading' },
+      showAllAmounts: false,
+      pending: false,
+      failure: null,
+      open: jest.fn(),
+      close: jest.fn(),
+      toggleShowAllAmounts: jest.fn(),
+      link: jest.fn(async () => undefined),
+      unlink: jest.fn(async () => undefined),
+      ...overrides,
+    })
+
+    it('offers Link transaction on an unmatched installment and Unlink, after a confirmation, on a paid one', async () => {
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+      const linking = linkingFor()
+      const { view } = await renderScreen({ linking })
+
+      await fireEvent.press(view.getByRole('button', { name: 'Actions for installment 3 of 4' }))
+      await fireEvent.press(within(view.getByTestId('installment-row-menu')).getByRole('menuitem', { name: 'Link transaction' }))
+      expect(linking.open).toHaveBeenCalledWith(3)
+
+      await fireEvent.press(view.getByRole('button', { name: 'Actions for installment 1 of 4' }))
+      await fireEvent.press(within(view.getByTestId('installment-row-menu')).getByRole('menuitem', { name: 'Unlink' }))
+      expect(linking.unlink).not.toHaveBeenCalled()
+      expect(alert).toHaveBeenCalledWith('Unlink installment 1 of 4?', expect.stringContaining('no longer counts as paid'), expect.any(Array))
+      const buttons = alert.mock.calls[0]?.[2] ?? []
+      expect(buttons.map((button) => button.text)).toEqual(['Cancel', 'Unlink'])
+      buttons[1]?.onPress?.()
+      expect(linking.unlink).toHaveBeenCalledWith(1)
+      alert.mockRestore()
+    })
+
+    it('offers no row actions without linking', async () => {
+      const { view } = await renderScreen()
+      expect(view.queryByRole('button', { name: 'Actions for installment 3 of 4' })).not.toBeOnTheScreen()
+    })
+
+    it('lists the candidates closest first and links the chosen one', async () => {
+      const linking = linkingFor({
+        target: 3,
+        candidates: { status: 'loaded', rows: [
+          { transactionKey: 904, title: 'LAPTOP 3/4', day: '2026-11-06', amount: 25, amountDifference: 0, dayDistance: 1 },
+          { transactionKey: 905, title: 'Laptop shop', day: '2026-11-09', amount: 26, amountDifference: 1, dayDistance: 4 },
+        ] },
+      })
+      const { view } = await renderScreen({ linking })
+      const sheet = within(view.getByTestId('installment-link-sheet'))
+      expect(sheet.getByRole('header', { name: 'Link installment 3 of 4' })).toBeOnTheScreen()
+      expect(sheet.getByText(`Posted charges on this card within a month of Nov 5, 2026, for about ${euro(25)}.`)).toBeOnTheScreen()
+      expect(sheet.getByLabelText(`Laptop shop, ${euro(26)}, Nov 9, 2026, ${euro(1)} more than the installment`)).toBeOnTheScreen()
+
+      const link = sheet.getByRole('button', { name: 'Link' })
+      expect(link).toBeDisabled()
+      await fireEvent.press(sheet.getByTestId('installment-candidate-904'))
+      await fireEvent.press(sheet.getByRole('button', { name: 'Link' }))
+      expect(linking.link).toHaveBeenCalledWith(904)
+
+      await fireEvent.press(sheet.getByRole('button', { name: 'Show other amounts' }))
+      expect(linking.toggleShowAllAmounts).toHaveBeenCalled()
+    })
+
+    it('says when nothing fits, and why a link was refused', async () => {
+      const linking = linkingFor({ target: 3, candidates: { status: 'loaded', rows: [] }, failure: 'installments.link.failures.alreadyLinked' })
+      const { view } = await renderScreen({ linking })
+      const sheet = within(view.getByTestId('installment-link-sheet'))
+      expect(sheet.getByText('No posted charge on this card fits this installment.')).toBeOnTheScreen()
+      expect(sheet.getByTestId('installment-link-failure')).toHaveTextContent(/already pays an installment/)
+    })
+
+    it('shows a failed unlink on the page', async () => {
+      const { view } = await renderScreen({ linking: linkingFor({ failure: 'installments.link.failures.unlinkFailed' }) })
+      expect(view.getByTestId('installment-link-failure')).toHaveTextContent('Could not unlink the installment. Try again.')
+    })
   })
 })

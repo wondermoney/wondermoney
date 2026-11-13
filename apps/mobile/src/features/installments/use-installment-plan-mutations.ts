@@ -6,7 +6,10 @@ import { transactionsRootKey } from '@/features/transactions/query-keys'
 
 import {
   createDeleteInstallmentPlanEndpoint,
+  createInstallmentLinkEndpoint,
   createInstallmentPlanEndpoint,
+  createInstallmentUnlinkEndpoint,
+  installmentLinkBodySchema,
   installmentPlanCreateSchema,
   isValidInstallmentPlanId,
   type InstallmentPlanCreate,
@@ -92,4 +95,69 @@ export function useDeleteInstallmentPlan() {
     },
     onError,
   })
+}
+
+/**
+ * The message key (`installments.link.failures.*` or `installments.failures.*`) for a refused link
+ * or unlink. The endpoint answers with generic codes, so the status says why: 400 a transaction on
+ * another card, 409 a transaction that already pays an installment (or an installment already
+ * paid), 404 a plan or transaction that is gone.
+ */
+export function installmentLinkFailureMessage(failure: InstallmentWriteFailure, action: 'link' | 'unlink'): string {
+  if (failure === 'invalid') return action === 'link' ? 'installments.link.failures.wrongCard' : 'installments.link.failures.unlinkFailed'
+  if (failure === 'conflict') return 'installments.link.failures.alreadyLinked'
+  if (failure === 'not-found') return 'installments.link.failures.notFound'
+  if (failure === 'general') return action === 'link' ? 'installments.link.failures.linkFailed' : 'installments.link.failures.unlinkFailed'
+  return `installments.failures.${failure}`
+}
+
+type InstallmentRef = Readonly<{ planId: number; accountId: number; installmentNumber: number }>
+
+/**
+ * A link change answers with the plan as it now stands; it goes straight into the plan's page and
+ * the same queries as any plan change refresh. A conflict or a missing row means this page was out
+ * of date, so those refresh too.
+ */
+function useLinkWrite<Input extends InstallmentRef>(
+  name: string,
+  write: (input: Input) => { endpoint: ReturnType<typeof createInstallmentLinkEndpoint>; body?: unknown },
+) {
+  const { runtime } = useProductRuntime()
+  if (!runtime) throw new Error(`${name} requires an authenticated runtime`)
+  const queryClient = useQueryClient()
+  const blockOnMfa = useBlockOnMfa()
+  return useMutation({
+    retry: false,
+    networkMode: 'always',
+    mutationFn: (input: Input) => {
+      const { endpoint, body } = write(input)
+      return runtime.apiClient.write(endpoint, {
+        body,
+        commit: (result) => {
+          queryClient.setQueryData(installmentPlanDetailKey(runtime.epochId, input.planId), result)
+          refreshAfterWrite(queryClient, runtime.epochId, input.accountId)
+        },
+      })
+    },
+    onError: (error, input) => {
+      blockOnMfa(error)
+      const failure = classifyInstallmentWriteFailure(error)
+      if (failure === 'conflict' || failure === 'not-found') refreshAfterWrite(queryClient, runtime.epochId, input.accountId)
+    },
+  })
+}
+
+/** `POST /v1/installment-plans/:id/installments/:n/link`: a posted transaction pays installment `n`. */
+export function useLinkInstallment() {
+  return useLinkWrite('useLinkInstallment', (input: InstallmentRef & { transactionKey: number }) => ({
+    endpoint: createInstallmentLinkEndpoint(input.planId, input.installmentNumber),
+    body: installmentLinkBodySchema.parse({ transactionKey: input.transactionKey }),
+  }))
+}
+
+/** `DELETE /v1/installment-plans/:id/installments/:n/link`: installment `n` is no longer paid. */
+export function useUnlinkInstallment() {
+  return useLinkWrite('useUnlinkInstallment', (input: InstallmentRef) => ({
+    endpoint: createInstallmentUnlinkEndpoint(input.planId, input.installmentNumber),
+  }))
 }

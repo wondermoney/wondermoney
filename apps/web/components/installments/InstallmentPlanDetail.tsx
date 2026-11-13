@@ -1,6 +1,13 @@
 "use client";
 
-import { CheckCircle2, Clock, Pencil, Trash2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Link2,
+  Link2Off,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,10 +34,15 @@ import type {
   InstallmentPlanDetail as InstallmentPlanDetailData,
   InstallmentStatus,
 } from "@/lib/api/installment-plans/types";
-import { useDeleteInstallmentPlan } from "@/lib/api/installment-plans/useInstallmentPlanMutations";
+import {
+  installmentLinkError,
+  useDeleteInstallmentPlan,
+  useUnlinkInstallment,
+} from "@/lib/api/installment-plans/useInstallmentPlanMutations";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
+import InstallmentLinkDialog from "./InstallmentLinkDialog";
 import InstallmentPlanFormDialog from "./InstallmentPlanFormDialog";
 import { useFormatPlanDay } from "./useFormatPlanDay";
 
@@ -62,6 +74,9 @@ export default function InstallmentPlanDetail({
   const deletePlan = useDeleteInstallmentPlan();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const unlink = useUnlinkInstallment();
+  const [linkTarget, setLinkTarget] = useState<Installment | null>(null);
+  const [unlinkTarget, setUnlinkTarget] = useState<Installment | null>(null);
 
   const onDelete = async () => {
     try {
@@ -78,6 +93,35 @@ export default function InstallmentPlanDetail({
         return;
       }
       toast.error(t("installments.delete-failed"), { duration: 9000 });
+    }
+  };
+
+  const onUnlink = async () => {
+    if (!unlinkTarget) return;
+    try {
+      await unlink.mutateAsync({
+        installmentPlanKey: plan.installmentPlanKey,
+        installmentNumber: unlinkTarget.installmentNumber,
+      });
+      toast.success(t("installments.unlinked"));
+      setUnlinkTarget(null);
+    } catch (error) {
+      const reason = installmentLinkError(error);
+      if (reason === "demo") {
+        toast.error(t("demo-read-only-title"), {
+          description: t("demo-read-only-description"),
+          duration: 9000,
+        });
+        return;
+      }
+      toast.error(
+        t(
+          reason === "not-found"
+            ? "installments.link-errors.not-found"
+            : "installments.link-errors.unlink-failed",
+        ),
+        { duration: 9000 },
+      );
     }
   };
 
@@ -155,6 +199,8 @@ export default function InstallmentPlanDetail({
               installment={installment}
               installmentCount={plan.installmentCount}
               currency={plan.currency}
+              onLink={() => setLinkTarget(installment)}
+              onUnlink={() => setUnlinkTarget(installment)}
             />
           ))}
         </ol>
@@ -166,6 +212,50 @@ export default function InstallmentPlanDetail({
         mode={{ kind: "edit", plan }}
         categories={categories}
       />
+
+      <InstallmentLinkDialog
+        plan={plan}
+        installment={linkTarget}
+        onOpenChange={(open) => {
+          if (!open) setLinkTarget(null);
+        }}
+      />
+
+      <AlertDialog
+        open={unlinkTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !unlink.isPending) setUnlinkTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {unlinkTarget
+                ? t("installments.unlink-title", {
+                    number: unlinkTarget.installmentNumber,
+                    count: plan.installmentCount,
+                  })
+                : null}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("installments.unlink-description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unlink.isPending}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              loading={unlink.isPending}
+              disabled={unlink.isPending}
+              onClick={() => void onUnlink()}
+            >
+              {t("installments.unlink-action")}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
@@ -200,15 +290,23 @@ function InstallmentRow({
   installment,
   installmentCount,
   currency,
+  onLink,
+  onUnlink,
 }: {
   installment: Installment;
   installmentCount: number;
   currency: string;
+  onLink: () => void;
+  onUnlink: () => void;
 }) {
   const t = useTranslations();
   const formatPlanDay = useFormatPlanDay();
   const formatCurrency = useFormatCurrency();
   const projected = installment.status === "upcoming";
+  const numbers = {
+    number: installment.installmentNumber,
+    count: installmentCount,
+  };
 
   return (
     <li
@@ -272,6 +370,27 @@ function InstallmentRow({
             projected ? "text-muted-foreground" : "text-foreground",
           )}
         />
+        {installment.status === "paid" ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onUnlink}
+            aria-label={t("installments.unlink-action-label", numbers)}
+          >
+            <Link2Off className="size-4" aria-hidden="true" />
+            {t("installments.unlink-action")}
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLink}
+            aria-label={t("installments.link-action-label", numbers)}
+          >
+            <Link2 className="size-4" aria-hidden="true" />
+            {t("installments.link-action")}
+          </Button>
+        )}
       </div>
     </li>
   );

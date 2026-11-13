@@ -71,7 +71,21 @@ As prestações que ainda faltam são projeções, como a previsão do saldo. N�
 
 Quando o banco lança uma prestação, o WonderMoney liga a transação lançada à sua prestação, que passa a aparecer como **Paga**. Nada é contado duas vezes, porque a projeção nunca foi uma transação. Uma transação lançada é ligada quando está no cartão do plano, a descrição indica a prestação (`PARC 03/12` num plano de 12 prestações) e o valor coincide. Nas listas, a transação mostra a prestação como `3/12`.
 
-Uma prestação passada sem nenhuma transação lançada ligada aparece como **Sem correspondência**. Deixa de contar para o que o cartão ainda tem para cobrar.
+Uma prestação passada sem nenhuma transação lançada ligada aparece como **Sem correspondência**. Deixa de contar para o que o cartão ainda tem para cobrar. Podes ligar a transação manualmente.
+
+### Ligar uma transação manualmente
+
+O WonderMoney só liga sozinho uma transação lançada quando a marca, o valor, o cartão e a data correspondem a um único plano. Quando o banco não escreve a marca, arredonda o valor de outra forma ou data a prestação noutro dia, liga-a tu:
+
+1. Abre o plano. Ao lado de uma prestação **Sem correspondência** ou **Por cobrar**, escolhe **Ligar transação** (no telemóvel, no menu **…** da prestação).
+2. A lista mostra as despesas lançadas no cartão do plano até um mês antes ou depois da data da prestação, de cerca do seu valor, das mais próximas para as menos próximas. Uma despesa com outro valor diz a diferença. Escolhe **Mostrar outros valores** para veres todas as despesas desse período.
+3. Escolhe a transação e depois **Ligar**. A prestação passa a aparecer como **Paga**, e o valor **Ainda por cobrar** do cartão, a previsão e as listas de transações atualizam-se.
+
+Também podes começar pela transação: na lista de transações de um cartão, abre uma despesa lançada e escolhe **Ligar a uma prestação** para escolheres uma das prestações por pagar dos planos desse cartão.
+
+Uma transação paga apenas uma prestação, do seu próprio cartão. O WonderMoney avisa-te quando escolhes uma transação de outro cartão, uma que já paga uma prestação, ou uma prestação que entretanto outra transação pagou.
+
+Para desfazer uma ligação, escolhe **Desligar** ao lado de uma prestação **Paga** e confirma. A transação fica no cartão como uma transação normal, e a prestação volta a aparecer como **Sem correspondência** ou **Por cobrar**.
 
 ### Orçamentos
 

@@ -59,6 +59,7 @@ import {
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
 import { InstallmentBadge } from "../installments/InstallmentBadge";
+import { TransactionInstallmentLinkAction } from "../installments/TransactionInstallmentLink";
 import { MerchantAvatar } from "../merchant/MerchantAvatar";
 import { MerchantDetails } from "../merchant/MerchantDetails";
 import { TagChipList } from "../tags/TagChip";
@@ -1892,16 +1893,28 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             }
             actions={
               inspectedTransaction ? (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    openEditTransactionModal(inspectedTransaction);
-                    setInspectedTransaction(null);
-                  }}
-                >
-                  <Pencil className="mr-2 size-3.5" />
-                  {t("edit")}
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      openEditTransactionModal(inspectedTransaction);
+                      setInspectedTransaction(null);
+                    }}
+                  >
+                    <Pencil className="mr-2 size-3.5" />
+                    {t("edit")}
+                  </Button>
+                  {/* A charge on a card with plans that pays no installment yet. */}
+                  <TransactionInstallmentLinkAction
+                    key={inspectedTransaction.transactionKey}
+                    transaction={inspectedTransaction}
+                    onLinked={(installment) =>
+                      setInspectedTransaction((current) =>
+                        current ? { ...current, installment } : current,
+                      )
+                    }
+                  />
+                </>
               ) : null
             }
           >
@@ -1944,6 +1957,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                           )
                         : "—",
                   },
+                  ...(inspectedTransaction.installment
+                    ? [
+                        {
+                          key: "installment",
+                          label: t("installments.title"),
+                          value: (
+                            <InstallmentBadge
+                              installment={inspectedTransaction.installment}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                   {
                     key: "tags",
                     label: t("transactionTags.label"),
