@@ -137,7 +137,86 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
    `.github/workflows/publish-images.yml`, which builds the images and attaches `install.sh` and
    its SHA-256 checksum to the release: that is what the one-line install in
    `apps/api/deploy/selfhost/README.md` downloads. It also publishes the Helm chart, with the
-   release's version, to `oci://ghcr.io/wondermoney/charts/wondermoney`.
+   release's version, to `oci://ghcr.io/wondermoney/charts/wondermoney`. To edit the notes
+   before anyone sees them, create the release as a draft instead (see
+   [Release notes](#release-notes)).
+
+## Release notes
+
+Each tagged release has notes on GitHub and a "What's new" page on the docs site. Whoever
+writes them follows these steps.
+
+1. **Label pull requests as they merge.** [`.github/release.yml`](.github/release.yml) groups
+   GitHub's generated notes by label, and a pull request goes into the first section that
+   matches one of its labels:
+
+   | Label | Section |
+   |---|---|
+   | `security`, `privacy` | Security and privacy |
+   | `self-hosting` | Self-hosting |
+   | `translations` | Translations |
+   | `enhancement` | Features |
+   | `bug` | Fixes |
+   | `documentation` | Documentation |
+   | `dependencies` (Dependabot adds it) | Dependencies |
+   | any other, or none | Other changes |
+
+   The title's Conventional Commits type is a guide: `feat` is `enhancement`, `fix` is `bug`.
+   Area labels such as `api`, `web` and `mobile` pick no section. A pull request labelled
+   `skip-release-notes` is left out, and so is the "Release: develop → main" pull request.
+2. **Generate a draft** once the release pull request is merged:
+   `gh release create vX.Y.Z --target main --generate-notes --notes-start-tag vA.B.C --draft`,
+   where `vA.B.C` is the previous release. A draft creates no tag yet, so nothing is published.
+3. **Edit the draft** for the people who run and use WonderMoney. Start with an
+   **Upgrading** section: migrations (and whether to back up first), new or changed
+   settings, and commands to run after updating, or "Nothing to do" when there are none.
+   Then rewrite the grouped lists in plain terms, referencing issues or pull requests, and
+   drop entries nobody outside the project would notice.
+4. **Credit contributors.** GitHub's "New Contributors" list names only first-time
+   contributors, and rewriting the lists drops the "by @author" on each line. Print a
+   "Thanks to" section that names every pull request author, with first-time contributors
+   marked, and paste it at the end of the notes:
+
+   ```bash
+   .github/scripts/release-thanks.sh vX.Y.Z vA.B.C
+   ```
+
+   It reads the same generated notes, so it credits exactly the pull requests in the draft.
+5. **Publish the draft.** That creates the tag, which runs `publish-images.yml` (see
+   [Releasing](#releasing-maintainers)).
+6. **Add the "What's new" page** in a pull request against `develop`: the same release in
+   user-facing words, in English, Portuguese and Spanish. Save it as
+   `apps/docs/content/docs/<locale>/whats-new/vX-Y-Z.mdx` for each of `en`, `pt` and `es`,
+   and list `vX-Y-Z` right after `index` in each locale's `whats-new/meta.json`, so the
+   newest release comes first. Start from this template:
+
+   ```mdx
+   ---
+   title: WonderMoney X.Y.Z
+   description: One sentence on what this release changes for people who use it.
+   ---
+
+   [Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/vX.Y.Z)
+
+   ## Upgrading
+
+   {/* Self-hosters: migrations, new or changed settings, commands to run. Otherwise
+   "Nothing to do." Link to the self-hosting pages rather than repeating them. */}
+
+   ## New
+
+   {/* One line per change people will notice, starting with what they can now do. */}
+
+   ## Fixes
+
+   ## Thanks to
+
+   {/* The output of .github/scripts/release-thanks.sh, as on GitHub. */}
+   ```
+
+   In Portuguese the headings are "Atualizar", "Novo", "Correções" and "Agradecimentos"; in
+   Spanish, "Actualizar", "Nuevo", "Correcciones" and "Agradecimientos". Leave out a section
+   with nothing in it, except Upgrading.
 
 ## Leak check
 

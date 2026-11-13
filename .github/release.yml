@@ -1,0 +1,49 @@
+# Groups GitHub's generated release notes (`gh release create --generate-notes`, the
+# "Generate release notes" button, and the release publish-images.yml creates for a tag pushed
+# without one) by pull request label. A pull request goes into the first category with one of
+# its labels, so the narrow, operator-facing categories come first; one without any of these
+# labels goes into "Other changes". The draft is a starting point: a maintainer edits it and
+# puts the "Upgrading" section first (CONTRIBUTING.md, "Release notes").
+#
+# Area labels (api, web, mobile, shared, docs-site, infra) and triage labels (priority:*,
+# ready-for-*, epic, good first issue, help wanted) say where a change is or who can pick it
+# up, not what kind of change it is, so they pick no category.
+changelog:
+  exclude:
+    labels:
+      # Optional: label a pull request with this to keep it out of the notes.
+      - skip-release-notes
+    authors:
+      # The "Release: develop → main" pull request that release-pr.yml opens and keeps
+      # current. It only repeats the pull requests already listed. Both spellings, because
+      # the generated notes show the app's login with its [bot] suffix.
+      - github-actions
+      - github-actions[bot]
+  categories:
+    - title: Security and privacy
+      labels:
+        - security
+        - privacy
+    - title: Self-hosting
+      labels:
+        - self-hosting
+    - title: Translations
+      labels:
+        - translations
+    - title: Features
+      labels:
+        - enhancement
+    - title: Fixes
+      labels:
+        - bug
+    - title: Documentation
+      labels:
+        - documentation
+    # Dependabot's pull requests carry this label. They stay in the draft, last, so a
+    # maintainer can summarise them (for example as the advisories they fix) or delete them.
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Other changes
+      labels:
+        - '*'
