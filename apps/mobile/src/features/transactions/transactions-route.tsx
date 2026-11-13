@@ -38,6 +38,7 @@ import { useTransferDestinations } from './use-transfer-destinations'
 function classifyResult(error: unknown, blockAccess: (state: 'mfa-required') => void): ReviewResult {
   if (!(error instanceof ApiError)) return 'error'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network'
   if (error.code === 'mfa-required') { blockAccess('mfa-required'); return 'mfa' }

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { HttpTransport } from '@/lib/api/client'
+import { tolerantEnum } from '@/lib/api/runtime-schema'
 
 /**
  * `GET /v1/household/invites/validate` is the one endpoint a signed-out device calls —
@@ -12,6 +13,9 @@ export const inviteValidationSchema = z.object({
   email: z.string(),
   expiresAt: z.iso.datetime(),
   inviterName: z.string().nullable(),
+  // Absent from an older API, whose invites were all for a member and named no household.
+  householdName: z.string().nullable().optional(),
+  role: tolerantEnum(['admin', 'member', 'viewer'], 'unknown').optional(),
 })
 
 export type InviteValidationDto = z.infer<typeof inviteValidationSchema>

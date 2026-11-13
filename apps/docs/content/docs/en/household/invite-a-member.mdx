@@ -1,42 +1,49 @@
 ---
 title: Invite a member
-description: Generate an invite link and share it so a new person can join the household.
+description: Invite someone to the household by email, pick their role, and manage pending invites.
 ---
 
-The owner invites new members with an invite link generated in settings. The link is validated server-side, and the invite is redeemed when the invitee completes a fresh signup.
+The owner and admins invite people from the household settings. The invite goes to the person's email address with a link to join, and it stays pending until they accept it.
 
-Only the owner can generate invite links. Members do not see the invite option in settings.
+Members and viewers do not see the invite form.
 
 <DocsImage
   src="/images/docs/household/invite-a-member-invite-form.png"
-  alt="Household settings with the invite form open, showing the field used to generate an invite link."
-  caption="The owner generates a shareable invite link from household settings."
+  alt="Household settings with the invite form, where you enter the email address of the person to invite."
+  caption="The owner and admins invite people from the household settings."
   width={683}
   height={176}
 />
 
-## Generating an invite link
+## Sending an invite
 
-Open the household settings and generate an invite link. The link carries the household and the invitation, and it is checked against the server when it is used.
+1. Open the household settings.
+2. Enter the email address of the person you want to invite.
+3. Pick their role: admin, member or viewer. The owner can invite with any of the three; an admin can invite only as member or viewer. The role starts as member.
+4. Send the invite.
 
-Share the link only with people you intend to join the household. Anyone with the link can redeem it, so treat it like a shared secret.
+The person can be new to WonderMoney or already have an account on this server. Either way, they join with the email address you invited. See [Join a household](/en/docs/household/join-a-household).
 
-## How the invite works
+You can't invite yourself or someone who is already in the household. When the household is full, the invite is refused; see [How many people](/en/docs/household/what-is-a-household#how-many-people).
 
-- The invitee opens the link and sees the household invitation.
-- The invitee accepts the invitation.
-- The invitee completes a fresh signup.
-- The new account is provisioned into the household as a member.
+## Pending invites
 
 <DocsImage
   src="/images/docs/household/invite-a-member-pending.png"
-  alt="The member list showing an invite still in the pending state before it has been redeemed."
-  caption="A generated invite stays pending until the invitee completes a fresh signup."
+  alt="The member list showing an invite still in the pending state before it has been accepted."
+  caption="An invite stays pending until the person accepts it."
   width={683}
   height={85}
 />
 
-Because invites are redeemed during signup, an invite link cannot add an existing account to the household. See [Join a household](/en/docs/household/join-a-household) for the full flow.
+Every pending invite is listed in the household settings with its email address, role and expiry date. Everyone in the household can see them; the owner and admins can act on them:
+
+- **Resend** sends a new email with a new link and gives the invite another 7 days. The old link stops working.
+- **Revoke** cancels the invite, and its link stops working.
+
+An admin can resend and revoke only invites for members and viewers. An invite expires 7 days after it was sent, and a pending invite holds a seat in the household until it is accepted, revoked or expires.
+
+Share the link only with the person you invited. It works only for the invited email address.
 
 ## Related pages
 

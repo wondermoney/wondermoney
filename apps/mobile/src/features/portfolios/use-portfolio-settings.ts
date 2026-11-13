@@ -9,7 +9,7 @@ import { netWorthKey } from '@/features/net-worth/query-keys'
 import { createPortfolioSettingsEndpoint, portfolioSettingsWriteSchema, type PortfolioSettingsWrite } from './portfolios-contract'
 import { aggregatePortfolioDashboardPrefix, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
 
-export type PortfolioSettingsFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general' | 'link-held' | 'link-managed'
+export type PortfolioSettingsFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general' | 'link-held' | 'link-managed'
 export type PortfolioSettingsUnknown = Readonly<{ payload: Readonly<PortfolioSettingsWrite> }>
 const activeSettings = new WeakMap<object, Set<string>>()
 const locksFor = (client: object) => { let value = activeSettings.get(client); if (!value) { value = new Set(); activeSettings.set(client, value) }; return value }
@@ -23,6 +23,7 @@ export function classifyPortfolioSettingsFailure(error: unknown, payload?: Reado
   if (error.code === 'portfolio-link-held') return error.linkedBy ? 'link-held' : 'link-managed'
   if (payload?.accountLink !== undefined && error.code === 'http' && error.status === 403) return 'link-managed'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

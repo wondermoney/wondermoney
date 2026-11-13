@@ -36,11 +36,12 @@ export function useTags() {
 }
 
 /** How a tag write ended, for the screen's notice. */
-export type TagWriteResult = 'success' | 'taken' | 'demo' | 'mfa' | 'network' | 'error'
+export type TagWriteResult = 'success' | 'taken' | 'demo' | 'read-only' | 'mfa' | 'network' | 'error'
 
 export function classifyTagWriteFailure(error: unknown): Exclude<TagWriteResult, 'success'> {
   if (!(error instanceof ApiError)) return 'error'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'network') return 'network'
   if (error.code === 'http' && error.status === 409) return 'taken'

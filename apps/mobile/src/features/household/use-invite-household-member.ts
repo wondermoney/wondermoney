@@ -3,8 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
 
-import { inviteEmailSchema, inviteHouseholdMemberEndpoint } from './household-contract'
+import { grantableRoleSchema, type GrantableHouseholdRole, inviteEmailSchema, inviteHouseholdMemberEndpoint } from './household-contract'
 import { householdKey } from './query-keys'
+
+export type HouseholdInviteInput = Readonly<{ email: string; role: GrantableHouseholdRole }>
 
 export function useInviteHouseholdMember() {
   const { runtime, blockAccess } = useProductRuntime()
@@ -14,8 +16,8 @@ export function useInviteHouseholdMember() {
   return useMutation({
     retry: false,
     networkMode: 'always',
-    mutationFn: (email: string) => {
-      const body = { email: inviteEmailSchema.parse(email) }
+    mutationFn: ({ email, role }: HouseholdInviteInput) => {
+      const body = { email: inviteEmailSchema.parse(email), role: grantableRoleSchema.parse(role) }
       return runtime.apiClient.write(inviteHouseholdMemberEndpoint, {
         body,
         commit: () => {

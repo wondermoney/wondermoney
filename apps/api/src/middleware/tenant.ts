@@ -17,9 +17,11 @@ async function getTenantForRequest(req: Request) {
     throw new BadRequestError(ERROR.AUTH.INVALID_USER);
   }
 
+  // A personal API token arrives with its household already set (`requireAuth`); a session
+  // resolves the one active membership. Either way the membership carries the caller's role.
   const currentTenant = req.tenant;
   const appuserTenant = currentTenant
-    ? await DI.em.getRepository(AppuserTenant).findOne({ appuserKey: appuser, tenantKey: currentTenant })
+    ? await DI.em.getRepository(AppuserTenant).findOne({ appuserKey: appuser, recordActive: true, tenantKey: currentTenant })
     : await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser);
   if (!appuserTenant) {
     logger.error(`Tenant not found for appuserKey: ${appuser.appuserKey}`);
@@ -27,13 +29,17 @@ async function getTenantForRequest(req: Request) {
   }
 
   req.tenant = appuserTenant.tenantKey;
+  req.householdRole = appuserTenant.role;
   return { appuser, tenant: appuserTenant.tenantKey };
 }
 
-/** Resolve `req.tenant` for the authenticated user and arm the tenant filter on the request EM. */
+/**
+ * Resolve `req.tenant` and `req.householdRole` for the authenticated user and arm the tenant
+ * filter on the request EM.
+ */
 export async function resolveTenantForRequest(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
-    if (!req.tenant) {
+    if (!req.tenant || !req.householdRole) {
       await getTenantForRequest(req);
     }
     // Stamp the tenant context onto the request EM so the global

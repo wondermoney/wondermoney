@@ -73,7 +73,7 @@ export function RulePresetSheet({ code, name, onClose }: { code: string; name: s
         Alert.alert(t('rulePresets.installed', { count: created.length }))
       },
       onError: (error) => {
-        Alert.alert(error instanceof ApiError && error.code === 'demo-forbidden' ? t('rules.demoWriteBlocked') : t('rulePresets.installError'))
+        Alert.alert(error instanceof ApiError && error.code === 'demo-forbidden' ? t('rules.demoWriteBlocked') : error instanceof ApiError && error.code === 'household-read-only' ? t('common.householdReadOnly') : t('rulePresets.installError'))
       },
     })
   }

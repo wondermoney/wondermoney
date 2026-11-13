@@ -17,11 +17,12 @@ import {
 } from './manual-assets-contract'
 import { manualAssetKey, manualAssetsKey } from './query-keys'
 
-export type ManualAssetWriteFailure = 'demo' | 'access' | 'mfa' | 'not-found' | 'invalid' | 'invalid-response' | 'network-ambiguous' | 'general'
+export type ManualAssetWriteFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'invalid' | 'invalid-response' | 'network-ambiguous' | 'general'
 
 export function classifyManualAssetWriteFailure(error: unknown): ManualAssetWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'network') return 'network-ambiguous'

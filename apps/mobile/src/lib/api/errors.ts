@@ -1,5 +1,6 @@
 export type ApiErrorCode =
   | 'demo-forbidden'
+  | 'household-read-only'
   | 'email-verification-required'
   | 'ai-allowance-exhausted'
   | 'portfolio-link-held'
@@ -26,9 +27,10 @@ export type ApiErrorOptions = Readonly<{
 
 const diagnosticMessages: Record<ApiErrorCode, string> = {
   'demo-forbidden': 'This action is unavailable in demo mode.',
+  'household-read-only': 'This household member has view-only access.',
   'email-verification-required': 'This action requires a verified email address.',
   'ai-allowance-exhausted': "Today's allowance for this AI feature is used up.",
-  'portfolio-link-held': 'The portfolio is linked to an account only the other household member can see.',
+  'portfolio-link-held': 'The portfolio is linked to an account only another household member can see.',
   'auth-session': 'The authenticated session could not be used.',
   'mfa-required': 'Multi-factor authentication is required.',
   cancelled: 'The operation was cancelled.',

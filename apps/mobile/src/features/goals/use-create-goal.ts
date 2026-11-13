@@ -7,7 +7,7 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 import { createGoalEndpoint, goalCreateWriteSchema, type GoalCreateWrite } from './goals-contract'
 import { goalCreateUnknownKey, goalsKey } from './query-keys'
 
-export type GoalCreateFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'request' | 'cancelled' | 'unknown' | 'general'
+export type GoalCreateFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'request' | 'cancelled' | 'unknown' | 'general'
 export type GoalCreateUnknownGate = Readonly<{ payload: Readonly<GoalCreateWrite> }>
 
 class GoalCreateBlockedError extends Error {
@@ -20,6 +20,7 @@ class GoalCreateBlockedError extends Error {
 export function classifyGoalCreateFailure(error: unknown): GoalCreateFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

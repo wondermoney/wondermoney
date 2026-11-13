@@ -34,7 +34,7 @@ Seleciona transações para lhes dar uma categoria, marcá-las como revistas, oc
 - **Na web**, marca as linhas na lista de transações; a caixa no cabeçalho seleciona todas as linhas da página. Aparece uma barra com as ações por baixo da lista.
 - **Na aplicação móvel**, abre o menu de uma linha e escolhe **Selecionar**; depois marca mais linhas ou escolhe **Selecionar as transações carregadas**.
 
-Quando todas as linhas da página (na aplicação móvel, todas as linhas carregadas) estão selecionadas e o período e os filtros abrangem mais, escolhe **Selecionar as transações correspondentes**. A ação passa a abranger todas as transações da lista, incluindo as que ainda não foram carregadas, e nada fora dela: nunca transações de outro agregado, nem das contas privadas do outro membro. Na aplicação móvel não é oferecida enquanto estiver ativo um filtro que só restringe os resultados carregados (comerciante, conta, categoria ou tipo).
+Quando todas as linhas da página (na aplicação móvel, todas as linhas carregadas) estão selecionadas e o período e os filtros abrangem mais, escolhe **Selecionar as transações correspondentes**. A ação passa a abranger todas as transações da lista, incluindo as que ainda não foram carregadas, e nada fora dela: nunca transações de outro agregado, nem das contas privadas dos outros membros. Na aplicação móvel não é oferecida enquanto estiver ativo um filtro que só restringe os resultados carregados (comerciante, conta, categoria ou tipo).
 
 Uma ação abrange no máximo 5000 transações. Se os filtros abrangerem mais, restringe-os primeiro.
 
@@ -58,7 +58,7 @@ Para dar um logótipo a um comerciante na web, abre uma das transações dele e,
 - **Website**: o site do próprio comerciante, como `https://example.com`. Se a tua instância tiver os logótipos de comerciantes ligados, o WonderMoney obtém ele próprio o logótipo desse site e mostra-to; o serviço de logótipos nunca fica a saber quem és. Numa instância sem eles, o website fica apenas guardado.
 - **URL do logótipo**: o endereço de uma imagem a usar em vez disso. Tem de começar por `https://`. Todas as pessoas do teu agregado que vejam o comerciante carregam essa imagem a partir do endereço dela, por isso usa apenas uma de um site em que confies.
 
-Deixa um campo vazio para o retirar. Os detalhes do comerciante são partilhados com o teu agregado, e ambos os podem alterar. A aplicação móvel mostra os mesmos logótipos e iniciais nas listas. Quando uma imagem não carrega, aparece a primeira letra.
+Deixa um campo vazio para o retirar. Os detalhes do comerciante são partilhados com o teu agregado, e todas as pessoas do agregado, exceto os observadores, os podem alterar. A aplicação móvel mostra os mesmos logótipos e iniciais nas listas. Quando uma imagem não carrega, aparece a primeira letra.
 
 ## Antes de começar
 
@@ -81,7 +81,7 @@ Os períodos da página de contas também seguem o teu calendário: **1 mês** c
 
 Cada total que o WonderMoney mostra para um período soma transações que podes listar, e cada um diz quais:
 
-- **Entradas** e **Saídas**, por cima da lista de transações, somam todas as transações que a lista tem para o intervalo de datas, em todas as contas e sejam quais forem os filtros da tabela, na tua moeda: as transações do outro membro são convertidas à taxa de câmbio da sua data.
+- **Entradas** e **Saídas**, por cima da lista de transações, somam todas as transações que a lista tem para o intervalo de datas, em todas as contas e sejam quais forem os filtros da tabela, na tua moeda: as transações dos outros membros são convertidas à taxa de câmbio da sua data.
 - **Os relatórios** contam só as transações confirmadas, a menos que ligues **Incluir transações pendentes**, e deixam de fora as transferências entre as tuas contas, a menos que ligues **Incluir transferências**.
 - **O fluxo de caixa e os gastos por categoria da página inicial** contam também as transações pendentes, e nunca as transferências entre as tuas contas.
 
@@ -103,7 +103,7 @@ Por exemplo, um reembolso de 20 associado a uma compra de 50 em Supermercado dei
 - Quando a despesa está dividida, o montante associado sai de cada linha na proporção.
 - A despesa mostra **Reembolsada** e o reembolso **Reembolso**. Seleciona o distintivo para abrires a outra transação. Abre qualquer uma para veres as associações, e escolhe **Desassociar** para remover uma; os totais voltam ao que eram.
 - Eliminar qualquer uma das transações remove as suas associações.
-- Por agora, as duas transações têm de estar na mesma moeda. Uma transação numa conta privada só pode ser associada a outra das tuas contas privadas, para que o outro membro nunca veja metade de uma associação.
+- Por agora, as duas transações têm de estar na mesma moeda. Uma transação numa conta privada só pode ser associada a outra das tuas contas privadas, para que mais ninguém do agregado veja metade de uma associação.
 
 ## Escrever montantes
 

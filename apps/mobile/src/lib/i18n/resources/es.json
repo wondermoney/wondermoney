@@ -47,7 +47,8 @@
       "years_other": "hace {{count}} años"
     },
     "close": "Cerrar",
-    "moreActions": "Más acciones"
+    "moreActions": "Más acciones",
+    "householdReadOnly": "Tienes acceso de solo lectura a este hogar, así que no se cambió nada. Pide a un titular o administrador si necesitas hacer cambios."
   },
   "navigation": {
     "home": "Inicio",
@@ -536,6 +537,7 @@
     "errors": {
       "validation": "El servidor no aceptó estos valores. Edita los datos y revísalos de nuevo.",
       "demo": "Los perfiles de demostración son de solo lectura. No se ha creado ninguna cuenta.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ahora mismo no tienes acceso para crear una cuenta.",
       "mfa": "Se necesita una verificación adicional antes de crear una cuenta.",
       "cancelled": "La creación de la cuenta se canceló antes del envío. No se ha creado ninguna cuenta.",
@@ -599,6 +601,7 @@
     "failures": {
       "too-soon": "Esta cuenta se recalculó hace menos de un minuto. Vuelve a intentarlo en breve.",
       "demo": "Recalcular no está disponible en la demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Vuelve a iniciar sesión para recalcular esta cuenta.",
       "not-found": "Esta cuenta ya no está disponible.",
       "network": "No se pudo contactar con el servidor. Revisa tu conexión y vuelve a intentarlo.",
@@ -619,13 +622,14 @@
     "saveDetails": "Guardar detalles",
     "saving": "Guardando…",
     "privacyTitle": "Cuenta privada",
-    "privacyHelper": "Solo tú puedes ver esta cuenta y sus transacciones; tu pareja del hogar no la verá en ningún sitio.",
+    "privacyHelper": "Solo tú puedes ver esta cuenta y sus transacciones; las demás personas de tu hogar no la verán en ningún sitio.",
     "privacySwitch": "Cuenta privada",
     "discardTitle": "¿Descartar los cambios sin guardar?",
     "discardMessage": "Se perderán los cambios de cuenta no guardados.",
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cuenta.",
       "cancelled": "El guardado se canceló porque tu contexto de sesión cambió. Revisa el formulario actual antes de volver a intentarlo.",
       "not-found": "Esta cuenta ya no existe. Tu formulario no se ha borrado.",
@@ -642,6 +646,7 @@
     "deleteConfirmAction": "Eliminar cuenta",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta cuenta no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para eliminar esta cuenta.",
       "cancelled": "La eliminación se canceló porque tu contexto de sesión cambió.",
       "not-found": "Esta cuenta ya no existe.",
@@ -801,6 +806,7 @@
     },
     "reviewResult": {
       "demo": "Los perfiles de demostración son de solo lectura. Las transacciones seleccionadas no se han modificado",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Se requiere autenticación multifactor. Las transacciones seleccionadas no se han modificado",
       "cancelled": "El cambio se canceló porque tu sesión cambió. Las transacciones seleccionadas no se han modificado",
       "network": "El resultado de la solicitud de red es incierto. Revisa las transacciones seleccionadas antes de volver a intentarlo",
@@ -916,6 +922,7 @@
         "exists": "Estas dos ya están vinculadas. Desvincúlalas primero para cambiar el importe.",
         "not-found": "Esa transacción o vínculo ya no está disponible. Actualiza e inténtalo de nuevo.",
         "demo": "Los perfiles de demostración son de solo lectura. No se ha cambiado nada.",
+        "read-only": "$t(common.householdReadOnly)",
         "mfa": "Se requiere autenticación multifactor. No se ha cambiado nada.",
         "cancelled": "El cambio se canceló porque tu sesión cambió. No se ha cambiado nada.",
         "network": "La solicitud tuvo un resultado de red incierto. Revisa la transacción antes de volver a intentarlo.",
@@ -1018,6 +1025,7 @@
     "result": {
       "taken": "Ya existe una etiqueta con este nombre.",
       "demo": "Los perfiles de demostración son de solo lectura. La etiqueta no se creó.",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Se requiere autenticación multifactor. La etiqueta no se creó.",
       "network": "La solicitud tuvo un resultado de red incierto. Revisa las etiquetas antes de volver a intentarlo.",
       "error": "No se pudo crear la etiqueta. Inténtalo de nuevo."
@@ -1083,6 +1091,7 @@
     "submitting": "Registrando…",
     "result": {
       "demo": "Los perfiles de demostración son de solo lectura. No se registró nada.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso para registrar esta transacción. No se registró nada.",
       "mfa": "Se requiere verificación adicional. No se registró nada.",
       "validation": "Estos datos fueron rechazados. Edítalos antes de volver a enviarlos.",
@@ -1167,6 +1176,7 @@
     "tryAgain": "Intentar de nuevo",
     "failures": {
       "demo": "Importar transacciones no está disponible en modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso cambió. Inténtalo de nuevo.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "La importación se canceló antes de enviarse.",
@@ -1274,6 +1284,7 @@
     },
     "failures": {
       "demo": "Escanear recibos no está disponible en modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "allowance": "Tu hogar ya ha usado el límite diario de escaneo de recibos. Se restablece a medianoche UTC.",
       "unverified": "Verifica tu correo electrónico para escanear recibos.",
       "access": "Tu acceso cambió. Inténtalo de nuevo.",
@@ -1326,6 +1337,7 @@
     },
     "actionResult": {
       "demo": "Los perfiles de demostración son de solo lectura. No se cambió nada",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Se necesita una verificación adicional. No se cambió nada",
       "cancelled": "El cambio se canceló porque tu sesión cambió",
       "network": "El resultado es incierto porque se perdió la conexión. Comprueba la lista antes de volver a intentarlo",
@@ -1717,6 +1729,7 @@
     "failures": {
       "validation": "Los datos de la categoría no son válidos.",
       "demo": "Los perfiles de demostración son de solo lectura. No se cambió ninguna categoría.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso para cambiar categorías.",
       "mfa": "Se necesita verificación adicional para cambiar categorías.",
       "not-found": "Esta categoría o la categoría principal ya no está disponible. Actualiza Categorías.",
@@ -1906,6 +1919,7 @@
     "refreshBoth": "Actualizar historial y candidatos",
     "result": {
       "demo": "Los perfiles de demostración son de solo lectura. No cambió ninguna clasificación.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso para cambiar esta clasificación.",
       "mfa": "Se requiere verificación adicional antes de cambiar clasificaciones.",
       "cancelled": "La solicitud se canceló antes del envío. Nada cambió y puedes confirmar de nuevo.",
@@ -1950,6 +1964,7 @@
     "saving": "Guardando…",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. Este préstamo no se creó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para añadir un préstamo.",
       "mfa": "Se necesita una verificación adicional antes de añadir un préstamo.",
       "invalid": "El servidor rechazó estos valores. Revisa los importes y las fechas introducidas.",
@@ -2006,6 +2021,7 @@
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este préstamo.",
       "mfa": "Se necesita una verificación adicional antes de cambiar este préstamo.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa el formulario antes de volver a intentarlo.",
@@ -2060,6 +2076,7 @@
     },
     "failures": {
       "demo": "La demo es de solo lectura, así que no se guardó nada.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no puedes cambiar este bien. Vuelve a iniciar sesión o consúltalo con tu hogar.",
       "mfa": "Confirma que eres tú para continuar.",
       "not-found": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
@@ -2147,7 +2164,7 @@
     "growthRateOptional": "Variación anual en porcentaje, opcional",
     "growthRateHint": "El valor cambia este porcentaje cada año después de la última valoración. Usa un número negativo para algo que pierde valor, como un coche.",
     "private": "Bien privado",
-    "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto del otro miembro del hogar.",
+    "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto de las demás personas de tu hogar.",
     "notes": "Notas",
     "notesOptional": "Notas, opcional",
     "optional": "Opcional",
@@ -2230,6 +2247,7 @@
       "address-exists": "Esta dirección ya está en el monedero.",
       "feature-disabled": "Los monederos de criptomonedas no están activados para esta red en este servidor.",
       "demo": "La demo es de solo lectura, así que no se ha guardado nada.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no puedes cambiar este monedero. Vuelve a iniciar sesión o consulta con tu hogar.",
       "mfa": "Confirma que eres tú para continuar.",
       "not-found": "Este monedero ya no existe o es privado del otro miembro de tu hogar.",
@@ -2373,6 +2391,7 @@
       "forward": "Eliminar desde este mes en adelante",
       "failures": {
         "demo": "El modo de demostración es de solo lectura. Esta categoría no se eliminó.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Ya no tienes acceso para cambiar este presupuesto.",
         "cancelled": "La eliminación se canceló porque cambió el contexto de sesión.",
         "not-found": "Esta categoría ya no forma parte del presupuesto.",
@@ -2449,6 +2468,7 @@
     "confirmAction": "Aplicar hasta diciembre",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio de categoría.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta categoría del presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa los valores conservados antes de volver a intentarlo.",
       "not-found": "Esta categoría o mes del presupuesto ya no está disponible. Es posible que no existan filas de meses futuros. Se conservaron los valores.",
@@ -2514,6 +2534,7 @@
     "failures": {
       "unknown": "El resultado es desconocido. La aplicación comprueba ambas listas y no volverá a enviar",
       "demo": "Los perfiles de demostración son de solo lectura",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para crear un presupuesto",
       "invalid": "Revisa el hogar y los ingresos",
       "general": "No se pudo crear el presupuesto. Los datos se conservaron"
@@ -2565,6 +2586,7 @@
       "unknown": "El resultado es incierto. Se está actualizando el mes actual",
       "duplicate": "El servidor indicó un duplicado. Se actualizó el mes porque la categoría puede existir",
       "demo": "Los perfiles de demostración son de solo lectura",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso",
       "not-found": "El presupuesto o la categoría ya no está disponible",
       "invalid": "Elige categoría final, importe positivo y periodicidad",
@@ -2590,6 +2612,7 @@
     "saving": "Guardando…",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión.",
       "not-found": "Este presupuesto ya no existe.",
@@ -2645,6 +2668,7 @@
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa el formulario antes de volver a intentarlo.",
       "not-found": "Este presupuesto ya no existe. El formulario no se ha borrado.",
@@ -2661,6 +2685,7 @@
     "deleteConfirmAction": "Eliminar presupuesto",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Este presupuesto no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para eliminar este presupuesto.",
       "cancelled": "La eliminación se canceló porque cambió el contexto de sesión.",
       "not-found": "Este presupuesto ya no existe.",
@@ -2816,6 +2841,7 @@
       "validation": "El servidor no aceptó estos detalles. Revisa los campos antes de volver a confirmar",
       "request": "El servidor rechazó esta solicitud. Revisa los detalles fijados o vuelve a Objetivos",
       "demo": "El modo de demostración es de solo lectura. No se creó ningún objetivo",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso cambió antes de que se pudiera crear este objetivo",
       "mfa": "Completa la autenticación multifactor antes de crear un objetivo",
       "cancelled": "La creación se canceló antes de enviar la solicitud. No se creó ningún objetivo",
@@ -2901,6 +2927,7 @@
         "validation": "Introduce un importe positivo con un máximo de cuatro decimales",
         "insufficient-reserve": "El importe no puede superar la reserva disponible. Actualiza antes de probar otro importe",
         "demo": "El modo de demostración es de solo lectura. La reserva no cambió",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Tu acceso cambió antes de poder guardar el cambio de reserva",
         "mfa": "Completa la autenticación multifactor antes de cambiar esta reserva",
         "not-found": "Este objetivo ya no está disponible",
@@ -2913,6 +2940,7 @@
     "writeFailures": {
       "validation": "Comprueba los detalles. Los importes deben ser positivos y tener como máximo cuatro decimales",
       "demo": "El modo de demostración es de solo lectura. No se realizó ningún cambio",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso cambió antes de poder guardar",
       "mfa": "Completa la autenticación multifactor antes de hacer este cambio",
       "not-found": "Este objetivo o cuenta ya no está disponible. Actualiza antes de intentarlo de nuevo",
@@ -3140,6 +3168,7 @@
     "failures": {
       "validation": "Comprueba el nombre y la moneda",
       "demo": "La creación no está disponible en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado",
       "mfa": "Se requiere verificación adicional",
       "cancelled": "La creación se canceló antes del envío",
@@ -3221,6 +3250,7 @@
     "failures": {
       "validation": "Comprueba los campos",
       "demo": "Los ajustes no están disponibles en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado",
       "mfa": "Se requiere verificación adicional",
       "not-found": "Esta cartera ya no está disponible",
@@ -3239,7 +3269,7 @@
     "includesHoldingsHint": "El patrimonio neto cuenta la cuenta y muestra esta cartera sin sumarla otra vez.",
     "cashOnly": "No, solo el efectivo",
     "cashOnlyHint": "El patrimonio neto cuenta el efectivo de la cuenta y también esta cartera.",
-    "managedByPartner": "Esta cartera está vinculada a una cuenta que solo ve el otro miembro del hogar, así que solo esa persona puede cambiar el vínculo.",
+    "managedByPartner": "Esta cartera está vinculada a una cuenta que solo ve otro miembro del hogar, así que solo esa persona puede cambiar el vínculo.",
     "alreadyLinkedBy": "Ya vinculada por {{name}}",
     "suggestionTitle": "¿Es el mismo dinero?",
     "suggestionBody": "Tienes una cuenta de inversión y una cartera sin cuenta vinculada. Si la cuenta ya contiene la cartera, vincúlalas para que el patrimonio neto la cuente una sola vez.",
@@ -3253,6 +3283,7 @@
     "saved": "Vínculo guardado",
     "failures": {
       "demo": "Los vínculos no están disponibles en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado",
       "mfa": "Se requiere verificación adicional",
       "not-found": "Esta cartera o cuenta ya no está disponible",
@@ -3273,6 +3304,7 @@
     "deleteConfirmMessage": "Esta acción elimina permanentemente {{name}} de esta cartera. No se puede deshacer.",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta transacción no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere autenticación multifactor para hacer este cambio.",
       "not-found": "Esta transacción ya no existe.",
@@ -3290,6 +3322,7 @@
     "savingEdit": "Guardando…",
     "editFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta transacción no se cambió.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere autenticación multifactor para hacer este cambio.",
       "not-found": "Esta transacción ya no existe.",
@@ -3428,74 +3461,142 @@
   },
   "household": {
     "title": "Hogar",
-    "helper": "Comparte tu plan de WonderMoney con una pareja",
+    "helper": "Comparte tu plan de WonderMoney con las personas de tu hogar",
     "loading": "Cargando tu hogar…",
     "back": "Volver",
     "stale": "Mostrando el último hogar conocido. Desliza para actualizar y ver lo más reciente.",
     "members": {
       "heading": "Miembros",
       "you": "Tú",
-      "roleOwner": "Propietario",
-      "roleMember": "Miembro"
+      "roleOwner": "Titular",
+      "roleMember": "Miembro",
+      "roleAdmin": "Administrador",
+      "roleViewer": "Observador"
     },
     "actions": {
-      "remove": "Eliminar",
-      "leave": "Salir del hogar"
+      "remove": "Quitar del hogar",
+      "leave": "Salir del hogar",
+      "changeRole": "Cambiar rol",
+      "transferOwnership": "Hacer titular",
+      "menuFor": "Acciones para {{name}}"
     },
     "leaving": "Saliendo…",
     "removeDialog": {
-      "title": "¿Eliminar a {{name}}?",
-      "description": "Perderá el acceso a las finanzas compartidas de este hogar. Sus datos existentes se conservan, pero sus conexiones bancarias se desconectarán.",
-      "confirm": "Eliminar"
+      "title": "¿Quitar a {{name}}?",
+      "description": "Pierde el acceso a este hogar de inmediato y se cierra su sesión. Las cuentas y transacciones que añadió se quedan en el hogar, y sus conexiones bancarias se desconectan.",
+      "confirm": "Quitar"
     },
     "leaveDialog": {
       "title": "¿Salir de este hogar?",
-      "description": "Perderás el acceso a las finanzas compartidas de este hogar. Tus datos existentes se conservan, pero tus conexiones bancarias se desconectarán.",
+      "description": "Pierdes el acceso a sus cuentas, presupuestos y objetivos compartidos, y tus conexiones bancarias se desconectan. Se cerrará tu sesión; vuelve a iniciarla para empezar con un hogar propio.",
       "confirm": "Salir"
     },
-    "removeFailures": {
-      "demo": "Esta acción no está disponible en modo demo.",
-      "access": "Ya no tienes acceso para gestionar este hogar.",
-      "cancelled": "Se canceló porque tu contexto de sesión cambió.",
-      "conflict": "No se pudo eliminar a este miembro en este momento.",
-      "invalid": "No se pudo eliminar a este miembro.",
-      "not-found": "Este miembro ya no forma parte del hogar.",
-      "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
-      "general": "No se pudo completar la acción. Inténtalo de nuevo."
-    },
     "pending": {
-      "heading": "Invitación pendiente",
+      "heading": "Invitaciones pendientes",
       "sentTo": "Invitación enviada a {{email}}",
       "expires": "Caduca {{date}}",
       "resend": "Reenviar",
       "resending": "Reenviando…",
       "revoke": "Revocar",
-      "revoking": "Revocando…"
+      "revoking": "Revocando…",
+      "resendFor": "Reenviar la invitación a {{email}}",
+      "revokeFor": "Revocar la invitación a {{email}}"
     },
     "invite": {
-      "heading": "Invitar a una pareja",
-      "description": "Invita a una pareja a compartir el plan de este hogar. Recibirá un correo con un enlace para unirse.",
+      "heading": "Invitar a alguien",
+      "description": "Recibirá un correo con un enlace para unirse. Quien ya tiene cuenta se une desde la app.",
       "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "pareja@ejemplo.com",
+      "emailPlaceholder": "nombre@ejemplo.com",
       "invalidEmail": "Introduce una dirección de correo válida",
       "submit": "Enviar invitación",
-      "sending": "Enviando…"
+      "sending": "Enviando…",
+      "roleLabel": "Rol",
+      "full": "Tu hogar está completo: tiene sitio para {{max}} personas, contando las invitaciones pendientes."
     },
     "inviteFailures": {
       "demo": "Las invitaciones no están disponibles en modo demo.",
-      "access": "Ya no tienes acceso para invitar a una pareja.",
+      "access": "Ya no tienes acceso para invitar a personas.",
       "cancelled": "Se canceló porque tu contexto de sesión cambió.",
-      "conflict": "Tu hogar está completo o ese correo ya tiene una cuenta.",
+      "conflict": "No se pudo enviar esta invitación en este momento. Actualiza e inténtalo de nuevo.",
       "invalid": "Introduce un correo válido que no sea el tuyo.",
       "not-found": "No se pudo encontrar este hogar.",
       "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
-      "general": "No se pudo enviar la invitación. Inténtalo de nuevo."
+      "general": "No se pudo enviar la invitación. Inténtalo de nuevo.",
+      "read-only": "Tienes acceso de solo lectura a este hogar, así que no se envió ninguna invitación.",
+      "role-required": "Tu rol no permite invitar a personas con ese rol.",
+      "full": "Tu hogar está completo. Revoca una invitación o quita a alguien primero.",
+      "already-member": "Esa persona ya está en este hogar."
     },
     "states": {
       "errorTitle": "No se pudo cargar tu hogar",
       "errorMessage": "Comprueba tu conexión e inténtalo de nuevo.",
       "invalid-responseTitle": "No se pudieron verificar los datos del hogar",
       "invalid-responseMessage": "Esta pantalla no usará datos del hogar sin verificar."
+    },
+    "roles": {
+      "adminDescription": "Puede invitar a personas y gestionar miembros y observadores.",
+      "memberDescription": "Puede ver y cambiar las cuentas, presupuestos y objetivos compartidos.",
+      "viewerDescription": "Puede ver las finanzas compartidas, pero no cambiarlas."
+    },
+    "roleDialog": {
+      "title": "Rol de {{name}}"
+    },
+    "transferDialog": {
+      "title": "¿Hacer titular a {{name}}?",
+      "description": "{{name}} pasa a ser titular de este hogar y puede gestionar a todas sus personas. Tú pasas a administrador. Solo el nuevo titular puede deshacerlo.",
+      "confirm": "Hacer titular",
+      "transferring": "Transfiriendo…"
+    },
+    "memberFailures": {
+      "demo": "Esta acción no está disponible en modo demo.",
+      "read-only": "Tienes acceso de solo lectura a este hogar, así que no se cambió nada.",
+      "role-required": "Tu rol no permite este cambio. Actualiza para ver los roles actuales.",
+      "access": "Ya no tienes acceso para gestionar este hogar.",
+      "cancelled": "Se canceló porque tu contexto de sesión cambió.",
+      "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
+      "full": "Tu hogar está completo.",
+      "already-member": "Esa persona ya está en este hogar.",
+      "conflict": "No se pudo hacer este cambio en este momento. Actualiza e inténtalo de nuevo.",
+      "invalid": "No se pudo hacer este cambio.",
+      "not-found": "Este miembro ya no forma parte del hogar.",
+      "general": "No se pudo completar la acción. Inténtalo de nuevo."
+    },
+    "joinExisting": {
+      "validating": "Comprobando tu invitación…",
+      "invalidTitle": "Esta invitación no es válida",
+      "invalidBody": "Puede que ya se haya usado, revocado o caducado. Pide una nueva invitación.",
+      "unavailableTitle": "No se pudo comprobar esta invitación",
+      "unavailableBody": "Comprueba tu conexión e inténtalo de nuevo.",
+      "titleHousehold": "¿Unirte a {{name}}?",
+      "titleInviter": "¿Unirte al hogar de {{name}}?",
+      "titleGeneric": "¿Unirte a este hogar?",
+      "role": "Te unirás como: {{role}}",
+      "invitedEmail": "Invitación para {{email}}",
+      "consequencesHeading": "Qué pasa con lo que tienes ahora",
+      "consequences": {
+        "emptyOnly": "Solo puedes unirte si tu hogar actual no tiene cuentas ni transacciones.",
+        "leftBehind": "Los presupuestos, categorías, reglas y objetivos que creaste allí se quedan atrás. No se mueven.",
+        "banksDisconnected": "Las conexiones bancarias de ese hogar se desconectan.",
+        "yoursStays": "Tu inicio de sesión, perfil y ajustes siguen siendo tuyos."
+      },
+      "failureTitle": "No pudiste unirte a este hogar",
+      "failures": {
+        "household-has-data": "Tu hogar actual tiene cuentas o transacciones. Elimínalas primero o acepta con otra cuenta.",
+        "household-has-members": "Eres titular de un hogar con otros miembros. Transfiere la titularidad o quítalos primero.",
+        "already-member": "Ya estás en este hogar.",
+        "household-full": "Este hogar está completo. Pide a quien te invitó que haga sitio.",
+        "email-mismatch": "Esta invitación es para otra dirección de correo. Inicia sesión con el correo invitado para unirte.",
+        "expired": "Esta invitación ha caducado. Pide una nueva.",
+        "invalid": "Esta invitación ya no es válida. Pide una nueva.",
+        "already-used": "Esta invitación ya se ha usado.",
+        "demo": "La demo no puede unirse a un hogar.",
+        "cancelled": "Se canceló porque tu contexto de sesión cambió.",
+        "network-ambiguous": "Se perdió la conexión y el resultado es desconocido. Abre tu hogar para comprobarlo antes de volver a intentarlo.",
+        "general": "Algo salió mal. Inténtalo de nuevo."
+      },
+      "join": "Unirme al hogar",
+      "joining": "Uniéndome…",
+      "notNow": "Ahora no"
     }
   },
   "security": {
@@ -3537,7 +3638,7 @@
     },
     "dataExport": {
       "heading": "Exporta tus datos",
-      "helper": "Descarga todo lo que ves en tu hogar (cuentas, transacciones, presupuestos, objetivos, préstamos e inversiones) en un zip con archivos JSON y CSV. Las cuentas privadas de tu pareja no se incluyen.",
+      "helper": "Descarga todo lo que ves en tu hogar (cuentas, transacciones, presupuestos, objetivos, préstamos e inversiones) en un zip con archivos JSON y CSV. Las cuentas privadas de los demás miembros no se incluyen.",
       "start": "Exportar todos los datos",
       "protect": "Proteger el archivo con una contraseña",
       "password": "Contraseña",
@@ -3865,6 +3966,7 @@
         "confirmAction": "Desconectar",
         "failures": {
           "demo": "Esta acción no está disponible en el modo de demostración.",
+          "read-only": "$t(common.householdReadOnly)",
           "access": "No tienes acceso para desconectar este banco.",
           "cancelled": "Se canceló la solicitud de desconexión.",
           "not-found": "Esa conexión ya no está disponible.",
@@ -3945,6 +4047,7 @@
         "server-not-allowed": "Este token de configuración apunta a un servidor de SimpleFIN que este servidor de WonderMoney no permite. Crea uno en SimpleFIN Bridge.",
         "rejected": "SimpleFIN no aceptó este token de configuración. Crea uno nuevo en SimpleFIN Bridge e inténtalo de nuevo.",
         "demo": "Esta acción no está disponible en el modo demo.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "No tienes acceso para conectar un banco.",
         "mfa": "Se requiere verificación adicional antes de poder conectar un banco.",
         "disabled": "SimpleFIN no está activado en este servidor.",
@@ -3978,6 +4081,7 @@
       },
       "failures": {
         "demo": "Esta acción no está disponible en el modo de demostración.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "No tienes acceso para importar un extracto.",
         "mfa": "Se requiere verificación adicional antes de poder importar un extracto.",
         "cancelled": "Se canceló la importación.",
@@ -4198,6 +4302,7 @@
     "tryAgain": "Inténtalo de nuevo",
     "failures": {
       "demo": "Importar transacciones no está disponible en modo demostración.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado. Inténtalo de nuevo.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "La importación se canceló antes de enviarse.",
@@ -4267,6 +4372,7 @@
     "metadataError": "No se pudieron cargar los detalles necesarios para añadir una transacción",
     "failures": {
       "demo": "Añadir transacciones no está disponible en modo demostración.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "El guardado se canceló porque tu contexto de sesión cambió.",
@@ -4607,7 +4713,7 @@
       "description": "Gestiona tus categorías"
     },
     "household": {
-      "description": "Comparte cuentas, presupuestos y objetivos con tu pareja."
+      "description": "Comparte cuentas, presupuestos y objetivos con las personas de tu hogar."
     },
     "connections": {
       "heading": "Conexiones bancarias",
@@ -4880,6 +4986,7 @@
     },
     "failures": {
       "demo": "Esto no está disponible en el modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso a los planes de esta tarjeta.",
       "invalid": "Se rechazó el plan. Revisa los datos e inténtalo de nuevo.",
       "conflict": "Una de estas transacciones ya está vinculada a otra cuota.",
@@ -5095,6 +5202,7 @@
       "done_other": "Hecho: {{count}} transacciones cambiadas",
       "inProgress": "Las reglas ya se están aplicando. Espera a que terminen e inténtalo de nuevo.",
       "demo": "Los perfiles de demostración son de solo lectura. Las transacciones existentes no se pueden cambiar.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu sesión necesita atención antes de aplicar reglas.",
       "error": "No se pudo aplicar la regla ahora mismo."
     },
@@ -5148,6 +5256,7 @@
     "failure": {
       "gone": "Ese cambio ya no se puede aplicar: caducó, ya se decidió, o una transacción o categoría ya no existe. La lista está actualizada.",
       "demo": "Los cambios están desactivados en la demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "general": "No se pudo guardar. Inténtalo de nuevo."
     }
   },

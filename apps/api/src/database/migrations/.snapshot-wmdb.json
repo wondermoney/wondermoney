@@ -2595,8 +2595,10 @@
           "comment": null,
           "collation": null,
           "enumItems": [
+            "admin",
             "member",
-            "owner"
+            "owner",
+            "viewer"
           ],
           "mappedType": "enum"
         },
@@ -2650,8 +2652,8 @@
       "checks": [
         {
           "name": "appuser_tenant_role_check",
-          "expression": "\"role\" in ('member', 'owner')",
-          "definition": "check (\"role\" in ('member', 'owner'))",
+          "expression": "\"role\" in ('admin', 'member', 'owner', 'viewer')",
+          "definition": "check (\"role\" in ('admin', 'member', 'owner', 'viewer'))",
           "columnName": "role"
         }
       ],
@@ -15463,6 +15465,28 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'member'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "admin",
+            "member",
+            "owner",
+            "viewer"
+          ],
+          "mappedType": "enum"
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -15571,6 +15595,12 @@
         }
       ],
       "checks": [
+        {
+          "name": "household_invite_role_check",
+          "expression": "\"role\" in ('admin', 'member', 'owner', 'viewer')",
+          "definition": "check (\"role\" in ('admin', 'member', 'owner', 'viewer'))",
+          "columnName": "role"
+        },
         {
           "name": "household_invite_status_check",
           "expression": "\"status\" in ('accepted', 'expired', 'pending', 'revoked')",

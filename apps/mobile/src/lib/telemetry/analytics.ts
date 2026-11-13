@@ -124,6 +124,7 @@ export const featureScreens = [
   'settings_category_create',
   'settings_category_edit',
   'settings_household',
+  'settings_household_join',
   'settings_notifications',
   'settings_preferences',
   'settings_profile',

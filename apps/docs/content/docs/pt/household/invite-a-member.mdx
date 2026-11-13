@@ -1,45 +1,52 @@
 ---
 title: Convidar um membro
-description: Gera uma ligação de convite e partilha-a para que uma nova pessoa possa aderir ao agregado familiar.
+description: Convida alguém para o agregado familiar por email, escolhe a sua função e gere os convites pendentes.
 ---
 
-O titular convida novos membros com uma ligação de convite gerada nas definições. A ligação é validada no servidor, e o convite é utilizado quando a pessoa convidada completa um novo registo.
+O titular e os administradores convidam pessoas a partir das definições do agregado familiar. O convite vai para o endereço de email da pessoa, com uma ligação para aderir, e fica pendente até ela o aceitar.
 
-Apenas o titular pode gerar ligações de convite. Os membros não veem a opção de convite nas definições.
+Os membros e os observadores não veem o formulário de convite.
 
 <DocsImage
   src="/images/docs/pt/household/invite-a-member-invite-form.png"
-  alt="Definições do agregado com o formulário de convite aberto, a mostrar o campo usado para gerar uma ligação de convite."
-  caption="O titular gera uma ligação de convite partilhável nas definições do agregado."
+  alt="Definições do agregado com o formulário de convite, onde introduzes o endereço de email da pessoa a convidar."
+  caption="O titular e os administradores convidam pessoas a partir das definições do agregado."
   width={683}
   height={176}
 />
 
-## Gerar uma ligação de convite
+## Enviar um convite
 
-Abre as definições do agregado familiar e gera uma ligação de convite. A ligação contém o agregado familiar e o convite, e é verificada no servidor quando é utilizada.
+1. Abre as definições do agregado familiar.
+2. Introduz o endereço de email da pessoa que queres convidar.
+3. Escolhe a sua função: administrador, membro ou observador. O titular pode convidar com qualquer uma das três; um administrador só pode convidar como membro ou observador. A função começa como membro.
+4. Envia o convite.
 
-Partilha a ligação apenas com as pessoas que pretendes que adiram ao agregado familiar. Qualquer pessoa com a ligação pode utilizá-la, por isso trata-a como um segredo partilhado.
+A pessoa pode ser nova no WonderMoney ou já ter conta neste servidor. Em ambos os casos, adere com o endereço de email que convidaste. Consulta [Aderir a um agregado familiar](/pt/docs/household/join-a-household).
 
-## Como funciona o convite
+Não te podes convidar a ti próprio nem a alguém que já faz parte do agregado. Quando o agregado está cheio, o convite é recusado; consulta [Quantas pessoas](/pt/docs/household/what-is-a-household#quantas-pessoas).
 
-- A pessoa convidada abre a ligação e vê o convite para o agregado familiar.
-- A pessoa convidada aceita o convite.
-- A pessoa convidada completa um novo registo.
-- A nova conta é criada no agregado familiar como membro.
-
-Como os convites são utilizados durante o registo, uma ligação de convite não pode adicionar uma conta já existente ao agregado familiar. Consulta [Aderir a um agregado familiar](/pt/docs/household/join-a-household) para o fluxo completo.
+## Convites pendentes
 
 <DocsImage
   src="/images/docs/pt/household/invite-a-member-pending.png"
-  alt="Lista de membros com um convite ainda pendente, antes de ser usado."
-  caption="Um convite gerado fica pendente até a pessoa convidada concluir um registo novo."
+  alt="Lista de membros com um convite ainda pendente, antes de ser aceite."
+  caption="Um convite fica pendente até a pessoa o aceitar."
   width={683}
   height={85}
 />
 
+Cada convite pendente aparece nas definições do agregado com o endereço de email, a função e a data de expiração. Todas as pessoas do agregado os veem; o titular e os administradores podem agir sobre eles:
+
+- **Reenviar** envia um novo email com uma nova ligação e dá ao convite mais 7 dias. A ligação antiga deixa de funcionar.
+- **Revogar** cancela o convite, e a sua ligação deixa de funcionar.
+
+Um administrador só pode reenviar e revogar convites para membros e observadores. Um convite expira 7 dias depois de ser enviado, e um convite pendente ocupa um lugar no agregado até ser aceite, revogado ou expirar.
+
+Partilha a ligação apenas com a pessoa que convidaste. Só funciona para o endereço de email convidado.
+
 ## Páginas relacionadas
 
 - [Agregado familiar e partilha entre utilizadores](/pt/docs/household)
-- [Entrar num agregado familiar](/pt/docs/household/join-a-household)
+- [Aderir a um agregado familiar](/pt/docs/household/join-a-household)
 - [O que é um agregado familiar](/pt/docs/household/what-is-a-household)

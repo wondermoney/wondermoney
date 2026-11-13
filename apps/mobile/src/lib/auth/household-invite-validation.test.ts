@@ -38,8 +38,21 @@ describe('validateHouseholdInviteToken', () => {
 
   it('returns valid when the API adds fields to the invite, dropping them', async () => {
     const invite = { email: 'partner@example.com', expiresAt: '2024-01-08T00:00:00.000Z', inviterName: 'Alex' }
-    const request = jest.fn().mockResolvedValue({ status: 200, body: { ...invite, householdName: 'Casa' } })
+    const request = jest.fn().mockResolvedValue({ status: 200, body: { ...invite, somethingNew: 'x' } })
     await expect(validateHouseholdInviteToken(transportWith(request), 'tok-1')).resolves.toEqual({ status: 'valid', invite })
+  })
+
+  it('keeps the household name and the role the invite grants', async () => {
+    const invite = { email: 'b@x.test', expiresAt: '2024-01-08T00:00:00.000Z', inviterName: null, householdName: 'Casa', role: 'viewer' }
+    const request = jest.fn().mockResolvedValue({ status: 200, body: invite })
+    await expect(validateHouseholdInviteToken(transportWith(request), 'tok-1')).resolves.toEqual({ status: 'valid', invite })
+  })
+
+  it('reads a role this build does not know as unknown', async () => {
+    const invite = { email: 'b@x.test', expiresAt: '2024-01-08T00:00:00.000Z', inviterName: null, role: 'auditor' }
+    const request = jest.fn().mockResolvedValue({ status: 200, body: invite })
+    const result = await validateHouseholdInviteToken(transportWith(request), 'tok-1')
+    expect(result).toMatchObject({ status: 'valid', invite: { role: 'unknown' } })
   })
 
   it('returns unavailable when the 200 body fails schema validation', async () => {

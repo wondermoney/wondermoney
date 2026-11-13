@@ -94,7 +94,7 @@ export type ReimbursementFailure =
   | 'invalid'
   | 'exists'
   | 'not-found'
-  | 'demo'
+  | 'demo' | 'read-only'
   | 'mfa'
   | 'cancelled'
   | 'network'
@@ -113,6 +113,7 @@ const SERVER_FAILURES: Readonly<Record<string, ReimbursementFailure>> = {
 export function classifyReimbursementFailure(error: unknown): ReimbursementFailure {
   if (!(error instanceof ApiError)) return 'error'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network'

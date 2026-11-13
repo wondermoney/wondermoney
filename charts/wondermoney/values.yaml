@@ -34,6 +34,8 @@ config:
   # open: anyone can sign up · invite: only people invited to a household · closed: nobody.
   # The first account on a new instance can always sign up.
   SIGNUP_MODE: open
+  # The most people in one household, owner included; a pending invite holds a seat (6 when empty).
+  HOUSEHOLD_MAX_MEMBERS: ""
   SUPPORT_EMAIL: ""
   SPONSOR_URL: ""
   # "true": a public read-only demo, with a "Try the demo" button that signs anyone in to one

@@ -1,60 +1,118 @@
 {
   "household": {
     "title": "Agregado familiar",
-    "description": "Partilha contas, orçamentos e objetivos com o teu parceiro.",
+    "description": "Partilha contas, orçamentos e objetivos com as pessoas com quem vives.",
+    "roles": {
+      "owner": "Titular",
+      "admin": "Administrador",
+      "member": "Membro",
+      "viewer": "Observador"
+    },
+    "roleDescriptions": {
+      "owner": "Gere todas as pessoas do agregado e pode passar a titularidade a outra pessoa.",
+      "admin": "Convida e gere membros e observadores, e altera as finanças partilhadas.",
+      "member": "Vê e altera as contas, orçamentos e objetivos partilhados.",
+      "viewer": "Vê as finanças partilhadas, mas não pode alterar nada."
+    },
     "members": {
       "heading": "Membros",
       "you": "Tu",
-      "roleOwner": "Titular",
-      "roleMember": "Parceiro"
+      "seats": "{used} de {max} lugares ocupados, incluindo convites pendentes",
+      "actionsLabel": "Ações para {name}",
+      "changeRole": "Alterar papel",
+      "makeOwner": "Tornar titular",
+      "remove": "Remover do agregado"
     },
     "invite": {
-      "heading": "Convida o teu parceiro",
-      "description": "Ele terá o seu próprio acesso e vê as finanças partilhadas. As contas que marcares como privadas permanecem privadas.",
-      "emailLabel": "Email do parceiro",
-      "emailPlaceholder": "parceiro@exemplo.com",
+      "heading": "Convidar alguém",
+      "description": "Terá o seu próprio acesso e verá as finanças partilhadas. As contas que marcares como privadas continuam privadas. Quem já tem conta aceita a partir do link do convite.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@exemplo.com",
       "invalidEmail": "Introduz um email válido",
-      "submit": "Enviar convite"
+      "roleLabel": "Papel",
+      "submit": "Enviar convite",
+      "full": "O teu agregado tem lugar para {max} pessoas, incluindo convites pendentes. Anula um convite ou remove alguém para convidares outra pessoa."
     },
     "pending": {
-      "heading": "Convite pendente",
+      "heading": "Convites pendentes",
       "sentTo": "Convite enviado para {email}",
       "expires": "Expira a {date}",
       "resend": "Reenviar",
       "revoke": "Anular"
     },
     "actions": {
-      "remove": "Remover parceiro",
       "leave": "Sair do agregado"
     },
     "removeDialog": {
       "title": "Remover {name}?",
-      "description": "Perde o acesso a este agregado de imediato. Os dados partilhados ficam contigo e as ligações bancárias associadas são desligadas.",
-      "confirm": "Remover parceiro"
+      "description": "Perde o acesso a este agregado de imediato e a sessão termina em todos os dispositivos. As contas e transações que adicionou ficam no agregado e as ligações bancárias associadas são desligadas.",
+      "confirm": "Remover"
     },
     "leaveDialog": {
       "title": "Sair deste agregado?",
       "description": "Perdes o acesso às contas, orçamentos e objetivos partilhados, e as tuas ligações bancárias são desligadas. Esta ação não pode ser anulada.",
       "confirm": "Sair do agregado"
     },
+    "roleDialog": {
+      "title": "Alterar o papel de {name}",
+      "description": "O novo papel aplica-se da próxima vez que abrir a aplicação.",
+      "save": "Guardar papel"
+    },
+    "transferDialog": {
+      "title": "Tornar {name} titular?",
+      "description": "{name} passa a ser titular: gere todas as pessoas do agregado, incluindo tu, e só essa pessoa pode voltar a passar a titularidade. Tu passas a administrador.",
+      "confirm": "Tornar {name} titular"
+    },
     "cancel": "Cancelar",
+    "errors": {
+      "already_household_member": "Essa pessoa já faz parte deste agregado.",
+      "demo_read_only": "A conta de demonstração é só de leitura.",
+      "household_full": "Este agregado está cheio. Anula um convite ou remove alguém primeiro.",
+      "household_has_data": "O teu agregado atual já tem contas ou transações, por isso ainda não pode juntar-se a outro. Elimina-as primeiro ou aceita com outra conta.",
+      "household_has_members": "Partilhas o teu agregado atual com outras pessoas. Passa a titularidade a uma delas, ou remove-as, antes de te juntares a outro agregado.",
+      "household_owner_required": "Só o titular pode fazer isso.",
+      "household_role_required": "O teu papel não permite isso. Pede ao titular ou a um administrador.",
+      "invite_already_used": "Este convite já foi usado.",
+      "invite_email_mismatch": "Este convite é para um email diferente daquele com que tens sessão iniciada.",
+      "invite_expired": "Este convite expirou. Pede um novo.",
+      "invite_invalid": "Este link de convite não é válido. Pede um novo."
+    },
+    "readOnly": {
+      "title": "Acesso só de leitura",
+      "description": "Podes ver as finanças deste agregado, mas não alterá-las. Pede ao titular ou a um administrador outro papel."
+    },
     "join": {
       "greetingNamed": "{name} convidou-te para o seu agregado em {instanceName}",
       "greetingGeneric": "Foste convidado para um agregado em {instanceName}",
       "subtitle": "Cria a tua conta para partilhar contas, orçamentos e objetivos.",
       "emailLockedHint": "Este convite é para {email}",
+      "signInToAccept": "Já tens conta? <link>Inicia sessão para aceitar</link>",
       "invalidTitle": "Este link de convite não é válido",
-      "invalidBody": "Pode já ter sido usado, anulado ou expirado. Pede ao teu parceiro para enviar um novo convite.",
-      "loggedInTitle": "Já tens sessão iniciada",
-      "loggedInBody": "Os convites de agregado só podem ser aceites com uma conta nova. Termina a sessão e cria uma com o email convidado para entrar.",
-      "logoutAndJoin": "Terminar sessão e criar conta",
-      "backToApp": "Ir para {instanceName}"
+      "invalidBody": "Pode já ter sido usado, anulado ou expirado. Pede a quem te convidou para enviar um novo convite.",
+      "backToApp": "Ir para {instanceName}",
+      "confirmTitleNamed": "Juntar-te a {household}?",
+      "confirmTitleInviter": "Juntar-te ao agregado de {name}?",
+      "confirmTitleGeneric": "Juntar-te a este agregado?",
+      "confirmRole": "Vais entrar como {role}.",
+      "signedInAs": "Sessão iniciada como {email}",
+      "dataHeading": "O que acontece ao teu agregado atual",
+      "dataRequirement": "Só te podes juntar se o teu agregado atual não tiver contas nem transações.",
+      "dataStaysBehind": "Os orçamentos, categorias, regras e objetivos que lá criaste ficam para trás. Não são movidos.",
+      "dataBanks": "As ligações bancárias desse agregado são desligadas.",
+      "dataYours": "O teu perfil, acesso, preferências e dispositivos continuam a ser teus.",
+      "accept": "Juntar-me ao agregado",
+      "useDifferentAccount": "Terminar sessão e usar outra conta",
+      "emailMismatchTitle": "Este convite é para outro email",
+      "emailMismatchBody": "Foi enviado para {invited}, mas tens sessão iniciada como {current}. Termina a sessão e depois inicia sessão ou cria uma conta com {invited} para o aceitares.",
+      "errorTitle": "Ainda não te podes juntar"
     },
     "toast": {
       "inviteSent": "Convite enviado",
       "inviteResent": "Convite reenviado",
       "inviteRevoked": "Convite anulado",
-      "memberRemoved": "Parceiro removido",
+      "memberRemoved": "{name} foi removido",
+      "roleChanged": "O papel de {name} é agora {role}",
+      "ownershipTransferred": "{name} é agora titular",
       "left": "Saíste do agregado",
       "error": "Algo correu mal. Tenta novamente."
     },

@@ -122,10 +122,10 @@ export async function currencyFor(em: EntityManager, code: string): Promise<Curr
   return currency;
 }
 
-/** Add a second, invited member to a household, with their own currency if given. */
-export async function addPartner(em: EntityManager, household: Household, input: { currency?: Currency } = {}): Promise<Appuser> {
+/** Add an invited member to a household, with their own currency and role if given (default member). */
+export async function addPartner(em: EntityManager, household: Household, input: { currency?: Currency; role?: HouseholdRole } = {}): Promise<Appuser> {
   const partner = em.create(Appuser, { currencyKey: input.currency ?? household.currency, emailAddress: `partner${next()}@example.test`, externalUserId: randomUUID(), firstName: 'Partner' }, { partial: true });
-  em.create(AppuserTenant, { appuserKey: partner, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
+  em.create(AppuserTenant, { appuserKey: partner, recordActive: true, role: input.role ?? HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
   await em.flush();
   return partner;
 }

@@ -54,6 +54,7 @@ export function RecurringRoute() {
   const classify = (error: unknown, input: RecurringMutation): RecurringActionResult => {
     if (!(error instanceof ApiError)) return 'error'
     if (error.code === 'demo-forbidden') { setDemoReadOnly(true); return 'demo' }
+    if (error.code === 'household-read-only') return 'read-only'
     if (error.code === 'cancelled') return 'cancelled'
     if (error.code === 'network') return 'network'
     if (error.code === 'invalid-response') return 'invalid'

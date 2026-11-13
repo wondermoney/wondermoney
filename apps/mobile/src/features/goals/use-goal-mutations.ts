@@ -18,11 +18,12 @@ import {
 } from './goals-contract'
 import { archivedGoalsKey, goalActivityKey, goalDetailKey, goalsKey } from './query-keys'
 
-export type GoalWriteFailure = 'demo' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'network-ambiguous' | 'invalid-response' | 'general'
+export type GoalWriteFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'network-ambiguous' | 'invalid-response' | 'general'
 
 export function classifyGoalWriteFailure(error: unknown): GoalWriteFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'http' && error.status === 404) return 'not-found'

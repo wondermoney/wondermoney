@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
-  ensureAppuserTenantLink: vi.fn(),
-  getOrCreateTenant: vi.fn(),
   getUserByEmail: vi.fn(),
   getUserByExternalId: vi.fn(),
+  provisionHomeTenant: vi.fn(),
   reconnectLegacyAppuser: vi.fn(),
   recordAnalyticsOutboxEvent: vi.fn(),
   recordSignup: vi.fn(),
@@ -23,9 +22,8 @@ vi.mock('@app/app', () => ({
   },
 }));
 vi.mock('@service/auth/auth-callback.service', () => ({
-  ensureAppuserTenantLink: mocked.ensureAppuserTenantLink,
-  getOrCreateTenant: mocked.getOrCreateTenant,
   isAppError: (error: unknown) => Boolean(error && typeof error === 'object' && 'status' in error),
+  provisionHomeTenant: mocked.provisionHomeTenant,
 }));
 vi.mock('@service/auth/auth-callback.utils', () => ({ getAuthUserFullName: vi.fn(() => 'Old User') }));
 vi.mock('@service/auth/better-auth', () => ({
@@ -64,7 +62,7 @@ describe('auth callback for an account from before better-auth', () => {
     vi.clearAllMocks();
     mocked.zParse.mockResolvedValue({ body: { locale: 'pt' } });
     mocked.getUserByEmail.mockResolvedValue(legacyAccount);
-    mocked.getOrCreateTenant.mockResolvedValue({ tenantKey: 3 });
+    mocked.provisionHomeTenant.mockResolvedValue({ tenantKey: 3 });
   });
 
   it('signs a verified login into the old account instead of creating a new one', async () => {

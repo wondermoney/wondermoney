@@ -35,7 +35,7 @@ Quando um pedido excede o limite, a API devolve `429`. Espera o período indicad
 
 ## Erros
 
-A referência documenta os códigos e esquemas de resposta de cada operação. As falhas de autenticação e de permissão podem devolver `401` ou `403`; verifica se o token é válido e inclui o âmbito indicado para a operação. `422` indica que o pedido não passou na validação. Para `429`, segue o `Retry-After`. Consulta o esquema de resposta da operação, sem presumires que todos os erros têm o mesmo corpo.
+A referência documenta os códigos e esquemas de resposta de cada operação. As falhas de autenticação e de permissão podem devolver `401` ou `403`; verifica se o token é válido e inclui o âmbito indicado para a operação. O token de um observador do agregado familiar pode ler mas não escrever: uma escrita devolve `403` com o código `household_read_only`. `422` indica que o pedido não passou na validação. Para `429`, segue o `Retry-After`. Consulta o esquema de resposta da operação, sem presumires que todos os erros têm o mesmo corpo.
 
 ## Paginação
 

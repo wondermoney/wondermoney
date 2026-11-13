@@ -399,7 +399,7 @@ export const manualAssetSchema = open('ManualAsset', {
   currentValue: nullableNumber,
   manualAssetKey: id,
   name: z.string(),
-  linkedLoans: z.array(assetLinkedLoanSchema).describe('The viewer\'s loans secured against the asset. Loans are personal, so the other member\'s are not listed.'),
+  linkedLoans: z.array(assetLinkedLoanSchema).describe('The viewer\'s loans secured against the asset. Loans are personal, so other members\' loans are not listed.'),
   linkedDebt: nullableNumber.describe('Their total outstanding principal in the asset\'s currency: 0 with none, null when a loan has no exchange rate.'),
   equity: nullableNumber.describe('Today\'s value less linkedDebt, in the asset\'s currency. Null when the asset has no value today or linkedDebt is null.'),
   unconvertedLoanCurrencies: z.array(z.string()).describe('Currencies of linked loans no rate converts into the asset\'s currency.'),

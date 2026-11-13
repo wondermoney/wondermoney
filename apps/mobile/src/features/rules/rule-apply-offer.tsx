@@ -22,7 +22,7 @@ function applyMessage(state: RuleApplyState, count: number, t: TFunction): strin
     case 'error':
       return t(state.reason === 'in-progress'
         ? 'rules.apply.inProgress'
-        : state.reason === 'demo' ? 'rules.apply.demo' : state.reason === 'access' ? 'rules.apply.access' : 'rules.apply.error')
+        : state.reason === 'demo' ? 'rules.apply.demo' : state.reason === 'read-only' ? 'rules.apply.read-only' : state.reason === 'access' ? 'rules.apply.access' : 'rules.apply.error')
     default:
       return t('rules.apply.description', { count })
   }

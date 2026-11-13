@@ -171,7 +171,7 @@ A new Enable Banking application runs in Restricted Production mode, in which it
 - Every other household sees the usual "add your own key" step, with a line saying the server's shared connection covers one household only.
 - If a second household signs up before anyone has linked a bank, no household gets the server's application until you set `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
 
-The demo account never counts. Enable Banking also enforces the limit itself: in Restricted Production mode, it refuses accounts that don't belong to the application's owner, a partner's included. Check what your application may reach in the Enable Banking Control Panel.
+The demo account never counts. Enable Banking also enforces the limit itself: in Restricted Production mode, it refuses accounts that don't belong to the application's owner, including those of the other people in their household. Check what your application may reach in the Enable Banking Control Panel.
 
 ## Google sign-in
 
@@ -210,6 +210,7 @@ If the web app moves to another hostname, existing passkeys stop working and you
 |---|---|
 | `INSTANCE_NAME` | Your instance's name. The web app shows it in browser tab titles, link previews and the sign-in and sign-up pages, and in place of the WonderMoney logo when you change it. Every email uses it in the subject, copy and sign-off, and as the sender's name unless `EMAIL_FROM_NAME` is set; authenticator apps show it as the label. The web app reads it from the API, so set it on the API only; a change shows up in the web app within five minutes |
 | `SIGNUP_MODE` | `open`, `invite` or `closed` (see [Install](/en/docs/self-hosting/install)) |
+| `HOUSEHOLD_MAX_MEMBERS` | The most people in one household, owner included. A pending invite holds a seat until it is accepted, revoked or expires. Defaults to `6`; a positive whole number. Set it on the API; a value that isn't a positive whole number stops it at start-up |
 | `SUPPORT_EMAIL` | The inbox for the contact form, account alerts and in-app feedback, and the support address the app shows; leave empty to turn them off and hide the support links. The "Share Feedback" form also needs email configured; without it the form is hidden |
 | `SPONSOR_URL` | A page where your users can chip in towards running the instance (Open Collective, GitHub Sponsors, ...). The web app's FAQ links to it when set |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |

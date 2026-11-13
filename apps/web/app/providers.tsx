@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 
 import { AnalyticsInit } from "@/components/analytics/AnalyticsInit";
 import { SignupCompletionTracker } from "@/components/analytics/SignupCompletionTracker";
+import { HouseholdReadOnlyNotifier } from "@/components/household/HouseholdReadOnlyNotifier";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getToastOptions } from "@/components/ui/sonner-options";
 import { AuthUserProvider } from "@/lib/auth/user-context";
@@ -33,6 +34,7 @@ export function Providers(props: { children: React.ReactNode }) {
         <AuthUserProvider>
           <AnalyticsInit />
           <SignupCompletionTracker analyticsEnabled={isAnalyticsEnabled()} />
+          <HouseholdReadOnlyNotifier />
           <ThemeProvider
             // The class feeds Tailwind's `dark:` variant; the data attribute
             // selects the dark token block in theme/globals.css.

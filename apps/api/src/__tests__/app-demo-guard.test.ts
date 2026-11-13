@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { HouseholdRole } from '@entity/AppuserTenant';
 import { ERROR_CODE } from '@utils/errors';
 
 /**
@@ -75,6 +76,7 @@ vi.mock('@middleware/tenant', () => ({
     if (!req.headers['x-test-no-tenant']) {
       const demo = req.headers['x-test-user'] === 'demo';
       req.tenant = { tenantKey: demo ? 1 : 2, tenantType: demo ? 'demo' : 'regular' } as unknown as express.Request['tenant'];
+      req.householdRole = HouseholdRole.OWNER;
     }
     next();
   },

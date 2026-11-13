@@ -8,7 +8,7 @@ import type { PortfolioAccountLinkInput } from './portfolio-account-link'
 import { createPortfolioSettingsEndpoint, portfolioSettingsWriteSchema } from './portfolios-contract'
 import { aggregatePortfolioDashboardPrefix, portfolioKey, portfoliosKey } from './query-keys'
 
-export type PortfolioLinkFailure = 'link-held' | 'link-managed' | 'demo' | 'mfa' | 'access' | 'not-found' | 'unknown' | 'request' | 'general'
+export type PortfolioLinkFailure = 'link-held' | 'link-managed' | 'demo' | 'read-only' | 'mfa' | 'access' | 'not-found' | 'unknown' | 'request' | 'general'
 
 /**
  * Why changing a link failed. `link-held`: the other member holds it, and `holder` names them
@@ -21,6 +21,7 @@ export function classifyPortfolioLinkFailure(error: unknown): Readonly<{ failure
   }
   if (!(error instanceof ApiError)) return { failure: 'general', holder: null }
   if (error.code === 'demo-forbidden') return { failure: 'demo', holder: null }
+  if (error.code === 'household-read-only') return { failure: 'read-only', holder: null }
   if (error.code === 'mfa-required') return { failure: 'mfa', holder: null }
   if (error.code === 'http' && error.status === 403) return { failure: 'link-managed', holder: null }
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 401)) return { failure: 'access', holder: null }

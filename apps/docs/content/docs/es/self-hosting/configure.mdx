@@ -171,7 +171,7 @@ Una aplicación nueva de Enable Banking funciona en modo Restricted Production, 
 - Los demás hogares ven el paso habitual "añade tu propia clave", con una línea que explica que la conexión compartida del servidor solo sirve a un hogar.
 - Si un segundo hogar se registra antes de que nadie conecte un banco, ningún hogar recibe la aplicación del servidor hasta que definas `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
 
-La cuenta de demostración nunca cuenta. La propia Enable Banking también aplica el límite: en modo Restricted Production, rechaza cuentas que no sean del dueño de la aplicación, incluidas las de una pareja. Comprueba en el Control Panel de Enable Banking a qué cuentas puede acceder tu aplicación.
+La cuenta de demostración nunca cuenta. La propia Enable Banking también aplica el límite: en modo Restricted Production, rechaza cuentas que no sean del dueño de la aplicación, incluidas las de las demás personas de su hogar. Comprueba en el Control Panel de Enable Banking a qué cuentas puede acceder tu aplicación.
 
 ## Inicio de sesión con Google
 
@@ -210,6 +210,7 @@ Si la aplicación web pasa a otro dominio, las llaves de acceso existentes dejan
 |---|---|
 | `INSTANCE_NAME` | El nombre de tu instancia. La aplicación web lo muestra en los títulos de las pestañas del navegador, en las vistas previas de enlaces y en las páginas de inicio de sesión y registro, y en lugar del logotipo de WonderMoney cuando lo cambias. Cada correo lo usa en el asunto, el texto y la firma, y como nombre del remitente si `EMAIL_FROM_NAME` no está definido; las aplicaciones de autenticación lo muestran como etiqueta. La aplicación web lo lee de la API, así que defínelo solo en la API; un cambio aparece en la aplicación web en un máximo de cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` o `closed` (consulta [Instalar](/es/docs/self-hosting/install)) |
+| `HOUSEHOLD_MAX_MEMBERS` | El número máximo de personas en un hogar, incluido el titular. Una invitación pendiente ocupa una plaza hasta que se acepta, se revoca o caduca. Por defecto `6`; un número entero positivo. Configúralo en la API; un valor que no sea un número entero positivo impide que arranque |
 | `SUPPORT_EMAIL` | El buzón del formulario de contacto, de las alertas de cuenta y de los comentarios desde la aplicación, y la dirección de soporte que muestra la aplicación; déjalo vacío para desactivarlos y ocultar los enlaces de soporte. El formulario "Compartir comentarios" también necesita el correo configurado; sin él, el formulario se oculta |
 | `SPONSOR_URL` | Una página donde tus usuarios pueden contribuir a mantener la instancia (Open Collective, GitHub Sponsors, ...). Las preguntas frecuentes de la aplicación web la enlazan cuando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Tus páginas legales, enlazadas desde la página de registro cuando ambas están definidas |

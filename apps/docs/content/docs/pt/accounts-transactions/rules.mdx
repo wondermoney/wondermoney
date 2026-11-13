@@ -3,7 +3,7 @@ title: Regras
 description: Categoriza, renomeia, etiqueta ou oculta transações automaticamente, vê o que uma regra apanha antes de a guardares, e aplica-a às transações que já tens.
 ---
 
-Uma regra diz ao WonderMoney o que fazer com transações de um certo tipo: por exemplo, "quando a descrição contém NETFLIX, definir a categoria Entretenimento". As regras pertencem ao agregado, por isso ambos os membros veem e gerem a mesma lista.
+Uma regra diz ao WonderMoney o que fazer com transações de um certo tipo: por exemplo, "quando a descrição contém NETFLIX, definir a categoria Entretenimento". As regras pertencem ao agregado, por isso todas as pessoas do agregado veem a mesma lista, e todas exceto os observadores a podem gerir.
 
 ## Onde as encontrar
 
@@ -35,7 +35,7 @@ Quando corriges vezes sem conta o mesmo tipo de transação, o WonderMoney prop�
 
 - **Destas** quer dizer o mesmo comerciante, ou o mesmo início da descrição, sem referências nem números. "TRF MB WAY 912345678 JOAO" e "TRF MB WAY 913333333 ANA" começam ambas por "TRF MB WAY". Um cabeçalho de cartão como "COMPRA 1192" é ignorado, por isso "COMPRA 1192 CONTINENTE" conta como "CONTINENTE".
 - Alterar várias transações de uma vez conta cada uma delas, e cada transação só conta uma vez.
-- Só contam as alterações que fazes. As do outro membro, uma proposta do assistente que confirmes e as categorias definidas por uma regra, pela categorização aprendida ou por uma importação não contam. As transações das contas privadas do outro membro nunca contam.
+- Só contam as alterações que fazes. As dos outros membros, uma proposta do assistente que confirmes e as categorias definidas por uma regra, pela categorização aprendida ou por uma importação não contam. As transações das contas privadas dos outros membros nunca contam.
 - Escolhe **Criar regra** para abrir o editor de regras já preenchido, com a pré-visualização, e confirma antes de guardar. Escolhe **Não sugerir de novo** para deixares de ver essa sugestão. Se não escolheres nenhuma, pode voltar a aparecer da próxima vez.
 
 Não aparece nenhuma sugestão quando uma regra ativa já dá essa categoria a essas transações, ou quando o WonderMoney já as reconhece pela categoria que escolheste para o comerciante. Essa categoria aprendida só é reutilizada quando a descrição de uma transação nova é exatamente o nome do comerciante, por isso a regra continua a ser sugerida para descrições com mais texto.
@@ -44,7 +44,7 @@ Não aparece nenhuma sugestão quando uma regra ativa já dá essa categoria a e
 
 Enquanto editas, a pré-visualização ao lado do formulário mostra quantas das tuas transações a regra apanha, quantas delas mudaria, e as 50 correspondências mais recentes com a alteração que cada uma receberia. Atualiza-se pouco depois de parares de escrever.
 
-A pré-visualização avalia a regra sozinha e abrange as transações do agregado que podes ver, incluindo as ocultas. Nunca mostra as contas privadas do outro membro. Uma correspondência pode aparecer como **Sem alteração** quando a transação já tem esses valores, ou quando foste tu a definir esse valor (ver abaixo).
+A pré-visualização avalia a regra sozinha e abrange as transações do agregado que podes ver, incluindo as ocultas. Nunca mostra as contas privadas dos outros membros. Uma correspondência pode aparecer como **Sem alteração** quando a transação já tem esses valores, ou quando foste tu a definir esse valor (ver abaixo).
 
 Guardar uma regra não altera as transações que já tens. Para as alterar também, aplica a regra (ver abaixo).
 
@@ -56,7 +56,7 @@ Para correr todas as regras ativas sobre as transações que já tens (por exemp
 
 - O número que confirmas é exatamente o que a aplicação altera.
 - A aplicação corre em segundo plano: a janela mostra o progresso, e podes fechá-la enquanto corre. Quando termina, uma mensagem diz quantas transações mudaram.
-- Abrange as transações do agregado que podes ver, incluindo as ocultas, mas não as eliminadas nem as contas privadas do outro membro. Tudo o que está em "O que as regras nunca alteram" continua a valer.
+- Abrange as transações do agregado que podes ver, incluindo as ocultas, mas não as eliminadas nem as contas privadas dos outros membros. Tudo o que está em "O que as regras nunca alteram" continua a valer.
 - Aplicar a mesma regra outra vez não altera mais nada. Cada alteração fica registada na atividade da transação.
 - Só uma aplicação de cada vez por agregado: espera que uma termine antes de começar outra.
 
@@ -64,7 +64,7 @@ Para correr todas as regras ativas sobre as transações que já tens (por exemp
 
 - O que definiste à mão: uma categoria que escolheste, um comerciante ou uma descrição que editaste, e notas que escreveste. A regra continua a contar como correspondência, mas deixa esses campos como estão.
 - O tipo de transação. Só a deteção de transferências marca uma transação como transferência.
-- Transações nas contas privadas do outro membro. Uma regra atua em nome do membro que alterou por último as suas condições ou ações, e só sobre transações que esse membro pode ver.
+- Transações nas contas privadas dos outros membros. Uma regra atua em nome do membro que alterou por último as suas condições ou ações, e só sobre transações que esse membro pode ver.
 
 ## Ordem
 

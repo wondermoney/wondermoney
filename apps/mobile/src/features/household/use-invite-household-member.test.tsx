@@ -18,15 +18,15 @@ const setup = () => {
 describe('useInviteHouseholdMember', () => {
   beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset() })
 
-  it('trims and lowercases the email, and invalidates the household query after commit', async () => {
+  it('sends the trimmed, lowercased email with the chosen role, and invalidates the household query after commit', async () => {
     const { client, wrapper } = setup()
     const invalidate = jest.spyOn(client, 'invalidateQueries')
     mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(undefined); return undefined })
     const hook = await renderHook(() => useInviteHouseholdMember(), { wrapper })
-    await act(async () => { await hook.result.current.mutateAsync('  Partner@Example.com  ') })
+    await act(async () => { await hook.result.current.mutateAsync({ email: '  Ana@Example.com  ', role: 'viewer' }) })
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'POST', path: '/v1/household/invites' })
-    expect(mockWrite.mock.calls[0][1].body).toEqual({ email: 'partner@example.com' })
+    expect(mockWrite.mock.calls[0][1].body).toEqual({ email: 'ana@example.com', role: 'viewer' })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['household', 8], exact: true })
     await hook.unmount(); client.clear()
   })
@@ -34,7 +34,17 @@ describe('useInviteHouseholdMember', () => {
   it('rejects an invalid email before ever calling write', async () => {
     const { client, wrapper } = setup()
     const hook = await renderHook(() => useInviteHouseholdMember(), { wrapper })
-    await act(async () => { await expect(hook.result.current.mutateAsync('not-an-email')).rejects.toThrow() })
+    await act(async () => { await expect(hook.result.current.mutateAsync({ email: 'not-an-email', role: 'member' })).rejects.toThrow() })
+    expect(mockWrite).not.toHaveBeenCalled()
+    await hook.unmount(); client.clear()
+  })
+
+  it('never sends owner as an invite role', async () => {
+    const { client, wrapper } = setup()
+    const hook = await renderHook(() => useInviteHouseholdMember(), { wrapper })
+    await act(async () => {
+      await expect(hook.result.current.mutateAsync({ email: 'a@b.co', role: 'owner' as never })).rejects.toThrow()
+    })
     expect(mockWrite).not.toHaveBeenCalled()
     await hook.unmount(); client.clear()
   })
@@ -43,7 +53,7 @@ describe('useInviteHouseholdMember', () => {
     const { client, wrapper } = setup()
     mockWrite.mockRejectedValue(new ApiError('mfa-required'))
     const hook = await renderHook(() => useInviteHouseholdMember(), { wrapper })
-    await act(async () => { await expect(hook.result.current.mutateAsync('a@b.co')).rejects.toMatchObject({ code: 'mfa-required' }) })
+    await act(async () => { await expect(hook.result.current.mutateAsync({ email: 'a@b.co', role: 'member' })).rejects.toMatchObject({ code: 'mfa-required' }) })
     expect(mockBlockAccess).toHaveBeenCalledWith('mfa-required')
     await hook.unmount(); client.clear()
   })

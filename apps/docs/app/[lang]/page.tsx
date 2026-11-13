@@ -95,7 +95,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: 'Share with your household',
-        description: 'Invite a partner, keep accounts private, and manage who is in your household.',
+        description: 'Invite the people you live with, choose their roles, and keep accounts private.',
         href: '/docs/household',
       },
       {
@@ -163,7 +163,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: 'Partilhar com o teu agregado',
-        description: 'Convida um parceiro, mantém contas privadas e gere quem faz parte do agregado.',
+        description: 'Convida as pessoas com quem vives, escolhe as suas funções e mantém contas privadas.',
         href: '/docs/household',
       },
       {
@@ -232,7 +232,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: 'Compartir con tu hogar',
-        description: 'Invita a tu pareja, mantén cuentas privadas y gestiona quién forma parte del hogar.',
+        description: 'Invita a las personas con las que vives, elige sus roles y mantén cuentas privadas.',
         href: '/docs/household',
       },
       {

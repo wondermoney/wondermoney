@@ -74,7 +74,7 @@ const passthrough = (_req: unknown, _res: unknown, next: () => void) => { next()
 vi.mock('@middleware/ai-allowance', () => ({ requireAiAllowance: () => passthrough }));
 vi.mock('@middleware/demo', () => ({ blockDemoStateChange: passthrough }));
 vi.mock('@middleware/email-verification', () => ({ requireVerifiedEmailForAi: passthrough }));
-vi.mock('@middleware/household', () => ({ requireHouseholdOwner: passthrough }));
+vi.mock('@middleware/household', () => ({ requireHouseholdManager: passthrough, requireHouseholdOwner: passthrough }));
 vi.mock('@middleware/multer', () => ({ default: passthrough }));
 vi.mock('@middleware/sensitive-session', () => ({ requireSensitiveSession: passthrough }));
 

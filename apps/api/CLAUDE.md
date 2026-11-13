@@ -114,11 +114,17 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
   migrations that leave `.snapshot-wmdb.json` alone. Middleware: `requireAuth`, `optionalAuth`,
   `requireBearerAuth` (the auth callback); `adminAuth`/`serviceAuth` are API-key auth.
 - `getUser` sets **`req.user`** (the `Appuser`); `resolveTenantForRequest` sets **`req.tenant`**
-  and arms the tenant filter. Keep the two distinct. Authed data routes use the `authedTenant`
-  stack (`middleware/stacks.ts`): `requireAuth → getUser → resolveTenantForRequest →
-  assertTenantResolved → blockDemoMutation`.
-- **A tenant is a household**: an owner plus at most one partner (`AppuserTenant.role`
-  `owner`/`member`), sharing accounts, transactions, budgets, categories, goals and portfolios.
+  and `req.householdRole`, and arms the tenant filter. Keep the two distinct. Authed data routes
+  use the `authedTenant` stack (`middleware/stacks.ts`): `requireAuth → getUser →
+  resolveTenantForRequest → assertTenantResolved → blockDemoMutation → blockViewerWrite`.
+- **A tenant is a household** of up to `HOUSEHOLD_MAX_MEMBERS` people (default 6; pending invites
+  hold a seat), sharing accounts, transactions, budgets, categories, goals and portfolios.
+  `AppuserTenant.role` is `owner` (exactly one, `Tenant.ownerAppuserKey`), `admin`, `member` or
+  `viewer`. `householdCan(role, action)` (`services/household/household-permissions.ts`) is the
+  one rule: a manager (owner, admin) acts on and grants only roles below their own; only the
+  owner transfers ownership (`POST /v1/household/transfer-ownership`). A viewer's writes answer
+  403 `household_read_only` except the personal ones in `VIEWER_PERSONAL_WRITES`
+  (`middleware/household.ts`); `household-viewer-policy.test.ts` walks every mounted route.
 - **Tenant filter** (`database/filters/tenant-filter.ts`): a global default-deny MikroORM
   filter. With no tenant context set (workers, invite provisioning) it is a deliberate system
   bypass. `assertTenantResolved` throws when `req.user` is set but `req.tenant` is not.
@@ -126,10 +132,15 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
   and every aggregate from the other member. Raw SQL, Kysely and QueryBuilder paths (account
   metrics, cashflow, budget spending, portfolio) bypass the ORM filter, so they carry explicit
   tenant and privacy predicates. Any new raw query needs both.
-- **Invites**: `HouseholdInvite` is a 7-day single-use token, and a pending one holds the seat.
-  Joining is for new signups only (the auth callback consumes `inviteToken` and skips creating
-  a tenant). `GET /v1/household/invites/validate` is public. Leaving deactivates the
-  membership and soft-deletes the member's bank connections; the owner cannot be removed.
+- **Invites**: `HouseholdInvite` is a 7-day single-use token carrying the role to join with; a
+  pending one holds a seat. The seat count and the write run under the tenant row lock
+  (`lockTenant`). A new signup joins through the auth callback's `inviteToken`; an existing,
+  signed-in user joins only by confirming (`POST /v1/household/invites/:token/accept`), and
+  only from a household holding no accounts or transactions (nothing is merged). Signing in
+  never moves anyone: `provisionHomeTenant` keeps an active membership, else restores the
+  user's own household, else creates one. `GET /v1/household/invites/validate` is public.
+  Leaving or removal deactivates the membership and soft-deletes the member's bank
+  connections; a removed member's sessions and push devices end too. The owner cannot leave.
 - Verify scripts in `database/scripts/`: `verify-tenant-filter.ts`, `verify-household-invite.ts`,
   `e2e-household-flow.sh`.
 - `blockDemoMutation` keeps the demo account read-only; demo is recognised by

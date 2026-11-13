@@ -69,9 +69,15 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 
 ## Households
 
-A tenant is a household (owner plus one partner, joined at signup by invite). Web pieces:
-`lib/api/household/`, `components/settings/Household.tsx`, the `/join` page
-(`app/[locale]/(no-layout)/join/`; `inviteToken` rides through signup into `/v1/auth/callback`).
+A tenant is a household: one owner plus admins, members and viewers, up to the API's
+`maxMembers` (pending invites take a place). Who may invite, change roles, remove or transfer
+ownership is in `lib/household/permissions.ts`, which mirrors the API's rule (a manager acts on
+roles strictly below their own, never on themself). Web pieces: `lib/api/household/`,
+`components/settings/Household.tsx`, the `/join` page (`app/[locale]/(no-layout)/join/`). A new
+account joins at signup (`inviteToken` rides into `/v1/auth/callback`); a signed-in account joins
+only by pressing Join on `/join`, which calls `POST /v1/household/invites/:token/accept` and reloads
+the app. A viewer's writes answer `household_read_only`, explained by
+`components/household/HouseholdReadOnlyNotifier.tsx`.
 Private accounts: the owner-only "Private account" switch sends `isPrivate` only when the
 viewer owns the account; members never receive private accounts from the API.
 

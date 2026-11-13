@@ -20,6 +20,7 @@ export interface HouseholdInvitePostClient {
   ) => Promise<{ data: T }>;
 }
 
+/** `role` defaults to member on the API; the form always sends one. */
 export async function createHouseholdInvite(
   input: CreateHouseholdInviteInput,
   apiClient: HouseholdInvitePostClient = api,

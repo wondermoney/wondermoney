@@ -107,6 +107,8 @@ const runtimeSchema = z.object({
   DEPLOY_ENV: z.string().trim().optional(),
   // Minutes a due job may wait before `GET /v1/health/ready` reports the queue as backed up.
   HEALTH_MAX_JOB_AGE_MINUTES: positiveInt('Readiness maximum job age').optional(),
+  // The most people in one household, owner and pending invites included (`config/household.ts`).
+  HOUSEHOLD_MAX_MEMBERS: positiveInt('Household member cap').optional(),
   INSTANCE_NAME: z.string().trim().optional(),
   MIN_APP_VERSION: z.string().trim().regex(/^\d+\.\d+\.\d+$/u, 'MIN_APP_VERSION must be a semver version such as 2.1.0').optional(),
   NODE_ENV: z.enum(['development', 'production', 'staging', 'test']).default('development'),

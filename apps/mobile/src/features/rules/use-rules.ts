@@ -163,7 +163,7 @@ export function useRuleApplyCount(ruleId: number | null) {
 
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set(['succeeded', 'partial', 'failed', 'needs_action', 'stale'])
 
-export type RuleApplyFailure = 'in-progress' | 'demo' | 'access' | 'failed' | 'general'
+export type RuleApplyFailure = 'in-progress' | 'demo' | 'read-only' | 'access' | 'failed' | 'general'
 
 export type RuleApplyState =
   | { phase: 'idle' }
@@ -184,6 +184,7 @@ const defaultWait = (ms: number) => new Promise<void>((resolve) => setTimeout(re
 function classifyApplyFailure(error: unknown): RuleApplyFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'http' && error.status === 409) return 'in-progress'
   if (error.code === 'http' && error.status === 404) return 'failed'

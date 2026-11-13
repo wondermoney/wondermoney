@@ -68,7 +68,7 @@ const positiveDecimal = decimal.refine((value) => Number(value) > 0, 'a positive
 /** A day an override may be set for: no later than tomorrow in UTC, as when it is set in the app (`validators/currency.ts`). */
 const overrideDay = day.refine((value) => value <= new Date(Date.now() + 86_400_000).toISOString().slice(0, 10), 'not in the future');
 
-const member = z.object({ email: text(320), firstName: text(255), id, isExporter: z.boolean(), lastName: text(255), role: z.enum(['member', 'owner']).nullable() });
+const member = z.object({ email: text(320), firstName: text(255), id, isExporter: z.boolean(), lastName: text(255), role: z.enum(['admin', 'member', 'owner', 'viewer']).nullable() });
 
 const preferences = z.object({
   currency: currency.nullable(),

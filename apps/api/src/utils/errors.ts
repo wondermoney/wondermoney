@@ -104,17 +104,33 @@ export const ERROR_CODE = {
    * Deliberately one code for all three — the phone's only useful response is "scan a new QR".
    */
   PAIRING_CODE_INVALID: 'pairing_code_invalid',
-  /** Route is household-owner-only and the caller is a member. */
+  /** Route is household-owner-only and the caller is not the owner (403). */
   HOUSEHOLD_OWNER_REQUIRED: 'household_owner_required',
-  /** Joining a household: it already has its two members (409). */
+  /**
+   * Managing the household beyond the caller's role (403): a member or viewer managing it, or an
+   * admin acting on, or granting, a role at or above admin.
+   */
+  HOUSEHOLD_ROLE_REQUIRED: 'household_role_required',
+  /** A viewer tried to change the household's shared data (403). Viewers read only. */
+  HOUSEHOLD_READ_ONLY: 'household_read_only',
+  /** Inviting or joining: the household already holds `HOUSEHOLD_MAX_MEMBERS` people (409). */
   HOUSEHOLD_FULL: 'household_full',
+  /** Inviting or joining: the person already belongs to this household (409). */
+  ALREADY_HOUSEHOLD_MEMBER: 'already_household_member',
+  /**
+   * Accepting an invite as an existing user whose own household holds accounts or transactions
+   * (409). Nothing is merged; joining needs an empty household.
+   */
+  HOUSEHOLD_HAS_DATA: 'household_has_data',
+  /** Accepting an invite as the owner of a household that has other members (409). */
+  HOUSEHOLD_HAS_MEMBERS: 'household_has_members',
   /** Household invite (signup): accepted already, by this person or someone else (400/409). */
   INVITE_ALREADY_USED: 'invite_already_used',
   /** Household invite (signup): the invite went to a different email address (400). */
   INVITE_EMAIL_MISMATCH: 'invite_email_mismatch',
   /** Household invite (signup): past its 7-day lifetime (400). */
   INVITE_EXPIRED: 'invite_expired',
-  /** Household invite (signup): unknown token or revoked by the owner (400). */
+  /** Household invite (signup or accept): unknown token, or revoked (400). */
   INVITE_INVALID: 'invite_invalid',
   /**
    * Auth callback: the email belongs to an account from before better-auth, and this login has not

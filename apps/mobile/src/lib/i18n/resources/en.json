@@ -47,7 +47,8 @@
       "years_other": "{{count}} years ago"
     },
     "close": "Close",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "householdReadOnly": "You have view-only access to this household, so nothing was changed. Ask an owner or admin if you need to make changes."
   },
   "navigation": {
     "home": "Home",
@@ -536,6 +537,7 @@
     "errors": {
       "validation": "The server did not accept these values. Edit the details and review them again.",
       "demo": "Demo profiles are read-only. No account was created.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not currently have access to create an account.",
       "mfa": "Additional verification is required before an account can be created.",
       "cancelled": "Account creation was cancelled before it was sent. No account was created.",
@@ -599,6 +601,7 @@
     "failures": {
       "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
       "demo": "Recalculating is not available in the demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Sign in again to recalculate this account.",
       "not-found": "This account is no longer available.",
       "network": "Could not reach the server. Check your connection and try again.",
@@ -619,13 +622,14 @@
     "saveDetails": "Save details",
     "saving": "Saving…",
     "privacyTitle": "Private account",
-    "privacyHelper": "Only you can see this account and its transactions — your household partner won't see it anywhere.",
+    "privacyHelper": "Only you can see this account and its transactions. Other people in your household won't see it anywhere.",
     "privacySwitch": "Private account",
     "discardTitle": "Discard unsaved changes?",
     "discardMessage": "Your unsaved account changes will be lost.",
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this account.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
       "not-found": "This account no longer exists. Your form has not been cleared.",
@@ -642,6 +646,7 @@
     "deleteConfirmAction": "Delete account",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This account was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to delete this account.",
       "cancelled": "The deletion was cancelled because your signed-in context changed.",
       "not-found": "This account no longer exists.",
@@ -801,6 +806,7 @@
     },
     "reviewResult": {
       "demo": "Demo profiles are read-only. The selected transactions were not changed",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Multi-factor authentication is required. The selected transactions were not changed",
       "cancelled": "The change was cancelled because your session changed. The selected transactions were not changed",
       "network": "The request had an uncertain network result. Inspect the selected transactions before trying again",
@@ -916,6 +922,7 @@
         "exists": "These two are already linked. Unlink them first to change the amount.",
         "not-found": "That transaction or link is no longer available. Refresh and try again.",
         "demo": "Demo profiles are read-only. Nothing was changed.",
+        "read-only": "$t(common.householdReadOnly)",
         "mfa": "Multi-factor authentication is required. Nothing was changed.",
         "cancelled": "The change was cancelled because your session changed. Nothing was changed.",
         "network": "The request had an uncertain network result. Check the transaction before trying again.",
@@ -1018,6 +1025,7 @@
     "result": {
       "taken": "A tag with this name already exists.",
       "demo": "Demo profiles are read-only. The tag was not created.",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Multi-factor authentication is required. The tag was not created.",
       "network": "The request had an uncertain network result. Check your tags before trying again.",
       "error": "The tag could not be created. Try again."
@@ -1083,6 +1091,7 @@
     "submitting": "Recording…",
     "result": {
       "demo": "Demo profiles are read-only. Nothing was recorded.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to record this transaction. Nothing was recorded.",
       "mfa": "Additional verification is required. Nothing was recorded.",
       "validation": "These details were rejected. Edit them before submitting again.",
@@ -1167,6 +1176,7 @@
     "tryAgain": "Try again",
     "failures": {
       "demo": "Importing transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The import was cancelled before it was sent.",
@@ -1274,6 +1284,7 @@
     },
     "failures": {
       "demo": "Scanning receipts is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "allowance": "Your household has used today's receipt-scanning allowance. It resets at midnight UTC.",
       "unverified": "Verify your email address to use receipt scanning.",
       "access": "Your access changed. Try again.",
@@ -1326,6 +1337,7 @@
     },
     "actionResult": {
       "demo": "Demo profiles are read-only. Nothing was changed",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Additional verification is required. Nothing was changed",
       "cancelled": "The change was cancelled because your session changed",
       "network": "The result is uncertain because the connection was lost. Check the list before trying again",
@@ -1717,6 +1729,7 @@
     "failures": {
       "validation": "The category details are invalid.",
       "demo": "Demo profiles are read-only. No category changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to change categories.",
       "mfa": "Additional verification is required before changing categories.",
       "not-found": "This category or selected main category is no longer available. Refresh Categories.",
@@ -1906,6 +1919,7 @@
     "refreshBoth": "Refresh history and candidates",
     "result": {
       "demo": "Demo profiles are read-only. No repayment classification changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to change this repayment classification.",
       "mfa": "Additional verification is required before changing repayment classifications.",
       "cancelled": "The request was cancelled before dispatch. Nothing changed and you may confirm again.",
@@ -1950,6 +1964,7 @@
     "saving": "Saving…",
     "failures": {
       "demo": "Demo mode is read-only. This loan was not created.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to add a loan.",
       "mfa": "Additional verification is required before adding a loan.",
       "invalid": "The server rejected these values. Review the amounts and dates entered.",
@@ -2006,6 +2021,7 @@
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this loan.",
       "mfa": "Additional verification is required before this loan can be changed.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
@@ -2060,6 +2076,7 @@
     },
     "failures": {
       "demo": "The demo is read-only, so nothing was saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You can no longer change this asset. Sign in again or check with your household.",
       "mfa": "Confirm it is you to continue.",
       "not-found": "This asset no longer exists, or it is private to the other member of your household.",
@@ -2147,7 +2164,7 @@
     "growthRateOptional": "Yearly change in percent, optional",
     "growthRateHint": "The value changes by this percentage each year after the latest valuation. Use a negative number for something that loses value, such as a car.",
     "private": "Private asset",
-    "privateDescription": "Only you see this asset. It stays out of the other household member's net worth.",
+    "privateDescription": "Only you see this asset. It stays out of the net worth of the other people in your household.",
     "notes": "Notes",
     "notesOptional": "Notes, optional",
     "optional": "Optional",
@@ -2230,6 +2247,7 @@
       "address-exists": "This address is already on the wallet.",
       "feature-disabled": "Crypto wallets are not turned on for this network on this server.",
       "demo": "The demo is read-only, so nothing was saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You can no longer change this wallet. Sign in again or check with your household.",
       "mfa": "Confirm it is you to continue.",
       "not-found": "This wallet no longer exists, or it is private to the other member of your household.",
@@ -2373,6 +2391,7 @@
       "forward": "Remove from this month onward",
       "failures": {
         "demo": "Demo mode is read-only. This category was not removed.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "You no longer have access to change this budget.",
         "cancelled": "The removal was cancelled because your signed-in context changed.",
         "not-found": "This category is no longer part of the budget.",
@@ -2449,6 +2468,7 @@
     "confirmAction": "Apply through December",
     "failures": {
       "demo": "Demo mode is read-only. No category change was saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget category.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the retained values before trying again.",
       "not-found": "This category or budget month is no longer available. Future month rows may not exist. Your values were retained.",
@@ -2514,6 +2534,7 @@
     "failures": {
       "unknown": "The creation result is unknown. The app is checking both budget lists and will not submit again",
       "demo": "Demo profiles are read-only. No budget was created",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to create a budget",
       "invalid": "Review the household and income values",
       "general": "The budget could not be created. Your entries were retained"
@@ -2565,6 +2586,7 @@
       "unknown": "The result is uncertain. The current month is being refreshed before another attempt is allowed",
       "duplicate": "The server reported a duplicate. The current month was refreshed because the category may already exist",
       "demo": "Demo profiles are read-only. No category was added",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to add a budget category",
       "not-found": "The budget or category is no longer available",
       "invalid": "Choose a leaf category, positive amount, and recurrence",
@@ -2590,6 +2612,7 @@
     "saving": "Saving…",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget.",
       "cancelled": "The save was cancelled because your signed-in context changed.",
       "not-found": "This budget no longer exists.",
@@ -2645,6 +2668,7 @@
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
       "not-found": "This budget no longer exists. Your form has not been cleared.",
@@ -2661,6 +2685,7 @@
     "deleteConfirmAction": "Delete budget",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This budget was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to delete this budget.",
       "cancelled": "The deletion was cancelled because your signed-in context changed.",
       "not-found": "This budget no longer exists.",
@@ -2816,6 +2841,7 @@
       "validation": "The server did not accept these details. Review the fields before confirming again",
       "request": "The server rejected this request. Review the frozen details or return to Goals",
       "demo": "Demo mode is read-only. No goal was created",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed before this goal could be created",
       "mfa": "Complete multi-factor authentication before creating a goal",
       "cancelled": "Creation was cancelled before the request was sent. No goal was created",
@@ -2901,6 +2927,7 @@
         "validation": "Enter a positive amount with no more than four decimal places",
         "insufficient-reserve": "The amount cannot exceed the available reserve. Refresh before trying a different amount",
         "demo": "Demo mode is read-only. No reserve change was made",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Your access changed before this reserve change could be saved",
         "mfa": "Complete multi-factor authentication before changing this reserve",
         "not-found": "This goal is no longer available",
@@ -2913,6 +2940,7 @@
     "writeFailures": {
       "validation": "Check the highlighted details. Amounts must be positive and use no more than four decimal places",
       "demo": "Demo mode is read-only. No change was made",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed before this could be saved",
       "mfa": "Complete multi-factor authentication before making this change",
       "not-found": "This goal or account is no longer available. Refresh before trying again",
@@ -3140,6 +3168,7 @@
     "failures": {
       "validation": "Check the name and currency",
       "demo": "Portfolio creation is unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed. Return to the app and try again",
       "mfa": "Additional verification is required",
       "cancelled": "Creation was cancelled before it was sent",
@@ -3221,6 +3250,7 @@
     "failures": {
       "validation": "Check the fields",
       "demo": "Portfolio settings are unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed",
       "mfa": "Additional verification is required",
       "not-found": "This portfolio is no longer available",
@@ -3239,7 +3269,7 @@
     "includesHoldingsHint": "Net worth counts the account and shows this portfolio without adding it again.",
     "cashOnly": "No, cash only",
     "cashOnlyHint": "Net worth counts the account's cash and this portfolio.",
-    "managedByPartner": "This portfolio is linked to an account only the other household member can see, so only they can change the link.",
+    "managedByPartner": "This portfolio is linked to an account only another household member can see, so only they can change the link.",
     "alreadyLinkedBy": "Already linked by {{name}}",
     "suggestionTitle": "Is this the same money?",
     "suggestionBody": "You have an investment account and a portfolio that isn't linked to an account. If the account already holds the portfolio, link them so net worth counts it once.",
@@ -3253,6 +3283,7 @@
     "saved": "Link saved",
     "failures": {
       "demo": "Linking is unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed",
       "mfa": "Additional verification is required",
       "not-found": "This portfolio or account is no longer available",
@@ -3273,6 +3304,7 @@
     "deleteConfirmMessage": "This permanently removes {{name}} from this portfolio. This cannot be undone.",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This transaction was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Multi-factor authentication is required to make this change.",
       "not-found": "This transaction no longer exists.",
@@ -3290,6 +3322,7 @@
     "savingEdit": "Saving…",
     "editFailures": {
       "demo": "Demo mode is read-only. This transaction was not changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Multi-factor authentication is required to make this change.",
       "not-found": "This transaction no longer exists.",
@@ -3428,7 +3461,7 @@
   },
   "household": {
     "title": "Household",
-    "helper": "Share your WonderMoney plan with one partner",
+    "helper": "Share your WonderMoney plan with the people in your household",
     "loading": "Loading your household…",
     "back": "Back",
     "stale": "Showing the last known household. Pull to refresh for the latest.",
@@ -3436,66 +3469,134 @@
       "heading": "Members",
       "you": "You",
       "roleOwner": "Owner",
-      "roleMember": "Member"
+      "roleMember": "Member",
+      "roleAdmin": "Admin",
+      "roleViewer": "Viewer"
     },
     "actions": {
-      "remove": "Remove",
-      "leave": "Leave household"
+      "remove": "Remove from household",
+      "leave": "Leave household",
+      "changeRole": "Change role",
+      "transferOwnership": "Make owner",
+      "menuFor": "Actions for {{name}}"
     },
     "leaving": "Leaving…",
     "removeDialog": {
       "title": "Remove {{name}}?",
-      "description": "They will lose access to this household's shared finances. Their existing data stays, but their bank connections will be disconnected.",
+      "description": "They lose access to this household right away and are signed out. The accounts and transactions they added stay with the household, and their bank connections are disconnected.",
       "confirm": "Remove"
     },
     "leaveDialog": {
       "title": "Leave this household?",
-      "description": "You will lose access to this household's shared finances. Your existing data stays, but your bank connections will be disconnected.",
+      "description": "You lose access to its shared accounts, budgets and goals, and your bank connections are disconnected. You'll be signed out; sign in again to start with a household of your own.",
       "confirm": "Leave"
     },
-    "removeFailures": {
-      "demo": "This action is unavailable in demo mode.",
-      "access": "You no longer have access to manage this household.",
-      "cancelled": "This was cancelled because your signed-in context changed.",
-      "conflict": "This member could not be removed right now.",
-      "invalid": "This member could not be removed.",
-      "not-found": "This member is no longer part of the household.",
-      "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
-      "general": "This could not be completed. Try again."
-    },
     "pending": {
-      "heading": "Pending invite",
+      "heading": "Pending invites",
       "sentTo": "Invited {{email}}",
       "expires": "Expires {{date}}",
       "resend": "Resend",
       "resending": "Resending…",
       "revoke": "Revoke",
-      "revoking": "Revoking…"
+      "revoking": "Revoking…",
+      "resendFor": "Resend invite to {{email}}",
+      "revokeFor": "Revoke invite to {{email}}"
     },
     "invite": {
-      "heading": "Invite a partner",
-      "description": "Invite one partner to share this household's plan. They'll get an email with a link to join.",
+      "heading": "Invite someone",
+      "description": "They'll get an email with a link to join. Someone who already has an account joins from the app.",
       "emailLabel": "Email",
-      "emailPlaceholder": "partner@example.com",
+      "emailPlaceholder": "name@example.com",
       "invalidEmail": "Enter a valid email address",
       "submit": "Send invite",
-      "sending": "Sending…"
+      "sending": "Sending…",
+      "roleLabel": "Role",
+      "full": "Your household is full: it has room for {{max}} people, counting pending invites."
     },
     "inviteFailures": {
       "demo": "Invites are unavailable in demo mode.",
-      "access": "You no longer have access to invite a partner.",
+      "access": "You no longer have access to invite people.",
       "cancelled": "This was cancelled because your signed-in context changed.",
-      "conflict": "Your household is full, or that email already has an account.",
+      "conflict": "This invite could not be sent right now. Refresh and try again.",
       "invalid": "Enter a valid email address that isn't your own.",
       "not-found": "This household could not be found.",
       "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
-      "general": "The invite could not be sent. Try again."
+      "general": "The invite could not be sent. Try again.",
+      "read-only": "You have view-only access to this household, so no invite was sent.",
+      "role-required": "Your role can't invite people with that role.",
+      "full": "Your household is full. Revoke an invite or remove someone first.",
+      "already-member": "That person is already in this household."
     },
     "states": {
       "errorTitle": "Could not load your household",
       "errorMessage": "Check your connection and try again.",
       "invalid-responseTitle": "Could not verify household data",
       "invalid-responseMessage": "This screen will not use unverified household data."
+    },
+    "roles": {
+      "adminDescription": "Can invite people and manage members and viewers.",
+      "memberDescription": "Can see and change shared accounts, budgets and goals.",
+      "viewerDescription": "Can see shared finances but not change them."
+    },
+    "roleDialog": {
+      "title": "{{name}}'s role"
+    },
+    "transferDialog": {
+      "title": "Make {{name}} the owner?",
+      "description": "{{name}} becomes the owner of this household and can manage everyone in it. You become an admin. Only the new owner can undo this.",
+      "confirm": "Make owner",
+      "transferring": "Transferring…"
+    },
+    "memberFailures": {
+      "demo": "This action is unavailable in demo mode.",
+      "read-only": "You have view-only access to this household, so nothing was changed.",
+      "role-required": "Your role doesn't allow this change. Refresh to see the current roles.",
+      "access": "You no longer have access to manage this household.",
+      "cancelled": "This was cancelled because your signed-in context changed.",
+      "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
+      "full": "Your household is full.",
+      "already-member": "That person is already in this household.",
+      "conflict": "This change could not be made right now. Refresh and try again.",
+      "invalid": "This change could not be made.",
+      "not-found": "This member is no longer part of the household.",
+      "general": "This could not be completed. Try again."
+    },
+    "joinExisting": {
+      "validating": "Checking your invite…",
+      "invalidTitle": "This invite isn't valid",
+      "invalidBody": "It may have been used, revoked or expired. Ask for a new invite.",
+      "unavailableTitle": "Couldn't check this invite",
+      "unavailableBody": "Check your connection and try again.",
+      "titleHousehold": "Join {{name}}?",
+      "titleInviter": "Join {{name}}'s household?",
+      "titleGeneric": "Join this household?",
+      "role": "You'll join as: {{role}}",
+      "invitedEmail": "Invite for {{email}}",
+      "consequencesHeading": "What happens to what you have now",
+      "consequences": {
+        "emptyOnly": "You can join only if your current household has no accounts or transactions.",
+        "leftBehind": "Budgets, categories, rules and goals you set up there stay behind. They are not moved.",
+        "banksDisconnected": "Bank connections there are disconnected.",
+        "yoursStays": "Your sign-in, profile and settings stay yours."
+      },
+      "failureTitle": "You couldn't join this household",
+      "failures": {
+        "household-has-data": "Your current household has accounts or transactions. Delete them first, or accept with another account.",
+        "household-has-members": "You own a household with other members. Transfer ownership or remove them first.",
+        "already-member": "You're already in this household.",
+        "household-full": "This household is full. Ask whoever invited you to make room.",
+        "email-mismatch": "This invite is for another email address. Sign in with the invited email to join.",
+        "expired": "This invite has expired. Ask for a new one.",
+        "invalid": "This invite isn't valid any more. Ask for a new one.",
+        "already-used": "This invite has already been used.",
+        "demo": "The demo can't join a household.",
+        "cancelled": "This was cancelled because your signed-in context changed.",
+        "network-ambiguous": "The connection was lost and the result is unknown. Open your household to check before trying again.",
+        "general": "Something went wrong. Try again."
+      },
+      "join": "Join household",
+      "joining": "Joining…",
+      "notNow": "Not now"
     }
   },
   "security": {
@@ -3537,7 +3638,7 @@
     },
     "dataExport": {
       "heading": "Export your data",
-      "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Your partner's private accounts are not included.",
+      "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Other members' private accounts are not included.",
       "start": "Export all data",
       "protect": "Protect the file with a password",
       "password": "Password",
@@ -3865,6 +3966,7 @@
         "confirmAction": "Disconnect",
         "failures": {
           "demo": "This action is unavailable in demo mode.",
+          "read-only": "$t(common.householdReadOnly)",
           "access": "You don't have access to disconnect this bank.",
           "cancelled": "The disconnect request was cancelled.",
           "not-found": "That connection is no longer available.",
@@ -3945,6 +4047,7 @@
         "server-not-allowed": "This setup token points to a SimpleFIN server this WonderMoney server doesn't allow. Create one at SimpleFIN Bridge instead.",
         "rejected": "SimpleFIN did not accept this setup token. Create a new one at SimpleFIN Bridge and try again.",
         "demo": "This action is unavailable in demo mode.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "You don't have access to connect a bank.",
         "mfa": "Additional verification is required before you can connect a bank.",
         "disabled": "SimpleFIN isn't turned on for this server.",
@@ -3978,6 +4081,7 @@
       },
       "failures": {
         "demo": "This action is unavailable in demo mode.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "You don't have access to import a statement.",
         "mfa": "Additional verification is required before you can import a statement.",
         "cancelled": "The import was cancelled.",
@@ -4198,6 +4302,7 @@
     "tryAgain": "Try again",
     "failures": {
       "demo": "Importing transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The import was cancelled before it was sent.",
@@ -4267,6 +4372,7 @@
     "metadataError": "Could not load the details needed to add a transaction",
     "failures": {
       "demo": "Adding transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Additional verification is required.",
       "cancelled": "The save was cancelled because your signed-in context changed.",
@@ -4607,7 +4713,7 @@
       "description": "Manage your categories"
     },
     "household": {
-      "description": "Share accounts, budgets, and goals with your partner."
+      "description": "Share accounts, budgets, and goals with the people in your household."
     },
     "connections": {
       "heading": "Bank connections",
@@ -4880,6 +4986,7 @@
     },
     "failures": {
       "demo": "This is not available in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to this card’s plans.",
       "invalid": "The plan was refused. Check the details and try again.",
       "conflict": "One of these transactions is already linked to another installment.",
@@ -5095,6 +5202,7 @@
       "done_other": "Done: {{count}} transactions changed",
       "inProgress": "Rules are already being applied. Wait for that to finish, then try again.",
       "demo": "Demo profiles are read-only. Existing transactions can't be changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your session needs attention before rules can be applied.",
       "error": "The rule could not be applied right now."
     },
@@ -5148,6 +5256,7 @@
     "failure": {
       "gone": "That change can no longer be applied: it expired, was already decided, or a transaction or category is gone. The list is up to date.",
       "demo": "Changes are turned off in the demo.",
+      "read-only": "$t(common.householdReadOnly)",
       "general": "Couldn't save that. Try again."
     }
   },

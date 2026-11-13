@@ -24,6 +24,7 @@ export const AUTHED_MOUNTS: Record<string, () => Promise<Router>> = {
   '/v1/financial-markets': async () => (await import('@route/financial-markets')).default,
   '/v1/goals': async () => (await import('@route/goal')).default,
   '/v1/household': async () => (await import('@route/household')).default,
+  '/v1/insights': async () => (await import('@route/insights')).default,
   '/v1/installment-plans': async () => (await import('@route/installment-plan')).default,
   '/v1/loan': async () => (await import('@route/loan')).default,
   '/v1/manual-assets': async () => (await import('@route/manual-asset')).default,
@@ -36,6 +37,7 @@ export const AUTHED_MOUNTS: Record<string, () => Promise<Router>> = {
   '/v1/rule': async () => (await import('@route/rule')).default,
   '/v1/tag': async () => (await import('@route/tag')).default,
   '/v1/transaction-import-sessions': async () => (await import('@route/transaction-import')).default,
+  '/v1/transaction-template': async () => (await import('@route/transaction-template')).default,
   '/v1/user': async () => (await import('@route/user')).default,
 };
 
