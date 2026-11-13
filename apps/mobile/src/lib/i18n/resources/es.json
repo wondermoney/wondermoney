@@ -4939,6 +4939,10 @@
       "unlinkConfirmMessage": "La cuota deja de contar como pagada. Su transacción se queda en la tarjeta como un movimiento normal.",
       "failures": {
         "wrongCard": "Esa transacción no es de la tarjeta de este plan.",
+        "pending": "Esa transacción aún está pendiente. Vincúlala cuando el banco la contabilice.",
+        "expired": "El banco anuló esa transacción, así que no pagó nada.",
+        "transactionLinked": "Esa transacción ya paga otra cuota. Desvincúlala de esa cuota primero. El plan se ha actualizado.",
+        "installmentPaid": "Esta cuota ya está pagada por otra transacción. Desvincula esa transacción primero. El plan se ha actualizado.",
         "alreadyLinked": "Esa transacción ya paga una cuota, o esta cuota ya está pagada por otra transacción. El plan se ha actualizado.",
         "notFound": "Esa transacción o este plan ya no existe. El plan se ha actualizado.",
         "linkFailed": "No se pudo vincular la transacción. Inténtalo de nuevo.",

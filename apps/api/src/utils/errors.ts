@@ -197,6 +197,15 @@ export const ERROR_CODE = {
   LOAN_SCHEDULE_UNAVAILABLE: 'loan_schedule_unavailable',
   /** A loan payoff projection needs a principal, an interest rate and a term (422). */
   LOAN_PROJECTION_UNAVAILABLE: 'loan_projection_unavailable',
+  /**
+   * Linking an installment to a charge the bank has not posted yet (400). A pending charge can still
+   * change or drop out; link it once it is posted.
+   */
+  TRANSACTION_PENDING: 'transaction_pending',
+  /** Linking a transaction to an installment while it already pays another one; unlink it first (409). */
+  TRANSACTION_ALREADY_LINKED: 'transaction_already_linked',
+  /** Linking a transaction to an installment that another transaction already pays; unlink that one first (409). */
+  INSTALLMENT_ALREADY_PAID: 'installment_already_paid',
   /** Linking a split transaction as a loan repayment; remove the split first (409). */
   TRANSACTION_IS_SPLIT: 'transaction_is_split',
   /**

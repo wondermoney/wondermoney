@@ -4939,6 +4939,10 @@
       "unlinkConfirmMessage": "The installment no longer counts as paid. Its transaction stays on the card as an ordinary row.",
       "failures": {
         "wrongCard": "That transaction is not on this plan’s card.",
+        "pending": "That transaction is still pending. Link it once the bank posts it.",
+        "expired": "The bank dropped that transaction, so it paid nothing.",
+        "transactionLinked": "That transaction already pays another installment. Unlink it there first. The plan has been refreshed.",
+        "installmentPaid": "This installment is already paid by another transaction. Unlink that one first. The plan has been refreshed.",
         "alreadyLinked": "That transaction already pays an installment, or this installment is already paid by another transaction. The plan has been refreshed.",
         "notFound": "That transaction or plan no longer exists. The plan has been refreshed.",
         "linkFailed": "Could not link the transaction. Try again.",

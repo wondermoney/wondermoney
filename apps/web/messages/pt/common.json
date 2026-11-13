@@ -3143,6 +3143,10 @@
     "link-installment-option": "{description}, prestação {number} de {count}",
     "link-errors": {
       "wrong-card": "Essa transação não é do cartão deste plano.",
+      "pending": "Essa transação ainda está pendente. Liga-a quando o banco a lançar.",
+      "expired": "O banco anulou essa transação, por isso não pagou nada.",
+      "transaction-linked": "Essa transação já paga outra prestação. Desliga-a dessa prestação primeiro. O plano foi atualizado.",
+      "installment-paid": "Esta prestação já está paga por outra transação. Desliga essa transação primeiro. O plano foi atualizado.",
       "already-linked": "Essa transação já paga uma prestação, ou esta prestação já está paga por outra transação. O plano foi atualizado.",
       "not-found": "Essa transação ou este plano já não existe. O plano foi atualizado.",
       "failed": "Não foi possível ligar a transação.",

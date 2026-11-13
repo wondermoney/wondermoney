@@ -127,24 +127,50 @@ const installmentLinkPath = ({
 
 /**
  * Why the API refused to link or unlink an installment, as the key of its message
- * (`installments.link-errors.*`). The endpoint answers with the generic codes: 400 when the
- * transaction is not on the plan's card (or the installment is past the plan's count), 409 when
- * the transaction already pays an installment or the installment is already paid by another
- * transaction, 404 when the plan or the transaction is gone.
+ * (`installments.link-errors.*`). The endpoint names each refusal: 400 `transaction_pending`
+ * (the bank has not posted the charge yet) and `transaction_expired` (the bank dropped it), 409
+ * `transaction_already_linked` (it already pays another installment) and
+ * `installment_already_paid` (another transaction pays this one), 404 when the plan or the
+ * transaction is gone. An older API answers with the generic codes, so the status still decides
+ * then: another 400 is a transaction on another card, another 409 either conflict.
  */
 export type InstallmentLinkError =
-  "demo" | "wrong-card" | "already-linked" | "not-found" | "failed";
+  | "demo"
+  | "pending"
+  | "expired"
+  | "wrong-card"
+  | "transaction-linked"
+  | "installment-paid"
+  | "already-linked"
+  | "not-found"
+  | "failed";
 
 export function installmentLinkError(error: unknown): InstallmentLinkError {
   if (isDemoReadOnlyError(error)) return "demo";
   const status = (error as { response?: { status?: unknown } } | undefined)
     ?.response?.status;
   const code = getApiErrorCode(error);
-  if (status === 400 && code !== "validation_failed") return "wrong-card";
-  if (status === 409) return "already-linked";
+  if (status === 400) {
+    if (code === "transaction_pending") return "pending";
+    if (code === "transaction_expired") return "expired";
+    if (code !== "validation_failed") return "wrong-card";
+  }
+  if (status === 409) {
+    if (code === "transaction_already_linked") return "transaction-linked";
+    if (code === "installment_already_paid") return "installment-paid";
+    return "already-linked";
+  }
   if (status === 404) return "not-found";
   return "failed";
 }
+
+/** A refusal that means the page is out of date: refetch the plan before the next try. */
+const STALE_LINK_ERRORS: readonly InstallmentLinkError[] = [
+  "transaction-linked",
+  "installment-paid",
+  "already-linked",
+  "not-found",
+];
 
 /**
  * After a link changes, or a refusal says the page is out of date: the plan, the commitments,
@@ -162,7 +188,7 @@ function useRefreshAfterLink() {
     },
     onError: async (error: unknown) => {
       const reason = installmentLinkError(error);
-      if (reason === "already-linked" || reason === "not-found") {
+      if (STALE_LINK_ERRORS.includes(reason)) {
         await invalidateInstallmentPlans(queryClient);
       }
     },

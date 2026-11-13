@@ -29,6 +29,31 @@ export function classifyInstallmentWriteFailure(error: unknown): InstallmentWrit
   return 'general'
 }
 
+/** A refused link or unlink: a write failure, or one of the link endpoint's own reasons. */
+export type InstallmentLinkFailure = InstallmentWriteFailure | 'pending' | 'expired' | 'transaction-linked' | 'installment-paid'
+
+/** The link endpoint's reasons (`ERROR_CODE` in the API), by the code it answers with. */
+const LINK_SERVER_FAILURES: Readonly<Record<string, InstallmentLinkFailure>> = {
+  transaction_pending: 'pending',
+  transaction_expired: 'expired',
+  transaction_already_linked: 'transaction-linked',
+  installment_already_paid: 'installment-paid',
+}
+
+/**
+ * Why a link or unlink was refused. The endpoint names each reason: 400 `transaction_pending` (the
+ * bank has not posted the charge yet) and `transaction_expired` (the bank dropped it), 409
+ * `transaction_already_linked` and `installment_already_paid`. An older API answers with the generic
+ * codes, so the status still decides then, as {@link classifyInstallmentWriteFailure} reads it.
+ */
+export function classifyInstallmentLinkFailure(error: unknown): InstallmentLinkFailure {
+  if (error instanceof ApiError && error.code === 'http' && error.serverCode) {
+    const known = LINK_SERVER_FAILURES[error.serverCode]
+    if (known) return known
+  }
+  return classifyInstallmentWriteFailure(error)
+}
+
 /**
  * A plan changes what its card shows: the plans, the commitment, the suggestions (a linked row is
  * no longer one), the "n/N" badges in transaction lists and the card's forecast.
@@ -99,17 +124,24 @@ export function useDeleteInstallmentPlan() {
 
 /**
  * The message key (`installments.link.failures.*` or `installments.failures.*`) for a refused link
- * or unlink. The endpoint answers with generic codes, so the status says why: 400 a transaction on
- * another card, 409 a transaction that already pays an installment (or an installment already
+ * or unlink. A named reason has its own message; otherwise the status says why: 400 a transaction
+ * on another card, 409 a transaction that already pays an installment (or an installment already
  * paid), 404 a plan or transaction that is gone.
  */
-export function installmentLinkFailureMessage(failure: InstallmentWriteFailure, action: 'link' | 'unlink'): string {
+export function installmentLinkFailureMessage(failure: InstallmentLinkFailure, action: 'link' | 'unlink'): string {
+  if (failure === 'pending') return 'installments.link.failures.pending'
+  if (failure === 'expired') return 'installments.link.failures.expired'
+  if (failure === 'transaction-linked') return 'installments.link.failures.transactionLinked'
+  if (failure === 'installment-paid') return 'installments.link.failures.installmentPaid'
   if (failure === 'invalid') return action === 'link' ? 'installments.link.failures.wrongCard' : 'installments.link.failures.unlinkFailed'
   if (failure === 'conflict') return 'installments.link.failures.alreadyLinked'
   if (failure === 'not-found') return 'installments.link.failures.notFound'
   if (failure === 'general') return action === 'link' ? 'installments.link.failures.linkFailed' : 'installments.link.failures.unlinkFailed'
   return `installments.failures.${failure}`
 }
+
+/** A refusal that means the page was out of date, so the plan is refetched. */
+const STALE_LINK_FAILURES: readonly InstallmentLinkFailure[] = ['conflict', 'transaction-linked', 'installment-paid', 'not-found']
 
 type InstallmentRef = Readonly<{ planId: number; accountId: number; installmentNumber: number }>
 
@@ -141,8 +173,7 @@ function useLinkWrite<Input extends InstallmentRef>(
     },
     onError: (error, input) => {
       blockOnMfa(error)
-      const failure = classifyInstallmentWriteFailure(error)
-      if (failure === 'conflict' || failure === 'not-found') refreshAfterWrite(queryClient, runtime.epochId, input.accountId)
+      if (STALE_LINK_FAILURES.includes(classifyInstallmentLinkFailure(error))) refreshAfterWrite(queryClient, runtime.epochId, input.accountId)
     },
   })
 }

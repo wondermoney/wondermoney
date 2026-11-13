@@ -19,6 +19,14 @@ import type { Transaction } from '@entity/Transaction';
  */
 export const EXPIRED_TRANSACTION_STATUS = 'EXPIRED';
 
+/** A row the bank has sent but not posted yet: it can still change, or drop out as EXPIRED. */
+export const PENDING_TRANSACTION_STATUS = 'PENDING';
+
+/** True when a status name marks a row that is not posted yet. A row with no status is posted. */
+export function isPendingStatusName(name: null | string | undefined): boolean {
+  return name === PENDING_TRANSACTION_STATUS;
+}
+
 /** True when a status name marks a row whose money never moved. */
 export function isExpiredStatusName(name: null | string | undefined): boolean {
   return name === EXPIRED_TRANSACTION_STATUS;
