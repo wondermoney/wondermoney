@@ -1,4 +1,6 @@
 import { renderHook } from '@testing-library/react-native'
+import { readdirSync } from 'node:fs'
+import { join, relative, sep } from 'node:path'
 
 import { captureAnalyticsEvent, featureScreens } from '@/lib/telemetry/analytics'
 
@@ -31,6 +33,10 @@ describe('resolveFeatureScreen', () => {
     ['/reports/month-comparison', 'report_month_comparison'],
     ['/settings/profile/edit', 'settings_profile_edit'],
     ['/net-worth/history', 'net_worth_history'],
+    ['/home/customize', 'home_customize'],
+    ['/more/banking/history', 'bank_sync_history'],
+    ['/more/pending-changes', 'pending_changes'],
+    ['/settings/rules', 'settings_rules'],
   ])('maps the static route %p to %p', (pathname, screen) => {
     expect(resolveFeatureScreen(pathname)).toBe(screen)
   })
@@ -48,6 +54,8 @@ describe('resolveFeatureScreen', () => {
     ['/portfolio/abc123', 'portfolio_detail'],
     ['/portfolio/abc123/holding/asset_7', 'portfolio_holding_detail'],
     ['/settings/categories/cat_3/edit', 'settings_category_edit'],
+    ['/assets/as_4/edit', 'asset_edit'],
+    ['/accounts/8142/installments/plan_5', 'installment_plan_detail'],
   ])('reduces the identifier-bearing route %p to %p', (pathname, screen) => {
     expect(resolveFeatureScreen(pathname)).toBe(screen)
   })
@@ -62,6 +70,7 @@ describe('resolveFeatureScreen', () => {
     ['/markets/screener', 'market_screener'],
     ['/portfolio/create', 'portfolio_create'],
     ['/portfolio/activity', 'portfolio_activity'],
+    ['/accounts/8142/installments/create', 'installment_plan_create'],
   ])('prefers the literal route %p over the dynamic one at the same depth', (pathname, screen) => {
     expect(resolveFeatureScreen(pathname)).toBe(screen)
   })
@@ -80,6 +89,75 @@ describe('resolveFeatureScreen', () => {
       expect(screen).not.toBeNull()
       expect(allowed.has(screen as string)).toBe(true)
     }
+  })
+})
+
+/**
+ * The route tree itself, walked from disk, so a screen added later without an
+ * identifier fails here instead of silently recording no view. Each route file
+ * becomes the pathname expo-router would report for it: groups such as `(app)`
+ * drop out, `index` is its folder, and every `[param]` gets a recognisable
+ * stand-in value so a leak of it into the payload is easy to spot.
+ */
+const APP_DIR = join(__dirname, '..', '..', 'app')
+const DYNAMIC_MARKER = 'leak7f3a'
+
+function routeFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name)
+    if (entry.isDirectory()) return routeFiles(path)
+    if (!/\.tsx?$/.test(entry.name) || /\.test\.tsx?$/.test(entry.name)) return []
+    // `_layout` wraps routes and `+native-intent` rewrites links; neither is a screen.
+    if (entry.name.startsWith('_') || entry.name.startsWith('+')) return []
+    return [path]
+  })
+}
+
+function toPathname(file: string): { pathname: string; dynamic: boolean } {
+  const segments = relative(APP_DIR, file)
+    .replace(/\.tsx?$/, '')
+    .split(sep)
+    .filter((segment) => !/^\(.+\)$/.test(segment))
+  if (segments.at(-1) === 'index') segments.pop()
+  let dynamic = false
+  const concrete = segments.map((segment) => {
+    const param = /^\[(.+)\]$/.exec(segment)?.[1]
+    if (param === undefined) return segment
+    if (param.startsWith('...')) throw new Error(`catch-all route ${file} needs its own pattern handling`)
+    dynamic = true
+    return `${param}-${DYNAMIC_MARKER}`
+  })
+  return { pathname: `/${concrete.join('/')}`, dynamic }
+}
+
+const routes = routeFiles(APP_DIR).map((file) => ({ file: relative(APP_DIR, file), ...toPathname(file) }))
+
+describe('every route in src/app', () => {
+  it('finds the route tree', () => {
+    expect(routes.length).toBeGreaterThan(50)
+    expect(routes.some((route) => route.dynamic)).toBe(true)
+  })
+
+  it.each(routes.map((route) => [route.file, route.pathname] as const))(
+    'has a screen identifier: %s',
+    (_file, pathname) => {
+      expect(resolveFeatureScreen(pathname)).not.toBeNull()
+    },
+  )
+
+  it('gives distinct screens distinct identifiers', () => {
+    const byScreen = new Map<string, string[]>()
+    for (const route of routes) {
+      const screen = resolveFeatureScreen(route.pathname) ?? 'unmapped'
+      byScreen.set(screen, [...(byScreen.get(screen) ?? []), route.file])
+    }
+    const shared = [...byScreen].filter(([, files]) => files.length > 1)
+    expect(shared).toEqual([])
+  })
+
+  it('leaves no identifier without a route', () => {
+    const reached = new Set(routes.map((route) => resolveFeatureScreen(route.pathname)))
+    expect(featureScreens.filter((screen) => !reached.has(screen))).toEqual([])
   })
 })
 
@@ -107,6 +185,25 @@ describe('useFeatureScreenAnalytics', () => {
 
     expect(captured).not.toHaveBeenCalled()
     hook.unmount()
+  })
+
+  it('keeps every dynamic segment of every route out of the payload', async () => {
+    const dynamicRoutes = routes.filter((route) => route.dynamic)
+    expect(dynamicRoutes.length).toBeGreaterThan(0)
+
+    for (const route of dynamicRoutes) {
+      captured.mockReset()
+      mockUsePathname.mockReturnValue(route.pathname)
+
+      const hook = await renderHook(() => useFeatureScreenAnalytics())
+
+      expect(captured).toHaveBeenCalledTimes(1)
+      const [event, properties] = captured.mock.calls[0] ?? []
+      expect(event).toBe('feature_screen_viewed')
+      expect(Object.keys(properties ?? {})).toEqual(['screen'])
+      expect(JSON.stringify(captured.mock.calls)).not.toContain(DYNAMIC_MARKER)
+      await hook.unmount()
+    }
   })
 
   it('reports one view per screen, not one per resource', async () => {

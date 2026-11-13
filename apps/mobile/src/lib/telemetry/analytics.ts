@@ -44,6 +44,7 @@ export const featureScreens = [
   'onboarding_create_account',
   // Tabs
   'dashboard',
+  'home_customize',
   'accounts',
   'goals',
   'portfolio',
@@ -58,6 +59,9 @@ export const featureScreens = [
   'transaction_create',
   'transaction_import',
   'transaction_scan',
+  // Credit-card installment plans
+  'installment_plan_create',
+  'installment_plan_detail',
   // Budgets
   'budgets',
   'budget_create',
@@ -76,6 +80,7 @@ export const featureScreens = [
   'asset_create',
   'crypto_wallet_create',
   'asset_detail',
+  'asset_edit',
   'asset_value',
   // Goals
   'goal_detail',
@@ -91,6 +96,9 @@ export const featureScreens = [
   'bank_connect',
   'bank_connect_simplefin',
   'bank_statement_import',
+  'bank_sync_history',
+  // Assistant proposals
+  'pending_changes',
   // Net worth
   'net_worth_history',
   // Portfolio
@@ -120,6 +128,7 @@ export const featureScreens = [
   'settings_preferences',
   'settings_profile',
   'settings_profile_edit',
+  'settings_rules',
   'settings_security',
 ] as const
 
