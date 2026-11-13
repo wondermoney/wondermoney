@@ -52,8 +52,8 @@ describe('installment plans', () => {
     return em.findOneOrFail(InstallmentPlan, { installmentPlanKey: created.installmentPlanKey }, { populate: ['accountKey', 'accountKey.currencyKey', 'categoryKey'] });
   }
 
-  const charge = (em: EntityManager, owner: Household, description: string, amount: number, day: string, account?: Account) =>
-    addTransaction(em, owner, { account, amount, date: utc(day), status: 'BOOKED' }).then(async (row) => {
+  const charge = (em: EntityManager, owner: Household, description: string, amount: number, day: string, account?: Account, status: 'BOOKED' | 'EXPIRED' | 'PENDING' | null = 'BOOKED') =>
+    addTransaction(em, owner, { account, amount, date: utc(day), status }).then(async (row) => {
       row.description = description;
       await em.flush();
       return row;
@@ -99,6 +99,28 @@ describe('installment plans', () => {
     const described = await describePlan(em, created, utc('2026-01-20'));
 
     expect(described.installments.map((row) => row.status)).toEqual(['paid', 'upcoming', 'upcoming']);
+  });
+
+  it('links a pending charge only once it posts, never one the bank dropped, and a row with no status as posted', async () => {
+    const { em, owner } = await household();
+    const created = await plan(em, owner);
+    const pending = await charge(em, owner, 'LOJAS X PARC 01/03', -33.33, '2026-01-10', undefined, 'PENDING');
+    const dropped = await charge(em, owner, 'LOJAS X PARC 02/03', -33.33, '2026-02-10', undefined, 'EXPIRED');
+    // Hand-entered and older rows carry no status; they are posted.
+    const unstated = await charge(em, owner, 'LOJAS X PARC 03/03', -33.34, '2026-03-10', undefined, null);
+    const tenantKey = owner.tenant.tenantKey;
+
+    await expect(linkPostedInstallments(em, { tenantKey })).resolves.toBe(1);
+    expect((await describePlan(em, created, utc('2026-03-20'))).installments.map((row) => row.transactionKey)).toEqual([null, null, unstated.transactionKey]);
+
+    // When the bank posts the charge, the sync promotes the pending row in place; its linking pass, over every unlinked charge, then picks it up.
+    pending.transactionStatusKey = owner.statuses.BOOKED;
+    await em.flush();
+    await expect(linkPostedInstallments(em, { tenantKey })).resolves.toBe(1);
+
+    const described = await describePlan(em, created, utc('2026-03-20'));
+    expect(described.installments.map((row) => [row.status, row.transactionKey])).toEqual([['paid', pending.transactionKey], ['unmatched', null], ['paid', unstated.transactionKey]]);
+    expect((await em.fork().findOneOrFail(Transaction, { transactionKey: dropped.transactionKey }, { filters: false })).installmentPlanKey).toBeNull();
   });
 
   it('leaves a row that does not fit the plan for the user to link', async () => {
