@@ -56,13 +56,19 @@ describe('readiness', () => {
 
   it('gives up on a database that does not answer within the timeout instead of hanging', async () => {
     const never = () => new Promise<unknown>(() => undefined);
-    const started = Date.now();
+    // Fake time, so a busy machine cannot make the timeout look slow: the report has to be ready
+    // once 30 ms have passed, not after the 3 s default.
+    vi.useFakeTimers();
+    let report: Awaited<ReturnType<typeof run>> | undefined;
+    try {
+      void run({ execute: fakeDatabase({ backlog: never, heartbeat: never, ping: never }), timeoutMs: 30 }).then((value) => (report = value));
+      await vi.advanceTimersByTimeAsync(30);
+    } finally {
+      vi.useRealTimers();
+    }
 
-    const report = await run({ execute: fakeDatabase({ backlog: never, heartbeat: never, ping: never }), timeoutMs: 30 });
-
-    expect(Date.now() - started).toBeLessThan(1_000);
-    expect(report.status).toBe('degraded');
-    expect(report.checks).toEqual({
+    expect(report?.status).toBe('degraded');
+    expect(report?.checks).toEqual({
       database: { reason: 'timeout', status: 'fail' },
       queue: { reason: 'timeout', status: 'fail' },
       worker: { reason: 'timeout', status: 'fail' },

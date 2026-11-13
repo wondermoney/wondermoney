@@ -85,6 +85,29 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 run the files you touch, then `pnpm verify:changed` from the repository root before pushing (the
 root `CLAUDE.md`, "Verifying a change"); CI runs the whole suite.
 
+## Running tests
+
+The suite is split into vitest projects (`vitest.config.ts`); `pnpm test` (`vitest run`) runs
+`unit` and `db`, and a file path narrows any of them.
+
+| Script | Project | What |
+|---|---|---|
+| `pnpm test:unit` | `unit` | Files that start no database; the quick inner loop |
+| `pnpm test:db` | `db` | Files that import `__helpers__/pg-test-db.ts` (found by that import, no naming rule) |
+| `pnpm test:perf` | `perf` | `*.perf.test.ts`: timing budgets, only meaningful on a quiet machine; needs `TEST_POSTGRES_URL`. Not in `pnpm test` |
+
+- `pg-test-db.ts` runs most database tests on in-process PGlite. Tests of concurrent sessions
+  pass `postgresUrl: process.env.TEST_POSTGRES_URL` and are skipped without it; point it at a
+  throwaway server only (`postgres://user:pass@localhost:<port>/<maintenance db>`).
+- On that server each file gets a copy of a template database (`wm_tpl_<schema>_<hash>`, built once
+  per schema and shared by every run with the same hash) named `<WM_TEST_DB_PREFIX>_<pid>_<time>_<hex>`
+  (prefix default `wm_test`; give each worktree its own). A run drops its databases when it ends
+  and sweeps those of dead runs under its prefix when it starts (`__helpers__/pg-test-run.ts`).
+- `VITEST_MAX_WORKERS` caps the workers (vitest reads it, overriding `--maxWorkers`).
+- A pg-boss double wrapped in `withPgBossNameRules` (`__helpers__/pgboss-names.ts`) refuses the
+  queue names and schedule keys pg-boss refuses; `worker.bootstrap.test.ts` boots the worker
+  through it, so every queue and schedule the worker registers is checked.
+
 ## Code conventions
 
 - **Path aliases, never cross-layer relative imports:** `@app/*` → `src/*`, `@entity/*` →

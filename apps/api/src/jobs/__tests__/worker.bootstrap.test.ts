@@ -130,6 +130,7 @@ vi.mock('@app/jobs/portfolio-csv-import-confirmed.worker', () => ({
 }));
 vi.mock('@service/operations/background-operation-recovery.service', () => ({ default: { recoverOnce: recoverOnceMock } }));
 
+import { withPgBossNameRules } from '@app/__tests__/__helpers__/pgboss-names';
 import {
   DEMO_DATA_REFRESH_SINGLETON_KEY,
 } from '@app/jobs/demo-data-refresh.queue';
@@ -164,7 +165,9 @@ describe('worker startup bootstrap', () => {
   });
 });
 
-const createBossMock = (overrides: Record<string, unknown> = {}) => ({
+// Refuses the queue names and schedule keys the real pg-boss refuses (`pgboss-names.ts`), so every
+// queue and schedule the worker registers is checked in every test below.
+const createBossMock = (overrides: Record<string, unknown> = {}) => withPgBossNameRules({
   createQueue: createQueueMock,
   deleteQueue: deleteQueueMock,
   findJobs: vi.fn().mockResolvedValue([]),
@@ -271,13 +274,6 @@ describe('createWorker', () => {
       expect.not.objectContaining({ policy: 'short', singletonKey: expect.anything() }),
     );
     expect(createQueueMock).toHaveBeenCalledBefore(workMock);
-    // pg-boss asserts queue names and schedule keys against /^[\w.\-/]+$/ at runtime; a mocked
-    // boss would not, so a bad name only showed up as a worker that never started.
-    const PG_BOSS_NAME = /^[\w.\-/]+$/;
-    for (const [queue] of createQueueMock.mock.calls) expect(queue).toMatch(PG_BOSS_NAME);
-    const scheduled = scheduleMock.mock.calls as [string, string, unknown, undefined | { key?: string; singletonKey?: string }][];
-    const scheduleNames = scheduled.flatMap(([queue, , , options]) => [queue, options?.key, options?.singletonKey]).filter((name) => name !== undefined);
-    for (const name of scheduleNames) expect(name).toMatch(PG_BOSS_NAME);
     expect(workMock).toHaveBeenCalledWith('foundation.health-check', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.initial-sync', { includeMetadata: true }, expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('user.data-export', expect.any(Function));
@@ -347,6 +343,20 @@ describe('createWorker', () => {
     expect(scheduleMock).not.toHaveBeenCalled();
     expect(unscheduleMock).not.toHaveBeenCalled();
     expect(startMock).toHaveBeenCalledOnce();
+  });
+
+  it('starts with every optional schedule owned, under queue names and schedule keys pg-boss accepts', async () => {
+    vi.stubEnv('PGBOSS_SCHEDULE', 'true');
+    vi.stubEnv('ENABLE_PGBOSS_DEMO_DATA_REFRESH', 'true');
+    vi.stubEnv('HETRIX_WORKER_HEARTBEAT_URL', 'https://heartbeat.example.test/ping');
+    const worker = createWorker({
+      backgroundOperationService: backgroundOperationServiceMock(),
+      createBoss: vi.fn(() => createBossMock()),
+      logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+    });
+
+    await worker.start();
+    expect(callNames(scheduleMock.mock.calls)).toEqual(expect.arrayContaining(['demo-data.refresh', 'worker.heartbeat']));
   });
 
   it('registers schedules when PGBOSS_SCHEDULE is explicitly true', async () => {
