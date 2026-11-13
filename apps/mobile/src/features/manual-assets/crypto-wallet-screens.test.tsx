@@ -124,6 +124,7 @@ describe('Crypto wallet page', () => {
     onRemoveAddress: jest.fn().mockResolvedValue(null),
     onSyncNow: jest.fn().mockResolvedValue(null),
     onUpdateWallet: jest.fn().mockResolvedValue(null),
+    onSetArchived: jest.fn().mockResolvedValue(null),
     onDeleteWallet: jest.fn().mockResolvedValue(null),
     ...overrides,
   })
@@ -136,7 +137,8 @@ describe('Crypto wallet page', () => {
     expect(view.getByText('Value today')).toBeOnTheScreen()
     expect(view.queryByRole('button', { name: 'Update value' })).not.toBeOnTheScreen()
     expect(view.queryByTestId('asset-valuations')).not.toBeOnTheScreen()
-    expect(view.getByText('Archive this wallet or edit its notes in WonderMoney on the web.')).toBeOnTheScreen()
+    // Archiving and notes are here now, so nothing sends the reader to the web.
+    expect(view.queryByText(/on the web/)).not.toBeOnTheScreen()
   })
 
   it('shows each address with its chain, kind, label, short address and status', async () => {
@@ -261,9 +263,65 @@ describe('Crypto wallet page', () => {
     alert.mockRestore()
   })
 
-  it('offers no edit or removal on an archived wallet', async () => {
-    const view = await renderScreen(detail(actions(), walletDetailFixture({}, { archived: true, archivedAt: '2026-11-12T09:00:00.000Z', value: null, valueInUserCurrency: null })))
-    expect(view.queryByRole('button', { name: 'Edit wallet' })).not.toBeOnTheScreen()
-    expect(view.queryByRole('button', { name: 'Remove wallet' })).not.toBeOnTheScreen()
+  it("edits the wallet's notes, trimmed, and clears them with null", async () => {
+    const wallet = actions()
+    const view = await renderScreen(detail(wallet, walletDetailFixture({}, { notes: 'Ledger in the drawer' })))
+    expect(view.getByLabelText('Notes, Ledger in the drawer')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Edit wallet' }))
+    const sheet = within(view.getByTestId('wallet-edit'))
+    expect(sheet.getByLabelText('Notes, optional').props.value).toBe('Ledger in the drawer')
+    // The same note, only re-spaced, is no change.
+    await fireEvent.changeText(sheet.getByLabelText('Notes, optional'), ' Ledger in the drawer ')
+    expect(sheet.getByRole('button', { name: 'Save' })).toBeDisabled()
+    await fireEvent.changeText(sheet.getByLabelText('Notes, optional'), ' Kept in the safe ')
+    await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(wallet.onUpdateWallet).toHaveBeenCalledWith({ notes: 'Kept in the safe' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Edit wallet' }))
+    await fireEvent.changeText(within(view.getByTestId('wallet-edit')).getByLabelText('Notes, optional'), '  ')
+    await fireEvent.press(within(view.getByTestId('wallet-edit')).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(wallet.onUpdateWallet).toHaveBeenLastCalledWith({ notes: null }))
+  })
+
+  it('archives the wallet only once confirmed, with the web text', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => buttons?.[0]?.onPress?.())
+    const wallet = actions()
+    const view = await renderScreen(detail(wallet))
+    await fireEvent.press(view.getByRole('button', { name: 'Archive' }))
+    await waitFor(() => expect(alert).toHaveBeenCalledWith('Archive this asset?', 'It stops counting in net worth from today. Its history stays.', expect.anything(), expect.anything()))
+    expect(wallet.onSetArchived).not.toHaveBeenCalled()
+    alert.mockImplementation((_title, _message, buttons) => buttons?.[1]?.onPress?.())
+    await fireEvent.press(view.getByRole('button', { name: 'Archive' }))
+    await waitFor(() => expect(wallet.onSetArchived).toHaveBeenCalledWith(true))
+    alert.mockRestore()
+  })
+
+  it('brings an archived wallet back without asking, and still offers edit and removal, as on the web', async () => {
+    const alert = jest.spyOn(Alert, 'alert')
+    const wallet = actions()
+    const view = await renderScreen(detail(wallet, walletDetailFixture({}, { archived: true, archivedAt: '2026-11-12T09:00:00.000Z', value: null, valueInUserCurrency: null })))
+    expect(view.getByRole('button', { name: 'Edit wallet' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Remove wallet' })).toBeOnTheScreen()
+    // The addresses and tokens of an archived wallet stay read-only.
+    expect(view.queryByRole('button', { name: 'Sync now' })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Bring back' }))
+    await waitFor(() => expect(wallet.onSetArchived).toHaveBeenCalledWith(false))
+    expect(alert).not.toHaveBeenCalled()
+    alert.mockRestore()
+  })
+
+  it('says the demo is read-only when it refuses an archive, and changes nothing', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => buttons?.[1]?.onPress?.())
+    const wallet = actions({ onSetArchived: jest.fn().mockResolvedValue({ kind: 'demo', addressIndex: null }) })
+    const view = await renderScreen(detail(wallet))
+    await fireEvent.press(view.getByRole('button', { name: 'Archive' }))
+    await waitFor(() => expect(view.getByText('The demo is read-only, so nothing was saved.')).toBeOnTheScreen())
+    expect(view.getByRole('button', { name: 'Archive' })).toBeOnTheScreen()
+    alert.mockRestore()
+  })
+
+  it('reads the wallet controls in Portuguese', async () => {
+    const view = await renderScreen(detail(actions(), walletDetailFixture({}, { archived: true, archivedAt: '2026-11-12T09:00:00.000Z', value: null, valueInUserCurrency: null })), 'pt-PT')
+    expect(view.getByRole('button', { name: 'Repor' })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Editar carteira' })).toBeOnTheScreen()
   })
 })

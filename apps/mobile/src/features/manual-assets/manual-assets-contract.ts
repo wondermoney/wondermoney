@@ -113,7 +113,8 @@ export const manualAssetCreateWriteSchema = z.object({
   purchasePrice: money.nonnegative().optional(),
   isPrivate: z.boolean(),
   notes: z.string().max(10_000).optional(),
-  growthRule: z.object({ annualRatePercent: z.number().finite().gt(-100).max(1000) }).strict().optional(),
+  // The start date is optional: without one the change runs from the latest valuation.
+  growthRule: z.object({ annualRatePercent: z.number().finite().gt(-100).max(1000), startDate: day.optional() }).strict().optional(),
 }).strict()
 
 export const manualAssetValuationWriteSchema = z.object({
@@ -148,13 +149,16 @@ export const cryptoWalletCreateEndpoint = writeEndpoint({
 })
 
 /**
- * What a wallet's page changes on it: its name, and its privacy (the owner only). The rest of
- * the PATCH (kind, value fields) does not apply to a wallet and is never sent from here.
+ * What a wallet's page changes on it, as web's: its name, its notes (null clears them), its privacy
+ * (the owner only), and `archived` alone for Archive or Bring back. The rest of the PATCH (kind,
+ * value fields) does not apply to a wallet and is never sent from here.
  */
 export const cryptoWalletUpdateWriteSchema = z.object({
   name: z.string().trim().min(1).max(255).optional(),
+  notes: z.string().max(10_000).nullable().optional(),
   isPrivate: z.boolean().optional(),
-}).strict().refine((value) => value.name !== undefined || value.isPrivate !== undefined)
+  archived: z.boolean().optional(),
+}).strict().refine((value) => Object.values(value).some((field) => field !== undefined))
 
 export type CryptoWalletUpdateWrite = z.input<typeof cryptoWalletUpdateWriteSchema>
 

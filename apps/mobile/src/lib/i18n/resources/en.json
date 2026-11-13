@@ -2154,7 +2154,8 @@
     "fieldErrors": {
       "value": "Enter zero or more",
       "amount": "Enter zero or more",
-      "growthRate": "Enter a percentage above -100 and up to 1000"
+      "growthRate": "Enter a percentage above -100 and up to 1000",
+      "date": "Enter a valid date (YYYY-MM-DD)."
     }
   },
   "manualAssetEdit": {
@@ -2272,8 +2273,7 @@
       "saveLabel": "Save label",
       "noPrice": "No price",
       "countToken": "Count {{symbol}}",
-      "notValuedYet": "Not valued yet: the value appears after the first sync.",
-      "manageOnWeb": "Archive this wallet or edit its notes in WonderMoney on the web."
+      "notValuedYet": "Not valued yet: the value appears after the first sync."
     },
     "manage": {
       "edit": "Edit wallet",
@@ -4293,7 +4293,7 @@
     "loading": "Loading holding details",
     "unavailable": "Unavailable",
     "currentValue": "Current value",
-    "gainLoss": "Gain or loss",
+    "gainLoss": "Unrealized gain or loss",
     "realizedGain": "Realized gain",
     "portfolioWeight": "Portfolio weight",
     "quantity": "Quantity",

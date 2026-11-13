@@ -141,6 +141,7 @@ function useCryptoWalletActions(assetId: number | null, onDeleted: () => void): 
     onRemoveAddress: (addressId) => attempt(() => remove.mutateAsync({ assetId, addressId })),
     onSyncNow: () => attempt(() => sync.mutateAsync({ assetId })),
     onUpdateWallet: (value) => attempt(() => update.mutateAsync({ assetId, value })),
+    onSetArchived: (archived) => attempt(() => update.mutateAsync({ assetId, value: { archived } })),
     onDeleteWallet: async () => {
       const outcome = await attempt(() => removeWallet.mutateAsync({ assetId }))
       if (outcome === null) onDeleted()
