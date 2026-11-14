@@ -48,7 +48,7 @@ export default function RepaymentCandidateDrawer({
   );
   const candidate =
     data?.candidates.find(
-      (item) => item.transactionKey === selectedTransactionKey,
+      (item) => item.transaction.transactionKey === selectedTransactionKey,
     ) ?? null;
   const selectedCandidate = candidate ?? null;
   return (

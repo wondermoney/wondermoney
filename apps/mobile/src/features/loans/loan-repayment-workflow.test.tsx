@@ -28,6 +28,15 @@ const renderWorkflow = async (overrides: Partial<React.ComponentProps<typeof Loa
 }
 
 describe('LoanRepaymentWorkflow', () => {
+  it.each(['en', 'pt-PT', 'es'])('shows the candidate account and translated confidence in %s', async (locale) => {
+    const candidate = { ...repaymentCandidateFixture, transaction: { ...repaymentCandidateFixture.transaction, accountName: 'Current account' } }
+    const { view } = await renderWorkflow({ candidates: { status: 'loaded', candidates: [candidate] } }, locale)
+    expect(view.getByText('Current account')).toBeOnTheScreen()
+    const i18n = await initMobileI18n(locale)
+    expect(view.getByText(new RegExp(i18n.t('loanRepayment.confidence.HIGH')))).toBeOnTheScreen()
+    view.unmount()
+  })
+
   it('requires an explicit frozen review before linking and explains classification-only behavior', async () => {
     const write = jest.fn().mockResolvedValue('success')
     const { view } = await renderWorkflow({ onWrite: write })

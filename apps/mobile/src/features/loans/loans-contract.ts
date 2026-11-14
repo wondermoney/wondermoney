@@ -188,7 +188,7 @@ export const loanRepaymentCandidateSchema = z.object({
   outstandingPrincipal: z.number().finite(),
   reasons: z.array(z.string()),
   suggestedAllocation: suggestedAllocationSchema,
-  transaction: loanRepaymentTransactionSchema,
+  transaction: loanRepaymentTransactionSchema.extend({ accountName: optionalNullableString }),
 })
 
 export const loanRepaymentCandidatesResponseSchema = z.object({
