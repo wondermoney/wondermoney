@@ -24,6 +24,21 @@ describe('portfolio view models', () => {
     expect(result.portfolioCount).toBe(2)
   })
 
+  it('lists a portfolio excluded from the aggregate dashboard, marked, without counting it with the figures', () => {
+    const result = mapPortfolioOverview(
+      { portfolios: [
+        { appuserCurrencyCode: 'EUR', balance: 220, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },
+        { appuserCurrencyCode: 'EUR', balance: 80, currencyKey: { code: 'EUR' }, name: 'Side pot', portfolioKey: 8 },
+      ] },
+      { portfolios: [
+        { currency: 'EUR', excluded: false, gainPercent: 10, name: 'Long-term', portfolioKey: 7, value: 220, weight: 100 },
+        { currency: 'EUR', excluded: true, gainPercent: 5, name: 'Side pot', portfolioKey: 8, value: 80, weight: 0 },
+      ], summary: { ...summary, portfolioCount: 1 } },
+    )
+    expect(result).toMatchObject({ portfolioCount: 1, totalValue: 220 })
+    expect(result.portfolios.map((portfolio) => [portfolio.name, portfolio.excluded ?? false])).toEqual([['Long-term', false], ['Side pot', true]])
+  })
+
   it('filtered by member, counts only the member\'s portfolios yet knows the household has some, and still offers every portfolio a transaction', () => {
     const list = { portfolios: [
       { appuserCurrencyCode: 'EUR', balance: 220, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },

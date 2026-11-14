@@ -216,13 +216,13 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ byAsset: [], currency: context.currency, total: 0 }, 'portfolio_income'))),
 
-  defineTool('get_portfolio_summary', 'Read-only portfolio summary: value, gains and the share of each portfolio, in the caller\'s base currency.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_portfolio_summary', 'Read-only portfolio summary: value, gains and the share of each portfolio, in the caller\'s base currency. A portfolio marked excluded is left out of the totals by the household\'s choice and has no share.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const dashboard = await portfolioDashboardService.getAggregateDashboard(viewer.appuser, 'YTD', viewer.tenant.tenantKey);
       return result(
         {
           currency: dashboard.summary.currency,
-          portfolios: dashboard.portfolios.map((portfolio) => ({ name: portfolio.name, value: portfolio.value, weight: portfolio.weight })),
+          portfolios: dashboard.portfolios.map((portfolio) => ({ excluded: portfolio.excluded, name: portfolio.name, value: portfolio.value, weight: portfolio.weight })),
           portfolioValue: dashboard.summary.totalValue,
           totalGainLoss: dashboard.summary.totalGainLoss,
           totalGainLossPercent: dashboard.summary.totalGainLossPercent,

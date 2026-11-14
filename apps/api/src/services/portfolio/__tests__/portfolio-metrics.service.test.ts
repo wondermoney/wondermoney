@@ -329,7 +329,8 @@ describe('portfolio metrics calculations', () => {
     });
 
     it('scopes the cash flows to the household when a tenant is given', async () => {
-      Object.assign(DI.em, { getKysely: vi.fn().mockReturnValue(createDatabase([])) });
+      // The household's portfolios, none excluded from the aggregate dashboard.
+      Object.assign(DI.em, { find: vi.fn().mockResolvedValue([]), getKysely: vi.fn().mockReturnValue(createDatabase([])) });
       portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue([]);
       portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([]);
 

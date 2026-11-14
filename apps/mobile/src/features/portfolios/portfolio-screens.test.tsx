@@ -40,6 +40,20 @@ describe('portfolio screens', () => {
     expect(create).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps a portfolio excluded from the aggregate dashboard openable, saying it is outside the totals instead of a weight', async () => {
+    const select = jest.fn()
+    const data: PortfolioOverviewViewModel = { ...overview, portfolios: [
+      { currency: 'EUR', description: null, gainPercent: -3.2, id: 3, name: 'Broker', nativeCurrency: 'USD', value: 120, weight: 100 },
+      { currency: 'EUR', description: null, excluded: true, gainPercent: 5, id: 4, name: 'Side pot', nativeCurrency: 'EUR', value: 80, weight: 0 },
+    ] }
+    const view = await provider(<PortfoliosScreen state={{ status: 'loaded', data }} onCreatePortfolio={jest.fn()} onAddTransaction={jest.fn()} onRefresh={jest.fn()} onLogout={jest.fn()} onSelectPortfolio={select} />)
+    const [counted, sidePot] = view.getAllByTestId('portfolio-row')
+    expect(within(sidePot!).getByText('Excluded from totals')).toBeOnTheScreen()
+    expect(within(counted!).queryByText('Excluded from totals')).not.toBeOnTheScreen()
+    await fireEvent.press(sidePot!)
+    expect(select).toHaveBeenCalledWith(4)
+  })
+
   it('leads with four summary figures and drives the period and the add flow from the header', async () => {
     const two: PortfolioOverviewViewModel = { ...overview, periodLabel: 'YTD', realizedGains: 0, unrealizedGains: 18.5, totalGainLoss: 20, totalGainLossPercent: 21, periodReturn: 17.06, portfolioCount: 2, portfolios: [...overview.portfolios, { ...overview.portfolios[0]!, id: 4, name: 'Tech picks' }] }
     const period = jest.fn()

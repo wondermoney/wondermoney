@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, test, vi } from "vitest";
+import { afterEach, beforeAll, test, vi } from "vitest";
 
 import type { Portfolio } from "@/lib/api/portfolio/usePortfolio";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
@@ -25,6 +25,15 @@ vi.mock("@/components/ui/dialog-responsive", () => ({
   ),
 }));
 
+beforeAll(() => {
+  // The switch measures itself.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+});
+
 afterEach(() => {
   cleanup();
   mutateAsync.mockClear();
@@ -38,7 +47,7 @@ const portfolio: Portfolio = {
   portfolioKey: 7,
 };
 
-function renderModal() {
+function renderModal(shown: Portfolio = portfolio) {
   vi.mocked(useUpdatePortfolio).mockReturnValue({
     isPending: false,
     mutateAsync,
@@ -49,7 +58,7 @@ function renderModal() {
       <PortfolioSettingsModal
         closeModal={vi.fn()}
         isOpen
-        portfolio={portfolio}
+        portfolio={shown}
       />
     </NextIntlClientProvider>,
   );
@@ -85,6 +94,38 @@ test("does not send the method when it did not change", async () => {
   );
   assert.equal(
     Object.hasOwn(mutateAsync.mock.calls[0]?.[0] ?? {}, "costBasisMethod"),
+    false,
+  );
+});
+
+test("switches the portfolio out of the aggregate dashboard", async () => {
+  const user = userEvent.setup();
+  renderModal();
+
+  const toggle = screen.getByRole("switch", {
+    name: "Exclude from aggregate dashboard",
+  });
+  assert.equal(toggle.getAttribute("aria-checked"), "false");
+  await user.click(toggle);
+  await user.click(screen.getByRole("button", { name: "Save" }));
+
+  await waitFor(() => assert.equal(mutateAsync.mock.calls.length, 1));
+  assert.equal(mutateAsync.mock.calls[0]?.[0]?.excluded, true);
+});
+
+test("shows an excluded portfolio as excluded and sends the switch only when changed", async () => {
+  const user = userEvent.setup();
+  renderModal({ ...portfolio, excluded: true });
+
+  const toggle = screen.getByRole("switch", {
+    name: "Exclude from aggregate dashboard",
+  });
+  assert.equal(toggle.getAttribute("aria-checked"), "true");
+  await user.click(screen.getByRole("button", { name: "Save" }));
+
+  await waitFor(() => assert.equal(mutateAsync.mock.calls.length, 1));
+  assert.equal(
+    Object.hasOwn(mutateAsync.mock.calls[0]?.[0] ?? {}, "excluded"),
     false,
   );
 });

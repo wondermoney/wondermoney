@@ -292,7 +292,10 @@ export function PortfolioAllocationSection({ state, title, locale }: { state: Po
 
 // ─── Portfolio breakdown ────────────────────────────────────────────────────
 
-/** Web's `PortfolioBreakdown` table as rows: name, value; weight and gain beneath. Rows open the portfolio. */
+/**
+ * Web's `PortfolioBreakdown` table as rows: name, value; weight and gain beneath. Rows open the
+ * portfolio. A portfolio excluded from the aggregate dashboard says so in place of its weight.
+ */
 export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { portfolios: readonly PortfolioRowViewModel[]; locale: string; onSelect: (id: number) => void }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
@@ -306,7 +309,7 @@ export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { po
             <ListRow
               key={portfolio.id}
               testID="portfolio-row"
-              accessibilityLabel={[portfolio.name, value, portfolio.weight !== undefined ? `${t('portfolioSections.weight')} ${points(portfolio.weight, locale)}` : null, `${t('portfolioSections.gain')} ${gain}`].filter(Boolean).join(', ')}
+              accessibilityLabel={[portfolio.name, value, portfolio.excluded ? t('portfolioSections.excludedFromTotals') : portfolio.weight !== undefined ? `${t('portfolioSections.weight')} ${points(portfolio.weight, locale)}` : null, `${t('portfolioSections.gain')} ${gain}`].filter(Boolean).join(', ')}
               leading={<EntityMark {...portfolioMark({ name: portfolio.brokerName })} />}
               onPress={() => onSelect(portfolio.id)}
               title={portfolio.name}
@@ -314,7 +317,9 @@ export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { po
               figure={<Amount align="right" currency={portfolio.currency} locale={locale} value={portfolio.value} />}
               figureMeta={<Text align="right" tone={portfolio.gainPercent > 0 ? 'success' : portfolio.gainPercent < 0 ? 'destructive' : 'muted'} variant="amountSmall">{gain}</Text>}
             >
-              {portfolio.weight !== undefined ? <ShareBar label={points(portfolio.weight, locale)} value={portfolio.weight} /> : null}
+              {portfolio.excluded
+                ? <Text tone="muted" variant="meta">{t('portfolioSections.excludedFromTotals')}</Text>
+                : portfolio.weight !== undefined ? <ShareBar label={points(portfolio.weight, locale)} value={portfolio.weight} /> : null}
             </ListRow>
           )
         })}

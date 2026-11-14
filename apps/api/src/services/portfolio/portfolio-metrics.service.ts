@@ -9,7 +9,7 @@ import type { MemberFilter } from '@service/household/member-attribution';
 import { historyInViewerCurrency, historyRatePairs, type PortfolioSnapshotValue } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
-import { memberPortfolioKeys } from './portfolio-member-scope';
+import { aggregatePortfolioKeys } from './portfolio-member-scope';
 import {
   calculateMaxDrawdown,
   calculateMoneyWeightedAnnualYield,
@@ -148,11 +148,12 @@ class PortfolioMetricsService {
 
   /**
    * The metrics of every household portfolio together, or with `members` of the portfolios those
-   * members own (a former member's as Shared): value, allocation, returns and risk alike.
+   * members own (a former member's as Shared): value, allocation, returns and risk alike. A
+   * portfolio excluded from the aggregate dashboard is left out (`aggregatePortfolioKeys`).
    */
   async getPortfoliosMetrics(appuser: Appuser, fromDate?: Date, tenantKey?: number, members?: MemberFilter): Promise<{ metrics: PortfolioMetrics }> {
-    // The household's portfolios, or those the member filter keeps (`memberPortfolioKeys`).
-    const selected = await memberPortfolioKeys(DI.em, tenantKey, members);
+    // The household's portfolios, or those the member filter keeps, less the excluded ones.
+    const selected = await aggregatePortfolioKeys(DI.em, tenantKey, members);
     // Get current holdings and their values
     const currentHoldings = await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, selected);
     const validHoldings = filterValidHoldings(currentHoldings);

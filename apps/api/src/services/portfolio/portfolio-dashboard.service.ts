@@ -15,7 +15,7 @@ import { calculateCostBasis, getPeriodStartDate } from './portfolio-dashboard.ut
 import { historyInViewerCurrency, historyRatePairs } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
-import { memberPortfolioKeys } from './portfolio-member-scope';
+import { aggregatePortfolioKeys, aggregatePortfolioScope } from './portfolio-member-scope';
 import {
   calculateTimeWeightedReturn,
   combinePeriodMeasures,
@@ -143,6 +143,11 @@ interface PerformanceResponse {
 
 interface PortfolioBreakdownItem {
   currency: string;
+  /**
+   * Switched to "Exclude from aggregate dashboard": listed so its page can be opened, but outside
+   * every combined figure, so its weight is 0.
+   */
+  excluded: boolean;
   gainPercent: number;
   name: string;
   portfolioKey: number;
@@ -310,11 +315,12 @@ export class PortfolioDashboardService {
 
   /**
    * The summary and breakdown of every household portfolio together. `members` keeps the
-   * portfolios those members own, a former member's as Shared (`memberPortfolioKeys`), so every
-   * figure (value, gains, return, counts) is theirs alone.
+   * portfolios those members own, a former member's as Shared (`aggregatePortfolioScope`), so every
+   * figure (value, gains, return, counts) is theirs alone. A portfolio excluded from the aggregate
+   * dashboard counts in none of them; it is listed last in the breakdown, marked, with no weight.
    */
   async getAggregateDashboard(appuser: Appuser, period: Period = 'YTD', tenantKey?: number, options: DashboardOptions = {}, members?: MemberFilter): Promise<AggregateDashboardResponse> {
-    const selected = await memberPortfolioKeys(DI.em, tenantKey, members);
+    const { excluded, included: selected } = await aggregatePortfolioScope(DI.em, tenantKey, members);
     const portfolios = await DI.em.find(
       Portfolio,
       { deletedAt: undefined, ...portfolioScope(appuser, tenantKey), ...(selected ? { portfolioKey: { $in: selected } } : {}) },
@@ -341,17 +347,13 @@ export class PortfolioDashboardService {
     const periodInputs: PeriodInputs[] = [];
 
     for (const portfolio of portfolios) {
-      const portfolioHoldings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolio.portfolioKey, tenantKey);
-      const validPortfolioHoldings = filterValidHoldings(portfolioHoldings);
-      const portfolioValue = valuePortfolioHoldings(portfolioHoldings).value;
-      const portfolioCostBasis = calculateCostBasis(validPortfolioHoldings);
-      const portfolioGain =
-        portfolioCostBasis > 0 ? ((portfolioValue - portfolioCostBasis) / portfolioCostBasis) * 100 : 0;
+      const { gainPercent: portfolioGain, value: portfolioValue } = this.breakdownFigures(await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolio.portfolioKey, tenantKey));
 
       periodInputs.push(await this.loadPeriodInputs(appuser, portfolio.portfolioKey, periodStartDate, portfolioValue, tenantKey));
 
       portfolioBreakdown.push({
         currency: appuser.currencyKey.code || 'EUR',
+        excluded: false,
         gainPercent: portfolioGain,
         name: portfolio.name,
         portfolioKey: portfolio.portfolioKey,
@@ -367,10 +369,18 @@ export class PortfolioDashboardService {
     // Get unique asset count
     const uniqueAssets = new Set(validHoldings.map((h) => h.financialAssetKey));
 
+    const excludedRows: PortfolioBreakdownItem[] = [];
+    for (const portfolio of excluded) {
+      excludedRows.push({ ...this.breakdownFigures(await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolio.portfolioKey, tenantKey)), currency: appuser.currencyKey.code || 'EUR', excluded: true, name: portfolio.name, portfolioKey: portfolio.portfolioKey, weight: 0 });
+    }
+
     return {
-      portfolios: portfolioBreakdown
-        .map((item) => ({ ...item, weight: totalValue > 0 ? (item.value / totalValue) * 100 : 0 }))
-        .toSorted((a, b) => b.value - a.value),
+      portfolios: [
+        ...portfolioBreakdown
+          .map((item) => ({ ...item, weight: totalValue > 0 ? (item.value / totalValue) * 100 : 0 }))
+          .toSorted((a, b) => b.value - a.value),
+        ...excludedRows.toSorted((a, b) => b.value - a.value),
+      ],
       summary: {
         assetCount: uniqueAssets.size,
         currency: appuser.currencyKey.code || 'EUR',
@@ -387,6 +397,13 @@ export class PortfolioDashboardService {
         unrealizedGains,
       },
     };
+  }
+
+  /** One breakdown row's value (as the portfolio list and net worth value it) and gain on cost. */
+  private breakdownFigures(holdings: Awaited<ReturnType<typeof portfolioHoldingsService.getPortfolioHoldings>>): Pick<PortfolioBreakdownItem, 'gainPercent' | 'value'> {
+    const value = valuePortfolioHoldings(holdings).value;
+    const costBasis = calculateCostBasis(filterValidHoldings(holdings));
+    return { gainPercent: costBasis > 0 ? ((value - costBasis) / costBasis) * 100 : 0, value };
   }
 
   /**
@@ -496,8 +513,9 @@ export class PortfolioDashboardService {
 
   /**
    * The value and return chart: one portfolio's, or with `portfolioId` null every household
-   * portfolio's together. `members` (the aggregate only) keeps the portfolios those members own,
-   * a former member's as Shared (`portfoliosOfMembers`), as the portfolio performance report does.
+   * portfolio's together, less those excluded from the aggregate dashboard. `members` (the
+   * aggregate only) keeps the portfolios those members own, a former member's as Shared
+   * (`portfoliosOfMembers`), as the portfolio performance report does.
    */
   async getPerformanceData(
     appuser: Appuser,
@@ -531,7 +549,7 @@ export class PortfolioDashboardService {
     // Fetch benchmark data in parallel with portfolio data
     const benchmarkPromise = assetPriceService.getBenchmarkHistoricalPrices(benchmarkSymbol, fromStr, toStr);
     // A single portfolio was found (and scoped) above; the aggregate is every household portfolio,
-    // or the ones the member filter keeps.
+    // or the ones the member filter keeps, less the excluded ones.
     const portfolioIds = portfolioId
       ? [portfolioId]
       : await this.aggregatePortfolioKeys(appuser, tenantKey, members);
@@ -589,9 +607,9 @@ export class PortfolioDashboardService {
     };
   }
 
-  /** The aggregate chart's portfolios: the household's (the user's without a tenant), narrowed by the member filter. */
+  /** The aggregate chart's portfolios: the household's (the user's without a tenant), narrowed by the member filter, less the excluded ones. */
   private async aggregatePortfolioKeys(appuser: Appuser, tenantKey: number | undefined, members: MemberFilter | undefined): Promise<number[]> {
-    return (await memberPortfolioKeys(DI.em, tenantKey, members))
+    return (await aggregatePortfolioKeys(DI.em, tenantKey, members))
       ?? (await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) })).map((portfolio) => portfolio.portfolioKey);
   }
 
@@ -632,12 +650,13 @@ export class PortfolioDashboardService {
 
   /**
    * The allocation of one portfolio, or with `portfolioId` null of every household portfolio
-   * together; `members` (the aggregate only) keeps the portfolios those members own.
+   * together, less those excluded from the aggregate dashboard; `members` (the aggregate only)
+   * keeps the portfolios those members own.
    */
   async getAllocation(appuser: Appuser, portfolioId: null | number, tenantKey?: number, members?: MemberFilter): Promise<AllocationResponse> {
     const holdings = portfolioId
       ? await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, tenantKey)
-      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await memberPortfolioKeys(DI.em, tenantKey, members));
+      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await aggregatePortfolioKeys(DI.em, tenantKey, members));
     const validHoldings = filterValidHoldings(holdings);
     const pricedHoldings = validHoldings.filter((h): h is typeof h & { currentValue: number } => h.currentValue != null);
 
@@ -762,8 +781,8 @@ export class PortfolioDashboardService {
 
   /**
    * The period's top gainers and losers of one portfolio, or with `portfolioId` null of every
-   * household portfolio together; `members` (the aggregate only) keeps the portfolios those
-   * members own.
+   * household portfolio together, less those excluded from the aggregate dashboard; `members`
+   * (the aggregate only) keeps the portfolios those members own.
    */
   async getTopMovers(
     appuser: Appuser,
@@ -775,7 +794,7 @@ export class PortfolioDashboardService {
   ): Promise<TopMoversResponse> {
     const holdings = portfolioId
       ? await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, tenantKey)
-      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await memberPortfolioKeys(DI.em, tenantKey, members));
+      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await aggregatePortfolioKeys(DI.em, tenantKey, members));
 
     const eligibleHoldings = filterValidHoldings(holdings).filter((h) => h.currentValue != null);
     if (eligibleHoldings.length < MIN_TOP_MOVERS_HOLDINGS) {

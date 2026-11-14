@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
+import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/Typography";
 import useAccounts from "@/lib/api/account/useAccounts";
 import {
@@ -48,6 +49,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
   const [costBasisMethod, setCostBasisMethod] = useState<PortfolioCostBasisMethod>(
     portfolio.costBasisMethod ?? "FIFO",
   );
+  const [excluded, setExcluded] = useState(portfolio.excluded ?? false);
 
   // Reload the fields from the portfolio when the modal opens (or the
   // portfolio changes while open), adjusting during render.
@@ -59,6 +61,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
       setDescription(portfolio.description ?? "");
       setLink(draftFromLink(portfolio.accountLink));
       setCostBasisMethod(portfolio.costBasisMethod ?? "FIFO");
+      setExcluded(portfolio.excluded ?? false);
     }
   }
 
@@ -93,6 +96,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
           ? { accountLink: linkInputFromDraft(link) }
           : {}),
         ...(costBasisMethodChanged ? { costBasisMethod } : {}),
+        ...(excluded !== (portfolio.excluded ?? false) ? { excluded } : {}),
       });
       toast.success(t("save"));
       closeModal();
@@ -140,6 +144,27 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
           value={link}
           onChange={setLink}
         />
+
+        <div className="flex items-start gap-3">
+          <Switch
+            id="portfolio-excluded"
+            checked={excluded}
+            onCheckedChange={setExcluded}
+            aria-describedby="portfolio-excluded-hint"
+          />
+          <div className="flex flex-col gap-0.5">
+            <Label htmlFor="portfolio-excluded">
+              {t("portfolio-excluded")}
+            </Label>
+            <Text
+              id="portfolio-excluded-hint"
+              variant="smallText"
+              className="text-muted-foreground"
+            >
+              {t("portfolio-excluded-hint")}
+            </Text>
+          </div>
+        </div>
 
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-sm font-medium">

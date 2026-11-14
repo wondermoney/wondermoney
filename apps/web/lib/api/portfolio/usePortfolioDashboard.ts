@@ -58,6 +58,11 @@ export interface PortfolioBreakdownItem {
   weight: number;
   gainPercent: number;
   currency: string;
+  /**
+   * Switched to "Exclude from aggregate dashboard": listed so its page can be
+   * opened, but outside the totals, so its weight is 0. Absent on older APIs.
+   */
+  excluded?: boolean;
 }
 
 export interface QuickStats {

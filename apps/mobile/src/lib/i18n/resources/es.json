@@ -3458,7 +3458,7 @@
     "blankBenchmark": "Déjalo en blanco para eliminar la comparación con el índice de referencia",
     "benchmarkCleared": "Eliminar el índice de referencia actual",
     "excluded": "Excluir del panel agregado",
-    "excludedHelper": "Oculta esta cartera de los totales combinados y del rendimiento de todas las carteras",
+    "excludedHelper": "Deja esta cartera fuera de los totales, posiciones y gráficos de todas las carteras juntas. Su propia página y tu patrimonio neto la siguen incluyendo.",
     "favored": "Destacar en el panel",
     "favoredHelper": "Da a esta cartera prioridad de visualización en el panel",
     "allocation": {
@@ -5097,6 +5097,7 @@
     "worstPerformer": "Peor valor",
     "dataUnavailable": "Datos no disponibles",
     "weight": "Peso",
+    "excludedFromTotals": "Fuera de los totales",
     "gain": "Ganancia",
     "performanceInsufficient": "La rentabilidad necesita al menos dos snapshots para mostrar una tendencia.",
     "performanceWaiting": "La rentabilidad aparecerá después de crear snapshots.",

@@ -265,6 +265,8 @@ describe('portfolio controller scenarios', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'));
     vi.mocked(zParse).mockResolvedValueOnce({ query: {} });
+    // The household's portfolios, none excluded from the aggregate dashboard.
+    mocked.find.mockResolvedValueOnce([]);
     mocked.getPortfoliosHoldings.mockResolvedValueOnce([
       { financialAssetSymbol: 'AAPL', isInvalid: false },
       { financialAssetSymbol: 'AMD', isInvalid: false },
@@ -303,6 +305,8 @@ describe('portfolio controller scenarios', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'));
     vi.mocked(zParse).mockResolvedValueOnce({ query: {} });
+    // The household's portfolios, none excluded from the aggregate dashboard.
+    mocked.find.mockResolvedValueOnce([]);
     mocked.getPortfoliosHoldings.mockResolvedValueOnce([
       { financialAssetSymbol: 'AAPL', isInvalid: false },
       { financialAssetSymbol: 'AMD', isInvalid: false },
