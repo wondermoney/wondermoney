@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "Additional verification required",
-      "message": "Enter the 6-digit code from your authenticator app to continue",
+      "message": "Confirm it's you with a code from your authenticator app or one of your backup codes",
       "codeLabel": "6-digit code",
       "codePlaceholder": "123456",
       "verify": "Verify",

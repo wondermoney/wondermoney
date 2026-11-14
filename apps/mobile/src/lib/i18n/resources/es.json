@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "Se necesita una verificación adicional",
-      "message": "Introduce el código de 6 dígitos de tu aplicación de autenticación para continuar",
+      "message": "Confirma que eres tú con un código de tu aplicación de autenticación o uno de tus códigos de respaldo",
       "codeLabel": "Código de 6 dígitos",
       "codePlaceholder": "123456",
       "verify": "Verificar",
