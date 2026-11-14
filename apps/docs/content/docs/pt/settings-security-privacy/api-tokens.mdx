@@ -37,7 +37,7 @@ Revoga um token quando um script já não precisa dele, quando um portátil ou d
 
 ## Limites de pedidos
 
-O tráfego de tokens tem o seu próprio orçamento, contado por token. Um pedido acima do limite recebe `429 Too Many Requests` com um cabeçalho `Retry-After`. O orçamento é separado da tua sessão no navegador, por isso um script ocupado não torna a aplicação mais lenta para ti.
+O tráfego de tokens tem o seu próprio orçamento, contado por token: 1200 pedidos a cada 15 minutos. Um pedido acima do limite recebe `429 Too Many Requests` com um cabeçalho `Retry-After`. O orçamento é separado da tua sessão no navegador, por isso um script ocupado não torna a aplicação mais lenta para ti.
 
 ## Páginas relacionadas
 

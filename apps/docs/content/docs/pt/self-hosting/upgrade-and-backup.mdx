@@ -10,7 +10,7 @@ docker compose pull
 docker compose up -d
 ```
 
-A API aplica as alterações à base de dados quando arranca. Para ficares numa versão específica em vez da mais recente, define `WM_VERSION` no `.env`, por exemplo `WM_VERSION=1.4`.
+A API aplica as alterações à base de dados quando arranca. Para ficares numa versão específica em vez da mais recente, define `WM_VERSION` no `.env`, por exemplo `WM_VERSION=1.4`. As imagens vêm de `ghcr.io/wondermoney`; para as obteres de outro sítio, como um espelho ou um registo com as tuas próprias compilações, define `WM_IMAGE_REGISTRY` com esse endereço. Os nomes das imagens continuam a ser `wondermoney-api`, `wondermoney-worker` e `wondermoney-web`.
 
 Uma instalação feita com o script de instalação já fica fixada: o script define `WM_VERSION` com a versão que instalou, por isso `docker compose pull` mantém-se nessa versão. Para passares para a versão mais recente, corre `./install.sh --dir .` na pasta da instalação (o script deixa lá uma cópia de si próprio e só altera a linha `WM_VERSION` do `.env`), ou define `WM_VERSION` tu mesmo.
 

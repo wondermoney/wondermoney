@@ -59,9 +59,9 @@ Añade las variables al archivo `.env` junto a `docker-compose.yml` y ejecuta `d
 
 | Ajuste | Qué hace |
 |---|---|
-| `OIDC_ISSUER` | La URL del emisor del proveedor. Debe ser HTTPS |
+| `OIDC_ISSUER` | La URL del emisor del proveedor. Debe ser HTTPS; `http` sin cifrar solo se acepta en `localhost` o `127.0.0.1` |
 | `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | El cliente que registraste |
-| `OIDC_DISPLAY_NAME` | El nombre del botón: **Iniciar sesión con &lt;nombre&gt;**. Por defecto, `SSO` |
+| `OIDC_DISPLAY_NAME` | El nombre del botón: **Iniciar sesión con &lt;nombre&gt;**. Por defecto, `SSO`; como máximo 60 caracteres |
 | `OIDC_SCOPES` | Ámbitos separados por espacios; debe incluir `openid`. Por defecto, `openid email profile`. Añade el ámbito que tu proveedor necesite para los grupos, si tiene uno |
 | `OIDC_GROUPS_CLAIM` | La claim del token de ID que lista los grupos de la persona. Por defecto, `groups` |
 | `OIDC_ALLOWED_GROUPS` | Grupos separados por comas que pueden iniciar sesión |

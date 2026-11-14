@@ -41,7 +41,7 @@ Categorization confidence is how sure an automatic category assignment is.
 
 A transaction fingerprint is a value that identifies a transaction for duplicate detection.
 
-**In WonderMoney:** A transaction fingerprint is built from transaction details such as date and amount. It is used to avoid importing the same transaction twice. The tolerance is calibrated so that similar but legitimate transactions are not treated as duplicates.
+**In WonderMoney:** A transaction fingerprint is built from the transaction's date and amount. It identifies a transaction that has no reference from the bank, such as one you entered or imported from a file, so the same transaction is not added twice. A transaction synced from a bank is identified by the bank's own reference instead, so two identical purchases on the same day stay separate.
 
 **Related:** [Transaction](/en/docs/glossary#transaction), [Ghost-pending](/en/docs/glossary#ghost-pending), [Audit log](/en/docs/glossary#audit-log)
 
@@ -49,7 +49,7 @@ A transaction fingerprint is a value that identifies a transaction for duplicate
 
 A ghost-pending is a pending transaction that never becomes a booked one.
 
-**In WonderMoney:** A ghost-pending is a stored pending transaction that no longer appears in the bank's pending feed. WonderMoney expires it after a grace period instead of leaving it in place, so it does not become a duplicate when the real booked transaction arrives.
+**In WonderMoney:** A ghost-pending is a stored pending transaction that no longer appears in the bank's pending feed. Once it is more than 7 days old, the next sync marks it as expired instead of leaving it in place, so it does not linger as a pending transaction. The change is recorded in the audit log.
 
 **Related:** [Transaction](/en/docs/glossary#transaction), [Transaction fingerprint](/en/docs/glossary#transaction-fingerprint)
 
@@ -57,7 +57,7 @@ A ghost-pending is a pending transaction that never becomes a booked one.
 
 An audit log is a record of changes made to data.
 
-**In WonderMoney:** An audit log records events on a transaction, such as creation, edits, categorization, and duplicate decisions. The original entry is preserved so the history stays traceable.
+**In WonderMoney:** An audit log records events on a transaction, such as creation, edits, categorization, and duplicate decisions. Entries are only added, never changed or deleted, so the history stays traceable.
 
 **Related:** [Transaction](/en/docs/glossary#transaction), [Transaction fingerprint](/en/docs/glossary#transaction-fingerprint)
 
@@ -119,7 +119,7 @@ Available to assign is the money you can still put toward a goal.
 
 Debt pay down is the goal of reducing what you owe.
 
-**In WonderMoney:** A debt pay down goal groups one or more debts and plans their repayment, using strategies such as avalanche or snowball ordering. Assigning money to the goal tracks progress against the plan.
+**In WonderMoney:** A debt pay down goal tracks one debt. From its balance, interest rate and monthly payment, it shows a payoff date and the total interest. With two or more debt pay down goals, the goals page compares paying them in avalanche or snowball order.
 
 **Related:** [Available to assign](/en/docs/glossary#available-to-assign), [Budget](/en/docs/glossary#budget)
 

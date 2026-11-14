@@ -48,7 +48,7 @@ El método de coste decide qué coste de compra consume una venta. FIFO (primero
 En los ajustes de la cartera, donde eliges el método, y en la sección de lotes de los detalles de una posición, que lista cada lote de compra con la fecha, la cantidad, la cantidad restante, el coste unitario y las comisiones.
 
 ### Cómo interpretarlo
-Elige el método que usan tus normas fiscales. Portugal y España usan FIFO; Brasil y otras jurisdicciones usan el coste medio. Cambiar el método recalcula las ganancias realizadas de la cartera y reconstruye su historial diario con el nuevo coste.
+La configuración de la cartera en la web ofrece dos métodos: **FIFO (lotes más antiguos primero)** y **Coste medio**. Una cartera nueva empieza en FIFO; el método se elige en la configuración, no al crear la cartera. La ayuda bajo cada opción indica países donde se usa, pero WonderMoney no comprueba qué método exigen tus normas fiscales. Cambiar el método recalcula las ganancias realizadas de la cartera y reconstruye su historial diario con el nuevo coste.
 
 ### Ejemplo
 Compra 10 unidades a 100 y 10 unidades a 200, y vende 10.
@@ -190,7 +190,7 @@ Una cifra que no se puede calcular muestra un motivo breve en lugar de un númer
 - **Necesita un año de historial**: la rentabilidad anual, y el ratio de Sharpe que depende de ella, necesitan al menos 365 días entre tu primera transacción registrada y hoy (o tu última transacción, cuando ya no tienes ninguna posición).
 - **Necesita 3 meses de historial de precios** y **Necesita 3 meses de historial para calcular el riesgo**: la volatilidad y el nivel de riesgo necesitan al menos 90 valores diarios. En la web, un periodo más corto que eso, como 1 mes, muestra este mensaje por antigua que sea la cartera.
 - **Necesita una ventana de drawdown más larga**: la caída máxima necesita al menos 30 valores diarios.
-- Con menos de 30 valores diarios en el historial leído, la sección añade la nota **El historial de rendimiento necesita alrededor de un mes de instantáneas diarias.**
+- Con entre 1 y 29 días de historial en lo que se lee, la sección añade la nota **El historial de rendimiento necesita alrededor de un mes de instantáneas diarias.** Sin ningún historial, la web no añade nota y la aplicación móvil dice **Las métricas de riesgo necesitan más historial de precios.**
 
 Las cifras también se omiten, con los mismos mensajes, cuando no se pueden medir en tu moneda: una transacción sin tipo de cambio para su fecha deja fuera las cifras que la leen, y un día del historial que no se puede convertir deja fuera la volatilidad, el nivel de riesgo y la caída máxima. Una posición con más unidades vendidas que compradas deja fuera las cinco hasta que se corrijan sus transacciones.
 
@@ -332,7 +332,7 @@ En los gráficos de distribución, las tablas de posiciones y los resúmenes de 
 Fíjate en la concentración, el equilibrio y si una posición domina la cartera.
 
 ### Qué puede hacer que cambie
-Las operaciones nuevas, los cambios de precio, los dividendos y los movimientos en los saldos de efectivo.
+Las compras y ventas nuevas, los cambios de precio y los tipos de cambio. Los dividendos, los depósitos y las retiradas no la cambian: una cartera no guarda saldo en efectivo.
 
 ### Malentendido habitual
 La distribución describe la estructura, no una recomendación.

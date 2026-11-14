@@ -22,13 +22,15 @@ Las conexiones de SimpleFIN aparecen aparte, como **Conectada**, **Primera sincr
 
 Solo ves el estado de tus propias conexiones, y el estado se limita a tu cuenta y no al banco o al proveedor en su conjunto.
 
-## Cuando falla una sincronización
+## Cuando falla una conexión o una sincronización
 
-Si una sincronización falla, la vista de recuperación explica qué ocurrió y ofrece el siguiente paso relevante, como reintentar la conexión, añadir la cuenta manualmente o importar un extracto. El flujo de recuperación muestra el nombre del banco afectado, para que quede claro qué conexión necesita atención.
+Si inicias una conexión desde **Cuentas** en la web y vuelves del banco sin ella, por ejemplo porque cancelaste la aprobación, la página muestra **No se ha podido completar la conexión bancaria**. No se añaden datos bancarios, y el aviso ofrece **Reintentar conexión bancaria**, **Añadir cuenta manualmente** e **Importar CSV o extracto bancario**. El aviso no indica el nombre del banco.
+
+Una sincronización que falla en una conexión existente queda registrada en el historial de esa conexión. La aplicación móvil, y la lista de SimpleFIN en la web, muestran además el motivo debajo de la conexión, y cuando un banco lleva más de 2 días sin actualizarse, la página de inicio lo avisa e indica el nombre del banco.
 
 **Historial de sincronizaciones**, en cada conexión, muestra las últimas 20 veces que WonderMoney intentó sincronizarla y el resultado de cada intento.
 
-Si la lista de bancos no está disponible temporalmente — por ejemplo, durante una interrupción en el proveedor — el selector de bancos muestra un error claro en lugar de fallar, y puedes reintentar.
+Si la lista de bancos no se puede cargar, por ejemplo durante una interrupción en el proveedor, la aplicación móvil muestra **No se pudieron cargar los bancos** con **Reintentar**. En la web, la lista queda vacía: cierra el diálogo e inténtalo más tarde.
 
 ## Antes de empezar
 
@@ -57,8 +59,8 @@ Después de actualizar una conexión, confirma que aparecen nuevas transacciones
 
 - El banco cambió su flujo de inicio de sesión o de seguridad.
 - Una cuenta se sincronizó y otra no.
-- Una conexión eliminada sigue apareciendo hasta la siguiente actualización.
-- La conexión bancaria es válida, pero la cuenta estaba oculta o excluida.
+- En la web, una conexión eliminada sigue apareciendo hasta que la lista se vuelve a cargar.
+- La conexión bancaria es válida, pero la cuenta es [privada](/es/docs/household/account-privacy), así que los demás miembros del hogar no la ven.
 
 ## Enlaces relacionados
 

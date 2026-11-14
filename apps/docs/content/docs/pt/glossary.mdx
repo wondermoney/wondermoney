@@ -41,7 +41,7 @@ A confiança da categorização indica o grau de certeza de uma categorização 
 
 A impressão digital da transação é um valor que identifica uma transação para deteção de duplicados.
 
-**Na aplicação WonderMoney:** A impressão digital da transação é construída a partir de detalhes da transação, como a data e o montante. Serve para evitar importar a mesma transação duas vezes. A tolerância está calibrada para que transações semelhantes mas legítimas não sejam tratadas como duplicados.
+**Na aplicação WonderMoney:** A impressão digital da transação é construída a partir da data e do montante da transação. Identifica uma transação que não tem referência do banco, como uma que introduziste ou importaste de um ficheiro, para que a mesma transação não seja adicionada duas vezes. Uma transação sincronizada de um banco é identificada pela referência do próprio banco, por isso duas compras idênticas no mesmo dia continuam separadas.
 
 **Relacionado:** [Transação](/pt/docs/glossary#transação), [Pendente fantasma](/pt/docs/glossary#pendente-fantasma), [Registo de auditoria](/pt/docs/glossary#registo-de-auditoria)
 
@@ -49,7 +49,7 @@ A impressão digital da transação é um valor que identifica uma transação p
 
 Um pendente fantasma é uma transação pendente que nunca se torna uma transação registada.
 
-**Na aplicação WonderMoney:** Um pendente fantasma é uma transação pendente guardada que deixou de aparecer na lista de pendentes do banco. O WonderMoney expira-o após um período de tolerância, em vez de o manter, para que não se transforme num duplicado quando a transação registada real chegar.
+**Na aplicação WonderMoney:** Um pendente fantasma é uma transação pendente guardada que deixou de aparecer na lista de pendentes do banco. Quando tem mais de 7 dias, a sincronização seguinte marca-o como expirado, em vez de o manter, para que não fique como transação pendente. A alteração fica no registo de auditoria.
 
 **Relacionado:** [Transação](/pt/docs/glossary#transação), [Impressão digital da transação](/pt/docs/glossary#impressão-digital-da-transação)
 
@@ -57,7 +57,7 @@ Um pendente fantasma é uma transação pendente que nunca se torna uma transaç
 
 Um registo de auditoria é um histórico das alterações feitas aos dados.
 
-**Na aplicação WonderMoney:** Um registo de auditoria regista eventos numa transação, como criação, edições, categorização e decisões de duplicados. A entrada original é preservada para que o histórico continue a ser rastreável.
+**Na aplicação WonderMoney:** Um registo de auditoria regista eventos numa transação, como criação, edições, categorização e decisões de duplicados. As entradas só são acrescentadas, nunca alteradas nem apagadas, para que o histórico continue a ser rastreável.
 
 **Relacionado:** [Transação](/pt/docs/glossary#transação), [Impressão digital da transação](/pt/docs/glossary#impressão-digital-da-transação)
 
@@ -119,7 +119,7 @@ O disponível para atribuir é o dinheiro que ainda podes destinar a um objetivo
 
 Reduzir dívida é o objetivo de diminuir o que deves.
 
-**Na aplicação WonderMoney:** Um objetivo de redução de dívida agrupa uma ou mais dívidas e planeia o seu pagamento, usando estratégias como avalanche ou bola de neve. Atribuir dinheiro ao objetivo acompanha o progresso do plano.
+**Na aplicação WonderMoney:** Um objetivo de redução de dívida acompanha uma dívida. A partir do saldo, da taxa de juro e do pagamento mensal, mostra a data de liquidação e o total de juros. Com dois ou mais objetivos de redução de dívida, a página de objetivos compara pagá-los pela ordem avalanche ou bola de neve.
 
 **Relacionado:** [Disponível para atribuir](/pt/docs/glossary#disponível-para-atribuir), [Orçamento](/pt/docs/glossary#orçamento)
 

@@ -31,7 +31,7 @@ The example requests accounts; see [Accounts in the reference](/en/docs/api/refe
 
 ## Rate limits
 
-If a request is rate limited, the API returns `429`. Honour the `Retry-After` response header before retrying. Avoid immediate retry loops; use a bounded retry policy.
+Each token may make 1,200 requests every 15 minutes. If a request is rate limited, the API returns `429`. Honour the `Retry-After` response header before retrying. Avoid immediate retry loops; use a bounded retry policy.
 
 ## Errors
 

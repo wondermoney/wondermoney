@@ -9,6 +9,27 @@ Toda a configuração está no ficheiro `.env`, ao lado do `docker-compose.yml`,
 docker compose up -d
 ```
 
+## Endereços e segredos
+
+O `generate-env.sh`, que o script de instalação executa, escreve estes valores uma vez. A API não arranca sem eles.
+
+| Definição | O que é |
+|---|---|
+| `APP_URL`, `API_URL` | Os endereços públicos da aplicação web e da API. Vê [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains) |
+| `POSTGRES_PASSWORD` | A palavra-passe da base de dados Postgres incluída, definida quando a base de dados é criada pela primeira vez |
+| `BETTER_AUTH_SECRET` | O segredo de início de sessão, que protege as sessões |
+| `CREDENTIAL_ENCRYPTION_KEY_V1` | Cifra as credenciais bancárias guardadas de cada utilizador. Nunca a alteres depois de estar em uso, e guarda uma cópia separada das cópias de segurança da base de dados: sem ela, uma base de dados restaurada é ilegível |
+| `EMAIL_OPT_OUT_SIGNING_SECRET` | Assina as ligações para cancelar a subscrição nos emails. O worker cria-as e a API verifica-as, por isso ambos precisam do mesmo valor |
+| `ADMIN_API_KEY` | A chave dos endpoints de administração, enviada no cabeçalho `x-api-key` (vê [Estado da sincronização bancária](/pt/docs/self-hosting/bank-sync-health)) |
+| `INTERNAL_SERVICE_API_KEY` | Uma chave de serviço interna que a API exige no arranque. Mantém o valor gerado |
+
+Algumas definições do `.env` estão descritas noutras páginas:
+
+- `TRUST_PROXY`, `BIND_ADDRESS`, `AUTH_COOKIE_DOMAIN`, `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` e o perfil `proxy` em `COMPOSE_PROFILES`: [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains).
+- `WM_VERSION`, `WM_IMAGE_REGISTRY`, `BACKUP_DIR`, `BACKUP_SCHEDULE`, `BACKUP_KEEP_DAYS`, `BACKUP_TZ`, `BACKUP_DESTINATION`, `BACKUP_OFFSITE_SCHEDULE` e `BACKUP_OFFSITE_KEEP_DAYS`: [Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup).
+- `HEALTH_MAX_JOB_AGE_MINUTES`: [Monitorização](/pt/docs/self-hosting/monitoring).
+- `IOS_APP_TEAM_ID`, `IOS_APP_BUNDLE_ID`, `ANDROID_APP_PACKAGE` e `ANDROID_APP_CERT_SHA256`: [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app).
+
 ## Email
 
 Indica um servidor SMTP:
@@ -24,6 +45,8 @@ EMAIL_FROM=money@example.com
 Ou define `RESEND_API_KEY` para usar o Resend. Para testar sem um fornecedor real, usa o Mailpit incluído: acrescenta `mail` a `COMPOSE_PROFILES`, define `SMTP_HOST=mailpit` e `SMTP_PORT=1025`, corre `docker compose up -d` e lê os emails em http://localhost:8025.
 
 O `SMTP_PORT` é `587` por omissão. A ligação usa TLS implícito na porta 465 e, nas restantes, STARTTLS quando o servidor o oferece; define `SMTP_SECURE` como `true` ou `false` para escolheres tu.
+
+A API escolhe o fornecedor a partir do que está definido: o Resend quando `RESEND_API_KEY` está definida, caso contrário SMTP quando `SMTP_HOST` está. Para escolheres tu, define `EMAIL_DRIVER` como `smtp`, `resend` ou `log`; `log` escreve cada mensagem no registo da API em vez de a enviar. `EMAIL_FROM_NAME` define o nome do remetente, que é o `INSTANCE_NAME` quando está vazio.
 
 Sem um fornecedor configurado, a API escreve cada mensagem no seu registo e o worker não envia lembretes em segundo plano (lembretes de pagamento do cartão, expiração de tokens de API). Os lembretes de pagamento do cartão saem alguns dias antes do vencimento de um extrato: define `CREDIT_CARD_DUE_REMINDER_DAYS` no worker para mudar a antecedência (3 por omissão, um número inteiro de dias).
 
@@ -51,7 +74,7 @@ AI_BASE_URL=http://host.docker.internal:11434/v1
 AI_MODEL=llama3.1
 ```
 
-Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`. As funcionalidades são `ASSISTANT`, `CSV_MAPPING`, `ENRICHMENT` (categorização de transações), `MONTHLY_STORY`, `OCR` e `STATEMENT_IMPORT`.
+Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`. As funcionalidades são `ASSISTANT`, `CSV_MAPPING`, `ENRICHMENT` (categorização de transações), `MONTHLY_STORY`, `OCR` e `STATEMENT_IMPORT`. As definições são `AI_MODEL_ASSISTANT`, `AI_MODEL_CSV_MAPPING`, `AI_MODEL_ENRICHMENT`, `AI_MODEL_MONTHLY_STORY`, `AI_MODEL_OCR` e `AI_MODEL_STATEMENT_IMPORT`.
 
 Para usares a Anthropic com a tua própria chave de API, escolhe-a explicitamente:
 
@@ -61,7 +84,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 AI_MODEL=claude-sonnet-4-5
 ```
 
-`AI_MODEL`, ou `AI_MODEL_<FUNCIONALIDADE>` para uma funcionalidade, é obrigatório: não há modelo predefinido. A leitura de recibos precisa de um modelo que leia imagens, por isso define `AI_MODEL_OCR` se o teu modelo predefinido não o fizer. A Anthropic tem prioridade sobre `AI_BASE_URL`, mas uma configuração Azure completa continua a ter precedência.
+`AI_MODEL`, ou `AI_MODEL_<FUNCIONALIDADE>` para uma funcionalidade, é obrigatório: não há modelo predefinido. A leitura de recibos precisa de um modelo que leia imagens, por isso define `AI_MODEL_OCR` se o teu modelo predefinido não o fizer. A Anthropic tem prioridade sobre `AI_BASE_URL`, mas uma configuração Azure completa continua a ter precedência. Vê [Azure](#azure).
 
 A [importação de extratos em PDF](/pt/docs/accounts-transactions/import-pdf-statements) envia cada página do extrato ao modelo como imagem, por isso precisa de um modelo que leia imagens. Num endpoint compatível com OpenAI fica desligada até indicares um com `AI_MODEL_STATEMENT_IMPORT`; o `AI_MODEL` não é usado para ela, porque um modelo local predefinido muitas vezes só lê texto. Na Anthropic usa `AI_MODEL_STATEMENT_IMPORT`, ou `AI_MODEL` quando esse estiver vazio. A aplicação diz à pessoa qual é o fornecedor antes de enviar qualquer página: a Anthropic ou o Azure OpenAI pelo nome, um endpoint compatível com OpenAI como o fornecedor de IA configurado no servidor. O endereço do endpoint nunca é mostrado, e `GET /v1/instance` indica apenas o tipo de fornecedor.
 
@@ -77,6 +100,20 @@ Define os dois limites na API e no worker; um valor que não seja um número int
 Se o registo estiver aberto e pagares pelo modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. As contas criadas com email e palavra-passe recebem então um link de verificação por email, e têm de o seguir antes de poderem usar o assistente, a leitura de recibos, o mapeamento de colunas com IA ou a importação de extratos em PDF. As contas Google e Apple contam como verificadas. É preciso ter o email configurado.
 
 Para limitar o que cada agregado pode gastar no modelo por dia, define `AI_DAILY_LIMIT_ASSISTANT` (mensagens ao assistente), `AI_DAILY_LIMIT_OCR` (leituras de recibos) e `AI_DAILY_LIMIT_CSV_MAPPING` (importações CSV mapeadas pelo modelo). Os membros de um agregado partilham o limite, que é reposto à meia-noite UTC. Deixa-os vazios para não haver limite. Quando um agregado chega a um limite, a aplicação avisa até ao dia seguinte; as importações CSV continuam a funcionar, com as colunas mapeadas à mão.
+
+### Azure
+
+O Azure OpenAI e o Azure AI Foundry são decididos funcionalidade a funcionalidade. Uma funcionalidade com todas as suas definições de Azure presentes usa o Azure, independentemente de `AI_PROVIDER` e `AI_BASE_URL`; uma funcionalidade a que falte alguma recorre à Anthropic ou ao endpoint compatível com OpenAI, ou fica desligada.
+
+| Definição | O que faz |
+|---|---|
+| `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_API_VERSION` | O teu recurso Azure OpenAI, a sua chave e a versão da API a chamar. As três são necessárias para o assistente, a leitura de recibos, o mapeamento de colunas de CSV, a história mensal e a importação de extratos em PDF |
+| `AZURE_OPENAI_DEPLOYMENT` | O deployment que o assistente usa. Sem ele, o assistente não usa o Azure |
+| `AZURE_OPENAI_OCR_DEPLOYMENT` | O deployment que lê recibos; tem de ler imagens. Sem ele, a leitura de recibos não usa o Azure |
+| `AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT` | O deployment que lê extratos em PDF; tem de ler imagens. Sem ele, a importação de extratos em PDF não usa o Azure |
+| `AZURE_AI_FOUNDRY_ENDPOINT`, `AZURE_AI_FOUNDRY_API_KEY`, `AZURE_AI_FOUNDRY_API_VERSION` | O teu recurso Azure AI Foundry, apenas para a categorização de transações. As três são necessárias |
+
+Dois nomes estão fixos no código. No Azure OpenAI, o mapeamento de colunas de CSV e a história mensal chamam um deployment chamado `gpt-5.4-nano`, por isso o recurso precisa de um deployment com esse nome. No Azure AI Foundry, a categorização de transações chama o modelo `DeepSeek-V4-Flash`; define `TRANSACTION_ENRICHMENT_GPT_MODEL_VERSION` no worker para indicares outro. Define as definições de Azure na API e no worker.
 
 ## Dados de mercado
 
@@ -179,6 +216,14 @@ A conta de demonstração nunca conta. A própria Enable Banking também aplica 
 
 Define `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` (de um cliente OAuth no Google Cloud, com `<API_URL>/api/auth/callback/google` como URI de redirecionamento autorizado) para mostrares "Continuar com Google" nas páginas de início de sessão e de registo. Sem os dois, o botão fica escondido.
 
+## Iniciar sessão com a Apple
+
+O início de sessão com a Apple funciona apenas na aplicação para iOS; a aplicação web não tem botão da Apple. A aplicação para iOS mostra o botão em todos os servidores, por isso, até configurares isto, quem tocar nele no teu servidor é informado de que o início de sessão não está disponível.
+
+Define `APPLE_NATIVE_AUDIENCE` na API com o bundle ID da aplicação para iOS que os teus utilizadores usam: `money.wonder.app` para a aplicação publicada, ou o bundle ID de uma aplicação compilada por ti. A API passa a aceitar o token de identidade que a Apple emite para essa aplicação, e verifica-o com as chaves públicas da Apple. Aceita um único bundle ID, sem espaços nem carateres universais; qualquer outra coisa impede a API de arrancar. Uma conta nova criada desta forma segue o `SIGNUP_MODE`.
+
+`APPLE_CLIENT_ID` e `APPLE_CLIENT_SECRET` (um Services ID da Apple e o respetivo segredo de cliente, um token assinado que geras tu) registam na API o início de sessão da Apple pelo navegador. Nenhuma página da aplicação web o usa, por isso deixa-as vazias. `APPLE_CLIENT_SECRET` sem `APPLE_CLIENT_ID` impede a API de arrancar.
+
 ## Início de sessão único (OIDC)
 
 Inicia sessão através do teu próprio fornecedor de identidade, como o Authentik ou o Keycloak: as páginas de início de sessão e de registo, na web e na aplicação móvel, mostram então `Iniciar sessão com <nome>`. [Início de sessão único](/pt/docs/self-hosting/single-sign-on) explica como configurar o fornecedor.
@@ -220,6 +265,11 @@ Se a aplicação web mudar para outro domínio, as chaves de acesso existentes d
 | `MCP_ENABLED` | O servidor MCP só de leitura em `POST /v1/mcp`, que permite a um cliente de IA perguntar pelas finanças do próprio utilizador com um token de API pessoal com `mcp:read` (consulta [Ligar um cliente de IA](/pt/docs/settings-security-privacy/connect-ai-client)). Ligado por omissão; define `false` para responder `404` e reportar `features.mcp: false` em `GET /v1/instance` |
 | `DEMO_SIGN_IN_ENABLED` | `true` liga uma demonstração pública só de leitura: um botão **Experimentar a demonstração** que inicia a sessão de qualquer pessoa numa conta de demonstração partilhada. Desligado por omissão; consulta [Demonstração pública](#demonstração-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | A diferença aceite entre os dois lados de uma transferência entre contas em moedas diferentes, depois de converter o valor que saiu à taxa de câmbio desse dia, como fração do valor que chegou: `0.02` (por omissão) é 2 por cento. Aumenta-a se a margem cambial e as comissões do teu banco forem maiores; no máximo `0.25`. Define-a na API e no worker |
+| `MIN_APP_VERSION` | A versão mais antiga da aplicação móvel que se pode ligar, por exemplo `1.0.3`. Uma aplicação mais antiga recebe o aviso para atualizar quando alguém introduz o endereço do teu servidor. Vazio significa qualquer versão. `GET /v1/instance` indica-a em `minAppVersion` |
+| `MCP_TOOL_CALLS_PER_MINUTE` | Quantas chamadas a ferramentas MCP um token pode fazer por minuto. Por omissão, `60`. Define-a na API |
+| `CORS_ALLOWED_ORIGINS` | As origens de navegador que podem chamar a API, separadas por vírgulas, por exemplo `https://money.example.com,https://other.example.com`. Vazio significa a origem de `APP_URL`, que é tudo o que uma instalação normal precisa. Um valor substitui essa predefinição, por isso inclui a origem da própria aplicação web. Define-a na API |
+| `NEXT_PUBLIC_DOCS_URL` | Para onde apontam as ligações de ajuda e documentação da aplicação web. Vazio significa `https://docs.wonder.money`. Define-a com a tua própria cópia desta documentação, se alojares uma |
+| `TRANSACTION_BAYES_CATEGORIZATION_ENABLED` | As transações novas são categorizadas no servidor a partir das escolhas anteriores de cada pessoa, sem nenhum fornecedor de IA e também para quem ocultou as funcionalidades de IA. Ligado por omissão; `false` desliga-o. `TRANSACTION_BAYES_MIN_POSTERIOR` (por omissão `0.8`) e `TRANSACTION_BAYES_MIN_MARGIN` (por omissão `0.2`) definem a certeza necessária para atribuir uma categoria, cada uma um número de 0 a 1 |
 
 ## Demonstração pública
 
@@ -271,6 +321,7 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Banco Central Europeu | O worker, uma vez por dia, para descarregar as taxas de câmbio do euro. Não envia dados sobre ti nem sobre os teus utilizadores | Sempre ligado |
 | Email (o teu servidor SMTP ou o Resend) | A API e o worker, para enviar redefinições de palavra-passe, convites e notificações | `SMTP_HOST` ou `RESEND_API_KEY` |
 | IA (o teu endpoint compatível com OpenAI ou a Anthropic) | A API e o worker, com o recibo, as colunas do CSV, as páginas do extrato, as transações ou as mensagens de chat de que a funcionalidade precisa | `AI_BASE_URL` e `AI_MODEL`, ou `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` e `AI_MODEL` |
+| IA (o teu recurso Azure OpenAI ou Azure AI Foundry) | A API e o worker, com os mesmos dados da linha acima | As definições `AZURE_OPENAI_*` ou `AZURE_AI_FOUNDRY_*` ([Azure](#azure)) |
 | Dados de mercado (EODHD) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `EODHD_API_KEY` |
 | Dados de mercado (Stooq) | A API e o worker, com símbolos de cotação, não dados de utilizadores | `stooq` em `MARKET_DATA_PROVIDERS` |
 | Dados de mercado (CoinGecko) | A API e o worker, com símbolos de moedas e texto de pesquisa, não dados de utilizadores | `coingecko` em `MARKET_DATA_PROVIDERS` |
@@ -279,11 +330,12 @@ Nada é enviado para o projeto WonderMoney. Cada serviço externo que a tua inst
 | Notificações push (serviço de push da Expo) | A API e o worker, com o token de push de cada telemóvel registado e o texto da notificação, que nunca tem valores nem comerciantes ([Notificações push](#notificações-push)) | `PUSH_ENABLED=true` |
 | Armazenamento de ficheiros (o teu armazenamento compatível com S3) | A API e os navegadores, para importações de CSV e cópias de recibos | `S3_ENDPOINT` e `S3_BUCKET` |
 | Cópias de segurança fora do servidor (o teu destino rclone) | O serviço `backup-offsite`, uma vez por dia, com as cópias da base de dados e dos ficheiros | O perfil `backup-offsite` e `BACKUP_DESTINATION` ([Atualizações e cópias de segurança](/pt/docs/self-hosting/upgrade-and-backup#cópias-fora-do-servidor)) |
-| Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web) |
+| Registo de erros (Sentry) | A API, o worker e a aplicação web, com relatórios de erros | `SENTRY_DSN` (API e worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicação web). As imagens publicadas correm em modo de produção, em que `SENTRY_DSN` tem efeito; é ignorada se definires `APP_ENV` como `development` |
 | Analytics (Google Tag Manager, PostHog) | Consulta [Analytics](#analytics) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
 | Sincronização bancária (Enable Banking) | A API e o worker, para os utilizadores que ligam um banco | A chave Enable Banking de cada utilizador, adicionada nas Definições, ou a aplicação do servidor (`ENABLE_BANKING_APP_ID`) |
 | Sincronização bancária (SimpleFIN) | A API, para trocar o token de configuração de um utilizador, e o worker, para sincronizar, no SimpleFIN Bridge ou nos anfitriões de `SIMPLEFIN_BRIDGE_HOSTS`. Desligada por omissão | `simplefin` em `BANK_PROVIDERS`, e depois o token de configuração de cada utilizador |
 | Início de sessão com Google | Os navegadores e a API, quando um utilizador escolhe "Continuar com Google" | `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` |
+| Iniciar sessão com a Apple | A aplicação para iOS, quando um utilizador escolhe a Apple, e a API, que obtém as chaves públicas da Apple para verificar o início de sessão | `APPLE_NATIVE_AUDIENCE` |
 | O teu fornecedor de identidade (OIDC) | Os navegadores e a API, quando um utilizador escolhe `Iniciar sessão com <nome>`. A API obtém o documento de descoberta e as chaves do fornecedor, e troca o código de início de sessão | `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Os navegadores no formulário de contacto, e a aplicação web para verificar a resposta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` e `RECAPTCHA_SECRET_KEY` |
 

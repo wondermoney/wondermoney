@@ -22,13 +22,15 @@ As ligações SimpleFIN aparecem à parte, como **Ligada**, **Primeira sincroniz
 
 Só vês o estado das tuas próprias ligações e o estado é limitado à tua conta, não ao banco ou ao fornecedor como um todo.
 
-## Quando a sincronização falha
+## Quando uma ligação ou uma sincronização falha
 
-Se uma sincronização falhar, a vista de recuperação explica o que aconteceu e sugere o passo seguinte adequado, como repetir a ligação, adicionar a conta manualmente ou importar um extrato. O fluxo de recuperação mostra o nome do banco afetado, pelo que fica claro qual é a ligação que precisa de atenção.
+Se iniciares uma ligação a partir de **Contas** na web e voltares do banco sem ela, por exemplo porque cancelaste a aprovação, a página mostra **Não foi possível concluir a ligação ao banco**. Não são adicionados dados bancários, e o aviso oferece **Repetir ligação ao banco**, **Adicionar conta manualmente** e **Importar CSV ou extrato bancário**. O aviso não indica o nome do banco.
+
+Uma sincronização que falha numa ligação existente fica registada no histórico dessa ligação. A aplicação móvel, e a lista SimpleFIN na web, mostram também o motivo por baixo da ligação, e quando um banco não é atualizado há mais de 2 dias, a página inicial avisa e indica o nome do banco.
 
 **Histórico de sincronizações**, em cada ligação, mostra as últimas 20 tentativas de sincronização e o resultado de cada uma.
 
-Se a lista de bancos estiver temporariamente indisponível — por exemplo durante uma falha no fornecedor — o seletor de bancos mostra um erro claro em vez de falhar, e podes tentar novamente.
+Se a lista de bancos não puder ser carregada, por exemplo durante uma falha no fornecedor, a aplicação móvel mostra **Não foi possível carregar os bancos** com **Tentar novamente**. Na web, a lista fica vazia: fecha a janela e tenta mais tarde.
 
 ## Antes de começar
 
@@ -57,8 +59,8 @@ Depois de atualizar uma ligação, confirma se novas transações aparecem e se 
 
 - O banco alterou o início de sessão ou o fluxo de segurança.
 - Uma conta sincronizou e outra não.
-- Uma ligação removida continua visível até à próxima atualização.
-- A ligação é válida, mas a conta foi ocultada ou excluída.
+- Na web, uma ligação removida continua visível até a lista ser carregada de novo.
+- A ligação é válida, mas a conta é [privada](/pt/docs/household/account-privacy), pelo que os outros membros do agregado não a veem.
 
 
 ## Ligações relacionadas

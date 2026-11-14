@@ -56,7 +56,7 @@ The cost basis method decides which purchase cost a sale relieves. FIFO (first i
 In the portfolio settings, where you choose the method, and in the lots section of a holding's details, which lists each purchase lot with its date, quantity, remaining quantity, unit cost and fees.
 
 ### How to read it
-Pick the method your tax rules use. Portugal and Spain use FIFO; Brazil and some other jurisdictions use average cost. Changing the method recalculates the portfolio's realized gains and rebuilds its daily history with the new cost basis.
+The portfolio settings on the web offer two methods: **FIFO (oldest lots first)** and **Average cost**. A new portfolio starts on FIFO; the method is chosen in the settings, not when the portfolio is created. The hint under each option names countries where it is used, but WonderMoney does not check which method your tax rules require. Changing the method recalculates the portfolio's realized gains and rebuilds its daily history with the new cost basis.
 
 ### Example
 Buy 10 units at 100 and 10 units at 200, then sell 10.
@@ -198,7 +198,7 @@ A figure that cannot be calculated shows a short reason in place of a number. It
 - **Needs a year of history**: the annual yield, and the Sharpe ratio that depends on it, need at least 365 days between your first recorded transaction and today (or your last transaction, when you no longer hold anything).
 - **Needs 3 months of price history** and **Needs 3 months of history to score risk**: volatility and the risk level need at least 90 daily values. On the web, a period shorter than that, such as 1 Month, shows this message however old the portfolio is.
 - **Needs a longer drawdown window**: max drawdown needs at least 30 daily values.
-- With fewer than 30 daily values in the history it reads, the section adds the note **Performance history needs about a month of daily snapshots.**
+- With between 1 and 29 days of history in what it reads, the section adds the note **Performance history needs about a month of daily snapshots.** With no history at all, the web adds no note and the mobile app says **Risk metrics need more price history.**
 
 The figures are also left out, with the same messages, when they cannot be measured in your currency: a transaction with no exchange rate for its date leaves out the figures that read it, and a day of history that cannot be converted leaves out volatility, risk level and max drawdown. A holding with more units sold than bought leaves all five out until its transactions are corrected.
 
@@ -340,7 +340,7 @@ Allocation charts, holding tables, and portfolio summaries.
 Look for concentration, balance, and whether one holding dominates the portfolio.
 
 ### What can make it change
-New trades, price changes, dividends, and movements in cash balances.
+New buys and sales, price changes and exchange rates. Dividends, deposits and withdrawals do not change it: a portfolio holds no cash balance.
 
 ### Common misunderstanding
 Allocation describes structure, not a recommendation.

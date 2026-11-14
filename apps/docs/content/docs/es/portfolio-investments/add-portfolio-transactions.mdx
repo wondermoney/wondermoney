@@ -15,7 +15,7 @@ Elige **Añadir transacción** en la página Carteras o en la página de una car
 - Retirada
 - Oferta
 
-Las posiciones, el coste base y las ganancias realizadas se calculan a partir de las compras y las ventas. Un depósito, una retirada o una oferta se guarda en la lista de transacciones de la cartera y no cambia tus posiciones.
+Las posiciones, el coste base y las ganancias realizadas se calculan a partir de las compras y las ventas. Un depósito, una retirada o una oferta se guarda en la lista de transacciones de la cartera y en ningún otro sitio: no cambia tus posiciones, el valor ni el historial de la cartera, ni los flujos de caja a partir de los cuales se miden las rentabilidades. Una cartera no guarda saldo en efectivo. Los marcadores **Depósito** y **Retirada** del gráfico de rendimiento de la web señalan días de compras netas y de ventas netas, no estas transacciones.
 
 Dividendo no está en la lista: no puedes añadir un dividendo a mano en la aplicación web ni en la app móvil. Una comisión tampoco es un tipo propio: se registra en la compra o la venta a la que pertenece.
 
@@ -43,7 +43,9 @@ Los certificados de ahorro portugueses (Certificados de Aforro) no tienen ticker
 2. Introduce la **Fecha de suscripción** y el **Importe suscrito**.
 3. En las series C a F, marca **Exento de IRS (65+)** si la exención de retención se te aplica. Lo declaras tú: WonderMoney no comprueba tu edad ni si cumples los requisitos.
 
-En las series C a F, WonderMoney estima el valor actual a partir de las tasas que publica el IGCP. Cada tres meses desde la fecha de suscripción, los intereses se abonan a la tasa base de la serie más la prima de permanencia de los años transcurridos, menos la retención del 28 % salvo que hayas marcado la exención, y se suman al saldo. Las series A y B no tienen fórmula publicada, así que su valor es el que indican tus transacciones.
+En las series C a F, WonderMoney estima el valor actual con su propio modelo del producto. Cada tres meses desde la fecha de suscripción, abona intereses a la tasa base que tiene registrada para la serie en ese trimestre más una prima de permanencia por los años transcurridos, deduce una retención del 28 % salvo que hayas marcado la exención, y suma el resultado al saldo. Antes de sumar la prima, la aplicación limita la tasa base al 3,5 % en las series C, D y E y al 2,5 % en la serie F. Deja de abonar intereses 10 años después de la fecha de suscripción en las series C a E, y 15 años después en la serie F.
+
+Estas tasas, límites y plazos son los que aplica la aplicación. No son una declaración de las condiciones oficiales vigentes, así que compruébalos en la información del propio IGCP. Las series A y B no tienen fórmula publicada, así que su valor es el que indican tus transacciones.
 
 Los detalles de la posición muestran **Detalles de capitalización**: la tasa actual, los años transcurridos, el tramo de la prima, la próxima capitalización y el valor actual de cada suscripción. Las cifras son una estimación, no una garantía del valor de reembolso.
 

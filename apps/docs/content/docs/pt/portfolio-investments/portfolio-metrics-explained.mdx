@@ -48,7 +48,7 @@ O método de custo decide que custo de compra é consumido por uma venda. FIFO (
 Nas definições do portefólio, onde escolhes o método, e na secção de lotes dos detalhes de uma posição, que lista cada lote de compra com a data, quantidade, quantidade restante, custo unitário e comissões.
 
 ### Como ler
-Escolhe o método que as tuas regras fiscais usam. Portugal e Espanha usam FIFO; o Brasil e outras jurisdições usam o custo médio. Alterar o método recalcula os ganhos realizados do portefólio e reconstrói o histórico diário com o novo custo.
+As definições do portefólio na web oferecem dois métodos: **FIFO (lotes mais antigos primeiro)** e **Custo médio**. Um portefólio novo começa em FIFO; o método escolhe-se nas definições, não ao criar o portefólio. A ajuda por baixo de cada opção indica países onde é usado, mas o WonderMoney não verifica que método as tuas regras fiscais exigem. Alterar o método recalcula os ganhos realizados do portefólio e reconstrói o histórico diário com o novo custo.
 
 ### Exemplo
 Compra 10 unidades a 100 e 10 unidades a 200 e vende 10.
@@ -190,7 +190,7 @@ Um valor que não pode ser calculado mostra um motivo curto em vez de um número
 - **Precisa de um ano de histórico**: o rendimento anual, e o índice de Sharpe que depende dele, precisam de pelo menos 365 dias entre a tua primeira transação registada e hoje (ou a tua última transação, quando já não tens nenhuma posição).
 - **Precisa de 3 meses de histórico de preços** e **Precisa de 3 meses de histórico para calcular o risco**: a volatilidade e o nível de risco precisam de pelo menos 90 valores diários. Na web, um período mais curto do que isso, como 1 mês, mostra esta mensagem por mais antigo que seja o portefólio.
 - **Precisa de uma janela de drawdown maior**: o drawdown máximo precisa de pelo menos 30 valores diários.
-- Com menos de 30 valores diários no histórico lido, a secção acrescenta a nota **O histórico de desempenho precisa de cerca de um mês de snapshots diários.**
+- Com entre 1 e 29 dias de histórico no que é lido, a secção acrescenta a nota **O histórico de desempenho precisa de cerca de um mês de snapshots diários.** Sem histórico nenhum, a web não acrescenta nota e a aplicação móvel diz **As métricas de risco precisam de mais histórico de preços.**
 
 Os valores também ficam de fora, com as mesmas mensagens, quando não podem ser medidos na tua moeda: uma transação sem taxa de câmbio para a sua data deixa de fora os valores que a leem, e um dia do histórico que não pode ser convertido deixa de fora a volatilidade, o nível de risco e o drawdown máximo. Uma posição com mais unidades vendidas do que compradas deixa os cinco de fora até as transações serem corrigidas.
 
@@ -332,7 +332,7 @@ Gráficos de alocação, tabelas de posições e resumos do portefólio.
 Procura concentração, equilíbrio e se uma única posição domina o portefólio.
 
 ### O que o pode alterar
-Novas operações, mudanças de preço, dividendos e movimentos de caixa.
+Novas compras e vendas, mudanças de preço e taxas de câmbio. Os dividendos, os depósitos e os levantamentos não a alteram: um portefólio não guarda saldo em dinheiro.
 
 ### Má interpretação comum
 A alocação descreve a estrutura, não uma recomendação.

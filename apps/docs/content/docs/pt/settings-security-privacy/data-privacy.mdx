@@ -17,9 +17,11 @@ O WonderMoney usa acesso bancário só de leitura para contas ligadas. Não cons
 
 ## Como funciona o consentimento
 
-O consentimento é uma propriedade da conta de utilizador. No registo, aceitas os termos e escolhes se permites análise e atribuição. Podes rever ou alterar ambas as escolhas em qualquer altura a partir das definições.
+Criar uma conta significa aceitar os Termos de serviço e a Política de privacidade. O registo não pergunta pela análise. O assistente de IA tem o seu próprio consentimento, guardado com a tua conta: vê [Consentimento do assistente de IA](/pt/docs/settings-security-privacy/ai-assistant-consent).
 
-A análise e a atribuição dependem do consentimento. Se não consentiste a análise, essas chamadas não são feitas e a tua atividade não é recolhida para fins de análise.
+A análise e a medição de publicidade são perguntadas no site wonder.money, não na aplicação. Na primeira visita, a faixa **Escolhas de privacidade** oferece **Usar apenas o necessário**, **Personalizar** e **Permitir tudo**; **Análise** e **Publicidade** ficam desligadas a menos que as permitas. A escolha é guardada nesse navegador, não na tua conta, por isso cada navegador pergunta uma vez. Para a alterares, seleciona o botão **Escolhas de privacidade** no canto de qualquer página do site.
+
+As aplicações web e móvel não têm uma opção de análise por conta. A aplicação web só carrega análise num servidor cujo operador a tenha configurado, e um servidor auto-alojado não tem nenhuma por omissão (vê [Analytics](/pt/docs/self-hosting/configure#analytics)). A aplicação móvel só envia eventos de utilização enquanto está ligada ao servidor para o qual foi compilada.
 
 ## Funcionalidades de IA
 
@@ -37,7 +39,7 @@ Enquanto a opção estiver ativa, o servidor recusa o assistente, a leitura de r
 
 - A que agregado familiar pertencem os dados da tua conta
 - As definições de privacidade por conta e se correspondem ao acesso pretendido
-- Se a análise e a atribuição estão ativas para a conta
+- As tuas **Escolhas de privacidade** no site wonder.money, em cada navegador que usas
 - Se os serviços ligados continuam ativos
 - Se o acesso bancário ligado continua a ser necessário
 
@@ -45,7 +47,7 @@ Enquanto a opção estiver ativa, o servidor recusa o assistente, a leitura de r
 
 **Definições > Privacidade > Exportar todos os dados** (ou **Definições > Segurança** na aplicação móvel) descarrega tudo o que vês no teu agregado familiar, num ficheiro zip chamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: um ficheiro JSON por tipo de dados: contas (com a sua partilha: partilhadas com o agregado, ou privadas e quem as pode ver ou editar), transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, reembolsos ligados às despesas que compensam, grupos de despesas partilhadas com os seus membros, despesas e acertos, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, os endereços públicos e os saldos das carteiras de criptomoedas, portefólios e as suas transações, definições de extrato dos cartões de crédito, compras em prestações e os seus planos, as taxas de câmbio e os preços manuais do agregado, os teus modelos de transação, a tua lista de interesse e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
+- `data/`: um ficheiro JSON por tipo de dados: os membros do agregado (os outros membros apenas pelo primeiro nome e pela função), contas (com a sua partilha: partilhadas com o agregado, ou privadas e quem as pode ver ou editar), transações, categorias e definições de categorias, comerciantes, etiquetas, divisões de transações, reembolsos ligados às despesas que compensam, grupos de despesas partilhadas com os seus membros, despesas e acertos, regras, pagamentos recorrentes, orçamentos, objetivos, empréstimos, ativos avaliados manualmente e as respetivas avaliações, os endereços públicos e os saldos das carteiras de criptomoedas, portefólios e as suas transações, definições de extrato dos cartões de crédito, compras em prestações e os seus planos, as taxas de câmbio e os preços manuais do agregado, os teus modelos de transação, a tua lista de interesse e as tuas preferências. As linhas referem-se umas às outras por identificadores que só têm significado dentro da exportação.
 - `csv/`: transações, contas, transações de portefólio e posições atuais, para folhas de cálculo. Os valores usam o ponto como separador decimal e as datas estão no formato `AAAA-MM-DD`.
 - `manifest.json`: a versão do formato, quando a exportação foi feita e o número de linhas e uma soma de verificação SHA-256 de cada ficheiro.
 

@@ -20,7 +20,7 @@ As carteiras de criptomoedas só aparecem quando o operador do teu servidor as l
 | Bitcoin | Um endereço (que começa por `1`, `3`, `bc1q` ou `bc1p`), ou uma chave pública estendida (`xpub`, `ypub` ou `zpub`) | O saldo em BTC |
 | Ethereum | Um endereço `0x` | O saldo em ETH e os tokens ERC-20 que o endereço tem |
 
-Uma chave pública estendida abrange todos os endereços que uma conta da carteira já usou. O WonderMoney lê os endereços de receção e de troco por ordem, até encontrar 20 seguidos sem uso. A maioria das aplicações de carteira mostra-a nas definições ou nos detalhes da conta, às vezes como "chave pública da conta". Usa a que começa por `xpub`, `ypub` ou `zpub`, nunca uma que comece por `xprv`, `yprv` ou `zprv`.
+Uma chave pública estendida abrange todos os endereços que uma conta da carteira já usou. O WonderMoney lê os endereços de receção e de troco por ordem, até encontrar 20 seguidos sem uso ou ter lido 1000 de cada tipo. A maioria das aplicações de carteira mostra-a nas definições ou nos detalhes da conta, às vezes como "chave pública da conta". Usa a que começa por `xpub`, `ypub` ou `zpub`, nunca uma que comece por `xprv`, `yprv` ou `zprv`.
 
 Só é lida a própria rede Ethereum: os tokens noutras redes que usam os mesmos endereços `0x` não são.
 
@@ -38,13 +38,13 @@ Mais tarde, podes adicionar, mudar a etiqueta e remover endereços na página da
 
 ## Sincronização
 
-O servidor sincroniza todas as carteiras uma vez por dia, de madrugada (UTC). Também sincroniza uma carteira logo depois de a criares, de adicionares um endereço ou de marcares um token. Para sincronizar agora, abre a carteira e escolhe Sincronizar agora.
+O servidor sincroniza todas as carteiras uma vez por dia, de madrugada (UTC). Também sincroniza uma carteira logo depois de a criares, de adicionares ou removeres um endereço, ou de marcares ou desmarcares um token. Para sincronizar agora, abre a carteira e escolhe Sincronizar agora.
 
 Cada endereço mostra o seu próprio estado:
 
-- **Pendente**: ainda não foi lido.
-- **Sincronizado**: a hora da última leitura. Os saldos são dessa altura.
-- **Falhou**: a última tentativa não resultou, e porquê: o explorador demorou demasiado, estava sobrecarregado, estava indisponível ou recusou o endereço, enviou uma resposta que o servidor não conseguiu ler, ou a rede foi desligada no servidor.
+- À espera da primeira leitura: ainda não foi lido.
+- Lido: a hora da última leitura. Os saldos são dessa altura.
+- Falhou: a última tentativa não resultou, e porquê: o explorador demorou demasiado, estava sobrecarregado, estava indisponível ou recusou o endereço, enviou uma resposta que o servidor não conseguiu ler, ou a rede foi desligada no servidor.
 
 Um endereço que falha não trava os outros: esses continuam a sincronizar, e o que falhou mantém os saldos da última leitura bem-sucedida. O servidor volta a tentar na sincronização seguinte.
 
