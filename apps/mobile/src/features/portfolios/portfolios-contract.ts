@@ -639,10 +639,16 @@ export type PortfolioPerformanceResponseDto = z.infer<typeof portfolioPerformanc
 export type PortfolioPerformancePoint = z.infer<typeof performancePointSchema>
 export type PortfolioPerformanceValuePoint = z.infer<typeof performanceValuePointSchema>
 
-/** `null` is the household aggregate (`/v1/portfolio/performance`), as web's chart on /portfolio. */
-export const createPortfolioPerformanceEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
+/**
+ * `null` is the household aggregate (`/v1/portfolio/performance`), as web's chart on /portfolio.
+ * `member` (a member's key or `shared`, the aggregate only) keeps the portfolios that member owns,
+ * a former member's under Shared; one portfolio has one owner, so it takes none.
+ */
+export const createPortfolioPerformanceEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD', member?: string) => readEndpoint({
   method: 'GET' as const,
-  path: `${portfolioId === null ? '/v1/portfolio/performance' : portfolioPath(portfolioId, '/performance')}?period=${period}`,
+  path: portfolioId === null
+    ? `/v1/portfolio/performance?${new URLSearchParams({ period, ...(member === undefined ? {} : { memberKeys: member }) }).toString()}`
+    : `${portfolioPath(portfolioId, '/performance')}?period=${period}`,
   schema: portfolioPerformanceResponseSchema,
 })
 

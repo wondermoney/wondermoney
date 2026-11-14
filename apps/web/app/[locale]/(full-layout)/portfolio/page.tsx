@@ -7,6 +7,7 @@ import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 
 import TimeframeSelect from "@/components/dashboard/TimeframeSelect";
+import PortfolioAggregatePerformance from "@/components/portfolio/PortfolioAggregatePerformance";
 import PortfolioAllocationChart from "@/components/portfolio/PortfolioAllocationChart";
 import PortfolioBenchmarkChart from "@/components/portfolio/PortfolioBenchmarkChart";
 import PortfolioBreakdown from "@/components/portfolio/PortfolioBreakdown";
@@ -18,7 +19,6 @@ import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendInc
 import PortfolioEmptyState from "@/components/portfolio/PortfolioEmptyState";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
 import PortfolioMetrics from "@/components/portfolio/PortfolioMetrics";
-import PortfolioPerformanceChart from "@/components/portfolio/PortfolioPerformanceChart";
 import PortfolioRealizedGains from "@/components/portfolio/PortfolioRealizedGains";
 import PortfolioTopMovers from "@/components/portfolio/PortfolioTopMovers";
 import PortfolioTransactionAddModal from "@/components/portfolio/PortfolioTransactionAddModal";
@@ -238,19 +238,11 @@ const Portfolio = () => {
         </div>
       )}
 
-      {/* Performance */}
-      <section className="border-foreground min-w-0 border-t-2 pt-4">
-        <div className="mb-4">
-          <h2 className="text-foreground text-lg font-semibold tracking-tight">
-            {t("performance")}
-          </h2>
-        </div>
-        <PortfolioPerformanceChart
-          portfolioId={null}
-          period={period}
-          currency={dashboardData?.summary?.currency}
-        />
-      </section>
+      {/* Performance: follows the member filter, its control in the section's head. */}
+      <PortfolioAggregatePerformance
+        period={period}
+        currency={dashboardData?.summary?.currency}
+      />
 
       {/* Allocation + Benchmark */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">

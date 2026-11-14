@@ -121,6 +121,13 @@ describe('portfolio endpoint contracts', () => {
     expect(() => createPortfolioPerformanceEndpoint(0, 'YTD')).toThrow()
   })
 
+  it('sends the member filter on the household chart only: one portfolio has one owner', () => {
+    expect(createPortfolioPerformanceEndpoint(null, '1M').path).toBe('/v1/portfolio/performance?period=1M')
+    expect(createPortfolioPerformanceEndpoint(null, '1M', '12').path).toBe('/v1/portfolio/performance?period=1M&memberKeys=12')
+    expect(createPortfolioPerformanceEndpoint(null, 'YTD', 'shared').path).toBe('/v1/portfolio/performance?period=YTD&memberKeys=shared')
+    expect(createPortfolioPerformanceEndpoint(7, 'YTD', '12').path).toBe('/v1/portfolio/7/performance?period=YTD')
+  })
+
   it('parses a full performance response and strips fields the API adds', () => {
     const response = {
       dataPoints: [{ date: '2026-07-01', value: 1000 }],

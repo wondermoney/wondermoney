@@ -6,6 +6,7 @@ import { anyOf, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
+import { type MemberFilter, portfoliosOfMembers } from '@service/household/member-attribution';
 import { roundDisplay, sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
@@ -491,13 +492,16 @@ export class PortfolioDashboardService {
 
 
   /**
-   * Get performance data for chart
+   * The value and return chart: one portfolio's, or with `portfolioId` null every household
+   * portfolio's together. `members` (the aggregate only) keeps the portfolios those members own,
+   * a former member's as Shared (`portfoliosOfMembers`), as the portfolio performance report does.
    */
   async getPerformanceData(
     appuser: Appuser,
     portfolioId: null | number,
     period: Period = 'YTD',
     tenantKey?: number,
+    members?: MemberFilter,
   ): Promise<PerformanceResponse> {
     const periodStartDate = getPeriodStartDate(period);
     const fromStr = format(periodStartDate, 'yyyy-MM-dd');
@@ -523,9 +527,17 @@ export class PortfolioDashboardService {
 
     // Fetch benchmark data in parallel with portfolio data
     const benchmarkPromise = assetPriceService.getBenchmarkHistoricalPrices(benchmarkSymbol, fromStr, toStr);
+    // A single portfolio was found (and scoped) above; the aggregate is every household portfolio,
+    // or the ones the member filter keeps.
+    const portfolioIds = portfolioId
+      ? [portfolioId]
+      : await this.aggregatePortfolioKeys(appuser, tenantKey, members);
+    const charted = new Set(portfolioIds);
+    // Only the charted portfolios' holdings decide whether the chart can be drawn: another
+    // member's oversold position does not blank a member's own chart.
     const holdings = portfolioId
       ? await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, tenantKey)
-      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey);
+      : (await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey)).filter((holding) => holding.portfolioKey == null || charted.has(holding.portfolioKey));
 
     if (holdings.some((holding) => holding.isInvalid)) {
       const benchmarkPrices = await benchmarkPromise;
@@ -546,11 +558,6 @@ export class PortfolioDashboardService {
         },
       };
     }
-
-    // A single portfolio was found (and scoped) above; the aggregate is every household portfolio.
-    const portfolioIds = portfolioId
-      ? [portfolioId]
-      : (await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) })).map((p) => p.portfolioKey);
 
     const [history, benchmarkPrices] = await Promise.all([
       this.loadHistoryInViewerCurrency(appuser, portfolioIds, periodStartDate, tenantKey),
@@ -577,6 +584,13 @@ export class PortfolioDashboardService {
         performance: { status: portfolioHistoryStatus },
       },
     };
+  }
+
+  /** The aggregate chart's portfolios: the household's (the user's without a tenant), narrowed by the member filter. */
+  private async aggregatePortfolioKeys(appuser: Appuser, tenantKey: number | undefined, members: MemberFilter | undefined): Promise<number[]> {
+    const portfolios = await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) });
+    const kept = tenantKey == null ? portfolios : await portfoliosOfMembers(DI.em, tenantKey, portfolios, members);
+    return kept.map((portfolio) => portfolio.portfolioKey);
   }
 
   /**
