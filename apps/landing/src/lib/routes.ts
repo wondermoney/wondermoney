@@ -289,6 +289,25 @@ export const TOP_LEVEL_PAGE_ROUTE_IDS = [
 	"pageBudgetApp",
 ] as const satisfies ReadonlyArray<RouteId>
 
+// Top-level pages with their own route file in each locale tree, named by the
+// localized slug (`src/pages/{lang}/{slug}.astro`). They used to be served under
+// the Portuguese slug in every locale too; vercel.json now 301s those addresses
+// to the localized slug.
+export const STANDALONE_PAGE_ROUTE_IDS = [
+	"alternativaExcel",
+	"appFinancasPortugal",
+	"controloGastos",
+	"gestaoFinanceira",
+] as const satisfies ReadonlyArray<RouteId>
+
+export type StandalonePageRouteId = (typeof STANDALONE_PAGE_ROUTE_IDS)[number]
+
+// Other top-level pages with their own route file in each locale tree, such as
+// the lead-magnet guide. Listed so the language switcher maps their slugs too.
+const OTHER_TOP_LEVEL_ROUTE_IDS = [
+	"guideMoneyCheckin",
+] as const satisfies ReadonlyArray<RouteId>
+
 export const FEATURE_ROUTE_IDS = [
 	"featureAccounts",
 	"featureBudgeting",
@@ -450,7 +469,15 @@ export function toLocalizedPathname(pathname: string, nextLang: Lang): string {
 
 	const [slug, ...tail] = segments
 	try {
-		const routeId = resolveTopLevelPageRouteId(currentLang, slug)
+		const routeId = resolveRouteIdFor(
+			[
+				...TOP_LEVEL_PAGE_ROUTE_IDS,
+				...STANDALONE_PAGE_ROUTE_IDS,
+				...OTHER_TOP_LEVEL_ROUTE_IDS,
+			],
+			currentLang,
+			slug,
+		)
 		const localizedSlug = getLocalizedSlug(routeId, nextLang)
 		const suffix = tail.length > 0 ? `/${tail.join("/")}` : ""
 		return `/${nextLang}/${localizedSlug}${suffix}`

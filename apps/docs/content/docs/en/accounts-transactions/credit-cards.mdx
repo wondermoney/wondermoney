@@ -29,7 +29,7 @@ The due date is the first due day after the close. Closing on the 5th and paying
 
 ## Moving a transaction to another statement
 
-When your bank's statement disagrees with its own transaction list, you can move a single transaction. Open the transaction and set its statement date: it is counted in the statement that contains that date instead of the one its own date falls in. Clearing the date puts it back.
+When your bank's statement disagrees with its own transaction list, a single transaction can be moved: it gets a statement date and is counted in the statement that contains that date instead of the one its own date falls in. Clearing the date puts it back. The web and mobile apps have no control for this yet; it is set through the [API](/en/docs/api), with the `statementDateOverride` field when updating a transaction.
 
 ## Synced accounts
 

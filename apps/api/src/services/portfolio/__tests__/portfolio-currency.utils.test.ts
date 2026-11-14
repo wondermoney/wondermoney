@@ -52,6 +52,7 @@ describe('portfolio currency utils', () => {
       }),
     ).toMatchObject({
       currentPrice: 122.2,
+      currentPriceInAssetCurrency: 130,
       currentValue: 244.4,
       unrealizedGains: 4.4,
     });

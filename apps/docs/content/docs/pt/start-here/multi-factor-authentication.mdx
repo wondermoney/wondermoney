@@ -3,33 +3,65 @@ title: Autenticação de dois fatores
 description: Configura e usa a autenticação de dois fatores no início de sessão.
 ---
 
-A autenticação de dois fatores acrescenta uma segunda verificação no início de sessão. Quando está ativa, confirmas a identidade com um código ou outro método aprovado antes de abrires a sessão.
+A autenticação de dois fatores acrescenta uma segunda verificação no início de sessão. Quando está ativa, iniciar sessão com a palavra-passe pede também o código de 6 dígitos da tua aplicação de autenticação, ou um dos teus códigos de recuperação se não tiveres a aplicação contigo.
 
 ## Antes de começar
 
-Mantém acesso ao telefone, à aplicação autenticadora ou ao método de reserva associado à conta. Se estiveres a trocar de dispositivo, garante que o método antigo continua a funcionar até o novo estar pronto.
+Mantém acesso ao telefone e à aplicação de autenticação associados à conta. Se estiveres a trocar de dispositivo, garante que o método antigo continua a funcionar até o novo estar pronto.
+
+## Ativar
+
+1. Abre **Definições → Segurança** e encontra **Autenticação de dois fatores**.
+2. Seleciona **Ativar 2FA** e introduz a palavra-passe da tua conta.
+3. Digitaliza o código QR com a tua aplicação de autenticação.
+4. Em **Guarda os teus códigos de recuperação**, seleciona **Copiar códigos** e guarda-os num local a que consigas chegar sem o telemóvel, como um gestor de palavras-passe. Só são mostrados desta vez.
+5. Introduz o código de 6 dígitos que a aplicação de autenticação mostra para concluir.
+
+Para desativar, seleciona **Desativar 2FA** na mesma secção e introduz a palavra-passe da tua conta. Para a aplicação móvel, vê [Autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication).
 
 ## Passos
 
 1. Inicia sessão com o email e a palavra-passe.
-2. Introduz o código de verificação ou aprova a notificação.
-3. Guarda os códigos de reserva, se forem fornecidos.
+2. Introduz o código de 6 dígitos da tua aplicação de autenticação.
+3. Se não tiveres a aplicação, seleciona **Usar um código de recuperação** e introduz um dos códigos de recuperação que guardaste. **Usar a aplicação de autenticação** leva-te de volta ao código de 6 dígitos.
 4. Confirma que a sessão abre normalmente.
+
+Iniciar sessão com uma chave de acesso não pede o código; vê [Chaves de acesso](/pt/docs/settings-security-privacy/passkeys).
+
+<DocsImage
+  src="/images/docs/pt/start-here/multi-factor-authentication-otp.png"
+  alt="Campo de seis dígitos para o código de uso único da aplicação de autenticação, com a ligação Usar um código de recuperação por baixo."
+  width={1440}
+  height={900}
+  caption="Introduz o código da tua aplicação de autenticação, ou usa um código de recuperação."
+/>
+
+## Códigos de recuperação
+
+- Cada código de recuperação só funciona uma vez. Depois de iniciares sessão com ele, já não pode ser usado.
+- Introduz o código tal como foi mostrado, com as mesmas maiúsculas e minúsculas. Podes omitir o hífen.
+- Desativar e voltar a ativar a autenticação de dois fatores dá-te um novo conjunto de códigos, e os antigos deixam de funcionar.
+- A aplicação móvel também oferece **Usar um código de recuperação** no ecrã de verificação, nas versões posteriores à 1.0.3.
 
 ## Rever a configuração
 
-Testa o fluxo de início de sessão uma vez após a configuração para garantir que o segundo fator funciona antes de precisares dele. Se dependeres de códigos de reserva, guarda-os num local seguro e separado do dispositivo que usas todos os dias.
+Testa o fluxo de início de sessão uma vez após a configuração para garantir que o segundo fator funciona antes de precisares dele. Guarda os códigos de recuperação num local seguro e separado do dispositivo que usas todos os dias. Antes de trocares ou repores o telefone, passa a aplicação de autenticação para o novo dispositivo, ou desativa e volta a ativar a autenticação de dois fatores enquanto ainda tens a sessão iniciada.
 
 ## Problemas comuns
 
 - O código expirou antes de ser introduzido.
-- A aplicação autenticadora está num dispositivo substituído ou reposto.
-- Os códigos de reserva foram usados ou guardados no local errado.
+- A aplicação de autenticação está num dispositivo substituído ou reposto: inicia sessão com um código de recuperação e volta a configurar a autenticação de dois fatores no novo dispositivo.
+- O relógio do dispositivo que gera os códigos está dessincronizado.
+- **Esse código de recuperação não é válido ou já foi usado**: o código foi mal escrito ou já foi usado num início de sessão anterior. Experimenta outro.
+- **Demasiados códigos incorretos**: ao fim de cinco códigos errados, o início de sessão termina. Volta ao início de sessão e entra novamente.
+- **Demasiadas tentativas falhadas**: depois de vários códigos errados, o segundo passo fica bloqueado durante cerca de 15 minutos. Aguarda e tenta novamente.
 - O browser pede um novo desafio depois de terminar sessão.
 
+Sem a aplicação de autenticação nem um código de recuperação por usar, não é possível concluir o segundo passo.
 
 ## Ligações relacionadas
 
 - [Iniciar sessão e recuperar a palavra-passe](/pt/docs/start-here/sign-in-password-recovery)
+- [Definições da autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication)
 - [Criar uma conta](/pt/docs/start-here/create-account)
 - [Compreender o painel](/pt/docs/start-here/understand-dashboard)

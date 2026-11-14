@@ -11,13 +11,13 @@ Una transacción pasa por un ciclo de vida definido:
 
 - **Pendiente.** El banco ha comunicado el pago, pero aún no lo ha confirmado. Los pagos con tarjeta suelen empezar aquí.
 - **Confirmada.** El banco ha confirmado la transacción. Un pago pendiente se empareja automáticamente con su versión confirmada, así que los dos no permanecen separados durante mucho tiempo.
-- **Caducada.** Una transacción pendiente que el banco nunca confirma dentro del plazo configurado se marca como caducada y se elimina de la lista activa. Esto evita que los registros pendientes antiguos se queden acumulados.
+- **Caducada.** Una transacción pendiente que el banco deja de listar sin confirmarla se marca como caducada cuando tiene más de 7 días y se elimina de la lista. Esto evita que los registros pendientes antiguos se queden acumulados.
 
 El saldo disponible es el saldo actual una vez descontada la actividad pendiente, por lo que el dinero que sigue pendiente se refleja en lo que ves.
 
 ## Registro de auditoría
 
-Cada cambio en una transacción — incluido el tratamiento de los duplicados y los cambios de estado — queda registrado en un registro de auditoría. Si necesitas entender por qué una transacción está en un estado concreto, el historial de auditoría contiene el registro.
+Cada cambio en una transacción, incluido el tratamiento de los duplicados y los cambios de estado, queda registrado en un registro de auditoría. Si necesitas entender por qué una transacción está en un estado concreto, el historial de auditoría contiene el registro: en la web, elige **Editar** en una transacción para verlo en **Actividad**. La aplicación móvil no lo muestra.
 
 ## Adjuntos
 
@@ -69,7 +69,15 @@ Asegúrate de que la cuenta ha terminado su primera sincronización o de que tie
 1. Abre la lista de transacciones de una cuenta.
 2. Filtra por fecha, categoría o cuenta si es necesario.
 3. Abre una transacción para revisar el importe, el comercio y las notas.
-4. Actualiza la categoría, la descripción o el estado de recurrencia cuando sea necesario.
+4. Actualiza la categoría, la descripción o las etiquetas cuando sea necesario.
+
+<DocsImage
+  src="/images/docs/es/accounts-transactions/understand-transactions-list.png"
+  alt="Lista de transacciones con los totales de entradas y salidas y las columnas de fecha, comercio y cuenta, categoría, importe y saldo."
+  caption="Cada fila muestra el comercio, el importe y el saldo acumulado de una transacción."
+  width={1440}
+  height={900}
+/>
 
 ## Fechas e intervalos de fechas
 

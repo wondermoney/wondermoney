@@ -3,14 +3,14 @@ title: Create an account
 description: Create your WonderMoney account, pick your country, and add your first account.
 ---
 
-Create your account with the same email you will use to sign in later. The first-run flow takes you through account creation, the country picker, and the first account before you reach the dashboard.
+Create your account with the same email you will use to sign in later. After you sign up, a short setup asks what you want to work on first, explains read-only bank access, and offers to add your first account before you reach the dashboard.
 
 <DocsImage
   src="/images/docs/start-here/create-account-signup-form.png"
-  alt="Sign-up form with email and password fields."
+  alt="Create your WonderMoney account form with email and password fields and a Join now button."
   width={1440}
   height={900}
-  caption="Empty sign-up form."
+  caption="The sign-up form, empty."
 />
 
 ## Before you start
@@ -20,21 +20,24 @@ Make sure you can access the inbox for the email address you plan to use. If you
 ## Steps
 
 1. Open the signup form.
-2. Enter your name, email address, and password.
-3. Submit the form and complete the first sign-in.
-4. Pick your country when the onboarding asks for it.
-5. Add your first account and finish the onboarding.
+2. Enter your email address and a password of at least 8 characters. The form does not ask for a name. In the mobile app, you also repeat the password and accept the terms.
+3. Select **Join now**. You are signed in straight away, and the setup opens.
+4. Select **Start setup**, choose up to 2 goals, and read the privacy step. You can skip the goals.
+5. In the account step, pick your country and add your first account, or select **Skip this step**, then finish the setup.
+
+Where the server offers them, the sign-up page also has **Google** and single sign-on under **Or continue with**. On the first setup screen, **Restore from an export** loads the data from another WonderMoney server or from an export you kept, in place of starting from scratch.
 
 ## Pick your country
 
-The country selector is part of the account step. Choose the country where your bank operates; WonderMoney uses it to show the right banks and connection options.
+The country selector is part of the account step. Choose the country where your bank operates; WonderMoney uses it to show the right banks and connection options. The selector, **Where is your bank?**, appears once an Enable Banking key is available; until then the step explains that linking a bank needs your own key first. See [Connect your first bank account](/en/docs/start-here/connect-first-bank-account).
 
 ## Add your first account
 
 You can add an account by connecting a bank directly from this step, or by creating an offline account that you update manually.
 
 - **Connect a bank inline:** choose your bank, approve access with the provider, and wait for the first sync. See [Connect bank account](/en/docs/accounts-transactions/connect-bank-account).
-- **Add an offline account:** enter the name, currency, and starting balance. See [Manual offline account](/en/docs/accounts-transactions/manual-offline-account).
+- **Add an offline account:** select **Add account manually** and enter the account name and current balance. See [Manual offline account](/en/docs/accounts-transactions/manual-offline-account).
+- **Skip this step:** continue without an account. You can add one later from **Accounts**.
 
 ## If you leave the flow
 
@@ -46,12 +49,12 @@ Reaching the final onboarding step marks your first run complete, so the dashboa
 
 ## Review your account
 
-After signup, check that your email address is correct and that you can reach the dashboard. If the account was created with the wrong email, sign out and create a new account with the address you want to keep.
+After signup, check that your email address is correct and that you can reach the dashboard. The email address can't be changed afterwards: **Settings → Profile** shows it but does not let you edit it. If the account was created with the wrong email, sign out and create a new account with the address you want to keep.
 
 ## Common issues
 
 - The email is already in use.
-- The password does not meet the required length or complexity.
+- The password is shorter than 8 characters.
 - The inbox does not receive the confirmation or reset message.
 - The browser kept an old session open.
 - The onboarding does not advance after returning from the bank approval page.

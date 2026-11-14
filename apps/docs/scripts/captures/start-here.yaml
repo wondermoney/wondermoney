@@ -28,7 +28,7 @@ pages:
     url: http://localhost:64590/en/auth/signup
     login: false
     anchor:
-      text: "Sign up for 14 days of full access"
+      text: "Create your WonderMoney account"
     note: "Empty signup form."
 
   - slug: sign-in-password-recovery
@@ -56,36 +56,6 @@ pages:
       Requires an enrolled TOTP factor. Page-level `user` override uses the
       primary user (vault `docs-screens`), which has TOTP enrolled; the
       `+sandbox` user has no MFA and gets redirected to /. Do not submit the OTP.
-
-  - slug: connect-first-bank-account
-    step: bank-picker
-    url: http://localhost:64590/en/accounts
-    anchor:
-      text: "Add Account"
-    actions:
-      - type: click-role
-        name: "Add Account"
-        locales:
-          pt: "Adicionar Conta"
-          es: "Añadir cuenta"
-      - type: wait-text
-        text: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: click-role
-        name: "Linked"
-        locales:
-          pt: "Ligada"
-          es: "Vinculada"
-      - type: wait-text
-        text: "Sandbox Finance"
-    note: >-
-      Requires the +sandbox user; the primary user won't see Sandbox Finance in
-      the list. The capture target is the open bank picker with Sandbox Finance
-      first — do not click the institution (that would start the GoCardless
-      flow). The picker dialog is headed "Add Account" (there is no
-      "Choose your bank" text in this build).
 
   - slug: understand-dashboard
     step: overview

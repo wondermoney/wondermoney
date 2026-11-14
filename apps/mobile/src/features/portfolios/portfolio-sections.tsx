@@ -215,7 +215,7 @@ export function PortfolioMetricsSection({ state, locale }: { state: PortfolioRes
               <StatList>
                 <Stat label={t('portfolioSections.annualYield')} locale={locale} valueNode={metrics.annualYield === null ? missing('annualYield') : <StatValue size="amountLarge">{signedPoints(metrics.annualYield, locale)}</StatValue>} />
                 <Stat label={t('portfolioSections.volatility')} locale={locale} valueNode={metrics.volatility === null ? missing('volatility') : <StatValue size="amountLarge">{points(metrics.volatility, locale)}</StatValue>} />
-                <Stat label={t('portfolioSections.sharpeRatio')} locale={locale} valueNode={metrics.sharpeRatio === null ? missing('sharpeRatio') : <StatValue size="amountLarge">{ratio(metrics.sharpeRatio)}</StatValue>} />
+                <Stat label={t('portfolioSections.sharpeRatio')} helper={t('portfolioSections.sharpeBasis')} locale={locale} valueNode={metrics.sharpeRatio === null ? missing('sharpeRatio') : <StatValue size="amountLarge">{ratio(metrics.sharpeRatio)}</StatValue>} />
                 <Stat label={t('portfolioSections.maxDrawdown')} locale={locale} valueNode={metrics.maxDrawdown === null ? missing('maxDrawdown') : <StatValue size="amountLarge">{points(metrics.maxDrawdown, locale)}</StatValue>} />
                 <Stat label={t('portfolioSections.riskLevel')} locale={locale} valueNode={metrics.riskLevel === null ? missing('riskLevel') : <StatValue size="amountLarge" tone={metrics.riskLevel === 'Low' ? 'default' : 'warning'}>{t(`portfolioSections.riskLevels.${metrics.riskLevel}`)}</StatValue>} />
               </StatList>
@@ -292,7 +292,10 @@ export function PortfolioAllocationSection({ state, title, locale }: { state: Po
 
 // ─── Portfolio breakdown ────────────────────────────────────────────────────
 
-/** Web's `PortfolioBreakdown` table as rows: name, value; weight and gain beneath. Rows open the portfolio. */
+/**
+ * Web's `PortfolioBreakdown` table as rows: name, value; weight and gain beneath. Rows open the
+ * portfolio. A portfolio excluded from the aggregate dashboard says so in place of its weight.
+ */
 export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { portfolios: readonly PortfolioRowViewModel[]; locale: string; onSelect: (id: number) => void }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
@@ -306,7 +309,7 @@ export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { po
             <ListRow
               key={portfolio.id}
               testID="portfolio-row"
-              accessibilityLabel={[portfolio.name, value, portfolio.weight !== undefined ? `${t('portfolioSections.weight')} ${points(portfolio.weight, locale)}` : null, `${t('portfolioSections.gain')} ${gain}`].filter(Boolean).join(', ')}
+              accessibilityLabel={[portfolio.name, value, portfolio.excluded ? t('portfolioSections.excludedFromTotals') : portfolio.weight !== undefined ? `${t('portfolioSections.weight')} ${points(portfolio.weight, locale)}` : null, `${t('portfolioSections.gain')} ${gain}`].filter(Boolean).join(', ')}
               leading={<EntityMark {...portfolioMark({ name: portfolio.brokerName })} />}
               onPress={() => onSelect(portfolio.id)}
               title={portfolio.name}
@@ -314,7 +317,9 @@ export function PortfolioBreakdownSection({ portfolios, locale, onSelect }: { po
               figure={<Amount align="right" currency={portfolio.currency} locale={locale} value={portfolio.value} />}
               figureMeta={<Text align="right" tone={portfolio.gainPercent > 0 ? 'success' : portfolio.gainPercent < 0 ? 'destructive' : 'muted'} variant="amountSmall">{gain}</Text>}
             >
-              {portfolio.weight !== undefined ? <ShareBar label={points(portfolio.weight, locale)} value={portfolio.weight} /> : null}
+              {portfolio.excluded
+                ? <Text tone="muted" variant="meta">{t('portfolioSections.excludedFromTotals')}</Text>
+                : portfolio.weight !== undefined ? <ShareBar label={points(portfolio.weight, locale)} value={portfolio.weight} /> : null}
             </ListRow>
           )
         })}

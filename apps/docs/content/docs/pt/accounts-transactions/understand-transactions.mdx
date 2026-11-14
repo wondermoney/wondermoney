@@ -11,13 +11,13 @@ Uma transação percorre um ciclo definido:
 
 - **Pendente.** O banco comunicou o pagamento, mas ainda não o confirmou. Os pagamentos por cartão costumam começar aqui.
 - **Confirmado.** O banco confirmou a transação. Um pagamento pendente é associado automaticamente à versão confirmada, pelo que os dois não ficam muito tempo separados.
-- **Expirado.** Uma transação pendente que o banco nunca confirma dentro do intervalo definido fica marcada como expirada e é removida da lista ativa. Isto evita que registos pendentes antigos fiquem na lista.
+- **Expirado.** Uma transação pendente que o banco deixa de listar sem a confirmar fica marcada como expirada quando tiver mais de 7 dias e é removida da lista. Isto evita que registos pendentes antigos fiquem na lista.
 
 O saldo disponível é o saldo atual líquido da atividade pendente, pelo que o dinheiro ainda pendente está refletido no que vês.
 
 ## Registo de auditoria
 
-Cada alteração a uma transação — incluindo o tratamento de duplicados e as mudanças de estado — fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo.
+Cada alteração a uma transação, incluindo o tratamento de duplicados e as mudanças de estado, fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo: na web, escolhe **Editar** numa transação para o veres em **Atividade**. A aplicação móvel não o mostra.
 
 ## Anexos
 
@@ -69,7 +69,15 @@ Confirma que a conta terminou a primeira sincronização ou que já tens transa�
 1. Abre a lista de transações de uma conta.
 2. Filtra por data, categoria ou conta, se necessário.
 3. Abre uma transação para rever o valor, o comerciante e as notas.
-4. Atualiza a categoria, a descrição ou o estado recorrente quando for preciso.
+4. Atualiza a categoria, a descrição ou as etiquetas quando for preciso.
+
+<DocsImage
+  src="/images/docs/pt/accounts-transactions/understand-transactions-list.png"
+  alt="Lista de transações com os totais de entradas e saídas e as colunas de data, comerciante e conta, categoria, montante e saldo."
+  caption="Cada linha mostra o comerciante, o montante e o saldo corrente de uma transação."
+  width={1440}
+  height={900}
+/>
 
 ## Datas e intervalos de datas
 

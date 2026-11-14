@@ -7,13 +7,15 @@ WonderMoney prevents duplicates as part of its normal transaction pipeline, so m
 
 ## How duplicates are handled
 
-Each transaction carries a fingerprint that identifies it. When incoming data matches an existing fingerprint, the duplicate is dropped instead of creating a second row. On the rare occasion the match is uncertain, the transaction is kept and flagged with a hint so you can decide.
+A transaction your bank sends carries the bank's own reference, and one that is already stored is not added a second time. A transaction with no bank reference, such as one you add by hand or import from a file, is identified by a fingerprint of its date and amount. When you add a transaction by hand on the web and it matches one already in the account, it is still added, and a message says it looks like a duplicate so you can decide.
 
-Every decision is recorded in the transaction audit log, including skipped duplicates and status changes. The fingerprint tolerance is deliberately narrow: two legitimate transactions that look similar — for example two identical purchases on the same day — are not treated as duplicates. A distinct bank reference tells them apart, and when the bank sends identical purchases without one, each one the bank lists is still kept as its own transaction.
+Duplicates skipped during a bank sync and status changes are recorded in the transaction's audit log; on the web, choose **Edit** on a transaction to see it under **Activity**. Two legitimate transactions from your bank that look alike, for example two identical purchases on the same day, are not treated as duplicates. A distinct bank reference tells them apart, and when the bank sends identical purchases without one, each one the bank lists is still kept as its own transaction.
+
+A file import adds one more check: a row with the same amount as a transaction already in the account, up to 3 days apart, is listed as a [possible duplicate](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates) and skipped unless you include it.
 
 ## Pending and posted versions
 
-A pending card payment is matched to its posted version automatically when the bank confirms it, so the two should not remain separate. If the bank never confirms a pending payment, it expires after the configured window and shows as expired instead of lingering as a pending record.
+A pending card payment is matched to its posted version automatically when the bank confirms it, so the two should not remain separate. If the bank stops listing a pending payment without confirming it, the payment is marked expired once it is more than 7 days old, and it leaves the list instead of lingering as a pending record.
 
 ## Before you start
 
@@ -24,7 +26,7 @@ Confirm the account, date range, and category filters before looking deeper. If 
 1. Check whether the transaction is pending, posted, expired, or still outside the selected date range.
 2. Review whether another account imported the same payment.
 3. Compare manual entries with imported entries.
-4. Remove or merge duplicates when the source is clear.
+4. Delete the duplicate when the source is clear. A transaction that came from your bank can't be deleted, because the bank would send it again: hide it instead to keep it out of lists and totals.
 
 <DocsImage
   src="/images/docs/accounts-transactions/missing-duplicate-transactions-review.png"
@@ -41,7 +43,7 @@ After you correct the issue, check the account again after the next sync. The sa
 ## Common issues
 
 - A manual entry was added before the bank import arrived, and a hint suggests it may be a duplicate.
-- A pending transaction shows as expired because the bank never confirmed it.
+- A pending transaction left the list because the bank never confirmed it and it expired.
 - The bank omitted a transaction until the next refresh.
 - The wrong date filter made the transaction look missing.
 

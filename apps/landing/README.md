@@ -1,6 +1,6 @@
 # WonderMoney marketing site
 
-The public site at [wonder.money](https://wonder.money): Astro 5 with React 19 islands and
+The public site at [wonder.money](https://wonder.money): Astro 7 with React 19 islands and
 Tailwind 4. Content is composed from local configuration and Sanity. Six locale-prefixed
 route trees: `pt`, `en`, `es`, `fr`, `de` and `it`; Portuguese (`pt`) is the default.
 

@@ -3,6 +3,16 @@ title: Problemas de importación de transacciones
 description: Pasos para diagnosticar problemas de importación de transacciones en WonderMoney.
 ---
 
+Un archivo ilegible se rechaza con un mensaje de error en lugar de importarse en silencio, para que puedas corregir el archivo e intentarlo de nuevo.
+
+<DocsImage
+  src="/images/docs/es/troubleshooting/transaction-import-problems-error-state.png"
+  alt="Ventana Importar transacciones tras añadir un archivo no reconocido, que te pide elegir las columnas de fecha, descripción e importe."
+  width={1440}
+  height={900}
+  caption="Cuando WonderMoney no distingue qué columnas tienen la fecha, la descripción y el importe, te pide que las elijas antes de importar."
+/>
+
 ## Síntomas
 
 - Un archivo de importación es rechazado.
@@ -26,7 +36,7 @@ description: Pasos para diagnosticar problemas de importación de transacciones 
 
 ## Transacciones similares y duplicados
 
-WonderMoney identifica los duplicados mediante una huella de transacción construida a partir de detalles como la fecha y el importe. La tolerancia de la huella se ha reforzado, de modo que dos transacciones que son similares pero legítimas — por ejemplo, dos compras del mismo importe el mismo día — ya no se omiten como duplicados. Cuando se detecta un duplicado real, se conserva la entrada original y la decisión se registra en el registro de auditoría, de modo que nada se sobrescribe en silencio.
+WonderMoney reconoce una fila del archivo como ya importada por el identificador o la referencia del propio banco, cuando el archivo los tiene (un `FITID` de OFX, una referencia de CAMT.053), y, si no, por una huella construida a partir de detalles como la fecha y el importe. Las filas del mismo archivo que comparten esos detalles cuentan por separado, de modo que dos compras del mismo importe el mismo día se importan ambas. Una fila importada antes aparece en la revisión como **Ya en la cuenta** y se omite a menos que la incluyas; la transacción que está en la cuenta se queda como está.
 
 Una fila del archivo con el mismo importe que una transacción que ya está en la cuenta, con hasta 3 días de diferencia, aparece en la revisión como posible duplicado, junto a la transacción a la que se parece. Se omite a menos que la incluyas; consulta [Posibles duplicados](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados).
 

@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "Additional verification required",
-      "message": "Enter the 6-digit code from your authenticator app to continue",
+      "message": "Confirm it's you with a code from your authenticator app or one of your backup codes",
       "codeLabel": "6-digit code",
       "codePlaceholder": "123456",
       "verify": "Verify",
@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Enter the 6-digit code from your authenticator app.",
         "invalidCode": "That code was not correct. Try again.",
-        "unavailable": "Could not verify that code. Check your connection and try again."
-      }
+        "unavailable": "Could not verify that code. Check your connection and try again.",
+        "backupCodeValidation": "Enter a backup code.",
+        "invalidBackupCode": "That backup code isn't valid or has already been used.",
+        "challengeExpired": "This sign-in can't be completed any more. Sign out and sign in again.",
+        "rateLimited": "Too many failed attempts. Wait a few minutes and try again."
+      },
+      "useBackupCode": "Use a backup code",
+      "useAuthenticator": "Use your authenticator app instead",
+      "backupCodeLabel": "Enter one of your backup codes",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Each backup code works once. After you sign in with it, it can't be used again."
     },
     "signOutFailed": {
       "title": "Could not sign out",
@@ -2329,7 +2338,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "You can no longer change this asset. Sign in again or check with your household.",
       "mfa": "Confirm it is you to continue.",
-      "not-found": "This asset no longer exists, or it is private to the other member of your household.",
+      "not-found": "This asset no longer exists, or it is private to another member of your household.",
       "invalid": "Something entered is not valid. Check the fields and try again.",
       "invalid-response": "It may have been saved, but the server's answer could not be read. Refresh before trying again.",
       "network-ambiguous": "The connection dropped, so it is not known whether it was saved. Refresh before trying again.",
@@ -2344,7 +2353,7 @@
     "invalidTitle": "This asset could not be shown",
     "invalidMessage": "The server sent something this version of the app cannot read. Try again, or update the app.",
     "notFoundTitle": "Asset not found",
-    "notFoundMessage": "It may have been deleted, or it is private to the other member of your household.",
+    "notFoundMessage": "It may have been deleted, or it is private to another member of your household.",
     "invalidIdTitle": "Asset not found",
     "invalidIdMessage": "This link does not point to an asset.",
     "stale": "These figures may be out of date: the last refresh failed.",
@@ -2430,7 +2439,7 @@
     "loading": "Loading asset",
     "error": "This asset could not be loaded. Close and try again.",
     "invalid": "The server sent something this version of the app cannot read. Close and try again, or update the app.",
-    "notFound": "This asset no longer exists, or it is private to the other member of your household.",
+    "notFound": "This asset no longer exists, or it is private to another member of your household.",
     "save": "Save changes",
     "saving": "Saving",
     "growthStartDate": "Changes from",
@@ -2500,7 +2509,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "You can no longer change this wallet. Sign in again or check with your household.",
       "mfa": "Confirm it is you to continue.",
-      "not-found": "This wallet no longer exists, or it is private to the other member of your household.",
+      "not-found": "This wallet no longer exists, or it is private to another member of your household.",
       "invalid": "Something entered is not valid. Check the fields and try again.",
       "invalid-response": "It may have been saved, but the server's answer could not be read. Refresh before trying again.",
       "network-ambiguous": "The connection dropped, so it is not known whether it was saved. Refresh before trying again.",
@@ -2707,18 +2716,14 @@
     "legacyRecurrence": "This category has no saved recurrence. Select one explicitly before saving.",
     "scope": "Apply change to",
     "scopeMonth": "Selected month only",
-    "scopeForward_one": "Selected month through December ({{count}} month)",
-    "scopeForward_other": "Selected month through December ({{count}} months)",
-    "scopeNote": "The selected route month is the starting point. Earlier months and future years are never changed.",
+    "scopeNote": "Choosing following months also updates later years. Earlier months stay unchanged.",
     "suggestionLabel": "Suggested from your spending: {{amount}}",
     "suggestionApply": "Apply",
     "suggestionNotEnoughData": "Not enough history yet for a suggestion.",
     "save": "Save category budget",
     "saving": "Saving category budget…",
-    "confirmTitle": "Apply through December?",
-    "confirmMessage_one": "Apply this amount and recurrence from {{start}} through {{end}} ({{count}} month)? Earlier months, future years, account balances, and spending transactions will not change.",
-    "confirmMessage_other": "Apply this amount and recurrence from {{start}} through {{end}} ({{count}} months)? Earlier months, future years, account balances, and spending transactions will not change.",
-    "confirmAction": "Apply through December",
+    "confirmTitle": "Apply to following months?",
+    "confirmAction": "Apply to following months",
     "failures": {
       "demo": "Demo mode is read-only. No category change was saved.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2729,7 +2734,9 @@
       "invalid-response": "The server did not confirm the category change safely. Your values were retained.",
       "invalid": "Enter a positive amount and explicitly select a recurrence.",
       "general": "The category change could not be saved. Your values were retained."
-    }
+    },
+    "scopeForward": "Selected month and all following months",
+    "confirmMessage": "Apply this amount and recurrence from {{start}} onward, including later years? Earlier months, account balances, and spending transactions will not change."
   },
   "budgetCreate": {
     "title": "Create budget",
@@ -3449,7 +3456,7 @@
     "blankBenchmark": "Leave blank to remove the benchmark comparison",
     "benchmarkCleared": "Remove the current benchmark",
     "excluded": "Exclude from aggregate dashboard",
-    "excludedHelper": "Hides this portfolio from combined totals and performance across all portfolios",
+    "excludedHelper": "Leaves this portfolio out of the totals, holdings and charts of all portfolios together. Its own page and your net worth still include it.",
     "favored": "Highlight on dashboard",
     "favoredHelper": "Gives this portfolio priority placement on the dashboard",
     "allocation": {
@@ -3882,7 +3889,7 @@
     },
     "appLock": {
       "heading": "App lock",
-      "helper": "Require Face ID, Touch ID, or your device passcode to open WonderMoney.",
+      "helper": "Set up face or fingerprint recognition to turn on app lock. Your device passcode can be used as a fallback when unlocking.",
       "loading": "Checking app lock status…",
       "onLabel": "App lock is on",
       "offLabel": "App lock is off",
@@ -3892,8 +3899,8 @@
       "turningOff": "Turning off…",
       "confirmPrompt": "Confirm to turn on app lock",
       "errors": {
-        "no-hardware": "No biometric or passcode is set up on this device.",
-        "not-enrolled": "Set up Face ID, Touch ID, or a passcode in your device settings first.",
+        "no-hardware": "This device does not support face or fingerprint recognition.",
+        "not-enrolled": "Enroll a face or fingerprint in your device settings before turning on app lock.",
         "auth-failed": "Could not confirm. Try again."
       }
     },
@@ -3944,7 +3951,11 @@
         "validation": "Enter the 6-digit code from your authenticator app.",
         "invalidCode": "That code was not correct. Try again.",
         "unavailable": "Could not complete that action. Check your connection and try again."
-      }
+      },
+      "backupCodesTitle": "Save your backup codes",
+      "backupCodesHelper": "Store these codes somewhere safe. Each one can be used once if you lose access to your authenticator app.",
+      "copyBackupCodes": "Copy codes",
+      "backupCodesCopied": "Backup codes copied to clipboard."
     },
     "deleteHeading": "Delete account",
     "deleteExplainer": "Permanently deletes your WonderMoney account and all associated data from our systems.",
@@ -5084,13 +5095,15 @@
     "worstPerformer": "Worst Performer",
     "dataUnavailable": "Data unavailable",
     "weight": "Weight",
+    "excludedFromTotals": "Excluded from totals",
     "gain": "Gain",
     "performanceInsufficient": "We need at least two snapshots to show a trend.",
     "performanceWaiting": "Performance appears once snapshots are created.",
     "loading": "Loading",
     "sectionError": "Could not load this section. Pull down to try again.",
     "more": "More for this portfolio",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "All-time yield and volatility; fixed 4.5% reference rate for every currency."
   },
   "privacy": {
     "hiddenAmount": "Hidden amount",
@@ -5350,7 +5363,7 @@
   },
   "rules": {
     "title": "Rules",
-    "description": "Rules tidy up transactions for you: when a transaction matches a rule's conditions, its actions run. Rules run from top to bottom and never change what you set by hand. Both members of a household share them.",
+    "description": "Rules tidy up transactions for you: when a transaction matches a rule's conditions, its actions run. Rules run from top to bottom and never change what you set by hand. Everyone in a household shares them.",
     "back": "Back to More",
     "loading": "Loading rules",
     "stale": "Could not refresh. Showing previously loaded rules",

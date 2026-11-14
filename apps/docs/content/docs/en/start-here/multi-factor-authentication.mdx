@@ -3,41 +3,65 @@ title: Multi-factor authentication
 description: Set up and use multi-factor authentication for sign-in.
 ---
 
-Multi-factor authentication adds a second check at sign-in. When it is enabled, you confirm your identity with a code or another approved method before the session opens.
+Multi-factor authentication adds a second check at sign-in. When it is on, signing in with your password also asks for the 6-digit code from your authenticator app, or for one of your backup codes if you don't have the app with you.
 
 ## Before you start
 
-Keep access to the phone, authenticator app, or backup method tied to the account. If you are changing devices, make sure the old method still works until the new one is ready.
+Keep access to the phone and authenticator app tied to the account. If you are changing devices, make sure the old method still works until the new one is ready.
+
+## Turn it on
+
+1. Open **Settings → Security** and find **Multi-factor authentication**.
+2. Select **Enable 2FA** and enter your account password.
+3. Scan the QR code with your authenticator app.
+4. Under **Save your backup codes**, select **Copy codes** and store them somewhere you can reach without your phone, such as a password manager. They are shown only this once.
+5. Enter the 6-digit code your authenticator app shows to finish.
+
+To turn it off, select **Disable 2FA** in the same section and enter your account password. For the mobile app, see [Two-factor authentication](/en/docs/settings-security-privacy/two-factor-authentication).
 
 ## Steps
 
 1. Sign in with your email and password.
-2. Enter the verification code or approve the prompt.
-3. Save any backup codes if they are provided.
+2. Enter the 6-digit code from your authenticator app.
+3. If you don't have the app, select **Use a backup code** and enter one of your saved backup codes. **Use your authenticator app instead** takes you back to the 6-digit code.
 4. Confirm that the session opens normally.
+
+Signing in with a passkey does not ask for the code; see [Passkeys](/en/docs/settings-security-privacy/passkeys).
 
 <DocsImage
   src="/images/docs/start-here/multi-factor-authentication-otp.png"
-  alt="Six-slot one-time password input for an authenticator-app code."
+  alt="Six-slot one-time password input for an authenticator-app code, with a Use a backup code link below it."
   width={1440}
   height={900}
-  caption="Enter the code from your authenticator app."
+  caption="Enter the code from your authenticator app, or use a backup code."
 />
+
+## Backup codes
+
+- Each backup code works once. After you sign in with it, it can't be used again.
+- Enter the code as it was shown, upper and lower case included. You can leave out the hyphen.
+- Turning two-factor authentication off and on again gives you a new set of codes, and the old ones stop working.
+- The mobile app offers **Use a backup code** on its verification screen too, in versions after 1.0.3.
 
 ## Review your setup
 
-Test the sign-in flow once after setup so you know the second factor works before you need it. If you rely on backup codes, store them in a safe place separate from the device you use every day.
+Test the sign-in flow once after setup so you know the second factor works before you need it. Store your backup codes in a safe place separate from the device you use every day. Before you replace or reset your phone, move the authenticator to the new device, or turn two-factor authentication off and on again while you are still signed in.
 
 ## Common issues
 
 - The code expired before it was entered.
-- The authenticator app is on a replaced or reset device.
-- Backup codes were used up or stored in the wrong place.
+- The authenticator app is on a replaced or reset device: sign in with a backup code, then set up two-factor authentication again on the new device.
+- The clock on the device that generates the codes is out of sync.
+- **That backup code isn't valid or has already been used**: the code was mistyped, or it was used for an earlier sign-in. Try another one.
+- **Too many incorrect codes**: after five wrong codes the sign-in stops. Go back to login and sign in again.
+- **Too many failed attempts**: after repeated wrong codes, the second step is locked for about 15 minutes. Wait, then try again.
 - The browser is asking for a new challenge after sign-out.
 
+Without the authenticator app or an unused backup code, the second step can't be completed.
 
 ## Related links
 
 - [Sign in and recover a password](/en/docs/start-here/sign-in-password-recovery)
+- [Two-factor authentication settings](/en/docs/settings-security-privacy/two-factor-authentication)
 - [Create an account](/en/docs/start-here/create-account)
 - [Understand the dashboard](/en/docs/start-here/understand-dashboard)

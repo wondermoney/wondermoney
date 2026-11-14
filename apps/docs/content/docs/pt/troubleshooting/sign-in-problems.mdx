@@ -3,47 +3,48 @@ title: Problemas de início de sessão
 description: Recupera o acesso quando não é possível iniciar sessão.
 ---
 
+O formulário de início de sessão assinala credenciais inválidas com uma mensagem de erro em vez de abrir a aplicação, para que possas corrigir o email ou a palavra-passe e tentar de novo.
+
+<DocsImage
+  src="/images/docs/pt/troubleshooting/sign-in-problems-error-state.png"
+  alt="Formulário de início de sessão com uma mensagem de erro depois de uma palavra-passe errada."
+  width={1440}
+  height={900}
+  caption="Um início de sessão falhado mostra uma mensagem de erro para corrigires o email ou a palavra-passe."
+/>
+
 ## Sintomas
 
-Esta página ajuda quando não é possível iniciar sessão ou quando a autenticação falha.
-
-Sintomas comuns:
-
-- A palavra-passe não é aceite
-- O email não é reconhecido
-- O segundo fator falha
-- A sessão fica presa na página de login
+- Não consegues iniciar sessão com o email esperado.
+- A palavra-passe é rejeitada.
+- A página volta sempre ao ecrã de início de sessão.
+- Um passo de verificação não conclui.
 
 ## O que verificar
 
-Confirma:
-
-- Se o email está correto
-- Se o método de início de sessão correto está a ser usado
-- Se a palavra-passe foi escrita sem erros
-- Se o código de autenticação ainda é válido
+- Se estás a usar o endereço de email correto.
+- Se a conta foi criada com o mesmo método de início de sessão.
+- Se os cookies do navegador estão ativos.
+- Se o problema acontece só num navegador.
+- Se a autenticação de dois fatores está ativa. O código de seis dígitos vem da tua aplicação de autenticação, e o relógio desse dispositivo tem de estar certo.
 
 ## O que tentar
 
-Tenta estes passos:
-
-1. Reintroduz as credenciais com cuidado.
-2. Usa a recuperação de palavra-passe, se disponível.
-3. Limpa o formulário e volta a tentar.
-4. Testa noutro navegador.
+1. Volta a introduzir o email e a palavra-passe com calma.
+2. Limpa a cache do navegador ou abre uma janela privada.
+3. Repõe a palavra-passe: na página de início de sessão, seleciona **Esqueceste-te da palavra-passe?**. Uma conta criada com o Google ou com início de sessão único não tem palavra-passe para repor; inicia sessão da mesma forma como criaste a conta.
+4. Experimenta outro navegador ou dispositivo.
 
 ## Quando contactar o suporte
 
-Contacta o suporte se:
-
-- Não for possível repor o acesso
-- O código de 2FA não funcionar
-- A conta existir mas continua a bloquear o acesso
+Contacta o suporte se conseguires repor a palavra-passe mas continuares sem conseguir iniciar sessão, ou se a conta parecer existir mas o processo de início de sessão nunca concluir.
 
 
 ## Páginas relacionadas
 
-- [Resolução de problemas](/pt/docs/troubleshooting/)
+- [Iniciar sessão e recuperar a palavra-passe](/pt/docs/start-here/sign-in-password-recovery)
 - [Mudar palavra-passe](/pt/docs/settings-security-privacy/change-password)
 - [Autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication)
+- [Chaves de acesso](/pt/docs/settings-security-privacy/passkeys)
+- [Problemas de ligação bancária](/pt/docs/troubleshooting/bank-connection-problems)
 - [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

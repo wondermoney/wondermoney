@@ -55,7 +55,7 @@ To use passkeys in the app with your own server, build the app from source (`app
 | Web app | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | The app's package name and the SHA-256 fingerprints of its signing certificates, comma-separated (`AB:CD:…`, as `keytool` or the Play Console print them). The web app serves them as `/.well-known/assetlinks.json`. |
 | API | `ANDROID_APP_CERT_SHA256` | The same fingerprints. Android reports a passkey from an app as coming from `android:apk-key-hash:` and the certificate's hash, not from your web address, so the API accepts that origin only for these certificates. |
 
-With the Docker Compose setup, all of them go in `.env`. Until they are set, both `/.well-known` addresses answer 404 and nothing changes. Keep `APP_URL` on the default HTTPS port: iOS reports the app's passkeys as coming from `https://` and the hostname, without a port.
+With the Docker Compose setup, all of them go in `.env`. With the Helm chart, the web app's go in `webExtraEnv` and the API's in `extraEnv`. Until they are set, both `/.well-known` addresses answer 404 and nothing changes. Keep `APP_URL` on the default HTTPS port: iOS reports the app's passkeys as coming from `https://` and the hostname, without a port.
 
 ## Requirements
 

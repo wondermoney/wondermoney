@@ -1,0 +1,69 @@
+---
+title: App lock
+description: Require Face ID, Touch ID or your device passcode to open the mobile app.
+---
+
+App lock puts a lock screen in front of the WonderMoney mobile app. To get past it you confirm with the phone's own unlock: your face, your fingerprint or the device passcode. Use it when other people sometimes hold your unlocked phone.
+
+App lock exists in the mobile app only, and it is off until you turn it on. It is a screen lock on one phone, not a change to how you sign in to your account.
+
+## Turn it on
+
+1. In the mobile app, open **More > Settings > Security** and find **App lock**.
+2. Select **Turn on app lock**.
+3. Confirm with the prompt your phone shows.
+
+The section then reads **App lock is on**. The app does not lock at once: it locks the next time it leaves the screen.
+
+The phone must have face or fingerprint unlock set up. If it does not, the section shows one of these messages and app lock stays off:
+
+- **No biometric or passcode is set up on this device.** The phone reports no face or fingerprint sensor.
+- **Set up Face ID, Touch ID, or a passcode in your device settings first.** The phone has a sensor, but no face or fingerprint is saved on it. Add one in the phone's settings and try again.
+- **Could not confirm. Try again.** The prompt was cancelled or did not recognize you.
+
+## When the app locks
+
+With app lock on, WonderMoney locks:
+
+- every time you open it after it was closed;
+- as soon as it leaves the foreground. On an iPhone that includes switching to another app, opening the app switcher, pulling down Control Center and taking a call. On Android it locks when the app goes to the background, for example when you switch to another app or go to the home screen.
+
+There is no delay. Coming back after a second asks you to unlock again.
+
+## Unlock the app
+
+The lock screen reads **WonderMoney is locked**. Select **Unlock** and confirm with your face or fingerprint. The app does not show the prompt by itself; it waits for you to select **Unlock**.
+
+- If your face or fingerprint is not recognized, the phone offers the device passcode instead.
+- WonderMoney has no PIN of its own for this. The lock uses whatever unlocks the phone.
+- If you cancel the prompt or it fails, the screen shows **Could not unlock. Try again.** Select **Unlock** to try again.
+- If you later remove your face or fingerprint from the phone, the device passcode still unlocks the app.
+
+The lock screen has no other way in and no sign-out button.
+
+## On Android
+
+App lock works the same way on Android, with the phone's own unlock. The app's messages name Face ID and Touch ID on every phone: on Android they mean the fingerprint or face unlock saved in the phone's settings, and the device passcode is your PIN, pattern or password. As on an iPhone, turning app lock on needs a fingerprint or a face saved on the phone; a PIN alone is not enough.
+
+## Turn it off
+
+Open **More > Settings > Security** and select **Turn off app lock**. The app is already unlocked at that point, so it does not ask you to confirm again.
+
+## What it protects
+
+- App lock keeps someone who has your unlocked phone from opening WonderMoney on it. Anyone who knows the device passcode can still unlock the app.
+- It is not a second factor. It does not change how you sign in, and it does nothing on the web or on your other devices. To protect the account itself, use [two-factor authentication](/en/docs/settings-security-privacy/two-factor-authentication) or a [passkey](/en/docs/settings-security-privacy/passkeys).
+- The setting is kept on the phone, not in your account. Turn it on separately on each phone or tablet.
+- It covers the signed-in app. The sign-in screens are not behind the lock.
+- Signing out does not turn it off. The setting stays on the phone and applies again once someone signs in, with the same account or another one.
+- The setting is kept in the phone's secure storage. Android removes it when the app is uninstalled, so app lock is off after a reinstall. An iPhone can keep it after the app is deleted, so app lock may still be on when you install the app again.
+
+To hide amounts while the app is open, use [privacy mode](/en/docs/settings-security-privacy/privacy-mode).
+
+## Related pages
+
+- [Two-factor authentication](/en/docs/settings-security-privacy/two-factor-authentication)
+- [Passkeys](/en/docs/settings-security-privacy/passkeys)
+- [Privacy mode](/en/docs/settings-security-privacy/privacy-mode)
+- [Use the mobile app with your server](/en/docs/self-hosting/mobile-app)
+- [Settings, security, and privacy](/en/docs/settings-security-privacy)

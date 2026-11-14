@@ -177,8 +177,9 @@ export async function transferOwnership(em: EntityManager, tenant: Tenant, actor
 /**
  * Owner account deletion: tear down the household — deactivate every
  * OTHER member of each tenant this user owns and revoke their bank connections.
- * The account-deletion service already handles the owner's own rows; this covers
- * the other members. Runs inside the deletion transaction (no flush here).
+ * The deleted user's own memberships and bank connections, in every household, are the
+ * account-deletion service's (`deleteWonderMoneyAccount`). Runs inside the deletion
+ * transaction (no flush here).
  */
 export async function tearDownHouseholdOnOwnerDeletion(em: EntityManager, ownerAppuserKey: number, now: Date): Promise<void> {
   const ownedTenants = await em.find(Tenant, { ownerAppuserKey: { appuserKey: ownerAppuserKey } });

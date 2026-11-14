@@ -235,6 +235,43 @@ describe('app auth adapter — TOTP lifecycle', () => {
     await expect(adapter.mfaVerify('totp', 'totp', '000000')).resolves.toEqual({ status: 'unavailable' })
   })
 
+  it('signs in with a backup code, clears the pending flag, and refreshes the session', async () => {
+    const signInEmail = jest.fn().mockResolvedValue({ data: { twoFactorRedirect: true }, error: null })
+    const twoFactorVerifyBackupCode = jest.fn().mockResolvedValue({ data: {}, error: null })
+    const getSession = jest.fn().mockResolvedValue({ data: sessionData('u1'), error: null })
+    const adapter = createAppAuthAdapter(createPort({ signInEmail, twoFactorVerifyBackupCode, getSession }))
+
+    await adapter.signInWithPassword('a@b.co', 'secret')
+    await expect(adapter.mfaVerifyBackupCode('abcde-12345')).resolves.toEqual({ status: 'verified' })
+    await expect(adapter.getState()).resolves.toMatchObject({ status: 'authenticated' })
+    // No trustDevice: the next sign-in asks for a second factor again.
+    expect(twoFactorVerifyBackupCode).toHaveBeenCalledWith({ code: 'abcde-12345' })
+  })
+
+  it('classifies better-auth\'s backup-code refusals', async () => {
+    const twoFactorVerifyBackupCode = jest.fn()
+      .mockResolvedValueOnce({ data: null, error: errorLike(401, 'INVALID_BACKUP_CODE') })
+      .mockResolvedValueOnce({ data: null, error: errorLike(400, 'TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE') })
+      .mockResolvedValueOnce({ data: null, error: errorLike(401, 'INVALID_TWO_FACTOR_COOKIE') })
+      .mockResolvedValueOnce({ data: null, error: errorLike(429, 'ACCOUNT_TEMPORARILY_LOCKED') })
+      .mockResolvedValueOnce({ data: null, error: errorLike(429) })
+      .mockResolvedValueOnce({ data: null, error: errorLike(409) })
+      .mockRejectedValueOnce(new Error('network'))
+    const signInEmail = jest.fn().mockResolvedValue({ data: { twoFactorRedirect: true }, error: null })
+    const adapter = createAppAuthAdapter(createPort({ signInEmail, twoFactorVerifyBackupCode }))
+    await adapter.signInWithPassword('a@b.co', 'secret')
+
+    await expect(adapter.mfaVerifyBackupCode('used0-codes')).resolves.toEqual({ status: 'invalid-code' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'challenge-expired' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'challenge-expired' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'rate-limited' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'rate-limited' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'unavailable' })
+    await expect(adapter.mfaVerifyBackupCode('x')).resolves.toEqual({ status: 'unavailable' })
+    // A refused code leaves the sign-in pending.
+    await expect(adapter.getState()).resolves.toEqual({ status: 'mfa-pending' })
+  })
+
   it('lists a verified factor only when the user has two-factor enabled', async () => {
     const getSession = jest.fn().mockResolvedValue({
       data: { session: { token: 't' }, user: { id: 'u1', twoFactorEnabled: true } },

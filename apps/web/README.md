@@ -29,10 +29,9 @@ Fill in the required environment variables in `.env.local` by name only.
 
 Environment variable names:
 
+- `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SENTRY_DSN`
 - `SENTRY_IGNORE_API_RESOLUTION_ERROR`
-- `NEXT_PUBLIC_TAWK_HASH`
-- `NEXT_PUBLIC_TAWK_PROPERTY_ID`
-- `NEXT_PUBLIC_TAWK_WIDGET_ID`
 - `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_GTM_ID` (optional: each turns on its tracker;
   unset, none loads)
 - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
@@ -49,10 +48,9 @@ Environment variable names:
 
 ## Architecture pointers
 
-- `CLAUDE.md`
-- `../docs/BRAND_GUIDELINES.md`
-- `../docs/UX_PLAYBOOK.md`
-- `../docs/PRODUCT_SPEC.md`
+- `AGENTS.md` (`CLAUDE.md` points to it)
+- `DESIGN.md`
+- `docs/qa/worktree-e2e.md`
 
 ## Testing notes
 

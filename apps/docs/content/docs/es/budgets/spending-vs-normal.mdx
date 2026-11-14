@@ -1,0 +1,77 @@
+---
+title: Gasto vs normal
+description: Mira adónde fue el dinero de un mes y qué categorías quedaron por encima o por debajo de su nivel habitual.
+---
+
+El informe **Gasto vs normal** muestra lo que gastaste en un mes, categoría a categoría, y compara cada categoría con su propio normal: la media de los mismos días de los tres meses anteriores.
+
+Es la imagen completa detrás de la tarjeta [Gasto frente a lo habitual](/es/docs/budgets/insights#gasto-frente-a-lo-habitual) de la página de inicio. Ambos usan el mismo cálculo, así que los importes de una categoría aquí coinciden con los de su tarjeta para el mismo mes. La tarjeta muestra como máximo tres categorías con una desviación del 25% o más; el informe muestra todas las categorías en las que gastaste.
+
+El informe está en la página **Informes** de la web. La aplicación móvil no tiene este informe; muestra la tarjeta de la página de inicio.
+
+## Elegir el mes
+
+El selector **Mes** empieza en el mes actual. En el mes actual, el informe cuenta el gasto hasta ahora. Un mes pasado se cuenta entero.
+
+## Leer el gráfico
+
+El gráfico tiene un bloque por cada categoría de nivel superior con gasto en el mes. El tamaño del bloque es el importe gastado. El color es el cambio frente a lo normal:
+
+- **Verde:** un 15% o más por debajo de lo normal.
+- **Neutro:** a menos de un 15% de lo normal, por encima o por debajo.
+- **Ámbar:** más de un 15% y hasta un 50% por encima de lo normal.
+- **Rojo:** más de un 50% por encima de lo normal.
+- **Neutro con contorno discontinuo:** no hay nada con lo que comparar (consulta [Cuando no hay comparación](#cuando-no-hay-comparación)).
+
+Un bloque con espacio suficiente muestra la categoría y el cambio en porcentaje, o un guion cuando no hay comparación. Señala un bloque para ver su **Gastado**, su **Normal** y su **Cambio vs normal** debajo del gráfico. Selecciona un bloque para abrir las transacciones que lo componen.
+
+## Leer la tabla
+
+La tabla lista las mismas categorías de nivel superior, de mayor a menor gasto, cada una seguida de sus subcategorías.
+
+- **Gastado** es el gasto del mes hasta ahora. Selecciona el importe para abrir las transacciones que lo componen.
+- **Normal** es la media de los tres meses para los mismos días.
+- **Cambio vs normal** es la distancia entre **Gastado** y **Normal**, en porcentaje. Aparece en rojo a partir de más de un 15% por encima de lo normal y en verde a partir de un 15% por debajo.
+
+Una subcategoría se compara con su propio normal, no con el de la categoría principal. Una categoría sin gasto en el mes no aparece, aunque suela tenerlo.
+
+## Cómo se calcula el normal
+
+- El informe toma los tres meses naturales anteriores al mes elegido.
+- En cada uno cuenta solo los días a los que ya ha llegado el mes elegido. El día 12, los primeros 12 días del mes actual se comparan con los días 1 a 12 de cada mes anterior.
+- El normal es la media de esos tres importes. Un mes sin gasto en la categoría cuenta como cero.
+
+## Cuando no hay comparación
+
+El informe siempre muestra lo que gastaste. **Normal**, **Cambio vs normal** o ambos muestran un guion cuando la comparación diría poco:
+
+- **El mes tiene menos de 7 días.** No se compara ninguna categoría antes del día 7.
+- **No hay tres meses de historial.** Si alguno de los tres meses anteriores no tiene transacciones en tus cuentas, no se compara ninguna categoría.
+- **La categoría es nueva.** Sin gasto en la categoría en esos días de los tres meses anteriores, no hay normal.
+- **El normal es inferior a 20 en tu moneda.** El importe **Normal** se muestra, pero sin porcentaje: por debajo, unos pocos euros lo hacen oscilar mucho.
+
+## Qué cuenta
+
+- El informe lee las cuentas de las que eres titular, incluidas las conjuntas. En un hogar, las cuentas de otro miembro no cuentan, tampoco las que comparte contigo. Las cuentas cerradas quedan fuera.
+- Las transacciones pendientes cuentan como dinero ya comprometido. Una transacción pendiente que caducó sin liquidarse no cuenta.
+- Las transferencias entre cuentas no cuentan nunca.
+- Las categorías que no son gasto (inversiones y ahorro) quedan fuera, igual que las transacciones sin categoría.
+- Un reembolso reduce el total de la categoría en la que entra, y una categoría nunca baja de cero. Un gasto con un reembolso vinculado cuenta por su importe neto.
+- Una transacción dividida cuenta cada línea en su categoría.
+- Un pago vinculado a un préstamo cuenta solo sus intereses y comisiones.
+- Los importes están en tu moneda base. Una transacción sin importe convertido queda fuera, y una nota debajo del informe lo indica.
+
+## Filtros
+
+En la página **Informes**, los filtros **Cuentas** y **Categorías** y el [filtro por miembro](/es/docs/household/filter-by-member) acotan este informe. El filtro por miembro conserva el gasto atribuido a ese miembro, o a **Compartido**, dentro de tus cuentas.
+
+**Periodo**, **Comercios**, **Etiquetas**, **Moneda**, **Incluir transacciones pendientes** e **Incluir transferencias** no lo cambian. El informe sigue la definición de la tarjeta para que los dos coincidan siempre.
+
+Este informe no tiene exportación a CSV.
+
+## Páginas relacionadas
+
+- [Información](/es/docs/budgets/insights)
+- [Comparar dos meses](/es/docs/budgets/compare-months)
+- [Seguir el gasto mensual](/es/docs/budgets/track-monthly-spending)
+- [Filtrar por miembro](/es/docs/household/filter-by-member)

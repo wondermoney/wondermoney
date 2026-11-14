@@ -9,44 +9,49 @@ The email preference center controls which emails WonderMoney sends to your acco
   src="/images/docs/settings-security-privacy/email-preferences-notifications.png"
   alt="Email notification preferences listing the unsubscribe-from-all-marketing switch and each email category with its on/off switch."
   caption="The email preference center lists every email category with its own switch plus a master unsubscribe control."
-  width={1216}
-  height={1042}
+  width={1112}
+  height={914}
 />
 
 ## Email categories
 
 Each email category covers a set of related messages. You can enable or disable every category independently.
 
-- **Bank recovery** covers messages about restoring or reconnecting a bank connection.
-- **Financial** covers budget alerts and weekly insights.
-- **Account recovery** covers messages that help you regain access to your account.
-- **Bank connection alerts** tell you when a bank connection needs you. You get one email about 7 days and another within the last day before a bank's access ends, one when the bank ends access early, and one when a bank has failed to sync for more than 2 days for a reason that needs you, such as a rejected consent or Enable Banking key. Temporary problems, like the bank being briefly unavailable or limiting requests, do not send an email. Each alert is sent once per connection, and only to the household member who connected the bank. It is on by default.
+- **Budget alerts** send one aggregated email when a budget category reaches 80% or 100% of its planned amount. At most one budget email is sent each day.
+- **Weekly insights** send a summary of the previous complete week on Mondays.
+- **Account recovery emails** are alerts when a bank connection needs reconnecting, with steps to fix it. They do not include security alerts about your sign-in, which are always sent.
+- **Bank connection alerts** tell you when a bank connection needs you. You get one email about 7 days and another within the last day before a bank's access ends, one when the bank ends access early, and one when a bank has failed to sync for more than 2 days for a reason that needs you, such as a rejected consent or Enable Banking key. Temporary problems, like the bank being briefly unavailable or limiting requests, do not send an email. Each alert is sent once per connection, and only to the household member who connected the bank.
+- **Card payment reminders** send an email a few days before a closed credit card statement is due, if it still has a balance to pay. At most one email is sent per statement.
 
-Some categories are on by default. Budget alert and weekly insights emails are enabled in production, so they are sent unless you turn off the financial category or disable it in the preference center.
+Every category is on by default, so its emails are sent unless you turn it off. Emails are sent in your account language. Each category shows whether it is **Active**, **Paused** or **Off**; a category is paused while you are unsubscribed from all marketing emails, or while email cannot be delivered to your address.
 
-The same alerts appear as a banner on the home screen, on the web and in the mobile app, with a link to reconnect. Dismissing the banner hides that alert until the next one.
+The bank connection alerts also appear as a banner on the home screen, on the web and in the mobile app, with a link to reconnect. Dismissing the banner hides that alert until the next one.
 
 ## Master switch
 
-The master switch turns off all marketing and informational email categories at once. It does not stop security-critical transactional email.
+The master switch, **Unsubscribe from all marketing emails**, turns off every category above at once. Your choice for each category is kept, and applies again when you turn the master switch off. It does not stop security-critical transactional email.
 
 ## Marketing and transactional consent
 
 Consent for email works in two parts:
 
 - **Marketing and informational email** is optional. You can turn it off per category or with the master switch.
-- **Transactional email** is required for the service to work. Security-critical messages, such as password recovery and sign-in notifications, cannot be unsubscribed from.
+- **Transactional email** is required for the service to work. Messages such as the password reset email, the email that confirms your address and a household invitation cannot be unsubscribed from.
 
 Transactional consent is handled separately from the email categories. Even with the master switch off, WonderMoney continues to send the messages needed to keep your account secure and to deliver the service.
 
 ## Where to find it
 
-1. Open settings.
-2. Go to the email preferences area.
-3. Adjust the categories you want to receive.
-4. Save the changes.
+1. Open **Settings** and choose **Notifications**. In the mobile app, open **More > Settings** and choose **Notifications**.
+2. Turn each category on or off. A change is saved as soon as you make it.
 
 If you do not see the email preference center, check that you are signed in to the correct account and that the settings page is fully loaded.
+
+## Push notifications in the mobile app
+
+The mobile app can also show budget alerts, card payment reminders and bank connection alerts as push notifications, on a server that has push notifications turned on. In **More > Settings > Notifications**, under **Push notifications**, each one is off until you turn it on, and the phone asks for permission the first time. **Send test notification** checks that the phone receives them.
+
+Push notifications never show amounts or merchants: open the app to see the figures. They are set per phone and are separate from the email categories above. If you run your own server, see [Push notifications](/en/docs/self-hosting/mobile-app#push-notifications).
 
 ## Related pages
 

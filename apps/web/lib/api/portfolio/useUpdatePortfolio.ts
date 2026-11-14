@@ -36,6 +36,10 @@ const useUpdatePortfolio = () => {
       queryClient.invalidateQueries({ queryKey: ["realized-gains"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-performance"] });
+      // "Exclude from aggregate dashboard" changes every combined figure.
+      queryClient.invalidateQueries({ queryKey: ["portfolio-top-movers"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-calendar"] });
+      queryClient.invalidateQueries({ queryKey: ["dividend-income"] });
       // A link changes what net worth counts.
       queryClient.invalidateQueries({ queryKey: ["net-worth"] });
       queryClient.invalidateQueries({ queryKey: ["net-worth-history"] });

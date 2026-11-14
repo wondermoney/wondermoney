@@ -29,7 +29,7 @@ La fecha de vencimiento es el primer día de vencimiento después del cierre. Ce
 
 ## Mover una transacción a otro extracto
 
-Cuando el extracto del banco no coincide con su propia lista de transacciones, puedes mover una transacción. Abre la transacción y define su fecha de extracto: pasa a contar en el extracto que contiene esa fecha en lugar de aquel en el que cae su propia fecha. Borrar la fecha lo devuelve a la normalidad.
+Cuando el extracto del banco no coincide con su propia lista de transacciones, se puede mover una transacción: recibe una fecha de extracto y pasa a contar en el extracto que contiene esa fecha en lugar de aquel en el que cae su propia fecha. Borrar la fecha lo devuelve a la normalidad. Las aplicaciones web y móvil aún no tienen un control para esto; se define a través de la [API](/es/docs/api), con el campo `statementDateOverride` al actualizar una transacción.
 
 ## Cuentas sincronizadas
 
@@ -48,7 +48,7 @@ En la web, la página de una tarjeta tiene una pestaña **Extractos**; en el mó
 
 Un extracto cerrado que aún tenga saldo recibe un recordatorio por email unos días antes del vencimiento: tres días, de forma predeterminada. Si se pierde un día, el recordatorio sale al día siguiente, hasta el mismo día del vencimiento. Un extracto pagado antes no recibe recordatorio. El recordatorio va a la persona a la que pertenece la tarjeta, en el idioma de su cuenta: inglés, portugués o español.
 
-Los recordatorios están activados de forma predeterminada. Desactiva **Recordatorios de pago de la tarjeta** en **Ajustes → Notificaciones** para dejar de recibirlos; darte de baja de todos los emails también los detiene. Los recordatorios solo se envían por email.
+Los recordatorios están activados de forma predeterminada. Desactiva **Recordatorios de pago de la tarjeta** en **Configuración → Notificaciones** para dejar de recibirlos; darte de baja de todos los emails también los detiene. Los recordatorios solo se envían por email.
 
 En una instancia autoalojada, los recordatorios necesitan un proveedor de email (consulta [Configurar tu instancia](/es/docs/self-hosting/configure#correo)). Define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar cuántos días antes del vencimiento se envían.
 

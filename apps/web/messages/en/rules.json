@@ -1,7 +1,7 @@
 {
   "rules": {
     "title": "Rules",
-    "description": "Rules tidy up transactions for you: when a transaction matches a rule's conditions, its actions run. Rules run from top to bottom and never change what you set by hand. Both members of a household share them.",
+    "description": "Rules tidy up transactions for you: when a transaction matches a rule's conditions, its actions run. Rules run from top to bottom and never change what you set by hand. Everyone in a household shares them.",
     "create": "Create rule",
     "empty": "No rules yet. Create one to categorize, rename or tag transactions automatically.",
     "load-error": "Rules could not be loaded.",

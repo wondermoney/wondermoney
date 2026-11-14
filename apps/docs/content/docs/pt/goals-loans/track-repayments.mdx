@@ -15,13 +15,16 @@ Isto mantém o saldo restante alinhado com os pagamentos registados.
   height={900}
 />
 
-## O que registar
+## Ligar um reembolso
 
-- Valor do reembolso
-- Data
-- Notas, se necessário
+Um reembolso é uma das tuas transações ligada ao empréstimo; não há um reembolso separado para introduzir. A sua data é a data da transação.
 
-Regista o reembolso na data em que foi efetivamente liquidado, se quiseres que o histórico do saldo se mantenha preciso.
+1. Na página do empréstimo, escolhe **Associar pagamento**.
+2. Escolhe a transação. A lista mostra as tuas transações de saída, cada uma com uma confiança que reflete até que ponto o valor, a data e o comerciante correspondem ao empréstimo.
+3. Revê a alocação: o pagamento total dividido em capital, juros e comissões.
+4. Escolhe **Guardar alocação**.
+
+Só a parte de capital reduz o saldo do empréstimo. Na tabela **Pagamentos** podes mais tarde editar a alocação de um reembolso ou remover a sua ligação.
 
 ## O que a vista mostra
 
@@ -31,15 +34,15 @@ Regista o reembolso na data em que foi efetivamente liquidado, se quiseres que o
 
 ## Erros comuns
 
-- Registar o mesmo reembolso duas vezes.
+- Ligar a mesma transação a dois empréstimos. Uma transação só pode ser ligada uma vez ao mesmo empréstimo, mas nada te impede de a ligar também a um segundo.
 - Introduzir um reembolso no empréstimo errado.
 - Assumir que um reembolso altera o saldo de um objetivo. Empréstimos e objetivos são separados.
 
-Se um pagamento foi reembolsado ou revertido, anota-o antes de adicionares uma nova entrada de reembolso.
+Se um pagamento foi devolvido ou revertido, remove a sua ligação para que deixe de reduzir o saldo.
 
 ## Corrigir o saldo
 
-Quando o extrato do credor mostrar um saldo diferente, regista o valor dele. Na página do empréstimo, escolhe **Ajustar saldo**, mantém **Corrigir saldo** e introduz o saldo e a data do extrato. Zero é permitido, para um empréstimo que o credor dá como liquidado.
+Quando o extrato do credor mostrar um saldo diferente, regista o valor dele. Na página do empréstimo, escolhe **Adicionar ajuste de saldo**, mantém **Corrigir saldo** e introduz o saldo e a data do extrato. Zero é permitido, para um empréstimo que o credor dá como liquidado.
 
 - Uma correção substitui o saldo acompanhado a partir da sua data; não é um pagamento adicional. Os reembolsos anteriores a essa data já estão no valor do credor, e os posteriores reduzem o saldo corrigido.
 - Uma correção com data futura não altera o saldo de hoje. Entra em vigor na sua data.
@@ -53,6 +56,10 @@ Para um empréstimo com taxa variável, escolhe o tipo de taxa **Variável** ao 
 
 - Os juros de cada mês usam a taxa em vigor no início desse mês. Quando uma nova taxa está em vigor numa data de pagamento, a prestação é recalculada para que o empréstimo termine na mesma data de vencimento.
 - O WonderMoney não obtém taxas de referência como a Euribor nem prevê alterações. Adiciona cada alteração quando o credor a anunciar.
+
+## Na aplicação móvel
+
+A aplicação móvel liga reembolsos e mostra o saldo, os reembolsos e a projeção de quitação. Os ajustes de saldo, o histórico de taxas e o plano de amortização estão na web.
 
 ## Páginas relacionadas
 

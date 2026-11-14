@@ -1,42 +1,77 @@
 ---
-title: Adicionar transações de carteira
-description: Adiciona compras, vendas, dividendos e comissões a uma carteira.
+title: Adicionar transações de portefólio
+description: Adiciona compras, vendas e outras transações a um portefólio, com as respetivas comissões.
 ---
 
-Adiciona transações quando for necessário que o desempenho da carteira reflita o que aconteceu de facto no mercado e na conta do corretor.
+Adiciona transações quando for necessário que o desempenho do portefólio reflita o que aconteceu de facto no mercado e na conta do corretor.
+
+<DocsImage
+  src="/images/docs/pt/portfolio-investments/add-portfolio-transactions-modal.png"
+  alt="Janela Adicionar transação com os campos de portefólio, data e tipo de transação, os separadores de tipo de ativo (ação, ETF ou fundo, ou certificado de aforro) e os campos de corretora, ticker, quantidade, preço unitário e notas."
+  caption="A janela Adicionar transação regista os detalhes de uma compra, venda, dividendo ou comissão."
+  width={1440}
+  height={900}
+/>
 
 ## Tipos suportados
 
+Escolhe **Adicionar transação** na página Portefólios ou na página de um portefólio. A lista **Tipo de transação** oferece:
+
 - Compra
 - Venda
-- Dividendo ou distribuição
-- Comissão ou taxa
-- Outra transação de caixa da carteira, quando fizer sentido no ficheiro exportado pelo corretor
+- Depósito
+- Levantamento
+- Oferta
+
+As posições, o preço de custo e os ganhos realizados são calculados a partir das compras e das vendas. Um depósito, um levantamento ou uma oferta fica na lista de transações do portefólio e em mais lado nenhum: não altera as tuas posições, o valor ou o histórico do portefólio, nem os fluxos de caixa a partir dos quais os retornos são medidos. Um portefólio não guarda saldo em dinheiro. Os marcadores **Depósito** e **Levantamento** no gráfico de desempenho da web assinalam dias de compras líquidas e de vendas líquidas, não estas transações.
+
+Dividendos não está na lista: não podes adicionar um dividendo à mão na aplicação web nem na app móvel. Uma comissão também não é um tipo próprio: fica registada na compra ou na venda a que pertence.
 
 ## O que incluir
 
-- Data da transação
+- Portefólio
+- Data, hoje ou anterior
 - Ativo ou ticker
 - Quantidade
-- Preço
-- Comissões
-- Moeda
+- Preço unitário e a respetiva moeda
+- Comissões, se houver: ativa **Adicionar Comissões** e introduz o montante e a respetiva moeda
+
+Na web podes também escolher a corretora, juntar notas e, para uma transação feita noutra moeda, ativar **Adicionar moeda/montante originais** para guardar o preço original. O formulário da app móvel não tem os campos de corretora, comissão nem moeda original.
+
+## Editar ou corrigir uma transação
+
+- Uma venda de mais unidades do que as que o portefólio tem é recusada.
+- Uma transação guardada pode passar de compra a venda e vice-versa. Para a transformar noutro tipo, elimina-a e adiciona uma nova.
+
+## Certificados de Aforro
+
+Os Certificados de Aforro não têm ticker. Na web, em **Tipo de ativo**, na janela Adicionar transação, escolhe **Certificado de Aforro** em vez de **Ação, ETF ou fundo**. Depois:
+
+1. Escolhe a **Série**, de A a F.
+2. Introduz a **Data de subscrição** e o **Montante subscrito**.
+3. Nas séries C a F, marca **Isento de IRS (65+)** se a isenção de retenção se aplicar a ti. É uma declaração tua: o WonderMoney não verifica a tua idade nem a elegibilidade.
+
+Nas séries C a F, o WonderMoney estima o valor atual com o seu próprio modelo do produto. De três em três meses a contar da data de subscrição, credita juros à taxa base que tem registada para a série nesse trimestre mais um prémio de permanência pelos anos decorridos, deduz uma retenção de 28%, a não ser que tenhas marcado a isenção, e soma o resultado ao saldo. Antes de somar o prémio, a aplicação limita a taxa base a 3,5% nas séries C, D e E e a 2,5% na série F. Deixa de creditar juros 10 anos depois da data de subscrição nas séries C a E, e 15 anos depois na série F.
+
+Estas taxas, limites e prazos são os que a aplicação aplica. Não são uma declaração das condições oficiais em vigor, por isso confirma-os na informação do próprio IGCP. As séries A e B não têm fórmula publicada, por isso o valor é o que as tuas transações indicam.
+
+Os detalhes da posição mostram **Detalhes de capitalização**: a taxa atual, os anos decorridos, o escalão do prémio, a próxima capitalização e o valor atual de cada subscrição. Os valores são uma estimativa, não uma garantia do valor de resgate.
 
 ## Porque isto importa
 
-As transações servem para mostrar como as posições mudaram ao longo do tempo. Ajudam a explicar o preço de custo, ganhos realizados e a evolução do valor da carteira.
+As transações servem para mostrar como as posições mudaram ao longo do tempo. Ajudam a explicar o preço de custo, ganhos realizados e a evolução do valor do portefólio.
 
 ## Erros comuns
 
 - Inserir apenas a transação mais recente e omitir as anteriores.
 - Ignorar comissões.
-- Usar uma transação que pertence a outra carteira.
+- Usar uma transação que pertence a outro portefólio.
 - Tratar transferências de caixa como desempenho de investimento.
 
 
 ## Páginas relacionadas
 
-- [Investimentos de carteira](/pt/docs/portfolio-investments)
-- [Criar uma carteira](/pt/docs/portfolio-investments/create-portfolio)
-- [Importar um CSV de carteira](/pt/docs/portfolio-investments/import-portfolio-csv)
+- [Investimentos de portefólio](/pt/docs/portfolio-investments)
+- [Criar um portefólio](/pt/docs/portfolio-investments/create-portfolio)
+- [Importar um CSV de portefólio](/pt/docs/portfolio-investments/import-portfolio-csv)
 - [Alocação das posições](/pt/docs/portfolio-investments/holdings-allocation)

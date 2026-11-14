@@ -22,7 +22,7 @@ let mockFactorStatus: {
 } = { isLoading: false, isError: false, data: { hasVerifiedFactor: false, verifiedFactorId: null } }
 const mockStartMutate = jest.fn()
 const mockStartReset = jest.fn()
-let mockStart: { isPending: boolean; data?: { status: string; factorId?: string; totp?: { secret: string; uri: string } } } = { isPending: false }
+let mockStart: { isPending: boolean; data?: { status: string; factorId?: string; totp?: { secret: string; uri: string }; backupCodes?: string[] } } = { isPending: false }
 const mockConfirmMutateAsync = jest.fn()
 const mockConfirmReset = jest.fn()
 let mockConfirm: { isPending: boolean; data?: { status: string } } = { isPending: false }
@@ -295,16 +295,23 @@ describe('SecurityRoute', () => {
 
       mockStart = {
         isPending: false,
-        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' } },
+        data: {
+          status: 'enrolled',
+          factorId: 'factor-1',
+          totp: { secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/x' },
+          backupCodes: ['abcde-12345', 'fghij-67890'],
+        },
       }
       const view2 = await renderRoute()
       expect(view2.getByText('JBSWY3DPEHPK3PXP')).toBeOnTheScreen()
+      expect(view2.getByText('abcde-12345')).toBeOnTheScreen()
+      expect(view2.getByText('fghij-67890')).toBeOnTheScreen()
     })
 
     it('confirms with the typed code and resets to the enabled state on success', async () => {
       mockStart = {
         isPending: false,
-        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' } },
+        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' }, backupCodes: [] },
       }
       mockConfirmMutateAsync.mockResolvedValue({ status: 'verified' })
       const view = await renderRoute()
@@ -317,7 +324,7 @@ describe('SecurityRoute', () => {
     it('keeps the pending factor and surfaces an invalid code without resetting', async () => {
       mockStart = {
         isPending: false,
-        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' } },
+        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' }, backupCodes: [] },
       }
       mockConfirmMutateAsync.mockResolvedValue({ status: 'invalid-code' })
       const view = await renderRoute()
@@ -330,7 +337,7 @@ describe('SecurityRoute', () => {
     it('resets both enrollment mutations on cancel', async () => {
       mockStart = {
         isPending: false,
-        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' } },
+        data: { status: 'enrolled', factorId: 'factor-1', totp: { secret: 'secret', uri: 'uri' }, backupCodes: [] },
       }
       const view = await renderRoute()
       await fireEvent.press(view.getByRole('button', { name: 'Cancel setup' }))
@@ -403,7 +410,8 @@ describe('SecurityRoute', () => {
       mockAppLockSetEnabled.mockResolvedValue({ status: 'unavailable', capability: 'not-enrolled' })
       const view = await renderRoute()
       await fireEvent.press(view.getByRole('button', { name: 'Turn on app lock' }))
-      await waitFor(() => expect(view.getByRole('alert')).toHaveTextContent(/set up face id/i))
+      const i18n = await initMobileI18n('en')
+      await waitFor(() => expect(view.getByRole('alert')).toHaveTextContent(i18n.t('security.appLock.errors.not-enrolled')))
     })
 
     it('turns off without requiring a device prompt confirmation from the caller', async () => {

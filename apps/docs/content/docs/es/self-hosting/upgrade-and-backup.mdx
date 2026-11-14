@@ -10,7 +10,9 @@ docker compose pull
 docker compose up -d
 ```
 
-La API aplica los cambios en la base de datos al arrancar. Para quedarte en una versión concreta en lugar de la más reciente, define `WM_VERSION` en el `.env`, por ejemplo `WM_VERSION=1.4`.
+La API aplica los cambios en la base de datos al arrancar. Para quedarte en una versión concreta en lugar de la más reciente, define `WM_VERSION` en el `.env`, por ejemplo `WM_VERSION=1.4`. Las imágenes vienen de `ghcr.io/wondermoney`; para obtenerlas de otro sitio, como un espejo o un registro con tus propias compilaciones, define `WM_IMAGE_REGISTRY` con esa dirección. Los nombres de las imágenes siguen siendo `wondermoney-api`, `wondermoney-worker` y `wondermoney-web`.
+
+Una instalación hecha con el script de instalación ya queda fijada: el script define `WM_VERSION` con la versión que instaló, así que `docker compose pull` se queda en esa versión. Para pasar a la última versión, ejecuta `./install.sh --dir .` en la carpeta de la instalación (el script deja allí una copia de sí mismo y solo cambia la línea `WM_VERSION` de `.env`), o define `WM_VERSION` tú mismo.
 
 Para comprobar qué versión ejecuta una instancia, abre el menú de la cuenta en la aplicación web (o **Más** en la aplicación móvil): muestra la versión de la aplicación web y la del servidor, con el commit de cada una. `GET /v1/instance` también devuelve `version` y `commit`.
 

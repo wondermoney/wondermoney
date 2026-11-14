@@ -3,12 +3,12 @@ title: Create a goal
 description: Set up a goal to save up or to pay down debt.
 ---
 
-Create a goal when you want to set aside money for a specific purpose, such as an emergency fund, a trip, taxes, or a future purchase, or when you want to plan paying off one or more debts.
+Create a goal when you want to set aside money for a specific purpose, such as an emergency fund, a trip, taxes, or a future purchase, or when you want to plan paying off a debt.
 
 <DocsImage
   src="/images/docs/goals-loans/create-fund-goal-dialog.png"
-  alt="Create goal dialog with Save up selected and fields for name and target amount."
-  caption="The create dialog starts with a Save up goal: name, target amount, and optional date and contribution."
+  alt="Create goal dialog with Save up selected, a priority choice, and fields for the name, target amount, and target date."
+  caption="The create dialog starts with a Save up goal: name, target amount, and an optional date."
   width={1440}
   height={900}
 />
@@ -18,9 +18,9 @@ Create a goal when you want to set aside money for a specific purpose, such as a
 When you create a goal, choose the type first:
 
 - **Save up** reserves money toward a target amount, such as an emergency fund or a future purchase.
-- **Debt pay down** tracks progress toward paying off one or more debts.
+- **Pay off debt** creates a debt pay down goal, which tracks paying off one debt, such as a loan or a card.
 
-The goal type is part of the goal setup. Once contributions begin, the type and the target amount are locked and cannot be changed.
+The goal type is part of the goal setup: it can't be changed after the goal is created. Everything else, the target amount included, can be changed later when you edit the goal.
 
 <DocsImage
   src="/images/docs/goals-loans/create-fund-goal-debt-paydown.png"
@@ -29,8 +29,6 @@ The goal type is part of the goal setup. Once contributions begin, the type and 
   width={1440}
   height={900}
 />
-
-The goal type is part of the goal setup. Once contributions begin, the type and the target amount are locked and cannot be changed.
 
 ## Save up goals
 
@@ -43,14 +41,27 @@ For a save up goal, set:
 
 ## Debt pay down goals
 
-For a debt pay down goal, choose which debts to include and how they should be ordered.
+A debt pay down goal tracks one debt. Set:
 
-Choose the ordering strategy:
+- Goal name
+- Current balance
+- Interest rate (APR)
+- Minimum monthly payment
+- Extra monthly payment, if you pay more than the minimum
+- Target payoff date, if you have one
+
+If the debt is one of your loans on the Loans page, choose it under **Link a debt account (optional)** to fill in the name, balance, rate and payment from the loan.
+
+The goal then shows its payoff plan: the payoff date, the time to payoff, the total interest and a timeline of the balance. When the monthly payment doesn't cover the interest, the goal says the payment is too low instead of showing a date.
+
+With two or more debt pay down goals, the goals page shows **Debt payoff strategy**. It compares paying your debts in two orders, with the same total monthly budget:
 
 - **Avalanche** — orders debts by interest rate, highest first. This usually minimizes the total interest paid.
 - **Snowball** — orders debts by balance, smallest first. This usually clears the smallest balances sooner.
 
-Set a target payoff date if you have one. The goal shows the projected payoff timeline for your strategy and compares it with the alternative, so you can see how the choice changes the total interest and the payoff date.
+For each order you see the time to payoff and the total interest, and how much interest avalanche saves over snowball. It is a comparison only: you don't pick a strategy, and nothing is saved on the goals.
+
+In the mobile app you can create save up goals; create a debt pay down goal on the web. Debt goals and the strategy comparison appear in both.
 
 ## Priority
 
@@ -60,7 +71,7 @@ Set the priority in the create or edit form. Goals with a higher priority appear
 
 The goal stores a target and tracks progress through goal activity. It does not move money between bank accounts. You can assign money to the goal manually and then fund an expense from it when needed.
 
-When you assign money, the available-to-assign ceiling limits the amount you can assign based on your budget. You cannot assign more than the ceiling. A confirmation message appears when the assignment succeeds.
+When you assign money, you cannot assign more than **Available to assign**: the balance of your open accounts less the money already assigned to goals. A confirmation message appears when the assignment succeeds. **Move money out** takes money back out of a goal.
 
 ## Good goal names
 

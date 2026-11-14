@@ -17,7 +17,7 @@
 
 ## How to add a new screenshot
 
-1. Capture the raw full-page PNG into `dogfood-output/docs-screens/<section>/<page-slug>-<step>.png` at the repository root (gitignored); `scripts/capture-screens.ts` automates this.
+1. Capture the raw full-page PNG into `apps/dogfood-output/docs-screens/<section>/<page-slug>-<step>.png` (gitignored; both scripts resolve it two levels above `apps/docs/scripts/`); `scripts/capture-screens.ts` automates this.
 2. Crop to the relevant UI bounds with `scripts/crop-screens.ts`, which writes the cropped PNG to `public/images/docs/<section>/<page-slug>-<step>.png`.
 3. Add a `<DocsImage>` reference in the matching MDX file under `content/docs/en/`. Include `alt`, `width`, `height`, and a one-line `caption`.
 4. Mirror the reference in the matching `content/docs/pt/` and `content/docs/es/` files when the corresponding screenshot has been captured in that locale.

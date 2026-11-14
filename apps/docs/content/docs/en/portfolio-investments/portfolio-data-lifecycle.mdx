@@ -1,54 +1,53 @@
 ---
-title: Portfolio Data Lifecycle
-description: Understand how portfolio data moves through import, resolution, pricing, snapshots, and history.
+title: When portfolio data updates
+description: Why holdings appear at once while the performance history and the benchmark take longer, and what each status on a portfolio means.
 ---
 
-WonderMoney portfolio data moves through a staged lifecycle. Some parts can be ready before others, so holdings, prices, snapshots, and history may not update at the same moment.
+After you add or import transactions, a portfolio does not update all at once. Holdings and allocation are ready immediately; the performance history is built in the background from historical prices, and can take longer.
 
 <DocsImage
   src="/images/docs/portfolio-investments/portfolio-data-lifecycle-transactions.png"
-  alt="Portfolio transactions list showing buys, sells, dividends, and withdrawals for the Investment Portfolio."
-  caption="Every imported or manually added transaction feeds the portfolio data lifecycle."
+  alt="Portfolio transactions list with buys, a sale, dividends, a deposit, and a withdrawal."
+  caption="Every imported or manually added transaction updates the portfolio in stages."
   width={1440}
   height={900}
 />
 
-## Current lifecycle
+## What happens after a change
 
-1. Manual transaction or CSV import creates or updates portfolio transactions.
-2. Asset resolution matches symbols, ISINs, or broker labels to a financial asset.
-3. Price updates fetch current market prices when coverage exists.
-4. Snapshot refresh rebuilds daily portfolio snapshots for the affected range.
-5. History readiness reflects whether the portfolio has enough coverage for charts and metrics.
+1. Your manual transaction or confirmed import is saved.
+2. Holdings, their current value and the allocation update from the saved transactions.
+3. WonderMoney fetches the historical prices of each asset you bought, from your first buy, up to ten years back.
+4. The day-by-day history behind the performance chart is rebuilt for the dates the change affects.
+5. The benchmark comparison and the risk metrics follow once that history exists.
 
-## What users should expect
+Current prices refresh on weekdays.
 
-- Holdings can appear before full performance history is ready.
-- CSV import can succeed even if some rows need asset resolution later.
-- Some charts or metrics may show partial or processing states while background work finishes.
-- Missing history does not always mean an error; it can also mean coverage is still being built.
+## The status on a portfolio
 
-## Status vocabulary
+While the history is not complete, the portfolio page on the web shows a notice with four lines: **Current holdings & value**, **Allocation**, **Performance history** and **Benchmark & risk metrics**, each with its own state.
 
-This docs set uses the following status language:
+| Notice | What it means | What to do |
+|---|---|---|
+| **Building performance history** | Historical prices are still being fetched for some assets. Holdings and allocation are already **Ready**; performance shows **Building** and the benchmark **Waiting** | Nothing. It finishes by itself |
+| **Portfolio history is partially available** | The prices are in, and the history does not yet cover the whole period. Performance and the benchmark show **Partial** | Nothing. Charts and metrics may cover a shorter period for now |
+| **Historical prices unavailable** | Some assets still lack historical prices more than three days after their latest buy was recorded, usually because the market-data provider has no older prices for them. All four lines read **Unavailable**, although holdings and allocation are still shown and current | Check that each asset was matched to the right ticker. Holdings stay up to date either way |
 
-- ready: the surface can usually be trusted.
-- processing: background work is still catching up.
-- partial: the surface is usable but incomplete.
-- needs_action: the user should resolve an import or asset issue.
-- unavailable: reserved in docs for a future or backend-emitted state; do not assume it is active today.
+When there is no notice, the history is complete, or the portfolio has no buys yet.
 
-## Data lifecycle notes for developers
+The mobile app does not show this notice. While the history has fewer than two daily values, its performance chart shows **Not enough history yet to chart performance** instead of the chart, or **No performance history is available yet** when there is none. The advanced metrics carry a note when the performance history or the risk metrics need more history.
 
-- Manual transactions and CSV imports share the same end goal: persisted transactions plus refreshed portfolio views.
-- Import rows with unresolved assets should be reported clearly instead of silently guessed.
-- Historical price coverage is on-demand and may be incomplete for older dates.
-- Snapshot rebuilds can lag price updates, especially after imports with historical BUY/SELL activity.
-- Current docs should avoid promising pre-save row review unless a specific review flow is implemented.
+## What to expect
+
+- Holdings can appear before the performance chart has any history.
+- A metric that needs more history than exists shows as unavailable until the history is built.
+- A missing history is not always an error. It often means the prices are still being fetched.
+- A CSV import can be confirmed only once every row that needs asset review is resolved or its group is skipped. Rows in a skipped group are not imported. See [Review before anything is saved](/en/docs/portfolio-investments/import-portfolio-csv#review-before-anything-is-saved).
 
 ## Related pages
 
 - [Portfolio and investments](/en/docs/portfolio-investments)
 - [Import a portfolio CSV](/en/docs/portfolio-investments/import-portfolio-csv)
 - [Add portfolio transactions](/en/docs/portfolio-investments/add-portfolio-transactions)
+- [Performance and benchmarks](/en/docs/portfolio-investments/performance-benchmarks)
 - [Portfolio metrics explained](/en/docs/portfolio-investments/portfolio-metrics-explained)

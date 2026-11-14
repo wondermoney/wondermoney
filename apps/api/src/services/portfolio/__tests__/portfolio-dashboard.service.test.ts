@@ -434,6 +434,82 @@ describe('portfolio dashboard service', () => {
     });
   });
 
+  describe('top movers currency', () => {
+    /** A dollar-listed security in a euro-viewed portfolio: up 10% in dollars while the dollar fell. */
+    const dollarHolding = {
+      currency: 'EUR',
+      // 110 USD at today's 0.90 EUR per USD; at the start, 100 USD was worth 95 EUR.
+      currentPrice: 99,
+      currentPriceInAssetCurrency: 110,
+      currentValue: 990,
+      financialAssetCurrencyCode: 'USD',
+      financialAssetKey: 31,
+      financialAssetName: 'Dollar Corp',
+      financialAssetSymbol: 'DLR',
+      portfolioKey: 1,
+      quantity: 10,
+      unrealizedGains: 40,
+      unrealizedGainsPercentage: 4.21,
+    };
+    const euroHolding = {
+      currency: 'EUR',
+      currentPrice: 45,
+      currentPriceInAssetCurrency: 45,
+      currentValue: 450,
+      financialAssetCurrencyCode: 'EUR',
+      financialAssetKey: 32,
+      financialAssetName: 'Euro Corp',
+      financialAssetSymbol: 'EUR1',
+      portfolioKey: 1,
+      quantity: 10,
+      unrealizedGains: -30,
+      unrealizedGainsPercentage: -6.25,
+    };
+
+    function setupMovers(holdings: unknown[], startPrices: [number, number][]) {
+      Object.assign(DI.em, {
+        find: vi.fn().mockResolvedValue([{ portfolioKey: 1 }]),
+        findOne: portfolioWithoutSnapshots({ portfolioKey: 1 }),
+      });
+      portfolioHoldingsServiceMock.getPortfolioHoldings.mockResolvedValue(holdings);
+      const startDate = new Date('2024-01-01T00:00:00Z');
+      // Start prices are stored in each asset's own currency.
+      assetPriceServiceMock.getPricesAsOf.mockResolvedValue(
+        new Map(startPrices.map(([assetKey, price]) => [assetKey, { date: startDate, price, source: 'market' }])),
+      );
+    }
+
+    it("measures a foreign-currency holding's change in its own currency, not the exchange rate", async () => {
+      setupMovers([dollarHolding, euroHolding], [[31, 100], [32, 50]]);
+
+      const result = await service.getTopMovers(appuser, 1, 'YTD', 5);
+
+      expect(result.gainers.map((m) => m.ticker)).toEqual(['DLR']);
+      expect(result.gainers[0]?.change).toBeCloseTo(10, 6);
+      expect(result.losers.map((m) => m.ticker)).toEqual(['EUR1']);
+      expect(result.losers[0]?.change).toBeCloseTo(-10, 6);
+    });
+
+    it("states a foreign-currency holding's contribution in the viewer's currency", async () => {
+      setupMovers([dollarHolding, euroHolding], [[31, 100], [32, 50]]);
+
+      const result = await service.getTopMovers(appuser, 1, 'YTD', 5);
+
+      // The 10% move on today's 990 EUR position: 990 - 990 / 1.1.
+      expect(result.gainers[0]?.contribution).toBeCloseTo(90, 6);
+      // 450 EUR now against 500 EUR at the start price.
+      expect(result.losers[0]?.contribution).toBeCloseTo(-50, 6);
+    });
+
+    it('falls back to the unrealized gain for a holding with no start price', async () => {
+      setupMovers([dollarHolding, euroHolding], [[32, 50]]);
+
+      const result = await service.getTopMovers(appuser, 1, 'YTD', 5);
+
+      expect(result.gainers[0]).toMatchObject({ change: 4.21, contribution: 40, ticker: 'DLR' });
+    });
+  });
+
   describe('performance data statuses', () => {
     it('marks one-point portfolio history as insufficient and waits for benchmark comparison', async () => {
       setupDashboardMocks();

@@ -106,6 +106,7 @@ export type ProductRuntimeContextValue = Readonly<{
   mfaEnrollTotp: () => Promise<MfaTotpEnrollOutcome>
   mfaChallenge: (factorId: string) => Promise<MfaChallengeOutcome>
   mfaVerify: (factorId: string, challengeId: string, code: string) => Promise<MfaVerifyOutcome>
+  mfaVerifyBackupCode: (code: string) => Promise<MfaVerifyOutcome>
   mfaUnenroll: (factorId: string) => Promise<MfaUnenrollOutcome>
   mfaListFactors: () => Promise<MfaListFactorsOutcome>
   /** Thin proxy to the injected auth adapter's password-change operation; usable in any route state. */
@@ -463,6 +464,7 @@ export function ProductRuntimeProvider({
     (factorId: string, challengeId: string, code: string) => auth.mfaVerify(factorId, challengeId, code),
     [auth],
   )
+  const mfaVerifyBackupCode = useCallback((code: string) => auth.mfaVerifyBackupCode(code), [auth])
   const mfaUnenroll = useCallback((factorId: string) => auth.mfaUnenroll(factorId), [auth])
   const mfaListFactors = useCallback(() => auth.mfaListFactors(), [auth])
   const changePassword = useCallback(
@@ -514,6 +516,7 @@ export function ProductRuntimeProvider({
     mfaEnrollTotp,
     mfaChallenge,
     mfaVerify,
+    mfaVerifyBackupCode,
     mfaUnenroll,
     mfaListFactors,
     changePassword,
@@ -539,6 +542,7 @@ export function ProductRuntimeProvider({
     mfaListFactors,
     mfaUnenroll,
     mfaVerify,
+    mfaVerifyBackupCode,
     registerAuthenticatedBoundary,
     routeState,
     runSignOut,

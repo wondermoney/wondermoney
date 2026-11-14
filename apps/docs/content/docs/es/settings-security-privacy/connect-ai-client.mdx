@@ -33,11 +33,11 @@ No puede crear, cambiar ni borrar nada, y no llega al hogar, a las conexiones ba
 
 ## Propuestas
 
-Con el ámbito de propuestas (`mcp:propose`), el cliente también puede llamar a `propose_categorize_transactions`, `propose_mark_transactions_reviewed` y `propose_update_transaction_note`. Cada una comprueba que todas las transacciones son visibles para ti y prepara una propuesta; no cambia la transacción. La propuesta espera en **Ajustes > Asistente > Cambios pendientes** (y en **Más > Cambios pendientes** en el móvil) hasta que la apliques o descartes, y caduca a los siete días. El cliente no puede aplicarla, ni ningún token de API. Consulta [Configuración del asistente](/es/docs/settings-security-privacy/assistant-settings#propuestas-y-cambios-pendientes).
+Con el ámbito de propuestas (`mcp:propose`), el cliente también puede llamar a `propose_categorize_transactions`, `propose_mark_transactions_reviewed` y `propose_update_transaction_note`. Cada una comprueba que todas las transacciones son visibles para ti y prepara una propuesta; no cambia la transacción. La propuesta espera en **Configuración > Asistente > Cambios pendientes** (y en **Más > Cambios pendientes** en el móvil) hasta que la apliques o descartes, y caduca a los siete días. El cliente no puede aplicarla, ni ningún token de API. Consulta [Configuración del asistente](/es/docs/settings-security-privacy/assistant-settings#propuestas-y-cambios-pendientes).
 
 ## Crear un token
 
-1. Abre **Ajustes → Tokens de API**.
+1. Abre **Configuración → Tokens de API**.
 2. En **Conectar un cliente de IA**, selecciona **Crear un token de cliente de IA**.
 3. Copia el token de inmediato. Solo se muestra una vez.
 
@@ -85,11 +85,11 @@ Sustituye la dirección de la API por la tuya y `<your-token>` por el valor que 
 
 ## Registro de auditoría
 
-Cada llamada a una herramienta se escribe en el registro de auditoría del asistente con el nombre de la herramienta, el token y la hora. Los importes y las descripciones nunca se escriben allí. **Ajustes → Tokens de API → Conectar un cliente de IA** lista las llamadas más recientes.
+Cada llamada a una herramienta se escribe en el registro de auditoría del asistente con el nombre de la herramienta, el token y la hora. Los importes y las descripciones nunca se escriben allí. **Configuración → Tokens de API → Conectar un cliente de IA** lista las llamadas más recientes.
 
 ## Revocar el acceso
 
-Selecciona **Revocar** junto al token en **Ajustes → Tokens de API**. La revocación es inmediata: la siguiente petición del cliente recibe `401 Unauthorized`. Borra también la entrada del servidor en la configuración del cliente, para que deje de intentarlo.
+Selecciona **Revocar** junto al token en **Configuración → Tokens de API**. La revocación es inmediata: la siguiente petición del cliente recibe `401 Unauthorized`. Borra también la entrada del servidor en la configuración del cliente, para que deje de intentarlo.
 
 ## Límites de uso
 

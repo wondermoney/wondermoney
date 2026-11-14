@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "Se necesita una verificación adicional",
-      "message": "Introduce el código de 6 dígitos de tu aplicación de autenticación para continuar",
+      "message": "Confirma que eres tú con un código de tu aplicación de autenticación o uno de tus códigos de respaldo",
       "codeLabel": "Código de 6 dígitos",
       "codePlaceholder": "123456",
       "verify": "Verificar",
@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Introduce el código de 6 dígitos de tu aplicación de autenticación.",
         "invalidCode": "Ese código no era correcto. Inténtalo de nuevo.",
-        "unavailable": "No se pudo verificar ese código. Comprueba tu conexión e inténtalo de nuevo."
-      }
+        "unavailable": "No se pudo verificar ese código. Comprueba tu conexión e inténtalo de nuevo.",
+        "backupCodeValidation": "Introduce un código de respaldo.",
+        "invalidBackupCode": "Ese código de respaldo no es válido o ya se ha usado.",
+        "challengeExpired": "Ya no se puede completar este inicio de sesión. Cierra sesión y vuelve a iniciarla.",
+        "rateLimited": "Demasiados intentos fallidos. Espera unos minutos y vuelve a intentarlo."
+      },
+      "useBackupCode": "Usar un código de respaldo",
+      "useAuthenticator": "Usar tu aplicación de autenticación",
+      "backupCodeLabel": "Introduce uno de tus códigos de respaldo",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Cada código de respaldo funciona una sola vez. Después de iniciar sesión con él, ya no se puede volver a usar."
     },
     "signOutFailed": {
       "title": "No se pudo cerrar la sesión",
@@ -2329,7 +2338,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no puedes cambiar este bien. Vuelve a iniciar sesión o consúltalo con tu hogar.",
       "mfa": "Confirma que eres tú para continuar.",
-      "not-found": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
+      "not-found": "Este bien ya no existe, o es privado de otro miembro de tu hogar.",
       "invalid": "Algo de lo introducido no es válido. Revisa los campos y vuelve a intentarlo.",
       "invalid-response": "Puede que se haya guardado, pero no se pudo leer la respuesta del servidor. Actualiza antes de volver a intentarlo.",
       "network-ambiguous": "Se cortó la conexión, así que no se sabe si se guardó. Actualiza antes de volver a intentarlo.",
@@ -2344,7 +2353,7 @@
     "invalidTitle": "No se pudo mostrar este bien",
     "invalidMessage": "El servidor envió algo que esta versión de la app no puede leer. Vuelve a intentarlo o actualiza la app.",
     "notFoundTitle": "Bien no encontrado",
-    "notFoundMessage": "Puede que se haya eliminado, o que sea privado del otro miembro de tu hogar.",
+    "notFoundMessage": "Puede que se haya eliminado, o que sea privado de otro miembro de tu hogar.",
     "invalidIdTitle": "Bien no encontrado",
     "invalidIdMessage": "Este enlace no lleva a un bien.",
     "stale": "Estas cifras pueden estar desactualizadas: la última actualización falló.",
@@ -2430,7 +2439,7 @@
     "loading": "Cargando el bien",
     "error": "No se pudo cargar este bien. Cierra y vuelve a intentarlo.",
     "invalid": "El servidor envió algo que esta versión de la app no puede leer. Cierra y vuelve a intentarlo, o actualiza la app.",
-    "notFound": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
+    "notFound": "Este bien ya no existe, o es privado de otro miembro de tu hogar.",
     "save": "Guardar cambios",
     "saving": "Guardando",
     "growthStartDate": "Varía desde",
@@ -2500,7 +2509,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no puedes cambiar este monedero. Vuelve a iniciar sesión o consulta con tu hogar.",
       "mfa": "Confirma que eres tú para continuar.",
-      "not-found": "Este monedero ya no existe o es privado del otro miembro de tu hogar.",
+      "not-found": "Este monedero ya no existe o es privado de otro miembro de tu hogar.",
       "invalid": "Algún dato no es válido. Revisa los campos e inténtalo de nuevo.",
       "invalid-response": "Puede que se haya guardado, pero no se pudo leer la respuesta del servidor. Actualiza antes de volver a intentarlo.",
       "network-ambiguous": "Se perdió la conexión, así que no se sabe si se guardó. Actualiza antes de volver a intentarlo.",
@@ -2707,18 +2716,14 @@
     "legacyRecurrence": "Esta categoría no tiene una periodicidad guardada. Selecciona una explícitamente antes de guardar.",
     "scope": "Aplicar cambio a",
     "scopeMonth": "Solo al mes seleccionado",
-    "scopeForward_one": "Del mes seleccionado a diciembre ({{count}} mes)",
-    "scopeForward_other": "Del mes seleccionado a diciembre ({{count}} meses)",
-    "scopeNote": "El mes de la ruta seleccionada es el punto de partida. Los meses anteriores y los años futuros nunca cambian.",
+    "scopeNote": "La opción de meses siguientes también actualiza los años siguientes. Los meses anteriores no cambian.",
     "suggestionLabel": "Sugerido a partir de tus gastos: {{amount}}",
     "suggestionApply": "Aplicar",
     "suggestionNotEnoughData": "Todavía no hay historial suficiente para una sugerencia.",
     "save": "Guardar presupuesto de categoría",
     "saving": "Guardando presupuesto de categoría…",
-    "confirmTitle": "¿Aplicar hasta diciembre?",
-    "confirmMessage_one": "¿Aplicar este importe y periodicidad desde {{start}} hasta {{end}} ({{count}} mes)? Los meses anteriores, años futuros, saldos de cuentas y transacciones de gastos no cambiarán.",
-    "confirmMessage_other": "¿Aplicar este importe y periodicidad desde {{start}} hasta {{end}} ({{count}} meses)? Los meses anteriores, años futuros, saldos de cuentas y transacciones de gastos no cambiarán.",
-    "confirmAction": "Aplicar hasta diciembre",
+    "confirmTitle": "¿Aplicar a los meses siguientes?",
+    "confirmAction": "Aplicar a los meses siguientes",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio de categoría.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2729,7 +2734,9 @@
       "invalid-response": "El servidor no confirmó el cambio de categoría de forma segura. Se conservaron los valores.",
       "invalid": "Introduce un importe positivo y selecciona explícitamente una periodicidad.",
       "general": "No se pudo guardar el cambio de categoría. Se conservaron los valores."
-    }
+    },
+    "scopeForward": "Mes seleccionado y todos los meses siguientes",
+    "confirmMessage": "¿Aplicar este importe y periodicidad desde {{start}}, incluidos los años siguientes? Los meses anteriores, saldos de cuentas y transacciones de gastos no cambiarán."
   },
   "budgetCreate": {
     "title": "Crear presupuesto",
@@ -3449,7 +3456,7 @@
     "blankBenchmark": "Déjalo en blanco para eliminar la comparación con el índice de referencia",
     "benchmarkCleared": "Eliminar el índice de referencia actual",
     "excluded": "Excluir del panel agregado",
-    "excludedHelper": "Oculta esta cartera de los totales combinados y del rendimiento de todas las carteras",
+    "excludedHelper": "Deja esta cartera fuera de los totales, posiciones y gráficos de todas las carteras juntas. Su propia página y tu patrimonio neto la siguen incluyendo.",
     "favored": "Destacar en el panel",
     "favoredHelper": "Da a esta cartera prioridad de visualización en el panel",
     "allocation": {
@@ -3882,7 +3889,7 @@
     },
     "appLock": {
       "heading": "Bloqueo de la aplicación",
-      "helper": "Exige Face ID, Touch ID o el código de tu dispositivo para abrir WonderMoney.",
+      "helper": "Configura el reconocimiento facial o de huella digital para activar el bloqueo de la aplicación. Al desbloquear, puedes usar el código del dispositivo como alternativa.",
       "loading": "Comprobando el estado del bloqueo de la aplicación…",
       "onLabel": "El bloqueo de la aplicación está activado",
       "offLabel": "El bloqueo de la aplicación está desactivado",
@@ -3892,8 +3899,8 @@
       "turningOff": "Desactivando…",
       "confirmPrompt": "Confirma para activar el bloqueo de la aplicación",
       "errors": {
-        "no-hardware": "No hay biometría ni código configurado en este dispositivo.",
-        "not-enrolled": "Configura primero Face ID, Touch ID o un código en los ajustes de tu dispositivo.",
+        "no-hardware": "Este dispositivo no admite reconocimiento facial o de huella digital.",
+        "not-enrolled": "Registra tu rostro o una huella digital en los ajustes del dispositivo antes de activar el bloqueo de la aplicación.",
         "auth-failed": "No se pudo confirmar. Inténtalo de nuevo."
       }
     },
@@ -3944,7 +3951,11 @@
         "validation": "Introduce el código de 6 dígitos de tu aplicación de autenticación.",
         "invalidCode": "Ese código no era correcto. Inténtalo de nuevo.",
         "unavailable": "No se pudo completar esa acción. Comprueba tu conexión e inténtalo de nuevo."
-      }
+      },
+      "backupCodesTitle": "Guarda tus códigos de respaldo",
+      "backupCodesHelper": "Guarda estos códigos en un lugar seguro. Cada uno se puede usar una vez si pierdes el acceso a tu aplicación de autenticación.",
+      "copyBackupCodes": "Copiar códigos",
+      "backupCodesCopied": "Códigos de respaldo copiados al portapapeles."
     },
     "deleteHeading": "Eliminar cuenta",
     "deleteExplainer": "Elimina permanentemente tu cuenta de WonderMoney y todos los datos asociados de nuestros sistemas.",
@@ -5084,13 +5095,15 @@
     "worstPerformer": "Peor valor",
     "dataUnavailable": "Datos no disponibles",
     "weight": "Peso",
+    "excludedFromTotals": "Fuera de los totales",
     "gain": "Ganancia",
     "performanceInsufficient": "La rentabilidad necesita al menos dos snapshots para mostrar una tendencia.",
     "performanceWaiting": "La rentabilidad aparecerá después de crear snapshots.",
     "loading": "Cargando",
     "sectionError": "No se pudo cargar esta sección. Desliza hacia abajo para volver a intentarlo.",
     "more": "Más sobre esta cartera",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "Rentabilidad y volatilidad de todo el historial; tasa de referencia fija del 4,5 % para todas las monedas."
   },
   "privacy": {
     "hiddenAmount": "Importe oculto",
@@ -5350,7 +5363,7 @@
   },
   "rules": {
     "title": "Reglas",
-    "description": "Las reglas ordenan tus transacciones por ti: cuando una transacción cumple las condiciones de una regla, se ejecutan sus acciones. Las reglas se ejecutan de arriba abajo y nunca cambian lo que has definido a mano. Las comparten los dos miembros del hogar.",
+    "description": "Las reglas ordenan tus transacciones por ti: cuando una transacción cumple las condiciones de una regla, se ejecutan sus acciones. Las reglas se ejecutan de arriba abajo y nunca cambian lo que has definido a mano. Las comparten todos los miembros del hogar.",
     "back": "Volver a Más",
     "loading": "Cargando reglas",
     "stale": "No se pudo actualizar. Se muestran las reglas cargadas anteriormente",

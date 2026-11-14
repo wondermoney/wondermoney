@@ -7,40 +7,50 @@ Categories keep transactions and budgets organized. Use this page to understand 
 
 <DocsImage
   src="/images/docs/settings-security-privacy/manage-categories-categories.png"
-  alt="Categories settings listing the category table with name, color, icon, and actions columns."
+  alt="Categories tab listing each category with its color, icon, whether it counts as spending, and edit actions."
   caption="The Categories tab lists every category with its color, icon, and edit actions in one table."
-  width={1216}
+  width={1192}
   height={900}
 />
 
 ## What you can manage
 
-- Create a new category for a recurring type of expense or income.
-- Rename a category without changing its purpose.
-- Hide or archive categories you no longer want to use.
-- Review where a category is already used before making larger changes.
+- Create a category of your own with **Add Category**: a name, a color, an icon and, if you want, a parent category.
+- Edit a category of your own: its name, color, icon and parent category.
+- Delete a category of your own.
+- Choose whether a category **Counts as spending**. When this is off, rows in the category are left out of spending in reports, budgets and the home cash flow.
+
+System categories cannot be edited or deleted. You can still choose whether one counts as spending.
 
 ## How category changes work
 
-Category changes usually affect future items first. Existing transactions may keep their current category unless you update them manually. If you rename a category, the new name appears wherever that category is shown. If you merge or replace a category, check that budgets and summaries still reflect the right group.
+An edit applies everywhere at once: if you rename a category or change its color or icon, the change appears wherever that category is shown, on past transactions too. The form warns you when a name or a color is already in use.
+
+Deleting a category removes it from the category list, so it can no longer be chosen for a transaction, a budget or a rule. It changes nothing else:
+
+- Transactions that had the category are not moved to another one. Recategorize them yourself, before or after.
+- Budgets that plan an amount for the category are not edited.
+- Rules that set the category are kept, but they stop setting it.
+
+On the web, the delete action takes effect as soon as you select it, without a confirmation step.
 
 ## Before you edit categories
 
 - Confirm you are in the right account.
 - Check whether the category is already attached to budgets or imported transactions.
-- Decide whether you want to rename, hide, or replace the category.
+- Decide whether you want to rename or delete the category.
 
 ## What to do
 
-1. Open category settings.
-2. Select the category you want to change.
-3. Apply the edit and review the preview, if one is shown.
-4. Save and verify the category in a transaction or budget screen.
+1. Open **Settings** and choose **Categories**. In the mobile app, open **More > Settings** and choose **Categories**.
+2. Select **Add Category**, or the edit action next to the category you want to change.
+3. Apply the edit and save it.
+4. Verify the category in a transaction or budget screen.
 
 ## Common mistakes
 
 - Creating duplicate categories with slightly different names.
-- Hiding a category that is still used in summaries.
+- Deleting a category that is still used in budgets or summaries.
 - Renaming a category without checking imported data.
 
 

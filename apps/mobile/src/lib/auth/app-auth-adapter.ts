@@ -109,6 +109,8 @@ const INVALID_CREDENTIALS_CODES = new Set(['INVALID_EMAIL_OR_PASSWORD', 'INVALID
 const EMAIL_TAKEN_CODES = new Set(['USER_ALREADY_EXISTS', 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL'])
 const WEAK_PASSWORD_CODES = new Set(['PASSWORD_TOO_SHORT', 'PASSWORD_TOO_LONG'])
 const INVALID_CODE_CODES = new Set(['INVALID_CODE', 'INVALID_BACKUP_CODE', 'OTP_HAS_EXPIRED'])
+/** The pending sign-in is spent (five wrong codes) or gone (expired two-factor cookie). */
+const CHALLENGE_EXPIRED_CODES = new Set(['TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE', 'INVALID_TWO_FACTOR_COOKIE'])
 
 type ErrorLike = { status?: unknown; code?: unknown; error?: unknown }
 
@@ -130,6 +132,15 @@ const errorCode = (error: unknown): string | null => {
     if (typeof nested === 'string') return nested
   }
   return null
+}
+
+/** better-auth's two-factor refusals (`TWO_FACTOR_ERROR_CODES`), as the app's outcomes. */
+const classifyMfaVerifyError = (error: unknown): Exclude<MfaVerifyOutcome, { status: 'verified' }> => {
+  const code = errorCode(error)
+  if (code !== null && INVALID_CODE_CODES.has(code)) return { status: 'invalid-code' }
+  if (code !== null && CHALLENGE_EXPIRED_CODES.has(code)) return { status: 'challenge-expired' }
+  if (code === 'ACCOUNT_TEMPORARILY_LOCKED' || errorStatus(error) === 429) return { status: 'rate-limited' }
+  return { status: 'unavailable' }
 }
 
 /**
@@ -388,7 +399,7 @@ export function createAppAuthAdapter(
           return { status: 'accepted' }
         }
         // A two-factor account: twoFactorOAuthGuard swapped the session for the pending
-        // two-factor cookie, which `twoFactor.verifyTotp` completes.
+        // two-factor cookie, which `twoFactor.verifyTotp` (or `verifyBackupCode`) completes.
         const cookie = client.getCookie ? await client.getCookie() : ''
         if (/(?:^|[;\s.])two_factor=/.test(cookie)) {
           mfaPending = true
@@ -552,15 +563,24 @@ export function createAppAuthAdapter(
     mfaVerify: async (_factorId, _challengeId, code): Promise<MfaVerifyOutcome> => {
       try {
         const { error } = await client.twoFactor.verifyTotp({ code })
-        if (error) {
-          const status = errorCode(error)
-          return status !== null && INVALID_CODE_CODES.has(status)
-            ? { status: 'invalid-code' }
-            : { status: 'unavailable' }
-        }
+        if (error) return classifyMfaVerifyError(error)
         mfaPending = false
         // `verifyTotp` rotates the session (enrollment) or creates it (sign-in),
         // so re-read it now: the bearer snapshot picks up the new opaque token.
+        await client.getSession({ query: { disableCookieCache: true } }).catch(() => undefined)
+        return { status: 'verified' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    mfaVerifyBackupCode: async (code): Promise<MfaVerifyOutcome> => {
+      try {
+        // No `trustDevice`, as with `verifyTotp`: every sign-in asks for a second factor.
+        const { error } = await client.twoFactor.verifyBackupCode({ code })
+        if (error) return classifyMfaVerifyError(error)
+        mfaPending = false
+        // Like `verifyTotp` at sign-in, this creates the session; re-read it for the bearer.
         await client.getSession({ query: { disableCookieCache: true } }).catch(() => undefined)
         return { status: 'verified' }
       } catch {

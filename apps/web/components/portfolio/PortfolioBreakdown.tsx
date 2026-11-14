@@ -55,14 +55,20 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
       }),
       columnHelper.accessor("weight", {
         header: t("weight"),
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <Progress value={info.getValue()} className="w-[80px]" />
-            <span className="text-foreground font-mono text-sm font-medium">
-              {formatPercentage(info.getValue() / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+        cell: (info) =>
+          // Outside the totals: no share of them to show.
+          info.row.original.excluded ? (
+            <span className="text-muted-foreground text-sm">
+              {t("portfolio-excluded-badge")}
             </span>
-          </div>
-        ),
+          ) : (
+            <div className="flex items-center gap-2">
+              <Progress value={info.getValue()} className="w-[80px]" />
+              <span className="text-foreground font-mono text-sm font-medium">
+                {formatPercentage(info.getValue() / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+              </span>
+            </div>
+          ),
       }),
       columnHelper.accessor("gainPercent", {
         header: () => <div className="text-right">{t("gain")}</div>,

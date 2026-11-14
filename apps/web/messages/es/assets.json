@@ -24,7 +24,7 @@
       "vehicle": "Vehículo",
       "valuable": "Objeto de valor",
       "other": "Otro",
-      "crypto_wallet": "Cartera cripto"
+      "crypto_wallet": "Monedero de criptomonedas"
     },
     "summary": {
       "total": "Valor total",
@@ -56,7 +56,7 @@
       "growthStartDate": "Varía desde",
       "growthStartDateHint": "Opcional. El valor se queda como está hasta esta fecha.",
       "private": "Bien privado",
-      "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto del otro miembro del hogar.",
+      "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto de los demás miembros del hogar.",
       "notes": "Notas",
       "notesPlaceholder": "Lo que merezca la pena recordar sobre este bien",
       "datePlaceholder": "Elige una fecha"
@@ -83,7 +83,7 @@
       "estimated": "Estimado a partir de la variación anual desde la valoración del {date}.",
       "errors": {
         "loadFailed": "No se pudo cargar este bien",
-        "loadFailedBody": "Puede que se haya eliminado, o que sea privado del otro miembro de tu hogar."
+        "loadFailedBody": "Puede que se haya eliminado, o que sea privado de otro miembro de tu hogar."
       },
       "history": {
         "title": "Valor a lo largo del tiempo",
@@ -165,9 +165,9 @@
       "done-description": "{count, plural, one {# bien se añadió con su valoración.} other {# bienes se añadieron con sus valoraciones.}}"
     },
     "wallet": {
-      "addTitle": "Añadir cartera cripto",
+      "addTitle": "Añadir monedero de criptomonedas",
       "actions": {
-        "add": "Añadir cartera cripto",
+        "add": "Añadir monedero de criptomonedas",
         "addRow": "Añadir otra dirección",
         "removeRow": "Quitar la dirección {number}",
         "removeRowShort": "Quitar",
@@ -183,8 +183,8 @@
         "body": "Introduce una dirección pública, o una xpub, ypub o zpub para Bitcoin. Nunca introduzcas una clave privada ni una frase de recuperación: quien tenga cualquiera de las dos puede gastar tus monedas, y esta aplicación nunca las necesita."
       },
       "fields": {
-        "namePlaceholder": "p. ej., Cartera física",
-        "private": "Cartera privada",
+        "namePlaceholder": "p. ej., Monedero físico",
+        "private": "Monedero privado",
         "chain": "Red",
         "address": "Dirección pública",
         "addressOrXpub": "Dirección pública o xpub",
@@ -212,7 +212,7 @@
         "secretBlocked": "Esto parece una clave privada o una frase de recuperación, así que se ha borrado y no se ha enviado. Introduce una dirección pública.",
         "secretRejected": "Eso parecía una clave privada o una frase de recuperación, así que se ha rechazado y no se ha guardado. Introduce una dirección pública.",
         "addressInvalid": "Esta no es una dirección pública válida para la red elegida.",
-        "addressExists": "Esta dirección ya está en esta cartera.",
+        "addressExists": "Esta dirección ya está en este monedero.",
         "featureDisabled": "Este servidor no puede leer saldos en esa red."
       },
       "status": {
@@ -245,7 +245,7 @@
         "noValuations": "Se registra un valor cada día en que se leen sus saldos."
       },
       "removeAddressTitle": "¿Quitar esta dirección?",
-      "removeAddressConfirm": "Sus saldos dejan de contar en el valor de la cartera a partir de la próxima lectura. Los valores ya registrados se mantienen.",
+      "removeAddressConfirm": "Sus saldos dejan de contar en el valor del monedero a partir de la próxima lectura. Los valores ya registrados se mantienen.",
       "syncQueued": "Leyendo los saldos de nuevo. El valor se actualizará cuando lleguen."
     }
   }

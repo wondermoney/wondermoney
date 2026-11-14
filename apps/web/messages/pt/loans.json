@@ -8,7 +8,6 @@
       "add": "Adicionar empréstimo",
       "edit": "Editar empréstimo",
       "delete": "Eliminar empréstimo",
-      "recordPayment": "Registar pagamento",
       "linkRepayment": "Associar pagamento",
       "unlinkRepayment": "Desassociar pagamento",
       "save": "Guardar alterações"
@@ -33,7 +32,6 @@
       "amortizationMethodHint": "O francês mantém a prestação constante; o de capital constante paga o mesmo capital todos os meses, por isso a prestação desce.",
       "startDate": "Data de início",
       "dueDate": "Data de vencimento",
-      "linkedAccount": "Conta associada",
       "linkedTransaction": "Pagamento associado",
       "namePlaceholder": "Ex.: Crédito habitação",
       "interestRatePlaceholder": "0,00",

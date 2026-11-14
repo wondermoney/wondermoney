@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "É necessária verificação adicional",
-      "message": "Introduz o código de 6 dígitos da tua aplicação de autenticação para continuar",
+      "message": "Confirma que és tu com um código da tua aplicação de autenticação ou um dos teus códigos de recuperação",
       "codeLabel": "Código de 6 dígitos",
       "codePlaceholder": "123456",
       "verify": "Verificar",
@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Introduz o código de 6 dígitos da tua aplicação de autenticação.",
         "invalidCode": "Esse código não estava correto. Tenta novamente.",
-        "unavailable": "Não foi possível verificar esse código. Verifica a tua ligação e tenta novamente."
-      }
+        "unavailable": "Não foi possível verificar esse código. Verifica a tua ligação e tenta novamente.",
+        "backupCodeValidation": "Introduz um código de recuperação.",
+        "invalidBackupCode": "Esse código de recuperação não é válido ou já foi usado.",
+        "challengeExpired": "Já não é possível concluir este início de sessão. Termina a sessão e inicia sessão novamente.",
+        "rateLimited": "Demasiadas tentativas falhadas. Aguarda alguns minutos e tenta novamente."
+      },
+      "useBackupCode": "Usar um código de recuperação",
+      "useAuthenticator": "Usar a aplicação de autenticação",
+      "backupCodeLabel": "Introduz um dos teus códigos de recuperação",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Cada código de recuperação só funciona uma vez. Depois de iniciares sessão com ele, já não pode ser usado."
     },
     "signOutFailed": {
       "title": "Não foi possível terminar a sessão",
@@ -987,7 +996,7 @@
       "noDestination": "Não indicado",
       "destinationGroups": {
         "account": "Contas",
-        "portfolio": "Carteiras",
+        "portfolio": "Portefólios",
         "goal": "Objetivos"
       },
       "label": "Transferência",
@@ -2329,7 +2338,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "Já não podes alterar este bem. Volta a iniciar sessão ou fala com o teu agregado.",
       "mfa": "Confirma que és tu para continuar.",
-      "not-found": "Este bem já não existe, ou é privado do outro membro do teu agregado.",
+      "not-found": "Este bem já não existe, ou é privado de outro membro do teu agregado.",
       "invalid": "Há algo introduzido que não é válido. Verifica os campos e tenta outra vez.",
       "invalid-response": "Pode ter ficado guardado, mas não foi possível ler a resposta do servidor. Atualiza antes de tentar outra vez.",
       "network-ambiguous": "A ligação caiu, por isso não se sabe se ficou guardado. Atualiza antes de tentar outra vez.",
@@ -2344,7 +2353,7 @@
     "invalidTitle": "Não foi possível mostrar este bem",
     "invalidMessage": "O servidor enviou algo que esta versão da app não consegue ler. Tenta outra vez ou atualiza a app.",
     "notFoundTitle": "Bem não encontrado",
-    "notFoundMessage": "Pode ter sido eliminado, ou é privado do outro membro do teu agregado.",
+    "notFoundMessage": "Pode ter sido eliminado, ou é privado de outro membro do teu agregado.",
     "invalidIdTitle": "Bem não encontrado",
     "invalidIdMessage": "Esta ligação não aponta para um bem.",
     "stale": "Estes valores podem estar desatualizados: a última atualização falhou.",
@@ -2430,7 +2439,7 @@
     "loading": "A carregar o bem",
     "error": "Não foi possível carregar este bem. Fecha e tenta outra vez.",
     "invalid": "O servidor enviou algo que esta versão da app não consegue ler. Fecha e tenta outra vez, ou atualiza a app.",
-    "notFound": "Este bem já não existe, ou é privado do outro membro do teu agregado.",
+    "notFound": "Este bem já não existe, ou é privado de outro membro do teu agregado.",
     "save": "Guardar alterações",
     "saving": "A guardar",
     "growthStartDate": "Varia a partir de",
@@ -2500,7 +2509,7 @@
       "read-only": "$t(common.householdReadOnly)",
       "access": "Já não podes alterar esta carteira. Inicia sessão de novo ou fala com o teu agregado.",
       "mfa": "Confirma que és tu para continuar.",
-      "not-found": "Esta carteira já não existe, ou é privada do outro membro do teu agregado.",
+      "not-found": "Esta carteira já não existe, ou é privada de outro membro do teu agregado.",
       "invalid": "Algum dado não é válido. Verifica os campos e tenta de novo.",
       "invalid-response": "Pode ter sido guardado, mas não foi possível ler a resposta do servidor. Atualiza antes de tentar de novo.",
       "network-ambiguous": "A ligação caiu, por isso não se sabe se foi guardado. Atualiza antes de tentar de novo.",
@@ -2707,18 +2716,14 @@
     "legacyRecurrence": "Esta categoria não tem uma recorrência guardada. Seleciona uma explicitamente antes de guardares.",
     "scope": "Aplicar alteração a",
     "scopeMonth": "Apenas ao mês selecionado",
-    "scopeForward_one": "Do mês selecionado até dezembro ({{count}} mês)",
-    "scopeForward_other": "Do mês selecionado até dezembro ({{count}} meses)",
-    "scopeNote": "O mês da rota selecionada é o ponto de partida. Os meses anteriores e os anos futuros nunca são alterados.",
+    "scopeNote": "A opção de meses seguintes também altera os anos seguintes. Os meses anteriores mantêm-se.",
     "suggestionLabel": "Sugerido a partir dos teus gastos: {{amount}}",
     "suggestionApply": "Aplicar",
     "suggestionNotEnoughData": "Ainda não há histórico suficiente para uma sugestão.",
     "save": "Guardar orçamento da categoria",
     "saving": "A guardar orçamento da categoria…",
-    "confirmTitle": "Aplicar até dezembro?",
-    "confirmMessage_one": "Aplicar este montante e recorrência de {{start}} até {{end}} ({{count}} mês)? Os meses anteriores, anos futuros, saldos das contas e transações de despesa não serão alterados.",
-    "confirmMessage_other": "Aplicar este montante e recorrência de {{start}} até {{end}} ({{count}} meses)? Os meses anteriores, anos futuros, saldos das contas e transações de despesa não serão alterados.",
-    "confirmAction": "Aplicar até dezembro",
+    "confirmTitle": "Aplicar aos meses seguintes?",
+    "confirmAction": "Aplicar aos meses seguintes",
     "failures": {
       "demo": "O modo de demonstração é só de leitura. Não foi guardada nenhuma alteração à categoria.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2729,7 +2734,9 @@
       "invalid-response": "O servidor não confirmou a alteração da categoria de forma segura. Os valores foram mantidos.",
       "invalid": "Introduz um montante positivo e seleciona explicitamente uma recorrência.",
       "general": "Não foi possível guardar a alteração da categoria. Os valores foram mantidos."
-    }
+    },
+    "scopeForward": "Mês selecionado e todos os meses seguintes",
+    "confirmMessage": "Aplicar este montante e recorrência a partir de {{start}}, incluindo anos seguintes? Os meses anteriores, saldos das contas e transações de despesa não serão alterados."
   },
   "budgetCreate": {
     "title": "Criar orçamento",
@@ -3284,7 +3291,7 @@
     "invalidMessage": "Não foi possível verificar os dados dos portefólios recebidos",
     "stale": "Não foi possível atualizar. A mostrar os valores dos portefólios carregados anteriormente",
     "emptyTitle": "Sem portefólios disponíveis",
-    "empty": "Ainda sem carteiras",
+    "empty": "Ainda sem portefólios",
     "totalValue": "Valor total",
     "gainLoss": "Ganho ou perda",
     "ytdReturn": "Rendimento desde o início do ano",
@@ -3298,7 +3305,7 @@
     "create": "Criar portefólio",
     "previewValue": "Pré-visualização do valor total",
     "previewAllocation": "Alocação de exemplo",
-    "emptyMessage": "As carteiras e as posições aparecem aqui depois de criadas",
+    "emptyMessage": "Os portefólios e as posições aparecem aqui depois de criados",
     "description": "Esta é uma visão geral dos teus portefólios, incluindo evolução do saldo, últimas transações e análises.",
     "helpHint": "Saber mais sobre portefólios",
     "period": "Período de tempo",
@@ -3449,7 +3456,7 @@
     "blankBenchmark": "Deixa em branco para remover a comparação com o benchmark",
     "benchmarkCleared": "Remover o benchmark atual",
     "excluded": "Excluir do painel agregado",
-    "excludedHelper": "Oculta este portefólio dos totais combinados e do desempenho de todos os portefólios",
+    "excludedHelper": "Deixa este portefólio fora dos totais, posições e gráficos de todos os portefólios juntos. A página dele e o teu património líquido continuam a incluí-lo.",
     "favored": "Destacar no painel",
     "favoredHelper": "Dá a este portefólio destaque prioritário no painel",
     "allocation": {
@@ -3882,7 +3889,7 @@
     },
     "appLock": {
       "heading": "Bloqueio da aplicação",
-      "helper": "Exige Face ID, Touch ID ou o código do dispositivo para abrir o WonderMoney.",
+      "helper": "Configura o reconhecimento facial ou de impressão digital para ativar o bloqueio da aplicação. Ao desbloquear, podes usar o código do dispositivo como alternativa.",
       "loading": "A verificar o estado do bloqueio da aplicação…",
       "onLabel": "O bloqueio da aplicação está ativado",
       "offLabel": "O bloqueio da aplicação está desativado",
@@ -3892,8 +3899,8 @@
       "turningOff": "A desativar…",
       "confirmPrompt": "Confirma para ativar o bloqueio da aplicação",
       "errors": {
-        "no-hardware": "Não existe biometria ou código configurado neste dispositivo.",
-        "not-enrolled": "Configura primeiro o Face ID, Touch ID ou um código nas definições do dispositivo.",
+        "no-hardware": "Este dispositivo não suporta reconhecimento facial ou de impressão digital.",
+        "not-enrolled": "Regista o teu rosto ou uma impressão digital nas definições do dispositivo antes de ativares o bloqueio da aplicação.",
         "auth-failed": "Não foi possível confirmar. Tenta novamente."
       }
     },
@@ -3944,7 +3951,11 @@
         "validation": "Introduz o código de 6 dígitos da tua aplicação de autenticação.",
         "invalidCode": "Esse código não estava correto. Tenta novamente.",
         "unavailable": "Não foi possível concluir essa ação. Verifica a tua ligação e tenta novamente."
-      }
+      },
+      "backupCodesTitle": "Guarda os teus códigos de recuperação",
+      "backupCodesHelper": "Guarda estes códigos num local seguro. Cada um pode ser usado uma vez se perderes o acesso à tua aplicação de autenticação.",
+      "copyBackupCodes": "Copiar códigos",
+      "backupCodesCopied": "Códigos de recuperação copiados para a área de transferência."
     },
     "deleteHeading": "Eliminar conta",
     "deleteExplainer": "Elimina permanentemente a tua conta WonderMoney e todos os dados associados dos nossos sistemas.",
@@ -4149,7 +4160,7 @@
     "steps": {
       "netWorthValue": {
         "title": "Acompanha o teu património líquido estimado",
-        "body": "O WonderMoney combina as tuas contas e carteiras numa estimativa diária do que possuis e do que deves."
+        "body": "O WonderMoney combina as tuas contas e portefólios numa estimativa diária do que possuis e do que deves."
       },
       "readOnlyBankAccess": {
         "title": "Acesso bancário apenas de leitura",
@@ -4607,13 +4618,13 @@
     },
     "assetReview": {
       "title": "Resolver ativos ambíguos",
-      "helper": "Algumas linhas deste ficheiro não puderam ser associadas automaticamente a um ativo. Escolhe uma correspondência sugerida, procura o símbolo correto, escolhe um ativo que já está nesta carteira ou ignora o grupo.",
+      "helper": "Algumas linhas deste ficheiro não puderam ser associadas automaticamente a um ativo. Escolhe uma correspondência sugerida, procura o símbolo correto, escolhe um ativo que já está neste portefólio ou ignora o grupo.",
       "progress": "{{resolved}} de {{total}} resolvidos",
       "unknownAsset": "Ativo desconhecido",
       "candidatesTitle": "Correspondências sugeridas",
       "searchLabel": "Procurar um símbolo",
-      "chooseHolding": "Escolher um ativo desta carteira",
-      "holdingsTitle": "Ativos nesta carteira",
+      "chooseHolding": "Escolher um ativo deste portefólio",
+      "holdingsTitle": "Ativos neste portefólio",
       "skip": "Ignorar este grupo",
       "change": "Alterar",
       "resolvedAs": "Associado a {{symbol}}",
@@ -4808,7 +4819,7 @@
     },
     "portfolioPerformance": {
       "title": "Desempenho do portefólio",
-      "subtitle": "Como variou o valor de cada carteira no período, descontando o que entrou e saiu.",
+      "subtitle": "Como variou o valor de cada portefólio no período, descontando o que entrou e saiu.",
       "loading": "A carregar o desempenho do portefólio",
       "aggregateReturn": "{{value}} de variação combinada",
       "startValue": "Valor inicial",
@@ -4818,9 +4829,9 @@
       "endValue": "Valor final",
       "unknownValue": "Sem valor registado",
       "noExchangeRate": "Ainda sem taxa de câmbio",
-      "emptyTitle": "Sem carteiras para mostrar",
-      "emptyMessage": "Adiciona uma carteira para ver aqui o seu desempenho",
-      "portfolio": "Carteira",
+      "emptyTitle": "Sem portefólios para mostrar",
+      "emptyMessage": "Adiciona um portefólio para ver aqui o seu desempenho",
+      "portfolio": "Portefólio",
       "total": "Total",
       "notCombined": "Medido por portefólio",
       "daysWithoutSnapshot_one": "{{count}} dia sem snapshot",
@@ -5084,13 +5095,15 @@
     "worstPerformer": "Pior Performance",
     "dataUnavailable": "Dados indisponíveis",
     "weight": "Peso",
+    "excludedFromTotals": "Fora dos totais",
     "gain": "Ganho",
     "performanceInsufficient": "Precisamos de pelo menos dois snapshots para mostrar uma tendência.",
     "performanceWaiting": "O desempenho aparece assim que existirem snapshots.",
     "loading": "A carregar",
     "sectionError": "Não foi possível carregar esta secção. Puxa para baixo para tentar novamente.",
     "more": "Mais sobre este portefólio",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "Rendimento e volatilidade de todo o histórico; taxa de referência fixa de 4,5% para todas as moedas."
   },
   "privacy": {
     "hiddenAmount": "Montante oculto",
@@ -5350,7 +5363,7 @@
   },
   "rules": {
     "title": "Regras",
-    "description": "As regras organizam as transações por ti: quando uma transação cumpre as condições de uma regra, as ações dessa regra são aplicadas. As regras são executadas de cima para baixo e nunca alteram o que definiste à mão. São partilhadas por ambos os membros do agregado.",
+    "description": "As regras organizam as transações por ti: quando uma transação cumpre as condições de uma regra, as ações dessa regra são aplicadas. As regras são executadas de cima para baixo e nunca alteram o que definiste à mão. São partilhadas por todos os membros do agregado.",
     "back": "Voltar a Mais",
     "loading": "A carregar regras",
     "stale": "Não foi possível atualizar. A mostrar as regras carregadas anteriormente",

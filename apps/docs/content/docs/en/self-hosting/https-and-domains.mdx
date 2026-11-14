@@ -87,4 +87,4 @@ Leave it empty when there is no proxy: otherwise anyone can write their own `X-F
 
 ## Keep the ports private
 
-When the proxy runs on the same machine, set `BIND_ADDRESS=127.0.0.1` in `.env` and run `docker compose up -d`. The published ports (the web app, the API, and the optional storage and Mailpit) then listen on localhost only, so they are reachable only through the proxy.
+When the proxy runs on the same machine, set `BIND_ADDRESS=127.0.0.1` in `.env` and run `docker compose up -d`. The published ports (the web app, the API, and the optional storage and Mailpit) then listen on localhost only, so they are reachable only through the proxy. `WEB_PORT`, `API_PORT`, `S3_PORT` and `MAILPIT_PORT` change those ports on the machine (`3000`, `3001`, `9000` and `8025` by default).

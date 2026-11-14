@@ -3,7 +3,7 @@ title: Two-factor Authentication
 description: Add a second step to sign-in using an authenticator app.
 ---
 
-Two-factor authentication adds another check when you sign in.
+Two-factor authentication adds another check when you sign in: after your password, you enter the 6-digit code from an authenticator app, or one of your backup codes.
 
 It is most useful when you want extra protection on top of your password.
 
@@ -11,15 +11,42 @@ It is most useful when you want extra protection on top of your password.
   src="/images/docs/settings-security-privacy/two-factor-authentication-mfa.png"
   alt="Multi-factor authentication section showing a Disabled status badge with an Enable 2FA button."
   caption="Until you enroll, the multi-factor authentication section shows a Disabled status with an Enable 2FA button."
-  width={1216}
-  height={245}
+  width={1112}
+  height={197}
 />
+
+## Turn it on
+
+On the web:
+
+1. Open **Settings**, choose **Security** and find **Multi-factor authentication**.
+2. Select **Enable 2FA** and enter your account password.
+3. Scan the QR code with an authenticator app.
+4. Save the backup codes shown under the QR code. Select **Copy codes** to copy them, and keep them somewhere you can reach without your phone. They are shown only this once.
+5. Select **Continue**, enter the 6-digit code the app shows, and select **Submit**.
+
+In the mobile app, open **More > Settings > Security** and select **Turn on two-factor authentication**. Add the setup key to your authenticator app, enter the 6-digit code it shows, and select **Confirm code**. Backup codes were added to the mobile app after version 1.0.3: a later version also shows the backup codes under the setup key, with **Copy codes**. Version 1.0.3 and earlier show only the setup key. The app shows its version on the **More** screen.
+
+## Turn it off
+
+On the web, select **Disable 2FA** in the same section and enter your account password. In the mobile app, select **Turn off two-factor authentication**.
+
+## Sign in with a backup code
+
+If you don't have your authenticator app, select **Use a backup code** on the sign-in verification step and enter one of your saved codes. Each code works once. See [Multi-factor authentication](/en/docs/start-here/multi-factor-authentication) for the details.
+
+## If you lose your authenticator app
+
+1. Sign in with one of your backup codes.
+2. Open **Settings → Security** and turn two-factor authentication off.
+3. Turn it on again with the new device. This gives you a new set of backup codes; the old ones stop working.
 
 ## Common issues
 
 - The code has expired.
 - The authenticator app is using the wrong account.
 - The device time is out of sync.
+- A backup code was already used, or was typed with the wrong upper and lower case.
 
 ## What to try
 
@@ -27,13 +54,13 @@ It is most useful when you want extra protection on top of your password.
 - Check the time on the device that generates codes.
 - Make sure you are using the correct account entry in the authenticator app.
 
-If you still cannot sign in, use recovery options if they were saved when the feature was enabled.
-
-
+If you still cannot sign in, use one of the backup codes you saved when you turned the feature on.
 
 ## Related pages
 
+- [Multi-factor authentication](/en/docs/start-here/multi-factor-authentication)
 - [Passkeys](/en/docs/settings-security-privacy/passkeys)
+- [App lock](/en/docs/settings-security-privacy/app-lock)
 - [Change password](/en/docs/settings-security-privacy/change-password)
 - [Assistant settings](/en/docs/settings-security-privacy/assistant-settings)
 - [Settings, security, and privacy](/en/docs/settings-security-privacy)

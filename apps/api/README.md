@@ -65,7 +65,7 @@ pnpm test                    # vitest
 pnpm test:coverage           # thresholds are enforced
 pnpm type-check              # typecheck
 pnpm lint / pnpm lint:fix    # eslint
-pnpm knip                    # unused files, exports and dependencies
+pnpm knip                    # unused files, exports and dependencies (a root script: run it from the repository root)
 
 pnpm migrate:dev:create      # scaffold a migration
 pnpm migrate:dev             # apply pending migrations (non-destructive)
@@ -110,9 +110,9 @@ pull requests, and skips with a notice when no model is configured for the repos
   data belongs in `src/database/seeders/`. Shipped migrations are immutable. The API
   applies pending migrations on start, and on an empty database it also loads the
   reference data.
-- **Tenancy.** A tenant is a household (an owner plus at most one partner). A global
-  MikroORM filter scopes reads to the request's tenant, and private accounts are hidden
-  from the other member. Raw SQL paths carry explicit tenant and privacy predicates.
+- **Tenancy.** A tenant is a household (an owner plus admins, members and viewers, up to
+  `HOUSEHOLD_MAX_MEMBERS`, 6 by default). A global MikroORM filter scopes reads to the
+  request's tenant, and private accounts are hidden from members they are not shared with. Raw SQL paths carry explicit tenant and privacy predicates.
 - **Optional integrations** fail closed: a missing provider makes its feature report as
   disabled (HTTP 501, `feature_disabled`), never a crash at boot.
 - **Tests** must be able to fail for a reason a user would care about: assert outcomes,

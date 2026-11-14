@@ -7,7 +7,7 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 import { netWorthKey } from '@/features/net-worth/query-keys'
 
 import { createPortfolioSettingsEndpoint, portfolioSettingsWriteSchema, type PortfolioSettingsWrite } from './portfolios-contract'
-import { aggregatePortfolioDashboardPrefix, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
+import { aggregatePortfolioDashboardPrefix, isPortfolioContentQueryForEpoch, portfolioKey, portfolioSettingsUnknownKey, portfoliosKey } from './query-keys'
 
 export type PortfolioSettingsFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'not-found' | 'cancelled' | 'unknown' | 'request' | 'general' | 'link-held' | 'link-managed'
 export type PortfolioSettingsUnknown = Readonly<{ payload: Readonly<PortfolioSettingsWrite> }>
@@ -63,6 +63,8 @@ export function usePortfolioSettings(portfolioId: number) {
               queryClient.invalidateQueries({ queryKey: aggregatePortfolioDashboardPrefix(runtime.epochId) }),
               // A link changes what net worth counts, today and in its history.
               ...(payload.accountLink !== undefined ? [queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId) })] : []),
+              // "Exclude from aggregate dashboard" changes every combined figure.
+              ...(payload.excluded !== undefined ? [queryClient.invalidateQueries({ predicate: (query) => isPortfolioContentQueryForEpoch(query.queryKey, runtime.epochId) })] : []),
             ]) },
           })
           if (response.portfolio.portfolioKey !== portfolioId) throw new ApiError('invalid-response')
@@ -85,6 +87,7 @@ export function usePortfolioSettings(portfolioId: number) {
       if (outcome !== 'applied' && outcome !== 'not-applied') throw new Error('Only a definitive reconciliation can be acknowledged.')
       // A link that did apply changed net worth without the write's commit having run.
       if (outcome === 'applied' && unknown.data?.payload.accountLink !== undefined) void queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId) })
+      if (outcome === 'applied' && unknown.data?.payload.excluded !== undefined) void queryClient.invalidateQueries({ predicate: (query) => isPortfolioContentQueryForEpoch(query.queryKey, runtime.epochId) })
       queryClient.setQueryData(unknownKey, null)
     },
   }

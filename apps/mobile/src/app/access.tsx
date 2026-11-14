@@ -36,6 +36,7 @@ export default function AccessRoute() {
         submitting: mfaChallenge.submitting,
         failure: mfaChallenge.failure,
         onSubmit: mfaChallenge.submit,
+        onSubmitBackupCode: mfaChallenge.submitBackupCode,
       }}
     />
   )

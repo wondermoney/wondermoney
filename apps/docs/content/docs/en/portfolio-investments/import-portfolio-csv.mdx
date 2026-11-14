@@ -9,11 +9,11 @@ Importing a file is the fastest way to load broker data into WonderMoney. The im
 - **Current positions**: what you hold today, one row per holding, without the trades that led there.
 - **Manual assets**: homes, vehicles and valuables, each with a value on a day.
 
-Open it from a portfolio with **Import transactions**, then pick the mode.
+Open it from a portfolio: choose **Add transaction**, then **Import transactions**, and pick the mode.
 
 <DocsImage
   src="/images/docs/portfolio-investments/import-portfolio-csv-import-modal.png"
-  alt="Import Transactions modal with a drag-and-drop file upload area, portfolio selector, and Analyze file button."
+  alt="Import transactions dialog asking what you are importing (trade history, current positions, or manual assets), with portfolio and broker selectors and a file upload area."
   caption="The import modal accepts a broker CSV, XLS, or XLSX export for the selected portfolio."
   width={1440}
   height={900}
@@ -22,7 +22,7 @@ Open it from a portfolio with **Import transactions**, then pick the mode.
 ## Import a trade history
 
 1. Export your trades from your broker.
-2. Choose **Trade history**, the portfolio and, if you like, the broker.
+2. Choose **Trade history**, the portfolio and, if you like, the broker. The list has Degiro, Interactive Broker, Trading212 and Coinbase. A file from any other broker imports the same way, by matching its columns.
 3. Upload the file and choose **Analyze file**.
 4. Match the file's columns to the trade fields: date, type (buy or sell), quantity, unit price or total amount, currency and the asset (ISIN, ticker or name). A fee and the broker's own transaction ID are optional.
 5. Resolve any asset WonderMoney could not match (see [Review before anything is saved](#review-before-anything-is-saved)).
@@ -58,7 +58,7 @@ Each row becomes one **opening buy**: a normal buy of that quantity at the avera
 
 If the portfolio already has buys or sales of an asset in the file, an opening buy on top of them would count the holding twice. Those rows are listed with a warning and **skipped by default**. Switch a row on to import it anyway, for example when the existing trades are of a holding you sold before buying again. Rows for assets without trades import as usual.
 
-Importing the same positions file twice is caught as a duplicate.
+Importing the same positions file into the same portfolio twice, with the same broker choice, is caught as a duplicate as long as each row lands on the same date. A row without an acquisition date takes the as-of date, so under a different as-of date it is not a duplicate; it is then listed with the warning above and skipped by default.
 
 ## Import manual assets
 

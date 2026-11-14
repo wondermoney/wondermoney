@@ -11,13 +11,13 @@ A transaction moves through a defined lifecycle:
 
 - **Pending.** The bank has reported the payment but has not confirmed it yet. Card payments usually start here.
 - **Posted.** The bank has confirmed the transaction. A pending payment is matched to its posted version automatically, so the two do not stay separate for long.
-- **Expired.** A pending transaction that the bank never confirms within the configured window is marked as expired and removed from the active list. This stops old pending records from lingering.
+- **Expired.** A pending transaction that the bank stops listing without confirming it is marked as expired once it is more than 7 days old, and removed from the list. This stops old pending records from lingering.
 
 The available balance is the current balance net of pending activity, so money that is still pending is reflected in what you see.
 
 ## Audit log
 
-Every change to a transaction — including duplicate handling and status changes — is recorded in an audit log. If you need to understand why a transaction is in a particular state, the audit history has the record.
+Every change to a transaction, including duplicate handling and status changes, is recorded in an audit log. If you need to understand why a transaction is in a particular state, the audit history has the record: on the web, choose **Edit** on a transaction to see it under **Activity**. The mobile app does not show it.
 
 ## Attachments
 
@@ -69,11 +69,11 @@ Make sure the account has finished its first sync or has manual entries availabl
 1. Open the transactions list for an account.
 2. Filter by date, category, or account if needed.
 3. Open a transaction to review the amount, merchant, and notes.
-4. Update the category, description, or recurring status when required.
+4. Update the category, description, or tags when required.
 
 <DocsImage
   src="/images/docs/accounts-transactions/understand-transactions-list.png"
-  alt="Transactions list with date, account, merchant, category, amount, and balance columns."
+  alt="Transactions list with totals for money in and out, and date, merchant and account, category, amount, and balance columns."
   caption="Each row shows the merchant, amount, and running balance for a transaction."
   width={1440}
   height={900}

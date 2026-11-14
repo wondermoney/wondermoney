@@ -250,6 +250,53 @@ describe('financial-markets controller (stable DTOs)', () => {
       });
     });
 
+    const quoteOf = (code: string) => ({ change: 1, change_p: 1, close: 100, code, timestamp: 1767340800, volume: 1000 });
+    const listing = (Code: string, Exchange: string, Currency: string) => ({ Code, Country: '', Currency, Exchange, ISIN: '', Name: `${Code} plc`, Type: 'Common Stock' });
+
+    it("returns the listing's currency with the quote", async () => {
+      eodhdMocks.getQuote.mockResolvedValue(quoteOf('EXMP'));
+      eodhdMocks.search.mockResolvedValue([listing('EXMPL', 'US', 'USD'), listing('EXMP', 'XETRA', 'EUR')]);
+      const { getQuote } = await import('../financial-markets');
+      const { json, res } = fakeRes();
+
+      await getQuote({ params: { ticker: 'EXMP' } } as unknown as Request, res);
+
+      expect(json.mock.calls[0]?.[0]).toMatchObject({ currency: 'EUR', price: 100 });
+    });
+
+    it('matches an exchange-qualified ticker to the listing on that exchange', async () => {
+      eodhdMocks.getQuote.mockResolvedValue(quoteOf('EXMP'));
+      eodhdMocks.search.mockResolvedValue([listing('EXMP', 'US', 'USD'), listing('EXMP', 'LSE', 'GBP')]);
+      const { getQuote } = await import('../financial-markets');
+      const { json, res } = fakeRes();
+
+      await getQuote({ params: { ticker: 'EXMP.LSE' } } as unknown as Request, res);
+
+      expect(json.mock.calls[0]?.[0]).toMatchObject({ currency: 'GBP' });
+    });
+
+    it('leaves the currency unknown when listings of the symbol trade in different currencies', async () => {
+      eodhdMocks.getQuote.mockResolvedValue(quoteOf('EXMP'));
+      eodhdMocks.search.mockResolvedValue([listing('EXMP', 'US', 'USD'), listing('EXMP', 'LSE', 'GBP')]);
+      const { getQuote } = await import('../financial-markets');
+      const { json, res } = fakeRes();
+
+      await getQuote({ params: { ticker: 'EXMP' } } as unknown as Request, res);
+
+      expect(json.mock.calls[0]?.[0]).toMatchObject({ currency: null, price: 100 });
+    });
+
+    it('still answers the quote, with no currency, when the search fails', async () => {
+      eodhdMocks.getQuote.mockResolvedValue(quoteOf('EXMP'));
+      eodhdMocks.search.mockRejectedValue(new Error('provider timeout'));
+      const { getQuote } = await import('../financial-markets');
+      const { json, res } = fakeRes();
+
+      await getQuote({ params: { ticker: 'EXMP' } } as unknown as Request, res);
+
+      expect(json.mock.calls[0]?.[0]).toMatchObject({ currency: null, price: 100 });
+    });
+
     it('propagates a provider error through handleEodhdError when EODHD rejects', async () => {
       eodhdMocks.getQuote.mockRejectedValue(new Error('not found'));
       const { getQuote } = await import('../financial-markets');

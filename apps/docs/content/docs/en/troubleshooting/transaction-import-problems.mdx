@@ -7,10 +7,10 @@ An unreadable file is rejected with an error message instead of being imported s
 
 <DocsImage
   src="/images/docs/troubleshooting/transaction-import-problems-error-state.png"
-  alt="Transaction import dialog showing an error message after a malformed CSV file was uploaded."
+  alt="Import transactions dialog after an unrecognised file was added, asking you to pick the date, description, and amount columns."
   width={1440}
-  height={1131}
-  caption="An unreadable CSV is rejected with an error message so you can fix the file and retry."
+  height={900}
+  caption="When WonderMoney can't tell which columns hold the date, description, and amount, it asks you to pick them before importing."
 />
 
 ## Symptoms
@@ -36,7 +36,7 @@ An unreadable file is rejected with an error message instead of being imported s
 
 ## Similar transactions and duplicates
 
-WonderMoney identifies duplicates using a transaction fingerprint built from transaction details such as date and amount. Fingerprint tolerance has been strengthened, so two transactions that are similar but legitimate — for example, two purchases of the same amount on the same day — are no longer skipped as duplicates. When a true duplicate is detected, the original entry is kept and the decision is recorded in the audit log, so nothing is silently overwritten.
+WonderMoney recognises a file row as already imported by the bank's own id or reference when the file has one (an OFX `FITID`, a CAMT.053 reference), and otherwise by a fingerprint built from details such as its date and amount. Rows of the same file that share those details are counted separately, so two purchases of the same amount on the same day both import. A row imported before is listed in the review as **Already in the account** and skipped unless you include it; the transaction in the account is left as it is.
 
 A file row with the same amount as a transaction already in the account, up to 3 days apart, is listed in the review as a possible duplicate, beside the transaction it resembles. It is skipped unless you include it; see [Possible duplicates](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates).
 

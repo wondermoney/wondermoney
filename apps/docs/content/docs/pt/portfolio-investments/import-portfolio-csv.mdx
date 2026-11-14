@@ -1,5 +1,5 @@
 ---
-title: Importar carteira por CSV
+title: Importar portefólio por CSV
 description: Importa um histórico de transações, as posições que deténs hoje ou os teus bens manuais a partir de um ficheiro CSV, XLS ou XLSX.
 ---
 
@@ -9,12 +9,12 @@ Importar um ficheiro é a forma mais rápida de carregar dados do corretor para 
 - **Posições atuais**: o que deténs hoje, uma linha por posição, sem as transações que lá levaram.
 - **Bens manuais**: imóveis, veículos e objetos de valor, cada um com um valor num dia.
 
-Abre-a a partir de uma carteira com **Importar transações** e escolhe o modo.
+Abre-a a partir de um portefólio: escolhe **Adicionar transação**, depois **Importar transações**, e escolhe o modo.
 
 <DocsImage
   src="/images/docs/pt/portfolio-investments/import-portfolio-csv-import-modal.png"
-  alt="Janela Importar transações com uma área para arrastar e largar o ficheiro, o seletor de carteira e o botão Analisar ficheiro."
-  caption="A janela de importação aceita uma exportação CSV, XLS ou XLSX da corretora para a carteira selecionada."
+  alt="Janela Importar transações a perguntar o que estás a importar (histórico de operações, posições atuais ou bens manuais), com os seletores de portefólio e de corretora e uma área para carregar o ficheiro."
+  caption="A janela de importação aceita uma exportação CSV, XLS ou XLSX da corretora para o portefólio selecionado."
   width={1440}
   height={900}
 />
@@ -22,7 +22,7 @@ Abre-a a partir de uma carteira com **Importar transações** e escolhe o modo.
 ## Importar um histórico de transações
 
 1. Exporta as transações do corretor.
-2. Escolhe **Histórico de transações**, a carteira e, se quiseres, o corretor.
+2. Escolhe **Histórico de transações**, o portefólio e, se quiseres, o corretor. A lista tem Degiro, Interactive Broker, Trading212 e Coinbase. Um ficheiro de qualquer outro corretor importa-se da mesma forma, associando as colunas.
 3. Carrega o ficheiro e escolhe **Analisar ficheiro**.
 4. Associa as colunas do ficheiro aos campos da transação: data, tipo (compra ou venda), quantidade, preço unitário ou montante total, moeda e o ativo (ISIN, ticker ou nome). A comissão e o ID da transação no corretor são opcionais.
 5. Resolve os ativos que o WonderMoney não conseguiu associar (vê [Revisão antes de guardar](#revisão-antes-de-guardar)).
@@ -40,29 +40,29 @@ Usa este modo quando partes do que deténs hoje e não de anos de histórico. Ca
 | Moeda | Sim | Uma coluna, ou uma moeda para todo o ficheiro. |
 | Data de aquisição | Não | As linhas sem data usam a data de referência. |
 
-1. Escolhe **Posições atuais**, a carteira e, se quiseres, o corretor. **Descarregar o modelo de posições** dá-te um ficheiro com estas colunas, que se associa sozinho.
+1. Escolhe **Posições atuais**, o portefólio e, se quiseres, o corretor. **Descarregar o modelo de posições** dá-te um ficheiro com estas colunas, que se associa sozinho.
 2. Carrega o ficheiro e escolhe **Analisar ficheiro**.
 3. Associa as colunas e escolhe a **data de referência**: o dia em que é comprada uma linha sem data de aquisição. Por omissão é hoje.
-4. Resolve os ativos por associar e revê as linhas de ativos que a carteira já transaciona (abaixo).
+4. Resolve os ativos por associar e revê as linhas de ativos que o portefólio já transaciona (abaixo).
 5. Escolhe **Confirmar importação**.
 
 ### No que se torna uma posição
 
-Cada linha torna-se uma **compra de abertura**: uma compra normal dessa quantidade ao custo médio unitário, na data de aquisição ou na data de referência, assinalada como "Opening position" nas notas. Como é uma compra comum, a carteira trata-a exatamente como uma que registasses à mão:
+Cada linha torna-se uma **compra de abertura**: uma compra normal dessa quantidade ao custo médio unitário, na data de aquisição ou na data de referência, assinalada como "Opening position" nas notas. Como é uma compra comum, o portefólio trata-a exatamente como uma que registasses à mão:
 
 - Em FIFO é um lote; no custo médio entra na média. Uma venda posterior abate o seu custo e mostra o ganho realizado, em qualquer [método de custo](/pt/docs/portfolio-investments/portfolio-metrics-explained#método-de-custo-fifo-e-custo-médio).
-- Conta como dinheiro investido na carteira nessa data para os [retornos ponderados pelo tempo e pelo dinheiro](/pt/docs/portfolio-investments/portfolio-metrics-explained#retorno-ponderado-pelo-tempo-e-pelo-dinheiro). Os retornos medem-se a partir desse dia: o que aconteceu antes não faz parte deles.
+- Conta como dinheiro investido no portefólio nessa data para os [retornos ponderados pelo tempo e pelo dinheiro](/pt/docs/portfolio-investments/portfolio-metrics-explained#retorno-ponderado-pelo-tempo-e-pelo-dinheiro). Os retornos medem-se a partir desse dia: o que aconteceu antes não faz parte deles.
 - O custo é o que o ficheiro diz que pagaste, por isso confirma-o: o ganho não realizado mede-se em relação a ele.
 
 ### Ativos que já têm transações
 
-Se a carteira já tiver compras ou vendas de um ativo do ficheiro, uma compra de abertura por cima contaria a posição duas vezes. Essas linhas aparecem com um aviso e são **ignoradas por omissão**. Liga uma linha para a importar mesmo assim, por exemplo quando as transações existentes são de uma posição que vendeste antes de voltares a comprar. As linhas de ativos sem transações importam-se normalmente.
+Se o portefólio já tiver compras ou vendas de um ativo do ficheiro, uma compra de abertura por cima contaria a posição duas vezes. Essas linhas aparecem com um aviso e são **ignoradas por omissão**. Liga uma linha para a importar mesmo assim, por exemplo quando as transações existentes são de uma posição que vendeste antes de voltares a comprar. As linhas de ativos sem transações importam-se normalmente.
 
-Importar o mesmo ficheiro de posições duas vezes é detetado como duplicado.
+Importar duas vezes o mesmo ficheiro de posições para o mesmo portefólio, com a mesma escolha de corretora, é detetado como duplicado desde que cada linha fique na mesma data. Uma linha sem data de aquisição usa a data de referência, por isso com outra data de referência não é um duplicado; nesse caso aparece com o aviso acima e é ignorada por omissão.
 
 ## Importar bens manuais
 
-Os bens manuais não fazem parte de uma carteira: contam no teu património a um valor que defines. Vê [Casas, veículos e outros bens](/pt/docs/portfolio-investments/manual-assets).
+Os bens manuais não fazem parte de um portefólio: contam no teu património a um valor que defines. Vê [Casas, veículos e outros bens](/pt/docs/portfolio-investments/manual-assets).
 
 1. Escolhe **Bens manuais** na janela de importação, ou **Importar CSV** na página Bens.
 2. **Descarrega o modelo** e preenche uma linha por bem:
@@ -83,7 +83,7 @@ O modelo de bens manuais lê um ficheiro CSV com até 500 bens.
 
 ## Revisão antes de guardar
 
-Nada é adicionado a uma carteira até escolheres **Confirmar importação**. Antes disso:
+Nada é adicionado a um portefólio até escolheres **Confirmar importação**. Antes disso:
 
 - **Associação de colunas.** O WonderMoney sugere uma associação a partir dos cabeçalhos do ficheiro; confere-a e completa o que faltar.
 - **Revisão de ativos.** Uma linha cujo ativo não foi associado com confiança vai para a revisão de ativos. Escolhe o título certo entre as sugestões, procura outro símbolo ou ignora o grupo.
@@ -92,22 +92,22 @@ Nada é adicionado a uma carteira até escolheres **Confirmar importação**. An
 ## Melhores resultados
 
 - Usa uma exportação recente do corretor.
-- Mantém uma carteira por conta de corretor, quando possível.
+- Mantém um portefólio por conta de corretor, quando possível.
 - Prefere ISINs: identificam um único título, enquanto um ticker pode existir em várias bolsas.
 - Revê quantidades, datas, custos e moedas no ficheiro antes de o carregar.
 
 ## Erros comuns
 
-- Importar um ficheiro de posições para uma carteira que já tem as mesmas transações: o aviso deteta-o, mas só para os ativos do ficheiro.
+- Importar um ficheiro de posições para um portefólio que já tem as mesmas transações: o aviso deteta-o, mas só para os ativos do ficheiro.
 - Importar um histórico de transações como posições atuais, ou o contrário.
 - Deixar a coluna da moeda vazia quando o ficheiro inclui várias moedas.
 - Assumir que todos os corretores usam os mesmos nomes de colunas.
 
 ## Páginas relacionadas
 
-- [Investimentos de carteira](/pt/docs/portfolio-investments)
-- [Criar uma carteira](/pt/docs/portfolio-investments/create-portfolio)
-- [Adicionar transações de carteira](/pt/docs/portfolio-investments/add-portfolio-transactions)
-- [Métricas da carteira explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)
+- [Investimentos de portefólio](/pt/docs/portfolio-investments)
+- [Criar um portefólio](/pt/docs/portfolio-investments/create-portfolio)
+- [Adicionar transações de portefólio](/pt/docs/portfolio-investments/add-portfolio-transactions)
+- [Métricas do portefólio explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)
 - [Casas, veículos e outros bens](/pt/docs/portfolio-investments/manual-assets)
-- [Resolver problemas de importação de carteira](/pt/docs/portfolio-investments/troubleshoot-portfolio-imports)
+- [Resolver problemas de importação de portefólio](/pt/docs/portfolio-investments/troubleshoot-portfolio-imports)

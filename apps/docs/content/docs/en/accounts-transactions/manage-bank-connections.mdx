@@ -7,20 +7,30 @@ Bank connections can expire, need re-approval, or stop syncing after a bank chan
 
 ## Connection status
 
-Each connection shows one of a small set of states:
+On the web, **Settings → Connections** lists each bank with its accounts, when its consent expires, and a status:
 
-- **Connected** — the connection is active and its accounts have refreshed.
-- **Processing** — the connection is being set up or has not finished its first refresh.
-- **Expired** — the connection is no longer valid and needs re-approval.
+- **Linked** — the connection is active.
+- **Created** or **Authorized** — the connection was started, but the approval at the bank has not finished.
+- **Expires in N days** — the consent ends within 14 days. **Reconnect** appears on the row.
+- **Expired** — the consent has ended and the connection needs re-approval.
+- **Ended by your bank** — the bank withdrew access before the consent's end date.
 - **Error** — the connection could not complete.
+
+The mobile app lists the same connections under **More → Bank connections**, labelled **Connected**, **Processing**, **Expiring soon**, **Consent expired**, **Ended by bank** or **Error**, with the date the consent expires and the date the data is fresh as of.
+
+SimpleFIN connections are listed separately, as **Connected**, **First sync running**, **Access revoked**, **Expired** or **Error**.
 
 You only see status for your own connections, and status is scoped to your account rather than to the bank or provider as a whole.
 
-## When a sync fails
+## When a connection or a sync fails
 
-If a sync fails, the recovery view explains what happened and offers the relevant next step, such as retrying the connection, adding the account manually, or importing a statement. The recovery flow shows the name of the affected bank, so it is clear which connection needs attention.
+If you start a connection from **Accounts** on the web and come back from the bank without one, for example because you cancelled the approval, the page shows **Bank connection could not be completed**. No bank data is added, and the notice offers **Retry bank connection**, **Add account manually** and **Import CSV or bank statement**. The notice does not name the bank.
 
-If the list of banks is temporarily unavailable — for example during an outage at the provider — the bank picker shows a clear error instead of failing, and you can retry.
+A sync that fails on an existing connection is recorded in that connection's history. The mobile app, and the SimpleFIN list on the web, also show the reason under the connection, and when a bank has not updated for more than 2 days, the home page says so and names the bank.
+
+**Sync history** on a connection lists the last 20 times WonderMoney tried to sync it, with the result of each attempt.
+
+If the list of banks cannot be loaded, for example during an outage at the provider, the mobile app shows **Could not load banks** with **Retry**. On the web, the list stays empty: close the dialog and try again later.
 
 ## Before you start
 
@@ -28,10 +38,10 @@ Check whether the problem is limited to one account or affects the whole bank co
 
 ## Steps
 
-1. Open the list of connected banks.
-2. Review the sync status and last refresh time.
-3. Reconnect or re-authorize any connection that has expired.
-4. Remove a connection only if you no longer want new imports from it. Unlinking is safe to retry: if the first attempt does not complete, doing it again finishes the job.
+1. Open **Settings → Connections** on the web, or **More → Bank connections** in the mobile app.
+2. Review each connection's status and when its consent expires. Open **Sync history** to see how recent syncs went.
+3. Select **Reconnect** on a connection whose consent is ending, has expired or was ended by the bank, and approve it again at the bank. An account the bank reports with the same IBAN keeps its history. A SimpleFIN connection whose access was revoked needs a new setup token instead.
+4. Remove a connection only if you no longer want new imports from it. On the web, select the unsync icon in the **Actions** column and confirm with **Unsync**; in the mobile app, or for a SimpleFIN connection, select **Disconnect**. The data already imported stays. Unlinking is safe to retry: if the first attempt does not complete, doing it again finishes the job.
 
 <DocsImage
   src="/images/docs/accounts-transactions/manage-bank-connections-overview.png"
@@ -49,8 +59,8 @@ After updating a connection, confirm that new transactions appear and that balan
 
 - The bank changed its login or security flow.
 - One account synced while another did not.
-- A removed connection still appears until the next refresh.
-- The bank connection is valid, but the account was hidden or excluded.
+- On the web, a removed connection still appears until the list is loaded again.
+- The bank connection is valid, but the account is [private](/en/docs/household/account-privacy), so other household members do not see it.
 
 ## Related links
 

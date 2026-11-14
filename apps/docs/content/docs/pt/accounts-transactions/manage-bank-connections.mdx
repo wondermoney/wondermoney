@@ -7,20 +7,30 @@ As ligações bancárias podem expirar, exigir nova aprovação ou deixar de sin
 
 ## Estado da ligação
 
-Cada ligação mostra um de um pequeno conjunto de estados:
+Na web, **Definições → Ligações** mostra cada banco com as suas contas, quando expira o consentimento e um estado:
 
-- **Ligada** — a ligação está ativa e as contas já foram atualizadas.
-- **Em processamento** — a ligação está a ser criada ou ainda não terminou a primeira atualização.
-- **Expirada** — a ligação deixou de ser válida e precisa de nova aprovação.
+- **Ligada** — a ligação está ativa.
+- **Criado** ou **Autorizada** — a ligação foi iniciada, mas a aprovação no banco ainda não terminou.
+- **Expira em N dias** — o consentimento termina dentro de 14 dias. **Voltar a ligar** aparece na linha.
+- **Expirada** — o consentimento terminou e a ligação precisa de nova aprovação.
+- **Terminada pelo banco** — o banco retirou o acesso antes da data de fim do consentimento.
 - **Erro** — não foi possível concluir a ligação.
+
+A aplicação móvel mostra as mesmas ligações em **Mais → Ligações bancárias**, com os estados **Ligado**, **Em processamento**, **Expira em breve**, **Consentimento expirado**, **Terminada pelo banco** ou **Erro**, a data em que o consentimento expira e a data até à qual os dados estão atualizados.
+
+As ligações SimpleFIN aparecem à parte, como **Ligada**, **Primeira sincronização em curso**, **Acesso revogado**, **Expirada** ou **Erro**.
 
 Só vês o estado das tuas próprias ligações e o estado é limitado à tua conta, não ao banco ou ao fornecedor como um todo.
 
-## Quando a sincronização falha
+## Quando uma ligação ou uma sincronização falha
 
-Se uma sincronização falhar, a vista de recuperação explica o que aconteceu e sugere o passo seguinte adequado, como repetir a ligação, adicionar a conta manualmente ou importar um extrato. O fluxo de recuperação mostra o nome do banco afetado, pelo que fica claro qual é a ligação que precisa de atenção.
+Se iniciares uma ligação a partir de **Contas** na web e voltares do banco sem ela, por exemplo porque cancelaste a aprovação, a página mostra **Não foi possível concluir a ligação ao banco**. Não são adicionados dados bancários, e o aviso oferece **Repetir ligação ao banco**, **Adicionar conta manualmente** e **Importar CSV ou extrato bancário**. O aviso não indica o nome do banco.
 
-Se a lista de bancos estiver temporariamente indisponível — por exemplo durante uma falha no fornecedor — o seletor de bancos mostra um erro claro em vez de falhar, e podes tentar novamente.
+Uma sincronização que falha numa ligação existente fica registada no histórico dessa ligação. A aplicação móvel, e a lista SimpleFIN na web, mostram também o motivo por baixo da ligação, e quando um banco não é atualizado há mais de 2 dias, a página inicial avisa e indica o nome do banco.
+
+**Histórico de sincronizações**, em cada ligação, mostra as últimas 20 tentativas de sincronização e o resultado de cada uma.
+
+Se a lista de bancos não puder ser carregada, por exemplo durante uma falha no fornecedor, a aplicação móvel mostra **Não foi possível carregar os bancos** com **Tentar novamente**. Na web, a lista fica vazia: fecha a janela e tenta mais tarde.
 
 ## Antes de começar
 
@@ -28,10 +38,10 @@ Confirma se o problema afeta apenas uma conta ou toda a ligação bancária. Se 
 
 ## Passos
 
-1. Abre a lista de bancos ligados.
-2. Revê o estado da sincronização e a última atualização.
-3. Volta a ligar ou autoriza novamente qualquer ligação expirada.
-4. Remove uma ligação apenas se já não quiseres novas importações a partir dela. Remover é seguro de repetir: se a primeira tentativa não terminar, repetir conclui a operação.
+1. Abre **Definições → Ligações** na web, ou **Mais → Ligações bancárias** na aplicação móvel.
+2. Revê o estado de cada ligação e quando expira o consentimento. Abre **Histórico de sincronizações** para ver como correram as sincronizações recentes.
+3. Seleciona **Voltar a ligar** numa ligação cujo consentimento está a terminar, expirou ou foi terminado pelo banco, e aprova-a de novo no banco. Uma conta que o banco indique com o mesmo IBAN mantém o seu histórico. Uma ligação SimpleFIN com o acesso revogado precisa antes de um novo token de configuração.
+4. Remove uma ligação apenas se já não quiseres novas importações a partir dela. Na web, seleciona o ícone de desligar na coluna **Ações** e confirma com **Desligar**; na aplicação móvel, ou numa ligação SimpleFIN, seleciona **Desligar**. Os dados já importados mantêm-se. Remover é seguro de repetir: se a primeira tentativa não terminar, repetir conclui a operação.
 
 <DocsImage
   src="/images/docs/pt/accounts-transactions/manage-bank-connections-overview.png"
@@ -49,8 +59,8 @@ Depois de atualizar uma ligação, confirma se novas transações aparecem e se 
 
 - O banco alterou o início de sessão ou o fluxo de segurança.
 - Uma conta sincronizou e outra não.
-- Uma ligação removida continua visível até à próxima atualização.
-- A ligação é válida, mas a conta foi ocultada ou excluída.
+- Na web, uma ligação removida continua visível até a lista ser carregada de novo.
+- A ligação é válida, mas a conta é [privada](/pt/docs/household/account-privacy), pelo que os outros membros do agregado não a veem.
 
 
 ## Ligações relacionadas

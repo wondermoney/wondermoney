@@ -7,7 +7,7 @@ WonderMoney shows portfolio data so you can understand what changed. This page a
 
 <DocsImage
   src="/images/docs/portfolio-investments/portfolio-metrics-explained-metrics.png"
-  alt="Portfolio detail page with a performance chart, allocation breakdown, top movers, quick stats, and holdings sections."
+  alt="Portfolio detail page with total value, gains, time-weighted and money-weighted returns, and the performance chart next to the allocation."
   caption="The portfolio detail page brings value, performance, allocation, and holdings metrics together."
   width={1440}
   height={900}
@@ -56,7 +56,7 @@ The cost basis method decides which purchase cost a sale relieves. FIFO (first i
 In the portfolio settings, where you choose the method, and in the lots section of a holding's details, which lists each purchase lot with its date, quantity, remaining quantity, unit cost and fees.
 
 ### How to read it
-Pick the method your tax rules use. Portugal and Spain use FIFO; Brazil and some other jurisdictions use average cost. Changing the method recalculates the portfolio's realized gains and rebuilds its daily history with the new cost basis.
+The portfolio settings on the web offer two methods: **FIFO (oldest lots first)** and **Average cost**. A new portfolio starts on FIFO; the method is chosen in the settings, not when the portfolio is created. The hint under each option names countries where it is used, but WonderMoney does not check which method your tax rules require. Changing the method recalculates the portfolio's realized gains and rebuilds its daily history with the new cost basis.
 
 ### Example
 Buy 10 units at 100 and 10 units at 200, then sell 10.
@@ -156,7 +156,7 @@ Two returns for the selected period answer two different questions.
 - **Money-weighted return** says how your money did. It is the rate at which the value at the start of the period, every buy, sale and dividend in it, and the value at the end balance out: the same calculation as a spreadsheet's `XIRR`. Money that stayed invested longer weighs more.
 
 ### Where it appears
-The portfolio summary, for one portfolio or for all of them together, for every period you can pick; the portfolio performance report and its CSV download; and, for the time-weighted return, the percentage view of the performance chart, day by day.
+The portfolio summary, for one portfolio or for all of them together, for every period you can pick; the portfolio performance report and its CSV download; and, for the time-weighted return, the Benchmark Comparison chart, day by day.
 
 ### How to read it
 - When the two are close, the timing of your deposits and withdrawals made little difference.
@@ -179,19 +179,151 @@ Price moves, dividends, fees, currency effects and the selected period. A buy or
 ### Common misunderstanding
 Neither figure is the gain over cost basis. Compare a benchmark with the time-weighted return, because a benchmark has no deposits or withdrawals either.
 
+## Advanced metrics
+
+### What it means
+Five figures that describe the return and the risk of your portfolios taken together: **Annual yield**, **Volatility**, **Sharpe Ratio**, **Max Drawdown** and **Risk level**. Each has its own section below.
+
+### Where it appears
+The **Advanced metrics** section of the Portfolios page, on the web and in the mobile app. It covers all your portfolios together, or the portfolios of the members chosen in the member filter. A single portfolio's page does not have it.
+
+### Which history it reads
+- **Annual yield** reads every buy, sale and dividend you have recorded, whatever period is selected.
+- On the web, **Volatility**, **Max Drawdown** and **Risk level** read the portfolio's daily history from the first day of the selected period. In the mobile app they read the whole history, and the period selector does not change them.
+- **Sharpe Ratio** combines the all-time annual yield with volatility over all available daily history, on both web and mobile. Selecting a period does not change it.
+
+### When a figure is missing
+A figure that cannot be calculated shows a short reason in place of a number. It is never shown as zero.
+
+- **Needs a year of history**: the annual yield, and the Sharpe ratio that depends on it, need at least 365 days between your first recorded transaction and today (or your last transaction, when you no longer hold anything).
+- **Needs 3 months of price history** and **Needs 3 months of history to score risk**: volatility and the risk level need at least 90 daily values. On the web, a period shorter than that, such as 1 Month, shows this message however old the portfolio is.
+- **Needs a longer drawdown window**: max drawdown needs at least 30 daily values.
+- With between 1 and 29 days of history in what it reads, the section adds the note **Performance history needs about a month of daily snapshots.** With no history at all, the web adds no note and the mobile app says **Risk metrics need more price history.**
+
+The figures are also left out, with the same messages, when they cannot be measured in your currency: a transaction with no exchange rate for its date leaves out the figures that read it, and a day of history that cannot be converted leaves out volatility, risk level and max drawdown. A holding with more units sold than bought leaves all five out until its transactions are corrected.
+
+### Common misunderstanding
+These figures describe the past. They are not a forecast or a rating, and WonderMoney does not use them to recommend anything.
+
+## Annual yield
+
+### What it means
+The yearly rate your money has earned across all your portfolios since your first transaction. It is a money-weighted return: the same `XIRR` calculation described in [Time-weighted and money-weighted return](#time-weighted-and-money-weighted-return), run over the whole history and not over the selected period.
+
+### How it is calculated
+Every buy (with its fee) counts as money put in, every sale (net of its fee) and every dividend as money received, and what you hold today as a final amount received today. The annual yield is the rate `r` that balances them:
+
+```text
+sum of amount / (1 + r)^(days since the first transaction / 365) = 0
+```
+
+Amounts are converted into your currency at the exchange rate of each transaction's date.
+
+### How to read it
+A positive figure means your money grew at that rate per year; a negative one means it shrank. Money that was invested for longer weighs more.
+
+### What can make it change
+Price moves, new buys and sales, dividends, fees and exchange rates. The selected period does not change it.
+
+### Common misunderstanding
+It is not a dividend yield, and it is not the return of the selected period. It is not shown for a history shorter than a year, because stretching a few months into a year would exaggerate it.
+
+## Volatility and risk level
+
+### What it means
+Volatility says how much the value of your portfolios moved from day to day, as a yearly percentage. **Risk level** is a label read from it.
+
+### How it is calculated
+1. For each pair of consecutive days in the history, the daily return is `(value today - money added today + money taken out today) / value yesterday - 1`. Buys and sales are taken out, so a deposit is not read as a gain or a sale as a loss.
+2. Volatility is the standard deviation of those daily returns, multiplied by `sqrt(365)` to make it yearly. The history has one value per calendar day, weekends and holidays included, which is why the factor is 365 and not the 252 trading days often used elsewhere.
+3. The risk level follows the volatility:
+
+| Volatility | Risk level |
+|---|---|
+| Below 15% | **Low** |
+| 15% to below 25% | **Medium** |
+| 25% or more | **High** |
+
+### How to read it
+A higher figure means larger daily swings, up or down. Compare it only with a volatility measured the same way: a figure built on trading days alone is not directly comparable.
+
+### What can make it change
+Price moves, exchange rates, the mix of holdings and, on the web, the selected period.
+
+### What it does not account for
+- Days with a missing value on either side are skipped, so a gap in the history removes those days from the measure.
+- Dividends you received are not part of the daily values.
+- The risk level reads volatility alone. It does not look at concentration, the kind of assets you hold, or your own circumstances.
+
+### Common misunderstanding
+**Low** does not mean safe, and **High** does not mean a loss is coming. The label only says how much the value has moved in the history measured.
+
+## Sharpe ratio
+
+### What it means
+The return earned above a risk-free rate for each unit of volatility.
+
+### How it is calculated
+`(annual yield - 4.5) / volatility`, with all three as yearly percentages. Both yield and volatility use all available history, regardless of the selected period. The risk-free reference rate remains fixed at 4.5% per year for every currency; it is an assumption, not a live or currency-specific market rate.
+
+### How to read it
+A higher ratio means more return for the swings taken. A negative ratio means the annual yield was below 4.5%.
+
+### What can make it change
+Anything that changes the all-time annual yield or all-time volatility. Web and mobile show the same ratio for the same portfolios, viewer currency and data.
+
+### What it does not account for
+- It needs both a year of transactions and 90 daily values, and it is not shown when the volatility is zero.
+- The fixed rate may be far from the rate available in your currency, which shifts the ratio up or down.
+- It uses all available daily history for volatility; selecting a shorter period does not change the ratio. Snapshot history may start later than your first recorded transaction.
+
+### Common misunderstanding
+A Sharpe ratio is only comparable with another one that uses the same risk-free rate and the same way of annualising.
+
+## Max drawdown
+
+### What it means
+The largest fall from a peak to a later low in the history measured, as a percentage.
+
+### How it is calculated
+An index starts at 100 and moves each day by the same daily return used for [volatility](#volatility-and-risk-level), so deposits and withdrawals do not move it. The drawdown on a day is `(highest index so far - index that day) / highest index so far`, and the max drawdown is the largest of them.
+
+### How to read it
+A max drawdown of 20% means that, at the worst point, the investments stood 20% below their earlier high. It says nothing about how long the fall lasted or whether it has been recovered. A figure of 0% means the index never closed below an earlier high.
+
+### What can make it change
+Price moves, exchange rates and, on the web, the selected period: a shorter period can miss an older, deeper fall.
+
+### Common misunderstanding
+It is not the loss on your cost basis, and it is not the most the portfolio could fall. It only reports the worst fall that happened in the history measured, from daily values, so moves within a day are not seen.
+
 ## Dividends and income
 
 ### What it means
 Cash income paid by investments, usually from dividends or similar distributions.
 
 ### Where it appears
-Transaction lists, income summaries, and performance views.
+Transaction lists, income summaries, and performance views. The **Dividend Income** section adds up the dividend transactions in your portfolios, and the **Calendar** lists upcoming dividend dates; both are described below.
 
 ### How to read it
 Treat it as part of total return when you want the full picture.
 
 ### What can make it change
 New dividend payments, reinvestments, withholding taxes, and corrections.
+
+### Dividend Income
+The **Dividend Income** section is on the Portfolios page, for all your portfolios together, and on each portfolio's page, on the web and in the mobile app. It appears only when the portfolios hold at least one dividend transaction. The web and mobile apps cannot add a dividend at present, and a CSV import brings in buys and sells only (see [Add portfolio transactions](/en/docs/portfolio-investments/add-portfolio-transactions#supported-transaction-types)), so most portfolios do not show this section.
+
+- **Total Dividends** is the sum of every dividend transaction in the portfolios, since the first one. It does not follow the selected period.
+- **Dividends by Asset** splits that total by security, largest first.
+- Amounts are in your currency. A dividend recorded in another currency is converted at the exchange rate of its date. One with no rate for that date is left out of the totals, and a note says how many were left out.
+
+The section counts dividend transactions only, at their recorded amounts. It does not fetch the dividends a security paid, and it does not estimate future income.
+
+### Upcoming dividends in the Calendar
+The **Calendar** section is on the Portfolios page on the web. Under **Upcoming Dividends**, it lists the ticker and the ex-dividend date of dividends announced for the securities you hold, for the next 120 days, soonest first, up to ten entries. It follows the member filter.
+
+The dates come from the server's market data provider. A dividend that has not been announced yet is not listed, no amount is shown, and nothing is added to your transactions when the date arrives. **Upcoming Earnings** has no data at present and shows **No upcoming events**.
 
 ### Common misunderstanding
 Income is not the same as profit on price movement.
@@ -208,7 +340,7 @@ Allocation charts, holding tables, and portfolio summaries.
 Look for concentration, balance, and whether one holding dominates the portfolio.
 
 ### What can make it change
-New trades, price changes, dividends, and movements in cash balances.
+New buys and sales, price changes and exchange rates. Dividends, deposits and withdrawals do not change it: a portfolio holds no cash balance.
 
 ### Common misunderstanding
 Allocation describes structure, not a recommendation.

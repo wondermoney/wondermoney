@@ -1,7 +1,7 @@
 {
   "exchangeRates": {
     "title": "Taxas de câmbio",
-    "description": "Define a tua própria taxa para um par de moedas num dado dia, para uma moeda que a fonte de taxas não cobre ou um dia em que errou. Os dois membros do agregado partilham estas taxas.",
+    "description": "Define a tua própria taxa para um par de moedas num dado dia, para uma moeda que a fonte de taxas não cobre ou um dia em que errou. Todos os membros do agregado partilham estas taxas.",
     "how-it-applies": "Uma taxa aplica-se a partir do seu dia até a fonte, ou outra das tuas taxas, ter uma mais recente. No próprio dia substitui a taxa da fonte. Os montantes já guardados são convertidos de novo em segundo plano.",
     "table-label": "As tuas taxas de câmbio",
     "pair": "Par",

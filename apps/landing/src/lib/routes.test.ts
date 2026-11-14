@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest"
-import { existsSync } from "node:fs"
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { join, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 import {
+	STANDALONE_PAGE_ROUTE_IDS,
 	SUPPORTED_LANGS,
+	getLocalizedSlug,
+	type Lang,
 	resolveToolRouteIdFromLegacy,
 	resolveFeatureRouteId,
 	resolveToolRouteId,
@@ -319,6 +321,106 @@ describe("route localization", () => {
 		expect(toLocalizedPathname("/en", "fr")).toBe("/fr")
 		expect(toLocalizedPathname("/de/unknown-slug", "es")).toBe(
 			"/es/unknown-slug",
+		)
+	})
+})
+
+describe("standalone page routes", () => {
+	const pagesDir = fileURLToPath(new URL("../pages", import.meta.url))
+	const vercelConfig = JSON.parse(
+		readFileSync(fileURLToPath(new URL("../../vercel.json", import.meta.url)), "utf8"),
+	) as {
+		redirects: Array<{
+			source: string
+			destination: string
+			statusCode: number
+			has?: Array<{ type: string; value: string }>
+		}>
+	}
+
+	function routeFilesFor(lang: Lang): string[] {
+		return readdirSync(join(pagesDir, lang), { recursive: true, encoding: "utf8" })
+			.filter((file) => file.endsWith(".astro"))
+			.map((file) => file.split(sep).join("/"))
+	}
+
+	function standalonePageIdIn(lang: Lang, file: string): string | undefined {
+		const source = readFileSync(join(pagesDir, lang, file), "utf8")
+		return source.match(/<StandaloneLandingPage[^>]*\bpageId="([^"]+)"/)?.[1]
+	}
+
+	it.each(SUPPORTED_LANGS)(
+		"renders each standalone page once in %s, under its localized slug",
+		(lang) => {
+			const filesByPageId = new Map<string, string[]>()
+			for (const file of routeFilesFor(lang)) {
+				const pageId = standalonePageIdIn(lang, file)
+				if (pageId) {
+					filesByPageId.set(pageId, [...(filesByPageId.get(pageId) ?? []), file])
+				}
+			}
+
+			expect([...filesByPageId.keys()].sort()).toEqual(
+				[...STANDALONE_PAGE_ROUTE_IDS].sort(),
+			)
+			for (const routeId of STANDALONE_PAGE_ROUTE_IDS) {
+				expect(filesByPageId.get(routeId)).toEqual([
+					`${getLocalizedSlug(routeId, lang)}.astro`,
+				])
+			}
+		},
+	)
+
+	it("301s the Portuguese-slug addresses in other locales to the localized slug", () => {
+		const expected = SUPPORTED_LANGS.filter((lang) => lang !== "pt").flatMap((lang) =>
+			STANDALONE_PAGE_ROUTE_IDS.filter(
+				(routeId) => getLocalizedSlug(routeId, "pt") !== getLocalizedSlug(routeId, lang),
+			).map((routeId) => ({
+				source: `/${lang}/${getLocalizedSlug(routeId, "pt")}`,
+				destination: toLocalizedPath(routeId, lang),
+			})),
+		)
+
+		expect(expected).toHaveLength(18)
+		for (const { source, destination } of expected) {
+			expect(vercelConfig.redirects).toContainEqual({
+				source,
+				has: [{ type: "host", value: "wonder.money" }],
+				destination,
+				statusCode: 301,
+			})
+		}
+	})
+
+	it("never redirects away from an address that has its own route file", () => {
+		for (const { source } of vercelConfig.redirects) {
+			const [lang, ...rest] = source.split("/").filter(Boolean)
+			if (!SUPPORTED_LANGS.includes(lang as Lang) || source.includes(":")) continue
+			expect(existsSync(join(pagesDir, lang, `${rest.join("/")}.astro`))).toBe(false)
+			expect(existsSync(join(pagesDir, lang, ...rest, "index.astro"))).toBe(false)
+		}
+	})
+
+	it("maps the lead-magnet guide slug when switching language", () => {
+		expect(
+			toLocalizedPathname("/en/10-minute-net-worth-check-in-guide", "pt"),
+		).toBe("/pt/guia-verificacao-patrimonio-10-minutos")
+		expect(
+			toLocalizedPathname("/de/leitfaden-nettovermoegen-10-minuten", "it"),
+		).toBe("/it/guida-patrimonio-netto-10-minuti")
+	})
+
+	it("maps standalone page slugs when switching language", () => {
+		expect(toLocalizedPathname("/pt/controlo-gastos", "en")).toBe("/en/expense-tracker")
+		expect(toLocalizedPathname("/en/expense-tracker", "pt")).toBe("/pt/controlo-gastos")
+		expect(toLocalizedPathname("/de/finanzverwaltung", "it")).toBe(
+			"/it/gestione-finanziaria",
+		)
+		expect(toLocalizedPathname("/es/alternativa-excel", "fr")).toBe(
+			"/fr/alternative-excel",
+		)
+		expect(toLocalizedPathname("/fr/app-finances-personnelles", "en")).toBe(
+			"/en/personal-finance-app-portugal",
 		)
 	})
 })

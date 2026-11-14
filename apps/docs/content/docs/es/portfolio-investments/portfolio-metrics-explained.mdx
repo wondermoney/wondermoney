@@ -5,6 +5,14 @@ description: Comprende el valor de la cartera, el coste base, la rentabilidad, l
 
 WonderMoney muestra los datos de la cartera para que puedas entender qué ha cambiado. Esta página y sus datos son solo informativos. WonderMoney no te dice qué comprar, vender o mantener.
 
+<DocsImage
+  src="/images/docs/es/portfolio-investments/portfolio-metrics-explained-metrics.png"
+  alt="Página de detalle de la cartera con el valor total, las ganancias, las rentabilidades ponderadas por tiempo y por dinero y el gráfico de rendimiento junto a la asignación."
+  caption="La página de detalle de la cartera reúne las métricas de valor, rendimiento, asignación y posiciones."
+  width={1440}
+  height={900}
+/>
+
 ## Valor de la cartera
 
 ### Qué significa
@@ -48,7 +56,7 @@ El método de coste decide qué coste de compra consume una venta. FIFO (primero
 En los ajustes de la cartera, donde eliges el método, y en la sección de lotes de los detalles de una posición, que lista cada lote de compra con la fecha, la cantidad, la cantidad restante, el coste unitario y las comisiones.
 
 ### Cómo interpretarlo
-Elige el método que usan tus normas fiscales. Portugal y España usan FIFO; Brasil y otras jurisdicciones usan el coste medio. Cambiar el método recalcula las ganancias realizadas de la cartera y reconstruye su historial diario con el nuevo coste.
+La configuración de la cartera en la web ofrece dos métodos: **FIFO (lotes más antiguos primero)** y **Coste medio**. Una cartera nueva empieza en FIFO; el método se elige en la configuración, no al crear la cartera. La ayuda bajo cada opción indica países donde se usa, pero WonderMoney no comprueba qué método exigen tus normas fiscales. Cambiar el método recalcula las ganancias realizadas de la cartera y reconstruye su historial diario con el nuevo coste.
 
 ### Ejemplo
 Compra 10 unidades a 100 y 10 unidades a 200, y vende 10.
@@ -148,7 +156,7 @@ Dos rentabilidades para el periodo elegido responden a dos preguntas distintas.
 - **Rentabilidad ponderada por dinero** dice cómo le fue a tu dinero. Es la tasa a la que se equilibran el valor al inicio del periodo, cada compra, venta y dividendo dentro de él, y el valor al final: el mismo cálculo que la función `XIRR` (`TIR.NO.PER` en español) de una hoja de cálculo. El dinero que estuvo invertido más tiempo pesa más.
 
 ### Dónde aparece
-En el resumen de la cartera, para una cartera o para todas juntas, en cada periodo que puedes elegir; en el informe de rentabilidad de la cartera y su descarga CSV; y, para la rentabilidad ponderada por tiempo, en la vista en porcentaje del gráfico de rentabilidad, día a día.
+En el resumen de la cartera, para una cartera o para todas juntas, en cada periodo que puedes elegir; en el informe de rentabilidad de la cartera y su descarga CSV; y, para la rentabilidad ponderada por tiempo, en el gráfico Comparativa con benchmark, día a día.
 
 ### Cómo interpretarlo
 - Cuando las dos son parecidas, el momento de tus aportaciones y retiradas apenas influyó.
@@ -171,19 +179,151 @@ Los movimientos de precio, los dividendos, las comisiones, los efectos cambiario
 ### Malentendido habitual
 Ninguna de las dos es la ganancia sobre el coste base. Compara un índice de referencia con la rentabilidad ponderada por tiempo, porque un índice de referencia tampoco tiene aportaciones ni retiradas.
 
+## Métricas avanzadas
+
+### Qué significa
+Cinco cifras que describen la rentabilidad y el riesgo de tus carteras en conjunto: **Rentabilidad anual**, **Volatilidad**, **Ratio de Sharpe**, **Caída máxima** y **Nivel de riesgo**. Cada una tiene su sección más abajo.
+
+### Dónde aparece
+En la sección **Métricas avanzadas** de la página Carteras, en la web y en la app móvil. Abarca todas tus carteras juntas, o las carteras de los miembros elegidos en el filtro por miembro. La página de una cartera no la tiene.
+
+### Qué historial lee
+- La **Rentabilidad anual** lee todas las compras, ventas y dividendos registrados, sea cual sea el periodo elegido.
+- En la web, la **Volatilidad**, la **Caída máxima** y el **Nivel de riesgo** leen el historial diario de la cartera desde el primer día del periodo elegido. En la app móvil leen todo el historial, y el selector de periodo no los cambia.
+- El **Ratio de Sharpe** combina la rentabilidad anual de todo el historial con la volatilidad de todo el historial diario disponible, tanto en la web como en la app móvil. Elegir un periodo no lo cambia.
+
+### Cuando falta una cifra
+Una cifra que no se puede calcular muestra un motivo breve en lugar de un número. Nunca aparece como cero.
+
+- **Necesita un año de historial**: la rentabilidad anual, y el ratio de Sharpe que depende de ella, necesitan al menos 365 días entre tu primera transacción registrada y hoy (o tu última transacción, cuando ya no tienes ninguna posición).
+- **Necesita 3 meses de historial de precios** y **Necesita 3 meses de historial para calcular el riesgo**: la volatilidad y el nivel de riesgo necesitan al menos 90 valores diarios. En la web, un periodo más corto que eso, como 1 mes, muestra este mensaje por antigua que sea la cartera.
+- **Necesita una ventana de drawdown más larga**: la caída máxima necesita al menos 30 valores diarios.
+- Con entre 1 y 29 días de historial en lo que se lee, la sección añade la nota **El historial de rendimiento necesita alrededor de un mes de instantáneas diarias.** Sin ningún historial, la web no añade nota y la aplicación móvil dice **Las métricas de riesgo necesitan más historial de precios.**
+
+Las cifras también se omiten, con los mismos mensajes, cuando no se pueden medir en tu moneda: una transacción sin tipo de cambio para su fecha deja fuera las cifras que la leen, y un día del historial que no se puede convertir deja fuera la volatilidad, el nivel de riesgo y la caída máxima. Una posición con más unidades vendidas que compradas deja fuera las cinco hasta que se corrijan sus transacciones.
+
+### Malentendido habitual
+Estas cifras describen el pasado. No son una previsión ni una calificación, y WonderMoney no las usa para recomendar nada.
+
+## Rentabilidad anual
+
+### Qué significa
+La tasa anual que ha obtenido tu dinero en todas tus carteras desde tu primera transacción. Es una rentabilidad ponderada por dinero: el mismo cálculo `XIRR` descrito en [Rentabilidad ponderada por tiempo y por dinero](#rentabilidad-ponderada-por-tiempo-y-por-dinero), hecho sobre todo el historial y no sobre el periodo elegido.
+
+### Cómo se calcula
+Cada compra (con su comisión) cuenta como dinero aportado, cada venta (neta de su comisión) y cada dividendo como dinero recibido, y lo que tienes hoy como un último importe recibido hoy. La rentabilidad anual es la tasa `r` que los equilibra:
+
+```text
+suma de importe / (1 + r)^(días desde la primera transacción / 365) = 0
+```
+
+Los importes se convierten a tu moneda al tipo de cambio de la fecha de cada transacción.
+
+### Cómo interpretarlo
+Una cifra positiva significa que tu dinero creció a esa tasa por año; una negativa, que disminuyó. El dinero que estuvo invertido más tiempo pesa más.
+
+### Qué puede hacer que cambie
+Los movimientos de precio, las compras y ventas nuevas, los dividendos, las comisiones y los tipos de cambio. El periodo elegido no la cambia.
+
+### Malentendido habitual
+No es una rentabilidad por dividendo, y no es la rentabilidad del periodo elegido. No se muestra para un historial de menos de un año, porque estirar unos meses hasta un año la exageraría.
+
+## Volatilidad y nivel de riesgo
+
+### Qué significa
+La volatilidad dice cuánto se movió el valor de tus carteras de un día a otro, como porcentaje anual. El **Nivel de riesgo** es una etiqueta que se lee a partir de ella.
+
+### Cómo se calcula
+1. Para cada par de días consecutivos del historial, la rentabilidad diaria es `(valor de hoy - dinero aportado hoy + dinero retirado hoy) / valor de ayer - 1`. Las compras y las ventas se descuentan, así que una aportación no se lee como ganancia ni una venta como pérdida.
+2. La volatilidad es la desviación típica de esas rentabilidades diarias, multiplicada por `sqrt(365)` para hacerla anual. El historial tiene un valor por día natural, con fines de semana y festivos incluidos, y por eso el factor es 365 y no los 252 días de negociación que se usan a menudo en otros sitios.
+3. El nivel de riesgo sigue a la volatilidad:
+
+| Volatilidad | Nivel de riesgo |
+|---|---|
+| Menos del 15 % | **Bajo** |
+| Del 15 % a menos del 25 % | **Medio** |
+| 25 % o más | **Alto** |
+
+### Cómo interpretarlo
+Una cifra más alta significa oscilaciones diarias mayores, al alza o a la baja. Compárala solo con una volatilidad medida de la misma forma: una cifra calculada solo con días de negociación no es directamente comparable.
+
+### Qué puede hacer que cambie
+Los movimientos de precio, los tipos de cambio, la composición de las posiciones y, en la web, el periodo elegido.
+
+### Qué no tiene en cuenta
+- Los días a los que les falta un valor a un lado u otro se omiten, así que un hueco en el historial saca esos días de la medida.
+- Los dividendos que recibiste no forman parte de los valores diarios.
+- El nivel de riesgo lee solo la volatilidad. No mira la concentración, el tipo de activos que tienes ni tus circunstancias.
+
+### Malentendido habitual
+**Bajo** no significa seguro, y **Alto** no significa que venga una pérdida. La etiqueta solo dice cuánto se movió el valor en el historial medido.
+
+## Ratio de Sharpe
+
+### Qué significa
+La rentabilidad obtenida por encima de una tasa sin riesgo por cada unidad de volatilidad.
+
+### Cómo se calcula
+`(rentabilidad anual - 4,5) / volatilidad`, con los tres como porcentajes anuales. La rentabilidad y la volatilidad usan todo el historial disponible, independientemente del periodo elegido. La tasa de referencia sin riesgo sigue fija en el 4,5 % anual para todas las monedas; es una suposición, no una tasa de mercado actual o específica de cada moneda.
+
+### Cómo interpretarlo
+Un ratio más alto significa más rentabilidad por las oscilaciones asumidas. Un ratio negativo significa que la rentabilidad anual quedó por debajo del 4,5 %.
+
+### Qué puede hacer que cambie
+Todo lo que cambie la rentabilidad anual o la volatilidad de todo el historial. La web y la app móvil muestran el mismo ratio para las mismas carteras, moneda de visualización y datos.
+
+### Qué no tiene en cuenta
+- Necesita un año de transacciones y 90 valores diarios, y no se muestra cuando la volatilidad es cero.
+- La tasa fija puede estar lejos de la tasa disponible en tu moneda, lo que desplaza el ratio hacia arriba o hacia abajo.
+- Usa todo el historial diario disponible para la volatilidad; elegir un periodo más corto no cambia el ratio. El historial de snapshots puede empezar después de tu primera transacción registrada.
+
+### Malentendido habitual
+Un ratio de Sharpe solo es comparable con otro que use la misma tasa sin riesgo y la misma forma de anualizar.
+
+## Caída máxima
+
+### Qué significa
+La mayor caída desde un máximo hasta un mínimo posterior en el historial medido, como porcentaje.
+
+### Cómo se calcula
+Un índice empieza en 100 y se mueve cada día con la misma rentabilidad diaria que se usa para la [volatilidad](#volatilidad-y-nivel-de-riesgo), así que las aportaciones y las retiradas no lo mueven. La caída de un día es `(índice más alto hasta entonces - índice de ese día) / índice más alto hasta entonces`, y la caída máxima es la mayor de ellas.
+
+### Cómo interpretarlo
+Una caída máxima del 20 % significa que, en el peor momento, las inversiones estaban un 20 % por debajo de su máximo anterior. No dice cuánto duró la caída ni si ya se ha recuperado. Una cifra del 0 % significa que el índice nunca cerró por debajo de un máximo anterior.
+
+### Qué puede hacer que cambie
+Los movimientos de precio, los tipos de cambio y, en la web, el periodo elegido: un periodo más corto puede dejar fuera una caída más antigua y más profunda.
+
+### Malentendido habitual
+No es la pérdida sobre tu coste base, y no es lo máximo que puede caer la cartera. Solo indica la peor caída que ocurrió en el historial medido, a partir de valores diarios, así que los movimientos dentro de un día no se ven.
+
 ## Dividendos e ingresos
 
 ### Qué significa
 Los ingresos en efectivo que pagan las inversiones, normalmente por dividendos o distribuciones similares.
 
 ### Dónde aparece
-En las listas de transacciones, los resúmenes de ingresos y las vistas de rentabilidad.
+En las listas de transacciones, los resúmenes de ingresos y las vistas de rentabilidad. La sección **Ingresos por dividendos** suma las transacciones de dividendos de tus carteras, y el **Calendario** lista las próximas fechas de dividendos; ambos se describen más abajo.
 
 ### Cómo interpretarlo
 Considéralo parte de la rentabilidad total cuando quieras tener la visión completa.
 
 ### Qué puede hacer que cambie
 Los pagos de dividendos nuevos, las reinversiones, las retenciones fiscales y las correcciones.
+
+### Ingresos por dividendos
+La sección **Ingresos por dividendos** está en la página Carteras, para todas tus carteras juntas, y en la página de cada cartera, en la web y en la app móvil. Solo aparece cuando las carteras tienen al menos una transacción de dividendo. Por ahora, la aplicación web y la app móvil no permiten añadir un dividendo, y una importación de CSV solo trae compras y ventas (consulta [Añadir transacciones de cartera](/es/docs/portfolio-investments/add-portfolio-transactions#tipos-de-transacción-admitidos)), así que la mayoría de las carteras no muestra esta sección.
+
+- **Dividendos totales** es la suma de todas las transacciones de dividendos de las carteras, desde la primera. No sigue el periodo elegido.
+- **Dividendos por activo** reparte ese total por valor, de mayor a menor.
+- Los importes están en tu moneda. Un dividendo registrado en otra moneda se convierte al tipo de cambio de su fecha. Uno sin tipo de cambio para esa fecha queda fuera de los totales, y una nota indica cuántos quedaron fuera.
+
+La sección solo cuenta transacciones de dividendos, por los importes registrados. No obtiene los dividendos que pagó un valor, y no estima ingresos futuros.
+
+### Próximos dividendos en el Calendario
+La sección **Calendario** está en la página Carteras, en la web. En **Próximos dividendos**, lista el ticker y la fecha ex-dividendo de los dividendos anunciados para los valores que tienes, en los próximos 120 días, del más cercano al más lejano, hasta diez entradas. Sigue el filtro por miembro.
+
+Las fechas vienen del proveedor de datos de mercado del servidor. Un dividendo que todavía no se ha anunciado no aparece, no se muestra ningún importe, y no se añade nada a tus transacciones cuando llega la fecha. **Próximos resultados** no tiene datos por ahora y muestra **No hay próximos eventos**.
 
 ### Malentendido habitual
 Los ingresos no son lo mismo que el beneficio por movimiento del precio.
@@ -200,7 +340,7 @@ En los gráficos de distribución, las tablas de posiciones y los resúmenes de 
 Fíjate en la concentración, el equilibrio y si una posición domina la cartera.
 
 ### Qué puede hacer que cambie
-Las operaciones nuevas, los cambios de precio, los dividendos y los movimientos en los saldos de efectivo.
+Las compras y ventas nuevas, los cambios de precio y los tipos de cambio. Los dividendos, los depósitos y las retiradas no la cambian: una cartera no guarda saldo en efectivo.
 
 ### Malentendido habitual
 La distribución describe la estructura, no una recomendación.

@@ -17,6 +17,8 @@ export interface TickerQuoteResponse {
   name: string | null;
   price: number | null;
   changePercentage: number | null;
+  /** The listing's currency; null when the API cannot tell. */
+  currency: string | null;
 }
 
 // The raw stable-DTO shape the API returns for this endpoint.
@@ -25,6 +27,7 @@ interface QuoteDto {
   name: string | null;
   price: number | null;
   changePercent: number | null;
+  currency: string | null;
 }
 
 export async function getTickerQuote(
@@ -39,6 +42,7 @@ export async function getTickerQuote(
     name: data.name,
     price: data.price,
     changePercentage: data.changePercent,
+    currency: data.currency ?? null,
   };
 }
 

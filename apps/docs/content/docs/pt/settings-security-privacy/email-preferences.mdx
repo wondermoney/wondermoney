@@ -9,44 +9,49 @@ O centro de preferências de email controla os emails que o WonderMoney envia pa
   src="/images/docs/pt/settings-security-privacy/email-preferences-notifications.png"
   alt="Preferências de notificações por email, com o interruptor para cancelar todo o marketing e cada categoria de email com o seu interruptor."
   caption="O centro de preferências de email lista cada categoria de email com o seu próprio interruptor, mais um controlo geral para cancelar tudo."
-  width={1216}
-  height={1042}
+  width={1112}
+  height={1002}
 />
 
 ## Categorias de email
 
 Cada categoria de email cobre um conjunto de mensagens relacionadas. Podes ativar ou desativar cada categoria de forma independente.
 
-- **Recuperação bancária** cobre mensagens sobre a reposição ou religação de uma ligação bancária.
-- **Financeiro** cobre alertas de orçamento e insights semanais.
-- **Recuperação de conta** cobre mensagens que ajudam a recuperar o acesso à conta.
-- **Alertas de ligação bancária** avisam-te quando uma ligação bancária precisa de ti. Recebes um email cerca de 7 dias antes e outro no último dia antes de o acesso a um banco terminar, um quando o banco termina o acesso mais cedo e um quando um banco não sincroniza há mais de 2 dias por um motivo que precisa de ti, como um consentimento ou uma chave do Enable Banking recusados. Problemas temporários, como o banco estar indisponível por pouco tempo ou limitar os pedidos, não enviam email. Cada alerta é enviado uma vez por ligação e apenas ao membro do agregado que ligou o banco. Está ativo por predefinição.
+- **Alertas de orçamento** enviam um email agregado quando uma categoria do orçamento atinge 80% ou 100% do valor planeado. É enviado, no máximo, um email de orçamento por dia.
+- **Resumo semanal** envia à segunda-feira um resumo da semana completa anterior.
+- **Emails de recuperação de conta** são alertas quando uma ligação bancária precisa de ser restabelecida, com os passos para resolver. Não incluem alertas de segurança sobre o teu início de sessão, que são sempre enviados.
+- **Alertas de ligações bancárias** avisam-te quando uma ligação bancária precisa de ti. Recebes um email cerca de 7 dias antes e outro no último dia antes de o acesso a um banco terminar, um quando o banco termina o acesso mais cedo e um quando um banco não sincroniza há mais de 2 dias por um motivo que precisa de ti, como um consentimento ou uma chave do Enable Banking recusados. Problemas temporários, como o banco estar indisponível por pouco tempo ou limitar os pedidos, não enviam email. Cada alerta é enviado uma vez por ligação e apenas ao membro do agregado que ligou o banco.
+- **Lembretes de pagamento do cartão** enviam um email alguns dias antes do vencimento de um extrato de cartão de crédito fechado, se ainda tiver saldo por pagar. É enviado, no máximo, um email por extrato.
 
-Algumas categorias estão ativas por predefinição. Os alertas de orçamento e os insights semanais estão ativos em produção, por isso são enviados a menos que desatives a categoria financeira ou os desatives no centro de preferências.
+Todas as categorias estão ativas por predefinição, por isso os emails são enviados a menos que as desatives. Os emails são enviados no idioma da tua conta. Cada categoria mostra se está em **Envio ativo**, **Em pausa** ou **Envio desativado**; uma categoria fica em pausa enquanto tiveres a subscrição de todos os emails de marketing cancelada, ou enquanto não for possível entregar email no teu endereço.
 
-Os mesmos alertas aparecem como um aviso no ecrã inicial, na web e na app móvel, com uma ligação para voltar a ligar o banco. Fechar o aviso esconde esse alerta até ao próximo.
+Os alertas de ligações bancárias aparecem também como um aviso no ecrã inicial, na web e na app móvel, com uma ligação para voltar a ligar o banco. Fechar o aviso esconde esse alerta até ao próximo.
 
 ## Interruptor principal
 
-O interruptor principal desliga de uma vez todas as categorias de email de marketing e informativas. Não impede o envio de email transacional crítico para a segurança.
+O interruptor principal, **Cancelar subscrição de todos os emails de marketing**, desliga de uma vez todas as categorias acima. A tua escolha em cada categoria fica guardada e volta a aplicar-se quando desligas o interruptor principal. Não impede o envio de email transacional crítico para a segurança.
 
 ## Consentimento de marketing e transacional
 
 O consentimento para email tem duas partes:
 
 - **Email de marketing e informativo** é opcional. Podes desativá-lo por categoria ou com o interruptor principal.
-- **Email transacional** é necessário para o funcionamento do serviço. Mensagens críticas para a segurança, como a recuperação de palavra-passe e notificações de início de sessão, não podem ser desativadas.
+- **Email transacional** é necessário para o funcionamento do serviço. Mensagens como o email de reposição da palavra-passe, o email que confirma o teu endereço e um convite para um agregado não podem ser desativadas.
 
 O consentimento transacional é gerido separadamente das categorias de email. Mesmo com o interruptor principal desligado, o WonderMoney continua a enviar as mensagens necessárias para manter a conta segura e para prestar o serviço.
 
 ## Onde encontrar
 
-1. Abre Definições.
-2. Vai para a área de preferências de email.
-3. Ajusta as categorias que queres receber.
-4. Guarda as alterações.
+1. Abre **Definições** e escolhe **Notificações**. Na aplicação móvel, abre **Mais > Definições** e escolhe **Notificações**.
+2. Liga ou desliga cada categoria. A alteração é guardada assim que a fazes.
 
 Se não vires o centro de preferências de email, confirma que estás na conta correta e que a página de definições está totalmente carregada.
+
+## Notificações push na aplicação móvel
+
+A aplicação móvel também pode mostrar os alertas de orçamento, os lembretes de pagamento do cartão e os alertas de ligações bancárias como notificações push, num servidor que tenha as notificações push ativas. Em **Mais > Definições > Notificações**, na secção **Notificações push**, cada uma fica desligada até a ligares, e o telemóvel pede autorização na primeira vez. **Enviar notificação de teste** verifica se o telemóvel as recebe.
+
+As notificações push nunca mostram valores nem comerciantes: abre a aplicação para ver os números. São definidas por telemóvel e são independentes das categorias de email acima. Se geres o teu próprio servidor, consulta [Notificações push](/pt/docs/self-hosting/mobile-app#notificações-push).
 
 ## Páginas relacionadas
 

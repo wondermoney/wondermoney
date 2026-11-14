@@ -23,6 +23,8 @@ On a self-hosted instance, imports also need [file storage](/en/docs/self-hostin
 5. Check the rows, as for any [import](/en/docs/accounts-transactions/import-transactions-csv): new rows are included, rows already in the account are skipped.
 6. Choose **Import**. The import runs in the background, and the category choices are saved with it.
 
+In the mobile app, a YNAB export stops before importing anything, because its categories need the category step: cancel it there and import the file on the web.
+
 ## How YNAB rows import
 
 - **Amounts.** Each row's amount is its inflow minus its outflow, so money out is negative and money in positive. The currency symbol and the thousands separator are read in the budget's own number format (`$1,234.56`, `1.234,56 €`, `CHF 1'234.50`).

@@ -1,0 +1,69 @@
+---
+title: Bloqueio da aplicação
+description: Exige Face ID, Touch ID ou o código do dispositivo para abrir a aplicação móvel.
+---
+
+O bloqueio da aplicação põe um ecrã de bloqueio à frente da aplicação móvel do WonderMoney. Para o passares, confirmas com o desbloqueio do próprio telemóvel: o rosto, a impressão digital ou o código do dispositivo. Usa-o quando outras pessoas pegam por vezes no teu telemóvel desbloqueado.
+
+O bloqueio da aplicação existe só na aplicação móvel e fica desativado até o ativares. É um bloqueio de ecrã num telemóvel, não uma alteração à forma como inicias sessão na tua conta.
+
+## Ativar
+
+1. Na aplicação móvel, abre **Mais > Definições > Segurança** e procura **Bloqueio da aplicação**.
+2. Seleciona **Ativar o bloqueio da aplicação**.
+3. Confirma no pedido que o telemóvel mostra.
+
+A secção passa a dizer **O bloqueio da aplicação está ativado**. A aplicação não bloqueia de imediato: bloqueia da próxima vez que sair do ecrã.
+
+O telemóvel tem de ter o desbloqueio por rosto ou por impressão digital configurado. Se não tiver, a secção mostra uma destas mensagens e o bloqueio continua desativado:
+
+- **Não existe biometria ou código configurado neste dispositivo.** O telemóvel não indica nenhum sensor de rosto ou de impressão digital.
+- **Configura primeiro o Face ID, Touch ID ou um código nas definições do dispositivo.** O telemóvel tem sensor, mas não tem nenhum rosto ou impressão digital guardado. Adiciona um nas definições do telemóvel e tenta de novo.
+- **Não foi possível confirmar. Tenta novamente.** O pedido foi cancelado ou não te reconheceu.
+
+## Quando a aplicação bloqueia
+
+Com o bloqueio ativado, o WonderMoney bloqueia:
+
+- sempre que o abres depois de ter sido fechado;
+- assim que sai do primeiro plano. Num iPhone, isso inclui mudar para outra aplicação, abrir o seletor de aplicações, puxar a Central de controlo e atender uma chamada. Em Android, bloqueia quando a aplicação passa para segundo plano, por exemplo quando mudas para outra aplicação ou vais para o ecrã principal.
+
+Não há tempo de espera. Se voltares ao fim de um segundo, tens de desbloquear outra vez.
+
+## Desbloquear a aplicação
+
+O ecrã de bloqueio diz **O WonderMoney está bloqueado**. Seleciona **Desbloquear** e confirma com o rosto ou a impressão digital. A aplicação não mostra o pedido sozinha; espera que seleciones **Desbloquear**.
+
+- Se o rosto ou a impressão digital não forem reconhecidos, o telemóvel propõe o código do dispositivo.
+- O WonderMoney não tem um PIN próprio para isto. O bloqueio usa o que desbloqueia o telemóvel.
+- Se cancelares o pedido ou ele falhar, o ecrã mostra **Não foi possível desbloquear. Tenta novamente.** Seleciona **Desbloquear** para tentares de novo.
+- Se mais tarde removeres o rosto ou a impressão digital do telemóvel, o código do dispositivo continua a desbloquear a aplicação.
+
+O ecrã de bloqueio não tem outra forma de entrar nem um botão para terminar sessão.
+
+## Em Android
+
+O bloqueio da aplicação funciona da mesma forma em Android, com o desbloqueio do próprio telemóvel. As mensagens da aplicação referem o Face ID e o Touch ID em todos os telemóveis: em Android, querem dizer o desbloqueio por impressão digital ou por rosto guardado nas definições do telemóvel, e o código do dispositivo é o teu PIN, padrão ou palavra-passe. Tal como num iPhone, ativar o bloqueio exige uma impressão digital ou um rosto guardado no telemóvel; um PIN sozinho não chega.
+
+## Desativar
+
+Abre **Mais > Definições > Segurança** e seleciona **Desativar o bloqueio da aplicação**. Nesse momento a aplicação já está desbloqueada, por isso não pede nova confirmação.
+
+## O que protege
+
+- O bloqueio da aplicação impede que alguém com o teu telemóvel desbloqueado abra o WonderMoney nele. Quem souber o código do dispositivo consegue desbloquear a aplicação.
+- Não é um segundo fator. Não muda a forma como inicias sessão e não faz nada na web nem nos teus outros dispositivos. Para protegeres a conta em si, usa a [autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication) ou uma [chave de acesso](/pt/docs/settings-security-privacy/passkeys).
+- A definição fica guardada no telemóvel, não na tua conta. Ativa-a em cada telemóvel ou tablet separadamente.
+- Abrange a aplicação com sessão iniciada. Os ecrãs de início de sessão não ficam atrás do bloqueio.
+- Terminar sessão não o desativa. A definição continua no telemóvel e volta a aplicar-se quando alguém iniciar sessão, com a mesma conta ou com outra.
+- A definição fica no armazenamento seguro do telemóvel. O Android remove-a quando a aplicação é desinstalada, por isso o bloqueio fica desativado depois de reinstalares. Um iPhone pode mantê-la depois de a aplicação ser apagada, por isso o bloqueio pode continuar ativado quando voltares a instalar a aplicação.
+
+Para ocultar os montantes com a aplicação aberta, usa o [modo de privacidade](/pt/docs/settings-security-privacy/privacy-mode).
+
+## Páginas relacionadas
+
+- [Autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication)
+- [Chaves de acesso](/pt/docs/settings-security-privacy/passkeys)
+- [Modo de privacidade](/pt/docs/settings-security-privacy/privacy-mode)
+- [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app)
+- [Definições, segurança e privacidade](/pt/docs/settings-security-privacy)

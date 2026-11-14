@@ -23,3 +23,6 @@ opencode.json
 
 # Per-user Claude Code settings (shared project settings live in .claude/settings.json)
 **/.claude/settings.local.json
+
+# Raw docs screenshot captures (apps/docs/scripts/capture-screens.ts); the cropped images are committed
+dogfood-output/

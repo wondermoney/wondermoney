@@ -55,9 +55,11 @@ export const handlePortfolioSnapshotAutoJob = async (job: Job<PortfolioSnapshotA
   if (!(await bg.claimJobStart(correlationId, job.id))) return false;
   if (bg.attachQueueJob) await bg.attachQueueJob(correlationId, job.id);
   try {
+    // Every live portfolio, those excluded from the aggregate dashboard too: the switch leaves a
+    // portfolio out of the combined figures, and its own chart still needs each day's value.
     const portfolios = await DI.em.find(
       Portfolio,
-      { deletedAt: undefined, excluded: false, portfolioKey: { $gt: cursor } },
+      { deletedAt: undefined, portfolioKey: { $gt: cursor } },
       { limit: pageSize, orderBy: { portfolioKey: 'asc' } },
     );
     let processed = 0;

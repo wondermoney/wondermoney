@@ -151,7 +151,7 @@ export const BACKEND_URL = INSTANCE_URLS.apiUrl;
 
 /**
  * The privacy-policy link in email footers: `PRIVACY_POLICY_URL` (a `{lang}` placeholder is
- * replaced with `en`/`pt`), or the app's own privacy settings.
+ * replaced with `en`, `pt` or `es`), or the app's own privacy settings.
  */
 export function privacyPolicyUrl(lang: string): string {
   const configured = process.env['PRIVACY_POLICY_URL']?.trim();

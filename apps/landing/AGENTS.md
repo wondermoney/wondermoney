@@ -2,7 +2,7 @@
 
 ## OVERVIEW
 
-Astro 5 marketing site (wonder.money) with React 19 islands, Tailwind 4, Sanity-backed
+Astro 7 marketing site (wonder.money) with React 19 islands, Tailwind 4, Sanity-backed
 content, and application/API seams. Node 26 (root `.nvmrc`) and pnpm from the repository
 root; `pnpm dev:landing` at the root starts it. It has six locale-prefixed route trees
 (`pt`, `en`, `es`, `fr`, `de`, `it`), with `pt` as the default locale. Deployed through
@@ -12,7 +12,7 @@ prerendered.
 ## STRUCTURE
 
 ```text
-src/pages/             # Root redirect plus 15 mirrored pages per locale
+src/pages/             # Root redirect plus 17 mirrored route files per locale
 src/components/pages/  # Shared page archetypes/composition
 src/components/shared/ # Layout, SEO, structured data
 src/lib/               # Locale, routes, static paths, Sanity clients
@@ -43,7 +43,9 @@ public/                # Static assets
 - Public claims and the offer are guarded: `src/lib/claimsAlignment.test.ts` and
   `scripts/check-offer-alignment.mjs` (both run by `pnpm test`) fail on unsupported product
   claims or a stale offer in any locale.
-- Follow nearby formatting: this app has no Prettier config and existing Astro/TS style is mixed.
+- Follow nearby formatting: `prettier` and `prettier-plugin-astro` are installed, but there is no
+  Prettier config or format script, and existing Astro/TS style is mixed. Do not reformat files
+  you are not otherwise changing.
 - `pt` copy is European Portuguese and addresses the reader as **tu** ("Começa grátis", "as tuas
   contas"), never "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples).
 - Analytics IDs in `src/lib/gtm.ts` and `src/lib/posthog.ts` are public client keys, and
@@ -52,7 +54,7 @@ public/                # Static assets
 
 ## LOCALIZED ROUTES
 
-Ninety localized Astro routes: 15 mirrored pages for each of the six locales, plus the root
+102 localized Astro route files: 17 mirrored files for each of the six locales, plus the root
 redirect to `/pt`.
 
 ```text
@@ -70,6 +72,10 @@ src/pages/index.astro         # Root redirect only
 - Localized routes normally export `prerender = true`; preserve intentional exceptions explicitly.
 - Add/remove/rename a route across all six locale trees and update route-symmetry tests in the same change.
 - Preserve the `/` to `/pt` redirect unless the default-locale policy changes deliberately.
+- The standalone pages (`STANDALONE_PAGE_ROUTE_IDS` in `src/lib/routes.ts`) each have one route
+  file per locale, named by that locale's slug. Their Portuguese-slug addresses in the other
+  locales are 301s in `vercel.json`; `src/lib/routes.test.ts` fails on a second copy or a missing
+  redirect.
 - Paid-traffic landing pages under `/{locale}/go/` are `noindex,follow` and kept out of the sitemap.
 - Verify generated URLs for all six locales, not only the default route.
 

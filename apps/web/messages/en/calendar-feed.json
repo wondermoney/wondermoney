@@ -22,7 +22,7 @@
     "instructions-google": "Google Calendar: Other calendars → From URL → paste the link.",
     "instructions-apple": "Apple Calendar: File → New Calendar Subscription → paste the link.",
     "instructions-refresh": "Your calendar app refreshes the feed on its own schedule.",
-    "instructions-privacy": "The feed shows only the bills you can see. A private account belonging to the other household member does not appear.",
+    "instructions-privacy": "The feed shows only the bills you can see. A private account belonging to another household member does not appear.",
     "revoke-title": "Revoke this link?",
     "revoke-description": "Your calendar will stop receiving the bills. You can create a new link later.",
     "revoke-confirm": "Revoke this link",

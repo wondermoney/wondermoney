@@ -1,54 +1,53 @@
 ---
-title: Ciclo de vida dos dados da carteira
-description: Compreende como os dados da carteira passam por importação, resolução, preços, snapshots e histórico.
+title: Quando os dados do portefólio são atualizados
+description: Porque é que as posições aparecem de imediato e o histórico de desempenho e o benchmark demoram mais, e o que significa cada estado de um portefólio.
 ---
 
-Os dados da carteira no WonderMoney seguem um ciclo de vida faseado. Algumas partes podem ficar prontas antes de outras, por isso posições, preços, snapshots e histórico podem não ser atualizados ao mesmo tempo.
+Depois de adicionares ou importares transações, o portefólio não é atualizado todo de uma vez. As posições e a alocação ficam prontas de imediato; o histórico de desempenho é construído em segundo plano a partir de preços históricos e pode demorar mais.
 
 <DocsImage
   src="/images/docs/pt/portfolio-investments/portfolio-data-lifecycle-transactions.png"
-  alt="Lista de transações da carteira com compras, vendas, dividendos e levantamentos da carteira de investimento."
-  caption="Cada transação importada ou adicionada manualmente entra no ciclo de vida dos dados da carteira."
+  alt="Lista de transações do portefólio com compras, uma venda, dividendos, um depósito e um levantamento."
+  caption="Cada transação importada ou adicionada manualmente atualiza o portefólio por fases."
   width={1440}
   height={900}
 />
 
-## Ciclo atual
+## O que acontece depois de uma alteração
 
-1. Transação manual ou importação CSV cria ou atualiza transações da carteira.
-2. A resolução de ativos associa símbolos, ISINs ou etiquetas do corretor a um ativo financeiro.
-3. A atualização de preços obtém preços de mercado atuais quando existe cobertura.
-4. A atualização de snapshots reconstrói snapshots diários da carteira para o intervalo afetado.
-5. A disponibilidade do histórico reflete se a carteira tem cobertura suficiente para gráficos e métricas.
+1. A transação manual ou a importação confirmada é guardada.
+2. As posições, o seu valor atual e a alocação são atualizados a partir das transações guardadas.
+3. O WonderMoney vai buscar os preços históricos de cada ativo que compraste, desde a primeira compra, até dez anos para trás.
+4. O histórico diário que alimenta o gráfico de desempenho é reconstruído para as datas afetadas pela alteração.
+5. A comparação com o benchmark e as métricas de risco seguem-se quando esse histórico existe.
 
-## O que o utilizador deve esperar
+Os preços atuais são atualizados nos dias úteis.
 
-- As posições podem aparecer antes de o histórico de desempenho estar completo.
-- A importação CSV pode terminar com sucesso mesmo que algumas linhas precisem de resolução de ativos mais tarde.
-- Alguns gráficos ou métricas podem mostrar estados parciais ou em processamento enquanto termina o trabalho em segundo plano.
-- Histórico em falta nem sempre significa erro; pode significar que a cobertura ainda está a ser construída.
+## O estado de um portefólio
 
-## Vocabulário de estados
+Enquanto o histórico não está completo, a página do portefólio na web mostra um aviso com quatro linhas: **Posições e valor atuais**, **Alocação**, **Histórico de desempenho** e **Benchmark e métricas de risco**, cada uma com o seu estado.
 
-Esta documentação usa a seguinte linguagem de estados:
+| Aviso | O que significa | O que fazer |
+|---|---|---|
+| **A construir o histórico de desempenho** | Os preços históricos de alguns ativos ainda estão a ser obtidos. As posições e a alocação já estão em **Pronto**; o desempenho mostra **A construir** e o benchmark **A aguardar** | Nada. Termina sozinho |
+| **O histórico do portefólio está parcialmente disponível** | Os preços já chegaram, e o histórico ainda não cobre o período todo. O desempenho e o benchmark mostram **Parcial** | Nada. Os gráficos e as métricas podem cobrir, por agora, um período mais curto |
+| **Preços históricos indisponíveis** | Alguns ativos continuam sem preços históricos mais de três dias depois de a compra mais recente ter sido registada, normalmente porque o fornecedor de dados de mercado não tem preços mais antigos para eles. As quatro linhas mostram **Indisponível**, embora as posições e a alocação continuem visíveis e atualizadas | Confirma que cada ativo foi associado ao ticker certo. As posições continuam atualizadas de qualquer forma |
 
-- ready: a superfície pode, em geral, ser confiada.
-- processing: o trabalho em segundo plano ainda está a recuperar.
-- partial: a superfície é utilizável, mas incompleta.
-- needs_action: o utilizador deve resolver um problema de importação ou de ativo.
-- unavailable: reservado na documentação para um estado futuro ou emitido pelo backend; não assumas que está ativo hoje.
+Quando não há aviso, o histórico está completo, ou o portefólio ainda não tem compras.
 
-## Notas do ciclo de vida para desenvolvimento
+A aplicação móvel não mostra este aviso. Enquanto o histórico tiver menos de dois valores diários, o gráfico de desempenho mostra **Ainda não há histórico suficiente para representar o desempenho** em vez do gráfico, ou **Ainda não há histórico de desempenho disponível** quando não existe nenhum. As métricas avançadas trazem uma nota quando o histórico de desempenho ou as métricas de risco precisam de mais histórico.
 
-- Transações manuais e importações CSV têm o mesmo objetivo final: transações persistidas e vistas da carteira atualizadas.
-- Linhas importadas com ativos não resolvidos devem ser reportadas de forma clara, sem adivinhação silenciosa.
-- A cobertura histórica de preços é obtida a pedido e pode estar incompleta para datas antigas.
-- A reconstrução de snapshots pode ficar atrás da atualização de preços, especialmente após importações com atividade histórica de BUY/SELL.
-- A documentação atual não deve prometer revisão de linhas antes de guardar, a menos que esse fluxo exista de facto.
+## O que esperar
+
+- As posições podem aparecer antes de o gráfico de desempenho ter histórico.
+- Uma métrica que precisa de mais histórico do que o existente aparece como indisponível até o histórico ser construído.
+- A falta de histórico nem sempre é um erro. Muitas vezes significa que os preços ainda estão a ser obtidos.
+- Uma importação de CSV só pode ser confirmada quando todas as linhas que precisam de revisão de ativos estiverem resolvidas ou o seu grupo for ignorado. As linhas de um grupo ignorado não são importadas. Vê [Revisão antes de guardar](/pt/docs/portfolio-investments/import-portfolio-csv#revisão-antes-de-guardar).
 
 ## Páginas relacionadas
 
-- [Investimentos de carteira](/pt/docs/portfolio-investments)
-- [Importar um CSV de carteira](/pt/docs/portfolio-investments/import-portfolio-csv)
-- [Adicionar transações de carteira](/pt/docs/portfolio-investments/add-portfolio-transactions)
-- [Métricas da carteira explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)
+- [Portefólio e investimentos](/pt/docs/portfolio-investments)
+- [Importar um CSV de portefólio](/pt/docs/portfolio-investments/import-portfolio-csv)
+- [Adicionar transações de portefólio](/pt/docs/portfolio-investments/add-portfolio-transactions)
+- [Desempenho e benchmarks](/pt/docs/portfolio-investments/performance-benchmarks)
+- [Métricas do portefólio explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)

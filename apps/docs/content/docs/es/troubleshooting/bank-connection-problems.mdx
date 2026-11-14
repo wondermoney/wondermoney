@@ -3,6 +3,8 @@ title: Problemas de conexión bancaria
 description: Diagnostica problemas al vincular una cuenta bancaria o al configurar tu clave de Enable Banking en WonderMoney.
 ---
 
+Antes de que empiece el flujo del banco, WonderMoney explica lo que ocurre a continuación, incluido el acceso de solo lectura y a dónde van tus credenciales.
+
 ## Síntomas
 
 - El banco no termina de conectarse.
@@ -13,7 +15,7 @@ description: Diagnostica problemas al vincular una cuenta bancaria o al configur
 
 ## Qué comprobar
 
-- Si tienes guardada una clave de Enable Banking válida en Configuración → Proveedor bancario — sin ella no se puede iniciar ninguna conexión bancaria.
+- Si tienes guardada una clave de Enable Banking válida en Configuración → Proveedor bancario — sin ella no se puede iniciar ninguna conexión bancaria, salvo que tu servidor proporcione una clave compartida o que conectes a través de SimpleFIN.
 - Si el banco admite actualmente el método de conexión que usas.
 - Si completaste todos los pasos de aprobación en el banco.
 - Si la cuenta está conectada a la cuenta correcta.
@@ -32,8 +34,8 @@ description: Diagnostica problemas al vincular una cuenta bancaria o al configur
 Los bancos dan a WonderMoney acceso de solo lectura durante un tiempo limitado. Según PSD2, un consentimiento dura como máximo 180 días, y cada banco fija su propio límite, a menudo 90 o 180 días. La lista de conexiones en Configuración muestra cuándo termina cada consentimiento.
 
 - **Caduca pronto.** En los últimos 14 días antes de que termine un consentimiento, la conexión muestra cuántos días quedan y ofrece **Volver a conectar**, en la web y en la app móvil.
-- **Consentimiento caducado.** El consentimiento llegó a su fecha de fin. Los datos dejan de actualizarse hasta que vuelvas a conectar.
-- **Finalizada por el banco.** El banco terminó el consentimiento antes de tiempo, por ejemplo después de que cambiaras la contraseña de la banca online o retiraras el acceso en la app del banco. Los datos dejan de actualizarse hasta que vuelvas a conectar.
+- **Caducada.** El consentimiento llegó a su fecha de fin. Los datos dejan de actualizarse hasta que vuelvas a conectar.
+- **Finalizada por tu banco.** El banco terminó el consentimiento antes de tiempo, por ejemplo después de que cambiaras la contraseña de la banca online o retiraras el acceso en la app del banco. Los datos dejan de actualizarse hasta que vuelvas a conectar.
 
 WonderMoney también te envía un correo unos 7 días antes y otro en el último día antes de que termine un consentimiento, y cuando el banco lo termina antes de tiempo. Consulta [Preferencias de correo](/es/docs/settings-security-privacy/email-preferences) para desactivar estas alertas.
 
@@ -51,14 +53,11 @@ La mayoría de los problemas de conexión vienen de cómo se configuró la aplic
   Enable Banking muestra la clave privada una sola vez, en el momento en que se genera, y no puede volver a mostrarla — ni siquiera a través de su propio soporte. Si el archivo `.pem` no se guardó a salvo y ya no se puede encontrar, no hay forma de recuperarlo. La única solución es registrar una aplicación completamente nueva en el Panel de Control y generar una clave nueva.
 </Callout>
 
-## Incidentes de conexión
+## Errores e historial de sincronización
 
-Una conexión bancaria puede terminar en un estado de incidente en lugar de en un éxito o un fallo limpio. Los estados más comunes son:
+Una sincronización que falla queda registrada en el historial de la conexión. Selecciona **Historial de sincronizaciones** en la conexión, en la web o en la app móvil, para ver las últimas 20 veces que WonderMoney intentó sincronizarla y cómo terminó cada una. **Error** en **Configuración → Conexiones** significa que la propia conexión no se completó, no que una sincronización falló. WonderMoney sincroniza cada conexión automáticamente más o menos una vez al día, y una sincronización fallida puede reintentarse una vez, media hora después. Una conexión que sigue fallando suele necesitar **Volver a conectar**.
 
-- `bank-disconnected` — el banco interrumpió o terminó la conexión, y hay que restablecerla.
-- `payment-failed` — un paso de la conexión relacionado con el pago no se completó.
-
-Los incidentes son recuperables. Las caídas del proveedor, como una caída de Enable Banking, se gestionan en la lista de bancos en lugar de aparecer como errores del servidor, de modo que tus datos existentes no cambian. Cuando un incidente es recuperable, iniciar la conexión de nuevo reabre el flujo de conexión con el nombre real del banco, y puedes completar los pasos de aprobación en cuanto el proveedor esté disponible.
+Durante una caída del proveedor, como Enable Banking, la lista de bancos no se puede cargar: la app móvil lo indica y ofrece **Reintentar**, y en la web la lista queda vacía. Tus datos existentes no cambian. Puedes iniciar la conexión de nuevo en cuanto el proveedor esté disponible.
 
 Para el flujo de conexión completo, consulta [Gestionar conexiones bancarias](/es/docs/accounts-transactions/manage-bank-connections).
 
