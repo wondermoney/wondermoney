@@ -24,7 +24,7 @@
       "vehicle": "Veículo",
       "valuable": "Objeto de valor",
       "other": "Outro",
-      "crypto_wallet": "Carteira cripto"
+      "crypto_wallet": "Carteira de criptomoedas"
     },
     "summary": {
       "total": "Valor total",
@@ -56,7 +56,7 @@
       "growthStartDate": "Varia a partir de",
       "growthStartDateHint": "Opcional. O valor fica como está até esta data.",
       "private": "Bem privado",
-      "privateDescription": "Só tu vês este bem. Fica fora do património do outro membro do agregado.",
+      "privateDescription": "Só tu vês este bem. Fica fora do património dos outros membros do agregado.",
       "notes": "Notas",
       "notesPlaceholder": "O que valha a pena lembrar sobre este bem",
       "datePlaceholder": "Escolhe uma data"
@@ -83,7 +83,7 @@
       "estimated": "Estimado a partir da variação anual desde a avaliação de {date}.",
       "errors": {
         "loadFailed": "Não foi possível carregar este bem",
-        "loadFailedBody": "Pode ter sido eliminado, ou é privado do outro membro do teu agregado."
+        "loadFailedBody": "Pode ter sido eliminado, ou é privado de outro membro do teu agregado."
       },
       "history": {
         "title": "Valor ao longo do tempo",
@@ -165,9 +165,9 @@
       "done-description": "{count, plural, one {# bem foi adicionado com a sua avaliação.} other {# bens foram adicionados com as suas avaliações.}}"
     },
     "wallet": {
-      "addTitle": "Adicionar carteira cripto",
+      "addTitle": "Adicionar carteira de criptomoedas",
       "actions": {
-        "add": "Adicionar carteira cripto",
+        "add": "Adicionar carteira de criptomoedas",
         "addRow": "Adicionar outro endereço",
         "removeRow": "Remover o endereço {number}",
         "removeRowShort": "Remover",

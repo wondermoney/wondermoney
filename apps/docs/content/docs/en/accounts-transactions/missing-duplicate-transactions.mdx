@@ -11,6 +11,8 @@ Each transaction carries a fingerprint that identifies it. When incoming data ma
 
 Every decision is recorded in the transaction audit log, including skipped duplicates and status changes. The fingerprint tolerance is deliberately narrow: two legitimate transactions that look similar — for example two identical purchases on the same day — are not treated as duplicates. A distinct bank reference tells them apart, and when the bank sends identical purchases without one, each one the bank lists is still kept as its own transaction.
 
+A file import adds one more check: a row with the same amount as a transaction already in the account, up to 3 days apart, is listed as a [possible duplicate](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates) and skipped unless you include it.
+
 ## Pending and posted versions
 
 A pending card payment is matched to its posted version automatically when the bank confirms it, so the two should not remain separate. If the bank never confirms a pending payment, it expires after the configured window and shows as expired instead of lingering as a pending record.
@@ -24,7 +26,7 @@ Confirm the account, date range, and category filters before looking deeper. If 
 1. Check whether the transaction is pending, posted, expired, or still outside the selected date range.
 2. Review whether another account imported the same payment.
 3. Compare manual entries with imported entries.
-4. Remove or merge duplicates when the source is clear.
+4. Delete the duplicate when the source is clear. A transaction that came from your bank can't be deleted, because the bank would send it again: hide it instead to keep it out of lists and totals.
 
 <DocsImage
   src="/images/docs/accounts-transactions/missing-duplicate-transactions-review.png"

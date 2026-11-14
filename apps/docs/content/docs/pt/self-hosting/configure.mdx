@@ -23,6 +23,8 @@ EMAIL_FROM=money@example.com
 
 Ou define `RESEND_API_KEY` para usar o Resend. Para testar sem um fornecedor real, usa o Mailpit incluído: acrescenta `mail` a `COMPOSE_PROFILES`, define `SMTP_HOST=mailpit` e `SMTP_PORT=1025`, corre `docker compose up -d` e lê os emails em http://localhost:8025.
 
+O `SMTP_PORT` é `587` por omissão. A ligação usa TLS implícito na porta 465 e, nas restantes, STARTTLS quando o servidor o oferece; define `SMTP_SECURE` como `true` ou `false` para escolheres tu.
+
 Sem um fornecedor configurado, a API escreve cada mensagem no seu registo e o worker não envia lembretes em segundo plano (lembretes de pagamento do cartão, expiração de tokens de API). Os lembretes de pagamento do cartão saem alguns dias antes do vencimento de um extrato: define `CREDIT_CARD_DUE_REMINDER_DAYS` no worker para mudar a antecedência (3 por omissão, um número inteiro de dias).
 
 ## Armazenamento de ficheiros
@@ -38,7 +40,7 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-As duas chaves passam a ser as credenciais do armazenamento, que não arranca sem elas. O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento; atrás de um proxy, dá-lhe um nome próprio com HTTPS que encaminhe para a porta 9000. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3. Os anexos das transações usam o mesmo armazenamento: sem ele, a secção de anexos fica oculta e os seus endpoints respondem 503.
+As duas chaves passam a ser as credenciais do armazenamento, que não arranca sem elas. O `S3_PUBLIC_ENDPOINT` é o endereço que os navegadores usam para chegar ao armazenamento; atrás de um proxy, dá-lhe um nome próprio com HTTPS que encaminhe para a porta 9000. Qualquer serviço compatível com S3 também funciona, como Cloudflare R2, Backblaze B2 ou AWS S3: define `S3_REGION` quando o serviço o exigir (com `S3_ENDPOINT` definido e a região vazia, usa-se `us-east-1`). Com `S3_ENDPOINT`, os pedidos usam endereços no estilo de caminho (path-style); define `S3_FORCE_PATH_STYLE=false` para um serviço que só aceite o estilo de anfitrião virtual. Os anexos das transações usam o mesmo armazenamento: sem ele, a secção de anexos fica oculta e os seus endpoints respondem 503.
 
 ## Funcionalidades de IA
 
@@ -49,7 +51,7 @@ AI_BASE_URL=http://host.docker.internal:11434/v1
 AI_MODEL=llama3.1
 ```
 
-Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`.
+Define `AI_API_KEY` quando o endpoint exigir uma chave. Para usares um modelo diferente numa funcionalidade, define `AI_MODEL_<FUNCIONALIDADE>`; por exemplo, a leitura de recibos precisa de um modelo que leia imagens, definido com `AI_MODEL_OCR`. As funcionalidades são `ASSISTANT`, `CSV_MAPPING`, `ENRICHMENT` (categorização de transações), `MONTHLY_STORY`, `OCR` e `STATEMENT_IMPORT`.
 
 Para usares a Anthropic com a tua própria chave de API, escolhe-a explicitamente:
 
@@ -214,7 +216,7 @@ Se a aplicação web mudar para outro domínio, as chaves de acesso existentes d
 | `SUPPORT_EMAIL` | A caixa de correio do formulário de contacto, dos alertas de conta e do feedback na aplicação, e o endereço de suporte que a aplicação mostra; deixa vazio para os desligar e esconder as ligações de suporte. O formulário "Partilhar Feedback" também precisa de email configurado; sem ele, o formulário fica escondido |
 | `SPONSOR_URL` | Uma página onde os teus utilizadores podem contribuir para manter a instância (Open Collective, GitHub Sponsors, ...). As perguntas frequentes da aplicação web incluem a ligação quando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | As tuas páginas legais, ligadas a partir da página de registo quando ambas estão definidas |
-| `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en` ou `pt`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |
+| `PRIVACY_POLICY_URL` | A tua política de privacidade, ligada a partir do rodapé dos emails. `{lang}` é substituído pelo idioma do destinatário (`en`, `pt` ou `es`), por exemplo `https://example.com/{lang}/privacy`. Por omissão, aponta para as definições de privacidade da aplicação |
 | `MCP_ENABLED` | O servidor MCP só de leitura em `POST /v1/mcp`, que permite a um cliente de IA perguntar pelas finanças do próprio utilizador com um token de API pessoal com `mcp:read` (consulta [Ligar um cliente de IA](/pt/docs/settings-security-privacy/connect-ai-client)). Ligado por omissão; define `false` para responder `404` e reportar `features.mcp: false` em `GET /v1/instance` |
 | `DEMO_SIGN_IN_ENABLED` | `true` liga uma demonstração pública só de leitura: um botão **Experimentar a demonstração** que inicia a sessão de qualquer pessoa numa conta de demonstração partilhada. Desligado por omissão; consulta [Demonstração pública](#demonstração-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | A diferença aceite entre os dois lados de uma transferência entre contas em moedas diferentes, depois de converter o valor que saiu à taxa de câmbio desse dia, como fração do valor que chegou: `0.02` (por omissão) é 2 por cento. Aumenta-a se a margem cambial e as comissões do teu banco forem maiores; no máximo `0.25`. Define-a na API e no worker |
@@ -256,7 +258,7 @@ A tua instância não carrega analytics nem gestor de tags, nem regista eventos 
 |---|---|
 | `NEXT_PUBLIC_GTM_ID` | O teu contentor do Google Tag Manager (`GTM-XXXXXXX`), carregado em todas as páginas da aplicação web |
 | `NEXT_PUBLIC_POSTHOG_KEY` | O PostHog na aplicação web: visualizações de página, eventos de utilização e gravações de sessão, associados ao endereço de email de cada utilizador |
-| `ANALYTICS_OUTBOX_MODE=live` com `POSTHOG_API_KEY` | Eventos de registo, início de sessão e sincronização bancária enviados para o PostHog pela API e pelo worker. Define ambos na API e no worker; com o modo desligado, nenhum evento é registado |
+| `ANALYTICS_OUTBOX_MODE=live` com `POSTHOG_API_KEY` | Eventos de registo, início de sessão e sincronização bancária enviados para o PostHog pela API e pelo worker. Define ambos na API e no worker; com o modo desligado, nenhum evento é registado. O `POSTHOG_HOST`, no worker, define o endereço do PostHog, por omissão `https://eu.i.posthog.com` |
 
 Se ligares algum destes, informa os teus utilizadores na tua política de privacidade (`NEXT_PUBLIC_PRIVACY_URL`) e pede consentimento quando a lei o exigir.
 

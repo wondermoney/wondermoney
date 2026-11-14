@@ -39,7 +39,9 @@ Um ficheiro com várias contas pergunta para qual das tuas contas vai cada uma a
 
 Um ficheiro QIF cujas datas possam ser dia primeiro ou mês primeiro mostra a escolha na revisão: escolhe a ordem que o ficheiro usa e as linhas são lidas outra vez antes de importares.
 
-Uma importação que não termines expira ao fim de sete dias. Sete dias depois de uma importação, o WonderMoney elimina o ficheiro que carregaste e a lista linha a linha; a importação guarda apenas o nome do ficheiro e quantas transações foram importadas e ignoradas, e as transações importadas continuam na conta. Na aplicação móvel a importação faz-se num só passo: as transações novas são importadas, as que já estão na conta são ignoradas e os possíveis duplicados são importados (ninguém os reviu); aí, um ficheiro QIF com datas ambíguas é lido com o dia primeiro.
+Uma importação que não termines expira ao fim de sete dias. Sete dias depois de uma importação, o WonderMoney elimina o ficheiro que carregaste e a lista linha a linha; a importação guarda apenas o nome do ficheiro e quantas transações foram importadas e ignoradas, e as transações importadas continuam na conta.
+
+A aplicação móvel tem a mesma revisão antes de importar: as linhas aparecem por tipo, os possíveis duplicados são ignorados a não ser que os incluas, um ficheiro QIF com datas ambíguas pergunta a ordem, e um ficheiro com várias contas pergunta para onde vai cada uma. Não tem pré-visualização de colunas: uma conta num dos bancos indicados acima aceita a exportação CSV ou Excel desse banco; para qualquer outra conta, a aplicação pede um CSV no modelo do WonderMoney, que o ecrã de importação descreve e partilha. Os ficheiros OFX/QFX, QIF e CAMT.053 funcionam em ambos os casos.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"

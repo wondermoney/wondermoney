@@ -1,0 +1,77 @@
+---
+title: Spending vs normal
+description: See where a month's money went and which categories ran above or below their usual level.
+---
+
+The **Spending vs normal** report shows what you spent in one month, category by category, and compares each category with its own normal: the average of the same days in the three months before.
+
+It is the full picture behind the [Spending vs normal insight](/en/docs/budgets/insights#spending-vs-normal) on your home. Both use the same calculation, so a category's amounts here match its insight card for the same month. The insight shows at most three categories that deviate by 25% or more; the report shows every category you spent in.
+
+The report is on the **Reports** page on the web. The mobile app does not have this report; it shows the home insight.
+
+## Pick the month
+
+The **Month** picker starts on the current month. For the current month the report counts spending up to now. A past month is counted in full.
+
+## Read the chart
+
+The chart has one tile for each top-level category with spending in the month. A tile's size is the amount spent. Its colour is the change against normal:
+
+- **Green:** 15% or more below normal.
+- **Neutral:** within 15% of normal, above or below.
+- **Amber:** more than 15% and up to 50% above normal.
+- **Red:** more than 50% above normal.
+- **Neutral with a dashed outline:** there is nothing to compare with (see [When there is no comparison](#when-there-is-no-comparison)).
+
+A tile with enough room shows the category and its change as a percentage, or a dash when there is no comparison. Point at a tile to see its **Spent**, **Normal** and **Change vs normal** under the chart. Select a tile to open the transactions behind it.
+
+## Read the table
+
+The table lists the same top-level categories, largest spending first, each followed by its subcategories.
+
+- **Spent** is the spending in the month so far. Select the amount to open the transactions behind it.
+- **Normal** is the three-month average for the same days.
+- **Change vs normal** is how far **Spent** is from **Normal**, as a percentage. It is red from more than 15% above normal and green from 15% below.
+
+A subcategory is compared with its own normal, not its parent's. A category with no spending in the month is not listed, even if it usually has some.
+
+## How normal is calculated
+
+- The report takes the three calendar months before the selected month.
+- In each of them it counts only the days the selected month has reached. On the 12th, the current month's first 12 days are compared with days 1 to 12 of each earlier month.
+- Normal is the average of those three amounts. A month with no spending in the category counts as zero.
+
+## When there is no comparison
+
+The report always shows what you spent. **Normal**, **Change vs normal** or both show a dash when a comparison would not mean much:
+
+- **The month is less than 7 days old.** No category is compared until day 7.
+- **There are not three months of history.** If any of the three earlier months has no transactions in your accounts, no category is compared.
+- **The category is new.** With no spending in the category in the three earlier months, it has no normal.
+- **The normal is under 20 in your currency.** The **Normal** amount is shown, but not a percentage: below that, a few euros swing it wildly.
+
+## What counts
+
+- The report reads the accounts you own, joint accounts included. In a household, another member's accounts are not counted, including the ones they share with you. Closed accounts are left out.
+- Pending transactions count as money already committed. A pending transaction that expired without settling does not.
+- Transfers between accounts never count.
+- Categories that are not spending (investments and savings) are left out, and so are uncategorized transactions.
+- A refund lowers the total of the category it lands in, and a category never goes below zero. An expense with a linked reimbursement counts net of it.
+- A split transaction counts each line in its own category.
+- A loan repayment linked to a loan counts only its interest and fees.
+- Amounts are in your base currency. A transaction with no converted amount is left out, and a note under the report says so.
+
+## Filters
+
+On the **Reports** page, the **Accounts** and **Categories** filters and the [member filter](/en/docs/household/filter-by-member) narrow this report. The member filter keeps the spending attributed to that member, or to **Shared**, within your own accounts.
+
+**Date range**, **Merchants**, **Tags**, **Currency**, **Include pending transactions** and **Include transfers** do not change it. The report keeps to the insight's definition so that the two always agree.
+
+This report has no CSV export.
+
+## Related pages
+
+- [Insights](/en/docs/budgets/insights)
+- [Compare two months](/en/docs/budgets/compare-months)
+- [Track monthly spending](/en/docs/budgets/track-monthly-spending)
+- [Filter by member](/en/docs/household/filter-by-member)

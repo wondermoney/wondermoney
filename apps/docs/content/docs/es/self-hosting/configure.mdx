@@ -23,6 +23,8 @@ EMAIL_FROM=money@example.com
 
 O define `RESEND_API_KEY` para usar Resend. Para probar sin un proveedor real, usa el Mailpit incluido: añade `mail` a `COMPOSE_PROFILES`, define `SMTP_HOST=mailpit` y `SMTP_PORT=1025`, ejecuta `docker compose up -d` y lee los correos en http://localhost:8025.
 
+`SMTP_PORT` es `587` por defecto. La conexión usa TLS implícito en el puerto 465 y, en los demás, STARTTLS cuando el servidor lo ofrece; define `SMTP_SECURE` como `true` o `false` para elegirlo tú.
+
 Sin un proveedor configurado, la API escribe cada mensaje en su registro y el worker no envía recordatorios en segundo plano (recordatorios de pago de la tarjeta, caducidad de tokens de API). Los recordatorios de pago de la tarjeta salen unos días antes del vencimiento de un extracto: define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar la antelación (3 de forma predeterminada, un número entero de días).
 
 ## Almacenamiento de archivos
@@ -38,7 +40,7 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-Las dos claves pasan a ser las credenciales del almacenamiento, que no arranca sin ellas. `S3_PUBLIC_ENDPOINT` es la dirección que usan los navegadores para llegar al almacenamiento; detrás de un proxy, dale su propio nombre con HTTPS que redirija al puerto 9000. Cualquier servicio compatible con S3 también funciona, como Cloudflare R2, Backblaze B2 o AWS S3. Los adjuntos de transacciones usan el mismo almacenamiento: sin él, la sección de adjuntos queda oculta y sus endpoints responden 503.
+Las dos claves pasan a ser las credenciales del almacenamiento, que no arranca sin ellas. `S3_PUBLIC_ENDPOINT` es la dirección que usan los navegadores para llegar al almacenamiento; detrás de un proxy, dale su propio nombre con HTTPS que redirija al puerto 9000. Cualquier servicio compatible con S3 también funciona, como Cloudflare R2, Backblaze B2 o AWS S3: define `S3_REGION` cuando el servicio lo necesite (con `S3_ENDPOINT` definido y la región vacía, se usa `us-east-1`). Con `S3_ENDPOINT`, las peticiones usan direcciones de estilo de ruta (path-style); define `S3_FORCE_PATH_STYLE=false` para un servicio que solo acepte el estilo de host virtual. Los adjuntos de transacciones usan el mismo almacenamiento: sin él, la sección de adjuntos queda oculta y sus endpoints responden 503.
 
 ## Funciones de IA
 
@@ -49,7 +51,7 @@ AI_BASE_URL=http://host.docker.internal:11434/v1
 AI_MODEL=llama3.1
 ```
 
-Define `AI_API_KEY` cuando el endpoint necesite una clave. Para usar otro modelo en una función concreta, define `AI_MODEL_<FUNCIÓN>`; por ejemplo, la lectura de recibos necesita un modelo que lea imágenes, definido con `AI_MODEL_OCR`.
+Define `AI_API_KEY` cuando el endpoint necesite una clave. Para usar otro modelo en una función concreta, define `AI_MODEL_<FUNCIÓN>`; por ejemplo, la lectura de recibos necesita un modelo que lea imágenes, definido con `AI_MODEL_OCR`. Las funciones son `ASSISTANT`, `CSV_MAPPING`, `ENRICHMENT` (categorización de transacciones), `MONTHLY_STORY`, `OCR` y `STATEMENT_IMPORT`.
 
 Para usar Anthropic con tu propia clave de API, elígela explícitamente:
 
@@ -103,7 +105,7 @@ Los [monederos de criptomonedas](/es/docs/portfolio-investments/crypto-wallets) 
 | `CRYPTO_BTC_EXPLORER_URL` | La raíz REST de una API compatible con mempool.space o Esplora, por ejemplo `https://mempool.example.org/api`. El servidor pide `<url>/address/<address>` para cada dirección de Bitcoin, incluida cada una derivada de una clave pública extendida |
 | `CRYPTO_ETH_EXPLORER_URL` | La raíz de una instancia de Blockscout, por ejemplo `https://blockscout.example.org`. El servidor pide `<url>/api/v2/addresses/<address>` y `<url>/api/v2/addresses/<address>/token-balances` para cada dirección de Ethereum |
 
-Cada uno tiene que ser una dirección `https` sin nombre de usuario, contraseña, query ni fragmento; cualquier otra cosa impide que la API y el worker arranquen. Defínelos en ambos. La API solo ofrece monederos para las redes que tienen explorador, y `GET /v1/instance` las indica en `features.cryptoWalletChains`. El worker sincroniza todos los monederos una vez al día a las 04:30 UTC, y de nuevo cuando un miembro crea un monedero, añade una dirección, marca un token o elige Sincronizar ahora. Hace una petición cada vez a cada explorador, espaciadas, con un tiempo límite de 15 segundos, y lo intenta hasta tres veces tras un tiempo agotado, un error del servidor o un `429` (esperando lo que pida `Retry-After`, hasta 30 segundos).
+Cada uno tiene que ser una dirección `https` sin nombre de usuario, contraseña, query ni fragmento; cualquier otra cosa impide que la API y el worker arranquen. Defínelos en ambos. La API solo ofrece monederos de criptomonedas para las redes que tienen explorador, y `GET /v1/instance` las indica en `features.cryptoWalletChains`. El worker sincroniza todos los monederos una vez al día a las 04:30 UTC, y de nuevo cuando un miembro crea un monedero, añade una dirección, marca un token o elige Sincronizar ahora. Hace una petición cada vez a cada explorador, espaciadas, con un tiempo límite de 15 segundos, y lo intenta hasta tres veces tras un tiempo agotado, un error del servidor o un `429` (esperando lo que pida `Retry-After`, hasta 30 segundos).
 
 El explorador ve cada dirección por la que se le pregunta y la dirección IP de tu servidor, y como un mismo servidor pregunta por todas las direcciones de un hogar, puede relacionarlas entre sí. No se envía nada más: ni nombres, ni importes, ni identificadores de usuarios. La opción privada es un nodo propio de Bitcoin o Ethereum con un explorador delante: [mempool](https://github.com/mempool/mempool) o [Esplora](https://github.com/Blockstream/esplora) para Bitcoin, [Blockscout](https://github.com/blockscout/blockscout) para Ethereum. Hay instancias públicas, como `https://mempool.space/api` y `https://eth.blockscout.com`. Son servicios externos con sus propias condiciones de uso y límites de peticiones: usar una es decisión tuya, cumplir sus condiciones es responsabilidad tuya, y tu política de privacidad debe indicar que las direcciones de tus usuarios se le envían. El servicio alojado de WonderMoney no activa los monederos de criptomonedas.
 
@@ -214,7 +216,7 @@ Si la aplicación web pasa a otro dominio, las llaves de acceso existentes dejan
 | `SUPPORT_EMAIL` | El buzón del formulario de contacto, de las alertas de cuenta y de los comentarios desde la aplicación, y la dirección de soporte que muestra la aplicación; déjalo vacío para desactivarlos y ocultar los enlaces de soporte. El formulario "Compartir comentarios" también necesita el correo configurado; sin él, el formulario se oculta |
 | `SPONSOR_URL` | Una página donde tus usuarios pueden contribuir a mantener la instancia (Open Collective, GitHub Sponsors, ...). Las preguntas frecuentes de la aplicación web la enlazan cuando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Tus páginas legales, enlazadas desde la página de registro cuando ambas están definidas |
-| `PRIVACY_POLICY_URL` | Tu política de privacidad, enlazada desde el pie de los correos. `{lang}` se sustituye por el idioma del destinatario (`en` o `pt`), por ejemplo `https://example.com/{lang}/privacy`. Por defecto, apunta a los ajustes de privacidad de la aplicación |
+| `PRIVACY_POLICY_URL` | Tu política de privacidad, enlazada desde el pie de los correos. `{lang}` se sustituye por el idioma del destinatario (`en`, `pt` o `es`), por ejemplo `https://example.com/{lang}/privacy`. Por defecto, apunta a los ajustes de privacidad de la aplicación |
 | `MCP_ENABLED` | El servidor MCP de solo lectura en `POST /v1/mcp`, que permite a un cliente de IA preguntar por las finanzas del propio usuario con un token de API personal con `mcp:read` (consulta [Conectar un cliente de IA](/es/docs/settings-security-privacy/connect-ai-client)). Activado por defecto; define `false` para responder `404` e informar de `features.mcp: false` en `GET /v1/instance` |
 | `DEMO_SIGN_IN_ENABLED` | `true` activa una demostración pública de solo lectura: un botón **Probar la demo** que inicia la sesión de cualquier persona en una cuenta de demostración compartida. Desactivado por defecto; consulta [Demostración pública](#demostración-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | La diferencia aceptada entre los dos lados de una transferencia entre cuentas en monedas distintas, después de convertir el importe que salió al tipo de cambio de ese día, como fracción del importe que llegó: `0.02` (por defecto) es un 2 por ciento. Súbela si el margen de cambio y las comisiones de tu banco son mayores; como máximo `0.25`. Configúrala en la API y en el worker |
@@ -256,7 +258,7 @@ Tu instancia no carga analítica ni gestor de etiquetas, ni registra eventos de 
 |---|---|
 | `NEXT_PUBLIC_GTM_ID` | Tu contenedor de Google Tag Manager (`GTM-XXXXXXX`), cargado en todas las páginas de la aplicación web |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog en la aplicación web: vistas de página, eventos de uso y grabaciones de sesión, asociados a la dirección de correo de cada usuario |
-| `ANALYTICS_OUTBOX_MODE=live` con `POSTHOG_API_KEY` | Eventos de registro, inicio de sesión y sincronización bancaria enviados a PostHog por la API y el worker. Define ambos en la API y en el worker; con el modo desactivado, no se registra ningún evento |
+| `ANALYTICS_OUTBOX_MODE=live` con `POSTHOG_API_KEY` | Eventos de registro, inicio de sesión y sincronización bancaria enviados a PostHog por la API y el worker. Define ambos en la API y en el worker; con el modo desactivado, no se registra ningún evento. `POSTHOG_HOST`, en el worker, define la dirección de PostHog, por defecto `https://eu.i.posthog.com` |
 
 Si activas alguno, informa a tus usuarios en tu política de privacidad (`NEXT_PUBLIC_PRIVACY_URL`) y pide su consentimiento cuando la ley lo exija.
 
@@ -279,7 +281,7 @@ No se envía nada al proyecto WonderMoney. Cada servicio externo que tu instanci
 | Copias de seguridad fuera del servidor (tu destino de rclone) | El servicio `backup-offsite`, una vez al día, con las copias de la base de datos y de los archivos | El perfil `backup-offsite` y `BACKUP_DESTINATION` ([Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup#copias-fuera-del-servidor)) |
 | Registro de errores (Sentry) | La API, el worker y la aplicación web, con informes de errores | `SENTRY_DSN` (API y worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicación web) |
 | Analítica (Google Tag Manager, PostHog) | Consulta [Analítica](#analítica) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
-| Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Ajustes, o la aplicación del servidor (`ENABLE_BANKING_APP_ID`) |
+| Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Configuración, o la aplicación del servidor (`ENABLE_BANKING_APP_ID`) |
 | Sincronización bancaria (SimpleFIN) | La API, para canjear el token de configuración de un usuario, y el worker, para sincronizar, en SimpleFIN Bridge o en los hosts de `SIMPLEFIN_BRIDGE_HOSTS`. Desactivada por defecto | `simplefin` en `BANK_PROVIDERS`, y después el token de configuración de cada usuario |
 | Inicio de sesión con Google | Los navegadores y la API, cuando un usuario elige "Continuar con Google" | `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` |
 | Tu proveedor de identidad (OIDC) | Los navegadores y la API, cuando un usuario elige `Iniciar sesión con <nombre>`. La API obtiene el documento de descubrimiento y las claves del proveedor, e intercambia el código de inicio de sesión | `OIDC_ISSUER`, `OIDC_CLIENT_ID` y `OIDC_CLIENT_SECRET` |

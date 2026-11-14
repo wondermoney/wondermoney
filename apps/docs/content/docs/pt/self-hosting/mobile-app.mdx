@@ -55,7 +55,7 @@ Para usares chaves de acesso na aplicação com o teu próprio servidor, compila
 | Aplicação web | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | O nome do pacote da aplicação e as impressões digitais SHA-256 dos certificados de assinatura, separadas por vírgulas (`AB:CD:…`, como o `keytool` ou a Play Console as mostram). A aplicação web serve-os como `/.well-known/assetlinks.json`. |
 | API | `ANDROID_APP_CERT_SHA256` | As mesmas impressões digitais. O Android indica que uma chave de acesso de uma aplicação vem de `android:apk-key-hash:` e do hash do certificado, não do teu endereço web, por isso a API só aceita essa origem para estes certificados. |
 
-Com o Docker Compose, ficam todas no `.env`. Enquanto não estiverem definidas, os dois endereços `/.well-known` respondem 404 e nada muda. Mantém o `APP_URL` na porta HTTPS predefinida: o iOS indica que as chaves de acesso da aplicação vêm de `https://` e do domínio, sem porta.
+Com o Docker Compose, ficam todas no `.env`. Com o chart Helm, as da aplicação web ficam em `webExtraEnv` e a da API em `extraEnv`. Enquanto não estiverem definidas, os dois endereços `/.well-known` respondem 404 e nada muda. Mantém o `APP_URL` na porta HTTPS predefinida: o iOS indica que as chaves de acesso da aplicação vêm de `https://` e do domínio, sem porta.
 
 ## Requisitos
 

@@ -1,24 +1,31 @@
 ---
 title: Desempenho e benchmarks
-description: Compara o desempenho da carteira com uma referência de mercado.
+description: Compara o desempenho do portefólio com uma referência de mercado.
 ---
 
 Os benchmarks ajudam-te a comparar as tuas posições com um índice de referência ou outra base de mercado.
 
-Esta vista é apenas informativa. WonderMoney não diz o que comprar, vender ou manter.
+Esta vista é apenas informativa. O WonderMoney não diz o que comprar, vender ou manter.
 
 <DocsImage
   src="/images/docs/pt/portfolio-investments/performance-benchmarks-performance.png"
-  alt="Gráfico de desempenho na página de detalhe da carteira, com o valor da carteira ao longo do tempo e as secções de alocação e de comparação com o índice de referência."
-  caption="A secção de desempenho mostra o valor da carteira ao longo do tempo para o poderes comparar com um índice de referência."
+  alt="Gráfico de desempenho na página de detalhe do portefólio, com o valor do portefólio ao longo do tempo e as secções de alocação e de comparação com o índice de referência."
+  caption="A secção de desempenho mostra o valor do portefólio ao longo do tempo para o poderes comparar com um índice de referência."
   width={1440}
   height={900}
 />
 
+## Onde encontrar
+
+- **Desempenho** está na página Portefólios, para todos os teus portefólios em conjunto, e na página de cada portefólio.
+- **Comparação com Benchmark** está na página Portefólios, na web. Compara todos os teus portefólios em conjunto com o `SPY`, um fundo cotado que segue o S&P 500.
+- Ambos seguem o período que escolheres: 1 mês, 3 meses, 6 meses, Ano até à data, 1 ano ou Todo o período. A página abre em Ano até à data.
+- Num agregado familiar com mais de um membro, a página Portefólios tem um filtro por membro, e os dois gráficos seguem-no. Vê [Filtrar por membro](/pt/docs/household/filter-by-member).
+
 ## O que esta vista mostra
 
-- **Retorno (ponderado pelo tempo)**: o retorno ponderado pelo tempo acumulado da carteira desde o primeiro dia do período. O dinheiro que juntas ou retiras não o altera, por isso um depósito não aparece como ganho nem um levantamento como perda.
-- A vista de valor: quanto valia a carteira em cada dia, com depósitos e levantamentos incluídos. Os dias com um depósito ou levantamento estão assinalados.
+- **Retorno (ponderado pelo tempo)**, na Comparação com Benchmark: o retorno ponderado pelo tempo acumulado do portefólio desde o primeiro dia do período. O dinheiro que juntas ou retiras não o altera, por isso um depósito não aparece como ganho nem um levantamento como perda.
+- O gráfico Desempenho: quanto valia o portefólio em cada dia, com depósitos e levantamentos incluídos. Os dias com um depósito ou levantamento estão assinalados.
 - Retorno do benchmark no mesmo período: a variação do preço do benchmark desde o mesmo primeiro dia. Um benchmark não tem depósitos nem levantamentos, por isso as duas linhas têm a mesma base.
 - Diferença entre os dois.
 - No resumo, o retorno ponderado pelo tempo e pelo dinheiro do período (ver [Retorno ponderado pelo tempo e pelo dinheiro](/pt/docs/portfolio-investments/portfolio-metrics-explained#retorno-ponderado-pelo-tempo-e-pelo-dinheiro)).
@@ -31,17 +38,36 @@ Esta vista é apenas informativa. WonderMoney não diz o que comprar, vender ou 
 - Usa o mesmo contexto cambial sempre que possível.
 - Compara o benchmark com o retorno ponderado pelo tempo. Tal como o preço de um benchmark, não é alterado por depósitos nem levantamentos. O retorno ponderado pelo dinheiro reflete também quando juntaste ou retiraste dinheiro, por isso pode ser diferente dos dois.
 
+## Maiores Movimentos
+
+**Maiores Movimentos** lista as posições cujo preço mais subiu ou desceu num período: até cinco **Ganhos** e até cinco **Perdas**. Está na página Portefólios, onde abrange todos os teus portefólios em conjunto e segue o período e o filtro por membro, e na página de cada portefólio, onde abrange sempre Ano até à data. Está na web e na app móvel.
+
+Cada linha mostra dois valores:
+
+- A percentagem é a variação do preço do título: `(preço atual - preço no início do período) / preço no início do período`. O preço inicial é o último preço no primeiro dia do período ou antes dele, e um [preço manual](/pt/docs/portfolio-investments/holdings-allocation#definir-um-preço-manual) conta.
+- O montante por baixo é quanto essa variação vale na quantidade que tens hoje, na tua moeda: `valor atual - valor atual / (1 + variação)`.
+
+O que não tem em conta:
+
+- Mede o título, não as tuas transações. Uma posição comprada a meio do período é medida na mesma desde o primeiro dia do período, e o montante assume que tiveste a quantidade de hoje durante todo o período.
+- Os dividendos e as comissões não estão incluídos.
+- Quando não há preço no primeiro dia do período ou antes dele, a linha mostra em vez disso o ganho não realizado da posição sobre o preço de custo. Isto é comum com Todo o período, que recua dez anos.
+- Uma posição cujo preço não mudou não está em nenhuma das listas.
+
+As listas precisam de pelo menos duas posições com preço. Até lá, a secção indica que os maiores movimentos aparecem quando houver mais de uma posição com preço.
+
 ## Erros comuns
 
+- Ler uma percentagem dos Maiores Movimentos como o teu retorno nessa posição. É a variação do preço no período, seja qual for a data em que compraste.
 - Comparar períodos curtos como se fossem resultados úteis de longo prazo.
 - Tratar a diferença para o benchmark como prova de que um ativo é melhor.
-- Usar um benchmark com um perfil de risco muito diferente da carteira.
-- Ler um salto na vista de valor como um ganho. Um depósito aumenta o valor, não o retorno; vê a vista em percentagem para saber como correram os investimentos.
+- Usar um benchmark com um perfil de risco muito diferente do portefólio.
+- Ler um salto no gráfico Desempenho como um ganho. Um depósito aumenta o valor, não o retorno; vê o retorno ponderado pelo tempo para saber como correram os investimentos.
 
 
 ## Páginas relacionadas
 
-- [Investimentos de carteira](/pt/docs/portfolio-investments)
+- [Investimentos de portefólio](/pt/docs/portfolio-investments)
 - [Alocação das posições](/pt/docs/portfolio-investments/holdings-allocation)
-- [Importar um CSV de carteira](/pt/docs/portfolio-investments/import-portfolio-csv)
-- [Métricas da carteira explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)
+- [Importar um CSV de portefólio](/pt/docs/portfolio-investments/import-portfolio-csv)
+- [Métricas do portefólio explicadas](/pt/docs/portfolio-investments/portfolio-metrics-explained)

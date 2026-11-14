@@ -33,7 +33,7 @@
       "heading": { "en": "PostHog", "pt": "PostHog", "es": "PostHog" },
       "purpose": "Product analytics and session replay.",
       "evidence": "web AnalyticsInit.tsx: posthog.init({ api_host: 'https://eu.posthog.com' }), posthog.startSessionRecording() outside development, posthog.identify(user.id, { email }); api depends on posthog-node.",
-      "personalData": "Email address, Supabase user id, usage events, and session recordings of authenticated screens — which contain account balances and transaction descriptions.",
+      "personalData": "Email address, user id, usage events, and session recordings of authenticated screens — which contain account balances and transaction descriptions.",
       "location": "European Union (eu.posthog.com)"
     },
     {
@@ -45,20 +45,11 @@
       "location": "United States (us.sentry.io)"
     },
     {
-      "id": "supabase",
-      "heading": { "en": "Supabase", "pt": "Supabase", "es": "Supabase" },
-      "purpose": "Authentication and identity only.",
-      "evidence": "api depends on @supabase/supabase-js with SUPABASE_JWT_SECRET / SUPABASE_SERVICE_KEY; web depends on @supabase/ssr. The application database is the self-hosted Postgres (see the application-hosting entry), not Supabase.",
-      "personalData": "Email address, authentication credentials and MFA state.",
-      "location": "European Union",
-      "notes": "Financial data lives in the self-hosted Postgres, not in Supabase. When Supabase is removed in favour of better-auth, this entry must be replaced, not just deleted."
-    },
-    {
       "id": "application-hosting",
       "heading": { "en": "netcup", "pt": "netcup", "es": "netcup" },
       "purpose": "Hosting for the API, the background worker and the production Postgres database that holds all account and transaction data.",
       "evidence": "The API, the background worker and Postgres run as Docker containers on a virtual server operated by netcup GmbH.",
-      "personalData": "Everything: accounts, transactions, balances, budgets, portfolios, household membership.",
+      "personalData": "Everything: sign-in data (email address, password hash, passkeys, MFA state; authentication is better-auth on this Postgres), accounts, transactions, balances, budgets, portfolios, household membership.",
       "location": "Germany (Nuremberg)",
       "notes": "Coolify is self-hosted software, not a processor; the processor is netcup GmbH, which operates the server. Inside the EEA, so no Article 46 transfer safeguard is needed for the primary data store."
     },

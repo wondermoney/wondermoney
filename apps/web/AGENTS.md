@@ -16,7 +16,7 @@ adding its own copy of this note to this file.
   cite ("rule 3"); `DESIGN.md` wins where they disagree. Tokens live in `theme/globals.css`;
   there is no Tailwind config file.
 - All data comes from the API over HTTP; web has no database access. Never import API source:
-  the `@api/*` path in `tsconfig.json` is unused and must stay that way.
+  `tsconfig.json` has no path into `apps/api` (only `@/*`) and must stay that way.
 
 ## Where to look
 
@@ -48,7 +48,8 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 ## Conventions
 
 - Server Components by default; `"use client"` only for hooks, interaction or browser APIs.
-- Server state in React Query, navigable filters in the URL, UI-only state in Zustand (`store/`),
+- Server state in React Query, navigable filters in the URL, UI-only state in Zustand (a store beside its feature, as in
+  `app/[locale]/(no-layout)/budgets/wizard/store.ts`),
   forms in React Hook Form + Zod.
 - `@/*` imports. Merge classes with `cn()`; variants with `cva`.
 - All customer-facing copy goes through next-intl, in **en, pt and es**; the

@@ -11,6 +11,8 @@ Cada transacción lleva una huella que la identifica. Cuando los datos entrantes
 
 Cada decisión queda registrada en el registro de auditoría de la transacción, incluidos los duplicados omitidos y los cambios de estado. La tolerancia de la huella es deliberadamente estrecha: dos transacciones legítimas que se parecen — por ejemplo, dos compras idénticas el mismo día — no se tratan como duplicadas. Una referencia bancaria distinta las diferencia y, cuando el banco envía compras idénticas sin referencia, cada una que el banco lista se sigue guardando como una transacción propia.
 
+Una importación de archivo añade una comprobación más: una fila con el mismo importe que una transacción que ya está en la cuenta, con hasta 3 días de diferencia, aparece como [posible duplicado](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados) y se omite a menos que la incluyas.
+
 ## Versiones pendiente y confirmada
 
 Un pago con tarjeta pendiente se empareja automáticamente con su versión confirmada cuando el banco lo confirma, así que los dos no deberían permanecer separados. Si el banco nunca confirma un pago pendiente, este caduca después del plazo configurado y aparece como caducado en lugar de quedarse como registro pendiente.
@@ -24,7 +26,7 @@ Confirma la cuenta, el intervalo de fechas y los filtros de categoría antes de 
 1. Comprueba si la transacción está pendiente, confirmada, caducada o si sigue fuera del intervalo de fechas seleccionado.
 2. Revisa si otra cuenta importó el mismo pago.
 3. Compara las entradas manuales con las importadas.
-4. Elimina o fusiona los duplicados cuando el origen esté claro.
+4. Elimina el duplicado cuando el origen esté claro. Una transacción que vino de tu banco no se puede eliminar, porque el banco la volvería a enviar: ocúltala para sacarla de las listas y los totales.
 
 <DocsImage
   src="/images/docs/es/accounts-transactions/missing-duplicate-transactions-review.png"

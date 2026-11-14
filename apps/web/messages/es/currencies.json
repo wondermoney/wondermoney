@@ -1,7 +1,7 @@
 {
   "exchangeRates": {
     "title": "Tipos de cambio",
-    "description": "Define tu propio tipo para un par de divisas en un día concreto, para una divisa que la fuente de tipos no cubre o un día en que se equivocó. Los dos miembros del hogar comparten estos tipos.",
+    "description": "Define tu propio tipo para un par de divisas en un día concreto, para una divisa que la fuente de tipos no cubre o un día en que se equivocó. Todos los miembros del hogar comparten estos tipos.",
     "how-it-applies": "Un tipo se aplica desde su día hasta que la fuente, u otro de tus tipos, tenga uno más reciente. En su propio día sustituye al tipo de la fuente. Los importes ya guardados se convierten de nuevo en segundo plano.",
     "table-label": "Tus tipos de cambio",
     "pair": "Par",

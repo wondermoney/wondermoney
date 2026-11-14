@@ -122,9 +122,9 @@
         }
       },
       "portfolioPerformance": {
-        "title": "Performance da carteira",
-        "subtitle": "Como variou o valor de cada carteira no período, descontando o que entrou e saiu.",
-        "portfolio": "Carteira",
+        "title": "Performance do portefólio",
+        "subtitle": "Como variou o valor de cada portefólio no período, descontando o que entrou e saiu.",
+        "portfolio": "Portefólio",
         "startValue": "Valor inicial",
         "netContributions": "Contribuições líquidas",
         "change": "Variação",
@@ -139,11 +139,11 @@
         "moneyWeightedDescription": "Como correu o teu dinheiro, tendo em conta quando investiste ou retiraste. Uma taxa por ano em períodos de um ano ou mais.",
         "perYear": "por ano",
         "returnUnavailable": "Sem histórico suficiente para medir",
-        "notCombined": "Não combinado entre carteiras",
+        "notCombined": "Não combinado entre portefólios",
         "missingSnapshots": "{count, plural, one {# dia sem snapshot, valor mantido} other {# dias sem snapshot, valor mantido}}",
         "noData": {
-          "title": "Sem carteiras para mostrar",
-          "description": "Adiciona uma carteira para ver a sua performance aqui."
+          "title": "Sem portefólios para mostrar",
+          "description": "Adiciona um portefólio para ver a sua performance aqui."
         }
       },
       "monthComparison": {

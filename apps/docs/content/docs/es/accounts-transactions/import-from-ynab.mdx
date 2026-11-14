@@ -12,7 +12,7 @@ Exporta el registro en YNAB:
 - **YNAB**: abre el menú bajo el nombre de tu presupuesto y exporta el presupuesto. YNAB descarga un archivo zip; descomprímelo y guarda el archivo cuyo nombre termina en `Register.csv`. El otro archivo del zip (`Plan.csv`) contiene los importes presupuestados, que no se importan.
 - **YNAB 4**: elige **File** y luego **Export**, y guarda el archivo de registro que crea.
 
-En una instancia autoalojada, las importaciones también necesitan [almacenamiento de archivos](/es/docs/self-hosting/configure#file-storage).
+En una instancia autoalojada, las importaciones también necesitan [almacenamiento de archivos](/es/docs/self-hosting/configure#almacenamiento-de-archivos).
 
 ## Pasos
 
@@ -22,6 +22,8 @@ En una instancia autoalojada, las importaciones también necesitan [almacenamien
 4. Elige una categoría para cada categoría de YNAB. Una categoría de YNAB cuyo nombre coincide con una tuya, en tu idioma, queda ya rellenada; las mayúsculas y los acentos no cuentan. Las demás quedan sin categoría, salvo que elijas una.
 5. Revisa las filas, como en cualquier [importación](/es/docs/accounts-transactions/import-transactions-csv): las filas nuevas se incluyen y las que ya están en la cuenta se omiten.
 6. Elige **Importar**. La importación se ejecuta en segundo plano, y las elecciones de categoría se guardan con ella.
+
+En la app móvil, una exportación de YNAB se detiene antes de importar nada, porque sus categorías necesitan el paso de categorías: cancélala allí e importa el archivo en la web.
 
 ## Cómo se importan las filas de YNAB
 

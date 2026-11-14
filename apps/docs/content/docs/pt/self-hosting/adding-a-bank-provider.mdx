@@ -27,7 +27,8 @@ Tudo vive em `apps/api/src/services/bank-providers/`:
   redirecionamento. Recusa os métodos do fluxo de consentimento, liga-se pela sua própria rota
   (`services/simplefin/`) e lê todas as contas num só pedido por sincronização.
 
-Os serviços de sincronização importam apenas `types.ts`. Nunca importam o cliente ou a entidade
+Os serviços de sincronização (`account-initial-sync-account.service.ts`,
+`account-initial-sync-transaction.service.ts`) importam apenas `types.ts`. Nunca importam o cliente ou a entidade
 de um fornecedor e nunca ramificam pelo nome do fornecedor.
 
 ## 1. Implementa `BankProvider`

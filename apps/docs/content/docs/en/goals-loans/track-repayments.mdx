@@ -15,13 +15,16 @@ This keeps the remaining balance aligned with recorded payments.
   height={900}
 />
 
-## What to record
+## Link a repayment
 
-- Repayment amount
-- Date
-- Notes, if needed
+A repayment is one of your transactions linked to the loan; there is no separate repayment to type in. Its date is the transaction's date.
 
-Record the repayment on the date it actually cleared when you want the balance history to stay accurate.
+1. On the loan page, choose **Link repayment**.
+2. Choose the transaction. The list shows your outgoing transactions, each with a confidence that reflects how well its amount, date and merchant match the loan.
+3. Review the allocation: the total payment split into principal, interest and fees.
+4. Choose **Save allocation**.
+
+Only the principal part reduces the loan balance. In the **Repayments** table you can later edit a repayment's allocation or remove its link.
 
 ## What the view tells you
 
@@ -43,11 +46,11 @@ Record the repayment on the date it actually cleared when you want the balance h
 - Entering a repayment against the wrong loan.
 - Assuming a repayment changes a goal balance. Loans and goals are separate.
 
-If a payment was refunded or reversed, note that before adding a new repayment entry.
+If a payment was refunded or reversed, remove its link so it no longer reduces the balance.
 
 ## Correct the balance
 
-When your lender's statement shows a different balance, record their figure. On the loan page, choose **Adjust balance**, keep **Correct balance**, and enter the balance and the date of the statement. Zero is allowed, for a loan the lender reports as paid off.
+When your lender's statement shows a different balance, record their figure. On the loan page, choose **Add balance adjustment**, keep **Correct balance**, and enter the balance and the date of the statement. Zero is allowed, for a loan the lender reports as paid off.
 
 - A correction replaces the tracked balance from its date on; it is not an extra payment. Repayments before that date are already in the lender's figure, and repayments after it reduce the corrected balance.
 - A correction dated in the future does not change today's balance. It takes effect on its date.
@@ -61,6 +64,10 @@ For a variable-rate loan, set the rate type to **Variable** when you add or edit
 
 - Each month's interest uses the rate in force when that month began. When a new rate is in force on a payment date, the payment is recalculated so the loan still ends on its maturity date.
 - WonderMoney does not fetch index rates such as Euribor or predict changes. Add each change when your lender announces it.
+
+## In the mobile app
+
+The mobile app links repayments and shows the balance, the repayments and the payoff projection. Balance adjustments, the rate history and the amortization schedule are on the web.
 
 ## Related pages
 

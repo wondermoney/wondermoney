@@ -9,7 +9,7 @@ La aplicación de WonderMoney funciona con cualquier servidor de WonderMoney, no
 
 La forma más rápida de conectar la aplicación es escanear un código desde la aplicación web de tu servidor, sin escribir nada en el teclado del teléfono.
 
-1. En la aplicación web, abre **Ajustes → Seguridad**.
+1. En la aplicación web, abre **Configuración → Seguridad**.
 2. En **Conectar la aplicación móvil**, toca **Mostrar código QR**.
 3. En la pantalla de inicio de sesión de la aplicación, toca **Escanear código QR** y apunta la cámara al código.
 
@@ -28,11 +28,11 @@ La aplicación comprueba la dirección antes de guardarla. Si no puede llegar al
 
 ## Dispositivos conectados
 
-**Ajustes → Seguridad → Dispositivos** muestra los teléfonos conectados a tu cuenta, con la última vez que se vio cada uno. **Revocar** cierra la sesión de ese teléfono de inmediato; tiene que escanear un código nuevo para volver a conectarse.
+**Configuración → Seguridad → Dispositivos** muestra los teléfonos conectados a tu cuenta, con la última vez que se vio cada uno. **Revocar** cierra la sesión de ese teléfono de inmediato; tiene que escanear un código nuevo para volver a conectarse.
 
 ## Notificaciones push
 
-La aplicación puede mostrar alertas de presupuesto, recordatorios de pago de la tarjeta y alertas de conexiones bancarias como notificaciones push cuando tu servidor tiene el push activado (`PUSH_ENABLED=true`, consulta [Configurar](/es/docs/self-hosting/configure#notificaciones-push)). Abre **Ajustes → Notificaciones** en la aplicación: cada categoría de push está desactivada hasta que la activas, y el teléfono pide permiso la primera vez que lo haces. **Enviar notificación de prueba** comprueba todo el camino. Al tocar una notificación se abre la pantalla a la que se refiere. Cerrar sesión quita el teléfono, igual que revocarlo en **Dispositivos**.
+La aplicación puede mostrar alertas de presupuesto, recordatorios de pago de la tarjeta y alertas de conexiones bancarias como notificaciones push cuando tu servidor tiene el push activado (`PUSH_ENABLED=true`, consulta [Configurar](/es/docs/self-hosting/configure#notificaciones-push)). Abre **Configuración → Notificaciones** en la aplicación: cada categoría de push está desactivada hasta que la activas, y el teléfono pide permiso la primera vez que lo haces. **Enviar notificación de prueba** comprueba todo el camino. Al tocar una notificación se abre la pantalla a la que se refiere. Cerrar sesión quita el teléfono, igual que revocarlo en **Dispositivos**.
 
 ### Qué versiones de la aplicación puede alcanzar tu servidor
 
@@ -55,7 +55,7 @@ Para usar llaves de acceso en la aplicación con tu propio servidor, compila la 
 | Aplicación web | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | El nombre del paquete de la aplicación y las huellas SHA-256 de sus certificados de firma, separadas por comas (`AB:CD:…`, como las muestran `keytool` o la Play Console). La aplicación web los sirve como `/.well-known/assetlinks.json`. |
 | API | `ANDROID_APP_CERT_SHA256` | Las mismas huellas. Android indica que una llave de acceso de una aplicación viene de `android:apk-key-hash:` y el hash del certificado, no de tu dirección web, así que la API solo acepta ese origen para estos certificados. |
 
-Con Docker Compose, todas van en `.env`. Mientras no estén definidas, las dos direcciones `/.well-known` responden 404 y nada cambia. Mantén `APP_URL` en el puerto HTTPS predeterminado: iOS indica que las llaves de acceso de la aplicación vienen de `https://` y el dominio, sin puerto.
+Con Docker Compose, todas van en `.env`. Con el chart de Helm, las de la aplicación web van en `webExtraEnv` y la de la API en `extraEnv`. Mientras no estén definidas, las dos direcciones `/.well-known` responden 404 y nada cambia. Mantén `APP_URL` en el puerto HTTPS predeterminado: iOS indica que las llaves de acceso de la aplicación vienen de `https://` y el dominio, sin puerto.
 
 ## Requisitos
 

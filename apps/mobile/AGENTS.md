@@ -9,7 +9,8 @@ root; there is no app-local lockfile. Scripts are in `package.json`.
 - The app talks to the API over HTTP only. Never import source from `apps/api` or `apps/web`;
   follow the API's HTTP contract (`src/lib/api/` holds the endpoint schemas). `packages/*` are
   used only through a dependency-free workspace entry point, never by relative path: today
-  `@wondermoney/shared/decimal`, which reads typed numbers (`src/lib/formatters/decimal-input.ts`).
+  `@wondermoney/shared/decimal`, which reads typed numbers (`src/lib/formatters/decimal-input.ts`),
+  and its `amount-expression`, `bank-sync`, `crypto-wallet` and `dashboard-layout` entries.
 - Auth is the API's better-auth, at `<EXPO_PUBLIC_API_BASE_URL>/api/auth`. The base URL comes
   from `.env` (`EXPO_PUBLIC_API_BASE_URL`) or the sign-in screen's "Use a different server".
   `EXPO_PUBLIC_*` values ship in the client; no secret goes in them.

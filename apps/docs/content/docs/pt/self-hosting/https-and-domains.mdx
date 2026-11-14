@@ -87,4 +87,4 @@ Deixa-o vazio quando não há proxy: caso contrário, qualquer pessoa pode escre
 
 ## Manter as portas privadas
 
-Quando o proxy corre na mesma máquina, define `BIND_ADDRESS=127.0.0.1` no `.env` e corre `docker compose up -d`. As portas publicadas (a aplicação web, a API e, se os usares, o armazenamento e o Mailpit) passam a escutar só no localhost, e só são acessíveis através do proxy.
+Quando o proxy corre na mesma máquina, define `BIND_ADDRESS=127.0.0.1` no `.env` e corre `docker compose up -d`. As portas publicadas (a aplicação web, a API e, se os usares, o armazenamento e o Mailpit) passam a escutar só no localhost, e só são acessíveis através do proxy. `WEB_PORT`, `API_PORT`, `S3_PORT` e `MAILPIT_PORT` mudam essas portas na máquina (por omissão, `3000`, `3001`, `9000` e `8025`).

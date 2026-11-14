@@ -1,5 +1,5 @@
 {
-  "title": "Carteira e investimentos",
+  "title": "Portefólio e investimentos",
   "pages": [
     "index",
     "portfolio-metrics-explained",
@@ -9,6 +9,7 @@
     "import-portfolio-csv",
     "holdings-allocation",
     "performance-benchmarks",
+    "portfolio-data-lifecycle",
     "manual-assets",
     "crypto-wallets",
     "troubleshoot-portfolio-imports"

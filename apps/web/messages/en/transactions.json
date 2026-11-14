@@ -16,7 +16,7 @@
   "transactionTags": {
     "label": "Tags",
     "title": "Tags",
-    "description": "Tags label transactions across categories, such as a trip or a project. Both members of a household share them.",
+    "description": "Tags label transactions across categories, such as a trip or a project. Everyone in a household shares them.",
     "list-label": "Tags: {names}",
     "more": "+{count}",
     "picker-label": "Tags, none",

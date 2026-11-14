@@ -1,44 +1,36 @@
 ---
-title: Problemas na importação de carteira
-description: Corrige erros ao importar ficheiros de carteira.
+title: Problemas na importação de portefólio
+description: Corrige erros ao importar ficheiros de portefólio.
 ---
+
+Um ficheiro de corretora inválido é rejeitado antes de qualquer dado ser alterado, com uma mensagem de erro clara e opções para tentar de novo.
 
 ## Sintomas
 
-Usa esta página quando a importação de investimentos falha ou os dados chegam incompletos.
-
-Sinais frequentes:
-
-- O ficheiro não é aceite
-- Algumas linhas não aparecem
-- Os preços ou quantidades ficam errados
-- A carteira fica incompleta
+- Um ficheiro de portefólio não é carregado.
+- As posições importadas mostram a quantidade ou o preço errados.
+- As transações aparecem incompletas depois da importação.
+- A importação assinala uma coluna ou um formato de data não suportados.
 
 ## O que verificar
 
-Confirma:
-
-- Se o ficheiro está no formato esperado
-- Se as datas estão corretas
-- Se os símbolos ou ativos existem
-- Se o separador decimal está consistente
+- Se o ficheiro usa o formato esperado.
+- Se a data e a moeda do portefólio estão corretas.
+- Se o ficheiro inclui posições divididas ou ajustes que precisam de tratamento especial.
+- Se a exportação de origem está completa.
 
 ## O que tentar
 
-Tenta:
-
-1. Abre e revê o ficheiro original.
-2. Remove linhas inválidas.
-3. Repete a importação com um ficheiro mais pequeno.
-4. Confirma se os ativos estão mapeados corretamente.
+1. Exporta de novo o ficheiro a partir da plataforma de origem.
+2. Confirma que as colunas correspondem ao modelo de importação.
+3. Remove linhas a mais, notas ou células unidas.
+4. Experimenta importar primeiro um ficheiro de amostra mais pequeno.
 
 ## Quando contactar o suporte
 
-Contacta o suporte se a importação continuar a falhar ou se existir risco de duplicação de posições.
+Contacta o suporte se o ficheiro for válido mas o portefólio continuar a ser importado com valores errados, ou se a importação falhar com dados que parecem corretos.
 
 
 ## Páginas relacionadas
 
-- [Resolução de problemas](/pt/docs/troubleshooting/)
-- [Importar carteira por CSV](/pt/docs/portfolio-investments/import-portfolio-csv)
-- [Criar uma carteira](/pt/docs/portfolio-investments/create-portfolio)
+- [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

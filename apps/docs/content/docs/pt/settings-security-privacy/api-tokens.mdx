@@ -20,7 +20,7 @@ Criar um token exige um início de sessão recente. Se usares autenticação de 
 
 ## Permissões
 
-- **Leitura** permite `GET` nas rotas de dados: contas, transações, categorias, orçamentos, objetivos, relatórios, património líquido, carteiras e as restantes superfícies de leitura.
+- **Leitura** permite `GET` nas rotas de dados: contas, transações, categorias, orçamentos, objetivos, relatórios, património líquido, portefólios e as restantes superfícies de leitura.
 - **Escrita** permite criar e atualizar transações, contas, categorias, orçamentos e objetivos. A escrita também permite ler esses recursos, porque um script que escreve uma transação normalmente lê-a de volta.
 
 Nenhuma permissão permite apagar, importar, recalcular, gerir o agregado ou a ligação bancária, ou gerir tokens de API. Um token nunca chega a `/api/auth`, `/v1/admin`, `/v1/user`, `/v1/household` ou `/v1/banking`.

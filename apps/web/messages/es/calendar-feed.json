@@ -22,7 +22,7 @@
     "instructions-google": "Google Calendar: Otros calendarios → Desde URL → pega el enlace.",
     "instructions-apple": "Apple Calendar: Archivo → Nueva suscripción de calendario → pega el enlace.",
     "instructions-refresh": "La aplicación de calendario actualiza el feed según su propia frecuencia.",
-    "instructions-privacy": "El feed solo muestra los pagos que puedes ver. Una cuenta privada del otro miembro del hogar no aparece.",
+    "instructions-privacy": "El feed solo muestra los pagos que puedes ver. Una cuenta privada de otro miembro del hogar no aparece.",
     "revoke-title": "¿Revocar este enlace?",
     "revoke-description": "El calendario dejará de recibir los pagos. Puedes crear un enlace nuevo más adelante.",
     "revoke-confirm": "Revocar este enlace",

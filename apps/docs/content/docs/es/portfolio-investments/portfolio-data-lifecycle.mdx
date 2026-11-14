@@ -1,54 +1,51 @@
 ---
-title: Ciclo de vida de los datos de la cartera
-description: Comprende cómo fluyen los datos de la cartera por la importación, la resolución, los precios, las instantáneas y el historial.
+title: Cuándo se actualizan los datos de la cartera
+description: Por qué las posiciones aparecen al momento mientras que el historial de rendimiento y el benchmark tardan más, y qué significa cada estado de una cartera.
 ---
 
-Los datos de cartera de WonderMoney pasan por un ciclo de vida por etapas. Algunas partes pueden estar listas antes que otras, por lo que las posiciones, los precios, las instantáneas y el historial pueden no actualizarse al mismo tiempo.
+Después de añadir o importar transacciones, la cartera no se actualiza toda a la vez. Las posiciones y la asignación están listas al momento; el historial de rendimiento se construye en segundo plano a partir de precios históricos y puede tardar más.
 
 <DocsImage
   src="/images/docs/es/portfolio-investments/portfolio-data-lifecycle-transactions.png"
-  alt="Portfolio transactions list showing buys, sells, dividends, and withdrawals for the Investment Portfolio."
-  caption="Every imported or manually added transaction feeds the portfolio data lifecycle."
+  alt="Lista de transacciones de la cartera con compras, ventas, dividendos y retiradas de la cartera de ejemplo Investment Portfolio."
+  caption="Cada transacción importada o añadida a mano actualiza la cartera por etapas."
   width={1440}
   height={900}
 />
 
-## Ciclo de vida actual
+## Qué ocurre después de un cambio
 
-1. La introducción manual de transacciones o la importación de CSV crea o actualiza las transacciones de cartera.
-2. La resolución de activos relaciona símbolos, ISIN o etiquetas del bróker con un activo financiero.
-3. Las actualizaciones de precio obtienen los precios de mercado actuales cuando existe cobertura.
-4. La actualización de instantáneas reconstruye las instantáneas diarias de la cartera para el periodo afectado.
-5. La disponibilidad del historial refleja si la cartera tiene cobertura suficiente para los gráficos y las métricas.
+1. Se guarda la transacción manual o la importación confirmada.
+2. Las posiciones, su valor actual y la asignación se actualizan a partir de las transacciones guardadas.
+3. WonderMoney obtiene los precios históricos de cada activo que compraste, desde la primera compra, hasta diez años atrás.
+4. El historial diario que alimenta el gráfico de rendimiento se reconstruye para las fechas afectadas por el cambio.
+5. La comparación con el benchmark y las métricas de riesgo llegan cuando ese historial existe.
 
-## Qué deben esperar los usuarios
+Los precios actuales se actualizan los días laborables.
 
-- Las posiciones pueden aparecer antes de que el historial completo de rentabilidad esté listo.
-- La importación de CSV puede completarse aunque algunas filas necesiten resolución de activos más adelante.
-- Algunos gráficos o métricas pueden mostrar estados parciales o de procesamiento mientras el trabajo en segundo plano termina.
-- La falta de historial no siempre significa un error; también puede significar que la cobertura todavía se está construyendo.
+## El estado de una cartera
 
-## Vocabulario de estados
+Mientras el historial no está completo, la página de la cartera en la web muestra un aviso con cuatro líneas: **Posiciones y valor actuales**, **Asignación**, **Historial de rendimiento** y **Benchmark y métricas de riesgo**, cada una con su estado.
 
-Este conjunto de documentación usa el siguiente lenguaje de estados:
+| Aviso | Qué significa | Qué hacer |
+|---|---|---|
+| **Construyendo el historial de rendimiento** | Aún se están obteniendo los precios históricos de algunos activos. Las posiciones y la asignación ya están en **Listo**; el rendimiento muestra **Construyendo** y el benchmark **En espera** | Nada. Termina solo |
+| **El historial de la cartera está disponible solo en parte** | Los precios ya han llegado, y el historial aún no cubre todo el periodo. El rendimiento y el benchmark muestran **Parcial** | Nada. Los gráficos y las métricas pueden cubrir, por ahora, un periodo más corto |
+| **Precios históricos no disponibles** | Faltan precios de algunos activos desde hace más de tres días, normalmente porque el proveedor de datos de mercado no tiene precios más antiguos para ellos | Comprueba que cada activo se asoció al ticker correcto. Las posiciones siguen actualizadas en cualquier caso |
 
-- ready: normalmente se puede confiar en esa vista.
-- processing: el trabajo en segundo plano todavía se está poniendo al día.
-- partial: la vista es utilizable, pero está incompleta.
-- needs_action: el usuario debe resolver un problema de importación o de activos.
-- unavailable: reservado en la documentación para un estado futuro o generado por el backend; no des por hecho que esté activo hoy.
+Cuando no hay aviso, el historial está completo.
 
-## Notas sobre el ciclo de vida de los datos para desarrolladores
+## Qué esperar
 
-- Las transacciones manuales y las importaciones de CSV comparten el mismo objetivo final: transacciones persistidas y vistas de cartera actualizadas.
-- Las filas importadas con activos sin resolver deben notificarse con claridad, no deducirse en silencio.
-- La cobertura de precios históricos es bajo demanda y puede estar incompleta para fechas antiguas.
-- La reconstrucción de instantáneas puede ir por detrás de las actualizaciones de precio, sobre todo después de importaciones con actividad histórica de BUY/SELL.
-- La documentación actual debe evitar prometer una revisión de filas antes de guardar, a menos que exista un flujo de revisión específico.
+- Las posiciones pueden aparecer antes de que el gráfico de rendimiento tenga historial.
+- Una métrica que necesita más historial del que existe aparece como no disponible hasta que el historial se construye.
+- Que falte historial no siempre es un error. A menudo significa que los precios aún se están obteniendo.
+- Una importación de CSV solo puede confirmarse cuando todas las filas que necesitan revisión de activos están resueltas o su grupo se omite. Las filas de un grupo omitido no se importan. Consulta [Revisión antes de guardar](/es/docs/portfolio-investments/import-portfolio-csv#revisión-antes-de-guardar).
 
 ## Páginas relacionadas
 
-- [Inversiones de cartera](/es/docs/portfolio-investments)
+- [Cartera e inversiones](/es/docs/portfolio-investments)
 - [Importar un CSV de cartera](/es/docs/portfolio-investments/import-portfolio-csv)
 - [Añadir transacciones de cartera](/es/docs/portfolio-investments/add-portfolio-transactions)
+- [Rentabilidad e índices de referencia](/es/docs/portfolio-investments/performance-benchmarks)
 - [Métricas de cartera explicadas](/es/docs/portfolio-investments/portfolio-metrics-explained)

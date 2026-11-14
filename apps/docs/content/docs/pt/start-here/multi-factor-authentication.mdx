@@ -3,33 +3,45 @@ title: Autenticação de dois fatores
 description: Configura e usa a autenticação de dois fatores no início de sessão.
 ---
 
-A autenticação de dois fatores acrescenta uma segunda verificação no início de sessão. Quando está ativa, confirmas a identidade com um código ou outro método aprovado antes de abrires a sessão.
+A autenticação de dois fatores acrescenta uma segunda verificação no início de sessão. Quando está ativa, confirmas a identidade com um código de seis dígitos de uma aplicação de autenticação antes de abrires a sessão.
 
 ## Antes de começar
 
-Mantém acesso ao telefone, à aplicação autenticadora ou ao método de reserva associado à conta. Se estiveres a trocar de dispositivo, garante que o método antigo continua a funcionar até o novo estar pronto.
+Mantém acesso ao telefone e à aplicação de autenticação associados à conta. Se estiveres a trocar de dispositivo, garante que o método antigo continua a funcionar até o novo estar pronto.
+
+## Ativar
+
+1. Abre **Definições → Segurança** e encontra **Autenticação de dois fatores**.
+2. Seleciona **Ativar 2FA** e introduz a palavra-passe da tua conta.
+3. Digitaliza o código QR com a tua aplicação de autenticação.
+4. Em **Guarda os teus códigos de recuperação**, seleciona **Copiar códigos** e guarda-os num local seguro.
+5. Introduz o código de seis dígitos que a aplicação de autenticação mostra para concluir.
+
+Para desativar, seleciona **Desativar 2FA** na mesma secção e introduz a palavra-passe da tua conta.
 
 ## Passos
 
 1. Inicia sessão com o email e a palavra-passe.
-2. Introduz o código de verificação ou aprova a notificação.
-3. Guarda os códigos de reserva, se forem fornecidos.
-4. Confirma que a sessão abre normalmente.
+2. Introduz o código de seis dígitos da tua aplicação de autenticação.
+3. Confirma que a sessão abre normalmente.
+
+Iniciar sessão com uma chave de acesso não pede o código; vê [Chaves de acesso](/pt/docs/settings-security-privacy/passkeys).
 
 ## Rever a configuração
 
-Testa o fluxo de início de sessão uma vez após a configuração para garantir que o segundo fator funciona antes de precisares dele. Se dependeres de códigos de reserva, guarda-os num local seguro e separado do dispositivo que usas todos os dias.
+Testa o fluxo de início de sessão uma vez após a configuração para garantir que o segundo fator funciona antes de precisares dele. A página de início de sessão pede apenas o código da aplicação de autenticação, por isso mantém a aplicação disponível. Antes de trocares ou repores o telefone, passa a aplicação de autenticação para o novo dispositivo, ou desativa e volta a ativar a autenticação de dois fatores enquanto ainda tens a sessão iniciada.
 
 ## Problemas comuns
 
 - O código expirou antes de ser introduzido.
 - A aplicação autenticadora está num dispositivo substituído ou reposto.
-- Os códigos de reserva foram usados ou guardados no local errado.
+- O relógio do dispositivo que gera os códigos está dessincronizado.
 - O browser pede um novo desafio depois de terminar sessão.
 
 
 ## Ligações relacionadas
 
 - [Iniciar sessão e recuperar a palavra-passe](/pt/docs/start-here/sign-in-password-recovery)
+- [Definições da autenticação de dois fatores](/pt/docs/settings-security-privacy/two-factor-authentication)
 - [Criar uma conta](/pt/docs/start-here/create-account)
 - [Compreender o painel](/pt/docs/start-here/understand-dashboard)

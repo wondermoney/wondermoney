@@ -1,5 +1,5 @@
 # Financial markets — explorer, ticker quote, watchlist (populated first),
-# screener. market-news (no app surface) is intentionally not captured.
+# screener.
 section: financial-markets
 user: docs-screens-sandbox
 pages:

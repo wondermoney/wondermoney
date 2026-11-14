@@ -1,0 +1,64 @@
+---
+title: Bloqueo de la aplicación
+description: Exige Face ID, Touch ID o el código de tu dispositivo para abrir la aplicación móvil.
+---
+
+El bloqueo de la aplicación pone una pantalla de bloqueo delante de la aplicación móvil de WonderMoney. Para pasarla confirmas con el desbloqueo del propio teléfono: tu cara, tu huella o el código del dispositivo. Úsalo cuando otras personas cogen a veces tu teléfono desbloqueado.
+
+El bloqueo de la aplicación existe solo en la aplicación móvil y está desactivado hasta que lo activas. Es un bloqueo de pantalla en un teléfono, no un cambio en la forma de iniciar sesión en tu cuenta.
+
+## Activarlo
+
+1. En la aplicación móvil, abre **Más > Configuración > Seguridad** y busca **Bloqueo de la aplicación**.
+2. Selecciona **Activar el bloqueo de la aplicación**.
+3. Confirma en la solicitud que muestra el teléfono.
+
+La sección pasa a decir **El bloqueo de la aplicación está activado**. La aplicación no se bloquea en ese momento: se bloquea la próxima vez que salga de la pantalla.
+
+El teléfono debe tener configurado el desbloqueo por cara o por huella. Si no lo tiene, la sección muestra uno de estos mensajes y el bloqueo sigue desactivado:
+
+- **No hay biometría ni código configurado en este dispositivo.** El teléfono no indica ningún sensor de cara o de huella.
+- **Configura primero Face ID, Touch ID o un código en los ajustes de tu dispositivo.** El teléfono tiene sensor, pero no tiene guardada ninguna cara ni huella. Añade una en los ajustes del teléfono e inténtalo de nuevo.
+- **No se pudo confirmar. Inténtalo de nuevo.** La solicitud se canceló o no te reconoció.
+
+## Cuándo se bloquea la aplicación
+
+Con el bloqueo activado, WonderMoney se bloquea:
+
+- cada vez que la abres después de haberla cerrado;
+- en cuanto deja el primer plano, por ejemplo cuando cambias a otra aplicación, abres el selector de aplicaciones, despliegas el panel de control del teléfono o atiendes una llamada.
+
+No hay tiempo de espera. Si vuelves al cabo de un segundo, tienes que desbloquear otra vez.
+
+## Desbloquear la aplicación
+
+La pantalla de bloqueo dice **WonderMoney está bloqueada**. Selecciona **Desbloquear** y confirma con tu cara o tu huella. La aplicación no muestra la solicitud por sí sola; espera a que selecciones **Desbloquear**.
+
+- Si no se reconoce tu cara o tu huella, el teléfono ofrece el código del dispositivo.
+- WonderMoney no tiene un PIN propio para esto. El bloqueo usa lo que desbloquea el teléfono.
+- Si cancelas la solicitud o falla, la pantalla muestra **No se pudo desbloquear. Inténtalo de nuevo.** Selecciona **Desbloquear** para volver a intentarlo.
+- Si más adelante quitas tu cara o tu huella del teléfono, el código del dispositivo sigue desbloqueando la aplicación.
+
+La pantalla de bloqueo no tiene otra forma de entrar ni un botón para cerrar sesión.
+
+## Desactivarlo
+
+Abre **Más > Configuración > Seguridad** y selecciona **Desactivar el bloqueo de la aplicación**. En ese momento la aplicación ya está desbloqueada, así que no pide otra confirmación.
+
+## Qué protege
+
+- El bloqueo de la aplicación impide que alguien con tu teléfono desbloqueado abra WonderMoney en él. Quien conozca el código del dispositivo puede desbloquear la aplicación.
+- No es un segundo factor. No cambia la forma de iniciar sesión y no hace nada en la web ni en tus otros dispositivos. Para proteger la cuenta en sí, usa la [autenticación de dos factores](/es/docs/settings-security-privacy/two-factor-authentication) o una [llave de acceso](/es/docs/settings-security-privacy/passkeys).
+- El ajuste se guarda en el teléfono, no en tu cuenta. Actívalo por separado en cada teléfono o tableta.
+- Cubre la aplicación con la sesión iniciada. Las pantallas de inicio de sesión no quedan detrás del bloqueo.
+- Cerrar sesión no lo desactiva. El ajuste sigue en el teléfono y vuelve a aplicarse cuando alguien inicie sesión, con la misma cuenta o con otra.
+
+Para ocultar los importes con la aplicación abierta, usa el [modo privacidad](/es/docs/settings-security-privacy/privacy-mode).
+
+## Páginas relacionadas
+
+- [Autenticación de dos factores](/es/docs/settings-security-privacy/two-factor-authentication)
+- [Llaves de acceso](/es/docs/settings-security-privacy/passkeys)
+- [Modo privacidad](/es/docs/settings-security-privacy/privacy-mode)
+- [Usar la aplicación móvil con tu servidor](/es/docs/self-hosting/mobile-app)
+- [Configuración, seguridad y privacidad](/es/docs/settings-security-privacy)

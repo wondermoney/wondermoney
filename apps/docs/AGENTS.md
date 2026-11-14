@@ -56,7 +56,7 @@ proxy.ts               # Next 16 request gate/rewrites, not middleware.ts
 ```bash
 pnpm dev
 pnpm type-check   # Regenerates MDX and Next types before tsc
-pnpm lint         # ESLint plus the sub-processor check
+pnpm lint         # ESLint plus the sub-processor, locale-parity and rule-presets checks
 pnpm build
 ```
 

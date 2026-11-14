@@ -14,6 +14,8 @@ sh install.sh
 
 El script comprueba que estén Docker, el plugin Compose, `openssl` y `curl`, y se detiene con instrucciones si falta alguno. Descarga los archivos del servidor desde la etiqueta de la versión, escribe `.env` con secretos nuevos, inicia la pila y espera hasta tres minutos a la API. Pregunta las direcciones de la aplicación web y de la API; `--yes` usa los valores por defecto, `http://localhost:3000` y `http://localhost:3001`. Vuelve a ejecutarlo para actualizar: nunca reescribe `.env` y propone pasar a la última versión.
 
+Instala en `./wondermoney` (`--dir` elige otra carpeta, `--version` otra versión) y define `WM_VERSION` en `.env` con la versión que instaló. Ejecuta los comandos `docker compose` de estas páginas desde esa carpeta. En macOS, comprueba el archivo con `shasum -a 256 -c install.sh.sha256` en lugar de `sha256sum`.
+
 ### Léelo primero
 
 El instalador es un script POSIX `sh` corto. Descárgalo, léelo y después ejecútalo:

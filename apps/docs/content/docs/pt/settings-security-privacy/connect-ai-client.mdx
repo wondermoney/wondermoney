@@ -3,7 +3,7 @@ title: Ligar um cliente de IA
 description: Permite que o Claude Desktop, o Cursor ou outro cliente MCP pergunte sobre as tuas próprias finanças com um token só de leitura.
 ---
 
-O WonderMoney tem um servidor [Model Context Protocol](https://modelcontextprotocol.io) (MCP) só de leitura. Um cliente MCP como o Claude Desktop, o Cursor ou o VS Code pode perguntar-lhe pelas tuas contas, despesas, orçamentos, objetivos, património líquido e carteira, e responder no próprio chat do cliente.
+O WonderMoney tem um servidor [Model Context Protocol](https://modelcontextprotocol.io) (MCP) só de leitura. Um cliente MCP como o Claude Desktop, o Cursor ou o VS Code pode perguntar-lhe pelas tuas contas, despesas, orçamentos, objetivos, património líquido e portefólio, e responder no próprio chat do cliente.
 
 O servidor está em `POST /v1/mcp` na tua API. Não é uma conta separada e não tem ferramentas de escrita: pode ler e, se o permitires, propor uma alteração para confirmares. Nunca altera nada sozinho.
 
@@ -11,7 +11,7 @@ O servidor está em `POST /v1/mcp` na tua API. Não é uma conta separada e não
 
 O cliente vê exatamente o que tu vês:
 
-- As contas, transações, orçamentos, categorias, objetivos e carteiras partilhados do agregado.
+- As contas, transações, orçamentos, categorias, objetivos e portefólios partilhados do agregado.
 - As tuas contas privadas e as contas privadas partilhadas contigo, e **não** as contas privadas de outro membro do agregado que estão ocultas para ti.
 - Nunca os dados de outro agregado.
 

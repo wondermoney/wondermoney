@@ -1,7 +1,7 @@
 {
   "exchangeRates": {
     "title": "Exchange rates",
-    "description": "Set your own rate for a currency pair on a given day, for a currency the rate feed does not cover or a day it got wrong. Both members of a household share these rates.",
+    "description": "Set your own rate for a currency pair on a given day, for a currency the rate feed does not cover or a day it got wrong. Everyone in a household shares these rates.",
     "how-it-applies": "A rate applies from its day until the feed, or another of your rates, has a newer one. On its own day it replaces the feed's rate. Amounts already stored are converted again in the background.",
     "table-label": "Your exchange rates",
     "pair": "Pair",

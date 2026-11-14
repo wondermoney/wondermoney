@@ -1,6 +1,6 @@
 ---
 title: Add Portfolio Transactions
-description: Add buys, sells, dividends, and fees to a portfolio.
+description: Add buys, sells and other transactions to a portfolio, with their fees.
 ---
 
 Add transactions when you want portfolio performance to reflect what actually happened in the market and in your broker account.
@@ -15,20 +15,45 @@ Add transactions when you want portfolio performance to reflect what actually ha
 
 ## Supported transaction types
 
+Choose **Add transaction** on the Portfolios page or on a portfolio's page. The **Transaction type** list offers:
+
 - Buy
 - Sell
-- Dividend or distribution
-- Fee or commission
-- Other portfolio cash movement, when relevant to your broker export
+- Deposit
+- Withdrawal
+- Offer
+
+Holdings, cost basis and realized gains are worked out from buys and sells. A deposit, a withdrawal or an offer is kept in the portfolio's transaction list and does not change your holdings.
+
+Dividend is not in the list: a dividend cannot be added by hand in the web or mobile app. A fee is not a type of its own either: it is recorded on the buy or sale it belongs to.
 
 ## What to include
 
-- Trade date
+- Portfolio
+- Date, today or earlier
 - Asset or ticker symbol
 - Quantity
-- Price
-- Fees
-- Currency
+- Unit price and its currency
+- Fees, if any: turn on **Add Fees** and enter the amount and its currency
+
+On the web you can also choose the broker, add notes and, for a trade made in another currency, turn on **Add original currency/amount** to keep the original price. The mobile app's form has no broker, fee or original-currency fields.
+
+## Edit or correct a transaction
+
+- A sale of more units than the portfolio holds is refused.
+- A saved transaction can change between buy and sell. To turn it into another type, delete it and add a new one.
+
+## Savings certificates
+
+Portuguese savings certificates (Certificados de Aforro) have no ticker. On the web, under **Asset type** in the Add transaction dialog, choose **Savings certificate** instead of **Stock, ETF, or fund**. Then:
+
+1. Pick the **Série**, from A to F.
+2. Enter the **Subscription date** and the **Principal amount**.
+3. For séries C to F, tick **Tax-exempt (65+)** if the exemption from withholding applies to you. It is self-reported: WonderMoney does not check your age or eligibility.
+
+For séries C to F, WonderMoney estimates the current value from the rates IGCP publishes. Every three months from the subscription date, interest is credited at the série's base rate plus the loyalty premium for the years held, less the 28% withholding unless you ticked the exemption, and is added to the balance. Séries A and B have no published formula, so their value is what your transactions say.
+
+The holding's details show **Accrual details**: the current rate, the years held, the premium tier, the next capitalization and the current value of each subscription. The figures are an estimate, not a guarantee of the redemption value.
 
 ## Why this matters
 
