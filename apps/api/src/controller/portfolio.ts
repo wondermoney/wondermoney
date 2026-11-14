@@ -554,9 +554,9 @@ export async function getAllocation(req: Request, res: Response) {
 export async function getPerformance(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { period },
+    query: { memberKeys, period },
   } = await zParse(getAggregatePerformanceRequestSchema, req);
-  const performance = await portfolioDashboardService.getPerformanceData(user, null, period || 'YTD', tenant.tenantKey);
+  const performance = await portfolioDashboardService.getPerformanceData(user, null, period || 'YTD', tenant.tenantKey, memberKeys);
   return res.json(performance);
 }
 

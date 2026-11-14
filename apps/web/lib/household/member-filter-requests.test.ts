@@ -1,6 +1,6 @@
 /**
  * Every surface the member filter applies to sends it the way its endpoint reads it: `memberKeys`
- * on lists, reports, cash flow, category spending and budgets, `member` on net worth. Without a filter, nothing is
+ * on lists, reports, cash flow, category spending, budgets and the portfolio chart, `member` on net worth. Without a filter, nothing is
  * sent, so an unfiltered request is the same as before the filter existed.
  */
 import assert from "node:assert/strict";
@@ -21,6 +21,7 @@ import {
 import { getTransactionsCategorySpending } from "@/lib/api/account/useTransactionsCategorySpending";
 import { getBudgetsFull } from "@/lib/api/budget/useBudgetsFull";
 import { getNetWorth } from "@/lib/api/net-worth/useNetWorth";
+import { getPortfolioPerformance } from "@/lib/api/portfolio/usePortfolioPerformance";
 import { getCashflow } from "@/lib/api/reports/cashflow";
 
 /** A client that records the params of every GET and answers with `data`. */
@@ -85,6 +86,23 @@ test("the accounts overview's category spending sends memberKeys only when filte
   assert.equal(sent[0].url, "/v1/account/transaction/category-spending");
   assert.equal(sent[0].params?.memberKeys, "4");
   assert.equal("memberKeys" in (sent[1].params ?? {}), false);
+});
+
+test("the portfolio chart sends memberKeys on the household's chart only, and only when filtered", async () => {
+  const { client, sent } = recordingClient({ dataPoints: [] });
+  await getPortfolioPerformance(null, "YTD", client, ["4", "shared"]);
+  await getPortfolioPerformance(null, "YTD", client);
+  // One portfolio has one owner: the filter has nothing to narrow there.
+  await getPortfolioPerformance(7, "YTD", client, ["4"]);
+
+  assert.deepEqual(
+    sent.map((request) => [request.url, request.params]),
+    [
+      ["/v1/portfolio/performance", { period: "YTD", memberKeys: "4,shared" }],
+      ["/v1/portfolio/performance", { period: "YTD" }],
+      ["/v1/portfolio/7/performance", { period: "YTD" }],
+    ],
+  );
 });
 
 test("budgets send memberKeys only when filtered", async () => {

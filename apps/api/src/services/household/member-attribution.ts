@@ -122,6 +122,22 @@ export function memberFilterSql(attribution: string, filter: MemberFilter): stri
   return branches.length === 0 ? 'false' : `(${branches.join(' or ')})`;
 }
 
+/**
+ * The portfolios a member filter keeps. A portfolio is its owner's outright: it has no joint switch
+ * and no ownership shares, and one whose owner left the household is Shared. Portfolios belong to
+ * the household, so this only narrows the household's list; it never decides who sees one.
+ */
+export async function portfoliosOfMembers<T extends { portfolioOwnerAppuserKey: { appuserKey: number } }>(
+  em: EntityManager,
+  tenantKey: number,
+  portfolios: readonly T[],
+  filter: MemberFilter | undefined,
+): Promise<T[]> {
+  if (!filter) return [...portfolios];
+  const active = new Set((await loadActiveMembers(em, tenantKey)).keys());
+  return portfolios.filter((portfolio) => matchesMemberFilter(accountAttributionOf({ isJoint: false, ownerAppuserKey: portfolio.portfolioOwnerAppuserKey.appuserKey }, active), filter));
+}
+
 /** The household's active members, each with the name the clients show for them. */
 export function displayNameOf(appuser: { emailAddress: string; firstName?: null | string }): string {
   return appuser.firstName?.trim() || appuser.emailAddress;

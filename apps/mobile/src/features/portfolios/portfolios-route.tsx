@@ -2,6 +2,8 @@ import { type Href, useRouter } from 'expo-router'
 import { useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { effectiveMemberFilter, type MemberFilter, memberKeysParam } from '@/features/household/member-attribution'
+import { useHouseholdMembers } from '@/features/household/use-household-members'
 
 import { mapPortfolioDividendIncome } from './portfolio-activity-view-model'
 import type { PortfolioPerformanceState } from './portfolio-performance-chart'
@@ -31,10 +33,16 @@ export function PortfoliosRoute() {
   const { signOut } = useProductRuntime()
   const router = useRouter()
   const hasPortfolios = (query.data?.portfolios.portfolios.length ?? 0) > 0
+  // The chart's member filter (households of more than one): it keeps the chosen member's
+  // portfolios. The summary and the other sections stay the household's.
+  const members = useHouseholdMembers()
+  const [memberChoice, setMemberChoice] = useState<MemberFilter>(null)
+  const memberFilter = effectiveMemberFilter(memberChoice, members)
+  const member = memberKeysParam(memberFilter)
 
   // The sections web loads alongside the summary. Each loads, fails and retries on its own.
   const metrics = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'metrics'), () => portfolioMetricsEndpoint, hasPortfolios)
-  const performance = usePortfolioResource((epoch) => portfolioPerformanceKey(epoch, 'aggregate', period), () => createPortfolioPerformanceEndpoint(null, period), hasPortfolios, true)
+  const performance = usePortfolioResource((epoch) => portfolioPerformanceKey(epoch, 'aggregate', period, member), () => createPortfolioPerformanceEndpoint(null, period, member), hasPortfolios, true)
   const allocation = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'allocation'), () => portfolioAllocationEndpoint, hasPortfolios)
   const topMovers = usePortfolioResource((epoch) => portfolioTopMoversKey(epoch, 'aggregate', period), () => createPortfolioTopMoversEndpoint(null, period), hasPortfolios, true)
   const dividends = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'dividends'), () => portfolioDividendIncomeEndpoint, hasPortfolios)
@@ -77,6 +85,7 @@ export function PortfoliosRoute() {
       onOpenHolding={(holding) => { if (holding.portfolioId) router.push(`/portfolio/${holding.portfolioId}/holding/${holding.id}` as Href) }}
       onRefresh={refresh}
       onLogout={signOut}
+      performanceMemberFilter={members.multiMember ? { model: members, value: memberFilter, onChange: setMemberChoice } : undefined}
       onSelectPortfolio={(portfolioId) => router.push({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolioId) } } as unknown as Href)}
     />
   )

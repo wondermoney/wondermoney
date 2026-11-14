@@ -69,12 +69,18 @@ interface PortfolioPerformanceChartProps {
   portfolioId: number | null;
   period: Period;
   currency?: string;
+  /**
+   * The aggregate chart's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone.
+   */
+  memberKeys?: string[];
 }
 
 const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
   portfolioId,
   period,
   currency = "USD",
+  memberKeys,
 }) => {
   const t = useTranslations();
   const { formatChartDate } = useChartFormatters();
@@ -83,6 +89,8 @@ const PortfolioPerformanceChart: React.FC<PortfolioPerformanceChartProps> = ({
   const { data: performanceData, isLoading } = usePortfolioPerformance(
     portfolioId,
     period,
+    undefined,
+    memberKeys,
   );
   const readiness = performanceData?.readiness?.performance;
   const status: PortfolioPerformanceReadinessStatus =

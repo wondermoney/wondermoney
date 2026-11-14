@@ -37,8 +37,9 @@ export const portfolioAnalyticsKey = (epochId: number, resource: 'allocation' | 
 export const portfolioDividendIncomeKey = (epochId: number, portfolioId: number) => (
   ['portfolio-analytics', epochId, portfolioId, 'dividend-income'] as const
 )
-export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string) => (
-  ['portfolio-performance', epochId, portfolioId, period] as const
+/** A member filter (the aggregate's) is its own entry under the period, so invalidating the chart refreshes every one. */
+export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string, member?: string) => (
+  member === undefined ? ['portfolio-performance', epochId, portfolioId, period] as const : ['portfolio-performance', epochId, portfolioId, period, member] as const
 )
 
 const PORTFOLIO_CONTENT_QUERY_TAGS = new Set([
