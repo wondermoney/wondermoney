@@ -22,7 +22,7 @@
     "instructions-google": "Google Calendar: Outros calendários → A partir de URL → cola a ligação.",
     "instructions-apple": "Apple Calendar: Ficheiro → Nova subscrição de calendário → cola a ligação.",
     "instructions-refresh": "A aplicação de calendário atualiza o feed segundo a sua própria periodicidade.",
-    "instructions-privacy": "O feed mostra apenas os pagamentos que podes ver. Uma conta privada do outro membro do agregado não aparece.",
+    "instructions-privacy": "O feed mostra apenas os pagamentos que podes ver. Uma conta privada de outro membro do agregado não aparece.",
     "revoke-title": "Revogar esta ligação?",
     "revoke-description": "O calendário deixa de receber as contas a pagar. Podes criar uma nova ligação mais tarde.",
     "revoke-confirm": "Revogar esta ligação",

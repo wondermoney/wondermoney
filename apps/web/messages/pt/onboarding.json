@@ -107,7 +107,7 @@
           },
           "netWorth": {
             "title": "Património líquido",
-            "description": "Contas e carteiras combinam-se num só número: o teu património líquido."
+            "description": "Contas e portefólios combinam-se num só número: o teu património líquido."
           }
         },
         "proofNote": "O acompanhamento regular do património líquido dá às pessoas uma forma mensurável de ver o progresso financeiro ao longo do tempo.",
@@ -279,7 +279,7 @@
           "previewLabel": "Dados de pré-visualização",
           "transactionLabel": "Transação recente",
           "transactionValue": "€128,40 • Supermercado",
-          "portfolioLabel": "Alocação da carteira",
+          "portfolioLabel": "Alocação do portefólio",
           "portfolioValue": "52% ações",
           "deltaValue": "+4,2%",
           "categories": {

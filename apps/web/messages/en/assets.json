@@ -56,7 +56,7 @@
       "growthStartDate": "Changes from",
       "growthStartDateHint": "Optional. The value stays as it is until this date.",
       "private": "Private asset",
-      "privateDescription": "Only you see this asset. It stays out of the other household member's net worth.",
+      "privateDescription": "Only you see this asset. It stays out of the other household members' net worth.",
       "notes": "Notes",
       "notesPlaceholder": "Anything worth remembering about this asset",
       "datePlaceholder": "Pick a date"
@@ -83,7 +83,7 @@
       "estimated": "Estimated from the yearly change since the valuation of {date}.",
       "errors": {
         "loadFailed": "This asset could not be loaded",
-        "loadFailedBody": "It may have been deleted, or it is private to the other member of your household."
+        "loadFailedBody": "It may have been deleted, or it is private to another member of your household."
       },
       "history": {
         "title": "Value over time",

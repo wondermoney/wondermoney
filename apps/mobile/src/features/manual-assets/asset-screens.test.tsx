@@ -178,7 +178,7 @@ describe('Asset detail', () => {
 
   it('says a missing asset may be private to the other member, with no retry', async () => {
     const view = await renderScreen(<AssetDetailScreen state={{ status: 'not-found' }} onBack={jest.fn()} onUpdateValue={jest.fn()} onRefresh={jest.fn()} />)
-    expect(view.getByText('It may have been deleted, or it is private to the other member of your household.')).toBeOnTheScreen()
+    expect(view.getByText('It may have been deleted, or it is private to another member of your household.')).toBeOnTheScreen()
     expect(view.queryByRole('button', { name: 'Retry' })).not.toBeOnTheScreen()
   })
 })
@@ -403,6 +403,6 @@ describe('Edit asset', () => {
 
   it('says when the asset is gone', async () => {
     const view = await renderScreen(<AssetEditScreen state={{ status: 'not-found' }} pending={false} outcome={null} onBack={jest.fn()} onSave={jest.fn()} />)
-    expect(view.getByText('This asset no longer exists, or it is private to the other member of your household.')).toBeOnTheScreen()
+    expect(view.getByText('This asset no longer exists, or it is private to another member of your household.')).toBeOnTheScreen()
   })
 })
