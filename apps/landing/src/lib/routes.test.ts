@@ -401,6 +401,15 @@ describe("standalone page routes", () => {
 		}
 	})
 
+	it("maps the lead-magnet guide slug when switching language", () => {
+		expect(
+			toLocalizedPathname("/en/10-minute-net-worth-check-in-guide", "pt"),
+		).toBe("/pt/guia-verificacao-patrimonio-10-minutos")
+		expect(
+			toLocalizedPathname("/de/leitfaden-nettovermoegen-10-minuten", "it"),
+		).toBe("/it/guida-patrimonio-netto-10-minuti")
+	})
+
 	it("maps standalone page slugs when switching language", () => {
 		expect(toLocalizedPathname("/pt/controlo-gastos", "en")).toBe("/en/expense-tracker")
 		expect(toLocalizedPathname("/en/expense-tracker", "pt")).toBe("/pt/controlo-gastos")
