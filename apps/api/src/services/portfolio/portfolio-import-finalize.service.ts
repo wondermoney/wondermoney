@@ -98,7 +98,7 @@ class PortfolioImportFinalizeService {
 
         if (!transactionDate) throw new Error('Invalid date');
         if (!transactionType && typeof transactionTypeId !== 'number') throw new Error('Invalid transaction type');
-        if (transactionType && transactionType !== 'BUY' && transactionType !== 'SELL') throw new Error('Invalid transaction type');
+        if (transactionType && !['BUY', 'DIVIDEND', 'SELL'].includes(transactionType)) throw new Error('Invalid transaction type');
         if (typeof quantity !== 'number' || !Number.isFinite(quantity) || quantity <= 0) throw new Error('Invalid quantity');
         if (typeof unitPrice !== 'number' || !Number.isFinite(unitPrice) || unitPrice <= 0) throw new Error('Invalid unitPrice');
         if (settlementCurrencyCode === undefined && typeof settlementCurrencyId !== 'number') throw new Error('Invalid settlementCurrency');
@@ -107,7 +107,7 @@ class PortfolioImportFinalizeService {
           ? await em.findOne(FinancialTransactionType, { financialTransactionTypeKey: transactionTypeId })
           : await em.findOne(FinancialTransactionType, { name: transactionType });
         if (!type) throw new Error(`Financial transaction type not found: ${transactionType ?? transactionTypeId}`);
-        if (type.name !== 'BUY' && type.name !== 'SELL') throw new Error('Invalid transaction type');
+        if (!['BUY', 'DIVIDEND', 'SELL'].includes(type.name)) throw new Error('Invalid transaction type');
         const currency = typeof settlementCurrencyId === 'number'
           ? await em.findOne(Currency, { currencyKey: settlementCurrencyId })
           : await em.findOne(Currency, { code: settlementCurrencyCode });

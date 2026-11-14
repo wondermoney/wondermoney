@@ -46,10 +46,12 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
   const [name, setName] = useState(portfolio.name);
   const [description, setDescription] = useState(portfolio.description ?? "");
   const [link, setLink] = useState(draftFromLink(portfolio.accountLink));
-  const [costBasisMethod, setCostBasisMethod] = useState<PortfolioCostBasisMethod>(
-    portfolio.costBasisMethod ?? "FIFO",
-  );
+  const [costBasisMethod, setCostBasisMethod] =
+    useState<PortfolioCostBasisMethod>(portfolio.costBasisMethod ?? "FIFO");
   const [excluded, setExcluded] = useState(portfolio.excluded ?? false);
+  const [benchmarkSymbol, setBenchmarkSymbol] = useState(
+    portfolio.benchmarkSymbol ?? "",
+  );
 
   // Reload the fields from the portfolio when the modal opens (or the
   // portfolio changes while open), adjusting during render.
@@ -62,6 +64,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
       setLink(draftFromLink(portfolio.accountLink));
       setCostBasisMethod(portfolio.costBasisMethod ?? "FIFO");
       setExcluded(portfolio.excluded ?? false);
+      setBenchmarkSymbol(portfolio.benchmarkSymbol ?? "");
     }
   }
 
@@ -97,6 +100,9 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
           : {}),
         ...(costBasisMethodChanged ? { costBasisMethod } : {}),
         ...(excluded !== (portfolio.excluded ?? false) ? { excluded } : {}),
+        ...(benchmarkSymbol.trim() !== (portfolio.benchmarkSymbol ?? "")
+          ? { benchmarkSymbol: benchmarkSymbol.trim() || null }
+          : {}),
       });
       toast.success(t("save"));
       closeModal();
@@ -137,6 +143,28 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="portfolio-benchmark">
+            {t("portfolio-benchmark-symbol")}
+          </Label>
+          <Input
+            id="portfolio-benchmark"
+            value={benchmarkSymbol}
+            maxLength={20}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            aria-describedby="portfolio-benchmark-hint"
+            onChange={(e) => setBenchmarkSymbol(e.target.value)}
+          />
+          <Text
+            id="portfolio-benchmark-hint"
+            variant="smallText"
+            className="text-muted-foreground"
+          >
+            {t("portfolio-benchmark-symbol-hint")}
+          </Text>
         </div>
 
         <PortfolioAccountLinkFields

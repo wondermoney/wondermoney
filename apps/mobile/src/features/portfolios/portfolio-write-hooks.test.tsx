@@ -45,6 +45,16 @@ describe('portfolio writes', () => {
     const { client, wrapper } = setup(); mockWrite.mockRejectedValue(new ApiError('invalid-response')); const first = await renderHook(() => usePortfolioSettings(7), { wrapper }); await act(async () => { await expect(first.result.current.mutateAsync({ description: null })).rejects.toBeInstanceOf(ApiError) }); await waitFor(() => expect(first.result.current.unknownOutcome?.payload).toEqual({ description: null })); await first.unmount()
     const second = await renderHook(() => usePortfolioSettings(7), { wrapper }); expect(second.result.current.unknownOutcome?.payload).toEqual({ description: null }); await act(async () => { await expect(second.result.current.mutateAsync({ name: 'Again' })).rejects.toBeInstanceOf(ApiError) }); expect(mockWrite).toHaveBeenCalledTimes(1); await act(async () => { second.result.current.acknowledgeReconciliation('not-applied') }); await waitFor(() => expect(second.result.current.unknownOutcome).toBeNull()); await second.unmount(); client.clear()
   })
+  it('refreshes cached comparisons for every period after changing the benchmark', async () => {
+    const { client, wrapper } = setup()
+    const key = ['portfolio-performance', 8, 7, '1Y'] as const
+    client.setQueryData(key, { benchmarkSymbol: 'SPY' })
+    mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(); return metadata })
+    const hook = await renderHook(() => usePortfolioSettings(7), { wrapper })
+    await act(async () => { await hook.result.current.mutateAsync({ benchmarkSymbol: 'QQQ' }) })
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true)
+    await hook.unmount(); client.clear()
+  })
   it('a settings save that changes the link also refreshes net worth and its history', async () => {
     const { client, wrapper } = setup(); const invalidate = jest.spyOn(client, 'invalidateQueries'); mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(); return metadata })
     const hook = await renderHook(() => usePortfolioSettings(7), { wrapper })

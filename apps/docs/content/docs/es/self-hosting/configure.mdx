@@ -306,8 +306,8 @@ Tu instancia no carga analítica ni gestor de etiquetas, ni registra eventos de 
 
 | Ajuste | Qué activa |
 |---|---|
-| `NEXT_PUBLIC_GTM_ID` | Tu contenedor de Google Tag Manager (`GTM-XXXXXXX`), cargado en todas las páginas de la aplicación web |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog en la aplicación web: vistas de página, eventos de uso y grabaciones de sesión, asociados a la dirección de correo de cada usuario |
+| `NEXT_PUBLIC_GTM_ID` | Tu contenedor de Google Tag Manager (`GTM-XXXXXXX`), cargado solo tras el consentimiento en el navegador |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog en la aplicación web: vistas de página y eventos de uso solo tras el consentimiento en el navegador. La grabación de sesiones y la identificación por correo están desactivadas |
 | `ANALYTICS_OUTBOX_MODE=live` con `POSTHOG_API_KEY` | Eventos de registro, inicio de sesión y sincronización bancaria enviados a PostHog por la API y el worker. Define ambos en la API y en el worker; con el modo desactivado, no se registra ningún evento. `POSTHOG_HOST`, en el worker, define la dirección de PostHog, por defecto `https://eu.i.posthog.com` |
 
 Si activas alguno, informa a tus usuarios en tu política de privacidad (`NEXT_PUBLIC_PRIVACY_URL`) y pide su consentimiento cuando la ley lo exija.

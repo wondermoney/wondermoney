@@ -437,7 +437,7 @@ export async function rebuildPortfolioSnapshot(req: Request, res: Response) {
 export async function updatePortfolio(req: Request, res: Response) {
   const { appuserKey, tenantKey } = authedContext(req);
   const {
-    body: { accountLink, benchmarkSymbol, costBasisMethod, currencyId, description, excluded, favored, name, targetAllocation },
+    body: { accountLink, benchmarkSymbol, costBasisMethod, currencyId, description, excluded, name, targetAllocation },
     params: { portfolioId },
   } = await zParse(updatePortfolioRequestSchema, req);
 
@@ -460,8 +460,7 @@ export async function updatePortfolio(req: Request, res: Response) {
   if (name !== undefined) portfolio.name = name;
   if (description !== undefined) portfolio.description = description ?? undefined;
   if (excluded !== undefined) portfolio.excluded = excluded;
-  if (favored !== undefined) portfolio.favored = favored;
-  if (benchmarkSymbol !== undefined) portfolio.benchmarkSymbol = benchmarkSymbol;
+  if (benchmarkSymbol !== undefined) portfolio.benchmarkSymbol = benchmarkSymbol || undefined;
   if (costBasisMethodChanged) portfolio.costBasisMethod = nextCostBasisMethod;
   if (targetAllocation !== undefined && targetAllocation !== null) {
     const assetClasses = await DI.em.find(AssetClass, {});
@@ -497,7 +496,7 @@ export async function updatePortfolio(req: Request, res: Response) {
     }
   }
 
-  return res.json({ portfolio: pick(portfolio, ['portfolioKey', 'name', 'description', 'currencyKey.code', 'excluded', 'favored', 'benchmarkSymbol', 'targetAllocation', 'costBasisMethod']) });
+  return res.json({ portfolio: pick(portfolio, ['portfolioKey', 'name', 'description', 'currencyKey.code', 'excluded', 'benchmarkSymbol', 'targetAllocation', 'costBasisMethod']) });
 }
 
 export async function updatePortfolioTransaction(req: Request, res: Response) {

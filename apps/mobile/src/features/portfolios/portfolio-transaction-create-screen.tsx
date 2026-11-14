@@ -76,12 +76,9 @@ export type PortfolioTransactionCreateScreenProps = Readonly<{
 const SEGMENT_TYPES = new Set(['BUY', 'SELL'])
 
 /**
- * Manual BUY/SELL transaction entry, as a calm-structure flow: the form bar
- * (close, save), the unit price big and centred, Buy | Sell, then one group
- * of rows. Mirrors web's PortfolioTransactionAddModal field set minus
- * broker/fee/original-currency (mobile-scoped, same rationale as the edit
- * form), and never offers DIVIDEND as a type: the route passes the
- * already-filtered transactionTypes list.
+ * Manual portfolio transaction entry. Dividends use quantity × dividend per
+ * share; they do not change the shares held. Mirrors web's fields except the
+ * optional broker, fee and original currency.
  */
 export function PortfolioTransactionCreateScreen({ transactionTypes, currencies, defaultCurrencyId, loading, metadataError, pending, outcome, palette, onBack, onCreate }: PortfolioTransactionCreateScreenProps) {
   const { t, i18n } = useTranslation()
@@ -93,6 +90,7 @@ export function PortfolioTransactionCreateScreen({ transactionTypes, currencies,
   const [chosenTypeId, setFinancialTransactionTypeId] = useState<number | null>(null)
   const defaultType = transactionTypes.find((type) => type.name.toUpperCase() === 'BUY') ?? transactionTypes[0]
   const financialTransactionTypeId = chosenTypeId ?? defaultType?.financialTransactionTypeKey ?? null
+  const isDividend = transactionTypes.some((type) => type.financialTransactionTypeKey === financialTransactionTypeId && type.name.toUpperCase() === 'DIVIDEND')
   const [settlementCurrencyId, setSettlementCurrencyId] = useState<number | null>(defaultCurrencyId)
   const [quantity, setQuantity] = useState('')
   const [unitPrice, setUnitPrice] = useState('')
@@ -141,8 +139,8 @@ export function PortfolioTransactionCreateScreen({ transactionTypes, currencies,
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.page}>
           <AmountEntry
-            accessibilityLabel={t('portfolioTransactionCreate.unitPrice')}
-            caption={t('portfolioTransactionCreate.unitPrice')}
+            accessibilityLabel={t(isDividend ? 'portfolioTransactionCreate.dividendPerShare' : 'portfolioTransactionCreate.unitPrice')}
+            caption={t(isDividend ? 'portfolioTransactionCreate.dividendPerShare' : 'portfolioTransactionCreate.unitPrice')}
             currency={currency?.code ?? null}
             editable={!locked}
             error={unitPriceError}

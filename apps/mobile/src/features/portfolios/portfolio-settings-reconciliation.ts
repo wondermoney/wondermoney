@@ -25,7 +25,6 @@ export function reconcilePortfolioSettings(
       : response.data.portfolio.benchmarkSymbol === payload.data.benchmarkSymbol)
   }
   if (payload.data.excluded !== undefined) matches.push(response.data.portfolio.excluded === payload.data.excluded)
-  if (payload.data.favored !== undefined) matches.push(response.data.portfolio.favored === payload.data.favored)
   if (payload.data.targetAllocation !== undefined) {
     matches.push(portfolioTargetAllocationsEqual(payload.data.targetAllocation, response.data.portfolio.targetAllocation))
   }

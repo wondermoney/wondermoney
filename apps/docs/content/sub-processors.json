@@ -31,9 +31,9 @@
     {
       "id": "posthog",
       "heading": { "en": "PostHog", "pt": "PostHog", "es": "PostHog" },
-      "purpose": "Product analytics and session replay.",
-      "evidence": "web AnalyticsInit.tsx: posthog.init({ api_host: 'https://eu.posthog.com' }), posthog.startSessionRecording() outside development, posthog.identify(user.id, { email }); api depends on posthog-node.",
-      "personalData": "Email address, user id, usage events, and session recordings of authenticated screens — which contain account balances and transaction descriptions.",
+      "purpose": "Product analytics.",
+      "evidence": "web AnalyticsInit.tsx initializes PostHog only after browser opt-in, disables recording and person profiles, and uses memory persistence. The API/worker analytics outbox is separately enabled by the operator.",
+      "personalData": "Browser usage and device data, anonymous identifiers and IP address after opt-in; user ids and usage events from the separately enabled server analytics outbox. Browser session recording and email identification are disabled.",
       "location": "European Union (eu.posthog.com)"
     },
     {

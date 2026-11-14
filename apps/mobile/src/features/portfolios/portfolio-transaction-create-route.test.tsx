@@ -51,9 +51,9 @@ describe('portfolio transaction create route', () => {
     mockUsePortfolioTransactionTypes.mockReset().mockReturnValue({ data: { transactionTypes: [{ financialTransactionTypeKey: 1, name: 'BUY' }, { financialTransactionTypeKey: 2, name: 'SELL' }, { financialTransactionTypeKey: 3, name: 'DIVIDEND' }] }, isPending: false })
   })
 
-  it('filters DIVIDEND out before it ever reaches the screen and preselects the portfolio-native currency', async () => {
+  it('offers dividends alongside trades and preselects the portfolio-native currency', async () => {
     const view = await renderRoute()
-    expect(view.getByText('false:false:BUY,SELL:EUR,USD:1:-')).toBeOnTheScreen()
+    expect(view.getByText('false:false:BUY,SELL,DIVIDEND:EUR,USD:1:-')).toBeOnTheScreen()
   })
 
   it('surfaces the loading state while metadata is still resolving', async () => {

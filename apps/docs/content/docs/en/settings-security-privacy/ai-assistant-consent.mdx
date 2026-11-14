@@ -3,7 +3,7 @@ title: AI Assistant Consent
 description: Understand how consent for the assistant is collected and managed, and where analytics choices are made.
 ---
 
-WonderMoney asks for your consent before it turns on the assistant, and you can change that at any time from settings. Analytics is not an account setting: the wonder.money website asks about it in a banner, and the apps follow what the server is set up to do.
+WonderMoney asks for your consent before it turns on the assistant, and you can change that at any time from settings. Browser analytics has a separate opt-in choice, saved in this browser and changeable in **Settings → Privacy**.
 
 <DocsImage
   src="/images/docs/settings-security-privacy/ai-assistant-consent-consent.png"
@@ -15,18 +15,19 @@ WonderMoney asks for your consent before it turns on the assistant, and you can 
 
 ## How consent is collected
 
-Creating an account means accepting the Terms of Service and the Privacy Policy: the web sign-up page says so under the form, and the mobile app has a box to tick. Sign-up does not ask about analytics.
+Creating an account means accepting the Terms of Service and the Privacy Policy: the web sign-up page says so under the form, and the mobile app has a box to tick. Analytics consent is separate from creating an account.
 
 The AI assistant has its own consent: it stays off until you select **Enable assistant** on its consent screen, and that choice is stored with your account, so it applies wherever you sign in.
 
-Analytics and advertising measurement are asked about on the wonder.money website, not in the app. On your first visit, the **Privacy choices** banner offers **Use necessary only**, **Customize** and **Allow all**; **Analytics** and **Advertising** stay off unless you allow them. The choice is saved in that browser, not in your account, so each browser asks once. To change it, select the **Privacy choices** button in the corner of any page of the website.
+The wonder.money website separately asks about analytics and advertising measurement. On your first visit, the **Privacy choices** banner offers **Use necessary only**, **Customize** and **Allow all**; **Analytics** and **Advertising** stay off unless you allow them. The choice is saved in that browser, not in your account, so each browser asks once. To change it, select the **Privacy choices** button in the corner of any page of the website.
 
-The web and mobile apps have no analytics switch for an account. The web app loads analytics only on a server whose operator has configured it, and a self-hosted server has none by default (see [Analytics](/en/docs/self-hosting/configure#analytics)). The mobile app sends usage events only while it is connected to the server it was built for.
+The web app loads browser analytics only when the operator configures it and you opt in. You can withdraw that choice in **Settings → Privacy**. A self-hosted server has no browser analytics by default (see [Analytics](/en/docs/self-hosting/configure#analytics)). This choice does not change the separately configured API/worker analytics outbox or mobile telemetry; the mobile app sends usage events only while connected to the server it was built for.
 
 ## What you can control
 
 - Whether assistant features are enabled for your account.
 - Whether the assistant launcher is visible.
+- Whether the web app may use analytics in this browser.
 - Whether the wonder.money website may use analytics and advertising measurement in your browser.
 
 ## How to change your decision

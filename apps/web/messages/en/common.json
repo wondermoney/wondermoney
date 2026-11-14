@@ -885,6 +885,7 @@
   "value": "Value",
   "weight": "Weight",
   "average-price": "Average price",
+  "portfolio-dividend-per-share": "Dividend per share",
   "unit-price": "Unit price",
   "buy": "Buy",
   "sell": "Sell",
@@ -2108,6 +2109,8 @@
   "target-low": "Low",
   "consensus-target": "Consensus target",
   "target-consensus": "Consensus",
+  "portfolio-benchmark-symbol": "Benchmark ticker",
+  "portfolio-benchmark-symbol-hint": "Used for this portfolio’s benchmark comparison. Leave blank to use SPY. Combined portfolios use SPY.",
   "portfolio-settings": "Portfolio Settings",
   "cost-basis-method": "Cost basis method",
   "cost-basis-fifo": "FIFO (oldest lots first)",
@@ -2537,6 +2540,15 @@
     "calendarStatusDue": "Due",
     "calendarStatusOverdue": "Overdue",
     "calendarStatusProjected": "Projected"
+  },
+  "analytics-opt-in": {
+    "title": "Optional analytics",
+    "description": "Allow usage analytics to help improve WonderMoney. Session recording is disabled and your email is not sent to PostHog.",
+    "change-later": "You can change this choice in Settings → Privacy.",
+    "decline": "Decline analytics",
+    "allow": "Allow analytics",
+    "enabled": "Analytics is enabled in this browser.",
+    "disabled": "Analytics is disabled in this browser."
   },
   "analytics-consent": {
     "title": "Your privacy choices",

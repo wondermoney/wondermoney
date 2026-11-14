@@ -306,8 +306,8 @@ Your instance loads no analytics or tag manager and records no usage events unle
 
 | Setting | What it turns on |
 |---|---|
-| `NEXT_PUBLIC_GTM_ID` | Your Google Tag Manager container (`GTM-XXXXXXX`), loaded on every page of the web app |
-| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog in the web app: page views, usage events and session recordings, linked to each user's email address |
+| `NEXT_PUBLIC_GTM_ID` | Your Google Tag Manager container (`GTM-XXXXXXX`), loaded only after browser opt-in |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog in the web app: page views and usage events only after browser opt-in. Session recording and email identification are disabled |
 | `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` | Sign-up, login and bank sync events sent to PostHog by the API and the worker. Set both on the API and the worker; while the mode is off, no events are recorded. `POSTHOG_HOST` on the worker sets the PostHog address, `https://eu.i.posthog.com` by default |
 
 If you turn any of these on, tell your users in your privacy policy (`NEXT_PUBLIC_PRIVACY_URL`), and ask for consent where the law requires it.

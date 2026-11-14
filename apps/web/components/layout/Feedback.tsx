@@ -14,6 +14,7 @@ import { useState } from "react";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Textarea } from "@/components/ui/textarea";
 import { usePathname } from "@/i18n/navigation";
+import { useAnalyticsConsent } from "@/lib/analytics/consent";
 import useSubmitFeedback, {
   type FeedbackType,
 } from "@/lib/api/feedback/useSubmitFeedback";
@@ -43,8 +44,8 @@ const categories: {
 ];
 
 /**
- * The "Share Feedback" panel. Feedback goes to PostHog where analytics are configured (the
- * hosted app, as before), otherwise to `POST /v1/feedback`, which emails the instance's support
+ * The "Share Feedback" panel. Feedback goes to PostHog where analytics are configured and
+ * consented to, otherwise to `POST /v1/feedback`, which emails the instance's support
  * inbox. With neither, the form is not offered: it would thank the user for a message that
  * nobody receives.
  */
@@ -53,7 +54,8 @@ const Feedback = () => {
   const posthog = usePostHog();
   const pathname = usePathname();
   const supportEmail = useSupportEmail();
-  const sendsToAnalytics = isAnalyticsEnabled();
+  const consent = useAnalyticsConsent();
+  const sendsToAnalytics = isAnalyticsEnabled() && consent === "granted";
   const sendsToApi = useConfirmedFeature(
     (features) => features.feedback === true,
   );

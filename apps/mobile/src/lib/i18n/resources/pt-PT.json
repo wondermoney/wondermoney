@@ -3322,6 +3322,11 @@
     "add": "Adicionar"
   },
   "portfolioDetail": {
+    "benchmark": {
+      "title": "Comparação com Benchmark",
+      "summary": "Portefólio {{portfolio}} · {{symbol}} {{benchmark}}",
+      "unavailable": "A comparação precisa de histórico do portefólio e dos preços do benchmark."
+    },
     "back": "Voltar a Portefólio",
     "loading": "A carregar detalhes do portefólio",
     "stale": "Não foi possível atualizar. A mostrar os detalhes do portefólio carregados anteriormente",
@@ -3457,8 +3462,6 @@
     "benchmarkCleared": "Remover o benchmark atual",
     "excluded": "Excluir do painel agregado",
     "excludedHelper": "Deixa este portefólio fora dos totais, posições e gráficos de todos os portefólios juntos. A página dele e o teu património líquido continuam a incluí-lo.",
-    "favored": "Destacar no painel",
-    "favoredHelper": "Dá a este portefólio destaque prioritário no painel",
     "allocation": {
       "heading": "Alocação-alvo",
       "helper": "Define percentagens-alvo para cada classe de ativos. O total não precisa de somar 100%.",
@@ -4661,6 +4664,7 @@
     "asset": "Ativo",
     "changeAsset": "Alterar",
     "quantity": "Quantidade",
+    "dividendPerShare": "Dividendo por unidade",
     "unitPrice": "Preço unitário",
     "transactionDate": "Data da transação",
     "currency": "Moeda de liquidação",

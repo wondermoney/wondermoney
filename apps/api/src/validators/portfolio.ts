@@ -186,12 +186,11 @@ export const createPortfolioRequestSchema = z.object({
 export const updatePortfolioRequestSchema = z.object({
   body: z.object({
     accountLink: portfolioAccountLinkSchema.optional(),
-    benchmarkSymbol: z.string().max(20).optional(),
+    benchmarkSymbol: z.string().trim().max(20).nullable().optional(),
     costBasisMethod: z.enum(['FIFO', 'AVERAGE']).optional(),
     currencyId: positiveIntId.optional(),
     description: z.string().max(500).nullable().optional(),
     excluded: z.boolean().optional(),
-    favored: z.boolean().optional(),
     name: z.string().optional(),
     targetAllocation: z.record(z.string(), z.number()).nullable().optional(),
   }),

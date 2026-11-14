@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import PortfolioAllocationChart from "@/components/portfolio/PortfolioAllocationChart";
 import PortfolioAllocationEmptyState from "@/components/portfolio/PortfolioAllocationEmptyState";
 import PortfolioAllocationGuidance from "@/components/portfolio/PortfolioAllocationGuidance";
+import PortfolioBenchmarkChart from "@/components/portfolio/PortfolioBenchmarkChart";
 import PortfolioClosedPositions from "@/components/portfolio/PortfolioClosedPositions";
 import PortfolioDashboardSummary from "@/components/portfolio/PortfolioDashboardSummary";
 import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendIncome";
@@ -238,6 +239,16 @@ export default function PortfolioClient({
                 showSectorToggle
               />
             </div>
+          </section>
+
+          <section className="border-foreground min-w-0 border-t-2 pt-4">
+            <h2 className="text-foreground mb-4 text-lg font-semibold tracking-tight">
+              {t("benchmark-comparison")}
+            </h2>
+            <PortfolioBenchmarkChart
+              portfolioId={portfolioId}
+              period={period}
+            />
           </section>
 
           {/* Top Movers + Quick Stats */}

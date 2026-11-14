@@ -12,8 +12,7 @@ interface UpdatePortfolioRequest {
   currencyId?: string;
   costBasisMethod?: PortfolioCostBasisMethod;
   excluded?: boolean;
-  favored?: boolean;
-  benchmarkSymbol?: string;
+  benchmarkSymbol?: string | null;
   targetAllocation?: Record<string, number> | null;
   accountLink?: PortfolioAccountLinkInput | null;
 }

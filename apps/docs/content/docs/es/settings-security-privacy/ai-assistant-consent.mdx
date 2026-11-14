@@ -3,7 +3,7 @@ title: Consentimiento del asistente de IA
 description: Entiende cómo se recopila y se gestiona el consentimiento del asistente y dónde se eligen las opciones de análisis.
 ---
 
-WonderMoney pide tu consentimiento antes de activar el asistente, y puedes cambiarlo en cualquier momento desde la configuración. Los análisis no son un ajuste de la cuenta: el sitio web wonder.money pregunta por ellos en un aviso, y las aplicaciones siguen lo que el servidor tiene configurado.
+WonderMoney pide tu consentimiento antes de activar el asistente, y puedes cambiarlo en cualquier momento desde la configuración. La analítica del navegador tiene un consentimiento separado, guardado en este navegador y modificable en **Ajustes → Privacidad**.
 
 <DocsImage
   src="/images/docs/es/settings-security-privacy/ai-assistant-consent-consent.png"
@@ -15,18 +15,19 @@ WonderMoney pide tu consentimiento antes de activar el asistente, y puedes cambi
 
 ## Cómo se recopila el consentimiento
 
-Crear una cuenta significa aceptar los Términos del servicio y la Política de privacidad: la página de registro en la web lo indica bajo el formulario, y la aplicación móvil tiene una casilla que debes marcar. El registro no pregunta por los análisis.
+Crear una cuenta significa aceptar los Términos del servicio y la Política de privacidad: la página de registro en la web lo indica bajo el formulario, y la aplicación móvil tiene una casilla que debes marcar. El consentimiento para analítica es independiente de la creación de la cuenta.
 
 El asistente de IA tiene su propio consentimiento: permanece desactivado hasta que seleccionas **Activar asistente** en su pantalla de consentimiento, y esa elección se guarda con tu cuenta, así que se aplica dondequiera que inicies sesión.
 
-Los análisis y la medición de publicidad se preguntan en el sitio web wonder.money, no en la aplicación. En tu primera visita, el aviso **Opciones de privacidad** ofrece **Usar solo lo necesario**, **Personalizar** y **Permitir todo**; **Análisis** y **Publicidad** permanecen desactivados salvo que los permitas. La elección se guarda en ese navegador, no en tu cuenta, así que cada navegador pregunta una vez. Para cambiarla, selecciona el botón **Opciones de privacidad** en la esquina de cualquier página del sitio.
+El sitio web wonder.money pide por separado consentimiento para analítica y medición de publicidad. En tu primera visita, el aviso **Opciones de privacidad** ofrece **Usar solo lo necesario**, **Personalizar** y **Permitir todo**; **Análisis** y **Publicidad** permanecen desactivados salvo que los permitas. La elección se guarda en ese navegador, no en tu cuenta, así que cada navegador pregunta una vez. Para cambiarla, selecciona el botón **Opciones de privacidad** en la esquina de cualquier página del sitio.
 
-Las aplicaciones web y móvil no tienen un ajuste de análisis por cuenta. La aplicación web solo carga análisis en un servidor cuyo operador los haya configurado, y un servidor autoalojado no tiene ninguno de forma predeterminada (consulta [Analítica](/es/docs/self-hosting/configure#analítica)). La aplicación móvil solo envía eventos de uso mientras está conectada al servidor para el que se compiló.
+La aplicación web solo carga analítica del navegador cuando el operador la configura y tú la permites. Puedes retirar ese consentimiento en **Ajustes → Privacidad**. Un servidor autoalojado no tiene analítica del navegador de forma predeterminada (consulta [Analítica](/es/docs/self-hosting/configure#analítica)). Esta elección no cambia los eventos de la API y del worker ni la telemetría móvil, configurados por separado. La aplicación móvil solo envía eventos de uso mientras está conectada al servidor para el que se compiló.
 
 ## Qué puedes controlar
 
 - Si las funciones del asistente están activadas para tu cuenta.
 - Si el lanzador del asistente es visible.
+- Si la aplicación web puede usar analítica en este navegador.
 - Si el sitio web wonder.money puede usar análisis y medición de publicidad en tu navegador.
 
 ## Cómo cambiar tu decisión
