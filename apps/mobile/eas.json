@@ -47,6 +47,9 @@
         "track": "production",
         "releaseStatus": "inProgress",
         "rollout": 0.2
+      },
+      "ios": {
+        "ascAppId": "6800748899"
       }
     },
     "internal": {
@@ -54,6 +57,9 @@
         "serviceAccountKeyPath": "./secrets/play-service-account.json",
         "track": "internal",
         "releaseStatus": "completed"
+      },
+      "ios": {
+        "ascAppId": "6800748899"
       }
     }
   }
