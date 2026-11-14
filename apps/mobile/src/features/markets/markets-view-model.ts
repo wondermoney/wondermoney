@@ -32,8 +32,8 @@ export type QuoteViewModel = Readonly<QuoteResponseDto>
 export const mapQuote = (dto: QuoteResponseDto): QuoteViewModel => ({ ...dto })
 
 /**
- * `/quote`'s name/currency are always null (see markets-contract.ts's companyInformationSchema
- * comment); this merges in the real values from `/info` without touching any other field, so
+ * `/quote`'s name is always null and its currency often is (see markets-contract.ts's
+ * companyInformationSchema comment); this fills them from `/info` without touching any other field, so
  * price/change/volume/marketState still come from the live quote.
  */
 export function mergeCompanyInfo(quote: QuoteViewModel, companyInfo: CompanyInformationDto | null): QuoteViewModel {

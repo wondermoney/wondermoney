@@ -21,6 +21,7 @@ import {
   LiveQuoteUnavailableLabel,
   LiveQuoteUnavailableValue,
 } from "./LiveQuoteUnavailable";
+import { formatQuotePrice } from "./quote-price";
 
 function WatchlistRow({ symbol }: { symbol: string }) {
   const t = useTranslations();
@@ -67,12 +68,10 @@ function WatchlistRow({ symbol }: { symbol: string }) {
       ) : (
         <div className="text-right">
           <div className="text-foreground font-mono text-sm font-semibold tabular-nums">
-            {/* The quote endpoint doesn't return a currency code; USD is the
-                same assumption the Financials/Earnings charts already make. */}
             {data.price === null ? (
               <LiveQuoteUnavailableValue />
             ) : (
-              formatCurrency(data.price, "USD")
+              formatQuotePrice(formatCurrency, data.price, data.currency)
             )}
           </div>
           {data.changePercentage !== null ? (

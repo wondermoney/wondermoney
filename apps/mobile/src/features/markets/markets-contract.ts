@@ -65,9 +65,9 @@ export function createQuoteEndpoint(symbol: string) {
 }
 
 /**
- * `/quote`'s `name`/`currency` are permanently null server-side — EODHD's real-time quote has
- * neither field, both requiring the Fundamentals tier the API doesn't have (see
- * getQuote in core/api's financial-markets controller). `/info` sources name/currency/country/
+ * `/quote`'s `name` is permanently null server-side (EODHD's needs the Fundamentals tier the API
+ * doesn't have); its `currency` is the listing's from the provider's search, null when unknown or
+ * ambiguous (see getQuote in the API's financial-markets controller). `/info` sources name/currency/country/
  * exchange from a different, unrestricted EODHD call (`eodhd.search()`), so those four fields are
  * real today; the rest (price, sector, description, etc.) stay null.
  */

@@ -112,15 +112,16 @@ function WatchlistRowView({ row, separated, removing, onPress, onRemove }: {
   const [focused, setFocused] = useState(false)
   const formatMoney = useFormatMoney()
   const quote = row.quoteStatus === 'loaded' ? row.quote : null
-  const money = (value: number) => (quote?.currency ? formatMoney(value, { locale, currency: quote.currency }) : null)
+  // In the listing's currency; with none known (null), the bare number rather than a guessed symbol.
+  const money = (value: number) => formatMoney(value, { locale, currency: quote?.currency ?? null })
   const priceText = quote && quote.price !== null ? money(quote.price) : null
-  const changeText = quote && quote.change !== null && quote.currency !== null
+  const changeText = quote && quote.change !== null
     ? `${signPrefix(quote.change)}${money(quote.change)}${quote.changePercent === null ? '' : ` (${formatPercentagePoints(quote.changePercent, locale, { maximumFractionDigits: 2 })})`}`
     : null
   // Web shows the day change as a signed percentage beside a "1D" period label.
   const dayChange = quote && quote.changePercent !== null
     ? formatPercentagePoints(quote.changePercent, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : quote && quote.change !== null && quote.currency !== null ? `${signPrefix(quote.change)}${money(quote.change)}` : null
+    : quote && quote.change !== null ? `${signPrefix(quote.change)}${money(quote.change)}` : null
   const direction = quote?.changePercent ?? quote?.change ?? 0
   const changeTone = direction > 0 ? 'success' : direction < 0 ? 'destructive' : 'muted'
   const noLiveQuote = quote !== null && quote.price === null && quote.change === null

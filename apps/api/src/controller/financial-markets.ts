@@ -180,16 +180,17 @@ export async function getQuote(req: Request, res: Response) {
     params: { ticker },
   } = await zParse(getQuoteRequestSchema, req)
   try {
-    const { provider, value: quote } = await marketData().quote(ticker)
+    const [{ provider, value: quote }, currency] = await Promise.all([marketData().quote(ticker), listingCurrency(ticker)])
     const price = numeric(quote.close)
     const change = numeric(quote.change)
     const changePercent = roundPercent(numeric(quote.change_p))
     const dto: QuoteResponseDto = {
       change,
       changePercent,
-      // A quote carries no currency or company name (EODHD's needs the
-      // Fundamentals tier this plan doesn't cover; the free providers have none).
-      currency: null,
+      // A provider's quote carries no currency, so it comes from the search
+      // listing (null when unknown or ambiguous). The company name is left out:
+      // EODHD's needs the Fundamentals tier this plan doesn't cover.
+      currency,
       marketState: null,
       name: null,
       price,
@@ -270,9 +271,35 @@ async function fetchQuoteSnapshot(ticker: string): Promise<{ changePercentage: n
   }
 }
 
+/**
+ * The currency `ticker` trades in, from the provider's search: the listings whose code (and,
+ * for `CODE.EXCHANGE`, exchange) match exactly. Null when none match, when they disagree (one
+ * symbol on exchanges in different currencies) or when the search fails, so a client shows
+ * the bare number rather than a wrong currency. Never fails the quote.
+ */
 function ignoreDisabled(error: unknown): null {
   if (error instanceof FeatureDisabledError) return null
   throw error
+}
+
+async function listingCurrency(ticker: string): Promise<null | string> {
+  const symbol = readSymbol(ticker)
+  const dot = symbol.lastIndexOf('.')
+  const code = dot > 0 ? symbol.slice(0, dot) : symbol
+  const exchange = dot > 0 ? symbol.slice(dot + 1) : null
+  try {
+    const { value: results } = await marketData().search(symbol)
+    const currencies = new Set(
+      results
+        .filter((row) => readSymbol(row.Code) === code && (exchange === null || readSymbol(row.Exchange) === exchange))
+        .map((row) => upperCurrency(row.Currency)),
+    )
+    const [only] = currencies
+    return currencies.size === 1 ? only ?? null : null
+  } catch (error) {
+    logger.warn({ error, ticker }, 'Failed to look up the listing currency for a quote')
+    return null
+  }
 }
 
 function numeric(value: unknown): null | number {

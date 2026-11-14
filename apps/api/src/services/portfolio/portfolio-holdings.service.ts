@@ -476,7 +476,7 @@ class PortfolioHoldingsService {
       const conversionRate = p.financialAssetCurrencyCode && p.financialAssetCurrencyCode !== currency
         ? exchangeRateMap.get(p.financialAssetCurrencyCode)
         : 1;
-      const { currentPrice: normalizedCurrentPrice, currentValue, unrealizedGains, unrealizedGainsPercentage } =
+      const { currentPrice: normalizedCurrentPrice, currentPriceInAssetCurrency, currentValue, unrealizedGains, unrealizedGainsPercentage } =
         resolveHoldingCurrentMetrics({
           assetType: p.financialAssetType,
           averageBuyPrice: p.averageBuyPrice,
@@ -490,6 +490,7 @@ class PortfolioHoldingsService {
         allocation: null,
         currency,
         currentPrice: normalizedCurrentPrice,
+        currentPriceInAssetCurrency,
         currentValue,
         unrealizedGains,
         unrealizedGainsPercentage,
