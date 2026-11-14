@@ -121,7 +121,13 @@ export interface PortfolioHolding extends PortfolioAsset {
   /** Populated only for Savings Certificate holdings — per-lot accrual detail for the web accrual panel. */
   certificadoAforroDetail?: CertificadoAforroHoldingDetail;
   currency: string;
+  /** In `currency`, converted at the latest rate. */
   currentPrice: null | number;
+  /**
+   * The same price in the asset's own currency (`financialAssetCurrencyCode`), before
+   * conversion. Set by the market-price path; absent elsewhere.
+   */
+  currentPriceInAssetCurrency?: null | number;
   currentValue: null | number;
   /** Set only when a fee of this asset had no usable exchange rate and was counted as zero. */
   feeConversionIncomplete?: boolean;

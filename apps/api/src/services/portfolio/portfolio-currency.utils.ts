@@ -42,6 +42,7 @@ export function resolveHoldingCurrentMetrics({
 
   return {
     currentPrice,
+    currentPriceInAssetCurrency: effectiveRawPrice,
     currentValue,
     unrealizedGains,
     unrealizedGainsPercentage,

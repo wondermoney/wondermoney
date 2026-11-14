@@ -788,9 +788,12 @@ export class PortfolioDashboardService {
       periodStartDate,
       tenantKey,
     );
+    // The change is the security's own move: both prices in the asset's currency, since stored
+    // prices are. The contribution is then today's value (viewer's currency) times that move.
     const movers = eligibleHoldings.map((holding) => {
         const currentValue = holding.currentValue ?? 0;
-        const currentPrice = holding.currentPrice ?? null;
+        const sameCurrency = holding.financialAssetCurrencyCode == null || holding.financialAssetCurrencyCode === holding.currency;
+        const currentPrice = holding.currentPriceInAssetCurrency ?? (sameCurrency ? holding.currentPrice : null) ?? null;
         const startPrice = startPrices.get(holding.financialAssetKey) ?? null;
 
         if (currentPrice == null || startPrice == null || !Number.isFinite(currentPrice) || !Number.isFinite(startPrice) || startPrice <= 0) {
@@ -803,7 +806,8 @@ export class PortfolioDashboardService {
 
         const change = ((currentPrice - startPrice) / startPrice) * 100;
         const contributionFromChange = 100 + change !== 0 ? currentValue * (change / (100 + change)) : null;
-        const directContribution = currentValue - holding.quantity * startPrice;
+        // Quantity times a start price is in the viewer's currency only when the asset's is the same.
+        const directContribution = sameCurrency ? currentValue - holding.quantity * startPrice : Number.NaN;
 
         return {
           change,

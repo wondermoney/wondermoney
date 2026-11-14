@@ -102,6 +102,18 @@ describe('WatchlistScreen', () => {
     expect(appleRow).toBeOnTheScreen()
   })
 
+  it('shows a price in the currency the security is listed in', async () => {
+    const euroQuote = { ...loadedQuote, currency: 'EUR', name: 'Example AG', symbol: 'EXMP' }
+    const { view } = await setup({ state: { status: 'loaded', rows: [{ symbol: 'EXMP', quote: euroQuote, quoteStatus: 'loaded' }] } })
+    expect(within(view.getByTestId('watchlist-row-EXMP')).getByText('€232.50')).toBeOnTheScreen()
+  })
+
+  it('shows the bare price, with no currency symbol, when the listing currency is unknown', async () => {
+    const unknownQuote = { ...loadedQuote, currency: null, name: null, symbol: 'EXMP' }
+    const { view } = await setup({ state: { status: 'loaded', rows: [{ symbol: 'EXMP', quote: unknownQuote, quoteStatus: 'loaded' }] } })
+    expect(within(view.getByTestId('watchlist-row-EXMP')).getByText('232.50')).toBeOnTheScreen()
+  })
+
   it('keeps a symbol visible and tappable even when its quote failed to load (degraded row)', async () => {
     const { view } = await setup()
     expect(view.getByRole('button', { name: /^ZZZZ/ })).toBeOnTheScreen()
