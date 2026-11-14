@@ -9,22 +9,31 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
+import { BankConnectionStatus } from '@entity/BankConnection';
 import { Currency } from '@entity/Currency';
-import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionStatus } from '@entity/TransactionStatus';
 import { TransactionType } from '@entity/TransactionType';
-import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf } from '@service/bank-sync-run/provider-failure';
+import type { BankReportedErrorCode } from '@service/bank-providers/errors';
+import type {
+  BankConnectionRef,
+  BankProvider,
+  BankProviderTransaction,
+  BankStableIdFields,
+  BankTransactionIdentity,
+} from '@service/bank-providers/types';
+import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
 import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
-import { createEnableBankingSyncAdapter, type StableIdFields } from '@service/enable-banking/enable-banking-sync-adapter';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { DEFAULT_PENDING_GRACE_DAYS, logDryRunExpirations, planPendingExpirations } from '@service/transaction/pending-expiry.service';
 import { getReconciliationMode, logDryRunPromotions, planPromotions } from '@service/transaction/pending-reconciliation.service';
@@ -41,19 +50,16 @@ import { convertMoney, roundMoney, toNumber } from '@utils/money';
 
 /** See the identical note in `account-initial-sync-account.service.ts` — `requisitionId`/
  * `requisitionKey` are provider-agnostic sync-target identity fields. */
-export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
+export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; /** What the aggregator reported for an account that failed. */ reportedErrorCode?: BankReportedErrorCode; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
 
-interface BankSyncClient { account: (accountId: string) => { getTransactions: (input?: { country?: string; dateFrom?: string; dateTo?: string }) => Promise<BankSyncTransactionsResponse> }; }
-/** Berlin-Group-shaped transaction row. Both bank providers normalise into this shape;
- * declared locally so the app carries no dependency on any provider SDK's types. */
-export interface BankSyncTransaction { amount?: string; bookingDate?: string; creditDebitIndicator?: string; creditorName?: string; creditorReference?: string; currency?: string; currencyExchange?: { exchangeRate?: number | string; instructedAmount?: { amount?: string; currency?: string }; sourceCurrency?: string }; debtorName?: string; entryReference?: string; internalTransactionId?: string; providerStatus?: string; remittanceInformationStructured?: string; remittanceInformationUnstructured?: string; stableIdFields?: StableIdFields; /** Set by `withStableIdOccurrences`: the row is the nth (0-based) id-less row with this content in its fetch. */ stableIdOccurrence?: number; transactionAmount?: { amount?: string; currency?: string }; transactionDate?: string; transactionId?: string; valueDate?: string }
-/** `voided`: rows the provider reports as rejected or cancelled. Never ingested; used only to retract a stored copy. */
-interface BankSyncTransactionsResponse { transactions?: { booked?: BankSyncTransaction[]; pending?: BankSyncTransaction[]; voided?: BankSyncTransaction[] } }
-interface Deps { backgroundOperationService?: typeof backgroundOperationService; em?: EntityManager; enableBankingSyncAdapterFactory?: (connection: EnableBankingConnection) => Promise<BankSyncClient>; enqueue?: Enqueue; logger?: Pick<typeof logger, 'error' | 'info' | 'warn'>;  }
+/** One provider transaction row, re-exported under the name the sync services and tests use. */
+export type BankSyncTransaction = BankProviderTransaction;
+export type StableIdFields = BankStableIdFields;
+interface Deps { backgroundOperationService?: typeof backgroundOperationService; em?: EntityManager; enqueue?: Enqueue; logger?: Pick<typeof logger, 'error' | 'info' | 'warn'>; /** The aggregator to sync through; tests inject a fake, production gets it from the registry. */ provider?: BankProvider; }
 
-/** Client-construction seam — see the identical-purpose `SyncTarget` in
+/** The provider seam — see the identical-purpose `SyncTarget` in
  * `account-initial-sync-account.service.ts` for the full rationale. */
-interface SyncTarget { appuserRef: Appuser; client: BankSyncClient; enableBanking: boolean; requisitionId: string; requisitionKey: number; }
+interface SyncTarget { appuserRef: number; client: BankProvider; connection: BankConnectionRef; requisitionId: string; requisitionKey: number; transactionIdentity: BankTransactionIdentity; }
 
 const DUPLICATE_ERROR_CODES = new Set(['23505']);
 /** What a row outside the running-balance chain carries (PENDING, EXPIRED). */
@@ -63,7 +69,7 @@ const INCLUDE_HIDDEN = { includeHidden: true } as const;
 
 class AccountInitialSyncTransactionService {
   async syncTransactionsForRequisition(
-    input: { correlationId?: string; enableBankingConnectionKey: number; fetchWindowDays?: number; queueJobId?: string },
+    input: { connection: BankConnectionRef; correlationId?: string; fetchWindowDays?: number; queueJobId?: string },
     deps: Deps = {},
   ): Promise<AccountInitialSyncTransactionsResult> {
     const em = deps.em ?? DI.em;
@@ -71,13 +77,22 @@ class AccountInitialSyncTransactionService {
     const bg = deps.backgroundOperationService ?? backgroundOperationService;
     const metadataEnrichmentEnabled = isTransactionMetadataEnrichmentEnabled();
 
-    const target = await this.resolveSyncTarget(em, input, deps);
-    const { appuserRef, client, enableBanking, requisitionId, requisitionKey } = target;
+    const target = this.resolveSyncTarget(input, deps);
+    const { appuserRef, client, connection, requisitionId, requisitionKey, transactionIdentity } = target;
+    const enableBanking = transactionIdentity.column === 'enableBankingTransactionId';
 
-    const tenant = await em.findOne(AppuserTenant, { appuserKey: appuserRef, deletedAt: undefined, recordActive: true }, { populate: ['appuserKey.currencyKey'] });
+    const tenant = await em.findOne(AppuserTenant, { appuserKey: appuserRef as unknown as AppuserTenant['appuserKey'], deletedAt: undefined, recordActive: true }, { populate: ['appuserKey.currencyKey'] });
     if (!tenant) throw new NotFoundError('Active tenant not found for requisition');
 
-    const accounts = await em.find(Account, { deletedAt: undefined, enableBankingConnectionKey: input.enableBankingConnectionKey } as FilterQuery<Account>);
+    // `bankConnectionKey` is the provider-agnostic pointer; the legacy Enable Banking column is
+    // the fallback for a row the start-up backfill has not reached yet (and for old fixtures).
+    const accounts = await em.find(Account, {
+      $or: [
+        { bankConnectionKey: connection.bankConnectionKey },
+        { enableBankingConnectionKey: connection.bankConnectionKey },
+      ],
+      deletedAt: undefined,
+    } as FilterQuery<Account>);
     if (accounts.length === 0) return this.emptyResult(requisitionId, requisitionKey, appuserRef);
 
     const txnStatusBooked = await this.findTransactionStatus(em, ['BOOKED']);
@@ -87,22 +102,30 @@ class AccountInitialSyncTransactionService {
     const transactionTypes = await this.loadTransactionTypes(em);
     const settledStatusByName = { BOOKED: txnStatusBooked, PENDING: txnStatusPending };
 
+    // Train the viewer's local model once for this sync; every row the sync creates reuses it.
+    // Best-effort: a training failure leaves the batch null and the sync untouched.
+    const bayesBatch = await prepareBayesCategorization(em, { tenantKey: tenant.tenantKey.tenantKey, viewerAppuserKey: tenant.appuserKey.appuserKey }).catch((error: unknown) => {
+      log.warn({ error: sanitizeError(error) }, 'Bayes categorization training failed');
+      return null;
+    });
+
     let transactionsCreated = 0; let transactionsCategorized = 0; let transactionsFetched = 0; let transactionsFailed = 0; let transactionsSkipped = 0;
     const failedAccountIds: string[] = []; const processedAccountIds = new Set<string>(); const affectedTenantKeys = new Set<number>();
+    const createdTransactions: Transaction[] = [];
     // See `account-initial-sync-account.service.ts`: a rate limit stops the loop, and a 400/401 on
     // every account is reported so the worker can check whether the consent ended.
-    let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0;
+    let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0; let reportedErrorCode: BankReportedErrorCode | undefined;
     for (const [index, account] of accounts.entries()) {
       let accountCreated = 0; let accountFailed = 0; let accountSkipped = 0;
       try {
-        const response = await client.account(account.accountId ?? '').getTransactions({ country: '', dateFrom: dateOffset(new Date(), input.fetchWindowDays ?? 365), dateTo: isoDate(new Date()) });
-        const transactions = response.transactions;
+        const response = await client.getTransactions(connection, account.accountId ?? '', { country: '', dateFrom: dateOffset(new Date(), input.fetchWindowDays ?? 365), dateTo: isoDate(new Date()) });
+        const transactions = response;
         const accountStableId = account.accountId ?? String(account.accountKey);
         // Identical id-less rows are told apart by their position among their twins, counted per
         // list: a pending row and its booked version must not shift each other's identity.
-        const booked = withStableIdOccurrences(accountStableId, transactions?.booked ?? []);
-        const pending = withStableIdOccurrences(accountStableId, transactions?.pending ?? []);
-        const voided = withStableIdOccurrences(accountStableId, transactions?.voided ?? []);
+        const booked = withStableIdOccurrences(accountStableId, transactions.booked ?? []);
+        const pending = withStableIdOccurrences(accountStableId, transactions.pending ?? []);
+        const voided = withStableIdOccurrences(accountStableId, transactions.voided ?? []);
         // A rejected or cancelled row is never ingested, and a stored copy (e.g. a legacy row stored
         // as booked) is retracted. Before promotions, so a voided pending can
         // never be promoted by an unrelated booked row of the same amount.
@@ -114,7 +137,7 @@ class AccountInitialSyncTransactionService {
           const seenPendingIdentities = new Set<string>();
           // An id-less Enable Banking pending is stored under its stable hash, so that hash is one
           // of its identities too; without it a pending still in the feed would expire after the grace window.
-          for (const row of pending) { const tx = row as Partial<BankSyncTransaction>; for (const id of [tx.transactionId, tx.internalTransactionId, tx.entryReference, enableBanking ? this.buildStableId(accountStableId, row, 'enable_banking') : undefined]) if (id) seenPendingIdentities.add(id); }
+          for (const row of pending) { const tx = row as Partial<BankSyncTransaction>; for (const id of [tx.transactionId, tx.internalTransactionId, tx.entryReference, enableBanking ? this.buildStableId(accountStableId, row, transactionIdentity.prefix) : undefined]) if (id) seenPendingIdentities.add(id); }
           if (reconciliationMode === 'apply') {
             const promotedKeys = await this.applyPromotions(em, account, tenant, booked, { expired: txnStatusExpired, pending: txnStatusPending }, seenPendingIdentities, enableBanking);
             if (txnStatusExpired) await this.applyExpirations(em, account, txnStatusPending, txnStatusExpired, seenPendingIdentities, promotedKeys);
@@ -128,12 +151,12 @@ class AccountInitialSyncTransactionService {
         }
         const rows: { pending: boolean; row: BankSyncTransaction }[] = [...pending.map((row) => ({ pending: true, row })), ...booked.map((row) => ({ pending: false, row }))];
         transactionsFetched += rows.length;
-        const createdTransactions: Transaction[] = [];
+        const accountTransactionsStart = createdTransactions.length;
         for (const item of rows) {
           const mapped = await this.persistTransaction(em, account, tenant, item.row, item.pending, settledStatusByName, transactionTypes, metadataEnrichmentEnabled, enableBanking);
           accountCreated += mapped.created; accountSkipped += mapped.skipped; accountFailed += mapped.failed; if (mapped.createdTransaction) createdTransactions.push(mapped.createdTransaction); if (mapped.created > 0 && mapped.tenantKey) affectedTenantKeys.add(mapped.tenantKey);
         }
-        transactionsCategorized += await this.categorizeNewTransactions(em, tenant, createdTransactions);
+        transactionsCategorized += await this.categorizeNewTransactions(em, tenant, createdTransactions.slice(accountTransactionsStart));
         await this.auditMissingOccurrences(em, account, tenant, booked, enableBanking);
         // The running balance is a chain over the whole account, not a per-batch suffix.
         // Persisting the batch above leaves the newly created rows without a balance and the rows it
@@ -152,6 +175,7 @@ class AccountInitialSyncTransactionService {
       } catch (error) {
         failedAccountIds.push(account.accountId ?? String(account.accountKey)); transactionsFailed += 1;
         if (isProviderRejection(error)) rejectedCount += 1;
+        reportedErrorCode ??= providerReportedCodeOf(error);
         rateLimited = providerRateLimitOf(error);
         if (rateLimited) {
           // The accounts not yet fetched count as failed, so their freshness marker stays put.
@@ -188,6 +212,16 @@ class AccountInitialSyncTransactionService {
       } catch (error) {
         log.warn({ error: sanitizeError(error) }, 'Transfer matching failed');
       }
+      // Link posted rows that pay an installment of a card's plan ("PARC 03/12"), so the plan reads
+      // them as paid instead of projecting them again. A pending charge is not linked; once the bank
+      // posts it, the promotion above flips the row in place and this pass, over every unlinked
+      // charge, links it. Best-effort, like transfer matching.
+      try {
+        const linked = await em.fork().transactional((tx) => linkPostedInstallments(tx, { tenantKey: tenant.tenantKey.tenantKey }));
+        if (linked > 0) log.info({ linked, tenantKey: tenant.tenantKey.tenantKey }, 'Linked posted installments');
+      } catch (error) {
+        log.warn({ error: sanitizeError(error) }, 'Installment linking failed');
+      }
     }
 
     // Mark successfully-synced accounts fresh so the accounts DTO can derive staleness.
@@ -205,11 +239,21 @@ class AccountInitialSyncTransactionService {
       }
     }
 
+    // The local, token-free pass runs after the deterministic categorizer and before any AI
+    // enqueue, so a row it labels never reaches a model. Best-effort; it never fails the sync.
+    if (bayesBatch && createdTransactions.length > 0) {
+      try {
+        const assigned = await applyBayesCategorization(em, bayesBatch, createdTransactions);
+        if (assigned > 0) log.info({ assigned, tenantKey: tenant.tenantKey.tenantKey }, 'Bayes categorized transactions');
+      } catch (error) {
+        log.warn({ error: sanitizeError(error) }, 'Bayes categorization failed');
+      }
+    }
     for (const tenantKey of affectedTenantKeys) await triggerRecurringDetectionAfterTransactionIngestion(tenantKey, 'account-initial-sync');
     // Best-effort, fail-open shadow enrichment enqueue. Dormant by default; never blocks sync.
     for (const tenantKey of affectedTenantKeys) await enqueueTransactionEnrichmentForTenant(tenantKey, 'account-initial-sync', { enqueue: deps.enqueue });
     const status = failedAccountIds.length === accounts.length ? 'failed' : failedAccountIds.length > 0 ? 'partial' : 'completed';
-    const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}) };
+    const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}), ...(reportedErrorCode ? { reportedErrorCode } : {}) };
     return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), ...signals, failedAccountIds, requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
   }
 
@@ -247,24 +291,23 @@ class AccountInitialSyncTransactionService {
     }
     return categorized;
   }
-  private emptyResult(requisitionId: string, requisitionKey: number, appuserRef: Appuser): AccountInitialSyncTransactionsResult { return { accountsFailed: 0, accountsProcessed: 0, accountsTotal: 0, appuserKey: getAppuserKey(appuserRef), failedAccountIds: [], requisitionId, requisitionKey, status: 'failed', transactionsCategorized: 0, transactionsCreated: 0, transactionsFailed: 0, transactionsFetched: 0, transactionsSkipped: 0 }; }
+  private emptyResult(requisitionId: string, requisitionKey: number, appuserRef: number): AccountInitialSyncTransactionsResult { return { accountsFailed: 0, accountsProcessed: 0, accountsTotal: 0, appuserKey: getAppuserKey(appuserRef), failedAccountIds: [], requisitionId, requisitionKey, status: 'failed', transactionsCategorized: 0, transactionsCreated: 0, transactionsFailed: 0, transactionsFetched: 0, transactionsSkipped: 0 }; }
   private async findTransactionStatus(em: EntityManager, names: string[]) { for (const name of names) { const status = await em.findOne(TransactionStatus, { name }); if (status) return status; } return null; }
   private async loadTransactionTypes(em: EntityManager) { const names = ['TRANSFER_IN', 'TRANSFER_OUT', 'PAYMENT', 'CARD_PAYMENT', 'DEPOSIT', 'TOPUP', 'FEE']; const out = new Map<string, TransactionType>(); for (const name of names) { const type = await em.findOne(TransactionType, { name }); if (type) out.set(name, type); } return out; }
-  private async resolveSyncTarget(
-    em: EntityManager,
-    input: { enableBankingConnectionKey?: number },
+  private resolveSyncTarget(
+    input: { connection: BankConnectionRef },
     deps: Deps,
-  ): Promise<SyncTarget> {
-    if (input.enableBankingConnectionKey == null) {
-      throw new InternalServerError('Bank sync requires an Enable Banking connection');
-    }
-    const connection = await em.findOne(EnableBankingConnection, { deletedAt: undefined, enableBankingConnectionKey: input.enableBankingConnectionKey });
-    if (!connection) throw new NotFoundError('Enable Banking connection not found');
-    if (connection.status !== EnableBankingConnectionStatus.LINKED) throw new InternalServerError('Enable Banking connection is not linked');
-    // Cast is a shape-compatibility formality — see the identical note in
-    // `account-initial-sync-account.service.ts`'s `defaultEnableBankingSyncAdapterFactory`.
-    const client = await (deps.enableBankingSyncAdapterFactory ?? ((c: EnableBankingConnection) => Promise.resolve(createEnableBankingSyncAdapter(c) as unknown as BankSyncClient)))(connection);
-    return { appuserRef: connection.appuserKey, client, enableBanking: true, requisitionId: connection.sessionId ?? connection.state, requisitionKey: connection.enableBankingConnectionKey };
+  ): SyncTarget {
+    if (!deps.provider) throw new InternalServerError('Bank sync provider is not configured');
+    if (input.connection.status !== BankConnectionStatus.LINKED) throw new InternalServerError('Bank connection is not linked');
+    return {
+      appuserRef: input.connection.appuserId,
+      client: deps.provider,
+      connection: input.connection,
+      requisitionId: input.connection.externalId,
+      requisitionKey: input.connection.bankConnectionKey,
+      transactionIdentity: deps.provider.transactionIdentity,
+    };
   }
   // This does not write `balance` / `appuserCurrencyBalance`. Those are owned by the
   // whole-account chain rebuild that runs once per account after the persist loop — a batch cannot
@@ -444,11 +487,12 @@ class AccountInitialSyncTransactionService {
   }
 
   /**
-   * Promote matched pending rows in place. For each booked row that
-   * uniquely matches a stored pending (exact amount/currency/counterparty, ±5d), set that pending's
-   * provider id to the booked row's, so the subsequent persist loop finds it and updates it in place
-   * (status→BOOKED, balance, date, amount) — preserving the user's category/notes and never creating
-   * a duplicate. Returns the keys of the pendings it promoted or expired (so expiry skips them).
+   * Promote matched pending rows in place. For each booked row that uniquely matches a stored
+   * pending (exact amount/currency/counterparty, ±5d, then a looser amount/merchant pass when no
+   * exact match exists), set that pending's provider id to the booked row's, so the subsequent
+   * persist loop finds it and updates it in place (status→BOOKED, balance, date, amount) —
+   * preserving the user's category/notes and never creating a duplicate. Returns the keys of the
+   * pendings it promoted or expired (so expiry skips them).
    *
    * The booked row may already be stored (the provider id is unique per account). Then the
    * pending is not promoted: re-keying it would collide, or, for a row the sync would find through
@@ -463,14 +507,14 @@ class AccountInitialSyncTransactionService {
     let plan: ReturnType<typeof planPromotions>; let pendingByKey: Map<number, Transaction>;
     try {
       // Hidden pendings too: otherwise the booked row is stored again as a visible duplicate.
-      const storedPendings = await em.find(Transaction, { accountKey: account, deletedAt: undefined, transactionStatusKey: statuses.pending }, { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey'] });
+      const storedPendings = await em.find(Transaction, { accountKey: account, deletedAt: undefined, transactionStatusKey: statuses.pending }, { filters: { [HIDDEN_FILTER]: false }, populate: ['settlementCurrencyKey', 'transactionMerchantKey'] });
       if (storedPendings.length === 0) return handled;
       const bookedMatchables = booked.map((row) => { const tx = row as Partial<BankSyncTransaction>; return { counterparty: tx.creditorName ?? tx.debtorName ?? undefined, currencyCode: tx.transactionAmount?.currency ?? tx.currency ?? '', settlementAmount: Number(tx.transactionAmount?.amount ?? tx.amount), transactionDate: rowDate(tx) }; });
-      const pendingMatchables = storedPendings.map((pending) => ({ currencyCode: pending.settlementCurrencyKey?.code ?? '', settlementAmount: pending.settlementAmount ?? 0, transactionDate: pending.transactionDate ?? new Date(0), transactionKey: pending.transactionKey }));
+      const pendingMatchables = storedPendings.map((pending) => ({ counterparty: pending.transactionMerchantKey?.name, currencyCode: pending.settlementCurrencyKey?.code ?? '', settlementAmount: pending.settlementAmount ?? 0, transactionDate: pending.transactionDate ?? new Date(0), transactionKey: pending.transactionKey }));
       plan = planPromotions(bookedMatchables, pendingMatchables);
       pendingByKey = new Map(storedPendings.map((pending) => [pending.transactionKey, pending]));
     } catch (error) { logger.warn({ error: sanitizeError(error) }, 'Pending promotion failed'); return handled; }
-    for (const { bookedIndex, pendingKey } of plan) {
+    for (const { amountDifference, bookedIndex, matchPass, pendingKey } of plan) {
       const pending = pendingByKey.get(pendingKey); const row = booked[bookedIndex];
       if (!pending || !row) continue;
       const tx = row as Partial<BankSyncTransaction>;
@@ -489,7 +533,14 @@ class AccountInitialSyncTransactionService {
           ? { enableBankingTransactionId: enableBankingTransactionIdFor(accountId, row) }
           : { nordigenInternalTransactionId: tx.internalTransactionId ?? tx.transactionId ?? tx.entryReference ?? this.buildStableId(accountId, row, 'nordigen') });
         handled.add(pendingKey);
-        await TransactionAuditService.log(em, { accountKey: account.accountKey, actorType: TransactionAuditActorType.SYNC, appuserKey: getAppuserKey(tenant.appuserKey), changes: { transactionStatusKey: { from: 'PENDING', to: 'BOOKED' } }, eventType: TransactionAuditEventType.PENDING_PROMOTED, source: 'pending-reconciliation', tenantKey: pending.tenantKey?.tenantKey ?? 0, transactionKey: pendingKey });
+        const bookedAmount = Number(tx.transactionAmount?.amount ?? tx.amount);
+        const changes: Record<string, { from: unknown; to: unknown }> = {
+          amountDifference: { from: null, to: amountDifference },
+          matchPass: { from: null, to: matchPass },
+          transactionStatusKey: { from: 'PENDING', to: 'BOOKED' },
+        };
+        if (matchPass === 'loose' && Number.isFinite(bookedAmount)) changes['settlementAmount'] = { from: pending.settlementAmount ?? 0, to: bookedAmount };
+        await TransactionAuditService.log(em, { accountKey: account.accountKey, actorType: TransactionAuditActorType.SYNC, appuserKey: getAppuserKey(tenant.appuserKey), changes, eventType: TransactionAuditEventType.PENDING_PROMOTED, source: 'pending-reconciliation', tenantKey: pending.tenantKey?.tenantKey ?? 0, transactionKey: pendingKey });
       } catch (error) { logger.warn({ error: sanitizeError(error), transactionKey: pendingKey }, 'Pending promotion failed'); }
     }
     return handled;

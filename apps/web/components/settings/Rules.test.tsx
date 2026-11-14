@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
   update: vi.fn(),
   remove: vi.fn(),
   reorder: vi.fn(),
+  exportRules: vi.fn(),
 }));
 
 vi.mock("@/lib/api/rule/useRules", async (importOriginal) => {
@@ -36,8 +37,18 @@ vi.mock("@/lib/api/rule/useRules", async (importOriginal) => {
     useUpdateRule: () => ({ mutateAsync: state.update, isPending: false }),
     useDeleteRule: () => ({ mutateAsync: state.remove, isPending: false }),
     useReorderRules: () => ({ mutateAsync: state.reorder, isPending: false }),
+    useExportRules: () => ({
+      mutateAsync: state.exportRules,
+      isPending: false,
+    }),
   };
 });
+
+// The preset offer has its own tests; here it would only reach for the network.
+vi.mock("@/components/rules/RulePresetOffer", () => ({
+  RulePresetOffer: () => null,
+  RulePresetsButton: () => null,
+}));
 
 vi.mock("@/components/rules/useRuleLookups", () => ({
   useRuleLookups: () => ({
@@ -74,7 +85,12 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
-  for (const mock of [state.update, state.remove, state.reorder])
+  for (const mock of [
+    state.update,
+    state.remove,
+    state.reorder,
+    state.exportRules,
+  ])
     mock.mockReset();
 });
 
@@ -181,4 +197,52 @@ test("deletes a rule only after confirming", async () => {
   await user.click(screen.getByRole("button", { name: enRules.rules.delete }));
 
   await waitFor(() => assert.deepEqual(state.remove.mock.calls[0], [1]));
+});
+
+test("exporting downloads the household's rules as a JSON file", async () => {
+  state.exportRules.mockResolvedValue(
+    new Blob(["{}"], { type: "application/json" }),
+  );
+  const createObjectURL = URL.createObjectURL;
+  const revokeObjectURL = URL.revokeObjectURL;
+  const create = vi.fn(() => "blob:rules");
+  const revoke = vi.fn();
+  URL.createObjectURL = create;
+  URL.revokeObjectURL = revoke;
+  const click = vi
+    .spyOn(HTMLAnchorElement.prototype, "click")
+    .mockImplementation(() => {});
+  try {
+    const user = userEvent.setup();
+    renderRules([netflix]);
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: enRules.rules.export.action,
+      }),
+    );
+
+    await waitFor(() =>
+      assert.equal(state.exportRules.mock.calls.length, 1),
+    );
+    assert.equal(create.mock.calls.length, 1);
+    assert.equal(click.mock.calls.length, 1);
+    assert.equal(revoke.mock.calls[0]?.[0], "blob:rules");
+  } finally {
+    click.mockRestore();
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = revokeObjectURL;
+  }
+});
+
+test("importing opens the import dialog", async () => {
+  const user = userEvent.setup();
+  renderRules([netflix]);
+
+  await user.click(
+    await screen.findByRole("button", { name: enRules.rules.import.action }),
+  );
+
+  await screen.findByRole("dialog");
+  screen.getByText(enRules.rules.import.title);
 });

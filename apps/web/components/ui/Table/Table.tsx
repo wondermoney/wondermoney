@@ -69,6 +69,8 @@ interface DataTableProps<TData extends RowData> {
   debugTable?: boolean;
   onRowClick?: (row: Row<TData>) => void;
   onRowSelectionChange?: (rows: Row<TData>[]) => void;
+  /** Which rows may be selected; every row when left out. */
+  canSelectRow?: (row: TData) => boolean;
   meta?: TableMeta<DataTableFeatures, TData>;
   sticky?: boolean;
   footerActions?: React.ReactNode;
@@ -98,6 +100,7 @@ export function Table<TData extends RowData>({
   defaultExpanded = false,
   onRowClick,
   onRowSelectionChange,
+  canSelectRow,
   meta,
   sticky = false,
   footerActions,
@@ -130,7 +133,10 @@ export function Table<TData extends RowData>({
     onExpandedChange: withExpandableRows ? setExpanded : undefined,
     onSortingChange: withSorting ? setSorting : undefined,
     onColumnVisibilityChange: setColumnVisibility,
-    enableRowSelection: withSelectRow,
+    enableRowSelection:
+      withSelectRow && canSelectRow
+        ? (row) => canSelectRow(row.original)
+        : withSelectRow,
     enableMultiRowSelection: withMultiSelectRow,
     onRowSelectionChange: setRowSelection,
     getSubRows: (row) => (row as { subRows?: TData[] }).subRows,

@@ -7,8 +7,10 @@ import { addAccount, addPartner, type Household, seedHousehold } from '@app/__te
 import { type TestDatabase, useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import type { Appuser } from '@entity/Appuser';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
+import { SimplefinConnection } from '@entity/SimplefinConnection';
 import householdRoutes from '@route/household';
 import scheduler from '@service/account/account-auto-sync-scheduler.service';
 
@@ -28,9 +30,14 @@ async function linkBank(db: TestDatabase, household: Household, member: Appuser)
     enableBankingCredentialKey: credential, sessionId: `session-${member.appuserKey}`, state: `state-${member.appuserKey}`,
     status: EnableBankingConnectionStatus.LINKED, tenantKey: household.tenant,
   }, { partial: true });
+  const bankConnection = em.create(BankConnection, {
+    accessValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), appuserKey: member, externalId: `session-${member.appuserKey}`,
+    provider: 'enable_banking', status: BankConnectionStatus.LINKED, tenantKey: household.tenant,
+  }, { partial: true });
   await em.flush();
+  connection.bankConnectionKey = bankConnection;
   const account = await addAccount(em, household, { name: 'Partner bank account', owner: member });
-  account.enableBankingConnectionKey = connection;
+  account.bankConnectionKey = bankConnection;
   await em.flush();
   return connection;
 }
@@ -80,5 +87,22 @@ describe('leaving a household stops the departed member\'s bank sync', () => {
     await http.as(partner).delete(`/v1/household/members/${partner.appuserKey}`);
 
     expect(await accountsDueForBankSync()).toBe(1);
+  });
+
+  it('a partner who leaves has their SimpleFIN access destroyed, not just unlinked', async () => {
+    const household = await seedHousehold(db.em());
+    const partner = await addPartner(db.em(), household);
+    const em = db.em();
+    const bankConnection = em.create(BankConnection, { appuserKey: partner, externalId: `simplefin:${partner.appuserKey}`, provider: 'simplefin', status: BankConnectionStatus.LINKED, tenantKey: household.tenant }, { partial: true });
+    const detail = em.create(SimplefinConnection, { accessUrlAuthTag: 'tag', accessUrlCiphertext: 'cipher', accessUrlIv: 'iv', appuserKey: partner, bankConnectionKey: bankConnection, encryptionKeyVersion: 1, serverHost: 'beta-bridge.simplefin.org', tenantKey: household.tenant }, { partial: true });
+    await em.flush();
+
+    const response = await http.as(partner).delete(`/v1/household/members/${partner.appuserKey}`);
+
+    expect(response.status).toBe(200);
+    const stored = await db.em().findOneOrFail(SimplefinConnection, { simplefinConnectionKey: detail.simplefinConnectionKey }, { filters: false, populate: ['bankConnectionKey'] });
+    expect(stored.deletedAt).toBeInstanceOf(Date);
+    expect(stored.accessUrlCiphertext ?? null).toBeNull();
+    expect(stored.bankConnectionKey.deletedAt).toBeInstanceOf(Date);
   });
 });

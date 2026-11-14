@@ -4,7 +4,13 @@ import {
   createAccountTransactionsEndpoint,
   createAggregateTransactionsEndpoint,
   createEditTransactionAmountEndpoint,
+  createRemoveTransactionSplitsEndpoint,
+  createSetTransactionSplitsEndpoint,
   freezeEditTransactionAmount,
+  freezeSetTransactionSplits,
+  MAX_SPLIT_LINES,
+  transactionReviewSummaryEndpoint,
+  transactionReviewSummarySchema,
 } from './transactions-contract'
 import { inTimeZone } from '@/test/time-zone'
 
@@ -35,11 +41,42 @@ describe('transactions endpoint contracts', () => {
     expect(result.transactions[1]?.transactionKey).toBe(-42)
   })
 
+  it('reads the merchant with its logo fields, and an older server that sends only its name', () => {
+    const merchant = { transactionMerchantKey: 12, name: 'Starbucks', website: 'https://starbucks.example', logoUrl: null, resolvedLogoUrl: 'https://api.example.test/v1/account/transaction-merchants/12/logo' }
+    const [current, older, malformed, none] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, transactionMerchantKey: merchant },
+      { ...transactionFixture, transactionMerchantKey: { name: 'Corner shop' } },
+      { ...transactionFixture, transactionMerchantKey: { transactionMerchantKey: 'x', name: 'Odd', website: 42, logoUrl: {}, resolvedLogoUrl: false } },
+      { ...transactionFixture, transactionMerchantKey: undefined },
+    ] }).transactions
+    expect(current!.transactionMerchantKey).toEqual(merchant)
+    expect(older!.transactionMerchantKey).toEqual({ name: 'Corner shop' })
+    // A malformed logo field reads as absent rather than failing the list.
+    expect(malformed!.transactionMerchantKey).toEqual({ transactionMerchantKey: undefined, name: 'Odd', website: null, logoUrl: null, resolvedLogoUrl: null })
+    expect(none!.transactionMerchantKey).toBeUndefined()
+    expect(accountTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, transactionMerchantKey: merchant }] }).transactions[0]!.transactionMerchantKey).toEqual(merchant)
+  })
+
   it('keeps the list parsing when the API adds fields or recurring values this build does not know', () => {
     const recurringSeries = { recurringSeriesKey: 4, displayName: 'Gym', type: 'membership', amountType: 'tiered', status: 'snoozed', cadence: 'monthly' }
     const [row] = aggregateTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, recurringSeries, sentiment: 'positive' }] }).transactions
     expect(row!.recurringSeries).toEqual({ recurringSeriesKey: 4, displayName: 'Gym', type: 'unknown', amountType: 'unknown', status: 'unknown' })
     expect(row).not.toHaveProperty('sentiment')
+  })
+
+  it('reads the installment a row was linked to, and a row from an older API as none', () => {
+    const installment = { installmentPlanKey: 11, installmentNumber: 3, installmentCount: 12 }
+    const [linked, ordinary, older, malformed] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, installment },
+      { ...transactionFixture, installment: null },
+      transactionFixture,
+      { ...transactionFixture, installment: { installmentNumber: '3' } },
+    ] }).transactions
+    expect(linked?.installment).toEqual(installment)
+    expect(ordinary?.installment).toBeNull()
+    expect(older?.installment).toBeUndefined()
+    expect(malformed?.installment).toBeNull()
+    expect(accountTransactionsResponseSchema.parse({ transactions: [{ ...transactionFixture, installment }] }).transactions[0]?.installment).toEqual(installment)
   })
 
   it('reads how each row was converted, an unknown status or malformed rate date as unknown', () => {
@@ -213,5 +250,143 @@ describe('createEditTransactionAmountEndpoint', () => {
   it('rejects a non-positive transaction id', () => {
     expect(() => createEditTransactionAmountEndpoint(0)).toThrow()
     expect(() => createEditTransactionAmountEndpoint(-3)).toThrow()
+  })
+})
+
+describe('the review summary', () => {
+  it('reads the count, the amount at stake and its currency', () => {
+    expect(transactionReviewSummarySchema.parse({ count: 3, totalAbs: 1240, currency: 'EUR' })).toEqual({ count: 3, totalAbs: 1240, currency: 'EUR' })
+    expect(transactionReviewSummarySchema.safeParse({ count: -1, totalAbs: 0, currency: 'EUR' }).success).toBe(false)
+    expect(transactionReviewSummarySchema.safeParse({ count: 0, totalAbs: 0, currency: 'euro' }).success).toBe(false)
+  })
+
+  it('asks for it at its own path', () => {
+    expect(transactionReviewSummaryEndpoint.method).toBe('GET')
+    expect(transactionReviewSummaryEndpoint.path).toBe('/v1/account/transaction/review-summary')
+  })
+})
+
+describe('split transactions', () => {
+  const splitLine = {
+    transactionSplitKey: 5,
+    amount: -7.5,
+    appuserAmount: -7.5,
+    category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true },
+    notes: 'Food',
+    position: 0,
+  }
+
+  it('reads the lines a list row carries, and treats a row without them as unsplit', () => {
+    const [split, plain] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [splitLine, { ...splitLine, transactionSplitKey: 6, amount: -2.5, appuserAmount: -2.5, category: null, notes: null, position: 1 }] },
+      transactionFixture,
+    ] }).transactions
+    expect(split!.splits).toEqual([
+      { transactionSplitKey: 5, amount: -7.5, appuserAmount: -7.5, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: 'Food', position: 0 },
+      { transactionSplitKey: 6, amount: -2.5, appuserAmount: -2.5, category: null, notes: null, position: 1 },
+    ])
+    expect(plain).not.toHaveProperty('splits')
+  })
+
+  it('accepts a line with no converted amount, and drops fields this build does not know', () => {
+    const [row] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [{ ...splitLine, appuserAmount: null, sentiment: 'positive' }] },
+    ] }).transactions
+    expect(row!.splits?.[0]).not.toHaveProperty('sentiment')
+    expect(row!.splits?.[0]?.appuserAmount).toBeNull()
+  })
+
+  it('reads whose share an expense group line is, and treats a malformed one as none', () => {
+    const person = { expenseGroupKey: 4, expenseGroupMemberKey: 3, isHouseholdMember: false, name: 'Sam' }
+    const [shared, malformed, plain] = aggregateTransactionsResponseSchema.parse({ transactions: [
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: person }] },
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: { name: 'Sam' } }] },
+      { ...transactionFixture, splits: [{ ...splitLine, expenseGroupMember: null }] },
+    ] }).transactions
+    expect(shared!.splits?.[0]?.expenseGroupMember).toEqual(person)
+    expect(malformed!.splits?.[0]?.expenseGroupMember).toBeNull()
+    expect(plain!.splits?.[0]?.expenseGroupMember).toBeNull()
+  })
+
+  it('rejects a line without a finite amount or with a non-positive key', () => {
+    expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, amount: Number.NaN }] }] }).success).toBe(false)
+    expect(aggregateTransactionsResponseSchema.safeParse({ transactions: [{ ...transactionFixture, splits: [{ ...splitLine, transactionSplitKey: 0 }] }] }).success).toBe(false)
+  })
+
+  describe('reimbursement links on a row', () => {
+    const side = (transactionKey: number, settlementAmount: number) => ({ transactionKey, accountKey: 7, accountName: 'Daily account', description: 'Card purchase', merchantName: null, transactionDate: '2026-07-18T10:00:00.000Z', settlementAmount, currencyCode: 'EUR' })
+    const link = { transactionReimbursementKey: 5, amount: 20, currencyCode: 'EUR', createdAt: '2026-07-20T10:00:00.000Z', expense: side(41, -50), reimbursement: side(90, 20) }
+
+    it('reads the links a row carries, and a row from an older server without them as unlinked', () => {
+      const [linked, plain, empty] = accountTransactionsResponseSchema.parse({ transactions: [
+        { ...transactionFixture, reimbursements: [{ ...link, note: 'dropped' }] },
+        transactionFixture,
+        { ...transactionFixture, reimbursements: [] },
+      ] }).transactions
+      expect(linked!.reimbursements).toEqual([link])
+      expect(plain!.reimbursements).toBeUndefined()
+      expect(empty!.reimbursements).toEqual([])
+    })
+
+    it('reads a malformed list of links as none rather than failing the ledger', () => {
+      const result = aggregateTransactionsResponseSchema.safeParse({ transactions: [
+        { ...transactionFixture, reimbursements: [{ ...link, amount: -20 }] },
+        { ...transactionFixture, reimbursements: 'yes' },
+      ] })
+      expect(result.success).toBe(true)
+      expect(result.data?.transactions.map((row) => row.reimbursements)).toEqual([[], []])
+    })
+  })
+
+  describe('freezeSetTransactionSplits', () => {
+    it('trims notes, keeps nulls, and freezes the payload', () => {
+      const frozen = freezeSetTransactionSplits({
+        transactionId: 41,
+        lines: [
+          { categoryId: 3, amount: '-7.5', notes: '  Food  ' },
+          { categoryId: null, amount: '-2.5', notes: '   ' },
+        ],
+      })
+      expect(frozen.transactionId).toBe(41)
+      expect(frozen.payload).toEqual([
+        { categoryId: 3, amount: '-7.5', notes: 'Food' },
+        { categoryId: null, amount: '-2.5', notes: null },
+      ])
+      expect(Object.isFrozen(frozen)).toBe(true)
+      expect(Object.isFrozen(frozen.payload)).toBe(true)
+    })
+
+    it('needs at least two lines and no more than the API takes', () => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: null, amount: '-10', notes: null }] })).toThrow()
+      const many = Array.from({ length: MAX_SPLIT_LINES + 1 }, () => ({ categoryId: null, amount: '-1', notes: null }))
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: many })).toThrow()
+    })
+
+    it.each([
+      ['five decimals', '-1.23456'],
+      ['text', 'ten'],
+      ['empty', ''],
+    ])('rejects a %s amount', (_label, amount) => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: null, amount, notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+    })
+
+    it('rejects a non-positive transaction or category id', () => {
+      expect(() => freezeSetTransactionSplits({ transactionId: 0, lines: [{ categoryId: null, amount: '-1', notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+      expect(() => freezeSetTransactionSplits({ transactionId: 41, lines: [{ categoryId: -1, amount: '-1', notes: null }, { categoryId: null, amount: '-1', notes: null }] })).toThrow()
+    })
+  })
+
+  it('builds the PUT and DELETE paths, rejecting a bad id', () => {
+    expect(createSetTransactionSplitsEndpoint(41)).toMatchObject({ method: 'PUT', path: '/v1/account/transaction/41/splits' })
+    expect(createRemoveTransactionSplitsEndpoint(41)).toMatchObject({ method: 'DELETE', path: '/v1/account/transaction/41/splits' })
+    expect(() => createSetTransactionSplitsEndpoint(0)).toThrow()
+    expect(() => createRemoveTransactionSplitsEndpoint(-1)).toThrow()
+  })
+
+  it('reads the transaction the split endpoints return', () => {
+    const endpoint = createSetTransactionSplitsEndpoint(41)
+    expect(endpoint.schema.parse({
+      transaction: { transactionKey: 41, splits: [splitLine], reviewed: false, appuserSettlementAmount: -10 },
+    })).toEqual({ transaction: { transactionKey: 41, splits: [splitLine], reviewed: false, appuserSettlementAmount: -10 } })
   })
 })

@@ -29,6 +29,7 @@ type PortfolioImportLedgerSummary = Pick<
   | "skippedRows"
   | "importedRows"
   | "failedRows"
+  | "existingTradeSkippedRows"
 >;
 
 type PortfolioImportFailureSummary = PortfolioImportLedgerSummary &
@@ -117,9 +118,7 @@ export function resolvePortfolioImportVisibleStep({
   if (status === "partial") {
     const terminalKind = getPortfolioImportTerminalKind(summary);
 
-    if (terminalKind || isDuplicateOnlyResult(summary ?? undefined)) {
-      return "terminal";
-    }
+    if (terminalKind) return "terminal";
 
     if (
       isFinalizing &&
@@ -127,6 +126,12 @@ export function resolvePortfolioImportVisibleStep({
     ) {
       return "terminal";
     }
+
+    // A positions file whose rows are held back for existing trades is still the person's to
+    // decide on, even when nothing else is left to import.
+    if (hasHeldBackPositionRows(summary)) return "confirm";
+
+    if (isDuplicateOnlyResult(summary ?? undefined)) return "terminal";
 
     return canConfirmPortfolioImport(status, summary) ? "confirm" : "preview";
   }
@@ -158,6 +163,18 @@ export function isDuplicateOnlyResult(
     (summary.readyRows ?? 0) === 0 &&
     (summary.invalidRows ?? 0) === 0 &&
     (summary.needsAssetReviewRows ?? 0) === 0
+  );
+}
+
+/** Positions files: rows skipped because their asset already has trades, before anything imported. */
+export function hasHeldBackPositionRows(
+  summary?: PortfolioImportLedgerSummary | null,
+): boolean {
+  if (!summary) return false;
+  return (
+    (summary.existingTradeSkippedRows ?? 0) > 0 &&
+    (summary.importedRows ?? 0) === 0 &&
+    (summary.failedRows ?? 0) === 0
   );
 }
 

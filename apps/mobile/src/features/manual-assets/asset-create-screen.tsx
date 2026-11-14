@@ -48,6 +48,7 @@ export function AssetCreateScreen({ currencies, userCurrency, loading, metadataE
   const [purchasePrice, setPurchasePrice] = useState('')
   const [purchaseDate, setPurchaseDate] = useState('')
   const [growthRatePercent, setGrowthRatePercent] = useState('')
+  const [growthStartDate, setGrowthStartDate] = useState('')
   const [isPrivate, setIsPrivate] = useState(false)
   const [notes, setNotes] = useState('')
   // The viewer's own currency until one is chosen; none at all until the list has loaded.
@@ -67,6 +68,7 @@ export function AssetCreateScreen({ currencies, userCurrency, loading, metadataE
     purchasePrice: decimal(purchasePrice),
     purchaseDate,
     growthRatePercent: decimal(growthRatePercent),
+    growthStartDate,
     isPrivate,
     notes,
   })
@@ -113,6 +115,7 @@ export function AssetCreateScreen({ currencies, userCurrency, loading, metadataE
               <FormTextRow key="purchase-price" accessibilityLabel={t('manualAssetCreate.purchasePriceOptional')} editable={!pending} error={errorFor('purchasePrice', purchasePrice, 'amount')} keyboardType="decimal-pad" label={t('manualAssetCreate.purchasePrice')} onChangeText={setPurchasePrice} placeholder={t('manualAssetCreate.optional')} value={purchasePrice} />
               <DateField key="purchase-date" appearance="row" disabled={pending} helperText={t('manualAssetCreate.purchaseHint')} label={t('manualAssetCreate.purchaseDate')} maximumDate={today} onChange={(next) => setPurchaseDate(next ?? '')} optional value={purchaseDate || null} />
               <FormTextRow key="growth" accessibilityLabel={t('manualAssetCreate.growthRateOptional')} editable={!pending} error={errorFor('growthRatePercent', growthRatePercent, 'growthRate')} hint={t('manualAssetCreate.growthRateHint')} keyboardType="numbers-and-punctuation" label={t('manualAssetCreate.growthRate')} onChangeText={setGrowthRatePercent} placeholder={t('manualAssetCreate.optional')} value={growthRatePercent} />
+              <DateField key="growth-start" appearance="row" disabled={pending} error={errorFor('growthStartDate', growthStartDate, 'date') ?? undefined} helperText={t('manualAssetEdit.growthStartDateHint')} label={t('manualAssetEdit.growthStartDate')} onChange={(next) => setGrowthStartDate(next ?? '')} optional value={growthStartDate || null} />
               <FormSwitchRow key="private" disabled={pending} hint={t('manualAssetCreate.privateDescription')} label={t('manualAssetCreate.private')} onValueChange={setIsPrivate} value={isPrivate} />
               <FormTextRow key="notes" accessibilityLabel={t('manualAssetCreate.notesOptional')} editable={!pending} label={t('manualAssetCreate.notes')} maxLength={10_000} multiline onChangeText={setNotes} placeholder={t('manualAssetCreate.optional')} value={notes} />
             </FormGroup>

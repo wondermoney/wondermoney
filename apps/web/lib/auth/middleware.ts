@@ -52,8 +52,8 @@ export async function updateSession(
   const isAuthRoute =
     pathAfterLocale === "/auth" || pathAfterLocale.startsWith("/auth/");
   // Household invite-accept (B5): reachable while logged out (to sign up) AND
-  // while logged in (to show the "can't join with an existing account" screen),
-  // so it's excluded from the logged-out gate but NOT bounced when logged in.
+  // while logged in (to confirm joining with the existing account), so it's
+  // excluded from the logged-out gate but NOT bounced when logged in.
   const isJoinRoute =
     pathAfterLocale === "/join" || pathAfterLocale.startsWith("/join/");
   // The pivot-announcement banner (PivotBanner) links to /faq for logged-out

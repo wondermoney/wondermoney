@@ -5,6 +5,8 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
 import type { Category } from '@entity/Category';
+import { ExpenseGroupExpense } from '@entity/ExpenseGroupExpense';
+import type { ExpenseGroupMember } from '@entity/ExpenseGroupMember';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
@@ -48,6 +50,17 @@ import { big } from '@utils/money';
  *
  * Tags stay on the transaction, not on lines (a tag filter matches every line of a tagged
  * transaction); see the issue for the follow-up.
+ *
+ * ## Shares in an expense group
+ *
+ * A transaction shared in an expense group is split by person: every line carries the member whose
+ * share it is (`expense-group/expense-group.service.ts` writes them through
+ * {@link writeGroupShareLines}). Such a split is the group's: `PUT` and `DELETE` here refuse it (409
+ * `transaction_in_expense_group`; change or remove the shares in the group), a category edit moves
+ * every share to the new category instead of dropping the split, and an amount change rescales the
+ * shares like any lines. When the split has to go (the amount became zero or changed sign), the
+ * transaction leaves its group too. A group split may have a single line: someone else's share of
+ * the whole amount.
  */
 
 export interface SplitLineDto {
@@ -56,9 +69,26 @@ export interface SplitLineDto {
   /** The line's share of the transaction's amount in its owner's currency; null when that has none. */
   appuserAmount: null | number;
   category: CategoryDto | null;
+  /** The person whose share this line is, for a transaction shared in an expense group. */
+  expenseGroupMember: null | SplitLineMemberDto;
   notes: null | string;
   position: number;
   transactionSplitKey: number;
+}
+
+export interface SplitLineMemberDto {
+  expenseGroupKey: number;
+  expenseGroupMemberKey: number;
+  /** Whether the person is a member of the household (their share counts in its totals). */
+  isHouseholdMember: boolean;
+  name: string;
+}
+
+/** One person's share, for {@link writeGroupShareLines}: signed like the transaction, in its settlement currency. */
+export interface GroupShareLine {
+  amount: number;
+  category: Category | null;
+  member: ExpenseGroupMember;
 }
 
 export interface SplitLineInput {
@@ -99,7 +129,7 @@ const AMOUNT_SCALE = 4;
 /** A rescaled line is rounded to cents; the largest line takes what is left. */
 const RESCALE_SCALE = 2;
 /** What `Transaction.splits` must be populated with to build {@link SplitLineDto}s. */
-export const SPLIT_LINE_POPULATE = ['splits.categoryKey'] as const;
+export const SPLIT_LINE_POPULATE = ['splits.categoryKey', 'splits.expenseGroupMemberKey'] as const;
 
 /** The settlement amount the lines must sum to: the user's edit when there is one. */
 export function effectiveSettlementAmount(transaction: Pick<Transaction, 'editedSettlementAmount' | 'settlementAmount'>): null | number {
@@ -116,10 +146,14 @@ export function toSplitLineDtos(transaction: Transaction): SplitLineDto[] {
   return lines.flatMap((line) => {
     const split = line.transactionSplitKey === null ? undefined : byKey.get(line.transactionSplitKey);
     if (!split) return [];
+    const member = split.expenseGroupMemberKey;
     return [{
       amount: split.amount,
       appuserAmount: line.amount,
       category: line.category ? toCategoryDto(line.category) : null,
+      expenseGroupMember: member
+        ? { expenseGroupKey: member.expenseGroupKey.expenseGroupKey, expenseGroupMemberKey: member.expenseGroupMemberKey, isHouseholdMember: member.appuserKey != null, name: member.name }
+        : null,
       notes: line.notes,
       position: split.position,
       transactionSplitKey: split.transactionSplitKey,
@@ -142,6 +176,7 @@ export async function setTransactionSplits(em: EntityManager, actor: Actor, tran
     const categories = await resolveCategories(txEm, actor.tenantKey, lines);
 
     const current = await liveSplits(txEm, transaction);
+    assertNotGroupSplit(current);
     if (sameLines(current, lines)) return;
 
     const now = new Date();
@@ -178,6 +213,7 @@ export async function removeTransactionSplits(em: EntityManager, actor: Actor, t
     const transaction = await lockVisibleTransaction(txEm, actor, transactionKey);
     const current = await liveSplits(txEm, transaction);
     if (current.length === 0) return;
+    assertNotGroupSplit(current);
     await unsplit(txEm, transaction, current, { actorAppuserKey: actor.appuserKey, actorType: TransactionAuditActorType.USER, source: 'transaction-splits-remove' });
     await txEm.flush();
   });
@@ -185,19 +221,67 @@ export async function removeTransactionSplits(em: EntityManager, actor: Actor, t
 }
 
 /**
- * Drop the split of transactions a member is about to give one category for their whole amount
- * (the category edit and bulk categorization). Audited per transaction; the caller flushes.
+ * Drop the split of transactions a member is about to give `category` for their whole amount
+ * (the category edit and bulk categorization). A transaction shared in an expense group keeps its
+ * shares, each moved to `category`: the people sharing it have not changed. Audited per
+ * transaction; the caller flushes.
  */
-export async function removeSplitsBeforeCategorizing(em: EntityManager, transactions: Transaction[], actorAppuserKey: number): Promise<void> {
+export async function removeSplitsBeforeCategorizing(em: EntityManager, transactions: Transaction[], actorAppuserKey: number, category: Category): Promise<void> {
   if (transactions.length === 0) return;
   const lines = await em.find(TransactionSplit, { transactionKey: { $in: transactions } }, { filters: { [HIDDEN_FILTER]: false } });
   const now = new Date();
   for (const transaction of transactions) {
-    const current = lines.filter((line) => line.transactionKey.transactionKey === transaction.transactionKey);
+    const current = sortLines(lines.filter((line) => line.transactionKey.transactionKey === transaction.transactionKey));
     if (current.length === 0) continue;
+    const from = current.map(auditLine);
+    if (current.some((line) => line.expenseGroupMemberKey)) {
+      if (current.every((line) => line.categoryKey?.categoryKey === category.categoryKey)) continue;
+      for (const line of current) line.categoryKey = category;
+      await audit(em, transaction, { actorAppuserKey, actorType: TransactionAuditActorType.USER, source: 'expense-group-shares-categorize' }, { splits: { from, to: current.map(auditLine) } });
+      continue;
+    }
     for (const line of current) line.deletedAt = now;
-    await audit(em, transaction, { actorAppuserKey, actorType: TransactionAuditActorType.USER, source: 'transaction-splits-remove' }, { splits: { from: sortLines(current).map(auditLine), to: [] } });
+    await audit(em, transaction, { actorAppuserKey, actorType: TransactionAuditActorType.USER, source: 'transaction-splits-remove' }, { splits: { from, to: [] } });
   }
+}
+
+/**
+ * Replace the lines of `transaction` (locked by the caller) with one line per person's share in an
+ * expense group. Checks the split invariant for shares: at least one line, each with the
+ * transaction's sign and at most 4 decimals, summing exactly to the effective amount. The
+ * transaction's own category becomes the largest share's. Audited; the caller flushes.
+ */
+export async function writeGroupShareLines(em: EntityManager, transaction: Transaction, shares: GroupShareLine[], context: AuditContext & { actorAppuserKey: number }): Promise<void> {
+  assertValidShareAmounts(shares.map((share) => share.amount), effectiveSettlementAmount(transaction));
+  const current = await liveSplits(em, transaction);
+  const now = new Date();
+  for (const line of current) line.deletedAt = now;
+  const written = shares.map((share, position) => {
+    const split = new TransactionSplit();
+    split.amount = share.amount;
+    split.categoryKey = share.category;
+    split.expenseGroupMemberKey = share.member;
+    split.notes = null;
+    split.position = position;
+    split.tenantKey = transaction.tenantKey!;
+    split.transactionKey = transaction;
+    em.persist(split);
+    return split;
+  });
+  const largest = shares[largestIndex(shares.map((share) => share.amount))]!;
+  const categoryChange = await mirrorAssignment(em, transaction, largest.category, context.actorAppuserKey);
+  markUserCategorized(transaction);
+  await audit(em, transaction, context, { ...categoryChange, splits: { from: sortLines(current).map(auditLine), to: written.map(auditLine) } });
+}
+
+/**
+ * Remove the expense-group shares of `transaction` (locked by the caller): it is no longer split,
+ * and keeps the largest share's category. Audited; the caller flushes.
+ */
+export async function removeGroupShareLines(em: EntityManager, transaction: Transaction, context: AuditContext): Promise<void> {
+  const current = await liveSplits(em, transaction);
+  if (current.length === 0) return;
+  await unsplit(em, transaction, current, context);
 }
 
 /**
@@ -238,6 +322,12 @@ export async function isSplit(em: EntityManager, transaction: Transaction): Prom
   return (await em.count(TransactionSplit, { transactionKey: transaction }, { filters: { [HIDDEN_FILTER]: false } })) > 0;
 }
 
+function assertNotGroupSplit(current: TransactionSplit[]): void {
+  if (current.some((line) => line.expenseGroupMemberKey)) {
+    throw new ConflictError('This transaction is shared in an expense group; change its shares there', ERROR_CODE.TRANSACTION_IN_EXPENSE_GROUP);
+  }
+}
+
 function assertValidLines(lines: SplitLineInput[], target: null | number): void {
   const invalid = (message: string) => new BadRequestError(message, ERROR_CODE.SPLIT_INVALID);
   if (target === null || target === 0) throw invalid('A transaction with no amount cannot be split');
@@ -249,6 +339,19 @@ function assertValidLines(lines: SplitLineInput[], target: null | number): void 
   }
   const total = lines.reduce((sum, line) => sum.plus(big(line.amount)), big(0));
   if (!total.eq(big(target))) throw invalid('The lines must add up to the transaction\'s amount');
+}
+
+function assertValidShareAmounts(amounts: number[], target: null | number): void {
+  const invalid = (message: string) => new BadRequestError(message, ERROR_CODE.EXPENSE_GROUP_SHARES_INVALID);
+  if (target === null || target === 0) throw invalid('A transaction with no amount cannot be shared');
+  if (amounts.length === 0) throw invalid('Sharing needs at least one share');
+  for (const value of amounts) {
+    const amount = big(value);
+    if (!amount.round(AMOUNT_SCALE).eq(amount)) throw invalid(`A share has at most ${AMOUNT_SCALE} decimals`);
+    if (amount.eq(0) || Math.sign(value) !== Math.sign(target)) throw invalid('Every share must be more than zero');
+  }
+  const total = amounts.reduce((sum, value) => sum.plus(big(value)), big(0));
+  if (!total.eq(big(target))) throw invalid('The shares must add up to the transaction\'s amount');
 }
 
 function liveSplits(em: EntityManager, transaction: Transaction): Promise<TransactionSplit[]> {
@@ -321,6 +424,11 @@ async function unsplit(em: EntityManager, transaction: Transaction, current: Tra
   const largest = ordered[largestIndex(ordered.map((line) => line.amount))]!;
   const now = new Date();
   for (const line of ordered) line.deletedAt = now;
+  // Without its shares, a transaction is no longer in its expense group.
+  if (ordered.some((line) => line.expenseGroupMemberKey)) {
+    const shared = await em.find(ExpenseGroupExpense, { deletedAt: null, transactionKey: transaction }, { filters: false });
+    for (const row of shared) row.deletedAt = now;
+  }
   const categoryChange = await mirrorAssignment(em, transaction, largest.categoryKey ?? null, context.actorAppuserKey ?? transaction.appuserKey?.appuserKey ?? null);
   await audit(em, transaction, context, { ...categoryChange, splits: { from: ordered.map(auditLine), to: [] } });
 }
@@ -347,7 +455,8 @@ async function audit(em: EntityManager, transaction: Transaction, context: Audit
 }
 
 function auditLine(line: TransactionSplit) {
-  return { amount: line.amount, categoryKey: line.categoryKey?.categoryKey ?? null };
+  const member = line.expenseGroupMemberKey?.expenseGroupMemberKey;
+  return { amount: line.amount, categoryKey: line.categoryKey?.categoryKey ?? null, ...(member === undefined ? {} : { expenseGroupMemberKey: member }) };
 }
 
 async function mirrorAssignment(em: EntityManager, transaction: Transaction, category: Category | null, appuserKey: null | number): Promise<{ categoryKey?: { from: null | number; to: null | number } }> {

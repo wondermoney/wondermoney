@@ -1,63 +1,229 @@
 ---
 title: Regras
-description: Categorize, renomeie, etiquete ou oculte transações automaticamente, veja o que uma regra apanha antes de a guardar, e aplique-a às transações que já tem.
+description: Categoriza, renomeia, etiqueta ou oculta transações automaticamente, vê o que uma regra apanha antes de a guardares, e aplica-a às transações que já tens.
 ---
 
-Uma regra diz ao WonderMoney o que fazer com transações de um certo tipo: por exemplo, "quando a descrição contém NETFLIX, definir a categoria Entretenimento". As regras pertencem ao agregado, por isso ambos os membros veem e gerem a mesma lista.
+Uma regra diz ao WonderMoney o que fazer com transações de um certo tipo: por exemplo, "quando a descrição contém NETFLIX, definir a categoria Entretenimento". As regras pertencem ao agregado, por isso todas as pessoas do agregado veem a mesma lista, e todas exceto os observadores a podem gerir.
 
 ## Onde as encontrar
 
-Na web, vá a **Definições → Regras**. A lista mostra todas as regras pela ordem em que correm, com um resumo numa linha, como "Descrição contém NETFLIX, definir categoria Entretenimento", e um interruptor para ligar ou desligar cada regra.
+Na web, vai a **Definições → Regras**. A lista mostra todas as regras pela ordem em que correm, com um resumo numa linha, como "Descrição contém NETFLIX, definir categoria Entretenimento", e um interruptor para ligar ou desligar cada regra.
 
-- **Pesquise** pelo nome, ou **filtre** pela categoria que a regra define, para encontrar uma regra depressa.
-- **Reordene** arrastando uma regra, ou com as setas para cima e para baixo. Limpe primeiro a pesquisa e o filtro: a ordem abrange sempre a lista inteira.
-- **Edite** ou **elimine** uma regra a partir da sua linha. Eliminar uma regra não desfaz o que ela já alterou.
+- **Pesquisa** pelo nome, ou **filtra** pela categoria que a regra define, para encontrares uma regra depressa.
+- **Reordena** arrastando uma regra, ou com as setas para cima e para baixo. Limpa primeiro a pesquisa e o filtro: a ordem abrange sempre a lista inteira.
+- **Edita** ou **elimina** uma regra a partir da sua linha. Eliminar uma regra não desfaz o que ela já alterou.
 
 ## Criar uma regra
 
-Escolha **Criar regra**, ou comece a partir de uma transação: abra o menu da transação, escolha **Editar** e depois **Criar regra**. Começar a partir de uma transação preenche o comerciante (ou a descrição, quando não tem comerciante) e a categoria atual.
+Escolhe **Criar regra**, ou começa a partir de uma transação: abre o menu da transação, escolhe **Editar** e depois **Criar regra**. Começar a partir de uma transação preenche o comerciante (ou a descrição, quando não tem comerciante) e a categoria atual.
 
 Uma regra tem:
 
 - **Condições.** Cada uma compara um campo da transação:
-  - **Descrição** ou **Comerciante**: contém, não contém, é, começa por, termina em. A comparação ignora maiúsculas, acentos e espaços a mais. Na descrição pode comparar o texto como é mostrado ou o texto original do banco.
-  - **Montante**: é, é maior que, é pelo menos, é menor que, é no máximo, ou está entre dois montantes. Os montantes são comparados sem sinal; acrescente uma condição de **Sentido** (entrada ou saída de dinheiro) para os distinguir.
-  - **Conta**, **Categoria** (incluindo "Sem categoria"), **Tipo de transação** e **Moeda**: é uma de, ou não é nenhuma de, os valores que escolher.
+  - **Descrição** ou **Comerciante**: contém, não contém, é, começa por, termina em. A comparação ignora maiúsculas, acentos e espaços a mais. Na descrição podes comparar o texto como é mostrado ou o texto original do banco.
+  - **Montante**: é, é maior que, é pelo menos, é menor que, é no máximo, ou está entre dois montantes. Os montantes são comparados sem sinal; acrescenta uma condição de **Sentido** (entrada ou saída de dinheiro) para os distinguir.
+  - **Conta**, **Categoria** (incluindo "Sem categoria"), **Tipo de transação** e **Moeda**: é uma de, ou não é nenhuma de, os valores que escolheres.
 - **Cumprir todas as condições ou qualquer condição.** Uma regra pode ter até 20 condições.
-- **Ações**: definir a categoria, definir o comerciante (escolha um ou escreva um nome novo), renomear a descrição, adicionar notas (só onde as notas estão vazias), adicionar etiquetas, marcar como revista ou ocultar a transação. Cada tipo de ação só pode aparecer uma vez numa regra.
+- **Ações**: definir a categoria, definir o comerciante (escolhe um ou escreve um nome novo), renomear a descrição, adicionar notas (só onde as notas estão vazias), adicionar etiquetas, marcar como revista ou ocultar a transação. Cada tipo de ação só pode aparecer uma vez numa regra.
 - **Parar depois desta regra.** Quando a regra se aplica a uma transação, as regras abaixo não correm sobre essa transação.
 
 Um agregado pode ter até 200 regras.
 
+## Sugestões de regras
+
+Quando corriges vezes sem conta o mesmo tipo de transação, o WonderMoney propõe uma regra que o faz por ti. Depois de alterares a categoria de uma transação, na web ou na app, se já moveste três transações destas para essa categoria nos últimos 90 dias, pergunta: "Categorizar sempre transações destas como Mercearia?"
+
+- **Destas** quer dizer o mesmo comerciante, ou o mesmo início da descrição, sem referências nem números. "TRF MB WAY 912345678 JOAO" e "TRF MB WAY 913333333 ANA" começam ambas por "TRF MB WAY". Um cabeçalho de cartão como "COMPRA 1192" é ignorado, por isso "COMPRA 1192 CONTINENTE" conta como "CONTINENTE".
+- Alterar várias transações de uma vez conta cada uma delas, e cada transação só conta uma vez.
+- Só contam as alterações que fazes. As dos outros membros, uma proposta do assistente que confirmes e as categorias definidas por uma regra, pela categorização aprendida ou por uma importação não contam. As transações das contas privadas que não vês nunca contam.
+- Escolhe **Criar regra** para abrir o editor de regras já preenchido, com a pré-visualização, e confirma antes de guardar. Escolhe **Não sugerir de novo** para deixares de ver essa sugestão. Se não escolheres nenhuma, pode voltar a aparecer da próxima vez.
+
+Não aparece nenhuma sugestão quando uma regra ativa já dá essa categoria a essas transações, ou quando o WonderMoney já as reconhece pela categoria que escolheste para o comerciante. Essa categoria aprendida só é reutilizada quando a descrição de uma transação nova é exatamente o nome do comerciante, por isso a regra continua a ser sugerida para descrições com mais texto.
+
 ## Pré-visualizar antes de guardar
 
-Enquanto edita, a pré-visualização ao lado do formulário mostra quantas das suas transações a regra apanha, quantas delas mudaria, e as 50 correspondências mais recentes com a alteração que cada uma receberia. Atualiza-se pouco depois de parar de escrever.
+Enquanto editas, a pré-visualização ao lado do formulário mostra quantas das tuas transações a regra apanha, quantas delas mudaria, e as 50 correspondências mais recentes com a alteração que cada uma receberia. Atualiza-se pouco depois de parares de escrever.
 
-A pré-visualização avalia a regra sozinha e abrange as transações do agregado que pode ver, incluindo as ocultas. Nunca mostra as contas privadas do outro membro. Uma correspondência pode aparecer como **Sem alteração** quando a transação já tem esses valores, ou quando foi o próprio a definir esse valor (ver abaixo).
+A pré-visualização avalia a regra sozinha e abrange as transações do agregado que podes ver, incluindo as ocultas. Nunca mostra as contas privadas que não vês. Uma correspondência pode aparecer como **Sem alteração** quando a transação já tem esses valores, ou quando foste tu a definir esse valor (ver abaixo).
 
-Guardar uma regra não altera as transações que já tem. Para as alterar também, aplique a regra (ver abaixo).
+Guardar uma regra não altera as transações que já tens. Para as alterar também, aplica a regra (ver abaixo).
 
 ## Aplicar regras às transações existentes
 
-Depois de guardar uma regra ativa, o WonderMoney verifica quantas das suas transações existentes ela alteraria. Se houver alguma, propõe **Aplicar a N transações**. Confirme para a aplicar, ou escolha **Agora não** para as deixar como estão.
+Depois de guardares uma regra ativa, o WonderMoney verifica quantas das tuas transações existentes ela alteraria. Se houver alguma, propõe **Aplicar a N transações**. Confirma para a aplicar, ou escolhe **Agora não** para as deixar como estão.
 
-Para correr todas as regras ativas sobre as transações que já tem (por exemplo, depois de as reordenar), escolha **Aplicar às transações existentes** no topo de **Definições → Regras**. As regras correm então de cima para baixo, como nas transações novas.
+Para correr todas as regras ativas sobre as transações que já tens (por exemplo, depois de as reordenares), escolhe **Aplicar às transações existentes** no topo de **Definições → Regras**. As regras correm então de cima para baixo, como nas transações novas.
 
-- O número que confirma é exatamente o que a aplicação altera.
-- A aplicação corre em segundo plano: a janela mostra o progresso, e pode fechá-la enquanto corre. Quando termina, uma mensagem diz quantas transações mudaram.
-- Abrange as transações do agregado que pode ver, incluindo as ocultas, mas não as eliminadas nem as contas privadas do outro membro. Tudo o que está em "O que as regras nunca alteram" continua a valer.
+- O número que confirmas é exatamente o que a aplicação altera.
+- A aplicação corre em segundo plano: a janela mostra o progresso, e podes fechá-la enquanto corre. Quando termina, uma mensagem diz quantas transações mudaram.
+- Abrange as transações do agregado que podes ver, incluindo as ocultas, mas não as eliminadas nem as contas privadas que não vês. Tudo o que está em "O que as regras nunca alteram" continua a valer.
 - Aplicar a mesma regra outra vez não altera mais nada. Cada alteração fica registada na atividade da transação.
-- Só uma aplicação de cada vez por agregado: espere que uma termine antes de começar outra.
+- Só uma aplicação de cada vez por agregado: espera que uma termine antes de começar outra.
 
 ## O que as regras nunca alteram
 
-- O que definiu à mão: uma categoria que escolheu, um comerciante ou uma descrição que editou, e notas que escreveu. A regra continua a contar como correspondência, mas deixa esses campos como estão.
+- O que definiste à mão: uma categoria que escolheste, um comerciante ou uma descrição que editaste, e notas que escreveste. A regra continua a contar como correspondência, mas deixa esses campos como estão.
 - O tipo de transação. Só a deteção de transferências marca uma transação como transferência.
-- Transações nas contas privadas do outro membro. Uma regra atua em nome do membro que alterou por último as suas condições ou ações, e só sobre transações que esse membro pode ver.
+- Transações em contas que o membro da regra não pode editar. Uma regra atua em nome do membro que alterou por último as suas condições ou ações, e só sobre transações que esse membro pode ver e editar: nunca em contas privadas ocultas para ele ou que só pode ver.
 
 ## Ordem
 
-As regras correm de cima para baixo. Cada regra olha para a transação como chegou, não como as regras anteriores a deixaram. Quando duas regras definem o mesmo campo, ganha a de baixo; as etiquetas de várias regras somam-se. Ligue **Parar depois desta regra** para impedir que as regras abaixo corram sobre o que ela apanhou.
+As regras correm de cima para baixo. Cada regra olha para a transação como chegou, não como as regras anteriores a deixaram. Quando duas regras definem o mesmo campo, ganha a de baixo; as etiquetas de várias regras somam-se. Liga **Parar depois desta regra** para impedir que as regras abaixo corram sobre o que ela apanhou.
+
+## Exportar e importar regras
+
+Escolhe **Exportar** no topo de **Definições → Regras** para descarregar as regras do agregado num ficheiro JSON. Escolhe **Importar** para carregar um: o WonderMoney verifica primeiro o ficheiro e mostra o que vai acontecer antes de alterar alguma coisa.
+
+O ficheiro não tem identificadores internos. Uma regra nomeia aquilo a que se refere: contas, comerciantes e etiquetas pelo nome, uma categoria de sistema pela sua chave (o nome semeado, como `FOOD`) e uma categoria tua pelo nome. É isso que lhe permite mudar de instância.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- Uma categoria é `{ "system": "FOOD" }` para uma categoria de sistema, `{ "name": "Streaming" }` para uma tua, ou `"uncategorized"`.
+- Os nomes de contas, comerciantes e etiquetas têm de corresponder aos nomes do agregado para onde importas.
+- O ficheiro pode ter até 1.000 regras e no máximo 1 MB. O limite de 200 regras por agregado continua a aplicar-se.
+
+**Modos de importação.** *Acrescentar* mantém as regras que já existem e junta as do ficheiro a seguir. *Substituir* remove as regras existentes e fica só com as do ficheiro, depois de o ficheiro inteiro ser validado; uma importação falhada deixa a lista como estava. Ambos os modos pedem confirmação.
+
+**O ensaio.** Antes de escrever seja o que for, a importação mostra as regras que vai criar, as que vai ignorar por já existir uma regra com o mesmo nome, e as referências que não encontrou. Depois:
+
+- Uma categoria personalizada em falta pode ser criada, se marcares a caixa.
+- Uma regra que nomeia uma conta que este agregado não tem é importada desligada, sem essa condição de conta.
+- Uma regra que nomeia uma categoria de sistema ou etiqueta em falta é ignorada.
+
+Um ficheiro que não seja uma exportação de regras do WonderMoney, tenha mais de 1 MB, ou tenha mais de 1.000 regras é recusado com uma mensagem a explicar porquê.
+
+## Regras predefinidas para o teu país
+
+O WonderMoney inclui listas curtas de regras para lojas e serviços conhecidos em Portugal, Espanha, Brasil, Reino Unido e Estados Unidos, para que os comerciantes habituais tenham uma categoria desde o primeiro dia.
+
+- **Onde são sugeridas.** No fim da configuração inicial e no topo de **Definições → Regras**, o WonderMoney sugere a predefinição que te corresponde. Olha primeiro para os países das tuas ligações bancárias, depois para o teu idioma e a região do navegador ou do dispositivo, e por fim para a tua moeda. Na web, **Predefinições** no topo de **Definições → Regras** mostra todas. A app móvel sugere a predefinição correspondente no ecrã Regras.
+- **Nada é adicionado sozinho.** A sugestão abre uma pré-visualização de todas as regras da predefinição e do que cada uma define. As regras só são adicionadas quando escolhes **Adicionar N regras**, depois das tuas. **Agora não** esconde a sugestão.
+- **Adicionar duas vezes não duplica.** Uma regra da predefinição é ignorada quando já tens uma regra com o mesmo nome, por isso adicionar de novo, ou depois de eliminar algumas, só acrescenta o que falta.
+- **O que uma predefinição pode fazer.** Uma regra predefinida só corresponde a dinheiro que sai e só define uma categoria, um comerciante ou uma descrição. Nunca marca uma transação como transferência, nunca a esconde, nunca dá a uma receita uma categoria de despesa e nunca decide uma categoria a partir de um meio de pagamento como MB WAY, PIX, Bizum, SEPA ou uma transferência, porque por eles passa dinheiro nos dois sentidos. Um teste verifica cada predefinição antes de ser publicada.
+- Depois de adicionares uma predefinição, podes aplicar as regras às transações que já tens (ver acima) e editá-las ou eliminá-las como qualquer outra regra.
+
+Cada regra compara a descrição original do banco, sem distinguir maiúsculas nem acentos. As predefinições contêm:
+
+{/* rule-presets:start (generated by scripts/rule-presets.mjs; do not edit by hand) */}
+
+### Portugal (`pt-PT`, 19 regras)
+
+| Regra | A descrição contém | Categoria | Comerciante |
+| --- | --- | --- | --- |
+| Continente | “Continente” | Mercearia | Continente |
+| Pingo Doce | “Pingo Doce” | Mercearia | Pingo Doce |
+| Lidl | “Lidl” | Mercearia | Lidl |
+| Auchan | “Auchan” | Mercearia | Auchan |
+| Intermarché | “Intermarché” | Mercearia | Intermarché |
+| Minipreço | “Minipreço” | Mercearia | Minipreço |
+| Mercadona | “Mercadona” | Mercearia | Mercadona |
+| EDP Comercial | “EDP Comercial” | Eletricidade | EDP |
+| Galp Electricidade | “Galp Electricidade” | Eletricidade | Galp |
+| Vodafone | “Vodafone” | TV, Telefone & Internet | Vodafone |
+| Via Verde | “Via Verde” | Manutenção de veículos | Via Verde |
+| Metropolitano de Lisboa | “Metropolitano de Lisboa” | Transportes públicos | Metropolitano de Lisboa |
+| Metro do Porto | “Metro do Porto” | Transportes públicos | Metro do Porto |
+| Comboios de Portugal | “Comboios de Portugal” | Transportes públicos | CP - Comboios de Portugal |
+| Glovo | “Glovo” | Entrega de Comida | Glovo |
+| Uber Eats | “Uber Eats” | Entrega de Comida | Uber Eats |
+| Netflix | “Netflix” | Serviços de "Streaming" | Netflix |
+| Spotify | “Spotify” | Serviços de "Streaming" | Spotify |
+| Farmácia | “Farmácia” | Saúde | — |
+
+### Espanha (`es-ES`, 18 regras)
+
+| Regra | A descrição contém | Categoria | Comerciante |
+| --- | --- | --- | --- |
+| Mercadona | “Mercadona” | Mercearia | Mercadona |
+| Carrefour | “Carrefour” | Mercearia | Carrefour |
+| Lidl | “Lidl” | Mercearia | Lidl |
+| Eroski | “Eroski” | Mercearia | Eroski |
+| Alcampo | “Alcampo” | Mercearia | Alcampo |
+| Iberdrola | “Iberdrola” | Eletricidade | Iberdrola |
+| Endesa | “Endesa” | Eletricidade | Endesa |
+| Movistar | “Movistar” | TV, Telefone & Internet | Movistar |
+| Vodafone | “Vodafone” | TV, Telefone & Internet | Vodafone |
+| Yoigo | “Yoigo” | TV, Telefone & Internet | Yoigo |
+| Renfe | “Renfe” | Transportes públicos | Renfe |
+| Metro de Madrid | “Metro de Madrid” | Transportes públicos | Metro de Madrid |
+| Glovo | “Glovo” | Entrega de Comida | Glovo |
+| Just Eat | “Just Eat” | Entrega de Comida | Just Eat |
+| Uber Eats | “Uber Eats” | Entrega de Comida | Uber Eats |
+| Netflix | “Netflix” | Serviços de "Streaming" | Netflix |
+| Spotify | “Spotify” | Serviços de "Streaming" | Spotify |
+| Farmacia | “Farmacia” | Saúde | — |
+
+### Brasil (`pt-BR`, 14 regras)
+
+| Regra | A descrição contém | Categoria | Comerciante |
+| --- | --- | --- | --- |
+| Carrefour | “Carrefour” | Mercearia | Carrefour |
+| Pão de Açúcar | “Pão de Açúcar” | Mercearia | Pão de Açúcar |
+| Assaí Atacadista | “Assaí Atacadista” | Mercearia | Assaí Atacadista |
+| Atacadão | “Atacadão” | Mercearia | Atacadão |
+| CPFL | “CPFL” | Eletricidade | CPFL |
+| Cemig | “Cemig” | Eletricidade | Cemig |
+| Sabesp | “Sabesp” | Água | Sabesp |
+| Comgás | “Comgás” | Gás | Comgás |
+| iFood | “iFood” | Entrega de Comida | iFood |
+| Rappi | “Rappi” | Entrega de Comida | Rappi |
+| Netflix | “Netflix” | Serviços de "Streaming" | Netflix |
+| Spotify | “Spotify” | Serviços de "Streaming" | Spotify |
+| Drogasil | “Drogasil” | Saúde | Drogasil |
+| Droga Raia | “Droga Raia” | Saúde | Droga Raia |
+
+### Reino Unido e Estados Unidos (`en`, 23 regras)
+
+| Regra | A descrição contém | Categoria | Comerciante |
+| --- | --- | --- | --- |
+| Tesco | “Tesco” mas não “Bank”, “Mobile” | Mercearia | Tesco |
+| Sainsbury's | “Sainsbury” mas não “Bank” | Mercearia | Sainsbury's |
+| Asda | “Asda” | Mercearia | Asda |
+| Morrisons | “Morrisons” | Mercearia | Morrisons |
+| Waitrose | “Waitrose” | Mercearia | Waitrose |
+| Lidl | “Lidl” | Mercearia | Lidl |
+| Kroger | “Kroger” | Mercearia | Kroger |
+| Whole Foods | “Whole Foods” | Mercearia | Whole Foods |
+| Trader Joe's | “Trader Joe” | Mercearia | Trader Joe's |
+| Thames Water | “Thames Water” | Água | Thames Water |
+| Virgin Media | “Virgin Media” | TV, Telefone & Internet | Virgin Media |
+| Comcast | “Comcast” | TV, Telefone & Internet | Comcast |
+| Verizon | “Verizon” | TV, Telefone & Internet | Verizon |
+| TfL Travel | “TfL Travel” | Transportes públicos | Transport for London |
+| Trainline | “Trainline” | Transportes públicos | Trainline |
+| Deliveroo | “Deliveroo” | Entrega de Comida | Deliveroo |
+| Uber Eats | “Uber Eats” | Entrega de Comida | Uber Eats |
+| DoorDash | “DoorDash” | Entrega de Comida | DoorDash |
+| Just Eat | “Just Eat” | Entrega de Comida | Just Eat |
+| Netflix | “Netflix” | Serviços de "Streaming" | Netflix |
+| Spotify | “Spotify” | Serviços de "Streaming" | Spotify |
+| Boots | “Boots” | Saúde | Boots |
+| Walgreens | “Walgreens” | Saúde | Walgreens |
+
+{/* rule-presets:end */}
 
 ## Ligações relacionadas
 

@@ -6,6 +6,7 @@ const normalized = (filters: TransactionFilters) => ({
   needsReview: filters.needsReview === true,
   includeHidden: filters.includeHidden === true,
   tagIds: [...(filters.tagIds ?? [])].sort((left, right) => left - right).join(','),
+  memberKeys: (filters.memberKeys ?? []).join(','),
   limit: filters.limit ?? 100,
 })
 
@@ -20,4 +21,19 @@ export const accountTransactionsKey = (
 ) => [...transactionsRootKey(epochId), 'account', accountId, normalized(filters)] as const
 export const recentTransactionsKey = (epochId: number, accountId: number) => (
   [...transactionsRootKey(epochId), 'recent', accountId] as const
+)
+export const transactionReviewSummaryKey = (epochId: number) => (
+  [...transactionsRootKey(epochId), 'review-summary'] as const
+)
+
+export const transactionAttachmentsKey = (epochId: number, transactionId: number) => (
+  [...transactionsRootKey(epochId), 'attachments', transactionId] as const
+)
+
+/** One transaction's reimbursement links; under the transactions root, so a list change refreshes it. */
+export const transactionReimbursementsKey = (epochId: number, transactionId: number) => (
+  [...transactionsRootKey(epochId), 'reimbursements', transactionId] as const
+)
+export const reimbursementSuggestionsKey = (epochId: number, transactionId: number, search: string) => (
+  [...transactionReimbursementsKey(epochId, transactionId), 'suggestions', search] as const
 )

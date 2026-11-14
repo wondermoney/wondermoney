@@ -1,4 +1,5 @@
 import type { EntityMarkCategory, EntityMarkSource } from '@/components/ui/entity-mark'
+import type { MerchantAvatarSource } from '@/features/merchants/merchant-avatar'
 
 const TRANSFER_TYPES = new Set(['TRANSFER_IN', 'TRANSFER_OUT'])
 
@@ -25,4 +26,18 @@ export function transactionMark(input: Readonly<{
   if (input.transfer || isTransferType(input.type)) return { glyph: 'arrow-left-right' }
   if (input.category) return { icon: input.category }
   return { glyph: 'tag' }
+}
+
+/**
+ * The merchant avatar a transaction row leads with in place of its category mark, or null to
+ * keep `transactionMark`. Only an ordinary row with a merchant gets one: the opening balance row
+ * is the account, and a transfer keeps its arrows, since the arrows are what says "transfer".
+ */
+export function transactionMerchantAvatar(input: Readonly<{
+  synthetic?: boolean
+  type?: string | null
+  merchant?: Readonly<{ name: string; resolvedLogoUrl?: string | null }> | null
+}>): MerchantAvatarSource | null {
+  if (input.synthetic || isTransferType(input.type) || !input.merchant?.name.trim()) return null
+  return { name: input.merchant.name, resolvedLogoUrl: input.merchant.resolvedLogoUrl ?? null }
 }

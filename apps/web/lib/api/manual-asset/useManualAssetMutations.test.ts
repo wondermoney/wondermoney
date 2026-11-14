@@ -7,9 +7,13 @@ import { reportsKeys } from "../reports/keys";
 import { invalidateManualAssets } from "./useManualAssetMutations";
 
 /** Seeds one query per key and reports which of them a call invalidates. */
-function staleAfter(run: (client: QueryClient) => void) {
+function staleAfter(
+  run: (client: QueryClient) => void,
+  extraKeys: unknown[][] = [],
+) {
   const client = new QueryClient();
   const keys = [
+    ...extraKeys,
     ["manual-assets"],
     ["manual-asset", "7"],
     ["manual-asset", "8"],
@@ -47,4 +51,18 @@ test("a deleted asset's own page is not refetched", () => {
     false,
   );
   assert.ok(stale.some((key) => key[0] === "net-worth"));
+});
+
+test("a change to an asset refreshes the loans, which show the asset they are secured against", () => {
+  const stale = staleAfter(
+    (client) => invalidateManualAssets(client, 7),
+    [["loans"], ["loan", 5], ["loan", 5, "schedule"]],
+  );
+  for (const key of [["loans"], ["loan", 5], ["loan", 5, "schedule"]])
+    assert.ok(
+      stale.some(
+        (stalekey) => JSON.stringify(stalekey) === JSON.stringify(key),
+      ),
+      `${JSON.stringify(key)} is not refreshed`,
+    );
 });

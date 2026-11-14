@@ -24,6 +24,11 @@ export interface ReportFilters {
   merchantKeys?: string[];
   /** Tag keys; a transaction counts when it carries any of them. */
   tagKeys?: string[];
+  /**
+   * One household member's appuser key, or `shared` (the household as a whole); absent for
+   * everyone. Sent repeated, like the other arrays.
+   */
+  memberKeys?: string[];
   currencyKey?: string;
   includePending?: boolean;
   includeTransfers?: boolean;
@@ -73,6 +78,69 @@ export interface CashflowPoint {
   income: number;
   expenses: number;
   net: number;
+  /** `(income - expenses) / income`; null when the month has no income. */
+  savingsRate?: number | null;
+}
+
+/** One month's totals in `GET /v1/reports/month-comparison`. */
+export interface MonthComparisonTotals {
+  /** `YYYY-MM`. */
+  month: string;
+  income: number;
+  expenses: number;
+  net: number;
+  /** `(income - expenses) / income`; null when the month has no income. */
+  savingsRate: number | null;
+}
+
+/** One category's spending in both months. */
+export interface MonthComparisonCategoryRow {
+  categoryKey: string;
+  name: string;
+  color: string;
+  /** Spending in the base month. */
+  base: number;
+  /** Spending in the compare month. */
+  compare: number;
+  /** `base - compare`: positive when the category grew. */
+  delta: number;
+  /** `delta / compare` as a percentage; null when the compare month had no spending there. */
+  deltaPct: number | null;
+}
+
+/** Body of `GET /v1/reports/month-comparison`. */
+export interface MonthComparisonData {
+  base: MonthComparisonTotals;
+  compare: MonthComparisonTotals;
+  categories: MonthComparisonCategoryRow[];
+}
+
+/** The two months a comparison asks for, as `YYYY-MM` keys. */
+export interface MonthComparisonMonths {
+  base: string;
+  compare: string;
+}
+
+/** One category's spend against its three-month normal, in `GET /v1/reports/spending-vs-normal`. */
+export interface SpendingVsNormalRow {
+  categoryKey: string;
+  name: string;
+  /** The top-level category this row breaks down; null for a top-level row. */
+  parentKey: string | null;
+  /** Spend this period, in the viewer's currency. */
+  total: number;
+  /** The normal for the same days of the previous three months; null without a usable baseline. */
+  normal: number | null;
+  /** `total / normal`; null without a usable baseline (the row is neutral). */
+  ratio: number | null;
+}
+
+/** Body of `GET /v1/reports/spending-vs-normal`. */
+export interface SpendingVsNormalData {
+  /** `YYYY-MM`. */
+  month: string;
+  /** Top-level rows, each followed by its subcategory rows. */
+  rows: SpendingVsNormalRow[];
 }
 
 /** Graph shape for `GET /v1/reports/sankey`. */
@@ -142,4 +210,12 @@ export interface PortfolioPerformanceRow {
   dividends: number | null;
   /** Value when the period closes: live for a current period. */
   endValue: number | null;
+  /** % over the period with cash flows taken out; null when it cannot be measured. */
+  timeWeightedReturn: number | null;
+  /** % XIRR: yearly when `moneyWeightedReturnAnnualized`, else over the period itself. */
+  moneyWeightedReturn: number | null;
+  /** True only for periods of a year or more. */
+  moneyWeightedReturnAnnualized: boolean;
+  /** `YYYY-MM-DD` days with no snapshot; the day before's value was carried over. */
+  missingSnapshotDates: string[];
 }

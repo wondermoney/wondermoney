@@ -1,7 +1,11 @@
 export type ApiErrorCode =
   | 'demo-forbidden'
+  | 'household-read-only'
+  | 'account-read-only'
+  | 'account-share-manager-required'
   | 'email-verification-required'
   | 'ai-allowance-exhausted'
+  | 'portfolio-link-held'
   | 'auth-session'
   | 'mfa-required'
   | 'cancelled'
@@ -13,12 +17,24 @@ export type WriteDispatchState = 'pre-dispatch' | 'post-dispatch'
 
 export type ApiErrorOptions = Readonly<{
   writeDispatchState?: WriteDispatchState
+  /** `portfolio-link-held` only: the display name of the member who holds the link. */
+  linkedBy?: string
+  /** A 400's `message`, kept only for an endpoint that opts in (`keepsBadRequestMessage`). */
+  serverMessage?: string
+  /** `http` 4xx only: the API's machine-readable `code` (`reimbursement_amount_exceeded`). */
+  serverCode?: string
+  /** `http` only: `details.addressIndex`, which address of a crypto wallet write the error is about. */
+  addressIndex?: number
 }>
 
 const diagnosticMessages: Record<ApiErrorCode, string> = {
   'demo-forbidden': 'This action is unavailable in demo mode.',
+  'household-read-only': 'This household member has view-only access.',
+  'account-read-only': 'This account is shared with this member to view only.',
+  'account-share-manager-required': "Only the account's owner or the household owner can change its sharing.",
   'email-verification-required': 'This action requires a verified email address.',
   'ai-allowance-exhausted': "Today's allowance for this AI feature is used up.",
+  'portfolio-link-held': 'The portfolio is linked to an account only another household member can see.',
   'auth-session': 'The authenticated session could not be used.',
   'mfa-required': 'Multi-factor authentication is required.',
   cancelled: 'The operation was cancelled.',
@@ -32,6 +48,27 @@ export class ApiError extends Error {
   readonly code: ApiErrorCode
   readonly status?: number
   readonly writeDispatchState?: WriteDispatchState
+  /**
+   * `portfolio-link-held` only: who holds the link, for "Already linked by {name}". The one value
+   * from a response body this boundary keeps. It is non-enumerable and never in the message, so
+   * an error report that serializes the error's own fields does not carry a member's name.
+   */
+  readonly linkedBy?: string
+  /**
+   * A 400's own `message`, kept only for an endpoint whose 400s the API words for the person
+   * (`WriteEndpoint.keepsBadRequestMessage`), such as a refused SimpleFIN setup token. Same rules
+   * as `linkedBy`: non-enumerable and never in `message`, so an error report does not carry it.
+   */
+  readonly serverMessage?: string
+  /**
+   * `http` 4xx only: the API's stable machine-readable reason (`ERROR_CODE` in the API), for the
+   * screens that word one failure differently from another with the same status. A fixed
+   * vocabulary of snake_case words, never prose or a value from the request. Non-enumerable, like
+   * `linkedBy`, so equality checks and serialized reports see the same error as before.
+   */
+  readonly serverCode?: string
+  /** `http` only: the index of the crypto wallet address a 400 is about (`details.addressIndex`). */
+  readonly addressIndex?: number
 
   constructor(code: ApiErrorCode, status?: number, options?: ApiErrorOptions) {
     super(diagnosticMessages[code])
@@ -39,6 +76,10 @@ export class ApiError extends Error {
     this.code = code
     if (status !== undefined) this.status = status
     if (options?.writeDispatchState !== undefined) this.writeDispatchState = options.writeDispatchState
+    if (options?.linkedBy !== undefined) Object.defineProperty(this, 'linkedBy', { value: options.linkedBy, enumerable: false, configurable: true })
+    if (options?.serverMessage !== undefined) Object.defineProperty(this, 'serverMessage', { value: options.serverMessage, enumerable: false, configurable: true })
+    if (options?.serverCode !== undefined) Object.defineProperty(this, 'serverCode', { value: options.serverCode, enumerable: false, configurable: true })
+    if (options?.addressIndex !== undefined) Object.defineProperty(this, 'addressIndex', { value: options.addressIndex, enumerable: false, configurable: true })
   }
 }
 

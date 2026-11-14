@@ -157,6 +157,18 @@ dense summaries; `ObjectHeader leading` puts it before a detail title.
 <ListRow leading={<EntityMark {...assetMark(holding.symbol, holding.logoUrl)} />} title={holding.symbol} … />
 ```
 
+### `MerchantAvatar` (`features/merchants/merchant-avatar`)
+Web's `MerchantAvatar`: the lead mark of a transaction row that has a merchant, in the same
+36pt column as `EntityMark` but a circle. `MerchantAvatar({ name, resolvedLogoUrl?, size?: md | sm })`
+draws the API's `resolvedLogoUrl` on the white logo backing, and otherwise (or after `onError`,
+until the URL changes) the name's first letter on one of eight fills hashed from the normalized
+name (`merchant-avatar-model`, the same FNV-1a and palette order as web: blue, teal, amber,
+fuchsia, sky, orange, stone, slate, never red, green or brand violet; colours in
+`merchantAvatarSources`/`merchantAvatarColors` in `theme/tokens.ts`). A logo on the API's own
+origin (the logo proxy) carries the bearer token; any other URL loads without credentials
+(`lib/api/api-image-source`). Decorative, like `EntityMark`. `transactionMerchantAvatar(...)` in
+`features/transactions` picks it: not for transfers or the opening row, which keep their mark.
+
 ### `SegmentedControl fill`
 Stretches the track and shares it equally: the flow's Expense | Income | Transfer, the chart's
 range switch. Every label stays on one line and shrinks its font to fit rather than break a word; keep

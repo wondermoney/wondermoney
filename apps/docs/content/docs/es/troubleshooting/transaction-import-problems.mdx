@@ -28,6 +28,8 @@ description: Pasos para diagnosticar problemas de importación de transacciones 
 
 WonderMoney identifica los duplicados mediante una huella de transacción construida a partir de detalles como la fecha y el importe. La tolerancia de la huella se ha reforzado, de modo que dos transacciones que son similares pero legítimas — por ejemplo, dos compras del mismo importe el mismo día — ya no se omiten como duplicados. Cuando se detecta un duplicado real, se conserva la entrada original y la decisión se registra en el registro de auditoría, de modo que nada se sobrescribe en silencio.
 
+Una fila del archivo con el mismo importe que una transacción que ya está en la cuenta, con hasta 3 días de diferencia, aparece en la revisión como posible duplicado, junto a la transacción a la que se parece. Se omite a menos que la incluyas; consulta [Posibles duplicados](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados).
+
 Para saber más sobre cómo se comparan y almacenan las transacciones, consulta [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions).
 
 ## Cuándo contactar con soporte

@@ -1,5 +1,6 @@
 import type { AuthRecoveryPort } from './auth-recovery'
 import type { NativeIdentityProviderId } from './native-identity'
+import type { SignupLocale } from './resolve-signup-locale'
 import type { AuthSessionPort } from './session-lifecycle'
 
 /**
@@ -45,6 +46,19 @@ export type IdTokenSignInOutcome =
   | { status: 'accepted' }
   | { status: 'mfa-pending' }
   | { status: 'unavailable' }
+
+/**
+ * Single sign-on through the server's identity provider, in the system browser sheet. The
+ * provider's refusal reasons are shown in that sheet (the web app's sign-in error page); the
+ * app only learns that no session came back, which a cancelled sheet also is.
+ */
+export type BrowserSignInOutcome =
+  | { status: 'accepted' }
+  | { status: 'mfa-pending' }
+  | { status: 'unavailable' }
+
+/** The API's provider id for single sign-on (`/sign-in/social` `provider`). */
+export const OIDC_PROVIDER_ID = 'oidc'
 
 export type SignUpOutcome =
   | { status: 'accepted' }
@@ -102,6 +116,41 @@ export type MfaListFactorsOutcome =
 
 export const TOTP_FACTOR_ID = 'totp'
 
+/**
+ * A passkey sign-in. `cancelled` is the person closing the device's prompt (or having no passkey
+ * on it), which is not an error. There is no `mfa-pending`: a passkey with user verification is
+ * both factors, so the server issues a full session (apps/api services/auth/passkey.ts).
+ */
+export type PasskeySignInOutcome =
+  | { status: 'accepted' }
+  | { status: 'cancelled' }
+  | { status: 'unavailable' }
+
+export type PasskeySummary = Readonly<{
+  id: string
+  name: string | null
+  /** The authenticator model, for a label when the passkey has no name. */
+  aaguid: string | null
+  createdAt: string | null
+  /** Set by the server on every sign-in with the passkey; null until the first. */
+  lastUsedAt: string | null
+}>
+
+export type PasskeyListOutcome =
+  | { status: 'available'; passkeys: PasskeySummary[] }
+  | { status: 'unavailable' }
+
+export type PasskeyAddOutcome =
+  | { status: 'added' }
+  | { status: 'cancelled' }
+  /** The server wants a recent sign-in before a passkey is added (`SESSION_NOT_FRESH`). */
+  | { status: 'session-not-fresh' }
+  | { status: 'unavailable' }
+
+export type PasskeyDeleteOutcome =
+  | { status: 'deleted' }
+  | { status: 'unavailable' }
+
 export type AppAuthAdapter = AuthSessionPort<AuthSession>
   & AuthRecoveryPort<AuthSession>
   & Readonly<{
@@ -120,7 +169,28 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
       token: string,
       nonce: string,
     ) => Promise<IdTokenSignInOutcome>
-    signUp: (email: string, password: string) => Promise<SignUpOutcome>
+    /**
+     * "Sign in with <name>": better-auth's browser OAuth flow, which the Expo client runs in an
+     * auth session and finishes on the `wondermoney://auth/complete` deep link, storing the
+     * session cookie it carries (or the pending two-factor cookie).
+     */
+    signInWithBrowser: (provider: typeof OIDC_PROVIDER_ID) => Promise<BrowserSignInOutcome>
+    /**
+     * "Sign in with a passkey": better-auth's passkey ceremony with the device's prompt in place
+     * of the browser's. Only offered where `isPasskeyAvailable` says the phone will cooperate.
+     */
+    signInWithPasskey: () => Promise<PasskeySignInOutcome>
+    /** The signed-in user's passkeys. */
+    listPasskeys: () => Promise<PasskeyListOutcome>
+    /** Creates a passkey on this device for the signed-in user. */
+    addPasskey: () => Promise<PasskeyAddOutcome>
+    /** Removes one of the signed-in user's passkeys from the server (the device keeps its copy). */
+    deletePasskey: (id: string) => Promise<PasskeyDeleteOutcome>
+    /**
+     * Email/password sign-up. `locale` is the app language: the API mails the verification link,
+     * which goes out before the account exists, in it.
+     */
+    signUp: (email: string, password: string, locale?: SignupLocale) => Promise<SignUpOutcome>
     signOutLocal: () => Promise<{ error: unknown | null }>
     /**
      * Enrolls a TOTP factor on the caller's current session. The secret is

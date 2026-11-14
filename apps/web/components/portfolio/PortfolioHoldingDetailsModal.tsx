@@ -23,7 +23,9 @@ import { HoldingActivitySummary } from "./HoldingActivitySummary";
 import HoldingAnalystRatings from "./HoldingAnalystRatings";
 import { HoldingPositionHeader } from "./HoldingPositionHeader";
 import { HoldingPositionMetrics } from "./HoldingPositionMetrics";
+import { HoldingPriceHistory } from "./HoldingPriceHistory";
 import HoldingValuationMetrics from "./HoldingValuationMetrics";
+import { PortfolioHoldingLots } from "./PortfolioHoldingLots";
 import PortfolioTransactionsTable from "./PortfolioTransactionsTable";
 
 interface PortfolioHoldingDetailsModalProps {
@@ -153,6 +155,10 @@ const PortfolioHoldingDetailsModal: React.FC<
             <HoldingPositionHeader summary={positionSummary} />
             <HoldingPositionMetrics summary={positionSummary} />
 
+            {hasMarketData && holding ? (
+              <HoldingPriceHistory holding={holding} enabled={isOpen} />
+            ) : null}
+
             <section className="space-y-3">
               {isTransactionsLoading ? (
                 <div className="flex h-[240px] items-center justify-center">
@@ -183,6 +189,14 @@ const PortfolioHoldingDetailsModal: React.FC<
                 </>
               ) : null}
             </section>
+
+            {portfolioId && holding ? (
+              <PortfolioHoldingLots
+                currency={positionSummary.currency}
+                financialAssetKey={holding.financialAssetKey}
+                portfolioId={portfolioId}
+              />
+            ) : null}
 
             {hasMarketData ? (
               <details

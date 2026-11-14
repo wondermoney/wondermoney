@@ -8,7 +8,12 @@ import { PortfolioSettingsScreen } from './portfolio-settings-screen'
 
 const currencies = [{ currencyKey: 151, code: 'EUR', description: 'Euro' }, { currencyKey: 152, code: 'USD', description: 'US Dollar' }]
 const commonCreate = { currencies, pending: false, unknownPayload: null, failure: null, detailState: 'idle' as const, confirmedPortfolioId: null, refreshingList: false, listRefreshFailed: false, onBack: jest.fn(), onRefreshList: jest.fn(), onRetryDetail: jest.fn() }
-const settingsModel = { id: 7, name: 'Future', description: 'Long horizon', currency: 'EUR', benchmarkSymbol: null, excluded: false, favored: false, targetAllocation: null }
+const settingsModel = { id: 7, name: 'Future', description: 'Long horizon', currency: 'EUR', benchmarkSymbol: null, excluded: false, favored: false, targetAllocation: null, accountLink: null }
+const linkAccounts = [
+  { accountKey: 22, accountName: 'Checking', accountType: 'CHECKING', source: 'open_banking' },
+  { accountKey: 21, accountName: 'Brokerage cash', accountType: 'INVESTMENT', source: 'open_banking' },
+]
+const storedLink = { accountKey: 21, accountName: 'Brokerage cash', mode: 'includes_holdings' as const }
 const commonSettings = { model: settingsModel, pending: false, failure: null, unknownPayload: null, reconciling: false, reconciliation: null, onBack: jest.fn(), onReconcile: jest.fn(), onAcknowledgeReconciliation: jest.fn(), onDismissApplied: jest.fn() }
 async function provider(node: React.ReactNode, locale: 'en' | 'pt-PT' | 'es' = 'en') { const i18n = await initMobileI18n(locale); return render(<I18nextProvider i18n={i18n}>{node}</I18nextProvider>) }
 
@@ -126,5 +131,65 @@ describe('portfolio forms', () => {
   })
   it.each(['pt-PT', 'es'] as const)('renders localized, labelled write controls in %s', async (locale) => {
     const view = await provider(<PortfolioCreateScreen {...commonCreate} defaultCurrencyId={151} onSubmit={jest.fn()} />, locale); expect(view.getByRole('header')).toBeOnTheScreen(); expect(view.getByRole('button', { name: /EUR · Euro$/ })).toBeOnTheScreen(); expect(view.getByRole('button', { name: locale === 'es' ? 'Revisar cartera' : 'Rever portefólio' })).toBeOnTheScreen()
+  })
+  describe('account link', () => {
+    const chooseAccount = async (view: Awaited<ReturnType<typeof provider>>, name: string) => {
+      await fireEvent.press(view.getByRole('button', { name: /^Account that holds this portfolio,/ }))
+      await fireEvent.press(view.getByRole('radio', { name }))
+    }
+
+    it('links an account, preselecting cash only for a synced one, and reviews the link before saving', async () => {
+      const save = jest.fn().mockResolvedValue(undefined)
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} accounts={linkAccounts} onSave={save} />)
+      expect(view.getByRole('button', { name: 'Account that holds this portfolio, Not linked' })).toBeOnTheScreen()
+      expect(view.queryByText("Does this account's balance include your investments?")).not.toBeOnTheScreen()
+      await chooseAccount(view, 'Brokerage cash')
+      expect(view.getByRole('button', { name: "Does this account's balance include your investments?, No, cash only" })).toBeOnTheScreen()
+      expect(view.getByText("Net worth counts the account's cash and this portfolio.")).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: /^Does this account's balance include your investments\?,/ }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Yes, it includes them' }))
+      await fireEvent.press(view.getByRole('button', { name: 'Review changes' }))
+      expect(view.getByLabelText('Account that holds this portfolio: Brokerage cash · Yes, it includes them')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Confirm changes' }))
+      await waitFor(() => expect(save).toHaveBeenCalledWith({ accountLink: { accountId: 21, mode: 'includes_holdings' } }))
+    })
+
+    it('unlinks with an explicit null', async () => {
+      const save = jest.fn().mockResolvedValue(undefined)
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} accounts={linkAccounts} model={{ ...settingsModel, accountLink: storedLink }} onSave={save} />)
+      expect(view.getByRole('button', { name: 'Account that holds this portfolio, Brokerage cash' })).toBeOnTheScreen()
+      await chooseAccount(view, 'Not linked')
+      await fireEvent.press(view.getByRole('button', { name: 'Review changes' }))
+      expect(view.getByLabelText('Account that holds this portfolio: Not linked')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Confirm changes' }))
+      await waitFor(() => expect(save).toHaveBeenCalledWith({ accountLink: null }))
+    })
+
+    it('never sends an unchanged link with other changes, and names the stored account before the accounts load', async () => {
+      const save = jest.fn().mockResolvedValue(undefined)
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} model={{ ...settingsModel, accountLink: storedLink }} onSave={save} />)
+      expect(view.getByRole('button', { name: 'Account that holds this portfolio, Brokerage cash' })).toBeOnTheScreen()
+      await fireEvent.changeText(view.getByLabelText('Portfolio name'), 'Renamed')
+      await fireEvent.press(view.getByRole('button', { name: 'Review changes' }))
+      await fireEvent.press(view.getByRole('button', { name: 'Confirm changes' }))
+      await waitFor(() => expect(save).toHaveBeenCalledWith({ name: 'Renamed' }))
+    })
+
+    it('tells a partner who holds the link, and nothing about the account', async () => {
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} accounts={linkAccounts} failure="link-held" linkHolder="Ana" onSave={jest.fn()} />)
+      // The partner's private account is not among this member's accounts and the link reads as none.
+      expect(view.getByRole('button', { name: 'Account that holds this portfolio, Not linked' })).toBeOnTheScreen()
+      expect(view.getByText('Already linked by Ana')).toBeOnTheScreen()
+    })
+
+    it('falls back to the older refusal without a name', async () => {
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} failure="link-managed" onSave={jest.fn()} />)
+      expect(view.getByText(/only another household member can see, so only they can change the link/)).toBeOnTheScreen()
+    })
+
+    it.each(['pt-PT', 'es'] as const)('names the holder in %s', async (locale) => {
+      const view = await provider(<PortfolioSettingsScreen {...commonSettings} failure="link-held" linkHolder="Ana" onSave={jest.fn()} />, locale)
+      expect(view.getByText(locale === 'es' ? 'Ya vinculada por Ana' : 'Já ligado por Ana')).toBeOnTheScreen()
+    })
   })
 })

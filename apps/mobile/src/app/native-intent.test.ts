@@ -18,4 +18,16 @@ describe('redirectSystemPath', () => {
       expect(redirectSystemPath({ path: 'wondermoney://more/banking', initial })).toBe('wondermoney://more/banking')
     }
   })
+
+  it('opens sign-in with the pairing code, whether the app was running or not', () => {
+    const link = 'wondermoney://pair?server=https%3A%2F%2Fapi.example.test&code=abcdefghijklmnop'
+    const expected = '/sign-in?pairCode=abcdefghijklmnop&pairServer=https%3A%2F%2Fapi.example.test'
+
+    expect(redirectSystemPath({ path: link, initial: true })).toBe(expected)
+    expect(redirectSystemPath({ path: link, initial: false })).toBe(expected)
+  })
+
+  it('still lands on sign-in for a malformed pairing link', () => {
+    expect(redirectSystemPath({ path: 'wondermoney://pair?code=short', initial: true })).toBe('/sign-in')
+  })
 })

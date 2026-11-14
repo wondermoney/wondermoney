@@ -19,8 +19,20 @@ export const loanTypeSchema = z.enum(LOAN_TYPES)
 const loanTypeResponseSchema = tolerantEnum(LOAN_TYPES, 'OTHER')
 const loanStatusSchema = tolerantEnum(['ACTIVE', 'CLOSED', 'PAID_OFF'], 'UNKNOWN')
 const loanPaymentFrequencySchema = tolerantEnum(['MONTHLY'], 'UNKNOWN')
-const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN'], 'UNKNOWN')
+const loanRateTypeSchema = tolerantEnum(['FIXED', 'UNKNOWN', 'VARIABLE'], 'UNKNOWN')
 const loanAllocationSourceSchema = tolerantEnum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL'], 'UNKNOWN')
+
+/**
+ * The manual asset (a home, a car) the loan is secured against, as the API summarises it on the
+ * loan. `value` is today's value in the asset's own `currency`, null once the asset is archived.
+ * An API from before secured assets sends no field at all; that reads as "not linked".
+ */
+export const loanSecuredAssetSchema = z.object({
+  key: positiveSafeId,
+  name: z.string().min(1),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  value: finiteMoney.nullable(),
+})
 
 export const loanSchema = z.object({
   annualInterestRateBps: z.number().int().min(0).max(10_000).nullable().optional(),
@@ -46,6 +58,7 @@ export const loanSchema = z.object({
   rateType: loanRateTypeSchema,
   regularPaymentAmount: optionalNullableMoney,
   remainingTermMonthsEstimated: z.number().int().finite().nullable(),
+  securedAsset: loanSecuredAssetSchema.nullable().default(null),
   status: loanStatusSchema,
   termMonths: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).nullable().optional(),
   type: loanTypeResponseSchema,
@@ -70,6 +83,9 @@ const loanEditableFieldsSchema = z.object({
   openingPrincipalBalance: finiteMoney.refine((value) => value > 0).optional(),
   providerName: z.string().max(255).optional(),
   regularPaymentAmount: finiteMoney.refine((value) => value > 0).optional(),
+  // The manual asset the loan is secured against; on PATCH, null unlinks it and leaving it out
+  // keeps the link as it is.
+  securedAssetKey: positiveSafeId.nullable().optional(),
   termMonths: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(),
   type: loanTypeSchema.optional(),
 })
@@ -115,6 +131,31 @@ export const loanRepaymentSchema = z.object({
 })
 
 export const loanRepaymentsResponseSchema = z.object({ repayments: z.array(loanRepaymentSchema) })
+
+const loanProjectionPointSchema = z.object({
+  baselineBalance: finiteMoney,
+  date: z.iso.datetime(),
+  month: z.number().int().nonnegative(),
+  withExtraBalance: finiteMoney,
+})
+
+export const loanProjectionSchema = z.object({
+  aheadOrBehindMonths: z.number().int().nullable(),
+  contractInterest: finiteMoney,
+  contractMonths: z.number().int().nonnegative(),
+  interestSaved: finiteMoney,
+  months: z.number().int().nonnegative().nullable(),
+  monthsSaved: z.number().int().nonnegative(),
+  payoffDate: z.iso.date().nullable(),
+  paysOff: z.boolean(),
+  reason: z.string().nullable(),
+  series: z.array(loanProjectionPointSchema),
+  totalInterest: finiteMoney,
+})
+
+export const loanProjectionResponseSchema = z.object({ projection: loanProjectionSchema })
+
+export type LoanProjectionDto = z.infer<typeof loanProjectionSchema>
 
 export const loanRepaymentAllocationSchema = z.object({
   feeAmount: z.number().finite().nonnegative(),
@@ -177,6 +218,7 @@ export const loanRepaymentMutationResponseSchema = z.object({
 
 export type LoanType = z.infer<typeof loanTypeSchema>
 export type LoanDto = z.infer<typeof loanSchema>
+export type LoanSecuredAssetDto = z.infer<typeof loanSecuredAssetSchema>
 export type LoanRepaymentDto = z.infer<typeof loanRepaymentSchema>
 export type LoanRepaymentCandidateDto = z.infer<typeof loanRepaymentCandidateSchema>
 export type LoanRepaymentAllocation = z.infer<typeof loanRepaymentAllocationSchema>
@@ -225,6 +267,12 @@ export function createLoanWriteEndpoint(loanId: number) {
 export function createLoanRepaymentsEndpoint(loanId: number) {
   if (!isValidLoanId(loanId)) throw new Error('A positive safe loan id is required.')
   return readEndpoint({ method: 'GET', path: `/v1/loan/${loanId}/repayments`, schema: loanRepaymentsResponseSchema })
+}
+
+export function createLoanProjectionEndpoint(loanId: number, extra?: number) {
+  if (!isValidLoanId(loanId)) throw new Error('A positive safe loan id is required.')
+  const query = extra !== undefined && extra > 0 ? `?extra=${extra}` : ''
+  return readEndpoint({ method: 'GET', path: `/v1/loan/${loanId}/projection${query}`, schema: loanProjectionResponseSchema })
 }
 
 export function createLoanRepaymentCandidatesEndpoint(loanId: number) {

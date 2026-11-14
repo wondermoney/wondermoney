@@ -8,11 +8,14 @@
  * day" unless we surface staleness (the ticket's Monarch reference).
  */
 
+import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
+
 export type AccountSource = 'manual' | 'open_banking';
 
 /** Ordered least → most severe. `error` means an open sync incident, independent of recency. */
 export interface ComputeSyncStatusInput {
   hasOpenIncident: boolean;
+  lastError?: BankSyncLastError | null;
   lastSyncedAt: Date | null | undefined;
   now: Date;
   source: AccountSource;
@@ -26,6 +29,8 @@ export type SyncStaleness = 'error' | 'fresh' | 'stale' | 'very_stale';
 
 export interface SyncStatus {
   hasOpenIncident: boolean;
+  /** The newest failure for the account's connection, or null when it has never failed. */
+  lastError: BankSyncLastError | null;
   /** ISO-8601 timestamp of the last successful sync, or null if never synced. */
   lastSyncedAt: null | string;
   staleness: SyncStaleness;
@@ -45,6 +50,7 @@ export function computeSyncStatus(input: ComputeSyncStatusInput): null | SyncSta
 
   return {
     hasOpenIncident: input.hasOpenIncident,
+    lastError: input.lastError ?? null,
     lastSyncedAt: lastSyncedAt?.toISOString() ?? null,
     staleness: deriveStaleness({ hasOpenIncident: input.hasOpenIncident, lastSyncedAt, now: input.now, staleHours, veryStaleHours }),
   };

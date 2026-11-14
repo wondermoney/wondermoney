@@ -1,6 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+
+import {
+  defaultDashboardLayout,
+  type DashboardLayoutEntry,
+  type DashboardSectionId,
+} from '@wondermoney/shared/dashboard-layout'
 
 import { Amount } from '@/components/ui/amount'
 import { Banner } from '@/components/ui/banner'
@@ -8,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { DataProvenance } from '@/components/ui/data-provenance'
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
+import { IconButton } from '@/components/ui/icon-button'
 import { PageHeader } from '@/components/ui/page-header'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { SegmentedControl } from '@/components/ui/segmented-control'
@@ -21,13 +28,16 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import type { BankAlertBannerModel } from '@/features/banking/bank-alerts-view-model'
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
 
 import { BankAlertBanner } from './bank-alert-banner'
 import {
   BalanceSheetSection,
   type BudgetMonthRow,
   CashflowSection,
-  InsightSection,
+  InsightsSection,
+  type InsightsState,
   LatestTransactionsSection,
   LoansSection,
   SectionEmpty,
@@ -37,11 +47,13 @@ import {
   type SectionState,
   type SetupSteps,
 } from './home-sections'
-import { balanceSheet, formatMonthName, netWorthChanges, type CashflowScale, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
+import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
+import { PortfolioLinkSuggestion, type PortfolioLinkSaveResult, type PortfolioLinkSuggestionModel } from './portfolio-link-suggestion'
+import type { PortfolioAccountLinkInput } from '@/features/portfolios/portfolio-account-link'
 import type { LoanDto } from '@/features/loans/loans-contract'
-import type { TransactionDto } from '@/features/transactions/transactions-contract'
+import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 
 export type NetWorthData = {
   primaryCurrency: string
@@ -80,19 +92,26 @@ export type HomeSections = {
   /** The bank connection alerts not yet dismissed; null or absent shows nothing. */
   bankAlert?: BankAlertBannerModel | null
   month: SectionState<readonly BudgetMonthRow[]>
-  cashflow: SectionState<CashflowScale>
+  cashflow: SectionState<CashflowView>
   loans: SectionState<{ upcoming: readonly LoanDto[]; hasLoans: boolean }>
-  latest: SectionState<{ transactions: readonly TransactionDto[]; unreviewedCount: number }>
+  latest: SectionState<{ review: TransactionReviewSummaryDto | null; transactions: readonly TransactionDto[] }>
+  /** Deterministic insights, with "Spent most on" as the fallback when none fires. */
+  insights: InsightsState
+  /** The "Spent most on" fallback's own query. */
   insight: InsightState
   /** Each account's mark for the balance sheet, by account key; absent until the accounts load. */
   accountMarks?: ReadonlyMap<number, EntityMarkSource>
   portfolioMarks?: ReadonlyMap<number, EntityMarkSource>
+  /** "Is this the same money?": what it offers to link, or null/absent when it does not show. */
+  portfolioLink?: PortfolioLinkSuggestionModel | null
 }
 
 export type NetWorthScreenProps = {
   state: NetWorthViewState
   sections: HomeSections
   today: Date
+  /** The home's section order and visibility; defaults to the shipped order. */
+  layout?: readonly DashboardLayoutEntry[]
   onRefresh: () => void | Promise<void>
   onLogout: () => void | Promise<void>
   onViewHistory: () => void
@@ -104,18 +123,25 @@ export type NetWorthScreenProps = {
   onRetryLatest: () => void
   onDismissSetup: () => void
   onDismissBankAlert?: () => void
+  onDismissPortfolioLink?: () => void
+  onLinkPortfolio?: (portfolioId: number, accountLink: PortfolioAccountLinkInput) => Promise<PortfolioLinkSaveResult>
+  /** Opens "Customize home"; omitted where the affordance should not show. */
+  onCustomize?: () => void
+  /** Whose home this is: everyone, one member or Shared. Omitted (a household of one), not shown. */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 /**
  * Home, as web's `HomeOverview` at phone width: net worth leads (the figure,
  * its change since last month and over the history, what is owned and owed,
- * the month-closing trend), then any bank connection alert, the setup checklist, this month's budgets,
+ * the month-closing trend), then any bank connection alert, the setup checklist,
+ * and the remaining sections in the person's saved order — this month's budgets,
  * the balance sheet, net cash flow, the next loan payments and the latest
  * transactions. Every section loads on its own, so one failed request costs
  * one section, not the page.
  */
 export function NetWorthScreen(props: NetWorthScreenProps) {
-  const { state, sections, today, onRefresh } = props
+  const { state, sections, today, onRefresh, layout = defaultDashboardLayout(), onCustomize, memberFilter } = props
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -137,6 +163,28 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
   const sheet = loaded ? balanceSheet(loaded.rows) : null
   const hasSheet = sheet !== null && (sheet.own.length > 0 || sheet.owe.length > 0)
 
+  // One node per configurable section; the layout decides which render, and in
+  // what order. Net worth is rendered above, pinned first.
+  const sectionNodes: Record<Exclude<DashboardSectionId, 'net-worth'>, ReactNode> = {
+    insights: <InsightsSection fallbackCurrency={currency} locale={locale} onNavigate={props.onNavigate} state={sections.insights} />,
+    'this-month': <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />,
+    'balance-sheet': sheet && hasSheet ? (
+      <BalanceSheetSection
+        accountMarks={sections.accountMarks}
+        currency={currency}
+        locale={locale}
+        notice={sections.portfolioLink && props.onLinkPortfolio ? (
+          <PortfolioLinkSuggestion model={sections.portfolioLink} onDismiss={() => props.onDismissPortfolioLink?.()} onSave={props.onLinkPortfolio} />
+        ) : null}
+        portfolioMarks={sections.portfolioMarks}
+        sheet={sheet}
+      />
+    ) : null,
+    cashflow: <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />,
+    loans: <LoansSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLoans} state={sections.loans} />,
+    'latest-transactions': <LatestTransactionsSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLatest} state={sections.latest} />,
+  }
+
   return (
     <SafeAreaView edges={['left', 'right']} style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <ScrollView
@@ -145,7 +193,27 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
       >
         <View style={styles.page}>
           <View style={styles.lead}>
-            <PageHeader action={<PrivacyToggle />} title={t('navigation.home')} />
+            <PageHeader
+              action={(
+                <View style={styles.headerActions}>
+                  {onCustomize ? (
+                    <IconButton
+                      accessibilityLabel={t('home.customize.action')}
+                      icon="sliders-horizontal"
+                      onPress={onCustomize}
+                      testID="home-customize"
+                    />
+                  ) : null}
+                  <PrivacyToggle />
+                </View>
+              )}
+              title={t('navigation.home')}
+            />
+            {memberFilter ? (
+              <View style={styles.memberFilter}>
+                <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} />
+              </View>
+            ) : null}
             <NetWorthHero {...props} locale={locale} />
           </View>
 
@@ -155,17 +223,11 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
 
           {sections.setup ? <SetupChecklist onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
 
-          <ThisMonthSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryBudgets} state={sections.month} today={today} />
-
-          {sheet && hasSheet ? <BalanceSheetSection accountMarks={sections.accountMarks} portfolioMarks={sections.portfolioMarks} currency={currency} locale={locale} sheet={sheet} /> : null}
-
-          <CashflowSection currency={currency} locale={locale} onRetry={props.onRetryCashflow} state={sections.cashflow} today={today} />
-
-          <LoansSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLoans} state={sections.loans} />
-
-          <LatestTransactionsSection locale={locale} onNavigate={props.onNavigate} onRetry={props.onRetryLatest} state={sections.latest} />
-
-          <InsightSection fallbackCurrency={currency} locale={locale} state={sections.insight} />
+          {layout
+            .filter((entry) => entry.id !== 'net-worth' && !entry.hidden)
+            .map((entry) => (
+              <View key={entry.id}>{sectionNodes[entry.id as Exclude<DashboardSectionId, 'net-worth'>]}</View>
+            ))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -366,10 +428,13 @@ function pointsInRange(points: readonly ResolvedHistoryPoint[], range: ChartRang
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  // The member filter sits under the title, at the start of the row, sized to its label.
+  memberFilter: { flexDirection: 'row' },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[12] },
   // Space, not rules, between Home's sections: 40pt and a strong heading.
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
   lead: { gap: themeTokens.spacing[6] },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[1] },
   chartBlock: { gap: themeTokens.spacing[3] },
   hero: { gap: themeTokens.spacing[4] },
   heroHeader: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', columnGap: themeTokens.spacing[8], rowGap: themeTokens.spacing[2] },

@@ -1,4 +1,5 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { act, fireEvent, render } from '@testing-library/react-native'
+import { Alert } from 'react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
@@ -9,6 +10,8 @@ import { mapTransactions } from './transactions-view-model'
 import { estimatedTransactionFixture, nullishTransactionFixture, transactionFixture, unconvertedTransactionFixture } from './test-fixtures'
 
 jest.mock('@/components/ui/date-field', () => jest.requireActual('./test-date-field'))
+// The attachments section has its own tests; the screen test does not mount a query/runtime provider.
+jest.mock('./transaction-attachments-section', () => ({ TransactionAttachmentsSection: () => null }))
 
 type View = Awaited<ReturnType<typeof renderLoaded>>['view']
 
@@ -87,6 +90,167 @@ describe('TransactionsScreen', () => {
     expect(view.queryByRole('checkbox')).not.toBeOnTheScreen()
   })
 
+  it('offers to create a rule from a row, pre-filled from the transaction', async () => {
+    const onCreateRule = jest.fn()
+    const { view } = await renderLoaded([transactionFixture], {}, { onCreateRule })
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    await fireEvent.press(view.getByRole('button', { name: 'Create rule' }))
+    expect(onCreateRule).toHaveBeenCalledWith(expect.objectContaining({ id: 41, merchant: 'Corner shop', categoryId: 3 }))
+  })
+
+  it('labels a split row with the number of categories it is shared over', async () => {
+    const splits = [
+      { transactionSplitKey: 1, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: null, position: 0 },
+      { transactionSplitKey: 2, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 4, name: 'Household', isSystemCategory: false }, notes: null, position: 1 },
+    ]
+    const { view } = await renderLoaded([{ ...transactionFixture, splits }])
+    expect(view.getByText('Split · 2 categories')).toBeOnTheScreen()
+    // The lines are in the row's detail, with the note when there is one.
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    expect(view.getByText('Split lines')).toBeOnTheScreen()
+    expect(view.getByText('Household')).toBeOnTheScreen()
+  })
+
+  it('marks an installment row "3/12" and names it, and leaves an ordinary row unmarked', async () => {
+    const installment = { installmentPlanKey: 11, installmentNumber: 3, installmentCount: 12 }
+    const onOpenInstallmentPlan = jest.fn()
+    const { view } = await renderLoaded([{ ...transactionFixture, installment }, { ...transactionFixture, transactionKey: 42, transactionMerchantKey: { name: 'Bakery' } }], {}, { onOpenInstallmentPlan })
+    expect(view.getByText('3/12')).toBeOnTheScreen()
+    expect(view.getAllByTestId('installment-badge')).toHaveLength(1)
+    expect(view.getByRole('button', { name: /^Corner shop, Installment 3 of 12,/ })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: row('Bakery') }).props.accessibilityLabel).not.toMatch(/Installment/)
+    await fireEvent.press(view.getByRole('button', { name: /^Corner shop,/ }))
+    await fireEvent.press(view.getByRole('button', { name: 'View installment plan' }))
+    expect(onOpenInstallmentPlan).toHaveBeenCalledWith(expect.objectContaining({ id: 41, installment }))
+  })
+
+  it('opens the split editor from a row’s detail', async () => {
+    const onSaveSplit = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([transactionFixture], {}, { onSaveSplit })
+    await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+    await fireEvent.press(view.getByRole('button', { name: 'Split' }))
+    expect(view.getByRole('header', { name: 'Split transaction' })).toBeOnTheScreen()
+    expect(view.getByTestId('transaction-split-save')).toBeDisabled()
+  })
+
+  describe('expense groups', () => {
+    const groupLine = (key: number, memberKey: number, name: string, position: number) => ({
+      transactionSplitKey: key, amount: -6.25, appuserAmount: -6.25, category: { categoryKey: 3, name: 'Groceries', isSystemCategory: true }, notes: null, position,
+      expenseGroupMember: { expenseGroupKey: 4, expenseGroupMemberKey: memberKey, isHouseholdMember: memberKey === 1, name },
+    })
+    const sharedRow = { ...transactionFixture, splits: [groupLine(1, 1, 'Ana', 0), groupLine(2, 3, 'Sam', 1)] }
+
+    it('offers "Split with group" on an ordinary row', async () => {
+      const onSplitWithGroup = jest.fn()
+      const { view } = await renderLoaded([transactionFixture], {}, { onSplitWithGroup, onSaveSplit: jest.fn() })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByRole('button', { name: 'Split' })).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Split with group' }))
+      expect(onSplitWithGroup).toHaveBeenCalledWith(expect.objectContaining({ id: 41 }))
+    })
+
+    it('shows a shared row’s shares read-only, with "Edit shares" and no split editor', async () => {
+      const onSplitWithGroup = jest.fn()
+      const { view } = await renderLoaded([sharedRow], {}, { onSplitWithGroup, onSaveSplit: jest.fn() })
+      expect(view.getByText('Shared in a group')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByTestId('transaction-group-shares')).toBeOnTheScreen()
+      expect(view.getByText('Sam')).toBeOnTheScreen()
+      expect(view.getByText('Not in the household')).toBeOnTheScreen()
+      // The split is the group's: the split editor is not offered.
+      expect(view.queryByRole('button', { name: 'Edit split' })).not.toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Split' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: 'Edit shares' }))
+      expect(onSplitWithGroup).toHaveBeenCalledWith(expect.objectContaining({ id: 41 }))
+    })
+
+    it('shows a viewer the shares and no group action', async () => {
+      const { view } = await renderLoaded([sharedRow])
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByTestId('transaction-group-shares')).toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Edit shares' })).not.toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Split with group' })).not.toBeOnTheScreen()
+    })
+  })
+
+  describe('reimbursements', () => {
+    const expenseRow = { ...transactionFixture, transactionKey: 41, settlementAmount: -50, appuserSettlementAmount: -50 }
+    const refundRow = { ...transactionFixture, transactionKey: 90, transactionTypeKey: { name: 'credit' }, transactionMerchantKey: { name: 'Refund desk' }, settlementAmount: 20, appuserSettlementAmount: 20 }
+    const side = (key: number, merchantName: string, amount: number) => ({ transactionKey: key, accountKey: 7, accountName: 'Daily account', description: null, merchantName, transactionDate: '2026-07-18T10:00:00.000Z', settlementAmount: amount, currencyCode: 'EUR' })
+    const link = (amount = 20, key = 5) => ({ transactionReimbursementKey: key, amount, currencyCode: 'EUR', createdAt: '2026-07-20T10:00:00.000Z', expense: side(41, 'Corner shop', -50), reimbursement: side(90, 'Refund desk', 20) })
+
+    it('badges a linked expense as reimbursed (in part until covered) and a linked refund as a reimbursement', async () => {
+      const { view } = await renderLoaded([
+        { ...expenseRow, reimbursements: [link()] },
+        { ...refundRow, reimbursements: [link()] },
+        { ...expenseRow, transactionKey: 43, transactionMerchantKey: { name: 'Shoe shop' }, reimbursements: [{ ...link(50, 6), expense: side(43, 'Shoe shop', -50) }] },
+        { ...expenseRow, transactionKey: 44, transactionMerchantKey: { name: 'Bakery' } },
+      ])
+      expect(view.getByText('Partly reimbursed')).toBeOnTheScreen()
+      expect(view.getByText('Reimbursement')).toBeOnTheScreen()
+      expect(view.getByText('Reimbursed')).toBeOnTheScreen()
+      expect(view.getAllByTestId('transaction-reimbursement-badge')).toHaveLength(3)
+      expect(view.getByRole('button', { name: /^Shoe shop,.*Reimbursed/ })).toBeOnTheScreen()
+    })
+
+    it('reads a row from an older server, with no links field, as unlinked', async () => {
+      const { view } = await renderLoaded([expenseRow])
+      expect(view.queryByTestId('transaction-reimbursement-badge')).not.toBeOnTheScreen()
+    })
+
+    it('offers "Mark as reimbursement" on money in only, never on an expense or a transfer', async () => {
+      const onMarkReimbursement = jest.fn()
+      const { view } = await renderLoaded([refundRow, expenseRow, { ...refundRow, transactionKey: 91, transactionTypeKey: { name: 'TRANSFER_IN' }, transactionMerchantKey: { name: 'Savings' } }], {}, { onMarkReimbursement })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.queryByRole('button', { name: 'Mark as reimbursement' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Savings') }))
+      expect(view.queryByRole('button', { name: 'Mark as reimbursement' })).not.toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('button', { name: row('Refund desk') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Mark as reimbursement' }))
+      expect(onMarkReimbursement).toHaveBeenCalledWith(expect.objectContaining({ id: 90 }))
+    })
+
+    it('lists who reimbursed an expense, and opens the other side in place when it is loaded', async () => {
+      const onOpenTransaction = jest.fn()
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }, { ...refundRow, reimbursements: [link()] }], {}, { onOpenTransaction })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      expect(view.getByText('Reimbursed by')).toBeOnTheScreen()
+      await fireEvent.press(view.getByRole('link', { name: 'Open Refund desk' }))
+      // The refund's own detail is open now, naming what it reimburses.
+      expect(view.getByText('Reimburses')).toBeOnTheScreen()
+      expect(view.getByRole('link', { name: 'Open Corner shop' })).toBeOnTheScreen()
+      expect(onOpenTransaction).not.toHaveBeenCalled()
+    })
+
+    it('hands a link to a row that is not loaded to the route', async () => {
+      const onOpenTransaction = jest.fn()
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }], {}, { onOpenTransaction })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('link', { name: 'Open Refund desk' }))
+      expect(onOpenTransaction).toHaveBeenCalledWith(expect.objectContaining({ transactionKey: 90, accountKey: 7 }))
+    })
+
+    it('unlinks from the detail only after confirmation, and words a failure', async () => {
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+      const onUnlinkReimbursement = jest.fn().mockResolvedValue('not-found')
+      const { view } = await renderLoaded([{ ...expenseRow, reimbursements: [link()] }], {}, { onUnlinkReimbursement })
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Unlink Refund desk' }))
+      expect(onUnlinkReimbursement).not.toHaveBeenCalled()
+      expect(alert).toHaveBeenCalledWith('Unlink this reimbursement?', expect.stringContaining('Refund desk'), expect.any(Array))
+      const buttons = alert.mock.calls[0]![2] as { text: string; onPress?: () => void }[]
+      await act(async () => { buttons.find((button) => button.text === 'Unlink')?.onPress?.() })
+      expect(onUnlinkReimbursement).toHaveBeenCalledWith(41, 5)
+      expect(await view.findByText('That transaction or link is no longer available. Refresh and try again.')).toBeOnTheScreen()
+      alert.mockRestore()
+    })
+
+    it('opens on the row a followed link points at', async () => {
+      const { view } = await renderLoaded([expenseRow, { ...refundRow, reimbursements: [link()] }], {}, { focusTransactionId: 90 })
+      expect(view.getByText('Reimburses')).toBeOnTheScreen()
+    })
+  })
+
   it('offers create, import, and scan-receipt actions when handlers are provided, and omits them when not', async () => {
     const i18n = await initMobileI18n('en')
     const onCreate = jest.fn()
@@ -124,6 +288,32 @@ describe('TransactionsScreen', () => {
     // Selection mode starts from the row's menu; there is no toolbar toggle beside Filters.
     await fireEvent.press(view.getByRole('menuitem', { name: 'Select' }))
     expect(view.getByRole('checkbox', { name: 'Select Corner shop' })).toBeChecked()
+  })
+
+  it('offers no change on a row of an account the caller can only view, only its details', async () => {
+    const other = { ...transactionFixture, transactionKey: 42, transactionMerchantKey: { ...transactionFixture.transactionMerchantKey, name: 'Bakery' }, accountKey: { ...transactionFixture.accountKey, accountKey: 8, accountName: 'Mine' } }
+    const extra = { onSetTags: jest.fn(), onCreateTag: jest.fn(), onSaveSplit: jest.fn(), onDeleteOne: jest.fn(), onCreateRule: jest.fn(), onMarkReimbursement: jest.fn(), onSetTransfer: jest.fn(), readOnlyAccountIds: new Set([7]) }
+    const { view } = await renderLoaded([transactionFixture, other], {}, extra)
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    expect(view.getAllByRole('menuitem').map((item) => item.props.accessibilityLabel)).toEqual(['Show details'])
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Show details' }))
+    expect(view.queryByRole('button', { name: 'Mark as reviewed' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit amount' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit tags' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Create rule' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Split/ })).not.toBeOnTheScreen()
+    // The writable account's row keeps its actions, and is the only one selection can reach.
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bakery' }))
+    expect(view.getByRole('menuitem', { name: 'Edit amount' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Select' }))
+    expect(view.getByRole('checkbox', { name: 'Select Bakery' })).toBeChecked()
+    expect(view.queryByRole('checkbox', { name: 'Select Corner shop' })).not.toBeOnTheScreen()
+  })
+
+  it('offers no selection at all when every row is on a view-only account', async () => {
+    const { view } = await renderLoaded([transactionFixture], {}, { readOnlyAccountIds: new Set([7]) })
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    expect(view.queryByRole('menuitem', { name: 'Select' })).not.toBeOnTheScreen()
   })
 
   it('leads with one row of figures and one review line that sends "Review them" to the needs-review filter', async () => {
@@ -192,6 +382,19 @@ describe('TransactionsScreen', () => {
       expect(editAmount).toHaveBeenCalledWith(41, '-1234.56', 'Card purchase')
     })
 
+    it('evaluates an expression typed into the amount editor', async () => {
+      const { view, editAmount } = await renderLoaded()
+      await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
+      await fireEvent.press(view.getByRole('button', { name: 'Edit amount' }))
+      const input = view.getByLabelText('Transaction amount')
+      await fireEvent.changeText(input, '12.40+3.15')
+      expect(view.getByText('= 15.55')).toBeOnTheScreen()
+      await fireEvent(input, 'blur')
+      expect(view.getByLabelText('Transaction amount').props.value).toBe('15.55')
+      await fireEvent.press(view.getByRole('button', { name: 'Save amount' }))
+      expect(editAmount).toHaveBeenCalledWith(41, '15.55', 'Card purchase')
+    })
+
     it('shows an error and does not submit an amount it cannot read', async () => {
       const { view, editAmount } = await renderLoaded()
       await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
@@ -226,11 +429,19 @@ describe('TransactionsScreen', () => {
     })
   })
 
-  it('leads each row with its mark, which the checkbox replaces while selecting', async () => {
-    const { view } = await renderLoaded()
+  it("leads each row with its merchant's avatar, or its mark without a merchant; the checkbox replaces both while selecting", async () => {
+    const { view } = await renderLoaded([
+      transactionFixture,
+      { ...transactionFixture, transactionKey: 42, transactionMerchantKey: undefined, description: 'Cash withdrawal' },
+    ])
     const hidden = { includeHiddenElements: true }
+    // "Corner shop" has a merchant and no logo: its initial, on the merchant's colour.
+    expect(view.getByTestId('transaction-merchant-avatar', hidden)).toBeOnTheScreen()
+    expect(view.getByText('C', hidden)).toBeOnTheScreen()
+    // A row without a merchant keeps today's category mark.
     expect(view.getByTestId('transaction-mark', hidden)).toBeOnTheScreen()
     await startSelecting(view)
+    expect(view.queryByTestId('transaction-merchant-avatar', hidden)).not.toBeOnTheScreen()
     expect(view.queryByTestId('transaction-mark', hidden)).not.toBeOnTheScreen()
     expect(view.getByRole('checkbox', { name: 'Select Corner shop' })).toBeOnTheScreen()
   })
@@ -619,5 +830,90 @@ describe('TransactionsScreen', () => {
       await fireEvent.press(view.getByRole('button', { name: row('Corner shop') }))
       expect(view.getByText('To Holiday')).toBeOnTheScreen()
     })
+  })
+})
+
+describe('TransactionsScreen bulk tag and delete', () => {
+  const tags = { status: 'loaded' as const, tags: [{ tagKey: 5, name: 'Trip', color: '#ff8800' }, { tagKey: 6, name: 'Work', color: '#0088ff' }] }
+  const shop = (transactionKey: number, name: string, extra: Partial<typeof transactionFixture> = {}) => ({ ...transactionFixture, transactionKey, transactionMerchantKey: { name }, ...extra })
+
+  it('adds a tag to the selected rows', async () => {
+    const onBulkTag = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { tags, onBulkTag })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Bakery' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Tag' }))
+    await fireEvent.press(view.getAllByRole('menuitem', { name: 'Work' })[0]!)
+    expect(onBulkTag).toHaveBeenCalledWith([41, 42], 6, 'add')
+  })
+
+  it('confirms a delete with its count and says the bank rows are skipped, then offers to hide them', async () => {
+    const onBulkDelete = jest.fn().mockResolvedValue({ result: 'success', deletedCount: 1, skippedIds: [42] })
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bank shop', { bankSynced: true })], {}, { onBulkDelete })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Bank shop' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Delete' }))
+    expect(view.getByText('Delete 1 transaction?')).toBeOnTheScreen()
+    expect(view.getByText(/1 of them came from your bank and will be skipped/)).toBeOnTheScreen()
+    expect(onBulkDelete).not.toHaveBeenCalled()
+    await fireEvent.press(view.getByRole('button', { name: 'Delete 1 transaction' }))
+    expect(onBulkDelete).toHaveBeenCalledWith([41, 42])
+    expect(view.getByText('1 transaction deleted.')).toBeOnTheScreen()
+    expect(view.getByText(/1 bank transaction was not deleted/)).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide them' }))
+    expect(setHidden).toHaveBeenCalledWith([42], true)
+  })
+
+  it('offers only hiding when every selected row came from the bank', async () => {
+    const onBulkDelete = jest.fn()
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop', { bankSynced: true })], {}, { onBulkDelete })
+    await startSelecting(view)
+    await fireEvent.press(view.getByRole('checkbox', { name: 'Select Corner shop' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Delete' }))
+    expect(view.getByText('This transaction came from your bank')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: /^Delete \d/ })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide it instead' }))
+    expect(setHidden).toHaveBeenCalledWith([41], true)
+    expect(onBulkDelete).not.toHaveBeenCalled()
+  })
+
+  it('offers every matching row once every loaded row is selected, and acts on all of them', async () => {
+    const onBulkDelete = jest.fn().mockResolvedValue({ result: 'success', deletedCount: 240, skippedIds: [] })
+    const { view, setHidden } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { total: 240, hasMore: true, onBulkDelete })
+    await startSelecting(view)
+    expect(view.queryByRole('button', { name: 'Select all 240 matching transactions' })).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Select all 2 loaded transactions' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Select all 240 matching transactions' }))
+    expect(view.getByText('All 240 matching transactions are selected')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide selected' }))
+    expect(view.getByText('Hide 240 selected transactions?')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Hide transactions' }))
+    expect(setHidden).toHaveBeenCalledWith('matching', true)
+  })
+
+  it('does not offer every matching row while a filter over the loaded rows is on', async () => {
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bakery')], {}, { total: 240, hasMore: true, onBulkDelete: jest.fn() })
+    await openFilters(view)
+    await fireEvent.changeText(view.getByLabelText('Filter loaded results by merchant'), 'Bakery')
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bakery' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Select' }))
+    expect(view.queryByRole('button', { name: /matching transactions/ })).not.toBeOnTheScreen()
+  })
+
+  it('deletes one row from its menu, and explains a bank row instead of deleting it', async () => {
+    const onDeleteOne = jest.fn().mockResolvedValue('success')
+    const { view } = await renderLoaded([shop(41, 'Corner shop'), shop(42, 'Bank shop', { bankSynced: true })], {}, { onDeleteOne })
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Corner shop' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Delete' }))
+    expect(view.getByText('Delete 1 transaction?')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Delete 1 transaction' }))
+    expect(onDeleteOne).toHaveBeenCalledWith(41)
+
+    await fireEvent.press(view.getByRole('button', { name: 'Actions for Bank shop' }))
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Delete' }))
+    expect(view.getByText('This transaction came from your bank')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Delete 1 transaction' })).not.toBeOnTheScreen()
   })
 })

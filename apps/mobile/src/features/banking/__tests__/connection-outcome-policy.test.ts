@@ -7,12 +7,14 @@ import {
 
 const row = (status: BankConnectionRow['status']): BankConnectionRow => ({
   accessType: 'open_banking',
+  accountNames: null,
   bankId: null,
   connectionId: 1,
   dataFreshAsOf: null,
   daysUntilExpiry: null,
   expiresAt: null,
   institutionName: 'Test Bank',
+  lastError: null,
   provider: 'GoCardless',
   status,
 })

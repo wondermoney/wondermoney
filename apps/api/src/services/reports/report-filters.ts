@@ -1,6 +1,7 @@
 import type { Appuser } from '@entity/Appuser';
 import type { Tenant } from '@entity/Tenant';
 import type { Transaction } from '@entity/Transaction';
+import { parseMemberFilter } from '@service/household/member-attribution';
 import { type CategoryLine, hasLineInCategories } from '@service/transaction/category-lines';
 import type { TransactionDateRange } from '@service/transaction/transaction-date-range';
 import { type TransactionScope, transactionScopeWhere } from '@service/transaction/transaction-scope';
@@ -54,6 +55,7 @@ export function reportScope(filters: ReportFilters, tenant: Pick<Tenant, 'tenant
     includeNonSpending: false,
     includeTransfers: filters.includeTransfers,
     memberCurrencyCode: filters.currencyKey,
+    members: parseMemberFilter(filters.memberKeys),
     merchantKeys: filters.merchantKeys?.map(Number),
     statuses: filters.includePending ? ['BOOKED', 'PENDING'] : ['BOOKED'],
     tenantKey: tenant.tenantKey,
@@ -87,6 +89,7 @@ export function listFiltersForReport(filters: ReportFilters): TransactionFilterI
     excludeTransfers: !filters.includeTransfers,
     fromDate: range.from,
     memberCurrencyCode: filters.currencyKey,
+    members: parseMemberFilter(filters.memberKeys),
     merchantKeys: filters.merchantKeys?.map(Number),
     statuses: filters.includePending ? ['BOOKED', 'PENDING'] : ['BOOKED'],
     tagKeys: filters.tagKeys?.map(Number),

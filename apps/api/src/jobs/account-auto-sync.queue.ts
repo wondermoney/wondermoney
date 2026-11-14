@@ -2,22 +2,39 @@ export const ACCOUNT_AUTO_SYNC_SCHEDULE_QUEUE = 'account.auto-sync.schedule';
 export const ACCOUNT_AUTO_SYNC_CRON = '0 */4 * * *';
 export const ACCOUNT_AUTO_SYNC_REQUISITION_QUEUE = 'account.auto-sync.requisition';
 export const ACCOUNT_AUTO_SYNC_REQUISITION_OPERATION_TYPE = 'account.auto-sync.requisition';
-// retryLimit + retryBackoff give us automatic retries with exponential backoff
-// for transient failures (provider 429s, network blips). retryDelay is the
-// base delay in seconds; pg-boss applies an exponential curve when retryBackoff is true.
-const ACCOUNT_AUTO_SYNC_MAX_RETRIES = 3;
-const ACCOUNT_AUTO_SYNC_RETRY_OPTIONS = {
-  // Explicit rather than pg-boss's 900 s default: a requisition job does the same shape of
-  // provider work as an initial sync, so both are sized to the work.
+// Retries are sized to what the job does. The schedule queue only scans the database, so it
+// keeps pg-boss's usual short backoff. The requisition queue calls the bank, where a retry
+// spends the account's PSD2 unattended-access quota (often four calls a day): one retry, half
+// an hour later. A failed run also waits out the connection's own interval before the next
+// scheduled scan picks it up again (see `lastSyncAttemptAt`).
+const ACCOUNT_AUTO_SYNC_SCHEDULE_MAX_RETRIES = 3;
+// Explicit rather than pg-boss's 900 s default: a requisition job does the same shape of
+// provider work as an initial sync, so both are sized to the work.
+const ACCOUNT_AUTO_SYNC_BASE_OPTIONS = {
   expireInSeconds: 3_600,
   retentionSeconds: 1_209_600,
+} as const;
+const ACCOUNT_AUTO_SYNC_SCHEDULE_RETRY_OPTIONS = {
+  ...ACCOUNT_AUTO_SYNC_BASE_OPTIONS,
   retryBackoff: true,
   retryDelay: 60,
-  retryLimit: ACCOUNT_AUTO_SYNC_MAX_RETRIES,
+  retryLimit: ACCOUNT_AUTO_SYNC_SCHEDULE_MAX_RETRIES,
+} as const;
+const ACCOUNT_AUTO_SYNC_PROVIDER_MAX_RETRIES = 1;
+const ACCOUNT_AUTO_SYNC_PROVIDER_RETRY_DELAY_SECONDS = 1_800;
+const ACCOUNT_AUTO_SYNC_PROVIDER_RETRY_OPTIONS = {
+  ...ACCOUNT_AUTO_SYNC_BASE_OPTIONS,
+  retryBackoff: false,
+  retryDelay: ACCOUNT_AUTO_SYNC_PROVIDER_RETRY_DELAY_SECONDS,
+  retryLimit: ACCOUNT_AUTO_SYNC_PROVIDER_MAX_RETRIES,
 } as const;
 const ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS = {
   policy: 'exclusive',
-  ...ACCOUNT_AUTO_SYNC_RETRY_OPTIONS,
+  ...ACCOUNT_AUTO_SYNC_SCHEDULE_RETRY_OPTIONS,
+} as const;
+const ACCOUNT_AUTO_SYNC_PROVIDER_QUEUE_OPTIONS = {
+  policy: 'exclusive',
+  ...ACCOUNT_AUTO_SYNC_PROVIDER_RETRY_OPTIONS,
 } as const;
 
 /**
@@ -26,19 +43,19 @@ const ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS = {
  * at all; it stays in the type so `account-auto-sync.worker.ts` can recognise such a payload and
  * reject it rather than coerce it.
  */
-export type AccountAutoSyncRequisitionJobPayload = AccountAutoSyncRequisitionJobPayloadEnableBanking | AccountAutoSyncRequisitionJobPayloadGoCardless;
+export type AccountAutoSyncRequisitionJobPayload = AccountAutoSyncRequisitionJobPayloadBank | AccountAutoSyncRequisitionJobPayloadGoCardless;
 
-export interface AccountAutoSyncRequisitionJobPayloadEnableBanking {
+/** Any provider behind the `BankProvider` interface. */
+export interface AccountAutoSyncRequisitionJobPayloadBank {
   // Included (unlike the initial-sync payload) because this job's handler needs to resolve the
-  // owning appuser's *current* `EnableBankingCredential` before syncing — the
-  // connection itself doesn't carry that identity in a way the worker can cheaply re-derive
-  // without an extra DB round trip per job.
+  // owning appuser's credential before syncing.
   appuserKey: number;
+  /** `BankConnection.bankConnectionKey`, the provider-agnostic key. */
+  bankConnectionKey: string;
   connectionId: string;
   correlationId: string;
-  enableBankingConnectionKey: string;
   incidentId: string;
-  provider: 'enable_banking';
+  provider: string;
   scheduleRunId: string;
 }
 
@@ -46,8 +63,8 @@ export interface AccountAutoSyncRequisitionJobPayloadGoCardless {
   correlationId: string;
   incidentId: string;
   nordigenRequisitionKey: string;
-  // Declared only so `job.provider === 'enable_banking'` discriminates the union at the type
-  // level — never actually present on the wire (see the module docblock above).
+  // Declared only so `job.provider !== undefined` discriminates the union at the type level —
+  // never actually present on the wire (see the module docblock above).
   provider?: undefined;
   requisitionId: string;
   scheduleRunId: string;
@@ -60,14 +77,15 @@ interface AccountAutoSyncQueueBoss {
   updateQueue?: (queue: string, options: Record<string, unknown>) => Promise<unknown>;
 }
 
-const ensureAccountAutoSyncQueue = async (boss: AccountAutoSyncQueueBoss, queue: string) => {
-  await boss.createQueue(queue, ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS);
-  await boss.updateQueue?.(queue, ACCOUNT_AUTO_SYNC_RETRY_OPTIONS);
+const ensureAccountAutoSyncQueue = async (boss: AccountAutoSyncQueueBoss, queue: string, options: Record<string, unknown>) => {
+  await boss.createQueue(queue, options);
+  const { policy: _policy, ...retryOptions } = options;
+  await boss.updateQueue?.(queue, retryOptions);
 };
 
-export const ensureAccountAutoSyncScheduleQueue = (boss: AccountAutoSyncQueueBoss) => ensureAccountAutoSyncQueue(boss, ACCOUNT_AUTO_SYNC_SCHEDULE_QUEUE);
+export const ensureAccountAutoSyncScheduleQueue = (boss: AccountAutoSyncQueueBoss) => ensureAccountAutoSyncQueue(boss, ACCOUNT_AUTO_SYNC_SCHEDULE_QUEUE, ACCOUNT_AUTO_SYNC_QUEUE_OPTIONS);
 
-export const ensureAccountAutoSyncRequisitionQueue = (boss: AccountAutoSyncQueueBoss) => ensureAccountAutoSyncQueue(boss, ACCOUNT_AUTO_SYNC_REQUISITION_QUEUE);
+export const ensureAccountAutoSyncRequisitionQueue = (boss: AccountAutoSyncQueueBoss) => ensureAccountAutoSyncQueue(boss, ACCOUNT_AUTO_SYNC_REQUISITION_QUEUE, ACCOUNT_AUTO_SYNC_PROVIDER_QUEUE_OPTIONS);
 
 export const scheduleAccountAutoSyncJob = (boss: { schedule: (name: string, cron: string, data?: null | Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown> }) =>
   boss.schedule(ACCOUNT_AUTO_SYNC_SCHEDULE_QUEUE, ACCOUNT_AUTO_SYNC_CRON, {}, { key: 'account-auto-sync-every-4-hours', singletonKey: 'account-auto-sync-every-4-hours', tz: 'UTC' });

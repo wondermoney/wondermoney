@@ -1,12 +1,20 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import type { FxStatus } from "@/lib/fx/fx-status";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
+import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 
 import api from "../api";
 
 export type SyncStaleness = "error" | "fresh" | "stale" | "very_stale";
+
+/**
+ * The caller's access to an account: its owner, or a member who may edit it (`write`) or only
+ * see it (`read`). A household viewer always reads. `lib/account/account-access.ts` holds the
+ * checks the screens use.
+ */
+export type AccountAccess = "owner" | "read" | "write";
 
 export interface SyncStatus {
   staleness: SyncStaleness;
@@ -38,6 +46,17 @@ export interface Account {
   isPrivate: boolean;
   isOwnedByViewer: boolean;
   ownerFirstName: string | null;
+  /** The caller's access; every edit action is hidden when it is `read`. */
+  myAccess: AccountAccess;
+  /**
+   * Member attribution (issue #96). Optional so fixtures written before it still type-check;
+   * `normalizeAccount` always fills them. A joint account's spending counts as Shared; it does
+   * not change who can see the account.
+   */
+  isJoint?: boolean;
+  ownerAppuserKey?: number | null;
+  /** Whose money the account is by default: a member, or Shared (`appuserKey` null). */
+  attribution?: AccountAttribution;
   /** Current balance net of pending transactions. Null when unknown. */
   availableBalance: number | null;
   appuserCurrencyAvailableBalance: number | null;
@@ -50,9 +69,28 @@ export interface Account {
   fxStatus?: FxStatus | null;
   /** The date of the old rate a `provisional` balance was converted at. */
   fxRateDate?: string | null;
+  /** The card's cycle and limit, or null when the account is not a credit card. */
+  creditCard?: CreditCardSettings | null;
 }
 
 export type AccountCsvImportFormat = "bank" | "generic";
+
+/** A member (their key and name), or Shared when `appuserKey` is null. */
+export interface AccountAttribution {
+  appuserKey: number | null;
+  displayName: string | null;
+}
+
+/**
+ * A credit card's cycle and limit, as the API stores it. Present only on an account the user (or
+ * the bank's own cash account type) marked as a card.
+ */
+export interface CreditCardSettings {
+  statementCloseDay: number;
+  paymentDueDay: number;
+  creditLimit: number | null;
+  minimumPaymentPercent: number | null;
+}
 
 export interface GetAccountsResponse {
   accounts: Account[];
@@ -76,6 +114,10 @@ export interface AccountWire {
   isPrivate?: boolean;
   isOwnedByViewer?: boolean;
   ownerFirstName?: string | null;
+  myAccess?: string | null;
+  isJoint?: boolean;
+  ownerAppuserKey?: number | null;
+  attribution?: { appuserKey?: number | null; displayName?: string | null } | null;
 }
 
 export interface GetAccountsWireResponse {
@@ -117,6 +159,18 @@ function normalizeAccountCurrencyCode(value: unknown): SupportedCurrencyCodes {
   return normalizeCurrencyCode(value) as SupportedCurrencyCodes;
 }
 
+const VALID_ACCESS = new Set<AccountAccess>(["owner", "read", "write"]);
+
+// Lenient: an API from before per-account sharing sends no `myAccess`, and then every account
+// the caller sees is theirs or editable, as it was.
+function normalizeAccess(
+  value: unknown,
+  isOwnedByViewer: boolean,
+): AccountAccess {
+  if (VALID_ACCESS.has(value as AccountAccess)) return value as AccountAccess;
+  return isOwnedByViewer ? "owner" : "write";
+}
+
 const VALID_FX_STATUS = new Set<FxStatus>(["exact", "missing", "provisional"]);
 
 const VALID_STALENESS = new Set<SyncStaleness>([
@@ -128,8 +182,7 @@ const VALID_STALENESS = new Set<SyncStaleness>([
 
 // Lenient: these fields are additive, so an old/partial payload degrades to null rather than
 // failing the whole accounts response.
-function normalizeSyncStatus(value: unknown): SyncStatus | null {
-  if (!isRecord(value)) return null;
+function normalizeSyncStatus(value: unknown): SyncStatus | null {  if (!isRecord(value)) return null;
   const staleness = value.staleness;
   if (
     typeof staleness !== "string" ||
@@ -142,6 +195,56 @@ function normalizeSyncStatus(value: unknown): SyncStatus | null {
     lastSyncedAt:
       typeof value.lastSyncedAt === "string" ? value.lastSyncedAt : null,
     hasOpenIncident: value.hasOpenIncident === true,
+  };
+}
+
+function normalizeMemberKey(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+// Lenient, like the sync status: an older API sends no attribution, which reads as Shared.
+function normalizeAttribution(value: unknown): AccountAttribution {
+  if (!isRecord(value)) return { appuserKey: null, displayName: null };
+  return {
+    appuserKey: normalizeMemberKey(value.appuserKey),
+    displayName:
+      typeof value.displayName === "string" ? value.displayName : null,
+  };
+}
+
+function normalizeCreditCardSettings(
+  value: unknown,
+): CreditCardSettings | null {
+  if (!isRecord(value)) return null;
+  const close = value.statementCloseDay;
+  const due = value.paymentDueDay;
+  if (
+    typeof close !== "number" ||
+    !Number.isInteger(close) ||
+    close < 1 ||
+    close > 31 ||
+    typeof due !== "number" ||
+    !Number.isInteger(due) ||
+    due < 1 ||
+    due > 31
+  ) {
+    return null;
+  }
+  return {
+    statementCloseDay: close,
+    paymentDueDay: due,
+    creditLimit:
+      typeof value.creditLimit === "number" &&
+      Number.isFinite(value.creditLimit)
+        ? value.creditLimit
+        : null,
+    minimumPaymentPercent:
+      typeof value.minimumPaymentPercent === "number" &&
+      Number.isFinite(value.minimumPaymentPercent)
+        ? value.minimumPaymentPercent
+        : null,
   };
 }
 
@@ -224,6 +327,13 @@ function normalizeAccount(account: unknown): Account {
     isPrivate: account.isPrivate === true,
     isOwnedByViewer: account.isOwnedByViewer === true,
     ownerFirstName: normalizeNullableString(account.ownerFirstName),
+    myAccess: normalizeAccess(
+      account.myAccess,
+      account.isOwnedByViewer === true,
+    ),
+    isJoint: account.isJoint === true,
+    ownerAppuserKey: normalizeMemberKey(account.ownerAppuserKey),
+    attribution: normalizeAttribution(account.attribution),
     availableBalance: normalizeNullableBalance(account.availableBalance),
     appuserCurrencyAvailableBalance: normalizeNullableBalance(
       account.appuserCurrencyAvailableBalance,
@@ -235,6 +345,7 @@ function normalizeAccount(account: unknown): Account {
       : null,
     fxRateDate:
       typeof account.fxRateDate === "string" ? account.fxRateDate : null,
+    creditCard: normalizeCreditCardSettings(account.creditCard),
   };
 }
 
@@ -280,5 +391,20 @@ export default function useAccounts<R = GetAccountsResponse>(
     queryKey: ["accounts"],
     queryFn: () => getAccounts(),
     ...options,
+  });
+}
+
+/**
+ * Saves this member's account order. The order is per member, so it never changes what the
+ * other household member sees. The list is refetched because the API sorts unordered accounts
+ * after the placed ones by name.
+ */
+export function useReorderAccounts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (accountIds: number[]) => {
+      await api.put("/v1/account/order", { accountIds });
+    },
+    onSuccess: () => invalidateAccounts(queryClient),
   });
 }

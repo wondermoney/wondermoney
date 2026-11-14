@@ -1,19 +1,23 @@
 import type { EntityManager } from '@mikro-orm/core';
 
+import { ApiToken } from '@entity/ApiToken';
 import { Appuser } from '@entity/Appuser';
-import { AssistantAuditEventType, AssistantAuditLog } from '@entity/AssistantAuditLog';
+import { AssistantAuditEventType, AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
 import { Tenant } from '@entity/Tenant';
 import { getRef } from '@utils/em-helpers';
 import logger from '@utils/logger';
 
 interface AssistantAuditLogInput {
   appuserKey: number;
+  /** The personal API token behind an MCP call; omitted for the in-app assistant. */
+  apiTokenKey?: number;
   consentVersion?: number;
   conversationId: string;
   eventType: AssistantAuditEventType;
   metadata?: Record<string, unknown>;
   model?: string;
   provider?: string;
+  source?: AssistantAuditSource;
   tenantKey: number;
   toolName?: string;
 }
@@ -24,12 +28,14 @@ export class AssistantAuditService {
     try {
       const auditLog = new AssistantAuditLog();
       auditLog.appuserKey = getRef(em, Appuser, input.appuserKey);
+      if (input.apiTokenKey !== undefined) auditLog.apiTokenKey = getRef(em, ApiToken, input.apiTokenKey);
       auditLog.conversationId = input.conversationId;
       auditLog.consentVersion = input.consentVersion;
       auditLog.eventType = input.eventType;
       auditLog.metadata = sanitizeAuditMetadata(input.metadata);
       auditLog.model = input.model;
       auditLog.provider = input.provider;
+      auditLog.source = input.source ?? AssistantAuditSource.ASSISTANT;
       auditLog.tenantKey = getRef(em, Tenant, input.tenantKey);
       auditLog.toolName = input.toolName;
       await em.persist(auditLog).flush();

@@ -47,4 +47,17 @@ describe('the one-step statement import', () => {
     expect(session).toMatchObject({ autoCommit: true, correlationId: response.body.correlationId, options: { bankName: 'bcp' }, s3Key: key, status: 'parsing' });
     expect(sent.at(-1)).toMatchObject({ data: { correlationId: response.body.correlationId, mode: 'parse' }, queue: 'transaction-import' });
   });
+
+  it('keeps the name the file had on the person\'s device, and none from a client that does not send it', async () => {
+    const household = await seedHousehold(db.em());
+    const accountKey = household.account.accountKey;
+    const agent = http.as(household.appuser);
+
+    const named = await agent.post(`/v1/account/${accountKey}/transaction/import`).send({ fileName: 'Extrato de março 🏦.csv', key: `account-${accountKey}-generic-1.csv` });
+    const unnamed = await agent.post(`/v1/account/${accountKey}/transaction/import`).send({ key: `account-${accountKey}-generic-2.csv` });
+
+    expect([named.status, unnamed.status]).toEqual([202, 202]);
+    expect((await db.em().findOneOrFail(TransactionImportSession, { publicId: named.body.importId as string })).fileName).toBe('Extrato de março 🏦.csv');
+    expect((await db.em().findOneOrFail(TransactionImportSession, { publicId: unnamed.body.importId as string })).fileName).toBeNull();
+  });
 });

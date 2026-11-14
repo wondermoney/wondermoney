@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { REPORT_DEFAULT_TIME_ZONE } from '@service/reports/report-months';
 
-import { MAX_REPORT_RANGE_DAYS, reportFiltersSchema } from '../reports';
+import { MAX_REPORT_RANGE_DAYS, monthComparisonQuerySchema, reportFiltersSchema, spendingVsNormalQuerySchema } from '../reports';
 
 const isoDaysApart = (days: number) => {
   const from = new Date('2020-01-01T00:00:00.000Z');
@@ -79,5 +79,46 @@ describe('reportFiltersSchema timezone', () => {
       includePending: false,
       includeTransfers: false,
     });
+  });
+});
+
+/**
+ * The month-comparison envelope names its two months instead of a date range.
+ * A malformed month must be refused at the edge rather than reach the report.
+ */
+describe('monthComparisonQuerySchema', () => {
+  it('accepts two calendar months and keeps the shared filters', () => {
+    const parsed = monthComparisonQuerySchema.parse({ query: { accountKeys: '3,4', base: '2026-08', compare: '2026-07', timezone: 'Europe/Lisbon' } });
+
+    expect(parsed.query).toMatchObject({ accountKeys: ['3', '4'], base: '2026-08', compare: '2026-07', includePending: false, includeTransfers: false });
+  });
+
+  it.each(['2026-13', '2026-00', '2026-8', '08-2026', '2026-08-01', ''])('rejects the malformed month %p', (month) => {
+    expect(monthComparisonQuerySchema.safeParse({ query: { base: month, compare: '2026-07' } }).success).toBe(false);
+  });
+
+  it('requires both months', () => {
+    expect(monthComparisonQuerySchema.safeParse({ query: { base: '2026-08' } }).success).toBe(false);
+    expect(monthComparisonQuerySchema.safeParse({ query: { compare: '2026-07' } }).success).toBe(false);
+  });
+});
+
+/**
+ * The spending-vs-normal report names one month. A malformed month must be refused at the edge
+ * rather than reach the report's calendar arithmetic.
+ */
+describe('spendingVsNormalQuerySchema', () => {
+  it('accepts a calendar month and keeps the shared filters', () => {
+    const parsed = spendingVsNormalQuerySchema.parse({ query: { accountKeys: '3,4', month: '2026-08', timezone: 'Europe/Lisbon' } });
+
+    expect(parsed.query).toMatchObject({ accountKeys: ['3', '4'], includePending: false, includeTransfers: false, month: '2026-08' });
+  });
+
+  it.each(['2026-13', '2026-00', '2026-8', '08-2026', '2026-08-01', ''])('rejects the malformed month %p', (month) => {
+    expect(spendingVsNormalQuerySchema.safeParse({ query: { month } }).success).toBe(false);
+  });
+
+  it('requires the month', () => {
+    expect(spendingVsNormalQuerySchema.safeParse({ query: {} }).success).toBe(false);
   });
 });

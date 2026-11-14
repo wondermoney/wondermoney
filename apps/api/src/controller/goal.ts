@@ -4,6 +4,7 @@ import { DI } from '@app/app';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { GoalType } from '@entity/Goal';
+import { accountActor, assertTransactionWritable } from '@service/account/account-access';
 import { GoalService } from '@service/goal/goal.service';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError } from '@utils/errors';
@@ -67,6 +68,8 @@ export async function createGoal(req: Request, res: Response) {
 
 export async function fundGoalTransaction(req: Request, res: Response) {
   const { body, params } = await zParse(fundGoalTransactionRequestSchema, req);
+  // Paying a transaction from a goal changes what that transaction counts as.
+  await assertTransactionWritable(DI.em, body.transactionKey, accountActor(req));
   const funding = await getGoalService().fundTransactionFromGoal({ ...(await getGoalContext(req)), amount: body.amount, goalKey: params.goalKey, transactionKey: body.transactionKey });
   return res.json({ funding });
 }

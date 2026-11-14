@@ -1,0 +1,37 @@
+{
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portugal",
+      "es-ES": "Espanha",
+      "pt-BR": "Brasil",
+      "en": "o Reino Unido e os EUA"
+    },
+    "offer": {
+      "title": "Começa com regras para {name}",
+      "description": "{count, plural, one {# regra reconhece} other {# regras reconhecem}} lojas e serviços conhecidos e atribuem-lhes uma categoria. Nada muda até as adicionares.",
+      "preview": "Ver as regras",
+      "dismiss": "Agora não"
+    },
+    "browse": "Predefinições",
+    "browse-hint": "Regras prontas para comerciantes conhecidos de um país",
+    "dialog": {
+      "title": "Regras para {name}",
+      "description": "Cada regra reconhece um comerciante na descrição do banco de um pagamento e define a categoria e o comerciante. Receitas, transferências e o que definiste à mão nunca mudam. As regras são adicionadas depois das tuas e podes editá-las ou eliminá-las depois.",
+      "choose": "País",
+      "list-label": "Regras para {name}",
+      "loading": "A carregar as regras…",
+      "error": "Não foi possível carregar as regras.",
+      "matches": "Descrição contém “{values}”",
+      "excludes": "mas não “{value}”",
+      "merchant": "Comerciante: {name}",
+      "nothing": "Todas estas regras já estão nas tuas regras.",
+      "install": "{count, plural, =0 {Nada a adicionar} one {Adicionar # regra} other {Adicionar # regras}}"
+    },
+    "status": {
+      "installed": "Já adicionada",
+      "unavailable": "Categoria indisponível"
+    },
+    "installed": "{count, plural, =0 {Nenhuma regra adicionada} one {# regra adicionada} other {# regras adicionadas}}",
+    "install-error": "Não foi possível adicionar as regras."
+  }
+}

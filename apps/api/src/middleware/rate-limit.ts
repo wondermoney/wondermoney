@@ -58,8 +58,11 @@ interface RateLimitFamily {
    * `identity` keys on the authenticated better-auth user id (or the app user key) and only
    * falls back to IP.
    * `ip` always keys on the source address — correct for unauthenticated/credential surfaces.
+   * `token` keys on the personal API token's row id, so one token cannot exhaust another's
+   * budget and a token's traffic never competes with the owner's browser session. The calendar
+   * feed's token is resolved before its limiter and keys the same way.
    */
-  scope: 'identity' | 'ip';
+  scope: 'identity' | 'ip' | 'token';
   windowMs: number;
 }
 
@@ -70,6 +73,14 @@ export const RATE_LIMIT_FAMILIES = {
    * Five attempts per quarter hour per IP against an `x-api-key` compare — never relaxed.
    */
   adminApi: { limit: 5, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * Personal API token traffic. A token gets its own budget, keyed by the token row, so a
+   * script cannot drain the owner's browser allowance and two tokens cannot starve each
+   * other. Sized like the ordinary read family: a dashboard polling every minute stays far
+   * below it, while a runaway loop is still bounded.
+   */
+  apiToken: { limit: 1200, relaxable: true, scope: 'token', windowMs: QUARTER_HOUR_MS },
 
   /**
    * `/v1/assistant` mutations — the LLM calls that cost money per request. Well above any
@@ -87,6 +98,13 @@ export const RATE_LIMIT_FAMILIES = {
   authExchange: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /**
+   * `GET /v1/calendar/bills.ics`. The feed token is resolved before the limiter, so the bucket is
+   * keyed on its row: Google and Apple fetch every subscriber's feed from their own infrastructure,
+   * and an IP-keyed bucket would put every subscriber behind one address into the same allowance.
+   */
+  calendarFeed: { limit: 120, relaxable: true, scope: 'token', windowMs: QUARTER_HOUR_MS },
+
+  /**
    * Starting and downloading a full data export (`/v1/user/me/exports`): each one reads the whole
    * household. The service also allows only one export in progress and three a day per person;
    * this bounds the requests around them (status polls ride the ordinary `read` family).
@@ -99,6 +117,12 @@ export const RATE_LIMIT_FAMILIES = {
    * ten a day per person; this bounds the requests around them (status polls ride `read`).
    */
   dataRestore: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
+
+  /**
+   * Connecting a bank with a pasted credential (a SimpleFIN setup token): each request makes the
+   * server call out to the aggregator, and a token is a secret worth guessing. Never relaxed.
+   */
+  bankConnect: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
   /** `/v1/feedback` — each request sends an email to the operator's inbox. */
   feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
@@ -133,6 +157,13 @@ export const RATE_LIMIT_FAMILIES = {
    */
   marketData: { limit: 600, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
 
+  /**
+   * `POST /v1/auth/pair` — public, and takes a pairing code that is a credential. Codes are
+   * 256-bit, single-use and short-lived, so guessing one is not realistic, but this is still
+   * the unauthenticated edge of the session exchange: IP-keyed, strict, never relaxed.
+   */
+  pairing: { limit: 10, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
   /** `/v1/marketing` — unauthenticated opt-out/lead endpoints. Unchanged from the previous rule. */
   publicMarketing: { limit: 50, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
@@ -142,6 +173,9 @@ export const RATE_LIMIT_FAMILIES = {
    * carrier-grade NAT.
    */
   publicRead: { limit: 300, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /** `POST /v1/user/me/push-test` — each request sends a notification through the Expo push service. */
+  pushTest: { limit: 10, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
 
   /**
    * Ordinary authenticated GET/HEAD traffic — the family the ticket is about. A budget page
@@ -173,6 +207,13 @@ export function resolveFamilyLimit(name: RateLimitFamilyName): number {
  * Requests that carry no verified identity fall back to the source IP.
  */
 export function buildRateLimitKey(req: Request, scope: RateLimitFamily['scope']): string {
+  if (scope === 'token') {
+    const apiTokenKey = req.apiToken?.apiTokenKey;
+    if (apiTokenKey !== undefined) {
+      return `t:${apiTokenKey}`;
+    }
+    return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
+  }
   if (scope === 'identity') {
     const subject = req.authUser?.user.id ?? req.user?.appuserKey;
     if (subject !== undefined && String(subject).length > 0) {
@@ -336,11 +377,41 @@ export const adminApiRateLimit = (): RequestHandler => createRateLimiter({ famil
 /** `/v1/auth` — Supabase token exchange. */
 export const authExchangeRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
 
+/**
+ * `/api/auth/passkey/*` — passkey sign-in and adding, renaming or deleting a passkey, on the
+ * `authExchange` family with a store of its own. The login page asks for passkey options on
+ * every visit (the email field offers saved passkeys), so sharing the password sign-in store
+ * would spend a password attempt each time. Listing passkeys is an ordinary read and is not
+ * counted.
+ */
+export const passkeyRateLimit = (): RequestHandler =>
+  createRateLimiter({ family: 'authExchange', skip: (req) => req.method === 'GET' && req.path === '/list-user-passkeys' });
+
+/**
+ * `/api/auth/callback/oidc` — the single sign-on callback, where an authorization code is traded
+ * for the provider's tokens. On the `authExchange` family with a store of its own, so one sign-in
+ * spends one attempt of each budget: `POST /sign-in/social` counts against the sign-in one.
+ */
+export const oidcCallbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
+
 /** `/v1/household/invites/validate` — public invite-token lookup. */
 export const inviteLookupRateLimit = (): RequestHandler => createRateLimiter({ family: 'inviteLookup' });
 
+/**
+ * `POST /v1/auth/demo` — public, password-less sign-in to the shared demo account. On the
+ * `authExchange` family (IP-keyed, never relaxed) with a store of its own: every call creates a
+ * session, and clicking "Try the demo" must not spend the attempts a password sign-in gets.
+ */
+export const demoSignInRateLimit = (): RequestHandler => createRateLimiter({ family: 'authExchange' });
+
+/** `POST /v1/auth/pair` — public session exchange for a QR pairing code. */
+export const pairingRateLimit = (): RequestHandler => createRateLimiter({ family: 'pairing' });
+
 /** `/v1/marketing` — public opt-out and lead endpoints. */
 export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicMarketing' });
+
+/** Connecting a bank with a pasted credential (SimpleFIN setup token). */
+export const bankConnectRateLimit = (): RequestHandler => createRateLimiter({ family: 'bankConnect' });
 
 /** `/v1/feedback` — sends email. */
 export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });
@@ -352,13 +423,24 @@ export const dataExportRateLimit = (): RequestHandler => createRateLimiter({ fam
 export const dataRestoreRateLimit = (): RequestHandler => createRateLimiter({ family: 'dataRestore' });
 
 /** `/v1/support` — sends email. */
+export const pushTestRateLimit = (): RequestHandler => createRateLimiter({ family: 'pushTest' });
+
 export const supportRateLimit = (): RequestHandler => createRateLimiter({ family: 'support' });
 
 /** Unauthenticated reads with no secret in them. */
 export const publicReadRateLimit = (): RequestHandler => createRateLimiter({ family: 'publicRead' });
 
+/** `/v1/calendar/bills.ics` — the feed token is resolved first, so the bucket is keyed on its row. */
+export const calendarFeedRateLimit = (): RequestHandler => createRateLimiter({ family: 'calendarFeed' });
+
 /** `/v1/assistant` — cheap GETs on the ordinary read budget, LLM calls on their own. */
 export const assistantRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'assistant');
+
+/**
+ * `/v1/mcp` — always a personal-token request, so always the token's own budget. Mount after
+ * `requireMcpToken` so the bucket is keyed on the token's row rather than the source address.
+ */
+export const apiTokenRateLimit = (): RequestHandler => createRateLimiter({ family: 'apiToken' });
 
 /** `/v1/portfolio-import-sessions` and `/v1/transaction-import-sessions` — polling on the read budget, mutations on their own. */
 export const importSessionRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'importSession');
@@ -368,6 +450,17 @@ export const marketDataRateLimit = (): RequestHandler => createRateLimiter({ fam
 
 /**
  * The default for an authenticated product mount. Must be mounted *after* `requireAuth` so
- * that `req.supabaseUser` carries a verified subject to key on. Called per mount.
+ * that `req.authUser` (or `req.apiToken`) carries a verified subject to key on. Called per
+ * mount.
+ *
+ * Token traffic gets the `apiToken` family instead of the session read/write budgets: a
+ * script's ceiling belongs to the token, not to the person's browser session.
  */
-export const productDataRateLimit = (): RequestHandler => createMethodScopedRateLimiter('read', 'write');
+export const productDataRateLimit = (): RequestHandler => {
+  const sessionLimiter = createMethodScopedRateLimiter('read', 'write');
+  const tokenLimiter = createRateLimiter({ family: 'apiToken' });
+  return (req, res, next) => {
+    const limiter = req.apiToken ? tokenLimiter : sessionLimiter;
+    limiter(req, res, next);
+  };
+};

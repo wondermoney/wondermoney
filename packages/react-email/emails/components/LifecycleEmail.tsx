@@ -38,7 +38,7 @@ export interface LifecycleEmailLayoutProps {
   brandName?: string;
 }
 
-const SHELL_COPY = {
+export const SHELL_COPY = {
   en: {
     greeting: (name?: string) => (name ? `Hi ${name},` : "Hi there,"),
     marketingFooterDefault: (brand: string) => `You're receiving this because you have a ${brand} account with product communications on.`,
@@ -54,6 +54,14 @@ const SHELL_COPY = {
     settings: "Definições de notificações",
     privacy: "Privacidade",
     transactionalFooter: (brand: string) => `Este é um aviso de faturação relativo à tua conta ${brand}.`,
+  },
+  es: {
+    greeting: (name?: string) => (name ? `Hola ${name},` : "Hola,"),
+    marketingFooterDefault: (brand: string) => `Recibes este correo porque tienes una cuenta de ${brand} con las comunicaciones de producto activadas.`,
+    unsubscribe: "Cancelar la suscripción a las novedades del producto",
+    settings: "Ajustes de notificaciones",
+    privacy: "Privacidad",
+    transactionalFooter: (brand: string) => `Este es un aviso de facturación sobre tu cuenta de ${brand}.`,
   },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;
 

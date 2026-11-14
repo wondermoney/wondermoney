@@ -55,8 +55,45 @@
  * same manifest and the format version does not change.
  */
 export const EXPORT_FORMAT = 'wondermoney-export';
-/** 1.1 added `data/manual-assets.json` and `data/manual-asset-valuations.json`. */
-export const EXPORT_FORMAT_VERSION = '1.1';
+/**
+ * 1.1 added `data/manual-assets.json` and `data/manual-asset-valuations.json`. 1.2 added
+ * `data/loan-rate-periods.json` and the `VARIABLE` loan rate type. 1.3 added `securedAssetId` to
+ * `data/loans.json`: the manual asset the loan finances, or null. 1.4 added `periodStartDay` to
+ * `data/budgets.json`: the day of the month the budget's months start on, 1 to 28.
+ * 1.5 added `website` and `logoUrl` to `data/merchants.json`: the https addresses the household set for the
+ * merchant, or null.
+ * 1.6 added `data/transaction-reimbursements.json`: refunds linked to the expenses they offset.
+ * 1.7 added `data/crypto-wallet-addresses.json` and `data/crypto-wallet-tokens.json`: a crypto
+ * wallet's (manual asset of kind `crypto_wallet`) public addresses, and the coins and tokens each held
+ * at its last sync (`balance` in the token's smallest unit) and whether they count.
+ * 1.8 added `data/credit-cards.json` (a card account's statement close and due days, limit and minimum
+ * payment), `data/installment-plans.json` and `data/installments.json` (purchases paid in installments
+ * and each one's scheduled day and amount), `data/transaction-templates.json` (the member's saved
+ * entries), `data/exchange-rate-overrides.json` and `data/price-overrides.json` (the household's own
+ * rates per pair and day, and its own prices per security and day). It also added `installmentPlanId`,
+ * `installmentNumber`, `installmentUnlinkedPlanId` (the plan a member unlinked the row from by hand),
+ * `statementDateOverride` and `transferExchangeRate` to `data/transactions.json`,
+ * `position` to `data/accounts.json` (the member's order), `rolloverCarriesOverspend` to
+ * `data/budgets.json`, `rolloverEnabled` to `data/budget-categories.json`, `amortizationMethod` and
+ * `firstPaymentDate` to `data/loans.json`, `costBasisMethod` to `data/portfolios.json`, and
+ * `creditCardDueReminders` to the email notifications in `data/preferences.json`.
+ * 1.9 added `shares` to `data/accounts.json`: for a private account, the members it is shared with
+ * (`memberId`) and whether each may only view it (`read`) or also change it (`write`).
+ * 1.10 added `isJoint` to `data/accounts.json` (a joint account's money counts as Shared) and
+ * `attributedMemberId` and `attributedToShared` to `data/transactions.json` (who the row's money is
+ * attributed to, "Spent by", when not its account's default; at most one is set).
+ * 1.11 added expense groups: `data/expense-groups.json`, `data/expense-group-members.json` (a person
+ * of the household carries `householdMemberId`, anyone else null), `data/expense-group-expenses.json`
+ * (a transaction shared in a group and who paid it) and `data/expense-group-settlements.json`, and
+ * `memberId` to `data/transaction-splits.json`: the group member whose share the line is, or null.
+ * 1.12 added `ownerMemberId` to `data/budgets.json`: the member a personal budget belongs to, or null
+ * for a household budget. An export holds the household's budgets and the exporting member's own
+ * personal ones, never another member's.
+ * 1.13 added `ownership` to `data/accounts.json`: each member's share of the account in per-member net
+ * worth (`memberId`, `basisPoints` with 10000 for 100%), adding up to 10000, or empty when the account
+ * is not split. The shares of people no longer in the household are one entry with `memberId: null`.
+ */
+export const EXPORT_FORMAT_VERSION = '1.13';
 
 export interface ExportManifest {
   appVersion: string;
@@ -102,11 +139,11 @@ encrypted archives. A forgotten password cannot be recovered: start a new export
 
 Exportação de dados WonderMoney (protegida por palavra-passe)
 
-Os ficheiros deste arquivo estão cifrados com AES-256 (WinZip AES). Abra-o com o 7-Zip
-(Windows, Linux), o Keka (macOS), o WinRAR ou o restauro do WonderMoney, e introduza a
-palavra-passe que escolheu ao iniciar a exportação. As ferramentas de zip integradas de alguns
+Os ficheiros deste arquivo estão cifrados com AES-256 (WinZip AES). Abre-o com o 7-Zip
+(Windows, Linux), o Keka (macOS), o WinRAR ou o restauro do WonderMoney, e introduz a
+palavra-passe que escolheste ao iniciar a exportação. As ferramentas de zip integradas de alguns
 sistemas não abrem arquivos cifrados. Uma palavra-passe esquecida não pode ser recuperada:
-inicie uma nova exportação.
+inicia uma nova exportação.
 
 ---
 

@@ -88,6 +88,7 @@ export function toStatementLine(row: transactionImport.NormalizedImportRow, sour
   return {
     descriptionDirty: row.description === '' ? undefined : row.description,
     internalTransactionId: row.externalId,
+    ...(row.notes ? { notes: row.notes.slice(0, 255) } : {}),
     ...(row.originalAmount !== undefined ? { originalAmount: row.originalAmount } : {}),
     ...(row.originalCurrency ? { originalCurrency: row.originalCurrency } : {}),
     settlementAmount: row.amount,

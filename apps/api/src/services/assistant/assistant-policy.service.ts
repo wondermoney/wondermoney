@@ -1,17 +1,12 @@
-const DEFAULT_ALLOWED_TOOLS = [
-  'compare_budget_periods',
-  'get_account_balance_summary',
-  'get_budget_status',
-  'get_cashflow_summary',
-  'get_goal_progress_summary',
-  'get_large_transactions_summary',
-  'get_net_worth_summary',
-  'get_portfolio_income_summary',
-  'get_portfolio_summary',
-  'get_recurring_payments_summary',
-  'get_spending_by_category',
-  'get_spending_trend',
-] as const;
+import { AI_PROPOSAL_TOOL_NAMES } from '@service/ai-tools/ai-proposal-tools.service';
+import { AI_TOOL_NAMES } from '@service/ai-tools/ai-tools.service';
+
+/**
+ * The tools the assistant may call: every read tool and every `propose_*` tool. One list with the
+ * shared tool layer, so a tool cannot be added to the MCP server and silently stay unreachable in
+ * the chat (or the reverse).
+ */
+const DEFAULT_ALLOWED_TOOLS = [...AI_TOOL_NAMES, ...AI_PROPOSAL_TOOL_NAMES];
 
 export type AssistantToolName = string;
 

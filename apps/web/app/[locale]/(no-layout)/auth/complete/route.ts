@@ -94,6 +94,9 @@ async function completeAuth(request: NextRequest) {
   }
 
   const cookieHeader = request.headers.get("cookie") ?? "";
+  // A household invite carried through single sign-on (OidcSignInButton); the API checks it
+  // against the signed-in address and ignores it for an existing account.
+  const inviteToken = request.nextUrl.searchParams.get("invite") || undefined;
 
   let session: BetterAuthSession | null;
   try {
@@ -117,7 +120,7 @@ async function completeAuth(request: NextRequest) {
   try {
     const { data: callbackResult } = await api.post<AuthCallbackResponse>(
       "/v1/auth/callback",
-      { locale },
+      { inviteToken, locale },
       {
         baseURL: getServerApiUrl(),
         // The API refuses a cookie-authenticated POST without an allowed

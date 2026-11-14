@@ -13,6 +13,12 @@ export type BudgetThresholdItem =
   | (BudgetThresholdItemBase & { state: "over"; threshold: 100 });
 
 export interface BudgetThresholdAlertProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
@@ -38,6 +44,12 @@ export interface WeeklyBudgetSummary {
 }
 
 export interface WeeklyInsightsProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   /** Copy language; defaults to `'pt'` for backward compatibility. */
@@ -85,6 +97,12 @@ export interface MonthlyStoryMetric {
 }
 
 export interface MonthlyStoryDataSufficientProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   budgetPressureDetail?: string;
@@ -109,6 +127,12 @@ export interface MonthlyStoryDataSufficientProps {
 }
 
 export interface MonthlyStoryInsufficientDataProps {
+  /**
+   * The locale segment of the app path the CTA's `next` carries, when it differs from `language`:
+   * an account whose language has no copy here reads English but opens the app in its own
+   * locale. Defaults to `language`.
+   */
+  appLocale?: AppLocale;
   /** Instance name (the API's `INSTANCE_NAME`) printed in the copy, header and footer; defaults to WonderMoney. */
   brandName?: string;
   ctaUrl: string;
@@ -128,7 +152,10 @@ export interface MonthlyStoryInsufficientDataProps {
 
 export type MonthlyStoryProps = MonthlyStoryDataSufficientProps | MonthlyStoryInsufficientDataProps;
 
-export type TransactionalEmailLanguage = "en" | "pt";
+export type TransactionalEmailLanguage = "en" | "pt" | "es";
+
+/** The web app's locales: the first segment of every app path. */
+export type AppLocale = "en" | "es" | "pt";
 
 /** "New bank connected" confirmation sent after an account sync links a bank. Transactional. */
 export interface AccountConnectedEmailProps {
@@ -144,6 +171,28 @@ export interface AccountConnectedEmailProps {
 
 /** Which bank-connection problem a bank sync alert email is about. */
 export type BankSyncAlertKind = "consent_expiring_7d" | "consent_expiring_1d" | "consent_revoked" | "sync_failing";
+
+/** A credit-card statement is due in a few days and still has a balance. Optional email. */
+export interface CreditCardDueReminderEmailProps {
+  /** Display name of the card account, as the person named it. */
+  accountName: string;
+  /** What is still to pay, formatted in `language` and the card's currency. */
+  amountDue: string;
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  /** The due date, formatted in `language`. */
+  dueDate: string;
+  /** Days from today to the due date; 1 reads as "tomorrow". */
+  daysUntilDue: number;
+  firstName?: string;
+  language: TransactionalEmailLanguage;
+  /** The statement's period, formatted in `language` (for example "1 – 31 October"). */
+  periodLabel: string;
+  /** Absolute link to the notification settings, where reminders are turned off. */
+  settingsUrl: string;
+  /** Absolute link to the card's statements. */
+  statementUrl: string;
+}
 
 /** A bank connection needs the user's attention (consent ending, ended by the bank, or failing syncs). */
 export interface BankSyncAlertEmailProps {
@@ -213,4 +262,38 @@ export interface LifecycleNudgeEmailProps {
   settingsUrl?: string;
   /** Overrides the default "you're receiving this as part of your account" footer line (e.g. for a recipient without an account). */
   footerNote?: string;
+}
+
+/** A password-reset link. Transactional: sent whatever the person's email preferences. */
+export interface PasswordResetEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  firstName?: string;
+  language: TransactionalEmailLanguage;
+  /** Absolute link that opens the reset (better-auth's, carrying the single-use token). */
+  resetUrl: string;
+}
+
+/** An email-verification link. Transactional: sent whatever the person's email preferences. */
+export interface EmailVerificationEmailProps {
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  firstName?: string;
+  language: TransactionalEmailLanguage;
+  /** Absolute link that verifies the address (better-auth's, carrying the token). */
+  verificationUrl: string;
+}
+
+/** An invitation to join someone's household, sent to an address that has no account yet. */
+export interface HouseholdInviteEmailProps {
+  /** Absolute link to the join page, carrying the invite token. */
+  acceptUrl: string;
+  /** Instance name (the API's `INSTANCE_NAME`); defaults to WonderMoney. */
+  brandName?: string;
+  /** Days until the invite expires, as the email states it. */
+  expiresInDays: number;
+  /** How the inviter is named: their first name, or their email address. */
+  inviterName: string;
+  /** The inviter's language: the recipient has no account, so none of their own. */
+  language: TransactionalEmailLanguage;
 }

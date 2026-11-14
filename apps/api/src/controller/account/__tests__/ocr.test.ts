@@ -3,15 +3,24 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   aiCapabilities: vi.fn(),
+  completeJson: vi.fn(),
   createTransaction: vi.fn(),
   findOne: vi.fn(),
   flush: vi.fn().mockResolvedValue(undefined),
   getAppuserTenantByAppuser: vi.fn(),
   getFilesBucketName: vi.fn().mockReturnValue('example-files-bucket'),
   isStorageEnabled: vi.fn(),
+  linkReceiptAttachment: vi.fn(),
   persist: vi.fn(),
-  processReceipt: vi.fn(),
   uploadFile: vi.fn(),
+}));
+
+// Account access reads the database directly; these controller tests run on a mocked EntityManager.
+vi.mock('@service/account/account-access', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/account/account-access')>()),
+  accountActor: (req: Request) => ({ appuserKey: req.user?.appuserKey ?? 0, householdRole: req.householdRole, tenantKey: req.tenant?.tenantKey ?? 0 }),
+  assertAccountWritable: vi.fn(async () => undefined),
+  loadAccountAccess: vi.fn(async () => new Map()),
 }));
 
 vi.mock('../../../app.js', () => ({
@@ -38,12 +47,16 @@ vi.mock('@service/storage/s3', () => ({
 
 vi.mock('@service/ai/ai-provider', () => ({ aiCapabilities: mocks.aiCapabilities }));
 
-vi.mock('@service/ai/openai', () => ({
-  default: { processReceipt: mocks.processReceipt },
+vi.mock('@service/ai/complete-json', () => ({
+  completeJson: mocks.completeJson,
 }));
 
 vi.mock('@service/transaction/transaction-creation.service', () => ({
   transactionCreationService: { createTransaction: mocks.createTransaction },
+}));
+
+vi.mock('@service/transaction/transaction-attachment.service', () => ({
+  linkReceiptAttachment: mocks.linkReceiptAttachment,
 }));
 
 import { confirmTransactionOCRImportAndCreateTransaction, createTransactionOCRImport } from '../ocr';
@@ -61,7 +74,10 @@ describe('createTransactionOCRImport', () => {
     mocks.isStorageEnabled.mockReturnValue(true);
     mocks.uploadFile.mockResolvedValue('https://example-files-bucket.s3.eu-west-2.amazonaws.com/wmocr/transaction_ocr_ext-user-1.123.png');
     // Short-circuit the flow right after upload so the test stays focused on the storage call.
-    mocks.processReceipt.mockResolvedValue({ answer: null, tokens: 0 });
+    mocks.completeJson.mockResolvedValue({
+      object: { settlementAmount: 12.5, settlementCurrency: 'EUR', transactionDate: '2026-07-01', transactionMerchantName: 'Shop' },
+      tokens: { completionTokens: 5, promptTokens: 20, totalTokens: 25 },
+    });
   });
 
   it('uploads the receipt to the S3 files bucket under the OCR prefix', async () => {
@@ -101,7 +117,7 @@ describe('createTransactionOCRImport', () => {
 
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ code: 'feature_disabled' }));
     expect(mocks.uploadFile).not.toHaveBeenCalled();
-    expect(mocks.processReceipt).not.toHaveBeenCalled();
+    expect(mocks.completeJson).not.toHaveBeenCalled();
   });
 
   it('still scans the receipt when file storage is not configured, recording no file', async () => {
@@ -110,7 +126,7 @@ describe('createTransactionOCRImport', () => {
     await createTransactionOCRImport(receiptRequest(), makeResponse(), vi.fn() as NextFunction);
 
     expect(mocks.uploadFile).not.toHaveBeenCalled();
-    expect(mocks.processReceipt).toHaveBeenCalled();
+    expect(mocks.completeJson).toHaveBeenCalled();
     expect((mocks.persist.mock.calls[0]?.[0] as { fileUrl?: string }).fileUrl).toBe('');
   });
 });
@@ -140,6 +156,7 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     const req = {
       body: { ...baseBody, categoryIds: [27, 28] },
       params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
       user: { appuserKey: 1 },
     } as unknown as Request;
     const sendStatus = vi.fn();
@@ -162,6 +179,7 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
     const req = {
       body: { ...baseBody },
       params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
       user: { appuserKey: 1 },
     } as unknown as Request;
     const res = makeResponse();
@@ -171,5 +189,44 @@ describe('confirmTransactionOCRImportAndCreateTransaction', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(mocks.createTransaction).toHaveBeenCalledWith(expect.objectContaining({ categoryId: undefined }));
+  });
+
+  it('links the stored receipt to the created transaction as its first attachment', async () => {
+    mocks.findOne
+      .mockResolvedValueOnce({ fileKey: 'wmocr/transaction_ocr_ext-user-1.123.png', transactionOCRImportKey: 5 })
+      .mockResolvedValueOnce({ accountKey: 3 });
+
+    const req = {
+      body: { ...baseBody },
+      params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
+      user: { appuserKey: 1 },
+    } as unknown as Request;
+
+    await confirmTransactionOCRImportAndCreateTransaction(req, makeResponse(), vi.fn() as NextFunction);
+
+    expect(mocks.linkReceiptAttachment).toHaveBeenCalledWith({
+      key: 'wmocr/transaction_ocr_ext-user-1.123.png',
+      tenantKey: 42,
+      transactionKey: 99,
+      uploadedByAppuserKey: 1,
+    });
+  });
+
+  it('does not try to link a receipt when no copy was kept', async () => {
+    mocks.findOne
+      .mockResolvedValueOnce({ transactionOCRImportKey: 5 })
+      .mockResolvedValueOnce({ accountKey: 3 });
+
+    const req = {
+      body: { ...baseBody },
+      params: { transactionOCRImportId: 5 },
+      tenant: { tenantKey: 42 },
+      user: { appuserKey: 1 },
+    } as unknown as Request;
+
+    await confirmTransactionOCRImportAndCreateTransaction(req, makeResponse(), vi.fn() as NextFunction);
+
+    expect(mocks.linkReceiptAttachment).not.toHaveBeenCalled();
   });
 });

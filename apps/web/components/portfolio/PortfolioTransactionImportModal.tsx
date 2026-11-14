@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { ManualAssetImportFlow } from "@/components/manual-asset/ManualAssetImportFlow";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
@@ -33,7 +34,9 @@ import useCreatePortfolioImportSession from "@/lib/api/portfolio/useCreatePortfo
 import useFinancialBrokers from "@/lib/api/portfolio/useFInancialBrokers";
 import usePortfolioImportSessionPreview from "@/lib/api/portfolio/usePortfolioImportSessionPreview";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
-import useSuggestPortfolioImportColumnMapping from "@/lib/api/portfolio/useSuggestPortfolioImportColumnMapping";
+import useSuggestPortfolioImportColumnMapping, {
+  isSuggestionRefusedWithoutAi,
+} from "@/lib/api/portfolio/useSuggestPortfolioImportColumnMapping";
 import useTriggerPortfolioImportSessionParse from "@/lib/api/portfolio/useTriggerPortfolioImportSessionParse";
 import {
   extractPortfolioImportCsvColumns,
@@ -43,6 +46,7 @@ import {
   getPortfolioImportInitialFixedValues,
   getPortfolioImportInitialLayout,
   getPortfolioImportInitialTransformations,
+  getPortfolioPositionsTemplateMapping,
 } from "@/lib/portfolio/import-session-column-mapping";
 import {
   isPostImportPartialResult,
@@ -57,6 +61,10 @@ import { PortfolioImportAnalyzingStep } from "./import-session/PortfolioImportAn
 import { PortfolioImportAssetReviewStep } from "./import-session/PortfolioImportAssetReviewStep";
 import { PortfolioImportColumnMappingStep } from "./import-session/PortfolioImportColumnMappingStep";
 import { PortfolioImportConfirmStep } from "./import-session/PortfolioImportConfirmStep";
+import {
+  type PortfolioImportMode,
+  PortfolioImportModeSelector,
+} from "./import-session/PortfolioImportModeSelector";
 import { PortfolioImportPreviewStep } from "./import-session/PortfolioImportPreviewStep";
 import { PortfolioImportSessionShell } from "./import-session/PortfolioImportSessionShell";
 import { PortfolioImportStepRecoveryAlert } from "./import-session/PortfolioImportStepRecoveryAlert";
@@ -253,6 +261,7 @@ const PortfolioTransactionImportModal: React.FC<
     number | undefined
   >();
   const [activeFileName, setActiveFileName] = useState<string | undefined>();
+  const [importMode, setImportMode] = useState<PortfolioImportMode>("trades");
   // Header columns read locally from the selected file, tagged with the file
   // they came from so a removed or replaced file never shows stale columns.
   const [localCsv, setLocalCsv] = useState<{ file: File; columns: string[] }>();
@@ -281,6 +290,7 @@ const PortfolioTransactionImportModal: React.FC<
   >();
   const [lastColumnMappingSubmission, setLastColumnMappingSubmission] = useState<
     | {
+        asOfDate?: string;
         columnMapping: PortfolioColumnMapping;
         derivedValues?: PortfolioImportColumnMappingDerivedValues;
         fixedValues?: PortfolioImportColumnMappingFixedValues;
@@ -362,7 +372,13 @@ const PortfolioTransactionImportModal: React.FC<
     localCsvColumns,
     preview,
   });
-  const initialColumnMapping = getPortfolioImportInitialColumnMapping(preview);
+  const previewImportType = preview?.importType ?? "trades";
+  // A filled-in positions template maps itself, even when no suggestion was asked for.
+  const initialColumnMapping =
+    getPortfolioImportInitialColumnMapping(preview) ??
+    (previewImportType === "positions"
+      ? getPortfolioPositionsTemplateMapping(availableColumns)
+      : undefined);
   const initialFixedValues = getPortfolioImportInitialFixedValues(preview);
   const initialDerivedValues = getPortfolioImportInitialDerivedValues(preview);
   const initialLayout = getPortfolioImportInitialLayout(preview);
@@ -498,6 +514,7 @@ const PortfolioTransactionImportModal: React.FC<
             await useCreatePortfolioImportSessionMutation.mutateAsync({
               portfolioId,
               brokerId,
+              importType: importMode === "positions" ? "positions" : undefined,
             });
 
           if (activeRunTokenRef.current !== runToken) return;
@@ -626,7 +643,19 @@ const PortfolioTransactionImportModal: React.FC<
       );
 
       await refetchPreview().catch(() => undefined);
-    } catch {
+    } catch (error) {
+      if (isSuggestionRefusedWithoutAi(error)) {
+        capturePortfolioImportFunnelEvent(
+          posthog,
+          PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSuggestionRequested,
+          {
+            mapping_source: "disabled",
+            outcome: "succeeded",
+            stage: "column_mapping",
+          },
+        );
+        return;
+      }
       capturePortfolioImportFunnelEvent(
         posthog,
         PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSaved,
@@ -661,6 +690,8 @@ const PortfolioTransactionImportModal: React.FC<
   );
 
   useEffect(() => {
+    // Asked whether or not AI is on: the API answers from a saved mapping or the column names
+    // without it, and only adds the model's suggestion when this person may use AI.
     if (
       !shouldSuggestPortfolioImportColumnMapping({
         hasSuggestion: Boolean(previewColumnMapping?.suggestion),
@@ -685,12 +716,14 @@ const PortfolioTransactionImportModal: React.FC<
   ]);
 
   const onSubmitColumnMapping = async ({
+    asOfDate,
     columnMapping,
     fixedValues,
     derivedValues,
     layout,
     transformations,
   }: {
+    asOfDate?: string;
     columnMapping: PortfolioColumnMapping;
     fixedValues?: PortfolioImportColumnMappingFixedValues;
     derivedValues?: PortfolioImportColumnMappingDerivedValues;
@@ -700,6 +733,7 @@ const PortfolioTransactionImportModal: React.FC<
     if (!activeImportSessionId) return;
     setStepRecovery(undefined);
     setLastColumnMappingSubmission({
+      asOfDate,
       columnMapping,
       derivedValues,
       fixedValues,
@@ -709,6 +743,7 @@ const PortfolioTransactionImportModal: React.FC<
 
     try {
       await useConfirmPortfolioImportColumnMappingMutation.mutateAsync({
+        asOfDate,
         importSessionId: activeImportSessionId,
         columnMapping,
         fixedValues,
@@ -856,9 +891,29 @@ const PortfolioTransactionImportModal: React.FC<
         }
       />
     );
+  } else if (currentStep === "upload" && importMode === "manualAssets") {
+    content = (
+      <div className="flex flex-col gap-4">
+        <PortfolioImportModeSelector value={importMode} onChange={setImportMode} />
+        <ManualAssetImportFlow
+          onClose={() => {
+            clearTransientState();
+            setOpen(false);
+          }}
+        />
+      </div>
+    );
   } else if (currentStep === "upload") {
     content = (
       <PortfolioImportUploadStep
+        importMode={importMode}
+        modeSelector={
+          <PortfolioImportModeSelector
+            value={importMode}
+            onChange={setImportMode}
+            disabled={isSubmitting}
+          />
+        }
         brokers={brokersData?.brokers ?? []}
         control={methods.control}
         defaultPortfolioId={defaultPortfolioId}
@@ -892,6 +947,8 @@ const PortfolioTransactionImportModal: React.FC<
     content = (
       <PortfolioImportColumnMappingStep
         availableColumns={availableColumns}
+        importType={previewImportType}
+        initialAsOfDate={previewColumnMapping?.confirmed?.asOfDate}
         initialMapping={initialColumnMapping}
         initialFixedValues={initialFixedValues}
         initialDerivedValues={initialDerivedValues}
@@ -939,6 +996,7 @@ const PortfolioTransactionImportModal: React.FC<
           isFinalizing={pendingFinalizationSessionId === activeImportSessionId}
           onChooseAnotherFile={onChooseAnotherFile}
           onConfirmed={onConfirmImport}
+          onPreviewRefetch={() => refetchPreview()}
           recovery={
             stepRecovery?.step === "confirm" ? (
               <PortfolioImportStepRecoveryAlert

@@ -22,6 +22,13 @@ jest.mock('expo-router', () => ({
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: mockSignOut }),
 }))
+// A server without push: the push section is not shown (see notifications-push-route.test.tsx).
+jest.mock('@/lib/server/use-instance', () => ({ useConfirmedFeature: () => false }))
+jest.mock('./use-push-notifications', () => ({
+  usePushPreferences: () => ({ data: undefined }),
+  useSendTestPush: () => ({ isPending: false, mutate: jest.fn() }),
+  useTogglePushCategory: () => ({ isPending: false, mutate: jest.fn() }),
+}))
 jest.mock('./use-notification-preferences', () => {
   const actual = jest.requireActual('./use-notification-preferences')
   return {
@@ -35,6 +42,7 @@ const preferences: NotificationPreferencesDto = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
   bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
+  creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
   growth: { effectiveEnabled: false, storedEnabled: false },
   marketingOptOut: false,
   weeklyInsights: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
@@ -66,6 +74,16 @@ describe('NotificationsRoute', () => {
     const view = await renderRoute()
     await fireEvent.press(view.getByRole('switch', { name: 'Turn off Budget alerts' }))
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ budgetAlertsEnabled: false }))
+  })
+
+  it('persists card reminder opt-out and preserves the saved value after failure', async () => {
+    mockMutateAsync.mockRejectedValue(new ApiError('network'))
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('switch', { name: 'Turn off Card payment reminders' }))
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ creditCardDueRemindersEnabled: false }))
+    await waitFor(() => expect(view.getByRole('alert')).toBeOnTheScreen())
+    expect(view.getByRole('switch', { name: 'Turn off Card payment reminders' }).props.accessibilityState.checked).toBe(true)
+    expect(mockRefetch).toHaveBeenCalled()
   })
 
   it('shows a save failure and resyncs from the server when a toggle is rejected', async () => {

@@ -1,0 +1,118 @@
+---
+title: Single sign-on
+description: Let people sign in with your own identity provider, such as Authentik or Keycloak, and make its groups decide who gets in and who is an admin.
+---
+
+If you already run an identity provider for your other services, WonderMoney can use it through OpenID Connect (OIDC). The login and sign-up pages, on the web and in the mobile app, then offer **Sign in with &lt;name&gt;**, and your provider's groups decide who may sign in and who is an instance admin.
+
+The examples below use `money.example.com` for the web app, `api.money.example.com` for the API, and `sso.example.com` or `auth.example.com` for the identity provider. On a one-hostname install, the API address is the web app's address.
+
+## How it works
+
+1. The person picks **Sign in with &lt;name&gt;** and signs in on your provider's own page, with whatever second factor and policies you set there.
+2. The provider sends them back to `<API_URL>/api/auth/callback/oidc`. The API exchanges the code for an ID token, using PKCE and the client secret, and checks the token's signature against the keys the provider publishes.
+3. WonderMoney reads the email address, the `email_verified` claim and the groups claim, and signs the person in.
+
+The API finds the provider through `<OIDC_ISSUER>/.well-known/openid-configuration`, so the provider must be reachable from the API container over HTTPS.
+
+## Set up your provider
+
+### Authentik
+
+1. In the admin interface, open **Applications → Providers → Create** and choose **OAuth2/OpenID Provider**.
+2. Set **Client type** to **Confidential** and add the redirect URI `https://api.money.example.com/api/auth/callback/oidc` (strict).
+3. Under **Signing Key**, pick a certificate. WonderMoney verifies RS256-signed tokens against the provider's published keys; without a signing key, Authentik signs with the client secret instead and the sign-in fails.
+4. Keep the `openid`, `email` and `profile` scopes. Authentik's `profile` scope includes the `groups` claim.
+5. Open **Applications → Applications → Create**, name it WonderMoney, give it the slug `wondermoney` and select the provider. Bind the groups that may use it under **Policy / Group / User Bindings** if you want Authentik itself to refuse everyone else.
+
+Copy the client ID and secret from the provider. The issuer is the application's URL, ending in a slash:
+
+```sh
+OIDC_ISSUER=https://sso.example.com/application/o/wondermoney/
+OIDC_CLIENT_ID=<client ID from Authentik>
+OIDC_CLIENT_SECRET=<client secret from Authentik>
+OIDC_DISPLAY_NAME=Authentik
+```
+
+### Keycloak
+
+1. In your realm (here `home`), open **Clients → Create client**, keep **OpenID Connect** and set **Client ID** to `wondermoney`.
+2. Turn on **Client authentication** and keep **Standard flow**. Add `https://api.money.example.com/api/auth/callback/oidc` under **Valid redirect URIs** and `https://money.example.com` under **Web origins**.
+3. Copy the secret from the client's **Credentials** tab.
+4. Keycloak does not put groups in the ID token by default. Open **Client scopes → wondermoney-dedicated → Configure a new mapper → Group Membership**, set **Token Claim Name** to `groups`, turn **Full group path** off (otherwise the groups read `/family` rather than `family`) and keep **Add to ID token** on.
+5. Keycloak sends `email_verified` from each user's **Email verified** setting. Turn it on for the people who will sign in, or have Keycloak verify their addresses.
+
+```sh
+OIDC_ISSUER=https://auth.example.com/realms/home
+OIDC_CLIENT_ID=wondermoney
+OIDC_CLIENT_SECRET=<secret from the Credentials tab>
+OIDC_DISPLAY_NAME=Keycloak
+```
+
+### Other providers
+
+Any provider that publishes a discovery document and signs ID tokens with a published key works the same way: Authelia, Zitadel, Pocket ID and others. Register `<API_URL>/api/auth/callback/oidc` as the redirect URI and make sure the ID token carries `email`, `email_verified` and, if you use groups, the groups claim.
+
+## Configure WonderMoney
+
+Add the variables to the `.env` file next to `docker-compose.yml` and run `docker compose up -d`. Set them on the API; the web app and the mobile app learn about the provider from the API. If any `OIDC_` variable is set without the issuer, client ID and secret, the API refuses to start and names what is missing.
+
+| Setting | What it does |
+|---|---|
+| `OIDC_ISSUER` | The provider's issuer URL. Must be HTTPS |
+| `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | The client you registered |
+| `OIDC_DISPLAY_NAME` | The name on the button: **Sign in with &lt;name&gt;**. Defaults to `SSO` |
+| `OIDC_SCOPES` | Space-separated scopes; must include `openid`. Defaults to `openid email profile`. Add the scope your provider needs for groups, if it has one |
+| `OIDC_GROUPS_CLAIM` | The ID token claim that lists the person's groups. Defaults to `groups` |
+| `OIDC_ALLOWED_GROUPS` | Comma-separated groups that may sign in |
+| `OIDC_ADMIN_GROUPS` | Comma-separated groups whose members are instance admins |
+| `OIDC_AUTO_SIGNUP` | `true` creates accounts on the first sign-in even when sign-up is closed |
+| `OIDC_ONLY` | `true` turns off password sign-in |
+| `OIDC_TRUST_IDP_MFA` | `true` skips the WonderMoney authenticator code after an OIDC sign-in |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL` | `true` accepts an email address the provider has not verified |
+
+## Who may sign in
+
+With `OIDC_ALLOWED_GROUPS=family,friends`, only members of `family` or `friends` may sign in through the provider. Members of an admin group may always sign in. The check runs at every sign-in, so someone you remove from the groups is refused the next time, with a message saying their account is not in a group that may use this server. Sessions they already have keep working until they sign out or the session expires; delete their WonderMoney account to cut them off at once.
+
+New accounts follow `SIGNUP_MODE` like any other sign-up: with `invite` only invited addresses get in, and with `closed` nobody new does. Set `OIDC_AUTO_SIGNUP=true` to let your provider decide instead: anyone who may sign in there gets an account on their first sign-in. Password sign-up still follows `SIGNUP_MODE`. The first account on an empty server is always allowed, whatever the mode.
+
+## Admins
+
+With `OIDC_ADMIN_GROUPS=wondermoney-admins`, members of that group are instance admins. WonderMoney reads the groups at every sign-in through the provider and grants or removes admin to match, so taking someone out of the group removes admin at their next sign-in. Only that yes-or-no answer is kept; WonderMoney does not store the provider's tokens or the list of groups. Without `OIDC_ADMIN_GROUPS`, sign-in leaves the admin flag alone.
+
+Admins can open the [bank sync health](/en/docs/self-hosting/bank-sync-health) page. That page also shows how to make someone an admin without single sign-on.
+
+## Email addresses and existing accounts
+
+The ID token must say the address is verified (`email_verified: true`); otherwise the sign-in is refused. If your provider does not verify addresses, `OIDC_ALLOW_UNVERIFIED_EMAIL=true` lets such people in, as new accounts with an unverified address.
+
+When someone already has a WonderMoney account with the same address, for example one created with a password before you added single sign-on, the first sign-in through the provider links to it, but only when both sides have verified the address: the provider's `email_verified` claim, and the account's own verification link. Otherwise the sign-in is refused, so that nobody can take over an account by registering its address somewhere else. To link an account whose address was never verified, sign in with the password and follow a verification link first (the AI features' verification notice sends one; with the log email driver, the link is written to the API log), then sign in through the provider.
+
+## Two-factor authentication
+
+An account that has an authenticator app set up in WonderMoney is asked for its code after signing in through the provider, as after a Google sign-in. If your provider already requires a second factor, set `OIDC_TRUST_IDP_MFA=true` to skip the WonderMoney code for sign-ins through the provider. Password and Google sign-ins still ask for it.
+
+## Single sign-on only
+
+Once single sign-on works, `OIDC_ONLY=true` turns off password sign-in, password sign-up and password reset on the server, and the web and mobile apps hide those forms. Make sure you can sign in through the provider before you set it; to undo it, remove the variable and restart.
+
+Passkeys keep working under `OIDC_ONLY`. A passkey can only be added by someone already signed in, it cannot be phished, and it lets people in while the provider is down. If you remove someone in the provider and they had a passkey, also delete their WonderMoney account.
+
+## The mobile app
+
+The app opens your provider's sign-in page in an in-app browser, the same way it handles bank consent, and returns to the app when it is done. Your provider's address must use HTTPS for that. When the sign-in is refused, the reason shows in that browser window.
+
+## When sign-in fails
+
+The web app shows the reason on its sign-in error page. The `error` value in that page's address names it:
+
+| `error` | Meaning |
+|---|---|
+| `OIDC_GROUP_NOT_ALLOWED` | The person is not in `OIDC_ALLOWED_GROUPS` or `OIDC_ADMIN_GROUPS`. Check the groups claim name and, on Keycloak, **Full group path** |
+| `OIDC_EMAIL_NOT_VERIFIED` | The ID token's `email_verified` is not `true` |
+| `account_not_linked` | An account with this address exists, but one of the two addresses is not verified |
+| `SIGNUP_DISABLED` | A new account, and `SIGNUP_MODE` does not allow it. See `OIDC_AUTO_SIGNUP` |
+| `invalid_code`, `unable_to_get_user_info` | The code exchange or the ID token check failed. Check the client secret, the redirect URI and, on Authentik, the signing key. The API log has the details |
+
+If the button does not appear, open `<API_URL>/v1/instance`: `features.oidc` is null until the three required variables are set. If the API cannot reach the provider at start-up, it tries again on the next sign-in.

@@ -16,16 +16,25 @@ import AccountTransactionImportModal from "@/components/account/AccountTransacti
 import TransactionsTable from "@/components/account/AccountTransactionsTable";
 import { TransactionsLead } from "@/components/account/TransactionsLead";
 import { TransactionsReportScope } from "@/components/account/TransactionsReportScope";
+import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import {
+  readOnlyAccountKeys,
+  writableAccounts,
+} from "@/lib/account/account-access";
 import type { TransactionReportScope } from "@/lib/account/transaction-report-scope";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
-import type { GetTransactionsResponse } from "@/lib/api/account/useTransactions";
+import type {
+  GetTransactionsResponse,
+  TransactionListFilter,
+} from "@/lib/api/account/useTransactions";
 import { useInfiniteTransactions } from "@/lib/api/account/useTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import { serverSeed } from "@/lib/query/server-seed";
 
 interface AccountsTransactionsClientProps {
@@ -108,12 +117,17 @@ export default function AccountsTransactionsClient({
 
   // Table stuff
   // A report's range counts as a chosen one: an empty scope is a result, not a first visit.
-  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(reportScope !== null);
+  const [hasUsedDateFilter, setHasUsedDateFilter] = useState(
+    reportScope !== null,
+  );
   const [transactionDateRange, setTransactionDateRange] = useState<
     DateRange | undefined
   >(
     reportScope
-      ? { from: new Date(reportScope.fromDate), to: new Date(reportScope.toDate) }
+      ? {
+          from: new Date(reportScope.fromDate),
+          to: new Date(reportScope.toDate),
+        }
       : { from: defaultDateRange.from, to: defaultDateRange.to },
   );
   const handleDateRangeChange = (dateRange?: DateRange) => {
@@ -123,9 +137,13 @@ export default function AccountsTransactionsClient({
 
   const [showHiddenTransactions, setShowHiddenTransactions] = useState(false);
 
+  // One member's (or Shared) rows, from the URL's `member`; a report's member filter arrives there.
+  const { memberKeys } = useMemberFilter();
+
   // True only while the visible query matches what the server rendered.
   const isServerRenderedQuery =
     !reportScope &&
+    !memberKeys &&
     !showHiddenTransactions &&
     transactionDateRange?.from?.getTime() === defaultDateRange.from.getTime() &&
     transactionDateRange?.to?.getTime() === defaultDateRange.to.getTime();
@@ -186,54 +204,64 @@ export default function AccountsTransactionsClient({
     tableFilters.transactionTypes.length > 0 ||
     tableFilters.needsReview;
 
+  // The list's filters: the request below, and "select all matching" in the bulk bar.
+  const listFilter: TransactionListFilter = {
+    fromDate: transactionDateRange?.from,
+    toDate: transactionDateRange?.to,
+    includeHidden: showHiddenTransactions,
+    // The table's own filters narrow a report's; where the table has none, the report's apply.
+    accountKeys:
+      tableFilters.accountKeys.length > 0
+        ? tableFilters.accountKeys
+        : reportScope?.accountKeys,
+    categoryKeys:
+      tableFilters.categoryKeys.length > 0
+        ? tableFilters.categoryKeys
+        : reportScope?.categoryKeys,
+    tagKeys:
+      tableFilters.tagKeys.length > 0
+        ? tableFilters.tagKeys
+        : reportScope?.tagKeys,
+    transactionTypes: tableFilters.transactionTypes,
+    ...(memberKeys ? { memberKeys } : {}),
+    ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
+    ...(reportScope
+      ? {
+          statuses: reportScope.statuses,
+          excludeTransfers: reportScope.excludeTransfers,
+          excludeNonSpending: reportScope.excludeNonSpending,
+          direction: reportScope.direction,
+          merchantKeys: reportScope.merchantKeys,
+          memberCurrency: reportScope.memberCurrency,
+        }
+      : {}),
+  };
+
   const {
     data: transactionsData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading: isLoadingTransactions,
-  } = useInfiniteTransactions(
-    {
-      fromDate: transactionDateRange?.from,
-      toDate: transactionDateRange?.to,
-      includeHidden: showHiddenTransactions,
-      // The table's own filters narrow a report's; where the table has none, the report's apply.
-      accountKeys: tableFilters.accountKeys.length > 0 ? tableFilters.accountKeys : reportScope?.accountKeys,
-      categoryKeys: tableFilters.categoryKeys.length > 0 ? tableFilters.categoryKeys : reportScope?.categoryKeys,
-      tagKeys: tableFilters.tagKeys.length > 0 ? tableFilters.tagKeys : reportScope?.tagKeys,
-      transactionTypes: tableFilters.transactionTypes,
-      ...(tableFilters.needsReview ? { unreviewedOnly: true } : {}),
-      ...(reportScope
-        ? {
-            statuses: reportScope.statuses,
-            excludeTransfers: reportScope.excludeTransfers,
-            excludeNonSpending: reportScope.excludeNonSpending,
-            direction: reportScope.direction,
-            merchantKeys: reportScope.merchantKeys,
-            memberCurrency: reportScope.memberCurrency,
-          }
-        : {}),
-    },
-    {
-      enabled: accountsData?.accounts && accountsData.accounts.length > 0,
-      // Only seed the query key the server actually rendered.
-      //
-      // `initialData` applies to whatever key is current, and changing the
-      // date range makes a *new* key. Passed unconditionally, every range
-      // the user picked was seeded with the server payload for the
-      // **default** range — and because the global `staleTime` is 60s, that
-      // stale seed counted as fresh, so no fetch fired. Changing the date
-      // filter silently did nothing for a minute.
-      // A table filter makes this a different query too, so it must not be seeded
-      // with the server's unfiltered payload — the same trap the date range fell into.
-      ...serverSeed(
-        isServerRenderedQuery && !hasTableFilters
-          ? initialTransactionsData
-          : undefined,
-        serverRenderedAt,
-      ),
-    },
-  );
+  } = useInfiniteTransactions(listFilter, {
+    enabled: accountsData?.accounts && accountsData.accounts.length > 0,
+    // Only seed the query key the server actually rendered.
+    //
+    // `initialData` applies to whatever key is current, and changing the
+    // date range makes a *new* key. Passed unconditionally, every range
+    // the user picked was seeded with the server payload for the
+    // **default** range — and because the global `staleTime` is 60s, that
+    // stale seed counted as fresh, so no fetch fired. Changing the date
+    // filter silently did nothing for a minute.
+    // A table filter makes this a different query too, so it must not be seeded
+    // with the server's unfiltered payload — the same trap the date range fell into.
+    ...serverSeed(
+      isServerRenderedQuery && !hasTableFilters
+        ? initialTransactionsData
+        : undefined,
+      serverRenderedAt,
+    ),
+  });
 
   const { data: configsData, isLoading: isLoadingConfigs } = useConfigs(
     serverSeed(initialConfigsData, serverRenderedAt),
@@ -241,6 +269,11 @@ export default function AccountsTransactionsClient({
 
   const isLoading =
     isLoadingAccountsData || isLoadingTransactions || isLoadingConfigs;
+
+  // Transactions go only into accounts the person may change; rows of a view-only account
+  // keep their edit actions off.
+  const editableAccounts = writableAccounts(accountsData?.accounts ?? []);
+  const viewOnlyAccountKeys = readOnlyAccountKeys(accountsData?.accounts);
 
   const noAccounts =
     !isLoadingAccountsData &&
@@ -252,8 +285,9 @@ export default function AccountsTransactionsClient({
     transactionsData?.transactions &&
     transactionsData.transactions.length === 0;
 
-  // Only show empty state for transactions if user hasn't filtered by date
-  const showTransactionsEmptyState = noTransactions && !hasUsedDateFilter;
+  // Only show empty state for transactions if user hasn't filtered by date or member
+  const showTransactionsEmptyState =
+    noTransactions && !hasUsedDateFilter && !memberKeys;
 
   if (isLoading) {
     return <Spinner />;
@@ -295,30 +329,34 @@ export default function AccountsTransactionsClient({
           onAddAccount={() => setAccountAddModalIsOpen(true)}
           onAddTransaction={openAddManualTransactionModal}
         />
-        <AccountTransactionAddModal
-          isOpen={isAddManualTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeAddManualTransactionModal();
-            } else {
-              openAddManualTransactionModal();
-            }
-          }}
-          accounts={accountsData?.accounts ?? []}
-          trigger={null}
-        />
-        <AccountTransactionImportModal
-          isOpen={isImportTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeImportTransactionModal();
-            } else {
-              openImportTransactionModal();
-            }
-          }}
-          accounts={accountsData?.accounts ?? []}
-          trigger={null}
-        />
+        {editableAccounts.length > 0 ? (
+          <>
+            <AccountTransactionAddModal
+              isOpen={isAddManualTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeAddManualTransactionModal();
+                } else {
+                  openAddManualTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={null}
+            />
+            <AccountTransactionImportModal
+              isOpen={isImportTransactionModalOpen}
+              setOpen={(open) => {
+                if (!open) {
+                  closeImportTransactionModal();
+                } else {
+                  openImportTransactionModal();
+                }
+              }}
+              accounts={editableAccounts}
+              trigger={null}
+            />
+          </>
+        ) : null}
       </>
     );
   }
@@ -341,40 +379,46 @@ export default function AccountsTransactionsClient({
           <AccountsFreshness accounts={accountsData?.accounts} />
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <AccountTransactionImportModal
-            isOpen={isImportTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeImportTransactionModal();
-              } else {
-                openImportTransactionModal();
-              }
-            }}
-            accounts={accountsData?.accounts ?? []}
-            trigger={
-              <Button variant="outline" className="w-full sm:w-auto">
-                <Download className="size-4" />
-                {t("import-transactions")}
-              </Button>
-            }
-          />
-          <AccountTransactionAddModal
-            isOpen={isAddManualTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeAddManualTransactionModal();
-              } else {
-                openAddManualTransactionModal();
-              }
-            }}
-            accounts={accountsData?.accounts ?? []}
-            trigger={
-              <Button className="w-full sm:w-auto">
-                <Plus className="size-4" />
-                {t("add-transaction")}
-              </Button>
-            }
-          />
+          {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
+          <MemberFilterControl />
+          {editableAccounts.length > 0 ? (
+            <>
+              <AccountTransactionImportModal
+                isOpen={isImportTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeImportTransactionModal();
+                  } else {
+                    openImportTransactionModal();
+                  }
+                }}
+                accounts={editableAccounts}
+                trigger={
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Download className="size-4" />
+                    {t("import-transactions")}
+                  </Button>
+                }
+              />
+              <AccountTransactionAddModal
+                isOpen={isAddManualTransactionModalOpen}
+                setOpen={(open) => {
+                  if (!open) {
+                    closeAddManualTransactionModal();
+                  } else {
+                    openAddManualTransactionModal();
+                  }
+                }}
+                accounts={editableAccounts}
+                trigger={
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="size-4" />
+                    {t("add-transaction")}
+                  </Button>
+                }
+              />
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -412,6 +456,7 @@ export default function AccountsTransactionsClient({
           ) : undefined
         }
         onServerFiltersChange={handleTableFiltersChange}
+        selectionFilter={listFilter}
         categories={configsData?.categories ?? []}
         transactionDateRange={transactionDateRange}
         setTransactionDateRange={handleDateRangeChange}
@@ -419,6 +464,7 @@ export default function AccountsTransactionsClient({
         onShowHiddenTransactionsChange={setShowHiddenTransactions}
         withSelectRow
         withMultiSelectRow
+        readOnlyAccountKeys={viewOnlyAccountKeys}
       />
     </div>
   );

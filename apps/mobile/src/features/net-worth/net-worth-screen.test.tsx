@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import type { PreferenceStorage } from '@/features/preferences/preference-storage'
@@ -42,12 +42,13 @@ const sections: HomeSections = {
   month: { status: 'loaded', data: [] },
   cashflow: { status: 'loaded', data: { zero: 0, bars: [] } },
   loans: { status: 'loaded', data: { upcoming: [], hasLoans: false } },
-  latest: { status: 'loaded', data: { transactions: [], unreviewedCount: 0 } },
+  latest: { status: 'loaded', data: { review: null, transactions: [] } },
+  insights: { status: 'hidden' },
   insight: { status: 'hidden' },
 }
 
-async function renderScreen(overrides: Partial<NetWorthScreenProps> = {}, sectionOverrides: Partial<HomeSections> = {}, privacy?: PreferenceStorage) {
-  const i18n = await initMobileI18n('en')
+async function renderScreen(overrides: Partial<NetWorthScreenProps> = {}, sectionOverrides: Partial<HomeSections> = {}, privacy?: PreferenceStorage, locale: 'en' | 'pt-PT' | 'es' = 'en') {
+  const i18n = await initMobileI18n(locale)
   const props: NetWorthScreenProps = {
     state: { status: 'loaded', data },
     sections: { ...sections, ...sectionOverrides },
@@ -117,6 +118,15 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByLabelText(/^Car loan, €125\.00, EUR, Liability$/)).toBeOnTheScreen()
   })
 
+  it("says what share of a split account one member's figure counts, read-only", async () => {
+    const { view } = await renderScreen({ state: { status: 'loaded', data: { ...data, rows: [
+      { type: 'accounts', id: 41, name: 'House fund', balance: 600, sharePercent: 60 },
+      { type: 'accounts', id: 42, name: 'Joint card', balance: -33.33, sharePercent: 33.33 },
+    ] } } })
+    expect(view.getByLabelText(/^House fund, €600\.00, EUR, 60% of this account$/)).toBeOnTheScreen()
+    expect(view.getByLabelText(/^Joint card, €33\.33, EUR, 33\.33% of this account, Liability$/)).toBeOnTheScreen()
+  })
+
   it('keeps the month-by-month trend one tap away', async () => {
     const { view, props } = await renderScreen()
     await fireEvent.press(view.getByRole('button', { name: 'View net worth trend' }))
@@ -142,7 +152,7 @@ describe('NetWorthScreen (Home)', () => {
   })
 
   it('shows a latest transaction with no exchange rate in its own currency, marked, and an estimated one with its rate date', async () => {
-    const { view } = await renderScreen({}, { latest: { status: 'loaded', data: { unreviewedCount: 0, transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] } } })
+    const { view } = await renderScreen({}, { latest: { status: 'loaded', data: { review: null, transactions: [unconvertedTransactionFixture, estimatedTransactionFixture, transactionFixture] } } })
     const labels = view.getAllByTestId('home-transaction-fx-status')
     expect(labels).toHaveLength(2)
     expect(labels[0]).toHaveTextContent('Not converted')
@@ -215,9 +225,9 @@ describe('NetWorthScreen (Home)', () => {
         loanKey: 3, name: 'Mortgage', currency: { code: 'EUR', currencyKey: 1 }, includeInNetWorth: true, nextPaymentDate: '2026-11-20T00:00:00.000Z',
         openingBalanceDate: '2020-01-01', openingPrincipalBalance: 200000, outstandingPrincipal: 150000, paymentFrequency: 'MONTHLY',
         progressBasis: 'OPENING_BALANCE', progressPercentage: 25, rateType: 'FIXED', regularPaymentAmount: 900, remainingTermMonthsEstimated: 200,
-        status: 'ACTIVE', type: 'MORTGAGE', annualInterestRateBps: 350, providerName: 'Bank',
+        securedAsset: null, status: 'ACTIVE', type: 'MORTGAGE', annualInterestRateBps: 350, providerName: 'Bank',
       }] } },
-      latest: { status: 'loaded', data: { unreviewedCount: 3, transactions: [{
+      latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [{
         transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
         description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: false, appuserTransactionCategories: [], recurringSeries: null,
       }] } },
@@ -230,8 +240,87 @@ describe('NetWorthScreen (Home)', () => {
     expect(view.getByText('Coffee shop')).toBeOnTheScreen()
     expect(view.getByText('Uncategorised')).toBeOnTheScreen()
     expect(view.getByText('Needs review')).toBeOnTheScreen()
-    expect(view.getByRole('button', { name: '3 need review' })).toBeOnTheScreen()
+    expect(view.getByText('3 transactions to review · €1,240.00 in total')).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Review now' })).toBeOnTheScreen()
     expect(view.getByRole('button', { name: 'All transactions' })).toBeOnTheScreen()
+  })
+
+  describe('the review status', () => {
+    const latestTransaction = {
+      transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
+      description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: true, appuserTransactionCategories: [], recurringSeries: null,
+    }
+
+    it('opens the ledger filtered to unreviewed transactions', async () => {
+      const { view, props } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [latestTransaction] } },
+      })
+      await fireEvent.press(view.getByRole('button', { name: 'Review now' }))
+      expect(props.onNavigate).toHaveBeenCalledWith('/accounts/transactions?filter=unreviewed')
+    })
+
+    it('says all caught up when nothing is waiting', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [latestTransaction] } },
+      })
+      expect(view.getByText('All caught up')).toBeOnTheScreen()
+      expect(view.queryByRole('button', { name: 'Review now' })).toBeNull()
+    })
+
+    it('shows nothing for an account with no transactions', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [] } },
+      })
+      expect(view.queryByText('All caught up')).toBeNull()
+      expect(view.queryByRole('button', { name: 'Review now' })).toBeNull()
+    })
+
+    it('shows nothing for an account with only an opening balance', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 0, currency: 'EUR', totalAbs: 0 }, transactions: [{ ...latestTransaction, transactionKey: -1, description: 'Initial balance' }] } },
+      })
+      expect(view.queryByText('All caught up')).toBeNull()
+    })
+
+    it('masks the amount at stake in privacy mode, but not the count', async () => {
+      const { view } = await renderScreen({}, {
+        latest: { status: 'loaded', data: { review: { count: 3, currency: 'EUR', totalAbs: 1240 }, transactions: [latestTransaction] } },
+      }, memoryPreferenceStorage(true))
+      const text = renderedText(view.toJSON())
+      expect(text).toContain('3 transactions to review')
+      expect(text).toContain('•')
+      expect(text).not.toContain('1,240')
+    })
+  })
+
+  it('shows this month’s income, spending and savings rate with the change from last month', async () => {
+    const { view } = await renderScreen({}, {
+      cashflow: { status: 'loaded', data: {
+        zero: 0,
+        bars: [{ date: '2026-11-01T00:00:00.000Z', amount: 600, width: 100 }],
+        summary: {
+          income: 2000,
+          spending: 1400,
+          savingsRate: 0.3,
+          comparison: { expenses: 1520, income: 1880, savingsRate: 0.1915, month: new Date(2026, 9, 1), samePoint: true },
+          incomeDelta: 120,
+          spendingDelta: -120,
+          savingsRateDelta: 10.85,
+        },
+      } },
+    })
+
+    const text = renderedText(view.toJSON())
+    expect(text).toContain('This month')
+    expect(text).toContain('Income')
+    expect(text).toContain('€2,000.00')
+    expect(text).toContain('Spending')
+    expect(text).toContain('€1,400.00')
+    expect(text).toContain('Savings rate')
+    expect(text).toContain('30%')
+    expect(text).toContain('+10.9 pts')
+    expect(text).toContain('vs same point last month')
+    expect(text).toContain('Savings rate is income minus spending')
   })
 
   describe.each(['America/New_York', 'Asia/Tokyo'])('for a viewer in %s', (zone) => {
@@ -239,12 +328,69 @@ describe('NetWorthScreen (Home)', () => {
 
     it('dates a date-only bank booking in the latest transactions on its own date', async () => {
       const { view } = await renderScreen({}, {
-        latest: { status: 'loaded', data: { unreviewedCount: 0, transactions: [{
+        latest: { status: 'loaded', data: { review: null, transactions: [{
           transactionKey: 1, transactionDate: '2026-08-01T00:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
           description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: true, appuserTransactionCategories: [], recurringSeries: null,
         }] } },
       })
       expect(view.getByText('Aug 1, Checking')).toBeOnTheScreen()
+    })
+  })
+
+  describe('"Is this the same money?"', () => {
+    const portfolioLink = {
+      portfolios: [{ portfolioKey: 7, name: 'Long term' }],
+      accounts: [{ accountKey: 21, accountName: 'Brokerage cash', accountType: 'INVESTMENT', source: 'open_banking' }],
+    }
+
+    it('leads the balance sheet, with Link a portfolio and Dismiss', async () => {
+      const onDismissPortfolioLink = jest.fn()
+      const { view } = await renderScreen({ onDismissPortfolioLink, onLinkPortfolio: jest.fn() }, { portfolioLink })
+      const sheet = within(view.getByTestId('home-balance-sheet'))
+      expect(sheet.getByRole('alert', { name: /^Is this the same money\?\. You have an investment account/ })).toBeOnTheScreen()
+      expect(sheet.getByRole('button', { name: 'Link a portfolio' })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Dismiss' }))
+      expect(onDismissPortfolioLink).toHaveBeenCalledTimes(1)
+    })
+
+    it('is absent without a suggestion', async () => {
+      const { view } = await renderScreen({ onLinkPortfolio: jest.fn() }, { portfolioLink: null })
+      expect(view.queryByTestId('home-portfolio-link-suggestion')).toBeNull()
+    })
+
+    it('links from its sheet, preselecting cash only for a synced account, and closes once saved', async () => {
+      const onLinkPortfolio = jest.fn().mockResolvedValue({ status: 'saved' })
+      const { view } = await renderScreen({ onLinkPortfolio }, { portfolioLink })
+      await fireEvent.press(view.getByRole('button', { name: 'Link a portfolio' }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      expect(sheet.getByRole('header', { name: 'Link a portfolio to its account' })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Portfolio, Select a portfolio' }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: 'Account that holds this portfolio, Not linked' }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      expect(sheet.getByRole('button', { name: "Does this account's balance include your investments?, No, cash only" })).toBeOnTheScreen()
+      await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+      await waitFor(() => expect(onLinkPortfolio).toHaveBeenCalledWith(7, { accountId: 21, mode: 'cash_only' }))
+      await waitFor(() => expect(view.queryByTestId('home-portfolio-link-sheet')).toBeNull())
+    })
+
+    it.each([
+      ['pt-PT', 'É o mesmo dinheiro?', /^Tens uma conta de investimento/, 'Já ligado por Ana'],
+      ['es', '¿Es el mismo dinero?', /^Tienes una cuenta de inversión/, 'Ya vinculada por Ana'],
+    ] as const)('speaks %s, naming who holds a refused link', async (locale, title, body, held) => {
+      const onLinkPortfolio = jest.fn().mockResolvedValue({ status: 'failed', failure: 'link-held', holder: 'Ana' })
+      const { view } = await renderScreen({ onLinkPortfolio }, { portfolioLink }, undefined, locale)
+      expect(view.getByText(title)).toBeOnTheScreen()
+      expect(view.getByText(body)).toBeOnTheScreen()
+      const i18n = await initMobileI18n(locale)
+      await fireEvent.press(view.getByRole('button', { name: i18n.t('portfolioAccountLink.suggestionLink') }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      await fireEvent.press(sheet.getByRole('button', { name: new RegExp(`^${i18n.t('portfolioAccountLink.portfolioLabel')},`) }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: new RegExp(`^${i18n.t('portfolioAccountLink.accountLabel')},`) }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      await fireEvent.press(sheet.getByRole('button', { name: i18n.t('portfolioAccountLink.save') }))
+      expect(await sheet.findByText(held)).toBeOnTheScreen()
     })
   })
 
@@ -271,10 +417,27 @@ describe('NetWorthScreen (Home)', () => {
     expect(props.onRetryCashflow).toHaveBeenCalled()
   })
 
-  it('keeps the top spending category last, as web has no equivalent', async () => {
-    const { view } = await renderScreen({}, { insight: { status: 'loaded', data: { name: 'Groceries', amount: 420, currency: 'EUR' } } })
+  it('keeps the top spending category as the fallback when no insight fires', async () => {
+    const { view } = await renderScreen({}, { insights: { status: 'loaded', data: { fallback: { name: 'Groceries', amount: 420, currency: 'EUR' }, insights: [] } } })
     expect(view.getByRole('header', { name: 'Insights' })).toBeOnTheScreen()
     expect(view.getByText('Groceries — €420.00 this month')).toBeOnTheScreen()
+  })
+
+  it('renders an insight card with its figures and a link to the underlying rows', async () => {
+    const insight = {
+      facts: {
+        baselineAmount: '100', categoryKey: 9, categoryKeys: [10, 11], categoryName: 'Food',
+        currency: 'EUR', currentAmount: '150', daysElapsed: 10, deviationPercent: '50.00',
+        direction: 'above' as const, fromDate: '2026-11-01T00:00:00.000Z', toDate: '2026-11-10T12:00:00.000Z',
+      },
+      id: 'spending-1', period: '2026-11', severity: 'warning' as const, type: 'spending_vs_normal' as const,
+    }
+    const { view, props } = await renderScreen({}, { insights: { status: 'loaded', data: { fallback: null, insights: [insight] } } })
+
+    expect(view.getByText('Food is 50% above its usual pace.')).toBeOnTheScreen()
+    expect(view.getByText(/€150\.00 so far, normally €100\.00 by this point\./)).toBeOnTheScreen()
+    fireEvent.press(view.getByRole('button', { name: 'View transactions' }))
+    expect(props.onNavigate).toHaveBeenCalledWith(expect.stringContaining('/accounts/transactions?fromDate='))
   })
 
   describe('privacy mode', () => {
@@ -282,7 +445,7 @@ describe('NetWorthScreen (Home)', () => {
     const MONEY = /€\s?[\d−-]|\d\s?€/
     const loadedSections: Partial<HomeSections> = {
       cashflow: { status: 'loaded', data: { zero: 0, bars: [{ date: '2026-10-31', amount: -250 }, { date: '2026-11-30', amount: 410 }] } as never },
-      insight: { status: 'loaded', data: { name: 'Groceries', amount: 321.45, currency: 'EUR' } } as never,
+      insights: { status: 'loaded', data: { fallback: { name: 'Groceries', amount: 321.45, currency: 'EUR' }, insights: [] } } as never,
     }
 
     it('shows the same sections\' amounts with the mode off (the control for the test below)', async () => {
@@ -301,6 +464,29 @@ describe('NetWorthScreen (Home)', () => {
       expect(view.getByLabelText('You own, Hidden amount')).toBeOnTheScreen()
     })
 
+    it('keeps the savings rate visible while the amounts are hidden', async () => {
+      const { view } = await renderScreen({}, {
+        cashflow: { status: 'loaded', data: {
+          zero: 0,
+          bars: [{ date: '2026-11-01T00:00:00.000Z', amount: 600, width: 100 }],
+          summary: {
+            income: 2000,
+            spending: 1400,
+            savingsRate: 0.3,
+            comparison: { expenses: 1520, income: 1880, savingsRate: 0.1915, month: new Date(2026, 9, 1), samePoint: true },
+            incomeDelta: 120,
+            spendingDelta: -120,
+            savingsRateDelta: 10.85,
+          },
+        } },
+      }, memoryPreferenceStorage(true))
+
+      const text = renderedText(view.toJSON())
+      expect(text).toContain('30%')
+      expect(text).toContain('+10.9 pts')
+      expect(text).not.toMatch(MONEY)
+    })
+
     it('toggles from the home header and remembers the choice on the device', async () => {
       const storage = memoryPreferenceStorage(false)
       const { view } = await renderScreen({}, {}, storage)
@@ -314,6 +500,45 @@ describe('NetWorthScreen (Home)', () => {
       await fireEvent.press(view.getByRole('button', { name: 'Show amounts' }))
       expect(await view.findByLabelText('You own, €1,825.00')).toBeOnTheScreen()
       expect(storage.saved).toEqual([true, false])
+    })
+  })
+
+  describe('the saved home layout', () => {
+    const headingOrder = (view: Awaited<ReturnType<typeof renderScreen>>['view']) =>
+      view.getAllByRole('header').map((header) => header.props.children).filter((name): name is string => typeof name === 'string')
+
+    it('renders the sections in the saved order and skips hidden ones', async () => {
+      const { view } = await renderScreen({
+        layout: [
+          { id: 'net-worth', hidden: false },
+          { id: 'loans', hidden: false },
+          { id: 'this-month', hidden: true },
+          { id: 'cashflow', hidden: false },
+          { id: 'balance-sheet', hidden: false },
+          { id: 'latest-transactions', hidden: false },
+        ],
+      })
+
+      const order = headingOrder(view)
+      expect(order.indexOf('Next loan payments')).toBeLessThan(order.indexOf('Net cash flow by month'))
+      expect(view.queryByRole('header', { name: 'This month' })).toBeNull()
+      expect(view.getByRole('header', { name: 'Net worth' })).toBeOnTheScreen()
+    })
+
+    it('opens the customize screen from the header', async () => {
+      const onCustomize = jest.fn()
+      const { view } = await renderScreen({ onCustomize })
+
+      await fireEvent.press(view.getByTestId('home-customize'))
+
+      expect(onCustomize).toHaveBeenCalledTimes(1)
+    })
+
+    it('renders every section when no layout is saved', async () => {
+      const { view } = await renderScreen()
+
+      expect(view.getByRole('header', { name: 'This month' })).toBeOnTheScreen()
+      expect(view.getByRole('header', { name: 'Latest transactions' })).toBeOnTheScreen()
     })
   })
 })

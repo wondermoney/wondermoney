@@ -68,3 +68,38 @@ test("an arrow with no month on that side is disabled, not just faded", async ()
   await user.click(previous);
   assert.equal(onPreviousMonth.mock.calls.length, 0);
 });
+
+test("a month that does not follow the calendar shows its days under its name", () => {
+  render(
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <BudgetMonthNavigator
+        label="November 2026"
+        periodLabel="Oct 25 – Nov 24"
+        hasPreviousMonth
+        hasNextMonth
+        onPreviousMonth={() => {}}
+        onNextMonth={() => {}}
+      />
+    </NextIntlClientProvider>,
+  );
+
+  assert.ok(screen.getByRole("heading", { name: "November 2026" }));
+  assert.ok(screen.getByText("Oct 25 – Nov 24"));
+});
+
+test("a calendar month shows only its name", () => {
+  const { container } = render(
+    <NextIntlClientProvider locale="en" messages={enMessages}>
+      <BudgetMonthNavigator
+        label="November 2026"
+        periodLabel={null}
+        hasPreviousMonth
+        hasNextMonth
+        onPreviousMonth={() => {}}
+        onNextMonth={() => {}}
+      />
+    </NextIntlClientProvider>,
+  );
+
+  assert.equal(container.querySelector("p"), null);
+});

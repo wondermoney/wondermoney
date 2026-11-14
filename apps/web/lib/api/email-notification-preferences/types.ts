@@ -29,6 +29,8 @@ export interface EmailNotificationPreferencesResponse {
   accountRecovery: EmailCategoryPreferenceState;
   /** Bank connection alerts: consent ending (7 days and 1 day before), ended early by the bank, or syncs failing for over 2 days. On by default. */
   bankSyncAlerts: EmailCategoryPreferenceState;
+  /** Optional for compatibility with servers deployed before card reminders. Defaults on. */
+  creditCardDueReminders?: EmailCategoryPreferenceState;
   /** Global unsubscribe: when true, every category's `effectiveEnabled` is false regardless of `storedEnabled`. */
   marketingOptOut: boolean;
 }
@@ -39,6 +41,7 @@ export interface UpdateEmailNotificationPreferencesInput {
   growthEmailsEnabled?: boolean;
   accountRecoveryEnabled?: boolean;
   bankSyncAlertsEnabled?: boolean;
+  creditCardDueRemindersEnabled?: boolean;
   marketingOptOut?: boolean;
 }
 

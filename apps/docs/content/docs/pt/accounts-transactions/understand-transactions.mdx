@@ -19,6 +19,47 @@ O saldo disponível é o saldo atual líquido da atividade pendente, pelo que o 
 
 Cada alteração a uma transação — incluindo o tratamento de duplicados e as mudanças de estado — fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo.
 
+## Anexos
+
+Anexa os documentos de uma compra — um recibo, uma fatura, uma garantia — à respetiva transação. Abre a transação e usa **Anexos** para arrastar ficheiros ou escolhê-los; na app móvel, tira uma foto ou escolhe ficheiros do dispositivo. Seleciona um ficheiro para o abrir e remove-o com o respetivo controlo de eliminação.
+
+Cada transação guarda até 10 ficheiros de até 10 MB cada: JPEG, PNG, WebP, HEIC ou PDF. O servidor verifica os próprios bytes do ficheiro, por isso mudar o nome não altera o que ele é. Os anexos são privados: as ligações de descarregamento são de curta duração e só o teu agregado as vê. Quando digitalizas um recibo para criar uma transação, a imagem é anexada automaticamente.
+
+Os anexos precisam de armazenamento de ficheiros no servidor. Se a tua instância não tiver, a secção fica oculta.
+
+## Alterar várias transações de uma vez
+
+Seleciona transações para lhes dar uma categoria, marcá-las como revistas, ocultá-las ou voltar a mostrá-las, adicionar ou remover uma etiqueta, ou eliminá-las, de uma só vez.
+
+- **Na web**, marca as linhas na lista de transações; a caixa no cabeçalho seleciona todas as linhas da página. Aparece uma barra com as ações por baixo da lista.
+- **Na aplicação móvel**, abre o menu de uma linha e escolhe **Selecionar**; depois marca mais linhas ou escolhe **Selecionar as transações carregadas**.
+
+Quando todas as linhas da página (na aplicação móvel, todas as linhas carregadas) estão selecionadas e o período e os filtros abrangem mais, escolhe **Selecionar as transações correspondentes**. A ação passa a abranger todas as transações da lista, incluindo as que ainda não foram carregadas, e nada fora dela: nunca transações de outro agregado, nem das contas privadas que não vês. Na aplicação móvel não é oferecida enquanto estiver ativo um filtro que só restringe os resultados carregados (comerciante, conta, categoria ou tipo).
+
+Uma ação abrange no máximo 5000 transações. Se os filtros abrangerem mais, restringe-os primeiro.
+
+## Eliminar transações
+
+Podes eliminar transações que adicionaste manualmente, importaste de um ficheiro ou criaste a partir de um recibo.
+
+- **Na web**, abre o menu de uma transação e escolhe **Eliminar**, ou seleciona várias e escolhe **Eliminar** na barra.
+- **Na aplicação móvel**, abre o menu de uma linha e escolhe **Eliminar**, ou seleciona várias e escolhe **Eliminar**.
+
+O WonderMoney pede confirmação e diz quantas transações vão ser eliminadas. Uma transação eliminada sai de todas as listas, totais e relatórios, e os saldos acumulados da conta são recalculados sem ela: o saldo depois de cada transação posterior, e o saldo de uma conta que manténs à mão, ficam como se ela nunca tivesse sido introduzida. O registo de auditoria guarda o registo da eliminação, mas uma transação eliminada não pode ser recuperada.
+
+As transações que o teu banco enviou não podem ser eliminadas, porque a sincronização seguinte voltaria a enviá-las. Quando uma seleção inclui algumas, essas ficam de fora e o WonderMoney propõe ocultá-las. Uma transação oculta fica fora das listas e dos totais; ativa **Mostrar transações ocultas** nos filtros para a voltar a ver.
+
+## Logótipos de comerciantes
+
+Uma transação com comerciante mostra um pequeno círculo ao lado na lista, na caixa de revisão e nos detalhes da transação. Sem logótipo, o círculo tem a primeira letra do comerciante, e a cor vem do nome, por isso o mesmo comerciante tem sempre a mesma cor.
+
+Para dar um logótipo a um comerciante na web, abre uma das transações dele e, em **Comerciante**, escolhe **Editar detalhes do comerciante**:
+
+- **Website**: o site do próprio comerciante, como `https://example.com`. Se a tua instância tiver os logótipos de comerciantes ligados, o WonderMoney obtém ele próprio o logótipo desse site e mostra-to; o serviço de logótipos nunca fica a saber quem és. Numa instância sem eles, o website fica apenas guardado.
+- **URL do logótipo**: o endereço de uma imagem a usar em vez disso. Tem de começar por `https://`. Todas as pessoas do teu agregado que vejam o comerciante carregam essa imagem a partir do endereço dela, por isso usa apenas uma de um site em que confies.
+
+Deixa um campo vazio para o retirar. Os detalhes do comerciante são partilhados com o teu agregado, e todas as pessoas do agregado, exceto os observadores, os podem alterar. A aplicação móvel mostra os mesmos logótipos e iniciais nas listas. Quando uma imagem não carrega, aparece a primeira letra.
+
 ## Antes de começar
 
 Confirma que a conta terminou a primeira sincronização ou que já tens transações manuais disponíveis. Se estiveres a rever um mês de orçamento, confirma primeiro o intervalo de datas.
@@ -32,21 +73,38 @@ Confirma que a conta terminou a primeira sincronização ou que já tens transa�
 
 ## Datas e intervalos de datas
 
-Um intervalo de datas abrange dias inteiros no teu fuso horário. Os bancos costumam enviar uma data de movimento sem hora, e a WonderMoney conta essa transação nessa data, estejas onde estiveres: um intervalo que começa ou termina nesse dia inclui-a, e um intervalo que termina no dia anterior não. Uma transação com hora, como uma que adicionas tu, conta a essa hora no teu fuso horário. As listas e os detalhes das transações, na web e na app móvel, mostram uma data de movimento como essa mesma data, e uma transação com hora no seu dia no teu fuso horário.
+Um intervalo de datas abrange dias inteiros no teu fuso horário. Os bancos costumam enviar uma data de movimento sem hora, e o WonderMoney conta essa transação nessa data, estejas onde estiveres: um intervalo que começa ou termina nesse dia inclui-a, e um intervalo que termina no dia anterior não. Uma transação com hora, como uma que adicionas tu, conta a essa hora no teu fuso horário. As listas e os detalhes das transações, na web e na app móvel, mostram uma data de movimento como essa mesma data, e uma transação com hora no seu dia no teu fuso horário.
 
 Os períodos da página de contas também seguem o teu calendário: **1 mês** começa no mesmo dia do mês anterior, e **Ano até à data** a 1 de janeiro, no teu fuso horário. Nos pagamentos recorrentes, **Último pagamento** e **Próximo previsto** mostram uma data de movimento como essa mesma data, e um pagamento previsto para uma data de movimento fica em **Próximos** durante todo esse dia.
 
 ## Totais
 
-Cada total que a WonderMoney mostra para um período soma transações que podes listar, e cada um diz quais:
+Cada total que o WonderMoney mostra para um período soma transações que podes listar, e cada um diz quais:
 
-- **Entradas** e **Saídas**, por cima da lista de transações, somam todas as transações que a lista tem para o intervalo de datas, em todas as contas e sejam quais forem os filtros da tabela, na tua moeda: as transações do outro membro são convertidas à taxa de câmbio da sua data.
+- **Entradas** e **Saídas**, por cima da lista de transações, somam todas as transações que a lista tem para o intervalo de datas, em todas as contas e sejam quais forem os filtros da tabela, na tua moeda: as transações dos outros membros são convertidas à taxa de câmbio da sua data.
 - **Os relatórios** contam só as transações confirmadas, a menos que ligues **Incluir transações pendentes**, e deixam de fora as transferências entre as tuas contas, a menos que ligues **Incluir transferências**.
 - **O fluxo de caixa e os gastos por categoria da página inicial** contam também as transações pendentes, e nunca as transferências entre as tuas contas.
 
 As transações ocultas e expiradas, e as partes de uma transação numa categoria que não conta como gasto, nunca entram num total de um relatório ou da página inicial.
 
 No relatório de gastos por categoria, seleciona o total para abrires a lista de transações com exatamente as transações que o compõem: as mesmas datas, filtros e opções, só saídas. A lista mostra quanto somam, que é o total do relatório. Os teus filtros na lista restringem-nas ainda mais, e **Mostrar todas as transações** volta à lista completa.
+
+## Reembolsos
+
+Um reembolso, ou um amigo que te devolve dinheiro, chega como uma entrada, enquanto a compra que cobre continua a contar por inteiro. Associa as duas e o WonderMoney conta só o que gastaste de facto: o montante associado sai da categoria da despesa e das tuas receitas.
+
+- **Na web**, abre a transação de entrada e escolhe **Marcar como reembolso**. **Na aplicação móvel**, abre-a e escolhe **Marcar como reembolso**.
+- Escolhe a despesa que reembolsa. O WonderMoney sugere despesas dos 60 dias anteriores, do mesmo comerciante ou de pelo menos o seu montante; pesquisa por descrição ou comerciante para procurar mais atrás.
+- Indica o montante a associar. Começa no que as duas transações ainda têm livre; um reembolso pode cobrir parte de uma despesa.
+
+Por exemplo, um reembolso de 20 associado a uma compra de 50 em Supermercado deixa 30 gastos em Supermercado, e 20 a menos de receitas. Os orçamentos, os relatórios, a página inicial e os totais por cima da lista de transações contam-no assim. Os saldos das contas não mudam: o dinheiro moveu-se mesmo.
+
+- Uma despesa pode ter vários reembolsos, e um reembolso pode cobrir várias despesas. O que está associado nunca soma mais do que qualquer uma das transações.
+- Quando a despesa está dividida, o montante associado sai de cada linha na proporção.
+- A despesa mostra **Reembolsada** e o reembolso **Reembolso**. Seleciona o distintivo para abrires a outra transação. Abre qualquer uma para veres as associações, e escolhe **Desassociar** para remover uma; os totais voltam ao que eram.
+- Eliminar qualquer uma das transações remove as suas associações.
+- Por agora, as duas transações têm de estar na mesma moeda. Uma transação numa conta privada só pode ser associada a outra numa conta que exatamente as mesmas pessoas veem, para que ninguém do agregado veja metade de uma associação. Também tens de poder editar as duas contas.
+- Uma transação partilhada num [grupo de despesas](/pt/docs/accounts-transactions/shared-expense-groups), ou que acerta uma dívida de um grupo, não pode ser também um reembolso: a parte dos teus amigos já fica fora dos teus totais.
 
 ## Escrever montantes
 
@@ -55,7 +113,7 @@ Os campos de montante leem os números como o idioma da aplicação os escreve. 
 - Um número com os dois separadores, como `1.234,56` ou `1,234.56`, é lido da mesma forma em qualquer idioma.
 - Espaços e apóstrofos podem agrupar os milhares (`1 234,56`, `1'234.56`).
 - São aceites um sinal de menos, parênteses e um símbolo ou código de moeda (`-12,30 €`, `(12,30)`, `EUR 12,30`).
-- Um valor que a WonderMoney não consegue ler com certeza, como `1.2.3` ou `12,`, mostra um erro por baixo do campo em vez de ser guardado como outro montante.
+- Um valor que o WonderMoney não consegue ler com certeza, como `1.2.3` ou `12,`, mostra um erro por baixo do campo em vez de ser guardado como outro montante.
 
 ## Rever
 
@@ -67,7 +125,7 @@ Procura itens sem categoria, entradas duplicadas e transações que pertençam a
 - Uma transação pendente aparece como expirada porque o banco nunca a confirmou.
 - Os dados importados não incluem um pagamento recente.
 - Foi introduzida duas vezes uma correção manual.
-- O intervalo de datas esconde a transação que procura.
+- O intervalo de datas esconde a transação que procuras.
 
 
 ## Ligações relacionadas

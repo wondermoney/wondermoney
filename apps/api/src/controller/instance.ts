@@ -1,13 +1,21 @@
 import type { Request, Response } from 'express';
 
+import { enabledCryptoChains } from '@config/crypto-explorers';
+import { isDemoSignInEnabled } from '@config/demo';
 import { instanceName } from '@config/instance-name';
-import { aiCapabilities } from '@service/ai/ai-provider';
+import { isMcpEnabled } from '@config/mcp';
+import { isPushEnabled } from '@config/push';
+import { statementImportLimits } from '@config/statement-import';
+import { aiCapabilities, aiProviderLabel } from '@service/ai/ai-provider';
+import { signInMethods } from '@service/auth/oidc-provider';
+import { passkeyRelyingParty } from '@service/auth/passkey';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
+import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
-import { isMarketDataEnabled } from '@service/market-data/eodhd.service';
+import { isMarketDataEnabled, marketDataFeatures } from '@service/market-data/registry';
 import { resolveStorageConfig } from '@service/storage/s3';
-import { buildInfo } from '@utils/constants';
+import { buildInfo, FRONTEND_URL } from '@utils/constants';
 
 /**
  * Public description of this server: what it is called, who may sign up, where to ask for help
@@ -20,14 +28,28 @@ import { buildInfo } from '@utils/constants';
  */
 export function getInstance(_req: Request, res: Response) {
   const { commit, version } = buildInfo();
+  const bankSync = bankSyncFeatures();
+  const signIn = signInMethods();
+  const market = marketDataFeatures();
+  const statementProvider = aiProviderLabel('statementImport');
   return res.json({
     apiVersion: 1,
     commit,
     features: {
       ai: aiCapabilities(),
-      // Enable Banking is bring-your-own-key: each user adds their own credentials.
-      bankSync: true,
+      bankSync: bankSync.bankSync,
+      // `instance` when the operator set an instance-wide Enable Banking credential, `user` when
+      // each user adds their own. Whether the caller's household may use the instance one is on
+      // the signed-in profile (`GET /v1/user/me/profile`, `bankSyncCredentials`).
+      bankSyncCredentials: bankSync.bankSyncCredentials,
+      /** The providers this instance enabled through `BANK_PROVIDERS`. */
+      bankSyncProviders: bankSync.bankSyncProviders,
       contactForm: supportInbox() !== null,
+      // Crypto wallets from public addresses: the chains whose block explorer the operator set
+      // (`CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL`). Empty: off.
+      cryptoWalletChains: enabledCryptoChains(),
+      // One-click sign-in to the shared read-only demo (`POST /v1/auth/demo`, `DEMO_SIGN_IN_ENABLED`).
+      demo: isDemoSignInEnabled(),
       // False when mail only goes to the log.
       email: resolveEmailDriver() !== 'log',
       // In-app feedback is emailed to SUPPORT_EMAIL, so it needs both an inbox and a real driver.
@@ -35,6 +57,27 @@ export function getInstance(_req: Request, res: Response) {
       fileStorage: resolveStorageConfig() !== null,
       googleSignIn: isGoogleSignInConfigured(),
       marketData: isMarketDataEnabled(),
+      /** What the market-data providers here can be asked (`search`, `quote`, `dailyHistory`, `dividends`, `splits`). */
+      marketDataCapabilities: market.marketDataCapabilities,
+      /** The set-up providers, in the order `MARKET_DATA_PROVIDERS` asks them. */
+      marketDataProviders: market.marketDataProviders,
+      // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
+      mcp: isMcpEnabled(),
+      // Single sign-on through the operator's OIDC provider: "Sign in with <name>". Null when off.
+      oidc: signIn.oidc,
+      // Passkey sign-in on the web app (better-auth's passkey plugin, always on, OIDC_ONLY too).
+      passkey: true,
+      // The hostname passkeys belong to (the web app's, from `APP_URL`). The mobile app offers
+      // passkeys only when its build lists this hostname among its associated domains.
+      passkeyRpId: passkeyRelyingParty(FRONTEND_URL).rpID,
+      // False under OIDC_ONLY: the server refuses password sign-in, sign-up and reset.
+      passwordSignIn: signIn.passwordSignIn,
+      // Mobile push notifications through the Expo push service (`PUSH_ENABLED`, off by default).
+      push: isPushEnabled(),
+      // PDF statement import: the largest PDF it takes and the provider's family. Null when no
+      // model for it is configured. This document is public, so it never names the provider's
+      // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.
+      statementImport: statementProvider ? { ...statementImportLimits(), providerKind: statementProvider.kind } : null,
     },
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

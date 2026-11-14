@@ -1,30 +1,47 @@
 ---
 title: O que é um agregado familiar
-description: Compreende o modelo de agregado familiar, as funções de titular e membro, e como funcionam os dados partilhados.
+description: Compreende o modelo de agregado familiar, as quatro funções e como funcionam os dados partilhados.
 ---
 
-Um agregado familiar é o modelo multiutilizador da WonderMoney. Um agregado familiar contém uma ou mais pessoas, cada uma com o seu próprio início de sessão. Os dados vivem no agregado, e não numa conta individual de qualquer pessoa.
+Um agregado familiar é o modelo multiutilizador do WonderMoney. Um agregado familiar contém uma ou mais pessoas, cada uma com o seu próprio início de sessão. Os dados vivem no agregado, e não numa conta individual de qualquer pessoa.
 
-Um agregado familiar é útil quando duas pessoas querem gerir dinheiro em conjunto: despesas partilhadas, contas conjuntas ou uma visão comum das finanças do agregado, sem manter duas configurações separadas.
+Um agregado familiar é útil quando várias pessoas querem gerir dinheiro em conjunto: despesas partilhadas, contas conjuntas ou uma visão comum das finanças do agregado, sem manter configurações separadas.
+
+## Quantas pessoas
+
+Um agregado familiar tem até 6 pessoas por omissão, incluindo o titular. Quem gere o teu servidor pode aumentar ou diminuir esse número (consulta [Configurar a tua instância](/pt/docs/self-hosting/configure#a-tua-instância)). Um convite que ainda não foi aceite ocupa um lugar até ser aceite, revogado ou expirar, por isso, quando o agregado está cheio, revoga um convite pendente para libertar um lugar.
 
 ## Funções
 
-Cada pessoa num agregado familiar tem uma função:
+Cada pessoa num agregado familiar tem uma função. Quem convida alguém escolhe a sua função, e ela pode ser alterada mais tarde.
 
-- **Titular** — a pessoa que criou o agregado familiar no registo. O titular gera ligações de convite e pode remover membros.
-- **Membro** — uma pessoa que aderiu através de uma ligação de convite. Os membros podem usar os dados partilhados e gerir as suas próprias contas privadas.
+| Função | O que pode fazer |
+|---|---|
+| **Titular** | Tudo: convidar pessoas com qualquer função abaixo de titular, reenviar e revogar convites, alterar funções, remover qualquer pessoa e transferir a titularidade. Há exatamente um titular, a pessoa que criou o agregado, a não ser que a titularidade tenha sido transferida. |
+| **Administrador** | Ler e alterar os dados partilhados, e gerir as pessoas abaixo de si: convidar apenas como membro ou observador, reenviar e revogar esses convites, mudar funções entre membro e observador, e remover membros e observadores. Um administrador não pode alterar nem remover outro administrador nem o titular. |
+| **Membro** | Ler e alterar os dados partilhados: contas, transações, orçamentos, categorias, regras, objetivos e o resto. Os membros não podem convidar nem remover ninguém. |
+| **Observador** | Ver apenas os dados partilhados. Um observador não pode adicionar, alterar nem eliminar nada do que o agregado partilha, mas as suas definições pessoais continuam a funcionar: perfil, preferências, notificações, dispositivos, tokens de API pessoais, o feed de calendário, a exportação de dados e o assistente. |
 
-A função é definida na ligação entre o utilizador e o agregado familiar, e determina quem pode enviar convites ou remover membros.
+Todos, exceto o titular, podem sair do agregado a qualquer momento. Consulta [Sair do agregado ou remover um membro](/pt/docs/household/leave-or-remove).
+
+## Alterar uma função
+
+O titular e os administradores alteram funções a partir da lista de membros nas definições do agregado. Só podes dar uma função abaixo da tua, e só a alguém abaixo de ti: o titular pode tornar qualquer outra pessoa administrador, membro ou observador, e um administrador pode mudar pessoas entre membro e observador. Ninguém pode alterar a sua própria função.
+
+## Transferir a titularidade
+
+Só o titular pode transferir a titularidade. Escolhe outra pessoa do agregado e transfere-a para ela: essa pessoa torna-se o titular e tu passas a administrador. O agregado tem sempre exatamente um titular.
 
 ## Dados partilhados e privacidade
 
-Os dados do agregado estão limitados a ele. Contas, transações, categorias, objetivos, orçamentos, carteira, fluxo de caixa e património líquido vivem dentro do agregado, e cada membro vê apenas o que lhe é permitido ver.
+Os dados do agregado estão limitados a ele. Contas, transações, categorias, objetivos, orçamentos, carteira, fluxo de caixa e património líquido vivem dentro do agregado, e cada pessoa vê apenas o que lhe é permitido ver.
 
-As contas têm a sua própria definição de privacidade. Uma conta partilhada é visível para ambos os membros; uma conta privada é visível apenas para o membro que a possui. O titular também pode configurar quais as séries recorrentes privadas. Consulta [Privacidade das contas](/pt/docs/household/account-privacy) para mais detalhes.
+As contas têm a sua própria definição de partilha. Uma conta partilhada é visível para todas as pessoas do agregado. Uma conta privada é visível apenas para a pessoa a quem pertence e para os membros com quem ela a partilha, cada um dos quais a pode ver ou editar; um observador só vê. O titular e os administradores não veem a conta privada de outra pessoa, a não ser que esteja partilhada com eles. Consulta [Privacidade das contas](/pt/docs/household/account-privacy) para mais detalhes.
 
 ## Páginas relacionadas
 
 - [Agregado familiar e partilha entre utilizadores](/pt/docs/household)
 - [Criar um agregado familiar](/pt/docs/household/create-a-household)
+- [Convidar um membro](/pt/docs/household/invite-a-member)
 - [Privacidade das contas](/pt/docs/household/account-privacy)
 - [Contexto partilhado](/pt/docs/household/shared-context)

@@ -17,9 +17,11 @@ import { Tenant } from '@entity/Tenant';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 import { TransactionCategoryStats, Source as TransactionCategoryStatsSource } from '@entity/TransactionCategoryStats';
 import { TransactionEnrichment, TransactionEnrichmentStatus } from '@entity/TransactionEnrichment';
+import { isAiHidden } from '@service/ai/ai-availability';
 import { estimateTransactionEnrichmentCostUsd } from '@service/transaction-enrichment/cost';
-import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/deepseek';
+import { requestTransactionEnrichmentSuggestion } from '@service/transaction-enrichment/suggestion';
 import { reserveTransactionEnrichmentBudget } from '@service/transaction-enrichment/transaction-enrichment-budget.service';
+import { clearsWriteThreshold, isUninformativeCategory } from '@service/transaction-enrichment/write-guardrail';
 import { getRef } from '@utils/em-helpers';
 import logger from '@utils/logger';
 
@@ -40,7 +42,7 @@ interface TransactionEnrichmentWorkerDependencies {
 }
 
 /**
- * Worker for the DeepSeek transaction-enrichment pipeline.
+ * Worker for the AI transaction-enrichment pipeline.
  *
  * Runs post-sync/non-critical. Fail-safe and idempotent: the ONLY path that triggers a pg-boss
  * retry is a `throw` on a transient transport error (429 / >=500); every other outcome returns a
@@ -75,7 +77,7 @@ export async function handleTransactionEnrichmentGptJob(
   const reserveBudget = dependencies.reserveBudget ?? reserveTransactionEnrichmentBudget;
 
   // One try/catch guards ALL DB + model work. Only a genuine transient transport failure
-  // (DeepSeekHttpError 429/>=500) rethrows to trigger a pg-boss retry. Everything else — DB errors
+  // (AiCompletionError 429/>=500) rethrows to trigger a pg-boss retry. Everything else — DB errors
   // from findOne/find/flush, parse/validation, terminal 4xx — is deterministic: mark the row FAILED
   // and consume the job, so a guaranteed-to-fail input never re-reserves budget or re-calls the
   // model across the retry limit.
@@ -94,10 +96,21 @@ export async function handleTransactionEnrichmentGptJob(
     const tenantKey = resolveTenantKey(enrichment.tenantKey);
     const transactionKey = resolveTransactionKey(enrichment.transactionKey);
 
-    const transaction = await em.findOne(Transaction, { transactionKey }, { populate: ['transactionMerchantKey', 'accountKey'] });
+    const transaction = await em.findOne(Transaction, { transactionKey }, { populate: ['transactionMerchantKey', 'accountKey', 'accountKey.accountOwnerAppuserKey'] });
     if (!transaction) {
       log.warn({ jobId: job.id, queue: TRANSACTION_ENRICHMENT_GPT_QUEUE }, 'Transaction enrichment target transaction not found');
       return false;
+    }
+
+    // The person who owns the account may have hidden AI after this job was enqueued. Nothing
+    // from their accounts goes to a model; the deterministic categorizers are unaffected.
+    const accountOwner = resolveAccountOwner(transaction);
+    if (accountOwner && isAiHidden(accountOwner)) {
+      enrichment.status = TransactionEnrichmentStatus.SKIPPED;
+      enrichment.eligibilityReason = 'ai_hidden';
+      await em.flush();
+      log.info({ jobId: job.id, queue: TRANSACTION_ENRICHMENT_GPT_QUEUE }, 'Transaction enrichment skipped: account owner hid AI');
+      return true;
     }
 
     const categories = await loadCandidateCategories(em, tenantKey, resolveAccountOwnerKey(transaction));
@@ -111,7 +124,7 @@ export async function handleTransactionEnrichmentGptJob(
     // and flushed on the retryable-transport path, so a value above 1 means this job
     // already holds a reservation from a previous attempt — re-reserving would charge a
     // 3-retry job four units of the tenant's daily cap for one enrichment, and could
-    // exhaust a tenant's budget on a DeepSeek outage without producing a single result.
+    // exhaust a tenant's budget on a model outage without producing a single result.
     const alreadyReserved = enrichment.attemptCount > 1;
     if (tenantKey === undefined || (!alreadyReserved && !(await reserveBudget(em, tenantKey, utcDay(now()), config.dailyTenantBudget)))) {
       enrichment.status = TransactionEnrichmentStatus.SKIPPED;
@@ -206,12 +219,6 @@ export async function handleTransactionEnrichmentGptJob(
 }
 
 /**
- * The system category the enrichment pipeline is never allowed to write. See
- * `applySuggestionIfEligible` for why.
- */
-const UNINFORMATIVE_CATEGORY_NAME = 'OTHER';
-
-/**
  * Apply a confident AI suggestion to a still-uncategorized transaction (write mode).
  *
  * Guardrails: needs a category suggestion, a confidence at/above the threshold, and a resolvable
@@ -226,19 +233,15 @@ async function applySuggestionIfEligible(
   result: { categorySuggestionKey: null | number; confidence: number },
   threshold: number,
 ): Promise<boolean> {
-  if (result.categorySuggestionKey === null || result.confidence < threshold) return false;
+  if (!clearsWriteThreshold(result, threshold)) return false;
 
   const appuserKey = resolveAccountOwnerKey(transaction);
   if (appuserKey === undefined) return false;
 
-  // Never write `OTHER`, at any confidence. It is the model's most common
-  // suggestion by far. Writing it is worse than writing nothing — it carries no
-  // information *and* it marks the transaction categorised, so it stops being an
-  // enrichment candidate and drops off every needs-attention surface. Matched by
-  // name because the key is seed-order dependent (see CategorySeeder).
+  // Never write `OTHER`, at any confidence (see `isUninformativeCategory`).
   const suggested = await em.findOne(Category, { categoryKey: result.categorySuggestionKey });
   if (!suggested) return false;
-  if (suggested.isSystemCategory && suggested.name === UNINFORMATIVE_CATEGORY_NAME) return false;
+  if (isUninformativeCategory(suggested)) return false;
 
   const existing = await em.findOne(
     AppuserTransactionCategory,
@@ -322,9 +325,13 @@ async function loadPersonalizedCandidateCategories(
     .map(([categoryKey, { label }]) => ({ categoryKey, label }));
 }
 
+function resolveAccountOwner(transaction: Transaction): undefined | { preferences?: Record<string, unknown> } {
+  const account = transaction.accountKey as unknown as undefined | { accountOwnerAppuserKey?: undefined | { preferences?: Record<string, unknown> } };
+  return account?.accountOwnerAppuserKey ?? undefined;
+}
+
 function resolveAccountOwnerKey(transaction: Transaction): number | undefined {
-  const account = transaction.accountKey as unknown as undefined | { accountOwnerAppuserKey?: undefined | { appuserKey?: number } };
-  const owner = account?.accountOwnerAppuserKey;
+  const owner = resolveAccountOwner(transaction) as undefined | { appuserKey?: number };
   return owner && typeof owner.appuserKey === 'number' ? owner.appuserKey : undefined;
 }
 

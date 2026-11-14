@@ -1,0 +1,133 @@
+{{- $component := dict "root" . "component" "api" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wondermoney.componentName" $component }}
+  labels:
+    {{- include "wondermoney.componentLabels" $component | nindent 4 }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      {{- include "wondermoney.componentSelectorLabels" $component | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "wondermoney.componentSelectorLabels" $component | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include "wondermoney.secretValues" . | sha256sum }}
+        {{- with .Values.api.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- include "wondermoney.podSecurityContext" . | nindent 8 }}
+      {{- if .Values.postgresql.enabled }}
+      {{- $postgresql := include "wondermoney.componentName" (dict "root" . "component" "postgresql") }}
+      initContainers:
+        # The migrations run first thing; the bundled Postgres must be accepting connections.
+        - name: wait-for-postgresql
+          image: {{ printf "%s:%s" .Values.postgresql.image.repository .Values.postgresql.image.tag }}
+          securityContext:
+            {{- include "wondermoney.containerSecurityContext" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -q -h {{ $postgresql }} -p 5432 -U {{ .Values.postgresql.auth.username }}; do
+                echo "Waiting for Postgres at {{ $postgresql }}:5432"
+                sleep 2
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+      {{- end }}
+      containers:
+        - name: api
+          image: {{ include "wondermoney.image" (dict "root" . "image" .Values.api.image) }}
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          securityContext:
+            {{- include "wondermoney.containerSecurityContext" . | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 3001
+          envFrom:
+            {{- include "wondermoney.serverEnvFrom" . | nindent 12 }}
+          env:
+            {{- include "wondermoney.databaseEnv" . | trim | nindent 12 }}
+            {{- if .Values.enableBanking.privateKeySecret }}
+            - name: ENABLE_BANKING_PRIVATE_KEY_FILE
+              value: {{ printf "%s/private-key.pem" (include "wondermoney.enableBankingKeyDir" .) | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.api.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.enableBanking.privateKeySecret }}
+          volumeMounts:
+            - name: enable-banking-key
+              mountPath: {{ include "wondermoney.enableBankingKeyDir" . }}
+              readOnly: true
+          {{- end }}
+      {{- if .Values.enableBanking.privateKeySecret }}
+      volumes:
+        # The Enable Banking application's private key, readable by the pod's group (fsGroup) only.
+        - name: enable-banking-key
+          secret:
+            secretName: {{ .Values.enableBanking.privateKeySecret }}
+            defaultMode: 0440
+            items:
+              - key: {{ .Values.enableBanking.privateKeySecretKey }}
+                path: private-key.pem
+      {{- end }}
+      {{- with .Values.api.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wondermoney.componentName" $component }}
+  labels:
+    {{- include "wondermoney.componentLabels" $component | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "wondermoney.componentSelectorLabels" $component | nindent 4 }}
+  ports:
+    - name: http
+      port: 3001
+      targetPort: http

@@ -2,6 +2,7 @@ import * as DocumentPicker from 'expo-document-picker'
 import { type Href, usePreventRemove, useRouter } from 'expo-router'
 import { useState } from 'react'
 
+import { canWriteAccount } from '@/features/accounts/account-access'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { ApiError } from '@/lib/api/errors'
 
@@ -35,7 +36,8 @@ export function StatementImportRoute() {
   const accountsState: StatementImportAccountsState = accounts.data ? {
     status: 'loaded',
     accounts: accounts.data.accounts
-      .filter((account) => Number.isSafeInteger(account.accountKey) && account.accountKey > 0)
+      // A view-only account (#95) takes no statement.
+      .filter((account) => Number.isSafeInteger(account.accountKey) && account.accountKey > 0 && canWriteAccount(account))
       .map((account) => ({ accountId: account.accountKey, name: account.accountName })),
   } : accounts.isLoading ? { status: 'loading' } : {
     status: accounts.error instanceof ApiError && accounts.error.code === 'invalid-response' ? 'invalid-response' : 'error',

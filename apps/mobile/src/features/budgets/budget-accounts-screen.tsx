@@ -22,6 +22,8 @@ export type BudgetAccountsScreenProps = Readonly<{
   linkedIds: readonly number[]
   pending: boolean
   failure: BudgetAccountsWriteFailure | null
+  /** A household budget left the member's private accounts out of `accounts`: say why. */
+  privateAccountsHidden?: boolean
   onBack: () => void
   onRefresh: () => void | Promise<void>
   onSubmit: (accountKeys: readonly number[]) => Promise<void>
@@ -35,7 +37,7 @@ export function BudgetAccountsScreen(props: BudgetAccountsScreenProps) {
   return <BudgetAccountsForm key={props.linkedIds.join(',')} {...props} palette={palette} />
 }
 
-function BudgetAccountsForm({ accounts, linkedIds, pending, failure, onBack, onSubmit, palette }: Omit<BudgetAccountsScreenProps, 'status' | 'onRefresh'> & { palette: Palette }) {
+function BudgetAccountsForm({ accounts, linkedIds, pending, failure, privateAccountsHidden = false, onBack, onSubmit, palette }: Omit<BudgetAccountsScreenProps, 'status' | 'onRefresh'> & { palette: Palette }) {
   const { t } = useTranslation()
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set(linkedIds))
   const dirty = selected.size !== linkedIds.length || linkedIds.some((id) => !selected.has(id))
@@ -65,6 +67,7 @@ function BudgetAccountsForm({ accounts, linkedIds, pending, failure, onBack, onS
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
         <View style={styles.page}>
           <UiText tone="muted" variant="meta">{t('budgetAccounts.helper')}</UiText>
+          {privateAccountsHidden ? <UiText tone="muted" variant="meta">{t('budgetAccounts.privateHidden')}</UiText> : null}
           {failure ? <FormNotice tone="destructive">{t(`budgetAccounts.failures.${failure}`)}</FormNotice> : null}
           {accounts.length === 0 ? (
             <UiText tone="muted" variant="body">{t('budgetAccounts.none')}</UiText>

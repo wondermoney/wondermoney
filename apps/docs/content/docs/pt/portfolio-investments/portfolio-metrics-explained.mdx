@@ -20,12 +20,12 @@ Compara-o com o teu preço de custo e com a mesma carteira ao longo do tempo.
 Movimentos de preços, novas operações, dividendos, comissões e efeitos cambiais.
 
 ### Má interpretação comum
-Não é o mesmo que o dinheiro investido nem o que pagou originalmente.
+Não é o mesmo que o dinheiro investido nem o que pagaste originalmente.
 
 ## Dinheiro investido e preço de custo
 
 ### O que significa
-Dinheiro investido é o montante que aplicou na carteira. Preço de custo é o valor registado para as posições atuais, incluindo custos rastreados.
+Dinheiro investido é o montante que aplicaste na carteira. Preço de custo é o valor registado para as posições atuais, incluindo os custos registados.
 
 ### Onde aparece
 Totais da carteira, detalhes da posição e vistas de ganhos/perdas.
@@ -38,6 +38,29 @@ Novas compras, vendas, transferências e custos de compra registados.
 
 ### Má interpretação comum
 Preço de custo não é o mesmo que valor atual.
+
+## Método de custo: FIFO e custo médio
+
+### O que significa
+O método de custo decide que custo de compra é consumido por uma venda. FIFO (primeiro a entrar, primeiro a sair) vende primeiro os lotes mais antigos. O custo médio consome a média corrente de tudo o que ainda deténs, e uma venda não altera essa média.
+
+### Onde aparece
+Nas definições da carteira, onde escolhes o método, e na secção de lotes dos detalhes de uma posição, que lista cada lote de compra com a data, quantidade, quantidade restante, custo unitário e comissões.
+
+### Como ler
+Escolhe o método que as tuas regras fiscais usam. Portugal e Espanha usam FIFO; o Brasil e outras jurisdições usam o custo médio. Alterar o método recalcula os ganhos realizados da carteira e reconstrói o histórico diário com o novo custo.
+
+### Exemplo
+Compra 10 unidades a 100 e 10 unidades a 200 e vende 10.
+
+- FIFO consome o primeiro lote: custo realizado de 1 000 e as 10 unidades restantes mantêm um custo médio de 200.
+- O custo médio consome metade dos 3 000 totais: custo realizado de 1 500 e as 10 unidades restantes mantêm um custo médio de 150.
+
+### O que o pode alterar
+Alterar o método nas definições da carteira, novas compras e vendas, splits, comissões e correções de transações.
+
+### Má interpretação comum
+O método altera o custo e os ganhos realizados, não o valor de mercado do que deténs. Uma venda nunca altera o custo médio por unidade no método do custo médio.
 
 ## Valor de mercado
 
@@ -71,24 +94,33 @@ Valores positivos significam que a posição está acima do preço de custo; val
 Mudanças de preço, comissões e efeitos cambiais.
 
 ### Má interpretação comum
-Só se torna real quando vende. Até lá, é não realizado.
+Só se torna real quando vendes. Até lá, é não realizado.
 
 ## Ganho ou perda realizado
 
 ### O que significa
-O lucro ou prejuízo fixado quando vendes ou fechas uma posição.
+O lucro ou prejuízo fixado quando vendes ou fechas uma posição. Em cada venda é o valor da venda depois da comissão, menos o custo que o método da carteira abateu (incluindo as comissões de compra das unidades vendidas).
 
 ### Onde aparece
-Resumos de transações e desempenho.
+- No resumo da carteira, como total da carteira ou de todas as carteiras.
+- Na coluna **Realizado** da tabela de posições: tudo o que essa posição já realizou.
+- Na secção **Ganhos realizados**, que lista cada venda com a data, a quantidade, o valor da venda, o custo de aquisição, o ganho realizado e a data da compra mais antiga de que vendeu (detido desde). Filtra-a por ano e descarrega a lista apresentada como ficheiro CSV.
+- Em **Posições fechadas**: ativos que vendeste na totalidade, com o resultado de toda a sua vida, para continuarem visíveis depois de saírem das posições.
 
 ### Como ler
-Usa-o para ver o que já foi concretizado por operações concluídas.
+Usa-o para ver o que já foi concretizado por operações concluídas. As vendas de um ano somam o total desse ano, e todos os anos juntos somam os ganhos realizados da carteira. Um ano é um ano civil em UTC, pela data da venda.
+
+### Exemplo
+Compra 10 unidades a 100 com uma comissão de 10 e vende 4 a 150 com uma comissão de 2. Em FIFO a venda abate 4 × 100 mais 4 dos 10 de comissão de compra, um custo de 404. O valor da venda é 600 menos a comissão de 2, ou seja 598, por isso a venda realizou 194.
 
 ### O que o pode alterar
-Vendas, vendas parciais, comissões e correções de transações.
+Vendas, vendas parciais, comissões, desdobramentos de ações, correções de transações e uma mudança do método de custo.
+
+### Moeda
+Os valores aparecem na tua moeda. Uma venda registada noutra moeda é convertida à taxa de câmbio do dia da venda. Uma venda sem taxa para esse dia aparece na sua própria moeda e fica fora dos totais, com uma nota a indicá-lo.
 
 ### Má interpretação comum
-Ganho ou perda realizado é diferente de ganho ou perda não realizado.
+Ganho ou perda realizado é diferente de ganho ou perda não realizado. O WonderMoney mostra o que cada venda rendeu segundo o método de custo da carteira; não aplica regras fiscais de cada país, como as regras de wash sale, e não é uma declaração fiscal.
 
 ## Percentagem de retorno
 
@@ -106,6 +138,38 @@ Movimentos de preço, dividendos, comissões e efeitos cambiais.
 
 ### Má interpretação comum
 A percentagem de retorno não é o mesmo que o valor da carteira.
+
+## Retorno ponderado pelo tempo e pelo dinheiro
+
+### O que significa
+Dois retornos para o período escolhido respondem a duas perguntas diferentes.
+
+- **Retorno ponderado pelo tempo** diz como correram os investimentos. O retorno de cada dia é medido sem o dinheiro que entrou ou saiu nesse dia, e os dias são encadeados, por isso um depósito ou um levantamento não o altera. Os dividendos pagos contam como retorno.
+- **Retorno ponderado pelo dinheiro** diz como correu o teu dinheiro. É a taxa a que o valor no início do período, cada compra, venda e dividendo nele, e o valor no fim se equilibram: o mesmo cálculo que a função `XIRR` (`XTIR` em português) de uma folha de cálculo. O dinheiro investido durante mais tempo pesa mais.
+
+### Onde aparece
+No resumo da carteira, para uma carteira ou para todas em conjunto, em cada período que podes escolher; no relatório de desempenho da carteira e na sua exportação CSV; e, para o retorno ponderado pelo tempo, na vista em percentagem do gráfico de desempenho, dia a dia.
+
+### Como ler
+- Quando os dois são próximos, o momento dos teus depósitos e levantamentos fez pouca diferença.
+- Quando o retorno ponderado pelo dinheiro é maior, mais do teu dinheiro estava investido enquanto os preços subiam; quando é menor, mais estava investido enquanto desciam.
+- Para um período de um ano ou mais, o retorno ponderado pelo dinheiro é uma taxa anual. Para um período mais curto é a taxa nesse período, porque esticar umas semanas até um ano exageraria o valor.
+- Sem depósitos nem levantamentos no período, o retorno ponderado pelo tempo é a variação do valor sobre o valor inicial.
+
+### Exemplo
+Tens 10 000 no início do ano. Os preços ficam estáveis até juntares mais 10 000 em junho; depois sobem 10% e a carteira acaba o ano com 22 000.
+
+- Retorno ponderado pelo tempo: +10%. Os investimentos subiram 10%; o depósito não é um ganho.
+- Retorno ponderado pelo dinheiro: mais de +10%, porque o dobro do dinheiro estava investido durante a subida.
+
+### Dias em falta
+Os dois retornos são medidos a partir do histórico diário da carteira. Um dia sem valor registado (por exemplo enquanto o histórico é reconstruído, ou quando nenhuma taxa de câmbio o converte para a tua moeda) nunca é lido como zero: o último valor é mantido nesse dia, e o resumo indica quantos dias faltaram. Os dias em que a carteira não tinha nada, antes da primeira compra ou depois de vender tudo, não contam como em falta.
+
+### O que o pode alterar
+Movimentos de preço, dividendos, comissões, efeitos cambiais e o período escolhido. Uma compra ou venda altera o retorno ponderado pelo dinheiro; só altera o retorno ponderado pelo tempo através do que o dinheiro faz depois.
+
+### Má interpretação comum
+Nenhum dos dois é o ganho sobre o preço de custo. Compara um benchmark com o retorno ponderado pelo tempo, porque um benchmark também não tem depósitos nem levantamentos.
 
 ## Dividendos e rendimento
 

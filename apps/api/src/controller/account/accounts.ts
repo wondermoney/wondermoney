@@ -8,17 +8,25 @@ import { Account } from '@entity/Account';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { AccountType } from '@entity/AccountType';
 import { Appuser } from '@entity/Appuser';
+import { AppuserAccountPosition } from '@entity/AppuserAccountPosition';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankSyncFinality, BankSyncIncident } from '@entity/BankSyncIncident';
+import { CreditCardDetail } from '@entity/CreditCardDetail';
 import { Currency } from '@entity/Currency';
 import { Transaction } from '@entity/Transaction';
 import { TransactionStatus } from '@entity/TransactionStatus';
+import { type AccountAccess, accountActor, loadAccountAccess } from '@service/account/account-access';
 import { computeAvailableBalance } from '@service/account/account-available-balance.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { startAccountRecalculation } from '@service/account/account-recalculation.service';
+import { getAccountShares, setAccountPrivacy, setAccountShares } from '@service/account/account-share.service';
 import { computeSyncStatus } from '@service/account/account-sync-status.service';
+import { mapCreditCardDetail } from '@service/account/credit-card-statement.service';
+import type { BankSyncLastError } from '@service/bank-sync/bank-sync-history.service';
 import { convertWithStatus, type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
+import { getAccountOwnership, setAccountOwnership } from '@service/household/account-ownership';
+import { accountAttributionDto, loadActiveMembers } from '@service/household/member-attribution';
 import { isManualAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
@@ -32,7 +40,7 @@ import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFo
  */
 import { authedUser } from '@middleware/authed-context';
 import { getFullName } from '@utils/misc';
-import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountRequestSchema, recalculateAccountRequestSchema, updateAccountRequestSchema } from '@validators/account';
+import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountOwnershipRequestSchema, getAccountRequestSchema, getAccountSharesRequestSchema, putAccountOwnershipRequestSchema, putAccountSharesRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
@@ -134,6 +142,7 @@ export async function getAccount(req: Request, res: Response) {
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
+        'enableBankingConnectionKey',
         'nordigenRequisitionKey',
       ],
     },
@@ -142,12 +151,15 @@ export async function getAccount(req: Request, res: Response) {
     throw new NotFoundError('Account not found');
   }
 
-  const [openIncidentRequisitionIds, pendingSumsByAccount, [fx]] = await Promise.all([
-    loadOpenIncidentRequisitionIds(req.user),
+  const [syncIncidentContext, pendingSumsByAccount, [fx], accessByAccount, members] = await Promise.all([
+    loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount([account.accountKey]),
     describeAccountsFx([account], rateScope(req.tenant)),
+    loadAccountAccess(DI.em, [account.accountKey], accountActor(req)),
+    loadActiveMembers(DI.em, req.tenant.tenantKey),
   ]);
-  return res.json({ account: mapAccountSummary(account, { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx) });
+  const creditCard = await DI.em.findOne(CreditCardDetail, { accountKey: { accountKey: account.accountKey }, deletedAt: undefined });
+  return res.json({ account: mapAccountSummary(account, { ...syncIncidentContext, accessByAccount, members, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey }, fx, creditCard ? mapCreditCardDetail(creditCard) : null) });
 }
 
 export async function getAccountFinancialInstitutions(_req: Request, res: Response) {
@@ -184,18 +196,69 @@ export async function getAccounts(req: Request, res: Response) {
         'currencyKey',
         'accountOwnerAppuserKey',
         'accountOwnerAppuserKey.currencyKey',
+        'enableBankingConnectionKey',
         'nordigenRequisitionKey',
       ],
     },
   );
-  const [openIncidentRequisitionIds, pendingSumsByAccount, fx] = await Promise.all([
-    loadOpenIncidentRequisitionIds(req.user),
+  const [syncIncidentContext, pendingSumsByAccount, fx, accessByAccount, members] = await Promise.all([
+    loadSyncIncidentContext(req.user),
     loadPendingSumsByAccount(accounts.map((account) => account.accountKey)),
     describeAccountsFx(accounts, rateScope(req.tenant)),
+    loadAccountAccess(DI.em, accounts.map((account) => account.accountKey), accountActor(req)),
+    loadActiveMembers(DI.em, req.tenant.tenantKey),
   ]);
-  const syncContext = { now: new Date(), openIncidentRequisitionIds, pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
-  const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index]));
+  const positions = await DI.em.find(AppuserAccountPosition, { appuserKey: req.user });
+  const positionByAccount = new Map<number, number>();
+  for (const position of positions) {
+    const accountKey = relationAccountKey(position.accountKey);
+    if (accountKey != null) positionByAccount.set(accountKey, position.position);
+  }
+  // `sort` is stable, so the name order above survives among accounts with the same place.
+  // An account this member has not placed (a new one) sorts after every placed one.
+  accounts.sort((a, b) => (positionByAccount.get(a.accountKey) ?? Number.MAX_SAFE_INTEGER) - (positionByAccount.get(b.accountKey) ?? Number.MAX_SAFE_INTEGER));
+  const creditCards = await loadCreditCardDetailsByAccount(accounts.map((account) => account.accountKey));
+  const syncContext = { ...syncIncidentContext, accessByAccount, members, now: new Date(), pendingSumsByAccount, viewerAppuserKey: req.user.appuserKey };
+  const transformedData = accounts.map((account, index) => mapAccountSummary(account, syncContext, fx[index], creditCards.get(account.accountKey) ?? null));
   return res.json({ accounts: transformedData });
+}
+
+/**
+ * `PUT /v1/account/order`: this member's accounts in their new display order, each once. Every
+ * id must be an account they can see — another household's, or the other member's private one,
+ * is refused (400) rather than silently ordered. A closed account is skipped: it keeps no place
+ * and does not fail the request. Positions are per member, so a household's orders never collide.
+ */
+export async function reorderAccounts(req: Request, res: Response) {
+  const user = authedUser(req);
+  const {
+    body: { accountIds },
+  } = await zParse(reorderAccountsRequestSchema, req);
+
+  await DI.em.transactional(async (txEm) => {
+    const accounts = await txEm.find(Account, { accountKey: { $in: accountIds }, deletedAt: undefined });
+    const byKey = new Map(accounts.map((account) => [account.accountKey, account]));
+    if (accountIds.some((accountKey) => !byKey.has(accountKey))) {
+      throw new BadRequestError('Every account in the order must be one you can see');
+    }
+    const ordered = accountIds.flatMap((accountKey) => {
+      const account = byKey.get(accountKey);
+      return account && !account.closed ? [account] : [];
+    });
+    const existing = await txEm.find(AppuserAccountPosition, { appuserKey: user });
+    const existingByAccount = new Map<number, AppuserAccountPosition>();
+    for (const position of existing) {
+      const accountKey = relationAccountKey(position.accountKey);
+      if (accountKey != null) existingByAccount.set(accountKey, position);
+    }
+    ordered.forEach((account, index) => {
+      const position = existingByAccount.get(account.accountKey);
+      if (position) position.position = index;
+      else txEm.create(AppuserAccountPosition, { accountKey: account, appuserKey: user, position: index }, { partial: true });
+    });
+    await txEm.flush();
+  });
+  return res.sendStatus(200);
 }
 
 /** Read-only lookup so the web "Add account" form can populate a real type dropdown. */
@@ -233,6 +296,8 @@ export interface PendingSums {
 
 /** Context for the per-account stale-sync signal and available balance. */
 export interface AccountSyncContext {
+  /** Newest failure per requisition id, for the account's `syncStatus.lastError`. */
+  lastErrorByRequisitionId: Map<string, BankSyncLastError>;
   now: Date;
   /** requisitionIds that currently have an open (non-terminal, user-visible) sync incident. */
   openIncidentRequisitionIds: Set<string>;
@@ -240,6 +305,10 @@ export interface AccountSyncContext {
   pendingSumsByAccount?: Map<number, PendingSums>;
   /** The requesting member's appuserKey — drives per-account ownership flags. */
   viewerAppuserKey?: number;
+  /** The requesting member's access to each account (`account-access.ts`), for `myAccess`. */
+  accessByAccount?: Map<number, AccountAccess>;
+  /** The household's active members by key, for the account's attribution (`member-attribution.ts`). */
+  members?: ReadonlyMap<number, string>;
 }
 
 /**
@@ -256,7 +325,7 @@ function describeAccountsFx(accounts: Account[], scope: RateScope): Promise<FxDi
 }
 
 /** `fx` says how the balance was converted; without it the account reports no FX status. */
-export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext, fx: FxDisplay = UNKNOWN_FX) {
+export function mapAccountSummary(account: Account, syncContext?: AccountSyncContext, fx: FxDisplay = UNKNOWN_FX, creditCard: null | ReturnType<typeof mapCreditCardDetail> = null) {
   const currencyCode = resolveRequiredCurrencyCode(account.currencyKey.code, 'account');
   const ownerCurrencyCode = resolveRequiredCurrencyCode(
     account.accountOwnerAppuserKey?.currencyKey.code,
@@ -265,6 +334,7 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
   const institution = account.accountFinancialInstitutionKey;
   const source = account.nordigenRequisitionKey || account.accountId ? ('open_banking' as const) : ('manual' as const);
   const pending = syncContext?.pendingSumsByAccount?.get(account.accountKey);
+  const requisitionId = accountRequisitionId(account);
 
   return {
     accountFinancialInstitutionKey: institution
@@ -279,11 +349,14 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     // client can pick a glyph for an account with no institution logo. Null when none was set.
     accountOwnerAppuserKey: { currencyKey: { code: ownerCurrencyCode } },
     accountType: account.accountTypeKey?.description ?? null,
+    // The card's cycle and limit, or null for a non-card account. Drives the card settings and the
+    // statement summary on web and mobile.
     appuserCurrencyAvailableBalance:
       account.appuserCurrencyBalance == null && !pending ? null : computeAvailableBalance(account.appuserCurrencyBalance, [pending?.appuserSettlement]),
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,
     availableBalance: account.balance == null && !pending ? null : computeAvailableBalance(account.balance, [pending?.settlement]),
     balance: account.balance ?? null,
+    creditCard,
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
     currencyKey: { code: currencyCode },
@@ -295,12 +368,22 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
       syncContext?.viewerAppuserKey != null &&
       account.accountOwnerAppuserKey?.appuserKey === syncContext.viewerAppuserKey,
     isPrivate: account.isPrivate,
+    // The viewer's access ('owner', 'write' or 'read'), so a client hides what it cannot do. Without
+    // the loaded access a private account the viewer does not own reads as view-only.
+    myAccess: syncContext?.accessByAccount?.get(account.accountKey)
+      ?? (account.accountOwnerAppuserKey?.appuserKey === syncContext?.viewerAppuserKey ? 'owner' : account.isPrivate ? 'read' : 'write'),
+    // Whose money the account is for reporting: its owner, or Shared (null) when joint or when its
+    // owner has left the household. Not who can see it.
+    attribution: accountAttributionDto(account, syncContext?.members ?? new Map()),
+    isJoint: account.isJoint,
+    ownerAppuserKey: account.accountOwnerAppuserKey?.appuserKey ?? null,
     ownerFirstName: account.accountOwnerAppuserKey?.firstName ?? null,
     refreshedAt: account.refreshedAt?.toISOString() ?? null,
     source,
     syncStatus: syncContext
       ? computeSyncStatus({
-          hasOpenIncident: isAccountIncidentOpen(account, syncContext.openIncidentRequisitionIds),
+          hasOpenIncident: requisitionId ? syncContext.openIncidentRequisitionIds.has(requisitionId) : false,
+          lastError: requisitionId ? syncContext.lastErrorByRequisitionId.get(requisitionId) ?? null : null,
           lastSyncedAt: account.transactionsRefreshedAt ?? account.refreshedAt ?? null,
           now: syncContext.now,
           source,
@@ -309,9 +392,15 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
   };
 }
 
-function isAccountIncidentOpen(account: Account, openIncidentRequisitionIds: Set<string>): boolean {
-  const requisitionId = account.nordigenRequisitionKey?.requisitionId;
-  return requisitionId ? openIncidentRequisitionIds.has(requisitionId) : false;
+/**
+ * The provider-issued id incidents store for the account's connection: the legacy
+ * requisition id, or the Enable Banking session (falling back to the pre-link state).
+ */
+function accountRequisitionId(account: Account): string | undefined {
+  const legacy = (account.nordigenRequisitionKey as unknown as undefined | { requisitionId?: string })?.requisitionId;
+  if (legacy) return legacy;
+  const connection = account.enableBankingConnectionKey as unknown as undefined | { sessionId?: null | string; state?: string };
+  return connection?.sessionId ?? connection?.state;
 }
 
 /**
@@ -322,7 +411,7 @@ function isAccountIncidentOpen(account: Account, openIncidentRequisitionIds: Set
 export async function updateAccount(req: Request, res: Response, next: NextFunction) {
   const user = authedUser(req);
   const {
-    body: { accountName, isPrivate, openingBalance, openingBalanceDate },
+    body: { accountName, isJoint, isPrivate, openingBalance, openingBalanceDate },
     params: { accountId },
   } = await zParse(updateAccountRequestSchema, req);
   const account = await DI.em.findOne(Account, {
@@ -337,15 +426,20 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
     account.accountName = accountName;
   }
   if (isPrivate !== undefined) {
-    // Only the account owner controls its privacy (hiding it from
-    // other household members). Other members may rename a shared account but not
-    // change whether it's private.
+    // The account owner or the household owner controls whether it is private (hidden from the
+    // members it is not shared with). Other members may rename a shared account but not change
+    // who sees it. `PUT /v1/account/:accountId/shares` is the full control.
+    await setAccountPrivacy(DI.em, account, accountActor(req), isPrivate);
+  }
+  if (isJoint !== undefined) {
+    // Joint is the owner's to say, like privacy: it moves the account's money from them to Shared
+    // in every report and member filter (`member-attribution.ts`). It changes nobody's access.
     const ownerAppuserKey = (account.accountOwnerAppuserKey as unknown as undefined | { appuserKey: number })?.appuserKey;
     if (ownerAppuserKey !== user.appuserKey) {
-      next(new ForbiddenError('Only the account owner can change its privacy.', ERROR_CODE.ACCOUNT_OWNER_REQUIRED));
+      next(new ForbiddenError('Only the account owner can mark it as joint.', ERROR_CODE.ACCOUNT_OWNER_REQUIRED));
       return;
     }
-    account.isPrivate = isPrivate;
+    account.isJoint = isJoint;
   }
   const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
   if (opensDifferently) {
@@ -366,6 +460,46 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
   return res.status(200).json({ operationId });
 }
 
+/** `GET /v1/account/:accountId/shares`: who sees and who changes the account (404 when the caller cannot see it). */
+export async function getAccountSharesController(req: Request, res: Response) {
+  const {
+    params: { accountId },
+  } = await zParse(getAccountSharesRequestSchema, req);
+  return res.json(await getAccountShares(DI.em, accountId, accountActor(req)));
+}
+
+/**
+ * `PUT /v1/account/:accountId/shares`: replace who sees and who changes the account. Only the
+ * account owner or the household owner (403 `account_share_manager_required`).
+ */
+export async function putAccountSharesController(req: Request, res: Response) {
+  const {
+    body,
+    params: { accountId },
+  } = await zParse(putAccountSharesRequestSchema, req);
+  return res.json(await setAccountShares(DI.em, accountId, accountActor(req), body));
+}
+
+/** `GET /v1/account/:accountId/ownership`: each member's share of the account in net worth (404 when the caller cannot see it). */
+export async function getAccountOwnershipController(req: Request, res: Response) {
+  const {
+    params: { accountId },
+  } = await zParse(getAccountOwnershipRequestSchema, req);
+  return res.json(await getAccountOwnership(DI.em, accountId, accountActor(req)));
+}
+
+/**
+ * `PUT /v1/account/:accountId/ownership`: replace each member's share of the account, for net worth.
+ * Only the account owner or the household owner (403 `account_ownership_manager_required`).
+ */
+export async function putAccountOwnershipController(req: Request, res: Response) {
+  const {
+    body,
+    params: { accountId },
+  } = await zParse(putAccountOwnershipRequestSchema, req);
+  return res.json(await setAccountOwnership(DI.em, accountId, accountActor(req), body));
+}
+
 /**
  * `POST /v1/account/:accountId/recalculate`: queue a rebuild of the account's running balances and
  * answer the operation id to follow on `GET /v1/operations/:id` (202). The tenant filter finds the
@@ -384,24 +518,25 @@ export async function recalculateAccount(req: Request, res: Response) {
 }
 
 /**
+ * Card settings per account, for the account list and detail. One query for the whole list; an
+ * account with no row is simply not a card.
+ */
+async function loadCreditCardDetailsByAccount(accountKeys: number[]): Promise<Map<number, ReturnType<typeof mapCreditCardDetail>>> {
+  const cards = new Map<number, ReturnType<typeof mapCreditCardDetail>>();
+  if (accountKeys.length === 0) return cards;
+  const details = await DI.em.find(CreditCardDetail, { accountKey: { accountKey: { $in: accountKeys } }, deletedAt: undefined });
+  for (const detail of details) {
+    const accountKey = detail.accountKey.accountKey;
+    if (accountKey) cards.set(accountKey, mapCreditCardDetail(detail));
+  }
+  return cards;
+}
+
+/**
  * Sum of pending (unsettled) transaction amounts per account, for the available-balance display.
  * Empty map on any failure so available balance degrades to the current balance rather than
  * breaking the accounts list.
  */
-async function loadOpenIncidentRequisitionIds(appuserKey: Appuser): Promise<Set<string>> {
-  try {
-    const incidents = await DI.em.find(
-      BankSyncIncident,
-      { appuserKey, deletedAt: undefined, finality: BankSyncFinality.NON_TERMINAL, userVisible: true },
-      { fields: ['requisitionId'] },
-    );
-    return new Set(incidents.map((incident) => incident.requisitionId).filter((id): id is string => Boolean(id)));
-  } catch {
-    // Degrade to a recency-only staleness signal rather than breaking the accounts list.
-    return new Set();
-  }
-}
-
 async function loadPendingSumsByAccount(accountKeys: number[]): Promise<Map<number, PendingSums>> {
   const sums = new Map<number, PendingSums>();
   if (accountKeys.length === 0) return sums;
@@ -427,9 +562,45 @@ async function loadPendingSumsByAccount(accountKeys: number[]): Promise<Map<numb
   return sums;
 }
 
+/**
+ * The caller's sync incidents, reduced to the two signals the accounts list needs:
+ * which requisitions currently have an open incident, and the newest failure per
+ * requisition. Empty on any failure so staleness degrades to a recency-only signal
+ * rather than breaking the accounts list.
+ */
+async function loadSyncIncidentContext(appuserKey: Appuser): Promise<Pick<AccountSyncContext, 'lastErrorByRequisitionId' | 'openIncidentRequisitionIds'>> {
+  try {
+    const incidents = await DI.em.find(
+      BankSyncIncident,
+      { appuserKey, deletedAt: undefined },
+      { fields: ['errorCode', 'finality', 'requisitionId', 'updatedAt', 'userVisible'], orderBy: { updatedAt: QueryOrder.DESC } },
+    );
+    const openIncidentRequisitionIds = new Set<string>();
+    const lastErrorByRequisitionId = new Map<string, BankSyncLastError>();
+    for (const incident of incidents) {
+      if (!incident.requisitionId) continue;
+      if (incident.finality === BankSyncFinality.NON_TERMINAL && incident.userVisible === true) {
+        openIncidentRequisitionIds.add(incident.requisitionId);
+      }
+      if (incident.errorCode && !lastErrorByRequisitionId.has(incident.requisitionId)) {
+        lastErrorByRequisitionId.set(incident.requisitionId, { code: incident.errorCode, occurredAt: incident.updatedAt.toISOString() });
+      }
+    }
+    return { lastErrorByRequisitionId, openIncidentRequisitionIds };
+  } catch {
+    return { lastErrorByRequisitionId: new Map(), openIncidentRequisitionIds: new Set() };
+  }
+}
+
 function resolveRequiredCurrencyCode(code: string | undefined, relation: string): string {
   if (!code || !/^[A-Z]{3}$/.test(code)) {
     throw new InternalServerError(`Required ${relation} currency relation is unavailable`);
   }
   return code;
+}
+
+/** The account key of an `Account` relation that was not populated, read without loading the row. */
+function relationAccountKey(value: unknown): number | undefined {
+  const accountKey = (value as undefined | { accountKey?: unknown })?.accountKey;
+  return typeof accountKey === 'number' ? accountKey : undefined;
 }

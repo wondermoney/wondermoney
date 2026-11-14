@@ -23,6 +23,8 @@ EMAIL_FROM=money@example.com
 
 O define `RESEND_API_KEY` para usar Resend. Para probar sin un proveedor real, usa el Mailpit incluido: añade `mail` a `COMPOSE_PROFILES`, define `SMTP_HOST=mailpit` y `SMTP_PORT=1025`, ejecuta `docker compose up -d` y lee los correos en http://localhost:8025.
 
+Sin un proveedor configurado, la API escribe cada mensaje en su registro y el worker no envía recordatorios en segundo plano (recordatorios de pago de la tarjeta, caducidad de tokens de API). Los recordatorios de pago de la tarjeta salen unos días antes del vencimiento de un extracto: define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar la antelación (3 de forma predeterminada, un número entero de días).
+
 ## Almacenamiento de archivos
 
 Las importaciones CSV y las copias de recibos necesitan almacenamiento compatible con S3. Para usar el almacenamiento incluido ([SeaweedFS](https://github.com/seaweedfs/seaweedfs)), define estos valores en `.env` y ejecuta `docker compose up -d`:
@@ -36,11 +38,11 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-Las dos claves pasan a ser las credenciales del almacenamiento, que no arranca sin ellas. `S3_PUBLIC_ENDPOINT` es la dirección que usan los navegadores para llegar al almacenamiento; detrás de un proxy, dale su propio nombre con HTTPS que redirija al puerto 9000. Cualquier servicio compatible con S3 también funciona, como Cloudflare R2, Backblaze B2 o AWS S3.
+Las dos claves pasan a ser las credenciales del almacenamiento, que no arranca sin ellas. `S3_PUBLIC_ENDPOINT` es la dirección que usan los navegadores para llegar al almacenamiento; detrás de un proxy, dale su propio nombre con HTTPS que redirija al puerto 9000. Cualquier servicio compatible con S3 también funciona, como Cloudflare R2, Backblaze B2 o AWS S3. Los adjuntos de transacciones usan el mismo almacenamiento: sin él, la sección de adjuntos queda oculta y sus endpoints responden 503.
 
 ## Funciones de IA
 
-La lectura de recibos, el mapeo de columnas CSV, la categorización de transacciones, el resumen mensual y el asistente funcionan con cualquier endpoint compatible con OpenAI: OpenAI, OpenRouter, o un modelo ejecutado localmente con Ollama, LM Studio o vLLM.
+La lectura de recibos, el mapeo de columnas CSV, la importación de extractos en PDF, la categorización de transacciones, el resumen mensual y el asistente funcionan con cualquier endpoint compatible con OpenAI: OpenAI, OpenRouter, o un modelo ejecutado localmente con Ollama, LM Studio o vLLM.
 
 ```sh
 AI_BASE_URL=http://host.docker.internal:11434/v1
@@ -49,7 +51,28 @@ AI_MODEL=llama3.1
 
 Define `AI_API_KEY` cuando el endpoint necesite una clave. Para usar otro modelo en una función concreta, define `AI_MODEL_<FUNCIÓN>`; por ejemplo, la lectura de recibos necesita un modelo que lea imágenes, definido con `AI_MODEL_OCR`.
 
-Si el registro está abierto y pagas por el modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. Las cuentas creadas con correo y contraseña reciben entonces un enlace de verificación por correo, y tienen que seguirlo antes de poder usar el asistente, la lectura de recibos o el mapeo de columnas con IA. Las cuentas de Google y Apple cuentan como verificadas. Necesita el correo configurado.
+Para usar Anthropic con tu propia clave de API, elígela explícitamente:
+
+```sh
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+AI_MODEL=claude-sonnet-4-5
+```
+
+`AI_MODEL`, o `AI_MODEL_<FUNCIÓN>` para una función, es obligatorio: no hay modelo predeterminado. La lectura de recibos necesita un modelo que lea imágenes, así que define `AI_MODEL_OCR` si tu modelo predeterminado no lo hace. Anthropic tiene prioridad sobre `AI_BASE_URL`, pero una configuración completa de Azure sigue teniendo precedencia.
+
+La [importación de extractos en PDF](/es/docs/accounts-transactions/import-pdf-statements) envía cada página del extracto al modelo como imagen, así que necesita un modelo que lea imágenes. En un endpoint compatible con OpenAI queda desactivada hasta que indiques uno con `AI_MODEL_STATEMENT_IMPORT`; `AI_MODEL` no se usa para ella, porque un modelo local predeterminado a menudo solo lee texto. En Anthropic usa `AI_MODEL_STATEMENT_IMPORT`, o `AI_MODEL` cuando está vacío. La aplicación le dice a la persona cuál es el proveedor antes de enviar ninguna página: Anthropic o Azure OpenAI por su nombre, un endpoint compatible con OpenAI como el proveedor de IA configurado en el servidor. La dirección del endpoint nunca se muestra, y `GET /v1/instance` indica solo el tipo de proveedor.
+
+| Ajuste | Qué hace |
+|---|---|
+| `AI_MODEL_STATEMENT_IMPORT` | El modelo que lee los extractos en PDF. Obligatorio en un endpoint compatible con OpenAI |
+| `AI_DAILY_LIMIT_STATEMENT_IMPORT` | Extractos en PDF que un hogar puede importar al día; cada extracto cuenta como uno, tenga las páginas que tenga. Vacío significa sin límite |
+| `STATEMENT_IMPORT_MAX_BYTES` | El PDF más grande que se acepta, en bytes. Por defecto `10485760` (10 MB) |
+| `STATEMENT_IMPORT_MAX_PAGES` | El máximo de páginas de un extracto. Cada página es una petición al modelo, así que también limita lo que cuesta un extracto. Por defecto `20` |
+
+Define los dos límites en la API y en el worker; un valor que no sea un número entero positivo impide que arranquen.
+
+Si el registro está abierto y pagas por el modelo, define `AI_REQUIRES_VERIFIED_EMAIL=true`. Las cuentas creadas con correo y contraseña reciben entonces un enlace de verificación por correo, y tienen que seguirlo antes de poder usar el asistente, la lectura de recibos, el mapeo de columnas con IA o la importación de extractos en PDF. Las cuentas de Google y Apple cuentan como verificadas. Necesita el correo configurado.
 
 Para limitar lo que cada hogar puede gastar en el modelo al día, define `AI_DAILY_LIMIT_ASSISTANT` (mensajes al asistente), `AI_DAILY_LIMIT_OCR` (lecturas de recibos) y `AI_DAILY_LIMIT_CSV_MAPPING` (importaciones CSV que mapea el modelo). Los miembros de un hogar comparten el límite, que se reinicia a medianoche UTC. Déjalos vacíos para no tener límite. Cuando un hogar llega a un límite, la aplicación lo indica hasta el día siguiente; las importaciones CSV siguen funcionando, con las columnas mapeadas a mano.
 
@@ -57,13 +80,129 @@ Para limitar lo que cada hogar puede gastar en el modelo al día, define `AI_DAI
 
 Define `EODHD_API_KEY` para activar la búsqueda de tickers, las cotizaciones en tiempo real y el módulo de Mercados Financieros.
 
+`MARKET_DATA_PROVIDERS` indica los proveedores de datos de mercado a consultar, en orden, separados por comas. Vacío significa solo `eodhd`. Cuando un proveedor falla o no tiene nada para un valor, se consulta el siguiente de la lista, y una función que ningún proveedor de la lista ofrece queda oculta. Un proveedor desconocido o repetido impide que la API y el worker arranquen. Defínelo en ambos.
+
+| Proveedor | Qué ofrece | Necesita |
+|---|---|---|
+| `eodhd` | Búsqueda, últimas cotizaciones, histórico diario, dividendos y splits, en la mayoría de las bolsas | `EODHD_API_KEY` |
+| `stooq` | El último cierre diario y el histórico diario de valores cotizados en EE. UU., Londres, Xetra y Tokio, y de los principales índices de EE. UU. Sin búsqueda, dividendos ni splits | Nada |
+| `coingecko` | Búsqueda de criptomonedas, últimas cotizaciones y hasta un año de histórico diario, para pares escritos como `BTC-USD` | Nada |
+
+`MARKET_DATA_PROVIDERS=eodhd,stooq,coingecko` consulta primero EODHD y los proveedores gratuitos cuando esta no puede responder. `MARKET_DATA_PROVIDERS=stooq,coingecko` cotiza las posiciones sin clave de EODHD; los valores solo se encuentran entonces con la búsqueda de criptomonedas de CoinGecko, así que las acciones tienen que estar ya en tu catálogo.
+
+Stooq y CoinGecko son servicios externos con sus propias condiciones de uso, y siguen desactivados hasta que los incluyas en la lista. Lee sus condiciones antes de hacerlo: eres responsable de cumplirlas, incluidos los límites de peticiones y de uso comercial que tengan. El servicio alojado de WonderMoney no los usa.
+
+Cada cotización guardada registra el proveedor del que vino. El histórico de cotizaciones de una posición lo muestra, y los administradores ven los proveedores y las cotizaciones recientes de cada uno en `GET /v1/admin/market-data/sources`.
+
+## Monederos de criptomonedas
+
+Los [monederos de criptomonedas](/es/docs/portfolio-investments/crypto-wallets) valoran los bitcoin y ether que tus usuarios guardan en direcciones públicas. Están desactivados por defecto: no se contacta con ningún explorador, y las aplicaciones no los ofrecen. Cada red se activa cuando indicas el explorador de bloques del que el servidor lee sus saldos.
+
+| Ajuste | Qué admite |
+|---|---|
+| `CRYPTO_BTC_EXPLORER_URL` | La raíz REST de una API compatible con mempool.space o Esplora, por ejemplo `https://mempool.example.org/api`. El servidor pide `<url>/address/<address>` para cada dirección de Bitcoin, incluida cada una derivada de una clave pública extendida |
+| `CRYPTO_ETH_EXPLORER_URL` | La raíz de una instancia de Blockscout, por ejemplo `https://blockscout.example.org`. El servidor pide `<url>/api/v2/addresses/<address>` y `<url>/api/v2/addresses/<address>/token-balances` para cada dirección de Ethereum |
+
+Cada uno tiene que ser una dirección `https` sin nombre de usuario, contraseña, query ni fragmento; cualquier otra cosa impide que la API y el worker arranquen. Defínelos en ambos. La API solo ofrece monederos para las redes que tienen explorador, y `GET /v1/instance` las indica en `features.cryptoWalletChains`. El worker sincroniza todos los monederos una vez al día a las 04:30 UTC, y de nuevo cuando un miembro crea un monedero, añade una dirección, marca un token o elige Sincronizar ahora. Hace una petición cada vez a cada explorador, espaciadas, con un tiempo límite de 15 segundos, y lo intenta hasta tres veces tras un tiempo agotado, un error del servidor o un `429` (esperando lo que pida `Retry-After`, hasta 30 segundos).
+
+El explorador ve cada dirección por la que se le pregunta y la dirección IP de tu servidor, y como un mismo servidor pregunta por todas las direcciones de un hogar, puede relacionarlas entre sí. No se envía nada más: ni nombres, ni importes, ni identificadores de usuarios. La opción privada es un nodo propio de Bitcoin o Ethereum con un explorador delante: [mempool](https://github.com/mempool/mempool) o [Esplora](https://github.com/Blockstream/esplora) para Bitcoin, [Blockscout](https://github.com/blockscout/blockscout) para Ethereum. Hay instancias públicas, como `https://mempool.space/api` y `https://eth.blockscout.com`. Son servicios externos con sus propias condiciones de uso y límites de peticiones: usar una es decisión tuya, cumplir sus condiciones es responsabilidad tuya, y tu política de privacidad debe indicar que las direcciones de tus usuarios se le envían. El servicio alojado de WonderMoney no activa los monederos de criptomonedas.
+
+Los precios vienen de los proveedores de `MARKET_DATA_PROVIDERS` ([Datos de mercado](#datos-de-mercado)): cada token se busca por su símbolo frente al dólar estadounidense, como `<SYMBOL>-USD.CC`. EODHD y CoinGecko cotizan criptomonedas. Sin un proveedor que lo haga, los monederos muestran sus saldos pero no tienen valor. Los tokens ERC-20 se cotizan por su símbolo, así que un token puede hacerse pasar por otro; los miembros marcan los tokens que quieren contar, y la aplicación les indica que marquen solo los que reconozcan.
+
+## Logotipos de comercios
+
+Los logotipos de comercios están desactivados por defecto. Cada comercio muestra entonces la primera letra de su nombre en un círculo de color, y nada sobre los comercios de tus usuarios sale del servidor.
+
+Define `MERCHANT_LOGO_URL_TEMPLATE` con la dirección de un servicio de logotipos, con `{domain}` donde va el dominio del sitio web del comercio, por ejemplo `https://logos.example.com/{domain}.png`. Debe ser una dirección `https`, y `{domain}` debe ir después del host; cualquier otro valor impide que la API arranque. Defínelo en la API.
+
+Cuando un miembro añade un sitio web a un comercio, la API pide al servicio el logotipo de ese dominio, lo guarda un día (un dominio sin logotipo, una hora) y lo sirve a las aplicaciones web y móvil desde tu propio servidor. El servicio ve la dirección de tu servidor y el dominio del comercio, como `example.com`. Nunca ve las direcciones, los navegadores, las cuentas ni las transacciones de tus usuarios, y las aplicaciones nunca lo contactan. Elige un servicio cuyas condiciones aceptes para ello, e indícalo en tu política de privacidad.
+
+Una dirección de logotipo que un miembro escriba él mismo tiene prioridad sobre la plantilla. Las aplicaciones cargan esa imagen directamente desde la dirección que eligió el miembro, sin referente, así que ese sitio ve la dirección de cada miembro del hogar que la ve. Solo se aceptan direcciones `https` con un nombre de host.
+
+## Notificaciones push
+
+Las notificaciones push están desactivadas por defecto. Define `PUSH_ENABLED=true` en la API y en el worker para que la aplicación móvil pueda registrar teléfonos y recibir notificaciones a través del servicio de push de Expo: alertas de presupuesto, recordatorios de pago de la tarjeta, alertas de conexiones bancarias y una notificación de prueba. Cada categoría queda desactivada hasta que la persona la activa en la aplicación, y solo entonces el teléfono pide permiso.
+
+El texto dice qué ha pasado, nunca cuánto: "Tu presupuesto Supermercado ha superado lo previsto" o "Un pago de tarjeta vence dentro de 3 días". Los importes, saldos y comercios se quedan en la aplicación. Expo recibe el token de push de cada teléfono registrado, el título y el texto de la notificación y la pantalla de la aplicación que abre.
+
+Si el proyecto de Expo con el que se compiló la aplicación exige un token de acceso en las peticiones de push, define `EXPO_ACCESS_TOKEN` en la API y en el worker. Las versiones de la aplicación que tu servidor puede alcanzar dependen de ese proyecto; consulta [Notificaciones push](/es/docs/self-hosting/mobile-app#notificaciones-push).
+
 ## Sincronización bancaria
 
-La sincronización bancaria no necesita configuración en el servidor. Cada persona añade su propia clave de aplicación de Enable Banking en la Configuración, así que las credenciales bancarias nunca se comparten entre usuarios.
+La sincronización con bancos europeos no necesita configuración en el servidor. Cada persona añade su propia clave de aplicación de Enable Banking en la Configuración, así que las credenciales bancarias nunca se comparten entre usuarios.
+
+`BANK_PROVIDERS` lista los proveedores bancarios que ofrece tu instancia, separados por comas. Sin definir o vacía significa todos los proveedores incluidos salvo los opcionales, que hoy es solo `enable_banking`. Defínela en la API y en el worker.
+
+| Proveedor | Qué conecta | Necesita |
+|---|---|---|
+| `enable_banking` | Bancos de Europa, a través de la aplicación de Enable Banking de cada persona o la del servidor | Nada en el servidor, o una aplicación de Enable Banking para todo el servidor ([abajo](#una-aplicación-de-enable-banking-para-el-servidor)). Activado, salvo que `BANK_PROVIDERS` lo deje fuera |
+| `simplefin` | Bancos de Estados Unidos y Canadá, a través de SimpleFIN Bridge, un servicio de pago que cada persona contrata | Opcional: desactivado hasta que se incluye en la lista, como en `BANK_PROVIDERS=enable_banking,simplefin`. Consulta [SimpleFIN](/es/docs/self-hosting/simplefin) |
+
+Un identificador que esta versión no tenga se ignora, así que `BANK_PROVIDERS=none` desactiva la sincronización bancaria. `GET /v1/instance` indica los proveedores activados en `features.bankSyncProviders`, y las aplicaciones solo ofrecen esos.
+
+| Ajuste | Qué hace |
+|---|---|
+| `SIMPLEFIN_BRIDGE_HOSTS` | Los hosts a los que el servidor puede llamar para SimpleFIN, separados por comas. Vacío significa SimpleFIN Bridge, `bridge.simplefin.org` y `beta-bridge.simplefin.org`. Defínelo solo para otro servidor que hable el protocolo SimpleFIN; sustituye la lista por defecto. Cada dirección de SimpleFIN tiene que ser `https` en el puerto 443, estar en uno de estos hosts y resolver solo a direcciones públicas ([SimpleFIN](/es/docs/self-hosting/simplefin#privacidad-y-seguridad)). Defínelo en la API y en el worker |
+
+El worker sincroniza cada conexión bancaria como máximo una vez cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por defecto. Según la PSD2, un banco puede limitar el acceso no asistido a cuatro llamadas al día por cuenta, así que defínela en `6` o más para mantenerte dentro de ese límite. SimpleFIN Bridge espera unas 24 peticiones al día o menos por conexión, así que no la bajes mucho si ofreces SimpleFIN. Una sincronización fallida espera el mismo intervalo antes del siguiente intento. Defínela en el worker; un valor que no sea un número positivo impide que el worker arranque.
+
+### Una aplicación de Enable Banking para el servidor
+
+Para que tu hogar pueda conectar bancos sin que cada persona registre una aplicación, registra tú una en Enable Banking y dale al servidor su ID de aplicación y su clave privada:
+
+| Ajuste | Qué hace |
+|---|---|
+| `ENABLE_BANKING_APP_ID` | El ID de la aplicación. Activa la aplicación del servidor junto con el archivo de la clave |
+| `ENABLE_BANKING_PRIVATE_KEY_FILE` | La clave privada de la aplicación (el archivo `.pem` que generaste al registrarla, no su certificado). Con Docker Compose, su ruta en el servidor, como `./enable-banking.pem` junto a `docker-compose.yml`: la API y el worker la leen como un secreto de Docker. En otros casos, la ruta desde la que la API y el worker la leen |
+| `ENABLE_BANKING_PRODUCTION_CONTRACT` | `true` levanta el límite de un hogar que se describe abajo. Defínelo solo cuando Enable Banking te haya dado un contrato de producción completo |
+
+Los contenedores se ejecutan como el usuario `1000`, así que ese usuario tiene que poder leer el archivo de la clave: `chmod 644 enable-banking.pem` o `chown 1000 enable-banking.pem`. En Kubernetes, guarda la clave en un Secret e indícalo en `enableBanking.privateKeySecret` en los valores del chart. Define los tres en la API y en el worker.
+
+Ambos comprueban la clave al arrancar: un archivo que no pueden leer, o que no sea una clave privada RSA, les impide arrancar con un error que nombra el archivo. La clave nunca se registra en los logs, no se guarda en la base de datos ni se envía a las aplicaciones. `GET /v1/instance` indica `features.bankSyncCredentials: "instance"` (`"user"` sin ella), y las aplicaciones web y móvil se saltan el paso "añade tu clave" para todos los que cubre la aplicación.
+
+Quien añada su propia clave en la Configuración sigue conectando bancos con la suya. Cada conexión conserva la aplicación con la que se hizo: si quitas o sustituyes la aplicación del servidor, las conexiones hechas con ella dejan de sincronizarse y sus dueños vuelven a conectarse.
+
+### El límite de la licencia: un hogar
+
+Una aplicación nueva de Enable Banking funciona en modo Restricted Production, en el que solo puede conectar las cuentas de quien la registró. Sin un contrato de producción completo, la aplicación del servidor sirve por tanto a un hogar:
+
+- Mientras el servidor tenga un único hogar, todos sus miembros pueden conectar bancos con ella.
+- El primer hogar que conecta un banco con ella la conserva, para conexiones nuevas y para volver a conectarse, aunque otros hogares se registren después. Sus conexiones siguen sincronizándose.
+- Los demás hogares ven el paso habitual "añade tu propia clave", con una línea que explica que la conexión compartida del servidor solo sirve a un hogar.
+- Si un segundo hogar se registra antes de que nadie conecte un banco, ningún hogar recibe la aplicación del servidor hasta que definas `ENABLE_BANKING_PRODUCTION_CONTRACT=true`.
+
+La cuenta de demostración nunca cuenta. La propia Enable Banking también aplica el límite: en modo Restricted Production, rechaza cuentas que no sean del dueño de la aplicación, incluidas las de las demás personas de su hogar. Comprueba en el Control Panel de Enable Banking a qué cuentas puede acceder tu aplicación.
 
 ## Inicio de sesión con Google
 
 Define `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (de un cliente OAuth en Google Cloud, con `<API_URL>/api/auth/callback/google` como URI de redirección autorizado) para mostrar "Continuar con Google" en las páginas de inicio de sesión y de registro. Sin ambos, el botón queda oculto.
+
+## Inicio de sesión único (OIDC)
+
+Inicia sesión a través de tu propio proveedor de identidad, como Authentik o Keycloak: las páginas de inicio de sesión y de registro, en la web y en la aplicación móvil, muestran entonces `Iniciar sesión con <nombre>`. [Inicio de sesión único](/es/docs/self-hosting/single-sign-on) explica cómo configurar el proveedor.
+
+| Ajuste | Qué hace |
+|---|---|
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | La URL del emisor del proveedor (HTTPS) y el cliente que registraste allí, con `<API_URL>/api/auth/callback/oidc` como URI de redirección. Los tres activan el inicio de sesión único juntos; cualquier otro ajuste `OIDC_` sin ellos impide que la API arranque |
+| `OIDC_DISPLAY_NAME` | El nombre del botón. Por defecto, `SSO` |
+| `OIDC_SCOPES` | Los ámbitos que se piden, separados por espacios; debe incluir `openid`. Por defecto, `openid email profile` |
+| `OIDC_GROUPS_CLAIM` | La claim que lista los grupos de la persona. Por defecto, `groups` |
+| `OIDC_ALLOWED_GROUPS` | Grupos separados por comas. Si se define, solo sus miembros (y los miembros de los grupos de administración) pueden iniciar sesión |
+| `OIDC_ADMIN_GROUPS` | Grupos separados por comas cuyos miembros son administradores de la instancia. Se comprueba en cada inicio de sesión, así que salir del grupo retira la administración |
+| `OIDC_AUTO_SIGNUP` | `true` crea la cuenta en el primer inicio de sesión a través del proveedor aunque `SIGNUP_MODE` sea `invite` o `closed`. El registro con contraseña sigue a `SIGNUP_MODE` |
+| `OIDC_ONLY` | `true` desactiva el inicio de sesión, el registro y el restablecimiento con contraseña, y los oculta en las aplicaciones. Las llaves de acceso siguen funcionando |
+| `OIDC_TRUST_IDP_MFA` | `true` omite el código del autenticador de WonderMoney tras un inicio de sesión a través del proveedor. Defínelo solo si el propio proveedor exige un segundo factor |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL` | `true` acepta una dirección de correo que el proveedor no ha verificado. Desactivado por defecto; una cuenta así nunca se vincula a una existente |
+
+`GET /v1/instance` indica `features.oidc: { "name": "<OIDC_DISPLAY_NAME>" }` y, con `OIDC_ONLY`, `features.passwordSignIn: false`.
+
+## Llaves de acceso
+
+Las llaves de acceso (passkeys) no necesitan ninguna variable de entorno. Pertenecen al dominio de `APP_URL`, la dirección de la aplicación web, y el navegador solo las ofrece en ese dominio. Funciona igual tanto si la aplicación web y la API comparten un dominio como si usan dos, como `money.example.com` y `api.money.example.com`.
+
+Los navegadores solo permiten llaves de acceso por HTTPS, o en `http://localhost`. Una dirección IP como `http://192.168.1.10:3000` no funciona: da a la aplicación web un dominio con HTTPS (consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)).
+
+Si la aplicación web pasa a otro dominio, las llaves de acceso existentes dejan de funcionar y tus usuarios tienen que volver a añadirlas. Sus contraseñas siguen funcionando. `GET /v1/instance` informa de `features.passkey: true`.
 
 ## Tu instancia
 
@@ -71,11 +210,43 @@ Define `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` (de un cliente OAuth en Googl
 |---|---|
 | `INSTANCE_NAME` | El nombre de tu instancia. La aplicación web lo muestra en los títulos de las pestañas del navegador, en las vistas previas de enlaces y en las páginas de inicio de sesión y registro, y en lugar del logotipo de WonderMoney cuando lo cambias. Cada correo lo usa en el asunto, el texto y la firma, y como nombre del remitente si `EMAIL_FROM_NAME` no está definido; las aplicaciones de autenticación lo muestran como etiqueta. La aplicación web lo lee de la API, así que defínelo solo en la API; un cambio aparece en la aplicación web en un máximo de cinco minutos |
 | `SIGNUP_MODE` | `open`, `invite` o `closed` (consulta [Instalar](/es/docs/self-hosting/install)) |
+| `HOUSEHOLD_MAX_MEMBERS` | El número máximo de personas en un hogar, incluido el titular. Una invitación pendiente ocupa una plaza hasta que se acepta, se revoca o caduca. Por defecto `6`; un número entero positivo. Configúralo en la API; un valor que no sea un número entero positivo impide que arranque |
 | `SUPPORT_EMAIL` | El buzón del formulario de contacto, de las alertas de cuenta y de los comentarios desde la aplicación, y la dirección de soporte que muestra la aplicación; déjalo vacío para desactivarlos y ocultar los enlaces de soporte. El formulario "Compartir comentarios" también necesita el correo configurado; sin él, el formulario se oculta |
 | `SPONSOR_URL` | Una página donde tus usuarios pueden contribuir a mantener la instancia (Open Collective, GitHub Sponsors, ...). Las preguntas frecuentes de la aplicación web la enlazan cuando está definida |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Tus páginas legales, enlazadas desde la página de registro cuando ambas están definidas |
 | `PRIVACY_POLICY_URL` | Tu política de privacidad, enlazada desde el pie de los correos. `{lang}` se sustituye por el idioma del destinatario (`en` o `pt`), por ejemplo `https://example.com/{lang}/privacy`. Por defecto, apunta a los ajustes de privacidad de la aplicación |
+| `MCP_ENABLED` | El servidor MCP de solo lectura en `POST /v1/mcp`, que permite a un cliente de IA preguntar por las finanzas del propio usuario con un token de API personal con `mcp:read` (consulta [Conectar un cliente de IA](/es/docs/settings-security-privacy/connect-ai-client)). Activado por defecto; define `false` para responder `404` e informar de `features.mcp: false` en `GET /v1/instance` |
+| `DEMO_SIGN_IN_ENABLED` | `true` activa una demostración pública de solo lectura: un botón **Probar la demo** que inicia la sesión de cualquier persona en una cuenta de demostración compartida. Desactivado por defecto; consulta [Demostración pública](#demostración-pública) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | La diferencia aceptada entre los dos lados de una transferencia entre cuentas en monedas distintas, después de convertir el importe que salió al tipo de cambio de ese día, como fracción del importe que llegó: `0.02` (por defecto) es un 2 por ciento. Súbela si el margen de cambio y las comisiones de tu banco son mayores; como máximo `0.25`. Configúrala en la API y en el worker |
+
+## Demostración pública
+
+Si tu instancia activa la demostración, la gente puede probar WonderMoney sin crear una cuenta. Define `DEMO_SIGN_IN_ENABLED=true` en la API: la página de inicio de sesión, en la web y en la app móvil, muestra entonces **Probar la demo**, que inicia la sesión del visitante en un hogar de demostración compartido, sin contraseña, y `GET /v1/instance` informa de `features.demo: true`. Con el ajuste desactivado, `POST /v1/auth/demo` responde `404` y el botón no aparece.
+
+Todos los visitantes comparten la demostración, así que es de solo lectura:
+
+- Cualquier cambio se rechaza con el mensaje de solo lectura: los datos del hogar y la propia cuenta (nombre, correo, contraseña, autenticador, llaves de acceso y cerrar la sesión de otros visitantes).
+- Una sesión de demostración termina dos horas después de empezar. Los inicios de sesión en la demostración tienen un límite por dirección IP, como los inicios de sesión con contraseña.
+- Una franja en todas las pantallas dice que los datos son una demostración compartida que se restablece cada día, con enlaces para crear una cuenta (solo cuando `SIGNUP_MODE` es `open`) y a estas guías de alojamiento propio.
+- La cuenta de demostración no tiene contraseña ni autenticador. El inicio de sesión en la demostración rechaza una cuenta con autenticador y nunca inicia la sesión en otra cuenta.
+
+Crea la cuenta de demostración y su hogar antes de activar el ajuste:
+
+```sh
+docker compose exec api node dist/database/scripts/seed-demo-household.js
+```
+
+En Kubernetes, ejecuta el mismo comando en el pod de la API. Solo escribe la cuenta de demostración (`demo@wonder.money`) y su hogar, no toca ninguna otra cuenta y se puede ejecutar de nuevo; vuelve a ejecutarlo para dejar la demostración como estaba. Se niega, sin cambiar nada, cuando esa dirección pertenece a una cuenta que no es la de demostración. En un servidor sin datos de mercado, también da un historial de precios a las seis acciones de la demostración, pero solo a una acción que no tenga ningún precio.
+
+Ajustes recomendados para una instancia de demostración:
+
+| Ajuste | Recomendado | Por qué |
+|---|---|---|
+| `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE` | Vacíos | Los visitantes son desconocidos: no se debe registrar nada sobre ellos (consulta [Analítica](#analítica)) |
+| IA (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Vacíos, o limitados con `AI_DAILY_LIMIT_*` | La cuenta de demostración no puede usar el asistente, la lectura de recibos ni el mapeo de columnas con IA, porque todos guardan algo. Con la IA desactivada, la app los oculta. Todos los visitantes comparten un hogar, así que los límites diarios también se comparten |
+| `BANK_PROVIDERS` | `none` | Oculta la sincronización bancaria. La cuenta de demostración tampoco puede conectar un banco |
+| `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Adelanta las transacciones de la demostración cada día a las 01:15 UTC, para que sigan siendo recientes |
+| `SIGNUP_MODE` | `closed` en un servidor solo de demostración, `open` para que los visitantes puedan crear una cuenta | La franja solo enlaza a crear una cuenta cuando es `open` |
 
 ## Analítica
 
@@ -97,13 +268,21 @@ No se envía nada al proyecto WonderMoney. Cada servicio externo que tu instanci
 |---|---|---|
 | Banco Central Europeo | El worker, una vez al día, para descargar los tipos de cambio del euro. No envía datos sobre ti ni sobre tus usuarios | Siempre activo |
 | Correo (tu servidor SMTP o Resend) | La API y el worker, para enviar restablecimientos de contraseña, invitaciones y notificaciones | `SMTP_HOST` o `RESEND_API_KEY` |
-| IA (tu endpoint compatible con OpenAI) | La API y el worker, con el recibo, las columnas del CSV, las transacciones o los mensajes de chat que necesita la función | `AI_BASE_URL` y `AI_MODEL` |
+| IA (tu endpoint compatible con OpenAI o Anthropic) | La API y el worker, con el recibo, las columnas del CSV, las páginas del extracto, las transacciones o los mensajes de chat que necesita la función | `AI_BASE_URL` y `AI_MODEL`, o `AI_PROVIDER=anthropic`, `ANTHROPIC_API_KEY` y `AI_MODEL` |
 | Datos de mercado (EODHD) | La API y el worker, con símbolos bursátiles, no datos de usuarios | `EODHD_API_KEY` |
+| Datos de mercado (Stooq) | La API y el worker, con símbolos bursátiles, no datos de usuarios | `stooq` en `MARKET_DATA_PROVIDERS` |
+| Datos de mercado (CoinGecko) | La API y el worker, con símbolos de monedas y texto de búsqueda, no datos de usuarios | `coingecko` en `MARKET_DATA_PROVIDERS` |
+| Monederos de criptomonedas (los exploradores de bloques que elijas) | El worker, con las direcciones públicas de los monederos de criptomonedas de tus usuarios, sin nombres ni importes ([Monederos de criptomonedas](#monederos-de-criptomonedas)) | `CRYPTO_BTC_EXPLORER_URL`, `CRYPTO_ETH_EXPLORER_URL` |
+| Logotipos de comercios (el servicio que elijas) | La API, con el dominio del sitio web de un comercio, no datos de usuarios ([Logotipos de comercios](#logotipos-de-comercios)) | `MERCHANT_LOGO_URL_TEMPLATE` |
+| Notificaciones push (servicio de push de Expo) | La API y el worker, con el token de push de cada teléfono registrado y el texto de la notificación, que nunca incluye importes ni comercios ([Notificaciones push](#notificaciones-push)) | `PUSH_ENABLED=true` |
 | Almacenamiento de archivos (tu almacenamiento compatible con S3) | La API y los navegadores, para importaciones de CSV y copias de recibos | `S3_ENDPOINT` y `S3_BUCKET` |
+| Copias de seguridad fuera del servidor (tu destino de rclone) | El servicio `backup-offsite`, una vez al día, con las copias de la base de datos y de los archivos | El perfil `backup-offsite` y `BACKUP_DESTINATION` ([Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup#copias-fuera-del-servidor)) |
 | Registro de errores (Sentry) | La API, el worker y la aplicación web, con informes de errores | `SENTRY_DSN` (API y worker), `NEXT_PUBLIC_SENTRY_DSN` (aplicación web) |
 | Analítica (Google Tag Manager, PostHog) | Consulta [Analítica](#analítica) | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_POSTHOG_KEY`, `ANALYTICS_OUTBOX_MODE=live` |
-| Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Ajustes |
+| Sincronización bancaria (Enable Banking) | La API y el worker, para los usuarios que conectan un banco | La clave de Enable Banking de cada usuario, añadida en Ajustes, o la aplicación del servidor (`ENABLE_BANKING_APP_ID`) |
+| Sincronización bancaria (SimpleFIN) | La API, para canjear el token de configuración de un usuario, y el worker, para sincronizar, en SimpleFIN Bridge o en los hosts de `SIMPLEFIN_BRIDGE_HOSTS`. Desactivada por defecto | `simplefin` en `BANK_PROVIDERS`, y después el token de configuración de cada usuario |
 | Inicio de sesión con Google | Los navegadores y la API, cuando un usuario elige "Continuar con Google" | `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` |
+| Tu proveedor de identidad (OIDC) | Los navegadores y la API, cuando un usuario elige `Iniciar sesión con <nombre>`. La API obtiene el documento de descubrimiento y las claves del proveedor, e intercambia el código de inicio de sesión | `OIDC_ISSUER`, `OIDC_CLIENT_ID` y `OIDC_CLIENT_SECRET` |
 | reCAPTCHA | Los navegadores en el formulario de contacto, y la aplicación web para comprobar la respuesta | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` y `RECAPTCHA_SECRET_KEY` |
 
-Los navegadores también cargan los logotipos de bancos y bolsas desde las direcciones guardadas en el catálogo de bancos y activos. La aplicación móvil no envía analítica ni informes de errores mientras está conectada a tu servidor.
+Los navegadores también cargan los logotipos de bancos y bolsas desde las direcciones guardadas en el catálogo de bancos y activos, y el logotipo de un comercio desde la dirección que un miembro escribió para él. La aplicación móvil no envía analítica ni informes de errores mientras está conectada a tu servidor.

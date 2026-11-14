@@ -1,7 +1,19 @@
 import { DI } from '@app/database/di';
 import { Portfolio } from '@entity/Portfolio';
+import { accountAttributionOf, loadActiveMembers, matchesMemberFilter, parseMemberFilter } from '@service/household/member-attribution';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
-import { findSnapshotPointOnOrBefore, loadCashFlowsInViewerCurrency, measurePortfolioPeriod, type PeriodEnd, periodFlowsSince } from '@service/portfolio/portfolio-period-performance';
+import {
+  findSnapshotPointOnOrBefore,
+  loadCashFlowsInViewerCurrency,
+  loadPortfolioSnapshotValues,
+  measurePortfolioPeriod,
+  type PeriodEnd,
+  periodFlowsSince,
+  periodReturnSeries,
+  periodReturnsOf,
+  snapshotSeriesInViewerCurrency,
+  utcDay,
+} from '@service/portfolio/portfolio-period-performance';
 
 import { toCsv } from './csv';
 import type { ReportServiceInput } from './report-filters';
@@ -21,6 +33,12 @@ import type { ReportServiceInput } from './report-filters';
  *   one has no rate into the user's currency.
  * - `change`: what the market did, `endValue - startValue - netContributions`; null when any of them is.
  * - `changePercent`: `change` as a % of `startValue + netContributions`, when that is positive.
+ * - `timeWeightedReturn`: how the investments did (%), each day's return chained, so money put in
+ *   or taken out does not move it; dividends count as return. Null when a value or flow is unknown.
+ * - `moneyWeightedReturn`: how the investor did (%), the XIRR of the start value, the flows and the
+ *   end value; yearly when `moneyWeightedReturnAnnualized` (a period of a year or more), otherwise
+ *   over the period itself.
+ * - `missingSnapshotDates`: days in the period with no snapshot, whose value was carried over.
  */
 export interface PortfolioPerformanceRow {
   change: null | number;
@@ -28,13 +46,31 @@ export interface PortfolioPerformanceRow {
   currency: string;
   dividends: null | number;
   endValue: null | number;
+  missingSnapshotDates: string[];
+  moneyWeightedReturn: null | number;
+  moneyWeightedReturnAnnualized: boolean;
   name: string;
   netContributions: null | number;
   portfolioKey: string;
   startValue: null | number;
+  timeWeightedReturn: null | number;
 }
 
-const CSV_HEADER = ['portfolioKey', 'name', 'currency', 'startValue', 'netContributions', 'change', 'changePercent', 'dividends', 'endValue'];
+const CSV_HEADER = [
+  'portfolioKey',
+  'name',
+  'currency',
+  'startValue',
+  'netContributions',
+  'change',
+  'changePercent',
+  'dividends',
+  'endValue',
+  'timeWeightedReturn',
+  'moneyWeightedReturn',
+  'moneyWeightedReturnAnnualized',
+  'missingSnapshotDays',
+];
 
 /** Mirrors `buildTransactionWhere`'s default window, so an unbounded request stays bounded. */
 const REPORT_DEFAULT_WINDOW_MONTHS = 24;
@@ -52,6 +88,10 @@ export function buildPortfolioPerformanceCsv(rows: PortfolioPerformanceRow[]): s
     optionalAmount(row.changePercent),
     optionalAmount(row.dividends),
     optionalAmount(row.endValue),
+    optionalAmount(row.timeWeightedReturn),
+    optionalAmount(row.moneyWeightedReturn),
+    String(row.moneyWeightedReturnAnnualized),
+    String(row.missingSnapshotDates.length),
   ]);
   return toCsv(CSV_HEADER, body);
 }
@@ -62,16 +102,26 @@ export async function getPortfolioPerformanceReport(input: ReportServiceInput, n
   const endIsLive = toDate.getTime() >= now.getTime();
   const currency = user.currencyKey.code || 'EUR';
 
-  // Portfolios belong to the household: every one of the tenant's, never another tenant's.
-  const portfolios = await DI.em.find(
+  // Portfolios belong to the household: every one of the tenant's, never another tenant's. A member
+  // filter keeps the portfolios those members own; one whose owner left is Shared (`member-attribution.ts`).
+  const members = parseMemberFilter(input.filters.memberKeys);
+  const active = members ? new Set((await loadActiveMembers(DI.em, tenant.tenantKey)).keys()) : new Set<number>();
+  const portfolios = (await DI.em.find(
     Portfolio,
     { deletedAt: undefined, tenantKey: { tenantKey: tenant.tenantKey } },
     { orderBy: { name: 'ASC' } },
-  );
+  )).filter((portfolio) => !members || matchesMemberFilter(accountAttributionOf({ isJoint: false, ownerAppuserKey: portfolio.portfolioOwnerAppuserKey.appuserKey }, active), members));
   if (portfolios.length === 0) return [];
 
   const portfolioKeys = portfolios.map((portfolio) => portfolio.portfolioKey);
   const liveValues = endIsLive ? await portfolioHoldingsService.getPortfolioValues(user, portfolioKeys, tenant.tenantKey) : null;
+  // A start snapshot is the latest on or before the start, so every later one is from its day on.
+  const seriesFrom = new Date(`${utcDay(fromDate)}T00:00:00.000Z`);
+  const snapshots = await snapshotSeriesInViewerCurrency(
+    await loadPortfolioSnapshotValues(portfolioKeys, seriesFrom, tenant.tenantKey),
+    currency,
+    { from: seriesFrom, to: endIsLive ? now : toDate },
+  );
 
   const rows: PortfolioPerformanceRow[] = [];
   for (const portfolio of portfolios) {
@@ -84,6 +134,7 @@ export async function getPortfolioPerformanceReport(input: ReportServiceInput, n
       : endSnapshot ? { kind: 'snapshot', ...endSnapshot } : { kind: 'unknown', toDate };
 
     const measure = measurePortfolioPeriod({ end, flows, fromDate, startSnapshot });
+    const returns = periodReturnsOf([periodReturnSeries({ end, flows, fromDate, now, snapshots: snapshots.get(portfolio.portfolioKey) ?? [], startSnapshot })]);
 
     // Nothing held, nothing traded: a portfolio that did not exist yet in this period.
     if (measure.startValue === 0 && measure.endValue === 0 && !measure.hadActivity) continue;
@@ -94,10 +145,14 @@ export async function getPortfolioPerformanceReport(input: ReportServiceInput, n
       currency,
       dividends: measure.dividends,
       endValue: measure.endValue,
+      missingSnapshotDates: returns.missingSnapshotDates,
+      moneyWeightedReturn: returns.moneyWeighted,
+      moneyWeightedReturnAnnualized: returns.moneyWeightedAnnualized,
       name: portfolio.name,
       netContributions: measure.netContributions,
       portfolioKey: String(portfolio.portfolioKey),
       startValue: measure.startValue,
+      timeWeightedReturn: returns.timeWeighted,
     });
   }
   return rows;

@@ -1,6 +1,8 @@
 import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
-import { Check, Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Check, Entity, Enum, Filter, Formula, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+
+import { reimbursedAmountOfSql } from '@service/transaction/reimbursement-sql.js';
 
 import { HIDDEN_FILTER, hiddenTransactionCond, TENANT_FILTER, transactionTenantCond } from '../filters/tenant-filter';
 
@@ -10,6 +12,7 @@ import { AppuserTransactionCategory } from './AppuserTransactionCategory';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
 import { Goal } from './Goal';
+import { InstallmentPlan } from './InstallmentPlan';
 import { Portfolio } from './Portfolio';
 import { Tenant } from './Tenant';
 import { TransactionMerchant } from './TransactionMerchant';
@@ -42,11 +45,21 @@ export enum FxStatus {
 }
 
 @Check({ expression: `num_nonnulls("transfer_destination_account_key", "transfer_destination_portfolio_key", "transfer_destination_goal_key") <= 1`, name: 'transaction_transfer_destination_single_check' })
+@Check({ expression: `not ("attributed_to_shared" and "attributed_appuser_key" is not null)`, name: 'transaction_attribution_single_check' })
 @Entity()
 @Filter({ args: false, cond: transactionTenantCond, default: true, name: TENANT_FILTER })
 @Filter({ cond: hiddenTransactionCond, default: true, name: HIDDEN_FILTER })
 @Index({ properties: ['appuserKey', 'transactionDate'] }) // Composite index for user transaction queries
 @Index({ properties: ['accountKey', 'transactionDate'] }) // Composite index for account transaction queries
+@Index({
+  expression:
+    'CREATE UNIQUE INDEX transaction_installment_unique ON "transaction" (installment_plan_key, installment_number) WHERE installment_plan_key IS NOT NULL AND deleted_at IS NULL',
+  name: 'transaction_installment_unique',
+})
+@Index({
+  expression: 'CREATE INDEX transaction_installment_unlinked_plan_index ON "transaction" (installment_unlinked_plan_key) WHERE installment_unlinked_plan_key IS NOT NULL',
+  name: 'transaction_installment_unlinked_plan_index',
+})
 @Unique({ properties: ['transactionKey', 'internalTransactionId'] })
 @Unique({ properties: ['accountKey', 'nordigenInternalTransactionId'] })
 @Unique({ properties: ['accountKey', 'enableBankingTransactionId'] })
@@ -63,12 +76,58 @@ export class Transaction extends Base {
   @ManyToOne({ cascade: [], entity: () => Tenant, fieldName: 'tenant_key', nullable: true })
   tenantKey?: Rel<Tenant>;
 
+  /**
+   * Who the money is attributed to when it is not the account's default: a member of the household
+   * ("Spent by"). Null follows the account: its owner, or Shared on a joint account. Never set
+   * together with `attributedToShared`. Attribution is for reporting and the member filter only;
+   * it changes nobody's access to the row (`services/household/member-attribution.ts`).
+   */
+  @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'attributed_appuser_key', nullable: true })
+  attributedAppuserKey?: null | Rel<Appuser>;
+
+  /** The row is attributed to the household as a whole (Shared), whatever its account's default. */
+  @Property({ default: false })
+  attributedToShared = false;
+
   @Index()
   @Property({ columnType: 'timestamptz', nullable: true })
   transactionDate?: Date;
 
+  /**
+   * Moves this row to the credit-card statement that contains this date, instead of the one its
+   * `transactionDate` falls in — for when the bank's own statement disagrees. Read only by the
+   * statement totals (`services/account/credit-card-statement.service.ts`); null means the
+   * transaction date decides.
+   */
+  @Property({ columnType: 'date', nullable: true })
+  statementDateOverride?: Date;
+
   @PrimaryKey()
   transactionKey!: number;
+
+  /**
+   * The installment plan this posted row pays, with `installmentNumber` naming which installment
+   * ("3" of "3/12"). Both are null on every other row, and set together. A live row is the only
+   * thing that makes a schedule row paid: the plan's future installments are projections, never
+   * transactions (`services/installment/`). One installment is paid by at most one live row.
+   *
+   * The tenant filter is off on this relation: a visible row's plan is on the same card, so the
+   * plan's filter adds nothing, and the join it would add to every transaction read breaks row locks.
+   */
+  @Property({ columnType: 'int', nullable: true })
+  installmentNumber?: null | number;
+
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => InstallmentPlan, fieldName: 'installment_plan_key', filters: { [TENANT_FILTER]: false }, nullable: true })
+  installmentPlanKey?: null | Rel<InstallmentPlan>;
+
+  /**
+   * The plan a member unlinked this row from by hand. The automatic linker
+   * (`linkPostedInstallments`) never links the row to that plan again, so the next sync or import
+   * does not undo the unlink; linking the row to that plan by hand clears it. Null on every other
+   * row, and cleared when the plan is deleted. Tenant filter off, as on `installmentPlanKey`.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => InstallmentPlan, fieldName: 'installment_unlinked_plan_key', filters: { [TENANT_FILTER]: false }, nullable: true })
+  installmentUnlinkedPlanKey?: null | Rel<InstallmentPlan>;
 
   @ManyToOne({ cascade: [], entity: () => TransactionMerchant, fieldName: 'transaction_merchant_key', nullable: true })
   transactionMerchantKey?: Rel<TransactionMerchant>;
@@ -215,6 +274,15 @@ export class Transaction extends Base {
    */
   @OneToMany({ cascade: [], entity: () => TransactionSplit, mappedBy: 'transactionKey', orderBy: { position: 'ASC' } })
   splits = new Collection<TransactionSplit>(this);
+
+  /**
+   * What the reimbursement links on this transaction take off it, positive, in its settlement
+   * currency (`TransactionReimbursement`; only the links that count, `reimbursement-sql.ts`).
+   * Lazy: loaded only when populated (`CATEGORY_LINE_POPULATE` in `category-lines.ts`), and read
+   * only there.
+   */
+  @Formula((columns) => reimbursedAmountOfSql(columns.transactionKey), { lazy: true, type: 'float' })
+  reimbursedAmount?: number;
 
   /** How confident the categorizer was (or 'high'/user_edit when the user set it). Null = never evaluated. */
   @Enum({ items: () => CategorizationConfidence, nullable: true })

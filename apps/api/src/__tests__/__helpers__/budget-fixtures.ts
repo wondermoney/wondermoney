@@ -24,8 +24,8 @@ export interface BudgetLine {
   year: number;
 }
 
-export async function addBudget(em: EntityManager, household: Household, input: { deleted?: boolean; lines: BudgetLine[]; name?: string; rolloverCarriesOverspend?: boolean }) {
-  const budget = em.create(Budget, { appuserKey: household.appuser, currencyKey: household.currency, deletedAt: input.deleted ? new Date() : undefined, name: input.name ?? 'Home', numAdults: 1, numDependents: 0, rolloverCarriesOverspend: input.rolloverCarriesOverspend ?? true, tenantKey: household.tenant }, { partial: true });
+export async function addBudget(em: EntityManager, household: Household, input: { deleted?: boolean; lines: BudgetLine[]; name?: string; periodStartDay?: number; rolloverCarriesOverspend?: boolean }) {
+  const budget = em.create(Budget, { appuserKey: household.appuser, currencyKey: household.currency, deletedAt: input.deleted ? new Date() : undefined, name: input.name ?? 'Home', numAdults: 1, numDependents: 0, periodStartDay: input.periodStartDay ?? 1, rolloverCarriesOverspend: input.rolloverCarriesOverspend ?? true, tenantKey: household.tenant }, { partial: true });
   await em.flush();
   const categories: Category[] = [];
   for (const [index, line] of input.lines.entries()) {

@@ -13,7 +13,7 @@ import {
   readAccountRecalculationResult,
 } from './account-recalculation-contract'
 
-export type AccountRecalculationFailure = 'too-soon' | 'demo' | 'access' | 'not-found' | 'network' | 'failed' | 'general'
+export type AccountRecalculationFailure = 'too-soon' | 'demo' | 'read-only' | 'account-read-only' | 'access' | 'not-found' | 'network' | 'failed' | 'general'
 
 export type AccountRecalculationState =
   | { phase: 'idle' }
@@ -26,6 +26,8 @@ export type AccountRecalculationState =
 function classifyFailure(error: unknown): AccountRecalculationFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'network') return 'network'
   if (error.code === 'http' && error.status === 429) return 'too-soon'

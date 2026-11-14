@@ -7,6 +7,7 @@ import { pick } from 'lodash-es';
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import type { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { CertificadoAforroSubscriptionDetail } from '@entity/CertificadoAforroSubscriptionDetail';
@@ -102,6 +103,22 @@ function generateManualPortfolioTransactionId(): string {
 }
 
 const SELL_QUANTITY_EXCEEDS_HOLDINGS_MESSAGE = 'Sell quantity exceeds available holdings for this portfolio';
+
+export const TRANSACTION_TYPE_CHANGE_MESSAGE =
+  'A transaction can only change between buy and sell. To turn a trade into a dividend or back, delete it and record a new transaction.';
+
+const TRADE_TYPE_NAMES: ReadonlySet<string | undefined> = new Set(['BUY', 'SELL']);
+
+/**
+ * An edit may switch a trade between BUY and SELL (the quantity's sign follows the type), but
+ * never a trade into a DIVIDEND or any other type, or back: quantity and unit price mean
+ * different things on each, so the row would be silently wrong. A row with no type yet may
+ * take any.
+ */
+function isAllowedTransactionTypeChange(from: FinancialTransactionType | undefined, to: FinancialTransactionType): boolean {
+  if (!from || from.financialTransactionTypeKey === to.financialTransactionTypeKey) return true;
+  return TRADE_TYPE_NAMES.has(from.name) && TRADE_TYPE_NAMES.has(to.name);
+}
 
 /**
  * Turns a missing enqueue seam into a loud, up-front failure. Callers that enable
@@ -382,6 +399,10 @@ class PortfolioTransactionService {
     proposedTransaction?: QuantityValidationTransaction,
     excludedTransactionKey?: number,
   ): Promise<void> {
+    // The method does not change which quantities are available, but it is the same replay the
+    // holdings and gains use, so pass the portfolio's method rather than assuming FIFO.
+    const portfolio = await entityManager.findOne(Portfolio, { portfolioKey: portfolioId }, { fields: ['costBasisMethod'] });
+    const costBasisMethod = portfolio?.costBasisMethod ?? PortfolioCostBasisMethod.FIFO;
     // Every member's rows in the portfolio: the caller has already authorised the portfolio,
     // and a household portfolio's holdings are the sum of what both members recorded.
     const existingTransactions = await entityManager.find(
@@ -413,7 +434,7 @@ class PortfolioTransactionService {
     const replayResult = replayHoldingTimeline([
       ...timeline.map((transaction) => this.toHoldingTimelineTransaction(transaction, portfolioId, financialAsset)),
       ...stockSplits.map((split) => this.toStockSplitTimelineItem(split, financialAsset.financialAssetKey)),
-    ]);
+    ], costBasisMethod);
 
     if (replayResult.oversoldByPortfolioAsset.has(`${portfolioId}:${financialAsset.financialAssetKey}`)) {
       throw new BadRequestError(SELL_QUANTITY_EXCEEDS_HOLDINGS_MESSAGE);
@@ -743,18 +764,27 @@ class PortfolioTransactionService {
 
     const originalTransactionDate = transaction.transactionDate;
     const originalTransactionTypeName = transaction.financialTransactionTypeKey?.name;
+
+    // Resolve and check the new type before touching the row, so a rejected edit changes nothing.
+    let transactionType: FinancialTransactionType | undefined;
+    if (params.financialTransactionTypeId !== undefined) {
+      transactionType = (await DI.em.findOne(FinancialTransactionType, {
+        financialTransactionTypeKey: params.financialTransactionTypeId,
+      })) ?? undefined;
+      if (!transactionType) {
+        throw new NotFoundError('Financial transaction type not found');
+      }
+      if (!isAllowedTransactionTypeChange(transaction.financialTransactionTypeKey, transactionType)) {
+        throw new BadRequestError(TRANSACTION_TYPE_CHANGE_MESSAGE);
+      }
+    }
+
     // Update fields if provided
     if (params.transactionDate !== undefined) {
       transaction.transactionDate = params.transactionDate;
     }
 
-    if (params.financialTransactionTypeId !== undefined) {
-      const transactionType = await DI.em.findOne(FinancialTransactionType, {
-        financialTransactionTypeKey: params.financialTransactionTypeId,
-      });
-      if (!transactionType) {
-        throw new NotFoundError('Financial transaction type not found');
-      }
+    if (transactionType) {
       transaction.financialTransactionTypeKey = transactionType;
     }
 

@@ -29,6 +29,7 @@ async function renderWithI18n(overrides: Partial<ReportsHubScreenProps> = {}) {
     sankey: loading,
     cashflow: loading,
     spendingByCategory: { ...loading, state: { status: 'loading' } },
+    monthComparison: { ...loading, months: { base: '2026-08', compare: '2026-07', setBase: jest.fn(), setCompare: jest.fn() } },
     netWorthHistory: loading,
     budgetVsActual: loading,
     portfolioPerformance: loading,
@@ -38,11 +39,12 @@ async function renderWithI18n(overrides: Partial<ReportsHubScreenProps> = {}) {
 }
 
 describe('ReportsHubScreen', () => {
-  it('composes all six reports inline on one page, each showing its own title', async () => {
+  it('composes all seven reports inline on one page, each showing its own title', async () => {
     const view = await renderWithI18n()
     expect(view.getByText('Cash flow Sankey')).toBeOnTheScreen()
     expect(view.getByText('Cash flow')).toBeOnTheScreen()
     expect(view.getByText('Spending by category')).toBeOnTheScreen()
+    expect(view.getByText('Compare months')).toBeOnTheScreen()
     expect(view.getByText('Net worth over time')).toBeOnTheScreen()
     expect(view.getByText('Budget vs actual')).toBeOnTheScreen()
     expect(view.getByText('Portfolio performance')).toBeOnTheScreen()

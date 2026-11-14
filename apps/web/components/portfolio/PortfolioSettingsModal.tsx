@@ -8,12 +8,16 @@ import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
+import { Text } from "@/components/ui/Typography";
 import useAccounts from "@/lib/api/account/useAccounts";
 import {
   getPortfolioLinkHolderName,
   isPortfolioLinkRefusal,
 } from "@/lib/api/errors";
-import type { Portfolio } from "@/lib/api/portfolio/usePortfolio";
+import type {
+  Portfolio,
+  PortfolioCostBasisMethod,
+} from "@/lib/api/portfolio/usePortfolio";
 import useUpdatePortfolio from "@/lib/api/portfolio/useUpdatePortfolio";
 import {
   draftFromLink,
@@ -41,6 +45,9 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
   const [name, setName] = useState(portfolio.name);
   const [description, setDescription] = useState(portfolio.description ?? "");
   const [link, setLink] = useState(draftFromLink(portfolio.accountLink));
+  const [costBasisMethod, setCostBasisMethod] = useState<PortfolioCostBasisMethod>(
+    portfolio.costBasisMethod ?? "FIFO",
+  );
 
   // Reload the fields from the portfolio when the modal opens (or the
   // portfolio changes while open), adjusting during render.
@@ -51,8 +58,28 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
       setName(portfolio.name);
       setDescription(portfolio.description ?? "");
       setLink(draftFromLink(portfolio.accountLink));
+      setCostBasisMethod(portfolio.costBasisMethod ?? "FIFO");
     }
   }
+
+  const costBasisMethodChanged =
+    (portfolio.costBasisMethod ?? "FIFO") !== costBasisMethod;
+  const methodOptions: Array<{
+    hint: string;
+    label: string;
+    method: PortfolioCostBasisMethod;
+  }> = [
+    {
+      hint: t("cost-basis-fifo-hint"),
+      label: t("cost-basis-fifo"),
+      method: "FIFO",
+    },
+    {
+      hint: t("cost-basis-average-hint"),
+      label: t("cost-basis-average"),
+      method: "AVERAGE",
+    },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +92,7 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
         ...(linkChanged(portfolio.accountLink, link)
           ? { accountLink: linkInputFromDraft(link) }
           : {}),
+        ...(costBasisMethodChanged ? { costBasisMethod } : {}),
       });
       toast.success(t("save"));
       closeModal();
@@ -112,6 +140,34 @@ const PortfolioSettingsModal: React.FC<PortfolioSettingsModalProps> = ({
           value={link}
           onChange={setLink}
         />
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-sm font-medium">
+            {t("cost-basis-method")}
+          </legend>
+          {methodOptions.map((option) => (
+            <label
+              key={option.method}
+              className="border-border has-[:checked]:border-foreground flex min-h-11 cursor-pointer items-start gap-3 rounded-md border p-3 text-sm"
+            >
+              <input
+                type="radio"
+                name="cost-basis-method"
+                value={option.method}
+                checked={costBasisMethod === option.method}
+                onChange={() => setCostBasisMethod(option.method)}
+                className="mt-0.5"
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="font-medium">{option.label}</span>
+                <span className="text-muted-foreground">{option.hint}</span>
+              </span>
+            </label>
+          ))}
+          <Text variant="smallText" className="text-muted-foreground">
+            {t("cost-basis-method-hint")}
+          </Text>
+        </fieldset>
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={closeModal}>

@@ -1,43 +1,51 @@
 ---
 title: Leave or remove a member
-description: Leave a household as a member, remove a member as the owner, and understand what happens to the data.
+description: Leave a household, remove someone from it, and understand what happens to the data.
 ---
 
-A member can leave a household at any time, and the owner can remove a member. Removing someone reassigns their accounts to the owner, so the household keeps its shared data.
+Anyone except the owner can leave a household at any time. The owner can remove anyone else, and an admin can remove members and viewers. Either way, the household keeps its data.
 
-If the owner leaves or deletes their account, the household is torn down.
+## Leaving a household
 
-## Leaving as a member
-
-As a member, you can leave the household voluntarily. Your accounts are reassigned to the owner, so they stay part of the household. After leaving, you no longer have access to the household's shared data.
+As an admin, member or viewer, you can leave the household from its settings. After leaving, you no longer have access to the household's shared data, and your bank connections in it are disconnected. Your past accounts and transactions stay with the household.
 
 <DocsImage
   src="/images/docs/household/leave-or-remove-leave-dialog.png"
-  alt="The leave-household confirmation dialog, showing what happens to the member's accounts and access."
-  caption="Leaving the household confirms that your accounts are reassigned to the owner."
+  alt="The leave-household confirmation dialog, explaining that you lose access to the shared data and your bank connections are disconnected."
+  caption="Leaving the household asks you to confirm before you lose access."
   width={766}
   height={176}
 />
 
 Leaving does not delete your user account. What you lose is access to the household and its data.
 
-## Removing a member as owner
+## Removing someone
 
-As the owner, you can remove a member from the household. The member's accounts are reassigned to you, and the member loses access to the shared data.
+The owner can remove anyone else in the household. An admin can remove members and viewers, but not another admin or the owner.
 
 <DocsImage
   src="/images/docs/household/leave-or-remove-remove-dialog.png"
-  alt="The remove-member confirmation dialog, showing that the member's accounts are reassigned to the owner."
-  caption="Removing a member reassigns their accounts to the owner."
+  alt="The remove-member confirmation dialog, explaining that the person loses access and their bank connections are disconnected."
+  caption="Removing someone asks you to confirm first."
   width={766}
   height={176}
 />
 
-Removing a member does not delete their user account. They keep their sign-in and any data that is separate from the household.
+When you remove someone:
 
-## Owner deletion teardown
+- They are signed out everywhere and lose access to the household right away.
+- Their bank connections are disconnected, so the household stops syncing their banks.
+- Their past accounts and transactions stay with the household.
 
-If the owner leaves the household or deletes their account, the household cannot continue: it is tied to the owner. The household is torn down, and members lose access to the shared data.
+Removing someone does not delete their user account. They keep their sign-in.
+
+## Private accounts of someone who leaves
+
+When someone leaves or is removed, their private accounts stay in the household, shared as they were. The members an account was shared with keep their access, to view it or to edit it; nobody else gains access, not even the household owner. If the person joins the household again, they see their accounts again. See [When someone leaves or is removed](/en/docs/household/account-privacy#when-someone-leaves-or-is-removed).
+
+## When the owner deletes their account
+
+The owner can't leave the household; to hand it over, transfer ownership first (see [Transferring ownership](/en/docs/household/what-is-a-household#transferring-ownership)). If the owner deletes their account, the household is dissolved: everyone else loses access to the shared data, and their bank connections in it are disconnected.
 
 ## Related pages
 

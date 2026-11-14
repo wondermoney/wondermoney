@@ -20,23 +20,27 @@ describe('mapBankConnections', () => {
     expect(rows).toEqual([
       {
         accessType: 'open_banking',
+        accountNames: null,
         bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
         daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: 'Real Bank',
+        lastError: null,
         provider: 'GoCardless',
         status: 'connected',
       },
       {
         accessType: 'open_banking',
+        accountNames: null,
         bankId: null,
         connectionId: null,
         dataFreshAsOf: '2026-07-30T10:00:00.000Z',
         daysUntilExpiry: null,
         expiresAt: '2026-08-30T12:00:00.000Z',
         institutionName: null,
+        lastError: null,
         provider: 'GoCardless',
         status: 'error',
       },
@@ -65,5 +69,25 @@ describe('mapBankConnections', () => {
   it('normalizes an explicit null connectionId to null', () => {
     const [row] = mapBankConnections([dto({ connectionId: null })])
     expect(row!.connectionId).toBeNull()
+  })
+
+  it("names a SimpleFIN connection's accounts, leaving blank names out", () => {
+    const [row] = mapBankConnections([dto({
+      provider: 'SimpleFIN',
+      accounts: [{ accountKey: 3, accountName: ' Everyday checking ' }, { accountKey: 4, accountName: null }, { accountKey: 5, accountName: '  ' }, { accountKey: 6, accountName: 'Savings' }],
+    })])
+    expect(row!.accountNames).toEqual(['Everyday checking', 'Savings'])
+  })
+
+  it('reads an empty account list as no accounts yet, and a missing one (an older API) as unknown', () => {
+    const [none] = mapBankConnections([dto({ provider: 'SimpleFIN', accounts: [] })])
+    expect(none!.accountNames).toEqual([])
+    const [older] = mapBankConnections([dto({ provider: 'SimpleFIN' })])
+    expect(older!.accountNames).toBeNull()
+  })
+
+  it('carries the newest failure so the row can say what went wrong', () => {
+    const [row] = mapBankConnections([dto({ lastError: { code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' } })])
+    expect(row!.lastError).toEqual({ code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' })
   })
 })

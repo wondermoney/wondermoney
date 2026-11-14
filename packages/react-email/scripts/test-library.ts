@@ -5,9 +5,13 @@ import {
   renderAccountConnectedEmail,
   renderBankSyncAlertEmail,
   renderBudgetThresholdAlert,
+  renderCreditCardDueReminderEmail,
+  renderEmailVerificationEmail,
+  renderHouseholdInviteEmail,
   renderInternalAlertEmail,
   renderLifecycleNudgeEmail,
   renderMonthlyStory,
+  renderPasswordResetEmail,
   renderWeeklyInsights,
   type BudgetThresholdAlertProps,
   type BudgetThresholdItem,
@@ -273,9 +277,9 @@ assert.ok(!/utm_|unsubscribe/i.test(alert.html), "internal alert must not carry 
 const bareAlert = await renderInternalAlertEmail({ subject: "Wonder.money - Support", title: "New support message" });
 assert.ok(bareAlert.html.includes("New support message") && bareAlert.text.trim());
 
-// Lifecycle nudge (bank recovery): EN/PT, multi-paragraph body, unsubscribe footer.
+// Lifecycle nudge (bank recovery): EN/PT/ES, multi-paragraph body, unsubscribe footer.
 const nudgeUnsub = "https://api.wonder.money/v1/marketing/email-opt-out?token=NUDGE";
-for (const [language, expectedGreeting] of [["en", "Hi Ada,"], ["pt", "Olá Ada,"]] as const) {
+for (const [language, expectedGreeting] of [["en", "Hi Ada,"], ["pt", "Olá Ada,"], ["es", "Hola Ada,"]] as const) {
   const nudge = await renderLifecycleNudgeEmail({
     language,
     subject: "Your bank connection needs another try",
@@ -303,7 +307,7 @@ await assert.rejects(
 );
 
 // Account connected ("new bank"): subject/body carry the bank name, CTA to accounts, no tracking.
-for (const language of ["en", "pt"] as const) {
+for (const language of ["en", "pt", "es"] as const) {
   const connected = await renderAccountConnectedEmail({
     language, firstName: "Ada", bankName: "Millennium BCP",
     dashboardUrl: "https://app.wonder.money/en/accounts",
@@ -318,11 +322,11 @@ await assert.rejects(
   /dashboardUrl must be an absolute http\(s\) URL/,
 );
 
-// Bank sync alerts: every kind renders in both languages with the bank, its date and both links.
+// Bank sync alerts: every kind renders in every language with the bank, its date and both links.
 {
   const kinds = ["consent_expiring_7d", "consent_expiring_1d", "consent_revoked", "sync_failing"] as const;
   const subjects = new Set<string>();
-  for (const language of ["en", "pt"] as const) {
+  for (const language of ["en", "pt", "es"] as const) {
     for (const kind of kinds) {
       const alert = await renderBankSyncAlertEmail({
         language, firstName: "Ada", kind, bankName: "Banco Exemplo",
@@ -340,7 +344,13 @@ await assert.rejects(
       subjects.add(alert.subject);
     }
   }
-  assert.equal(subjects.size, kinds.length * 2, "each bank-sync-alert kind and language needs its own subject");
+  const spanish = await renderCreditCardDueReminderEmail({
+    language: "es", accountName: "Tarjeta", amountDue: "428,30 €",
+    periodLabel: "1–31 de octubre", dueDate: "25 de noviembre", daysUntilDue: 3,
+    statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+  });
+  assert.ok(spanish.text.includes("extracto"), "credit-card-due-reminder must render Spanish copy");
+  assert.equal(subjects.size, kinds.length * 3, "each bank-sync-alert kind and language needs its own subject");
   await assert.rejects(
     renderBankSyncAlertEmail({ language: "en", kind: "consent_revoked", bankName: "X", reconnectUrl: "javascript:alert(1)", settingsUrl: "https://app.wonder.money/en/settings" }),
     /reconnectUrl must be an absolute http\(s\) URL/,
@@ -353,6 +363,84 @@ await assert.rejects(
     renderBankSyncAlertEmail({ language: "en", kind: "sync_failing", bankName: "X", reconnectUrl: "https://a.test/", settingsUrl: "https://a.test/" }),
     /failingSinceDate is required/,
   );
+}
+
+// A credit-card payment reminder: the account, the amount and the due date reach both languages,
+// the CTA opens the statements, and no campaign tracking rides along.
+{
+  for (const language of ["en", "pt", "es"] as const) {
+    const reminder = await renderCreditCardDueReminderEmail({
+      language, firstName: "Ada", accountName: "Millennium Card", amountDue: "€428.30",
+      periodLabel: "1 – 31 October", dueDate: "25 November", daysUntilDue: 3,
+      statementUrl: "https://app.wonder.money/en/accounts/12?tab=statements",
+      settingsUrl: "https://app.wonder.money/en/settings?tab=notifications",
+    });
+    assert.ok(reminder.subject.includes("Millennium Card"), `credit-card-due-reminder subject missing account for ${language}`);
+    assert.ok(reminder.text.includes("€428.30"), `credit-card-due-reminder body missing amount for ${language}`);
+    assert.ok(reminder.text.includes("25 November"), `credit-card-due-reminder body missing due date for ${language}`);
+    assert.ok(reminder.html.includes("tab=statements"), `credit-card-due-reminder statement link missing for ${language}`);
+    assert.ok(reminder.html.includes("tab=notifications"), `credit-card-due-reminder settings link missing for ${language}`);
+    assert.ok(!/utm_/i.test(reminder.html), "credit-card-due-reminder must not carry campaign tracking");
+  }
+  const tomorrow = await renderCreditCardDueReminderEmail({
+    language: "en", accountName: "Millennium Card", amountDue: "€10.00",
+    periodLabel: "1 – 31 October", dueDate: "12 November", daysUntilDue: 1,
+    statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+  });
+  assert.ok(/tomorrow/i.test(tomorrow.subject), "a reminder due in one day must read as tomorrow");
+  for (const [language, word] of [["en", /today/i], ["pt", /hoje/i], ["es", /hoy/i]] as const) {
+    const today = await renderCreditCardDueReminderEmail({
+      language, accountName: "Millennium Card", amountDue: "€10.00",
+      periodLabel: "1 – 31 October", dueDate: "12 November", daysUntilDue: 0,
+      statementUrl: "https://a.test/statements", settingsUrl: "https://a.test/settings",
+    });
+    assert.ok(word.test(today.subject), `a reminder due today must say so in ${language}`);
+  }
+  await assert.rejects(
+    renderCreditCardDueReminderEmail({
+      language: "en", accountName: "X", amountDue: "€1.00", periodLabel: "p", dueDate: "d", daysUntilDue: 3,
+      statementUrl: "javascript:alert(1)", settingsUrl: "https://a.test/",
+    }),
+    /statementUrl must be an absolute http\(s\) URL/,
+  );
+}
+
+// Account emails (password reset, email verification, household invite): each language has its own
+// subject and copy, the action link is both the button and written out, and nothing tracks or
+// offers an unsubscribe. A name with markup in it arrives as text.
+{
+  const resetUrl = "https://api.example.test/api/auth/reset-password/T0K3N?callbackURL=https%3A%2F%2Fapp.example.test%2Fes%2Fauth%2Freset";
+  const verificationUrl = "https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=https%3A%2F%2Fapp.example.test%2Fes";
+  const acceptUrl = "https://app.example.test/es/join?token=T0K3N";
+  const words = { en: /password/i, pt: /palavra-passe/i, es: /contraseña/i } as const;
+  const subjects = new Set<string>();
+  for (const language of ["en", "pt", "es"] as const) {
+    const reset = await renderPasswordResetEmail({ language, firstName: "Ada", resetUrl });
+    const verification = await renderEmailVerificationEmail({ language, firstName: "Ada", verificationUrl });
+    const invite = await renderHouseholdInviteEmail({ language, inviterName: "Ada", acceptUrl, expiresInDays: 7 });
+    assert.ok(words[language].test(reset.subject), `password-reset subject must be in ${language}`);
+    assert.ok(invite.subject.includes("Ada"), `household-invite subject must name the inviter in ${language}`);
+    assert.ok(invite.text.includes("7"), `household-invite must state the expiry in ${language}`);
+    assert.ok(new RegExp(`<html[^>]*lang="${language}"`).test(reset.html), `password-reset must declare ${language}`);
+    for (const [name, email, url] of [["password-reset", reset, resetUrl], ["email-verification", verification, verificationUrl], ["household-invite", invite, acceptUrl]] as const) {
+      const href = url.replaceAll("&", "&amp;");
+      assert.ok(email.html.split(`href="${href}"`).length - 1 >= 2, `${name} must link the button and the written-out link in ${language}`);
+      assert.ok(email.text.includes(url), `${name} plain text must carry the link in ${language}`);
+      assert.ok(!/utm_|unsubscribe/i.test(email.html), `${name} must not carry tracking or an unsubscribe`);
+      subjects.add(email.subject);
+    }
+  }
+  assert.equal(subjects.size, 9, "each account email and language needs its own subject");
+
+  const marked = await renderHouseholdInviteEmail({ language: "en", inviterName: '<a href="https://evil.test">Ada</a>', acceptUrl, expiresInDays: 7 });
+  assert.ok(!marked.html.includes('<a href="https://evil.test">'), "an inviter name must not become markup");
+  for (const render of [
+    () => renderPasswordResetEmail({ language: "en", resetUrl: "javascript:alert(1)" }),
+    () => renderEmailVerificationEmail({ language: "en", verificationUrl: "/verify" }),
+    () => renderHouseholdInviteEmail({ language: "en", inviterName: "Ada", acceptUrl: "data:text/html,x", expiresInDays: 7 }),
+  ]) {
+    await assert.rejects(render(), /must be an absolute http\(s\) URL/);
+  }
 }
 
 // A self-hosted instance on a LAN address sends plain-http links.
@@ -386,6 +474,66 @@ assert.ok(lanConnected.html.includes("http://192.168.1.10:3000/en/accounts"), "h
   const hosted = await renderAccountConnectedEmail({ language: "en", bankName: "X", dashboardUrl: "https://app.wonder.money/en/accounts", brandName: " " });
   assert.ok(hosted.subject.includes("WonderMoney"));
   assert.ok(hosted.html.includes("app.wonder.money/logo.png") && hosted.text.includes("Radix Catch"));
+}
+
+// Spanish: every template reads Spanish, with es-formatted values and /es links.
+{
+  const esUrls = {
+    ctaUrl: "https://app.wonder.money/es/budgets",
+    settingsUrl: "https://app.wonder.money/es/settings?tab=notifications",
+    privacyUrl: "https://docs.wonder.money/es/about/privacy-policy",
+    unsubscribeUrl: "https://app.wonder.money/es/email/unsubscribe/CUSTOM_TOKEN",
+  };
+  const esItem = { ...budgetItem("over"), formattedSpent: "108,00 €", formattedBudgeted: "100,00 €", formattedRemainingOrOver: "8,00 €" };
+  const budget = await renderBudgetThresholdAlert({ ...budgetProps([esItem]), ...esUrls, language: "es", firstName: "Lucía", periodLabel: "julio de 2026" });
+  assert.equal(budget.subject, "Hay categorías por encima de lo planificado");
+  assert.equal(budget.preheader, "Algunas categorías superan el importe planificado para este mes.");
+  for (const fragment of ["Hola Lucía,", "Este es el resumen agregado de julio de 2026.", "108,00 € / 100,00 €", "Excedido", "Ver presupuestos", "Ajustes de notificaciones", "Privacidad"]) {
+    assert.ok(budget.text.includes(fragment), `Spanish budget alert missing: ${fragment}`);
+  }
+  assert.match(budget.html, /next=%2Fes%2Fbudgets/);
+  assert.ok(budget.html.includes('lang="es"'), "Spanish budget alert must declare lang=es");
+
+  const weekly = await renderWeeklyInsights({ ...weeklyProps, ...esUrls, ctaUrl: "https://app.wonder.money/es", language: "es", weekDateRange: "6 al 12 de julio de 2026", formattedTotalSpending: "90,00 €", budgetSummary: { status: "over", overCount: 2 } });
+  assert.equal(weekly.subject, "Tu resumen financiero semanal");
+  assert.equal(weekly.preheader, "Gastos, categoría principal y estado de los presupuestos de la semana completa.");
+  assert.equal(weekly.preheader, getWeeklyInsightsPreheader({ status: "over" }, "es"));
+  for (const fragment of ["Semana completa del 6 al 12 de julio de 2026.", "Gasto total", "90,00 €", "2 por encima de lo planificado", "Ver resumen"]) {
+    assert.ok(weekly.text.includes(fragment), `Spanish weekly summary missing: ${fragment}`);
+  }
+  assert.match(weekly.html, /next=%2Fes(?!%2F)/);
+
+  // es-ES leaves four-digit amounts ungrouped ("1200,00 €"); the bars still compare 1200 to 800.
+  const story = await renderMonthlyStory({ ...monthlyStorySufficientProps, ...esUrls, ctaUrl: "https://app.wonder.money/es/reports", language: "es", monthLabel: "julio de 2026", formattedIncomeBaseline: "1200,00 €", formattedIncomeSubject: "800,00 €" });
+  assert.equal(story.subject, "Tu resumen financiero del mes: julio de 2026");
+  for (const fragment of ["Ingresos vs. lo habitual", "Lo que más cambió", "Pagos recurrentes", "Tasa de ahorro", "antes 28%", "Ver tus informes"]) {
+    assert.ok(story.text.includes(fragment), `Spanish monthly story missing: ${fragment}`);
+  }
+  assert.equal(comparisonBarWidths(story.html, "#ede9fe")[0], 100, "es income baseline bar width should be 100%");
+  assert.equal(comparisonBarWidths(story.html, "#7c3aed")[0], 67, "es income subject bar width should be ~67% (800/1200)");
+  assert.match(story.html, /next=%2Fes%2Freports/);
+  const thin = await renderMonthlyStory({ ...monthlyStoryInsufficientProps, ...esUrls, ctaUrl: "https://app.wonder.money/es/reports", language: "es", monthsNeeded: 1 });
+  assert.equal(thin.subject, "Preparando tu resumen financiero");
+  assert.match(thin.preheader, /^Necesitamos 1 mes más de historial/);
+  const thinner = await renderMonthlyStory({ ...monthlyStoryInsufficientProps, ...esUrls, ctaUrl: "https://app.wonder.money/es/reports", language: "es", monthsNeeded: 2 });
+  assert.match(thinner.preheader, /^Necesitamos 2 meses más de historial/);
+
+  const connected = await renderAccountConnectedEmail({ language: "es", firstName: "Lucía", bankName: "Banco Ejemplo", dashboardUrl: "https://app.wonder.money/es/accounts" });
+  assert.equal(connected.subject, "Banco Ejemplo está conectado a WonderMoney");
+  assert.ok(connected.text.includes("Hola Lucía,") && connected.text.includes("Ver tus cuentas"), "Spanish account-connected copy missing");
+  assert.ok(connected.html.includes("app.wonder.money/es/accounts"), "Spanish account-connected link must open /es");
+
+  const sync = await renderBankSyncAlertEmail({
+    language: "es", kind: "consent_expiring_7d", bankName: "Banco Ejemplo", expiryDate: "14 de noviembre",
+    reconnectUrl: "https://app.wonder.money/es/settings?tab=connections", settingsUrl: "https://app.wonder.money/es/settings?tab=notifications",
+  });
+  assert.equal(sync.subject, "Tu conexión con Banco Ejemplo termina el 14 de noviembre");
+  assert.ok(sync.text.includes("ajustes de notificaciones") && sync.html.includes("/es/settings?tab=connections"), "Spanish bank-sync alert copy or link missing");
+
+  const nudge = await renderLifecycleNudgeEmail({ language: "es", subject: "s", heading: "h", body: ["b"], unsubscribeUrl: nudgeUnsub, settingsUrl: esUrls.settingsUrl });
+  for (const fragment of ["Hola,", "Recibes este correo porque tienes una cuenta de WonderMoney.", "Cancelar la suscripción", "Ajustes de notificaciones"]) {
+    assert.ok(nudge.text.includes(fragment), `Spanish nudge footer missing: ${fragment}`);
+  }
 }
 
 console.log("Production library renderers verified.");

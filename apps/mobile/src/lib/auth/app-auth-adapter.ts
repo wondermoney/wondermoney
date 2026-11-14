@@ -3,6 +3,7 @@ import {
   type AppAuthAdapter,
   type AppAuthState,
   type AuthSession,
+  type BrowserSignInOutcome,
   type ChangePasswordOutcome,
   type IdTokenSignInOutcome,
   type MfaChallengeOutcome,
@@ -10,12 +11,18 @@ import {
   type MfaTotpEnrollOutcome,
   type MfaUnenrollOutcome,
   type MfaVerifyOutcome,
+  type PasskeyAddOutcome,
+  type PasskeyDeleteOutcome,
+  type PasskeyListOutcome,
+  type PasskeySignInOutcome,
+  type PasskeySummary,
   type SendVerificationEmailOutcome,
   type SignInOutcome,
   type SignUpOutcome,
 } from './app-auth'
 import type { AuthErrorClassification } from './auth-recovery'
 import type { NativeIdentityProviderId } from './native-identity'
+import { isPasskeyCancellation, type PasskeyAuthenticator, type WebAuthnJson } from './native-passkeys'
 import { extractSessionTokenFromCookieHeader } from './session-token'
 
 /**
@@ -43,10 +50,19 @@ export type BetterAuthClientPort = Readonly<{
       provider: NativeIdentityProviderId
       idToken: { token: string; nonce?: string }
       disableRedirect: boolean
+    } | {
+      provider: string
+      /** An app path; the Expo client turns it into the `wondermoney://` deep link. */
+      callbackURL: string
     }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signUp: Readonly<{
-    email: (input: { email: string; password: string; name?: string }) => Promise<AuthResult<Record<string, unknown>>>
+    email: (input: {
+      email: string
+      password: string
+      name: string
+      fetchOptions?: { headers?: Record<string, string> }
+    }) => Promise<AuthResult<Record<string, unknown>>>
   }>
   signOut: () => Promise<AuthResult<unknown>>
   sendVerificationEmail: (input: { email: string }) => Promise<AuthResult<unknown>>
@@ -67,6 +83,17 @@ export type BetterAuthClientPort = Readonly<{
     notify: (signal: string) => void
     listen: (signal: string, listener: () => void) => void
   }>
+  /**
+   * better-auth's raw request, through the client's plugins (the Expo plugin sends and stores
+   * the cookies, the passkey challenge cookie among them). Used for the passkey endpoints, whose
+   * client plugin drives the browser's WebAuthn and so can't run here.
+   */
+  $fetch?: (path: string, options: {
+    method: 'GET' | 'POST'
+    body?: Record<string, unknown>
+    query?: Record<string, string>
+    throw: false
+  }) => Promise<AuthResult<unknown>>
   /**
    * The Expo client plugin's cookie reader. Present on the real client; absent
    * on fakes that do not exercise the bearer snapshot. When present, its
@@ -140,7 +167,54 @@ const toAuthSession = async (
   }
 }
 
-export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapter {
+const UNSUPPORTED_PASSKEYS: PasskeyAuthenticator = {
+  isSupported: () => false,
+  create: async () => null,
+  get: async () => null,
+}
+
+/**
+ * What the device returned, as the server's verify endpoints take it: the client extension
+ * results stay on the device (as better-auth's own client does) and so does the module's
+ * `getPublicKey` helper.
+ */
+const credentialBody = (credential: WebAuthnJson): WebAuthnJson => {
+  const { clientExtensionResults: _extensions, ...rest } = credential
+  const response = rest.response
+  if (typeof response === 'object' && response !== null) {
+    const { getPublicKey: _getPublicKey, ...fields } = response as Record<string, unknown>
+    return { ...rest, response: fields }
+  }
+  return rest
+}
+
+const asText = (value: unknown): string | null => {
+  if (typeof value === 'string' && value) return value
+  if (value instanceof Date) return value.toISOString()
+  return null
+}
+
+const toPasskeySummary = (row: unknown): PasskeySummary | null => {
+  if (typeof row !== 'object' || row === null) return null
+  const record = row as Record<string, unknown>
+  if (typeof record.id !== 'string' || !record.id) return null
+  return {
+    id: record.id,
+    name: asText(record.name),
+    aaguid: asText(record.aaguid),
+    createdAt: asText(record.createdAt),
+    lastUsedAt: asText(record.lastUsedAt),
+  }
+}
+
+/**
+ * `passkeys` is the device's prompt (`nativePasskeyAuthenticator` in the app); without it every
+ * passkey call answers `unavailable`.
+ */
+export function createAppAuthAdapter(
+  client: BetterAuthClientPort,
+  passkeys: PasskeyAuthenticator = UNSUPPORTED_PASSKEYS,
+): AppAuthAdapter {
   // better-auth issues no session until the second factor is verified, so the
   // pending state cannot be re-derived from `getSession`; it is recorded here
   // when a sign-in returns `twoFactorRedirect` and cleared on step-up success.
@@ -302,9 +376,128 @@ export function createAppAuthAdapter(client: BetterAuthClientPort): AppAuthAdapt
       }
     },
 
-    signUp: async (email, password): Promise<SignUpOutcome> => {
+    signInWithBrowser: async (provider): Promise<BrowserSignInOutcome> => {
       try {
-        const { data, error } = await client.signUp.email({ email, password })
+        // Resolves once the browser sheet closes: on the deep link back, on a refusal page the
+        // person dismissed, or on cancel. The Expo client has stored whatever cookie came back.
+        const { error } = await client.signIn.social({ provider, callbackURL: '/auth/complete' })
+        if (error) return { status: 'unavailable' }
+        const { data } = await client.getSession({ query: { disableCookieCache: true } })
+        if (data) {
+          mfaPending = false
+          return { status: 'accepted' }
+        }
+        // A two-factor account: twoFactorOAuthGuard swapped the session for the pending
+        // two-factor cookie, which `twoFactor.verifyTotp` completes.
+        const cookie = client.getCookie ? await client.getCookie() : ''
+        if (/(?:^|[;\s.])two_factor=/.test(cookie)) {
+          mfaPending = true
+          return { status: 'mfa-pending' }
+        }
+        return { status: 'unavailable' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    signInWithPasskey: async (): Promise<PasskeySignInOutcome> => {
+      const request = client.$fetch
+      if (!request || !passkeys.isSupported()) return { status: 'unavailable' }
+      try {
+        const options = await request('/passkey/generate-authenticate-options', { method: 'GET', throw: false })
+        if (options.error || typeof options.data !== 'object' || options.data === null) return { status: 'unavailable' }
+        let assertion: WebAuthnJson | null
+        try {
+          assertion = await passkeys.get(options.data as WebAuthnJson)
+        } catch (error: unknown) {
+          return isPasskeyCancellation(error) ? { status: 'cancelled' } : { status: 'unavailable' }
+        }
+        if (!assertion) return { status: 'cancelled' }
+        const verified = await request('/passkey/verify-authentication', {
+          method: 'POST',
+          body: { response: credentialBody(assertion) },
+          throw: false,
+        })
+        if (verified.error || !verified.data) return { status: 'unavailable' }
+        // The Expo plugin stored the session cookie the verification set; re-read the session so
+        // the bearer snapshot and the cached session pick it up, as after any other sign-in.
+        const { data } = await client.getSession({ query: { disableCookieCache: true } })
+        if (!data) return { status: 'unavailable' }
+        mfaPending = false
+        return { status: 'accepted' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    listPasskeys: async (): Promise<PasskeyListOutcome> => {
+      const request = client.$fetch
+      if (!request) return { status: 'unavailable' }
+      try {
+        const { data, error } = await request('/passkey/list-user-passkeys', { method: 'GET', throw: false })
+        if (error || !Array.isArray(data)) return { status: 'unavailable' }
+        return {
+          status: 'available',
+          passkeys: data.map(toPasskeySummary).filter((passkey): passkey is PasskeySummary => passkey !== null),
+        }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    addPasskey: async (): Promise<PasskeyAddOutcome> => {
+      const request = client.$fetch
+      if (!request || !passkeys.isSupported()) return { status: 'unavailable' }
+      try {
+        const options = await request('/passkey/generate-register-options', { method: 'GET', throw: false })
+        if (options.error) {
+          return errorCode(options.error) === 'SESSION_NOT_FRESH' ? { status: 'session-not-fresh' } : { status: 'unavailable' }
+        }
+        if (typeof options.data !== 'object' || options.data === null) return { status: 'unavailable' }
+        let credential: WebAuthnJson | null
+        try {
+          credential = await passkeys.create(options.data as WebAuthnJson)
+        } catch (error: unknown) {
+          return isPasskeyCancellation(error) ? { status: 'cancelled' } : { status: 'unavailable' }
+        }
+        if (!credential) return { status: 'cancelled' }
+        // No name: the list labels it by its password manager, as the web app does.
+        const verified = await request('/passkey/verify-registration', {
+          method: 'POST',
+          body: { response: credentialBody(credential) },
+          throw: false,
+        })
+        if (verified.error) {
+          return errorCode(verified.error) === 'SESSION_NOT_FRESH' ? { status: 'session-not-fresh' } : { status: 'unavailable' }
+        }
+        return verified.data ? { status: 'added' } : { status: 'unavailable' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    deletePasskey: async (id): Promise<PasskeyDeleteOutcome> => {
+      const request = client.$fetch
+      if (!request) return { status: 'unavailable' }
+      try {
+        const { error } = await request('/passkey/delete-passkey', { method: 'POST', body: { id }, throw: false })
+        return error ? { status: 'unavailable' } : { status: 'deleted' }
+      } catch {
+        return { status: 'unavailable' }
+      }
+    },
+
+    signUp: async (email, password, locale): Promise<SignUpOutcome> => {
+      try {
+        // better-auth requires a name; like the web form, the address's local part stands in.
+        // The app sends no callback page, so the API reads the sign-up's language from
+        // Accept-Language: its verification email goes out before the account exists.
+        const { data, error } = await client.signUp.email({
+          email,
+          password,
+          name: email.split('@')[0] || email,
+          ...(locale ? { fetchOptions: { headers: { 'Accept-Language': locale } } } : {}),
+        })
         if (error) {
           const code = errorCode(error)
           if (code !== null && EMAIL_TAKEN_CODES.has(code)) return { status: 'email-taken' }

@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import { PersonalBudgetLabel } from "@/components/budget/PersonalBudgetLabel";
 import { Amount } from "@/components/ui/Amount";
 import { Button, buttonVariants } from "@/components/ui/button";
 import DataLoadError from "@/components/ui/DataLoadError";
@@ -53,14 +54,17 @@ function BudgetMonthRow({
   );
 
   const name = (
-    <h3 className="text-foreground text-base font-medium">
-      <Link
-        href={href}
-        className="inline-flex min-h-11 items-center hover:underline lg:min-h-0"
-      >
-        {budget.name}
-      </Link>
-    </h3>
+    <div className="flex min-w-0 items-center gap-2">
+      <h3 className="text-foreground text-base font-medium">
+        <Link
+          href={href}
+          className="inline-flex min-h-11 items-center hover:underline lg:min-h-0"
+        >
+          {budget.name}
+        </Link>
+      </h3>
+      <PersonalBudgetLabel budget={budget} />
+    </div>
   );
 
   if (isPending) {
@@ -149,16 +153,19 @@ export function ThisMonthSection() {
   const t = useTranslations("homeOverview");
   const locale = useLocale();
   const today = useMemo(() => new Date(), []);
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
 
   const budgetsQuery = useBudgetsFull();
   const budgets = useMemo(
     () => budgetsQuery.data?.budgets ?? [],
     [budgetsQuery.data],
   );
+  // Each budget in its own current month, which its start day decides.
   const monthQueries = useBudgetTemplatesByYearAndMonth(
-    budgets.map((budget) => ({ budgetKey: budget.budgetKey, year, month })),
+    budgets.map((budget) => ({
+      budgetKey: budget.budgetKey,
+      year: budget.year,
+      month: budget.month,
+    })),
   );
 
   const position = monthPosition(today);
@@ -223,7 +230,7 @@ export function ThisMonthSection() {
               error={query?.error ?? null}
               isPending={query?.isPending ?? true}
               onRetry={() => void query?.refetch()}
-              href={`/budgets/${budget.budgetKey}/${year}/${month}`}
+              href={`/budgets/${budget.budgetKey}/${budget.year}/${budget.month}`}
             />
           );
         })}

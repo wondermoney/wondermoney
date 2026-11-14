@@ -18,8 +18,14 @@ export type ReportFilters = Readonly<{
   currencyKey?: string
   includePending?: boolean
   includeTransfers?: boolean
+  /** Members' appuser keys or `shared` (the member filter); the household's when absent. */
+  memberKeys?: readonly string[]
   /** IANA time zone the period's days and months are in; the API's default when absent. */
   timezone?: string
+  /** Month-comparison only: the month examined (`YYYY-MM`). */
+  base?: string
+  /** Month-comparison only: the month it is compared against (`YYYY-MM`). */
+  compare?: string
 }>
 
 function reportQuery(filters: ReportFilters): string {
@@ -32,7 +38,10 @@ function reportQuery(filters: ReportFilters): string {
   if (filters.currencyKey !== undefined) params.set('currencyKey', filters.currencyKey)
   if (filters.includePending) params.set('includePending', 'true')
   if (filters.includeTransfers) params.set('includeTransfers', 'true')
+  if (filters.memberKeys?.length) params.set('memberKeys', filters.memberKeys.join(','))
   if (filters.timezone) params.set('timezone', filters.timezone)
+  if (filters.base) params.set('base', filters.base)
+  if (filters.compare) params.set('compare', filters.compare)
   return params.toString()
 }
 
@@ -78,6 +87,8 @@ export const cashflowPointSchema = z.object({
   income: z.number().finite(),
   expenses: z.number().finite(),
   net: z.number().finite(),
+  // `(income - expenses) / income`; null when the month has no income.
+  savingsRate: z.number().finite().nullish(),
 })
 
 const cashflowResponseSchema = reportResponseSchema(z.array(cashflowPointSchema))
@@ -136,6 +147,10 @@ export type BudgetVsActualRow = z.infer<typeof budgetVsActualRowSchema>
  * One household portfolio over the period, every amount in the appuser currency. A value the API
  * cannot know (no snapshot, or a trade or dividend with no exchange rate) is null, and so is anything
  * derived from it: change = endValue - startValue - netContributions.
+ *
+ * The time- and money-weighted returns are percentage points (10 = +10%); null when they cannot be
+ * measured. The money-weighted one is yearly when `moneyWeightedReturnAnnualized`, otherwise over
+ * the period itself. All four are optional: older APIs do not send them.
  */
 export const portfolioPerformanceReportRowSchema = z.object({
   portfolioKey: z.string(),
@@ -147,10 +162,46 @@ export const portfolioPerformanceReportRowSchema = z.object({
   changePercent: z.number().finite().nullable(),
   dividends: z.number().finite().nullable(),
   endValue: z.number().finite().nullable(),
+  timeWeightedReturn: z.number().finite().nullable().optional(),
+  moneyWeightedReturn: z.number().finite().nullable().optional(),
+  moneyWeightedReturnAnnualized: z.boolean().optional(),
+  /** Days in the period with no snapshot, whose value was carried over from the day before. */
+  missingSnapshotDates: z.array(z.string()).optional(),
 })
 
 const portfolioPerformanceReportResponseSchema = reportResponseSchema(z.array(portfolioPerformanceReportRowSchema))
 export type PortfolioPerformanceReportRow = z.infer<typeof portfolioPerformanceReportRowSchema>
+
+/** One month's totals in the month-comparison report. */
+export const monthComparisonTotalsSchema = z.object({
+  month: z.string(),
+  income: z.number().finite(),
+  expenses: z.number().finite(),
+  net: z.number().finite(),
+  savingsRate: z.number().finite().nullable(),
+})
+export type MonthComparisonTotals = z.infer<typeof monthComparisonTotalsSchema>
+
+/** One category's spending in both months, with the change between them. */
+export const monthComparisonCategoryRowSchema = z.object({
+  categoryKey: z.string(),
+  name: z.string(),
+  color: z.string(),
+  base: z.number().finite(),
+  compare: z.number().finite(),
+  delta: z.number().finite(),
+  deltaPct: z.number().finite().nullable(),
+})
+export type MonthComparisonCategoryRow = z.infer<typeof monthComparisonCategoryRowSchema>
+
+export const monthComparisonDataSchema = z.object({
+  base: monthComparisonTotalsSchema,
+  compare: monthComparisonTotalsSchema,
+  categories: z.array(monthComparisonCategoryRowSchema),
+})
+export type MonthComparisonData = z.infer<typeof monthComparisonDataSchema>
+
+const monthComparisonResponseSchema = reportResponseSchema(monthComparisonDataSchema)
 
 export function createSpendingByCategoryEndpoint(filters: ReportFilters) {
   return readEndpoint({
@@ -165,6 +216,14 @@ export function createCashflowEndpoint(filters: ReportFilters) {
     method: 'GET',
     path: `/v1/reports/cashflow?${reportQuery(filters)}`,
     schema: cashflowResponseSchema,
+  })
+}
+
+export function createMonthComparisonEndpoint(filters: ReportFilters) {
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/reports/month-comparison?${reportQuery(filters)}`,
+    schema: monthComparisonResponseSchema,
   })
 }
 
@@ -194,10 +253,16 @@ export function createBudgetVsActualEndpoint(filters: ReportFilters) {
 
 /**
  * The portfolio report covers every household portfolio over the period: account, category,
- * merchant and transaction filters don't apply to it, so only the period is sent.
+ * merchant and transaction filters don't apply to it, so they are not sent (and changing them
+ * does not refetch it). The member filter does: it narrows the report to the portfolios that
+ * member owns, or to Shared (a former member's), as web's report.
  */
 export function portfolioPerformanceFilters(filters: ReportFilters): ReportFilters {
-  return { fromDate: filters.fromDate, toDate: filters.toDate }
+  return {
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
+    ...(filters.memberKeys?.length ? { memberKeys: filters.memberKeys } : {}),
+  }
 }
 
 export function createPortfolioPerformanceReportEndpoint(filters: ReportFilters) {
@@ -208,7 +273,7 @@ export function createPortfolioPerformanceReportEndpoint(filters: ReportFilters)
   })
 }
 
-export type ReportSlug = 'spending-by-category' | 'cashflow' | 'sankey' | 'net-worth-history' | 'budget-vs-actual' | 'portfolio-performance'
+export type ReportSlug = 'spending-by-category' | 'cashflow' | 'month-comparison' | 'sankey' | 'net-worth-history' | 'budget-vs-actual' | 'portfolio-performance'
 
 /** Mirrors the API's dedicated `<report>.csv` routes (api/src/routes/v1/reports.ts) — same filter
  * query params, server-generated CSV body. Not a schema-validated JSON endpoint, so it's built for

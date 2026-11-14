@@ -34,13 +34,61 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     isPrivate: false,
     isOwnedByViewer: false,
     ownerFirstName: null,
+    myAccess: "write",
+    isJoint: false,
+    ownerAppuserKey: null,
+    attribution: { appuserKey: null, displayName: null },
     availableBalance: null,
     appuserCurrencyAvailableBalance: null,
     syncStatus: null,
     fxStatus: null,
     fxRateDate: null,
+    creditCard: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
+});
+
+test("reads the caller's access, and derives it for an API that does not send it", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), myAccess: "read" },
+      { ...requiredAccountFields(2), myAccess: "write" },
+      { ...requiredAccountFields(3), isOwnedByViewer: true },
+      { ...requiredAccountFields(4) },
+      { ...requiredAccountFields(5), myAccess: "admin" },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.myAccess),
+    ["read", "write", "owner", "write", "write"],
+  );
+});
+
+test("reads whose an account is: its owner, whether it is joint, and its attribution", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      {
+        ...requiredAccountFields(1),
+        isJoint: false,
+        ownerAppuserKey: 7,
+        attribution: { appuserKey: 7, displayName: "Ana" },
+      },
+      {
+        ...requiredAccountFields(2),
+        isJoint: true,
+        ownerAppuserKey: 7,
+        attribution: { appuserKey: null, displayName: null },
+      },
+    ],
+  });
+
+  const [own, joint] = response.accounts;
+  assert.equal(own.isJoint, false);
+  assert.equal(own.ownerAppuserKey, 7);
+  assert.deepEqual(own.attribution, { appuserKey: 7, displayName: "Ana" });
+  assert.equal(joint.isJoint, true);
+  assert.deepEqual(joint.attribution, { appuserKey: null, displayName: null });
 });
 
 test("derives transitional source when legacy source is null", () => {

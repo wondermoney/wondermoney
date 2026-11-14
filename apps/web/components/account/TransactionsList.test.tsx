@@ -48,3 +48,31 @@ test("a recent transaction with no rate shows its original amount, not one label
   assert.doesNotMatch(text, /€/);
   assert.ok(screen.getByRole("button", { name: /^Not converted\./ }));
 });
+
+test("a row with a merchant leads with its avatar; a row without keeps the category tile", () => {
+  const { container } = render(
+    <NextIntlClientProvider locale="en" messages={commonMessages}>
+      <TransactionsList
+        transactions={[
+          transaction({
+            transactionKey: 1,
+            transactionMerchantKey: {
+              transactionMerchantKey: 9,
+              name: "Starbucks",
+              website: null,
+              logoUrl: null,
+              resolvedLogoUrl: null,
+            },
+          }),
+          transaction({ transactionKey: 2 }),
+        ]}
+      />
+    </NextIntlClientProvider>,
+  );
+
+  const avatars = container.querySelectorAll("[data-merchant-avatar]");
+  assert.equal(avatars.length, 1);
+  assert.equal(avatars[0].textContent, "S");
+  assert.match(container.textContent ?? "", /Starbucks/);
+  assert.match(container.textContent ?? "", /Tokyo hotel/);
+});

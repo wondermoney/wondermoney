@@ -28,6 +28,7 @@ export function BudgetEditRoute() {
         name: detail.data.budget.name,
         description: detail.data.budget.description ?? null,
         rolloverCarriesOverspend: detail.data.budget.rolloverCarriesOverspend ?? null,
+        periodStartDay: detail.data.budget.periodStartDay ?? null,
       },
       refreshing: detail.isRefreshing,
     }

@@ -9,13 +9,18 @@ import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 
+import { SaveTransactionAsTemplateDialog } from "@/components/account/SaveTransactionAsTemplateDialog";
 import TransactionActivity from "@/components/account/TransactionActivity";
+import { TransactionAttachments } from "@/components/account/TransactionAttachments";
+import { TransactionReimbursementField } from "@/components/account/TransactionReimbursementField";
+import { TransactionSpentByField } from "@/components/account/TransactionSpentByField";
 import {
   splitSaveErrorKey,
   TransactionSplitField,
   useSplitDraft,
 } from "@/components/account/TransactionSplitField";
 import { TransactionTransferFields } from "@/components/account/TransactionTransferFields";
+import { TransactionExpenseGroupField } from "@/components/expense-group/TransactionExpenseGroupField";
 import { ApplyRulesDialog } from "@/components/rules/ApplyRulesDialog";
 import { RuleEditorDialog } from "@/components/rules/RuleEditorDialog";
 import { TagPicker } from "@/components/tags/TagPicker";
@@ -39,8 +44,9 @@ import { invalidateTags, useSetTransactionTags } from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { formFromTransaction } from "@/lib/rules/rule-draft";
 import {
+  amountExpressionResult,
   formatLocaleNumberInput,
-  parseLocaleNumber,
+  parseAmountInput,
   zLocaleNumber,
 } from "@/lib/utils/number";
 import { invalidateSpendingTotals } from "@/lib/utils/queryInvalidation";
@@ -57,6 +63,7 @@ import {
 } from "../ui/Form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
+import { AmountExpressionHint } from "../ui/MoneyInput";
 import {
   Sheet,
   SheetContent,
@@ -100,7 +107,9 @@ export function AccountTransactionEditSheet({
 
   const locale = useLocale();
   const formSchema = z.object({
-    updatedAmount: zLocaleNumber(locale, t("invalid-amount")),
+    updatedAmount: zLocaleNumber(locale, t("invalid-amount"), {
+      expressions: true,
+    }),
     description: z.string().optional(),
   });
 
@@ -124,7 +133,7 @@ export function AccountTransactionEditSheet({
   const transactionAmount = useMemo(
     () =>
       typeof watchedAmount === "string"
-        ? (parseLocaleNumber(watchedAmount, locale) ?? Number.NaN)
+        ? (parseAmountInput(watchedAmount, locale) ?? Number.NaN)
         : Number(
             watchedAmount ??
               transaction.editedSettlementAmount ??
@@ -147,7 +156,7 @@ export function AccountTransactionEditSheet({
   const splitTotalUnits = useMemo(() => {
     const typed =
       typeof watchedAmount === "string"
-        ? parseLocaleNumber(watchedAmount, locale)
+        ? parseAmountInput(watchedAmount, locale)
         : Number(watchedAmount ?? transaction.settlementAmount);
     return amountToUnits(
       typed !== null && Number.isFinite(typed) && typed !== 0
@@ -170,6 +179,7 @@ export function AccountTransactionEditSheet({
   );
   const [tagKeys, setTagKeys] = useState<number[]>(initialTagKeys);
   const [creatingRule, setCreatingRule] = useState(false);
+  const [savingAsTemplate, setSavingAsTemplate] = useState(false);
   const [applyingRule, setApplyingRule] = useState<Rule | null>(null);
   const closeApplyingRule = useCallback(() => setApplyingRule(null), []);
   const initialTransfer = isTransferType(transaction.transactionTypeKey?.name);
@@ -305,27 +315,52 @@ export function AccountTransactionEditSheet({
               control={form.control}
               name="updatedAmount"
               defaultValue={transaction.settlementAmount}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("amount")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="tel"
-                      inputMode="decimal"
-                      {...field}
-                      value={formatLocaleNumberInput(field.value, locale)}
+              render={({ field }) => {
+                const settleExpression = () => {
+                  const result = amountExpressionResult(
+                    String(field.value ?? ""),
+                    locale,
+                  );
+                  if (result === null) return false;
+                  field.onChange(formatLocaleNumberInput(result, locale));
+                  return true;
+                };
+                return (
+                  <FormItem>
+                    <FormLabel>{t("amount")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        inputMode="decimal"
+                        {...field}
+                        value={formatLocaleNumberInput(field.value, locale)}
+                        onBlur={() => {
+                          field.onBlur();
+                          settleExpression();
+                        }}
+                        onKeyDown={(event) => {
+                          // Enter settles the expression; a second Enter submits.
+                          if (event.key === "Enter" && settleExpression()) {
+                            event.preventDefault();
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <AmountExpressionHint
+                      locale={locale}
+                      value={String(field.value ?? "")}
                     />
-                  </FormControl>
-                  <FormDescription>
-                    {t("original-settlement-amount")}:{" "}
-                    <Amount
-                      value={transaction.settlementAmount}
-                      currency={transaction.settlementCurrencyKey.code}
-                    />
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                    <FormDescription>
+                      {t("original-settlement-amount")}:{" "}
+                      <Amount
+                        value={transaction.settlementAmount}
+                        currency={transaction.settlementCurrencyKey.code}
+                      />
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             {/* Its category, or the lines of its split. */}
             <TransactionSplitField
@@ -335,6 +370,23 @@ export function AccountTransactionEditSheet({
               amountChanged={amountFieldChanged}
               disabled={isSubmitting}
               onRemoved={() => onOpenChange(false)}
+            />
+            {/* Shared with an expense group: who paid and each person's share. Saves at once. */}
+            <TransactionExpenseGroupField
+              transaction={transaction}
+              categories={categories}
+              disabled={isSubmitting}
+              onChanged={() => onOpenChange(false)}
+            />
+            {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
+            <TransactionReimbursementField
+              transaction={transaction}
+              disabled={isSubmitting}
+            />
+            {/* Whose spending it counts as, in a household of more than one. Saves at once. */}
+            <TransactionSpentByField
+              transaction={transaction}
+              disabled={isSubmitting}
             />
             {/* The transaction's tags, with "create tag" inline. */}
             <div className="space-y-2">
@@ -359,6 +411,11 @@ export function AccountTransactionEditSheet({
                 setIsTransfer(transfer);
                 if (!transfer) setTransferDestination(null);
               }}
+            />
+            {/* Receipts, invoices and warranties kept with the purchase. */}
+            <TransactionAttachments
+              disabled={isSubmitting}
+              transactionKey={transaction.transactionKey}
             />
             <div className="bg-muted space-y-3 rounded-md p-4">
               <div className="space-y-1">
@@ -406,6 +463,25 @@ export function AccountTransactionEditSheet({
             />
           </form>
         </Form>
+        <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
+          <p className="text-muted-foreground text-sm">
+            {t("transactionTemplates.save-as-template-hint")}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setSavingAsTemplate(true)}
+          >
+            {t("transactionTemplates.save-as-template")}
+          </Button>
+        </div>
+        {savingAsTemplate ? (
+          <SaveTransactionAsTemplateDialog
+            transaction={transaction}
+            open
+            onOpenChange={setSavingAsTemplate}
+          />
+        ) : null}
         <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
           <p className="text-muted-foreground text-sm">
             {t("rules.from-transaction-hint")}

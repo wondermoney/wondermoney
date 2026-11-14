@@ -6,12 +6,16 @@ import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
 
+export type PortfolioCostBasisMethod = "AVERAGE" | "FIFO";
+
 export interface Portfolio {
   name: string;
   balance: number;
   currencyKey: { code: SupportedCurrencyCodes };
   portfolioKey: number;
   benchmarkSymbol?: string;
+  /** How a sale relieves cost. FIFO (oldest lots first) is the default. */
+  costBasisMethod?: PortfolioCostBasisMethod;
   description?: string | null;
   excluded?: boolean;
   favored?: boolean;

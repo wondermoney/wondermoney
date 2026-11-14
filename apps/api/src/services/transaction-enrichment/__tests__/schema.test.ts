@@ -19,7 +19,7 @@ describe('transaction enrichment schema', () => {
   it('rejects free form category names and validates schema constraints', () => {
     const inputId = 'a'.repeat(64);
     expect(() => parseTransactionEnrichmentResponseJson(JSON.stringify({ categoryName: 'Groceries', categorySuggestionKey: 1, confidence: 0.9, inputId, merchantSuggestion: 'ACME', reasonCode: 'merchant_suggested' }), inputId, [1])).toThrow();
-    expect(transactionEnrichmentResponseJsonSchema.properties.merchantSuggestion).toMatchObject({ anyOf: [{ maxLength: 80, minLength: 2, type: 'string' }, { type: 'null' }] });
+    expect(transactionEnrichmentResponseJsonSchema.properties?.['merchantSuggestion']).toMatchObject({ anyOf: [{ maxLength: 80, minLength: 2, type: 'string' }, { type: 'null' }] });
     expect(transactionEnrichmentReasonCodes).toEqual([
       'merchant_and_category_suggested',
       'merchant_suggested',

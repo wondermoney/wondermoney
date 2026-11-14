@@ -43,5 +43,17 @@
       "quarterly": "quarterly",
       "yearly": "yearly"
     }
+  },
+  "budgetVisibility": {
+    "household": "Household",
+    "personal": "Personal",
+    "household-budgets": "Household budgets",
+    "personal-budgets": "Personal budgets",
+    "personal-hint": "Only you can see this budget",
+    "wizard-title": "Who is this budget for?",
+    "wizard-description": "You choose this once: a budget can't switch between household and personal later.",
+    "household-description": "Everyone in your household can see it.",
+    "personal-description": "Only you can see it. The other people in your household won't, including its owner and admins.",
+    "private-accounts-excluded": "Private accounts can only be linked to a personal budget."
   }
 }

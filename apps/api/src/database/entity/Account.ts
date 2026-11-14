@@ -1,11 +1,14 @@
+import { Collection } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, Filter, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Filter, Index, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { accountTenantCond, TENANT_FILTER } from '../filters/tenant-filter';
 
 import { AccountFinancialInstitution } from './AccountFinancialInstitution';
+import { AccountShare } from './AccountShare';
 import { AccountType } from './AccountType';
 import { Appuser } from './Appuser';
+import { BankConnection } from './BankConnection';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
 import { EnableBankingConnection } from './EnableBankingConnection';
@@ -84,12 +87,32 @@ export class Account extends Base {
   openingBalanceDate?: Date;
 
   /**
-   * Per-account privacy within a household. Accounts are shared with the
-   * household by default; when `true`, the account and its transactions are visible
-   * only to the owner and hidden from other members everywhere (lists + aggregates).
+   * Per-account privacy within a household. Accounts are shared with the household by default:
+   * every member sees and changes them. When `true`, the account and its transactions are visible
+   * only to the owner and to the members it is shared with (`shares`), and hidden from everyone
+   * else everywhere (lists and aggregates). `services/account/account-access.ts` holds the rule.
    */
   @Property({ default: false })
   isPrivate = false;
+
+  /** Who else may see (and, with `write`, change) the account while it is private. */
+  @OneToMany(() => AccountShare, (share) => share.accountKey)
+  shares = new Collection<AccountShare>(this);
+  /**
+   * A joint account: its money is the household's, not one member's. Reporting counts its
+   * transactions as Shared, unless a transaction names a member (`Transaction.attributedAppuserKey`),
+   * and a member's own net worth leaves it out. Attribution only, never visibility: who sees the
+   * account is `isPrivate`'s rule. False by default, so an account belongs to its owner
+   * (`services/household/member-attribution.ts`).
+   */
+  @Property({ default: false })
+  isJoint = false;
+
+  // The provider-agnostic connection. New sync paths read this; `enableBankingConnectionKey`
+  // and `nordigenRequisitionKey` stay for rows linked before the provider interface existed.
+  @Index()
+  @ManyToOne({ cascade: [], entity: () => BankConnection, fieldName: 'bank_connection_key', nullable: true })
+  bankConnectionKey?: Rel<BankConnection>;
 
   // Enable Banking connection. `nordigenRequisitionKey` stays alongside it for accounts linked
   // through the legacy provider.

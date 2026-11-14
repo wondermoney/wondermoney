@@ -1,0 +1,44 @@
+{{- $api := include "wondermoney.componentName" (dict "root" . "component" "api") }}
+{{- $web := include "wondermoney.componentName" (dict "root" . "component" "web") }}
+# `helm test <release>`: the API and the web app answer inside the cluster, and the worker has
+# finished a job recently (the API's readiness report).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "wondermoney.fullname" . }}-test
+  labels:
+    {{- include "wondermoney.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    {{- include "wondermoney.podSecurityContext" . | nindent 4 }}
+  containers:
+    - name: health
+      # The API image ships curl.
+      image: {{ include "wondermoney.image" (dict "root" . "image" .Values.api.image) }}
+      {{- with .Values.image.pullPolicy }}
+      imagePullPolicy: {{ . }}
+      {{- end }}
+      securityContext:
+        {{- include "wondermoney.containerSecurityContext" . | nindent 8 }}
+      command:
+        - sh
+        - -c
+        - |
+          set -eu
+          curl -fsS "http://{{ $api }}:3001/v1/health"
+          echo
+          curl -fsS -o /dev/null "http://{{ $web }}:3000/health"
+          echo "web: ok"
+          # The worker sends a heartbeat when it starts; give it a minute.
+          i=0
+          until curl -fsS "http://{{ $api }}:3001/v1/health/ready"; do
+            i=$((i + 1))
+            [ "$i" -lt 30 ] || exit 1
+            sleep 2
+          done
+          echo

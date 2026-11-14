@@ -11,16 +11,40 @@ import { Text as UiText } from '@/components/ui/text'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import { accountUpdateWriteSchema, type AccountUpdateWrite } from './accounts-contract'
+import { canWriteAccount } from './account-access'
+import {
+  buildAccountSharesWrite,
+  initialShareChoices,
+  shareChoicesDiffer,
+  type AccountSharesWrite,
+  type ShareChoice,
+  type ShareChoices,
+} from './account-sharing-contract'
+import { AccountSharingPlaceholder, AccountSharingSection, type AccountSharingViewState } from './account-sharing-section'
+import {
+  accountUpdateWriteSchema,
+  creditCardWriteSchema,
+  type AccountAccess,
+  type AccountUpdateWrite,
+  type CreditCardSettingsDto,
+  type CreditCardWrite,
+} from './accounts-contract'
 import { LoadingState } from './screen-states'
 import { classifyAccountDeleteFailure, type AccountDeleteFailure } from './use-account-delete-mutation'
 import { classifyAccountWriteFailure, type AccountWriteFailure } from './use-account-metadata-mutation'
+import { classifyAccountSharingFailure, type AccountSharingFailure } from './use-account-shares'
 
 export type AccountEditModel = Readonly<{
   id: number
   name: string
   isPrivate: boolean
   isOwnedByViewer: boolean
+  /** Joint: its spending counts as Shared. Absent when the API doesn't say (older servers). */
+  isJoint?: boolean
+  /** The card's cycle and limit, or null when the account is not a credit card. */
+  creditCard?: CreditCardSettingsDto | null
+  /** The caller's access. `read`: the account's details can't change; only its sharing shows. */
+  myAccess?: AccountAccess
 }>
 
 export type AccountEditViewState =
@@ -33,21 +57,79 @@ type Props = Readonly<{
   onBack: () => void
   onRetry: () => void | Promise<void>
   onSaveAccount: (value: AccountUpdateWrite) => Promise<void>
+  onSaveCreditCard: (value: CreditCardWrite) => Promise<void>
   onDeleteAccount: () => Promise<void>
   pending: boolean
+  creditCardPending: boolean
   deletePending: boolean
+  /**
+   * Who sees the account (#95). Omitted or `unsupported` (an API from before per-member sharing),
+   * the owner keeps the private switch, saved with the name.
+   */
+  sharing?: AccountSharingViewState
+  /** `PUT /v1/account/:id/shares`, with the body the per-member control maps to. */
+  onSaveSharing?: (value: AccountSharesWrite) => Promise<void>
+  onRetrySharing?: () => void
+  sharingPending?: boolean
+  /** The household has more than one member: only then is "Joint account" offered. */
+  multiMember?: boolean
 }>
 
 
+export type CreditCardForm = Readonly<{
+  enabled: boolean
+  statementCloseDay: string
+  paymentDueDay: string
+  creditLimit: string
+  minimumPaymentPercent: string
+}>
+
+const optionalNumber = (value: string): null | number => {
+  const trimmed = value.trim()
+  if (trimmed === '') return null
+  const parsed = Number(trimmed)
+  return Number.isFinite(parsed) ? parsed : Number.NaN
+}
+
+/**
+ * The card settings to send, or null when there is nothing to change. A card cannot be un-marked:
+ * there is no endpoint that removes the cycle, so turning the switch off sends nothing.
+ */
+export function createCreditCardChanges(
+  original: CreditCardSettingsDto | null,
+  form: CreditCardForm,
+): CreditCardWrite | null {
+  if (!form.enabled) return null
+  const next: CreditCardWrite = {
+    statementCloseDay: Number(form.statementCloseDay),
+    paymentDueDay: Number(form.paymentDueDay),
+    creditLimit: optionalNumber(form.creditLimit),
+    minimumPaymentPercent: optionalNumber(form.minimumPaymentPercent),
+  }
+  if (!original) return next
+  const unchanged = original.statementCloseDay === next.statementCloseDay
+    && original.paymentDueDay === next.paymentDueDay
+    && (original.creditLimit ?? null) === (next.creditLimit ?? null)
+    && (original.minimumPaymentPercent ?? null) === (next.minimumPaymentPercent ?? null)
+  return unchanged ? null : next
+}
+
 export function createAccountMetadataChanges(
-  original: Pick<AccountEditModel, 'name' | 'isPrivate' | 'isOwnedByViewer'>,
-  current: { name: string; isPrivate: boolean },
+  original: Pick<AccountEditModel, 'name' | 'isPrivate' | 'isOwnedByViewer' | 'isJoint'>,
+  current: { name: string; isPrivate: boolean; isJoint?: boolean },
 ): AccountUpdateWrite | null {
   const changes: AccountUpdateWrite = {}
   if (current.name !== original.name) changes.accountName = current.name
   if (original.isOwnedByViewer && current.isPrivate !== original.isPrivate) changes.isPrivate = current.isPrivate
+  // Owner only, like privacy; an account whose joint state the API didn't send is never changed.
+  if (original.isOwnedByViewer && original.isJoint !== undefined && current.isJoint !== undefined && current.isJoint !== original.isJoint) changes.isJoint = current.isJoint
   return Object.keys(changes).length > 0 ? changes : null
 }
+
+/** "Joint account" is the owner's to set, in a household of more than one, on an API that reports it. */
+export const canSetJointAccount = (model: Pick<AccountEditModel, 'isOwnedByViewer' | 'isJoint'>, multiMember: boolean): boolean => (
+  model.isOwnedByViewer && multiMember && model.isJoint !== undefined
+)
 
 const confirmDiscard = (title: string, message: string, cancel: string, proceed: string) => new Promise<boolean>((resolve) => {
   Alert.alert(title, message, [
@@ -65,16 +147,41 @@ export function AccountEditScreen(props: Props) {
   return <AccountEditForm key={props.state.model.id} {...props} model={props.state.model} stale={props.state.status === 'refresh-error'} palette={palette} />
 }
 
-function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount, pending, deletePending, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
+function AccountEditForm({ model, stale, onBack, onSaveAccount, onSaveCreditCard, onDeleteAccount, pending, creditCardPending, deletePending, sharing = { status: 'unsupported' }, onSaveSharing, onRetrySharing, sharingPending = false, multiMember = false, palette }: Omit<Props, 'state' | 'onRetry'> & { model: AccountEditModel; stale: boolean; palette: Palette }) {
   const { t } = useTranslation()
+  // A member who can only view the account sees its sharing and nothing to change on it.
+  const readOnly = !canWriteAccount(model)
+  // An older API has no per-member sharing: the owner's private switch is saved with the name.
+  const legacyPrivacy = sharing.status === 'unsupported'
+  const shares = sharing.status === 'loaded' ? sharing.shares : null
+  const [shareOverrides, setShareOverrides] = useState<ShareChoices>({})
+  const [privateOverride, setPrivateOverride] = useState<boolean | null>(null)
+  const [sharingFailure, setSharingFailure] = useState<AccountSharingFailure | null>(null)
+  const initialChoices = shares ? initialShareChoices(shares) : {}
+  const choices: ShareChoices = { ...initialChoices, ...shareOverrides }
+  const privateToggle = privateOverride ?? shares?.isPrivate ?? false
+  const sharingEditable = Boolean(shares?.canManage && onSaveSharing)
+  const sharingChanges = shares && sharingEditable && (shareChoicesDiffer(shares, initialChoices, choices) || privateToggle !== shares.isPrivate)
+    ? buildAccountSharesWrite(shares, choices, privateToggle)
+    : null
   const [saved, setSaved] = useState(model)
   const [name, setName] = useState(model.name)
   const [isPrivate, setIsPrivate] = useState(model.isPrivate)
+  const [isJoint, setIsJoint] = useState(model.isJoint)
+  const showJoint = canSetJointAccount(model, multiMember)
+  const [cardEnabled, setCardEnabled] = useState(Boolean(model.creditCard))
+  const [statementCloseDay, setStatementCloseDay] = useState(String(model.creditCard?.statementCloseDay ?? 1))
+  const [paymentDueDay, setPaymentDueDay] = useState(String(model.creditCard?.paymentDueDay ?? 1))
+  const [creditLimit, setCreditLimit] = useState(model.creditCard?.creditLimit == null ? '' : String(model.creditCard.creditLimit))
+  const [minimumPaymentPercent, setMinimumPaymentPercent] = useState(model.creditCard?.minimumPaymentPercent == null ? '' : String(model.creditCard.minimumPaymentPercent))
   const [failure, setFailure] = useState<AccountWriteFailure | null>(null)
   const [deleteFailure, setDeleteFailure] = useState<AccountDeleteFailure | null>(null)
-  const changes = createAccountMetadataChanges(saved, { name, isPrivate })
-  const dirty = changes !== null
-  const locked = pending || deletePending
+  const changes = readOnly ? null : createAccountMetadataChanges(saved, { name, isPrivate: legacyPrivacy ? isPrivate : saved.isPrivate, isJoint: showJoint ? isJoint : saved.isJoint })
+  const cardForm: CreditCardForm = { creditLimit, enabled: cardEnabled, minimumPaymentPercent, paymentDueDay, statementCloseDay }
+  const cardChanges = readOnly ? null : createCreditCardChanges(saved.creditCard ?? null, cardForm)
+  const dirty = changes !== null || cardChanges !== null || sharingChanges !== null
+  const locked = pending || creditCardPending || deletePending || sharingPending
+  const saving = pending || creditCardPending || sharingPending
 
   const deleteAccount = async () => {
     if (locked) return
@@ -101,15 +208,80 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
   })
 
   const saveAccount = async () => {
-    if (!changes || locked) return
-    if (!accountUpdateWriteSchema.safeParse(changes).success) { setFailure('invalid'); return }
+    if (!dirty || locked) return
+    if (changes && !accountUpdateWriteSchema.safeParse(changes).success) { setFailure('invalid'); return }
+    if (cardChanges && !creditCardWriteSchema.safeParse(cardChanges).success) { setFailure('invalid'); return }
     setFailure(null)
+    setSharingFailure(null)
     try {
-      await onSaveAccount(changes)
-      setSaved((current) => ({ ...current, name, isPrivate }))
+      if (cardChanges) await onSaveCreditCard(cardChanges)
+      if (changes) await onSaveAccount(changes)
+      setSaved((current) => ({
+        ...current,
+        name,
+        isPrivate: legacyPrivacy ? isPrivate : current.isPrivate,
+        isJoint: changes?.isJoint ?? current.isJoint,
+        creditCard: cardChanges
+          ? {
+              statementCloseDay: cardChanges.statementCloseDay,
+              paymentDueDay: cardChanges.paymentDueDay,
+              creditLimit: cardChanges.creditLimit ?? null,
+              minimumPaymentPercent: cardChanges.minimumPaymentPercent ?? null,
+            }
+          : current.creditCard,
+      }))
     } catch (error) {
       setFailure(classifyAccountWriteFailure(error))
+      return
     }
+    if (!sharingChanges || !onSaveSharing) return
+    try {
+      await onSaveSharing(sharingChanges)
+      // The answer is the new sharing, so the control starts again from it.
+      setShareOverrides({})
+      setPrivateOverride(null)
+    } catch (error) {
+      setSharingFailure(classifyAccountSharingFailure(error))
+    }
+  }
+
+  const sharingSection = shares ? (
+    <AccountSharingSection
+      choices={choices}
+      disabled={locked || !sharingEditable}
+      onChange={(appuserKey: number, choice: ShareChoice) => setShareOverrides((current) => ({ ...current, [appuserKey]: choice }))}
+      onPrivateToggle={setPrivateOverride}
+      privateToggle={privateToggle}
+      shares={shares}
+    />
+  ) : sharing.status === 'loading' || sharing.status === 'error'
+    ? <AccountSharingPlaceholder onRetry={onRetrySharing} status={sharing.status} />
+    : null
+  const sharingFailureNotice = sharingFailure ? <Notice message={t(`accountEdit.sharing.failures.${sharingFailure}`)} tone="destructive" /> : null
+
+  if (readOnly) {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
+        <FormBar
+          closeDisabled={locked}
+          closeLabel={t('common.close')}
+          onClose={() => void requestExit()}
+          onSave={sharingEditable ? () => void saveAccount() : undefined}
+          saveDisabled={!dirty || locked}
+          saveLabel={saving ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
+          saving={saving}
+          title={t('accountEdit.sharing.screenTitle')}
+        />
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.page}>
+            <Notice message={t('common.accountReadOnly')} testID="account-edit-read-only" />
+            {stale ? <Notice message={t('accountEdit.stale')} /> : null}
+            {sharingFailureNotice}
+            {sharingSection}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -120,8 +292,8 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
         onClose={() => void requestExit()}
         onSave={() => void saveAccount()}
         saveDisabled={!dirty || locked}
-        saveLabel={pending ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
-        saving={pending}
+        saveLabel={saving ? t('accountEdit.saving') : t('accountEdit.saveDetails')}
+        saving={saving}
         title={t('accountEdit.title')}
       />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
@@ -131,6 +303,7 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
             {stale ? <Notice message={t('accountEdit.stale')} /> : null}
             {failure ? <Notice message={t(`accountEdit.failures.${failure}`)} tone="destructive" /> : null}
             {deleteFailure ? <Notice message={t(`accountEdit.deleteFailures.${deleteFailure}`)} tone="destructive" /> : null}
+            {sharingFailureNotice}
             <FormGroup>
               <FormTextRow
                 key="name"
@@ -143,7 +316,7 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
                 onChangeText={setName}
                 value={name}
               />
-              {model.isOwnedByViewer ? (
+              {legacyPrivacy && model.isOwnedByViewer ? (
                 <FormSwitchRow
                   key="privacy"
                   accessibilityLabel={t('accountEdit.privacySwitch')}
@@ -153,6 +326,75 @@ function AccountEditForm({ model, stale, onBack, onSaveAccount, onDeleteAccount,
                   onValueChange={setIsPrivate}
                   value={isPrivate}
                 />
+              ) : null}
+              {showJoint ? (
+                <FormSwitchRow
+                  key="joint"
+                  accessibilityLabel={t('memberAttribution.jointTitle')}
+                  disabled={locked}
+                  hint={t('memberAttribution.jointHelper')}
+                  label={t('memberAttribution.jointTitle')}
+                  onValueChange={setIsJoint}
+                  testID="account-joint-switch"
+                  value={isJoint === true}
+                />
+              ) : null}
+            </FormGroup>
+            {sharingSection}
+            <FormGroup>
+              <FormSwitchRow
+                key="credit-card"
+                accessibilityHint={t('accountEdit.creditCardHelper')}
+                accessibilityLabel={t('accountEdit.creditCardTitle')}
+                disabled={locked || Boolean(model.creditCard)}
+                hint={t('accountEdit.creditCardHelper')}
+                label={t('accountEdit.creditCardTitle')}
+                onValueChange={setCardEnabled}
+                value={cardEnabled}
+              />
+              {cardEnabled ? (
+                <>
+                  <FormTextRow
+                    key="close-day"
+                    accessibilityLabel={t('accountEdit.statementCloseDay')}
+                    editable={!locked}
+                    keyboardType="number-pad"
+                    label={t('accountEdit.statementCloseDay')}
+                    maxLength={2}
+                    onChangeText={setStatementCloseDay}
+                    value={statementCloseDay}
+                  />
+                  <FormTextRow
+                    key="due-day"
+                    accessibilityLabel={t('accountEdit.paymentDueDay')}
+                    editable={!locked}
+                    keyboardType="number-pad"
+                    label={t('accountEdit.paymentDueDay')}
+                    maxLength={2}
+                    onChangeText={setPaymentDueDay}
+                    value={paymentDueDay}
+                  />
+                  <FormTextRow
+                    key="limit"
+                    accessibilityLabel={t('accountEdit.creditLimit')}
+                    editable={!locked}
+                    keyboardType="decimal-pad"
+                    label={t('accountEdit.creditLimit')}
+                    onChangeText={setCreditLimit}
+                    placeholder={t('accountEdit.optional')}
+                    value={creditLimit}
+                  />
+                  <FormTextRow
+                    key="minimum"
+                    accessibilityLabel={t('accountEdit.minimumPaymentPercent')}
+                    editable={!locked}
+                    keyboardType="decimal-pad"
+                    label={t('accountEdit.minimumPaymentPercent')}
+                    onChangeText={setMinimumPaymentPercent}
+                    placeholder={t('accountEdit.optional')}
+                    value={minimumPaymentPercent}
+                  />
+                </>
               ) : null}
             </FormGroup>
             <View style={styles.danger}>

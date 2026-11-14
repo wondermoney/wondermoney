@@ -12,6 +12,7 @@ import { usePalette } from '@/theme/use-palette'
 import { AppLockSection, type AppLockSectionProps } from './app-lock-section'
 import { DataExportSection, type DataExportSectionProps } from './data-export-section'
 import { MfaSecuritySection, type MfaSecuritySectionProps } from './mfa-security-section'
+import { PasskeysSection, type PasskeysSectionProps } from './passkeys-section'
 import { PasswordChangeSection, type PasswordChangeSectionProps } from './password-change-section'
 import type { DeleteAccountFailure } from './use-delete-account'
 
@@ -24,9 +25,11 @@ export type SecurityScreenProps = {
   password: Omit<PasswordChangeSectionProps, 'palette'>
   appLock: Omit<AppLockSectionProps, 'palette'>
   dataExport: DataExportSectionProps
+  /** Null on a server without passkeys (or one older than them): the section is left out. */
+  passkeys?: PasskeysSectionProps | null
 }
 
-export function SecurityScreen({ pending, outcome, onBack, onDelete, mfa, password, appLock, dataExport }: SecurityScreenProps) {
+export function SecurityScreen({ pending, outcome, onBack, onDelete, mfa, password, appLock, dataExport, passkeys = null }: SecurityScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
   const [acknowledged, setAcknowledged] = useState(false)
@@ -35,6 +38,8 @@ export function SecurityScreen({ pending, outcome, onBack, onDelete, mfa, passwo
   return (
     <SettingsPage backDisabled={pending} backLabel={t('self.back')} onBack={onBack} section="security">
       <PasswordChangeSection {...password} palette={palette} />
+
+      {passkeys ? <PasskeysSection {...passkeys} /> : null}
 
       <MfaSecuritySection {...mfa} palette={palette} />
 

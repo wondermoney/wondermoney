@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getAccount } from "@/lib/api/account/useAccount";
+import { getAccountForecast } from "@/lib/api/account/useAccountForecast";
 import { getAccountMetrics } from "@/lib/api/account/useAccountMetrics";
 import { getAccounts } from "@/lib/api/account/useAccounts";
 import { getAccountTransactions } from "@/lib/api/account/useAccountTransactions";
@@ -12,10 +13,12 @@ import AccountClient from "./account-client";
 
 interface AccountPageProps {
   params: Promise<{ locale: string; accountId: string }>;
+  searchParams: Promise<{ tab?: string | string[] }>;
 }
 
-export default async function AccountPage({ params }: AccountPageProps) {
+export default async function AccountPage({ params, searchParams }: AccountPageProps) {
   const { locale, accountId: accountIdParam } = await params;
+  const { tab } = await searchParams;
   const accountId = Number(accountIdParam);
 
   if (!accountId || Number.isNaN(accountId)) {
@@ -32,6 +35,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
     transactionsData,
     configsData,
     accountMetricsData,
+    forecastData,
   ] = await Promise.all([
       getAccount(accountId, api),
       // The client gates its first render on the accounts list too. Unseeded,
@@ -41,6 +45,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
       getAccountTransactions({ accountId }, api),
       getConfigs(api),
       getAccountMetrics(accountId, api),
+      getAccountForecast({ accountKeys: [accountId], days: 30 }, api),
     ]);
 
   return (
@@ -52,6 +57,8 @@ export default async function AccountPage({ params }: AccountPageProps) {
       initialTransactionsData={transactionsData}
       initialConfigsData={configsData}
       initialAccountMetricsData={accountMetricsData}
+      initialForecastData={forecastData}
+      initialTab={Array.isArray(tab) ? tab[0] : tab}
     />
   );
 }

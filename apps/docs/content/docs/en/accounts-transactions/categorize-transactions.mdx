@@ -24,6 +24,14 @@ Each row shows a confidence indicator for the suggestion — high, medium, or lo
 
 Items you correct are used to learn the mapping for that merchant, so the next transaction from the same merchant is easier to categorize.
 
+## Local suggestions
+
+WonderMoney can suggest a category without sending anything to an AI service. It learns from the categories you have already confirmed — the ones you chose yourself and the ones it was sure about — and compares a new transaction's merchant, description, account, direction and amount range with that history. When the match is clear it fills in the category and marks it with medium confidence, so the transaction still appears in the Review Inbox for you to approve or change.
+
+It only suggests a category when it is confident; otherwise it stays quiet and the transaction is left for you to categorize or, if AI is configured, for an AI suggestion. The local suggestion runs before any AI step and needs no AI provider. It never sends your data anywhere, so it also runs when you have hidden AI in your settings. Withdrawals and transfers are never labelled this way, because their description does not say what the money was for.
+
+The more transactions you confirm, the better the local suggestions get. Private accounts you can't see never train your suggestions.
+
 If your household has rules, they run first on every new transaction, whether it comes from bank sync, a file import, a receipt or one you add by hand. A category a rule sets wins over the learned mapping, and such a transaction is not sent for an AI suggestion. Rules never change a category you chose yourself, nor a description or merchant you typed or edited, and they run once, when the transaction arrives: a later sync does not undo your changes. A transaction's activity history names the rule that changed it.
 
 ## Before you start
@@ -60,7 +68,7 @@ If the amount of a split transaction changes later, for example when a pending p
 
 ## Tags
 
-Tags label transactions across categories. A transaction has one category but can carry several tags, so a tag suits anything that cuts across categories: a trip, a home renovation, a work expense you will claim back. Tags belong to the household, so both members see and use the same list.
+Tags label transactions across categories. A transaction has one category but can carry several tags, so a tag suits anything that cuts across categories: a trip, a home renovation, a work expense you will claim back. Tags belong to the household, so everyone in it sees and uses the same list.
 
 ### Add or remove tags
 
@@ -68,6 +76,8 @@ Tags label transactions across categories. A transaction has one category but ca
 - **In the mobile app**, tap a transaction to open its details and choose **Edit tags**, or use **Edit tags** from the row's menu. Type a name under **New tag** to create one. When you add a transaction by hand, the **Tags** row opens the same picker.
 
 A transaction can carry up to 50 tags. Tag names are unique in a household regardless of capitalization, so "Trip" and "trip" are the same tag.
+
+To tag several transactions at once, select them and choose **Tag** in the bar (in the mobile app too), then a tag under **Add tag** or **Remove tag**. Only existing tags are offered there; create new ones in **Settings → Tags** or while editing a transaction. With every matching transaction selected, the tag goes on all of them (see [Change several transactions at once](/en/docs/accounts-transactions/understand-transactions#change-several-transactions-at-once)).
 
 ### See and filter by tag
 
@@ -89,7 +99,7 @@ Every household has the system category **Investments and savings**, with **Inve
 
 Every category, system categories included, has a **Counts as spending** switch. It is on by default, except for Investments and savings. Turn it off for a category, such as a savings pot of your own, and its transactions leave spending too. Turn it on for Investments and savings if you want those transactions counted as spending. Switching a category also switches the categories under it, and a category under one that does not count as spending does not count either.
 
-The switch applies to your household only: both of you see the same setting, and no other household is affected.
+The switch applies to your household only: everyone in it sees the same setting, and no other household is affected.
 
 - **On the web**, go to **Settings → Categories** and use the **Counts as spending** switch on any row. For a category of your own, it is also in the form when you create or edit it.
 - **In the mobile app**, a system category has its **Counts as spending** switch on its row in **Settings → Categories**. For a category of your own, use **Counts as spending** when you create or edit it. Categories that do not count are labelled in the list.
@@ -98,7 +108,7 @@ The switch applies to your household only: both of you see the same setting, and
 
 WonderMoney recognizes a transfer between two of your own accounts when it finds both sides: the money leaving one account and the same amount arriving on the other a few days later at most. Both rows are then left out of income and spending. A payment to a broker, or to an account you have not connected, has no other side, so it stays a payment until you mark it.
 
-Between two accounts in different currencies the amounts differ. WonderMoney converts the amount that left at the exchange rate for that day and pairs the two when the amount that arrived is within 2 percent of it, which leaves room for the bank's exchange margin and fees. With no exchange rate for that day, or with two equally likely matches, it leaves both rows as they are, and you can mark the transfer yourself. It never pairs a shared account with a private one, or private accounts of two different members.
+Between two accounts in different currencies the amounts differ. WonderMoney converts the amount that left at the exchange rate for that day and pairs the two when the amount that arrived is within 2 percent of it, which leaves room for the bank's exchange margin and fees. With no exchange rate for that day, or with two equally likely matches, it leaves both rows as they are, and you can mark the transfer yourself. It pairs two accounts only when exactly the same people can see both: never a shared account with a private one, or two private accounts shared with different people.
 
 - **On the web**, open the transaction's menu, choose **Edit** and turn on **Mark as transfer**.
 - **In the mobile app**, open the row's menu and choose **Mark as transfer**.

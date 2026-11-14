@@ -21,7 +21,12 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./bank-sync": "./lib/bank-sync/index.ts",
+    "./crypto-wallet": "./lib/crypto-wallet/index.ts",
     "./decimal": "./lib/decimal/index.ts",
+    "./amount-expression": "./lib/amount-expression/index.ts",
+    "./dashboard-layout": "./lib/dashboard-layout/index.ts",
+    "./name-match": "./lib/import/name-match.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -37,20 +42,21 @@
     "big.js": "^7.0.1",
     "csv-parse": "^7.0.3",
     "eodhd": "^1.0.1",
+    "fast-xml-parser": "^5.12.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.5",
+    "@eslint/js": "10.0.1",
     "@types/big.js": "^7.0.0",
     "@types/node": "^26.6.6",
     "@vitest/ui": "5.1.0",
-    "eslint": "9.39.5",
+    "eslint": "10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.13.0",
     "prettier": "^3.9.10",
     "tsup": "9.0.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.1",
+    "typescript-eslint": "8.72.2",
     "vitest": "5.1.0"
   }
 }

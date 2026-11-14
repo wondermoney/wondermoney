@@ -81,13 +81,14 @@ export async function getSankeyReport(input: ReportServiceInput): Promise<Report
   const accountTotals = new Map<string, { label: string; value: number }>();
 
   // One flow per category line: a split transaction feeds each of its lines' categories. A line in a
-  // category that is not spending (investments, savings) is no flow.
+  // category that is not spending (investments, savings) is no flow, and neither is a line with
+  // nothing left (a refund wholly taken off the expense it is linked to, `category-lines.ts`).
   const flows = visible.flatMap((transaction) => {
     // In the viewer's currency; a row no rate converts is left out and counted.
     const converted = amounts.amountOf(transaction);
     if (converted === null) return [];
     return spendingLinesOf(transaction, converted, spendingFlags)
-      .filter((line) => lineMatchesCategoryKeys(line, categoryKeys))
+      .filter((line) => lineMatchesCategoryKeys(line, categoryKeys) && line.amount !== 0)
       .map((line) => ({ account: transaction.accountKey, amount: line.amount ?? 0, assignedCategory: line.category }));
   });
 

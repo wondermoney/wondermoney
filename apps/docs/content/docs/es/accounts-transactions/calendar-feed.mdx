@@ -1,0 +1,54 @@
+---
+title: Feed de calendario
+description: Suscríbete a tus próximos pagos en Google Calendar, Apple Calendar o cualquier aplicación iCal.
+---
+
+WonderMoney puede publicar tus pagos recurrentes confirmados como un feed de calendario de solo lectura. Suscríbete una vez y tus pagos aparecen como eventos de día completo en la aplicación de calendario que ya usas.
+
+## Antes de empezar
+
+El feed muestra solo pagos recurrentes confirmados. Confirma primero las series que quieres ver en **Pagos y suscripciones**; una serie todavía en revisión no se incluye.
+
+## Crear el enlace
+
+1. Abre **Ajustes → Feed de calendario**.
+2. Selecciona **Crear enlace**.
+3. Copia el enlace y pégalo en tu aplicación de calendario.
+4. Selecciona **Ya lo he copiado**.
+
+El enlace contiene un token, así que trátalo como una contraseña. Solo se muestra una vez. Si lo pierdes, crea un enlace nuevo; el anterior deja de funcionar.
+
+Crear un enlace requiere una sesión reciente. Si usas autenticación en dos pasos, introduce también el código del autenticador.
+
+## Suscribirse
+
+- **Google Calendar**: **Otros calendarios → Desde URL**, pega el enlace y añade el calendario.
+- **Apple Calendar**: **Archivo → Nueva suscripción de calendario**, pega el enlace y elige la frecuencia de actualización.
+
+Otras aplicaciones compatibles con suscripciones iCal o webcal funcionan igual.
+
+## Qué contiene el feed
+
+- Un evento de día completo por cada pago previsto en los próximos 90 días.
+- El título del evento es el nombre de la serie y su importe esperado, con el formato del idioma en que se creó el enlace.
+- Sin saldos, nombres de cuenta ni números de cuenta.
+
+El feed sigue las mismas reglas de privacidad que la aplicación: un pago en una cuenta privada aparece solo en el feed de las personas que ven esa cuenta.
+
+## Actualizar y revocar
+
+El feed anuncia un intervalo de actualización de 12 horas, pero es la aplicación de calendario la que decide cuándo lo obtiene. Un cambio en una serie aparece en la siguiente actualización.
+
+Para detener el feed, selecciona **Revocar enlace** en **Ajustes → Feed de calendario**. El enlace deja de funcionar de inmediato; una aplicación de calendario ya suscrita sigue mostrando los últimos eventos que obtuvo hasta que elimines la suscripción.
+
+## Problemas habituales
+
+- **Sin eventos**: puede que la serie aún no esté confirmada, o que el próximo pago quede fuera de los 90 días.
+- **Idioma incorrecto**: el enlace lleva el idioma en que se creó. Crea un enlace nuevo después de cambiar de idioma.
+- **El enlace dejó de funcionar**: se revocó o se sustituyó. Crea un enlace nuevo y vuelve a suscribirte.
+
+## Enlaces relacionados
+
+- [Pagos recurrentes](/es/docs/accounts-transactions/recurring-payments)
+- [Tokens de API](/es/docs/settings-security-privacy/api-tokens)
+- [Privacidad de datos](/es/docs/settings-security-privacy/data-privacy)

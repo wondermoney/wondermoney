@@ -90,6 +90,25 @@ const createFormSchema = (t: (key: string) => string, locale: string) =>
 
 type FormProps = z.infer<ReturnType<typeof createFormSchema>>;
 
+const TRADE_TYPE_NAMES = new Set(["BUY", "SELL"]);
+
+/**
+ * The types an existing row may be switched to, matching the API's rule: a buy or sell may
+ * become the other, any other row (a dividend) keeps its own type. Quantity and unit price
+ * mean different things on a trade and a dividend, so switching between them is refused.
+ */
+function typesEditableFrom<
+  T extends { financialTransactionTypeKey: number | string; name: string },
+>(types: T[], currentTypeId: number): T[] {
+  const isCurrent = (type: T) =>
+    Number(type.financialTransactionTypeKey) === Number(currentTypeId);
+  const current = types.find(isCurrent);
+  if (current && TRADE_TYPE_NAMES.has(current.name)) {
+    return types.filter((type) => TRADE_TYPE_NAMES.has(type.name));
+  }
+  return types.filter(isCurrent);
+}
+
 const PortfolioTransactionEditModal = (
   props: PortfolioTransactionEditModalProps,
 ) => {
@@ -105,13 +124,12 @@ const PortfolioTransactionEditModal = (
   const hasFees = data.feeAmount != null && Number(data.feeAmount) > 0;
   const hasOriginalCurrency =
     data.originalUnitPrice != null && Number(data.originalUnitPrice) > 0;
-  const selectableTransactionTypes =
-    configsData?.financialTransactionTypes.filter(
-      (transactionType) =>
-        transactionType.name !== "DIVIDEND" ||
-        String(transactionType.financialTransactionTypeKey) ===
-          String(data.financialTransactionTypeId),
-    );
+  const selectableTransactionTypes = configsData
+    ? typesEditableFrom(
+        configsData.financialTransactionTypes,
+        data.financialTransactionTypeId,
+      )
+    : undefined;
 
   const [enableFees, setEnableFees] = useState(hasFees);
   const [enableOriginalCurrency, setEnableOriginalCurrency] =

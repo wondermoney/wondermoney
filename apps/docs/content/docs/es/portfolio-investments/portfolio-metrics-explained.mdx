@@ -39,6 +39,29 @@ Las compras nuevas, las ventas, las transferencias y cualquier coste de compra r
 ### Malentendido habitual
 El coste base no es lo mismo que el valor actual.
 
+## Método de coste: FIFO y coste medio
+
+### Qué significa
+El método de coste decide qué coste de compra consume una venta. FIFO (primero en entrar, primero en salir) vende primero los lotes más antiguos. El coste medio consume la media corriente de todo lo que sigues teniendo, y una venta no cambia esa media.
+
+### Dónde aparece
+En los ajustes de la cartera, donde eliges el método, y en la sección de lotes de los detalles de una posición, que lista cada lote de compra con la fecha, la cantidad, la cantidad restante, el coste unitario y las comisiones.
+
+### Cómo interpretarlo
+Elige el método que usan tus normas fiscales. Portugal y España usan FIFO; Brasil y otras jurisdicciones usan el coste medio. Cambiar el método recalcula las ganancias realizadas de la cartera y reconstruye su historial diario con el nuevo coste.
+
+### Ejemplo
+Compra 10 unidades a 100 y 10 unidades a 200, y vende 10.
+
+- FIFO consume el primer lote: coste realizado de 1.000 y las 10 unidades restantes mantienen un coste medio de 200.
+- El coste medio consume la mitad de los 3.000 totales: coste realizado de 1.500 y las 10 unidades restantes mantienen un coste medio de 150.
+
+### Qué puede hacer que cambie
+Cambiar el método en los ajustes de la cartera, compras y ventas nuevas, splits, comisiones y correcciones de transacciones.
+
+### Malentendido habitual
+El método cambia el coste base y las ganancias realizadas, no el valor de mercado de lo que tienes. Una venta nunca cambia el coste medio por unidad con el método de coste medio.
+
 ## Valor de mercado
 
 ### Qué significa
@@ -76,19 +99,28 @@ Solo se hace realidad cuando vendes. Hasta entonces, no está realizada.
 ## Ganancias o pérdidas realizadas
 
 ### Qué significa
-El beneficio o la pérdida que se fija cuando vendes o cierras de otro modo una posición.
+El beneficio o la pérdida que se fija cuando vendes o cierras de otro modo una posición. En cada venta es el importe de la venta después de su comisión, menos el coste que liberó el método de la cartera (incluidas las comisiones de compra de las unidades vendidas).
 
 ### Dónde aparece
-En los resúmenes de transacciones y de rentabilidad.
+- En el resumen de la cartera, como total de la cartera o de todas las carteras.
+- En la columna **Realizado** de la tabla de posiciones: todo lo que esa posición ha realizado hasta ahora.
+- En la sección **Ganancias realizadas**, que lista cada venta con su fecha, cantidad, importe de la venta, coste de adquisición, ganancia realizada y la fecha de la compra más antigua de la que vendió (en cartera desde). Fíltrala por año y descarga la lista que ves como archivo CSV.
+- En **Posiciones cerradas**: activos que has vendido por completo, con el resultado de toda su vida, para que sigan visibles cuando salen de las posiciones.
 
 ### Cómo interpretarlo
-Úsalo para ver qué se ha fijado ya con las operaciones completadas.
+Úsalo para ver qué se ha fijado ya con las operaciones completadas. Las ventas de un año suman el total de ese año, y todos los años juntos suman las ganancias realizadas de la cartera. Un año es un año natural en UTC, según la fecha de la venta.
+
+### Ejemplo
+Compras 10 unidades a 100 con una comisión de 10 y vendes 4 a 150 con una comisión de 2. Con FIFO la venta libera 4 × 100 más 4 de los 10 de comisión de compra, un coste de 404. El importe de la venta es 600 menos la comisión de 2, es decir 598, así que la venta realizó 194.
 
 ### Qué puede hacer que cambie
-Las ventas, las ventas parciales, las comisiones y las correcciones de transacciones.
+Las ventas, las ventas parciales, las comisiones, los desdoblamientos de acciones, las correcciones de transacciones y un cambio del método de coste.
+
+### Moneda
+Los importes se muestran en tu moneda. Una venta registrada en otra moneda se convierte al tipo de cambio del día de la venta. Una venta sin tipo para ese día aparece en su propia moneda y queda fuera de los totales, con una nota que lo indica.
 
 ### Malentendido habitual
-Las ganancias o pérdidas realizadas son independientes de las no realizadas.
+Las ganancias o pérdidas realizadas son independientes de las no realizadas. WonderMoney muestra lo que ganó cada venta según el método de coste de la cartera; no aplica normas fiscales de cada país, como las de *wash sale*, y no es una declaración de impuestos.
 
 ## Porcentaje de rentabilidad
 
@@ -106,6 +138,38 @@ Los movimientos de precio, los dividendos, las comisiones y los efectos cambiari
 
 ### Malentendido habitual
 El porcentaje de rentabilidad no es lo mismo que el valor de la cartera.
+
+## Rentabilidad ponderada por tiempo y por dinero
+
+### Qué significa
+Dos rentabilidades para el periodo elegido responden a dos preguntas distintas.
+
+- **Rentabilidad ponderada por tiempo** dice cómo les fue a las inversiones. La rentabilidad de cada día se mide sin el dinero que entró o salió ese día, y los días se encadenan, así que una aportación o una retirada no la mueve. Los dividendos pagados cuentan como rentabilidad.
+- **Rentabilidad ponderada por dinero** dice cómo le fue a tu dinero. Es la tasa a la que se equilibran el valor al inicio del periodo, cada compra, venta y dividendo dentro de él, y el valor al final: el mismo cálculo que la función `XIRR` (`TIR.NO.PER` en español) de una hoja de cálculo. El dinero que estuvo invertido más tiempo pesa más.
+
+### Dónde aparece
+En el resumen de la cartera, para una cartera o para todas juntas, en cada periodo que puedes elegir; en el informe de rentabilidad de la cartera y su descarga CSV; y, para la rentabilidad ponderada por tiempo, en la vista en porcentaje del gráfico de rentabilidad, día a día.
+
+### Cómo interpretarlo
+- Cuando las dos son parecidas, el momento de tus aportaciones y retiradas apenas influyó.
+- Cuando la rentabilidad ponderada por dinero es mayor, más de tu dinero estaba invertido mientras los precios subían; cuando es menor, más estaba invertido mientras bajaban.
+- Para un periodo de un año o más, la rentabilidad ponderada por dinero es una tasa anual. Para un periodo más corto es la tasa en ese periodo, porque estirar unas semanas hasta un año la exageraría.
+- Sin aportaciones ni retiradas en el periodo, la rentabilidad ponderada por tiempo es la variación del valor sobre el valor inicial.
+
+### Ejemplo
+Tienes 10.000 al inicio del año. Los precios se mantienen hasta que aportas otros 10.000 en junio; luego suben un 10 % y la cartera termina el año en 22.000.
+
+- Rentabilidad ponderada por tiempo: +10 %. Las inversiones subieron un 10 %; la aportación no es una ganancia.
+- Rentabilidad ponderada por dinero: más de +10 %, porque el doble de dinero estaba invertido durante la subida.
+
+### Días sin datos
+Las dos rentabilidades se miden a partir del historial diario de la cartera. Un día sin valor registrado (por ejemplo mientras se reconstruye el historial, o cuando ningún tipo de cambio lo convierte a tu moneda) nunca se lee como cero: se mantiene el último valor, y el resumen indica cuántos días faltaron. Los días en que la cartera no tenía nada, antes de la primera compra o después de venderlo todo, no cuentan como días sin datos.
+
+### Qué puede hacer que cambie
+Los movimientos de precio, los dividendos, las comisiones, los efectos cambiarios y el periodo elegido. Una compra o una venta cambia la rentabilidad ponderada por dinero; solo cambia la ponderada por tiempo a través de lo que hace el dinero después.
+
+### Malentendido habitual
+Ninguna de las dos es la ganancia sobre el coste base. Compara un índice de referencia con la rentabilidad ponderada por tiempo, porque un índice de referencia tampoco tiene aportaciones ni retiradas.
 
 ## Dividendos e ingresos
 

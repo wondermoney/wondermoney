@@ -3,15 +3,18 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Appuser } from '@entity/Appuser';
 import { Currency } from '@entity/Currency';
+import { Loan } from '@entity/Loan';
 import { ManualAsset } from '@entity/ManualAsset';
 import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { Tenant } from '@entity/Tenant';
+import { type CryptoWalletDto, markWalletPartsDeleted, walletOf } from '@service/crypto-wallet/wallet-parts';
 import { type CurrencyPair, loadRateTable, type RateScope, rateScope, type RateTable } from '@service/currency/exchange-rate';
+import { outstandingPrincipalsOn } from '@service/loan/loan-balance';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, ForbiddenError, NotFoundError } from '@utils/errors';
 import { Money } from '@utils/money';
 
-import type { ManualAssetKind } from './manual-asset-types';
+import { ManualAssetKind } from './manual-asset-types';
 import { type AssetValueSeriesPoint, buildValueSeries, latestValuationOn, type ValuedAsset, valueOn } from './manual-asset-valuation';
 
 /**
@@ -25,6 +28,11 @@ import { type AssetValueSeriesPoint, buildValueSeries, latestValuationOn, type V
  * An asset's value is in its own currency. For a viewer it is converted at the latest rate on or
  * before the day; with no rate it has no converted value and is left out of totals and counted,
  * never added at face value.
+ *
+ * A loan can be secured against an asset (`Loan.securedAssetKey`). The asset then shows the
+ * viewer's loans on it and its equity: today's value less their outstanding principal, both in
+ * the asset's currency. Loans are personal, so only the viewer's own count. The link is
+ * presentation only; net worth counts the asset and the loans exactly as without it.
  */
 
 export interface AssetViewer {
@@ -58,6 +66,18 @@ export interface LoadedManualAsset {
   valuations: ManualAssetValuation[];
 }
 
+/** One of the viewer's loans secured against an asset, with today's outstanding principal. */
+export interface LinkedLoanDto {
+  /** The loan's currency. */
+  currency: string;
+  loanKey: number;
+  name: string;
+  /** In the loan's currency. */
+  outstandingPrincipal: number;
+  /** In the asset's currency, at the latest rate. Null when no rate converts it. */
+  outstandingPrincipalInAssetCurrency: null | number;
+}
+
 export interface ManualAssetDto {
   archived: boolean;
   archivedAt: null | string;
@@ -65,6 +85,11 @@ export interface ManualAssetDto {
   /** The currency the asset is valued in. */
   currency: string;
   currencyKey: number;
+  /**
+   * `value` less `linkedDebt`, in `currency`. Null when the asset has no value today (archived) or
+   * a linked loan cannot be converted: it is never worked out from amounts in two currencies.
+   */
+  equity: null | number;
   growthRule: null | { annualRatePercent: number; startDate: null | string };
   /** The viewer owns the asset: only they may change `isPrivate`. */
   isOwner: boolean;
@@ -72,6 +97,10 @@ export interface ManualAssetDto {
   kind: ManualAssetKind;
   /** The latest valuation recorded, before any growth rule. */
   lastValuation: ManualAssetValuationDto | null;
+  /** The total outstanding principal of `linkedLoans` in `currency`; 0 with none, null when one has no rate. */
+  linkedDebt: null | number;
+  /** The viewer's loans secured against the asset. */
+  linkedLoans: LinkedLoanDto[];
   manualAssetKey: number;
   name: string;
   notes: null | string;
@@ -79,6 +108,8 @@ export interface ManualAssetDto {
   ownerFirstName: null | string;
   purchaseDate: null | string;
   purchasePrice: null | number;
+  /** The currencies of linked loans no rate converts into `currency`. */
+  unconvertedLoanCurrencies: string[];
   updatedAt: string;
   userCurrency: string;
   /** Today's value in `currency`. Null for an archived asset. */
@@ -127,6 +158,7 @@ const ASSET_POPULATE = ['currencyKey', 'ownerAppuserKey'] as const;
 
 export async function addValuation(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, input: { date?: Date; note?: null | string; value: number }, now = new Date()) {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
+  assertValuedByHand(loaded.asset);
   const date = input.date ?? utcDayOf(now);
   // One valuation a day: a second one for the same day corrects the first.
   const sameDay = loaded.valuations.find((valuation) => sameUtcDay(valuation.valuationDate, date));
@@ -163,33 +195,40 @@ export function assetValueFor(loaded: LoadedManualAsset, viewerCurrency: string,
 export async function createManualAsset(em: EntityManager, viewer: AssetViewer, input: CreateManualAssetInput, now = new Date()): Promise<ManualAssetDto> {
   const currency = await em.findOne(Currency, { currencyKey: input.currencyKey });
   if (!currency) throw new BadRequestError('Currency not found');
-
-  const asset = new ManualAsset();
-  asset.currencyKey = currency;
-  asset.growthAnnualRatePercent = input.growthRule?.annualRatePercent ?? null;
-  asset.growthStartDate = input.growthRule?.startDate ?? null;
-  asset.isPrivate = input.isPrivate ?? false;
-  asset.kind = input.kind;
-  asset.name = input.name;
-  asset.notes = input.notes ?? null;
-  asset.ownerAppuserKey = await em.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
-  asset.purchaseDate = input.purchaseDate ?? null;
-  asset.purchasePrice = input.purchasePrice ?? null;
-  asset.tenantKey = getRef(em, Tenant, viewer.tenantKey);
-  em.persist(asset);
-
-  const valuationDate = input.valuationDate ?? utcDayOf(now);
-  const valuations = [newValuation(em, asset, valuationDate, input.value)];
-  // The purchase is the asset's first known value, so its history starts there and not at today.
-  if (input.purchaseDate && input.purchasePrice != null && utcDayOf(input.purchaseDate).getTime() < utcDayOf(valuationDate).getTime()) {
-    valuations.push(newValuation(em, asset, input.purchaseDate, input.purchasePrice));
-  }
+  const owner = await em.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
+  const loaded = newManualAsset(em, viewer, owner, currency, input, now);
   await em.flush();
-  return describeAsset(em, viewer, { asset, valuations }, now);
+  return describeAsset(em, viewer, loaded, now);
 }
 
+/** One row of a manual-assets file: an asset and its value on a day, in a currency named by its code. */
+export interface ImportManualAssetRow extends Omit<CreateManualAssetInput, 'currencyKey' | 'growthRule' | 'purchaseDate' | 'purchasePrice'> {
+  currencyCode: string;
+}
+
+/**
+ * Creates every row as a manual asset with its initial valuation, all or none. Each asset is the
+ * importer's, in their household, shared with the other member unless the row is private:
+ * exactly what creating them one by one does. A row whose currency is unknown fails the batch.
+ */
 export function currentAssetValueFor(loaded: LoadedManualAsset, viewerCurrency: string, rates: RateTable, now: Date): null | ViewerAssetValue {
   return assetValueFor(loaded, viewerCurrency, rates, { rateDate: now, valueDate: currentValueDate(loaded, now) });
+}
+
+export async function importManualAssets(em: EntityManager, viewer: AssetViewer, rows: ImportManualAssetRow[], now = new Date()): Promise<{ assets: { manualAssetKey: number; name: string }[] }> {
+  const codes = [...new Set(rows.map((row) => row.currencyCode.toUpperCase()))];
+  const currencies = await em.find(Currency, { code: { $in: codes } });
+  const byCode = new Map(currencies.map((currency) => [currency.code.toUpperCase(), currency]));
+  const resolved = rows.map((row) => ({ currency: byCode.get(row.currencyCode.toUpperCase()), row }));
+  const unknownRows = resolved.flatMap(({ currency }, index) => (currency ? [] : [index + 1]));
+  if (unknownRows.length > 0) throw new BadRequestError(`Unknown currency on rows ${unknownRows.join(', ')}`);
+
+  return em.transactional(async (tx) => {
+    const owner = await tx.findOneOrFail(Appuser, { appuserKey: viewer.appuserKey });
+    const created = resolved.flatMap(({ currency, row }) => (currency ? [newManualAsset(tx, viewer, owner, currency, row, now)] : []));
+    await tx.flush();
+    return { assets: created.map(({ asset }) => ({ manualAssetKey: asset.manualAssetKey, name: asset.name })) };
+  });
 }
 
 /**
@@ -207,6 +246,10 @@ export async function deleteManualAsset(em: EntityManager, viewer: AssetViewer, 
   const deletedAt = new Date();
   asset.deletedAt = deletedAt;
   for (const valuation of valuations) valuation.deletedAt = deletedAt;
+  await markWalletPartsDeleted(em, asset, deletedAt);
+  // Every member's loans on it lose the link and stay as they are.
+  const securedLoans = await em.find(Loan, { securedAssetKey: asset, tenantKey: { tenantKey: viewer.tenantKey } });
+  for (const loan of securedLoans) loan.securedAssetKey = null;
   await em.flush();
 }
 
@@ -219,19 +262,24 @@ export async function deleteValuation(em: EntityManager, viewer: AssetViewer, ma
   await em.flush();
 }
 
-export async function getManualAsset(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, now = new Date()): Promise<{ asset: ManualAssetDto; history: AssetValueSeriesPoint[]; valuations: ManualAssetValuationDto[] }> {
+/** An asset with its value history and valuations; a crypto wallet also with its addresses and tokens. */
+export async function getManualAsset(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, now = new Date()): Promise<{ asset: ManualAssetDto; history: AssetValueSeriesPoint[]; valuations: ManualAssetValuationDto[]; wallet: CryptoWalletDto | null }> {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
   return {
     asset: await describeAsset(em, viewer, loaded, now),
     history: buildValueSeries(toValuedAsset(loaded), currentValueDate(loaded, now)),
     valuations: sortedValuationDtos(loaded),
+    wallet: loaded.asset.kind === ManualAssetKind.CRYPTO_WALLET ? await walletOf(em, loaded.asset) : null,
   };
 }
 
 export async function listManualAssets(em: EntityManager, viewer: AssetViewer, now = new Date()): Promise<{ assets: ManualAssetDto[]; summary: ManualAssetsSummary }> {
   const loaded = await loadVisibleManualAssets(em, viewer);
-  const rates = await loadAssetRates(em, loaded, viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey));
-  const assets = loaded.map((item) => toAssetDto(item, viewer, rates, now));
+  const [rates, linkedLoans] = await Promise.all([
+    loadAssetRates(em, loaded, viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey)),
+    loadLinkedLoans(em, viewer, loaded, now),
+  ]);
+  const assets = loaded.map((item) => toAssetDto(item, viewer, rates, now, linkedLoans.get(item.asset.manualAssetKey) ?? []));
 
   const counted = assets.filter((asset) => asset.value != null);
   const unconverted = counted.filter((asset) => asset.valueInUserCurrency == null);
@@ -254,6 +302,62 @@ export async function listValuations(em: EntityManager, viewer: AssetViewer, man
 /** The rates that convert these assets into `viewerCurrency` over `window`: the feed's and the household's overrides (`scope`). */
 export async function loadAssetRates(em: EntityManager, assets: LoadedManualAsset[], viewerCurrency: string, window: { from: Date; to: Date }, scope: RateScope): Promise<RateTable> {
   return loadRateTable(em, manualAssetRatePairs(assets, viewerCurrency), window, scope);
+}
+
+/**
+ * The viewer's live loans secured against each of these assets, keyed by asset, with today's
+ * outstanding principal converted into the asset's currency at the latest rate on or before
+ * `now` (the household's overrides included).
+ */
+export async function loadLinkedLoans(em: EntityManager, viewer: Pick<AssetViewer, 'appuserKey' | 'tenantKey'>, assets: LoadedManualAsset[], now: Date): Promise<Map<number, LinkedLoanDto[]>> {
+  const byAsset = new Map<number, LinkedLoanDto[]>();
+  if (assets.length === 0) return byAsset;
+  const assetsByKey = new Map(assets.map(({ asset }) => [asset.manualAssetKey, asset]));
+  const loans = await em.find(
+    Loan,
+    { deletedAt: undefined, ownerAppuserKey: { appuserKey: viewer.appuserKey }, securedAssetKey: { $in: assets.map(({ asset }) => asset) }, tenantKey: { tenantKey: viewer.tenantKey } },
+    { orderBy: { loanKey: 'ASC' }, populate: ['currencyKey'] },
+  );
+  if (loans.length === 0) return byAsset;
+  const pairs: CurrencyPair[] = loans.flatMap((loan) => {
+    const asset = loan.securedAssetKey ? assetsByKey.get(loan.securedAssetKey.manualAssetKey) : undefined;
+    return asset ? [{ from: loan.currencyKey.code, to: asset.currencyKey.code }] : [];
+  });
+  const [principals, rates] = await Promise.all([
+    outstandingPrincipalsOn(em, loans, now),
+    loadRateTable(em, pairs, { from: now, to: now }, rateScope(viewer.tenantKey)),
+  ]);
+  for (const loan of loans) {
+    const asset = loan.securedAssetKey ? assetsByKey.get(loan.securedAssetKey.manualAssetKey) : undefined;
+    if (!asset) continue;
+    const outstandingPrincipal = principals.get(loan.loanKey) ?? 0;
+    const rate = rates.rateOn(loan.currencyKey.code, asset.currencyKey.code, now);
+    const linked: LinkedLoanDto = {
+      currency: loan.currencyKey.code,
+      loanKey: loan.loanKey,
+      name: loan.name,
+      outstandingPrincipal,
+      outstandingPrincipalInAssetCurrency: rate == null ? null : Money.toNumber(Money.convert(Money.of(outstandingPrincipal, loan.currencyKey.code), { rate, to: asset.currencyKey.code })),
+    };
+    byAsset.set(asset.manualAssetKey, [...(byAsset.get(asset.manualAssetKey) ?? []), linked]);
+  }
+  return byAsset;
+}
+
+/**
+ * The debt secured against an asset and its equity, in the asset's currency. A loan with no rate
+ * leaves both unknown (and its currency named) rather than counting it at face value or not at all.
+ */
+export function securedEquity(value: null | number, currency: string, linkedLoans: readonly LinkedLoanDto[]): Pick<ManualAssetDto, 'equity' | 'linkedDebt' | 'unconvertedLoanCurrencies'> {
+  const unconverted = linkedLoans.filter((loan) => loan.outstandingPrincipalInAssetCurrency == null);
+  const unconvertedLoanCurrencies = [...new Set(unconverted.map((loan) => loan.currency))].sort();
+  if (unconverted.length > 0) return { equity: null, linkedDebt: null, unconvertedLoanCurrencies };
+  const debt = Money.sum(linkedLoans.map((loan) => Money.of(loan.outstandingPrincipalInAssetCurrency ?? 0, currency)), currency);
+  return {
+    equity: value == null ? null : Money.toNumber(Money.subtract(Money.of(value, currency), debt)),
+    linkedDebt: Money.toNumber(debt),
+    unconvertedLoanCurrencies,
+  };
 }
 
 /** Every live asset the viewer may see, with its live valuations: the household's shared ones and their own private ones. */
@@ -294,7 +398,11 @@ export async function updateManualAsset(em: EntityManager, viewer: AssetViewer, 
     asset.isPrivate = input.isPrivate;
   }
   if (input.name !== undefined) asset.name = input.name;
-  if (input.kind !== undefined) asset.kind = input.kind;
+  if (input.kind !== undefined && input.kind !== asset.kind) {
+    // A wallet is valued by its sync and any other asset by hand: neither turns into the other.
+    if (input.kind === ManualAssetKind.CRYPTO_WALLET || asset.kind === ManualAssetKind.CRYPTO_WALLET) throw new BadRequestError('A crypto wallet cannot change kind', ERROR_CODE.CRYPTO_WALLET_REQUIRED);
+    asset.kind = input.kind;
+  }
   if (input.notes !== undefined) asset.notes = input.notes;
   if (input.purchaseDate !== undefined) asset.purchaseDate = input.purchaseDate;
   if (input.purchasePrice !== undefined) asset.purchasePrice = input.purchasePrice;
@@ -310,6 +418,7 @@ export async function updateManualAsset(em: EntityManager, viewer: AssetViewer, 
 
 export async function updateValuation(em: EntityManager, viewer: AssetViewer, manualAssetKey: number, valuationKey: number, input: { date?: Date; note?: null | string; value?: number }, now = new Date()) {
   const loaded = await loadAssetOrThrow(em, viewer, manualAssetKey);
+  assertValuedByHand(loaded.asset);
   const valuation = findValuationOrThrow(loaded, valuationKey);
   const { date } = input;
   if (date !== undefined) {
@@ -328,9 +437,17 @@ export function visibleAssetsWhere(viewer: Pick<AssetViewer, 'appuserKey' | 'ten
   return { $or: [{ isPrivate: false }, { ownerAppuserKey: { appuserKey: viewer.appuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
 }
 
+/** A crypto wallet's value comes from its sync: a valuation by hand would be overwritten, or contradict it. */
+function assertValuedByHand(asset: ManualAsset): void {
+  if (asset.kind === ManualAssetKind.CRYPTO_WALLET) throw new ConflictError('A crypto wallet is valued by its sync, not by hand', ERROR_CODE.CRYPTO_WALLET_VALUE_SYNCED);
+}
+
 async function describeAsset(em: EntityManager, viewer: AssetViewer, loaded: LoadedManualAsset, now: Date): Promise<ManualAssetDto> {
-  const rates = await loadAssetRates(em, [loaded], viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey));
-  return toAssetDto(loaded, viewer, rates, now);
+  const [rates, linkedLoans] = await Promise.all([
+    loadAssetRates(em, [loaded], viewer.currencyCode, { from: now, to: now }, rateScope(viewer.tenantKey)),
+    loadLinkedLoans(em, viewer, [loaded], now),
+  ]);
+  return toAssetDto(loaded, viewer, rates, now, linkedLoans.get(loaded.asset.manualAssetKey) ?? []);
 }
 
 function findValuationOrThrow(loaded: LoadedManualAsset, valuationKey: number): ManualAssetValuation {
@@ -346,6 +463,31 @@ async function loadAssetOrThrow(em: EntityManager, viewer: AssetViewer, manualAs
   const [loaded] = await loadVisibleManualAssets(em, viewer, { manualAssetKey });
   if (!loaded) throw new NotFoundError('Asset not found');
   return loaded;
+}
+
+/** A new asset of the viewer's, in their household, with its first valuation (and its purchase, when earlier). Persisted, not flushed. */
+function newManualAsset(em: EntityManager, viewer: Pick<AssetViewer, 'tenantKey'>, owner: Appuser, currency: Currency, input: Omit<CreateManualAssetInput, 'currencyKey'>, now: Date): LoadedManualAsset {
+  const asset = new ManualAsset();
+  asset.currencyKey = currency;
+  asset.growthAnnualRatePercent = input.growthRule?.annualRatePercent ?? null;
+  asset.growthStartDate = input.growthRule?.startDate ?? null;
+  asset.isPrivate = input.isPrivate ?? false;
+  asset.kind = input.kind;
+  asset.name = input.name;
+  asset.notes = input.notes ?? null;
+  asset.ownerAppuserKey = owner;
+  asset.purchaseDate = input.purchaseDate ?? null;
+  asset.purchasePrice = input.purchasePrice ?? null;
+  asset.tenantKey = getRef(em, Tenant, viewer.tenantKey);
+  em.persist(asset);
+
+  const valuationDate = input.valuationDate ?? utcDayOf(now);
+  const valuations = [newValuation(em, asset, valuationDate, input.value)];
+  // The purchase is the asset's first known value, so its history starts there and not at today.
+  if (input.purchaseDate && input.purchasePrice != null && utcDayOf(input.purchaseDate).getTime() < utcDayOf(valuationDate).getTime()) {
+    valuations.push(newValuation(em, asset, input.purchaseDate, input.purchasePrice));
+  }
+  return { asset, valuations };
 }
 
 function newValuation(em: EntityManager, asset: ManualAsset, date: Date, value: number, note?: null | string): ManualAssetValuation {
@@ -370,7 +512,7 @@ function sortedValuationDtos(loaded: LoadedManualAsset): ManualAssetValuationDto
     .sort((a, b) => b.date.localeCompare(a.date) || b.manualAssetValuationKey - a.manualAssetValuationKey);
 }
 
-function toAssetDto(loaded: LoadedManualAsset, viewer: AssetViewer, rates: RateTable, now: Date): ManualAssetDto {
+function toAssetDto(loaded: LoadedManualAsset, viewer: AssetViewer, rates: RateTable, now: Date, linkedLoans: LinkedLoanDto[]): ManualAssetDto {
   const { asset } = loaded;
   const asOf = currentValueDate(loaded, now);
   const current = currentAssetValueFor(loaded, viewer.currencyCode, rates, now);
@@ -381,11 +523,13 @@ function toAssetDto(loaded: LoadedManualAsset, viewer: AssetViewer, rates: RateT
     createdAt: asset.createdAt.toISOString(),
     currency: asset.currencyKey.code,
     currencyKey: asset.currencyKey.currencyKey,
+    ...securedEquity(current?.value ?? null, asset.currencyKey.code, linkedLoans),
     growthRule: asset.growthAnnualRatePercent == null ? null : { annualRatePercent: asset.growthAnnualRatePercent, startDate: asset.growthStartDate ? isoDay(asset.growthStartDate) : null },
     isOwner: asset.ownerAppuserKey.appuserKey === viewer.appuserKey,
     isPrivate: asset.isPrivate,
     kind: asset.kind,
     lastValuation: latest ? toValuationDto(latest.valuation) : null,
+    linkedLoans,
     manualAssetKey: asset.manualAssetKey,
     name: asset.name,
     notes: asset.notes ?? null,

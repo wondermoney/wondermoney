@@ -7,6 +7,7 @@ import { HouseholdScreen, type HouseholdViewState } from './household-screen'
 import { computeHouseholdViewModel } from './household-view-models'
 import { useHousehold } from './use-household'
 import { useHouseholdInviteActions } from './use-household-invite-actions'
+import { useHouseholdMemberRole } from './use-household-member-role'
 import { useInviteHouseholdMember } from './use-invite-household-member'
 import { useRemoveHouseholdMember } from './use-remove-household-member'
 
@@ -16,14 +17,17 @@ export function HouseholdRoute() {
   const profile = useProfile()
   const invite = useInviteHouseholdMember()
   const { resend, revoke } = useHouseholdInviteActions()
+  const { changeRole, transferOwnership } = useHouseholdMemberRole()
   const removeMember = useRemoveHouseholdMember()
 
   const viewerEmail = profile.data?.profile.emailAddress
+  // An API that names the viewer needs no profile to find "me"; an older one is matched by email.
+  const knowsViewer = household.data?.viewerAppuserKey != null
   let state: HouseholdViewState
 
   if (household.isAccessTransition || profile.isAccessTransition) state = { status: 'access-transition' }
-  else if (household.isLoading || profile.isLoading) state = { status: 'loading' }
-  else if (household.data && viewerEmail) {
+  else if (household.isLoading || (!knowsViewer && profile.isLoading)) state = { status: 'loading' }
+  else if (household.data && (knowsViewer || viewerEmail)) {
     const data = computeHouseholdViewModel(household.data, viewerEmail)
     state = household.isRefreshFailure ? { status: 'refresh-error', data } : { status: 'loaded', data }
   } else if (
@@ -38,34 +42,33 @@ export function HouseholdRoute() {
     else router.replace('/more' as unknown as Href)
   }
 
-  const removeTarget = state.status === 'loaded' || state.status === 'refresh-error'
-    ? (state.data.isOwner ? state.data.partner : state.data.me)
-    : null
+  const me = state.status === 'loaded' || state.status === 'refresh-error' ? state.data.me : null
 
   return (
     <HouseholdScreen
       state={state}
       onBack={goBack}
       onRetry={async () => { await Promise.all([household.refetch(), profile.refetch()]) }}
-      onInvite={async (email) => { await invite.mutateAsync(email) }}
+      onInvite={async (email, role) => { await invite.mutateAsync({ email, role }) }}
       invitePending={invite.isPending}
-      onResendInvite={async () => {
-        const key = household.data?.pendingInvite?.householdInviteKey
-        if (key === undefined) return
-        await resend.mutateAsync(key)
-      }}
+      onResendInvite={async (key) => { await resend.mutateAsync(key) }}
       resendPending={resend.isPending}
-      onRevokeInvite={async () => {
-        const key = household.data?.pendingInvite?.householdInviteKey
-        if (key === undefined) return
-        await revoke.mutateAsync(key)
-      }}
+      onRevokeInvite={async (key) => { await revoke.mutateAsync(key) }}
       revokePending={revoke.isPending}
-      onRemoveMember={async () => {
-        if (!removeTarget) return
-        await removeMember.mutateAsync(removeTarget.appuserKey)
+      onChangeRole={async (appuserKey, role) => { await changeRole.mutateAsync({ appuserKey, role }) }}
+      changeRolePending={changeRole.isPending}
+      onTransferOwnership={async (appuserKey) => { await transferOwnership.mutateAsync(appuserKey) }}
+      transferPending={transferOwnership.isPending}
+      onRemoveMember={async (appuserKey) => {
+        if (appuserKey === me?.appuserKey) return
+        await removeMember.mutateAsync({ appuserKey, leaving: false })
       }}
-      removePending={removeMember.isPending}
+      removePending={removeMember.isPending && removeMember.variables?.leaving === false}
+      onLeave={async () => {
+        if (!me) return
+        await removeMember.mutateAsync({ appuserKey: me.appuserKey, leaving: true })
+      }}
+      leavePending={removeMember.isPending && removeMember.variables?.leaving === true}
     />
   )
 }

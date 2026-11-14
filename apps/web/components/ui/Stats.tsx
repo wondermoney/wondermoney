@@ -2,10 +2,11 @@
 
 import NumberFlow, { Format } from "@number-flow/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
 
 export type StatsItem = {
   name: string;
@@ -22,10 +23,19 @@ export type StatsItem = {
 
 interface StatsProps {
   stats: StatsItem[];
+  /**
+   * Figures per row on wide screens. Four suits a set that splits into a row
+   * of four and a row of up to four; it steps down to two below `xl`, where a
+   * quarter of the content column is too narrow for a currency figure.
+   */
+  columns?: 3 | 4;
 }
 
-export default function Stats({ stats }: StatsProps) {
+export default function Stats({ stats, columns = 3 }: StatsProps) {
   const t = useTranslations();
+  // The reader's locale, not the runtime's: `12,5 %` for pt, `12.5%` for en.
+  const locale = useLocale();
+  const numberLocale = normalizeFinancialLocale(locale) ?? locale;
 
   if (!stats || stats.length === 0) {
     return (
@@ -37,7 +47,12 @@ export default function Stats({ stats }: StatsProps) {
 
   return (
     <div>
-      <dl className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
+      <dl
+        className={cn(
+          "grid grid-cols-1 gap-x-8 gap-y-6",
+          columns === 4 ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-3",
+        )}
+      >
         {stats.map((item) => {
           let colorClass = "text-muted-foreground";
           let Icon = null;
@@ -89,6 +104,7 @@ export default function Stats({ stats }: StatsProps) {
                 <div className="text-foreground font-mono text-2xl font-medium tracking-tight whitespace-nowrap">
                   {item.value != null ? (
                     <NumberFlow
+                      locales={numberLocale}
                       value={item.value}
                       format={item.formatOptions}
                     />

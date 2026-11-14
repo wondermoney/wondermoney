@@ -3,7 +3,7 @@
 lib
 node_modules
 tests
-.eslintrc.js
+eslint.config.mjs
 .gitignore
 .prettierrc
 CHANGELOG.md

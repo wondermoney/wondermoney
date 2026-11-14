@@ -157,6 +157,9 @@ describe('API client', () => {
 
   it.each([
     [{ code: 'demo_read_only', message: 'Demo account is read-only' }, 'demo-forbidden'],
+    [{ code: 'household_read_only', message: 'Viewers have read-only access.' }, 'household-read-only'],
+    [{ code: 'account_read_only', message: 'You can view this account but not change it.' }, 'account-read-only'],
+    [{ code: 'account_share_manager_required', message: 'Only the owner can change sharing.' }, 'account-share-manager-required'],
     [{ code: 'email_verification_required', message: 'Verify your email address first.' }, 'email-verification-required'],
     [{ code: 'ai_allowance_exhausted', message: 'Daily allowance used up.' }, 'ai-allowance-exhausted'],
     // The code decides, never the prose: an unlabelled or unknown 403 is a plain http error.
@@ -166,6 +169,63 @@ describe('API client', () => {
   ] as const)('maps 403 envelope %p to %s', async (body, expected) => {
     const { client } = setup(async () => ({ status: 403, body }))
     await expectCode(client.read(okEndpoint), expected, 403)
+  })
+
+  it('keeps the name of the member who holds a portfolio link, and only that', async () => {
+    const { client } = setup(async () => ({ status: 403, body: { code: 'portfolio_link_held_by_member', message: 'Held.', details: { linkedBy: ' Ana ' } } }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ name: 'ApiError', code: 'portfolio-link-held', status: 403, linkedBy: 'Ana' })
+    // Never in the message or the error's enumerable fields, which an error report serializes.
+    expect((error as Error).message).not.toContain('Ana')
+    expect(Object.keys(error as object)).not.toContain('linkedBy')
+    expect(JSON.stringify(error)).not.toContain('Ana')
+  })
+
+  it.each([
+    ['no details', { code: 'portfolio_link_held_by_member' }],
+    ['a blank name', { code: 'portfolio_link_held_by_member', details: { linkedBy: '  ' } }],
+    ['a malformed name', { code: 'portfolio_link_held_by_member', details: { linkedBy: 42 } }],
+    ['malformed details', { code: 'portfolio_link_held_by_member', details: 'Ana' }],
+  ])('maps a held link with %s to the code without a name', async (_label, body) => {
+    const { client } = setup(async () => ({ status: 403, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'portfolio-link-held', status: 403 })
+    expect((error as ApiError).linkedBy).toBeUndefined()
+  })
+
+  it.each([
+    [400, { code: 'reimbursement_amount_exceeded', message: 'Too much.' }, 'reimbursement_amount_exceeded'],
+    [409, { code: 'reimbursement_link_exists', message: 'Linked.' }, 'reimbursement_link_exists'],
+    [404, { code: 'not_found' }, 'not_found'],
+    // Only a code-shaped word is kept, and nothing from a 5xx.
+    [400, { code: 'Not a code: 12 €' }, undefined],
+    [400, { message: 'No code' }, undefined],
+    [500, { code: 'internal_error' }, undefined],
+  ] as const)('keeps the API code of a %i as serverCode (%p)', async (status, body, expected) => {
+    const { client } = setup(async () => ({ status, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'http', status })
+    expect((error as ApiError).serverCode).toBe(expected)
+    expect(Object.keys(error as object)).not.toContain('serverCode')
+  })
+
+  it('keeps the API code and the crypto wallet address index of a 400, never its message', async () => {
+    const { client } = setup(async () => ({ status: 400, body: { code: 'crypto_wallet_address_invalid', message: 'Not an address: bc1qnope', details: { addressIndex: '1' } } }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ name: 'ApiError', code: 'http', status: 400, serverCode: 'crypto_wallet_address_invalid', addressIndex: 1 })
+    expect((error as Error).message).not.toContain('bc1qnope')
+    expect(Object.keys(error as object)).not.toContain('serverCode')
+  })
+
+  it.each([
+    ['a code that is not an identifier', { code: 'Not An Identifier', details: { addressIndex: 'x' } }],
+    ['no envelope', 'Bad request'],
+  ])('keeps no API code or address index for %s', async (_label, body) => {
+    const { client } = setup(async () => ({ status: 400, body }))
+    const error = await client.read(okEndpoint).catch((caught: unknown) => caught)
+    expect(error).toMatchObject({ code: 'http', status: 400 })
+    expect((error as ApiError).serverCode).toBeUndefined()
+    expect((error as ApiError).addressIndex).toBeUndefined()
   })
 
   it('uses the coordinator shared refresh promise and replays each concurrent GET once', async () => {
@@ -258,6 +318,40 @@ describe('API client', () => {
     const rejected = setup(async () => ({ status: 200, body: undefined }))
     await expectCode(rejected.client.write(endpoint, { commit: commit200 }), 'http', 200)
     expect(commit200).not.toHaveBeenCalled()
+  })
+
+  it('keeps a 400 message only for an endpoint that opts in, and never in the enumerable fields', async () => {
+    const body = { code: 'bad_request', message: ' This setup token was already used. ' }
+    const optedIn = writeEndpoint({ method: 'POST', path: '/write', schema: z.undefined(), keepsBadRequestMessage: true })
+    const kept = await setup(async () => ({ status: 400, body })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(kept).toMatchObject({ name: 'ApiError', code: 'http', status: 400, serverMessage: 'This setup token was already used.' })
+    expect((kept as Error).message).not.toContain('setup token')
+    expect(Object.keys(kept as object)).not.toContain('serverMessage')
+    expect(JSON.stringify(kept)).not.toContain('setup token')
+    expect((kept as ApiError).serverCode).toBe('bad_request')
+    expect(Object.keys(kept as object)).not.toContain('serverCode')
+
+    const plain = writeEndpoint({ method: 'POST', path: '/write', schema: z.undefined() })
+    const dropped = await setup(async () => ({ status: 400, body })).client.write(plain, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(dropped).toMatchObject({ code: 'http', status: 400 })
+    expect((dropped as ApiError).serverMessage).toBeUndefined()
+    // Every 4xx keeps its code; only the message needs the opt-in.
+    expect((dropped as ApiError).serverCode).toBe('bad_request')
+
+    // Only a 400: another status keeps its usual classification and no text.
+    const otherStatus = await setup(async () => ({ status: 502, body })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(otherStatus).toMatchObject({ code: 'http', status: 502 })
+    expect((otherStatus as ApiError).serverMessage).toBeUndefined()
+
+    // A blank or missing message reads as absent.
+    const blank = await setup(async () => ({ status: 400, body: { message: '  ' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect((blank as ApiError).serverMessage).toBeUndefined()
+
+    // A code without a message still comes through; a malformed code does not.
+    const codeOnly = await setup(async () => ({ status: 400, body: { code: 'simplefin_token_invalid' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect(codeOnly).toMatchObject({ serverCode: 'simplefin_token_invalid' })
+    const badCode = await setup(async () => ({ status: 400, body: { code: 'Not A Code!' } })).client.write(optedIn, { commit: jest.fn() }).catch((caught: unknown) => caught)
+    expect((badCode as ApiError).serverCode).toBeUndefined()
   })
 
   it('does not commit an invalid write response', async () => {

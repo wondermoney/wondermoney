@@ -1,4 +1,4 @@
-import { budgetCreateWriteSchema, type BudgetCreateIncome, type BudgetCreateWrite, type BudgetInventoryResponseDto, type BudgetRecurrence } from './budgets-contract'
+import { budgetCreateWriteSchema, type BudgetCreateIncome, type BudgetCreateWrite, type BudgetInventoryResponseDto, type BudgetRecurrence, type BudgetVisibility } from './budgets-contract'
 
 const occurrences: Record<BudgetRecurrence, number> = {
   MONTHLY_14: 14,
@@ -27,10 +27,12 @@ const toCreateIncome = (income: EditableIncome): BudgetCreateIncome => {
     : { name: income.name.trim(), amount, isRecurrent: false }
 }
 
-export const createBudgetPayload = (houseHoldSize: number, dependentsNum: number, incomes: readonly EditableIncome[]): BudgetCreateWrite => ({
+/** Always states the visibility, so the request says what the person chose rather than relying on the API's default. */
+export const createBudgetPayload = (houseHoldSize: number, dependentsNum: number, incomes: readonly EditableIncome[], visibility: BudgetVisibility = 'household'): BudgetCreateWrite => ({
   houseHoldSize,
   dependentsNum,
   incomes: incomes.map(toCreateIncome),
+  visibility,
 })
 
 export const monthlyEquivalentTotal = (incomes: readonly EditableIncome[]): number => incomes.reduce(

@@ -1,6 +1,7 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor, within } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
+import { ApiError } from '@/lib/api/errors'
 import { initMobileI18n } from '@/lib/i18n'
 
 import { NetWorthRoute } from './net-worth-route'
@@ -27,18 +28,29 @@ const mockDismiss = jest.fn()
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ signOut: jest.fn() }) }))
-jest.mock('./use-net-worth', () => ({ useNetWorth: () => mocks.netWorth }))
-jest.mock('./use-net-worth-history', () => ({ useNetWorthHistory: () => mocks.history }))
+// The member each hook was last asked for (the member filter), by hook.
+const mockMemberArgs: Record<string, unknown> = {}
+let mockHouseholdMembers: unknown = null
+jest.mock('@/features/household/use-household-members', () => ({
+  useHouseholdMembers: () => mockHouseholdMembers ?? jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS,
+}))
+jest.mock('./use-net-worth', () => ({ useNetWorth: (member?: string) => { mockMemberArgs.netWorth = member; return mocks.netWorth } }))
+jest.mock('./use-net-worth-history', () => ({ useNetWorthHistory: (_months: number, member?: string) => { mockMemberArgs.history = member; return mocks.history } }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mocks.accounts }))
 jest.mock('@/features/budgets/use-budgets', () => ({ useBudgets: () => mocks.budgets }))
 jest.mock('@/features/loans/use-loans', () => ({ useLoans: () => mocks.loans }))
 jest.mock('@/features/transactions/use-transactions', () => ({
-  useTransactions: (filters: { needsReview?: boolean }) => (filters.needsReview ? mocks.unreviewed : mocks.latest),
+  useTransactions: (filters: unknown) => { mockMemberArgs.latest = filters; return mocks.latest },
 }))
-jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: () => mocks.insight }))
+jest.mock('@/features/transactions/use-transaction-review-summary', () => ({
+  useTransactionReviewSummary: () => mocks.reviewSummary,
+}))
+jest.mock('@/features/account-insights/use-top-spending-category', () => ({ useTopSpendingCategory: (_now: unknown, member?: string) => { mockMemberArgs.insight = member; return mocks.insight } }))
+jest.mock('@/features/insights/use-insights', () => ({ useInsights: () => mocks.insights }))
 jest.mock('./use-home-data', () => ({
   useHomeBudgetMonths: () => mockMonths,
-  useHomeCashflow: () => mocks.cashflow,
+  useHomeCashflow: (_today: Date, member?: string) => { mockMemberArgs.cashflow = member; return mocks.cashflow },
+  useHomeCashflowComparison: (_today: Date, member?: string) => { mockMemberArgs.cashflowComparison = member; return mocks.cashflowComparison },
   useHomePortfolios: () => mocks.portfolios,
 }))
 let mockBankAlertBanner: unknown = null
@@ -46,7 +58,35 @@ const mockDismissBankAlert = jest.fn()
 jest.mock('@/features/banking/use-bank-alerts', () => ({
   useBankAlertBanner: () => ({ banner: mockBankAlertBanner, dismiss: mockDismissBankAlert, refetch: jest.fn() }),
 }))
+let mockLinkDismissal = { dismissed: false, loaded: true }
+const mockDismissLink = jest.fn()
+jest.mock('./use-portfolio-link-suggestion-dismissal', () => ({ usePortfolioLinkSuggestionDismissal: () => ({ ...mockLinkDismissal, dismiss: mockDismissLink }) }))
+const mockLinkMutate = jest.fn()
+jest.mock('@/features/portfolios/use-portfolio-account-link', () => {
+  const actual = jest.requireActual<typeof import('@/features/portfolios/use-portfolio-account-link')>('@/features/portfolios/use-portfolio-account-link')
+  return { ...actual, useLinkPortfolioAccount: () => ({ mutateAsync: mockLinkMutate, isPending: false }) }
+})
 jest.mock('./use-setup-checklist-dismissal', () => ({ useSetupChecklistDismissal: () => ({ dismissed: mockDismissed, dismiss: mockDismiss }) }))
+jest.mock('@/features/preferences/use-dashboard-layout', () => ({
+  useDashboardLayout: () => ({
+    layout: [
+      { id: 'net-worth', hidden: false },
+      { id: 'insights', hidden: false },
+      { id: 'this-month', hidden: false },
+      { id: 'balance-sheet', hidden: false },
+      { id: 'cashflow', hidden: false },
+      { id: 'loans', hidden: false },
+      { id: 'latest-transactions', hidden: false },
+    ],
+    storedLayout: [],
+    isLoading: false,
+    isLoadError: false,
+    isSaving: false,
+    saveError: false,
+    retryLoad: jest.fn(),
+    save: jest.fn(),
+  }),
+}))
 
 async function renderRoute() {
   const i18n = await initMobileI18n('en')
@@ -64,7 +104,11 @@ describe('NetWorthRoute', () => {
     mockDismissed = false
     mockBankAlertBanner = null
     mockDismissBankAlert.mockClear()
+    mockLinkDismissal = { dismissed: false, loaded: true }
+    mockDismissLink.mockClear()
+    mockLinkMutate.mockReset()
     mockMonths = []
+    mockHouseholdMembers = null
     mocks = {
       netWorth: loaded(netWorthData),
       history: loaded({ currencyCode: 'EUR', granularity: 'monthly', readiness: 'ready', points: [] }),
@@ -72,11 +116,39 @@ describe('NetWorthRoute', () => {
       budgets: loaded({ budgets: [] }),
       loans: loaded({ loans: [] }),
       latest: loaded({ transactions: [] }),
-      unreviewed: loaded({ transactions: [], total: 0 }),
+      reviewSummary: loaded({ count: 0, currency: 'EUR', totalAbs: 0 }),
       insight: loaded({ categorySpending: [] }),
+      insights: loaded({ insights: [] }),
       cashflow: loaded({ cashflow: [] }),
+      cashflowComparison: loaded({ cashflow: [] }),
       portfolios: loaded({ portfolios: [] }),
     }
+  })
+
+  it('offers no member filter in a household of one', async () => {
+    const view = await renderRoute()
+    expect(view.queryByTestId('member-filter')).toBeNull()
+    expect(mockMemberArgs.netWorth).toBeUndefined()
+  })
+
+  it('narrows net worth, cash flow, spending and the latest transactions to the chosen member', async () => {
+    const { householdMembersModel } = jest.requireActual<typeof import('@/features/household/member-attribution')>('@/features/household/member-attribution')
+    mockHouseholdMembers = householdMembersModel({
+      members: [
+        { appuserKey: 11, emailAddress: 'ana@example.test', firstName: 'Ana', role: 'owner' },
+        { appuserKey: 12, emailAddress: 'bruno@example.test', firstName: 'Bruno', role: 'member' },
+      ],
+      maxMembers: 6,
+      pendingInvites: [],
+      viewerAppuserKey: 11,
+    })
+    const view = await renderRoute()
+    await fireEvent.press(view.getByTestId('member-filter'))
+    await fireEvent.press(view.getByRole('radio', { name: 'Bruno' }))
+    expect(mockMemberArgs).toMatchObject({ netWorth: '12', history: '12', cashflow: '12', cashflowComparison: '12', insight: '12', latest: { memberKeys: [12] } })
+    await fireEvent.press(view.getByTestId('member-filter'))
+    await fireEvent.press(view.getByRole('radio', { name: 'Shared' }))
+    expect(mockMemberArgs).toMatchObject({ netWorth: 'shared', cashflow: 'shared', latest: { memberKeys: ['shared'] } })
   })
 
   it('renders Home with the figure and the oldest balance refresh', async () => {
@@ -84,6 +156,16 @@ describe('NetWorthRoute', () => {
     expect(view.getByLabelText(/^Net worth, €1,200\.00, EUR/)).toBeOnTheScreen()
     expect(view.getByText('Balances updated 1 day ago')).toBeOnTheScreen()
     expect(view.queryByTestId('home-bank-alert')).toBeNull()
+  })
+
+  it('shows the review status from the summary endpoint', async () => {
+    mocks.latest = loaded({ transactions: [{
+      transactionKey: 1, transactionDate: '2026-11-03T10:00:00.000Z', accountKey: { accountKey: 1, accountName: 'Checking', currencyKey: { code: 'EUR' } },
+      description: 'Coffee shop', appuserSettlementAmount: -4.5, appuserCurrencyKey: { code: 'EUR' }, reviewed: false, appuserTransactionCategories: [], recurringSeries: null,
+    }] })
+    mocks.reviewSummary = loaded({ count: 2, currency: 'EUR', totalAbs: 90 })
+    const view = await renderRoute()
+    expect(view.getByText('2 transactions to review · €90.00 in total')).toBeOnTheScreen()
   })
 
   it('shows a bank alert that reconnects through the bank connections screen and dismisses', async () => {
@@ -151,5 +233,101 @@ describe('NetWorthRoute', () => {
     mocks.insight = loaded({ categorySpending: [{ categoryKey: 1, name: 'Groceries', amount: 420, currency: 'EUR', numTransactions: 12, isSystemCategory: false, childCategories: [] }] })
     const view = await renderRoute()
     expect(view.getByText('Groceries — €420.00 this month')).toBeOnTheScreen()
+  })
+
+  describe('"Is this the same money?"', () => {
+    const brokerage = { accountKey: 21, accountName: 'Brokerage cash', accountType: 'INVESTMENT', source: 'manual', refreshedAt: null }
+    const checking = { accountKey: 22, accountName: 'Checking', accountType: 'CHECKING', source: 'open_banking', refreshedAt: null }
+    const suggested = () => {
+      mocks.netWorth = loaded({ ...netWorthData, suggestPortfolioLink: true })
+      mocks.accounts = loaded({ accounts: [checking, brokerage] })
+      mocks.portfolios = loaded({ portfolios: [
+        { portfolioKey: 7, name: 'Long term', accountLink: null },
+        { portfolioKey: 8, name: 'Already linked', accountLink: { accountKey: 22, accountName: 'Checking', mode: 'cash_only' } },
+      ] })
+    }
+
+    it('shows on the balance sheet when the API suggests it', async () => {
+      suggested()
+      const view = await renderRoute()
+      const nudge = within(view.getByTestId('home-portfolio-link-suggestion'))
+      expect(nudge.getByText('Is this the same money?')).toBeOnTheScreen()
+      expect(within(view.getByTestId('home-balance-sheet')).getByTestId('home-portfolio-link-suggestion')).toBeOnTheScreen()
+    })
+
+    it.each([
+      // The API answers false for a pair either member linked and for an account only the other member can see.
+      ['the API does not suggest it', () => { mocks.netWorth = loaded({ ...netWorthData, suggestPortfolioLink: false }) }],
+      ['an older API sends no answer', () => { mocks.netWorth = loaded(netWorthData) }],
+      ['it was dismissed on this device', () => { mockLinkDismissal = { dismissed: true, loaded: true } }],
+      ['the dismissal has not been read yet', () => { mockLinkDismissal = { dismissed: false, loaded: false } }],
+    ])('stays hidden when %s', async (_label, arrange) => {
+      suggested()
+      arrange()
+      const view = await renderRoute()
+      expect(view.queryByText('Is this the same money?')).toBeNull()
+    })
+
+    it('dismisses on this device', async () => {
+      suggested()
+      const view = await renderRoute()
+      await fireEvent.press(within(view.getByTestId('home-portfolio-link-suggestion')).getByRole('button', { name: 'Dismiss' }))
+      expect(mockDismissLink).toHaveBeenCalledTimes(1)
+    })
+
+    it('links an unlinked portfolio to the account that holds it', async () => {
+      suggested()
+      mockLinkMutate.mockResolvedValue({ portfolio: { portfolioKey: 7 } })
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('button', { name: 'Link a portfolio' }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      expect(sheet.getByRole('button', { name: 'Save' })).toBeDisabled()
+
+      await fireEvent.press(sheet.getByRole('button', { name: /^Portfolio,/ }))
+      // Only the portfolio with no link is offered.
+      expect(view.queryByRole('radio', { name: 'Already linked' })).toBeNull()
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+
+      await fireEvent.press(sheet.getByRole('button', { name: /^Account that holds this portfolio,/ }))
+      const options = view.getAllByRole('radio').map((option) => option.props.accessibilityLabel)
+      // The investment account leads the list.
+      expect(options).toEqual(['Not linked', 'Brokerage cash', 'Checking'])
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      // A manual account starts on "Yes, it includes them".
+      expect(sheet.getByRole('button', { name: "Does this account's balance include your investments?, Yes, it includes them" })).toBeOnTheScreen()
+
+      await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+      await waitFor(() => expect(mockLinkMutate).toHaveBeenCalledWith({ portfolioId: 7, accountLink: { accountId: 21, mode: 'includes_holdings' } }))
+      await waitFor(() => expect(view.queryByTestId('home-portfolio-link-sheet')).toBeNull())
+    })
+
+    it('names the member who holds the link, and nothing about their account', async () => {
+      suggested()
+      mockLinkMutate.mockRejectedValue(new ApiError('portfolio-link-held', 403, { linkedBy: 'Ana' }))
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('button', { name: 'Link a portfolio' }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      await fireEvent.press(sheet.getByRole('button', { name: /^Portfolio,/ }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: /^Account that holds this portfolio,/ }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Checking' }))
+      await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+      expect(await sheet.findByText('Already linked by Ana')).toBeOnTheScreen()
+      expect(view.getByTestId('home-portfolio-link-sheet')).toBeOnTheScreen()
+    })
+
+    it('says a demo cannot link', async () => {
+      suggested()
+      mockLinkMutate.mockRejectedValue(new ApiError('demo-forbidden', 403))
+      const view = await renderRoute()
+      await fireEvent.press(view.getByRole('button', { name: 'Link a portfolio' }))
+      const sheet = within(view.getByTestId('home-portfolio-link-sheet'))
+      await fireEvent.press(sheet.getByRole('button', { name: /^Portfolio,/ }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Long term' }))
+      await fireEvent.press(sheet.getByRole('button', { name: /^Account that holds this portfolio,/ }))
+      await fireEvent.press(view.getByRole('radio', { name: 'Brokerage cash' }))
+      await fireEvent.press(sheet.getByRole('button', { name: 'Save' }))
+      expect(await sheet.findByText('Linking is unavailable in demo mode')).toBeOnTheScreen()
+    })
   })
 })

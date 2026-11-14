@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import { z } from 'zod'
 
-import { tolerantEnum } from '@/lib/api/runtime-schema'
+import { knownValues, tolerantEnum } from '@/lib/api/runtime-schema'
 
 /**
  * Which WonderMoney server the app talks to. The build has a default (EXPO_PUBLIC_API_BASE_URL);
@@ -41,22 +41,51 @@ export function normalizeServerUrl(input: string): string | null {
 
 const instanceSchema = z.object({
   apiVersion: z.number().int().positive(),
+  // Which build the server runs. Optional so an older server that doesn't report them still
+  // parses; the More screen leaves the server line out then.
+  commit: z.string().nullable().optional(),
   features: z.object({
     ai: z.object({ assistant: z.boolean(), csvMapping: z.boolean(), enrichment: z.boolean(), monthlyStory: z.boolean(), ocr: z.boolean() }),
     bankSync: z.boolean(),
+    // `instance` when the operator set a shared Enable Banking credential; absent on an older
+    // server, which reads as `user` (everyone adds their own key).
+    bankSyncCredentials: tolerantEnum(['instance', 'user'], 'user').optional(),
+    // The bank-data providers the operator turned on (`simplefin` only when enabled). Optional,
+    // and malformed reads as absent, so an older server still parses and offers none of them.
+    bankSyncProviders: z.array(z.string()).optional().catch(undefined),
     contactForm: z.boolean(),
+    // The chains whose crypto wallets the server can read (an explorer is configured for each);
+    // empty when the feature is off. A chain this build doesn't know is dropped; an older server,
+    // or a malformed value, reads as none.
+    cryptoWalletChains: knownValues(['bitcoin', 'ethereum']).optional().catch(undefined),
+    // The public read-only demo ("Try the demo" on the sign-in screen). Optional so an older
+    // server that doesn't report it still parses; missing reads as off.
+    demo: z.boolean().optional(),
     email: z.boolean(),
     fileStorage: z.boolean(),
     // Optional so an older server that doesn't report it still parses; the app reads a
     // missing value as "not offered" (see use-instance.ts).
     googleSignIn: z.boolean().optional(),
     marketData: z.boolean(),
+    // Single sign-on through the operator's OIDC provider ("Sign in with <name>"); null when
+    // off, absent on a server older than it.
+    oidc: z.object({ name: z.string().min(1) }).nullable().optional(),
+    // Passkey sign-in (better-auth's passkey plugin) and the hostname passkeys belong to, the web
+    // app's. Absent on an older server: no passkeys. A malformed hostname reads as absent.
+    passkey: z.boolean().optional(),
+    passkeyRpId: z.string().min(1).optional().catch(undefined),
+    // False under OIDC_ONLY: no password sign-in or sign-up. Absent on an older server (on).
+    passwordSignIn: z.boolean().optional(),
+    // Mobile push notifications (`PUSH_ENABLED`). Absent on an older server: off.
+    push: z.boolean().optional(),
   }),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),
   // A mode this build doesn't know reads as 'unknown' instead of rejecting the server as
   // "not WonderMoney".
   signupMode: tolerantEnum(['open', 'invite', 'closed'], 'unknown'),
+  // The release version (`dev` for a local build); absent on an older server.
+  version: z.string().optional(),
 })
 
 export type InstanceDescription = z.infer<typeof instanceSchema>

@@ -1,4 +1,4 @@
-import { IMPORT_ROW_STATUSES, type ImportDecision, type ImportRowCounts, type ImportRowStatus, type ImportSourceAccount } from './types';
+import { IMPORT_ROW_STATUSES, type ImportDecision, type ImportMatchReason, type ImportRowCounts, type ImportRowStatus, type ImportSourceAccount } from './types';
 
 /**
  * What a staged row imports as unless the person says otherwise: a new row imports, a duplicate
@@ -14,6 +14,13 @@ export function defaultDecision(status: ImportRowStatus): ImportDecision | null 
     default:
       return null;
   }
+}
+
+/** Why a row is a duplicate or a possible one, from its status and whether a transaction is matched; null for any other row. */
+export function matchReason(status: ImportRowStatus, matched: boolean): ImportMatchReason | null {
+  if (status === 'duplicate') return matched ? 'same_id' : 'earlier_in_file';
+  if (status === 'possible_duplicate') return matched ? 'likely' : 'ambiguous';
+  return null;
 }
 
 /** Whether the person may include or skip a row: any row that reads and has not been committed. */

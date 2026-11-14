@@ -6,6 +6,7 @@ import { Tenant } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
+import { loadAccountAudiences } from '@service/account/account-access';
 import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { getRef } from '@utils/em-helpers';
 import { big, roundMoney, toNumber } from '@utils/money';
@@ -27,6 +28,9 @@ import { TransactionAuditService } from './transaction-audit.service';
  * - both are BOOKED, not soft-deleted, not hidden, dated, and not already in a pair;
  * - they have the same settlement currency and the same absolute settlement amount, to the cent, or
  *   they are a pair across currencies (below);
+ * - the same people can see both accounts: both shared with the household, or both private to the
+ *   same member. A pair re-types both rows, so it must not turn a row one member sees into a
+ *   transfer into an account only another member sees;
  * - their dates are at most {@link TRANSFER_MATCH_WINDOW_DAYS} calendar days apart;
  * - each is the other's unique closest candidate. A tie at the closest distance is ambiguous and is
  *   left unpaired. Pairs are accepted round by round, so once a row is taken a tie it was part of may
@@ -41,9 +45,7 @@ import { TransactionAuditService } from './transaction-audit.service';
  * - O's amount converted at that rate is within {@link transferMatchFxTolerance} of I's amount, as a
  *   fraction of I's amount. It absorbs the bank's spread on the rate and a fee taken out of the
  *   amount (2 percent by default, `TRANSFER_MATCH_FX_TOLERANCE`);
- * - the same people can see both accounts: both shared with the household, or both private to the
- *   same member. A pair re-types both rows, so it must not turn a row one member sees into a
- *   transfer into an account only the other one sees.
+ * - the same people can see both accounts, as for an exact pair.
  *
  * Exact same-currency matches are made first, by the rule above, and only the rows they leave take
  * part in matching across currencies: a cross-currency candidate never makes an exact match
@@ -56,8 +58,9 @@ import { TransactionAuditService } from './transaction-audit.service';
  *   its direction, DEPOSIT for money in and PAYMENT for money out, whose type no user changed. Pairing
  *   re-types it.
  * - **Anchor**: a row a person typed as a transfer, unpaired: a manual row typed TRANSFER_IN /
- *   TRANSFER_OUT, or a synced row a user re-typed so. Pairing links it but never changes its type.
- * - A pair needs at least one re-typeable row. Two anchors are already both transfers.
+ *   TRANSFER_OUT (a file that states its transfers, such as both sides of a YNAB or QIF transfer,
+ *   imports them so), or a synced row a user re-typed so. Pairing links it but never changes its
+ *   type. Two anchors pair too: both are already transfers, so the pair only links them.
  * - Never: a manual DEPOSIT or PAYMENT (the person said what it is), CARD_PAYMENT and every other
  *   type, and any row a user re-typed to something other than a transfer.
  *
@@ -70,10 +73,11 @@ import { TransactionAuditService } from './transaction-audit.service';
  *
  * ## Upkeep, before matching
  *
- * - A stored pair that no longer satisfies the rule (one side expired, deleted, re-amounted, or no
- *   longer pointing back; across currencies, also out of tolerance at the stored rate, or across a
- *   privacy line) is dissolved. A synced side gets its direction's type back, unless a user
- *   set it; a manual side keeps its type.
+ * - A stored pair that no longer satisfies the rule (one side expired, deleted, re-amounted, no
+ *   longer pointing back, or across a privacy line; across currencies, also out of tolerance at the
+ *   stored rate) is dissolved. A synced side gets its direction's type back, unless a user
+ *   set it; a manual side keeps its type. A private side is only ever changed on its own account,
+ *   which no other member can see.
  * - An unpaired synced row typed TRANSFER_IN / TRANSFER_OUT is a leftover of an older sync that typed
  *   every credit TRANSFER_IN. It gets its direction's type, unless a user set it, and may then
  *   pair like any other row.
@@ -158,8 +162,11 @@ export interface TransferRow {
   day: null | number;
   deleted: boolean;
   hidden: boolean;
-  /** Who may see the row's account: null for the whole household, else its owner (0: no owner). */
-  privateTo: null | number;
+  /**
+   * Who may see the row's account: null for the whole household, else the account's audience (its
+   * owner and the members it is shared with, `accountAudience` in `account-access.ts`).
+   */
+  privateTo: null | string;
   synced: boolean;
   transactionKey: number;
   /** The stored `transferExchangeRate`. */
@@ -179,7 +186,8 @@ export async function reconcileTransfers(em: EntityManager, input: TransferRecon
   // A row with no owner cannot be audited, so it is never changed (and never pairs).
   const entities = (await loadRows(em, input)).filter((entity) => entity.appuserKey != null);
   const userTyped = await loadUserTypedKeys(em, input.tenantKey);
-  const rows = entities.map((entity) => toTransferRow(entity, userTyped));
+  const audiences = await loadAccountAudiences(em, entities.flatMap((entity) => (entity.accountKey ? [entity.accountKey.accountKey] : [])));
+  const rows = entities.map((entity) => toTransferRow(entity, userTyped, audiences));
   const plan = planTransfers(rows, { fxTolerance: transferMatchFxTolerance(), rateOn: await loadRates(em, rows, input.tenantKey) });
   const result: TransferReconciliationResult = {
     pairsDissolved: plan.pairsDissolved,
@@ -364,11 +372,17 @@ function isValidPair(row: TransferRow, partner: TransferRow, options: TransferPl
     && row.booked && partner.booked && !row.deleted && !partner.deleted
     && row.cents !== 0
     && row.currencyKey !== null && partner.currencyKey !== null
-    && row.accountKey !== partner.accountKey;
+    && row.accountKey !== partner.accountKey
+    && sameVisibility(row, partner);
   if (!linked) return false;
   if (row.currencyKey === partner.currencyKey) return row.cents === -partner.cents;
   if (Math.sign(row.cents) === Math.sign(partner.cents)) return false;
   return row.cents < 0 ? acceptsAcrossCurrencies(row, partner, options) : acceptsAcrossCurrencies(partner, row, options);
+}
+
+/** Whether the same people can see both accounts: both shared, or both private and seen by exactly the same members. */
+function sameVisibility(a: TransferRow, b: TransferRow): boolean {
+  return a.privateTo === b.privateTo;
 }
 
 /**
@@ -377,7 +391,7 @@ function isValidPair(row: TransferRow, partner: TransferRow, options: TransferPl
  */
 function acceptsAcrossCurrencies(out: TransferRow, into: TransferRow, options: TransferPlanOptions): boolean {
   if (out.currencyKey === null || into.currencyKey === null || out.currencyKey === into.currencyKey || out.day === null) return false;
-  if (out.cents >= 0 || into.cents <= 0 || out.privateTo !== into.privateTo) return false;
+  if (out.cents >= 0 || into.cents <= 0 || !sameVisibility(out, into)) return false;
   const rate = options.rateOn(out.currencyKey, into.currencyKey, out.day);
   if (rate === null || !(rate > 0)) return false;
   const received = big(into.cents);
@@ -433,11 +447,10 @@ function matchPairs(candidates: TransferRow[], options: TransferPlanOptions): [T
   for (const out of outgoing) {
     for (const into of incoming) {
       if (into.accountKey === out.accountKey) continue;
-      if (!isRetypeable(out) && !isRetypeable(into)) continue;
       const distance = Math.abs((into.day ?? 0) - (out.day ?? 0));
       if (distance > TRANSFER_MATCH_WINDOW_DAYS) continue;
       const exact = into.currencyKey === out.currencyKey;
-      if (exact ? into.cents !== -out.cents : !acceptsAcrossCurrencies(out, into, options)) continue;
+      if (exact ? into.cents !== -out.cents || !sameVisibility(out, into) : !acceptsAcrossCurrencies(out, into, options)) continue;
       addEdge(out, into, distance, exact);
       addEdge(into, out, distance, exact);
     }
@@ -490,7 +503,7 @@ async function loadUserTypedKeys(em: EntityManager, tenantKey: number): Promise<
   return new Set(entries.filter((entry) => entry.changes != null && Object.hasOwn(entry.changes, 'transactionTypeKey')).map((entry) => entry.transactionKey.transactionKey));
 }
 
-function toTransferRow(entity: Transaction, userTyped: Set<number>): TransferRow {
+function toTransferRow(entity: Transaction, userTyped: Set<number>, audiences: ReadonlyMap<number, string>): TransferRow {
   const amount = entity.settlementAmount == null ? 0 : toNumber(entity.settlementAmount);
   const account = entity.accountKey;
   return {
@@ -502,7 +515,7 @@ function toTransferRow(entity: Transaction, userTyped: Set<number>): TransferRow
     day: entity.transactionDate ? Math.floor(new Date(entity.transactionDate).getTime() / MS_PER_DAY) : null,
     deleted: entity.deletedAt != null,
     hidden: entity.hidden,
-    privateTo: account?.isPrivate ? (account.accountOwnerAppuserKey?.appuserKey ?? 0) : null,
+    privateTo: account?.isPrivate ? (audiences.get(account.accountKey) ?? '') : null,
     synced: entity.enableBankingTransactionId != null || entity.nordigenInternalTransactionId != null,
     transactionKey: entity.transactionKey,
     transferRate: entity.transferExchangeRate == null ? null : toNumber(entity.transferExchangeRate, 8),

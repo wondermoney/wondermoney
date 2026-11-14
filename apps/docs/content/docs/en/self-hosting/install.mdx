@@ -3,10 +3,32 @@ title: Install
 description: Download WonderMoney, generate its configuration and start it with Docker Compose.
 ---
 
-## Download and start
+## Install with the script
 
 ```sh
-git clone --depth 1 https://github.com/wondermoney/wondermoney.git
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh.sha256
+sha256sum -c install.sh.sha256
+sh install.sh
+```
+
+The script checks for Docker, the Compose plugin, `openssl` and `curl`, and stops with instructions if one is missing. It downloads the server files from the release tag, writes `.env` with fresh secrets, starts the stack and waits up to three minutes for the API. It asks for the web app and API address; `--yes` takes the defaults, `http://localhost:3000` and `http://localhost:3001`. Run it again to upgrade: it never rewrites `.env`, and offers to move to the latest release.
+
+### Read it first
+
+The installer is a short POSIX `sh` script. Download it, read it, then run it:
+
+```sh
+curl -fsSLO https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh
+less install.sh
+sh install.sh
+```
+
+Or do the same steps by hand, from the release tag:
+
+```sh
+# v1.4.0 here: the release you want
+git clone --depth 1 --branch v1.4.0 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh
 docker compose up -d

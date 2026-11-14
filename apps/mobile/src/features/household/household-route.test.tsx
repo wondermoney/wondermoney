@@ -12,7 +12,9 @@ const mockUseProfile = jest.fn()
 const mockInvite = { isPending: false, mutateAsync: jest.fn() }
 const mockResend = { isPending: false, mutateAsync: jest.fn() }
 const mockRevoke = { isPending: false, mutateAsync: jest.fn() }
-const mockRemove = { isPending: false, mutateAsync: jest.fn() }
+const mockRemove = { isPending: false, mutateAsync: jest.fn(), variables: undefined }
+const mockChangeRole = { isPending: false, mutateAsync: jest.fn() }
+const mockTransfer = { isPending: false, mutateAsync: jest.fn() }
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, canGoBack: mockCanGoBack, replace: mockReplace }) }))
 jest.mock('./use-household', () => ({ useHousehold: () => mockUseHousehold() }))
@@ -20,13 +22,17 @@ jest.mock('@/features/self/use-self-resource', () => ({ useProfile: () => mockUs
 jest.mock('./use-invite-household-member', () => ({ useInviteHouseholdMember: () => mockInvite }))
 jest.mock('./use-household-invite-actions', () => ({ useHouseholdInviteActions: () => ({ resend: mockResend, revoke: mockRevoke }) }))
 jest.mock('./use-remove-household-member', () => ({ useRemoveHouseholdMember: () => mockRemove }))
+jest.mock('./use-household-member-role', () => ({ useHouseholdMemberRole: () => ({ changeRole: mockChangeRole, transferOwnership: mockTransfer }) }))
 type HouseholdScreenTestProps = {
-  state: { status: string }
+  state: { status: string; data?: { me: { appuserKey: number } | null } }
   onBack: () => void
-  onInvite: (email: string) => Promise<void>
-  onResendInvite: () => Promise<void>
-  onRevokeInvite: () => Promise<void>
-  onRemoveMember: () => Promise<void>
+  onInvite: (email: string, role: string) => Promise<void>
+  onResendInvite: (key: number) => Promise<void>
+  onRevokeInvite: (key: number) => Promise<void>
+  onChangeRole: (appuserKey: number, role: string) => Promise<void>
+  onTransferOwnership: (appuserKey: number) => Promise<void>
+  onRemoveMember: (appuserKey: number) => Promise<void>
+  onLeave: () => Promise<void>
 }
 
 jest.mock('./household-screen', () => ({
@@ -34,11 +40,15 @@ jest.mock('./household-screen', () => ({
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
     return <>
       <Native.Text>{props.state.status}</Native.Text>
+      <Native.Text>{`me:${props.state.data?.me?.appuserKey ?? 'none'}`}</Native.Text>
       <Native.Pressable accessibilityRole="button" accessibilityLabel="back route" onPress={props.onBack} />
-      <Native.Pressable accessibilityRole="button" accessibilityLabel="invite route" onPress={() => void props.onInvite('partner@example.com')} />
-      <Native.Pressable accessibilityRole="button" accessibilityLabel="resend route" onPress={() => void props.onResendInvite()} />
-      <Native.Pressable accessibilityRole="button" accessibilityLabel="revoke route" onPress={() => void props.onRevokeInvite()} />
-      <Native.Pressable accessibilityRole="button" accessibilityLabel="remove route" onPress={() => void props.onRemoveMember()} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="invite route" onPress={() => void props.onInvite('new@example.com', 'viewer')} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="resend route" onPress={() => void props.onResendInvite(5)} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="revoke route" onPress={() => void props.onRevokeInvite(5)} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="role route" onPress={() => void props.onChangeRole(2, 'viewer')} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="transfer route" onPress={() => void props.onTransferOwnership(2)} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="remove route" onPress={() => void props.onRemoveMember(2)} />
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="leave route" onPress={() => void props.onLeave()} />
     </>
   },
 }))
@@ -55,6 +65,8 @@ describe('HouseholdRoute', () => {
     mockResend.mutateAsync.mockReset().mockResolvedValue(undefined)
     mockRevoke.mutateAsync.mockReset().mockResolvedValue(undefined)
     mockRemove.mutateAsync.mockReset().mockResolvedValue(undefined)
+    mockChangeRole.mutateAsync.mockReset().mockResolvedValue(undefined)
+    mockTransfer.mutateAsync.mockReset().mockResolvedValue(undefined)
     mockUseProfile.mockReset().mockReturnValue({
       data: { profile: { emailAddress: 'owner@example.com' } },
       isLoading: false,
@@ -63,7 +75,7 @@ describe('HouseholdRoute', () => {
       refetch: jest.fn(),
     })
     mockUseHousehold.mockReset().mockReturnValue({
-      data: { members: [owner, partnerMember], pendingInvite: null },
+      data: { members: [owner, partnerMember], maxMembers: 6, pendingInvites: [], viewerAppuserKey: null },
       isLoading: false,
       isAccessTransition: false,
       isRefreshFailure: false,
@@ -94,18 +106,10 @@ describe('HouseholdRoute', () => {
   it('invites through the exact mutation', async () => {
     const view = await render(<HouseholdRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'invite route' }))
-    expect(mockInvite.mutateAsync).toHaveBeenCalledWith('partner@example.com')
+    expect(mockInvite.mutateAsync).toHaveBeenCalledWith({ email: 'new@example.com', role: 'viewer' })
   })
 
-  it('resends and revokes the pending invite by its key', async () => {
-    mockUseHousehold.mockReturnValue({
-      data: { members: [owner], pendingInvite: { email: 'x@y.co', expiresAt: '2026-01-08T00:00:00.000Z', householdInviteKey: 5 } },
-      isLoading: false,
-      isAccessTransition: false,
-      isRefreshFailure: false,
-      error: null,
-      refetch: jest.fn(),
-    })
+  it('resends and revokes an invite by its key', async () => {
     const view = await render(<HouseholdRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'resend route' }))
     expect(mockResend.mutateAsync).toHaveBeenCalledWith(5)
@@ -113,13 +117,21 @@ describe('HouseholdRoute', () => {
     expect(mockRevoke.mutateAsync).toHaveBeenCalledWith(5)
   })
 
-  it('removes the partner (not itself) when the viewer is the owner', async () => {
+  it('changes a role and transfers ownership through their mutations', async () => {
     const view = await render(<HouseholdRoute />)
-    await fireEvent.press(view.getByRole('button', { name: 'remove route' }))
-    expect(mockRemove.mutateAsync).toHaveBeenCalledWith(2)
+    await fireEvent.press(view.getByRole('button', { name: 'role route' }))
+    expect(mockChangeRole.mutateAsync).toHaveBeenCalledWith({ appuserKey: 2, role: 'viewer' })
+    await fireEvent.press(view.getByRole('button', { name: 'transfer route' }))
+    expect(mockTransfer.mutateAsync).toHaveBeenCalledWith(2)
   })
 
-  it('removes itself (leaves) when the viewer is a member', async () => {
+  it('removes another member without leaving', async () => {
+    const view = await render(<HouseholdRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'remove route' }))
+    expect(mockRemove.mutateAsync).toHaveBeenCalledWith({ appuserKey: 2, leaving: false })
+  })
+
+  it('leaves as the viewer, found by email from an older API', async () => {
     mockUseProfile.mockReturnValue({
       data: { profile: { emailAddress: 'partner@example.com' } },
       isLoading: false,
@@ -128,8 +140,23 @@ describe('HouseholdRoute', () => {
       refetch: jest.fn(),
     })
     const view = await render(<HouseholdRoute />)
-    await fireEvent.press(view.getByRole('button', { name: 'remove route' }))
-    expect(mockRemove.mutateAsync).toHaveBeenCalledWith(2)
+    await fireEvent.press(view.getByRole('button', { name: 'leave route' }))
+    expect(mockRemove.mutateAsync).toHaveBeenCalledWith({ appuserKey: 2, leaving: true })
+  })
+
+  it('finds the viewer by the key the API names, without waiting for the profile', async () => {
+    mockUseProfile.mockReturnValue({ data: undefined, isLoading: true, isAccessTransition: false, error: null, refetch: jest.fn() })
+    mockUseHousehold.mockReturnValue({
+      data: { members: [owner, partnerMember], maxMembers: 6, pendingInvites: [], viewerAppuserKey: 2 },
+      isLoading: false,
+      isAccessTransition: false,
+      isRefreshFailure: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+    const view = await render(<HouseholdRoute />)
+    expect(view.getByText('loaded')).toBeOnTheScreen()
+    expect(view.getByText('me:2')).toBeOnTheScreen()
   })
 
   it.each([
@@ -159,7 +186,7 @@ describe('HouseholdRoute', () => {
 
   it('keeps a stale-tagged loaded state after a refresh failure', async () => {
     mockUseHousehold.mockReturnValue({
-      data: { members: [owner, partnerMember], pendingInvite: null },
+      data: { members: [owner, partnerMember], maxMembers: 6, pendingInvites: [], viewerAppuserKey: null },
       isLoading: false,
       isAccessTransition: false,
       isRefreshFailure: true,

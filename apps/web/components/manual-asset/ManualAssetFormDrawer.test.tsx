@@ -8,7 +8,10 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import type { ManualAsset } from "@/lib/api/manual-asset/types";
-import { manualAsset } from "@/lib/manual-assets/asset-fixture";
+import {
+  cryptoWalletAsset,
+  manualAsset,
+} from "@/lib/manual-assets/asset-fixture";
 import { dayString } from "@/lib/manual-assets/asset-view";
 
 import enAssets from "../../messages/en/assets.json";
@@ -184,4 +187,26 @@ test("the member who does not own a shared asset cannot change its privacy, and 
 
   await waitFor(() => assert.equal(state.update.mock.calls.length, 1));
   assert.equal("isPrivate" in state.update.mock.calls[0][0].payload, false);
+});
+
+test("a crypto wallet is renamed here, but its kind and value fields are not offered or sent", async () => {
+  state.update.mockResolvedValue(cryptoWalletAsset());
+  const user = userEvent.setup();
+  renderDrawer(cryptoWalletAsset({ manualAssetKey: 5 }));
+
+  assert.equal(screen.queryByLabelText(m.fields.kind), null);
+  assert.equal(screen.queryByRole("combobox"), null);
+  assert.equal(screen.queryByLabelText(m.fields.purchasePrice), null);
+  assert.equal(screen.queryByLabelText(m.fields.growthRate), null);
+  const name = screen.getByLabelText(new RegExp(m.fields.name));
+  await user.clear(name);
+  await user.type(name, "Cold wallet");
+  await user.click(screen.getByRole("switch"));
+  await user.click(screen.getByRole("button", { name: m.actions.save }));
+
+  await waitFor(() => assert.equal(state.update.mock.calls.length, 1));
+  assert.deepEqual(state.update.mock.calls[0][0], {
+    manualAssetId: 5,
+    payload: { name: "Cold wallet", notes: null, isPrivate: true },
+  });
 });

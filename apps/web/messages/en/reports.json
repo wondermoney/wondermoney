@@ -133,9 +133,58 @@
         "total": "Total",
         "unknownValue": "No value recorded",
         "noExchangeRate": "No exchange rate yet",
+        "timeWeighted": "Time-weighted",
+        "moneyWeighted": "Money-weighted",
+        "timeWeightedDescription": "How the investments did, whatever you put in or took out.",
+        "moneyWeightedDescription": "How your money did, counting when you added or withdrew it. A yearly rate for periods of a year or more.",
+        "perYear": "a year",
+        "returnUnavailable": "Not enough history to measure",
+        "notCombined": "Not combined across portfolios",
+        "missingSnapshots": "{count, plural, one {# day without a snapshot, carried over} other {# days without a snapshot, carried over}}",
         "noData": {
           "title": "No portfolios to show",
           "description": "Add a portfolio to see its performance here."
+        }
+      },
+      "monthComparison": {
+        "title": "Compare months",
+        "subtitle": "What changed between two months, category by category.",
+        "baseMonth": "Month",
+        "compareMonth": "Compared with",
+        "metric": "Metric",
+        "income": "Income",
+        "expenses": "Expenses",
+        "net": "Net",
+        "savingsRate": "Savings rate",
+        "change": "Change",
+        "category": "Category",
+        "viewTransactions": "See the transactions behind this amount",
+        "largestChanges": "The chart shows the {count} largest changes; the table lists every category.",
+        "noData": {
+          "title": "No spending in either month",
+          "description": "Try two other months, or check that accounts are connected."
+        }
+      },
+      "spendingVsNormal": {
+        "title": "Spending vs normal",
+        "subtitle": "Where this month's money went, and which categories ran above or below their three-month normal.",
+        "month": "Month",
+        "category": "Category",
+        "spent": "Spent",
+        "normal": "Normal",
+        "change": "Change vs normal",
+        "noBaseline": "No baseline",
+        "baselineTooSmall": "Too small to compare",
+        "aboveNormal": "above normal",
+        "belowNormal": "below normal",
+        "nearNormal": "near normal",
+        "hoverHint": "Point at a tile, or use the table, to see its spend, normal and change.",
+        "tableCaption": "Spending by category in {month}, compared with the same days of the previous three months.",
+        "subcategoryOf": "Subcategory of {parent}",
+        "viewTransactions": "See the transactions behind this amount",
+        "noData": {
+          "title": "No spending this month",
+          "description": "Try another month, or check that accounts are connected."
         }
       }
     },

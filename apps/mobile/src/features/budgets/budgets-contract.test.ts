@@ -1,9 +1,13 @@
-import { budgetAccountsResponseSchema, budgetAccountsWriteSchema, budgetAddCategoryWriteSchema, budgetCreateResponseSchema, budgetCreateWriteSchema, budgetCategoryWriteSchema, budgetDetailResponseSchema, budgetInventoryEndpoint, budgetMetadataWriteSchema, budgetMonthResponseSchema, budgetsEndpoint, budgetsResponseSchema, budgetYearResponseSchema, createBudgetAccountsEndpoint, createBudgetAddCategoryEndpoint, createBudgetCategoryEndpoint, createBudgetDetailEndpoint, createBudgetEndpoint, createBudgetMetadataEndpoint, createBudgetMonthEndpoint, createBudgetYearEndpoint, createBudgetYearUntilMonthEndpoint, createDeleteBudgetCategoryForMonthEndpoint, createDeleteBudgetEndpoint, createRemoveBudgetCategoryEndpoint, createUpdateBudgetAccountsEndpoint, parseBudgetId } from './budgets-contract'
-import { budgetFixture, childRow, parentRow } from './test-fixtures'
+import { budgetAccountsResponseSchema, budgetAccountsWriteSchema, budgetAddCategoryWriteSchema, budgetCreateResponseSchema, budgetCreateWriteSchema, budgetCategoryWriteSchema, budgetDetailResponseSchema, budgetInventoryEndpoint, budgetInventoryResponseSchema, budgetMetadataWriteSchema, budgetMonthResponseSchema, budgetsEndpoint, budgetsResponseSchema, createBudgetsEndpoint, budgetYearResponseSchema, createBudgetAccountsEndpoint, createBudgetAddCategoryEndpoint, createBudgetCategoryEndpoint, createBudgetDetailEndpoint, createBudgetEndpoint, createBudgetMetadataEndpoint, createBudgetMonthEndpoint, createBudgetYearEndpoint, createBudgetYearUntilMonthEndpoint, createDeleteBudgetCategoryForMonthEndpoint, createDeleteBudgetEndpoint, createRemoveBudgetCategoryEndpoint, createUpdateBudgetAccountsEndpoint, parseBudgetId } from './budgets-contract'
+import { budgetFixture, budgetYearFixture, childRow, parentRow } from './test-fixtures'
 
 describe('budgets contracts', () => {
   it('pins both read-only endpoints and accepts documented nullable fields and raw income extras', () => {
     expect(budgetsEndpoint).toMatchObject({ method: 'GET', path: '/v1/budget/full' })
+    // The member filter: one member's (or Shared) part of each budget; nothing sent for everyone.
+    expect(createBudgetsEndpoint()).toMatchObject({ method: 'GET', path: '/v1/budget/full' })
+    expect(createBudgetsEndpoint('12')).toMatchObject({ method: 'GET', path: '/v1/budget/full?memberKeys=12' })
+    expect(createBudgetsEndpoint('shared').path).toBe('/v1/budget/full?memberKeys=shared')
     expect(createBudgetMonthEndpoint(7, 2026, 1)).toMatchObject({ method: 'GET', path: '/v1/budget/7/2026/1' })
     const parsed = budgetsResponseSchema.parse({ budgets: [{ ...budgetFixture, incomes: [{ ...budgetFixture.incomes[0], budgetKey: { budgetKey: 7 } }] }] })
     expect(parsed.budgets[0].categories[0]).toMatchObject({ child_category_name: null, category_recurrency: null })
@@ -74,9 +78,9 @@ describe('budgets contracts', () => {
     expect(createBudgetMetadataEndpoint(7)).toMatchObject({ method: 'PATCH', path: '/v1/budget/7' })
     expect(createBudgetMetadataEndpoint(7).schema.safeParse(undefined).success).toBe(true)
     expect(createBudgetMetadataEndpoint(7).schema.safeParse({}).success).toBe(false)
-    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', description: null } })).toEqual({ budget: { budgetKey: 7, name: 'Plan', description: null } })
+    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', description: null } })).toEqual({ budget: { budgetKey: 7, name: 'Plan', description: null, visibility: 'household' } })
     expect(budgetDetailResponseSchema.safeParse({ budget: { budgetKey: 7, name: 'Plan' } }).success).toBe(true)
-    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', accounts: [] } })).toEqual({ budget: { budgetKey: 7, name: 'Plan' } })
+    expect(budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', accounts: [] } })).toEqual({ budget: { budgetKey: 7, name: 'Plan', visibility: 'household' } })
     expect(budgetMetadataWriteSchema.safeParse({ name: '', extra: true }).success).toBe(false)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(100), description: 'd'.repeat(500) }).success).toBe(true)
     expect(budgetMetadataWriteSchema.safeParse({ name: 'n'.repeat(101), description: '' }).success).toBe(false)
@@ -179,6 +183,35 @@ describe('budgets contracts', () => {
     const parsed = budgetYearResponseSchema.parse({ budget: { ...yearFixture, categories: [parentRow], accounts: [] } })
     expect(parsed.budget).not.toHaveProperty('month')
     expect(budgetYearResponseSchema.parse({ budget: { ...budgetFixture, categories: [parentRow], accounts: [] } }).budget).not.toHaveProperty('month')
+  })
+
+  it('reads every budget\'s visibility, and reads a server that does not send it as household', () => {
+    const { visibility: _visibility, ...legacy } = budgetFixture
+    const { visibility: _yearVisibility, ...legacyYear } = budgetYearFixture
+    const month = (budget: object) => budgetMonthResponseSchema.parse({ budget, hasPreviousMonth: false, hasNextMonth: false }).budget.visibility
+    const inventory = (item: object) => budgetInventoryResponseSchema.parse({ budgets: [{ budgetKey: 7, budgetTemplates: [], name: 'Plan', ...item }] }).budgets[0]!.visibility
+    const detail = (item: object) => budgetDetailResponseSchema.parse({ budget: { budgetKey: 7, name: 'Plan', ...item } }).budget.visibility
+
+    expect(budgetsResponseSchema.parse({ budgets: [legacy] }).budgets[0]!.visibility).toBe('household')
+    expect(budgetsResponseSchema.parse({ budgets: [{ ...legacy, visibility: 'personal' }] }).budgets[0]!.visibility).toBe('personal')
+    expect(month(legacy)).toBe('household')
+    expect(month({ ...legacy, visibility: 'personal' })).toBe('personal')
+    expect(budgetYearResponseSchema.parse({ budget: legacyYear }).budget.visibility).toBe('household')
+    expect(budgetYearResponseSchema.parse({ budget: { ...legacyYear, visibility: 'personal' } }).budget.visibility).toBe('personal')
+    expect(inventory({})).toBe('household')
+    expect(inventory({ visibility: 'personal' })).toBe('personal')
+    expect(detail({})).toBe('household')
+    expect(detail({ visibility: 'personal' })).toBe('personal')
+    // A kind this build does not know reads as household rather than failing the list.
+    expect(inventory({ visibility: 'team' })).toBe('household')
+    expect(budgetsResponseSchema.safeParse({ budgets: [{ ...legacy, visibility: 1 }] }).success).toBe(false)
+  })
+
+  it('sends the visibility chosen at creation, and only a known one', () => {
+    const valid = { houseHoldSize: 1, dependentsNum: 0, incomes: [] }
+    expect(budgetCreateWriteSchema.parse({ ...valid, visibility: 'personal' })).toEqual({ ...valid, visibility: 'personal' })
+    expect(budgetCreateWriteSchema.parse({ ...valid, visibility: 'household' })).toEqual({ ...valid, visibility: 'household' })
+    expect(budgetCreateWriteSchema.safeParse({ ...valid, visibility: 'secret' }).success).toBe(false)
   })
 
   it('pins the strict account-keys write body', () => {

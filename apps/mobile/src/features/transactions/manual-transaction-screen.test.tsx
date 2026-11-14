@@ -70,6 +70,20 @@ describe('manual transaction screen', () => {
     view.unmount()
   })
 
+  it('evaluates an arithmetic expression typed into the amount', async () => {
+    const submit = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ onSubmit: submit })
+    await choose(view, 'Transaction type', 'Payment')
+    await fireEvent.changeText(view.getByLabelText('Settlement amount'), '12.40+3.15')
+    expect(view.getByText('= 15.55')).toBeOnTheScreen()
+    await choose(view, 'Settlement currency', /EUR/)
+    await choose(view, 'Existing merchant', 'Cafe')
+    await fireEvent.press(view.getByRole('button', { name: 'Review transaction' }))
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm and record' }))
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ payload: expect.objectContaining({ settlementAmount: '15.55' }) }))
+    view.unmount()
+  })
+
   it('tags a new transaction, creating a tag inline, and shows the tags in the review', async () => {
     const submit = jest.fn().mockResolvedValue(undefined)
     const onCreateTag = jest.fn().mockResolvedValue({ tag: { tagKey: 12, name: 'Holiday', color: '#94a3b8' } })
@@ -207,6 +221,42 @@ describe('manual transaction screen', () => {
     expect(view.getByText(i18n.t('transactionCreate.errors.amount'))).toBeOnTheScreen()
     await choose(view, i18n.t('transactionCreate.existingMerchant'), 'Cafe')
     expect(view.getByRole('button', { name: i18n.t('transactionCreate.review') }).props.accessibilityState.disabled).toBe(true)
+    view.unmount()
+  })
+
+  it('fills the form from a template, dates it today and creates nothing', async () => {
+    const submit = jest.fn().mockResolvedValue(undefined)
+    const savings = { ...account, accountId: 8, accountName: 'Savings' }
+    const template = {
+      transactionTemplateKey: 4,
+      name: 'Weekly groceries',
+      direction: 'out' as const,
+      amount: 12.5,
+      description: 'Market',
+      notes: 'Cash',
+      position: 0,
+      account: { accountKey: 8, accountName: 'Savings' },
+      category: { categoryKey: 4, name: 'Food' },
+      transactionMerchant: { transactionMerchantKey: 9, name: 'Cafe' },
+    }
+    const { view, i18n } = await renderScreen({
+      accounts: [account, savings],
+      onSubmit: submit,
+      templates: [template],
+      templatesStatus: 'loaded',
+    })
+
+    await fireEvent.press(view.getByRole('button', { name: i18n.t('transactionTemplates.use', { name: template.name }) }))
+
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    expect(view.getByLabelText(i18n.t('transactionCreate.amount')).props.value).toBe('12.5')
+    expect(view.getByLabelText(i18n.t('transactionCreate.date')).props.value).toBe(today)
+    expect(view.getByLabelText(i18n.t('transactionCreate.descriptionOptional')).props.value).toBe('Market')
+    expect(view.getByTestId('transaction-create-notes').props.value).toBe('Cash')
+    expect(view.getByRole('button', { name: `${i18n.t('transactionCreate.account')}, Savings` })).toBeOnTheScreen()
+    expect(view.getByRole('button', { name: `${i18n.t('transactionCreate.type')}, Payment` })).toBeOnTheScreen()
+    expect(submit).not.toHaveBeenCalled()
     view.unmount()
   })
 })

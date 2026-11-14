@@ -11,7 +11,7 @@ let mockParams: Record<string, string | string[] | undefined> = {}
 
 const metadata = { portfolio: { portfolioKey: 3, name: 'Broker', description: null, currencyKey: { code: 'EUR' } } }
 const dashboard = { quickStats: { bestPerformer: null, biggestPosition: null, holdingsCount: 1, worstPerformer: null }, summary: { assetCount: 1, currency: 'EUR', lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: 'YTD', periodReturn: null, realizedGains: 0, totalGainLoss: 0, totalGainLossPercent: 0, totalValue: 1100, unrealizedGains: 0 } }
-const rawHolding = { allocation: 12.5, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100, financialAssetKey: 8, financialAssetName: 'Apple Inc.', financialAssetSymbol: 'AAPL', financialAssetType: 'Stock', quantity: 10, unrealizedGains: 200, unrealizedGainsPercentage: 22.2 }
+const rawHolding = { allocation: 12.5, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100, financialAssetKey: 8, financialAssetName: 'Apple Inc.', financialAssetSymbol: 'AAPL', financialAssetType: 'Stock', quantity: 10, realizedGains: 48.75, unrealizedGains: 200, unrealizedGainsPercentage: 22.2 }
 const holdings = { holdings: [rawHolding] }
 const activityResponse = { transactions: [
   { financialAssetKey: { financialAssetKey: 8, name: 'Apple Inc.', symbol: 'AAPL' }, financialTransactionTypeKey: { financialTransactionTypeKey: 1, name: 'BUY' }, portfolioKey: { name: 'Broker', portfolioKey: 3 }, quantity: 10, settlementAmount: 1100, transactionDate: '2026-07-20T00:00:00.000Z', transactionKey: 1 },
@@ -48,6 +48,19 @@ describe('HoldingDetailRoute', () => {
     expect(view.getByText('AAPL')).toBeOnTheScreen()
     expect(view.getByText('Buy')).toBeOnTheScreen()
     expect(view.queryByText('FND')).not.toBeOnTheScreen()
+  })
+
+  it('shows the holding\'s realized gain from the holdings response', async () => {
+    const view = await renderRoute()
+    expect(view.getByLabelText('Realized gain, +€48.75')).toBeOnTheScreen()
+  })
+
+  it('leaves the realized gain out when an older server does not send it', async () => {
+    const { realizedGains: _omitted, ...olderHolding } = rawHolding
+    mockDetail = { ...mockDetail, data: { dashboard, holdings: { holdings: [olderHolding] }, metadata } }
+    const view = await renderRoute()
+    expect(view.getByText('AAPL')).toBeOnTheScreen()
+    expect(view.queryByLabelText(/^Realized gain/)).not.toBeOnTheScreen()
   })
 
   it('reports not-found for a malformed asset id without waiting on queries', async () => {

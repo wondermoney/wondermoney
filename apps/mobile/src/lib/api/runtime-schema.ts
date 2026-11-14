@@ -14,6 +14,13 @@ export type WriteEndpoint<Value> = Readonly<{
   path: string
   schema: z.ZodType<Value>
   successStatuses?: readonly number[]
+  /**
+   * The API words this endpoint's 400 `message` for the person, so the client keeps it and the
+   * 400's `code` on the `ApiError` (`serverMessage`, `serverCode`) for the screen to translate or
+   * show. Off by default: every other 4xx message
+   * is a diagnostic, and the error boundary keeps only the classification and status.
+   */
+  keepsBadRequestMessage?: boolean
 }>
 
 export const readEndpoint = <Value>(endpoint: ReadEndpoint<Value>): ReadEndpoint<Value> => endpoint
@@ -23,6 +30,8 @@ export const writeEndpoint = <Value>(endpoint: WriteEndpoint<Value>): WriteEndpo
 export const commonErrorEnvelopeSchema = z.object({
   code: z.string().optional(),
   message: z.string().optional(),
+  /** Values a client words the error with (4xx only); anything malformed reads as absent. */
+  details: z.record(z.string(), z.unknown()).optional().catch(undefined),
 })
 
 export type CommonErrorEnvelope = z.infer<typeof commonErrorEnvelopeSchema>

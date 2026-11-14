@@ -1,0 +1,78 @@
+name: Set up the workspace
+description: >-
+  pnpm, Node and an installed workspace. A job whose lockfile matches a saved entry restores the
+  installed node_modules trees and skips `pnpm install`; otherwise it installs from the registry.
+
+# Why it works this way (measured on ubuntu-latest, Node 26, pnpm 12, the hoisted layout):
+#   - restoring setup-node's pnpm store cache (~1 GB) then installing from it: ~45 s;
+#   - installing from the registry with an empty store: ~31 s;
+#   - restoring the installed node_modules (~850 MB compressed): 16-30 s. `pnpm install` over it
+#     is no shortcut: with no store, a hoisted install downloads every package again (~19 s)
+#     before it finds nothing to add. So a hit does not run it.
+# Skipping the install is safe because the key covers everything that decides what it produces:
+# the lockfile (every workspace package's dependencies, a new workspace package), the workspace
+# settings and .pnpmfile.cjs, the root package.json (the pnpm version), the OS, the CPU and the
+# Node version. The one install-time step outside node_modules, apps/docs's postinstall (it
+# generates the docs' .source, which their type-check, lint and build read), takes 20-40 s on its
+# own, so on a hit it runs only for a job that asks for it (`docs: 'true'`).
+#
+# Only jobs that pass `save: 'true'` save, and only on pushes: on a miss, every job of the run
+# would otherwise spend ~10 s compressing the same 850 MB before finding the key taken, and
+# every pull request that changes the lockfile would add an entry of its own. A pull request
+# that changes the lockfile installs from the registry until it is merged.
+#
+# Usage (after actions/checkout):
+#   - id: setup
+#     uses: ./.github/actions/setup-workspace
+#     with:
+#       node-version-file: apps/mobile/.nvmrc   # optional, default .nvmrc
+#       save: 'true'                            # optional, default 'false'
+#       docs: 'true'                            # optional, default 'false'
+#   ... ${{ steps.setup.outputs.node-version }}
+inputs:
+  node-version-file:
+    description: The file that names the Node version.
+    default: .nvmrc
+  save:
+    description: "'true' to save node_modules on a miss, when the run is a push."
+    default: 'false'
+  docs:
+    description: "'true' if the job checks or builds apps/docs, which need its generated .source."
+    default: 'false'
+outputs:
+  node-version:
+    description: The resolved Node version, for the calling job's own cache keys.
+    value: ${{ steps.node.outputs.node-version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6
+    - id: node
+      uses: actions/setup-node@v7
+      with:
+        node-version-file: ${{ inputs.node-version-file }}
+    - id: modules
+      uses: actions/cache/restore@v6
+      with:
+        path: |
+          node_modules
+          apps/*/node_modules
+          packages/*/node_modules
+        key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.pnpmfile.cjs') }}
+    - if: steps.modules.outputs.cache-hit != 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile
+    - if: steps.modules.outputs.cache-hit == 'true' && inputs.docs == 'true'
+      shell: bash
+      run: pnpm --filter @wondermoney/docs run postinstall
+    # Straight after the install, before the job writes caches of its own under node_modules
+    # (jest's transform cache, the API test harness's schemas), so those never end up in it.
+    - if: steps.modules.outputs.cache-hit != 'true' && inputs.save == 'true' && github.event_name == 'push'
+      uses: actions/cache/save@v6
+      with:
+        path: |
+          node_modules
+          apps/*/node_modules
+          packages/*/node_modules
+        key: ${{ steps.modules.outputs.cache-primary-key }}

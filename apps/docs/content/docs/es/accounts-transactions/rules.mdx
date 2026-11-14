@@ -3,7 +3,7 @@ title: Reglas
 description: Categoriza, renombra, etiqueta u oculta transacciones automáticamente, comprueba qué coincide con una regla antes de guardarla, y aplícala a las transacciones que ya tienes.
 ---
 
-Una regla le dice a WonderMoney qué hacer con las transacciones de cierto tipo: por ejemplo, "cuando la descripción contiene NETFLIX, asignar la categoría Entretenimiento". Las reglas pertenecen al hogar, así que ambos miembros ven y gestionan la misma lista.
+Una regla le dice a WonderMoney qué hacer con las transacciones de cierto tipo: por ejemplo, "cuando la descripción contiene NETFLIX, asignar la categoría Entretenimiento". Las reglas pertenecen al hogar, así que todas las personas del hogar ven la misma lista, y todas salvo los observadores pueden gestionarla.
 
 ## Dónde encontrarlas
 
@@ -29,11 +29,22 @@ Una regla tiene:
 
 Un hogar puede tener hasta 200 reglas.
 
+## Sugerencias de reglas
+
+Cuando corriges una y otra vez el mismo tipo de transacción, WonderMoney te propone una regla que lo haga por ti. Después de cambiar tú la categoría de una transacción, en la web o en la app, si ya has movido tres transacciones de este tipo a esa categoría en los últimos 90 días, te pregunta: "¿Categorizar siempre las transacciones de este tipo como Supermercado?"
+
+- **De este tipo** quiere decir el mismo comercio, o el mismo comienzo de la descripción sin referencias ni números. "TRF MB WAY 912345678 JOAO" y "TRF MB WAY 913333333 ANA" empiezan ambas por "TRF MB WAY". Una cabecera de tarjeta como "COMPRA 1192" se omite, así que "COMPRA 1192 CONTINENTE" cuenta como "CONTINENTE".
+- Cambiar varias transacciones a la vez cuenta cada una de ellas, y cada transacción cuenta una sola vez.
+- Solo cuentan los cambios que haces tú. Los de los demás miembros, una propuesta del asistente que confirmes y las categorías asignadas por una regla, por la categorización aprendida o por una importación no cuentan. Las transacciones de las cuentas privadas que no ves nunca cuentan.
+- Elige **Crear regla** para abrir el editor de reglas ya rellenado, con su vista previa, y revísala antes de guardar. Elige **No volver a sugerir** para dejar de ver esa sugerencia. Si no eliges ninguna, puede volver a aparecer la próxima vez.
+
+No aparece ninguna sugerencia cuando una regla activa ya da esa categoría a esas transacciones, o cuando WonderMoney ya las reconoce por la categoría que elegiste para su comercio. Esa categoría aprendida solo se reutiliza cuando la descripción de una transacción nueva es exactamente el nombre del comercio, así que la regla se sigue sugiriendo para descripciones con más texto.
+
 ## Vista previa antes de guardar
 
 Mientras editas, la vista previa junto al formulario muestra cuántas de tus transacciones coinciden con la regla, cuántas de ellas cambiaría, y las 50 coincidencias más recientes con el cambio que recibiría cada una. Se actualiza poco después de que dejes de escribir.
 
-La vista previa evalúa la regla sola y abarca las transacciones del hogar que puedes ver, incluidas las ocultas. Nunca muestra las cuentas privadas del otro miembro. Una coincidencia puede aparecer como **Sin cambios** cuando la transacción ya tiene esos valores, o cuando definiste ese valor tú mismo (ver abajo).
+La vista previa evalúa la regla sola y abarca las transacciones del hogar que puedes ver, incluidas las ocultas. Nunca muestra las cuentas privadas que no ves. Una coincidencia puede aparecer como **Sin cambios** cuando la transacción ya tiene esos valores, o cuando definiste ese valor tú mismo (ver abajo).
 
 Guardar una regla no cambia las transacciones que ya tienes. Para cambiarlas también, aplica la regla (ver más abajo).
 
@@ -45,7 +56,7 @@ Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (po
 
 - El número que confirmas es exactamente lo que cambia al aplicar.
 - La aplicación se ejecuta en segundo plano: el diálogo muestra el progreso, y puedes cerrarlo mientras se ejecuta. Al terminar, un mensaje te dice cuántas transacciones cambiaron.
-- Abarca las transacciones del hogar que puedes ver, incluidas las ocultas, pero no las eliminadas ni las cuentas privadas del otro miembro. Todo lo que aparece en "Lo que las reglas nunca cambian" sigue valiendo.
+- Abarca las transacciones del hogar que puedes ver, incluidas las ocultas, pero no las eliminadas ni las cuentas privadas que no ves. Todo lo que aparece en "Lo que las reglas nunca cambian" sigue valiendo.
 - Aplicar la misma regla otra vez no cambia nada más. Cada cambio queda registrado en la actividad de la transacción.
 - Solo una aplicación a la vez por hogar: espera a que termine una antes de empezar otra.
 
@@ -53,11 +64,166 @@ Para ejecutar todas las reglas activas sobre las transacciones que ya tienes (po
 
 - Lo que definiste a mano: una categoría que elegiste, un comercio o una descripción que editaste, y notas que escribiste. La regla sigue contando como coincidencia, pero deja esos campos como están.
 - El tipo de transacción. Solo la detección de transferencias marca una transacción como transferencia.
-- Las transacciones de las cuentas privadas del otro miembro. Una regla actúa en nombre del miembro que cambió por última vez sus condiciones o acciones, y solo sobre las transacciones que ese miembro puede ver.
+- Las transacciones de cuentas que el miembro de la regla no puede editar. Una regla actúa en nombre del miembro que cambió por última vez sus condiciones o acciones, y solo sobre las transacciones que ese miembro puede ver y editar: nunca en cuentas privadas ocultas para él o que solo puede ver.
 
 ## Orden
 
 Las reglas se ejecutan de arriba abajo. Cada regla mira la transacción tal como llegó, no como la dejaron las reglas anteriores. Cuando dos reglas asignan el mismo campo, gana la de abajo; las etiquetas de varias reglas se suman. Activa **Detenerse tras esta regla** para que las reglas de debajo no se ejecuten sobre lo que coincidió con ella.
+
+## Exportar e importar reglas
+
+Elige **Exportar** arriba en **Configuración → Reglas** para descargar las reglas del hogar en un archivo JSON. Elige **Importar** para cargar uno: WonderMoney revisa primero el archivo y muestra qué va a pasar antes de cambiar nada.
+
+El archivo no contiene identificadores internos. Una regla nombra aquello a lo que se refiere: cuentas, comercios y etiquetas por su nombre, una categoría del sistema por su clave (el nombre sembrado, como `FOOD`) y una categoría tuya por su nombre. Eso es lo que le permite moverse a otra instancia.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- Una categoría es `{ "system": "FOOD" }` para una categoría del sistema, `{ "name": "Streaming" }` para una tuya, o `"uncategorized"`.
+- Los nombres de cuentas, comercios y etiquetas deben coincidir con los del hogar al que importas.
+- El archivo puede contener hasta 1.000 reglas y ocupar como máximo 1 MB. El límite de 200 reglas por hogar sigue aplicándose.
+
+**Modos de importación.** *Añadir* conserva las reglas que ya hay y añade las del archivo después. *Sustituir* elimina las reglas existentes y deja solo las del archivo, una vez validado el archivo entero; una importación fallida deja la lista como estaba. Ambos modos piden confirmación.
+
+**La simulación.** Antes de escribir nada, la importación muestra las reglas que creará, las que omitirá porque ya existe una regla con ese nombre, y las referencias que no encontró. Después:
+
+- Una categoría personalizada que falta se puede crear, si marcas la casilla.
+- Una regla que nombra una cuenta que este hogar no tiene se importa desactivada, sin esa condición de cuenta.
+- Una regla que nombra una categoría del sistema o una etiqueta que falta se omite.
+
+Un archivo que no sea una exportación de reglas de WonderMoney, supere 1 MB o contenga más de 1.000 reglas se rechaza con un mensaje que explica por qué.
+
+## Reglas predefinidas para tu país
+
+WonderMoney incluye listas cortas de reglas para tiendas y suministros conocidos de Portugal, España, Brasil, Reino Unido y Estados Unidos, para que los comercios habituales tengan categoría desde el primer día.
+
+- **Dónde se ofrecen.** Al final de la configuración inicial y arriba en **Configuración → Reglas**, WonderMoney te ofrece la predefinida que te corresponde. Mira primero los países de tus conexiones bancarias, después tu idioma y la región del navegador o del dispositivo, y por último tu moneda. En la web, **Predefinidas** arriba en **Configuración → Reglas** muestra todas. La app móvil ofrece la que corresponde en su pantalla Reglas.
+- **Nada se añade solo.** La oferta abre una vista previa de todas las reglas de la predefinida y de lo que fija cada una. Las reglas solo se añaden cuando eliges **Añadir N reglas**, después de las tuyas. **Ahora no** oculta la oferta.
+- **Añadir dos veces no duplica.** Una regla predefinida se omite cuando ya tienes una regla con el mismo nombre, así que añadirla de nuevo, o después de eliminar algunas, solo añade lo que falta.
+- **Qué puede hacer una predefinida.** Una regla predefinida solo coincide con dinero que sale y solo fija una categoría, un comercio o una descripción. Nunca marca una transacción como transferencia, nunca la oculta, nunca da a un ingreso una categoría de gasto y nunca decide una categoría a partir de un medio de pago como MB WAY, PIX, Bizum, SEPA o una transferencia, porque por ellos circula dinero en ambos sentidos. Una prueba revisa cada predefinida antes de publicarla.
+- Después de añadir una predefinida puedes aplicar sus reglas a las transacciones que ya tienes (ver arriba) y editarlas o eliminarlas como cualquier otra regla.
+
+Cada regla compara la descripción original del banco, sin distinguir mayúsculas ni acentos. Las predefinidas contienen:
+
+{/* rule-presets:start (generated by scripts/rule-presets.mjs; do not edit by hand) */}
+
+### Portugal (`pt-PT`, 19 reglas)
+
+| Regla | La descripción contiene | Categoría | Comercio |
+| --- | --- | --- | --- |
+| Continente | “Continente” | Supermercado | Continente |
+| Pingo Doce | “Pingo Doce” | Supermercado | Pingo Doce |
+| Lidl | “Lidl” | Supermercado | Lidl |
+| Auchan | “Auchan” | Supermercado | Auchan |
+| Intermarché | “Intermarché” | Supermercado | Intermarché |
+| Minipreço | “Minipreço” | Supermercado | Minipreço |
+| Mercadona | “Mercadona” | Supermercado | Mercadona |
+| EDP Comercial | “EDP Comercial” | Electricidad | EDP |
+| Galp Electricidade | “Galp Electricidade” | Electricidad | Galp |
+| Vodafone | “Vodafone” | TV, teléfono e internet | Vodafone |
+| Via Verde | “Via Verde” | Mantenimiento del vehículo | Via Verde |
+| Metropolitano de Lisboa | “Metropolitano de Lisboa” | Transporte público | Metropolitano de Lisboa |
+| Metro do Porto | “Metro do Porto” | Transporte público | Metro do Porto |
+| Comboios de Portugal | “Comboios de Portugal” | Transporte público | CP - Comboios de Portugal |
+| Glovo | “Glovo” | Comida a domicilio | Glovo |
+| Uber Eats | “Uber Eats” | Comida a domicilio | Uber Eats |
+| Netflix | “Netflix” | Servicios de streaming | Netflix |
+| Spotify | “Spotify” | Servicios de streaming | Spotify |
+| Farmácia | “Farmácia” | Salud | — |
+
+### España (`es-ES`, 18 reglas)
+
+| Regla | La descripción contiene | Categoría | Comercio |
+| --- | --- | --- | --- |
+| Mercadona | “Mercadona” | Supermercado | Mercadona |
+| Carrefour | “Carrefour” | Supermercado | Carrefour |
+| Lidl | “Lidl” | Supermercado | Lidl |
+| Eroski | “Eroski” | Supermercado | Eroski |
+| Alcampo | “Alcampo” | Supermercado | Alcampo |
+| Iberdrola | “Iberdrola” | Electricidad | Iberdrola |
+| Endesa | “Endesa” | Electricidad | Endesa |
+| Movistar | “Movistar” | TV, teléfono e internet | Movistar |
+| Vodafone | “Vodafone” | TV, teléfono e internet | Vodafone |
+| Yoigo | “Yoigo” | TV, teléfono e internet | Yoigo |
+| Renfe | “Renfe” | Transporte público | Renfe |
+| Metro de Madrid | “Metro de Madrid” | Transporte público | Metro de Madrid |
+| Glovo | “Glovo” | Comida a domicilio | Glovo |
+| Just Eat | “Just Eat” | Comida a domicilio | Just Eat |
+| Uber Eats | “Uber Eats” | Comida a domicilio | Uber Eats |
+| Netflix | “Netflix” | Servicios de streaming | Netflix |
+| Spotify | “Spotify” | Servicios de streaming | Spotify |
+| Farmacia | “Farmacia” | Salud | — |
+
+### Brasil (`pt-BR`, 14 reglas)
+
+| Regla | La descripción contiene | Categoría | Comercio |
+| --- | --- | --- | --- |
+| Carrefour | “Carrefour” | Supermercado | Carrefour |
+| Pão de Açúcar | “Pão de Açúcar” | Supermercado | Pão de Açúcar |
+| Assaí Atacadista | “Assaí Atacadista” | Supermercado | Assaí Atacadista |
+| Atacadão | “Atacadão” | Supermercado | Atacadão |
+| CPFL | “CPFL” | Electricidad | CPFL |
+| Cemig | “Cemig” | Electricidad | Cemig |
+| Sabesp | “Sabesp” | Agua | Sabesp |
+| Comgás | “Comgás” | Gas | Comgás |
+| iFood | “iFood” | Comida a domicilio | iFood |
+| Rappi | “Rappi” | Comida a domicilio | Rappi |
+| Netflix | “Netflix” | Servicios de streaming | Netflix |
+| Spotify | “Spotify” | Servicios de streaming | Spotify |
+| Drogasil | “Drogasil” | Salud | Drogasil |
+| Droga Raia | “Droga Raia” | Salud | Droga Raia |
+
+### Reino Unido y Estados Unidos (`en`, 23 reglas)
+
+| Regla | La descripción contiene | Categoría | Comercio |
+| --- | --- | --- | --- |
+| Tesco | “Tesco” pero no “Bank”, “Mobile” | Supermercado | Tesco |
+| Sainsbury's | “Sainsbury” pero no “Bank” | Supermercado | Sainsbury's |
+| Asda | “Asda” | Supermercado | Asda |
+| Morrisons | “Morrisons” | Supermercado | Morrisons |
+| Waitrose | “Waitrose” | Supermercado | Waitrose |
+| Lidl | “Lidl” | Supermercado | Lidl |
+| Kroger | “Kroger” | Supermercado | Kroger |
+| Whole Foods | “Whole Foods” | Supermercado | Whole Foods |
+| Trader Joe's | “Trader Joe” | Supermercado | Trader Joe's |
+| Thames Water | “Thames Water” | Agua | Thames Water |
+| Virgin Media | “Virgin Media” | TV, teléfono e internet | Virgin Media |
+| Comcast | “Comcast” | TV, teléfono e internet | Comcast |
+| Verizon | “Verizon” | TV, teléfono e internet | Verizon |
+| TfL Travel | “TfL Travel” | Transporte público | Transport for London |
+| Trainline | “Trainline” | Transporte público | Trainline |
+| Deliveroo | “Deliveroo” | Comida a domicilio | Deliveroo |
+| Uber Eats | “Uber Eats” | Comida a domicilio | Uber Eats |
+| DoorDash | “DoorDash” | Comida a domicilio | DoorDash |
+| Just Eat | “Just Eat” | Comida a domicilio | Just Eat |
+| Netflix | “Netflix” | Servicios de streaming | Netflix |
+| Spotify | “Spotify” | Servicios de streaming | Spotify |
+| Boots | “Boots” | Salud | Boots |
+| Walgreens | “Walgreens” | Salud | Walgreens |
+
+{/* rule-presets:end */}
 
 ## Enlaces relacionados
 

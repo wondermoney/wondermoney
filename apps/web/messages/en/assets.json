@@ -12,7 +12,8 @@
       "archive": "Archive",
       "unarchive": "Bring back",
       "delete": "Delete asset",
-      "back": "Assets"
+      "back": "Assets",
+      "import": "Import CSV"
     },
     "empty": {
       "title": "Count your home and car in your net worth",
@@ -22,7 +23,8 @@
       "property": "Property",
       "vehicle": "Vehicle",
       "valuable": "Valuable",
-      "other": "Other"
+      "other": "Other",
+      "crypto_wallet": "Crypto wallet"
     },
     "summary": {
       "total": "Total value",
@@ -113,11 +115,138 @@
         "owner": "Owner",
         "notes": "Notes"
       },
+      "equity": {
+        "title": "Equity",
+        "value": "Value today",
+        "linkedDebt": "Owed on secured loans",
+        "equity": "Equity",
+        "loans": "Loans secured against it",
+        "converted": "<amount></amount> at today's rate",
+        "noRate": "Equity cannot be worked out: there is no exchange rate from {currencies} to {currency} yet.",
+        "archived": "An archived asset has no value today, so it has no equity.",
+        "underwater": "Underwater: more is owed on its loans than it is worth."
+      },
       "archiveTitle": "Archive this asset?",
       "archiveConfirm": "It stops counting in net worth from today. Its history stays.",
       "deleteTitle": "Delete this asset?",
       "deleteConfirm": "Its valuations go with it, and it leaves your net worth history. This cannot be undone.",
       "ownerOnlyPrivacy": "Only the asset's owner can change whether it is private."
+    },
+    "import": {
+      "title": "Import manual assets",
+      "description": "One row per asset with its value on a day. Every asset is created with that valuation, or none is when a row has a problem.",
+      "download-template": "Download the template",
+      "columns-hint": "Columns: Name, Kind (property, vehicle, valuable or other), Value, Valuation date (YYYY-MM-DD, optional: today when empty), Currency (a three-letter code) and Private (yes or no, optional).",
+      "file-problem-title": "This file can't be imported",
+      "rows-problem-title": "{count, plural, one {# row needs fixing} other {# rows need fixing}}",
+      "row-problem": "Line {line}: {problems}",
+      "issues": {
+        "missing-columns": "The file needs Name, Kind, Value and Currency columns.",
+        "empty-file": "The file has no rows.",
+        "too-many-rows": "A file can hold at most 500 assets.",
+        "name": "name",
+        "kind": "kind",
+        "value": "value",
+        "valuation-date": "valuation date",
+        "currency": "currency",
+        "private": "private"
+      },
+      "preview-caption": "The assets this file creates",
+      "column-name": "Asset",
+      "column-kind": "Kind",
+      "column-date": "Valued on",
+      "column-value": "Value",
+      "private": "Private",
+      "today": "Today",
+      "failed": "The assets could not be imported, and none was created. Try again.",
+      "action": "{count, plural, =0 {Import assets} one {Import # asset} other {Import # assets}}",
+      "close": "Close",
+      "done-title": "Assets imported",
+      "done-description": "{count, plural, one {# asset was added with its valuation.} other {# assets were added with their valuations.}}"
+    },
+    "wallet": {
+      "addTitle": "Add crypto wallet",
+      "actions": {
+        "add": "Add crypto wallet",
+        "addRow": "Add another address",
+        "removeRow": "Remove address {number}",
+        "removeRowShort": "Remove",
+        "addAddress": "Add address",
+        "editLabel": "Edit label",
+        "editLabelOf": "Edit the label of {title}",
+        "removeAddress": "Remove address",
+        "removeAddressOf": "Remove {title}",
+        "syncNow": "Sync now"
+      },
+      "publicOnly": {
+        "title": "Public addresses only",
+        "body": "Enter a public address, or an xpub, ypub or zpub for Bitcoin. Never enter a private key or a recovery phrase: anyone who has either can spend your coins, and this app never needs them."
+      },
+      "fields": {
+        "namePlaceholder": "e.g. Hardware wallet",
+        "private": "Private wallet",
+        "chain": "Network",
+        "address": "Public address",
+        "addressOrXpub": "Public address or xpub",
+        "addressPlaceholder": {
+          "bitcoin": "bc1q…, 1…, 3… or xpub…",
+          "ethereum": "0x…"
+        },
+        "label": "Label",
+        "labelPlaceholder": "e.g. Savings",
+        "addressNumber": "Address {number}"
+      },
+      "chains": {
+        "bitcoin": "Bitcoin",
+        "ethereum": "Ethereum"
+      },
+      "addressKinds": {
+        "address": "Address",
+        "xpub": "Extended public key"
+      },
+      "explorerNote": "Balances are read once a day from a blockchain explorer set up by this server's operator. The explorer sees the addresses it is asked about, and can tell they belong together. Nothing else is sent.",
+      "validation": {
+        "labelTooLong": "Use 100 characters or fewer"
+      },
+      "errors": {
+        "secretBlocked": "This looks like a private key or a recovery phrase, so it was cleared and not sent. Enter a public address instead.",
+        "secretRejected": "That looked like a private key or a recovery phrase, so it was refused and not kept. Enter a public address instead.",
+        "addressInvalid": "This is not a valid public address for the chosen network.",
+        "addressExists": "This address is already on this wallet.",
+        "featureDisabled": "This server cannot read balances on that network."
+      },
+      "status": {
+        "pending": "Waiting for the first read of its balances.",
+        "ok": "Balances read on {date}.",
+        "okNoDate": "Balances read.",
+        "failed": "The last read failed: {reason}.",
+        "balancesFrom": "The balances shown are from {date}."
+      },
+      "failure": {
+        "timeout": "the explorer took too long to answer",
+        "rate_limited": "the explorer asked to slow down",
+        "unavailable": "the explorer could not be reached",
+        "rejected": "the explorer refused this address",
+        "invalid_response": "the explorer sent an answer that could not be read",
+        "disabled": "this server no longer reads that network"
+      },
+      "tokens": {
+        "title": "Balances",
+        "count": "Count {symbol} in the value",
+        "noPrice": "No price",
+        "none": "No balances read yet."
+      },
+      "detail": {
+        "title": "Addresses and balances",
+        "howItWorks": "The value is the ticked balances at today's prices, in US dollars, read once a day. The network's own coin is ticked from the start. Other tokens found on an address are ignored until you tick them, so tick only tokens you recognise.",
+        "unpriced": "Today's value was not updated: there is no price for {symbols}. Untick them to count the rest.",
+        "noValueYet": "No value yet: its balances have not been read.",
+        "lastSynced": "Balances last read on {date}.",
+        "noValuations": "A value is recorded each day its balances are read."
+      },
+      "removeAddressTitle": "Remove this address?",
+      "removeAddressConfirm": "Its balances stop counting in the wallet's value from the next read. The values already recorded stay.",
+      "syncQueued": "Reading the balances again. The value follows once they are in."
     }
   }
 }

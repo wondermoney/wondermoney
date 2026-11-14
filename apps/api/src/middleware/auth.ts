@@ -3,11 +3,12 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { isEmpty, isString } from 'lodash-es';
 
+import { isApiTokenRequestAllowed } from '@middleware/api-token-policy';
+import { getBearerToken } from '@middleware/auth-helpers';
+import { authenticateApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
 import { getAuthSession } from '@service/auth/better-auth';
-import { UnauthorizedError } from '@utils/errors';
+import { ERROR_CODE, ForbiddenError, UnauthorizedError } from '@utils/errors';
 import logger from '@utils/logger';
-
-
 
 interface ApiKeyMatch {
   id?: string;
@@ -150,6 +151,12 @@ function readApiKeyRecords(envValue: string | undefined): ApiKeyRecord[] {
 
 async function requireAuth(req: Request, _res: Response, next: NextFunction) {
   try {
+    const bearer = getBearerToken(req.headers.authorization);
+    if (isApiTokenShaped(bearer)) {
+      await requirePersonalApiToken(req, bearer, next);
+      return;
+    }
+
     const ctx = await getAuthSession(req.headers);
     if (!ctx) {
       next(new UnauthorizedError('No valid session'));
@@ -184,6 +191,54 @@ async function requireBearerAuth(req: Request, _res: Response, next: NextFunctio
     logger.error(`Session validation failed (bearer auth): ${error}`);
     next(new UnauthorizedError('Session validation failed'));
   }
+}
+
+/**
+ * Resolve a `wm_pat_` bearer to its user and household, then apply the scope allowlist.
+ *
+ * The token behaves as the user: `req.user` and `req.tenant` come from the token's own row,
+ * so the tenant filter and the private-account rules run exactly as they do for a session.
+ * Only the identity resolution differs.
+ */
+async function requirePersonalApiToken(req: Request, token: string, next: NextFunction): Promise<void> {
+  let authenticated;
+  try {
+    authenticated = await authenticateApiToken(token, { ip: req.ip });
+  } catch (error) {
+    logger.error(`API token lookup failed: ${error}`);
+    next(new UnauthorizedError('Invalid API token'));
+    return;
+  }
+  if (!authenticated) {
+    next(new UnauthorizedError('Invalid API token'));
+    return;
+  }
+
+  const { apiToken, appuser, tenant } = authenticated;
+  req.apiToken = { apiTokenKey: apiToken.apiTokenKey, scopes: apiToken.scopes };
+  // Set the appuser and tenant here so the normal stack (`getUser`, `resolveTenantForRequest`)
+  // keeps working unchanged. `getUser` re-reads the appuser by its better-auth id; the tenant
+  // already present makes `resolveTenantForRequest` honour the token's household.
+  req.user = appuser;
+  req.tenant = tenant;
+  req.authUser = {
+    session: { createdAt: new Date(0), id: `api-token:${apiToken.apiTokenKey}` },
+    user: {
+      email: appuser.emailAddress,
+      emailVerified: true,
+      id: appuser.externalUserId,
+      image: null,
+      name: [appuser.firstName, appuser.lastName].filter(Boolean).join(' ') || null,
+      twoFactorEnabled: null,
+    },
+  };
+
+  if (!isApiTokenRequestAllowed(req)) {
+    next(new ForbiddenError('This API token does not have access to this route.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
+    return;
+  }
+
+  next();
 }
 
 function safeCompare(value: string, expected: string) {

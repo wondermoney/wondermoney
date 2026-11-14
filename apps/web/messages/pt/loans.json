@@ -2,7 +2,7 @@
   "loans": {
     "page": {
       "title": "Empréstimos",
-      "description": "Acompanhe empréstimos, planos de pagamento e saldos num só lugar."
+      "description": "Acompanha empréstimos, planos de pagamento e saldos num só lugar."
     },
     "actions": {
       "add": "Adicionar empréstimo",
@@ -24,11 +24,13 @@
       "status": "Estado",
       "principal": "Capital",
       "originalPrincipal": "Valor original do empréstimo",
-      "originalPrincipalHint": "Opcional. O valor originalmente emprestado, se diferente do capital acima (por exemplo, ao adicionar um empréstimo que já está a pagar). Usado para calcular o progresso do pagamento.",
+      "originalPrincipalHint": "Opcional. O valor originalmente emprestado, se diferente do capital acima (por exemplo, ao adicionar um empréstimo que já estás a pagar). Usado para calcular o progresso do pagamento.",
       "balance": "Saldo",
       "interestRate": "Taxa de juro",
       "installment": "Prestação mensal",
       "termMonths": "Prazo (meses)",
+      "amortizationMethod": "Método de amortização",
+      "amortizationMethodHint": "O francês mantém a prestação constante; o de capital constante paga o mesmo capital todos os meses, por isso a prestação desce.",
       "startDate": "Data de início",
       "dueDate": "Data de vencimento",
       "linkedAccount": "Conta associada",
@@ -36,8 +38,13 @@
       "namePlaceholder": "Ex.: Crédito habitação",
       "interestRatePlaceholder": "0,00",
       "termMonthsPlaceholder": "Ex.: 360",
-      "startDatePlaceholder": "Escolha a data de início",
-      "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo"
+      "startDatePlaceholder": "Escolhe a data de início",
+      "notesPlaceholder": "Algo que valha a pena lembrar sobre este empréstimo",
+      "rateType": "Tipo de taxa",
+      "rateTypeVariableHelp": "Introduz a taxa com que o empréstimo começou. Adiciona cada alteração posterior no histórico de taxas, na página do empréstimo.",
+      "securedAsset": "Garantido por",
+      "securedAssetNone": "Nenhum",
+      "securedAssetHint": "Opcional. O bem que garante este empréstimo, como a casa comprada com um crédito habitação. A página do bem passa a mostrar o capital próprio: o que vale menos o que ainda está em dívida."
     },
     "types": {
       "personal": "Pessoal",
@@ -45,6 +52,10 @@
       "auto": "Automóvel",
       "student": "Estudantil",
       "other": "Outro"
+    },
+    "methods": {
+      "french": "Francês (prestação constante)",
+      "constantPrincipal": "Capital constante (SAC)"
     },
     "statuses": {
       "active": "Ativo",
@@ -55,23 +66,23 @@
     },
     "repayment": {
       "title": "Associação de pagamentos",
-      "description": "Associe os pagamentos a movimentos da conta para um acompanhamento correto do saldo."
+      "description": "Associa os pagamentos a movimentos da conta para um acompanhamento correto do saldo."
     },
     "validation": {
       "required": "Este campo é obrigatório.",
-      "positiveAmount": "Introduza um valor positivo.",
-      "validRate": "Introduza uma taxa de juro válida.",
+      "positiveAmount": "Introduz um valor positivo.",
+      "validRate": "Introduz uma taxa de juro válida.",
       "originalPrincipalTooLow": "O valor original do empréstimo deve ser, no mínimo, igual ao capital."
     },
     "errors": {
       "loadFailed": "Não foi possível carregar os empréstimos.",
-      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente.",
       "saveFailed": "Não foi possível guardar o empréstimo.",
       "deleteFailed": "Não foi possível eliminar o empréstimo."
     },
     "empty": {
       "title": "Ainda sem empréstimos",
-      "description": "Adicione o primeiro empréstimo para acompanhar saldos e pagamentos.",
+      "description": "Adiciona o primeiro empréstimo para acompanhar saldos e pagamentos.",
       "noData": "—"
     },
     "summary": {
@@ -102,9 +113,9 @@
       "loading": "A carregar detalhes do empréstimo...",
       "errors": {
         "loadFailed": "Não foi possível carregar o empréstimo.",
-        "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente."
+        "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente."
       },
-      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tente novamente.",
+      "loadFailedBody": "Não foi possível carregar o empréstimo selecionado. Tenta novamente.",
       "assumptions": {
         "title": "Premissas do empréstimo"
       },
@@ -123,9 +134,9 @@
         "empty": "Ainda não existem pagamentos associados.",
         "noCandidates": "Não existem candidatos a pagamento.",
         "candidatesTitle": "Associar pagamentos",
-        "candidatesDescription": "Escolha uma transação para rever e alocar.",
+        "candidatesDescription": "Escolhe uma transação para rever e alocar.",
         "reviewTitle": "Rever alocação",
-        "reviewDescription": "Confirme a repartição do pagamento antes de guardar.",
+        "reviewDescription": "Confirma a repartição do pagamento antes de guardar.",
         "linked": "Associado",
         "candidateConfidence": "Confiança: {value}",
         "confidenceValue": "{value}%",
@@ -144,13 +155,110 @@
         "split": "<principal></principal> de capital, <interest></interest> de juros, <fees></fees> de comissões"
       },
       "amortization": {
-        "title": "Pré-visualização de amortização",
-        "unavailable": "A pré-visualização de amortização não está disponível com a resposta atual da API."
+        "title": "Plano de amortização",
+        "subtitle": "Cada pagamento dividido em juros e capital, e o saldo que resta depois.",
+        "unavailable": "O plano de amortização está indisponível neste momento.",
+        "missingInputs": "Adiciona a taxa de juro e o prazo para ver o plano contratual.",
+        "empty": "Não há linhas de amortização para mostrar.",
+        "totalInterest": "Juros totais",
+        "totalPaid": "Total pago",
+        "principal": "Capital",
+        "interest": "Juros",
+        "balance": "Saldo",
+        "paid": "Pago",
+        "scheduled": "Previsto",
+        "rowLabel": "Pagamento {number}",
+        "split": "<principal></principal> de capital, <interest></interest> de juros",
+        "columns": {
+          "number": "#",
+          "date": "Data",
+          "payment": "Pagamento",
+          "principal": "Capital",
+          "interest": "Juros",
+          "balance": "Saldo",
+          "status": "Estado"
+        }
+      },
+      "payoff": {
+        "title": "Projeção de quitação",
+        "subtitle": "Quando o empréstimo fica liquidado com a prestação contratual, e quanto mais cedo um pagamento mensal extra te leva lá.",
+        "extraLabel": "Pagamento mensal extra",
+        "extraPlaceholder": "0",
+        "extraHelper": "Somado à prestação contratual. Deixa vazio para ver apenas a quitação contratual.",
+        "baseline": "Prestação contratual",
+        "withExtra": "Com extra",
+        "payoffDate": "Quitação prevista",
+        "monthsSaved": "Meses poupados",
+        "interestSaved": "Juros poupados",
+        "monthCount": "{count, plural, one {# mês} other {# meses}}",
+        "noSavings": "—",
+        "never": "Não fica liquidado",
+        "neverBody": "Com esta prestação o saldo nunca chega a zero: o pagamento não cobre os juros mensais. Aumenta a prestação ou adiciona um extra.",
+        "missingInputs": "Adiciona a taxa de juro e o prazo para projetar a quitação.",
+        "unavailable": "A projeção de quitação está indisponível neste momento.",
+        "empty": "Não há projeção para mostrar."
       },
       "adjustment": {
-        "unavailableTitle": "Ajuste de saldo indisponível",
-        "unavailableDescription": "Esta ação ainda não está ligada a uma API.",
-        "unavailableBody": "O formulário de ajuste fica oculto até a API estar disponível."
+        "title": "Ajustar saldo",
+        "editTitle": "Editar ajuste",
+        "description": "Regista o saldo indicado pelo credor ou outra alteração do empréstimo. O saldo, o plano e a projeção de liquidação seguem-no a partir da sua data.",
+        "type": "Tipo de ajuste",
+        "date": "Data de efeito",
+        "amount": "Montante",
+        "balanceAmount": "Saldo nesta data",
+        "reason": "Motivo (opcional)",
+        "history": "Ajustes de saldo",
+        "loadError": "Não foi possível carregar os ajustes.",
+        "saveError": "Não foi possível guardar esta alteração.",
+        "empty": "Sem ajustes de saldo",
+        "emptyBody": "Quando o saldo do credor for diferente do apresentado aqui, regista o valor dele. Substitui o saldo calculado a partir da sua data, e os pagamentos seguintes reduzem-no a partir daí.",
+        "add": "Adicionar ajuste",
+        "save": "Guardar ajuste",
+        "edit": "Editar ajuste",
+        "delete": "Eliminar ajuste",
+        "deleteConfirm": "Eliminar este ajuste? O saldo é recalculado sem ele.",
+        "invalidAmount": "Introduz um montante válido.",
+        "amountPositive": "Introduz um montante superior a zero.",
+        "invalidDate": "Escolhe a data em que entra em vigor.",
+        "setTo": "Definido para <amount></amount>",
+        "increases": "Aumenta o saldo em",
+        "decreases": "Reduz o saldo em",
+        "types": {
+          "BALANCE_CORRECTION": "Corrigir saldo",
+          "FEE": "Comissão",
+          "CAPITALIZED_INTEREST": "Juros capitalizados",
+          "PRINCIPAL_INCREASE": "Aumento de capital",
+          "PRINCIPAL_DECREASE": "Redução de capital",
+          "WRITE_OFF": "Anulação"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Define o saldo para o valor do credor nesta data. Zero é permitido.",
+          "FEE": "Soma ao saldo uma comissão cobrada no empréstimo.",
+          "CAPITALIZED_INTEREST": "Soma ao saldo juros não pagos.",
+          "PRINCIPAL_INCREASE": "Soma ao saldo dinheiro emprestado.",
+          "PRINCIPAL_DECREASE": "Reduz o saldo fora de um pagamento associado.",
+          "WRITE_OFF": "Reduz o saldo num montante perdoado pelo credor."
+        }
+      },
+      "rateHistory": {
+        "title": "Histórico de taxas",
+        "description": "Cada taxa aplica-se desde a sua data até à seguinte. As taxas não são obtidas nem previstas: adiciona cada alteração quando o credor a anunciar.",
+        "effectiveDate": "Data de efeito",
+        "apr": "Taxa de juro anual (TAEG)",
+        "loadError": "Não foi possível carregar o histórico de taxas.",
+        "saveError": "Não foi possível guardar esta taxa.",
+        "empty": "Ainda não há alterações de taxa.",
+        "emptyWithRate": "Ainda não há alterações de taxa: aplica-se {rate} durante todo o prazo.",
+        "from": "Desde {date}: <rate></rate>",
+        "add": "Adicionar alteração de taxa",
+        "save": "Guardar alteração de taxa",
+        "cancel": "Cancelar",
+        "edit": "Editar alteração de taxa",
+        "delete": "Eliminar alteração de taxa",
+        "deleteConfirm": "Eliminar esta alteração de taxa?",
+        "invalidRate": "Introduz uma taxa válida.",
+        "maxRate": "A taxa deve estar entre 0 e 100%.",
+        "invalidDate": "Escolhe a data em que entra em vigor."
       }
     },
     "table": {
@@ -172,6 +280,11 @@
       "sampleProvider": "Banco",
       "sampleStatus": "Ativo",
       "sampleTerm": "28a 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fixa",
+      "VARIABLE": "Variável",
+      "UNKNOWN": "Não sei"
     }
   }
 }

@@ -23,6 +23,14 @@ export class FinancialAssetPrice {
 
   [PrimaryKeyProp]?: [number, Date]; // this is needed for proper type checks in `FilterQuery`
 
+  /**
+   * The market-data provider that supplied the price (`eodhd`, `stooq`, `coingecko`; see
+   * `services/market-data/registry.ts`). Null for prices stored before sources were recorded. A
+   * household's manual price is a `FinancialAssetPriceOverride`, never a row here.
+   */
+  @Property({ length: 32, nullable: true })
+  source?: null | string;
+
   @Property({ columnType: 'numeric' })
   volume!: number;
 }

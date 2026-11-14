@@ -29,8 +29,9 @@ import { readRestoreArchive, RestoreError, type RestoreErrorCode, type RestoreEr
  *              records what it would write and any warnings. A wrong password or a bad file comes
  *              back as `invalid`, and validate can be asked again (with another password).
  *   commit     `POST /:id/commit`, once validated: a worker job runs the same restore for real, in
- *              one database transaction, then queues balance re-conversion and portfolio
- *              snapshot rebuilds. The uploaded file is deleted once it ends either way.
+ *              one database transaction, then queues balance re-conversion (and that of each
+ *              restored exchange-rate override's pair) and full portfolio snapshot rebuilds,
+ *              which also take in the restored price overrides. The uploaded file is deleted once it ends either way.
  *
  * Who and where: only the household's owner, only into their own household, and only while it holds
  * no accounts, portfolios, budgets, goals, loans or manual assets (checked at every step, and again under a lock
@@ -300,7 +301,7 @@ export class DataRestoreService {
       }
       await backgroundOperationService.heartbeatJob(correlationId, queueJobId, { progress: done as unknown as Record<string, unknown> });
       await backgroundOperationService.finishJob(correlationId, queueJobId, { stage: `${DATA_RESTORE_OPERATION}:restored`, status: BackgroundOperationStatus.SUCCEEDED });
-      await this.afterRestore(correlationId, outcome);
+      await this.afterRestore(correlationId, target, outcome);
       return true;
     } catch (error) {
       const known = error instanceof RestoreError || error instanceof RestoreRefused;
@@ -339,12 +340,16 @@ export class DataRestoreService {
 
   // --- internals ---
 
-  private async afterRestore(correlationId: string, outcome: Awaited<ReturnType<typeof restoreHousehold>>): Promise<void> {
+  private async afterRestore(correlationId: string, target: RestoreTarget, outcome: Awaited<ReturnType<typeof restoreHousehold>>): Promise<void> {
     await this.deleteUpload(correlationId).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Restored file could not be deleted'); });
     const enqueue = this.deps.enqueue;
     if (!enqueue) return;
     try {
       if (outcome.hasForeignCurrencyAccounts) await enqueueFxReconvertJob({ correlationId: `fx.reconvert:${correlationId}` }, { enqueue });
+      // Each restored exchange-rate pair is converted again, as after an override is added in the app.
+      for (const pair of outcome.fxOverridePairs) {
+        await enqueueFxReconvertJob({ correlationId: `fx.reconvert:${correlationId}:${pair.fromCurrency}-${pair.toCurrency}`, override: { ...pair, tenantKey: target.tenantKey } }, { enqueue });
+      }
       for (const portfolioId of outcome.portfolioKeys) {
         const snapshot = `portfolio.snapshot:${correlationId}:${portfolioId}`;
         await enqueuePortfolioSnapshotManualJob({ correlationId: snapshot, portfolioId }, { enqueue, singletonKey: snapshot });

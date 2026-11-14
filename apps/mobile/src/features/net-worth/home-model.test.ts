@@ -4,8 +4,12 @@ import {
   chartScale,
   daysLeftInMonth,
   formatCompactMoney,
+  formatPercentagePoints,
+  formatSavingsRate,
+  monthComparisonRange,
   netWorthChanges,
   oldestRefresh,
+  savingsSummary,
   upcomingLoanPayments,
 } from './home-model'
 import { mapNetWorthSummary } from './net-worth-view-model'
@@ -80,10 +84,68 @@ describe('home model', () => {
     expect(sheet.own[1]).toEqual({ type: 'portfolios', total: 0, rows: [{ key: 'portfolios:1', label: 'Shares', amount: 8000, id: 7, countedInAccountId: 5 }] })
   })
 
+  it("carries a member's share of a split account on either side", () => {
+    const sheet = balanceSheet([
+      { type: 'accounts', id: 5, name: 'House fund', balance: 600, sharePercent: 60 },
+      { type: 'accounts', id: 6, name: 'Card', balance: -100, sharePercent: 50 },
+    ])
+    expect(sheet.own[0]?.rows).toEqual([{ key: 'accounts:0', label: 'House fund', amount: 600, id: 5, sharePercent: 60 }])
+    expect(sheet.owe[0]?.rows).toEqual([{ key: 'accounts:1', label: 'Card', amount: 100, id: 6, sharePercent: 50 }])
+  })
+
   it('diverges cash-flow bars from one zero line, oldest first', () => {
     const scale = cashflowScale([{ date: '2026-11-01T00:00:00.000Z', amount: 300 }, { date: '2026-10-01T00:00:00.000Z', amount: -100 }])
     expect(scale.zero).toBe(25)
     expect(scale.bars.map((bar) => bar.width)).toEqual([25, 75])
+  })
+
+  it('compares month-to-date with the same days of last month', () => {
+    const early = monthComparisonRange(new Date(2026, 10, 5, 12))
+    expect(early.samePoint).toBe(true)
+    expect(early.from).toEqual(new Date(2026, 9, 1))
+    expect(early.to).toEqual(new Date(2026, 9, 5, 23, 59, 59, 999))
+
+    const lastDay = monthComparisonRange(new Date(2026, 10, 30, 12))
+    expect(lastDay.samePoint).toBe(false)
+    expect(lastDay.to).toEqual(new Date(2026, 9, 31, 23, 59, 59, 999))
+  })
+
+  it('clamps a same-point comparison to a shorter previous month', () => {
+    const range = monthComparisonRange(new Date(2026, 2, 30, 12))
+    expect(range.samePoint).toBe(true)
+    expect(range.to).toEqual(new Date(2026, 1, 28, 23, 59, 59, 999))
+  })
+
+  it('states this month beside the comparison period, with no delta without data', () => {
+    const range = monthComparisonRange(new Date(2026, 10, 5, 12))
+    const summary = savingsSummary(
+      { expenses: 1400, income: 2000, savingsRate: 0.3 },
+      { expenses: 1520, income: 1880, savingsRate: 0.1915 },
+      range,
+    )
+    expect(summary).toMatchObject({
+      income: 2000,
+      spending: 1400,
+      savingsRate: 0.3,
+      incomeDelta: 120,
+      spendingDelta: -120,
+    })
+    expect(summary?.savingsRateDelta).toBeCloseTo(10.85, 2)
+    expect(summary?.comparison?.samePoint).toBe(true)
+
+    const noComparison = savingsSummary({ expenses: 1400, income: 2000, savingsRate: 0.3 }, undefined, range)
+    expect(noComparison?.comparison).toBeNull()
+    expect(noComparison?.incomeDelta).toBeNull()
+    expect(noComparison?.savingsRateDelta).toBeNull()
+
+    expect(savingsSummary(undefined, undefined, range)).toBeNull()
+  })
+
+  it('formats the rate and its points in the reader’s locale', () => {
+    expect(formatSavingsRate(0.3, 'en')).toBe('30%')
+    expect(formatSavingsRate(null, 'en')).toBe('—')
+    expect(formatPercentagePoints(10.85, 'en')).toBe('+10.9')
+    expect(formatPercentagePoints(-3, 'en')).toBe('-3')
   })
 
   it('lists active loans due from today, soonest first', () => {

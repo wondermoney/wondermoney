@@ -2,6 +2,7 @@ import type { Big as BigType } from 'big.js';
 import { isAfter } from 'date-fns';
 
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
 import { DI } from '@app/database/di';
 import { anyOf, toDate as parseDatabaseDate, sqlQuery } from '@app/database/sql';
 import { Appuser } from '@entity/Appuser';
@@ -103,7 +104,7 @@ class PortfolioSnapshotService {
             .filter((assetKey): assetKey is number => assetKey != null),
         ),
       );
-      const pricesByAsset = await this.loadHistoricalPrices(assetKeys, endDate);
+      const pricesByAsset = await this.loadHistoricalPrices(assetKeys, endDate, portfolio.tenantKey.tenantKey);
       const sameCurrency =
         portfolio.currencyKey.currencyKey === portfolio.portfolioOwnerAppuserKey.currencyKey.currencyKey;
       const exchangeRateCache = new Map<string, Map<string, number>>();
@@ -190,19 +191,23 @@ class PortfolioSnapshotService {
             }
             holding.lots.push({ quantity: tx.quantity, totalCost: settlementCost.plus(feeCost) });
           } else if (typeName === 'SELL' && holding.lots.length > 0) {
-            let sellQuantity = Math.abs(tx.quantity);
-            while (sellQuantity > 0 && holding.lots.length > 0) {
-              const lot = holding.lots[0];
-              if (!lot) break;
-              const consumed = Math.min(sellQuantity, lot.quantity);
-              const available = lot.quantity;
-              const lotCostPerShare = lot.totalCost.div(big(lot.quantity));
-              lot.quantity = available - consumed;
-              lot.totalCost = consumed === available
-                ? big(0)
-                : lot.totalCost.minus(lotCostPerShare.times(big(consumed)));
-              sellQuantity -= consumed;
-              if (lot.quantity <= 0) holding.lots.shift();
+            if (portfolio.costBasisMethod === PortfolioCostBasisMethod.AVERAGE) {
+              relieveAtAverageCost(holding.lots, Math.abs(tx.quantity));
+            } else {
+              let sellQuantity = Math.abs(tx.quantity);
+              while (sellQuantity > 0 && holding.lots.length > 0) {
+                const lot = holding.lots[0];
+                if (!lot) break;
+                const consumed = Math.min(sellQuantity, lot.quantity);
+                const available = lot.quantity;
+                const lotCostPerShare = lot.totalCost.div(big(lot.quantity));
+                lot.quantity = available - consumed;
+                lot.totalCost = consumed === available
+                  ? big(0)
+                  : lot.totalCost.minus(lotCostPerShare.times(big(consumed)));
+                sellQuantity -= consumed;
+                if (lot.quantity <= 0) holding.lots.shift();
+              }
             }
           }
           holdings.set(assetKey, holding);
@@ -280,7 +285,7 @@ class PortfolioSnapshotService {
     const portfolio = await DI.em.findOne(
       Portfolio,
       { portfolioKey: portfolioId },
-      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey'] },
+      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey', 'tenantKey'] },
     );
 
     if (!portfolio) throw new Error(`Portfolio ${portfolioId} not found`);
@@ -312,7 +317,7 @@ class PortfolioSnapshotService {
     return new Map(rates.map((rate) => [startOfUtcDay(rate.date).toISOString(), rate.rate]));
   }
 
-  private async loadHistoricalPrices(assetKeys: number[], toDate: Date) {
+  private async loadHistoricalPrices(assetKeys: number[], toDate: Date, tenantKey?: number) {
     if (!assetKeys.length) return new Map<number, { date: Date; price: number }[]>();
 
     const prices = (await sqlQuery(DI.em)
@@ -323,7 +328,20 @@ class PortfolioSnapshotService {
       .orderBy('date', 'asc')
       .execute()) as { date: Date | string; financial_asset_key: number; price: number }[];
 
-    return prices.reduce((map, price) => {
+    // The household's overrides replace the market price on their own day. Raw SQL bypasses the
+    // tenant filter, so the tenant and soft-delete predicates are explicit.
+    const overrides = tenantKey === undefined ? [] : (await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price_override')
+      .select(['financial_asset_key', 'date', 'price'])
+      .where(anyOf('financial_asset_key', assetKeys))
+      .where('tenant_key', '=', tenantKey)
+      .where('deleted_at', 'is', null)
+      .where('date', '<=', toDate)
+      .execute()) as { date: Date | string; financial_asset_key: number; price: number }[];
+    const effective = new Map<string, { date: Date | string; financial_asset_key: number; price: number }>();
+    for (const row of [...prices, ...overrides]) effective.set(`${row.financial_asset_key}:${parseDatabaseDate(row.date).toISOString().slice(0, 10)}`, row);
+
+    return [...effective.values()].sort((a, b) => parseDatabaseDate(a.date).getTime() - parseDatabaseDate(b.date).getTime()).reduce((map, price) => {
       const assetKey = price.financial_asset_key;
       const bucket = map.get(assetKey) ?? [];
       bucket.push({ date: parseDatabaseDate(price.date), price: price.price });
@@ -359,14 +377,16 @@ class PortfolioSnapshotService {
   }
 
   /**
-   * Calculate portfolio value and cost basis using FIFO holdings
+   * Calculate portfolio value and cost basis from holdings (under the portfolio's method).
    */
   private async calculatePortfolioMetrics(
     appuser: Appuser,
     portfolioId: number,
+    tenantKey: number,
   ): Promise<{ costBasis: number; totalValue: number }> {
     const { default: portfolioHoldingsService } = await import('./portfolio-holdings.service');
-    const holdings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId);
+    // Priced with the household's own overrides, like the backfilled days before it.
+    const holdings = await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, undefined, tenantKey);
 
     const totalValue = holdings.reduce((sum, h) => sum + (h.currentValue || 0), 0);
     const costBasis = holdings.reduce((sum, h) => sum + h.averageBuyPrice * h.quantity, 0);
@@ -384,7 +404,7 @@ class PortfolioSnapshotService {
     const portfolio = await DI.em.findOne(
       Portfolio,
       { portfolioKey: portfolioId },
-      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey'] },
+      { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey', 'tenantKey'] },
     );
 
     if (!portfolio) {
@@ -394,13 +414,15 @@ class PortfolioSnapshotService {
     // Ensure fresh prices
     await this.ensureFreshPricesForPortfolio(portfolioId);
 
-    // Calculate metrics using FIFO holdings. Holdings are valued in the owner's currency, so
-    // these are the user-currency figures; the portfolio-currency ones are converted from them.
+    // Calculate metrics from holdings under the portfolio's cost basis method. Holdings are
+    // valued in the owner's currency, so these are the user-currency figures; the
+    // portfolio-currency ones are converted from them.
     // Converting them again, portfolio to owner, counted a foreign-currency portfolio twice, and
     // an exact-date rate lookup valued it at nothing on days without a rate.
     const { costBasis: appuserCurrencyCostBasis, totalValue: appuserCurrencyTotalValue } = await this.calculatePortfolioMetrics(
       portfolio.portfolioOwnerAppuserKey,
       portfolioId,
+      portfolio.tenantKey.tenantKey,
     );
 
     const appuserCurrency = portfolio.portfolioOwnerAppuserKey.currencyKey;
@@ -461,6 +483,26 @@ function addUtcDays(date: Date | string, days: number): Date {
 
 function isValidFeeExchangeRate(rate: unknown): rate is number {
   return typeof rate === 'number' && Number.isFinite(rate) && rate > 0;
+}
+
+/**
+ * Relieves `quantity` from the lots at the running average of the open position, which the sale
+ * leaves unchanged: scaling every lot's quantity and cost by the same factor keeps each lot's
+ * cost per unit (and so the pool's average) constant. Only the totals are read afterwards.
+ */
+function relieveAtAverageCost(lots: { quantity: number; totalCost: BigType }[], quantity: number): void {
+  const totalQuantity = lots.reduce((sum, lot) => sum + lot.quantity, 0);
+  if (totalQuantity <= 0) return;
+  const consumed = Math.min(Math.abs(quantity), totalQuantity);
+  if (consumed <= 0) return;
+  const factor = big(totalQuantity - consumed).div(big(totalQuantity));
+  for (const lot of lots) {
+    lot.quantity *= Number(factor.toString());
+    lot.totalCost = lot.totalCost.times(factor);
+  }
+  for (let index = lots.length - 1; index >= 0; index--) {
+    if ((lots[index]?.quantity ?? 0) <= 1e-12) lots.splice(index, 1);
+  }
 }
 
 function startOfUtcDay(date: Date | string): Date {

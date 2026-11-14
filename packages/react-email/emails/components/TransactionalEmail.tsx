@@ -16,7 +16,9 @@ import {
 
 import { BrandFooterLine, BrandHeader, resolveBrandName } from "../../src/components/Brand";
 
-export type TransactionalEmailLanguage = "en" | "pt";
+import type { TransactionalEmailLanguage } from "../../src/types";
+
+export type { TransactionalEmailLanguage } from "../../src/types";
 
 export interface TransactionalEmailLayoutProps {
   language: TransactionalEmailLanguage;
@@ -36,13 +38,14 @@ export interface TransactionalEmailLayoutProps {
 function greetingFor(language: TransactionalEmailLanguage, firstName?: string): string {
   const name = firstName?.trim();
   if (language === "pt") return name ? `Olá ${name},` : "Olá,";
+  if (language === "es") return name ? `Hola ${name},` : "Hola,";
   return name ? `Hi ${name},` : "Hi there,";
 }
 
 /**
  * Brand-consistent layout for TRANSACTIONAL emails (auth, receipts) — no marketing footer,
  * no unsubscribe, no tracking. Shares the WonderMoney visual system with `LifecycleEmailLayout`
- * but is localized (EN/PT) so it can back English auth emails without a Portuguese greeting.
+ * but is localized (EN/PT/ES) so it can back English auth emails without a Portuguese greeting.
  */
 export function TransactionalEmailLayout({
   language,

@@ -11,3 +11,16 @@
 192\.0\.2\.\d+
 198\.51\.100\.\d+
 203\.0\.113\.\d+
+
+# Link-local (RFC 3927) and shared CGNAT (RFC 6598) IPv4 ranges: never routable on the internet,
+# used by the SSRF-guard tests as addresses the guard must refuse.
+169\.254\.\d+\.\d+
+100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.\d+\.\d+
+
+# Other IANA special-purpose IPv4 ranges (RFC 6890) that SSRF guards refuse: IETF protocol
+# assignments, the 6to4 relay anycast, benchmarking, multicast, and reserved space up to broadcast.
+192\.0\.0\.\d+
+192\.88\.99\.\d+
+198\.1[89]\.\d+\.\d+
+(22[4-9]|23[0-9])\.\d+\.\d+\.\d+
+(24[0-9]|25[0-5])\.\d+\.\d+\.\d+

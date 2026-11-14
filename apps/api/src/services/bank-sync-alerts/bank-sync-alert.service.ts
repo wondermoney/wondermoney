@@ -1,5 +1,6 @@
 import { type EntityManager, LockMode } from '@mikro-orm/core';
 
+import { isPushEnabled } from '@config/push';
 import { Appuser } from '@entity/Appuser';
 import { BankSyncAlertChannel, BankSyncAlertDelivery, BankSyncAlertDeliveryStatus } from '@entity/BankSyncAlertDelivery';
 import { EmailNotificationPreference } from '@entity/EmailNotificationPreference';
@@ -8,14 +9,16 @@ import { decideBankSyncAlert } from '@service/bank-sync-alerts/bank-sync-alert-p
 
 import type { BankSyncAlertChannelOutcome, BankSyncAlertChannels } from './bank-sync-alert-channel';
 
-/** The channels every alert goes out on. Push joins this list once mobile push exists. */
-const BANK_SYNC_ALERT_CHANNELS: readonly BankSyncAlertChannel[] = [BankSyncAlertChannel.EMAIL];
-
+/** The channels an alert goes out on: email, and push while push is on here (`PUSH_ENABLED`). */
 export interface SweepBankSyncAlertsInput {
   em: EntityManager;
   /** Queues one send of the delivery; a queue-level singleton per delivery keeps it to one job. */
   enqueueSend: (deliveryKey: number) => Promise<unknown>;
   now: Date;
+}
+
+export function bankSyncAlertChannels(env: Readonly<Record<string, string | undefined>> = process.env): readonly BankSyncAlertChannel[] {
+  return isPushEnabled(env) ? [BankSyncAlertChannel.EMAIL, BankSyncAlertChannel.PUSH] : [BankSyncAlertChannel.EMAIL];
 }
 
 /**
@@ -44,7 +47,7 @@ export async function sweepBankSyncAlerts(input: SweepBankSyncAlertsInput): Prom
     const decision = decideBankSyncAlert(connection, input.now);
     if (!decision) continue;
     alerts += 1;
-    for (const channel of BANK_SYNC_ALERT_CHANNELS) {
+    for (const channel of bankSyncAlertChannels()) {
       await input.em.getConnection().execute(
         `insert into bank_sync_alert_delivery (appuser_key, enable_banking_connection_key, event, episode_key, channel, status, created_at, updated_at)
          values (?, ?, ?, ?, ?, ?, ?, ?)

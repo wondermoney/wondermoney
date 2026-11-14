@@ -5,14 +5,57 @@ description: Point the WonderMoney app for iOS and Android at your own server.
 
 The WonderMoney app works with any WonderMoney server, not only wonder.money.
 
-## Connect the app
+## Connect the app with a QR code
+
+The fastest way to connect the app is to scan a code from your server's web app, so nothing has to be typed on a phone keyboard.
+
+1. On the web app, open **Settings → Security**.
+2. Under **Connect the mobile app**, tap **Show QR code**.
+3. In the app's sign-in screen, tap **Scan QR code** and point the camera at the code.
+
+The code works once and expires after two minutes; if it runs out, show a new one. When two-factor authentication is on for your account, enter your authenticator code on the web before the QR appears — the phone does not ask for it, because the web session already passed it.
+
+Scanning with the phone's own camera app works too: the code is a `wondermoney://` link that opens the app. The app checks the address before it connects, so a code from another app or a server that isn't WonderMoney is refused.
+
+## Connect the app by hand
 
 1. Open the app and go to the sign-in screen.
 2. Tap **Use a different server**.
-3. Enter your API address, the `API_URL` from your `.env`, for example `api.money.example.com`.
+3. Enter your server's address, the `API_URL` from your `.env` — with one hostname, the same address as the web app, for example `money.example.com`.
 4. Tap **Connect**, then sign in with your account on that server.
 
 The app checks the address before saving it. If the server can't be reached, isn't a WonderMoney server or needs a newer version of the app, the app tells you and keeps the previous server.
+
+## Paired devices
+
+**Settings → Security → Devices** lists the phones connected to your account, with when each was last seen. **Revoke** signs that phone out immediately; it has to scan a new code to connect again.
+
+## Push notifications
+
+The app can show budget alerts, card payment reminders and bank connection alerts as push notifications once your server has push turned on (`PUSH_ENABLED=true`, see [Configure](/en/docs/self-hosting/configure#push-notifications)). Open **Settings → Notifications** in the app: each push category is off until you turn it on, and the phone asks for permission the first time you do. **Send test notification** checks the whole path. Tapping a notification opens the screen it is about. Signing out removes the phone, and so does revoking it under **Devices**.
+
+### Which app builds your server can reach
+
+Notifications go through Expo's push service. A phone's push token belongs to the Expo project the app was built from, and that project holds the Apple and Google push credentials. For the published WonderMoney app, that is the WonderMoney maintainers' project, not yours.
+
+By default, Expo accepts a push request for a token without checking who sends it. The project's owner can turn on enhanced security for push notifications, and from then on Expo refuses push requests that do not carry a valid access token for that project. So your server reaches phones running the published app only while that project leaves enhanced security off, or if its owner gives you an access token to set as `EXPO_ACCESS_TOKEN`. Either can change without notice to you.
+
+To be independent of it, build the app from source with your own Expo project and your own Apple and Firebase push credentials (`apps/mobile/README.md`, "EAS configuration"). Your server then sends to your own build; set `EXPO_ACCESS_TOKEN` if you turn on enhanced security in your Expo account.
+
+## Passkeys
+
+A passkey belongs to your web app's hostname (the host of `APP_URL`), and a phone offers it to an app only when that hostname vouches for the app and the app was built to ask for it. The published WonderMoney app is built for wonder.money alone. On your server it hides **Sign in with a passkey** and **Add a passkey**, and people sign in with a password, Google, Apple or single sign-on instead. Passkeys keep working on your web app, and the app still lists them and can delete them.
+
+To use passkeys in the app with your own server, build the app from source (`apps/mobile/README.md`, "Passkeys") and set:
+
+| Where | Variable | Value |
+| --- | --- | --- |
+| App build | `WONDERMONEY_PASSKEY_DOMAINS` | Your web app's hostname, for example `money.example.com`. On iOS the App ID needs the Associated Domains capability. |
+| Web app | `IOS_APP_TEAM_ID`, `IOS_APP_BUNDLE_ID` | Your Apple Developer team ID and the app's bundle ID. The web app serves them as `/.well-known/apple-app-site-association`. |
+| Web app | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | The app's package name and the SHA-256 fingerprints of its signing certificates, comma-separated (`AB:CD:…`, as `keytool` or the Play Console print them). The web app serves them as `/.well-known/assetlinks.json`. |
+| API | `ANDROID_APP_CERT_SHA256` | The same fingerprints. Android reports a passkey from an app as coming from `android:apk-key-hash:` and the certificate's hash, not from your web address, so the API accepts that origin only for these certificates. |
+
+With the Docker Compose setup, all of them go in `.env`. Until they are set, both `/.well-known` addresses answer 404 and nothing changes. Keep `APP_URL` on the default HTTPS port: iOS reports the app's passkeys as coming from `https://` and the hostname, without a port.
 
 ## Requirements
 

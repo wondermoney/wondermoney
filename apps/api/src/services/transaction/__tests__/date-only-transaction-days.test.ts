@@ -186,7 +186,7 @@ describe('a date-only bank row\'s month in SQL', () => {
     await addTransaction(em, household, { amount: -25, category: groceries, date: new Date('2026-07-01T00:00:00.000Z'), status: 'BOOKED' });
     const templateKeys = (await budgetRows(em, budget.budgetKey)).map((row) => row.budgetTemplateCategoryKey);
 
-    const { categories } = await inSessionTimeZone('America/New_York', () => getBudgetSpending({ accountKeys: [household.account.accountKey], currency: household.currency, period: 'monthly', templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey }));
+    const { categories } = await inSessionTimeZone('America/New_York', () => getBudgetSpending({ accountKeys: [household.account.accountKey], currency: household.currency, period: 'monthly', periodStartDay: 1, templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey }));
 
     expect(categories.find((row) => row.child_category_name === 'Groceries')?.category_amount).toBe(25);
   });
@@ -198,7 +198,7 @@ describe('a date-only bank row\'s month in SQL', () => {
 
     const body = await inSessionTimeZone('America/New_York', () => call(getAccountsCashflow as Handler, household));
 
-    expect(body['cashflow']).toEqual([{ amount: -25, date: '2026-07-01T00:00:00.000Z' }]);
+    expect(body['cashflow']).toEqual([{ amount: -25, date: '2026-07-01T00:00:00.000Z', expenses: 25, income: 0, savingsRate: null }]);
   });
 });
 

@@ -47,6 +47,29 @@ New buys, sells, transfers, and any tracked purchase costs.
 ### Common misunderstanding
 Cost basis is not the same as current value.
 
+## Cost basis method: FIFO and average cost
+
+### What it means
+The cost basis method decides which purchase cost a sale relieves. FIFO (first in, first out) sells the oldest lots first. Average cost relieves the running average of everything you still hold, and a sale leaves that average unchanged.
+
+### Where it appears
+In the portfolio settings, where you choose the method, and in the lots section of a holding's details, which lists each purchase lot with its date, quantity, remaining quantity, unit cost and fees.
+
+### How to read it
+Pick the method your tax rules use. Portugal and Spain use FIFO; Brazil and some other jurisdictions use average cost. Changing the method recalculates the portfolio's realized gains and rebuilds its daily history with the new cost basis.
+
+### Example
+Buy 10 units at 100 and 10 units at 200, then sell 10.
+
+- FIFO relieves the first lot: realized cost 1,000, and the remaining 10 units keep an average cost of 200.
+- Average cost relieves half of the 3,000 total: realized cost 1,500, and the remaining 10 units keep an average cost of 150.
+
+### What can make it change
+Changing the method in portfolio settings, new buys and sells, splits, fees, and transaction corrections.
+
+### Common misunderstanding
+The method changes cost basis and realized gains, not the market value of what you hold. A sale never changes the average cost per unit under the average method.
+
 ## Market value
 
 ### What it means
@@ -84,19 +107,28 @@ It only becomes real when you sell. Until then, it is unrealized.
 ## Realized gain or loss
 
 ### What it means
-The profit or loss locked in when you sell or otherwise close a position.
+The profit or loss locked in when you sell or otherwise close a position. For each sale it is the proceeds after the sale's fee, less the cost basis the portfolio's method relieved (including the purchase fees of the units sold).
 
 ### Where it appears
-Transaction and performance summaries.
+- The portfolio summary, as a total for the portfolio or for all portfolios.
+- The **Realized** column of the holdings table: everything that holding has realized so far.
+- The **Realized gains** section, which lists every sale with its date, quantity, proceeds, cost basis, realized gain and the date of the oldest purchase it sold from (held since). Filter it by year and download the list shown as a CSV file.
+- **Closed positions**: assets you have sold in full, with their lifetime result, so they stay visible after they leave the holdings.
 
 ### How to read it
-Use it to see what has already been captured by completed trades.
+Use it to see what has already been captured by completed trades. The sales of a year add up to that year's total, and every year together adds up to the portfolio's realized gains. A year is a calendar year in UTC, by the date of the sale.
+
+### Example
+Buy 10 units at 100 with a fee of 10, then sell 4 at 150 with a fee of 2. Under FIFO the sale relieves 4 × 100 plus 4 of the 10 purchase fee, a cost basis of 404. Its proceeds are 600 less the 2 fee, 598, so the sale realized 194.
 
 ### What can make it change
-Sells, partial sells, fees, and transaction corrections.
+Sells, partial sells, fees, splits, transaction corrections and a change of cost basis method.
+
+### Currency
+Amounts are shown in your currency. A sale recorded in another currency is converted at the exchange rate of the day of the sale. A sale with no rate for that day is listed in its own currency and left out of the totals, with a note saying so.
 
 ### Common misunderstanding
-Realized gain or loss is separate from unrealized gain or loss.
+Realized gain or loss is separate from unrealized gain or loss. WonderMoney reports what each sale made under your portfolio's cost basis method; it does not apply country-specific tax rules such as wash-sale rules, and it is not a tax form.
 
 ## Return percentage
 
@@ -114,6 +146,38 @@ Price moves, dividends, fees, and currency effects.
 
 ### Common misunderstanding
 Return percentage is not the same as portfolio value.
+
+## Time-weighted and money-weighted return
+
+### What it means
+Two returns for the selected period answer two different questions.
+
+- **Time-weighted return** says how the investments did. Each day's return is measured net of the money put in or taken out that day, and the days are chained together, so a deposit or a withdrawal does not move it. Dividends paid out count as return.
+- **Money-weighted return** says how your money did. It is the rate at which the value at the start of the period, every buy, sale and dividend in it, and the value at the end balance out: the same calculation as a spreadsheet's `XIRR`. Money that stayed invested longer weighs more.
+
+### Where it appears
+The portfolio summary, for one portfolio or for all of them together, for every period you can pick; the portfolio performance report and its CSV download; and, for the time-weighted return, the percentage view of the performance chart, day by day.
+
+### How to read it
+- When the two are close, the timing of your deposits and withdrawals made little difference.
+- When the money-weighted return is higher, more of your money was invested while prices rose; when it is lower, more was invested while they fell.
+- For a period of a year or more, the money-weighted return is a yearly rate. For a shorter period it is the rate over that period, because stretching a few weeks into a year would exaggerate it.
+- With no deposits or withdrawals in the period, the time-weighted return is the change in value over the starting value.
+
+### Example
+You hold 10,000 at the start of the year. Prices stay flat until you add another 10,000 in June; then they rise 10%, and the portfolio ends the year at 22,000.
+
+- Time-weighted return: +10%. The investments rose 10%; the deposit is not a gain.
+- Money-weighted return: more than +10%, because twice the money was invested during the rise.
+
+### Missing days
+Both returns are measured from the portfolio's daily history. A day with no recorded value (for example while the history is rebuilt, or when no exchange rate converts it into your currency) is never read as zero: the last value is carried over it, and the summary says how many days were missing. Days when the portfolio held nothing, before its first buy or after everything was sold, are not missing.
+
+### What can make it change
+Price moves, dividends, fees, currency effects and the selected period. A buy or a sale changes the money-weighted return; it changes the time-weighted return only through what the money does afterwards.
+
+### Common misunderstanding
+Neither figure is the gain over cost basis. Compare a benchmark with the time-weighted return, because a benchmark has no deposits or withdrawals either.
 
 ## Dividends and income
 

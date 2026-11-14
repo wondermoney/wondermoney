@@ -34,8 +34,13 @@ Run `pnpm run check` before calling a template change done.
   components into `dist/index.js`, so the API's production install never gets the CLI or its
   esbuild. Only what `dist` imports at runtime (`@react-email/render`, `react`, `react-dom`)
   belongs in `dependencies`.
-- Copy is PT-PT, some templates also EN. Keep terminology consistent with the docs site
-  glossary (`apps/docs/content/docs/pt/glossary.mdx`). Never promise a feature that is not live.
+- Every user-facing template has EN, PT-PT and ES copy with the same keys and placeholders;
+  `pnpm check:copy` fails when one is missing. Keep terminology consistent with the docs site
+  glossary (`apps/docs/content/docs/pt/glossary.mdx`) and the web app's `messages/es`. Never
+  promise a feature that is not live.
+- PT copy addresses the reader as **tu** ("Recebes este email porque…", "a tua conta"), never
+  "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples). ES copy is
+  neutral Spanish in the **tú** form ("Recibes este correo porque…", "tu cuenta"), never "usted".
 - `PreviewProps` use fictional names and values only.
 - Placeholders such as `[[UNSUB_LINK_PT]]` are resolved by the API before sending.
 - CTA, settings, privacy and unsubscribe URLs are absolute `https:` links.

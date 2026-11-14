@@ -5,12 +5,13 @@ import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@m
 import { HouseholdInviteRepository } from '../repositories/HouseholdInviteRepository';
 
 import { Appuser } from './Appuser';
+import { HouseholdRole } from './AppuserTenant';
 import { Base } from './BaseEntity';
 import { Tenant } from './Tenant';
 
 /**
- * Invitation lifecycle for a partner to join a household tenant.
- * A pending invite consumes the household's single open seat.
+ * Invitation lifecycle for a person to join a household tenant.
+ * A pending, unexpired invite holds one of the household's seats (`HOUSEHOLD_MAX_MEMBERS`).
  */
 export enum HouseholdInviteStatus {
   ACCEPTED = 'accepted',
@@ -25,7 +26,7 @@ export class HouseholdInvite extends Base {
   @Property({ columnType: 'timestamptz', nullable: true })
   acceptedAt?: Date;
 
-  // Invited partner's email. The accept flow requires the signup email to match this.
+  // Invited person's email. Accepting requires the signed-in or signup email to match it.
   @Property({ length: 255 })
   emailAddress!: string;
 
@@ -37,8 +38,12 @@ export class HouseholdInvite extends Base {
   @PrimaryKey()
   householdInviteKey!: number;
 
+  // The role the person joins with, picked by the inviter. Never `owner`.
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'inviter_appuser_key' })
   inviterAppuserKey!: Rel<Appuser>;
+
+  @Enum(() => HouseholdRole)
+  role: HouseholdRole = HouseholdRole.MEMBER;
 
   @Enum(() => HouseholdInviteStatus)
   status: HouseholdInviteStatus = HouseholdInviteStatus.PENDING;

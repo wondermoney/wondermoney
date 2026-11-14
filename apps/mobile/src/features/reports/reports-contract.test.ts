@@ -2,8 +2,10 @@ import {
   budgetVsActualResponseSchema,
   createBudgetVsActualEndpoint,
   createCashflowEndpoint,
+  createMonthComparisonEndpoint,
   createNetWorthHistoryReportEndpoint,
   createPortfolioPerformanceReportEndpoint,
+  portfolioPerformanceReportRowSchema,
   createReportCsvEndpoint,
   createSankeyEndpoint,
   createSpendingByCategoryEndpoint,
@@ -59,6 +61,7 @@ describe('reports contract', () => {
   it.each([
     ['spending-by-category', createSpendingByCategoryEndpoint],
     ['cashflow', createCashflowEndpoint],
+    ['month-comparison', createMonthComparisonEndpoint],
     ['sankey', createSankeyEndpoint],
     ['net-worth-history', createNetWorthHistoryReportEndpoint],
     ['budget-vs-actual', createBudgetVsActualEndpoint],
@@ -66,6 +69,12 @@ describe('reports contract', () => {
   ] as const)('points %s at its own endpoint path', (segment, createEndpoint) => {
     const endpoint = createEndpoint(baseFilters)
     expect(endpoint.path.startsWith(`/v1/reports/${segment}?`)).toBe(true)
+  })
+
+  it('sends the two months the comparison asks for', () => {
+    const query = new URLSearchParams(createMonthComparisonEndpoint({ ...baseFilters, base: '2026-08', compare: '2026-07' }).path.split('?')[1])
+    expect(query.get('base')).toBe('2026-08')
+    expect(query.get('compare')).toBe('2026-07')
   })
 
   it('parses the report envelope and pins the budget-vs-actual fixture', () => {
@@ -100,6 +109,27 @@ describe('reports contract', () => {
       const query = new URLSearchParams(path.split('?')[1])
       expect([...query.keys()].sort()).toEqual(['fromDate', 'toDate'])
     }
+  })
+
+  it('sends the member filter for portfolio performance, as JSON and as CSV: it narrows the report to that member\'s portfolios', () => {
+    const filters = { ...baseFilters, accountKeys: ['acc-1'], memberKeys: ['12'] }
+    for (const path of [createPortfolioPerformanceReportEndpoint(filters).path, createReportCsvEndpoint('portfolio-performance', filters).path]) {
+      const query = new URLSearchParams(path.split('?')[1])
+      expect([...query.keys()].sort()).toEqual(['fromDate', 'memberKeys', 'toDate'])
+      expect(query.get('memberKeys')).toBe('12')
+    }
+    const shared = new URLSearchParams(createPortfolioPerformanceReportEndpoint({ ...baseFilters, memberKeys: ['shared'] }).path.split('?')[1])
+    expect(shared.get('memberKeys')).toBe('shared')
+  })
+
+  it('reads each portfolio\'s time- and money-weighted returns, and still parses rows from APIs that send none', () => {
+    const row = { portfolioKey: '7', name: 'Long-term', currency: 'EUR', startValue: 1000, netContributions: 0, change: 100, changePercent: 10, dividends: 0, endValue: 1100 }
+    const returns = { timeWeightedReturn: 9.87, moneyWeightedReturn: null, moneyWeightedReturnAnnualized: false, missingSnapshotDates: ['2026-06-01'] }
+    expect(portfolioPerformanceReportRowSchema.parse({ ...row, ...returns })).toEqual({ ...row, ...returns })
+    const older = portfolioPerformanceReportRowSchema.parse(row)
+    expect(older).toEqual(row)
+    expect(older.timeWeightedReturn).toBeUndefined()
+    expect(portfolioPerformanceReportRowSchema.safeParse({ ...row, timeWeightedReturn: 'n/a' }).success).toBe(false)
   })
 
   it.each([

@@ -3,7 +3,7 @@ title: Rules
 description: Categorize, rename, tag or hide transactions automatically, preview what a rule matches before you save it, and apply it to the transactions you already have.
 ---
 
-A rule tells WonderMoney what to do with transactions that look a certain way: for example, "when the description contains NETFLIX, set the category to Entertainment". Rules belong to the household, so both members see and manage the same list.
+A rule tells WonderMoney what to do with transactions that look a certain way: for example, "when the description contains NETFLIX, set the category to Entertainment". Rules belong to the household, so everyone in it sees the same list, and everyone but a viewer can manage it.
 
 ## Where to find them
 
@@ -29,11 +29,22 @@ A rule has:
 
 A household can have up to 200 rules.
 
+## Rule suggestions
+
+When you keep fixing the same kind of transaction, WonderMoney offers a rule that does it for you. After you change a transaction's category yourself, on the web or in the app, and you have now moved three transactions like it to that category within 90 days, it asks: "Always categorize transactions like this as Groceries?"
+
+- **Like this** means the same merchant, or the same start of the description once references and numbers are left out. "TRF MB WAY 912345678 JOAO" and "TRF MB WAY 913333333 ANA" both start with "TRF MB WAY". A card header such as "COMPRA 1192" is skipped, so "COMPRA 1192 CONTINENTE" counts as "CONTINENTE".
+- Changing several transactions at once counts each of them, and each transaction counts once.
+- Only the changes you make yourself count. Other members' changes, an assistant proposal you confirm, and categories set by a rule, by learned categorization or by an import do not. Transactions on private accounts you can't see never count.
+- Choose **Create rule** to open the rule editor already filled in, with its preview, and check it before you save. Choose **Don't suggest again** to stop that suggestion for good. If you do neither, it may come back the next time.
+
+No suggestion appears when an active rule already gives those transactions that category, or when WonderMoney already recognises them by the category you chose for their merchant. That learned category is reused only when a new transaction's description is exactly the merchant's name, so a rule is still suggested for descriptions with more in them.
+
 ## Preview before you save
 
 While you edit, the preview beside the form shows how many of your transactions the rule matches, how many of them it would change, and the 50 most recent matches with the change each would get. It updates a moment after you stop typing.
 
-The preview judges the rule on its own and covers the household's transactions you can see, hidden ones included. It never shows the other member's private accounts. A match can show **No change** when the transaction already has those values, or when you set that value yourself (see below).
+The preview judges the rule on its own and covers the household's transactions you can see, hidden ones included. It never shows private accounts you can't see. A match can show **No change** when the transaction already has those values, or when you set that value yourself (see below).
 
 Saving a rule does not change the transactions you already have. To change them too, apply the rule (see below).
 
@@ -45,7 +56,7 @@ To run every active rule over the transactions you already have (for example aft
 
 - The count you confirm is exactly what applying changes.
 - Applying runs in the background: the dialog shows its progress, and you can close it while it runs. A message tells you how many transactions changed when it finishes.
-- It covers the household's transactions you can see, hidden ones included, but not deleted ones or the other member's private accounts. Everything listed under "What rules never change" still holds.
+- It covers the household's transactions you can see, hidden ones included, but not deleted ones or private accounts you can't see. Everything listed under "What rules never change" still holds.
 - Applying the same rule again changes nothing more. Each change is recorded in the transaction's activity.
 - Only one run at a time per household: wait for one to finish before starting another.
 
@@ -53,11 +64,166 @@ To run every active rule over the transactions you already have (for example aft
 
 - Anything you set by hand: a category you chose, a merchant or description you edited, and notes you wrote. The rule still counts as a match, but leaves those fields alone.
 - The transaction type. Only transfer matching marks a transaction as a transfer.
-- Transactions on the other member's private accounts. A rule acts for the member who last changed its conditions or actions, and only on transactions that member can see.
+- Transactions on accounts the rule's member can't edit. A rule acts for the member who last changed its conditions or actions, and only on transactions that member can see and edit: never on private accounts hidden from them or that they can only view.
 
 ## Order
 
 Rules run from top to bottom. Each rule looks at the transaction as it arrived, not as earlier rules left it. When two rules set the same field, the lower one wins; tags from several rules add up. Turn on **Stop after this rule** to keep the rules below from running on what it matched.
+
+## Export and import rules
+
+Choose **Export** at the top of **Settings → Rules** to download the household's rules as a JSON file. Choose **Import** to load one: WonderMoney checks the file first and shows what would happen before anything changes.
+
+The file has no internal ids. A rule names what it refers to: accounts, merchants and tags by name, a system category by its key (the seeded name, such as `FOOD`), and one of your own categories by its name. That is what lets it move to another instance.
+
+```json
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Streaming",
+      "active": true,
+      "match": "all",
+      "stopProcessing": false,
+      "conditions": [
+        { "field": "merchant", "operator": "contains", "value": "netflix" },
+        { "field": "account", "operator": "in", "values": ["Current account"] },
+        { "field": "category", "operator": "in", "values": [{ "system": "ENTERTAINMENT" }] }
+      ],
+      "actions": [
+        { "type": "set_category", "category": { "name": "Streaming" } },
+        { "type": "set_merchant", "merchant": "Netflix" },
+        { "type": "add_tags", "tags": ["Subscriptions"] }
+      ]
+    }
+  ]
+}
+```
+
+- A category is `{ "system": "FOOD" }` for a system category, `{ "name": "Streaming" }` for one of yours, or `"uncategorized"`.
+- Account, merchant and tag names must match the names in the household you import into.
+- The file may hold up to 1,000 rules and be at most 1 MB. The household's 200-rule limit still applies.
+
+**Import modes.** *Append* keeps the rules already here and adds the file's rules after them. *Replace* removes the existing rules and keeps only the file's, once the whole file has validated; a failed import leaves the list as it was. Both modes ask you to confirm.
+
+**The dry run.** Before anything is written, the import shows the rules it will create, the rules it will skip because a rule with that name already exists, and the references it could not find. Then:
+
+- A missing custom category can be created, if you tick the box.
+- A rule naming an account this household does not have is imported switched off, without that account condition.
+- A rule naming a missing system category or tag is skipped.
+
+A file that is not a WonderMoney rules export, is over 1 MB, or holds more than 1,000 rules is refused with a message saying why.
+
+## Rule presets for your country
+
+WonderMoney comes with short lists of rules for well-known shops and utilities in Portugal, Spain, Brazil, and the UK and US, so common merchants get a category from day one.
+
+- **Where they are offered.** At the end of onboarding and at the top of **Settings → Rules**, WonderMoney offers the preset that matches you. It looks at the countries of your bank connections first, then your language and your browser or device region, then your currency. On the web, **Presets** at the top of **Settings → Rules** shows every preset. The mobile app offers the matching preset on its Rules screen.
+- **Nothing is added on its own.** The offer opens a preview of every rule in the preset and what it sets. Rules are added only when you choose **Add N rules**, after your own rules. **Not now** hides the offer.
+- **Adding twice adds nothing.** A preset rule is skipped when you already have a rule with the same name, so adding a preset again, or after deleting some of its rules, adds only what is missing.
+- **What a preset may do.** A preset rule only matches money going out and only sets a category, a merchant or a description. It never marks a transaction as a transfer, never hides one, never gives income a spending category, and never decides a category from a payment method such as MB WAY, PIX, Bizum, SEPA or a transfer, because money moves both ways on them. A test checks every preset for this before it ships.
+- After adding a preset you can apply its rules to the transactions you already have (see above), and edit or delete them like any other rule.
+
+Each rule matches the bank's original description, ignoring capitals and accents. The presets hold:
+
+{/* rule-presets:start (generated by scripts/rule-presets.mjs; do not edit by hand) */}
+
+### Portugal (`pt-PT`, 19 rules)
+
+| Rule | Description contains | Category | Merchant |
+| --- | --- | --- | --- |
+| Continente | “Continente” | Groceries | Continente |
+| Pingo Doce | “Pingo Doce” | Groceries | Pingo Doce |
+| Lidl | “Lidl” | Groceries | Lidl |
+| Auchan | “Auchan” | Groceries | Auchan |
+| Intermarché | “Intermarché” | Groceries | Intermarché |
+| Minipreço | “Minipreço” | Groceries | Minipreço |
+| Mercadona | “Mercadona” | Groceries | Mercadona |
+| EDP Comercial | “EDP Comercial” | Electricity | EDP |
+| Galp Electricidade | “Galp Electricidade” | Electricity | Galp |
+| Vodafone | “Vodafone” | TV, Phone & Internet | Vodafone |
+| Via Verde | “Via Verde” | Vehicle Maintenance | Via Verde |
+| Metropolitano de Lisboa | “Metropolitano de Lisboa” | Public Transport | Metropolitano de Lisboa |
+| Metro do Porto | “Metro do Porto” | Public Transport | Metro do Porto |
+| Comboios de Portugal | “Comboios de Portugal” | Public Transport | CP - Comboios de Portugal |
+| Glovo | “Glovo” | Food delivery | Glovo |
+| Uber Eats | “Uber Eats” | Food delivery | Uber Eats |
+| Netflix | “Netflix” | Streaming Services | Netflix |
+| Spotify | “Spotify” | Streaming Services | Spotify |
+| Farmácia | “Farmácia” | Health | — |
+
+### Spain (`es-ES`, 18 rules)
+
+| Rule | Description contains | Category | Merchant |
+| --- | --- | --- | --- |
+| Mercadona | “Mercadona” | Groceries | Mercadona |
+| Carrefour | “Carrefour” | Groceries | Carrefour |
+| Lidl | “Lidl” | Groceries | Lidl |
+| Eroski | “Eroski” | Groceries | Eroski |
+| Alcampo | “Alcampo” | Groceries | Alcampo |
+| Iberdrola | “Iberdrola” | Electricity | Iberdrola |
+| Endesa | “Endesa” | Electricity | Endesa |
+| Movistar | “Movistar” | TV, Phone & Internet | Movistar |
+| Vodafone | “Vodafone” | TV, Phone & Internet | Vodafone |
+| Yoigo | “Yoigo” | TV, Phone & Internet | Yoigo |
+| Renfe | “Renfe” | Public Transport | Renfe |
+| Metro de Madrid | “Metro de Madrid” | Public Transport | Metro de Madrid |
+| Glovo | “Glovo” | Food delivery | Glovo |
+| Just Eat | “Just Eat” | Food delivery | Just Eat |
+| Uber Eats | “Uber Eats” | Food delivery | Uber Eats |
+| Netflix | “Netflix” | Streaming Services | Netflix |
+| Spotify | “Spotify” | Streaming Services | Spotify |
+| Farmacia | “Farmacia” | Health | — |
+
+### Brazil (`pt-BR`, 14 rules)
+
+| Rule | Description contains | Category | Merchant |
+| --- | --- | --- | --- |
+| Carrefour | “Carrefour” | Groceries | Carrefour |
+| Pão de Açúcar | “Pão de Açúcar” | Groceries | Pão de Açúcar |
+| Assaí Atacadista | “Assaí Atacadista” | Groceries | Assaí Atacadista |
+| Atacadão | “Atacadão” | Groceries | Atacadão |
+| CPFL | “CPFL” | Electricity | CPFL |
+| Cemig | “Cemig” | Electricity | Cemig |
+| Sabesp | “Sabesp” | Water | Sabesp |
+| Comgás | “Comgás” | Gas | Comgás |
+| iFood | “iFood” | Food delivery | iFood |
+| Rappi | “Rappi” | Food delivery | Rappi |
+| Netflix | “Netflix” | Streaming Services | Netflix |
+| Spotify | “Spotify” | Streaming Services | Spotify |
+| Drogasil | “Drogasil” | Health | Drogasil |
+| Droga Raia | “Droga Raia” | Health | Droga Raia |
+
+### United Kingdom and United States (`en`, 23 rules)
+
+| Rule | Description contains | Category | Merchant |
+| --- | --- | --- | --- |
+| Tesco | “Tesco” but not “Bank”, “Mobile” | Groceries | Tesco |
+| Sainsbury's | “Sainsbury” but not “Bank” | Groceries | Sainsbury's |
+| Asda | “Asda” | Groceries | Asda |
+| Morrisons | “Morrisons” | Groceries | Morrisons |
+| Waitrose | “Waitrose” | Groceries | Waitrose |
+| Lidl | “Lidl” | Groceries | Lidl |
+| Kroger | “Kroger” | Groceries | Kroger |
+| Whole Foods | “Whole Foods” | Groceries | Whole Foods |
+| Trader Joe's | “Trader Joe” | Groceries | Trader Joe's |
+| Thames Water | “Thames Water” | Water | Thames Water |
+| Virgin Media | “Virgin Media” | TV, Phone & Internet | Virgin Media |
+| Comcast | “Comcast” | TV, Phone & Internet | Comcast |
+| Verizon | “Verizon” | TV, Phone & Internet | Verizon |
+| TfL Travel | “TfL Travel” | Public Transport | Transport for London |
+| Trainline | “Trainline” | Public Transport | Trainline |
+| Deliveroo | “Deliveroo” | Food delivery | Deliveroo |
+| Uber Eats | “Uber Eats” | Food delivery | Uber Eats |
+| DoorDash | “DoorDash” | Food delivery | DoorDash |
+| Just Eat | “Just Eat” | Food delivery | Just Eat |
+| Netflix | “Netflix” | Streaming Services | Netflix |
+| Spotify | “Spotify” | Streaming Services | Spotify |
+| Boots | “Boots” | Health | Boots |
+| Walgreens | “Walgreens” | Health | Walgreens |
+
+{/* rule-presets:end */}
 
 ## Related links
 

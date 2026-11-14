@@ -1,14 +1,15 @@
+import { transactionImport } from '@wondermoney/shared';
 import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
 import { Account } from '@entity/Account';
 import { authedContext } from '@middleware/authed-context';
 import { canUseAi } from '@middleware/email-verification';
-import AccountCsvImportEnqueueService from '@service/account/account-csv-import-enqueue.service';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import { detectStatement, toStatementPreview } from '@service/account/account-statement-detection.service';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
 import { spendAiAllowance } from '@service/ai/ai-allowance.service';
+import { isAiAllowedFor } from '@service/ai/ai-availability';
 import s3Service from '@service/storage/s3';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { BadRequestError, NotFoundError } from '@utils/errors';
@@ -43,13 +44,18 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
 /**
  * The one-step import: a statement read by its bank's parser or with the columns the person
  * confirmed runs as a staged session that commits itself with the default decisions (new rows in,
- * duplicates out), so it resumes like any staged import. A file with neither (the generic CSV
- * template) still runs the older one-job import.
+ * duplicates out), so it resumes like any staged import. The file, not the account, decides the
+ * format: an OFX/QFX file is read by the OFX adapter, a CAMT.053 export by the CAMT.053 adapter, a
+ * QIF file by the QIF adapter, a YNAB register export by the YNAB adapter, an Actual Budget export
+ * by the Actual adapter, and the older WonderMoney CSV template (with `internalTransactionId` and
+ * `transactionTypeKey` columns) by its own. Anything else is a statement. A file that names one
+ * account imports into this one; one that names several is not committed, and waits for its
+ * accounts to be mapped.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
   const { appuserKey, tenant, tenantKey, user } = authedContext(req);
   const {
-    body: { correlationId, key, mapping },
+    body: { fileName, key, mapping },
     params: { accountId },
   } = await zParse(startAccountCsvImportRequestSchema, req);
   const normalizedAccountId = typeof accountId === 'number' ? accountId : Number.parseInt(accountId, 10);
@@ -66,15 +72,21 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
     next(new BadRequestError('Invalid CSV object key'));
     return;
   }
-  const importFormat = resolveAccountCsvImportFormat(account.accountFinancialInstitutionKey?.name);
-  const supportedBankName = importFormat.format === 'bank' ? importFormat.bankName : undefined;
-  if (supportedBankName || mapping) {
-    const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, format: 'statement', key, options: mapping ? { mapping } : undefined });
-    return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
+  // The client uploads the same way for every format; the file's own content picks the reader.
+  let format: transactionImport.ImportFormat = 'statement';
+  try {
+    const bytes = new Uint8Array(await getLimitedCsvObjectBuffer({ bucket: s3Service.getAccountCsvBucketName(), key }));
+    if (transactionImport.isOfxFile(bytes)) format = 'ofx';
+    else if (transactionImport.isGenericCsvTemplate(bytes)) format = 'generic-csv';
+    else if (transactionImport.isQifFile(bytes)) format = 'qif';
+    else if (transactionImport.isCamt053File(bytes)) format = 'camt053';
+    else if (transactionImport.isYnabFile(bytes)) format = 'ynab';
+    else if (transactionImport.isActualFile(bytes)) format = 'actual';
+  } catch {
+    // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }
-  const service = new AccountCsvImportEnqueueService();
-  const operation = await service.enqueue({ accountKey: normalizedAccountId, bankName: supportedBankName, bucket: s3Service.getAccountCsvBucketName(), correlationId, key, mapping }, { enqueue: req.enqueue });
-  return res.status(202).json({ correlationId: operation.correlationId, status: (operation as { status?: string }).status ?? 'queued' });
+  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, fileName, format, key, options: mapping ? { mapping } : undefined });
+  return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
 }
 
 /**
@@ -115,7 +127,7 @@ export async function previewAccountCsvImport(req: Request, res: Response, next:
       bankName: importFormat.format === 'bank' ? importFormat.bankName : undefined,
       buffer,
       mapping,
-      model: { allowed: canUseAi(req), spend: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping') },
+      model: { allowed: canUseAi(req) && isAiAllowedFor(req.user, 'csvMapping'), spend: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping') },
     });
     res.json(toStatementPreview(detection, account.currencyKey.code));
   } catch (error) {

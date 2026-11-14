@@ -13,6 +13,7 @@ import { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionSplit } from '@entity/TransactionSplit';
 import { TransactionType } from '@entity/TransactionType';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 import { setTransactionSplits } from '@service/transaction/transaction-split.service';
 
 import service, { type BankSyncTransaction } from '../account-initial-sync-transaction.service';
@@ -25,10 +26,12 @@ import service, { type BankSyncTransaction } from '../account-initial-sync-trans
  */
 describe('bank sync of a split transaction', () => {
   const db = useTestDatabase();
+  let testAppuserId = 0;
 
   async function linkedAccount() {
     const em = db.em();
     const household = await seedHousehold(em);
+    testAppuserId = household.appuser.appuserKey;
     for (const name of ['DEPOSIT', 'PAYMENT', 'CARD_PAYMENT', 'TRANSFER_IN', 'TRANSFER_OUT']) {
       if (!(await em.findOne(TransactionType, { name }))) em.create(TransactionType, { displayName: name, name }, { partial: true });
     }
@@ -48,7 +51,7 @@ describe('bank sync of a split transaction', () => {
 
   async function sync(connectionKey: number, feed: { booked?: BankSyncTransaction[]; pending?: BankSyncTransaction[] }) {
     const client = { account: () => ({ getTransactions: () => Promise.resolve({ transactions: { booked: feed.booked ?? [], pending: feed.pending ?? [] } }) }) };
-    await service.syncTransactionsForRequisition({ enableBankingConnectionKey: connectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+    await service.syncTransactionsForRequisition({ connection: conn(connectionKey, { appuserId: testAppuserId }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
     return db.em().find(Transaction, { enableBankingTransactionId: { $ne: null } }, { filters: false });
   }
 

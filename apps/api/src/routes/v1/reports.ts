@@ -5,6 +5,8 @@ import {
   getBudgetVsActualReportCsv,
   getCashflowReport,
   getCashflowReportCsv,
+  getMonthComparisonReport,
+  getMonthComparisonReportCsv,
   getNetWorthHistoryReport,
   getNetWorthHistoryReportCsv,
   getPortfolioPerformanceReport,
@@ -13,14 +15,18 @@ import {
   getSankeyReportCsv,
   getSpendingByCategoryReport,
   getSpendingByCategoryReportCsv,
+  getSpendingVsNormalReport,
 } from '@controller/reports';
 
 const router = express.Router();
 
 router.get('/spending-by-category', getSpendingByCategoryReport);
 router.get('/spending-by-category.csv', getSpendingByCategoryReportCsv);
+router.get('/spending-vs-normal', getSpendingVsNormalReport);
 router.get('/cashflow', getCashflowReport);
 router.get('/cashflow.csv', getCashflowReportCsv);
+router.get('/month-comparison', getMonthComparisonReport);
+router.get('/month-comparison.csv', getMonthComparisonReportCsv);
 router.get('/sankey', getSankeyReport);
 router.get('/sankey.csv', getSankeyReportCsv);
 router.get('/net-worth-history', getNetWorthHistoryReport);

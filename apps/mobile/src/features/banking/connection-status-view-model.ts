@@ -6,13 +6,20 @@ import type { BankConnectionDto, ConnectionStatus } from './connection-status-co
  * to project a DTO into a render shape.
  *
  * `connectionId` is normalized to `null` whenever the contract's
- * optional/nullable field is absent. The real API never sends this field
- * (see connection-status-contract.ts), so it is always `null` in practice —
- * this keeps the screen's "can this row be disconnected?" check a single
- * `!== null` comparison instead of juggling `null | undefined`.
+ * optional/nullable field is absent. Legacy GoCardless rows send `null`; an
+ * Enable Banking row carries its key, which the sync-history route and the
+ * disconnect action both use.
  */
+export type BankConnectionLastError = Readonly<{ code: string; occurredAt: string }>
+
 export type BankConnectionRow = Readonly<{
   accessType: BankConnectionDto['accessType']
+  /**
+   * The names of the accounts a SimpleFIN connection feeds, blank names left out; empty when it
+   * feeds none yet (they arrive with the first sync). Null when the API did not say: an older one,
+   * or another provider.
+   */
+  accountNames: readonly string[] | null
   /** What starting a new connection to this bank takes; null when the row can't be reconnected. */
   bankId: null | string
   connectionId: null | number
@@ -20,6 +27,7 @@ export type BankConnectionRow = Readonly<{
   daysUntilExpiry: null | number
   expiresAt: null | string
   institutionName: null | string
+  lastError: BankConnectionLastError | null
   provider: BankConnectionDto['provider']
   status: ConnectionStatus
 }>
@@ -27,12 +35,16 @@ export type BankConnectionRow = Readonly<{
 function asRow(dto: BankConnectionDto): BankConnectionRow {
   return {
     accessType: dto.accessType,
+    accountNames: dto.accounts === undefined
+      ? null
+      : dto.accounts.flatMap((account) => (account.accountName?.trim() ? [account.accountName.trim()] : [])),
     bankId: dto.bankId ?? null,
     connectionId: dto.connectionId ?? null,
     dataFreshAsOf: dto.dataFreshAsOf,
     daysUntilExpiry: dto.daysUntilExpiry ?? null,
     expiresAt: dto.expiresAt,
     institutionName: dto.institutionName,
+    lastError: dto.lastError ?? null,
     provider: dto.provider,
     status: dto.status,
   }

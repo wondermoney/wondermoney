@@ -1,0 +1,106 @@
+---
+title: Tarjetas de crédito
+description: Configura el ciclo del extracto de una tarjeta y consulta lo que debes este mes.
+---
+
+El gasto de una tarjeta de crédito pertenece a un extracto que cierra un día fijo y se paga en una fecha de vencimiento. WonderMoney usa esos dos días para decidir a qué extracto pertenece cada transacción, de modo que puedas ver lo que debes ahora, cuándo vence y cuánto crédito queda.
+
+## Antes de empezar
+
+Busca los dos días en el extracto de la tarjeta o en la app del banco: el día en que cierra el extracto y el día en que vence el pago. Ambos son días del mes, del 1 al 31.
+
+## Pasos
+
+1. Abre la cuenta y elige **Editar**.
+2. Activa **Cuenta de tarjeta de crédito**.
+3. Indica el día en que cierra el extracto y el día en que vence el pago.
+4. Indica el límite de crédito, si quieres ver el crédito aún disponible. El pago mínimo es opcional.
+5. Guarda.
+
+La página de la cuenta pasa a mostrar el extracto actual: su saldo, su fecha de vencimiento y el crédito aún disponible. El saldo del extracto es lo que el extracto cobró menos los pagos y reembolsos contados contra él.
+
+## Finales de mes y el día de cierre
+
+Un día de cierre posterior al final de un mes más corto usa el último día de ese mes. Una tarjeta que cierra el 31 cierra el 28 de febrero en un año común y el 29 de febrero en un año bisiesto.
+
+Una transacción hecha el día de cierre pertenece al extracto que cierra ese día. El día siguiente al cierre inicia el extracto siguiente.
+
+La fecha de vencimiento es el primer día de vencimiento después del cierre. Cerrar el 5 y pagar el 25 vence el mismo mes; cerrar el 20 y pagar el 10 vence el mes siguiente.
+
+## Mover una transacción a otro extracto
+
+Cuando el extracto del banco no coincide con su propia lista de transacciones, puedes mover una transacción. Abre la transacción y define su fecha de extracto: pasa a contar en el extracto que contiene esa fecha en lugar de aquel en el que cae su propia fecha. Borrar la fecha lo devuelve a la normalidad.
+
+## Cuentas sincronizadas
+
+Cuando el banco indica que una cuenta es una tarjeta, la cuenta sincronizada se marca automáticamente como tarjeta de crédito. Define tú el día de cierre, el día de vencimiento y el límite, porque los bancos rara vez comparten el ciclo.
+
+## Problemas habituales
+
+- El total del extracto parece menor que el saldo de la tarjeta: el extracto cuenta solo su propio período, mientras que el saldo arrastra todo.
+- Un pago hecho después del cierre aparece en el extracto siguiente.
+- Un reembolso contado como pago reduce el saldo del extracto.
+- Una tarjeta sin límite definido no muestra crédito disponible.
+
+## Historial de extractos y recordatorios
+
+En la web, la página de una tarjeta tiene una pestaña **Extractos**; en el móvil, los extractos aparecen debajo del extracto actual, en la pantalla de la cuenta. Selecciona un extracto para ver las transacciones asignadas. Cada extracto aparece como **Abierto** hasta que cierra, **Cerrado** cuando ha cerrado con saldo pendiente, **Pagado** cuando los pagos cubren lo que cargó o **Vencido** cuando sigue sin pagarse después de su fecha de vencimiento. Un pago se asigna al extracto más antiguo que aún tenga saldo, y cualquier importe por encima de ese saldo pasa al siguiente.
+
+Un extracto cerrado que aún tenga saldo recibe un recordatorio por email unos días antes del vencimiento: tres días, de forma predeterminada. Si se pierde un día, el recordatorio sale al día siguiente, hasta el mismo día del vencimiento. Un extracto pagado antes no recibe recordatorio. El recordatorio va a la persona a la que pertenece la tarjeta, en el idioma de su cuenta: inglés, portugués o español.
+
+Los recordatorios están activados de forma predeterminada. Desactiva **Recordatorios de pago de la tarjeta** en **Ajustes → Notificaciones** para dejar de recibirlos; darte de baja de todos los emails también los detiene. Los recordatorios solo se envían por email.
+
+En una instancia autoalojada, los recordatorios necesitan un proveedor de email (consulta [Configurar tu instancia](/es/docs/self-hosting/configure#correo)). Define `CREDIT_CARD_DUE_REMINDER_DAYS` en el worker para cambiar cuántos días antes del vencimiento se envían.
+
+## Compras en cuotas
+
+En Brasil y Portugal una compra con tarjeta se paga a menudo en cuotas mensuales fijas: el banco muestra `PARC 03/12` o `3/12` en la tercera de doce. Un plan de cuotas registra la compra una vez y reparte sus cuotas, una por extracto, para que veas lo que la tarjeta aún tiene que cargar.
+
+### Crear un plan
+
+1. Abre la página de la cuenta de la tarjeta. La sección **Cuotas** está debajo del resumen del extracto.
+2. Elige **Nuevo plan de cuotas** (en el móvil, **Añadir plan**).
+3. Introduce una descripción, la fecha de compra, el total y el número de cuotas (de 2 a 120). La categoría es opcional.
+4. Guarda.
+
+Cada cuota es el total dividido por el número de cuotas, redondeado hacia abajo al céntimo; la última se queda con lo que sobra, así que siempre suman exactamente el total. 100 en 3 cuotas son 33,33, 33,33 y 33,34. La primera cuota está en el extracto que contiene la fecha de compra y cada una de las siguientes en el extracto siguiente, fechadas por los días de cierre y de vencimiento de la tarjeta. En una cuenta sin ciclo de extracto, caen cada mes en el día del mes de la compra.
+
+### Las cuotas futuras son proyecciones
+
+Las cuotas que aún faltan son proyecciones, como la previsión del saldo. No son transacciones: no cambian el saldo de la cuenta, el patrimonio neto, las listas de transacciones ni los informes. Aparecen como elementos previstos en el plan, en el importe **Pendiente de cargo** de la tarjeta, en la previsión del saldo y en el calendario de facturas.
+
+Cuando el banco registra una cuota, WonderMoney vincula la transacción registrada con su cuota, que pasa a mostrarse como **Pagada**. Nada se cuenta dos veces, porque la proyección nunca fue una transacción. Una transacción registrada se vincula cuando está en la tarjeta del plan, su descripción indica la cuota (`PARC 03/12` en un plan de 12 cuotas) y el importe coincide. En las listas, la transacción muestra la cuota como `3/12`. Una transacción pendiente se vincula cuando el banco la registra.
+
+Una cuota pasada sin ninguna transacción registrada vinculada aparece como **Sin coincidencia**. Deja de contar en lo que la tarjeta aún tiene que cargar. Puedes vincular su transacción a mano.
+
+### Vincular una transacción a mano
+
+WonderMoney vincula por sí solo una transacción registrada solo cuando su marca, su importe, su tarjeta y su fecha encajan con un único plan. Cuando el banco no escribe la marca, redondea el importe de otra forma o fecha la cuota en otro día, vincúlala tú:
+
+1. Abre el plan. Junto a una cuota **Sin coincidencia** o **Pendiente**, elige **Vincular transacción** (en el móvil, en el menú **…** de la cuota).
+2. La lista muestra los cargos registrados en la tarjeta del plan hasta un mes antes o después de la fecha de la cuota, de un importe parecido, de más a menos cercano. Un cargo con otro importe indica la diferencia. Elige **Mostrar otros importes** para ver todos los cargos de ese periodo.
+3. Elige la transacción y después **Vincular**. La cuota pasa a mostrarse como **Pagada**, y el importe **Pendiente de cargo** de la tarjeta, la previsión y las listas de transacciones se actualizan.
+
+También puedes empezar por la transacción: en la lista de transacciones de una tarjeta, abre un cargo registrado y elige **Vincular a una cuota** para elegir una de las cuotas pendientes de los planes de esa tarjeta.
+
+Una transacción paga una sola cuota, de su propia tarjeta. WonderMoney te avisa cuando eliges una transacción de otra tarjeta, una que ya paga una cuota, o una cuota que otra transacción ha pagado mientras tanto.
+
+Para deshacer un vínculo, elige **Desvincular** junto a una cuota **Pagada** y confirma. La transacción se queda en la tarjeta como una transacción normal, y la cuota vuelve a mostrarse como **Sin coincidencia** o **Pendiente**. Un cargo desvinculado se queda desvinculado: las sincronizaciones e importaciones posteriores no lo vuelven a vincular a ese plan, aunque puedes vincularlo a mano.
+
+### Presupuestos
+
+Una cuota registrada cuenta en el mes de presupuesto de su propio extracto: el mes en que está prevista la cuota. Esto se cumple aunque el banco feche todas las cuotas el día de la compra original, así que una compra en 12 cuotas nunca cae entera en el presupuesto de un solo mes. Las cuotas que aún faltan no cuentan en ningún presupuesto hasta que el banco las registra.
+
+### Planes sugeridos
+
+Cuando las transacciones registradas en una tarjeta llevan marcas de cuota como `PARC 01/04` y `PARC 02/04`, la página de la tarjeta las muestra en **Posibles compras en cuotas** (en el móvil, **Cuotas detectadas**). Elige **Crear plan** para abrir el formulario rellenado a partir de esas transacciones, revísalo y guarda. El plan solo se crea al guardar, y las transacciones de las que salió quedan vinculadas a sus cuotas.
+
+### Cambiar o eliminar un plan
+
+Abre un plan para ver cada cuota con su fecha, la fecha de vencimiento del extracto, el importe y el estado. Puedes cambiar su descripción o su categoría, o eliminarlo. Eliminar un plan conserva sus transacciones registradas; solo dejan de estar vinculadas a él.
+
+## Enlaces relacionados
+
+- [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
+- [Conectar una cuenta bancaria](/es/docs/accounts-transactions/connect-bank-account)
+- [Pagos recurrentes](/es/docs/accounts-transactions/recurring-payments)

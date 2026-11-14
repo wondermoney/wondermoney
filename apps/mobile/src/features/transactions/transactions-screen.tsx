@@ -1,11 +1,12 @@
 import type { TFunction } from 'i18next'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { Alert, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native'
 import type { ListRenderItemInfo } from 'react-native'
 
 import { Amount } from '@/components/ui/amount'
 import { BackControl } from '@/components/ui/back-control'
+import { Badge } from '@/components/ui/badge'
 import { Button as UiButton } from '@/components/ui/button'
 import { DateField } from '@/components/ui/date-field'
 import { EntityMark } from '@/components/ui/entity-mark'
@@ -20,33 +21,69 @@ import { Divider } from '@/components/ui/section'
 import { OptionSheet, Sheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
 import type { CategoryViewModel } from '@/features/categories/categories-view-model'
+import { displayCategoryName } from '@/features/categories/categories-view-model'
+import {
+  attributionMark,
+  attributionName,
+  NO_HOUSEHOLD_MEMBERS,
+  parseSpentByToken,
+  spentByOptions,
+  spentByToken,
+  type AccountAttributionDto,
+  type HouseholdMembersModel,
+  type SpentByValue,
+} from '@/features/household/member-attribution'
+import { MemberBadge } from '@/features/household/member-badge'
+import { MemberFilterField } from '@/features/household/member-filter-control'
+import { MerchantAvatar } from '@/features/merchants/merchant-avatar'
 import { TagChips, TagDot } from '@/features/tags/tag-chip'
 import { TagPickerSheet, type CreateTagOutcome, type TagsState } from '@/features/tags/tag-picker-sheet'
+import { InstallmentBadge, useInstallmentLabel } from '@/features/installments/installment-badge'
 import { formatTransactionDate, localCalendarDay, localDayRange } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
-import { formatNumberInput, parseDecimalInput } from '@/lib/formatters/decimal-input'
+import { amountExpressionResult, formatNumberInput, parseAmountInput } from '@/lib/formatters/decimal-input'
 import { formatMoneyForDisplay, PRIVACY_MASK } from '@/lib/formatters/money-display'
 import { formatRelativeTime } from '@/lib/formatters/relative-time'
 import { usePrivacyMode } from '@/lib/privacy/privacy-mode'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { canSplitWithGroup, groupShareOf } from '@/features/expense-groups/expense-groups-view-model'
+
 import { FormNotice, TextField } from './form-field'
+import type { LinkedTransactionDto, ReimbursementLinkDto } from './reimbursements-contract'
+import { canMarkAsReimbursement, linkedSide, linkedTitle, reimbursementBadge, reimbursementRoleOf, type ReimbursementFailure } from './reimbursements-view-model'
 import { SelectField } from './select-field'
-import { type TransactionFilters, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
+import { TransactionAttachmentsSection } from './transaction-attachments-section'
+import { TransactionSplitScreen } from './transaction-split-screen'
+import { BULK_TRANSACTION_LIMIT, type TransactionFilters, type TransactionSplitLineRequest, type TransferDestinationType, type TransferEditDraft } from './transactions-contract'
 import { formatMonth, formatRange, formatShortDate, monthKey, presetFor, presetRange, RANGE_PRESETS, type RangePreset } from './transactions-date-range'
 import { TransactionsLead } from './transactions-lead'
+import { canSplitTransaction, splitCategoryCount } from './transactions-split-view-model'
 import type { TransactionViewModel } from './transactions-view-model'
 import type { TransactionsLeadData } from './use-transactions-lead'
 
-export type ReviewResult = 'success' | 'demo' | 'mfa' | 'cancelled' | 'network' | 'error'
+export type ReviewResult = 'success' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'in-group' | 'error'
 export type TransactionCategoryState =
   | { status: 'loading' | 'error' }
   | { status: 'loaded'; categories: readonly CategoryViewModel[] }
+/**
+ * What a bulk action covers: the selected loaded rows, or `'matching'` — every row the list's
+ * server filters match, which the route sends as the list's filter ("select all matching").
+ */
+export type BulkScope = readonly number[] | 'matching'
+/** What a bulk delete came to: how many rows went, and the bank rows it skipped (to offer hiding them). */
+export type BulkDeleteOutcome = Readonly<{ result: ReviewResult; deletedCount?: number; skippedIds?: readonly number[] }>
+/** A single delete; `bank-synced` when the bank sent the row, which is never deleted. */
+export type DeleteOneResult = ReviewResult | 'bank-synced'
+/** Removing one reimbursement link: done, or why not (`transactions.reimbursement.errors.*`). */
+export type UnlinkReimbursementResult = 'success' | ReimbursementFailure
 type FrozenBulkAction =
-  | Readonly<{ type: 'review'; transactionIds: readonly number[] }>
-  | Readonly<{ type: 'category'; transactionIds: readonly number[]; category: CategoryViewModel }>
-  | Readonly<{ type: 'hidden'; transactionIds: readonly number[]; hidden: boolean }>
+  | Readonly<{ type: 'review'; transactionIds: BulkScope; count: number }>
+  | Readonly<{ type: 'category'; transactionIds: BulkScope; count: number; category: CategoryViewModel }>
+  | Readonly<{ type: 'hidden'; transactionIds: BulkScope; count: number; hidden: boolean }>
+  | Readonly<{ type: 'delete'; transactionIds: BulkScope; count: number; synced: readonly number[] | null }>
+  | Readonly<{ type: 'tag'; transactionIds: BulkScope; count: number }>
 const LARGE_BULK_THRESHOLD = 10
 export type TransactionsViewState =
   | { status: 'loading' }
@@ -88,9 +125,15 @@ type Props = Readonly<{
   onMarkReviewed: (transactionId: number) => Promise<ReviewResult>
   categories?: TransactionCategoryState
   pending?: boolean
-  onBulkReview?: (transactionIds: readonly number[]) => Promise<ReviewResult>
-  onAssignCategory?: (transactionIds: readonly number[], categoryId: number) => Promise<ReviewResult>
-  onSetHidden?: (transactionIds: readonly number[], hidden: boolean) => Promise<ReviewResult>
+  onBulkReview?: (transactionIds: BulkScope) => Promise<ReviewResult>
+  onAssignCategory?: (transactionIds: BulkScope, categoryId: number) => Promise<ReviewResult>
+  onSetHidden?: (transactionIds: BulkScope, hidden: boolean) => Promise<ReviewResult>
+  /** Add or remove one household tag on the selection. Omitted, "Tag" is not offered. */
+  onBulkTag?: (transactionIds: BulkScope, tagId: number, mode: 'add' | 'remove') => Promise<ReviewResult>
+  /** Delete the selection (bank rows are skipped). Omitted, "Delete" is not offered. */
+  onBulkDelete?: (transactionIds: BulkScope) => Promise<BulkDeleteOutcome>
+  /** Delete one row from its menu. Omitted, the action is not offered. */
+  onDeleteOne?: (transactionId: number) => Promise<DeleteOneResult>
   onEditAmount?: (transactionId: number, updatedAmount: string, description?: string) => Promise<ReviewResult>
   /** The household's tags, for the filter and the picker. Omitted or failed, both stay hidden. */
   tags?: TagsState
@@ -100,11 +143,49 @@ type Props = Readonly<{
   /** Mark a row as a transfer (or not). Omitted, the actions are not offered. */
   onSetTransfer?: (draft: TransferEditDraft) => Promise<ReviewResult>
   transferDestinations?: TransferDestinationOptions
+  /** Pre-fill a new rule from a row ("always do this"). Omitted, the action is not offered. */
+  onCreateRule?: (transaction: TransactionViewModel) => void
+  /** Replace a transaction's split lines. Omitted, the Split action is not offered. */
+  onSaveSplit?: (transactionId: number, lines: readonly TransactionSplitLineRequest[]) => Promise<ReviewResult>
+  /** Remove a transaction's split. Omitted, the editor hides Remove split. */
+  onRemoveSplit?: (transactionId: number) => Promise<ReviewResult>
+  /** Open the installment plan a row belongs to. Omitted, the action is not offered. */
+  onOpenInstallmentPlan?: (transaction: TransactionViewModel) => void
+  /** Open "Mark as reimbursement" for an incoming row. Omitted, the action is not offered. */
+  onMarkReimbursement?: (transaction: TransactionViewModel) => void
+  /**
+   * Open "Split with group" (or, for a row already shared in a group, its shares). Omitted (a
+   * household viewer), the action is not offered; a shared row still shows its shares.
+   */
+  onSplitWithGroup?: (transaction: TransactionViewModel) => void
+  /** Remove one reimbursement link from a row's detail. Omitted, links show without Unlink. */
+  onUnlinkReimbursement?: (transactionId: number, transactionReimbursementKey: number) => Promise<UnlinkReimbursementResult>
+  /**
+   * Show the other side of a link that is not among the loaded rows (another account, another
+   * date). A loaded one is opened in place. Omitted, only loaded rows open.
+   */
+  onOpenTransaction?: (transaction: LinkedTransactionDto) => void
+  /** A row to open expanded when the list first shows (a link followed from another ledger). */
+  focusTransactionId?: number | null
+  /**
+   * The accounts the caller can only view (#95), by key. Their rows open and show their details
+   * but offer no change: no review, edit, tags, split, reimbursement, transfer, delete or
+   * selection. An account not in the set stays writable (the server enforces it anyway).
+   */
+  readOnlyAccountIds?: ReadonlySet<number>
+  /** The household's members: with more than one, rows carry whose they are and the list filters by member. */
+  members?: HouseholdMembersModel
+  /** Each account's own attribution, by account key, to name "Account default" in "Spent by". */
+  accountAttributions?: ReadonlyMap<number, AccountAttributionDto>
+  /** Set a row's "Spent by" (null: back to its account's default). Omitted, it is not offered. */
+  onSetSpentBy?: (transactionId: number, value: SpentByValue) => Promise<ReviewResult>
 }>
+
+const NO_READ_ONLY_ACCOUNTS: ReadonlySet<number> = new Set()
 
 export function TransactionsScreen(props: Props) {
   const { filters } = props
-  const serverScope = `${filters.fromDate ?? ''}|${filters.toDate ?? ''}|${filters.needsReview ?? false}|${filters.includeHidden ?? false}|${(filters.tagIds ?? []).join(',')}|${filters.limit ?? 100}`
+  const serverScope = `${filters.fromDate ?? ''}|${filters.toDate ?? ''}|${filters.needsReview ?? false}|${filters.includeHidden ?? false}|${(filters.tagIds ?? []).join(',')}|${(filters.memberKeys ?? []).join(',')}|${filters.limit ?? 100}`
   // Held above the keyed content so changing a server filter from inside the
   // sheet (which remounts the content) does not snap the sheet shut.
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -148,19 +229,39 @@ function TransactionsContent({
   onBulkReview,
   onAssignCategory,
   onSetHidden,
+  onBulkTag,
+  onBulkDelete,
+  onDeleteOne,
   onEditAmount,
   tags = { status: 'loading' },
   onSetTags,
   onCreateTag,
   onSetTransfer,
   transferDestinations = { accounts: [], portfolios: [], goals: [] },
+  onCreateRule,
+  onOpenInstallmentPlan,
+  onSaveSplit,
+  onRemoveSplit,
+  onMarkReimbursement,
+  onSplitWithGroup,
+  onUnlinkReimbursement,
+  onOpenTransaction,
+  focusTransactionId = null,
+  readOnlyAccountIds = NO_READ_ONLY_ACCOUNTS,
+  members = NO_HOUSEHOLD_MEMBERS,
+  accountAttributions,
+  onSetSpentBy,
   filtersOpen,
   onFiltersOpenChange: setFiltersOpen,
 }: Props & Readonly<{ filtersOpen: boolean; onFiltersOpenChange: (open: boolean) => void }>) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const { hidden: amountsHidden } = usePrivacyMode()
+  const [expandedId, setExpandedId] = useState<number | null>(focusTransactionId)
+  const listRef = useRef<FlatList<TransactionViewModel>>(null)
+  const [unlinkingKey, setUnlinkingKey] = useState<number | null>(null)
+  const [unlinkError, setUnlinkError] = useState<Readonly<{ transactionId: number; message: string }> | null>(null)
   const [reviewingId, setReviewingId] = useState<number | null>(null)
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null)
   const [editingAmountId, setEditingAmountId] = useState<number | null>(null)
@@ -174,7 +275,10 @@ function TransactionsContent({
   const period = presetFor(filters)
   /** How many filters in the sheet are doing something. The date range has its own control. */
   const tagFilter = filters.tagIds ?? []
-  const advancedFilterCount = [filters.needsReview === true, filters.includeHidden === true, tagFilter.length > 0, accountFilter !== null, categoryFilter !== null, typeFilter !== null, merchantFilter.trim() !== ''].filter(Boolean).length
+  // One member or Shared; only the all-accounts ledger filters by member.
+  const memberFilterAvailable = members.multiMember && !perAccount
+  const memberFilter = memberFilterAvailable ? filters.memberKeys?.[0] ?? null : null
+  const advancedFilterCount = [filters.needsReview === true, filters.includeHidden === true, tagFilter.length > 0, memberFilter !== null, accountFilter !== null, categoryFilter !== null, typeFilter !== null, merchantFilter.trim() !== ''].filter(Boolean).length
   const [rangeOpen, setRangeOpen] = useState(false)
   // A custom range is whole local days, so it reopens on the local days its bounds fall on.
   const [customFromDraft, setCustomFromDraft] = useState<string | null>(period === 'custom' && filters.fromDate && filters.toDate ? localCalendarDay(filters.fromDate) : null)
@@ -193,8 +297,21 @@ function TransactionsContent({
   const [tagNotice, setTagNotice] = useState<string | null>(null)
   const [destinationId, setDestinationId] = useState<number | null>(null)
   const [transferPending, setTransferPending] = useState(false)
+  const [spentById, setSpentById] = useState<number | null>(null)
+  const [spentByPending, setSpentByPending] = useState(false)
+  const [splitId, setSplitId] = useState<number | null>(null)
+  const [splitSaving, setSplitSaving] = useState(false)
+  const [splitError, setSplitError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<FrozenBulkAction | null>(null)
   const [submittedAction, setSubmittedAction] = useState<FrozenBulkAction | null>(null)
+  // The selection is every row the server filters match, not only the loaded ones.
+  const [allMatching, setAllMatching] = useState(false)
+  const [bulkTagOpen, setBulkTagOpen] = useState(false)
+  // What the last bulk delete did, with the bank rows it skipped (offered for hiding).
+  const [deleteNotice, setDeleteNotice] = useState<Readonly<{ deleted: number; skippedIds: readonly number[] }> | null>(null)
+  const [deleteRowId, setDeleteRowId] = useState<number | null>(null)
+  const [deleteRowPending, setDeleteRowPending] = useState(false)
+  const [deleteRowError, setDeleteRowError] = useState<string | null>(null)
   const loaded = useMemo(() => 'transactions' in state ? state.transactions : [], [state])
   const accountOptions = useMemo(() => [...new Map(loaded.map((row) => [row.accountId, row.accountName])).entries()], [loaded])
   const categoryOptions = useMemo(() => [...new Set(loaded.map((row) => row.category).filter((value): value is string => Boolean(value)))], [loaded])
@@ -209,6 +326,7 @@ function TransactionsContent({
     setExpandedId((current) => (current === id ? null : id))
   }, [])
   const toggleSelect = useCallback((id: number) => {
+    setAllMatching(false)
     setSelectedIds((current) => {
       const next = new Set(current)
       if (next.has(id)) next.delete(id); else next.add(id)
@@ -236,7 +354,7 @@ function TransactionsContent({
     setDescriptionDraft('')
   }, [])
   // Read in the app's language ("-1.234,56" in pt and es) and sent as a dot decimal.
-  const amountWire = parseDecimalInput(amountDraft, locale)
+  const amountWire = parseAmountInput(amountDraft, locale)
   const saveEditAmount = useCallback((id: number) => {
     if (!onEditAmount || amountWire === null) return
     void (async () => {
@@ -254,6 +372,7 @@ function TransactionsContent({
   }, [onEditAmount, amountWire, descriptionDraft])
   const openRowMenu = useCallback((id: number) => setRowMenuId(id), [])
   const openTagEditor = useCallback((id: number) => { setTagNotice(null); setTagEditId(id) }, [])
+  const openSpentBy = useCallback((id: number) => setSpentById(id), [])
 
   if (state.status === 'access-transition') return null
   if (state.status === 'loading') return <Loading palette={palette} label={t('transactions.loading')} onBack={onBack} perAccount={perAccount} accountName={accountName} />
@@ -274,13 +393,16 @@ function TransactionsContent({
     )
   }
 
-  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden) && loaded.some(isSelectable)
+  // A row the caller may change: a stored transaction on an account they can edit.
+  const isWritable = (row: TransactionViewModel) => isSelectable(row) && !readOnlyAccountIds.has(row.accountId)
+  const bulkAvailable = Boolean(onBulkReview || onAssignCategory || onSetHidden || onBulkTag || onBulkDelete) && loaded.some(isWritable)
   const resultMessage = reviewResult && reviewResult !== 'success'
     ? t(`transactions.reviewResult.${reviewResult}`) : null
-  const filtered = loaded.filter((row) => (accountFilter === null || row.accountId === accountFilter)
+  const passesLocalFilters = (row: TransactionViewModel) => (accountFilter === null || row.accountId === accountFilter)
     && (categoryFilter === null || row.category === categoryFilter)
     && (typeFilter === null || row.type === typeFilter)
-    && (!merchantFilter.trim() || row.merchant?.toLocaleLowerCase(locale).includes(merchantFilter.trim().toLocaleLowerCase(locale))))
+    && (!merchantFilter.trim() || Boolean(row.merchant?.toLocaleLowerCase(locale).includes(merchantFilter.trim().toLocaleLowerCase(locale))))
+  const filtered = loaded.filter(passesLocalFilters)
   const visible = filtered.slice(0, visibleCount)
   const requestLimit = filters.limit ?? 100
   // Synthetic opening-balance rows ride along with the first page, so 100
@@ -292,12 +414,25 @@ function TransactionsContent({
   const countLine = total !== null && total > loaded.length
     ? t('transactions.resultShowing', { shown: loaded.length, total })
     : t('transactions.resultCount', { count: loaded.length })
-  const loadedIds = new Set(loaded.filter(isSelectable).map((row) => row.id))
+  const loadedIds = new Set(loaded.filter(isWritable).map((row) => row.id))
   const selected = [...selectedIds].filter((id) => loadedIds.has(id)).sort((left, right) => left - right)
   const selectedRows = loaded.filter((row) => selectedIds.has(row.id))
-  const allSelectedVisible = selectedRows.length > 0 && selectedRows.every((row) => !row.hidden)
-  const allSelectedHidden = selectedRows.length > 0 && selectedRows.every((row) => row.hidden)
-  const mutationPending = pending || submittedAction !== null || transferPending
+  // "Select all N matching" acts on the server's filters, so it is offered only while every
+  // filter in force is one the server applies: a filter over the loaded rows (account, category,
+  // type, merchant) would not be in the request, and the action would reach rows it hides.
+  const localFiltersActive = accountFilter !== null || categoryFilter !== null || typeFilter !== null || merchantFilter.trim() !== ''
+  const everyLoadedSelected = loadedIds.size > 0 && [...loadedIds].every((id) => selectedIds.has(id))
+  // Every matching row would also reach rows of an account the caller can only view, unless the
+  // ledger is one account's (whose own rows are writable, or nothing is selectable at all).
+  const matchingAvailable = !localFiltersActive && everyLoadedSelected && total !== null && total > loadedIds.size
+    && (perAccount || readOnlyAccountIds.size === 0)
+  const matchingSelected = allMatching && matchingAvailable
+  const scope: BulkScope = matchingSelected ? 'matching' : selected
+  const scopeCount = matchingSelected && total !== null ? total : selected.length
+  const allSelectedVisible = matchingSelected || (selectedRows.length > 0 && selectedRows.every((row) => !row.hidden))
+  const allSelectedHidden = matchingSelected ? filters.includeHidden === true : selectedRows.length > 0 && selectedRows.every((row) => row.hidden)
+  const selectedSynced = selectedRows.filter((row) => row.bankSynced).map((row) => row.id)
+  const mutationPending = pending || submittedAction !== null || transferPending || spentByPending
   const scopeLocked = mutationPending || confirmation !== null
   const completeAction = async (submitted: FrozenBulkAction, action: () => Promise<ReviewResult>) => {
     setReviewResult(null)
@@ -307,17 +442,20 @@ function TransactionsContent({
       setReviewResult(result)
       if (result === 'success') {
         setSelectedIds(new Set())
+        setAllMatching(false)
         setPickerOpen(false)
+        setBulkTagOpen(false)
         setConfirmation(null)
       }
     } finally {
       setSubmittedAction(null)
     }
   }
+  const frozenScope = (): BulkScope => (scope === 'matching' ? 'matching' : [...scope])
   const reviewSelected = async () => {
     if (!onBulkReview) return
-    const frozen: FrozenBulkAction = { type: 'review', transactionIds: [...selected] }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'review', transactionIds: frozenScope(), count: scopeCount }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
@@ -325,8 +463,8 @@ function TransactionsContent({
   }
   const assignCategory = async (category: CategoryViewModel) => {
     if (!onAssignCategory) return
-    const frozen: FrozenBulkAction = { type: 'category', transactionIds: [...selected], category }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'category', transactionIds: frozenScope(), count: scopeCount, category }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
@@ -334,15 +472,48 @@ function TransactionsContent({
   }
   const setHiddenSelected = async (hidden: boolean) => {
     if (!onSetHidden) return
-    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: [...selected], hidden }
-    if (frozen.transactionIds.length >= LARGE_BULK_THRESHOLD) {
+    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: frozenScope(), count: scopeCount, hidden }
+    if (frozen.count >= LARGE_BULK_THRESHOLD) {
       setConfirmation(frozen)
       return
     }
     await completeAction(frozen, () => onSetHidden(frozen.transactionIds, hidden))
   }
+  const tagSelected = async (value: string) => {
+    setBulkTagOpen(false)
+    if (!onBulkTag) return
+    const [mode, key] = value.split(':')
+    const tagId = Number(key)
+    const frozen: FrozenBulkAction = { type: 'tag', transactionIds: frozenScope(), count: scopeCount }
+    await completeAction(frozen, () => onBulkTag(frozen.transactionIds, tagId, mode === 'remove' ? 'remove' : 'add'))
+  }
+  // A delete always asks first, with the count and the bank rows it will skip.
+  const deleteSelected = () => {
+    if (!onBulkDelete) return
+    setConfirmation({ type: 'delete', transactionIds: frozenScope(), count: scopeCount, synced: matchingSelected ? null : [...selectedSynced] })
+  }
+  const hideIds = async (ids: readonly number[]) => {
+    if (!onSetHidden || ids.length === 0) return
+    const frozen: FrozenBulkAction = { type: 'hidden', transactionIds: [...ids], count: ids.length, hidden: true }
+    await completeAction(frozen, () => onSetHidden(frozen.transactionIds, true))
+    setDeleteNotice(null)
+  }
+  const runDelete = async (frozen: Extract<FrozenBulkAction, { type: 'delete' }>) => {
+    if (!onBulkDelete) return
+    setDeleteNotice(null)
+    await completeAction(frozen, async () => {
+      const outcome = await onBulkDelete(frozen.transactionIds)
+      if (outcome.result === 'success') setDeleteNotice({ deleted: outcome.deletedCount ?? 0, skippedIds: outcome.skippedIds ?? [] })
+      return outcome.result
+    })
+  }
   const confirmBulkAction = async () => {
     if (!confirmation) return
+    if (confirmation.type === 'delete') {
+      await runDelete(confirmation)
+      return
+    }
+    if (confirmation.type === 'tag') return
     if (confirmation.type === 'review') {
       if (onBulkReview) await completeAction(confirmation, () => onBulkReview(confirmation.transactionIds))
       return
@@ -353,7 +524,7 @@ function TransactionsContent({
     }
     if (onAssignCategory) await completeAction(confirmation, () => onAssignCategory(confirmation.transactionIds, confirmation.category.id))
   }
-  const rest: TransactionFilters = { needsReview: filters.needsReview, includeHidden: filters.includeHidden, tagIds: filters.tagIds, limit: filters.limit }
+  const rest: TransactionFilters = { needsReview: filters.needsReview, includeHidden: filters.includeHidden, tagIds: filters.tagIds, memberKeys: filters.memberKeys, limit: filters.limit }
   const choosePeriod = (next: RangePreset | 'all') => {
     setRangeOpen(false)
     if (scopeLocked || next === period) return
@@ -376,7 +547,7 @@ function TransactionsContent({
     setTypeFilter(null)
     setMerchantFilter('')
     setVisibleCount(50)
-    if (filters.needsReview || filters.includeHidden || tagFilter.length > 0) onFiltersChange({ fromDate: filters.fromDate, toDate: filters.toDate, limit: filters.limit })
+    if (filters.needsReview || filters.includeHidden || tagFilter.length > 0 || (filters.memberKeys?.length ?? 0) > 0) onFiltersChange({ fromDate: filters.fromDate, toDate: filters.toDate, limit: filters.limit })
   }
   const toggleTagFilter = (tagKey: number) => {
     onFiltersChange({ ...filters, tagIds: tagFilter.includes(tagKey) ? tagFilter.filter((key) => key !== tagKey) : [...tagFilter, tagKey] })
@@ -427,6 +598,98 @@ function TransactionsContent({
     void runTransferEdit({ transactionId: destinationRow.id, direction: 'debit', transfer: true, destination })
   }
 
+  // "Spent by": a member, Shared, or back to the account's default. Read-only viewers aren't offered it.
+  const canSetSpentBy = Boolean(onSetSpentBy) && members.multiMember && !members.readOnly
+  const spentByRow = spentById === null ? null : loaded.find((row) => row.id === spentById) ?? null
+  const chooseSpentBy = (token: string) => {
+    if (!onSetSpentBy || !spentByRow) return
+    const transactionId = spentByRow.id
+    void (async () => {
+      setSpentByPending(true)
+      setReviewResult(null)
+      try {
+        const result = await onSetSpentBy(transactionId, parseSpentByToken(token))
+        setReviewResult(result)
+        if (result === 'success') setSpentById(null)
+      } finally {
+        setSpentByPending(false)
+      }
+    })()
+  }
+
+  const splitRow = splitId === null ? null : loaded.find((row) => row.id === splitId) ?? null
+  const openSplit = (id: number) => { setSplitError(null); setSplitId(id) }
+  const saveSplit = async (lines: readonly TransactionSplitLineRequest[]) => {
+    if (!onSaveSplit || splitId === null) return
+    setSplitSaving(true)
+    setSplitError(null)
+    try {
+      const result = await onSaveSplit(splitId, lines)
+      if (result === 'success') setSplitId(null)
+      else setSplitError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setSplitSaving(false)
+    }
+  }
+  const removeSplit = async () => {
+    if (!onRemoveSplit || splitId === null) return
+    setSplitSaving(true)
+    setSplitError(null)
+    try {
+      const result = await onRemoveSplit(splitId)
+      if (result === 'success') setSplitId(null)
+      else setSplitError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setSplitSaving(false)
+    }
+  }
+
+  // A link's other side: opened in place when it is loaded (the loaded-row filters are cleared if
+  // they hide it), otherwise handed to the route, which opens it in its own ledger.
+  const openLinked = (linked: LinkedTransactionDto) => {
+    const target = loaded.find((row) => row.id === linked.transactionKey)
+    if (!target) { onOpenTransaction?.(linked); return }
+    let index = filtered.indexOf(target)
+    if (index < 0) {
+      setAccountFilter(null)
+      setCategoryFilter(null)
+      setTypeFilter(null)
+      setMerchantFilter('')
+      index = loaded.indexOf(target)
+    }
+    setVisibleCount((count) => Math.max(count, index + 1))
+    setExpandedId(target.id)
+    // After the list has re-rendered with the row in it.
+    setTimeout(() => listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 }), 0)
+  }
+  const confirmUnlink = (transaction: TransactionViewModel, link: ReimbursementLinkDto) => {
+    if (!onUnlinkReimbursement) return
+    const name = linkedTitle(linkedSide(link, transaction.id)) ?? t('transactions.unnamed')
+    Alert.alert(
+      t('transactions.reimbursement.unlinkTitle'),
+      t('transactions.reimbursement.unlinkDescription', { amount: formatMoneyForDisplay(link.amount, { locale, currency: link.currencyCode }, amountsHidden), name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('transactions.reimbursement.unlink'),
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              setUnlinkError(null)
+              setUnlinkingKey(link.transactionReimbursementKey)
+              try {
+                const result = await onUnlinkReimbursement(transaction.id, link.transactionReimbursementKey)
+                if (result !== 'success') setUnlinkError({ transactionId: transaction.id, message: t(`transactions.reimbursement.errors.${result}`) })
+              } finally {
+                setUnlinkingKey(null)
+              }
+            })()
+          },
+        },
+      ],
+    )
+  }
+
   const editingBundle: EditingBundle | null = editingAmountId === null ? null : {
     transactionId: editingAmountId,
     amountDraft,
@@ -448,6 +711,7 @@ function TransactionsContent({
       isFirst={index === 0}
       monthStart={index === 0 || monthKey(visible[index - 1].date) !== monthKey(item.date)}
       expanded={expandedId === item.id}
+      readOnly={readOnlyAccountIds.has(item.accountId)}
       selecting={selecting}
       selected={selectedIds.has(item.id)}
       scopeLocked={scopeLocked}
@@ -462,12 +726,54 @@ function TransactionsContent({
       onMarkReviewed={markReviewed}
       onStartEditAmount={startEditAmount}
       onOpenMenu={openRowMenu}
+      onCreateRule={onCreateRule}
+      onOpenInstallmentPlan={onOpenInstallmentPlan}
+      onSplit={openSplit}
+      canSplit={Boolean(onSaveSplit) && categories.status === 'loaded'}
+      onMarkReimbursement={onMarkReimbursement}
+      onSplitWithGroup={onSplitWithGroup}
+      onUnlinkReimbursement={onUnlinkReimbursement ? confirmUnlink : undefined}
+      onOpenLinked={openLinked}
+      unlinkPending={unlinkingKey !== null}
+      unlinkError={unlinkError?.transactionId === item.id ? unlinkError.message : null}
+      members={members}
+      onSpentBy={canSetSpentBy ? openSpentBy : undefined}
       palette={palette}
       locale={locale}
     />
   )
 
-  const clearSelection = () => { setSelectedIds(new Set()); setPickerOpen(false); setConfirmation(null) }
+  const clearSelection = () => { setSelectedIds(new Set()); setAllMatching(false); setPickerOpen(false); setBulkTagOpen(false); setConfirmation(null) }
+  const selectAllLoaded = () => { setSelectedIds(new Set(loadedIds)); setAllMatching(false) }
+  const bulkTagGroups = tags.status === 'loaded' ? [
+    { label: t('transactions.bulk.addTag'), options: tags.tags.map((tag) => ({ value: `add:${tag.tagKey}`, label: tag.name })) },
+    { label: t('transactions.bulk.removeTag'), options: tags.tags.filter((tag) => matchingSelected || selectedRows.some((row) => row.tags.some((carried) => carried.tagKey === tag.tagKey))).map((tag) => ({ value: `remove:${tag.tagKey}`, label: tag.name })) },
+  ].filter((group) => group.options.length > 0) : []
+  const deleteRow = deleteRowId === null ? null : loaded.find((row) => row.id === deleteRowId) ?? null
+  const openDeleteRow = (id: number) => { setDeleteRowError(null); setDeleteRowId(id) }
+  const confirmDeleteRow = async () => {
+    if (!onDeleteOne || deleteRow === null) return
+    setDeleteRowPending(true)
+    setDeleteRowError(null)
+    try {
+      const result = await onDeleteOne(deleteRow.id)
+      if (result === 'success') setDeleteRowId(null)
+      else setDeleteRowError(result === 'bank-synced' ? t('transactions.bulk.deleteOnlySynced', { count: 1 }) : t(`transactions.reviewResult.${result}`))
+    } finally {
+      setDeleteRowPending(false)
+    }
+  }
+  const hideDeleteRow = async () => {
+    if (!onSetHidden || deleteRow === null) return
+    setDeleteRowPending(true)
+    try {
+      const result = await onSetHidden([deleteRow.id], true)
+      if (result === 'success') setDeleteRowId(null)
+      else setDeleteRowError(t(`transactions.reviewResult.${result}`))
+    } finally {
+      setDeleteRowPending(false)
+    }
+  }
   const secondaryActions = [
     ...(onImport ? [{ value: 'import' as const, label: t('transactionImport.action') }] : []),
     ...(onScanReceipt ? [{ value: 'scan' as const, label: t('transactionOcr.action') }] : []),
@@ -478,18 +784,20 @@ function TransactionsContent({
   const allValue = ''
 
   const menuRow = rowMenuId === null ? null : loaded.find((row) => row.id === rowMenuId) ?? null
-  const menuEditable = menuRow ? isSelectable(menuRow) : false
-  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'transfer' | 'notTransfer' | 'destination' | 'select'
+  const menuEditable = menuRow ? isWritable(menuRow) : false
+  type RowAction = 'details' | 'review' | 'edit' | 'tags' | 'spentBy' | 'transfer' | 'notTransfer' | 'destination' | 'select' | 'delete'
   const canRetype = Boolean(onSetTransfer) && menuRow !== null && menuEditable && menuRow.direction !== 'unknown' && !mutationPending
   const rowActions: { value: RowAction; label: string }[] = menuRow ? [
     { value: 'details', label: expandedId === menuRow.id ? t('transactions.hideDetails') : t('transactions.showDetails') },
     ...(menuEditable && !menuRow.reviewed && !mutationPending ? [{ value: 'review' as const, label: t('transactions.markReviewed') }] : []),
     ...(menuEditable && canEditAmount && !mutationPending ? [{ value: 'edit' as const, label: t('transactions.editAmount') }] : []),
     ...(menuEditable && canEditTags && !mutationPending ? [{ value: 'tags' as const, label: t('tags.edit') }] : []),
+    ...(menuEditable && canSetSpentBy && !mutationPending ? [{ value: 'spentBy' as const, label: t('memberAttribution.spentByAction') }] : []),
     ...(canRetype && !menuRow.isTransfer ? [{ value: 'transfer' as const, label: t('transactions.transfer.mark') }] : []),
     ...(canRetype && menuRow.isTransfer && menuRow.direction === 'debit' ? [{ value: 'destination' as const, label: t('transactions.transfer.chooseDestination') }] : []),
     ...(canRetype && menuRow.isTransfer ? [{ value: 'notTransfer' as const, label: t('transactions.transfer.unmark') }] : []),
     ...(menuEditable && bulkAvailable && !scopeLocked ? [{ value: 'select' as const, label: t('transactions.select') }] : []),
+    ...(menuEditable && onDeleteOne && !mutationPending ? [{ value: 'delete' as const, label: t('transactions.bulk.deleteOne') }] : []),
   ] : []
   const runRowAction = (action: RowAction) => {
     if (!menuRow) return
@@ -497,12 +805,14 @@ function TransactionsContent({
     else if (action === 'review') markReviewed(menuRow.id)
     else if (action === 'edit') startEditAmount(menuRow)
     else if (action === 'tags') openTagEditor(menuRow.id)
+    else if (action === 'spentBy') openSpentBy(menuRow.id)
     // Money going out is asked where it went (or nowhere in particular) in the same step.
     else if (action === 'transfer' && menuRow.direction === 'debit') setDestinationId(menuRow.id)
     else if (action === 'transfer') void runTransferEdit({ transactionId: menuRow.id, direction: 'credit', transfer: true })
     else if (action === 'destination') setDestinationId(menuRow.id)
     else if (action === 'notTransfer' && menuRow.direction !== 'unknown') void runTransferEdit({ transactionId: menuRow.id, direction: menuRow.direction, transfer: false })
-    else { setSelecting(true); setSelectedIds((current) => new Set(current).add(menuRow.id)) }
+    else if (action === 'delete') openDeleteRow(menuRow.id)
+    else { setSelecting(true); setAllMatching(false); setSelectedIds((current) => new Set(current).add(menuRow.id)) }
   }
 
   const freshnessLine = freshness === null ? undefined
@@ -577,6 +887,18 @@ function TransactionsContent({
           </View>
         ) : null}
         {resultMessage ? <Text accessibilityRole="alert" style={[styles.notice, { borderColor: palette.border }]} variant="meta">{resultMessage}</Text> : null}
+        {deleteNotice ? (
+          <View accessibilityRole="alert" style={[styles.notice, { borderColor: palette.border }]}>
+            <Text variant="meta">{t('transactions.bulk.deleted', { count: deleteNotice.deleted })}</Text>
+            {deleteNotice.skippedIds.length > 0 ? (
+              <>
+                <Text variant="meta">{t('transactions.bulk.skipped', { count: deleteNotice.skippedIds.length })}</Text>
+                {onSetHidden ? <UiButton disabled={mutationPending} label={t('transactions.bulk.hideSkipped')} onPress={() => void hideIds(deleteNotice.skippedIds)} size="sm" variant="outline" /> : null}
+              </>
+            ) : null}
+            <UiButton label={t('transactions.close')} onPress={() => setDeleteNotice(null)} size="sm" variant="ghost" />
+          </View>
+        ) : null}
       </View>
 
       <Sheet
@@ -624,6 +946,16 @@ function TransactionsContent({
         title={t('transactions.filtersTitle')}
         visible={filtersOpen}
       >
+        {memberFilterAvailable ? (
+          <View style={styles.sheetSection}>
+            <MemberFilterField
+              disabled={scopeLocked}
+              model={members}
+              onChange={(value) => onFiltersChange({ ...filters, memberKeys: value === null ? undefined : [value] })}
+              value={memberFilter}
+            />
+          </View>
+        ) : null}
         <View>
           <ToggleRow disabled={scopeLocked} label={t('transactions.needsReview')} value={filters.needsReview === true} palette={palette} onChange={(value) => onFiltersChange({ ...filters, needsReview: value })} />
           <ToggleRow disabled={scopeLocked} label={t('transactions.showHidden')} value={filters.includeHidden === true} palette={palette} onChange={(value) => onFiltersChange({ ...filters, includeHidden: value })} />
@@ -692,6 +1024,16 @@ function TransactionsContent({
         visible={destinationRow !== null}
       />
 
+      <OptionSheet
+        onClose={() => { if (!spentByPending) setSpentById(null) }}
+        onSelect={chooseSpentBy}
+        options={spentByRow ? spentByOptions(members, accountAttributions?.get(spentByRow.accountId), t) : []}
+        testID="spent-by-sheet"
+        title={t('memberAttribution.spentBy')}
+        value={spentByRow ? spentByToken(spentByRow.attribution) : null}
+        visible={spentByRow !== null && canSetSpentBy && isWritable(spentByRow)}
+      />
+
       {tagEditRow && onCreateTag ? (
         <TagPickerSheet
           initial={tagEditRow.tags.map((tag) => tag.tagKey)}
@@ -727,7 +1069,13 @@ function TransactionsContent({
     <View style={styles.safe}>
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
       <FlatList
+        ref={listRef}
         data={visible}
+        // Rows have no fixed height: a jump to a row not yet measured lands near it, then on it.
+        onScrollToIndexFailed={({ index, averageItemLength }) => {
+          listRef.current?.scrollToOffset({ offset: averageItemLength * index, animated: false })
+          setTimeout(() => listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 }), 50)
+        }}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderRow}
         initialNumToRender={50}
@@ -748,14 +1096,22 @@ function TransactionsContent({
         // Web's TransactionReviewControl: a bar pinned under the list while rows are selected.
         <View accessibilityRole="toolbar" accessibilityLabel={t('transactions.bulkActions')} style={[styles.bulkBar, { borderTopColor: palette.border, backgroundColor: palette.popover }, themeTokens.shadow.overlay]}>
           <View style={styles.sectionHead}>
-            <Text accessibilityRole="header" variant="metaStrong">{t('transactions.selectedCount', { count: selected.length })}</Text>
-            <Text tone="muted" variant="label">{t('transactions.selectionScope')}</Text>
+            <Text accessibilityRole="header" variant="metaStrong">{matchingSelected ? t('transactions.bulk.allMatchingSelected', { count: scopeCount }) : t('transactions.selectedCount', { count: selected.length })}</Text>
+            <Text tone="muted" variant="label">{matchingSelected ? t('transactions.bulk.matchingScope') : t('transactions.selectionScope')}</Text>
           </View>
+          {!everyLoadedSelected && loadedIds.size > 1 ? <UiButton disabled={scopeLocked} label={t('transactions.bulk.selectLoaded', { count: loadedIds.size })} onPress={selectAllLoaded} size="sm" variant="ghost" /> : null}
+          {matchingAvailable && !matchingSelected && total !== null ? (
+            total > BULK_TRANSACTION_LIMIT
+              ? <Text tone="muted" variant="label">{t('transactions.bulk.tooManyMatching', { max: BULK_TRANSACTION_LIMIT })}</Text>
+              : <UiButton disabled={scopeLocked} label={t('transactions.bulk.selectAllMatching', { count: total })} onPress={() => setAllMatching(true)} size="sm" variant="outline" />
+          ) : null}
           <UiButton block disabled={scopeLocked || noneSelected || !onBulkReview} label={mutationPending ? t('transactions.updating') : t('transactions.reviewSelected')} onPress={reviewSelected} />
           <View style={styles.bulkSecondary}>
             <UiButton disabled={scopeLocked || noneSelected || !onAssignCategory} label={t('transactions.chooseCategory')} onPress={() => setPickerOpen((open) => !open)} size="sm" variant="secondary" />
             {allSelectedVisible ? <UiButton disabled={scopeLocked || !onSetHidden} label={t('transactions.hideSelected')} onPress={() => void setHiddenSelected(true)} size="sm" variant="secondary" /> : null}
             {allSelectedHidden ? <UiButton disabled={scopeLocked || !onSetHidden} label={t('transactions.unhideSelected')} onPress={() => void setHiddenSelected(false)} size="sm" variant="secondary" /> : null}
+            {onBulkTag && bulkTagGroups.length > 0 ? <UiButton disabled={scopeLocked || noneSelected} label={t('transactions.bulk.tag')} onPress={() => setBulkTagOpen(true)} size="sm" variant="secondary" /> : null}
+            {onBulkDelete ? <UiButton disabled={scopeLocked || noneSelected} label={t('transactions.bulk.delete')} onPress={deleteSelected} size="sm" variant="secondary" /> : null}
             {noneSelected ? null : <UiButton disabled={scopeLocked} label={t('transactions.clearSelection')} onPress={clearSelection} size="sm" variant="ghost" />}
             <UiButton disabled={scopeLocked} label={t('common.done')} onPress={() => { clearSelection(); setSelecting(false) }} size="sm" variant="ghost" />
           </View>
@@ -779,14 +1135,23 @@ function TransactionsContent({
               )) : null}
             </ScrollView>
           ) : null}
-          {confirmation ? (
+          {confirmation?.type === 'delete' ? (
+            <DeleteConfirmation
+              confirmation={confirmation}
+              pending={mutationPending}
+              palette={palette}
+              onCancel={() => setConfirmation(null)}
+              onConfirm={() => void confirmBulkAction()}
+              onHideSynced={onSetHidden && confirmation.synced && confirmation.synced.length > 0 ? () => { const ids = confirmation.synced ?? []; setConfirmation(null); void hideIds(ids) } : undefined}
+            />
+          ) : confirmation ? (
             <View accessible accessibilityRole="alert" style={[styles.confirmation, { borderTopColor: palette.border }]}>
               <Text accessibilityRole="header" variant="metaStrong">{t(confirmation.type === 'category' ? 'transactions.confirmCategoryTitle' : confirmation.type === 'hidden' ? (confirmation.hidden ? 'transactions.confirmHideTitle' : 'transactions.confirmUnhideTitle') : 'transactions.confirmReviewTitle')}</Text>
               <Text variant="meta">{confirmation.type === 'category'
-                ? t('transactions.confirmCategoryMessage', { count: confirmation.transactionIds.length, category: confirmation.category.name })
+                ? t('transactions.confirmCategoryMessage', { count: confirmation.count, category: confirmation.category.name })
                 : confirmation.type === 'hidden'
-                  ? t(confirmation.hidden ? 'transactions.confirmHideMessage' : 'transactions.confirmUnhideMessage', { count: confirmation.transactionIds.length })
-                  : t('transactions.confirmReviewMessage', { count: confirmation.transactionIds.length })}</Text>
+                  ? t(confirmation.hidden ? 'transactions.confirmHideMessage' : 'transactions.confirmUnhideMessage', { count: confirmation.count })
+                  : t('transactions.confirmReviewMessage', { count: confirmation.count })}</Text>
               <View style={styles.inlineActions}>
                 <UiButton disabled={mutationPending} label={t('transactions.cancel')} onPress={() => setConfirmation(null)} variant="secondary" />
                 <UiButton disabled={mutationPending} label={mutationPending ? t('transactions.updating') : t(confirmation.type === 'category' ? 'transactions.confirmCategory' : confirmation.type === 'hidden' ? (confirmation.hidden ? 'transactions.confirmHide' : 'transactions.confirmUnhide') : 'transactions.confirmReview')} onPress={confirmBulkAction} />
@@ -796,7 +1161,81 @@ function TransactionsContent({
         </View>
       ) : null}
     </SafeAreaView>
+    <OptionSheet
+      groups={bulkTagGroups}
+      mode="menu"
+      onClose={() => setBulkTagOpen(false)}
+      onSelect={(value: string) => void tagSelected(value)}
+      title={t('transactions.bulk.tagTitle', { count: scopeCount })}
+      visible={bulkTagOpen}
+    />
+    {deleteRow ? (
+      <Sheet
+        closeLabel={t('transactions.close')}
+        footer={(
+          <View style={styles.inlineActions}>
+            <UiButton disabled={deleteRowPending} label={t('transactions.cancel')} onPress={() => setDeleteRowId(null)} variant="secondary" />
+            {deleteRow.bankSynced
+              ? (onSetHidden && !deleteRow.hidden ? <UiButton disabled={deleteRowPending} label={t('transactions.bulk.hideInstead', { count: 1 })} onPress={() => void hideDeleteRow()} /> : null)
+              : <UiButton disabled={deleteRowPending} label={deleteRowPending ? t('transactions.updating') : t('transactions.bulk.confirmDelete', { count: 1 })} onPress={() => void confirmDeleteRow()} variant="destructive" />}
+          </View>
+        )}
+        onClose={() => { if (!deleteRowPending) setDeleteRowId(null) }}
+        title={deleteRow.bankSynced ? t('transactions.bulk.onlySyncedTitle', { count: 1 }) : t('transactions.bulk.deleteTitle', { count: 1 })}
+        visible
+      >
+        <View style={styles.sheetSection}>
+          <Text variant="meta">{deleteRow.title ?? t('transactions.unnamed')}</Text>
+          <Text tone="muted" variant="meta">{deleteRow.bankSynced ? t('transactions.bulk.deleteOnlySynced', { count: 1 }) : t('transactions.bulk.deleteMessage')}</Text>
+          {deleteRowError ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{deleteRowError}</Text> : null}
+        </View>
+      </Sheet>
+    ) : null}
     {showCreate && onCreate ? <FloatingActionButton accessibilityLabel={t('transactionCreate.action')} onPress={onCreate} testID="transactions-create" /> : null}
+    {splitRow ? (
+      <TransactionSplitScreen
+        categories={categoryChoices}
+        error={splitError}
+        locale={locale}
+        onClose={() => { if (!splitSaving) setSplitId(null) }}
+        onRemove={onRemoveSplit ? removeSplit : undefined}
+        onSave={saveSplit}
+        pending={splitSaving}
+        transaction={splitRow}
+      />
+    ) : null}
+    </View>
+  )
+}
+
+/**
+ * The bulk delete's confirmation: the count, and why rows the bank sent are skipped (the next
+ * sync would send them again), with hiding offered for them. With every matching row selected the
+ * bank rows among them are not known, so it says they are skipped without counting them.
+ */
+function DeleteConfirmation({ confirmation, pending, palette, onCancel, onConfirm, onHideSynced }: Readonly<{
+  confirmation: Extract<FrozenBulkAction, { type: 'delete' }>
+  pending: boolean
+  palette: Palette
+  onCancel: () => void
+  onConfirm: () => void
+  onHideSynced?: () => void
+}>) {
+  const { t } = useTranslation()
+  const syncedCount = confirmation.synced?.length ?? null
+  const deletable = syncedCount === null ? confirmation.count : confirmation.count - syncedCount
+  const onlySynced = syncedCount !== null && syncedCount > 0 && deletable === 0
+  return (
+    <View accessible accessibilityRole="alert" style={[styles.confirmation, { borderTopColor: palette.border }]}>
+      <Text accessibilityRole="header" variant="metaStrong">{onlySynced ? t('transactions.bulk.onlySyncedTitle', { count: confirmation.count }) : t('transactions.bulk.deleteTitle', { count: deletable })}</Text>
+      <Text variant="meta">{onlySynced ? t('transactions.bulk.deleteOnlySynced', { count: confirmation.count }) : t('transactions.bulk.deleteMessage')}</Text>
+      {!onlySynced && syncedCount !== null && syncedCount > 0 ? <Text variant="meta">{t('transactions.bulk.syncedNote', { count: syncedCount })}</Text> : null}
+      {syncedCount === null ? <Text variant="meta">{t('transactions.bulk.matchingSyncedNote')}</Text> : null}
+      <View style={styles.inlineActions}>
+        <UiButton disabled={pending} label={t('transactions.cancel')} onPress={onCancel} variant="secondary" />
+        {onHideSynced && syncedCount !== null && syncedCount > 0 ? <UiButton disabled={pending} label={t('transactions.bulk.hideInstead', { count: syncedCount })} onPress={onHideSynced} variant="outline" /> : null}
+        {onlySynced ? null : <UiButton disabled={pending} label={pending ? t('transactions.updating') : t('transactions.bulk.confirmDelete', { count: deletable })} onPress={onConfirm} variant="destructive" />}
+      </View>
     </View>
   )
 }
@@ -809,6 +1248,8 @@ type TransactionRowProps = Readonly<{
   /** Opens a month: the row carries web's month line ("October 2025") above it. */
   monthStart: boolean
   expanded: boolean
+  /** The row's account is one the caller can only view: details only, no change. */
+  readOnly: boolean
   selecting: boolean
   selected: boolean
   scopeLocked: boolean
@@ -823,6 +1264,26 @@ type TransactionRowProps = Readonly<{
   onMarkReviewed: (id: number) => void
   onStartEditAmount: (item: TransactionViewModel) => void
   onOpenMenu: (id: number) => void
+  onCreateRule?: (item: TransactionViewModel) => void
+  onOpenInstallmentPlan?: (item: TransactionViewModel) => void
+  /** Opens the full-screen split editor for this row. */
+  onSplit?: (id: number) => void
+  /** Whether the Split action is offered at all (the route provides a handler). */
+  canSplit: boolean
+  /** Opens "Mark as reimbursement"; offered only on ordinary money in. */
+  onMarkReimbursement?: (item: TransactionViewModel) => void
+  /** Opens "Split with group", or a shared row's shares. */
+  onSplitWithGroup?: (item: TransactionViewModel) => void
+  /** Asks to remove one link (the screen confirms first). Omitted, links show without Unlink. */
+  onUnlinkReimbursement?: (item: TransactionViewModel, link: ReimbursementLinkDto) => void
+  onOpenLinked: (linked: LinkedTransactionDto) => void
+  unlinkPending: boolean
+  /** Why the last unlink on this row failed. */
+  unlinkError: string | null
+  /** The household; with more than one member the row says whose it is. */
+  members: HouseholdMembersModel
+  /** Opens "Spent by" for this row. Omitted, it is not offered. */
+  onSpentBy?: (id: number) => void
   palette: Palette
   locale: string
 }>
@@ -841,6 +1302,7 @@ const TransactionRow = memo(function TransactionRow({
   isFirst,
   monthStart,
   expanded,
+  readOnly,
   selecting,
   selected,
   scopeLocked,
@@ -855,11 +1317,24 @@ const TransactionRow = memo(function TransactionRow({
   onMarkReviewed,
   onStartEditAmount,
   onOpenMenu,
+  onCreateRule,
+  onOpenInstallmentPlan,
+  onSplit,
+  canSplit,
+  onMarkReimbursement,
+  onSplitWithGroup,
+  onUnlinkReimbursement,
+  onOpenLinked,
+  unlinkPending,
+  unlinkError,
+  members,
+  onSpentBy,
   palette,
   locale,
 }: TransactionRowProps) {
   const { hidden: amountsHidden } = usePrivacyMode()
   const { t } = useTranslation()
+  const installmentLabel = useInstallmentLabel()
   // With no exchange rate there is no amount in the user's currency: the row shows its original one.
   const shownValue = item.fx.status === 'missing' ? item.fx.amount : item.amount
   const shownCurrency = item.fx.status === 'missing' ? item.fx.currency : item.currency
@@ -868,10 +1343,31 @@ const TransactionRow = memo(function TransactionRow({
   const fxCopy = describeFxState(item.fx, t, locale)
   const direction = t(`transactions.${item.direction === 'unknown' ? 'amount' : item.direction}`)
   const fullDate = formatTransactionDate(item.date, locale)
+  // The quiet "= 15,55" under the amount while the draft is an expression.
+  const amountExpressionHint = editing
+    ? (() => {
+        const result = amountExpressionResult(editing.amountDraft, locale)
+        return result === null ? null : `= ${formatNumberInput(result, locale)}`
+      })()
+    : null
   const title = item.title ?? t('transactions.unnamed')
   const account = item.accountName ?? t('transactions.accountUnavailable')
-  const selectable = selecting && isSelectable(item)
-  const editable = isSelectable(item)
+  const stored = isSelectable(item)
+  const editable = stored && !readOnly
+  const selectable = selecting && editable
+  // A row shared in an expense group: its split is the group's, one line per person.
+  const groupShare = groupShareOf(item)
+  // A split row shows its count in place of the one category, as web's ledger does.
+  const splitLabel = groupShare
+    ? t('expenseGroups.split.sharedIn')
+    : item.isSplit ? t('transactions.split.summary', { count: splitCategoryCount(item.splits) }) : null
+  const installment = item.installment ? installmentLabel(item.installment) : null
+  const categoryLabel = item.category ? formatCategoryName(item.category) : null
+  const badgeKind = reimbursementBadge(item)
+  const badgeLabel = badgeKind ? t(`transactions.reimbursement.badges.${badgeKind}`) : null
+  const role = reimbursementRoleOf(item)
+  const memberMark = attributionMark(item.attribution, members)
+  const memberName = memberMark ? attributionName(memberMark, t) : null
   const figure = shownValue !== null && shownCurrency !== null
     ? <Amount currency={shownCurrency} locale={locale} size="amountBase" value={shownValue} />
     : <Text variant="amountBase">{amount}</Text>
@@ -881,7 +1377,14 @@ const TransactionRow = memo(function TransactionRow({
     <View style={[!monthStart && { borderTopWidth: 1, borderTopColor: palette.border }, item.hidden && styles.hiddenRow]}>
       {monthStart ? <ListGroupHeading first={isFirst} title={formatMonth(item.date, locale)} variant="heading" /> : null}
       <ListRow
-        accessibilityLabel={[title, account, signedAmount, direction, fullDate, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        accessibilityLabel={[title, installment, account, signedAmount, direction, fullDate, splitLabel, badgeLabel, memberName ? `${t('memberAttribution.spentBy')}: ${memberName}` : null, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
+        badge={(
+          <>
+            <InstallmentBadge installment={item.installment} />
+            {badgeLabel ? <Badge label={badgeLabel} testID="transaction-reimbursement-badge" tone="outline" /> : null}
+            <MemberBadge mark={memberMark} testID="transaction-member-badge" />
+          </>
+        )}
         density="comfortable"
         figure={figure}
         leading={selectable ? (
@@ -896,8 +1399,10 @@ const TransactionRow = memo(function TransactionRow({
           >
             {selected ? <Icon color={palette.primaryForeground} name="check" size={14} weight="bold" /> : null}
           </Pressable>
-        ) : <EntityMark {...(item.mark ?? { glyph: 'tag' })} testID="transaction-mark" />}
-        meta={[`${account} · ${formatShortDate(item.date, locale)}`, item.category ? formatCategoryName(item.category) : null]}
+        ) : item.merchantAvatar
+          ? <MerchantAvatar {...item.merchantAvatar} testID="transaction-merchant-avatar" />
+          : <EntityMark {...(item.mark ?? { glyph: 'tag' })} testID="transaction-mark" />}
+        meta={[`${account} · ${formatShortDate(item.date, locale)}`, splitLabel ?? categoryLabel]}
         moreAccessibilityLabel={t('transactions.rowActions', { name: title })}
         onMorePress={() => onOpenMenu(item.id)}
         // While selecting, the row is the checkbox's larger target; it never
@@ -920,9 +1425,88 @@ const TransactionRow = memo(function TransactionRow({
           <Detail label={t('transactions.settlement')} value={formatAvailableMoney(item.settlementAmount, item.settlementCurrency, locale, t, amountsHidden)} data />
           <Detail label={t('transactions.balanceAfter')} value={formatAvailableMoney(item.balance, item.balanceCurrency, locale, t, amountsHidden)} data />
           <Detail label={t('transactions.convertedBalanceAfter')} value={formatAvailableMoney(item.convertedBalance, item.convertedBalanceCurrency, locale, t, amountsHidden)} data />
+          {memberName ? <Detail label={t('memberAttribution.spentBy')} value={memberName} /> : null}
           {item.isTransfer ? <Detail label={t('transactions.transfer.label')} value={transferDetail(item, t)} /> : null}
           {!item.isTransfer && !item.categoryCountsAsSpending ? <Detail label={t('transactions.transfer.spendingLabel')} value={t('transactions.transfer.notSpending')} /> : null}
+          {item.installment ? <Detail label={t('installments.transactionDetail')} value={installment ?? ''} /> : null}
           {item.recurring ? <Detail label={t('transactions.recurring')} value={`${item.recurring.displayName} · ${t(`transactions.recurringType.${item.recurring.type}`)}`} /> : null}
+          {groupShare ? (
+            <View style={styles.detail} testID="transaction-group-shares">
+              <Text tone="muted" variant="label">{t('expenseGroups.split.shares')}</Text>
+              <View style={styles.splitLines}>
+                {groupShare.shares.map((line) => (
+                  <View key={line.memberKey} style={styles.splitLine}>
+                    <View style={styles.flex}>
+                      <Text variant="meta">{line.name}</Text>
+                      {!line.isHouseholdMember ? <Text tone="muted" variant="label">{t('expenseGroups.outsideHousehold')}</Text> : null}
+                    </View>
+                    <Amount currency={item.settlementCurrency} locale={locale} size="amountSmall" value={line.amount} />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : item.isSplit ? (
+            <View style={styles.detail}>
+              <Text tone="muted" variant="label">{t('transactions.split.lines')}</Text>
+              <View style={styles.splitLines}>
+                {item.splits.map((line) => (
+                  <View key={line.transactionSplitKey} style={styles.splitLine}>
+                    <View style={styles.flex}>
+                      <Text variant="meta">{line.category ? displayCategoryName(line.category, t) : t('transactions.split.uncategorized')}</Text>
+                      {line.notes ? <Text tone="muted" variant="label">{line.notes}</Text> : null}
+                    </View>
+                    <Amount
+                      currency={line.appuserAmount != null ? item.currency : item.settlementCurrency}
+                      locale={locale}
+                      size="amountSmall"
+                      value={line.appuserAmount ?? line.amount}
+                    />
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+          {item.reimbursements.length > 0 ? (
+            <View style={styles.detail} testID="transaction-reimbursements">
+              <Text tone="muted" variant="label">{role === 'expense' ? t('transactions.reimbursement.reimbursedBy') : t('transactions.reimbursement.reimburses')}</Text>
+              <View style={styles.splitLines}>
+                {item.reimbursements.map((link) => {
+                  const other = linkedSide(link, item.id)
+                  const name = linkedTitle(other) ?? t('transactions.unnamed')
+                  const when = other.transactionDate ? formatShortDate(other.transactionDate, locale) : null
+                  return (
+                    <View key={link.transactionReimbursementKey} style={styles.splitLine}>
+                      <Pressable
+                        accessibilityLabel={t('transactions.reimbursement.open', { name })}
+                        accessibilityRole="link"
+                        hitSlop={8}
+                        onPress={() => onOpenLinked(other)}
+                        style={({ pressed }) => [styles.linkTarget, pressed && styles.dimmed]}
+                      >
+                        <View style={styles.flex}>
+                          <Text style={styles.underlined} variant="meta">{name}</Text>
+                          {when || other.accountName ? <Text tone="muted" variant="label">{[when, other.accountName].filter(Boolean).join(' · ')}</Text> : null}
+                        </View>
+                        <Icon color={palette.mutedForeground} name="chevron-right" size={14} />
+                      </Pressable>
+                      <Amount currency={link.currencyCode} locale={locale} size="amountSmall" value={link.amount} />
+                      {editable && onUnlinkReimbursement ? (
+                        <UiButton
+                          accessibilityLabel={t('transactions.reimbursement.unlinkNamed', { name })}
+                          disabled={mutationPending || unlinkPending}
+                          label={t('transactions.reimbursement.unlink')}
+                          onPress={() => onUnlinkReimbursement(item, link)}
+                          size="sm"
+                          variant="ghost"
+                        />
+                      ) : null}
+                    </View>
+                  )
+                })}
+              </View>
+              {unlinkError ? <Text accessibilityRole="alert" tone="destructive" variant="meta">{unlinkError}</Text> : null}
+            </View>
+          ) : null}
           {item.tags.length > 0 ? (
             <View style={styles.detail}>
               <Text tone="muted" variant="label">{t('tags.title')}</Text>
@@ -930,13 +1514,19 @@ const TransactionRow = memo(function TransactionRow({
             </View>
           ) : null}
           {item.repayment ? <Detail label={t('transactions.repayment')} value={t('transactions.repaymentValue', { name: item.repayment.loanName, amount: formatAvailableMoney(item.repayment.spendingAmount, item.currency, locale, t, amountsHidden) })} /> : null}
+          {stored ? <TransactionAttachmentsSection readOnly={readOnly} transactionId={item.id} /> : null}
           {editable && canEditAmount && editing ? (
             <View style={styles.amountEdit}>
               <TextField
                 editable={!editing.amountSubmitting}
+                hint={amountExpressionHint}
                 keyboardType="numbers-and-punctuation"
                 label={t('transactions.editAmountInput')}
                 invalid={editing.amountInvalid}
+                onBlur={() => {
+                  const result = amountExpressionResult(editing.amountDraft, locale)
+                  if (result !== null) editing.onAmountChange(formatNumberInput(result, locale))
+                }}
                 onChangeText={editing.onAmountChange}
                 value={editing.amountDraft}
               />
@@ -969,6 +1559,25 @@ const TransactionRow = memo(function TransactionRow({
               ) : null}
               {editable && canEditTags ? (
                 <UiButton disabled={mutationPending} icon="tag" label={t('tags.edit')} onPress={() => onEditTags(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onSpentBy ? (
+                <UiButton disabled={mutationPending} icon="users" label={t('memberAttribution.spentBy')} onPress={() => onSpentBy(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {stored && item.installment && onOpenInstallmentPlan ? (
+                <UiButton disabled={mutationPending} icon="calendar" label={t('installments.viewPlan')} onPress={() => onOpenInstallmentPlan(item)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onCreateRule ? (
+                <UiButton disabled={mutationPending} icon="sliders-horizontal" label={t('rules.createFromTransaction')} onPress={() => onCreateRule(item)} size="sm" variant="secondary" />
+              ) : null}
+              {/* A shared row's split is the group's: it is edited from "Edit shares", never here. */}
+              {editable && canSplit && onSplit && !groupShare && canSplitTransaction(item) ? (
+                <UiButton disabled={mutationPending} icon="split" label={item.isSplit ? t('transactions.split.edit') : t('transactions.split.action')} onPress={() => onSplit(item.id)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onMarkReimbursement && !groupShare && canMarkAsReimbursement(item) ? (
+                <UiButton disabled={mutationPending} icon="link" label={t('transactions.reimbursement.action')} onPress={() => onMarkReimbursement(item)} size="sm" variant="secondary" />
+              ) : null}
+              {editable && onSplitWithGroup && (groupShare || canSplitWithGroup(item)) ? (
+                <UiButton disabled={mutationPending} icon="users" label={groupShare ? t('expenseGroups.split.editShares') : t('expenseGroups.split.action')} onPress={() => onSplitWithGroup(item)} size="sm" variant="secondary" />
               ) : null}
             </View>
           )}
@@ -1059,6 +1668,10 @@ const styles = StyleSheet.create({
   checkbox: { width: 20, height: 20, borderWidth: 1, borderRadius: themeTokens.radius.sm, alignItems: 'center', justifyContent: 'center' },
   details: { padding: themeTokens.spacing[4], borderRadius: themeTokens.radius.lg, marginBottom: themeTokens.spacing[3], gap: themeTokens.spacing[3] },
   detail: { gap: 2 },
+  splitLines: { gap: themeTokens.spacing[2] },
+  splitLine: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  linkTarget: { flex: 1, minHeight: themeTokens.touchTarget.minimum - themeTokens.spacing[4], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  underlined: { textDecorationLine: 'underline' },
   amountEdit: { width: '100%', gap: themeTokens.spacing[3] },
   inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
   empty: { width: '100%', alignItems: 'flex-start', paddingVertical: themeTokens.spacing[6], gap: themeTokens.spacing[2] },

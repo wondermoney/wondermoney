@@ -11,10 +11,20 @@ import {
   SectionEmpty,
 } from "@/components/ui/RuledSection";
 import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
-import useAccountsCashflow from "@/lib/api/account/useAccountsCashflow";
+import useAccountsCashflow, {
+  type AccountCashflow,
+} from "@/lib/api/account/useAccountsCashflow";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
-import { cashflowScale, formatMonthName } from "@/lib/home/month-overview";
+import {
+  cashflowScale,
+  formatMonthName,
+  monthComparisonRange,
+  type SavingsSummary,
+  savingsSummary,
+} from "@/lib/home/month-overview";
+import { type MemberFilter, memberKeysFor } from "@/lib/household/member-attribution";
 import { cn } from "@/lib/utils";
+import { formatPercentageForLocale } from "@/lib/utils/formatPercentage";
 
 const MONTHS_SHOWN = 6;
 
@@ -27,12 +37,177 @@ const isSameUtcMonth = (iso: string, today: Date) => {
   );
 };
 
+/** A signed number of percentage points, without the percent sign Intl adds. */
+const formatPoints = (points: number, locale: string) =>
+  new Intl.NumberFormat(locale, {
+    signDisplay: "exceptZero",
+    maximumFractionDigits: 1,
+  })
+    .format(points)
+    // U+2212, the minus every rendered figure uses, not Intl's hyphen-minus.
+    .replace("-", "\u2212");
+
+function SummaryChange({
+  delta,
+  currency,
+  goodWhenNegative,
+  vs,
+}: {
+  delta: number | null;
+  currency: string | undefined;
+  /** Spending is the case: a fall is the good direction. */
+  goodWhenNegative: boolean;
+  vs: string | null;
+}) {
+  const t = useTranslations("homeOverview.cashflow");
+  if (delta === null || vs === null) return null;
+
+  return (
+    <span className="text-muted-foreground text-xs">
+      {t.rich("change", {
+        amount: () => (
+          <Amount
+            value={delta}
+            currency={currency}
+            tone="delta"
+            toneValue={goodWhenNegative ? -delta : delta}
+            signed
+            className="font-mono"
+          />
+        ),
+        vs,
+      })}
+    </span>
+  );
+}
+
+function RateChange({
+  delta,
+  vs,
+  locale,
+}: {
+  delta: number | null;
+  vs: string | null;
+  locale: string;
+}) {
+  const t = useTranslations("homeOverview.cashflow");
+  if (delta === null || vs === null) return null;
+
+  const tone =
+    delta > 0
+      ? "text-success-text"
+      : delta < 0
+        ? "text-destructive-text"
+        : "text-muted-foreground";
+
+  return (
+    <span className="text-muted-foreground text-xs">
+      {t.rich("rate-change", {
+        points: () => (
+          <span className={cn("font-mono", tone)}>
+            {t("points", { points: formatPoints(delta, locale) })}
+          </span>
+        ),
+        vs,
+      })}
+    </span>
+  );
+}
+
+/**
+ * This month's income, spending and savings rate, each beside the same figure
+ * for the comparison period. While the month is running the comparison is the
+ * same number of days last month, so a part is never set against a whole.
+ */
+function ThisMonthSummary({
+  summary,
+  currency,
+  locale,
+}: {
+  summary: SavingsSummary;
+  currency: string | undefined;
+  locale: string;
+}) {
+  const t = useTranslations("homeOverview.cashflow");
+  const comparison = summary.comparison;
+  const vs = comparison
+    ? comparison.samePoint
+      ? t("vs-same-point")
+      : t("vs", { month: formatMonthName(comparison.month, locale) })
+    : null;
+
+  return (
+    <div className="border-border mb-6 border-b pb-4">
+      <h3 className="text-foreground mb-3 text-base font-medium">
+        {t("this-month")}
+      </h3>
+      <dl className="grid gap-4 sm:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <dt className="text-muted-foreground text-sm">{t("income")}</dt>
+          <dd className="text-foreground font-mono text-lg">
+            <Amount value={summary.income} currency={currency} />
+          </dd>
+          <dd>
+            <SummaryChange
+              delta={summary.incomeDelta}
+              currency={currency}
+              goodWhenNegative={false}
+              vs={vs}
+            />
+          </dd>
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <dt className="text-muted-foreground text-sm">{t("spending")}</dt>
+          <dd className="text-foreground font-mono text-lg">
+            <Amount value={summary.spending} currency={currency} />
+          </dd>
+          <dd>
+            <SummaryChange
+              delta={summary.spendingDelta}
+              currency={currency}
+              goodWhenNegative
+              vs={vs}
+            />
+          </dd>
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
+          <dt className="text-muted-foreground text-sm">{t("savings-rate")}</dt>
+          <dd className="text-foreground font-mono text-lg">
+            {summary.savingsRate === null
+              ? "—"
+              : formatPercentageForLocale(summary.savingsRate, locale, {
+                  maximumFractionDigits: 0,
+                })}
+          </dd>
+          <dd>
+            <RateChange
+              delta={summary.savingsRateDelta}
+              vs={vs}
+              locale={locale}
+            />
+          </dd>
+        </div>
+      </dl>
+      <p className="text-muted-foreground mt-3 max-w-prose text-sm">
+        {t("formula")}
+      </p>
+    </div>
+  );
+}
+
 /**
  * Net cash flow per month as bars diverging from one zero line, the current
  * month in the chart's lead colour and every other month neutral. Each bar
  * carries its signed figure, so direction never rests on colour or side alone.
+ * Above them, this month's income, spending and savings rate, each with its
+ * change from the comparison period.
  */
-export function CashflowSection() {
+export function CashflowSection({
+  member = null,
+}: {
+  /** One member's money in and out, or Shared's; null for the household's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.cashflow");
   const locale = useLocale();
   const today = useMemo(() => new Date(), []);
@@ -41,9 +216,29 @@ export function CashflowSection() {
       new Date(today.getFullYear(), today.getMonth() - (MONTHS_SHOWN - 1), 1),
     [today],
   );
-  const { data, isPending, error, refetch } = useAccountsCashflow({ fromDate });
+  const comparisonRange = useMemo(() => monthComparisonRange(today), [today]);
+  // The current month is month-to-date: bound the read at today, so a
+  // future-dated row cannot make the summary claim more than has happened.
+  const memberKeys = memberKeysFor(member);
+  const { data, isPending, error, refetch } = useAccountsCashflow({
+    fromDate,
+    toDate: today,
+    ...(memberKeys ? { memberKeys } : {}),
+  });
+  // The same-point comparison is a second, bounded read of the same endpoint,
+  // and only worth making when this month has a row to compare.
+  const hasCurrentMonth =
+    data?.cashflow.some((row) => isSameUtcMonth(row.date, today)) ?? false;
+  const comparison = useAccountsCashflow(
+    {
+      fromDate: comparisonRange.from,
+      toDate: comparisonRange.to,
+      ...(memberKeys ? { memberKeys } : {}),
+    },
+    { enabled: hasCurrentMonth },
+  );
   // The cash flow is summed in the user's currency, which net worth reports.
-  const { data: netWorthData } = useNetWorth();
+  const { data: netWorthData } = useNetWorth(undefined, member);
   const currency = netWorthData?.netWorth.currencyCode;
 
   if (isPending) {
@@ -72,11 +267,27 @@ export function CashflowSection() {
     );
   }
 
+  const currentRow: AccountCashflow | undefined = data.cashflow.find((row) =>
+    isSameUtcMonth(row.date, today),
+  );
+  const summary = savingsSummary(
+    currentRow,
+    comparison.data?.cashflow[0],
+    comparisonRange,
+  );
+
   const monthLabel = (iso: string) =>
     formatMonthName(new Date(iso), locale, { short: true, utc: true });
 
   return (
     <Section id="cashflow-heading" title={t("title")}>
+      {summary ? (
+        <ThisMonthSummary
+          summary={summary}
+          currency={currency}
+          locale={locale}
+        />
+      ) : null}
       <ul
         aria-label={t("list-label", {
           from: monthLabel(scale.bars[0].date),

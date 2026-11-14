@@ -17,6 +17,9 @@ export default defineConfig({
   adapter: vercel(),
   site: "https://wonder.money",
   trailingSlash: "never",
+  // Astro 7 defaults to "jsx", which drops whitespace between inline elements the way React
+  // does; the copy relies on HTML whitespace (`<strong>x</strong> y`), so keep HTML rules.
+  compressHTML: true,
   i18n: {
     locales,
     defaultLocale,
@@ -53,6 +56,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     resolve: {
+      // Bundle Astro's own runtime dependencies whose version differs from the one the hoisted
+      // install puts at the root (other workspaces want cookie 0.x and html-escaper 2.x). Left
+      // external, the server and prerender bundles resolve them from the root and load the
+      // wrong major. Top-level `resolve` reaches every server environment; `ssr` only one.
+      noExternal: ["cookie", "html-escaper"],
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },

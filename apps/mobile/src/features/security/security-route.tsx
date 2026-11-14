@@ -6,10 +6,11 @@ import { useTranslation } from 'react-i18next'
 import { useAppLock } from '@/components/providers/app-lock-provider'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { useProfile } from '@/features/self/use-self-resource'
-import { useConfirmedFeature } from '@/lib/server/use-instance'
+import { useConfirmedFeature, usePasskeyAvailable } from '@/lib/server/use-instance'
 
 import type { AppLockFailure } from './app-lock-section'
 import type { DataExportFailure } from './data-export-section'
+import type { PasskeysNotice } from './passkeys-section'
 import type { MfaSecuritySectionStatus } from './mfa-security-section'
 import type { PasswordChangeFailure } from './password-change-section'
 import { SecurityScreen } from './security-screen'
@@ -19,6 +20,7 @@ import { classifyDeleteAccountFailure, useDeleteAccount, type DeleteAccountFailu
 import { useMfaEnrollment } from './use-mfa-enrollment'
 import { useMfaFactorStatus } from './use-mfa-factor-status'
 import { useMfaUnenroll } from './use-mfa-unenroll'
+import { useAddPasskey, useDeletePasskey, usePasskeys } from './use-passkeys'
 
 export function SecurityRoute() {
   const mutation = useDeleteAccount()
@@ -46,6 +48,15 @@ export function SecurityRoute() {
   const [exportFailure, setExportFailure] = useState<DataExportFailure | null>(null)
   const latest = latestExport.data ?? null
   const exportReady = latest?.status === 'ready' && latest.downloadUrl !== null
+
+  // Passkeys are listed wherever the server has them; one can be added only where the phone will
+  // hand this app the server's passkeys (its hostname is in the build's associated domains).
+  const serverPasskeys = useConfirmedFeature((features) => features.passkey)
+  const canAddPasskey = usePasskeyAvailable()
+  const passkeys = usePasskeys({ enabled: serverPasskeys })
+  const addPasskey = useAddPasskey()
+  const deletePasskey = useDeletePasskey()
+  const [passkeyNotice, setPasskeyNotice] = useState<PasskeysNotice | null>(null)
 
   // A deletion in flight must not be interrupted by a back gesture.
   usePreventRemove(mutation.isPending)
@@ -85,6 +96,29 @@ export function SecurityRoute() {
           setOutcome(classifyDeleteAccountFailure(error))
         }
       }}
+      passkeys={serverPasskeys ? {
+        status: passkeys.isLoading ? 'loading' : passkeys.isError ? 'error' : 'ready',
+        passkeys: passkeys.data ?? [],
+        canAdd: canAddPasskey,
+        adding: addPasskey.isPending,
+        deletingId: deletePasskey.isPending ? (deletePasskey.variables ?? null) : null,
+        notice: passkeyNotice,
+        locale: i18n.language,
+        onRetry: () => { void passkeys.refetch() },
+        onAdd: async () => {
+          setPasskeyNotice(null)
+          const result = await addPasskey.mutateAsync()
+          if (result.status === 'added') setPasskeyNotice('added')
+          else if (result.status === 'session-not-fresh') setPasskeyNotice('session-not-fresh')
+          else if (result.status === 'unavailable') setPasskeyNotice('add-failed')
+          // A closed prompt says nothing.
+        },
+        onDelete: async (id) => {
+          setPasskeyNotice(null)
+          const result = await deletePasskey.mutateAsync(id)
+          setPasskeyNotice(result.status === 'deleted' ? 'deleted' : 'delete-failed')
+        },
+      } : null}
       mfa={{
         status: mfaStatus,
         enrollment: pendingEnrollment ? { secret: pendingEnrollment.totp.secret, uri: pendingEnrollment.totp.uri } : null,

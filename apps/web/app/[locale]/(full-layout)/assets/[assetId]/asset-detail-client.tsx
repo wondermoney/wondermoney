@@ -6,6 +6,7 @@ import { type ReactNode, useState } from "react";
 import { toast } from "sonner";
 
 import ConfirmAssetAction from "@/components/manual-asset/ConfirmAssetAction";
+import CryptoWalletSection from "@/components/manual-asset/CryptoWalletSection";
 import ManualAssetFormDrawer from "@/components/manual-asset/ManualAssetFormDrawer";
 import ManualAssetValueChart from "@/components/manual-asset/ManualAssetValueChart";
 import ValuationDrawer from "@/components/manual-asset/ValuationDrawer";
@@ -15,14 +16,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   API_ERROR_CODE,
   getApiErrorCode,
   getApiErrorMessage,
   isDemoReadOnlyError,
 } from "@/lib/api/errors";
-import type { ManualAssetValuation } from "@/lib/api/manual-asset/types";
+import { useCryptoWalletChains } from "@/lib/api/instance/useInstance";
+import type {
+  ManualAsset,
+  ManualAssetValuation,
+} from "@/lib/api/manual-asset/types";
+import { useSyncCryptoWallet } from "@/lib/api/manual-asset/useCryptoWalletMutations";
 import useManualAsset from "@/lib/api/manual-asset/useManualAsset";
 import {
   useDeleteManualAsset,
@@ -34,10 +40,14 @@ import {
   changeSincePurchase,
   isEstimated,
 } from "@/lib/manual-assets/asset-view";
+import {
+  isCryptoWallet,
+  walletErrorKey,
+} from "@/lib/manual-assets/crypto-wallet";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div className="border-border flex justify-between gap-6 border-b py-2 text-sm">
       <dt className="text-muted-foreground shrink-0">{label}</dt>
@@ -46,13 +56,131 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+/**
+ * What the asset is worth less what is still owed on the reader's loans secured
+ * against it. Debt in another currency counts only once converted: with a loan the
+ * API has no rate for, there is no total and no equity, and the page says why
+ * rather than adding amounts in different currencies.
+ */
+function AssetEquity({ asset }: { asset: ManualAsset }) {
+  const t = useTranslations("assets");
+  const { linkedDebt, equity } = asset;
+
+  return (
+    <Section id="asset-equity-heading" title={t("detail.equity.title")}>
+      <dl>
+        <Fact label={t("detail.equity.value")}>
+          <Amount
+            value={asset.value}
+            currency={asset.currency}
+            className="font-mono"
+          />
+        </Fact>
+        <Fact label={t("detail.equity.linkedDebt")}>
+          <Amount
+            value={linkedDebt}
+            currency={asset.currency}
+            className="font-mono"
+          />
+        </Fact>
+        <Fact label={t("detail.equity.equity")}>
+          {/* Only a negative equity is exceptional; its minus sign and the
+              note below carry it as well as the colour. */}
+          <Amount
+            value={equity}
+            currency={asset.currency}
+            tone="threshold"
+            className="font-mono font-semibold"
+          />
+        </Fact>
+      </dl>
+      {linkedDebt === null ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.noRate", {
+            currencies: asset.unconvertedLoanCurrencies.join(", "),
+            currency: asset.currency,
+          })}
+        </p>
+      ) : asset.value === null ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.archived")}
+        </p>
+      ) : equity !== null && equity < 0 ? (
+        <p role="note" className="text-muted-foreground mt-3 text-sm">
+          {t("detail.equity.underwater")}
+        </p>
+      ) : null}
+
+      <h3 className="text-foreground mt-6 text-sm font-medium">
+        {t("detail.equity.loans")}
+      </h3>
+      <dl>
+        {asset.linkedLoans.map((loan) => (
+          <Fact
+            key={loan.loanKey}
+            label={
+              <Link
+                href={`/loans/${loan.loanKey}`}
+                className="text-primary font-medium underline-offset-4 hover:underline focus-visible:underline"
+              >
+                {loan.name}
+              </Link>
+            }
+          >
+            <span className="flex flex-col items-end">
+              <Amount
+                value={loan.outstandingPrincipal}
+                currency={loan.currency}
+                className="font-mono"
+              />
+              {loan.currency !== asset.currency &&
+              loan.outstandingPrincipalInAssetCurrency !== null ? (
+                <span className="text-muted-foreground text-xs">
+                  {t.rich("detail.equity.converted", {
+                    amount: () => (
+                      <Amount
+                        value={loan.outstandingPrincipalInAssetCurrency}
+                        currency={asset.currency}
+                        className="font-mono"
+                      />
+                    ),
+                  })}
+                </span>
+              ) : null}
+            </span>
+          </Fact>
+        ))}
+      </dl>
+    </Section>
+  );
+}
+
+/** How often, and for how long after "Sync now", a wallet's page looks for new balances. */
+const SYNC_POLL_MS = 5_000;
+const SYNC_WATCH_MS = 120_000;
+
 export default function AssetDetailClient({ assetId }: { assetId: string }) {
   const t = useTranslations("assets");
   const tCommon = useTranslations();
   const router = useRouter();
   const formatShortDate = useFormatShortDate();
   const formatPercentage = useFormatPercentage();
-  const { data, isPending, isError } = useManualAsset(assetId);
+  // A wallet reads its balances in the background: while an address waits for
+  // its first read, or just after "Sync now", look again every few seconds.
+  const [syncRequestedAt, setSyncRequestedAt] = useState<number | null>(null);
+  const { data, isPending, isError } = useManualAsset(assetId, {
+    refetchInterval: (query) => {
+      const wallet = query.state.data?.wallet;
+      if (!wallet) return false;
+      const waiting =
+        wallet.addresses.some((address) => address.status === "pending") ||
+        (syncRequestedAt !== null &&
+          Date.now() - syncRequestedAt < SYNC_WATCH_MS);
+      return waiting ? SYNC_POLL_MS : false;
+    },
+  });
+  const walletChains = useCryptoWalletChains();
+  const syncMutation = useSyncCryptoWallet();
   const updateMutation = useUpdateManualAsset();
   const deleteMutation = useDeleteManualAsset();
   const deleteValuationMutation = useDeleteValuation();
@@ -99,6 +227,9 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
     );
 
   const { asset, valuations, history } = data;
+  const wallet = data.wallet ?? null;
+  // A wallet's value comes from its balances: no valuation is typed or edited.
+  const isWallet = isCryptoWallet(asset);
   const day = (iso: string) =>
     formatShortDate(calendarDay(iso), { alwaysShowYear: true });
   const change = changeSincePurchase(asset);
@@ -117,11 +248,24 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
       });
       return;
     }
+    const walletKey = walletErrorKey(error);
     toast.error(
       getApiErrorCode(error) === API_ERROR_CODE.MANUAL_ASSET_LAST_VALUATION
         ? t("detail.valuations.lastOne")
-        : (getApiErrorMessage(error) ?? tCommon("server-error")),
+        : walletKey
+          ? t(`wallet.errors.${walletKey}`)
+          : (getApiErrorMessage(error) ?? tCommon("server-error")),
     );
+  };
+
+  const syncNow = async () => {
+    try {
+      await syncMutation.mutateAsync(asset.manualAssetKey);
+      setSyncRequestedAt(Date.now());
+      toast.success(t("wallet.syncQueued"));
+    } catch (error) {
+      fail(error);
+    }
   };
 
   const setArchived = async (archived: boolean) => {
@@ -200,10 +344,19 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
           : {})}
         actions={
           <>
-            {!asset.archived && (
+            {!asset.archived && !isWallet && (
               <Button onClick={() => openValuation(null)}>
                 <RefreshCw className="size-4" />
                 {t("actions.updateValue")}
+              </Button>
+            )}
+            {!asset.archived && isWallet && (
+              <Button
+                onClick={() => void syncNow()}
+                loading={syncMutation.isPending}
+              >
+                <RefreshCw className="size-4" />
+                {t("wallet.actions.syncNow")}
               </Button>
             )}
             <Button variant="secondary" onClick={() => setEditOpen(true)}>
@@ -218,6 +371,21 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
             {t("detail.estimated", { date: day(asset.lastValuation.date) })}
           </p>
         ) : null}
+        {isWallet && !asset.archived && asset.value === null ? (
+          <p className="text-muted-foreground text-sm">
+            {t("wallet.detail.noValueYet")}
+          </p>
+        ) : null}
+        {isWallet && wallet?.lastSyncedAt ? (
+          <p className="text-muted-foreground text-sm">
+            {t("wallet.detail.lastSynced", {
+              date: formatShortDate(wallet.lastSyncedAt, {
+                alwaysShowYear: true,
+                withTime: true,
+              }),
+            })}
+          </p>
+        ) : null}
         {!asset.archived &&
         inOtherCurrency &&
         asset.value !== null &&
@@ -230,6 +398,16 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
           </p>
         ) : null}
       </ObjectHeader>
+
+      {isWallet && wallet && (
+        <CryptoWalletSection
+          asset={asset}
+          wallet={wallet}
+          chains={walletChains}
+        />
+      )}
+
+      {asset.linkedLoans.length > 0 && <AssetEquity asset={asset} />}
 
       {history.length > 1 && (
         <Section id="asset-history-heading" title={t("detail.history.title")}>
@@ -286,13 +464,15 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
                       {valuation.note ?? ""}
                     </td>
                     <td className="py-2 text-right whitespace-nowrap">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openValuation(valuation)}
-                      >
-                        {t("detail.valuations.edit")}
-                      </Button>
+                      {!isWallet && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openValuation(valuation)}
+                        >
+                          {t("detail.valuations.edit")}
+                        </Button>
+                      )}
                       {valuations.length > 1 && (
                         <Button
                           variant="ghost"
@@ -310,6 +490,11 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
               </tbody>
             </table>
           </div>
+          {isWallet && valuations.length === 0 ? (
+            <p className="text-muted-foreground mt-3 text-sm">
+              {t("wallet.detail.noValuations")}
+            </p>
+          ) : null}
         </Section>
 
         <Section id="asset-facts-heading" title={t("detail.facts.title")}>
@@ -457,15 +642,17 @@ export default function AssetDetailClient({ assetId }: { assetId: string }) {
         onOpenChange={setEditOpen}
         asset={asset}
       />
-      <ValuationDrawer
-        open={valuationOpen}
-        onOpenChange={(open) => {
-          setValuationOpen(open);
-          if (!open) setEditingValuation(null);
-        }}
-        asset={asset}
-        valuation={editingValuation}
-      />
+      {!isWallet && (
+        <ValuationDrawer
+          open={valuationOpen}
+          onOpenChange={(open) => {
+            setValuationOpen(open);
+            if (!open) setEditingValuation(null);
+          }}
+          asset={asset}
+          valuation={editingValuation}
+        />
+      )}
     </div>
   );
 }

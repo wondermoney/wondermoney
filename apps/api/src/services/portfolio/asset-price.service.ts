@@ -1,48 +1,127 @@
 import { subDays } from 'date-fns';
-import { sql } from 'kysely';
 
 import { DI } from '@app/database/di';
-import { sqlQuery, toDate } from '@app/database/sql';
+import { anyOf, sqlQuery, toDate } from '@app/database/sql';
+import { isMarketDataProviderId, type MarketDataProviderId } from '@config/market-data-providers';
 import { FinancialAsset } from '@entity/FinancialAsset';
 import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
+import { marketData } from '@service/market-data/registry';
 
-import eodhdClient from '../market-data/eodhd.service';
+export interface EffectivePrice {
+  date: Date;
+  price: number;
+  /** For a market price, the provider that supplied it when recorded; null for a manual price. */
+  provider?: MarketDataProviderId | null;
+  source: 'manual' | 'market';
+}
+
+/** `numeric` comes back as a number (`connectDatabase` installs that parser). */
+interface PriceRow {
+  date: Date | string;
+  financial_asset_key: number;
+  price: number;
+  source?: null | string;
+}
+
+/** The provider recorded on a stored price, when it is one this server knows. */
+export const priceProvider = (source: unknown): MarketDataProviderId | null => (isMarketDataProviderId(source) ? source : null);
+
+/** `YYYY-MM-DD` of a stored price date, in UTC. */
+export const priceDay = (date: Date | string): string => toDate(date).toISOString().slice(0, 10);
 
 /**
- * Service for managing asset prices and EODHD API integration
+ * The newer of a market price and a household override for the same asset. Days are compared,
+ * not instants: a market quote is stamped with its trading time and an override with 00:00 UTC,
+ * and on the same day the override wins.
+ */
+export function pickNewerPrice(market: EffectivePrice | undefined, override: EffectivePrice | undefined): EffectivePrice | undefined {
+  if (!override) return market;
+  if (!market) return override;
+  return priceDay(override.date) >= priceDay(market.date) ? override : market;
+}
+
+function mergePrices(marketRows: readonly PriceRow[], overrideRows: readonly PriceRow[]): Map<number, EffectivePrice> {
+  const toPrice = (row: PriceRow, source: EffectivePrice['source']): EffectivePrice => ({
+    date: toDate(row.date),
+    price: row.price,
+    provider: source === 'market' ? priceProvider(row.source) : null,
+    source,
+  });
+  const merged = new Map<number, EffectivePrice>(marketRows.map((row) => [row.financial_asset_key, toPrice(row, 'market')]));
+  for (const row of overrideRows) {
+    const assetKey = row.financial_asset_key;
+    const newer = pickNewerPrice(merged.get(assetKey), toPrice(row, 'manual'));
+    if (newer) merged.set(assetKey, newer);
+  }
+  return merged;
+}
+
+/**
+ * Stored asset prices, and fetching new ones through the market-data registry.
  */
 class AssetPriceService {
-  private eodhd = eodhdClient;
 
   /**
-   * Get current asset prices from database
-   * @returns Array of asset prices with latest dates
+   * The current price of every priced asset: the latest market price, or for `tenantKey` the
+   * newer of that and the household's latest live override (`pickNewerPrice`).
    */
-  async getCurrentAssetPrices(): Promise<
+  async getCurrentAssetPrices(tenantKey?: number): Promise<
     {
       date: Date;
       financial_asset_key: number;
       price: number;
     }[]
   > {
-    const prices = await sqlQuery(DI.em)
-      .with('latest_prices', (db) =>
-        db
-          .selectFrom('financial_asset_price')
-          .select(['financial_asset_key', sql<Date | string>`MAX(date)`.as('date')])
-          .groupBy('financial_asset_key'))
+    const marketPrices = (await sqlQuery(DI.em)
       .selectFrom('financial_asset_price')
-      .innerJoin('latest_prices', (join) =>
-        join
-          .onRef('financial_asset_price.financial_asset_key', '=', 'latest_prices.financial_asset_key')
-          .onRef('financial_asset_price.date', '=', 'latest_prices.date'))
-      .select(['latest_prices.financial_asset_key', 'latest_prices.date', 'financial_asset_price.price'])
-      .execute();
-    return prices.map((row) => ({
-      date: toDate(row.date),
-      financial_asset_key: row.financial_asset_key as number,
-      price: row.price as number,
+      .distinctOn('financial_asset_key')
+      .select(['financial_asset_key', 'date', 'price'])
+      .orderBy('financial_asset_key')
+      .orderBy('date', 'desc')
+      .execute()) as PriceRow[];
+    const overrides = tenantKey === undefined ? [] : await this.latestOverrides(tenantKey);
+    return [...mergePrices(marketPrices, overrides).entries()].map(([financialAssetKey, price]) => ({
+      date: price.date,
+      financial_asset_key: financialAssetKey,
+      price: price.price,
     }));
+  }
+
+  /**
+   * Each asset's price as it stood at `through` (inclusive): the latest market price on or before
+   * it, or for `tenantKey` the newer of that and the household's latest live override on or before
+   * it. Assets with neither are absent.
+   */
+  async getPricesAsOf(assetKeys: readonly number[], through: Date, tenantKey?: number): Promise<Map<number, EffectivePrice>> {
+    const uniqueKeys = [...new Set(assetKeys)];
+    if (uniqueKeys.length === 0) return new Map();
+    const marketPrices = (await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price')
+      .distinctOn('financial_asset_key')
+      .select(['financial_asset_key', 'date', 'price', 'source'])
+      .where(anyOf('financial_asset_key', uniqueKeys))
+      .where('date', '<=', through)
+      .orderBy('financial_asset_key')
+      .orderBy('date', 'desc')
+      .execute()) as PriceRow[];
+    const overrides = tenantKey === undefined ? [] : await this.latestOverrides(tenantKey, uniqueKeys, through);
+    return mergePrices(marketPrices, overrides);
+  }
+
+  /** The household's latest live override per asset, optionally limited to assets and a date. */
+  private async latestOverrides(tenantKey: number, assetKeys?: readonly number[], through?: Date): Promise<PriceRow[]> {
+    // Raw SQL bypasses the tenant filter: the tenant and soft-delete predicates are explicit.
+    return (await sqlQuery(DI.em)
+      .selectFrom('financial_asset_price_override')
+      .distinctOn('financial_asset_key')
+      .select(['financial_asset_key', 'date', 'price'])
+      .where('tenant_key', '=', tenantKey)
+      .where('deleted_at', 'is', null)
+      .$if(assetKeys !== undefined, (query) => query.where(anyOf('financial_asset_key', assetKeys ?? [])))
+      .$if(through !== undefined, (query) => query.where('date', '<=', through))
+      .orderBy('financial_asset_key')
+      .orderBy('date', 'desc')
+      .execute()) as PriceRow[];
   }
 
   /**
@@ -77,17 +156,18 @@ class AssetPriceService {
   }
 
   /**
-   * Fetch and save asset price from EODHD API.
+   * Fetch the asset's latest price from the market-data registry and save it, with the provider
+   * that supplied it as its `source`.
    * Returns null (rather than persisting a NULL price, which violates the not-null constraint)
-   * when the provider has no usable price/timestamp for the symbol.
+   * when no provider has a usable price/timestamp for the symbol.
    * @param financialAsset - Financial asset entity
    * @returns Saved asset price entity, or null when the provider returned no usable price
    */
   async fetchAndSaveAssetPrice(financialAsset: FinancialAsset): Promise<FinancialAssetPrice | null> {
-    const quote = await this.eodhd.getQuote(financialAsset.symbol);
-    // EODHD's declared type promises `close`/`timestamp`/`volume` are always numbers, but the
-    // live API can still omit or null them for thinly-traded/delisted symbols — widen to `unknown`
-    // so these defensive checks are real guards rather than lint-flagged dead conditions.
+    const { provider, value: quote } = await marketData().quote(financialAsset.symbol);
+    // A provider can omit or null `close`/`timestamp`/`volume` for thinly-traded or delisted
+    // symbols (EODHD's own types claim they are always numbers) — widen to `unknown` so these
+    // defensive checks are real guards rather than lint-flagged dead conditions.
     const close: unknown = quote.close;
     const timestamp: unknown = quote.timestamp;
     const volume: unknown = quote.volume;
@@ -102,12 +182,13 @@ class AssetPriceService {
       date: new Date(Number(timestamp) * 1000),
       financialAssetKey: financialAsset,
       price,
+      source: provider,
       volume: Number.isFinite(Number(volume)) ? Number(volume) : 0,
     });
   }
 
   /**
-   * Ensure asset has recent price, fetching from EODHD if needed
+   * Ensure asset has recent price, fetching from the market-data providers if needed
    * @param financialAsset - Financial asset entity
    * @param daysThreshold - Number of days to consider "recent"
    */
@@ -151,7 +232,7 @@ class AssetPriceService {
     }));
   }
   /**
-   * Fetch historical prices for an index/benchmark from EODHD
+   * Fetch historical prices for an index/benchmark from the market-data providers
    * @param symbol - Index symbol (e.g., '^GSPC' for S&P 500)
    * @param from - Start date (yyyy-MM-dd)
    * @param to - End date (yyyy-MM-dd)
@@ -163,11 +244,9 @@ class AssetPriceService {
     to: string,
   ): Promise<{ date: string; value: number }[]> {
     try {
-      // EODHD indices use a `.INDX` suffix (e.g. GSPC.INDX for the S&P 500) rather
-      // than the caret prefix (^GSPC) callers of this method pass; translate at the
-      // boundary rather than pushing this knowledge up into every caller.
-      const eodhdSymbol = symbol.startsWith('^') ? `${symbol.slice(1)}.INDX` : symbol;
-      const rows = await this.eodhd.getEndOfDayPrices(eodhdSymbol, { from, to });
+      // The caret form (^GSPC) is the registry's index symbol; each provider translates it to
+      // its own (EODHD's GSPC.INDX, Stooq's ^spx).
+      const { value: rows } = await marketData().dailyHistory(symbol, { from, to });
       return rows
         .filter((row) => typeof row.date === 'string' && typeof row.close === 'number')
         .map((row) => ({ date: row.date, value: row.close }))

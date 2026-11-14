@@ -2,6 +2,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core';
 
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
+import { AccountType } from '@entity/AccountType';
 import { Currency } from '@entity/Currency';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -28,6 +29,8 @@ export interface CreateInitialEnableBankingAccountsResult {
 
 export interface EnableBankingSessionAccount {
   account_id?: { iban?: string };
+  /** ISO 20022 cash account type; `CARD` marks a credit card. */
+  cash_account_type?: string;
   currency?: string;
   name?: string;
   uid?: string;
@@ -133,7 +136,14 @@ export async function createInitialEnableBankingAccounts(
     account.currencyKey = currency;
     account.accountFinancialInstitutionKey = institution;
     account.enableBankingConnectionKey = connection;
+    if (connection.bankConnectionKey) account.bankConnectionKey = connection.bankConnectionKey;
     account.tenantKey = tenantKey;
+    // Enable Banking reports the ISO 20022 cash account type here, and only here: the session
+    // response is the one place it hands back account identity. `CARD` is a credit card.
+    if (sessionAccount.cash_account_type === 'CARD') {
+      const creditCardType = await em.findOne(AccountType, { description: 'CREDIT_CARD' });
+      if (creditCardType) account.accountTypeKey = creditCardType;
+    }
     if (existingDeleted) existingDeleted.deletedAt = undefined;
 
     try {
@@ -144,9 +154,11 @@ export async function createInitialEnableBankingAccounts(
       if (!reloaded) throw error;
       reloaded.accountName = account.accountName;
       reloaded.accountNumber = account.accountNumber;
+      reloaded.accountTypeKey = account.accountTypeKey;
       reloaded.currencyKey = account.currencyKey;
       reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
       reloaded.enableBankingConnectionKey = account.enableBankingConnectionKey;
+      reloaded.bankConnectionKey = account.bankConnectionKey;
       reloaded.tenantKey = account.tenantKey;
       await em.persist(reloaded).flush();
       accounts.push(reloaded);

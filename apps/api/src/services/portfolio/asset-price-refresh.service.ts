@@ -46,7 +46,7 @@ class AssetPriceRefreshService {
 
     const assets = await em.find(FinancialAsset, { deletedAt: undefined, isActivelyTrading: true });
     // Skip assets that already have a fresh price so steady-state runs only fetch what changed,
-    // keeping the EODHD call count (and DB write load) proportional to staleness, not catalog size.
+    // keeping the provider call count (and DB write load) proportional to staleness, not catalog size.
     const recentlyPricedKeys = await priceService.getRecentlyPricedAssetKeys(recentPriceDays);
     const stale = assets.filter((asset) => !recentlyPricedKeys.has(asset.financialAssetKey));
 

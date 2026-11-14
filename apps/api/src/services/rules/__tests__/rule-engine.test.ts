@@ -349,6 +349,13 @@ describe('evaluateRules', () => {
       expect(result.changes.hidden).toBeUndefined();
     });
 
+    it('acts on a private account shared with the rule\'s owner only when they may edit it', () => {
+      const partners = rule([netflix], [setCategory(1)], { ownerAppuserKey: PARTNER });
+
+      expect(evaluateRules([partners], facts({ account: { ...ownersPrivate, writerAppuserKeys: [PARTNER] } })).matchedRuleKeys).toEqual([partners.ruleKey]);
+      expect(evaluateRules([partners], facts({ account: { ...ownersPrivate, writerAppuserKeys: [] } })).matchedRuleKeys).toEqual([]);
+    });
+
     it('does not let a rule nobody owns any more touch a private account', () => {
       const orphan = rule([netflix], [setCategory(1)], { ownerAppuserKey: null });
       expect(evaluateRules([orphan], facts({ account: ownersPrivate })).matchedRuleKeys).toEqual([]);

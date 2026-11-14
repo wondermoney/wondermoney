@@ -73,6 +73,15 @@ describe('BudgetAccountsScreen', () => {
     expect(view.getByText('No accounts are available to link')).toBeOnTheScreen()
   })
 
+  it('says why private accounts are missing when a household budget leaves them out', async () => {
+    const i18n = await initMobileI18n('en')
+    const hidden = (await renderScreen({ privateAccountsHidden: true })).view
+    expect(hidden.getByText(i18n.t('budgetAccounts.privateHidden'))).toBeOnTheScreen()
+    hidden.unmount()
+    const shown = (await renderScreen()).view
+    expect(shown.queryByText(i18n.t('budgetAccounts.privateHidden'))).not.toBeOnTheScreen()
+  })
+
   it.each(['loading', 'error'] as const)('handles the %s state', async (status) => {
     const view = (await renderScreen({ status })).view
     expect(view.toJSON()).not.toBeNull()

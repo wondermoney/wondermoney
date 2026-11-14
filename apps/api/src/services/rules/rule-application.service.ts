@@ -2,6 +2,8 @@ import type { EntityManager as CoreEntityManager, FilterQuery } from '@mikro-orm
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
+import type { Account } from '@entity/Account';
+import { AccountShareAccess } from '@entity/AccountShare';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
 import type { Category } from '@entity/Category';
@@ -11,6 +13,7 @@ import { Tenant } from '@entity/Tenant';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
+import { writableAccountWhere } from '@service/account/account-access';
 import { linkTags } from '@service/tag/tag.service';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
@@ -39,7 +42,7 @@ import { ruleActionsSchema, ruleConditionsSchema, ruleMatchSchema } from './rule
 type AuditChanges = Record<string, { from: unknown; to: unknown }>;
 
 /** Relations `toTransactionFacts` reads. */
-export const TRANSACTION_FACTS_POPULATE = ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'transactionMerchantKey', 'transactionTags', 'transactionTypeKey'] as const;
+export const TRANSACTION_FACTS_POPULATE = ['accountKey', 'accountKey.shares', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'transactionMerchantKey', 'transactionTags', 'transactionTypeKey'] as const;
 
 /**
  * The household's active rules, as the engine reads them. A stored rule whose conditions or
@@ -86,11 +89,17 @@ function toEvaluableRules(rules: Rule[], tenantKey: number): EvaluableRule[] {
   });
 }
 
+/** The members a private account is shared with for `write`, when its shares are loaded. */
+function writeSharesOf(account: Account): number[] {
+  if (!account.shares.isInitialized()) return [];
+  return account.shares.getItems().filter((share) => share.access === AccountShareAccess.WRITE && !share.deletedAt).map((share) => share.appuserKey.appuserKey);
+}
+
 /** A transaction loaded with {@link TRANSACTION_FACTS_POPULATE}, as the engine reads it. */
 export function toTransactionFacts(transaction: Transaction, tenantKey: number): TransactionFacts {
   const account = transaction.accountKey;
   return {
-    account: account ? { accountKey: account.accountKey, isPrivate: account.isPrivate, ownerAppuserKey: account.accountOwnerAppuserKey?.appuserKey ?? null } : null,
+    account: account ? { accountKey: account.accountKey, isPrivate: account.isPrivate, ownerAppuserKey: account.accountOwnerAppuserKey?.appuserKey ?? null, writerAppuserKeys: writeSharesOf(account) } : null,
     amount: transaction.settlementAmount ?? null,
     categoryKey: currentCategory(transaction)?.categoryKey ?? null,
     currency: transaction.settlementCurrencyKey?.code ?? null,
@@ -163,12 +172,12 @@ export interface RuleBatchResult {
 }
 
 /**
- * The household's live transactions the viewer can see, hidden ones included: the rows a rule
- * run goes through.
+ * The household's live transactions the viewer can change, hidden ones included: the rows a rule
+ * run goes through. A row on an account they may only view is left alone.
  */
 export function ruleRunTransactionsWhere(em: EntityManager, tenantKey: number, viewerAppuserKey: number): FilterQuery<Transaction> {
   return {
-    $or: [{ accountKey: null }, { accountKey: { isPrivate: false } }, { accountKey: { accountOwnerAppuserKey: getRef(em, Appuser, viewerAppuserKey) } }],
+    $or: [{ accountKey: null }, { accountKey: writableAccountWhere(viewerAppuserKey) }],
     deletedAt: null,
     tenantKey: getRef(em, Tenant, tenantKey),
   };

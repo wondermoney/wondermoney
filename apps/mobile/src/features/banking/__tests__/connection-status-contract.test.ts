@@ -4,6 +4,7 @@ import {
   connectionStatusSchema,
   createBankConnectionsEndpoint,
   createDisconnectBankConnectionEndpoint,
+  isSameBankConnection,
   isValidBankConnectionId,
 } from '../connection-status-contract'
 
@@ -33,6 +34,13 @@ describe('banking connection-status contract', () => {
     expect(bankConnectionSchema.safeParse({ ...newConnection, daysUntilExpiry: -1 }).success).toBe(false)
   })
 
+  it("reads a SimpleFIN row's account names, and a row from an API that sends none", () => {
+    const simplefin = { ...newConnection, provider: 'SimpleFIN', accounts: [{ accountKey: 3, accountName: 'Everyday checking' }, { accountKey: 4, accountName: null }] }
+    expect(bankConnectionSchema.parse(simplefin).accounts).toEqual([{ accountKey: 3, accountName: 'Everyday checking' }, { accountKey: 4, accountName: null }])
+    expect(bankConnectionSchema.parse({ ...newConnection, provider: 'SimpleFIN' }).accounts).toBeUndefined()
+    expect(bankConnectionSchema.safeParse({ ...simplefin, accounts: [{ accountKey: 0, accountName: 'x' }] }).success).toBe(false)
+  })
+
   it('reads a status this build does not know as unknown, and still rejects a non-string', () => {
     expect(connectionStatusSchema.parse('pending')).toBe('unknown')
     expect(connectionStatusSchema.parse('linked')).toBe('unknown')
@@ -50,9 +58,25 @@ describe('banking connection-status contract', () => {
     ).toBe(true)
   })
 
-  it('accepts both known provider values', () => {
+  it('accepts every known provider value', () => {
     expect(bankConnectionSchema.parse({ ...newConnection, provider: 'GoCardless' }).provider).toBe('GoCardless')
     expect(bankConnectionSchema.parse({ ...newConnection, provider: 'EnableBanking' }).provider).toBe('EnableBanking')
+    expect(bankConnectionSchema.parse({ ...newConnection, provider: 'SimpleFIN' }).provider).toBe('SimpleFIN')
+  })
+
+  it('reads a SimpleFIN row, which has no bank id, consent end or days left', () => {
+    const parsed = bankConnectionSchema.parse({
+      ...newConnection,
+      bankId: null,
+      connectionId: 7,
+      daysUntilExpiry: null,
+      expiresAt: null,
+      institutionName: null,
+      lastError: { code: 'institution_action_required', occurredAt: '2026-11-12T10:00:00.000Z' },
+      provider: 'SimpleFIN',
+      status: 'processing',
+    })
+    expect(parsed).toMatchObject({ bankId: null, connectionId: 7, expiresAt: null, provider: 'SimpleFIN', status: 'processing' })
   })
 
   it('reads a provider or access type this build does not know as unknown instead of failing the list', () => {
@@ -77,6 +101,19 @@ describe('banking connection-status contract', () => {
     expect(parsed.connections).toEqual([])
   })
 
+  it('reads the newest failure for a connection, and accepts a row without one', () => {
+    expect(
+      bankConnectionSchema.parse({ ...newConnection, lastError: { code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' } }).lastError,
+    ).toEqual({ code: 'rate_limited', occurredAt: '2026-07-30T10:00:00.000Z' })
+    expect(bankConnectionSchema.parse({ ...newConnection, lastError: null }).lastError).toBeNull()
+    expect(bankConnectionSchema.parse(newConnection).lastError).toBeUndefined()
+  })
+
+  it('rejects a lastError without a code or a real timestamp', () => {
+    expect(bankConnectionSchema.safeParse({ ...newConnection, lastError: { code: '', occurredAt: '2026-07-30T10:00:00.000Z' } }).success).toBe(false)
+    expect(bankConnectionSchema.safeParse({ ...newConnection, lastError: { code: 'timeout', occurredAt: 'yesterday' } }).success).toBe(false)
+  })
+
   it('accepts connectionId as a positive int, null, or absent (forward-compatible)', () => {
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: 42 }).connectionId).toBe(42)
     expect(bankConnectionSchema.parse({ ...newConnection, connectionId: null }).connectionId).toBeNull()
@@ -96,10 +133,24 @@ describe('banking connection-status contract', () => {
     expect(isValidBankConnectionId(1.5)).toBe(false)
   })
 
-  it('exposes the disconnect write endpoint at DELETE /v1/banking/connections/:connectionId', () => {
+  it('exposes the disconnect write endpoint at DELETE /v1/banking/requisition/:connectionId', () => {
     const endpoint = createDisconnectBankConnectionEndpoint(42)
     expect(endpoint.method).toBe('DELETE')
-    expect(endpoint.path).toBe('/v1/banking/connections/42')
+    expect(endpoint.path).toBe('/v1/banking/requisition/42')
+  })
+
+  it('disconnects a SimpleFIN connection through its own route, its ids being a separate space', () => {
+    const endpoint = createDisconnectBankConnectionEndpoint(42, 'SimpleFIN')
+    expect(endpoint.method).toBe('DELETE')
+    expect(endpoint.path).toBe('/v1/banking/simplefin/connections/42')
+    expect(createDisconnectBankConnectionEndpoint(42, 'EnableBanking').path).toBe('/v1/banking/requisition/42')
+    expect(() => createDisconnectBankConnectionEndpoint(0, 'SimpleFIN')).toThrow()
+  })
+
+  it('names a connection by its id and provider together', () => {
+    expect(isSameBankConnection({ connectionId: 7, provider: 'SimpleFIN' }, { connectionId: 7, provider: 'SimpleFIN' })).toBe(true)
+    expect(isSameBankConnection({ connectionId: 7, provider: 'SimpleFIN' }, { connectionId: 7, provider: 'EnableBanking' })).toBe(false)
+    expect(isSameBankConnection({ connectionId: 7, provider: 'SimpleFIN' }, null)).toBe(false)
   })
 
   it('refuses to build a disconnect endpoint for an invalid connection id', () => {

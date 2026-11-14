@@ -13,9 +13,9 @@ import { captureAnalyticsEvent, type FeatureScreen } from '@/lib/telemetry/analy
  * `/portfolio/abc123`)". So this file is a translation table, not a pass-through:
  * a live pathname is matched against route *patterns*, and only the resulting
  * identifier is ever handed to `captureAnalyticsEvent`. A pathname that matches
- * no pattern captures nothing at all — failing closed is the whole point, and a
- * route added later simply produces no event until someone adds it here and to
- * `featureScreens`.
+ * no pattern captures nothing at all — failing closed is the whole point. A
+ * route added later needs a pattern here and an identifier in `featureScreens`;
+ * `screen-analytics.test.tsx` walks `src/app` and fails until both exist.
  */
 type RoutePattern = readonly [segments: readonly string[], screen: FeatureScreen]
 
@@ -31,6 +31,7 @@ const routePatterns: readonly RoutePattern[] = [
   [['access'], 'access_blocked'],
   [['onboarding'], 'onboarding'],
   [['onboarding', 'create-account'], 'onboarding_create_account'],
+  [['home', 'customize'], 'home_customize'],
 
   [['accounts'], 'accounts'],
   [['goals'], 'goals'],
@@ -46,6 +47,8 @@ const routePatterns: readonly RoutePattern[] = [
   [['accounts', WILDCARD], 'account_detail'],
   [['accounts', WILDCARD, 'edit'], 'account_edit'],
   [['accounts', WILDCARD, 'transactions'], 'account_transactions'],
+  [['accounts', WILDCARD, 'installments', 'create'], 'installment_plan_create'],
+  [['accounts', WILDCARD, 'installments', WILDCARD], 'installment_plan_detail'],
 
   [['budgets'], 'budgets'],
   [['budgets', 'create'], 'budget_create'],
@@ -59,9 +62,14 @@ const routePatterns: readonly RoutePattern[] = [
   [['loans', 'create'], 'loan_create'],
   [['loans', WILDCARD], 'loan_detail'],
   [['loans', WILDCARD, 'edit'], 'loan_edit'],
+  [['groups'], 'expense_groups'],
+  [['groups', 'create'], 'expense_group_create'],
+  [['groups', WILDCARD], 'expense_group_detail'],
   [['assets'], 'assets'],
   [['assets', 'create'], 'asset_create'],
+  [['assets', 'crypto-wallet'], 'crypto_wallet_create'],
   [['assets', WILDCARD], 'asset_detail'],
+  [['assets', WILDCARD, 'edit'], 'asset_edit'],
   [['assets', WILDCARD, 'value'], 'asset_value'],
 
   [['goals', 'create'], 'goal_create'],
@@ -75,7 +83,10 @@ const routePatterns: readonly RoutePattern[] = [
 
   [['more', 'banking'], 'bank_connections'],
   [['more', 'banking', 'connect'], 'bank_connect'],
+  [['more', 'banking', 'simplefin', 'connect'], 'bank_connect_simplefin'],
   [['more', 'banking', 'import'], 'bank_statement_import'],
+  [['more', 'banking', 'history'], 'bank_sync_history'],
+  [['more', 'pending-changes'], 'pending_changes'],
 
   [['net-worth', 'history'], 'net_worth_history'],
 
@@ -91,6 +102,7 @@ const routePatterns: readonly RoutePattern[] = [
   [['reports'], 'reports'],
   [['reports', 'budget-vs-actual'], 'report_budget_vs_actual'],
   [['reports', 'cashflow'], 'report_cashflow'],
+  [['reports', 'month-comparison'], 'report_month_comparison'],
   [['reports', 'net-worth-history'], 'report_net_worth_history'],
   [['reports', 'portfolio-performance'], 'report_portfolio_performance'],
   [['reports', 'sankey'], 'report_sankey'],
@@ -100,10 +112,12 @@ const routePatterns: readonly RoutePattern[] = [
   [['settings', 'categories', 'create'], 'settings_category_create'],
   [['settings', 'categories', WILDCARD, 'edit'], 'settings_category_edit'],
   [['settings', 'household'], 'settings_household'],
+  [['settings', 'household', 'join'], 'settings_household_join'],
   [['settings', 'notifications'], 'settings_notifications'],
   [['settings', 'preferences'], 'settings_preferences'],
   [['settings', 'profile'], 'settings_profile'],
   [['settings', 'profile', 'edit'], 'settings_profile_edit'],
+  [['settings', 'rules'], 'settings_rules'],
   [['settings', 'security'], 'settings_security'],
 ]
 

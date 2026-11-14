@@ -1,32 +1,108 @@
 ---
 title: Privacidade das contas
-description: Controla quais as contas partilhadas com o agregado familiar e quais são visíveis apenas para um membro.
+description: Partilha uma conta com todo o agregado familiar, ou mantém-na privada e escolhe, para cada membro, se não a vê, se a pode ver ou se a pode editar.
 ---
 
-Cada conta num agregado familiar tem uma definição de privacidade. Uma conta partilhada é visível para ambos os membros; uma conta privada é visível apenas para o membro que a possui.
+Cada conta num agregado familiar é partilhada com o agregado ou privada. Uma conta partilhada é visível para todas as pessoas, e todas a podem alterar. Uma conta privada é visível apenas para a pessoa a quem pertence e para os membros com quem está partilhada, e para cada um deles escolhes se só a pode ver ou se também a pode editar.
 
-Por predefinição, uma conta é partilhada com o agregado familiar. Altera a definição na conta quando pretenderes que esta permaneça privada.
+Por predefinição, uma conta é partilhada com o agregado familiar. Nada muda numa conta até alterares a sua partilha.
 
-## Definir a privacidade da conta
+## Partilhada com o agregado
 
-Abre a conta e escolhe a definição de privacidade:
+Uma conta partilhada, com as suas transações e o seu saldo, aparece na vista de todos: na lista de contas, nos totais, no património líquido, nos relatórios e nos orçamentos. Todas as pessoas do agregado a podem editar, e às suas transações, exceto os observadores, que só a veem.
 
-- **Partilhada** — ambos os membros veem a conta, as suas transações e o seu saldo.
-- **Privada** — apenas o membro que possui a conta a vê. As vistas dos outros membros, incluindo o património líquido, excluem a conta.
+As pessoas que entram no agregado mais tarde têm o mesmo acesso a uma conta partilhada que todas as outras.
 
-As contas privadas mantêm as despesas pessoais de um membro fora da vista partilhada, enquanto as contas partilhadas fazem parte do panorama comum do agregado familiar.
+## Privada, com acesso por membro
 
-## Privacidade das séries recorrentes
+Uma conta privada define o acesso de cada pessoa do agregado, uma a uma:
 
-O titular também pode definir a privacidade das séries recorrentes. Uma série recorrente privada é visível apenas para o membro que a possui; uma partilhada aparece nas vistas de ambos os membros. Esta definição funciona separadamente da definição ao nível da conta.
+- **Oculta**: a pessoa não vê a conta de todo.
+- **Pode ver**: a pessoa vê a conta, as suas transações e o seu saldo, e a conta conta nos seus totais, mas não pode alterar nada nela.
+- **Pode editar**: a pessoa vê a conta e pode alterá-la, e às suas transações, como numa conta partilhada.
 
-## Privacidade por tipo de dados
+A pessoa a quem a conta pertence tem sempre acesso total. Dar a todas as pessoas o máximo de acesso que podem ter (**Pode editar**, ou **Pode ver** para um observador) volta a tornar a conta partilhada com o agregado.
 
-A privacidade aplica-se por tipo de dados. Contas, transações, categorias, objetivos, orçamentos, carteira, fluxo de caixa e património líquido seguem as mesmas regras do agregado, e o titular decide quais destes dados permanecem visíveis para ambos os membros e quais ficam limitados a um membro.
+Quem entra no agregado mais tarde não vê uma conta privada até alguém a partilhar consigo.
+
+### Alterar a partilha
+
+Abre o ecrã de edição da conta: na web, escolhe **Editar** na conta, na lista de contas; na aplicação móvel, abre a conta e edita-a. A secção de partilha lista todas as pessoas do agregado, com **Oculta**, **Pode ver** ou **Pode editar** ao lado de cada nome. Escolhe o acesso de cada pessoa e guarda.
+
+Se fores a única pessoa do agregado, ainda não há ninguém com quem partilhar, e só podes marcar a conta como privada. Quem entrar mais tarde não a vê até a partilhares.
+
+Os membros que veem a conta mas não podem alterar a sua partilha veem como está partilhada, sem as opções.
+
+### O que "Pode ver" permite
+
+Um membro que pode ver uma conta vê-a como as outras pessoas: a conta e o seu saldo, as suas transações com as categorias, etiquetas, divisões e ficheiros, e o seu lugar nos totais, no património líquido, nos relatórios e nos orçamentos.
+
+Não pode alterar nada nela. Nessa conta, não pode:
+
+- editar, recalcular nem eliminar a conta;
+- adicionar, importar, editar nem eliminar transações;
+- alterar a categoria, as etiquetas ou as notas de uma transação, dividi-la, anexar ficheiros nem ligar um reembolso;
+- alterar as definições do cartão de crédito nem as compras em prestações.
+
+A aplicação esconde estas ações numa conta que só podes ver. Se uma alteração for tentada mesmo assim, por exemplo a partir de uma versão mais antiga da aplicação, é recusada com uma mensagem a dizer que podes ver a conta, mas não alterá-la.
+
+### Observadores
+
+Um observador do agregado só vê, diga o que disser a partilha da conta. Para um observador, uma conta privada oferece apenas **Oculta** e **Pode ver**.
+
+## O que significa "Oculta"
+
+Para um membro que não a vê, uma conta privada e as suas transações não existem. Ficam fora de tudo o que esse membro vê:
+
+- as listas de contas e de transações, e as pesquisas;
+- os totais, o património líquido, o fluxo de caixa e os relatórios;
+- os orçamentos, os pagamentos recorrentes, as previsões e os insights;
+- o feed de calendário e os emails, como o resumo mensal;
+- a exportação de dados;
+- o assistente, os clientes MCP e os tokens de API.
+
+## Quem pode alterar a partilha
+
+Duas pessoas podem alterar a partilha de uma conta:
+
+- a pessoa a quem a conta pertence;
+- o titular do agregado, nas contas que consegue ver.
+
+O titular do agregado não vê automaticamente as contas privadas dos outros membros: uma conta privada que não esteja partilhada com ele também fica oculta para ele, e ele não pode alterar a sua partilha. Os administradores só podem alterar a partilha das suas próprias contas.
+
+## Quando alguém sai ou é removido
+
+Quando um membro sai do agregado ou é removido, as suas contas privadas ficam no agregado, partilhadas como estavam:
+
+- Os membros com quem uma conta estava partilhada mantêm o seu acesso, de ver ou de editar.
+- Mais ninguém ganha acesso, nem o titular do agregado.
+- Se a pessoa voltar a entrar no agregado, volta a ver as suas contas, com acesso total.
+
+Consulta [Sair do agregado ou remover um membro](/pt/docs/household/leave-or-remove).
+
+## Ligações entre contas
+
+Uma transferência ou um reembolso que liga duas contas só conta quando as mesmas pessoas veem as duas contas, para que ninguém veja metade de uma ligação. Consulta [Categorizar transações](/pt/docs/accounts-transactions/categorize-transactions) e [Compreender transações](/pt/docs/accounts-transactions/understand-transactions).
+
+## O que acompanha a conta
+
+Os pagamentos recorrentes, as previsões e as contas a pagar do feed de calendário seguem a partilha da sua conta: quem vê a conta vê-os. As carteiras são partilhadas com o agregado; consulta [Ligar uma carteira à sua conta](/pt/docs/portfolio-investments/link-portfolio-account#contas-privadas-num-agregado-familiar). Os bens com valor manual têm a sua própria definição de privacidade; consulta [Bens privados num agregado](/pt/docs/portfolio-investments/manual-assets#bens-privados-num-agregado).
+
+## Orçamentos pessoais
+
+Um orçamento é do agregado ou de uma pessoa. Um orçamento pessoal é visível apenas para quem o criou, mesmo que as outras pessoas sejam o titular ou administradores, e só um orçamento pessoal pode ligar contas privadas. Conta as transações que quem o criou vê, por isso uma conta privada partilhada com essa pessoa também conta. Consulta [Criar o teu primeiro orçamento](/pt/docs/budgets/create-first-budget#orçamento-do-agregado-ou-pessoal).
+
+## Exportações
+
+A exportação de dados inclui as contas que consegues ver, com a sua partilha: se cada uma é partilhada com o agregado ou privada, e quem a pode ver ou editar. Consulta [Privacidade dos dados](/pt/docs/settings-security-privacy/data-privacy#exportar-os-teus-dados).
+
+Ao restaurar uma exportação, todas as contas voltam como tuas, porque as pessoas com quem estavam partilhadas não são associadas às pessoas do teu agregado. Uma conta privada volta privada para ti, pronta a partilhar de novo.
 
 ## Páginas relacionadas
 
+- [Filtrar por membro](/pt/docs/household/filter-by-member)
 - [Agregado familiar e partilha entre utilizadores](/pt/docs/household)
+- [O que é um agregado familiar](/pt/docs/household/what-is-a-household)
 - [Contexto partilhado](/pt/docs/household/shared-context)
-- [Ligar conta bancária](/pt/docs/accounts-transactions/connect-bank-account)
+- [Sair do agregado ou remover um membro](/pt/docs/household/leave-or-remove)
 - [Privacidade dos dados](/pt/docs/settings-security-privacy/data-privacy)

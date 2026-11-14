@@ -29,13 +29,19 @@ describe('loan metadata write', () => {
     expect(mockWrite).toHaveBeenCalledTimes(1)
     expect(mockWrite.mock.calls[0][0]).toMatchObject({ method: 'PATCH', path: '/v1/loan/7' })
     expect(mockWrite.mock.calls[0][1].body).toEqual({ providerName: '', notes: 'Retained' })
-    expect(invalidate).toHaveBeenCalledTimes(4)
+    expect(invalidate).toHaveBeenCalledTimes(5)
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'list', 8], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'overview', 8], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'detail', 8, 7], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['net-worth', 8], exact: true })
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['loans', 'repayments', 8, 7] }))
     expect(invalidate).not.toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['loans', 'detail', 9, 7] }))
+    // The assets' linked debt and equity follow the loan: this epoch's asset list and details only.
+    const { predicate } = invalidate.mock.calls.map(([filters]) => filters).find((filters) => filters?.predicate) ?? {}
+    expect(predicate?.({ queryKey: ['manual-assets', 'list', 8] } as never)).toBe(true)
+    expect(predicate?.({ queryKey: ['manual-assets', 'detail', 8, 3] } as never)).toBe(true)
+    expect(predicate?.({ queryKey: ['manual-assets', 'detail', 9, 3] } as never)).toBe(false)
+    expect(predicate?.({ queryKey: ['loans', 'list', 8] } as never)).toBe(false)
     await hook.unmount(); client.clear()
   })
 

@@ -10,10 +10,12 @@ import { ReportEmptyState } from "@/components/reports/primitives";
 import {
   BudgetVsActualReport,
   CashflowReport,
+  MonthComparisonReport,
   NetWorthHistoryReport,
   PortfolioPerformanceReport,
   SankeyReport,
   SpendingByCategoryReport,
+  SpendingVsNormalReport,
 } from "@/components/reports/reports";
 import { ReportsCurrencyProvider } from "@/components/reports/ReportsCurrencyContext";
 import { Button } from "@/components/ui/button";
@@ -57,6 +59,12 @@ export default function ReportsPage() {
               <CashflowReport />
               <SpendingByCategoryReport />
             </div>
+
+            {/* Two named months, category by category */}
+            <MonthComparisonReport />
+
+            {/* This month's spend against its own normal, tile size = spend, colour = change */}
+            <SpendingVsNormalReport />
 
             {/* Net worth over time — full width for the trend */}
             <NetWorthHistoryReport />

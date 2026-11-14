@@ -256,43 +256,16 @@ describe('background operation service', () => {
     }
   });
 
-  it('retries account initial sync with full payload and queue setup', async () => {
-    em.findOne.mockImplementation((entity: unknown) => {
-      if ((entity as { name?: string }).name === 'EnableBankingConnection') return { appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'req-42', state: 'state-42', status: 'linked' };
-      if ((entity as { name?: string }).name === 'BankSyncIncident') return { appuserKey: 7, attempts: 0, correlationId: 'cid', distinctId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', environment: 'development', finality: 'non_terminal', flow: 'initial-add', incidentId: 'incident-42', producer: 'pgboss-initial', requisitionId: 'req-42', result: 'pending' };
-      if ((entity as { name?: string }).name === 'BankSyncIncidentAttempt') return null;
-      return { correlationId: 'cid', operationType: 'account.initial-sync', resourceId: 'enable-banking-connection:42', retryable: true, status: BackgroundOperationStatus.FAILED };
-    });
+  // The payloads a bank-sync retry enqueues are proven against the real producers in
+  // `background-operation-retry.bank-sync.test.ts`.
+  it.each([
+    ['its connection is gone', 'bank-connection:42'],
+    ['it was stored before the bank provider interface', 'enable-banking-connection:42'],
+  ])('refuses a bank-sync retry when %s, and sends nothing', async (_name, resourceId) => {
+    em.findOne.mockImplementation((entity: unknown) => ((entity as { name?: string }).name === 'BankConnection' ? null : { correlationId: 'account.initial-sync:42', operationType: 'account.initial-sync', resourceId, retryable: true, status: BackgroundOperationStatus.FAILED }));
     boss.findJobs.mockResolvedValueOnce([]);
-    boss.send.mockResolvedValueOnce('job-42');
-    const execute = vi.fn().mockResolvedValue([{ background_operation_key: 1 }]);
-    em.getConnection.mockReturnValue({ execute });
-
-    await expect(service.retryAdminOperation('cid')).resolves.toMatchObject({ jobId: 'job-42' });
-    expect(boss.send).toHaveBeenCalledWith('account.initial-sync', expect.objectContaining({ connectionId: 'req-42', correlationId: 'cid', enableBankingConnectionKey: '42', provider: 'enable_banking' }), { singletonKey: 'cid' });
-  });
-
-  it('retries account auto sync connections with the connection singleton key', async () => {
-    em.findOne.mockImplementation((entity: unknown) => {
-      if ((entity as { name?: string }).name === 'EnableBankingConnection') return { appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, sessionId: 'req-42', state: 'state-42', status: 'linked' };
-      if ((entity as { name?: string }).name === 'BankSyncIncident') return { appuserKey: 7, attempts: 0, correlationId: 'account.auto-sync.requisition:run-1:42', distinctId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', environment: 'development', finality: 'non_terminal', flow: 'scheduled-refresh', incidentId: 'incident-42', producer: 'pgboss-scheduled', requisitionId: 'req-42', result: 'pending' };
-      if ((entity as { name?: string }).name === 'BankSyncIncidentAttempt') return null;
-      return { correlationId: 'account.auto-sync.requisition:run-1:42', operationType: 'account.auto-sync.requisition', resourceId: 'enable-banking-connection:42', retryable: true, status: BackgroundOperationStatus.FAILED };
-    });
-    boss.findJobs.mockResolvedValueOnce([]);
-    boss.send.mockResolvedValueOnce('job-42');
-    const execute = vi.fn().mockResolvedValue([{ background_operation_key: 1 }]);
-    em.getConnection.mockReturnValue({ execute });
-
-    await expect(service.retryAdminOperation('account.auto-sync.requisition:run-1:42')).resolves.toMatchObject({ jobId: 'job-42' });
-    expect(boss.findJobs).toHaveBeenCalledWith('account.auto-sync.requisition', { key: 'account.auto-sync.connection:42' });
-    expect(boss.send).toHaveBeenCalledWith('account.auto-sync.requisition', { connectionId: 'req-42', correlationId: 'account.auto-sync.requisition:run-1:42', enableBankingConnectionKey: '42', incidentId: 'incident-42', provider: 'enable_banking', scheduleRunId: 'run-1' }, { singletonKey: 'account.auto-sync.connection:42' });
-  });
-
-  it('rejects account retry when requisition is missing or unlinked', async () => {
-    em.findOne.mockImplementation((entity: unknown) => ((entity as { name?: string }).name === 'NordigenRequisition' ? null : { correlationId: 'cid', operationType: 'account.initial-sync', resourceId: 'enable-banking-connection:42', retryable: true, status: BackgroundOperationStatus.FAILED }));
-    boss.findJobs.mockResolvedValueOnce([]);
-    await expect(service.retryAdminOperation('cid')).rejects.toBeInstanceOf(Error);
+    em.getConnection.mockReturnValue({ execute: vi.fn().mockResolvedValue([{ background_operation_key: 1 }]) });
+    await expect(service.retryAdminOperation('account.initial-sync:42')).rejects.toBeInstanceOf(ConflictError);
     expect(boss.send).not.toHaveBeenCalled();
   });
 

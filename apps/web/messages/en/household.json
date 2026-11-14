@@ -1,63 +1,134 @@
 {
   "household": {
     "title": "Household",
-    "description": "Share accounts, budgets, and goals with your partner.",
+    "description": "Share accounts, budgets, and goals with the people you live with.",
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member",
+      "viewer": "Viewer"
+    },
+    "roleDescriptions": {
+      "owner": "Manages everyone in the household and can hand ownership to someone else.",
+      "admin": "Invites and manages members and viewers, and changes shared finances.",
+      "member": "Sees and changes shared accounts, budgets, and goals.",
+      "viewer": "Sees shared finances but can't change anything."
+    },
     "members": {
       "heading": "Members",
       "you": "You",
-      "roleOwner": "Owner",
-      "roleMember": "Partner"
+      "seats": "{used} of {max} places taken, pending invitations included",
+      "actionsLabel": "Actions for {name}",
+      "changeRole": "Change role",
+      "makeOwner": "Make owner",
+      "remove": "Remove from household"
     },
     "invite": {
-      "heading": "Invite your partner",
-      "description": "They get their own login and see your shared finances. Accounts you mark as private stay private.",
-      "emailLabel": "Partner's email",
-      "emailPlaceholder": "partner@example.com",
+      "heading": "Invite someone",
+      "description": "They get their own sign-in and see your shared finances. Accounts you mark as private stay private. Someone who already has an account accepts from the invitation link.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
       "invalidEmail": "Enter a valid email address",
-      "submit": "Send invitation"
+      "roleLabel": "Role",
+      "submit": "Send invitation",
+      "full": "Your household has room for {max} people, pending invitations included. Revoke an invitation or remove someone to invite another person."
     },
     "pending": {
-      "heading": "Pending invitation",
+      "heading": "Pending invitations",
       "sentTo": "Invited {email}",
       "expires": "Expires {date}",
       "resend": "Resend",
       "revoke": "Revoke"
     },
     "actions": {
-      "remove": "Remove partner",
       "leave": "Leave household"
     },
     "removeDialog": {
       "title": "Remove {name}?",
-      "description": "They lose access to this household right away. Shared data stays with you, and their linked bank connections are disconnected.",
-      "confirm": "Remove partner"
+      "description": "They lose access to this household right away and are signed out everywhere. The accounts and transactions they added stay with the household, and their linked bank connections are disconnected.",
+      "confirm": "Remove"
     },
     "leaveDialog": {
       "title": "Leave this household?",
       "description": "You lose access to the shared accounts, budgets, and goals, and your linked bank connections are disconnected. This can't be undone.",
       "confirm": "Leave household"
     },
+    "roleDialog": {
+      "title": "Change {name}'s role",
+      "description": "The new role applies the next time they open the app.",
+      "save": "Save role"
+    },
+    "transferDialog": {
+      "title": "Make {name} the owner?",
+      "description": "{name} becomes the owner: they manage everyone in the household, you included, and only they can hand ownership on again. You become an admin.",
+      "confirm": "Make {name} the owner"
+    },
     "cancel": "Cancel",
+    "errors": {
+      "already_household_member": "That person is already in this household.",
+      "demo_read_only": "The demo account is read-only.",
+      "household_full": "This household is full. Revoke an invitation or remove someone first.",
+      "household_has_data": "Your current household already holds accounts or transactions, so it can't join another one yet. Delete them first, or accept with a different account.",
+      "household_has_members": "Other people share your current household. Hand ownership to one of them, or remove them, before you join another household.",
+      "household_owner_required": "Only the owner can do that.",
+      "household_role_required": "Your role doesn't allow that. Ask the owner or an admin.",
+      "invite_already_used": "This invitation has already been used.",
+      "invite_email_mismatch": "This invitation is for a different email address than the one you're signed in with.",
+      "invite_expired": "This invitation has expired. Ask for a new one.",
+      "invite_invalid": "This invitation link isn't valid. Ask for a new one."
+    },
+    "readOnly": {
+      "title": "View-only access",
+      "description": "You can see this household's finances but not change them. Ask the owner or an admin for a different role."
+    },
     "join": {
       "greetingNamed": "{name} invited you to their {instanceName} household",
       "greetingGeneric": "You've been invited to a {instanceName} household",
       "subtitle": "Create your account to share accounts, budgets, and goals.",
       "emailLockedHint": "This invite is for {email}",
+      "signInToAccept": "Already have an account? <link>Sign in to accept</link>",
       "invalidTitle": "This invitation link isn't valid",
-      "invalidBody": "It may have already been used, revoked, or expired. Ask your partner to send a fresh invite.",
-      "loggedInTitle": "You're already signed in",
-      "loggedInBody": "Household invites can only be accepted with a new account. Log out and create one with the invited email to join.",
-      "logoutAndJoin": "Log out & create account",
-      "backToApp": "Go to {instanceName}"
+      "invalidBody": "It may have already been used, revoked, or expired. Ask the person who invited you to send a fresh invite.",
+      "backToApp": "Go to {instanceName}",
+      "confirmTitleNamed": "Join {household}?",
+      "confirmTitleInviter": "Join {name}'s household?",
+      "confirmTitleGeneric": "Join this household?",
+      "confirmRole": "You'll join as {role}.",
+      "signedInAs": "Signed in as {email}",
+      "dataHeading": "What happens to your current household",
+      "dataRequirement": "You can join only if your current household has no accounts or transactions.",
+      "dataStaysBehind": "Budgets, categories, rules, and goals you set up there stay behind. They aren't moved.",
+      "dataBanks": "Bank connections there are disconnected.",
+      "dataYours": "Your profile, sign-in, preferences, and devices stay yours.",
+      "accept": "Join household",
+      "useDifferentAccount": "Sign out and use a different account",
+      "emailMismatchTitle": "This invitation is for another email address",
+      "emailMismatchBody": "It was sent to {invited}, but you're signed in as {current}. Sign out, then sign in or create an account with {invited} to accept it.",
+      "errorTitle": "You can't join yet"
     },
     "toast": {
       "inviteSent": "Invitation sent",
       "inviteResent": "Invitation resent",
       "inviteRevoked": "Invitation revoked",
-      "memberRemoved": "Partner removed",
+      "memberRemoved": "{name} was removed",
+      "roleChanged": "{name}'s role is now {role}",
+      "ownershipTransferred": "{name} is now the owner",
       "left": "You've left the household",
       "error": "Something went wrong. Please try again."
     },
-    "loadError": "We couldn't load your household. Please try again."
+    "loadError": "We couldn't load your household. Please try again.",
+    "attribution": {
+      "filterLabel": "Member",
+      "everyone": "Everyone",
+      "shared": "Shared",
+      "spentBy": "Spent by",
+      "spentByDescription": "Whose spending this counts as in reports, budgets and the member filter.",
+      "accountDefault": "Account default ({name})",
+      "accountDefaultPlain": "Account default",
+      "spentBySaved": "Spent by updated",
+      "spentByError": "Couldn't change who this was spent by",
+      "jointAccount": "Joint account",
+      "jointAccountDescription": "Its spending counts as Shared. This doesn't change who can see it."
+    }
   }
 }

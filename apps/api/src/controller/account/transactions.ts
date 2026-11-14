@@ -1,11 +1,9 @@
 import { LockMode, QueryOrder } from '@mikro-orm/core';
 import { startOfMonth } from 'date-fns';
 import type { NextFunction, Request, Response } from 'express';
-import { sql } from 'kysely';
 import { orderBy, pick } from 'lodash-es';
 
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
-import { sqlQuery } from '@app/database/sql';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { Category } from '@entity/Category';
@@ -15,26 +13,41 @@ import { TransactionAuditActorType, TransactionAuditEventType, TransactionAuditL
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
 import { authedContext, authedUser } from '@middleware/authed-context';
+import { accountActor, assertTransactionsWritable, loadSharedAccountKeys, onlyWritableTransactions } from '@service/account/account-access';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { loadActiveMembers, transactionAttributionDto } from '@service/household/member-attribution';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import { loadLoanRepaymentLinks, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE } from '@service/reports/report-currency';
+import { type RuleSuggestion, suggestRuleAfterRecategorization } from '@service/rules/rule-suggestion.service';
 import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { findAssignableCategory } from '@service/transaction/household-category';
+import { toMerchantDto } from '@service/transaction/merchant-logo';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
-import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { findMerchantsSeenOnlyOnOthersPrivateAccounts } from '@service/transaction/merchant-visibility';
+import { updateTransactionAttribution } from '@service/transaction/transaction-attribution.service';
+import { MANUAL_CATEGORIZATION_SOURCE, TransactionAuditService } from '@service/transaction/transaction-audit.service';
+import { applyBulkTransactionChange, BULK_CHANGE_POPULATE } from '@service/transaction/transaction-bulk-update.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { findManualDuplicate } from '@service/transaction/transaction-dedup.service';
+import { deleteTransactions as deleteTransactionRows } from '@service/transaction/transaction-deletion.service';
 import { listTransactions } from '@service/transaction/transaction-list.service';
+import { updateTransactionNote } from '@service/transaction/transaction-note.service';
+import { getTransactionReviewSummary as getReviewSummary } from '@service/transaction/transaction-review-summary.service';
 import { dashboardScope, transactionScopeWhere } from '@service/transaction/transaction-scope';
+import { loadTransactionSelection } from '@service/transaction/transaction-selection.service';
 import { reconcileSplitsWithAmount } from '@service/transaction/transaction-split.service';
 import { retypeTransaction, TRANSFER_DESTINATION_POPULATE, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import { applyUserCategorization } from '@service/transaction/user-categorization.service';
 import { BadRequestError, InternalServerError, NotFoundError, UnauthorizedError } from '@utils/errors';
+import logger from '@utils/logger';
 import { addMoney } from '@utils/money';
 import {
   createTransactionRequestSchema,
+  deleteTransactionRequestSchema,
+  deleteTransactionsRequestSchema,
   getAccountTransactionsRequestSchema,
   getCategorySpendingRequestSchema,
   getTransactionHistoryRequestSchema,
@@ -140,6 +153,13 @@ export async function createTransaction(req: Request, res: Response, next: NextF
         transactionKey: created.transactionKey,
       });
     }
+    // A hand-entered row that names an installment of one of the card's plans ("PARC 03/12") pays
+    // it, as a synced one does. Best-effort: the row is already stored.
+    if (created.tenantKey) {
+      await linkPostedInstallments(DI.em, { accountKeys: [accountId], tenantKey: created.tenantKey.tenantKey }).catch((error: unknown) => {
+        logger.warn({ error: error instanceof Error ? error.message : String(error) }, 'Installment linking failed');
+      });
+    }
     return res.status(201).json({ possibleDuplicate: duplicateMatch !== null });
   } catch (err) {
     next(err);
@@ -171,14 +191,14 @@ export async function getAccountTransactions(req: Request, res: Response) {
 export async function getCategorySpending(req: Request, res: Response, _next: NextFunction) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { fromDate, limit, timezone, toDate },
+    query: { fromDate, limit, memberKeys, timezone, toDate },
   } = await zParse(getCategorySpendingRequestSchema, req);
 
   // The dashboard's rows (`dashboardScope`), money out only: pending counts, EXPIRED rows
   // never moved money, a transfer between own accounts is not spending, and a row wholly in
   // categories that are not spending is left out. A row with no converted amount is read by the
   // sign of its own amount, so it is counted as left out below.
-  const scope = dashboardScope({ dateRange: { from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
+  const scope = dashboardScope({ dateRange: { from: fromDate ?? startOfMonth(new Date()), timeZone: timezone, to: toDate }, members: memberKeys, tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey });
   const expenseTransactions = await DI.em.find(Transaction, transactionScopeWhere({ ...scope, direction: 'out' }), {
     populate: [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE],
   });
@@ -313,24 +333,29 @@ export async function getTransactionMerchants(req: Request, res: Response) {
       orderBy: { name: QueryOrder.ASC },
     },
   );
-  const transformedData = transactionMerchants.map((t) => pick(t, ['transactionMerchantKey', 'name']));
-  return res.json({ transactionMerchants: transformedData });
+  return res.json({ transactionMerchants: transactionMerchants.map(toMerchantDto) });
 }
 
 export async function getTransactions(req: Request, res: Response) {
   const {
-    query: { accountKeys, categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
+    query: { accountKeys, categoryKeys, confidence, cursor, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, limit, memberCurrency, memberKeys, merchantKeys, statuses, tagKeys, timezone, toDate, transactionTypes, unreviewedOnly },
   } = await zParse(getTransactionsRequestSchema, req);
   const { tenant, user } = authedContext(req);
   const page = await listTransactions({
     cursor,
-    filters: { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
+    filters: { accountKeys, categoryKeys, confidence, direction, excludeNonSpending, excludeTransfers, fromDate, includeHidden, memberCurrencyCode: memberCurrency, members: memberKeys, merchantKeys, statuses, tagKeys, timeZone: timezone, toDate, transactionTypes, unreviewedOnly },
     limit,
     scope: 'all-accounts',
     tenantKey: tenant.tenantKey,
     viewerAppuserKey: user.appuserKey,
   });
   return res.json(page);
+}
+
+/** The home's review status: the review inbox's count and the amount at stake. */
+export async function getTransactionReviewSummary(req: Request, res: Response) {
+  const { tenant, user } = authedContext(req);
+  return res.json(await getReviewSummary({ tenantKey: tenant.tenantKey, viewerAppuserKey: user.appuserKey }));
 }
 
 export async function getTransactionTypes(_req: Request, res: Response) {
@@ -348,7 +373,7 @@ export async function getTransactionTypes(_req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryKey, transactionType, transferDestination, updatedAmount },
+    body: { attributedAppuserKey, categoryKey, notes, statementDateOverride, transactionType, transferDestination, updatedAmount },
     params: { transactionId },
   } = await zParse(updateTransactionRequestSchema, req);
   // Authorize before any database access — a missing user or unresolved tenant must never
@@ -365,7 +390,7 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       // A revealed hidden transaction (already id/tenant-scoped) must be editable — e.g.
       // re-categorizing it — without a false not-found. Disable only the hidden filter.
       filters: { [HIDDEN_FILTER]: false },
-      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey', 'transactionTypeKey', ...TRANSFER_DESTINATION_POPULATE],
+      populate: ['accountKey', 'appuserTransactionCategories.categoryKey', 'settlementCurrencyKey', 'appuserCurrencyKey', 'transactionTypeKey', 'transactionMerchantKey', ...TRANSFER_DESTINATION_POPULATE],
     },
   );
   if (!transaction) {
@@ -388,6 +413,8 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       }));
     }
   }
+  // A rule offer when this change repeats a pattern of the member's own recategorizations.
+  let ruleSuggestion: null | RuleSuggestion = null;
   if (categoryKey) {
     const category = await findAssignableCategory(DI.em, tenant, categoryKey);
     if (!category) {
@@ -402,10 +429,21 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
       appuserKey: user.appuserKey,
       changes: { categoryKey: { from: previousCategory?.categoryKey ?? null, to: category.categoryKey } },
       eventType: TransactionAuditEventType.CATEGORIZED,
-      source: 'user-edit',
+      source: MANUAL_CATEGORIZATION_SOURCE.USER_EDIT,
       tenantKey: tenant.tenantKey,
       transactionKey: transaction.transactionKey,
     });
+    if (previousCategory?.categoryKey !== category.categoryKey) {
+      ruleSuggestion = await suggestRuleAfterRecategorization(DI.em, { appuserKey: user.appuserKey, category, tenantKey: tenant.tenantKey, transactionKeys: [transaction.transactionKey] });
+    }
+  }
+  // `null` (or an empty note) clears it.
+  if (notes !== undefined) {
+    await updateTransactionNote(DI.em, { appuser: user, tenant }, transaction, notes);
+  }
+  // "Spent by": a member of the household, `shared`, or null for the account's default.
+  if (attributedAppuserKey !== undefined) {
+    await updateTransactionAttribution(DI.em, { appuser: user, tenant }, transaction, attributedAppuserKey);
   }
   // `!== undefined`, not truthiness: an edit to 0 is an edit.
   if (updatedAmount !== undefined) {
@@ -526,9 +564,17 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     });
   }
 
+  // A statement override moves the row between credit-card statements without touching its date,
+  // its amount or any balance. `null` clears it, so the transaction date decides again.
+  if (statementDateOverride !== undefined) {
+    transaction.statementDateOverride = statementDateOverride ?? undefined;
+    await DI.em.persist(transaction).flush();
+  }
+
   const transformedData = pick(transaction, [
     'transactionKey',
     'transactionDate',
+    'statementDateOverride',
     'transactionTypeKey.name',
     'accountKey.accountKey',
     'accountKey.accountName',
@@ -541,19 +587,28 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
     'balance',
     'appuserCurrencyBalance',
     'categories',
-    'transactionMerchantKey.name',
     'hidden',
+    'notes',
     'reviewed',
     'appuserTransactionCategories',
     'appuserTransactionCategories.categoryKey',
   ]);
 
-  return res.json({ transaction: { ...transformedData, transferDestination: transferDestinationOf(transaction, user.appuserKey) } });
+  const merchant = transaction.transactionMerchantKey ? { transactionMerchantKey: toMerchantDto(transaction.transactionMerchantKey) } : {};
+  const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: user.appuserKey, tenantKey: authedContext(req).tenantKey });
+  const attribution = transactionAttributionDto(transaction, await loadActiveMembers(DI.em, tenant.tenantKey));
+  return res.json({ ruleSuggestion, transaction: { ...transformedData, ...merchant, attribution, transferDestination: transferDestinationOf(transaction, user.appuserKey, sharedAccountKeys) } });
 }
 
+/**
+ * `PATCH /v1/account/transaction`: categorize, mark reviewed, hide or unhide, and add or remove tags
+ * on many transactions at once. The rows are `transactionIds`, or every row `filter` (the list's
+ * filters) matches, at most 5,000 (`loadTransactionSelection`). Answers `{ ruleSuggestion }`: a
+ * rule to offer after a recategorization that repeats a pattern, or null.
+ */
 export async function updateTransactions(req: Request, res: Response, next: NextFunction) {
   const {
-    body: { categoryId, hidden, reviewed, transactionIds },
+    body: { addTagIds, categoryId, filter, hidden, removeTagIds, reviewed, transactionIds },
   } = await zParse(updateTransactionsRequestSchema, req);
   const { tenant, user: authenticatedUser } = authedContext(req);
   const appuser = await DI.em.findOne(Appuser, { appuserKey: authenticatedUser.appuserKey }, { populate: ['onboarding'] });
@@ -561,22 +616,17 @@ export async function updateTransactions(req: Request, res: Response, next: Next
     next(new InternalServerError('User not found'));
     return;
   }
-  const transactions = await DI.em.find(
-    Transaction,
-    {
-      deletedAt: undefined,
-      tenantKey: tenant,
-      transactionKey: { $in: transactionIds },
-    },
-    {
-      // This endpoint operates on explicit, already-authorized transactionIds — it must be
-      // able to load an already-hidden transaction (e.g. to unhide it), not just visible ones.
-      filters: { [HIDDEN_FILTER]: false },
-      populate: ['appuserTransactionCategories.categoryKey', 'transactionMerchantKey'],
-    },
-  );
-  if (transactions.length !== transactionIds.length) {
-    next(new NotFoundError('Transaction not found'));
+  let transactions: Transaction[];
+  try {
+    transactions = await loadTransactionSelection(
+      DI.em,
+      { tenant, viewerAppuserKey: authenticatedUser.appuserKey },
+      filter ? { filter } : { transactionIds: transactionIds ?? [] },
+      { populate: BULK_CHANGE_POPULATE },
+    );
+    transactions = await writableSelection(req, transactions, Boolean(filter));
+  } catch (error) {
+    next(error);
     return;
   }
   let category: Category | null = null;
@@ -587,65 +637,48 @@ export async function updateTransactions(req: Request, res: Response, next: Next
       return;
     }
   }
-  // Bulk categorize persists the assignment and learns the merchant mapping exactly like the
-  // single-transaction path — both go through applyUserCategorization, which also hands back each
-  // transaction's *original* category so the audit `from` recorded below stays correct.
-  const originalCategoryByTransaction = category
-    ? await applyUserCategorization(DI.em, { actor: authenticatedUser, category, transactions })
-    : new Map<number, Category | undefined>();
+  const { recategorizedTransactionKeys } = await applyBulkTransactionChange(DI.em, { appuser: authenticatedUser, tenant }, transactions, { addTagIds, category, hidden, removeTagIds, reviewed });
+  // Each recategorized row counts once toward a rule suggestion, as if changed one at a time.
+  const ruleSuggestion = category
+    ? await suggestRuleAfterRecategorization(DI.em, { appuserKey: authenticatedUser.appuserKey, category, tenantKey: tenant.tenantKey, transactionKeys: recategorizedTransactionKeys })
+    : null;
 
-  // The `reviewed` flag is uniform across every selected transaction, so this is a single bulk UPDATE
-  // rather than one per transaction. The WHERE mirrors the load above exactly (same tenant + soft-delete + id scope), so this does
-  // not widen access beyond the authenticated household's transactions.
-  // nativeUpdate bypasses the tenant filter, so scope explicitly by tenant (the ids were
-  // already validated against the household via the filtered load above).
-  const shouldSetReviewed = !!reviewed || !!category;
-  // Only include the fields the caller actually intends to change. `hidden` is bidirectional
-  // (true/false), unlike `reviewed` which this endpoint only ever sets to true — building this
-  // unconditionally would silently reset `reviewed` to false on a hidden-only call.
-  const transactionUpdate: { hidden?: boolean; reviewed?: boolean } = {};
-  if (shouldSetReviewed) transactionUpdate.reviewed = true;
-  if (hidden !== undefined) transactionUpdate.hidden = hidden;
-  if (Object.keys(transactionUpdate).length > 0) {
-    await DI.em.nativeUpdate(
-      Transaction,
-      {
-        deletedAt: undefined,
-        tenantKey: tenant,
-        transactionKey: { $in: transactionIds },
-      },
-      transactionUpdate,
-    );
-  }
+  return res.json({ ruleSuggestion });
+}
 
-  // Best-effort audit of the bulk review/category/hidden change (one row per transaction).
-  const tenantKeyForAudit = tenant.tenantKey;
-  for (const transaction of transactions) {
-    const changes: Record<string, { from: unknown; to: unknown }> = {};
-    if (shouldSetReviewed && !transaction.reviewed) {
-      changes['reviewed'] = { from: transaction.reviewed, to: true };
-    }
-    if (hidden !== undefined && transaction.hidden !== hidden) {
-      changes['hidden'] = { from: transaction.hidden, to: hidden };
-    }
-    if (category) {
-      const currentCategory = originalCategoryByTransaction.get(transaction.transactionKey);
-      changes['categoryKey'] = { from: currentCategory ? currentCategory.categoryKey : null, to: category.categoryKey };
-    }
-    if (Object.keys(changes).length === 0) continue;
-    await TransactionAuditService.log(DI.em, {
-      actorAppuserKey: authenticatedUser.appuserKey,
-      actorType: TransactionAuditActorType.USER,
-      appuserKey: authenticatedUser.appuserKey,
-      changes,
-      eventType: category ? TransactionAuditEventType.CATEGORIZED : TransactionAuditEventType.USER_EDIT,
-      source: 'bulk-update',
-      tenantKey: tenantKeyForAudit,
-      transactionKey: transaction.transactionKey,
-    });
-  }
+/**
+ * The rows of a bulk write the caller may change. Named rows must all be on accounts they can
+ * change (403 `account_read_only` otherwise); a filter's matches on accounts they may only view
+ * are left out, so "everything this filter matches" means everything they can change.
+ */
+async function writableSelection(req: Request, transactions: Transaction[], byFilter: boolean): Promise<Transaction[]> {
+  if (byFilter) return onlyWritableTransactions(DI.em, transactions, accountActor(req));
+  await assertTransactionsWritable(DI.em, transactions, accountActor(req));
+  return transactions;
+}
 
-  return res.sendStatus(200);
+/**
+ * `DELETE /v1/account/transaction`: delete `transactionIds`, or every row `filter` matches (at most
+ * 5,000). Bank-synced rows are skipped and reported; the rules are in `transaction-deletion.service.ts`.
+ */
+export async function deleteTransactions(req: Request, res: Response) {
+  const { body } = await zParse(deleteTransactionsRequestSchema, req);
+  const { appuserKey, tenant } = authedContext(req);
+  const selection = body.filter ? { filter: body.filter } : { transactionIds: body.transactionIds ?? [] };
+  const transactions = await writableSelection(req, await loadTransactionSelection(DI.em, { tenant, viewerAppuserKey: appuserKey }, selection, { populate: ['accountKey'] }), Boolean(body.filter));
+  const result = await deleteTransactionRows(DI.em, { appuserKey, tenantKey: tenant.tenantKey }, transactions);
+  return res.json(result);
+}
+
+/** `DELETE /v1/account/transaction/:transactionId`: 204, or 409 `transaction_bank_synced` for a row the bank sent. */
+export async function deleteTransaction(req: Request, res: Response) {
+  const {
+    params: { transactionId },
+  } = await zParse(deleteTransactionRequestSchema, req);
+  const { appuserKey, tenant } = authedContext(req);
+  const transactions = await loadTransactionSelection(DI.em, { tenant, viewerAppuserKey: appuserKey }, { transactionIds: [transactionId] }, { populate: ['accountKey'] });
+  await deleteTransactionRows(DI.em, { appuserKey, tenantKey: tenant.tenantKey }, transactions);
+  return res.sendStatus(204);
 }
 
 /** The amount before any user edit bounds an edit: same sign, no larger in magnitude. */
@@ -653,27 +686,4 @@ function exceedsUneditedAmount(transaction: Pick<Transaction, 'settlementAmount'
   const unedited = transaction.uneditedSettlementAmount ?? transaction.settlementAmount;
   if (unedited == null) return false;
   return (unedited > 0 && updatedAmount > unedited) || (unedited < 0 && updatedAmount < unedited);
-}
-
-/**
- * Merchants the household knows only from transactions on another member's private accounts.
- *
- * Merchants are a household-wide list, but a merchant that appears nowhere except on a private
- * account is part of that account's transactions (the privacy carve-out), so the other member
- * must not see it. A transaction is visible on exactly the terms of the Transaction tenant filter:
- * no account, a shared account, or the viewer's own account. Raw SQL, so it carries the tenant
- * predicate itself.
- */
-async function findMerchantsSeenOnlyOnOthersPrivateAccounts(tenantKey: number, viewerAppuserKey: number): Promise<number[]> {
-  const rows = await sqlQuery(DI.em)
-    .selectFrom('transaction as t')
-    .leftJoin('account as a', 'a.account_key', 't.account_key')
-    .select('t.transaction_merchant_key as merchantKey')
-    .where('t.tenant_key', '=', tenantKey)
-    .where('t.deleted_at', 'is', null)
-    .where('t.transaction_merchant_key', 'is not', null)
-    .groupBy('t.transaction_merchant_key')
-    .having(sql<boolean>`bool_and(coalesce(a.is_private and a.account_owner_appuser_key <> ${viewerAppuserKey}, false))`)
-    .execute();
-  return rows.map((row) => row.merchantKey as number);
 }

@@ -7,12 +7,15 @@ import { sqlQuery } from '@app/database/sql';
 import { zParse } from '@app/validators/parser';
 import { completeOnboardingStepSchema, getRequisitionRequestSchema, updateUserDataRequestSchema } from '@app/validators/user';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
-import { Appuser } from '@entity/Appuser';
+import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Onboarding } from '@entity/Onboarding';
 import { authedUser } from '@middleware/authed-context';
 import { deleteWonderMoneyAccount } from '@service/account/account-deletion.service';
+import { effectiveAiCapabilities } from '@service/ai/ai-availability';
+import { aiProviderLabel } from '@service/ai/ai-provider';
+import { bankSyncCredentialsFor } from '@service/bank-providers/registry';
 import { enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { ERROR } from '@utils/constants';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -44,11 +47,26 @@ export function getUserAccountInformation(req: Request, res: Response) {
 }
 
 /** Return the authenticated user's profile using the mobile profile contract. */
-export function getCurrentUserProfile(req: Request, res: Response) {
+export async function getCurrentUserProfile(req: Request, res: Response) {
   const profile = pick(req.user, ['emailAddress', 'firstName', 'lastName']);
+  const bankSyncCredentials = req.tenant ? await bankSyncCredentialsFor(DI.em, req.tenant.tenantKey) : 'user';
   return res.json({
     profile: {
       ...profile,
+      // The effective per-user AI capabilities: every feature off once this person hid AI, so a
+      // client can gate on the profile alone instead of combining it with `/v1/instance`.
+      ai: effectiveAiCapabilities(req.user),
+      // Who PDF statement pages go to, for the consent line the person reads before uploading one;
+      // null while the feature is off for them. An OpenAI-compatible endpoint is named only by its
+      // family: its address may be an internal host.
+      aiProviders: { statementImport: effectiveAiCapabilities(req.user).statementImport ? aiProviderLabel('statementImport') : null },
+      // `instance` when this person's household may link a bank with the instance-wide Enable
+      // Banking credential, so the clients skip the credential step; `user` when they need their
+      // own (`services/enable-banking/instance-credential-policy.ts`). Their own credential, when
+      // they have one, is used either way.
+      bankSyncCredentials,
+      // The shared read-only demo account: clients show the demo banner and its links.
+      demo: req.user?.accountType === AppuserAccountType.DEMO,
       // better-auth is the source of truth for MFA state; `getAuthSession` copies
       // `twoFactorEnabled` onto `req.authUser`. The `Appuser` row has no MFA column.
       mfaEnabled: req.authUser?.user.twoFactorEnabled ?? false,
@@ -65,7 +83,7 @@ export function getCurrentUserProfile(req: Request, res: Response) {
 export async function updateData(req: Request, res: Response, next: NextFunction) {
   const authedUser_ = authedUser(req);
   const {
-    body: { firstName, lastName, mobileNumber, mobileNumberPrefix },
+    body: { firstName, language, lastName, mobileNumber, mobileNumberPrefix },
   } = await zParse(updateUserDataRequestSchema, req);
   const user = await DI.em.getRepository(Appuser).getUserById(authedUser_.appuserKey);
   if (!user) {
@@ -74,6 +92,9 @@ export async function updateData(req: Request, res: Response, next: NextFunction
   }
   if (firstName) {
     user.firstName = firstName;
+  }
+  if (language) {
+    user.language = language;
   }
   if (lastName) {
     user.lastName = lastName;

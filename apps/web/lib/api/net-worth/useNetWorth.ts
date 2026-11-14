@@ -1,6 +1,8 @@
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
+import type { MemberFilter } from "@/lib/household/member-attribution";
+
 import api from "../api";
 
 export interface RawNetWorthSummary {
@@ -21,6 +23,8 @@ export interface RawNetWorthSummary {
     name: string;
     balance: number;
     countedInAccountId?: number;
+    /** Under a member filter: the percentage of a split account counted here, when not all of it. */
+    sharePercent?: number;
   }>;
   /** Ask "Is this the same money?": an investment account no portfolio is linked to, and an unlinked portfolio. */
   suggestPortfolioLink?: boolean;
@@ -50,6 +54,8 @@ export interface NetWorth {
     currencyCode?: string;
     /** Shown, but already counted in this account's balance. */
     countedInAccountId?: number;
+    /** One member's figure: their share of a split account, in percent, when not all of it. */
+    sharePercent?: number;
     subRows?: Array<{
       key: string;
       label: string;
@@ -71,10 +77,20 @@ export interface GetNetWorthResponse {
   netWorth: NetWorth;
 }
 
+/**
+ * @param member - One member's net worth (their share of each account split between members, and
+ *   the accounts they own outright, not joint; their portfolios and manual assets; loans only when
+ *   they are the viewer), or Shared's (joint accounts with no shares, and a departed member's
+ *   accounts and shares); null or absent for the household's.
+ */
 export async function getNetWorth(
   apiClient: AxiosInstance = api,
+  member: MemberFilter = null,
 ): Promise<GetNetWorthResponse> {
-  const { data } = await apiClient.get<RawNetWorthSummary>("/v1/net-worth");
+  const { data } = await apiClient.get<RawNetWorthSummary>(
+    "/v1/net-worth",
+    member === null ? undefined : { params: { member: String(member) } },
+  );
   return {
     netWorth: {
       assetsTotal:
@@ -100,6 +116,9 @@ export async function getNetWorth(
         ...(row.countedInAccountId === undefined
           ? {}
           : { countedInAccountId: row.countedInAccountId }),
+        ...(row.sharePercent === undefined
+          ? {}
+          : { sharePercent: row.sharePercent }),
       })),
       suggestPortfolioLink: data.suggestPortfolioLink === true,
       unconverted: {
@@ -118,10 +137,12 @@ export default function useNetWorth<R = GetNetWorthResponse>(
     UseQueryOptions<GetNetWorthResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  member: MemberFilter = null,
 ) {
   return useQuery({
-    queryKey: ["net-worth"],
-    queryFn: () => getNetWorth(),
+    // The household's keeps the plain key, so its cache and invalidation are as before.
+    queryKey: member === null ? ["net-worth"] : ["net-worth", { member }],
+    queryFn: () => getNetWorth(undefined, member),
     ...options,
   });
 }

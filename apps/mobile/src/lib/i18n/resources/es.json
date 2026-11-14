@@ -14,6 +14,7 @@
     "signOut": "Cerrar sesión",
     "preview": "Vista previa",
     "unavailable": "No disponible",
+    "expressionResult": "Resultado de la expresión: {{amount}}",
     "mixedCurrencies_one": "{{count}} moneda",
     "mixedCurrencies_other": "{{count}} monedas",
     "relativeTime": {
@@ -46,7 +47,9 @@
       "years_other": "hace {{count}} años"
     },
     "close": "Cerrar",
-    "moreActions": "Más acciones"
+    "moreActions": "Más acciones",
+    "householdReadOnly": "Tienes acceso de solo lectura a este hogar, así que no se cambió nada. Pide a un titular o administrador si necesitas hacer cambios.",
+    "accountReadOnly": "Puedes ver esta cuenta, pero no cambiarla."
   },
   "navigation": {
     "home": "Inicio",
@@ -62,6 +65,7 @@
     "watchlist": "Seguimiento",
     "goals": "Objetivos",
     "loans": "Préstamos",
+    "groups": "Grupos",
     "assets": "Bienes",
     "reports": "Informes",
     "help": "Ayuda",
@@ -120,6 +124,13 @@
         "unavailable": "No se pudo iniciar sesión así. Inténtalo de nuevo"
       }
     },
+    "sso": {
+      "signIn": "Iniciar sesión con {{provider}}",
+      "onlyNotice": "Este servidor inicia sesión a través de {{provider}}.",
+      "errors": {
+        "unavailable": "El inicio de sesión con {{provider}} no terminó. Si tu proveedor lo rechazó, mostró el motivo. Vuelve a intentarlo"
+      }
+    },
     "forgotPassword": {
       "title": "Enviar correo de restablecimiento",
       "helper": "Introduce tu correo y te enviaremos un enlace de restablecimiento",
@@ -169,7 +180,38 @@
     "notMember": "¿Aún no eres miembro?",
     "createAccountLink": "Crea una cuenta",
     "alreadyMember": "¿Ya eres miembro?",
-    "loginLink": "Inicia sesión aquí"
+    "loginLink": "Inicia sesión aquí",
+    "pairing": {
+      "scanButton": "Escanear código QR",
+      "scanTitle": "Escanea el código QR",
+      "scanHint": "Apunta la cámara al código en Ajustes → Seguridad en la web.",
+      "cameraPermission": "Permite el acceso a la cámara para escanear el código de emparejamiento.",
+      "grantCamera": "Permitir cámara",
+      "cancel": "Cancelar",
+      "connecting": "Conectando con el servidor…",
+      "invalidCode": "Ese no es un código de emparejamiento de WonderMoney.",
+      "errors": {
+        "invalidCode": "Ese código ha caducado o ya se ha usado. Muestra uno nuevo en la web.",
+        "unavailable": "No se pudo conectar con ese servidor. Inténtalo de nuevo."
+      }
+    },
+    "demo": {
+      "button": "Probar la demo",
+      "signingIn": "Abriendo la demo…",
+      "errors": {
+        "disabled": "Este servidor no ofrece la demo.",
+        "rateLimited": "Demasiados accesos a la demo. Inténtalo de nuevo en unos minutos.",
+        "unavailable": "La demo no está disponible ahora. Inténtalo más tarde.",
+        "unreachable": "No se ha podido contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo."
+      }
+    },
+    "passkey": {
+      "signIn": "Iniciar sesión con una llave de acceso",
+      "signingIn": "Iniciando sesión…",
+      "errors": {
+        "unavailable": "No se ha podido iniciar sesión con esa llave de acceso. Inténtalo de nuevo o usa tu contraseña."
+      }
+    }
   },
   "access": {
     "mfa": {
@@ -232,7 +274,23 @@
       "title": "Información",
       "loading": "Cargando información",
       "error": "No se pudo cargar la información",
-      "topCategory": "{{name}} — {{amount}} este mes"
+      "topCategory": "{{name}} — {{amount}} este mes",
+      "severity": {
+        "critical": "Requiere atención",
+        "warning": "Vale la pena mirar",
+        "info": "Buena noticia"
+      },
+      "spending": {
+        "above": "{{category}} está un {{percent}}% por encima de su ritmo habitual.",
+        "below": "{{category}} está un {{percent}}% por debajo de su ritmo habitual.",
+        "figures": "{{current}} hasta ahora, normalmente {{baseline}} a estas alturas.",
+        "link": "Ver transacciones"
+      },
+      "budget": {
+        "pace": "{{category}} va camino de superar su presupuesto.",
+        "figures": "{{projected}} previstos frente a {{budgeted}} planificados.",
+        "link": "Ver presupuesto"
+      }
     },
     "helpText": "Un resumen rápido de tus cuentas, cartera y pasivos.",
     "unsupportedAccount_one": "No se incluye {{count}} saldo de cuenta",
@@ -240,6 +298,29 @@
     "unconvertedCurrencies": "Aún no hay tipo de cambio para {{currencies}}."
   },
   "home": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar inicio",
+      "description": "Elige qué aparece en tu inicio y en qué orden.",
+      "back": "Volver al inicio",
+      "sections": {
+        "net-worth": "Patrimonio neto",
+        "this-month": "Este mes",
+        "balance-sheet": "Balance",
+        "cashflow": "Flujo de caja neto",
+        "loans": "Préstamos",
+        "latest-transactions": "Últimas transacciones"
+      },
+      "moveUp": "Mover {{section}} hacia arriba",
+      "moveDown": "Mover {{section}} hacia abajo",
+      "pinned": "Siempre aparece primero",
+      "reset": "Restablecer",
+      "saving": "Guardando…",
+      "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "loadError": "No se pudo cargar tu inicio.",
+      "loading": "Cargando tu inicio"
+    },
     "netWorth": {
       "title": "Patrimonio neto",
       "since": "desde el cierre de {{month}}",
@@ -304,14 +385,23 @@
         "manualAssets": "Inmuebles y otros bienes",
         "loans": "Préstamos"
       },
-      "countedIn": "Incluida en {{account}}"
+      "countedIn": "Incluida en {{account}}",
+      "shareOfAccount": "{{percent}} de esta cuenta"
     },
     "cashflow": {
       "title": "Flujo de caja neto por mes",
       "listLabel": "Flujo de caja neto, de {{from}} a {{to}}",
       "caption": "Entradas menos salidas en todas tus cuentas.",
       "emptyTitle": "Aún no hay flujo de caja",
-      "emptyBody": "Aparece cuando tus cuentas tengan transacciones."
+      "emptyBody": "Aparece cuando tus cuentas tengan transacciones.",
+      "thisMonth": "Este mes",
+      "income": "Ingresos",
+      "spending": "Gastos",
+      "savingsRate": "Tasa de ahorro",
+      "vs": "vs {{month}}",
+      "vsSamePoint": "vs el mismo punto del mes pasado",
+      "points": "{{points}} p.p.",
+      "formula": "La tasa de ahorro es los ingresos menos los gastos, dividido por los ingresos. Es — cuando los ingresos son cero."
     },
     "loans": {
       "title": "Próximos pagos de préstamos",
@@ -325,8 +415,10 @@
     },
     "latest": {
       "title": "Últimas transacciones",
-      "review_one": "{{count}} por revisar",
-      "review_other": "{{count}} por revisar",
+      "reviewSummary_one": "{{count}} transacción por revisar · {{amount}} en total",
+      "reviewSummary_other": "{{count}} transacciones por revisar · {{amount}} en total",
+      "reviewNow": "Revisar ahora",
+      "allCaughtUp": "Todo al día",
       "all": "Todas las transacciones",
       "uncategorised": "Sin categoría",
       "needsReview": "Por revisar",
@@ -455,6 +547,7 @@
     "errors": {
       "validation": "El servidor no aceptó estos valores. Edita los datos y revísalos de nuevo.",
       "demo": "Los perfiles de demostración son de solo lectura. No se ha creado ninguna cuenta.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ahora mismo no tienes acceso para crear una cuenta.",
       "mfa": "Se necesita una verificación adicional antes de crear una cuenta.",
       "cancelled": "La creación de la cuenta se canceló antes del envío. No se ha creado ninguna cuenta.",
@@ -478,6 +571,7 @@
     "stale": "No se pudo actualizar. Se muestran los datos de la cuenta cargados anteriormente",
     "viewTransactions": "Ver transacciones de la cuenta",
     "edit": "Editar cuenta",
+    "sharing": "Compartir",
     "error": {
       "title": "No se pudo cargar la cuenta",
       "message": "Comprueba tu conexión e inténtalo de nuevo"
@@ -495,6 +589,14 @@
       "message": "No se pudieron verificar los datos de la cuenta recibidos"
     }
   },
+  "accountForecast": {
+    "title": "Previsión",
+    "lowPoint": "Punto más bajo en los próximos {{days}} días",
+    "unavailable": "Aún no hay datos suficientes para prever esta cuenta.",
+    "next": "Próximos pagos previstos",
+    "notCounted": "No cuenta en los informes",
+    "nextInstallments": "Próximas cuotas"
+  },
   "accountRecalculate": {
     "action": "Recalcular saldos",
     "confirmTitle": "¿Recalcular los saldos?",
@@ -510,6 +612,8 @@
     "failures": {
       "too-soon": "Esta cuenta se recalculó hace menos de un minuto. Vuelve a intentarlo en breve.",
       "demo": "Recalcular no está disponible en la demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Vuelve a iniciar sesión para recalcular esta cuenta.",
       "not-found": "Esta cuenta ya no está disponible.",
       "network": "No se pudo contactar con el servidor. Revisa tu conexión y vuelve a intentarlo.",
@@ -530,13 +634,47 @@
     "saveDetails": "Guardar detalles",
     "saving": "Guardando…",
     "privacyTitle": "Cuenta privada",
-    "privacyHelper": "Solo tú puedes ver esta cuenta y sus transacciones; tu pareja del hogar no la verá en ningún sitio.",
+    "privacyHelper": "Solo tú puedes ver esta cuenta y sus transacciones; las demás personas de tu hogar no la verán en ningún sitio.",
     "privacySwitch": "Cuenta privada",
+    "sharing": {
+      "title": "Compartir",
+      "screenTitle": "Compartir la cuenta",
+      "helper": "Elige qué puede hacer cada persona de tu hogar con esta cuenta.",
+      "readOnlyHelper": "Solo el titular de la cuenta o el titular del hogar puede cambiar con quién se comparte.",
+      "owner": "Titular",
+      "choices": {
+        "hidden": "Oculta",
+        "read": "Puede ver",
+        "write": "Puede editar"
+      },
+      "memberAccess": "Acceso de {{name}}",
+      "viewerHint": "Los observadores solo pueden ver, nunca editar.",
+      "unnamedMember": "Miembro del hogar",
+      "laterShared": "Quien se una al hogar más adelante también podrá verla y editarla.",
+      "laterPrivate": "Quien se una al hogar más adelante no la verá hasta que alguien la comparta con esa persona.",
+      "alone": "Todavía no hay nadie más en tu hogar con quien compartirla.",
+      "loading": "Cargando quién puede ver esta cuenta…",
+      "error": "No se pudo cargar con quién se comparte esta cuenta.",
+      "failures": {
+        "demo": "El modo de demostración es de solo lectura. No se cambió el uso compartido.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "manager-required": "Solo el titular de la cuenta o el titular del hogar puede cambiar con quién se comparte.",
+        "access": "Ya no tienes acceso para cambiar con quién se comparte esta cuenta.",
+        "cancelled": "El guardado se canceló porque tu contexto de sesión cambió.",
+        "not-found": "Esta cuenta ya no existe.",
+        "invalid": "Alguien se unió al hogar o lo dejó desde que se cargó esta lista. Actualiza e inténtalo de nuevo.",
+        "network-ambiguous": "Se perdió la conexión al guardar. El resultado es incierto, por lo que esta aplicación no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
+        "general": "No se pudo guardar el uso compartido."
+      }
+    },
     "discardTitle": "¿Descartar los cambios sin guardar?",
     "discardMessage": "Se perderán los cambios de cuenta no guardados.",
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cuenta.",
       "cancelled": "El guardado se canceló porque tu contexto de sesión cambió. Revisa el formulario actual antes de volver a intentarlo.",
       "not-found": "Esta cuenta ya no existe. Tu formulario no se ha borrado.",
@@ -553,6 +691,8 @@
     "deleteConfirmAction": "Eliminar cuenta",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta cuenta no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Ya no tienes acceso para eliminar esta cuenta.",
       "cancelled": "La eliminación se canceló porque tu contexto de sesión cambió.",
       "not-found": "Esta cuenta ya no existe.",
@@ -569,7 +709,14 @@
       "not-foundMessage": "Es posible que esta cuenta se haya eliminado.",
       "invalid-idTitle": "Cuenta no disponible",
       "invalid-idMessage": "Vuelve a Cuentas y elige una cuenta disponible."
-    }
+    },
+    "creditCardTitle": "Cuenta de tarjeta de crédito",
+    "creditCardHelper": "Sigue el ciclo del extracto de esta tarjeta: cuándo cierra, cuándo vence y cuánto crédito queda.",
+    "statementCloseDay": "El extracto cierra el (1–31)",
+    "paymentDueDay": "El pago vence el (1–31)",
+    "creditLimit": "Límite de crédito",
+    "minimumPaymentPercent": "Pago mínimo (% del saldo)",
+    "optional": "Opcional"
   },
   "transactions": {
     "title": "Transacciones",
@@ -705,9 +852,12 @@
     },
     "reviewResult": {
       "demo": "Los perfiles de demostración son de solo lectura. Las transacciones seleccionadas no se han modificado",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Se requiere autenticación multifactor. Las transacciones seleccionadas no se han modificado",
       "cancelled": "El cambio se canceló porque tu sesión cambió. Las transacciones seleccionadas no se han modificado",
       "network": "El resultado de la solicitud de red es incierto. Revisa las transacciones seleccionadas antes de volver a intentarlo",
+      "in-group": "Esta transacción está compartida en un grupo, así que su división es del grupo. Cámbiala con Editar partes.",
       "error": "No se pudieron modificar las transacciones seleccionadas. Inténtalo de nuevo"
     },
     "moreFilters_zero": "Filtros",
@@ -730,6 +880,105 @@
     "rowActions": "Acciones para {{name}}",
     "showDetails": "Mostrar detalles",
     "hideDetails": "Ocultar detalles",
+    "split": {
+      "action": "Dividir",
+      "edit": "Editar división",
+      "title": "Dividir transacción",
+      "close": "Cerrar",
+      "save": "Guardar división",
+      "lines": "Líneas de la división",
+      "line": "Línea {{number}}",
+      "total": "Importe a dividir",
+      "remaining": "Falta asignar",
+      "over": "Excede en",
+      "balanced": "Todo asignado",
+      "saveBlocked": "Las líneas deben sumar el importe de la transacción antes de guardar.",
+      "needsAmounts": "Indica un importe en cada línea.",
+      "category": "Categoría",
+      "amount": "Importe",
+      "note": "Nota",
+      "notePlaceholder": "Nota (opcional)",
+      "lineCategory": "Categoría de la línea {{number}}",
+      "lineAmount": "Importe de la línea {{number}}",
+      "lineNote": "Nota de la línea {{number}}",
+      "removeLine": "Quitar línea {{number}}",
+      "addLine": "Añadir línea",
+      "splitEvenly": "Dividir a partes iguales",
+      "amountHint": "Escribe un importe o un porcentaje, como 25%. Cada línea lleva el signo de la transacción.",
+      "uncategorized": "Sin categoría",
+      "remove": "Quitar división",
+      "removeTitle": "¿Quitar la división?",
+      "removeDescription": "La transacción vuelve a tener una sola categoría: {{category}}, la de su línea más grande.",
+      "summary_one": "Dividida · {{count}} categoría",
+      "summary_other": "Dividida · {{count}} categorías",
+      "lineErrors": {
+        "invalid": "Escribe un importe o un porcentaje.",
+        "too-precise": "Usa como máximo 4 decimales.",
+        "zero": "Una línea no puede ser cero."
+      },
+      "errors": {
+        "save": "No se pudo guardar la división.",
+        "remove": "No se pudo quitar la división."
+      }
+    },
+    "reimbursement": {
+      "action": "Marcar como reembolso",
+      "title": "Marcar como reembolso",
+      "close": "Cerrar",
+      "save": "Vincular al gasto",
+      "amountIn": "Reembolso",
+      "left": "Pendiente de vincular",
+      "currencyHint": "Por ahora solo se pueden vincular gastos en {{currency}}.",
+      "reimbursedBy": "Reembolsado por",
+      "reimburses": "Reembolsa",
+      "searchLabel": "Buscar gastos",
+      "searchPlaceholder": "Comercio o descripción",
+      "suggested": "Gastos sugeridos",
+      "results": "Gastos que coinciden",
+      "loading": "Cargando gastos",
+      "loadError": "No se pudieron cargar los gastos.",
+      "empty": "No hay gastos que sugerir. Busca por comercio o descripción.",
+      "emptySearch": "Ningún gasto coincide con «{{search}}».",
+      "sameMerchant": "Mismo comercio",
+      "notYetReimbursed": "{{amount}} aún sin reembolsar",
+      "chooseFirst": "Elige el gasto que esto reembolsa.",
+      "fullyLinked": "Este reembolso ya está vinculado por completo. Desvincula un gasto para vincular otro.",
+      "amount": "Importe",
+      "amountLabel": "Importe a vincular",
+      "amountHint": "Hasta {{amount}}: lo que queda de este reembolso y del gasto.",
+      "amountErrors": {
+        "invalid": "Introduce un importe.",
+        "too-precise": "Usa como máximo 4 decimales.",
+        "zero": "El importe no puede ser cero.",
+        "over": "Se pueden vincular como máximo {{amount}}."
+      },
+      "unlink": "Desvincular",
+      "unlinkNamed": "Desvincular {{name}}",
+      "unlinkTitle": "¿Desvincular este reembolso?",
+      "unlinkDescription": "Los {{amount}} vinculados con {{name}} vuelven a contar como gasto e ingreso.",
+      "open": "Abrir {{name}}",
+      "badges": {
+        "reimbursed": "Reembolsado",
+        "partly-reimbursed": "Reembolsado en parte",
+        "reimbursement": "Reembolso"
+      },
+      "errors": {
+        "currency-mismatch": "Por ahora solo se pueden vincular transacciones en la misma divisa.",
+        "amount-exceeded": "Es más de lo que queda del gasto o de este reembolso.",
+        "visibility-mismatch": "Las dos transacciones deben estar en cuentas compartidas, o en cuentas privadas de la misma persona.",
+        "invalid": "Solo un ingreso puede reembolsar un gasto, y ninguno puede ser una transferencia ni el pago de un préstamo.",
+        "exists": "Estas dos ya están vinculadas. Desvincúlalas primero para cambiar el importe.",
+        "not-found": "Esa transacción o vínculo ya no está disponible. Actualiza e inténtalo de nuevo.",
+        "in-group": "Esta transacción está compartida en un grupo o liquida uno, así que no se puede vincular como reembolso.",
+        "demo": "Los perfiles de demostración son de solo lectura. No se ha cambiado nada.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "mfa": "Se requiere autenticación multifactor. No se ha cambiado nada.",
+        "cancelled": "El cambio se canceló porque tu sesión cambió. No se ha cambiado nada.",
+        "network": "La solicitud tuvo un resultado de red incierto. Revisa la transacción antes de volver a intentarlo.",
+        "error": "No se pudo guardar el cambio. Inténtalo de nuevo."
+      }
+    },
     "transfer": {
       "mark": "Marcar como transferencia",
       "unmark": "No es una transferencia",
@@ -746,6 +995,57 @@
       "excluded": "Entre tu propio dinero: queda fuera de gastos e ingresos",
       "spendingLabel": "Gasto",
       "notSpending": "Su categoría no cuenta como gasto"
+    },
+    "attachments": {
+      "title": "Adjuntos",
+      "empty": "Todavía no hay archivos.",
+      "addPhoto": "Hacer foto",
+      "chooseFiles": "Elegir archivos",
+      "open": "Abrir {{name}}",
+      "delete": "Eliminar {{name}}",
+      "uploading": "Subiendo…",
+      "limit": "Una transacción puede tener como máximo 10 adjuntos.",
+      "size": "El archivo supera los 10 MB.",
+      "type": "Ese tipo de archivo no es compatible.",
+      "access": "Verifica tu sesión e inténtalo de nuevo.",
+      "network": "Comprueba la conexión e inténtalo de nuevo.",
+      "general": "No se pudo completar. Inténtalo de nuevo."
+    },
+    "bulk": {
+      "tag": "Etiqueta",
+      "tagTitle_one": "Etiquetar {{count}} transacción",
+      "tagTitle_other": "Etiquetar {{count}} transacciones",
+      "addTag": "Añadir etiqueta",
+      "removeTag": "Quitar etiqueta",
+      "delete": "Eliminar",
+      "deleteOne": "Eliminar",
+      "deleteTitle_one": "¿Eliminar {{count}} transacción?",
+      "deleteTitle_other": "¿Eliminar {{count}} transacciones?",
+      "deleteMessage": "Las transacciones eliminadas salen de todas las listas y totales, y los saldos de la cuenta se recalculan sin ellas. Su historial queda en el registro de auditoría, pero no se pueden recuperar.",
+      "syncedNote_one": "{{count}} de ellas vino de tu banco y no se eliminará: el banco la volvería a enviar. Ocúltala para sacarla de las listas y los totales.",
+      "syncedNote_other": "{{count}} de ellas vinieron de tu banco y no se eliminarán: el banco las volvería a enviar. Ocúltalas para sacarlas de las listas y los totales.",
+      "matchingSyncedNote": "Las transacciones que vinieron de tu banco no se eliminan: el banco las volvería a enviar. Puedes ocultarlas.",
+      "onlySyncedTitle_one": "Esta transacción vino de tu banco",
+      "onlySyncedTitle_other": "Estas transacciones vinieron de tu banco",
+      "deleteOnlySynced_one": "No se puede eliminar: el banco la volvería a enviar. Ocúltala para sacarla de las listas y los totales.",
+      "deleteOnlySynced_other": "No se pueden eliminar: el banco las volvería a enviar. Ocúltalas para sacarlas de las listas y los totales.",
+      "confirmDelete_one": "Eliminar {{count}} transacción",
+      "confirmDelete_other": "Eliminar {{count}} transacciones",
+      "hideInstead_one": "Ocultarla",
+      "hideInstead_other": "Ocultar {{count}} transacciones del banco",
+      "deleted_one": "{{count}} transacción eliminada.",
+      "deleted_other": "{{count}} transacciones eliminadas.",
+      "skipped_one": "{{count}} transacción del banco no se eliminó: el banco la volvería a enviar.",
+      "skipped_other": "{{count}} transacciones del banco no se eliminaron: el banco las volvería a enviar.",
+      "hideSkipped": "Ocultarlas",
+      "selectLoaded_one": "Seleccionar la {{count}} transacción cargada",
+      "selectLoaded_other": "Seleccionar las {{count}} transacciones cargadas",
+      "selectAllMatching_one": "Seleccionar la {{count}} transacción que coincide",
+      "selectAllMatching_other": "Seleccionar las {{count}} transacciones que coinciden",
+      "allMatchingSelected_one": "La {{count}} transacción que coincide está seleccionada",
+      "allMatchingSelected_other": "Las {{count}} transacciones que coinciden están seleccionadas",
+      "matchingScope": "Todas las transacciones que coinciden con el periodo y los filtros, cargadas o no.",
+      "tooManyMatching": "Acota los filtros para cambiar más de {{max}} transacciones a la vez."
     }
   },
   "tags": {
@@ -775,6 +1075,7 @@
     "result": {
       "taken": "Ya existe una etiqueta con este nombre.",
       "demo": "Los perfiles de demostración son de solo lectura. La etiqueta no se creó.",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Se requiere autenticación multifactor. La etiqueta no se creó.",
       "network": "La solicitud tuvo un resultado de red incierto. Revisa las etiquetas antes de volver a intentarlo.",
       "error": "No se pudo crear la etiqueta. Inténtalo de nuevo."
@@ -840,6 +1141,8 @@
     "submitting": "Registrando…",
     "result": {
       "demo": "Los perfiles de demostración son de solo lectura. No se registró nada.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "No tienes acceso para registrar esta transacción. No se registró nada.",
       "mfa": "Se requiere verificación adicional. No se registró nada.",
       "validation": "Estos datos fueron rechazados. Edítalos antes de volver a enviarlos.",
@@ -912,27 +1215,20 @@
       "templateFailed": "No se pudo compartir la plantilla en este dispositivo.",
       "typeCodes": "Códigos de tipo",
       "showTypeCodes": "Mostrar códigos de tipo",
-      "hideTypeCodes": "Ocultar códigos de tipo",
-      "rowsFailed": "No se pudieron importar {{failed}} de {{total}} filas. Revisa sus columnas, fechas, importes y códigos de tipo con el formato."
+      "hideTypeCodes": "Ocultar códigos de tipo"
     },
     "chooseFile": "Elegir archivo",
     "phases": {
       "uploading": "Subiendo archivo…",
-      "starting": "Iniciando importación…",
-      "processing": "Procesando tu extracto…"
-    },
-    "outcomes": {
-      "succeeded": "Importación completa. Se añadieron nuevas transacciones.",
-      "partial": "Importación completa. Algunas filas no se pudieron importar.",
-      "needs_action": "Esta importación necesita revisión manual. Termínala en wonder.money en la web.",
-      "stale": "Esta importación no se pudo completar a tiempo. Inténtalo de nuevo.",
-      "failed": "No se pudo importar este archivo."
+      "starting": "Iniciando importación…"
     },
     "importAnother": "Importar otro archivo",
     "done": "Listo",
     "tryAgain": "Intentar de nuevo",
     "failures": {
       "demo": "Importar transacciones no está disponible en modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Tu acceso cambió. Inténtalo de nuevo.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "La importación se canceló antes de enviarse.",
@@ -941,7 +1237,66 @@
       "unsupported-bank": "Este formato de banco aún no es compatible.",
       "general": "No se pudo completar la importación. Comprueba tu conexión e inténtalo de nuevo.",
       "unknown-format": "Esta versión de la app no puede importar en esta cuenta. Actualiza la app o importa en la web.",
-      "csv-only": "Esta cuenta importa un archivo CSV con el formato indicado. Elige un archivo .csv."
+      "csv-only": "Esta cuenta importa un archivo CSV con el formato indicado. Elige un archivo .csv, .ofx, .qfx, .qif o .xml.",
+      "conflict": "Esta importación cambió mientras tanto. Revísala e inténtalo de nuevo."
+    },
+    "review": {
+      "reading": "Leyendo el archivo…",
+      "readStalled": "La lectura del archivo se detuvo antes de terminar. Vuelve a intentarlo para leerlo de nuevo.",
+      "importing": "Importando… {{imported}} de {{total}} transacciones hasta ahora.",
+      "stalled": "La importación se detuvo antes de terminar. Vuelve a intentarlo para seguir donde se quedó; nada se importa dos veces.",
+      "readFailed": "No pudimos leer este archivo. Elige una exportación del extracto en CSV o Excel.",
+      "expired": "Esta importación caducó antes de terminar. Empieza de nuevo con el archivo.",
+      "unsupported": "Esta versión de la app no puede mostrar esta importación. Actualiza la app o termínala en la web.",
+      "needsWeb": "Este archivo tiene sus propias categorías para asociar, algo que la app aún no hace. No se importó nada: cancela esta importación e importa el archivo en la web.",
+      "needsWebPdf": "Es un extracto en PDF, cuyos saldos la app aún no puede comprobar. No se importó nada: cancela esta importación y revisa el extracto en la web.",
+      "loadFailed": "No se pudo cargar esta importación. Comprueba tu conexión e inténtalo de nuevo.",
+      "unnamed": "Importación del {{date}}",
+      "summary": "No se importa nada hasta que confirmes. Las transacciones nuevas están incluidas; las que ya están en la cuenta se omiten.",
+      "filter": "Mostrar",
+      "filters": {
+        "all": "Todas ({{count}})",
+        "new": "Nuevas ({{count}})",
+        "duplicate": "Ya en la cuenta ({{count}})",
+        "possible_duplicate": "Posibles duplicados ({{count}})",
+        "invalid": "No se pudieron leer ({{count}})"
+      },
+      "status": {
+        "new": "Nueva",
+        "duplicate": "Ya en la cuenta",
+        "possible_duplicate": "Posible duplicado",
+        "invalid": "No se pudo leer",
+        "imported": "Importada",
+        "skipped": "Omitida",
+        "failed": "No se pudo importar"
+      },
+      "row": "Fila {{row}}",
+      "includeRow": "Importar la fila {{row}}",
+      "includeAll": "Incluir todas",
+      "skipAll": "Omitir todas",
+      "commit_one": "Importar {{count}} transacción",
+      "commit_other": "Importar {{count}} transacciones",
+      "commitNothing": "Nada que importar",
+      "cancel": "Cancelar importación",
+      "page": "Página {{page}} de {{pages}}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "empty": "No hay filas aquí.",
+      "mappingTitle": "Este archivo tiene varias cuentas. Elige adónde va cada una.",
+      "mappingSource_one": "{{label}} ({{count}} fila)",
+      "mappingSource_other": "{{label}} ({{count}} filas)",
+      "mappingChoose": "Elige una cuenta",
+      "mappingSave": "Guardar cuentas",
+      "dateOrderTitle": "Estas fechas pueden ser día primero o mes primero.",
+      "dateOrderHintDayFirst": "El archivo no lo indica, así que se leyeron con el día primero (15/01/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
+      "dateOrderHintMonthFirst": "El archivo no lo indica, así que se leyeron con el mes primero (01/15/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
+      "dayFirst": "Día primero (31/01/2026)",
+      "monthFirst": "Mes primero (01/31/2026)",
+      "done_one": "{{count}} transacción importada, {{skipped}} omitidas.",
+      "done_other": "{{count}} transacciones importadas, {{skipped}} omitidas.",
+      "doneFailed_one": "{{count}} fila no se pudo importar.",
+      "doneFailed_other": "{{count}} filas no se pudieron importar.",
+      "detailsDeleted": "Los detalles fila a fila de esta importación ya no se conservan: se eliminan 7 días después de una importación. Las transacciones importadas siguen en la cuenta."
     }
   },
   "transactionOcr": {
@@ -981,6 +1336,8 @@
     },
     "failures": {
       "demo": "Escanear recibos no está disponible en modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "allowance": "Tu hogar ya ha usado el límite diario de escaneo de recibos. Se restablece a medianoche UTC.",
       "unverified": "Verifica tu correo electrónico para escanear recibos.",
       "access": "Tu acceso cambió. Inténtalo de nuevo.",
@@ -1033,6 +1390,8 @@
     },
     "actionResult": {
       "demo": "Los perfiles de demostración son de solo lectura. No se cambió nada",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Se necesita una verificación adicional. No se cambió nada",
       "cancelled": "El cambio se canceló porque tu sesión cambió",
       "network": "El resultado es incierto porque se perdió la conexión. Comprueba la lista antes de volver a intentarlo",
@@ -1188,6 +1547,19 @@
       "paused": "Pausado",
       "ended": "Finalizado",
       "dismissed": "Descartado"
+    },
+    "calendar": "Calendario",
+    "calendarDescription": "Qué facturas caen en cada día de este mes",
+    "calendarPreviousMonth": "Mes anterior",
+    "calendarNextMonth": "Mes siguiente",
+    "calendarEmpty": "No hay pagos recurrentes este mes",
+    "calendarLoading": "Cargando los pagos de este mes…",
+    "calendarUnavailable": "Los pagos de este mes no están disponibles",
+    "occurrenceStatus": {
+      "paid": "Pagado",
+      "due": "Vence hoy",
+      "overdue": "Vencido",
+      "projected": "Previsto"
     }
   },
   "more": {
@@ -1232,6 +1604,10 @@
     },
     "appInformation": "Información de la aplicación",
     "version": "Versión {{version}}",
+    "serverVersion": "Servidor {{version}}",
+    "copyVersionInfo": "Copiar información de la versión",
+    "versionInfoCopied": "Información de la versión copiada",
+    "versionInfoCopyFailed": "No se pudo copiar la información de la versión. Inténtalo de nuevo.",
     "environment": "Entorno {{environment}}",
     "environments": {
       "local": "Local",
@@ -1239,7 +1615,10 @@
     },
     "goals": "Objetivos",
     "help": "Ayuda",
-    "whatsNew": "Novedades"
+    "whatsNew": "Novedades",
+    "pendingChanges": "Cambios pendientes",
+    "pendingChangesCount_one": "{{count}} en espera",
+    "pendingChangesCount_other": "{{count}} en espera"
   },
   "preferences": {
     "title": "Apariencia e idioma",
@@ -1258,7 +1637,7 @@
       "pt-PT": "Português (Portugal)",
       "es": "Español"
     },
-    "languageScope": "El idioma solo cambia la interfaz de la aplicación. No cambia el idioma del correo ni del perfil de la cuenta."
+    "languageScope": "El idioma cambia la interfaz de la aplicación en este dispositivo y el idioma de tus correos. Los correos que aún no están traducidos llegan en inglés."
   },
   "categories": {
     "title": "Categorías",
@@ -1404,6 +1783,7 @@
     "failures": {
       "validation": "Los datos de la categoría no son válidos.",
       "demo": "Los perfiles de demostración son de solo lectura. No se cambió ninguna categoría.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso para cambiar categorías.",
       "mfa": "Se necesita verificación adicional para cambiar categorías.",
       "not-found": "Esta categoría o la categoría principal ya no está disponible. Actualiza Categorías.",
@@ -1500,7 +1880,8 @@
     },
     "rateType": {
       "FIXED": "Tipo fijo",
-      "UNKNOWN": "Tipo no disponible"
+      "UNKNOWN": "Tipo no disponible",
+      "VARIABLE": "Tipo variable"
     },
     "loanDetails": "Detalles del préstamo",
     "openingDate": "Fecha del saldo inicial",
@@ -1536,7 +1917,14 @@
     "loanType": "Tipo de préstamo",
     "statusLabel": "Estado",
     "description": "Descripción",
-    "repaymentsTitle": "Pagos"
+    "repaymentsTitle": "Pagos",
+    "payoff": "Proyección de liquidación",
+    "payoffDate": "Liquidación prevista",
+    "monthsSaved": "Meses ahorrados",
+    "interestSaved": "Intereses ahorrados",
+    "never": "No se liquida",
+    "payoffLoading": "Cargando la proyección de liquidación",
+    "payoffUnavailable": "La proyección de liquidación no está disponible en este momento."
   },
   "loanRepayment": {
     "title": "Correspondencia de pagos",
@@ -1585,6 +1973,7 @@
     "refreshBoth": "Actualizar historial y candidatos",
     "result": {
       "demo": "Los perfiles de demostración son de solo lectura. No cambió ninguna clasificación.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "No tienes acceso para cambiar esta clasificación.",
       "mfa": "Se requiere verificación adicional antes de cambiar clasificaciones.",
       "cancelled": "La solicitud se canceló antes del envío. Nada cambió y puedes confirmar de nuevo.",
@@ -1629,6 +2018,7 @@
     "saving": "Guardando…",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. Este préstamo no se creó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para añadir un préstamo.",
       "mfa": "Se necesita una verificación adicional antes de añadir un préstamo.",
       "invalid": "El servidor rechazó estos valores. Revisa los importes y las fechas introducidas.",
@@ -1685,6 +2075,7 @@
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este préstamo.",
       "mfa": "Se necesita una verificación adicional antes de cambiar este préstamo.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa el formulario antes de volver a intentarlo.",
@@ -1703,6 +2094,207 @@
       "not-foundMessage": "Es posible que este préstamo se haya eliminado.",
       "invalid-routeTitle": "Préstamo no disponible",
       "invalid-routeMessage": "Vuelve a Préstamos y elige un préstamo disponible."
+    }
+  },
+  "loanForm": {
+    "securedAsset": "Garantizado con",
+    "securedAssetNone": "Ninguno",
+    "securedAssetHint": "Opcional. El bien que garantiza este préstamo, como la casa comprada con una hipoteca. Su página muestra entonces el capital propio: lo que vale menos lo que aún se debe."
+  },
+  "expenseGroups": {
+    "title": "Grupos",
+    "description": "Comparte gastos con amigos y familia, mira quién debe a quién y salda cuentas.",
+    "loading": "Cargando grupos",
+    "errorTitle": "No se pudieron cargar los grupos",
+    "errorMessage": "Comprueba tu conexión e inténtalo de nuevo.",
+    "stale": "Estos grupos pueden estar desactualizados. Desliza para actualizar.",
+    "emptyTitle": "Aún no hay grupos",
+    "emptyMessage": "Crea un grupo para un viaje, un piso compartido o una cena, y comparte gastos desde tus transacciones.",
+    "new": "Nuevo grupo",
+    "archived": "Archivado",
+    "archivedSection": "Archivados",
+    "backToGroups": "Volver a Grupos",
+    "people_one": "{{count}} persona",
+    "people_other": "{{count}} personas",
+    "settledUp": "Cuentas saldadas",
+    "youAreOwed": "Te deben {{amount}}",
+    "youOwe": "Debes {{amount}}",
+    "notInGroup": "No estás en este grupo",
+    "you": "Tú",
+    "youNamed": "{{name}} (tú)",
+    "someone": "Alguien",
+    "householdMember": "Hogar",
+    "outsideHousehold": "Fuera del hogar",
+    "addPerson": "Añadir persona",
+    "create": {
+      "title": "Nuevo grupo",
+      "save": "Crear",
+      "close": "Cerrar",
+      "name": "Nombre",
+      "namePlaceholder": "Viaje a Lisboa",
+      "nameRequired": "Ponle un nombre al grupo.",
+      "currency": "Divisa",
+      "currencyHint": "Las liquidaciones usan esta divisa por defecto. Los saldos se llevan por divisa.",
+      "choose": "Elegir",
+      "household": "Miembros del hogar",
+      "householdHint": "Ya estás en el grupo. Las partes de los miembros del hogar cuentan en tus gastos.",
+      "people": "Personas",
+      "peopleHint": "Personas sin cuenta de WonderMoney, por nombre. El correo solo se guarda como referencia; no se le envía nada.",
+      "personName": "Nombre",
+      "personNameNumbered": "Nombre de la persona {{number}}",
+      "personNameRequired": "Cada persona necesita un nombre.",
+      "personEmail": "Correo (opcional)",
+      "personEmailNumbered": "Correo de la persona {{number}} (opcional)",
+      "emailInvalid": "Ese correo no parece correcto.",
+      "remove": "Quitar",
+      "removePerson": "Quitar a {{name}}"
+    },
+    "edit": {
+      "action": "Editar grupo",
+      "title": "Editar grupo",
+      "save": "Guardar",
+      "currencyHint": "Las nuevas liquidaciones usan esta divisa por defecto. Los gastos compartidos y las liquidaciones ya registrados mantienen su propia divisa, y los saldos se siguen llevando por divisa."
+    },
+    "detail": {
+      "notFoundTitle": "Grupo no encontrado",
+      "notFoundMessage": "Este grupo se eliminó o no es de tu hogar.",
+      "sectionError": "No se pudo cargar. Desliza para actualizar.",
+      "recordSettlement": "Registrar liquidación",
+      "archive": "Archivar",
+      "unarchive": "Desarchivar",
+      "archivedNotice": "Este grupo está archivado. No se ofrece para nuevos gastos.",
+      "balances": "Saldos",
+      "noBalances": "Aún no hay nada compartido.",
+      "isOwed": "Le deben {{amount}}",
+      "owes": "Debe {{amount}}",
+      "settled": "Cuentas saldadas",
+      "suggestedPayments": "Pagos sugeridos",
+      "allSettled": "Todos tienen las cuentas saldadas.",
+      "payment": {
+        "you-owe": "Debes a {{to}} {{amount}}",
+        "owes-you": "{{from}} te debe {{amount}}",
+        "owes": "{{from}} debe a {{to}} {{amount}}"
+      },
+      "record": "Registrar",
+      "recordPayment": "Registrar liquidación: {{sentence}}",
+      "people": "Personas",
+      "remove": "Quitar",
+      "removeNamed": "Quitar a {{name}}",
+      "removeTitle": "¿Quitar a {{name}}?",
+      "removeMessage": "Sale del grupo. No se puede quitar a alguien con gastos compartidos o liquidaciones.",
+      "sharedExpenses": "Gastos compartidos",
+      "noExpenses": "Aún no hay gastos compartidos. Comparte uno desde una transacción con Dividir con grupo.",
+      "paidBy": "Pagado por {{name}}",
+      "settlements": "Liquidaciones",
+      "noSettlements": "Aún no hay liquidaciones.",
+      "paid": "{{from}} pagó a {{to}}",
+      "linked": "Vinculada",
+      "deleteSettlement": "Eliminar",
+      "deleteSettlementTitle": "¿Eliminar esta liquidación?",
+      "deleteSettlementMessage": "{{from}} pagó a {{to}} {{amount}}. Los saldos vuelven a lo que eran antes.",
+      "delete": "Eliminar grupo",
+      "deleteHelper": "Solo se puede eliminar un grupo sin gastos compartidos ni liquidaciones.",
+      "deleteTitle": "¿Eliminar {{name}}?",
+      "deleteMessage": "Esto no se puede deshacer.",
+      "notEmptyTitle": "Este grupo tiene historial",
+      "notEmptyMessage": "No se puede eliminar un grupo con gastos compartidos o liquidaciones. Archívalo para ocultarlo de los nuevos gastos."
+    },
+    "settlement": {
+      "title": "Registrar liquidación",
+      "save": "Guardar",
+      "close": "Cerrar",
+      "from": "De",
+      "to": "Para",
+      "choose": "Elegir",
+      "samePerson": "Elige dos personas distintas.",
+      "amount": "Importe",
+      "amountIn": "Importe en {{currency}}",
+      "currency": "Divisa",
+      "currencyHint": "En {{currency}}.",
+      "date": "Fecha",
+      "notes": "Notas",
+      "notesPlaceholder": "Opcional",
+      "amountErrors": {
+        "invalid": "Introduce un importe, como 12,50.",
+        "too-precise": "Usa como máximo 4 decimales.",
+        "zero": "Introduce más de cero.",
+        "over": "En la transacción vinculada quedan como máximo {{amount}}."
+      },
+      "linkTitle": "Transacción vinculada",
+      "linkHint": "Opcional: el dinero que se movió. Deja de contar como ingreso o gasto.",
+      "searchLabel": "Buscar transacciones",
+      "searchPlaceholder": "Descripción o comercio",
+      "loading": "Buscando transacciones…",
+      "loadError": "No se pudieron cargar las transacciones.",
+      "empty": "No hay transacciones que coincidan.",
+      "left": "Quedan {{amount}} por vincular"
+    },
+    "split": {
+      "action": "Dividir con grupo",
+      "title": "Dividir con grupo",
+      "save": "Guardar",
+      "close": "Cerrar",
+      "group": "Grupo",
+      "choose": "Elegir",
+      "noGroups": "No hay grupos con los que compartir. Crea uno primero en Grupos.",
+      "groupsError": "No se pudieron cargar los grupos.",
+      "paidBy": "Pagado por",
+      "method": "División",
+      "methods": {
+        "equal": "A partes iguales",
+        "amounts": "Por importe",
+        "percentages": "Por porcentaje"
+      },
+      "include": "Incluir a {{name}}",
+      "amount": "Importe",
+      "amountOf": "Importe de {{name}}",
+      "percent": "Porcentaje",
+      "percentOf": "Porcentaje de {{name}}",
+      "remaining": "Quedan {{amount}} por asignar",
+      "over": "{{amount}} por encima del total",
+      "remainingPercent": "Queda un {{percent}} % por asignar",
+      "overPercent": "{{percent}} % por encima del 100 %",
+      "balanced": "Cuadra",
+      "lineErrors": {
+        "invalid": "Introduce un número.",
+        "too-precise": "Demasiados decimales.",
+        "zero": "Introduce más de cero.",
+        "over-100": "Como máximo 100 %."
+      },
+      "problems": {
+        "no-amount": "Esta transacción no tiene importe que compartir.",
+        "no-people": "Elige al menos una persona.",
+        "zero-share": "Cada parte debe ser mayor que cero."
+      },
+      "outsiderHint": "Las partes de personas fuera del hogar no cuentan como gasto tuyo.",
+      "current": "Partes actuales",
+      "paidByInGroup": "Pagado por {{name}} · {{group}}",
+      "shares": "Partes",
+      "sharedIn": "Compartida en un grupo",
+      "editShares": "Editar partes",
+      "stopSharing": "Dejar de compartir",
+      "stopSharingHelper": "La transacción vuelve a estar entera, en una sola categoría.",
+      "stopTitle": "¿Dejar de compartir?",
+      "stopMessage": "Las partes se quitan del grupo y la transacción vuelve a estar entera, en una sola categoría."
+    },
+    "errors": {
+      "in-group": "Esta transacción está compartida en un grupo o liquida uno. Cámbiala desde el grupo.",
+      "shares-invalid": "Las partes no cuadran. Revisa los importes o porcentajes.",
+      "transaction-conflict": "Esta transacción no se puede compartir: es una transferencia, el pago de un préstamo, un reembolso, una liquidación o ya está compartida en otro grupo.",
+      "settlement-invalid": "Esta liquidación no es posible. Una transacción vinculada debe ser dinero entre alguien del hogar y alguien de fuera, en el sentido correcto.",
+      "currency-mismatch": "La transacción vinculada está en otra divisa.",
+      "amount-exceeded": "Es más de lo que queda en la transacción vinculada.",
+      "member-invalid": "No se puede añadir a esa persona. Un miembro del hogar solo puede estar una vez en un grupo.",
+      "member-in-use": "Esta persona tiene gastos compartidos o liquidaciones, así que no se puede quitar.",
+      "not-empty": "No se puede eliminar un grupo con gastos compartidos o liquidaciones. Archívalo en su lugar.",
+      "not-found": "Ese grupo, persona o transacción ya no está disponible. Actualiza e inténtalo de nuevo.",
+      "demo": "Los perfiles de demostración son de solo lectura. No se ha cambiado nada.",
+      "read-only": "$t(common.householdReadOnly)",
+      "mfa": "Se requiere autenticación multifactor. No se ha cambiado nada.",
+      "cancelled": "El cambio se canceló porque tu sesión cambió. No se ha cambiado nada.",
+      "network": "La solicitud tuvo un resultado de red incierto. Revisa el grupo antes de volver a intentarlo.",
+      "error": "No se pudo guardar el cambio. Inténtalo de nuevo.",
+      "account-read-only": "$t(common.accountReadOnly)"
     }
   },
   "manualAssets": {
@@ -1729,10 +2321,12 @@
       "property": "Inmueble",
       "vehicle": "Vehículo",
       "valuable": "Objeto de valor",
-      "other": "Otro"
+      "other": "Otro",
+      "crypto_wallet": "Monedero de criptomonedas"
     },
     "failures": {
       "demo": "La demo es de solo lectura, así que no se guardó nada.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no puedes cambiar este bien. Vuelve a iniciar sesión o consúltalo con tu hogar.",
       "mfa": "Confirma que eres tú para continuar.",
       "not-found": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
@@ -1762,7 +2356,17 @@
     "historyTitle": "Valor a lo largo del tiempo",
     "chartLabel": "Valor a lo largo del tiempo, del {{from}} al {{to}}",
     "valuationsTitle": "Valoraciones",
-    "manageOnWeb": "Edita, archiva o elimina este bien, o corrige una valoración, en WonderMoney en la web.",
+    "valuationsOnWeb": "Corrige o elimina una valoración en WonderMoney en la web.",
+    "manage": {
+      "edit": "Editar bien",
+      "archive": "Archivar",
+      "unarchive": "Recuperar",
+      "delete": "Eliminar bien",
+      "archiveTitle": "¿Archivar este bien?",
+      "archiveMessage": "Deja de contar en el patrimonio neto desde hoy. Su historial se conserva.",
+      "deleteTitle": "¿Eliminar este bien?",
+      "deleteMessage": "Sus valoraciones se eliminan con él, y sale del historial de tu patrimonio neto. No se puede deshacer."
+    },
     "facts": {
       "title": "Detalles",
       "kind": "Tipo",
@@ -1776,6 +2380,17 @@
       "shared": "Compartido con tu hogar",
       "owner": "Titular",
       "notes": "Notas"
+    },
+    "equity": {
+      "title": "Capital propio",
+      "value": "Valor hoy",
+      "linkedDebt": "Pendiente en préstamos garantizados",
+      "equity": "Capital propio",
+      "loans": "Préstamos garantizados con este bien",
+      "converted": "{{amount}} al tipo de hoy",
+      "noRate": "No se puede calcular el capital propio: todavía no hay tipo de cambio de {{currencies}} a {{currency}}.",
+      "archived": "Un bien archivado no tiene valor hoy, así que no tiene capital propio.",
+      "underwater": "En negativo: se debe más en sus préstamos de lo que vale el bien."
     }
   },
   "manualAssetCreate": {
@@ -1799,14 +2414,30 @@
     "growthRateOptional": "Variación anual en porcentaje, opcional",
     "growthRateHint": "El valor cambia este porcentaje cada año después de la última valoración. Usa un número negativo para algo que pierde valor, como un coche.",
     "private": "Bien privado",
-    "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto del otro miembro del hogar.",
+    "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto de las demás personas de tu hogar.",
     "notes": "Notas",
     "notesOptional": "Notas, opcional",
     "optional": "Opcional",
     "fieldErrors": {
       "value": "Introduce cero o más",
       "amount": "Introduce cero o más",
-      "growthRate": "Introduce un porcentaje mayor que -100 y hasta 1000"
+      "growthRate": "Introduce un porcentaje mayor que -100 y hasta 1000",
+      "date": "Introduce una fecha válida (AAAA-MM-DD)."
+    }
+  },
+  "manualAssetEdit": {
+    "title": "Editar bien",
+    "loading": "Cargando el bien",
+    "error": "No se pudo cargar este bien. Cierra y vuelve a intentarlo.",
+    "invalid": "El servidor envió algo que esta versión de la app no puede leer. Cierra y vuelve a intentarlo, o actualiza la app.",
+    "notFound": "Este bien ya no existe, o es privado del otro miembro de tu hogar.",
+    "save": "Guardar cambios",
+    "saving": "Guardando",
+    "growthStartDate": "Varía desde",
+    "growthStartDateHint": "El valor se queda como está hasta esta fecha.",
+    "ownerOnlyPrivacy": "Solo el titular del bien puede cambiar si es privado.",
+    "fieldErrors": {
+      "name": "Este campo es obligatorio"
     }
   },
   "manualAssetValuation": {
@@ -1819,6 +2450,107 @@
     "noteOptional": "Nota, opcional",
     "notePlaceholder": "p. ej. Estimación de la agencia",
     "description": "Registrar un valor nunca crea una transacción. Un valor ya registrado para la misma fecha se sustituye."
+  },
+  "cryptoWallet": {
+    "add": "Añadir monedero de criptomonedas",
+    "notValuedYet": "Aún sin valorar",
+    "publicOnly": "Solo se aceptan direcciones públicas: una dirección de Bitcoin o Ethereum, o una xpub, ypub o zpub de Bitcoin. Nunca introduzcas una clave privada ni una frase de recuperación. Quien tenga una puede gastar tus monedas.",
+    "secretBlocked": "Parecía una clave privada o una frase de recuperación, así que se ha borrado y no se ha enviado. Introduce una dirección pública.",
+    "chain": "Red",
+    "address": "Dirección",
+    "label": "Etiqueta",
+    "labelOptional": "Etiqueta, opcional",
+    "chains": {
+      "bitcoin": "Bitcoin",
+      "ethereum": "Ethereum",
+      "unknown": "Otra red"
+    },
+    "kinds": {
+      "address": "Dirección",
+      "xpub": "Clave pública extendida"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "ok": "Sincronizado",
+      "failed": "Error"
+    },
+    "errors": {
+      "timeout": "El explorador tardó demasiado en responder.",
+      "rate_limited": "El explorador está limitando las peticiones. Se volverá a intentar más tarde.",
+      "unavailable": "No se pudo contactar con el explorador.",
+      "rejected": "El explorador no aceptó esta dirección.",
+      "invalid_response": "El explorador envió una respuesta que no se pudo leer.",
+      "disabled": "Esta red ya no está activada en este servidor.",
+      "unknown": "La última lectura falló."
+    },
+    "addressHints": {
+      "bitcoin": "Una dirección que empieza por 1, 3 o bc1, o una xpub, ypub o zpub.",
+      "ethereum": "Una dirección que empieza por 0x. Se leen el ETH y sus tokens."
+    },
+    "fieldErrors": {
+      "address": "Introduce una dirección",
+      "name": "Introduce un nombre"
+    },
+    "failures": {
+      "secret-rejected": "Parecía una clave privada o una frase de recuperación, así que no se ha aceptado. Introduce una dirección pública.",
+      "address-invalid": "No es una dirección válida para la red elegida.",
+      "address-exists": "Esta dirección ya está en el monedero.",
+      "feature-disabled": "Los monederos de criptomonedas no están activados para esta red en este servidor.",
+      "demo": "La demo es de solo lectura, así que no se ha guardado nada.",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "Ya no puedes cambiar este monedero. Vuelve a iniciar sesión o consulta con tu hogar.",
+      "mfa": "Confirma que eres tú para continuar.",
+      "not-found": "Este monedero ya no existe o es privado del otro miembro de tu hogar.",
+      "invalid": "Algún dato no es válido. Revisa los campos e inténtalo de nuevo.",
+      "invalid-response": "Puede que se haya guardado, pero no se pudo leer la respuesta del servidor. Actualiza antes de volver a intentarlo.",
+      "network-ambiguous": "Se perdió la conexión, así que no se sabe si se guardó. Actualiza antes de volver a intentarlo.",
+      "general": "No se pudo guardar. Inténtalo de nuevo."
+    },
+    "create": {
+      "title": "Añadir monedero de criptomonedas",
+      "save": "Añadir monedero",
+      "saving": "Añadiendo",
+      "name": "Nombre",
+      "namePlaceholder": "p. ej., Monedero físico",
+      "private": "Monedero privado",
+      "addressHeading": "Dirección {{number}}",
+      "removeAddress": "Quitar",
+      "removeAddressNumber": "Quitar la dirección {{number}}",
+      "addAddress": "Añadir otra dirección",
+      "numbered": "{{label}}, dirección {{number}}"
+    },
+    "detail": {
+      "title": "Direcciones",
+      "lastSynced": "Saldos leídos {{time}}. Se vuelven a leer cada día.",
+      "neverSynced": "Los saldos aún no se han leído. La primera lectura está en camino.",
+      "tickHint": "Solo los tokens marcados cuentan en el valor. Los tokens detectados en una dirección se ignoran hasta que los marques.",
+      "unpriced": "No hay precio para {{symbols}}, así que el valor de hoy no se ha actualizado. Desmarca un token para dejarlo fuera.",
+      "removeTitle": "¿Quitar esta dirección?",
+      "removeMessage": "{{address}} y sus tokens dejan de contar en este monedero.",
+      "remove": "Quitar",
+      "removeFor": "Quitar {{address}}",
+      "addAddress": "Añadir dirección",
+      "adding": "Añadiendo",
+      "syncNow": "Sincronizar ahora",
+      "syncQueued": "Sincronización solicitada. Desliza para actualizar dentro de un momento y ver los saldos.",
+      "synced": "Sincronizado {{time}}",
+      "balancesAsOf": "Saldos a {{time}}.",
+      "pending": "Esperando la primera lectura",
+      "editLabel": "Editar etiqueta",
+      "editLabelFor": "Editar la etiqueta de {{address}}",
+      "saveLabel": "Guardar etiqueta",
+      "noPrice": "Sin precio",
+      "countToken": "Contar {{symbol}}",
+      "notValuedYet": "Aún sin valorar: el valor aparece tras la primera sincronización."
+    },
+    "manage": {
+      "edit": "Editar monedero",
+      "editTitle": "Editar monedero",
+      "save": "Guardar",
+      "remove": "Eliminar monedero",
+      "removeTitle": "¿Eliminar este monedero?",
+      "removeMessage": "Se eliminan {{name}}, sus direcciones y su historial de valor. No se puede deshacer."
+    }
   },
   "budgets": {
     "title": "Presupuestos",
@@ -1856,7 +2588,10 @@
     "nothingSpent": "Todavía sin gastos",
     "createFirst": "Crea tu primer presupuesto",
     "total": "Total",
-    "actionsFor": "Acciones para {{name}}"
+    "actionsFor": "Acciones para {{name}}",
+    "personal": "Personal",
+    "groupHousehold": "Hogar",
+    "groupPersonal": "Personales"
   },
   "budgetMonth": {
     "back": "Volver a Presupuestos",
@@ -1873,6 +2608,7 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "periodNavigation": "Periodo del presupuesto, {{period}}",
+    "periodWithRange": "Periodo del presupuesto, {{period}}, {{range}}",
     "categories": "Categorías",
     "categoriesHelper": "Los totales principales incluyen sus subcategorías",
     "noCategories": "No hay categorías disponibles para este mes",
@@ -1908,6 +2644,7 @@
       "forward": "Eliminar desde este mes en adelante",
       "failures": {
         "demo": "El modo de demostración es de solo lectura. Esta categoría no se eliminó.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Ya no tienes acceso para cambiar este presupuesto.",
         "cancelled": "La eliminación se canceló porque cambió el contexto de sesión.",
         "not-found": "Esta categoría ya no forma parte del presupuesto.",
@@ -1973,6 +2710,9 @@
     "scopeForward_one": "Del mes seleccionado a diciembre ({{count}} mes)",
     "scopeForward_other": "Del mes seleccionado a diciembre ({{count}} meses)",
     "scopeNote": "El mes de la ruta seleccionada es el punto de partida. Los meses anteriores y los años futuros nunca cambian.",
+    "suggestionLabel": "Sugerido a partir de tus gastos: {{amount}}",
+    "suggestionApply": "Aplicar",
+    "suggestionNotEnoughData": "Todavía no hay historial suficiente para una sugerencia.",
     "save": "Guardar presupuesto de categoría",
     "saving": "Guardando presupuesto de categoría…",
     "confirmTitle": "¿Aplicar hasta diciembre?",
@@ -1981,6 +2721,7 @@
     "confirmAction": "Aplicar hasta diciembre",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio de categoría.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta categoría del presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa los valores conservados antes de volver a intentarlo.",
       "not-found": "Esta categoría o mes del presupuesto ya no está disponible. Es posible que no existan filas de meses futuros. Se conservaron los valores.",
@@ -2046,6 +2787,7 @@
     "failures": {
       "unknown": "El resultado es desconocido. La aplicación comprueba ambas listas y no volverá a enviar",
       "demo": "Los perfiles de demostración son de solo lectura",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para crear un presupuesto",
       "invalid": "Revisa el hogar y los ingresos",
       "general": "No se pudo crear el presupuesto. Los datos se conservaron"
@@ -2070,7 +2812,14 @@
       "question": "¿Cuáles son los ingresos totales de tu hogar?",
       "description": "Es importante que añadas tus ingresos actuales para tener visibilidad completa de tus finanzas."
     },
-    "progress": "Paso {{current}} de {{total}}"
+    "progress": "Paso {{current}} de {{total}}",
+    "visibility": {
+      "label": "Quién puede ver este presupuesto",
+      "household": "Hogar",
+      "personal": "Personal",
+      "householdDescription": "Todos los miembros de tu hogar pueden ver este presupuesto.",
+      "personalDescription": "Solo tú puedes ver este presupuesto. Los demás miembros del hogar, incluidos el titular y los administradores, no pueden verlo."
+    }
   },
   "budgetAddCategory": {
     "title": "Añadir categoría existente",
@@ -2097,6 +2846,7 @@
       "unknown": "El resultado es incierto. Se está actualizando el mes actual",
       "duplicate": "El servidor indicó un duplicado. Se actualizó el mes porque la categoría puede existir",
       "demo": "Los perfiles de demostración son de solo lectura",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso",
       "not-found": "El presupuesto o la categoría ya no está disponible",
       "invalid": "Elige categoría final, importe positivo y periodicidad",
@@ -2122,13 +2872,15 @@
     "saving": "Guardando…",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión.",
       "not-found": "Este presupuesto ya no existe.",
       "network-ambiguous": "Se perdió la conexión durante el guardado. El resultado es desconocido y la aplicación no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
       "invalid": "Una o más cuentas no existen o no son tuyas.",
       "general": "No se pudieron guardar las cuentas vinculadas."
-    }
+    },
+    "privateHidden": "Las cuentas privadas no se pueden vincular a un presupuesto del hogar, así que no aparecen. Un presupuesto personal puede usar tus cuentas privadas."
   },
   "budgetYear": {
     "helper": "Resumen de {{year}}",
@@ -2165,6 +2917,9 @@
     "description": "Descripción",
     "carryOverspend": "Traspasar el gasto de más al mes siguiente",
     "carryOverspendHint": "Lo que gastes por encima del importe de una categoría se descuenta del mes siguiente. Desactivado, solo se traspasa el dinero sin gastar.",
+    "periodStartDay": "El mes empieza el",
+    "periodStartDayHint": "El día 1 sigue el calendario. Un día posterior, como el día de cobro, pasa a ser el inicio de cada mes del presupuesto: con 25, noviembre va del 25 de octubre al 24 de noviembre.",
+    "periodStartDayOption": "Día {{day}}",
     "descriptionHint": "Opcional, hasta 500 caracteres",
     "characterCount": "{{count}} / {{max}}",
     "saveDetails": "Guardar detalles",
@@ -2174,6 +2929,7 @@
     "discard": "Descartar cambios",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardaron cambios.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar este presupuesto.",
       "cancelled": "El guardado se canceló porque cambió el contexto de sesión. Revisa el formulario antes de volver a intentarlo.",
       "not-found": "Este presupuesto ya no existe. El formulario no se ha borrado.",
@@ -2190,6 +2946,7 @@
     "deleteConfirmAction": "Eliminar presupuesto",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Este presupuesto no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para eliminar este presupuesto.",
       "cancelled": "La eliminación se canceló porque cambió el contexto de sesión.",
       "not-found": "Este presupuesto ya no existe.",
@@ -2345,6 +3102,7 @@
       "validation": "El servidor no aceptó estos detalles. Revisa los campos antes de volver a confirmar",
       "request": "El servidor rechazó esta solicitud. Revisa los detalles fijados o vuelve a Objetivos",
       "demo": "El modo de demostración es de solo lectura. No se creó ningún objetivo",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso cambió antes de que se pudiera crear este objetivo",
       "mfa": "Completa la autenticación multifactor antes de crear un objetivo",
       "cancelled": "La creación se canceló antes de enviar la solicitud. No se creó ningún objetivo",
@@ -2430,6 +3188,7 @@
         "validation": "Introduce un importe positivo con un máximo de cuatro decimales",
         "insufficient-reserve": "El importe no puede superar la reserva disponible. Actualiza antes de probar otro importe",
         "demo": "El modo de demostración es de solo lectura. La reserva no cambió",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Tu acceso cambió antes de poder guardar el cambio de reserva",
         "mfa": "Completa la autenticación multifactor antes de cambiar esta reserva",
         "not-found": "Este objetivo ya no está disponible",
@@ -2442,6 +3201,7 @@
     "writeFailures": {
       "validation": "Comprueba los detalles. Los importes deben ser positivos y tener como máximo cuatro decimales",
       "demo": "El modo de demostración es de solo lectura. No se realizó ningún cambio",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso cambió antes de poder guardar",
       "mfa": "Completa la autenticación multifactor antes de hacer este cambio",
       "not-found": "Este objetivo o cuenta ya no está disponible. Actualiza antes de intentarlo de nuevo",
@@ -2571,6 +3331,14 @@
       "insufficientHistory": "Aún no hay suficiente historial para representar el rendimiento",
       "currencyIncomplete": "Algunos días excluyen una cartera en una moneda sin tipo de cambio para ese día, así que esos totales son parciales.",
       "totalReturn": "{{value}}%",
+      "returnLabel": "Rentabilidad (ponderada por tiempo)",
+      "returnAsOf": "hasta el {{date}}",
+      "flowMarkers": "Los puntos en la línea marcan los días con un depósito o una retirada.",
+      "deposit": "Depósito {{amount}}",
+      "withdrawal": "Retirada {{amount}}",
+      "flowUnknown": "Depósito o retirada, importe desconocido",
+      "flowsMore_one": "y {{count}} día más",
+      "flowsMore_other": "y {{count}} días más",
       "range": "{{start}} – {{end}}",
       "periods": {
         "1M": "1M",
@@ -2661,6 +3429,7 @@
     "failures": {
       "validation": "Comprueba el nombre y la moneda",
       "demo": "La creación no está disponible en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado",
       "mfa": "Se requiere verificación adicional",
       "cancelled": "La creación se canceló antes del envío",
@@ -2742,6 +3511,7 @@
     "failures": {
       "validation": "Comprueba los campos",
       "demo": "Los ajustes no están disponibles en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado",
       "mfa": "Se requiere verificación adicional",
       "not-found": "Esta cartera ya no está disponible",
@@ -2749,6 +3519,38 @@
       "unknown": "El resultado es desconocido",
       "request": "No se aceptaron los cambios",
       "general": "No se pudieron guardar los ajustes"
+    }
+  },
+  "portfolioAccountLink": {
+    "accountLabel": "Cuenta que contiene esta cartera",
+    "notLinked": "Sin vincular",
+    "selectAccount": "Elige una cuenta",
+    "question": "¿El saldo de esta cuenta incluye tus inversiones?",
+    "includesHoldings": "Sí, las incluye",
+    "includesHoldingsHint": "El patrimonio neto cuenta la cuenta y muestra esta cartera sin sumarla otra vez.",
+    "cashOnly": "No, solo el efectivo",
+    "cashOnlyHint": "El patrimonio neto cuenta el efectivo de la cuenta y también esta cartera.",
+    "managedByPartner": "Esta cartera está vinculada a una cuenta que solo ve otro miembro del hogar, así que solo esa persona puede cambiar el vínculo.",
+    "alreadyLinkedBy": "Ya vinculada por {{name}}",
+    "suggestionTitle": "¿Es el mismo dinero?",
+    "suggestionBody": "Tienes una cuenta de inversión y una cartera sin cuenta vinculada. Si la cuenta ya contiene la cartera, vincúlalas para que el patrimonio neto la cuente una sola vez.",
+    "suggestionLink": "Vincular una cartera",
+    "dismiss": "Descartar",
+    "dialogTitle": "Vincular una cartera a su cuenta",
+    "portfolioLabel": "Cartera",
+    "selectPortfolio": "Elige una cartera",
+    "save": "Guardar",
+    "saving": "Guardando",
+    "saved": "Vínculo guardado",
+    "failures": {
+      "demo": "Los vínculos no están disponibles en modo de demostración",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "Tu acceso ha cambiado",
+      "mfa": "Se requiere verificación adicional",
+      "not-found": "Esta cartera o cuenta ya no está disponible",
+      "unknown": "No se pudo confirmar que el vínculo se guardó. Inténtalo de nuevo",
+      "request": "No se aceptó este vínculo",
+      "general": "No se pudo guardar el vínculo"
     }
   },
   "portfolioActivity": {
@@ -2763,6 +3565,7 @@
     "deleteConfirmMessage": "Esta acción elimina permanentemente {{name}} de esta cartera. No se puede deshacer.",
     "deleteFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta transacción no se eliminó.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere autenticación multifactor para hacer este cambio.",
       "not-found": "Esta transacción ya no existe.",
@@ -2780,6 +3583,7 @@
     "savingEdit": "Guardando…",
     "editFailures": {
       "demo": "El modo de demostración es de solo lectura. Esta transacción no se cambió.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere autenticación multifactor para hacer este cambio.",
       "not-found": "Esta transacción ya no existe.",
@@ -2918,74 +3722,142 @@
   },
   "household": {
     "title": "Hogar",
-    "helper": "Comparte tu plan de WonderMoney con una pareja",
+    "helper": "Comparte tu plan de WonderMoney con las personas de tu hogar",
     "loading": "Cargando tu hogar…",
     "back": "Volver",
     "stale": "Mostrando el último hogar conocido. Desliza para actualizar y ver lo más reciente.",
     "members": {
       "heading": "Miembros",
       "you": "Tú",
-      "roleOwner": "Propietario",
-      "roleMember": "Miembro"
+      "roleOwner": "Titular",
+      "roleMember": "Miembro",
+      "roleAdmin": "Administrador",
+      "roleViewer": "Observador"
     },
     "actions": {
-      "remove": "Eliminar",
-      "leave": "Salir del hogar"
+      "remove": "Quitar del hogar",
+      "leave": "Salir del hogar",
+      "changeRole": "Cambiar rol",
+      "transferOwnership": "Hacer titular",
+      "menuFor": "Acciones para {{name}}"
     },
     "leaving": "Saliendo…",
     "removeDialog": {
-      "title": "¿Eliminar a {{name}}?",
-      "description": "Perderá el acceso a las finanzas compartidas de este hogar. Sus datos existentes se conservan, pero sus conexiones bancarias se desconectarán.",
-      "confirm": "Eliminar"
+      "title": "¿Quitar a {{name}}?",
+      "description": "Pierde el acceso a este hogar de inmediato y se cierra su sesión. Las cuentas y transacciones que añadió se quedan en el hogar, y sus conexiones bancarias se desconectan.",
+      "confirm": "Quitar"
     },
     "leaveDialog": {
       "title": "¿Salir de este hogar?",
-      "description": "Perderás el acceso a las finanzas compartidas de este hogar. Tus datos existentes se conservan, pero tus conexiones bancarias se desconectarán.",
+      "description": "Pierdes el acceso a sus cuentas, presupuestos y objetivos compartidos, y tus conexiones bancarias se desconectan. Se cerrará tu sesión; vuelve a iniciarla para empezar con un hogar propio.",
       "confirm": "Salir"
     },
-    "removeFailures": {
-      "demo": "Esta acción no está disponible en modo demo.",
-      "access": "Ya no tienes acceso para gestionar este hogar.",
-      "cancelled": "Se canceló porque tu contexto de sesión cambió.",
-      "conflict": "No se pudo eliminar a este miembro en este momento.",
-      "invalid": "No se pudo eliminar a este miembro.",
-      "not-found": "Este miembro ya no forma parte del hogar.",
-      "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
-      "general": "No se pudo completar la acción. Inténtalo de nuevo."
-    },
     "pending": {
-      "heading": "Invitación pendiente",
+      "heading": "Invitaciones pendientes",
       "sentTo": "Invitación enviada a {{email}}",
       "expires": "Caduca {{date}}",
       "resend": "Reenviar",
       "resending": "Reenviando…",
       "revoke": "Revocar",
-      "revoking": "Revocando…"
+      "revoking": "Revocando…",
+      "resendFor": "Reenviar la invitación a {{email}}",
+      "revokeFor": "Revocar la invitación a {{email}}"
     },
     "invite": {
-      "heading": "Invitar a una pareja",
-      "description": "Invita a una pareja a compartir el plan de este hogar. Recibirá un correo con un enlace para unirse.",
+      "heading": "Invitar a alguien",
+      "description": "Recibirá un correo con un enlace para unirse. Quien ya tiene cuenta se une desde la app.",
       "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "pareja@ejemplo.com",
+      "emailPlaceholder": "nombre@ejemplo.com",
       "invalidEmail": "Introduce una dirección de correo válida",
       "submit": "Enviar invitación",
-      "sending": "Enviando…"
+      "sending": "Enviando…",
+      "roleLabel": "Rol",
+      "full": "Tu hogar está completo: tiene sitio para {{max}} personas, contando las invitaciones pendientes."
     },
     "inviteFailures": {
       "demo": "Las invitaciones no están disponibles en modo demo.",
-      "access": "Ya no tienes acceso para invitar a una pareja.",
+      "access": "Ya no tienes acceso para invitar a personas.",
       "cancelled": "Se canceló porque tu contexto de sesión cambió.",
-      "conflict": "Tu hogar está completo o ese correo ya tiene una cuenta.",
+      "conflict": "No se pudo enviar esta invitación en este momento. Actualiza e inténtalo de nuevo.",
       "invalid": "Introduce un correo válido que no sea el tuyo.",
       "not-found": "No se pudo encontrar este hogar.",
       "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
-      "general": "No se pudo enviar la invitación. Inténtalo de nuevo."
+      "general": "No se pudo enviar la invitación. Inténtalo de nuevo.",
+      "read-only": "Tienes acceso de solo lectura a este hogar, así que no se envió ninguna invitación.",
+      "role-required": "Tu rol no permite invitar a personas con ese rol.",
+      "full": "Tu hogar está completo. Revoca una invitación o quita a alguien primero.",
+      "already-member": "Esa persona ya está en este hogar."
     },
     "states": {
       "errorTitle": "No se pudo cargar tu hogar",
       "errorMessage": "Comprueba tu conexión e inténtalo de nuevo.",
       "invalid-responseTitle": "No se pudieron verificar los datos del hogar",
       "invalid-responseMessage": "Esta pantalla no usará datos del hogar sin verificar."
+    },
+    "roles": {
+      "adminDescription": "Puede invitar a personas y gestionar miembros y observadores.",
+      "memberDescription": "Puede ver y cambiar las cuentas, presupuestos y objetivos compartidos.",
+      "viewerDescription": "Puede ver las finanzas compartidas, pero no cambiarlas."
+    },
+    "roleDialog": {
+      "title": "Rol de {{name}}"
+    },
+    "transferDialog": {
+      "title": "¿Hacer titular a {{name}}?",
+      "description": "{{name}} pasa a ser titular de este hogar y puede gestionar a todas sus personas. Tú pasas a administrador. Solo el nuevo titular puede deshacerlo.",
+      "confirm": "Hacer titular",
+      "transferring": "Transfiriendo…"
+    },
+    "memberFailures": {
+      "demo": "Esta acción no está disponible en modo demo.",
+      "read-only": "Tienes acceso de solo lectura a este hogar, así que no se cambió nada.",
+      "role-required": "Tu rol no permite este cambio. Actualiza para ver los roles actuales.",
+      "access": "Ya no tienes acceso para gestionar este hogar.",
+      "cancelled": "Se canceló porque tu contexto de sesión cambió.",
+      "network-ambiguous": "Se perdió la conexión. El resultado es desconocido, por lo que la app no reintentará automáticamente. Actualiza antes de volver a intentarlo.",
+      "full": "Tu hogar está completo.",
+      "already-member": "Esa persona ya está en este hogar.",
+      "conflict": "No se pudo hacer este cambio en este momento. Actualiza e inténtalo de nuevo.",
+      "invalid": "No se pudo hacer este cambio.",
+      "not-found": "Este miembro ya no forma parte del hogar.",
+      "general": "No se pudo completar la acción. Inténtalo de nuevo."
+    },
+    "joinExisting": {
+      "validating": "Comprobando tu invitación…",
+      "invalidTitle": "Esta invitación no es válida",
+      "invalidBody": "Puede que ya se haya usado, revocado o caducado. Pide una nueva invitación.",
+      "unavailableTitle": "No se pudo comprobar esta invitación",
+      "unavailableBody": "Comprueba tu conexión e inténtalo de nuevo.",
+      "titleHousehold": "¿Unirte a {{name}}?",
+      "titleInviter": "¿Unirte al hogar de {{name}}?",
+      "titleGeneric": "¿Unirte a este hogar?",
+      "role": "Te unirás como: {{role}}",
+      "invitedEmail": "Invitación para {{email}}",
+      "consequencesHeading": "Qué pasa con lo que tienes ahora",
+      "consequences": {
+        "emptyOnly": "Solo puedes unirte si tu hogar actual no tiene cuentas ni transacciones.",
+        "leftBehind": "Los presupuestos, categorías, reglas y objetivos que creaste allí se quedan atrás. No se mueven.",
+        "banksDisconnected": "Las conexiones bancarias de ese hogar se desconectan.",
+        "yoursStays": "Tu inicio de sesión, perfil y ajustes siguen siendo tuyos."
+      },
+      "failureTitle": "No pudiste unirte a este hogar",
+      "failures": {
+        "household-has-data": "Tu hogar actual tiene cuentas o transacciones. Elimínalas primero o acepta con otra cuenta.",
+        "household-has-members": "Eres titular de un hogar con otros miembros. Transfiere la titularidad o quítalos primero.",
+        "already-member": "Ya estás en este hogar.",
+        "household-full": "Este hogar está completo. Pide a quien te invitó que haga sitio.",
+        "email-mismatch": "Esta invitación es para otra dirección de correo. Inicia sesión con el correo invitado para unirte.",
+        "expired": "Esta invitación ha caducado. Pide una nueva.",
+        "invalid": "Esta invitación ya no es válida. Pide una nueva.",
+        "already-used": "Esta invitación ya se ha usado.",
+        "demo": "La demo no puede unirse a un hogar.",
+        "cancelled": "Se canceló porque tu contexto de sesión cambió.",
+        "network-ambiguous": "Se perdió la conexión y el resultado es desconocido. Abre tu hogar para comprobarlo antes de volver a intentarlo.",
+        "general": "Algo salió mal. Inténtalo de nuevo."
+      },
+      "join": "Unirme al hogar",
+      "joining": "Uniéndome…",
+      "notNow": "Ahora no"
     }
   },
   "security": {
@@ -3027,7 +3899,7 @@
     },
     "dataExport": {
       "heading": "Exporta tus datos",
-      "helper": "Descarga todo lo que ves en tu hogar (cuentas, transacciones, presupuestos, objetivos, préstamos e inversiones) en un zip con archivos JSON y CSV. Las cuentas privadas de tu pareja no se incluyen.",
+      "helper": "Descarga todo lo que ves en tu hogar (cuentas, transacciones, presupuestos, objetivos, préstamos e inversiones) en un zip con archivos JSON y CSV. Las cuentas privadas de los demás miembros no se incluyen.",
       "start": "Exportar todos los datos",
       "protect": "Proteger el archivo con una contraseña",
       "password": "Contraseña",
@@ -3088,6 +3960,33 @@
       "access": "Tu sesión no pudo autorizar esta acción. Tu cuenta no ha cambiado.",
       "mfa": "Se requiere autenticación multifactor antes de eliminar tu cuenta.",
       "cancelled": "La eliminación de la cuenta se canceló. Tu cuenta no ha cambiado."
+    },
+    "passkeys": {
+      "heading": "Llaves de acceso",
+      "helper": "Inicia sesión con tu huella, tu cara o el PIN del dispositivo en lugar de tu contraseña. Un inicio de sesión con llave de acceso no pide el código del autenticador.",
+      "loading": "Cargando llaves de acceso…",
+      "loadFailed": "No se han podido cargar tus llaves de acceso. Inténtalo más tarde.",
+      "retry": "Reintentar",
+      "empty": "Todavía no has añadido ninguna llave de acceso.",
+      "defaultName": "Llave de acceso",
+      "addedOn": "Añadida el {{date}}",
+      "lastUsed": "Último uso: {{date}}",
+      "neverUsed": "Nunca usada",
+      "add": "Añadir una llave de acceso",
+      "adding": "Añadiendo…",
+      "added": "Llave de acceso añadida.",
+      "unsupported": "Este dispositivo no puede usar llaves de acceso aquí. Puedes añadir una en la aplicación web.",
+      "delete": "Eliminar",
+      "deleteNamed": "Eliminar {{name}}",
+      "deleteTitle": "¿Eliminar esta llave de acceso?",
+      "deleteDescription": "Ya no podrás iniciar sesión con {{name}}. Tu contraseña y tus otras llaves de acceso siguen funcionando. Elimínala también de tu gestor de contraseñas.",
+      "deleteConfirm": "Eliminar llave de acceso",
+      "deleted": "Llave de acceso eliminada.",
+      "errors": {
+        "add": "No se ha podido añadir la llave de acceso. Inténtalo de nuevo.",
+        "sessionNotFresh": "Cierra sesión y vuelve a iniciarla antes de añadir una llave de acceso.",
+        "delete": "No se ha podido eliminar la llave de acceso. Inténtalo de nuevo."
+      }
     }
   },
   "notifications": {
@@ -3112,6 +4011,11 @@
       "title": "Alertas de conexiones bancarias",
       "description": "Recibe un correo cuando el acceso a un banco esté a punto de terminar (7 días y 1 día antes), cuando un banco finalice el acceso antes de tiempo o cuando un banco lleve más de 2 días sin sincronizarse.",
       "detail": "Solo se incluyen las conexiones bancarias que has configurado."
+    },
+    "creditCardDueReminders": {
+      "title": "Recordatorios de pago de la tarjeta",
+      "description": "Recibe un correo unos días antes del vencimiento de un extracto de tarjeta de crédito cerrado, si aún tiene saldo pendiente.",
+      "detail": "Como máximo un correo por extracto."
     },
     "marketingOptOut": {
       "title": "Cancelar la suscripción a todos los correos de marketing",
@@ -3143,7 +4047,32 @@
     },
     "retry": "Intentar de nuevo",
     "saving": "Guardando cambio…",
-    "saveError": "No se pudo confirmar este cambio. Tus preferencias se están actualizando desde el servidor."
+    "saveError": "No se pudo confirmar este cambio. Tus preferencias se están actualizando desde el servidor.",
+    "push": {
+      "title": "Notificaciones push",
+      "description": "Recibe avisos en este teléfono. Cada uno está desactivado hasta que lo activas, y el teléfono pide permiso la primera vez.",
+      "budgetAlerts": {
+        "title": "Alertas de presupuesto",
+        "description": "Cuando una categoría del presupuesto alcanza el 80% o el 100% de lo planificado."
+      },
+      "creditCardDueReminders": {
+        "title": "Recordatorios de pago de la tarjeta",
+        "description": "Unos días antes de que venza un extracto cerrado de la tarjeta."
+      },
+      "bankSyncAlerts": {
+        "title": "Alertas de conexiones bancarias",
+        "description": "Cuando una conexión bancaria está a punto de caducar, el banco la ha cerrado o sigue sin sincronizarse."
+      },
+      "privacy": "Las notificaciones nunca muestran importes ni comercios. Abre la aplicación para ver las cifras.",
+      "denied": "Las notificaciones de WonderMoney están desactivadas en los ajustes del teléfono. Actívalas allí y vuelve a intentarlo.",
+      "unavailable": "Este teléfono no puede recibir notificaciones push de esta versión de la aplicación.",
+      "saveError": "No se pudo guardar este cambio. Inténtalo de nuevo.",
+      "sendTest": "Enviar notificación de prueba",
+      "sendingTest": "Enviando…",
+      "testSent": "Notificación de prueba enviada. Debería llegar en unos segundos.",
+      "testNoDevice": "Activa primero una notificación push para registrar este teléfono.",
+      "testError": "No se pudo enviar la notificación de prueba. Inténtalo de nuevo."
+    }
   },
   "onboarding": {
     "firstRun": {
@@ -3275,6 +4204,7 @@
       "emptyMessage": "Conecta un banco para traer datos de cuentas de solo lectura a WonderMoney.",
       "readOnlyTrust": "El acceso Open Banking es de solo lectura. WonderMoney no puede mover dinero ni realizar pagos.",
       "rowLabel": "{{institution}}, estado {{status}}, expira {{expiry}}, datos {{freshness}}",
+      "rowLabelNoExpiry": "{{institution}}, estado {{status}}, datos {{freshness}}",
       "expiresOn": "El consentimiento expira el {{date}}",
       "freshnessOn": "Datos actualizados el {{date}}",
       "freshnessUnknown": "Actualidad de los datos no disponible",
@@ -3299,6 +4229,8 @@
         "message": "El estado de las conexiones recibido no se pudo verificar. Inténtalo de nuevo para obtener una versión actualizada."
       },
       "connectCta": "Conectar un banco",
+      "simplefinCta": "Conectar con SimpleFIN",
+      "simplefinHint": "Para bancos de EE. UU. y Canadá, a través de SimpleFIN Bridge.",
       "result": {
         "success": {
           "title": "Banco conectado",
@@ -3322,6 +4254,7 @@
         "confirmAction": "Desconectar",
         "failures": {
           "demo": "Esta acción no está disponible en el modo de demostración.",
+          "read-only": "$t(common.householdReadOnly)",
           "access": "No tienes acceso para desconectar este banco.",
           "cancelled": "Se canceló la solicitud de desconexión.",
           "not-found": "Esa conexión ya no está disponible.",
@@ -3345,6 +4278,12 @@
         "action": "Volver a conectar",
         "actionLabel": "Volver a conectar {{institution}}",
         "starting": "Abriendo tu banco…"
+      },
+      "simplefin": {
+        "statusRevoked": "Acceso revocado",
+        "accessEnded": "Se revocó el acceso de SimpleFIN. Vuelve a conectar con un nuevo token de configuración.",
+        "accounts": "Cuentas: {{names}}",
+        "noAccounts": "Aún no hay cuentas"
       }
     },
     "connect": {
@@ -3372,6 +4311,38 @@
         "notFound": "Ese banco ya no está disponible. Elige otro.",
         "unavailable": "Eso no se pudo completar. Comprueba tu conexión e inténtalo de nuevo.",
         "general": "Algo salió mal al iniciar esa conexión. Inténtalo de nuevo."
+      },
+      "credentialRequired": {
+        "title": "Añade primero tu clave de Enable Banking",
+        "message": "Para vincular un banco hace falta tu propio ID de aplicación y clave de Enable Banking. Añádelos en Ajustes, en Proveedor bancario, en la aplicación web de WonderMoney y vuelve después aquí.",
+        "sharedUnavailable": "La conexión bancaria compartida de este servidor solo sirve a un hogar, así que el tuyo necesita su propia clave."
+      }
+    },
+    "simplefin": {
+      "heading": "Conectar con SimpleFIN",
+      "helper": "Pega un token de configuración de SimpleFIN Bridge, que conecta bancos de EE. UU. y Canadá.",
+      "tokenExplainer": "Un token de configuración es un código de un solo uso que creas en SimpleFIN Bridge después de vincular allí tus bancos. Solo funciona una vez.",
+      "storageExplainer": "WonderMoney lo canjea una sola vez por un acceso de solo lectura a tus cuentas y guarda ese acceso cifrado. El token no se conserva.",
+      "bridgeLink": "Obtener un token en SimpleFIN Bridge",
+      "bridgeLinkHint": "Abre bridge.simplefin.org en tu navegador",
+      "tokenLabel": "Token de configuración",
+      "tokenPlaceholder": "Pega tu token de configuración",
+      "submit": "Conectar",
+      "connecting": "Conectando…",
+      "failures": {
+        "token-invalid": "Eso no es un token de configuración de SimpleFIN válido. Copia el token completo de SimpleFIN Bridge e inténtalo de nuevo.",
+        "token-already-claimed": "Este token de configuración ya se usó. Si no lo usaste tú, desactívalo en SimpleFIN Bridge, porque otra persona podría haberlo canjeado, y crea uno nuevo.",
+        "server-not-allowed": "Este token de configuración apunta a un servidor de SimpleFIN que este servidor de WonderMoney no permite. Crea uno en SimpleFIN Bridge.",
+        "rejected": "SimpleFIN no aceptó este token de configuración. Crea uno nuevo en SimpleFIN Bridge e inténtalo de nuevo.",
+        "demo": "Esta acción no está disponible en el modo demo.",
+        "read-only": "$t(common.householdReadOnly)",
+        "access": "No tienes acceso para conectar un banco.",
+        "mfa": "Se requiere verificación adicional antes de poder conectar un banco.",
+        "disabled": "SimpleFIN no está activado en este servidor.",
+        "unreachable": "No se pudo contactar con SimpleFIN. Inténtalo de nuevo en un momento.",
+        "rate-limited": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+        "network": "No pudimos confirmar la conexión. Revisa tus conexiones bancarias antes de volver a intentarlo: un token de configuración solo funciona una vez.",
+        "general": "Algo salió mal al conectar SimpleFIN. Inténtalo de nuevo."
       }
     },
     "statementImport": {
@@ -3398,6 +4369,8 @@
       },
       "failures": {
         "demo": "Esta acción no está disponible en el modo de demostración.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "access": "No tienes acceso para importar un extracto.",
         "mfa": "Se requiere verificación adicional antes de poder importar un extracto.",
         "cancelled": "Se canceló la importación.",
@@ -3618,6 +4591,7 @@
     "tryAgain": "Inténtalo de nuevo",
     "failures": {
       "demo": "Importar transacciones no está disponible en modo demostración.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Tu acceso ha cambiado. Inténtalo de nuevo.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "La importación se canceló antes de enviarse.",
@@ -3633,17 +4607,16 @@
     },
     "assetReview": {
       "title": "Resolver activos ambiguos",
-      "helper": "Algunas filas de este archivo no se pudieron emparejar automáticamente con un activo. Elige una coincidencia sugerida, busca el símbolo correcto u omite el grupo.",
+      "helper": "Algunas filas de este archivo no se pudieron emparejar automáticamente con un activo. Elige una coincidencia sugerida, busca el símbolo correcto, elige un activo que ya está en esta cartera u omite el grupo.",
       "progress": "{{resolved}} de {{total}} resueltos",
       "unknownAsset": "Activo desconocido",
-      "rowCount_one": "{{count}} fila",
-      "rowCount_other": "{{count}} filas",
       "candidatesTitle": "Coincidencias sugeridas",
       "searchLabel": "Buscar un símbolo",
+      "chooseHolding": "Elegir un activo de esta cartera",
+      "holdingsTitle": "Activos en esta cartera",
       "skip": "Omitir este grupo",
       "change": "Cambiar",
       "resolvedAs": "Asociado a {{symbol}}",
-      "resolvedAsMatch": "Asociado a un activo sugerido",
       "resolvedSkipped": "Omitido: no se importará ninguna transacción para este grupo",
       "submit": "Confirmar asociaciones de activos",
       "submitting": "Confirmando…"
@@ -3688,6 +4661,7 @@
     "metadataError": "No se pudieron cargar los detalles necesarios para añadir una transacción",
     "failures": {
       "demo": "Añadir transacciones no está disponible en modo demostración.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Ya no tienes acceso para cambiar esta cartera.",
       "mfa": "Se requiere verificación adicional.",
       "cancelled": "El guardado se canceló porque tu contexto de sesión cambió.",
@@ -3714,7 +4688,8 @@
     "loading": "Cargando detalles del activo",
     "unavailable": "No disponible",
     "currentValue": "Valor actual",
-    "gainLoss": "Ganancia o pérdida",
+    "gainLoss": "Ganancia o pérdida no realizada",
+    "realizedGain": "Ganancia realizada",
     "portfolioWeight": "Peso en la cartera",
     "quantity": "Cantidad",
     "currentPrice": "Precio actual",
@@ -3767,6 +4742,10 @@
     "sankey": {
       "label": "Sankey de flujo de caja",
       "description": "Desde los ingresos, por las categorías, hasta las cuentas"
+    },
+    "monthComparison": {
+      "label": "Comparar meses",
+      "description": "Qué cambió entre dos meses, categoría a categoría"
     }
   },
   "reports": {
@@ -3806,7 +4785,13 @@
       "searchPlaceholder": "Buscar {{label}}",
       "noResults": "Sin resultados",
       "unknownAccount": "Cuenta desconocida",
-      "dateRange": "Periodo"
+      "dateRange": "Periodo",
+      "customRange": "Intervalo personalizado",
+      "customRangeFrom": "Desde",
+      "customRangeTo": "Hasta",
+      "customRangeApply": "Aplicar",
+      "customRangeInvalid": "Introduce un intervalo de fechas válido.",
+      "customRangeOrder": "La fecha de inicio no puede ser posterior a la fecha de fin."
     },
     "budgetVsActual": {
       "title": "Presupuesto vs real",
@@ -3836,7 +4821,10 @@
       "emptyTitle": "Sin carteras que mostrar",
       "emptyMessage": "Añade una cartera para ver aquí su rendimiento",
       "portfolio": "Cartera",
-      "total": "Total"
+      "total": "Total",
+      "notCombined": "Se mide por cartera",
+      "daysWithoutSnapshot_one": "{{count}} día sin snapshot",
+      "daysWithoutSnapshot_other": "{{count}} días sin snapshot"
     },
     "netWorthHistory": {
       "title": "Patrimonio neto en el tiempo",
@@ -3889,6 +4877,22 @@
       "down": "Baja",
       "flat": "Sin cambios",
       "vsPriorPeriod": "vs. periodo anterior"
+    },
+    "monthComparison": {
+      "title": "Comparar meses",
+      "subtitle": "Qué cambió entre dos meses, categoría a categoría.",
+      "baseMonth": "Mes",
+      "compareMonth": "Comparado con",
+      "metric": "Indicador",
+      "income": "Ingresos",
+      "expenses": "Gastos",
+      "net": "Neto",
+      "savingsRate": "Tasa de ahorro",
+      "change": "Cambio",
+      "category": "Categoría",
+      "loading": "Cargando la comparación de meses",
+      "emptyTitle": "Sin gastos en ninguno de los meses",
+      "emptyMessage": "Prueba con otros dos meses o comprueba que las cuentas estén conectadas."
     }
   },
   "accountsOverview": {
@@ -3921,6 +4925,11 @@
     "balanceGrowth": "Evolución del saldo",
     "emptyTransactions": "Tu flujo de caja aparecerá aquí cuando haya transacciones disponibles. Conecta una cuenta bancaria, añade transacciones manualmente o importa un extracto bancario para empezar a seguir el dinero que entra y sale.",
     "accounts": "Cuentas",
+    "reorder": "Reordenar",
+    "done": "Listo",
+    "moveUp": "Mover {{name}} hacia arriba",
+    "moveDown": "Mover {{name}} hacia abajo",
+    "reorderError": "No se pudo guardar el nuevo orden.",
     "total": "Total",
     "lastTransactions": "Últimas transacciones",
     "viewAll": "Ver todo",
@@ -3928,6 +4937,7 @@
     "accountBalance": "Saldo de la cuenta",
     "available": "Disponible",
     "private": "Privada",
+    "viewOnly": "Solo lectura",
     "sharedBy": "Compartida por {{name}}",
     "edit": "Editar",
     "delete": "Eliminar",
@@ -3957,6 +4967,7 @@
       "household": "Hogar",
       "connections": "Conexiones",
       "categories": "Categorías",
+      "rules": "Reglas",
       "appearance": "Apariencia",
       "notifications": "Notificaciones"
     },
@@ -3964,17 +4975,35 @@
       "heading": "Información personal",
       "email": "Dirección de correo"
     },
+    "ai": {
+      "heading": "Funciones de IA",
+      "description": "Desactiva todas las funciones de IA en tu cuenta.",
+      "label": "Ocultar funciones de IA",
+      "hint": "Desactiva el asistente, la lectura de recibos, la asignación de columnas con IA y el texto del resumen mensual escrito por IA. Las transacciones dejan de enviarse a un modelo para categorizarlas.",
+      "saving": "Guardando…",
+      "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+      "loadError": "No se pudieron cargar tus preferencias."
+    },
     "appearance": {
       "heading": "Apariencia",
       "description": "Cambia el aspecto de la aplicación.",
       "theme": "Tema",
-      "language": "Idioma"
+      "language": "Idioma",
+      "previewFeatures": {
+        "heading": "Funciones en vista previa",
+        "description": "Prueba funciones antes de que estén listas para todos.",
+        "label": "Activar funciones en vista previa",
+        "hint": "Las funciones en vista previa están inacabadas. Pueden cambiar, fallar o desaparecer sin aviso.",
+        "saving": "Guardando…",
+        "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+        "loadError": "No se pudieron cargar tus preferencias."
+      }
     },
     "categories": {
       "description": "Gestiona tus categorías"
     },
     "household": {
-      "description": "Comparte cuentas, presupuestos y objetivos con tu pareja."
+      "description": "Comparte cuentas, presupuestos y objetivos con las personas de tu hogar."
     },
     "connections": {
       "heading": "Conexiones bancarias",
@@ -3994,6 +5023,13 @@
     "realizedGains": "Ganancias realizadas",
     "needsHistory": "Necesita más historial",
     "periodReturnUnavailable": "Necesitamos una referencia del periodo para mostrar esto.",
+    "timeWeighted": "Ponderada por tiempo",
+    "timeWeightedHelp": "Cómo rindieron las inversiones, sin contar lo que aportaste o retiraste.",
+    "moneyWeighted": "Ponderada por dinero",
+    "moneyWeightedHelp": "Cómo rindió tu dinero, según cuándo lo aportaste o retiraste.",
+    "perYear": "al año",
+    "missingSnapshots_one": "{{count}} día sin snapshot; se mantuvo el valor del día anterior.",
+    "missingSnapshots_other": "{{count}} días sin snapshot; se mantuvo el valor del día anterior.",
     "noHoldings": "No hay posiciones",
     "emptyTitle": "Aún sin transacciones",
     "emptyDescription": "Añade tu primera transacción para empezar a seguir el rendimiento, la asignación y las ganancias.",
@@ -4075,5 +5111,501 @@
       "hint": "Convertido al tipo del {{date}}, el más reciente disponible. Se actualiza cuando llega uno más reciente.",
       "hintNoDate": "Convertido a un tipo anterior, el más reciente disponible. Se actualiza cuando llega uno más reciente."
     }
+  },
+  "bank-sync": {
+    "errors": {
+      "account-phase-failed": "Tu banco no envió la lista de cuentas.",
+      "authentication": "Hay que volver a configurar el acceso a tu banco.",
+      "cancelled": "La conexión con el banco se canceló antes de terminar.",
+      "consent-expired": "Tu acceso a este banco ha caducado.",
+      "data-validation": "Tu banco envió datos que no pudimos leer.",
+      "institution-action-required": "Un banco dentro de tu proveedor de datos bancarios necesita tu atención. Vuelve a iniciar sesión en él allí, por ejemplo en SimpleFIN Bridge.",
+      "institution-unavailable": "Tu banco no está disponible ahora mismo.",
+      "internal": "Algo falló por nuestra parte.",
+      "invalid-requisition": "Esta conexión con el banco ya no es válida.",
+      "provider-unavailable": "Tu banco no respondió.",
+      "queue-unavailable": "No se pudo iniciar la sincronización.",
+      "rate-limited": "El banco limitó la frecuencia con la que podemos sincronizar.",
+      "timeout": "Tu banco tardó demasiado en responder.",
+      "transaction-phase-failed": "Tu banco no envió las transacciones.",
+      "unknown": "La sincronización falló.",
+      "unsupported-currency": "Una cuenta usa una moneda que WonderMoney no puede seguir, así que se ha dejado fuera."
+    },
+    "actions": {
+      "contact-support": "Contactar con soporte",
+      "fix-at-provider": "Resuélvelo en tu proveedor de datos bancarios",
+      "reconnect": "Volver a conectar tu banco",
+      "wait": "Lo intentaremos de nuevo automáticamente"
+    },
+    "history": {
+      "action": "Historial de sincronizaciones",
+      "actionLabel": "Historial de sincronizaciones de {{institution}}",
+      "title": "Historial de sincronizaciones",
+      "description": "Las últimas 20 veces que intentamos sincronizar esta conexión.",
+      "loading": "Cargando el historial de sincronizaciones",
+      "error": "No se pudo cargar el historial de sincronizaciones.",
+      "empty": "Todavía no hay sincronizaciones.",
+      "started": "Inicio",
+      "finished": "Fin",
+      "inProgress": "En curso",
+      "accounts_one": "{{count}} cuenta",
+      "accounts_other": "{{count}} cuentas",
+      "rows_one": "{{count}} transacción nueva",
+      "rows_other": "{{count}} transacciones nuevas",
+      "nextAttempt": "Próximo intento {{date}}",
+      "flow": {
+        "initial-add": "Primera sincronización",
+        "scheduled-refresh": "Sincronización programada"
+      },
+      "result": {
+        "failed": "Falló",
+        "full_success": "Completada",
+        "partial": "Completada en parte"
+      }
+    }
+  },
+  "transactionTemplates": {
+    "newTemplate": "Nueva plantilla",
+    "use": "Usar plantilla {{name}}",
+    "longPressHint": "Mantén pulsado para editar o eliminar",
+    "newTitle": "Nueva plantilla",
+    "editTitle": "Editar plantilla",
+    "name": "Nombre",
+    "namePlaceholder": "Compra semanal",
+    "nameRequired": "Ponle un nombre a la plantilla.",
+    "amount": "Importe",
+    "amountInvalid": "Introduce un importe mayor que cero.",
+    "optional": "Opcional",
+    "description": "Descripción",
+    "notes": "Notas",
+    "direction": "Sentido",
+    "directionOut": "Dinero que sale",
+    "directionIn": "Dinero que entra",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "delete": "Eliminar plantilla"
+  },
+  "creditCardStatement": {
+    "title": "Extracto actual",
+    "loading": "Cargando el extracto…",
+    "error": "No se pudo cargar este extracto. Actualiza para volver a intentarlo.",
+    "invalidResponse": "El extracto no se pudo verificar, por lo que no se muestra.",
+    "empty": "Todavía no hay extracto para este período.",
+    "balance": "Saldo del extracto",
+    "period": "{{start}} – {{end}}",
+    "dueDate": "Fecha de vencimiento",
+    "dueHelper": "Paga antes de este día para evitar intereses.",
+    "availableCredit": "Crédito disponible",
+    "limitOf": "De {{limit}}",
+    "limitNotSet": "Sin límite de crédito definido",
+    "historyTitle": "Historial de extractos",
+    "historyDue": "Vence el {{date}}",
+    "historyRow": "Extracto del {{start}} al {{end}}, saldo {{balance}}, {{status}}",
+    "status": {
+      "open": "Abierto",
+      "closed": "Cerrado",
+      "paid": "Pagado",
+      "overdue": "Vencido"
+    },
+    "transactionsTitle": "Transacciones del extracto",
+    "transactionsLoading": "Cargando transacciones del extracto…",
+    "transactionsError": "No se pudieron cargar estas transacciones. Inténtalo de nuevo.",
+    "transactionsInvalid": "No se pudieron verificar estas transacciones y no se muestran.",
+    "transactionsEmpty": "No hay transacciones en este extracto.",
+    "transactionUnavailable": "Detalles de la transacción no disponibles"
+  },
+  "installments": {
+    "title": "Cuotas",
+    "badgeLabel": "Cuota {{number}} de {{total}}",
+    "transactionDetail": "Cuota",
+    "viewPlan": "Ver plan de cuotas",
+    "total": "Total",
+    "paid": "Pagado",
+    "remaining": "Pendiente",
+    "paidCount": "{{paid}} de {{total}} pagadas",
+    "remainingCount_one": "{{count}} cuota por venir",
+    "remainingCount_other": "{{count}} cuotas por venir",
+    "unmatchedCount_one": "{{count}} cuota pasada sin emparejar",
+    "unmatchedCount_other": "{{count}} cuotas pasadas sin emparejar",
+    "activePlans_one": "{{count}} plan activo",
+    "activePlans_other": "{{count}} planes activos",
+    "commitment": "Pendiente de cargar",
+    "commitmentError": "No se pudo cargar lo que les queda por cargar a las cuotas.",
+    "next": "Siguiente: {{amount}} el {{date}}, {{name}}",
+    "nextDate": "Siguiente el {{date}}",
+    "finished": "Pagado",
+    "plansError": "No se pudieron cargar los planes de cuotas.",
+    "empty": "Esta tarjeta aún no tiene planes de cuotas.",
+    "projectionNote": "Las cuotas futuras son proyecciones: no son transacciones y no cuentan en los saldos.",
+    "status": {
+      "paid": "Pagada",
+      "upcoming": "Pendiente",
+      "unmatched": "Sin coincidencia"
+    },
+    "detail": {
+      "loading": "Cargando el plan de cuotas…",
+      "descriptor": "Comprado el {{date}} · {{total}} cuotas",
+      "totalMeta": "En {{total}} cuotas",
+      "scheduleTitle": "Calendario",
+      "scheduled": "Prevista el {{date}}",
+      "statementDue": "Extracto vence el {{date}}",
+      "posted": "Cargada el {{date}}",
+      "stale": "No se pudo actualizar este plan, así que puede estar desactualizado.",
+      "notFound": {
+        "title": "Plan no encontrado",
+        "message": "Este plan de cuotas se eliminó o no es visible para ti."
+      },
+      "invalidId": {
+        "title": "Plan no encontrado",
+        "message": "Este enlace no lleva a un plan de cuotas."
+      },
+      "invalidResponse": {
+        "title": "Plan no disponible",
+        "message": "No se pudo verificar el plan, así que no se muestra."
+      },
+      "error": {
+        "title": "No se pudo cargar el plan",
+        "message": "Comprueba tu conexión e inténtalo de nuevo."
+      }
+    },
+    "delete": {
+      "action": "Eliminar plan",
+      "confirmTitle": "¿Eliminar este plan de cuotas?",
+      "confirmMessage": "Se elimina el calendario. Las transacciones registradas se quedan en la tarjeta, ya sin vincular.",
+      "confirm": "Eliminar"
+    },
+    "failures": {
+      "demo": "Esto no está disponible en el modo demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
+      "access": "No tienes acceso a los planes de esta tarjeta.",
+      "invalid": "Se rechazó el plan. Revisa los datos e inténtalo de nuevo.",
+      "conflict": "Una de estas transacciones ya está vinculada a otra cuota.",
+      "not-found": "Esta tarjeta o este plan ya no están disponibles.",
+      "network": "No se pudo contactar con el servidor. Revisa los planes de la tarjeta antes de volver a intentarlo.",
+      "general": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "create": {
+      "action": "Añadir plan",
+      "title": "Nuevo plan de cuotas",
+      "fromSuggestionTitle": "Plan a partir de cuotas detectadas",
+      "save": "Crear plan",
+      "saving": "Creando el plan…",
+      "loading": "Cargando…",
+      "description": "Descripción",
+      "purchaseDate": "Fecha de compra",
+      "count": "Cuotas",
+      "links_one": "Al crear el plan, {{count}} transacción registrada se vincula a su cuota.",
+      "links_other": "Al crear el plan, {{count}} transacciones registradas se vinculan a sus cuotas.",
+      "previewTitle": "Vista previa",
+      "each": "Cada una",
+      "remainder": "Lleva el redondeo",
+      "range": "Cuotas {{from}} a {{to}} de {{total}}",
+      "errors": {
+        "total": "Introduce un importe mayor que cero con dos decimales como máximo.",
+        "count": "Introduce un número del {{min}} al {{max}}.",
+        "countLinks": "Una transacción detectada es la cuota {{number}}, así que el plan necesita al menos esas cuotas."
+      }
+    },
+    "suggestions": {
+      "title": "Cuotas detectadas",
+      "helper": "Estas transacciones de la tarjeta parecen cuotas de una compra sin plan. Nada cambia hasta que crees uno.",
+      "schedule": "{{total}} cuotas de {{amount}}",
+      "found_one": "{{count}} encontrada · comprado el {{date}}",
+      "found_other": "{{count}} encontradas · comprado el {{date}}",
+      "accept": "Crear plan",
+      "acceptNamed": "Crear plan para {{name}}",
+      "unavailable": "Esta sugerencia ya no está disponible. Aún puedes crear el plan tú mismo."
+    },
+    "link": {
+      "action": "Vincular transacción",
+      "unlink": "Desvincular",
+      "actionsLabel": "Acciones de la cuota {{number}} de {{total}}",
+      "title": "Vincular la cuota {{number}} de {{total}}",
+      "helper": "Cargos registrados en esta tarjeta hasta un mes antes o después del {{date}}, de unos {{amount}}.",
+      "helperAll": "Cargos registrados en esta tarjeta hasta un mes antes o después del {{date}}, de cualquier importe.",
+      "showOther": "Mostrar otros importes",
+      "showClose": "Mostrar solo importes cercanos",
+      "searching": "Buscando transacciones…",
+      "loadFailed": "No se pudieron cargar las transacciones.",
+      "empty": "Ningún cargo registrado en esta tarjeta coincide con esta cuota.",
+      "emptyHint": "Muestra otros importes para ver todos los cargos de este periodo.",
+      "more": "{{amount}} más que la cuota",
+      "less": "{{amount}} menos que la cuota",
+      "confirm": "Vincular",
+      "unlinkConfirmTitle": "¿Desvincular la cuota {{number}} de {{total}}?",
+      "unlinkConfirmMessage": "La cuota deja de contar como pagada. Su transacción se queda en la tarjeta como un movimiento normal.",
+      "failures": {
+        "wrongCard": "Esa transacción no es de la tarjeta de este plan.",
+        "pending": "Esa transacción aún está pendiente. Vincúlala cuando el banco la contabilice.",
+        "expired": "El banco anuló esa transacción, así que no pagó nada.",
+        "transactionLinked": "Esa transacción ya paga otra cuota. Desvincúlala de esa cuota primero. El plan se ha actualizado.",
+        "installmentPaid": "Esta cuota ya está pagada por otra transacción. Desvincula esa transacción primero. El plan se ha actualizado.",
+        "alreadyLinked": "Esa transacción ya paga una cuota, o esta cuota ya está pagada por otra transacción. El plan se ha actualizado.",
+        "notFound": "Esa transacción o este plan ya no existe. El plan se ha actualizado.",
+        "linkFailed": "No se pudo vincular la transacción. Inténtalo de nuevo.",
+        "unlinkFailed": "No se pudo desvincular la cuota. Inténtalo de nuevo."
+      }
+    }
+  },
+  "rules": {
+    "title": "Reglas",
+    "description": "Las reglas ordenan tus transacciones por ti: cuando una transacción cumple las condiciones de una regla, se ejecutan sus acciones. Las reglas se ejecutan de arriba abajo y nunca cambian lo que has definido a mano. Las comparten los dos miembros del hogar.",
+    "back": "Volver a Más",
+    "loading": "Cargando reglas",
+    "stale": "No se pudo actualizar. Se muestran las reglas cargadas anteriormente",
+    "errorTitle": "No se pudieron cargar las reglas",
+    "errorMessage": "Comprueba tu conexión e inténtalo de nuevo",
+    "invalidTitle": "No se pudieron verificar los datos de las reglas",
+    "invalidMessage": "No se pudieron verificar los datos de las reglas recibidos",
+    "empty": "Aún no hay reglas. Abre una transacción y elige Crear regla para categorizar, renombrar o etiquetar transacciones automáticamente.",
+    "createFromTransaction": "Crear regla",
+    "inactive": "Desactivada",
+    "stops": "Se detiene aquí",
+    "readOnly": "Editar en la web",
+    "readOnlyTitle": "Esta regla no se puede editar aquí",
+    "readOnlyMessage": "Usa campos que la aplicación aún no edita. Abre la aplicación web para cambiarla.",
+    "toggleNamed": "{{name}}, activa",
+    "rowActions": "Acciones para {{name}}",
+    "deleteTitle": "¿Eliminar «{{name}}»?",
+    "deleteMessage": "La regla deja de ejecutarse. Las transacciones que ya cambió se mantienen como están.",
+    "delete": "Eliminar",
+    "toggleFailedTitle": "No se pudo actualizar la regla",
+    "toggleFailedMessage": "Comprueba la conexión y vuelve a intentarlo.",
+    "deleteFailedTitle": "No se pudo eliminar la regla",
+    "deleteFailedMessage": "Comprueba la conexión y vuelve a intentarlo.",
+    "writeBlocked": "Los cambios en las reglas están en pausa mientras se comprueba el resultado de una solicitud anterior.",
+    "demoWriteBlocked": "Los perfiles de demostración son de solo lectura. Los cambios en las reglas no están disponibles durante este inicio de sesión.",
+    "uncategorized": "Sin categoría",
+    "summary": {
+      "textCondition": "{{field}} {{operator}} {{value}}",
+      "amountCondition": "Importe {{operator}} {{value}}",
+      "amountBetween": "Importe entre {{min}} y {{max}}",
+      "directionIn": "Dinero que entra",
+      "directionOut": "Dinero que sale",
+      "listCondition": "{{field}} {{operator}} {{values}}",
+      "listMore": "{{names}} y {{count}} más",
+      "and": "y",
+      "or": "o",
+      "unknown": "(eliminada)",
+      "setCategory": "definir categoría {{name}}",
+      "setMerchant": "definir comercio {{name}}",
+      "setMerchantSaved": "definir comercio",
+      "setDescription": "renombrar a «{{value}}»",
+      "setNotes": "añadir notas «{{value}}»",
+      "addTags": "añadir etiquetas",
+      "markReviewed": "marcar como revisada",
+      "hide": "ocultar",
+      "unsupportedCondition": "una condición que esta aplicación no muestra",
+      "unsupportedAction": "una acción que esta aplicación no muestra"
+    },
+    "fields": {
+      "description": "Descripción",
+      "rawDescription": "Descripción original",
+      "merchant": "Comercio",
+      "amount": "Importe",
+      "category": "Categoría"
+    },
+    "operators": {
+      "contains": "contiene",
+      "not_contains": "no contiene",
+      "equals": "es",
+      "starts_with": "empieza por",
+      "ends_with": "termina en",
+      "eq": "es",
+      "gt": "es más de",
+      "gte": "es al menos",
+      "lt": "es menos de",
+      "lte": "es como máximo",
+      "between": "está entre"
+    },
+    "actions": {
+      "set_category": "Definir categoría",
+      "set_merchant": "Definir comercio",
+      "mark_reviewed": "Marcar como revisada"
+    },
+    "editor": {
+      "createTitle": "Nueva regla",
+      "editTitle": "Editar regla",
+      "description": "Elige qué transacciones abarca la regla y qué hace con ellas. La vista previa muestra las transacciones que abarcaría.",
+      "name": "Nombre",
+      "namePlaceholder": "Café en la tienda de la esquina",
+      "nameRequired": "Ponle un nombre a la regla.",
+      "match": "Coincidencia",
+      "matchAll": "Todas las condiciones",
+      "matchAny": "Cualquier condición",
+      "conditions": "Cuando una transacción coincide",
+      "addCondition": "Añadir condición",
+      "removeCondition": "Quitar condición {{index}}",
+      "actions": "Entonces",
+      "addAction": "Añadir acción",
+      "removeAction": "Quitar acción {{index}}",
+      "fieldFor": "Campo de la condición {{index}}",
+      "operatorFor": "Comparación de la condición {{index}}",
+      "sourceFor": "Qué descripción para la condición {{index}}",
+      "sourceCleaned": "Como se muestra",
+      "sourceRaw": "Texto original del banco",
+      "valueFor": "Valor de la condición {{index}}",
+      "min": "Desde",
+      "max": "Hasta",
+      "actionFor": "Acción {{index}}",
+      "category": "Categoría",
+      "merchant": "Comercio",
+      "merchantPlaceholder": "Escribe el nombre de un comercio",
+      "choose": "Elegir",
+      "save": "Guardar regla",
+      "saving": "Guardando…",
+      "saveFailed": "No se pudo guardar la regla.",
+      "duplicateActions": "Cada tipo de acción puede aparecer solo una vez.",
+      "readOnlyTitle": "Esta regla no se puede editar aquí",
+      "readOnlyMessage": "Usa campos que la aplicación aún no edita. Abre la aplicación web para cambiarla.",
+      "valueRequired": "Introduce un valor.",
+      "valueTooLong": "Usa como máximo 255 caracteres.",
+      "amountInvalid": "Introduce un importe de 0 o más, con un máximo de 4 decimales.",
+      "rangeInvalid": "«Desde» no puede ser mayor que «Hasta».",
+      "categoryRequired": "Elige una categoría.",
+      "merchantRequired": "Escribe el nombre de un comercio."
+    },
+    "preview": {
+      "title": "Vista previa",
+      "incomplete": "Completa las condiciones y las acciones para ver las transacciones que coinciden.",
+      "loading": "Comprobando tus transacciones…",
+      "error": "La vista previa no está disponible ahora mismo.",
+      "matches_one": "{{count}} transacción coincide",
+      "matches_other": "{{count}} transacciones coinciden",
+      "changes_one": "{{count}} cambiaría",
+      "changes_other": "{{count}} cambiarían",
+      "scopeHint": "Evaluada por sí sola, en las transacciones que puedes ver. Guardar no cambia las transacciones existentes."
+    },
+    "apply": {
+      "title": "¿Aplicar «{{name}}» a las transacciones existentes?",
+      "description_one": "{{count}} transacción existente cambiaría.",
+      "description_other": "{{count}} transacciones existentes cambiarían.",
+      "scopeHint": "La regla se evalúa por sí sola. Se incluyen las transacciones ocultas; los valores definidos a mano y las cuentas privadas de los demás miembros se mantienen como están.",
+      "confirm_one": "Aplicar a {{count}} transacción",
+      "confirm_other": "Aplicar a {{count}} transacciones",
+      "notNow": "Ahora no",
+      "close": "Cerrar",
+      "running": "Aplicando…",
+      "continues": "La regla sigue aplicándose en segundo plano.",
+      "backgroundHint": "Puedes cerrar esto; sigue en segundo plano.",
+      "done_one": "Hecho: {{count}} transacción cambiada",
+      "done_other": "Hecho: {{count}} transacciones cambiadas",
+      "inProgress": "Las reglas ya se están aplicando. Espera a que terminen e inténtalo de nuevo.",
+      "demo": "Los perfiles de demostración son de solo lectura. Las transacciones existentes no se pueden cambiar.",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "Tu sesión necesita atención antes de aplicar reglas.",
+      "error": "No se pudo aplicar la regla ahora mismo."
+    },
+    "suggestion": {
+      "title": "¿Categorizar siempre las transacciones de este tipo como {{category}}?",
+      "description_one": "Moviste {{count}} transacción de este tipo en los últimos {{days}} días. Una regla puede hacerlo por ti.",
+      "description_other": "Moviste {{count}} transacciones de este tipo en los últimos {{days}} días. Una regla puede hacerlo por ti.",
+      "create": "Crear regla",
+      "dismiss": "No volver a sugerir"
+    }
+  },
+  "pendingChanges": {
+    "back": "Volver a Más",
+    "description": "Cambios que propuso el asistente o un cliente MCP. Nada cambia hasta que aplicas uno, y cada uno caduca a los 7 días.",
+    "loading": "Cargando cambios pendientes",
+    "errorTitle": "No se pudieron cargar los cambios pendientes",
+    "errorMessage": "Revisa tu conexión e inténtalo de nuevo.",
+    "invalidMessage": "El servidor envió algo que esta versión de la aplicación no puede leer. Actualiza la aplicación e inténtalo de nuevo.",
+    "stale": "Puede que no estén actualizados. Desliza hacia abajo para actualizar.",
+    "empty": "No hay cambios pendientes. Cuando el asistente o un cliente MCP proponga un cambio, te esperará aquí.",
+    "aiHidden": "Las funciones de IA están ocultas en tu cuenta. Vuelve a activarlas en Configuración › Apariencia para ver los cambios propuestos.",
+    "apply": "Aplicar",
+    "dismiss": "Descartar",
+    "applyNamed": "Aplicar: {{title}}",
+    "dismissNamed": "Descartar: {{title}}",
+    "expires": "Caduca el {{date}}",
+    "untitledTransaction": "Transacción",
+    "unavailable_one": "No se puede mostrar {{count}} transacción más: ya no puedes verla.",
+    "unavailable_other": "No se pueden mostrar {{count}} transacciones más: ya no puedes verlas.",
+    "rowAccessibility": "{{label}}: de {{before}} a {{after}}",
+    "source": {
+      "assistant": "Del asistente",
+      "mcp": "De un cliente MCP"
+    },
+    "title": {
+      "page": "Cambios pendientes",
+      "categorize_one": "Categorizar {{count}} transacción como {{category}}",
+      "categorize_other": "Categorizar {{count}} transacciones como {{category}}",
+      "categorizeUnnamed_one": "Categorizar {{count}} transacción",
+      "categorizeUnnamed_other": "Categorizar {{count}} transacciones",
+      "review_one": "Marcar {{count}} transacción como revisada",
+      "review_other": "Marcar {{count}} transacciones como revisadas",
+      "note": "Actualizar la nota de una transacción"
+    },
+    "value": {
+      "uncategorized": "Sin categoría",
+      "reviewed": "Revisada",
+      "notReviewed": "Sin revisar",
+      "noNote": "Sin nota"
+    },
+    "failure": {
+      "gone": "Ese cambio ya no se puede aplicar: caducó, ya se decidió, o una transacción o categoría ya no existe. La lista está actualizada.",
+      "demo": "Los cambios están desactivados en la demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
+      "general": "No se pudo guardar. Inténtalo de nuevo."
+    }
+  },
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portugal",
+      "es-ES": "España",
+      "pt-BR": "Brasil",
+      "en": "el Reino Unido y EE. UU."
+    },
+    "offer": {
+      "title": "Empieza con reglas para {{name}}",
+      "description_one": "{{count}} regla reconoce tiendas y suministros conocidos y les asigna una categoría. Nada cambia hasta que la añadas.",
+      "description_other": "{{count}} reglas reconocen tiendas y suministros conocidos y les asignan una categoría. Nada cambia hasta que las añadas.",
+      "preview": "Ver las reglas",
+      "dismiss": "Ahora no"
+    },
+    "dialog": {
+      "title": "Reglas para {{name}}",
+      "description": "Cada regla reconoce un comercio en la descripción del banco de un pago y fija su categoría y su comercio. Los ingresos, las transferencias y lo que hayas fijado a mano nunca cambian. Las reglas se añaden después de las tuyas y puedes editarlas o eliminarlas después.",
+      "loading": "Cargando las reglas…",
+      "error": "No se pudieron cargar las reglas.",
+      "matches": "La descripción contiene «{{values}}»",
+      "excludes": "pero no «{{value}}»",
+      "merchant": "Comercio: {{name}}",
+      "nothing": "Todas estas reglas ya están en tus reglas.",
+      "install_zero": "Nada que añadir",
+      "install_one": "Añadir {{count}} regla",
+      "install_other": "Añadir {{count}} reglas"
+    },
+    "status": {
+      "installed": "Ya añadida",
+      "unavailable": "Categoría no disponible"
+    },
+    "installed_zero": "No se añadió ninguna regla",
+    "installed_one": "{{count}} regla añadida",
+    "installed_other": "{{count}} reglas añadidas",
+    "installError": "No se pudieron añadir las reglas."
+  },
+  "demo": {
+    "banner": {
+      "message": "Estás explorando una demo compartida y de solo lectura. Sus datos se restablecen cada día.",
+      "signUp": "Crea tu cuenta",
+      "selfHost": "Aloja WonderMoney en tu servidor"
+    }
+  },
+  "memberAttribution": {
+    "everyone": "Todos",
+    "shared": "Compartido",
+    "filterTitle": "Miembro",
+    "filterNamed": "Miembro: {{name}}",
+    "attributedTo": "Atribuido a {{name}}",
+    "spentBy": "Gastado por",
+    "spentByAction": "Cambiar quién gastó",
+    "accountDefault": "Predeterminado de la cuenta ({{name}})",
+    "accountDefaultUnnamed": "Predeterminado de la cuenta",
+    "jointTitle": "Cuenta conjunta",
+    "jointHelper": "Sus gastos cuentan como compartidos. No cambia quién puede verla."
   }
 }

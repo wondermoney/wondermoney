@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { savingsRatePercent } from '@utils/savings-rate';
+
 import { getLisbonBudgetPeriod } from '../aggregation-periods';
 import type { BudgetAllocationRow, TransactionAggregationRow } from '../aggregation-types';
 import { TenantFinancialAggregationService } from '../tenant-financial-aggregation.service';
@@ -21,10 +23,13 @@ const allocation = (overrides: Partial<BudgetAllocationRow> = {}): BudgetAllocat
   categoryOwnerAppuserKey: 7,
   categorySystem: false,
   currencyCode: 'EUR',
+  month: 7,
   parentCategoryKey: 9,
   parentCategoryName: 'Food',
   parentCategoryOwnerAppuserKey: 7,
   parentCategorySystem: false,
+  period: { end: new Date('2026-08-01T00:00:00Z'), start: new Date('2026-07-01T00:00:00Z') },
+  year: 2026,
   ...overrides,
 });
 
@@ -429,7 +434,8 @@ describe('TenantFinancialAggregationService', () => {
       );
       await expect(service.aggregateMonthlyStory(input)).resolves.toMatchObject({
         facts: {
-          savingsRateBaseline: '60.00', // (1000 - 400) / 1000 * 100
+          // The email states the same rate the cash-flow report does, through one helper.
+          savingsRateBaseline: savingsRatePercent('1000', '400'),
           savingsRateSubject: null, // income is zero -> savings rate is undefined, not Infinity/NaN
         },
         status: 'ok',
@@ -451,15 +457,18 @@ describe('TenantFinancialAggregationService', () => {
     });
 
     it('computes budgetPressure by reusing loadBudgetAllocations/classifyBudgetThreshold, over taking priority over near', async () => {
+      // The June budget month, as the repository reads it for the June story.
+      const june = { month: 6, period: { end: new Date('2026-07-01T00:00:00Z'), start: new Date('2026-06-01T00:00:00Z') } };
       loadBudgetAllocations.mockResolvedValue([
-        allocation({ amountBudgeted: '100', categoryKey: 10 }),
-        allocation({ amountBudgeted: '50', budgetTemplateCategoryKey: 3, categoryKey: 20, categoryName: 'Transport' }),
+        allocation({ amountBudgeted: '100', categoryKey: 10, ...june }),
+        allocation({ amountBudgeted: '50', budgetTemplateCategoryKey: 3, categoryKey: 20, categoryName: 'Transport', ...june }),
       ]);
+      const inJune = new Date('2026-06-10T12:00:00Z');
       loadTransactions.mockImplementation((_appuserKey, _tenantKey, range) =>
-        range.start.getTime() === subjectRange.start.getTime()
+        range.start.getTime() === subjectRange.start.getTime() || range.start.getTime() === june.period.start.getTime()
           ? [
-              transaction({ categoryKey: 10, effectiveAmount: '-90', transactionKey: 1 }), // 90/100 = 90% -> near
-              transaction({ categoryKey: 20, categoryName: 'Transport', effectiveAmount: '-60', transactionKey: 2 }), // 60/50 = 120% -> over
+              transaction({ categoryKey: 10, effectiveAmount: '-90', transactionDate: inJune, transactionKey: 1 }), // 90/100 = 90% -> near
+              transaction({ categoryKey: 20, categoryName: 'Transport', effectiveAmount: '-60', transactionDate: inJune, transactionKey: 2 }), // 60/50 = 120% -> over
             ]
           : [transaction({ effectiveAmount: '-30' })],
       );

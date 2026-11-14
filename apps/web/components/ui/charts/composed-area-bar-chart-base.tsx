@@ -54,6 +54,8 @@ type Props = {
   signedBarKeys?: string[];
   /** Optional line series rendered on top of the area and bar layers. */
   lineKeys?: string[];
+  /** Line series drawn dashed: a projection, not a measured value. */
+  dashedLineKeys?: string[];
   /** Disable Recharts entrance animations for users who prefer reduced motion. */
   isAnimationActive?: boolean;
   /**
@@ -129,6 +131,7 @@ export function ComposedAreaBarChartBase({
   radius = 4,
   signedBarKeys = [],
   lineKeys = [],
+  dashedLineKeys = [],
   isAnimationActive = true,
   connectNulls = false,
   provisionalKey,
@@ -236,6 +239,9 @@ export function ComposedAreaBarChartBase({
             dataKey={key}
             stroke={`var(--color-${key})`}
             strokeWidth={2}
+            strokeDasharray={
+              dashedLineKeys.includes(key) ? "6 4" : undefined
+            }
             dot={lineDot}
             connectNulls={connectNulls}
             isAnimationActive={isAnimationActive}

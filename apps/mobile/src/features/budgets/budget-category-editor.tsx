@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { budgetCategoryWriteSchema, type BudgetCategoryWrite, type BudgetRecurrence } from './budgets-contract'
+import { budgetCategoryWriteSchema, type BudgetCategoryWrite, type BudgetRecurrence, type BudgetSuggestionDto } from './budgets-contract'
 import type { BudgetCategoryChildViewModel } from './budgets-view-model'
 import { classifyBudgetCategoryWriteFailure, type BudgetCategoryWriteFailure } from './use-budget-category-mutation'
 import { FormSwitchRow } from '@/components/ui/form-row'
 import { parseNumberInput } from '@/lib/formatters/decimal-input'
+import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
@@ -29,8 +30,9 @@ const confirmForwardScope = (title: string, message: string, cancel: string, pro
   ], { cancelable: true, onDismiss: () => resolve(false) })
 })
 
-export function BudgetCategoryEditor({ child, year, month, locale, pending, palette, onSave, onCancel }: { child: BudgetCategoryChildViewModel; year: number; month: number; locale: string; pending: boolean; palette: Palette; onSave: (value: BudgetCategoryWrite) => Promise<void>; onCancel: () => void }) {
+export function BudgetCategoryEditor({ child, currency, year, month, locale, pending, palette, suggestion, onSave, onCancel }: { child: BudgetCategoryChildViewModel; currency: string; year: number; month: number; locale: string; pending: boolean; palette: Palette; suggestion?: BudgetSuggestionDto | null; onSave: (value: BudgetCategoryWrite) => Promise<void>; onCancel: () => void }) {
   const { t } = useTranslation()
+  const formatMoney = useFormatMoney()
   const initialAmount = new Intl.NumberFormat(locale, { useGrouping: false, maximumFractionDigits: 20 }).format(child.rawAmount)
   const [amountInput, setAmountInput] = useState(initialAmount)
   const [recurrence, setRecurrence] = useState<BudgetRecurrence | null>(child.recurrence)
@@ -76,6 +78,14 @@ export function BudgetCategoryEditor({ child, year, month, locale, pending, pale
     {failure ? <Text accessibilityRole="alert" style={[styles.alert, { color: palette.foreground, borderColor: palette.destructive }]}>{t(`budgetCategory.failures.${failure}`)}</Text> : null}
     <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetCategory.amount')}</Text>
     <TextInput accessibilityLabel={t('budgetCategory.amount')} accessibilityHint={t('budgetCategory.amountHint')} editable={!pending} keyboardType="decimal-pad" value={amountInput} onChangeText={setAmountInput} style={[styles.input, { color: palette.foreground, borderColor: palette.border, backgroundColor: palette.background }]} />
+    {suggestion?.hasEnoughData && suggestion.suggested !== null ? (
+      <View style={[styles.suggestion, { borderColor: palette.border, backgroundColor: palette.background }]}>
+        <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('budgetCategory.suggestionLabel', { amount: formatMoney(suggestion.suggested, { currency, locale }) })}</Text>
+        <EditorButton label={t('budgetCategory.suggestionApply')} disabled={pending} busy={false} onPress={() => setAmountInput(new Intl.NumberFormat(locale, { useGrouping: false, maximumFractionDigits: 20 }).format(suggestion.suggested!))} palette={palette} />
+      </View>
+    ) : suggestion ? (
+      <Text style={[styles.helper, { color: palette.mutedForeground }]}>{t('budgetCategory.suggestionNotEnoughData')}</Text>
+    ) : null}
     <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetCategory.recurrence')}</Text>
     {child.recurrence === null ? <Text accessibilityRole="alert" style={[styles.legacy, { color: palette.mutedForeground }]}>{t('budgetCategory.legacyRecurrence')}</Text> : null}
     <View accessibilityRole="radiogroup" style={styles.choices}>{recurrences.map((option) => <Choice key={option} label={t(`budgetMonth.recurrence.${option}`)} selected={recurrence === option} disabled={pending} onPress={() => setRecurrence(option)} palette={palette} />)}</View>
@@ -111,5 +121,5 @@ function EditorButton({ label, disabled, busy, onPress, primary = false, palette
 }
 
 const styles = StyleSheet.create({
-  editor: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, title: { ...textStyles.section, fontWeight: '700' as const }, helper: { ...textStyles.meta }, label: { ...textStyles.bodyStrong, fontWeight: '700' as const, marginTop: themeTokens.spacing[1] }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choices: { gap: themeTokens.spacing[2] }, choice: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] }, radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' }, radioDot: { width: 10, height: 10, borderRadius: 5 }, choiceLabel: { ...textStyles.body, flex: 1 }, legacy: { ...textStyles.meta }, scopeNote: { ...textStyles.label }, switch: { borderWidth: 1, borderRadius: themeTokens.radius.md, overflow: 'hidden' }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, justifyContent: 'center', alignItems: 'center', paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.bodyStrong, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, alert: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
+  editor: { borderWidth: 1, borderRadius: themeTokens.radius.lg, padding: themeTokens.spacing[4], gap: themeTokens.spacing[3] }, title: { ...textStyles.section, fontWeight: '700' as const }, helper: { ...textStyles.meta }, label: { ...textStyles.bodyStrong, fontWeight: '700' as const, marginTop: themeTokens.spacing[1] }, input: { ...textStyles.amount, minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, paddingHorizontal: themeTokens.spacing[3] }, choices: { gap: themeTokens.spacing[2] }, choice: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] }, radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, alignItems: 'center', justifyContent: 'center' }, radioDot: { width: 10, height: 10, borderRadius: 5 }, choiceLabel: { ...textStyles.body, flex: 1 }, legacy: { ...textStyles.meta }, scopeNote: { ...textStyles.label }, switch: { borderWidth: 1, borderRadius: themeTokens.radius.md, overflow: 'hidden' }, suggestion: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3], gap: themeTokens.spacing[2] }, actions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[3] }, button: { minHeight: themeTokens.touchTarget.minimum, borderWidth: 1, borderRadius: themeTokens.radius.md, justifyContent: 'center', alignItems: 'center', paddingHorizontal: themeTokens.spacing[4] }, buttonText: { ...textStyles.bodyStrong, fontWeight: '700' as const }, disabled: { opacity: 0.45 }, alert: { ...textStyles.meta, borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[3] },
 })

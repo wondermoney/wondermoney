@@ -2,17 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { isManualAssetQueryOfEpoch } from '@/features/manual-assets/query-keys'
 import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError } from '@/lib/api/errors'
 
 import { createLoanWriteEndpoint, loanWriteSchema, type LoanWrite } from './loans-contract'
 import { loanKey, loanOverviewKey, loansKey } from './query-keys'
 
-export type LoanWriteFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'invalid-response' | 'general'
+export type LoanWriteFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'invalid-response' | 'general'
 
 export function classifyLoanWriteFailure(error: unknown): LoanWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
@@ -54,6 +56,8 @@ export function useLoanMetadataMutation() {
               queryClient.invalidateQueries({ queryKey: loanOverviewKey(runtime.epochId), exact: true }),
               queryClient.invalidateQueries({ queryKey: loanKey(runtime.epochId, loanId), exact: true }),
               queryClient.invalidateQueries({ queryKey: netWorthKey(runtime.epochId), exact: true }),
+              // Linked debt and equity on the assets the loan secures.
+              queryClient.invalidateQueries({ predicate: isManualAssetQueryOfEpoch(runtime.epochId) }),
             ])
           },
         })

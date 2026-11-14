@@ -1,0 +1,65 @@
+---
+title: Bank sync health
+description: See which banks fail to sync on your instance before the people using it notice, from an admin page or a script.
+---
+
+When a bank changes something or a consent runs out, syncs start failing quietly: the app keeps showing the last balances it fetched. The bank sync health page shows, for the whole instance, how many connections are in each state, which errors the syncs hit and which banks are failing. Only instance admins can open it.
+
+## Make someone an admin
+
+**With single sign-on**, set `OIDC_ADMIN_GROUPS`: members of those groups are admins, checked at every sign-in. See [Single sign-on](/en/docs/self-hosting/single-sign-on#admins).
+
+**Without single sign-on**, run the `instance-admin` command in the api container. The person needs an account first.
+
+```bash
+docker compose exec api node dist/database/scripts/instance-admin.js grant you@example.com
+docker compose exec api node dist/database/scripts/instance-admin.js list
+docker compose exec api node dist/database/scripts/instance-admin.js revoke you@example.com
+```
+
+On Kubernetes, run the same command with `kubectl -n wondermoney exec deploy/wondermoney-api -- node dist/database/scripts/instance-admin.js grant you@example.com`.
+
+The change applies to the next request; nobody needs to sign in again. With `OIDC_ADMIN_GROUPS` set, the person's next sign-in through the provider sets admin from their groups again, so manage admins in one place.
+
+An admin signs in like anyone else, with the same two-factor rules: an account with two-factor authentication enters its code before it gets a session. Turn [two-factor authentication](/en/docs/settings-security-privacy/two-factor-authentication) on for admin accounts.
+
+## Open the page
+
+Go to your `APP_URL` followed by `/en/admin/bank-sync` (or `/pt/` or `/es/`), for example `https://money.example.com/en/admin/bank-sync`. There is no link to it in the menus. Anyone who is not an admin gets the same "page not found" as for an address that does not exist.
+
+## What it shows
+
+| Section | Shows |
+|---|---|
+| Connections | Every bank connection by state: linked, expired, error, authorized, started but never linked. Plus how many have been failing for more than 48 hours |
+| Institutions | For each bank, the syncs of the last 7 days, how many failed, the success rate and how many of its connections are failing. Banks that need attention come first |
+| Errors | Sync runs by error code, over the last 24 hours and the last 7 days |
+| Failing for more than 48 hours | One row per failing connection: the bank, the latest error code, the connection's state, when the failures started and the last successful sync |
+
+A bank **needs attention** when two or more of its connections have been failing for more than 48 hours, or when fewer than half of at least three syncs in the last 7 days succeeded.
+
+A connection is **failing** when its latest sync failed and the failures started more than 48 hours ago. The clock starts at the first failure after the last sync that brought data back; a partial sync, where some accounts synced, restarts it. A connection someone removed is not listed.
+
+### Error codes
+
+| Code | Usually means |
+|---|---|
+| `consent_expired`, `authentication`, `invalid_requisition`, `cancelled` | The bank no longer accepts the consent. The person has to reconnect the bank in **Settings → Connections** |
+| `rate_limited` | The bank limited how often it may be asked. Syncs resume once the limit has passed |
+| `provider_unavailable`, `institution_unavailable`, `timeout` | The aggregator or the bank was down or slow. Usually passes on its own |
+| `account_phase_failed`, `transaction_phase_failed`, `data_validation`, `internal`, `unknown` | Something failed on this server. The worker log (`docker compose logs worker`) has the detail |
+
+## What it does not show
+
+The page and the endpoints behind it return counts, banks, states, error codes and times only. They never include a name, an email address, a household, an account name, an account number or a transaction, and they carry no id for a connection. You cannot change or retry a connection from here; the person who owns it reconnects it from their settings.
+
+## From a script
+
+The same data is available as JSON with the admin API key (`ADMIN_API_KEY`):
+
+```bash
+curl -H "x-api-key: $ADMIN_API_KEY" https://money.example.com/v1/admin/bank-sync/health
+curl -H "x-api-key: $ADMIN_API_KEY" https://money.example.com/v1/admin/bank-sync/failing
+```
+
+A personal API token cannot read them, even an admin's: the API answers 404. These endpoints are not part of the [public API reference](/en/docs/api/reference).

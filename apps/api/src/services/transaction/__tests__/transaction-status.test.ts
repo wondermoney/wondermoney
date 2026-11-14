@@ -4,7 +4,7 @@ import { addTransaction, ONE_OF_EACH_STATUS, seedHousehold } from '@app/__tests_
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { Transaction } from '@entity/Transaction';
 
-import { excludeExpired, isExpiredStatusName, notExpiredTransactionSql } from '../transaction-status';
+import { excludeExpired, isExpiredStatusName, isPostedStatusName, notExpiredTransactionSql, onlyPosted } from '../transaction-status';
 
 describe('the EXPIRED transaction rule', () => {
   const db = useTestDatabase();
@@ -37,5 +37,17 @@ describe('the EXPIRED transaction rule', () => {
 
   it('names only EXPIRED as money that never moved', () => {
     expect([null, undefined, 'BOOKED', 'PENDING', 'EXPIRED'].map(isExpiredStatusName)).toEqual([false, false, false, false, true]);
+  });
+
+  it('keeps only booked and status-less rows through the posted-only condition, composed with an existing $or', async () => {
+    const byStatus = await seed();
+
+    const rows = await db.em().find(Transaction, onlyPosted({ $or: [{ settlementAmount: { $lt: 0 } }, { settlementAmount: null }] }));
+
+    expect(rows.map((row) => row.transactionKey).sort()).toEqual([byStatus.get('BOOKED'), byStatus.get(null)].sort());
+  });
+
+  it('names a row posted unless it is pending or expired', () => {
+    expect([null, undefined, 'BOOKED', 'PENDING', 'EXPIRED'].map(isPostedStatusName)).toEqual([true, true, true, false, false]);
   });
 });

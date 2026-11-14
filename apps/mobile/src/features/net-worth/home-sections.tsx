@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, View } from 'react-native'
 
@@ -11,9 +11,11 @@ import { Icon } from '@/components/ui/icon'
 import { List, ListRow } from '@/components/ui/list-row'
 import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
+import type { InsightDto, SpendingVsNormalFactsDto } from '@/features/insights/insights-contract'
 import type { LoanDto } from '@/features/loans/loans-contract'
-import { transactionMark } from '@/features/transactions/transaction-mark'
-import type { TransactionDto } from '@/features/transactions/transactions-contract'
+import { MerchantAvatar } from '@/features/merchants/merchant-avatar'
+import { transactionMark, transactionMerchantAvatar } from '@/features/transactions/transaction-mark'
+import type { TransactionDto, TransactionReviewSummaryDto } from '@/features/transactions/transactions-contract'
 import { resolveFxState } from '@/lib/api/fx-status'
 import { transactionDisplayDate } from '@/lib/dates/transaction-date'
 import { formatCategoryName } from '@/lib/formatters/category-name'
@@ -25,12 +27,15 @@ import {
   calendarDay,
   daysLeftInMonth,
   formatMonthName,
+  formatPercentagePoints,
+  formatSavingsRate,
   formatShortDate,
   measureGeometry,
   type BalanceSheet,
   type BalanceSheetGroup,
-  type CashflowScale,
+  type CashflowView,
   type MonthSummary,
+  type SavingsSummary,
 } from './home-model'
 
 /** A Home section loads, fails and retries on its own, as on web. */
@@ -282,7 +287,7 @@ function BudgetMonthItem({ row, first, locale, onNavigate }: { row: BudgetMonthR
 
 // ── Balance sheet (web BalanceSheetSection) ───────────────────────────────
 
-export function BalanceSheetSection({ sheet, currency, locale, accountMarks, portfolioMarks }: {
+export function BalanceSheetSection({ sheet, currency, locale, accountMarks, portfolioMarks, notice }: {
   sheet: BalanceSheet
   currency: string
   locale: string
@@ -290,6 +295,8 @@ export function BalanceSheetSection({ sheet, currency, locale, accountMarks, por
   accountMarks?: ReadonlyMap<number, EntityMarkSource>
   /** Each portfolio's mark (its broker's letters), by portfolio key. */
   portfolioMarks?: ReadonlyMap<number, EntityMarkSource>
+  /** Shown above the sheet, as web shows "Is this the same money?" there. */
+  notice?: ReactNode
 }) {
   const { t } = useTranslation()
   if (sheet.own.length === 0 && sheet.owe.length === 0) return null
@@ -299,6 +306,7 @@ export function BalanceSheetSection({ sheet, currency, locale, accountMarks, por
     .flatMap((group) => group.rows.flatMap((row) => (row.id === undefined ? [] : [[row.id, row.label] as const]))))
   return (
     <Section title={t('home.sheet.title')} variant="open" testID="home-balance-sheet">
+      {notice ? <View style={styles.sheetNotice}>{notice}</View> : null}
       <View>
         <SheetSide accountMarks={accountMarks} accountNames={accountNames} portfolioMarks={portfolioMarks} currency={currency} groups={sheet.own} locale={locale} title={t('home.sheet.own')} total={sheet.ownTotal} />
         <View style={styles.sheetSplit}>
@@ -341,17 +349,20 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
             const formatted = formatMoney(row.amount, { locale, currency })
             // Already inside the account's balance: shown, never added to a total.
             const countedIn = row.countedInAccountId === undefined ? null : t('home.sheet.countedIn', { account: accountNames?.get(row.countedInAccountId) ?? '' })
+            // One member's figure: their part of an account split between members (read-only here; set on the web).
+            const share = row.sharePercent === undefined ? null : t('home.sheet.shareOfAccount', { percent: new Intl.NumberFormat(locale, { maximumFractionDigits: 2, style: 'percent' }).format(row.sharePercent / 100) })
             return (
               <View
                 key={row.key}
                 accessible
-                accessibilityLabel={`${row.label}, ${formatted}, ${currency}${countedIn ? `, ${countedIn}` : ''}${liability ? `, ${t('netWorth.liabilityCue')}` : ''}`}
+                accessibilityLabel={`${row.label}, ${formatted}, ${currency}${share ? `, ${share}` : ''}${countedIn ? `, ${countedIn}` : ''}${liability ? `, ${t('netWorth.liabilityCue')}` : ''}`}
                 style={[styles.sheetRow, { borderBottomColor: palette.border }]}
               >
                 <View style={styles.sheetLabel}>
                   <EntityMark {...markFor(group.type, row.id)} size="sm" testID="balance-sheet-mark" />
                   <View style={styles.flex}>
                     <Text numberOfLines={1} variant="body">{row.label}</Text>
+                    {share ? <Text numberOfLines={1} tone="muted" variant="meta">{share}</Text> : null}
                     {countedIn ? <Text numberOfLines={1} tone="muted" variant="meta">{countedIn}</Text> : null}
                   </View>
                 </View>
@@ -371,8 +382,68 @@ function SheetSide({ title, groups, total, currency, locale, liability = false, 
 
 // ── Net cash flow by month (web CashflowSection) ──────────────────────────
 
+function CashflowSummary({ summary, currency, locale }: { summary: SavingsSummary; currency: string; locale: string }) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const comparison = summary.comparison
+  const vs = comparison
+    ? comparison.samePoint
+      ? t('home.cashflow.vsSamePoint')
+      : t('home.cashflow.vs', { month: formatMonthName(comparison.month, locale) })
+    : null
+  const change = (delta: number | null, goodWhenNegative: boolean) =>
+    delta === null || vs === null ? null : (
+      <View style={styles.summaryChange}>
+        <Amount currency={currency} delta locale={locale} size="amountSmall" toneValue={goodWhenNegative ? -delta : delta} value={delta} />
+        <Text tone="muted" variant="label">{vs}</Text>
+      </View>
+    )
+  const rateTone = summary.savingsRateDelta === null
+    ? 'muted'
+    : summary.savingsRateDelta > 0
+      ? 'success'
+      : summary.savingsRateDelta < 0
+        ? 'destructive'
+        : 'muted'
+
+  return (
+    <View style={[styles.summary, { borderBottomColor: palette.border }]}>
+      <Text accessibilityRole="header" variant="bodyStrong">{t('home.cashflow.thisMonth')}</Text>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.income')}</Text>
+        <View style={styles.summaryFigure}>
+          <Amount currency={currency} locale={locale} size="amountLarge" value={summary.income} />
+          {change(summary.incomeDelta, false)}
+        </View>
+      </View>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.spending')}</Text>
+        <View style={styles.summaryFigure}>
+          <Amount currency={currency} locale={locale} size="amountLarge" value={summary.spending} />
+          {change(summary.spendingDelta, true)}
+        </View>
+      </View>
+      <View style={styles.summaryRow}>
+        <Text tone="muted" variant="meta">{t('home.cashflow.savingsRate')}</Text>
+        <View style={styles.summaryFigure}>
+          <Text variant="amountLarge">{formatSavingsRate(summary.savingsRate, locale)}</Text>
+          {summary.savingsRateDelta === null || vs === null ? null : (
+            <View style={styles.summaryChange}>
+              <Text tone={rateTone} variant="label">
+                {t('home.cashflow.points', { points: formatPercentagePoints(summary.savingsRateDelta, locale) })}
+              </Text>
+              <Text tone="muted" variant="label">{vs}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <Text style={styles.caption} tone="muted" variant="meta">{t('home.cashflow.formula')}</Text>
+    </View>
+  )
+}
+
 export function CashflowSection({ state, currency, today, locale, onRetry }: {
-  state: SectionState<CashflowScale>
+  state: SectionState<CashflowView>
   currency: string
   today: Date
   locale: string
@@ -384,7 +455,7 @@ export function CashflowSection({ state, currency, today, locale, onRetry }: {
   const title = t('home.cashflow.title')
   if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={title} rows={6} /></Section>
   if (state.status === 'error') return <Section title={title} variant="open"><SectionError onRetry={onRetry} /></Section>
-  const { bars, zero } = state.data
+  const { bars, zero, summary } = state.data
   if (bars.length === 0) {
     return <Section title={title} variant="open"><SectionEmpty body={t('home.cashflow.emptyBody')} title={t('home.cashflow.emptyTitle')} /></Section>
   }
@@ -395,6 +466,7 @@ export function CashflowSection({ state, currency, today, locale, onRetry }: {
   }
   return (
     <Section title={title} variant="open" testID="home-cashflow">
+      {summary ? <CashflowSummary currency={currency} locale={locale} summary={summary} /> : null}
       <View accessibilityLabel={t('home.cashflow.listLabel', { from: label(bars[0].date), to: label(bars[bars.length - 1].date) })}>
         {bars.map((bar) => {
           const current = isCurrent(bar.date)
@@ -493,8 +565,41 @@ export function LoansSection({ state, locale, onNavigate, onRetry }: {
 
 // ── Latest transactions (web LatestTransactionsSection) ───────────────────
 
+/**
+ * The review inbox at a glance, above the latest transactions: how many rows are
+ * waiting, what they add up to, and the way in. With nothing waiting it says so.
+ * It belongs to the latest-transactions section, not to the customizable layout.
+ */
+function ReviewStatusRow({ review, locale, onNavigate }: {
+  review: TransactionReviewSummaryDto
+  locale: string
+  onNavigate: Navigate
+}) {
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const formatMoney = useFormatMoney()
+  if (review.count === 0) {
+    return (
+      <View style={[styles.reviewStatus, { borderBottomColor: palette.border }]}>
+        <View style={styles.reviewCaughtUp}>
+          <Icon color={palette.successText} name="check" size={16} />
+          <Text tone="success" variant="meta">{t('home.latest.allCaughtUp')}</Text>
+        </View>
+      </View>
+    )
+  }
+  return (
+    <View style={[styles.reviewStatus, { borderBottomColor: palette.border }]}>
+      <Text style={styles.flex} tone="muted" variant="meta">
+        {t('home.latest.reviewSummary', { amount: formatMoney(review.totalAbs, { currency: review.currency, locale }), count: review.count })}
+      </Text>
+      <Button label={t('home.latest.reviewNow')} onPress={() => onNavigate('/accounts/transactions?filter=unreviewed')} variant="secondary" />
+    </View>
+  )
+}
+
 export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }: {
-  state: SectionState<{ transactions: readonly TransactionDto[]; unreviewedCount: number }>
+  state: SectionState<{ review: TransactionReviewSummaryDto | null; transactions: readonly TransactionDto[] }>
   locale: string
   onNavigate: Navigate
   onRetry: () => void
@@ -504,7 +609,7 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
   const title = t('home.latest.title')
   if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={title} rows={6} /></Section>
   if (state.status === 'error') return <Section title={title} variant="open"><SectionError onRetry={onRetry} /></Section>
-  const { transactions, unreviewedCount } = state.data
+  const { review, transactions } = state.data
   if (transactions.length === 0) {
     return (
       <Section title={title} variant="open">
@@ -516,15 +621,21 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
       </Section>
     )
   }
-  const reviewLink = unreviewedCount > 0 ? (
-    <Button label={t('home.latest.review', { count: unreviewedCount })} onPress={() => onNavigate('/accounts/transactions')} variant="link" />
-  ) : undefined
+  // An offline account with only its opening balance has no real transaction (that row's key is
+  // negative), so the review status stays out of it, exactly as for an empty account.
+  const hasTransactions = transactions.some((transaction) => transaction.transactionKey > 0)
   return (
-    <Section action={reviewLink} title={title} variant="open" testID="home-latest-transactions">
+    <Section title={title} variant="open" testID="home-latest-transactions">
       <View>
+        {hasTransactions && review ? <ReviewStatusRow locale={locale} onNavigate={onNavigate} review={review} /> : null}
         <List divided>
           {transactions.map((transaction) => {
             const category = transaction.appuserTransactionCategories[0]
+            const merchantAvatar = transactionMerchantAvatar({
+              synthetic: transaction.transactionKey < 0,
+              type: transaction.transactionTypeKey?.name,
+              merchant: transaction.transactionMerchantKey,
+            })
             const fx = resolveFxState({
               fxStatus: transaction.fxStatus,
               fxRateDate: transaction.fxRateDate,
@@ -541,7 +652,7 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
                 key={transaction.transactionKey}
                 density="comfortable"
                 figure={<Amount currency={currency} locale={locale} size="amountBase" value={amount} />}
-                leading={<EntityMark {...transactionMark({
+                leading={merchantAvatar ? <MerchantAvatar {...merchantAvatar} testID="home-transaction-merchant-avatar" /> : <EntityMark {...transactionMark({
                   synthetic: transaction.transactionKey < 0,
                   type: transaction.transactionTypeKey?.name,
                   category: category ? { name: category.icon, bgColor: category.bgColor, textColor: category.textColor } : null,
@@ -573,26 +684,120 @@ export function LatestTransactionsSection({ state, locale, onNavigate, onRetry }
   )
 }
 
-/** Mobile's "Spent most on" line; web's home has no equivalent, so it closes the page. */
-export function InsightSection({ state, fallbackCurrency, locale }: {
-  state: { status: 'hidden' } | SectionState<{ name: string; amount: number; currency: string | null }>
+/**
+ * The home's deterministic insights, in the same words and figures as web. "Spent most on" stays
+ * as the fallback when no insight fires, so the section is never empty on an ordinary month.
+ */
+export type InsightsState =
+  | { status: 'hidden' }
+  | SectionState<{
+      fallback: { amount: number; currency: string | null; name: string } | null
+      insights: readonly InsightDto[]
+    }>
+
+export function InsightsSection({ state, fallbackCurrency, locale, onNavigate }: {
+  state: InsightsState
   fallbackCurrency: string
   locale: string
+  onNavigate: Navigate
 }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
   if (state.status === 'hidden') return null
   const title = t('netWorth.insights.title')
-  if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={t('netWorth.insights.loading')} rows={1} /></Section>
+  if (state.status === 'loading') return <Section title={title} variant="open"><RowsSkeleton label={t('netWorth.insights.loading')} rows={2} /></Section>
   if (state.status === 'error') {
     return <Section title={title} variant="open"><Text tone="muted" variant="meta">{t('netWorth.insights.error')}</Text></Section>
   }
-  const amount = formatMoney(state.data.amount, { locale, currency: state.data.currency ?? fallbackCurrency })
+  const { fallback, insights } = state.data
+  if (insights.length === 0) {
+    if (!fallback) return null
+    const amount = formatMoney(fallback.amount, { locale, currency: fallback.currency ?? fallbackCurrency })
+    return (
+      <Section title={title} variant="open">
+        <Text variant="meta">{t('netWorth.insights.topCategory', { name: formatCategoryName(fallback.name), amount })}</Text>
+      </Section>
+    )
+  }
   return (
-    <Section title={title} variant="open">
-      <Text variant="meta">{t('netWorth.insights.topCategory', { name: formatCategoryName(state.data.name), amount })}</Text>
+    <Section title={title} variant="open" testID="home-insights">
+      <View>
+        {insights.map((insight) => (
+          <InsightRow insight={insight} key={insight.id} locale={locale} onNavigate={onNavigate} />
+        ))}
+      </View>
     </Section>
   )
+}
+
+function InsightRow({ insight, locale, onNavigate }: { insight: InsightDto; locale: string; onNavigate: Navigate }) {
+  const formatMoney = useFormatMoney()
+  const { t } = useTranslation()
+  const palette = usePalette()
+  const severity = t(`netWorth.insights.severity.${insight.severity}`)
+  const tone = insight.severity === 'critical' ? 'destructive' : insight.severity === 'warning' ? 'warning' : 'success'
+  const rowStyle = [styles.insightRow, { borderBottomColor: palette.border }]
+
+  if (insight.type === 'spending_vs_normal') {
+    const facts = insight.facts
+    const percent = Math.round(Math.abs(Number(facts.deviationPercent)))
+    const money = (value: string) => formatMoney(Number(value), { locale, currency: facts.currency })
+    return (
+      <View style={rowStyle} testID={`home-insight-${insight.id}`}>
+        <View style={styles.insightHead}>
+          <Text style={styles.flex} variant="bodyStrong">
+            {t(`netWorth.insights.spending.${facts.direction}`, { category: formatCategoryName(facts.categoryName), percent })}
+          </Text>
+          <Text tone={tone} variant="label">{severity}</Text>
+        </View>
+        <Text tone="muted" variant="meta">
+          {t('netWorth.insights.spending.figures', { baseline: money(facts.baselineAmount), current: money(facts.currentAmount) })}
+        </Text>
+        <View style={styles.insightAction}>
+          <Button
+            label={t('netWorth.insights.spending.link')}
+            onPress={() => onNavigate(spendingInsightHref(facts))}
+            trailingIcon="chevron-right"
+            variant="link"
+          />
+        </View>
+      </View>
+    )
+  }
+
+  const facts = insight.facts
+  const category = facts.parentCategoryName ? `${facts.parentCategoryName} / ${facts.categoryName}` : facts.categoryName
+  const [year, month] = insight.period.split('-')
+  const money = (value: string) => formatMoney(Number(value), { locale, currency: facts.currencyCode })
+  return (
+    <View style={rowStyle} testID={`home-insight-${insight.id}`}>
+      <View style={styles.insightHead}>
+        <Text style={styles.flex} variant="bodyStrong">{t('netWorth.insights.budget.pace', { category: formatCategoryName(category) })}</Text>
+        <Text tone={tone} variant="label">{severity}</Text>
+      </View>
+      <Text tone="muted" variant="meta">
+        {t('netWorth.insights.budget.figures', { budgeted: money(facts.amountBudgeted), projected: money(facts.projectedAmount) })}
+      </Text>
+      <View style={styles.insightAction}>
+        <Button
+          label={t('netWorth.insights.budget.link')}
+          onPress={() => onNavigate(`/budgets/${facts.budgetKey}/${year}/${Number(month)}`)}
+          trailingIcon="chevron-right"
+          variant="link"
+        />
+      </View>
+    </View>
+  )
+}
+
+/** The ledger opened on exactly the rows the card counted. */
+function spendingInsightHref(facts: SpendingVsNormalFactsDto): string {
+  const params = [
+    `fromDate=${encodeURIComponent(facts.fromDate)}`,
+    `toDate=${encodeURIComponent(facts.toDate)}`,
+    `categoryKeys=${encodeURIComponent(facts.categoryKeys.join(','))}`,
+  ]
+  return `/accounts/transactions?${params.join('&')}`
 }
 
 const styles = StyleSheet.create({
@@ -630,12 +835,18 @@ const styles = StyleSheet.create({
 
   // The owed side starts after space, not a rule.
   sheetSplit: { marginTop: themeTokens.spacing[8] },
+  sheetNotice: { marginBottom: themeTokens.spacing[6] },
   sideTitle: { fontWeight: '600', marginBottom: themeTokens.spacing[2] },
   sideEmpty: { paddingVertical: themeTokens.spacing[2] },
   groupHeading: { marginTop: themeTokens.spacing[4], marginBottom: themeTokens.spacing[1] },
   sheetRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[2], borderBottomWidth: 1 },
   sheetLabel: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[3] },
   sheetTotal: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingTop: themeTokens.spacing[3] },
+
+  summary: { gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[4], marginBottom: themeTokens.spacing[4], borderBottomWidth: 1 },
+  summaryRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[4] },
+  summaryFigure: { alignItems: 'flex-end', gap: 2, flexShrink: 1 },
+  summaryChange: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', justifyContent: 'flex-end', columnGap: themeTokens.spacing[1] },
 
   cashRow: { minHeight: themeTokens.touchTarget.minimum, flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[4], borderBottomWidth: 1 },
   cashMonth: { width: 48 },
@@ -650,7 +861,13 @@ const styles = StyleSheet.create({
   loanMain: { flex: 1, minWidth: 0, gap: themeTokens.spacing[1] },
   loanTitle: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: themeTokens.spacing[4] },
 
+  insightRow: { gap: themeTokens.spacing[2], paddingVertical: themeTokens.spacing[3], borderBottomWidth: 1 },
+  insightHead: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
+  insightAction: { alignItems: 'flex-start' },
+
   categoryLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: themeTokens.spacing[3], rowGap: themeTokens.spacing[1] },
   uncategorised: { borderWidth: 1, borderStyle: 'dashed', borderRadius: themeTokens.radius.sm, paddingHorizontal: 6 },
+  reviewStatus: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], paddingBottom: themeTokens.spacing[4], marginBottom: themeTokens.spacing[4], borderBottomWidth: 1 },
+  reviewCaughtUp: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   allLink: { marginTop: themeTokens.spacing[4], alignItems: 'flex-start' },
 })

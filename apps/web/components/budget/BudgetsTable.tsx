@@ -35,6 +35,7 @@ import {
 } from "../ui/dropdown-menu";
 import BudgetDeleteModal from "./BudgetDeleteModal";
 import BudgetEditModal from "./BudgetEditModal";
+import { PersonalBudgetLabel } from "./PersonalBudgetLabel";
 
 interface BudgetsTableProps {
   budgets: BudgetFull[];
@@ -71,6 +72,7 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
     name: BudgetFull["name"] | null;
     key: BudgetFull["budgetKey"] | null;
     rolloverCarriesOverspend?: BudgetFull["rolloverCarriesOverspend"];
+    periodStartDay?: BudgetFull["periodStartDay"];
   }>({ name: null, key: null });
 
   const [editBudgetModalIsOpen, setEditBudgetModalIsOpen] = useState(false);
@@ -81,8 +83,14 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   };
   const editBudgetOpenModal = useCallback(
     (rowIndex: number) => {
-      const { name, budgetKey, rolloverCarriesOverspend } = budgets[rowIndex];
-      setBudgetData({ name, key: budgetKey, rolloverCarriesOverspend });
+      const { name, budgetKey, rolloverCarriesOverspend, periodStartDay } =
+        budgets[rowIndex];
+      setBudgetData({
+        name,
+        key: budgetKey,
+        rolloverCarriesOverspend,
+        periodStartDay,
+      });
       setEditBudgetModalIsOpen(true);
       posthog.capture("edit_budget_modal", { action: "opened" });
     },
@@ -261,12 +269,15 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
         header: t("name"),
         cell: ({ row }) => (
           <div className="flex max-w-40 min-w-0 flex-col gap-1 sm:max-w-xs">
-            <Text
-              variant="smallText"
-              className="text-foreground block truncate font-medium"
-            >
-              {row.original.name}
-            </Text>
+            <div className="flex min-w-0 items-center gap-2">
+              <Text
+                variant="smallText"
+                className="text-foreground block truncate font-medium"
+              >
+                {row.original.name}
+              </Text>
+              <PersonalBudgetLabel budget={row.original} />
+            </div>
             <Text
               variant="smallText"
               className="text-muted-foreground block truncate text-xs"
@@ -363,12 +374,10 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
 
   const onRowClick = (row: Row<BudgetFull>) => {
     posthog.capture("budgets_table_row_clicked");
-    const now = new Date();
-    router.push(
-      `/budgets/${row.original.budgetKey}/${now.getFullYear()}/${
-        now.getMonth() + 1
-      }`,
-    );
+    // The budget month today is in, which the budget's start day decides: the
+    // API lists each budget in it.
+    const { budgetKey, year, month } = row.original;
+    router.push(`/budgets/${budgetKey}/${year}/${month}`);
   };
 
   return (
@@ -379,12 +388,13 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
           <BudgetEditModal
             // A fresh form per budget and per saved state: the form reads its
             // values only when it mounts.
-            key={`${budgetData.key}-${budgetData.name}-${budgetData.rolloverCarriesOverspend}`}
+            key={`${budgetData.key}-${budgetData.name}-${budgetData.rolloverCarriesOverspend}-${budgetData.periodStartDay}`}
             isOpen={editBudgetModalIsOpen}
             onOpenChange={setEditBudgetModalIsOpen}
             budgetName={budgetData.name}
             budgetKey={budgetData.key}
             rolloverCarriesOverspend={budgetData.rolloverCarriesOverspend}
+            periodStartDay={budgetData.periodStartDay}
           />
           <BudgetDeleteModal
             isOpen={deleteBudgetModalIsOpen}

@@ -20,6 +20,7 @@ const state = {
   accountRecovery: { effectiveEnabled: true, storedEnabled: true },
   bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
   budgetAlerts: { deliverySupported: true, effectiveEnabled: false, storedEnabled: false },
+  creditCardDueReminders: { effectiveEnabled: true, storedEnabled: false },
   growth: { effectiveEnabled: true, storedEnabled: true },
   marketingOptOut: false,
   weeklyInsights: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
@@ -42,10 +43,10 @@ describe('useUpdateNotificationPreferences', () => {
       return state
     })
     const hook = await renderHook(() => useUpdateNotificationPreferences(), { wrapper: wrap(client) })
-    await act(async () => { await hook.result.current.mutateAsync({ budgetAlertsEnabled: true }) })
+    await act(async () => { await hook.result.current.mutateAsync({ creditCardDueRemindersEnabled: false }) })
     expect(mockWrite).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'PATCH', path: '/v1/user/me/email-notification-preferences' }),
-      expect.objectContaining({ body: { budgetAlertsEnabled: true }, commit: expect.any(Function) }),
+      expect.objectContaining({ body: { creditCardDueRemindersEnabled: false }, commit: expect.any(Function) }),
     )
     expect(client.getQueryData(notificationPreferencesKey(9))).toEqual(state)
     await hook.unmount(); client.clear()

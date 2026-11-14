@@ -1,0 +1,54 @@
+---
+title: Feed de calendário
+description: Subscreve as próximas contas a pagar no Google Calendar, no Apple Calendar ou em qualquer aplicação iCal.
+---
+
+O WonderMoney pode publicar os teus pagamentos recorrentes confirmados como um feed de calendário só de leitura. Subscreve uma vez e as contas a pagar aparecem como eventos de dia inteiro na aplicação de calendário que já usas.
+
+## Antes de começar
+
+O feed mostra apenas pagamentos recorrentes confirmados. Confirma primeiro as séries que queres ver em **Contas a pagar e subscrições**; uma série ainda em revisão não é incluída.
+
+## Criar a ligação
+
+1. Abre **Definições → Feed de calendário**.
+2. Seleciona **Criar ligação**.
+3. Copia a ligação e cola-a na aplicação de calendário.
+4. Seleciona **Já copiei**.
+
+A ligação contém um token, por isso trata-a como uma palavra-passe. Só é mostrada uma vez. Se a perderes, cria uma nova ligação; a anterior deixa de funcionar.
+
+Criar uma ligação exige uma sessão recente. Se usares autenticação de dois fatores, introduz também o código do autenticador.
+
+## Subscrever
+
+- **Google Calendar**: **Outros calendários → A partir de URL**, cola a ligação e adiciona o calendário.
+- **Apple Calendar**: **Ficheiro → Nova subscrição de calendário**, cola a ligação e escolhe a frequência de atualização.
+
+Outras aplicações que suportem subscrições iCal ou webcal funcionam da mesma forma.
+
+## O que o feed contém
+
+- Um evento de dia inteiro por cada ocorrência prevista nos próximos 90 dias.
+- O título do evento é o nome da série e o valor esperado, formatado no idioma em que a ligação foi criada.
+- Sem saldos, nomes de conta ou números de conta.
+
+O feed segue as mesmas regras de privacidade da aplicação: uma conta a pagar numa conta privada aparece apenas no feed das pessoas que veem essa conta.
+
+## Atualizar e revogar
+
+O feed anuncia um intervalo de atualização de 12 horas, mas é a aplicação de calendário que decide quando o obtém. Uma alteração a uma série aparece na atualização seguinte.
+
+Para parar o feed, seleciona **Revogar ligação** em **Definições → Feed de calendário**. A ligação deixa de funcionar imediatamente; uma aplicação de calendário já subscrita continua a mostrar os últimos eventos que obteve até removeres a subscrição.
+
+## Problemas comuns
+
+- **Sem eventos**: a série pode ainda não estar confirmada, ou a próxima ocorrência pode cair fora dos 90 dias.
+- **Idioma errado**: a ligação leva o idioma em que foi criada. Cria uma nova ligação depois de mudares de idioma.
+- **A ligação deixou de funcionar**: foi revogada ou substituída. Cria uma nova ligação e subscreve de novo.
+
+## Ligações relacionadas
+
+- [Pagamentos recorrentes](/pt/docs/accounts-transactions/recurring-payments)
+- [Tokens de API](/pt/docs/settings-security-privacy/api-tokens)
+- [Privacidade dos dados](/pt/docs/settings-security-privacy/data-privacy)

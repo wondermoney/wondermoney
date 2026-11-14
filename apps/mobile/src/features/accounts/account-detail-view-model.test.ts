@@ -12,6 +12,7 @@ const dto: AccountSummaryDto = {
   isOwnedByViewer: true,
   isPrivate: false,
   refreshedAt: '2026-07-17T10:00:00.000Z',
+  myAccess: 'owner',
   source: 'open_banking',
 }
 
@@ -20,6 +21,7 @@ describe('account detail view model', () => {
     expect(mapAccountDetail(dto)).toEqual({
       accountId: 42,
       accountName: null,
+      attribution: null,
       institutionDisplayName: 'Wonder Bank',
       isOwnedByViewer: true,
       isPrivate: false,
@@ -36,6 +38,8 @@ describe('account detail view model', () => {
       lastSyncedAt: null,
       institutionLogoUrl: null,
       accountType: null,
+      creditCard: null,
+      myAccess: 'owner',
       fx: { status: 'exact' },
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')

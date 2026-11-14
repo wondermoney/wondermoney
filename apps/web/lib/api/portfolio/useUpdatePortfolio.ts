@@ -3,12 +3,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PortfolioAccountLinkInput } from "@/lib/portfolio/account-link";
 
 import api from "../api";
+import type { PortfolioCostBasisMethod } from "./usePortfolio";
 
 interface UpdatePortfolioRequest {
   portfolioId: number;
   name?: string;
   description?: string | null;
   currencyId?: string;
+  costBasisMethod?: PortfolioCostBasisMethod;
   excluded?: boolean;
   favored?: boolean;
   benchmarkSymbol?: string;
@@ -27,6 +29,13 @@ const useUpdatePortfolio = () => {
       queryClient.invalidateQueries({ queryKey: ["portfolio"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["portfolio-allocation"] });
+      // A cost basis method change re-prices every holding and realized gain.
+      queryClient.invalidateQueries({ queryKey: ["portfolio-holdings"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolios-holdings"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-holding-lots"] });
+      queryClient.invalidateQueries({ queryKey: ["realized-gains"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["portfolio-performance"] });
       // A link changes what net worth counts.
       queryClient.invalidateQueries({ queryKey: ["net-worth"] });
       queryClient.invalidateQueries({ queryKey: ["net-worth-history"] });

@@ -6,4 +6,5 @@ export * from "./chart-formatters";
 export * from "./composed-area-bar-chart-base";
 export * from "./pie-chart-base";
 export * from "./scatter-chart-base";
+export * from "./treemap-chart-base";
 export * from "./useChartFormatters";

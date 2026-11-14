@@ -1,13 +1,53 @@
 ---
 title: HTTPS y dominios
-description: Pon tu instancia detrás de un proxy inverso con HTTPS y sus propios dominios.
+description: Sirve tu instancia por HTTPS en un solo dominio, o da un dominio a la aplicación web y otro a la API.
 ---
 
-Antes de usar tu instancia fuera de tu red, sírvela por HTTPS. Da un nombre de dominio a la aplicación web y otro a la API, y pon un proxy inverso delante de ellas.
+Antes de usar tu instancia fuera de tu red, sírvela por HTTPS. Un solo dominio basta: el proxy incluido sirve la aplicación web y la API en la misma dirección.
 
-## Con Caddy
+## Un solo dominio
 
-[Caddy](https://caddyserver.com) obtiene y renueva los certificados automáticamente. Con la aplicación web y la API en la misma máquina:
+Añade `proxy` a `COMPOSE_PROFILES` en `.env` y define las dos direcciones con el mismo dominio:
+
+```sh
+APP_URL=https://money.example.com
+API_URL=https://money.example.com
+COMPOSE_PROFILES=proxy
+TRUST_PROXY=1
+BIND_ADDRESS=127.0.0.1
+```
+
+Después ejecuta `docker compose up -d` y apunta el DNS del dominio a la máquina. El proxy es [Caddy](https://caddyserver.com): obtiene y renueva el certificado por sí solo, envía `/v1/*` y `/api/auth/*` a la API y todo lo demás a la aplicación web.
+
+Los puertos 80 y 443 deben ser accesibles desde internet, porque Caddy responde al desafío del certificado en el 80. `PROXY_HTTP_PORT` y `PROXY_HTTPS_PORT` cambian los puertos publicados.
+
+No hace falta dominio de cookie: la cookie de sesión pertenece a ese único dominio. Deja `AUTH_COOKIE_DOMAIN` y `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` vacíos.
+
+`BIND_ADDRESS=127.0.0.1` mantiene los puertos HTTP simples (la aplicación web, la API y, si los usas, el almacenamiento y Mailpit) en la máquina, y solo el proxy queda accesible desde fuera.
+
+Para probarlo en local, define `APP_URL=http://localhost` y `API_URL=http://localhost`: el proxy sirve entonces HTTP simple en el puerto 80.
+
+## Otro proxy inverso
+
+Cualquier otro proxy inverso funciona: dale un solo dominio y enruta los mismos dos prefijos de ruta a la API. Con Caddy en la máquina:
+
+```
+money.example.com {
+  handle /v1/* {
+    reverse_proxy localhost:3001
+  }
+  handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle {
+    reverse_proxy localhost:3000
+  }
+}
+```
+
+## Dos dominios
+
+Un dominio para cada uno sigue funcionando. Da un nombre a la aplicación web y otro a la API:
 
 ```
 money.example.com {
@@ -19,9 +59,7 @@ api.money.example.com {
 }
 ```
 
-Cualquier otro proxy inverso funciona igual, como nginx, Traefik o un Cloudflare Tunnel.
-
-## Actualizar el `.env`
+Después, en `.env`:
 
 ```sh
 APP_URL=https://money.example.com
@@ -31,7 +69,7 @@ NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.example.com
 TRUST_PROXY=1
 ```
 
-Después vuelve a ejecutar `docker compose up -d`. El dominio de la cookie permite que la aplicación web lea la sesión que crea la API, porque están en subdominios distintos del mismo dominio.
+El dominio de la cookie permite que la aplicación web lea la sesión que crea la API, porque están en subdominios distintos del mismo dominio. El perfil `proxy` incluido sirve un solo dominio; déjalo desactivado.
 
 ## Indicar a la API que hay un proxy
 
@@ -40,7 +78,7 @@ La API limita cuántas veces cada visitante puede intentar iniciar sesión, y di
 | Configuración | `TRUST_PROXY` |
 |---|---|
 | Sin proxy: los navegadores se conectan directamente al puerto de la API | déjalo vacío |
-| Un proxy inverso (Caddy, nginx, Traefik, un Cloudflare Tunnel) | `1` |
+| Un proxy inverso (el perfil `proxy` incluido, Caddy, nginx, Traefik, un Cloudflare Tunnel) | `1` |
 | El proxy de Cloudflare delante de tu propio proxy inverso | `2` |
 
 En lugar de un número, también puedes indicar las direcciones de los proxies, en una lista separada por comas de direcciones IP o rangos (por ejemplo `172.16.0.0/12`).

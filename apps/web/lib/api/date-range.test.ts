@@ -123,7 +123,7 @@ describe("every data hook sends the range through dateRangeParams", () => {
     });
   }
 
-  test("accounts cash flow, which takes a start only", async () => {
+  test("accounts cash flow sends the start, and the end when one bounds it", async () => {
     let sent: Record<string, unknown> = {};
     const client = {
       get: async (_url: string, config: { params: Record<string, unknown> }) => {
@@ -133,8 +133,19 @@ describe("every data hook sends the range through dateRangeParams", () => {
     } as unknown as AxiosInstance;
 
     await getAccountsCashflow({ fromDate: new Date(2026, 0, 1, 12, 0) }, client);
-
     assert.deepEqual(sent, { fromDate: "2026-01-01T03:00:00.000Z" });
+
+    await getAccountsCashflow(
+      {
+        fromDate: new Date(2026, 0, 1, 12, 0),
+        toDate: new Date(2026, 0, 5, 12, 0),
+      },
+      client,
+    );
+    assert.deepEqual(sent, {
+      fromDate: "2026-01-01T03:00:00.000Z",
+      toDate: "2026-01-06T02:59:59.999Z",
+    });
   });
 });
 

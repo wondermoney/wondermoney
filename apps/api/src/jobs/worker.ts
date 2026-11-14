@@ -15,11 +15,6 @@ import {
   handleAccountAutoSyncScheduleJob,
 } from '@app/jobs/account-auto-sync.worker';
 import {
-  ACCOUNT_CSV_IMPORT_QUEUE,
-  type AccountCsvImportJobPayload,
-  ensureAccountCsvImportQueue,
-} from '@app/jobs/account-csv-import.queue';
-import {
   ACCOUNT_INITIAL_SYNC_QUEUE,
   type AccountInitialSyncJobPayload,
   ensureAccountInitialSyncQueue,
@@ -34,11 +29,23 @@ import {
 } from '@app/jobs/analytics-outbox.queue';
 import { handleAnalyticsOutboxJob } from '@app/jobs/analytics-outbox.worker';
 import {
+  API_TOKEN_EXPIRY_CRON,
+  API_TOKEN_EXPIRY_QUEUE,
+  ensureApiTokenExpiryQueue,
+  scheduleApiTokenExpiryJob,
+} from '@app/jobs/api-token-expiry.queue';
+import {
   ASSET_PRICE_REFRESH_CRON,
   ASSET_PRICE_REFRESH_QUEUE,
   ensureAssetPriceRefreshQueue,
   scheduleAssetPriceRefreshJob,
 } from '@app/jobs/asset-price-refresh.queue';
+import {
+  ASSISTANT_PROPOSAL_EXPIRY_CRON,
+  ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+  ensureAssistantProposalExpiryQueue,
+  scheduleAssistantProposalExpiryJob,
+} from '@app/jobs/assistant-proposal-expiry.queue';
 import {
   BACKGROUND_OPERATION_RECOVERY_CRON,
   BACKGROUND_OPERATION_RECOVERY_QUEUE,
@@ -74,7 +81,14 @@ import {
   ensureCertificadoAforroRateSyncQueue,
   scheduleCertificadoAforroRateSyncAutoJob,
 } from '@app/jobs/certificado-aforro-rate-sync.queue';
+import {
+  CREDIT_CARD_DUE_REMINDER_CRON,
+  CREDIT_CARD_DUE_REMINDER_QUEUE,
+  ensureCreditCardDueReminderQueue,
+  scheduleCreditCardDueReminderJob,
+} from '@app/jobs/credit-card-due-reminder.queue';
 import { type CronMonitorOptions, withCronMonitor } from '@app/jobs/cron-monitor';
+import { CRYPTO_WALLET_SYNC_CRON, CRYPTO_WALLET_SYNC_QUEUE, type CryptoWalletSyncPayload, ensureCryptoWalletSyncQueue, scheduleCryptoWalletSyncJob } from '@app/jobs/crypto-wallet-sync.queue';
 import {
   DATA_EXPORT_CLEANUP_QUEUE,
   DATA_EXPORT_QUEUE,
@@ -155,6 +169,7 @@ import {
   PORTFOLIO_SNAPSHOT_MANUAL_QUEUE,
   schedulePortfolioSnapshotAutoJob,
 } from '@app/jobs/portfolio-snapshot.queue';
+import { ensurePushSendQueue, PUSH_SEND_QUEUE } from '@app/jobs/push-send.queue';
 import { ensureFoundationQueue, FOUNDATION_QUEUE } from '@app/jobs/queue';
 import {
   ensureQueueDepthMonitorQueue,
@@ -301,6 +316,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     ...FINANCIAL_EMAIL_QUEUES,
     BANK_RECOVERY_QUEUE,
     BANK_SYNC_ALERT_SEND_QUEUE,
+    PUSH_SEND_QUEUE,
   ];
 
   const start = async () => {
@@ -313,7 +329,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureAccountInitialSyncQueue(boss);
     await ensureBankRecoveryQueue(boss);
     await ensureBankRecoveryDispatchQueue(boss);
-    await ensureAccountCsvImportQueue(boss);
     await ensureDataExportQueue(boss);
     await ensureDataExportCleanupQueue(boss);
     await ensureDataRestoreQueue(boss);
@@ -336,7 +351,10 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureAccountRecalculateQueue(boss);
     await ensureHistoricalAssetPriceBackfillQueue(boss);
     await ensureCertificadoAforroRateSyncQueue(boss);
+    await ensureCryptoWalletSyncQueue(boss);
     await ensureBudgetYearExtensionQueue(boss);
+    await ensureApiTokenExpiryQueue(boss);
+    await ensureAssistantProposalExpiryQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
     await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
@@ -347,6 +365,8 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureFinancialEmailQueues(boss);
     await ensureBankSyncAlertSweepQueue(boss);
     await ensureBankSyncAlertSendQueue(boss);
+    await ensureCreditCardDueReminderQueue(boss);
+    await ensurePushSendQueue(boss);
     await ensureTransactionEnrichmentGptQueue(boss);
     await ensureQueueDepthMonitorQueue(boss);
     if (schedulerEnabled()) {
@@ -377,7 +397,10 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleExchangeRateRefreshJob(boss);
       await schedulePortfolioSnapshotAutoJob(boss);
       await scheduleCertificadoAforroRateSyncAutoJob(boss);
+      await scheduleCryptoWalletSyncJob(boss);
       await scheduleBudgetYearExtensionJob(boss);
+      await scheduleApiTokenExpiryJob(boss);
+      await scheduleAssistantProposalExpiryJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
@@ -386,6 +409,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleInstanceHeartbeatJob(boss);
       await scheduleBankSyncAlertSweep(boss);
       await scheduleTransactionImportSweep(boss);
+      await scheduleCreditCardDueReminderJob(boss);
       await unscheduleBudgetEmails(boss);
       await unscheduleWeeklyEmails(boss);
       await scheduleBudgetEmails(boss);
@@ -450,16 +474,6 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await boss.work(BANK_RECOVERY_DISPATCH_QUEUE, workJobs<Job<unknown>>(BANK_RECOVERY_DISPATCH_QUEUE, () =>
       runInRequestContext(() => handleBankRecoveryDispatchJob(boss)),
     ));
-
-    await boss.work<AccountCsvImportJobPayload>(
-      ACCOUNT_CSV_IMPORT_QUEUE,
-      workJobs<Job<AccountCsvImportJobPayload>>(ACCOUNT_CSV_IMPORT_QUEUE, async (job) => {
-        const { handleAccountCsvImportJob } = await import('@app/jobs/account-csv-import.worker');
-        await runInRequestContext(() =>
-          handleAccountCsvImportJob(job, { backgroundOperationService: backgroundOperationServiceImpl, enqueue }),
-        );
-      }),
-    );
 
     await boss.work<DataExportJobPayload>(
       DATA_EXPORT_QUEUE,
@@ -581,6 +595,17 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       }),
     );
 
+    await boss.work<Partial<CryptoWalletSyncPayload>>(
+      CRYPTO_WALLET_SYNC_QUEUE,
+      workJobs<Job<Partial<CryptoWalletSyncPayload>>>(CRYPTO_WALLET_SYNC_QUEUE, async (job) => {
+        const { handleCryptoWalletSyncJob } = await import('@app/jobs/crypto-wallet-sync.worker');
+        const run = () => runInRequestContext(() => handleCryptoWalletSyncJob(job));
+        // Only the daily run of every wallet checks in; a sync of one wallet runs whenever someone asks.
+        if (typeof job.data.manualAssetKey === 'number') return run();
+        return withCronMonitor({ checkinMarginMinutes: 120, maxRuntimeMinutes: 60, monitorSlug: CRYPTO_WALLET_SYNC_QUEUE, schedule: CRYPTO_WALLET_SYNC_CRON }, run);
+      }),
+    );
+
     await boss.work<Partial<FxReconvertPayload>>(
       FX_RECONVERT_QUEUE,
       workJobs<Job<Partial<FxReconvertPayload>>>(FX_RECONVERT_QUEUE, async (job) => {
@@ -673,6 +698,30 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       ),
     );
 
+    await boss.work<Record<string, never>>(
+      API_TOKEN_EXPIRY_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        API_TOKEN_EXPIRY_QUEUE,
+        { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: API_TOKEN_EXPIRY_QUEUE, schedule: API_TOKEN_EXPIRY_CRON },
+        async (job) => {
+          const { handleApiTokenExpiryReminderJob } = await import('@app/jobs/api-token-expiry.worker');
+          await runInRequestContext(() => handleApiTokenExpiryReminderJob(job, { logger: log }));
+        },
+      ),
+    );
+
+    await boss.work<Record<string, never>>(
+      ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        ASSISTANT_PROPOSAL_EXPIRY_QUEUE,
+        { checkinMarginMinutes: 30, maxRuntimeMinutes: 10, monitorSlug: ASSISTANT_PROPOSAL_EXPIRY_QUEUE, schedule: ASSISTANT_PROPOSAL_EXPIRY_CRON },
+        async (job) => {
+          const { handleAssistantProposalExpiryJob } = await import('@app/jobs/assistant-proposal-expiry.worker');
+          await runInRequestContext(() => handleAssistantProposalExpiryJob(job, { logger: log }));
+        },
+      ),
+    );
+
     await boss.work(BANK_SYNC_ALERT_SWEEP_QUEUE, workCronJobs<Job<unknown>>(
       BANK_SYNC_ALERT_SWEEP_QUEUE,
       { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: BANK_SYNC_ALERT_SWEEP_QUEUE, schedule: BANK_SYNC_ALERT_SWEEP_CRON },
@@ -691,8 +740,20 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     ));
     await boss.work(BANK_SYNC_ALERT_SEND_QUEUE, workJobs<Job<unknown>>(BANK_SYNC_ALERT_SEND_QUEUE, async (job) => {
       const { handleBankSyncAlertSendJob } = await import('@app/jobs/bank-sync-alert.worker');
-      await runInRequestContext(() => handleBankSyncAlertSendJob(job, { logger: log }));
+      await runInRequestContext(() => handleBankSyncAlertSendJob(job, { enqueue, logger: log }));
     }));
+    await boss.work(PUSH_SEND_QUEUE, workJobs<Job<unknown>>(PUSH_SEND_QUEUE, async (job) => {
+      const { handlePushSendJob } = await import('@app/jobs/push-send.worker');
+      await runInRequestContext(() => handlePushSendJob(job, { enqueue, logger: log }));
+    }));
+    await boss.work(CREDIT_CARD_DUE_REMINDER_QUEUE, workCronJobs<Job<unknown>>(
+      CREDIT_CARD_DUE_REMINDER_QUEUE,
+      { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: CREDIT_CARD_DUE_REMINDER_QUEUE, schedule: CREDIT_CARD_DUE_REMINDER_CRON },
+      async () => {
+        const { handleCreditCardDueReminderJob } = await import('@app/jobs/credit-card-due-reminder.worker');
+        await runInRequestContext(() => handleCreditCardDueReminderJob({ enqueue, logger: log }));
+      },
+    ));
 
     if (schedulerEnabled()) {
       await boss.work(BUDGET_EMAIL_COORDINATOR_QUEUE, { includeMetadata: true }, workCronJobs<JobWithMetadata<Partial<FinancialEmailCoordinatorPayload>>>(
@@ -717,8 +778,8 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       ));
     }
     await boss.work(BUDGET_EMAIL_DELIVERY_QUEUE, workJobs<Job<FinancialEmailUserPayload>>(BUDGET_EMAIL_DELIVERY_QUEUE, async (job) => {
-      const { handleFinancialEmailUser } = await import('@app/jobs/financial-emails.worker');
-      await runInRequestContext(() => handleFinancialEmailUser(job, 'budget'));
+      const { handleBudgetEmailUser } = await import('@app/jobs/financial-emails.worker');
+      await runInRequestContext(() => handleBudgetEmailUser(job, enqueue));
     }));
     await boss.work(WEEKLY_EMAIL_DELIVERY_QUEUE, workJobs<Job<FinancialEmailUserPayload>>(WEEKLY_EMAIL_DELIVERY_QUEUE, async (job) => {
       const { handleFinancialEmailUser } = await import('@app/jobs/financial-emails.worker');

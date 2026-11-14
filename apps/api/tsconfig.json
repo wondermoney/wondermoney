@@ -67,6 +67,7 @@
       "@utils/*": ["./src/utils/*"],
       "@validators/*": ["./src/validators/*"],
       "@middleware/*": ["./src/middleware/*"],
+      "@openapi/*": ["./src/openapi/*"],
       "@config/*": ["./src/config/*"],
       "@app/*": ["./src/*"]
     },

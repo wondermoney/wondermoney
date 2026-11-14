@@ -1,6 +1,8 @@
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
-import type { AccountSource, AccountSummaryDto, AccountsResponseDto, CsvImportFormat } from './accounts-contract'
+import type { AccountAttributionDto } from '@/features/household/member-attribution'
+
+import type { AccountAccess, AccountSource, AccountSummaryDto, AccountsResponseDto, CreditCardSettingsDto, CsvImportFormat } from './accounts-contract'
 
 export type AccountSyncStaleness = 'fresh' | 'stale' | 'very_stale' | 'error' | 'unknown'
 
@@ -27,11 +29,17 @@ export type AccountSummaryViewModel = Readonly<{
   institutionLogoUrl?: string | null
   /** The API's type key ('CREDIT_CARD'); `null` when unset or not reported. */
   accountType?: string | null
+  /** The card's cycle and limit; `null` when the account is not a credit card. */
+  creditCard?: CreditCardSettingsDto | null
+  /** Who the account's money is attributed to; `null` when the API doesn't say (older servers). */
+  attribution?: AccountAttributionDto | null
   /**
    * How `convertedBalance` was converted. `missing`: there is none; show `originalBalance`, marked
    * "Not converted". `provisional`: an estimate at an older rate. Absent on older fixtures: exact.
    */
   fx?: FxState
+  /** The caller's access (#95). `read` hides every edit action; absent on older fixtures: writable. */
+  myAccess?: AccountAccess
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -53,6 +61,9 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   lastSyncedAt: dto.syncStatus?.lastSyncedAt ?? null,
   institutionLogoUrl: dto.accountFinancialInstitutionKey?.logoUrl ?? null,
   accountType: dto.accountType ?? null,
+  creditCard: dto.creditCard ?? null,
+  myAccess: dto.myAccess,
+  attribution: dto.attribution ?? null,
   fx: resolveFxState({
     fxStatus: dto.fxStatus,
     fxRateDate: dto.fxRateDate,

@@ -11,6 +11,8 @@ import { accountMark, EntityMark } from '@/components/ui/entity-mark'
 import { describeFxState, FxStatusLabel } from '@/components/ui/fx-status-label'
 import { IconButton } from '@/components/ui/icon-button'
 import { List, ListRow } from '@/components/ui/list-row'
+import { attributionMark, attributionName, NO_HOUSEHOLD_MEMBERS, type HouseholdMembersModel } from '@/features/household/member-attribution'
+import { MemberBadge } from '@/features/household/member-badge'
 import { Notice } from '@/components/ui/notice'
 import { PageHeader } from '@/components/ui/page-header'
 import { PreviewLabel } from '@/components/ui/preview-label'
@@ -34,6 +36,7 @@ import type { CashflowRow, CategoryRow } from '@/features/account-insights/insig
 import { MetricsStats, type MetricsSectionState } from '@/features/account-insights/metrics-stats'
 import type { TransactionViewModel } from '@/features/transactions/transactions-view-model'
 
+import { canWriteAccount } from './account-access'
 import { aggregateFreshness } from './account-freshness'
 import { freshnessStatus } from './balances-provenance'
 import type { AccountSummaryViewModel } from './accounts-view-model'
@@ -81,6 +84,10 @@ export type AccountsScreenProps = {
   onTimeframeChange?: (timeframe: AccountsTimeframe) => void
   /** Import a bank statement; listed behind the title row's overflow menu. */
   onImportTransactions?: () => void
+  /** Saves this member's account order. Absent, the reorder control is hidden. */
+  onReorderAccounts?: (accountIds: number[]) => void | Promise<void>
+  /** The household; with more than one member each account row says whose it is (or Shared). */
+  members?: HouseholdMembersModel
 }
 
 const LAST_TRANSACTIONS = 8
@@ -105,6 +112,8 @@ export function AccountsScreen({
   onViewTransactions,
   onTimeframeChange,
   onImportTransactions,
+  onReorderAccounts,
+  members = NO_HOUSEHOLD_MEMBERS,
 }: AccountsScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
@@ -115,6 +124,10 @@ export function AccountsScreen({
   const [addOpen, setAddOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [menuAccount, setMenuAccount] = useState<AccountSummaryViewModel | null>(null)
+  // Reorder mode: the list is local until a move is saved, and a refused save puts it back.
+  const [reorderOpen, setReorderOpen] = useState(false)
+  const [order, setOrder] = useState<number[] | null>(null)
+  const [reorderFailed, setReorderFailed] = useState(false)
   // The spinner belongs to the gesture: background refetches (an invalidation,
   // a period change) must not pin it, and on iOS a RefreshControl mounted with
   // `refreshing` already true sticks and pushes the title down.
@@ -146,6 +159,27 @@ export function AccountsScreen({
   const hasAccounts = accounts.length > 0
   const currency = accounts[0]?.primaryCurrencyCode ?? 'EUR'
   const timeframe = insights?.timeframe ?? 'YTD'
+  // Reorder mode: the saved order, then any account created since it was opened.
+  const reorderKeys = reorderOpen ? (order ?? accounts.map((account) => account.accountId)) : null
+  const displayAccounts = reorderKeys
+    ? reorderKeys.flatMap((accountId) => accounts.find((account) => account.accountId === accountId) ?? [])
+    : accounts
+  const moveAccount = async (from: number, to: number) => {
+    if (!reorderKeys || to < 0 || to >= reorderKeys.length || from === to) return
+    const next = [...reorderKeys]
+    const [moved] = next.splice(from, 1)
+    if (!moved) return
+    next.splice(to, 0, moved)
+    const previous = reorderKeys
+    setOrder(next)
+    setReorderFailed(false)
+    try {
+      await onReorderAccounts?.(next)
+    } catch {
+      setOrder(previous)
+      setReorderFailed(true)
+    }
+  }
   // The floating "+" holds both add actions (account and transaction). With
   // no accounts, or no transaction route, it is Add account itself.
   const canAddTransaction = hasAccounts && Boolean(onCreateTransaction)
@@ -235,8 +269,11 @@ export function AccountsScreen({
           }}
           options={[
             { value: 'details', label: t('accountsOverview.accountDetails') },
-            { value: 'edit', label: t('accountsOverview.edit') },
-            { value: 'delete', label: t('accountsOverview.delete'), destructive: true },
+            // An account the caller can only view (#95) can't be edited or deleted.
+            ...(canWriteAccount(menuAccount) ? [
+              { value: 'edit', label: t('accountsOverview.edit') },
+              { value: 'delete', label: t('accountsOverview.delete'), destructive: true },
+            ] : []),
           ]}
           title={menuAccount?.accountName ?? t('accounts.unnamed')}
           visible={menuAccount !== null}
@@ -324,16 +361,39 @@ export function AccountsScreen({
             </Section>
           ) : null}
 
-          <Section title={t('accountsOverview.accounts')} variant="open">
+          <Section
+            action={onReorderAccounts && accounts.length > 1 ? (
+              <Button
+                label={reorderOpen ? t('accountsOverview.done') : t('accountsOverview.reorder')}
+                onPress={() => {
+                  setReorderOpen((open) => !open)
+                  setOrder(null)
+                  setReorderFailed(false)
+                }}
+                size="sm"
+                variant="link"
+              />
+            ) : undefined}
+            title={t('accountsOverview.accounts')}
+            variant="open"
+          >
             <View>
+              {reorderFailed ? <Notice message={t('accountsOverview.reorderError')} /> : null}
               <List>
-                {accounts.map((account, index) => (
+                {displayAccounts.map((account, index) => (
                   <AccountRow
                     account={account}
                     key={account.accountId}
                     locale={locale}
-                    onMore={onEditAccount ? setMenuAccount : undefined}
-                    onSelect={selectAccount}
+                    members={members}
+                    onMore={reorderOpen || !onEditAccount ? undefined : setMenuAccount}
+                    onSelect={reorderOpen ? undefined : selectAccount}
+                    reorder={reorderOpen ? {
+                      canMoveDown: index < displayAccounts.length - 1,
+                      canMoveUp: index > 0,
+                      onMoveDown: () => void moveAccount(index, index + 1),
+                      onMoveUp: () => void moveAccount(index, index - 1),
+                    } : undefined}
                     separated={index > 0}
                   />
                 ))}
@@ -398,12 +458,19 @@ function SectionBody<T>({ state, render }: { state: SectionState<T>; render: (da
  * differ, and the "…" menu. Memoized so a period change doesn't re-format
  * every row.
  */
-const AccountRow = memo(function AccountRow({ account, separated, locale, onSelect, onMore }: {
+const AccountRow = memo(function AccountRow({ account, separated, locale, members, onSelect, onMore, reorder }: {
   account: AccountSummaryViewModel
   separated: boolean
   locale: string
-  onSelect: (accountId: number) => void
+  members: HouseholdMembersModel
+  onSelect?: (accountId: number) => void
   onMore?: (account: AccountSummaryViewModel) => void
+  reorder?: {
+    canMoveDown: boolean
+    canMoveUp: boolean
+    onMoveDown: () => void
+    onMoveUp: () => void
+  }
 }) {
   const { t } = useTranslation()
   const formatMoney = useFormatMoney()
@@ -413,6 +480,7 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   const updated = synced ? t('accounts.updated', { date: synced }) : null
   const shared = !account.isOwnedByViewer && account.ownerFirstName ? t('accountsOverview.sharedBy', { name: account.ownerFirstName }) : null
   const metaLine = [shared, account.institutionDisplayName, updated].filter(Boolean).join(' · ')
+  const memberMark = attributionMark(account.attribution, members)
   const money = (value: number, currency: string) => formatMoney(value, { locale, currency })
   const fx = account.fx ?? { status: 'exact' as const }
   const fxCopy = describeFxState(fx, t, locale)
@@ -426,9 +494,12 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   const available = account.convertedAvailableBalance != null && account.convertedBalance !== null && account.convertedAvailableBalance !== account.convertedBalance
     ? money(account.convertedAvailableBalance, account.primaryCurrencyCode)
     : null
+  const viewOnly = !canWriteAccount(account)
   const accessibilityLabel = [
     name,
     account.isPrivate ? t('accountsOverview.private') : null,
+    viewOnly ? t('accountsOverview.viewOnly') : null,
+    memberMark ? attributionName(memberMark, t) : null,
     shared,
     account.institutionDisplayName,
     primary,
@@ -441,7 +512,13 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
   return (
     <ListRow
       accessibilityLabel={accessibilityLabel}
-      badge={account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : undefined}
+      badge={account.isPrivate || viewOnly || memberMark ? (
+        <View style={styles.badges}>
+          {account.isPrivate ? <Badge label={t('accountsOverview.private')} tone="outline" /> : null}
+          {viewOnly ? <Badge label={t('accountsOverview.viewOnly')} testID="account-view-only" tone="outline" /> : null}
+          <MemberBadge mark={memberMark} testID="account-member-badge" />
+        </View>
+      ) : undefined}
       figure={unconverted
         ? <Amount currency={account.originalCurrencyCode} locale={locale} value={account.originalBalance} />
         : <Amount currency={account.primaryCurrencyCode} locale={locale} value={account.convertedBalance} />}
@@ -455,12 +532,30 @@ const AccountRow = memo(function AccountRow({ account, separated, locale, onSele
       meta={[metaLine || null]}
       moreAccessibilityLabel={t('accountsOverview.actionsFor', { name })}
       onMorePress={onMore ? () => onMore(account) : undefined}
-      onPress={() => onSelect(account.accountId)}
+      onPress={onSelect ? () => onSelect(account.accountId) : undefined}
       separated={separated}
       testID="account-row"
       title={name}
     >
       {fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-fx-status" /> : null}
+      {reorder ? (
+        <View style={styles.reorder}>
+          <IconButton
+            accessibilityLabel={t('accountsOverview.moveUp', { name })}
+            disabled={!reorder.canMoveUp}
+            icon="chevron-up"
+            onPress={reorder.onMoveUp}
+            testID="account-move-up"
+          />
+          <IconButton
+            accessibilityLabel={t('accountsOverview.moveDown', { name })}
+            disabled={!reorder.canMoveDown}
+            icon="chevron-down"
+            onPress={reorder.onMoveDown}
+            testID="account-move-down"
+          />
+        </View>
+      ) : null}
     </ListRow>
   )
 })
@@ -514,6 +609,7 @@ function AccountPreview({ locale }: { locale: string }) {
 }
 
 const styles = StyleSheet.create({
+  badges: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
   safeArea: { flex: 1 },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[10] },
@@ -524,6 +620,7 @@ const styles = StyleSheet.create({
   total: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3], borderTopWidth: 1, paddingVertical: themeTokens.spacing[3] },
   totalFigure: { fontWeight: '600' },
   figureMeta: { alignItems: 'flex-end' },
+  reorder: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[1], marginTop: themeTokens.spacing[1] },
   emptyBlock: { alignItems: 'center', gap: themeTokens.spacing[3], paddingVertical: themeTokens.spacing[6] },
   center: { textAlign: 'center' },
   preview: { borderWidth: 1, borderRadius: themeTokens.radius.lg, paddingHorizontal: themeTokens.spacing[4] },

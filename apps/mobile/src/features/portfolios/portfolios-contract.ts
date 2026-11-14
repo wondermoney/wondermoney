@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { amountsCompletenessSchema } from '@/lib/api/completeness'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
+import { PORTFOLIO_ACCOUNT_BALANCE_MODES } from './portfolio-account-link'
+
 const currencyCodeSchema = z.string().regex(/^[A-Z]{3}$/)
 const finite = z.number().finite()
 const finiteNullable = finite.nullable()
@@ -13,7 +15,19 @@ const nullableText = z.string().nullable().optional()
 const nullablePositiveId = z.number().int().positive().nullable().optional()
 const positiveSafeId = z.number().int().positive().max(Number.MAX_SAFE_INTEGER)
 
+/**
+ * The portfolio's link to the account that holds it, as this viewer may see it: null when there is
+ * none or its account is private to the other member. Absent from older APIs; a malformed link
+ * reads as none rather than failing the portfolio.
+ */
+const portfolioAccountLinkSchema = z.object({
+  accountKey: z.number().int().positive(),
+  accountName: z.string().nullable().optional().transform((value) => value ?? null),
+  mode: z.enum(PORTFOLIO_ACCOUNT_BALANCE_MODES),
+}).nullish().catch(null)
+
 const portfolioSummarySchema = z.object({
+  accountLink: portfolioAccountLinkSchema,
   appuserCurrencyCode: currencyCodeSchema,
   balance: finite,
   /** The broker it was last imported from; absent on older servers and hand-kept portfolios. */
@@ -28,6 +42,20 @@ export const portfoliosResponseSchema = z.object({
   portfolios: z.array(portfolioSummarySchema),
 })
 
+/**
+ * Time- and money-weighted returns over the requested period, in percentage points (10 = +10%).
+ * Sent only when the request asks with include=periodReturns. A null figure cannot be measured;
+ * `moneyWeighted` is yearly when `moneyWeightedAnnualized` (periods of a year or more), otherwise the
+ * rate over the period itself. `missingSnapshotDates` are days whose value was carried over from
+ * the day before.
+ */
+const periodReturnsSchema = z.object({
+  missingSnapshotDates: z.array(z.string()),
+  moneyWeighted: finiteNullable,
+  moneyWeightedAnnualized: z.boolean(),
+  timeWeighted: finiteNullable,
+})
+
 const dashboardSummarySchema = z.object({
   assetCount: z.number().int().nonnegative(),
   currency: currencyCodeSchema,
@@ -38,6 +66,8 @@ const dashboardSummarySchema = z.object({
   // The period the figures cover ('YTD', '1M', … 'ALL'); the API echoes the requested period.
   periodLabel: z.string().min(1),
   periodReturn: finiteNullable,
+  // Optional (older APIs do not send it); a malformed block hides the figures, not the dashboard.
+  periodReturns: periodReturnsSchema.optional().catch(undefined),
   portfolioCount: z.number().int().nonnegative().optional(),
   realizedGains: finite,
   totalGainLoss: finite,
@@ -63,6 +93,7 @@ export const aggregateDashboardResponseSchema = z.object({
 })
 
 const portfolioMetadataSchema = z.object({
+  accountLink: portfolioAccountLinkSchema,
   benchmarkSymbol: z.string().nullable().optional(),
   currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
@@ -105,6 +136,9 @@ const holdingBase = z.object({
   portfolioKey: z.number().int().positive().optional(),
   portfolioName: z.string().optional(),
   quantity: finite,
+  // Lifetime realized gain of the asset's sales, in the user's currency; 0 when never sold.
+  // Optional so older APIs, which do not send it, still parse.
+  realizedGains: finiteNullable.optional(),
   unrealizedGains: finiteNullable,
   unrealizedGainsPercentage: finiteNullable,
 })
@@ -124,6 +158,7 @@ const invalidHoldingSchema = holdingBase.extend({
   invalidReason: z.string().min(1),
   isInvalid: z.literal(true),
   relatedTransactionKeys: z.array(z.number().int().positive()),
+  realizedGains: z.null().optional(),
   unrealizedGains: z.null(),
   unrealizedGainsPercentage: z.null(),
 })
@@ -191,7 +226,14 @@ export function portfolioTargetAllocationsEqual(
   return leftKeys.every((key) => right[key] === left[key])
 }
 
+/** Link to an account the viewer can see, or null to unlink. */
+export const portfolioAccountLinkWriteSchema = z.object({
+  accountId: positiveSafeId,
+  mode: z.enum(PORTFOLIO_ACCOUNT_BALANCE_MODES),
+}).strict().nullable()
+
 export const portfolioSettingsWriteSchema = z.object({
+  accountLink: portfolioAccountLinkWriteSchema.optional(),
   name: z.string().trim().min(1).max(255).optional(),
   description: z.string().max(500).nullable().optional(),
   benchmarkSymbol: z.string().trim().max(20).nullable().optional(),
@@ -199,7 +241,8 @@ export const portfolioSettingsWriteSchema = z.object({
   favored: z.boolean().optional(),
   targetAllocation: portfolioTargetAllocationWriteSchema.optional(),
 }).strict().refine((value) => (
-  value.name !== undefined
+  value.accountLink !== undefined
+  || value.name !== undefined
   || value.description !== undefined
   || value.benchmarkSymbol !== undefined
   || value.excluded !== undefined
@@ -348,7 +391,7 @@ export const createPortfolioWriteEndpoint = writeEndpoint({
 })
 // The API sends opt-in dashboard fields only when asked. Older builds shipped strict schemas
 // that rejected unknown fields, so this keeps them parsing the summary.
-const DASHBOARD_INCLUDE = 'include=feeConversion'
+const DASHBOARD_INCLUDE = 'include=feeConversion,periodReturns'
 export const createAggregatePortfolioDashboardEndpoint = (period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
   method: 'GET' as const, path: `/v1/portfolio/dashboard?period=${period}&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
 })
@@ -560,10 +603,18 @@ export const PORTFOLIO_PERFORMANCE_PERIODS = ['1M', '3M', '6M', 'YTD', '1Y', 'AL
 export type PortfolioPerformancePeriod = typeof PORTFOLIO_PERFORMANCE_PERIODS[number]
 
 const performancePointSchema = z.object({ date: dateOnly, value: finite })
+/**
+ * A value-series day. `netContribution` is sent only on days with a buy or sale: positive is money
+ * put in, negative money taken out, null a trade with no amount in the viewer's currency. Optional,
+ * since older APIs do not send it.
+ */
+const performanceValuePointSchema = performancePointSchema.extend({ netContribution: finiteNullable.optional() })
 const performanceReadinessSchema = z.object({ status: z.string(), note: z.string().nullable().optional() })
 
 export const portfolioPerformanceResponseSchema = z.object({
-  dataPoints: z.array(performancePointSchema),
+  dataPoints: z.array(performanceValuePointSchema),
+  // The cumulative time-weighted return, % since the first day: money put in or taken out leaves
+  // it flat. A day that could not be measured has no point, so its dates are a subset of dataPoints'.
   normalizedDataPoints: z.array(performancePointSchema).optional(),
   benchmarkDataPoints: z.array(performancePointSchema).optional(),
   normalizedBenchmarkDataPoints: z.array(performancePointSchema).optional(),
@@ -586,6 +637,7 @@ export const portfolioPerformanceResponseSchema = z.object({
 })
 export type PortfolioPerformanceResponseDto = z.infer<typeof portfolioPerformanceResponseSchema>
 export type PortfolioPerformancePoint = z.infer<typeof performancePointSchema>
+export type PortfolioPerformanceValuePoint = z.infer<typeof performanceValuePointSchema>
 
 /** `null` is the household aggregate (`/v1/portfolio/performance`), as web's chart on /portfolio. */
 export const createPortfolioPerformanceEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({

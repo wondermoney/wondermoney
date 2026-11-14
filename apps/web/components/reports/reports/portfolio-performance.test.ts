@@ -22,6 +22,10 @@ const row = (
   changePercent: 0,
   dividends: 0,
   endValue: 1000,
+  timeWeightedReturn: 0,
+  moneyWeightedReturn: 0,
+  moneyWeightedReturnAnnualized: false,
+  missingSnapshotDates: [],
   ...overrides,
 });
 

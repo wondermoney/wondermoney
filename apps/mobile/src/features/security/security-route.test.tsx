@@ -76,8 +76,24 @@ let mockFileStorage = true
 let mockLatestExport: null | { id: string; status: string; delivery: string; downloadUrl: string | null; expiresAt: string | null; fileName: string } = null
 const mockStartExport = jest.fn()
 const mockOpenURL = jest.fn()
+let mockServerPasskeys = false
+let mockCanAddPasskey = false
 jest.mock('@/lib/server/use-instance', () => ({
-  useConfirmedFeature: () => mockFileStorage,
+  useConfirmedFeature: (select: (features: { fileStorage: boolean; passkey: boolean }) => boolean | undefined) =>
+    select({ fileStorage: mockFileStorage, passkey: mockServerPasskeys }) === true,
+  usePasskeyAvailable: () => mockCanAddPasskey,
+}))
+let mockPasskeyList: { isLoading: boolean; isError: boolean; data?: { id: string; name: string | null; aaguid: string | null; createdAt: string | null; lastUsedAt: string | null }[] } = { isLoading: false, isError: false, data: [] }
+const mockPasskeysEnabled = jest.fn()
+const mockAddPasskey = jest.fn()
+const mockDeletePasskey = jest.fn()
+jest.mock('./use-passkeys', () => ({
+  usePasskeys: ({ enabled }: { enabled: boolean }) => {
+    mockPasskeysEnabled(enabled)
+    return { ...mockPasskeyList, refetch: jest.fn() }
+  },
+  useAddPasskey: () => ({ isPending: false, mutateAsync: mockAddPasskey }),
+  useDeletePasskey: () => ({ isPending: false, variables: undefined, mutateAsync: mockDeletePasskey }),
 }))
 jest.mock('./use-data-export', () => {
   const actual = jest.requireActual('./use-data-export')
@@ -119,9 +135,67 @@ describe('SecurityRoute', () => {
     mockAppLockSetEnabled.mockReset()
     mockAppLock = { isLoaded: true, enabled: false }
     mockFileStorage = true
+    mockServerPasskeys = false
+    mockCanAddPasskey = false
+    mockPasskeyList = { isLoading: false, isError: false, data: [] }
+    mockPasskeysEnabled.mockReset(); mockAddPasskey.mockReset(); mockDeletePasskey.mockReset()
     mockLatestExport = null
     mockStartExport.mockReset()
     mockOpenURL.mockReset()
+  })
+
+  describe('passkeys', () => {
+    it('leaves the section out, and asks for nothing, on a server without passkeys', async () => {
+      const view = await renderRoute()
+      expect(view.queryByText('Passkeys')).toBeNull()
+      expect(mockPasskeysEnabled).toHaveBeenLastCalledWith(false)
+    })
+
+    it('adds a passkey where the phone can use the server\'s passkeys, and says so', async () => {
+      mockServerPasskeys = true
+      mockCanAddPasskey = true
+      mockAddPasskey.mockResolvedValue({ status: 'added' })
+      const view = await renderRoute()
+
+      expect(mockPasskeysEnabled).toHaveBeenLastCalledWith(true)
+      await fireEvent.press(view.getByRole('button', { name: 'Add a passkey' }))
+
+      expect(await view.findByText('Passkey added.')).toBeOnTheScreen()
+    })
+
+    it('asks for a fresh sign-in when the server wants one, and says nothing after a closed prompt', async () => {
+      mockServerPasskeys = true
+      mockCanAddPasskey = true
+      mockAddPasskey.mockResolvedValueOnce({ status: 'session-not-fresh' }).mockResolvedValueOnce({ status: 'cancelled' })
+      const view = await renderRoute()
+
+      await fireEvent.press(view.getByRole('button', { name: 'Add a passkey' }))
+      expect(await view.findByText('Sign out and sign in again before adding a passkey.')).toBeOnTheScreen()
+
+      await fireEvent.press(view.getByRole('button', { name: 'Add a passkey' }))
+      await waitFor(() => expect(mockAddPasskey).toHaveBeenCalledTimes(2))
+      expect(view.queryByText('Sign out and sign in again before adding a passkey.')).toBeNull()
+      expect(view.queryByText('Passkey added.')).toBeNull()
+    })
+
+    it('lists passkeys on a server the app has no passkeys for, and deletes one after confirming', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { Alert } = require('react-native') as typeof import('react-native')
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation((_title, _message, buttons) => {
+        buttons?.find((button) => button.style === 'destructive')?.onPress?.()
+      })
+      mockServerPasskeys = true
+      mockPasskeyList = { isLoading: false, isError: false, data: [{ id: 'pk-1', name: 'Laptop', aaguid: null, createdAt: '2026-11-01T10:00:00.000Z', lastUsedAt: null }] }
+      mockDeletePasskey.mockResolvedValue({ status: 'deleted' })
+      const view = await renderRoute()
+
+      expect(view.queryByRole('button', { name: 'Add a passkey' })).toBeNull()
+      await fireEvent.press(view.getByRole('button', { name: 'Delete Laptop' }))
+
+      expect(mockDeletePasskey).toHaveBeenCalledWith('pk-1')
+      expect(await view.findByText('Passkey deleted.')).toBeOnTheScreen()
+      alert.mockRestore()
+    })
   })
 
   describe('data export', () => {

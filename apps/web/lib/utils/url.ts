@@ -22,6 +22,12 @@ const getResetPasswordCallbackURL = (locale: string = "en") => {
   return `${getBaseUrl()}/${locale}/auth/reset`;
 };
 
+// Where the verification link in the sign-up email lands. Its locale also tells the API which
+// language to write that email in, since the account (and its language) does not exist yet.
+const getEmailVerificationCallbackURL = (locale: string = "en") => {
+  return `${getBaseUrl()}/${locale}`;
+};
+
 /** The auth cookie's `Domain` attribute: see `lib/instance.ts`. */
 const getCookiesDomain = () => instanceConfig.cookieDomain;
 
@@ -29,5 +35,6 @@ export {
   getBaseUrl,
   getCallbackURL,
   getCookiesDomain,
+  getEmailVerificationCallbackURL,
   getResetPasswordCallbackURL,
 };

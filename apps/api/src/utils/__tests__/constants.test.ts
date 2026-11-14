@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getAllowedOrigins, getCorsAllowedOrigins, privacyPolicyUrl } from '@utils/constants';
+import { getAllowedOrigins, getCorsAllowedOrigins, isCorsOriginAllowed, privacyPolicyUrl } from '@utils/constants';
 
 describe('getAllowedOrigins', () => {
   it('limits credentialed production CORS to the app origin', () => {
@@ -23,6 +23,31 @@ describe('getAllowedOrigins', () => {
 
   it('fails closed to production origins for unknown environments', () => {
     expect(getCorsAllowedOrigins('prod')).toEqual(['https://app.example.test']);
+  });
+});
+
+describe('CORS on one hostname', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('allows the shared origin when API_URL is APP_URL, and nothing else', () => {
+    vi.stubEnv('APP_URL', 'https://money.example.com');
+    vi.stubEnv('API_URL', 'https://money.example.com');
+    vi.stubEnv('CORS_ALLOWED_ORIGINS', '');
+
+    expect(getAllowedOrigins('production')).toEqual(['https://money.example.com']);
+    expect(isCorsOriginAllowed('https://money.example.com', 'production')).toBe(true);
+    expect(isCorsOriginAllowed('https://api.money.example.com', 'production')).toBe(false);
+  });
+
+  it('still allows the web app origin when the API has its own hostname', () => {
+    vi.stubEnv('APP_URL', 'https://money.example.com');
+    vi.stubEnv('API_URL', 'https://api.money.example.com');
+    vi.stubEnv('CORS_ALLOWED_ORIGINS', '');
+
+    expect(isCorsOriginAllowed('https://money.example.com', 'production')).toBe(true);
+    expect(isCorsOriginAllowed('https://api.money.example.com', 'production')).toBe(false);
   });
 });
 

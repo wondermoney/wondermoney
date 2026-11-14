@@ -5,6 +5,7 @@ import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/ca
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
 import { transactionCalendarDay } from '@service/transaction/transaction-date-range';
 import { addMoney, sumMoney } from '@utils/money';
+import { savingsRateNumber } from '@utils/savings-rate';
 
 import { round2, toCsv } from './csv';
 import { loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
@@ -36,6 +37,11 @@ export interface CashflowRow {
   income: number;
   month: string;
   net: number;
+  /**
+   * `(income - expenses) / income`, as a fraction; null when income is zero.
+   * The same helper the monthly email uses, so both state the same rate.
+   */
+  savingsRate: null | number;
 }
 
 const CATEGORY_POPULATE = [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULATE] as const;
@@ -105,6 +111,7 @@ export async function getCashflowReport(input: ReportServiceInput): Promise<Repo
         income,
         month: getMonthStartIso(monthKey),
         net: round2(income - expenses),
+        savingsRate: savingsRateNumber(income, expenses),
       };
     });
   return { completeness: amounts.completeness(), data };

@@ -3,6 +3,8 @@ import {
   buildSupportMailDestination,
   externalDestinations,
   isApprovedExternalDestination,
+  selfHostingDocs,
+  selfHostingDocsUrl,
 } from './link-policy'
 
 describe('More exact destination policy', () => {
@@ -63,5 +65,22 @@ describe('More exact destination policy', () => {
   it('rejects an unapproved version or environment, same as support mail', () => {
     expect(buildFeedbackMailDestination({ version: 'bad value', environment: 'staging' }, { category: 'bug', message: 'x' })).toBeNull()
     expect(buildFeedbackMailDestination({ version: '1.0.0', environment: 'production' as never }, { category: 'bug', message: 'x' })).toBeNull()
+  })
+})
+
+describe('self-hosting docs destination', () => {
+  it.each([
+    ['en', selfHostingDocs.en],
+    ['pt-PT', selfHostingDocs.pt],
+    ['pt', selfHostingDocs.pt],
+    ['es', selfHostingDocs.es],
+    ['fr', selfHostingDocs.en],
+  ])('sends %s to its docs language', (locale, expected) => {
+    expect(selfHostingDocsUrl(locale)).toBe(expected)
+  })
+
+  it('approves each docs language and nothing near it', () => {
+    for (const url of Object.values(selfHostingDocs)) expect(isApprovedExternalDestination(url)).toBe(true)
+    expect(isApprovedExternalDestination('https://docs.wonder.money/fr/docs/self-hosting')).toBe(false)
   })
 })

@@ -65,6 +65,17 @@ describe('TransactionAuditService.log', () => {
     expect(row?.changes).toEqual(changes);
   });
 
+  it('keeps the pending-match pass and amount difference', async () => {
+    const { em } = makeEm();
+    const changes = {
+      amountDifference: { from: null, to: 2 },
+      matchPass: { from: null, to: 'loose' },
+      settlementAmount: { from: -20, to: -22 },
+    };
+    const row = await TransactionAuditService.log(em as unknown as EntityManager, { ...baseInput, changes, eventType: TransactionAuditEventType.PENDING_PROMOTED });
+    expect(row?.changes).toEqual(changes);
+  });
+
   it('omits account/actor references when not supplied', async () => {
     const { em, getReference } = makeEm();
     const row = await TransactionAuditService.log(em as unknown as EntityManager, baseInput);

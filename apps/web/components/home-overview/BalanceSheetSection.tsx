@@ -1,7 +1,7 @@
 "use client";
 
 import { Briefcase, Building2, ReceiptText } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { AccountMark } from "@/components/account/AccountMark";
@@ -17,6 +17,7 @@ import {
   type BalanceSheetRow,
   type BalanceSheetType,
 } from "@/lib/home/month-overview";
+import type { MemberFilter } from "@/lib/household/member-attribution";
 
 import { PortfolioLinkSuggestion } from "./PortfolioLinkSuggestion";
 
@@ -42,6 +43,7 @@ function Side({
   countedInName: CountedInName;
 }) {
   const t = useTranslations("homeOverview.sheet");
+  const format = useFormatter();
 
   return (
     <section aria-labelledby={id} className="min-w-0">
@@ -66,6 +68,16 @@ function Side({
                     {markFor(group.type, row)}
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate">{row.label}</span>
+                      {row.sharePercent !== undefined ? (
+                        <span className="text-muted-foreground truncate text-xs">
+                          {t("share-of-account", {
+                            percent: format.number(row.sharePercent / 100, {
+                              maximumFractionDigits: 2,
+                              style: "percent",
+                            }),
+                          })}
+                        </span>
+                      ) : null}
                       {row.countedInAccountId !== undefined ? (
                         <span className="text-muted-foreground truncate text-xs">
                           {t("counted-in", {
@@ -110,9 +122,14 @@ function Side({
  * What makes up net worth: each side of the balance sheet itemised by kind,
  * with its total. The hero above carries the two totals and the net figure.
  */
-export function BalanceSheetSection() {
+export function BalanceSheetSection({
+  member = null,
+}: {
+  /** One member's balance sheet, or Shared's; null for the household's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.sheet");
-  const { data, isPending, error, refetch } = useNetWorth();
+  const { data, isPending, error, refetch } = useNetWorth(undefined, member);
   const { data: accountsData } = useAccounts();
 
   if (isPending) {
@@ -133,7 +150,10 @@ export function BalanceSheetSection() {
 
   const netWorth = data.netWorth;
   const currency = netWorth.currencyCode ?? "EUR";
-  const sheet = balanceSheet(netWorth);
+  const sheet = balanceSheet(
+    netWorth,
+    (accountsData?.accounts ?? []).map((account) => account.accountKey),
+  );
   const accountsByKey = new Map(
     (accountsData?.accounts ?? []).map((account) => [
       account.accountKey,

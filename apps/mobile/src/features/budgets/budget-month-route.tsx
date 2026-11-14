@@ -8,6 +8,7 @@ import { adjacentBudgetPeriod, mapBudget, mapBudgetYear } from './budgets-view-m
 import { useBudgetCategoryDeleteMutation } from './use-budget-category-delete-mutation'
 import { useBudgetCategoryMutation } from './use-budget-category-mutation'
 import { useBudgetMonth } from './use-budget-month'
+import { useBudgetSuggestions } from './use-budget-suggestions'
 import { useBudgetYear } from './use-budget-year'
 
 export function BudgetMonthRoute() {
@@ -19,6 +20,7 @@ export function BudgetMonthRoute() {
   // Web's month page sets the month beside its year in an overview table; the year is the same
   // read the year route makes (shared query key), so switching views reuses it.
   const yearQuery = useBudgetYear(budgetId, year)
+  const suggestionsQuery = useBudgetSuggestions(budgetId, year, month)
   const categoryMutation = useBudgetCategoryMutation()
   const categoryDeleteMutation = useBudgetCategoryDeleteMutation()
   const router = useRouter()
@@ -46,9 +48,13 @@ export function BudgetMonthRoute() {
     router.replace({ pathname: '/budgets/[budgetId]/[year]/[month]', params: { budgetId: String(budgetId), year: String(next.year), month: String(next.month) } })
   }
   const yearTotals = yearQuery.data && year !== null ? mapBudgetYear(yearQuery.data.budget, year).totals : null
+  const suggestions = suggestionsQuery.data
+    ? new Map(suggestionsQuery.data.categories.map((suggestion) => [suggestion.categoryKey, suggestion]))
+    : undefined
   return <BudgetMonthScreen
     state={state}
     yearTotals={yearTotals}
+    suggestions={suggestions}
     categoryPending={anyCategoryMutationPending}
     onSaveCategory={async (categoryId, value) => { if (budgetId === null || year === null || month === null) return; await categoryMutation.mutateAsync({ budgetId, year, month, categoryId, value }) }}
     onRemoveCategory={async (categoryId, scope) => { if (budgetId === null || year === null || month === null) return; await categoryDeleteMutation.mutateAsync({ budgetId, categoryId, scope, year, month }) }}

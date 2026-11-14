@@ -6,14 +6,21 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import type { Currency } from '@entity/Currency';
+import { InstallmentPlan } from '@entity/InstallmentPlan';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { RecurringOccurrence } from '@entity/RecurringOccurrence';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAttachment } from '@entity/TransactionAttachment';
+import { loadSharedAccountKeys, visibleAccountWhere } from '@service/account/account-access';
 import { type RateScope, rateScope } from '@service/currency/exchange-rate';
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
+import { accountAttributionDto, loadActiveMembers, transactionAttributionDto, type TransactionAttributionDto } from '@service/household/member-attribution';
 import { completenessFromCounts } from '@service/reports/report-currency';
 import { compareTags, type TagDto, toTagDto } from '@service/tag/tag.service';
 import { type CategorySpendingFlags, loadCategorySpendingFlags } from '@service/transaction/category-spending';
+import { toMerchantDto } from '@service/transaction/merchant-logo';
+import { isBankSyncedTransaction } from '@service/transaction/transaction-deletion.service';
+import { loadReimbursementLinks } from '@service/transaction/transaction-reimbursement.service';
 import { SPLIT_LINE_POPULATE, type SplitLineDto, toSplitLineDtos } from '@service/transaction/transaction-split.service';
 import { buildTransactionWhere, getTransactionTotal, hasReportScope, type TransactionFilterInput, type TransactionViewer } from '@service/transaction/transaction-total.service';
 import { TRANSFER_DESTINATION_POPULATE, type TransferDestinationDto, transferDestinationOf } from '@service/transaction/transaction-transfer.service';
@@ -29,6 +36,13 @@ export interface TransactionListRequest {
   scope: 'all-accounts' | { accountKey: number };
   tenantKey: number;
   viewerAppuserKey: number;
+}
+
+/** The installment a posted row pays, shown as "n/N" in the lists. */
+export interface TransactionInstallmentDto {
+  installmentCount: number;
+  installmentNumber: number;
+  installmentPlanKey: number;
 }
 
 export interface TransactionRecurringSeriesDto {
@@ -99,10 +113,21 @@ export async function listTransactions(request: TransactionListRequest) {
   });
 
   const loanRepayments = await loadLoanRepayments(transactions);
+  const attachmentCounts = await loadAttachmentCounts(transactions);
+  // Refunds linked to expenses, either side; only links whose other side the viewer can see.
+  const reimbursements = await loadReimbursementLinks(DI.em, { appuserKey: viewerAppuserKey, tenantKey }, transactions);
+  const sharedAccountKeys = await loadSharedAccountKeys(DI.em, { appuserKey: viewerAppuserKey, tenantKey });
   const spendingFlags = await loadCategorySpendingFlags(DI.em, tenantKey);
   const fx = await describeTransactionsFx(transactions, rateScope(tenantKey));
+  const members = await loadActiveMembers(DI.em, tenantKey);
   const rows = transactions.map((transaction, index) => {
-    const row = { ...toTransactionRow(transaction, viewerAppuserKey, spendingFlags), ...(fx[index] ?? UNKNOWN_FX) };
+    const row = {
+      ...toTransactionRow(transaction, viewerAppuserKey, sharedAccountKeys, spendingFlags, members),
+      ...(fx[index] ?? UNKNOWN_FX),
+      // The ledger shows a paperclip only when there is something behind it.
+      attachmentCount: attachmentCounts.get(transaction.transactionKey) ?? 0,
+      reimbursements: reimbursements.get(transaction.transactionKey) ?? [],
+    };
     const loanRepayment = summarizeLoanRepayments(loanRepayments.get(transaction.transactionKey) ?? []);
     return loanRepayment ? { ...row, loanRepayment } : row;
   });
@@ -112,13 +137,14 @@ export async function listTransactions(request: TransactionListRequest) {
   // Null when this page is the end of the set, so a client can stop without a second call.
   const nextCursor = lastRow && transactions.length >= limit ? encodeTransactionCursor(lastRow) : null;
 
-  const syntheticRows = await syntheticOpeningBalanceRows(accounts, filters, viewer.currencyKey.code, rateScope(tenantKey));
+  const syntheticRows = await syntheticOpeningBalanceRows(accounts, filters, viewer.currencyKey.code, rateScope(tenantKey), members);
   const pageSyntheticRows = syntheticRows.filter((row) => onThisPage(row.transactionDate, cursorTime(cursor), nextCursor ? lastRow?.transactionDate : undefined));
 
   const recurringSeries = await loadRecurringSeries(transactions, tenantKey);
+  const installments = await loadInstallments(transactions);
   // Newest first, an opening row after any real row of the same instant: it came before them.
   const page = orderBy([...rows, ...pageSyntheticRows], [(row) => row.transactionDate?.getTime() ?? 0, (row) => ((row.transactionKey ?? 0) < 0 ? 0 : 1)], ['desc', 'desc']).map(
-    (row) => ({ ...row, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
+    (row) => ({ ...row, installment: installments.get(row.transactionKey) ?? null, recurringSeries: recurringSeries.get(row.transactionKey) ?? null }),
   );
 
   const listTotal = isFirstPage ? await getTransactionTotal(filters, transactionViewer) : null;
@@ -170,9 +196,28 @@ async function loadLoanRepayments(transactions: Transaction[]): Promise<Map<numb
   return byTransaction;
 }
 
-/** The accounts the list covers: the household's, a private one only for its owner. Explicit, so it holds with no tenant filter set too. */
+/**
+ * How many live attachments each row has, in one query for the page. The tenant filter scopes the
+ * count; the explicit transaction list keeps it to this page.
+ */
+async function loadAttachmentCounts(transactions: Transaction[]): Promise<Map<number, number>> {
+  if (transactions.length === 0) return new Map();
+  const rows = await DI.em.find(
+    TransactionAttachment,
+    { deletedAt: undefined, transactionKey: { $in: transactions } },
+    { fields: ['transactionKey'] },
+  );
+  const counts = new Map<number, number>();
+  for (const row of rows) {
+    const key = row.transactionKey.transactionKey;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
+/** The accounts the list covers: the household's, a private one only for the members who see it. Explicit, so it holds with no tenant filter set too. */
 async function loadScopeAccounts(scope: TransactionListRequest['scope'], viewer: TransactionViewer): Promise<Account[]> {
-  const visible: FilterQuery<Account> = { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: { appuserKey: viewer.viewerAppuserKey } }], deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } };
+  const visible: FilterQuery<Account> = { $and: [visibleAccountWhere(viewer.viewerAppuserKey), { deletedAt: undefined, tenantKey: { tenantKey: viewer.tenantKey } }] };
   if (scope === 'all-accounts') {
     return DI.em.find(Account, visible, { populate: ['currencyKey', 'accountFinancialInstitutionKey', 'accountOwnerAppuserKey.currencyKey'] });
   }
@@ -192,6 +237,8 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
         countsAsSpending: spendingFlags.countsAsSpending(assignment.categoryKey),
         parentCategory: assignment.categoryKey.parentCategory?.categoryKey,
       })),
+      // The merchant with its website and the logo to show (`merchant-logo.ts`); absent without one.
+      transactionMerchantKey: transaction.transactionMerchantKey ? toMerchantDto(transaction.transactionMerchantKey) : undefined,
     },
     [
       'transactionKey',
@@ -210,7 +257,7 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
       'appuserCurrencyKey.code',
       'balance',
       'appuserCurrencyBalance',
-      'transactionMerchantKey.name',
+      'transactionMerchantKey',
       'hidden',
       'reviewed',
       'categorizationConfidence',
@@ -225,8 +272,17 @@ function pickTransactionRow(transaction: Transaction, spendingFlags: CategorySpe
  * `appuserTransactionCategories` is the largest line's category; clients show the lines instead.
  * An outgoing transfer carries where it went, when the user said so.
  */
-function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, spendingFlags: CategorySpendingFlags): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
-  return { ...pickTransactionRow(transaction, spendingFlags), splits: toSplitLineDtos(transaction), tags: rowTags(transaction), transferDestination: transferDestinationOf(transaction, viewerAppuserKey) };
+function toTransactionRow(transaction: Transaction, viewerAppuserKey: number, sharedAccountKeys: ReadonlySet<number>, spendingFlags: CategorySpendingFlags, members: ReadonlyMap<number, string>): Omit<ReturnType<typeof pickTransactionRow>, 'splits'> & { attribution: TransactionAttributionDto; bankSynced: boolean; splits: SplitLineDto[]; tags: TagDto[]; transferDestination: null | TransferDestinationDto } {
+  return {
+    ...pickTransactionRow(transaction, spendingFlags),
+    // Who the money is attributed to ("Spent by"), for the member badge and the editor (`member-attribution.ts`).
+    attribution: transactionAttributionDto(transaction, members),
+    // The bank sent it, so it cannot be deleted (`transaction-deletion.service.ts`): a client says so before asking.
+    bankSynced: isBankSyncedTransaction(transaction),
+    splits: toSplitLineDtos(transaction),
+    tags: rowTags(transaction),
+    transferDestination: transferDestinationOf(transaction, viewerAppuserKey, sharedAccountKeys),
+  };
 }
 
 /** The row's tags, by name. The links come through the tenant filter, so only a visible row has any. */
@@ -286,6 +342,25 @@ function summarizeLoanRepayments(links: LoanRepaymentLink[]) {
  * Each page emits only the rows whose date falls within it (`onThisPage`), and the key is the
  * account's, negated, so a client that sees one twice can de-duplicate it.
  */
+/**
+ * The installment each posted row pays ("3/12"), for the list's badge. The plan is read through the
+ * tenant filter, so only a plan the viewer can see names one; a row of a deleted plan has none.
+ */
+async function loadInstallments(transactions: Transaction[]): Promise<Map<number | undefined, TransactionInstallmentDto>> {
+  const byTransaction = new Map<number | undefined, TransactionInstallmentDto>();
+  const linked = transactions.filter((transaction) => transaction.installmentPlanKey && transaction.installmentNumber != null);
+  if (linked.length === 0) return byTransaction;
+  const plans = await DI.em.find(InstallmentPlan, { deletedAt: null, installmentPlanKey: { $in: [...new Set(linked.map((transaction) => transaction.installmentPlanKey?.installmentPlanKey ?? 0))] } });
+  const countByPlan = new Map(plans.map((plan) => [plan.installmentPlanKey, plan.installmentCount]));
+  for (const transaction of linked) {
+    const planKey = transaction.installmentPlanKey?.installmentPlanKey;
+    const count = planKey === undefined ? undefined : countByPlan.get(planKey);
+    if (planKey === undefined || count === undefined || transaction.installmentNumber == null) continue;
+    byTransaction.set(transaction.transactionKey, { installmentCount: count, installmentNumber: transaction.installmentNumber, installmentPlanKey: planKey });
+  }
+  return byTransaction;
+}
+
 async function loadRecurringSeries(transactions: Transaction[], tenantKey: number): Promise<Map<number | undefined, TransactionRecurringSeriesDto>> {
   const bySeries = new Map<number | undefined, TransactionRecurringSeriesDto>();
   if (transactions.length === 0) return bySeries;
@@ -313,7 +388,7 @@ async function loadRecurringSeries(transactions: Transaction[], tenantKey: numbe
   return bySeries;
 }
 
-async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string, scope: RateScope): Promise<(FxDisplay & TransactionRow)[]> {
+async function syntheticOpeningBalanceRows(accounts: Account[], filters: TransactionFilterInput, viewerCurrencyCode: string, scope: RateScope, members: ReadonlyMap<number, string>): Promise<(FxDisplay & TransactionRow)[]> {
   const { accountKeys, categoryKeys, fromDate, tagKeys, toDate, transactionTypes, unreviewedOnly } = filters;
   const namedCategoriesOnly = categoryKeys !== undefined && categoryKeys.keys.length > 0 && !categoryKeys.includeUncategorized;
   const tagged = tagKeys !== undefined && tagKeys.length > 0;
@@ -354,10 +429,14 @@ async function syntheticOpeningBalanceRows(accounts: Account[], filters: Transac
       appuserCurrencyKey: { code: viewerCurrencyCode } as Currency,
       appuserSettlementAmount: account.appuserCurrencyBalance,
       appuserTransactionCategories: [],
+      attachmentCount: 0,
+      attribution: { ...accountAttributionDto(account, members), overridden: false },
       balance: account.balance,
+      bankSynced: false,
       description: 'Initial balance',
       descriptionDirty: 'This is a fake transaction to reflect the initial balance of the account',
       hidden: false,
+      reimbursements: [],
       reviewed: true,
       settlementAmount: account.balance,
       settlementCurrencyKey: { code: account.currencyKey.code } as Currency,

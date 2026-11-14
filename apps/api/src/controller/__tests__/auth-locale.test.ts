@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
-  ensureAppuserTenantLink: vi.fn(),
   findOne: vi.fn(),
-  getOrCreateTenant: vi.fn(),
   getPrimaryAuthProvider: vi.fn(),
   getUserByEmail: vi.fn(),
   getUserByExternalId: vi.fn(),
+  provisionHomeTenant: vi.fn(),
   recordSignup: vi.fn(),
   sendSignupEmail: vi.fn(),
   sendWelcomeEmail: vi.fn(),
@@ -25,9 +24,8 @@ vi.mock('@app/app', () => ({
   },
 }));
 vi.mock('@service/auth/auth-callback.service', () => ({
-  ensureAppuserTenantLink: mocked.ensureAppuserTenantLink,
-  getOrCreateTenant: mocked.getOrCreateTenant,
   isAppError: (error: unknown) => Boolean(error && typeof error === 'object' && 'message' in error),
+  provisionHomeTenant: mocked.provisionHomeTenant,
 }));
 vi.mock('@service/auth/auth-callback.utils', () => ({ getAuthUserFullName: vi.fn(() => 'Demo User') }));
 vi.mock('@service/auth/better-auth', () => ({ getPrimaryAuthProvider: mocked.getPrimaryAuthProvider }));
@@ -74,7 +72,7 @@ describe('auth callback locale', () => {
     mocked.getUserByExternalId.mockResolvedValueOnce(null);
     mocked.getUserByEmail.mockResolvedValueOnce(null);
     mocked.recordSignup.mockResolvedValueOnce({ appuser, created: true });
-    mocked.getOrCreateTenant.mockResolvedValueOnce({ tenantKey: 6 });
+    mocked.provisionHomeTenant.mockResolvedValueOnce({ tenantKey: 6 });
 
     // When
     await authCallback(makeAuthUser(appuser.externalUserId, appuser.emailAddress), makeResponse().res);
@@ -84,20 +82,20 @@ describe('auth callback locale', () => {
     expect(mocked.sendSignupEmail).toHaveBeenCalledWith(expect.anything(), SupportedLanguages.PT);
   });
 
-  it.each(['en', 'es'] as const)('maps %s OAuth signup to English email', async (locale) => {
+  it.each([['en', SupportedLanguages.EN], ['es', SupportedLanguages.ES]] as const)('maps %s OAuth signup to the %s account language', async (locale, language) => {
     // Given
-    const appuser = { appuserKey: 23, emailAddress: `${locale}@example.com`, externalUserId: '017e067c-7e26-4711-b72e-efb5546d59ac', firstName: 'Demo', language: SupportedLanguages.EN, lastName: 'User' };
+    const appuser = { appuserKey: 23, emailAddress: `${locale}@example.com`, externalUserId: '017e067c-7e26-4711-b72e-efb5546d59ac', firstName: 'Demo', language, lastName: 'User' };
     mocked.zParse.mockResolvedValueOnce({ body: { locale } });
     mocked.getUserByExternalId.mockResolvedValueOnce(null);
     mocked.getUserByEmail.mockResolvedValueOnce(null);
     mocked.recordSignup.mockResolvedValueOnce({ appuser, created: true });
-    mocked.getOrCreateTenant.mockResolvedValueOnce({ tenantKey: 7 });
+    mocked.provisionHomeTenant.mockResolvedValueOnce({ tenantKey: 7 });
     mocked.getPrimaryAuthProvider.mockResolvedValueOnce('google');
 
     // When
     await authCallback(makeAuthUser(appuser.externalUserId, appuser.emailAddress), makeResponse().res);
 
     // Then
-    expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ language: SupportedLanguages.EN, method: 'google' }));
+    expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ language, method: 'google' }));
   });
 });

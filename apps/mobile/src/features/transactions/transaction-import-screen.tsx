@@ -12,7 +12,7 @@ import { usePalette } from '@/theme/use-palette'
 
 import { FormNotice } from './form-field'
 
-import { GENERIC_CSV_COLUMNS, GENERIC_CSV_OPTIONAL_COLUMNS, rowsFailedCounts, type TransactionImportFlow } from './generic-csv-format'
+import { GENERIC_CSV_COLUMNS, GENERIC_CSV_OPTIONAL_COLUMNS, type TransactionImportFlow } from './generic-csv-format'
 import { SelectField } from './select-field'
 import type { TransactionImportPhase } from './use-transaction-import'
 
@@ -30,6 +30,8 @@ export type TransactionImportScreenProps = Readonly<{
   bankName: string | null
   typeCodes: readonly TransactionImportTypeCode[]
   templateStatus: TemplateShareStatus
+  /** Looking for an unfinished import to resume; no new file until it is known. */
+  checkingResume?: boolean
   onShareTemplate: () => void | Promise<void>
   onSelectAccount: (accountId: number) => void
   onPickFile: () => void | Promise<void>
@@ -37,8 +39,7 @@ export type TransactionImportScreenProps = Readonly<{
   onBack: () => void
 }>
 
-const BUSY_PHASES: ReadonlySet<TransactionImportPhase['phase']> = new Set(['uploading', 'starting', 'processing'])
-const ROWS_CREATED_OUTCOMES: ReadonlySet<string> = new Set(['succeeded', 'partial'])
+const BUSY_PHASES: ReadonlySet<TransactionImportPhase['phase']> = new Set(['uploading', 'starting'])
 
 export function TransactionImportScreen({
   state,
@@ -49,6 +50,7 @@ export function TransactionImportScreen({
   bankName,
   typeCodes,
   templateStatus,
+  checkingResume = false,
   onShareTemplate,
   onSelectAccount,
   onPickFile,
@@ -58,7 +60,6 @@ export function TransactionImportScreen({
   const { t } = useTranslation()
   const palette = usePalette()
   const busy = BUSY_PHASES.has(state.phase)
-  const rowsFailed = state.phase === 'done' ? rowsFailedCounts(state.format, state.outcome, state.rows) : null
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: palette.background }]}>
@@ -86,7 +87,7 @@ export function TransactionImportScreen({
               {flow === 'bank' ? <Text tone="muted" variant="meta">{t('transactionImport.bankFormat', { bank: bankName ?? t('transactionImport.yourBank') })}</Text> : null}
               {flow === 'legacy' ? <Text tone="muted" variant="meta">{t('transactionImport.legacyFormat')}</Text> : null}
               {flow === 'unknown' ? <FormNotice tone="destructive">{t('transactionImport.unknownFormat')}</FormNotice> : null}
-              <Button block icon="upload" label={t('transactionImport.chooseFile')} onPress={onPickFile} disabled={selectedAccountId === null || flow === 'unknown'} />
+              <Button block icon="upload" label={t('transactionImport.chooseFile')} onPress={onPickFile} disabled={selectedAccountId === null || flow === 'unknown' || checkingResume} />
             </View>
           ) : null}
 
@@ -94,19 +95,6 @@ export function TransactionImportScreen({
             <View accessible accessibilityRole="progressbar" accessibilityLabel={t(`transactionImport.phases.${state.phase}`)} style={styles.progress}>
               <ActivityIndicator color={palette.mutedForeground} size="small" />
               <Text tone="muted" variant="meta">{t(`transactionImport.phases.${state.phase}`)}</Text>
-            </View>
-          ) : null}
-
-          {state.phase === 'done' ? (
-            <View style={styles.form}>
-              <Text accessibilityRole="alert" tone={ROWS_CREATED_OUTCOMES.has(state.outcome) ? 'default' : 'destructive'} variant="bodyStrong">
-                {t(`transactionImport.outcomes.${state.outcome}`)}
-              </Text>
-              {rowsFailed ? <Text tone="muted" variant="meta">{t('transactionImport.generic.rowsFailed', rowsFailed)}</Text> : null}
-              <View style={styles.actions}>
-                <Button block label={t('transactionImport.done')} onPress={onBack} />
-                <Button block label={t('transactionImport.importAnother')} onPress={onReset} variant="outline" />
-              </View>
             </View>
           ) : null}
 
@@ -129,6 +117,8 @@ export function TransactionImportScreen({
 function GenericFormat({ typeCodes, templateStatus, onShareTemplate }: {
   typeCodes: readonly TransactionImportTypeCode[]
   templateStatus: TemplateShareStatus
+  /** Looking for an unfinished import to resume; no new file until it is known. */
+  checkingResume?: boolean
   onShareTemplate: () => void | Promise<void>
 }) {
   const { t } = useTranslation()
@@ -191,6 +181,5 @@ const styles = StyleSheet.create({
   typeCode: { flexDirection: 'row', gap: themeTokens.spacing[3] },
   code: { minWidth: 32 },
   typeLabel: { flex: 1 },
-  actions: { gap: themeTokens.spacing[2] },
   inlineActions: { flexDirection: 'row', flexWrap: 'wrap', gap: themeTokens.spacing[2] },
 })

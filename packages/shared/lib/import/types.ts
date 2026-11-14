@@ -9,8 +9,12 @@
  * without changing the session, the review or the commit.
  */
 
-/** The file formats a session can read. Each one is an {@link ImportAdapter}. */
-export const IMPORT_FORMATS = ['statement'] as const;
+/**
+ * The file formats a session can read. Each one is an {@link ImportAdapter}, except `pdf`: a PDF
+ * bank statement read page by page by a vision model, which the API runs itself because it calls
+ * the model (`services/transaction-import/pdf-statement/`).
+ */
+export const IMPORT_FORMATS = ['statement', 'ofx', 'qif', 'generic-csv', 'camt053', 'ynab', 'actual', 'pdf'] as const;
 export type ImportFormat = (typeof IMPORT_FORMATS)[number];
 
 /**
@@ -18,12 +22,25 @@ export type ImportFormat = (typeof IMPORT_FORMATS)[number];
  * - `new`: nothing on the target account matches it; imports by default.
  * - `duplicate`: the same transaction is already on the target account, or earlier in the file;
  *   skipped by default.
- * - `possible_duplicate`: a near match (fuzzy detection); skipped by default, the person decides.
+ * - `possible_duplicate`: no id matched, but the target account holds a transaction with the same
+ *   amount and currency a few days either side, so it likely repeats it; skipped by default, the
+ *   person decides.
  * - `invalid`: the file's line could not be read; never imports.
  * - `skipped`, `imported`, `failed`: what the commit did with it.
  */
 export const IMPORT_ROW_STATUSES = ['new', 'duplicate', 'possible_duplicate', 'invalid', 'skipped', 'imported', 'failed'] as const;
 export type ImportRowStatus = (typeof IMPORT_ROW_STATUSES)[number];
+
+/**
+ * Why a row is a duplicate or a possible one, for the review to explain:
+ * - `same_id`: a `duplicate` whose id is on the target account (the matched transaction).
+ * - `earlier_in_file`: a `duplicate` of a row earlier in the same file.
+ * - `likely`: a `possible_duplicate` of one transaction on the account (the matched transaction).
+ * - `ambiguous`: a `possible_duplicate` that several transactions on the account could be, so
+ *   none is matched.
+ */
+export const IMPORT_MATCH_REASONS = ['same_id', 'earlier_in_file', 'likely', 'ambiguous'] as const;
+export type ImportMatchReason = (typeof IMPORT_MATCH_REASONS)[number];
 
 export const IMPORT_DECISIONS = ['import', 'skip'] as const;
 export type ImportDecision = (typeof IMPORT_DECISIONS)[number];
@@ -44,7 +61,11 @@ export type ImportSessionStatus = (typeof IMPORT_SESSION_STATUSES)[number];
 export interface NormalizedImportRow {
   /** Signed: negative is money leaving the account. */
   amount: number;
-  /** The category the source app gave it, for a later category-mapping step. */
+  /**
+   * The category the source app gave it (`Group: Category` for a YNAB export, the category's
+   * name for an Actual Budget export). A file whose
+   * categories the session maps lists them in {@link ImportParseResult.sourceCategories}.
+   */
   categoryLabel?: string;
   /** ISO 4217; absent means the target account's currency. */
   currency?: string;
@@ -56,14 +77,36 @@ export interface NormalizedImportRow {
    * statement reference). Stable across exports of the same line, so a re-import finds it.
    */
   externalId: string;
+  /**
+   * Whether `externalId` is the source's own id, or a fingerprint derived from the row. A
+   * fingerprint still matches a re-import, but is never stored as a provider's unique id: a
+   * collision must not skip a distinct transaction. Absent means trusted (the existing formats).
+   */
+  externalIdTrusted?: boolean;
   merchant?: string;
+  /**
+   * A note the commit stores on the transaction beside its description (at most 255 characters):
+   * the parts of an Actual Budget split, which imports as one transaction for its total.
+   */
+  notes?: string;
   /** The amount in the currency it was charged in, when that differs (a card payment abroad). */
   originalAmount?: number;
   originalCurrency?: string;
   /** Which account in the file the row belongs to, when the file holds several. */
   sourceAccountLabel?: string;
+  /**
+   * The other account a transfer names (a QIF `L[Account]` category), for the review to show and
+   * for a later step to match. The transfer itself is stated through {@link typeHint}.
+   */
+  transferAccountLabel?: string;
   /** A type the source suggests (`PAYMENT`, `CARD_PAYMENT`); the sign still decides direction. */
   typeHint?: string;
+  /**
+   * The file states the type itself, rather than a reader guessing it from the description: the
+   * generic CSV template's `transactionTypeKey` column. The commit records it as a type the person
+   * chose, so transfer matching never re-types the row.
+   */
+  typeIsUserSet?: boolean;
 }
 
 /** One line of the file: what it said, and how it reads (or why it does not). */
@@ -82,6 +125,28 @@ export interface ImportSourceAccount {
   currency?: string;
   label: string;
   rowCount: number;
+  /**
+   * The account the file's own identifier points at, when the session can tell: a CAMT.053
+   * statement is labelled by its IBAN, so an account whose `accountNumber` holds that IBAN is
+   * suggested. The person still confirms the mapping.
+   */
+  suggestedAccountId?: number;
+}
+
+/**
+ * A category the file uses, for the category-mapping step: the person picks a WonderMoney category
+ * for it, or leaves its rows uncategorised.
+ */
+export interface ImportSourceCategory {
+  /** The group the source app files it under (YNAB's category group), when it has one. */
+  group?: string;
+  /** The rows' {@link NormalizedImportRow.categoryLabel}. */
+  label: string;
+  /** The category's own name, without its group. */
+  name: string;
+  rowCount: number;
+  /** A category of the household whose name matches, when the session found exactly one. */
+  suggestedCategoryId?: number;
 }
 
 export interface ImportWarning {
@@ -94,6 +159,8 @@ export interface ImportParseResult {
   rows: ParsedImportRow[];
   /** Empty when the file is for one account only (the one the import was started on). */
   sourceAccounts: ImportSourceAccount[];
+  /** The categories to map, for a format whose categories the session maps (YNAB, Actual Budget). Absent otherwise. */
+  sourceCategories?: ImportSourceCategory[];
   warnings: ImportWarning[];
 }
 

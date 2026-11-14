@@ -1,16 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { isTransferEditAffectedQuery } from '@/features/transactions/use-edit-transaction-transfer'
 import { ApiError } from '@/lib/api/errors'
 
 import { accountUpdateWriteSchema, createUpdateAccountEndpoint, type AccountUpdateWrite } from './accounts-contract'
 import { accountKey, accountsKey } from './query-keys'
 
-export type AccountWriteFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type AccountWriteFailure = 'demo' | 'read-only' | 'account-read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyAccountWriteFailure(error: unknown): AccountWriteFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'
@@ -35,6 +38,10 @@ export function useAccountMetadataMutation() {
           void Promise.all([
             queryClient.invalidateQueries({ queryKey: accountsKey(runtime.epochId), exact: true }),
             queryClient.invalidateQueries({ queryKey: accountKey(runtime.epochId, accountId), exact: true }),
+            // A joint account's money is Shared: every member-filtered list, total and report moves.
+            ...(body.isJoint !== undefined
+              ? [queryClient.invalidateQueries({ predicate: (query) => isTransferEditAffectedQuery(query.queryKey, runtime.epochId) })]
+              : []),
           ])
         },
       })

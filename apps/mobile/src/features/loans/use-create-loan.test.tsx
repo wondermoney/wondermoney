@@ -32,6 +32,7 @@ describe('useCreateLoan', () => {
     expect(mockWrite.mock.calls[0][1].body).toEqual(payload)
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['loans', 'list', 8], exact: true })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['net-worth', 8], exact: true })
+    expect(invalidate).toHaveBeenCalledWith({ predicate: expect.any(Function) })
     await hook.unmount(); client.clear()
   })
 

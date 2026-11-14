@@ -9,6 +9,7 @@ import {
   PieChart,
   ReceiptText,
   Target,
+  Users,
 } from "lucide-react";
 
 /**
@@ -44,6 +45,8 @@ export type NavigationItem = {
   children?: NavigationChild[];
   /** Dropped when this server does not offer what the module needs. */
   requires?: "marketData";
+  /** Dropped until the person turns preview features on (`<PreviewGate>`'s nav equivalent). */
+  preview?: boolean;
 };
 
 export const NAVIGATION: NavigationItem[] = [
@@ -84,6 +87,13 @@ export const NAVIGATION: NavigationItem[] = [
     labelKey: "navigation.budgets",
     href: "/budgets",
     icon: PieChart,
+    group: "day-to-day",
+  },
+  {
+    id: "groups",
+    labelKey: "navigation.groups",
+    href: "/groups",
+    icon: Users,
     group: "day-to-day",
   },
   {

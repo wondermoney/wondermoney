@@ -11,12 +11,38 @@ import { useTransactions } from '@/features/transactions/use-transactions'
 import type { RecentTransactionsSectionState } from '@/features/transactions/recent-transactions-section'
 import { mapRecentTransactions } from '@/features/transactions/recent-transactions-view-model'
 import { useRecentTransactions } from '@/features/transactions/use-recent-transactions'
+import type { InstallmentPlansSectionState } from '@/features/installments/installment-plans-section'
+import { useInstallmentCommitments, useInstallmentPlans, useInstallmentSuggestions } from '@/features/installments/use-installment-plans'
 
 import { AccountDetailScreen, type AccountDetailData, type AccountDetailViewState } from './account-detail-screen'
 import { mapAccountDetail } from './account-detail-view-model'
 import { parseAccountId } from './accounts-contract'
 import { useAccount } from './use-account'
+import { useAccountForecast } from './use-account-forecast'
 import { useAccountRecalculation } from './use-account-recalculation'
+import { useCreditCardStatements } from './use-credit-card-statements'
+
+function creditCardStatementState(
+  creditCard: NonNullable<ReturnType<typeof mapAccountDetail>['creditCard']> | null,
+  statements: ReturnType<typeof useCreditCardStatements>,
+): AccountDetailData['creditCardStatement'] {
+  if (!creditCard) return undefined
+  if (statements.data) {
+    const list = statements.data.statements
+    const current = list.find((statement) => statement.isCurrent) ?? list[list.length - 1]
+    return current
+      ? { status: 'loaded', statement: current, statements: list, creditLimit: creditCard.creditLimit ?? null }
+      : { status: 'empty' }
+  }
+  if (statements.error && statements.error instanceof ApiError && statements.error.code === 'invalid-response') return { status: 'invalid-response' }
+  if (statements.error) return { status: 'error' }
+  return { status: 'loading' }
+}
+
+function sectionState<Value, Data>(query: { data?: Value; isLoading: boolean }, read: (value: Value) => Data) {
+  if (query.data !== undefined) return { status: 'loaded' as const, data: read(query.data) }
+  return query.isLoading ? { status: 'loading' as const } : { status: 'error' as const }
+}
 
 export function AccountDetailRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
@@ -26,19 +52,28 @@ export function AccountDetailRoute() {
   // comparison. (A fresh `new Date()` here would also churn the query key.)
   const metrics = useAccountMetrics(accountId)
   const recent = useRecentTransactions(accountId)
+  // The projected low point and the recurring payments still to come.
+  const forecast = useAccountForecast(accountId)
   // The account's ledger feeds the Balance growth chart, as on web.
   const noFilters = useMemo(() => ({}), [])
   const ledger = useTransactions(noFilters, accountId ?? 0)
   const recalculation = useAccountRecalculation()
+  const creditCard = query.data?.account.creditCard ?? null
+  const statements = useCreditCardStatements(accountId, Boolean(creditCard))
+  // Installment purchases belong to cards; another account costs no request.
+  const installmentPlans = useInstallmentPlans(accountId, Boolean(creditCard))
+  const installmentCommitments = useInstallmentCommitments(accountId, Boolean(creditCard))
+  const installmentSuggestions = useInstallmentSuggestions(accountId, Boolean(creditCard))
   const router = useRouter()
   const { signOut } = useProductRuntime()
   let state: AccountDetailViewState
 
   if (query.isInvalidId) state = { status: 'invalid-id' }
-  else if (query.isAccessTransition || metrics.isAccessTransition || ledger.isAccessTransition) state = { status: 'access-transition' }
+  else if (query.isAccessTransition || metrics.isAccessTransition || ledger.isAccessTransition || forecast.isAccessTransition) state = { status: 'access-transition' }
   else if (query.isLoading) state = { status: 'loading' }
   else if (query.data) {
     const ledgerRows = ledger.data ? mapTransactions(ledger.data) : null
+    const forecastSeries = forecast.data?.accounts.find((series) => series.accountKey === accountId) ?? null
     const data: AccountDetailData = {
       ...mapAccountDetail(query.data.account),
       metrics: metrics.data
@@ -47,6 +82,15 @@ export function AccountDetailRoute() {
       balance: ledgerRows
         ? { status: 'loaded', data: buildBalanceSeries(ledgerRows) }
         : ledger.isLoading ? { status: 'loading' } : { status: 'error' },
+      forecast: forecastSeries
+        ? { status: 'loaded', series: forecastSeries }
+        : forecast.isLoading ? { status: 'loading' } : forecast.data ? { status: 'unavailable' } : { status: 'error' },
+      creditCardStatement: creditCardStatementState(creditCard, statements),
+      installmentPlans: creditCard ? {
+        commitment: sectionState(installmentCommitments, (value) => value.commitments.find((row) => row.accountKey === accountId) ?? null),
+        plans: sectionState(installmentPlans, (value) => value.installmentPlans),
+        suggestions: sectionState(installmentSuggestions, (value) => value.suggestions),
+      } satisfies InstallmentPlansSectionState : undefined,
     }
     state = query.isRefreshFailure ? { status: 'refresh-error', data } : { status: 'loaded', data }
   } else if (query.isNotFound) state = { status: 'not-found' }
@@ -69,7 +113,12 @@ export function AccountDetailRoute() {
       state={state}
       recentTransactions={recentTransactions}
        onBack={() => { if (router.canGoBack()) router.back(); else router.replace('/accounts') }}
-      onRetry={async () => { await Promise.all([query.refetch(), metrics.refetch(), ledger.refetch()]) }}
+      onRetry={async () => {
+        await Promise.all([
+          query.refetch(), metrics.refetch(), ledger.refetch(), forecast.refetch(),
+          ...(creditCard ? [installmentPlans.refetch(), installmentCommitments.refetch(), installmentSuggestions.refetch()] : []),
+        ])
+      }}
       onRetryRecent={async () => { await recent.refetch() }}
       onLogout={signOut}
       onViewTransactions={() => router.push({
@@ -84,6 +133,9 @@ export function AccountDetailRoute() {
       onRecalculate={accountId === null ? undefined : () => { void recalculation.start(accountId) }}
       recalculation={recalculation.state}
       onDismissRecalculation={recalculation.reset}
+      onOpenInstallmentPlan={(planId) => router.push({ pathname: '/accounts/[accountId]/installments/[planId]', params: { accountId: String(accountId), planId: String(planId) } })}
+      onCreateInstallmentPlan={() => router.push({ pathname: '/accounts/[accountId]/installments/create', params: { accountId: String(accountId) } })}
+      onAcceptInstallmentSuggestion={(suggestion) => router.push({ pathname: '/accounts/[accountId]/installments/create', params: { accountId: String(accountId), suggestion } })}
     />
   )
 }

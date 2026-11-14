@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { SupportedLanguages } from '@entity/Appuser';
 
 /** The web locales a signup can start from. */
-const SIGNUP_ROUTE_LOCALES = ['en', 'pt', 'es'] as const;
-type SignupRouteLocale = (typeof SIGNUP_ROUTE_LOCALES)[number];
+export const SIGNUP_ROUTE_LOCALES = ['en', 'pt', 'es'] as const;
+export type SignupRouteLocale = (typeof SIGNUP_ROUTE_LOCALES)[number];
 
 export const authCallbackRequestSchema = z.object({
   body: z.object({
@@ -15,7 +15,7 @@ export const authCallbackRequestSchema = z.object({
 
 const EMAIL_LANGUAGE_BY_ROUTE_LOCALE: Readonly<Record<SignupRouteLocale, SupportedLanguages>> = {
   en: SupportedLanguages.EN,
-  es: SupportedLanguages.EN,
+  es: SupportedLanguages.ES,
   pt: SupportedLanguages.PT,
 };
 

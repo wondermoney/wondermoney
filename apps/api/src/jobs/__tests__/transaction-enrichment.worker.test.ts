@@ -12,7 +12,7 @@ vi.mock('@app/database/di', () => ({ DI: { em: { find, findOne, flush, getRefere
 import { handleTransactionEnrichmentGptJob } from '@app/jobs/transaction-enrichment.worker';
 import { CategorizationConfidence } from '@entity/Transaction';
 import { TransactionEnrichmentStatus } from '@entity/TransactionEnrichment';
-import { DeepSeekHttpError } from '@service/ai/deepseek';
+import { AiCompletionError } from '@service/ai/complete-json';
 
 import { pgBossJob } from '../../__tests__/__helpers__/pgboss-job';
 
@@ -128,6 +128,23 @@ describe('handleTransactionEnrichmentGptJob', () => {
     const result = await handleTransactionEnrichmentGptJob(job(validPayload), { config: shadowConfig, logger, requestSuggestion });
     expect(result).toBe(true);
     expect(requestSuggestion).not.toHaveBeenCalled();
+  });
+
+  it('skips without a model call when the account owner hid AI after the job was enqueued', async () => {
+    const row = enrichmentRow();
+    findOne
+      .mockResolvedValueOnce(row)
+      .mockResolvedValueOnce(transactionRow({ accountKey: { accountOwnerAppuserKey: { appuserKey: 1, preferences: { aiHidden: true } } } }));
+    const requestSuggestion = vi.fn();
+    const reserveBudget = vi.fn().mockResolvedValue(true);
+
+    const result = await handleTransactionEnrichmentGptJob(job(validPayload), { config: shadowConfig, logger, requestSuggestion, reserveBudget });
+
+    expect(result).toBe(true);
+    expect(requestSuggestion).not.toHaveBeenCalled();
+    expect(reserveBudget).not.toHaveBeenCalled();
+    expect(row.status).toBe(TransactionEnrichmentStatus.SKIPPED);
+    expect((row as { eligibilityReason?: string }).eligibilityReason).toBe('ai_hidden');
   });
 
   it('skips with budget_exhausted and does not call the model when the budget is spent', async () => {
@@ -283,7 +300,7 @@ describe('handleTransactionEnrichmentGptJob', () => {
     const row = enrichmentRow();
     findOne.mockResolvedValueOnce(row).mockResolvedValueOnce(transactionRow());
     find.mockResolvedValueOnce([]).mockResolvedValueOnce([{ categoryKey: 12, name: 'Groceries' }]);
-    const requestSuggestion = vi.fn().mockRejectedValue(new DeepSeekHttpError(status));
+    const requestSuggestion = vi.fn().mockRejectedValue(new AiCompletionError(`Model request failed with status ${status}`, { status }));
     const reserveBudget = vi.fn().mockResolvedValue(true);
 
     await expect(
@@ -296,7 +313,7 @@ describe('handleTransactionEnrichmentGptJob', () => {
     const row = enrichmentRow();
     findOne.mockResolvedValueOnce(row).mockResolvedValueOnce(transactionRow());
     find.mockResolvedValueOnce([]).mockResolvedValueOnce([{ categoryKey: 12, name: 'Groceries' }]);
-    const requestSuggestion = vi.fn().mockRejectedValue(new DeepSeekHttpError(400));
+    const requestSuggestion = vi.fn().mockRejectedValue(new AiCompletionError('Model request failed with status 400', { status: 400 }));
     const reserveBudget = vi.fn().mockResolvedValue(true);
 
     const result = await handleTransactionEnrichmentGptJob(job(validPayload), { config: shadowConfig, logger, requestSuggestion, reserveBudget });

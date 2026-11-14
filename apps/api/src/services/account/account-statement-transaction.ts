@@ -12,18 +12,20 @@ import accountCsvBalanceRecalculationService from '@service/account/account-csv-
 import accountCsvCategorizationService from '@service/account/account-csv-categorization.service';
 import type { StatementRow } from '@service/account/account-statement-reader';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
+import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { transactionTypeForSignedAmount } from '@service/transaction/transaction-direction';
 import { reconcileTransfers } from '@service/transaction/transfer-matching.service';
 import logger from '@utils/logger';
 
 /**
- * Writing bank statement lines as transactions, in three steps both statement imports share (the
- * one-step `AccountCsvImportService` and the staged `transaction-import` commit):
+ * Writing imported lines as transactions, in the three steps the staged `transaction-import`
+ * commit uses:
  *
  *   build    one line → one unsaved `Transaction`, signed as the file states it
  *   settle   the account's balance chain, the household's rules and learned categories, inside
@@ -37,6 +39,8 @@ type EM = typeof DI.em;
 export interface StatementLine {
   descriptionDirty?: string;
   internalTransactionId: string;
+  /** A note stored beside the description (an Actual Budget split's parts). */
+  notes?: string;
   originalAmount?: number | string | { toString: () => string };
   originalCurrency?: string;
   settlementAmount: number | string | { toString: () => string };
@@ -50,6 +54,7 @@ export interface StatementLine {
 export const statementLineSchema = z.object({
   descriptionDirty: z.string().trim().max(500).optional(),
   internalTransactionId: z.string().trim().min(1).max(255),
+  notes: z.string().trim().max(255).optional(),
   settlementAmount: z.preprocess((value) => toFiniteNumber(normalizeNumberInput(value) as number | string | { toString: () => string }), z.number()),
   settlementCurrency: z.string().trim().length(3).transform((value) => value.toUpperCase()),
   transactionDate: z.union([z.string(), z.date()]).transform((value) => toDate(value)),
@@ -86,13 +91,18 @@ export async function statementWriteContext(em: EM, account: Account): Promise<S
  * `trustedId: false` stores the line's id as its fingerprint only, not as its unique provider id:
  * for a line the person imports although the same id is already on the account (or earlier in the
  * file), which the account's unique `nordigenInternalTransactionId` would refuse.
+ *
+ * `trustedType: true` keeps the line's type as stated, without making it agree with the amount's
+ * sign: the generic CSV template's type is the person's word, and its amount is already signed by
+ * that type. A statement's type is only a guess from the description, so it is adjusted instead.
  */
-export async function buildStatementTransaction(em: EM, context: StatementWriteContext, line: StatementLine, options: { trustedId?: boolean } = {}): Promise<Transaction> {
+export async function buildStatementTransaction(em: EM, context: StatementWriteContext, line: StatementLine, options: { trustedId?: boolean; trustedType?: boolean } = {}): Promise<Transaction> {
   const validated = statementLineSchema.parse(line);
   // The bank file states the direction in the amount's sign; the type guessed from the
   // description is only a label, so it is made to agree with the sign rather than the reverse.
   const signedAmount = validated.settlementAmount;
-  const transactionType = await cached(context.types, transactionTypeForSignedAmount(resolveTransactionTypeName(validated.transactionType), signedAmount), (name) => em.findOne(TransactionType, { name }));
+  const statedType = resolveTransactionTypeName(validated.transactionType);
+  const transactionType = await cached(context.types, options.trustedType === true ? statedType : transactionTypeForSignedAmount(statedType, signedAmount), (name) => em.findOne(TransactionType, { name }));
   if (!transactionType) throw new Error(`TransactionType not found: ${line.transactionType}`);
   const currency = await cached(context.currencies, validated.settlementCurrency, (code) => em.findOne(Currency, { code }));
   if (!currency) throw new Error(`Currency not found: ${line.settlementCurrency}`);
@@ -118,6 +128,7 @@ export async function buildStatementTransaction(em: EM, context: StatementWriteC
   transaction.descriptionDirty = validated.descriptionDirty;
   transaction.internalTransactionId = validated.internalTransactionId;
   transaction.nordigenInternalTransactionId = options.trustedId === false ? undefined : validated.internalTransactionId;
+  if (validated.notes) transaction.notes = validated.notes;
   transaction.originalAmount = originalAmount;
   transaction.originalCurrencyKey = originalCurrencyKey ?? undefined;
   transaction.settlementAmount = signedAmount;
@@ -169,13 +180,29 @@ export async function settleStatementImport(em: EM, account: Account, existing: 
 
 /**
  * After the import's transaction commits: pair the imported halves of transfers between the
- * household's own accounts, then queue recurring detection and (dormant by default) enrichment.
- * Best-effort: none of it fails an import whose rows are stored.
+ * household's own accounts, run the local Bayes pass over the imported rows, then queue recurring
+ * detection and (dormant by default) enrichment. Best-effort: none of it fails an import whose
+ * rows are stored.
  */
-export async function followUpStatementImport(em: EM, account: Account, importedDates: Date[], deps: { enqueue?: Enqueue } = {}): Promise<void> {
+export async function followUpStatementImport(em: EM, account: Account, importedDates: Date[], deps: { enqueue?: Enqueue; transactions?: Transaction[] } = {}): Promise<void> {
   await matchTransfersAfterImport(em, account, importedDates);
+  await linkInstallmentsAfterImport(em, account, importedDates);
   const tenantKey = tenantKeyOf(account);
   if (importedDates.length === 0 || tenantKey === undefined) return;
+  // Local and token-free, so it runs before enrichment regardless of AI settings: a row it labels
+  // is never enqueued for a model.
+  const viewerAppuserKey = account.accountOwnerAppuserKey?.appuserKey;
+  if (viewerAppuserKey !== undefined && deps.transactions && deps.transactions.length > 0) {
+    try {
+      const batch = await prepareBayesCategorization(em, { tenantKey, viewerAppuserKey });
+      if (batch) {
+        const assigned = await applyBayesCategorization(em, batch, deps.transactions);
+        if (assigned > 0) logger.info({ assigned, tenantKey }, 'Bayes categorized imported transactions');
+      }
+    } catch (error) {
+      logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Bayes categorization failed');
+    }
+  }
   await triggerRecurringDetectionAfterTransactionIngestion(tenantKey, 'transaction-import');
   await enqueueTransactionEnrichmentForTenant(tenantKey, 'transaction-import', { enqueue: deps.enqueue });
 }
@@ -195,6 +222,22 @@ export async function matchTransfersAfterImport(em: EM, account: Account, import
     if (matched.rowsChanged > 0) logger.info({ ...matched, tenantKey }, 'Matched own-account transfers');
   } catch (error) {
     logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Transfer matching failed');
+  }
+}
+
+/**
+ * Link imported rows that pay an installment of one of the card's plans ("PARC 03/12"), so the
+ * schedule reads them as paid (`services/installment/installment-plan.service.ts`). Best-effort, like
+ * transfer matching: linking never fails an import, and the next import or sync links again.
+ */
+export async function linkInstallmentsAfterImport(em: EM, account: Account, importedDates: Date[]) {
+  const tenantKey = tenantKeyOf(account);
+  if (tenantKey === undefined || importedDates.length === 0) return;
+  try {
+    const linked = await em.fork().transactional((tx) => linkPostedInstallments(tx, { accountKeys: [account.accountKey], tenantKey }));
+    if (linked > 0) logger.info({ linked, tenantKey }, 'Linked posted installments');
+  } catch (error) {
+    logger.warn({ error: error instanceof Error ? error.message : String(error), tenantKey }, 'Installment linking failed');
   }
 }
 

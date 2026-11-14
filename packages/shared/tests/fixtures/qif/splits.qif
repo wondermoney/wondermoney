@@ -1,0 +1,16 @@
+!Type:Bank
+D25/01/2026
+T-42.40
+PSUPERMERCADO
+MWeekly shop
+SFood:Groceries
+EGroceries
+$-30.00
+SHousehold
+ECleaning
+$-12.40
+^
+D26/01/2026
+T-9.90
+PBAKERY
+^

@@ -1,5 +1,62 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Customize",
+      "title": "Customize home",
+      "description": "Choose what appears on your home and in what order.",
+      "sections": {
+        "net-worth": "Net worth",
+        "insights": "Insights",
+        "this-month": "This month",
+        "balance-sheet": "Balance sheet",
+        "cashflow": "Net cash flow",
+        "loans": "Loans",
+        "latest-transactions": "Latest transactions"
+      },
+      "moveUp": "Move {section} up",
+      "moveDown": "Move {section} down",
+      "pinned": "Always shown first",
+      "reset": "Reset to default",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "retry": "Try again",
+      "loadError": "Could not load your home layout.",
+      "done": "Done"
+    },
+    "insights": {
+      "title": "Insights",
+      "empty": {
+        "title": "Nothing unusual this month",
+        "body": "Spending is tracking its usual pace and no budget is on course to overrun."
+      },
+      "severity": {
+        "critical": "Needs attention",
+        "warning": "Worth a look",
+        "info": "Good news"
+      },
+      "spending": {
+        "above": "{category} is {percent}% above its usual pace.",
+        "below": "{category} is {percent}% below its usual pace.",
+        "figures": "<current></current> so far, normally <baseline></baseline> by this point.",
+        "link": "View transactions"
+      },
+      "budget": {
+        "pace": "{category} is on course to overrun its budget.",
+        "figures": "<projected></projected> projected against <budgeted></budgeted> planned.",
+        "link": "View budget"
+      },
+      "ask": {
+        "link": "Ask the assistant",
+        "prompt": {
+          "spending": {
+            "above": "Why is my {category} spending {percent} above normal this month?",
+            "below": "Why is my {category} spending {percent} below normal this month?"
+          },
+          "budget": "Why is my {category} budget projected at {projected} against {budgeted} planned this month?",
+          "budgetHidden": "Why is my {category} budget on course to overrun this month?"
+        }
+      }
+    },
     "bank-alerts": {
       "label": "Bank connection alerts",
       "consent-expiring": "{days, plural, =0 {Access to {bank} ends within a day.} one {Access to {bank} ends in # day.} other {Access to {bank} ends in # days.}} Reconnect to keep your transactions updating.",
@@ -54,14 +111,25 @@
         "loans": "Loans",
         "other": "Other"
       },
-      "counted-in": "Counted in {account}"
+      "counted-in": "Counted in {account}",
+      "share-of-account": "{percent} of this account"
     },
     "cashflow": {
       "title": "Net cash flow by month",
       "list-label": "Net cash flow, {from} to {to}",
       "caption": "Money in less money out across your accounts.",
       "empty-title": "No cash flow yet",
-      "empty-body": "It appears once your accounts have transactions."
+      "empty-body": "It appears once your accounts have transactions.",
+      "this-month": "This month",
+      "income": "Income",
+      "spending": "Spending",
+      "savings-rate": "Savings rate",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} pts",
+      "vs": "vs {month}",
+      "vs-same-point": "vs same point last month",
+      "formula": "Savings rate is income minus spending, divided by income. It is — when income is zero."
     },
     "loans": {
       "title": "Next loan payments",
@@ -75,7 +143,9 @@
     },
     "latest": {
       "title": "Latest transactions",
-      "review": "{count, plural, one {# needs review} other {# need review}}",
+      "review-summary": "{count, plural, one {# transaction to review} other {# transactions to review}} · {amount} in total",
+      "review-now": "Review now",
+      "all-caught-up": "All caught up",
       "all": "All transactions",
       "caption": "{count, plural, one {The most recent transaction} other {The # most recent transactions}}",
       "date": "Date",

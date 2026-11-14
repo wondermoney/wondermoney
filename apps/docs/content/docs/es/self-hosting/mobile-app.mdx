@@ -5,14 +5,57 @@ description: Conecta la aplicación de WonderMoney para iOS y Android a tu propi
 
 La aplicación de WonderMoney funciona con cualquier servidor de WonderMoney, no solo con wonder.money.
 
-## Conectar la aplicación
+## Conectar la aplicación con un código QR
+
+La forma más rápida de conectar la aplicación es escanear un código desde la aplicación web de tu servidor, sin escribir nada en el teclado del teléfono.
+
+1. En la aplicación web, abre **Ajustes → Seguridad**.
+2. En **Conectar la aplicación móvil**, toca **Mostrar código QR**.
+3. En la pantalla de inicio de sesión de la aplicación, toca **Escanear código QR** y apunta la cámara al código.
+
+El código funciona una vez y caduca a los dos minutos; si caduca, muestra uno nuevo. Si la autenticación en dos pasos está activa en tu cuenta, introduce el código del autenticador en la web antes de que aparezca el QR: el teléfono no lo pide, porque la sesión web ya lo validó.
+
+También puedes escanear el código con la aplicación de cámara del teléfono: el código es un enlace `wondermoney://` que abre la aplicación. La aplicación comprueba la dirección antes de conectar, así que un código de otra aplicación o de un servidor que no sea WonderMoney se rechaza.
+
+## Conectar la aplicación a mano
 
 1. Abre la aplicación y ve a la pantalla de inicio de sesión.
 2. Toca **Usar otro servidor**.
-3. Introduce la dirección de tu API, el `API_URL` de tu `.env`, por ejemplo `api.money.example.com`.
+3. Introduce la dirección de tu servidor, el `API_URL` de tu `.env` — con un solo dominio, la misma dirección que la aplicación web, por ejemplo `money.example.com`.
 4. Toca **Conectar** e inicia sesión con tu cuenta en ese servidor.
 
 La aplicación comprueba la dirección antes de guardarla. Si no puede llegar al servidor, si no es un servidor de WonderMoney o si necesita una versión más reciente de la aplicación, te avisa y mantiene el servidor anterior.
+
+## Dispositivos conectados
+
+**Ajustes → Seguridad → Dispositivos** muestra los teléfonos conectados a tu cuenta, con la última vez que se vio cada uno. **Revocar** cierra la sesión de ese teléfono de inmediato; tiene que escanear un código nuevo para volver a conectarse.
+
+## Notificaciones push
+
+La aplicación puede mostrar alertas de presupuesto, recordatorios de pago de la tarjeta y alertas de conexiones bancarias como notificaciones push cuando tu servidor tiene el push activado (`PUSH_ENABLED=true`, consulta [Configurar](/es/docs/self-hosting/configure#notificaciones-push)). Abre **Ajustes → Notificaciones** en la aplicación: cada categoría de push está desactivada hasta que la activas, y el teléfono pide permiso la primera vez que lo haces. **Enviar notificación de prueba** comprueba todo el camino. Al tocar una notificación se abre la pantalla a la que se refiere. Cerrar sesión quita el teléfono, igual que revocarlo en **Dispositivos**.
+
+### Qué versiones de la aplicación puede alcanzar tu servidor
+
+Las notificaciones pasan por el servicio de push de Expo. El token de push de un teléfono pertenece al proyecto de Expo con el que se compiló la aplicación, y ese proyecto guarda las credenciales de push de Apple y Google. En la aplicación WonderMoney publicada, ese es el proyecto de quienes mantienen WonderMoney, no el tuyo.
+
+Por defecto, Expo acepta una petición de push para un token sin comprobar quién la envía. El propietario del proyecto puede activar la seguridad reforzada de las notificaciones push y, desde ese momento, Expo rechaza las peticiones de push que no lleven un token de acceso válido para ese proyecto. Por eso, tu servidor solo alcanza los teléfonos con la aplicación publicada mientras ese proyecto mantenga la seguridad reforzada desactivada, o si su propietario te da un token de acceso para definirlo como `EXPO_ACCESS_TOKEN`. Cualquiera de las dos cosas puede cambiar sin aviso.
+
+Para no depender de ello, compila la aplicación desde el código con tu propio proyecto de Expo y tus propias credenciales de push de Apple y Firebase (`apps/mobile/README.md`, "EAS configuration"). Tu servidor envía entonces a tu versión; define `EXPO_ACCESS_TOKEN` si activas la seguridad reforzada en tu cuenta de Expo.
+
+## Llaves de acceso
+
+Una llave de acceso pertenece al dominio de tu aplicación web (el host de `APP_URL`), y un teléfono solo la ofrece a una aplicación cuando ese dominio respalda la aplicación y la aplicación se compiló para pedirla. La aplicación de WonderMoney publicada se compila solo para wonder.money. En tu servidor, oculta **Iniciar sesión con una llave de acceso** y **Añadir una llave de acceso**, y la gente inicia sesión con su contraseña, Google, Apple o el inicio de sesión único. Las llaves de acceso siguen funcionando en tu aplicación web, y la aplicación sigue mostrándolas y puede eliminarlas.
+
+Para usar llaves de acceso en la aplicación con tu propio servidor, compila la aplicación desde el código (`apps/mobile/README.md`, "Passkeys") y define:
+
+| Dónde | Variable | Valor |
+| --- | --- | --- |
+| Compilación de la aplicación | `WONDERMONEY_PASSKEY_DOMAINS` | El dominio de tu aplicación web, por ejemplo `money.example.com`. En iOS, el App ID necesita la capacidad Associated Domains. |
+| Aplicación web | `IOS_APP_TEAM_ID`, `IOS_APP_BUNDLE_ID` | El ID de tu equipo de Apple Developer y el bundle ID de la aplicación. La aplicación web los sirve como `/.well-known/apple-app-site-association`. |
+| Aplicación web | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | El nombre del paquete de la aplicación y las huellas SHA-256 de sus certificados de firma, separadas por comas (`AB:CD:…`, como las muestran `keytool` o la Play Console). La aplicación web los sirve como `/.well-known/assetlinks.json`. |
+| API | `ANDROID_APP_CERT_SHA256` | Las mismas huellas. Android indica que una llave de acceso de una aplicación viene de `android:apk-key-hash:` y el hash del certificado, no de tu dirección web, así que la API solo acepta ese origen para estos certificados. |
+
+Con Docker Compose, todas van en `.env`. Mientras no estén definidas, las dos direcciones `/.well-known` responden 404 y nada cambia. Mantén `APP_URL` en el puerto HTTPS predeterminado: iOS indica que las llaves de acceso de la aplicación vienen de `https://` y el dominio, sin puerto.
 
 ## Requisitos
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { decryptCredentialEntity } = vi.hoisted(() => ({ decryptCredentialEntity: vi.fn(() => ({ applicationId: 'app-1', privateKeyPem: 'pem' })) }));
-vi.mock('../enable-banking-credential.service', () => ({ enableBankingCredentialService: { decryptCredentialEntity } }));
+const { decryptForConnection } = vi.hoisted(() => ({ decryptForConnection: vi.fn(() => ({ applicationId: 'app-1', privateKeyPem: 'pem' })) }));
+vi.mock('../enable-banking-credential.service', () => ({ enableBankingCredentialService: { decryptForConnection } }));
 vi.mock('../enable-banking-client.service', () => ({ createEnableBankingClient: vi.fn() }));
 
 import type { EnableBankingConnection } from '@entity/EnableBankingConnection';
@@ -305,7 +305,7 @@ describe('createEnableBankingSyncAdapter', () => {
 
     createEnableBankingSyncAdapter(connection, { em: testEm as unknown as AdapterEm });
 
-    expect(decryptCredentialEntity).toHaveBeenCalledWith((connection as { enableBankingCredentialKey: unknown }).enableBankingCredentialKey);
+    expect(decryptForConnection).toHaveBeenCalledWith(connection);
     expect(createEnableBankingClient).toHaveBeenCalledWith({ applicationId: 'app-1', privateKeyPem: 'pem' });
   });
 });

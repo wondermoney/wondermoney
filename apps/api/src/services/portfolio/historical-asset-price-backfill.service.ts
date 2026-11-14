@@ -3,7 +3,7 @@ import { subDays } from 'date-fns';
 import { DI } from '@app/database/di';
 import { sqlQuery } from '@app/database/sql';
 import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
-import eodhdClient from '@service/market-data/eodhd.service';
+import { marketData, type MarketDataRegistry } from '@service/market-data/registry';
 
 import portfolioSnapshotService from './portfolio-snapshot.service';
 
@@ -26,9 +26,9 @@ const rangeCoverage = (fromDate: Date, endDate: Date, existingDates: Set<string>
 };
 
 class HistoricalAssetPriceBackfillService {
-  async backfillHistoricalAssetPrices(input: { items: { earliestTransactionDate?: string; financialAssetId?: number; financialAssetKey?: number; symbol: string; transactionDate?: string }[]; portfolioId: number }, deps: { em?: typeof DI.em; eodhd?: typeof eodhdClient; now?: Date; portfolioSnapshotService?: typeof portfolioSnapshotService } = {}): Promise<HistoricalAssetPriceBackfillResult> {
+  async backfillHistoricalAssetPrices(input: { items: { earliestTransactionDate?: string; financialAssetId?: number; financialAssetKey?: number; symbol: string; transactionDate?: string }[]; portfolioId: number }, deps: { em?: typeof DI.em; marketData?: Pick<MarketDataRegistry, 'dailyHistory'>; now?: Date; portfolioSnapshotService?: typeof portfolioSnapshotService } = {}): Promise<HistoricalAssetPriceBackfillResult> {
     const em = deps.em ?? DI.em;
-    const eodhd = deps.eodhd ?? eodhdClient;
+    const registry = deps.marketData ?? marketData();
     const snapshotService = deps.portfolioSnapshotService ?? portfolioSnapshotService;
     const today = new Date(deps.now ?? new Date());
     const endDate = subDays(today, 1);
@@ -54,11 +54,11 @@ class HistoricalAssetPriceBackfillService {
           earliestBackfillDate = minDate(earliestBackfillDate, fromDate);
           continue;
         }
-        const fetched = await eodhd.getEndOfDayPrices(item.symbol, { from: toYmd(fromDate), to: endYmd });
+        const { provider, value: fetched } = await registry.dailyHistory(item.symbol, { from: toYmd(fromDate), to: endYmd });
         const rows = fetched.map((row) => ({ date: fromYmd(row.date), price: row.close })).filter((row) => { const ymd = toYmd(row.date); if (existingDates.has(ymd)) return false; existingDates.add(ymd); return true; });
         result.skipped += fetched.length - rows.length; result.inserted += rows.length;
         if (rows.length) {
-          await sqlQuery(em).insertInto('financial_asset_price').values(rows.map((row) => ({ date: row.date, financial_asset_key: financialAssetKey, price: row.price, volume: 0 }))).onConflict((conflict) => conflict.columns(['financial_asset_key', 'date']).doNothing()).execute();
+          await sqlQuery(em).insertInto('financial_asset_price').values(rows.map((row) => ({ date: row.date, financial_asset_key: financialAssetKey, price: row.price, source: provider, volume: 0 }))).onConflict((conflict) => conflict.columns(['financial_asset_key', 'date']).doNothing()).execute();
           hasSuccessfulBackfillAttempt = true;
           earliestBackfillDate = minDate(earliestBackfillDate, fromDate);
         }

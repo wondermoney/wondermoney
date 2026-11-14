@@ -15,8 +15,14 @@ export enum AppuserAccountType {
   REGULAR = 'regular',
 }
 
+/**
+ * An account's language: the language of its emails and of every other text the server writes for
+ * it (notifications, the calendar feed, the assistant's default). A text without copy in the
+ * account's language falls back to English (`@utils/account-language`).
+ */
 export enum SupportedLanguages {
   EN = 'EN',
+  ES = 'ES',
   PT = 'PT',
 }
 @Entity({ repository: () => AppuserRepository })
@@ -85,6 +91,15 @@ export class Appuser extends Base {
 
   @Property({ columnType: 'int', nullable: true })
   onboardingCompletedVersion?: number;
+
+  /**
+   * Per-user preferences (`{ aiHidden, previewFeatures, dashboardLayout }` today). A JSON document
+   * rather than a column per setting, so a new preference does not need a
+   * migration. `@validators/preferences` validates it on every read and write and
+   * drops unknown keys.
+   */
+  @Property({ columnType: 'jsonb', default: '{}', type: 'json' })
+  preferences: Record<string, unknown> = {};
 
   @Property()
   recordActive = true;

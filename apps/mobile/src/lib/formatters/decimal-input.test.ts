@@ -1,4 +1,4 @@
-import { formatNumberInput, parseDecimalInput, parseNumberInput, toWireDecimalInput } from './decimal-input'
+import { amountExpressionResult, formatNumberInput, parseAmountInput, parseDecimalInput, parseNumberInput, toWireDecimalInput } from './decimal-input'
 
 describe('decimal input', () => {
   it.each([
@@ -54,5 +54,41 @@ describe('toWireDecimalInput', () => {
     for (const value of ['1.2.3', '1e3', 'Infinity', '0x10']) {
       expect(Number.isNaN(Number(toWireDecimalInput(value, 'pt-PT')))).toBe(true)
     }
+  })
+})
+
+describe('parseAmountInput', () => {
+  it('reads a plain number exactly as before', () => {
+    expect(parseAmountInput('1.234,56', 'pt-PT')).toBe('1234.56')
+    expect(parseAmountInput('1.000', 'es')).toBe('1000')
+    expect(parseAmountInput('1.000', 'en')).toBe('1.000')
+    expect(parseAmountInput('-12,50', 'es')).toBe('-12.50')
+  })
+
+  it('evaluates an expression in the reader\'s locale', () => {
+    expect(parseAmountInput('12.40+3.15', 'en')).toBe('15.55')
+    expect(parseAmountInput('12,40+3,15', 'pt-PT')).toBe('15.55')
+    expect(parseAmountInput('12,40+3,15', 'es')).toBe('15.55')
+    expect(parseAmountInput('100+27', 'en')).toBe('127')
+  })
+
+  it('rejects what is neither a number nor a usable expression', () => {
+    for (const value of ['', 'abc', '2+', '(2+3', '1/0']) {
+      expect(parseAmountInput(value, 'en')).toBeNull()
+    }
+  })
+})
+
+describe('amountExpressionResult', () => {
+  it('has no hint for a plain number or a blank field', () => {
+    expect(amountExpressionResult('12.50', 'en')).toBeNull()
+    expect(amountExpressionResult('-12,50', 'pt-PT')).toBeNull()
+    expect(amountExpressionResult('', 'en')).toBeNull()
+  })
+
+  it('returns the result while the text is an expression', () => {
+    expect(amountExpressionResult('12.40+3.15', 'en')).toBe(15.55)
+    expect(amountExpressionResult('12,40+3,15', 'pt-PT')).toBe(15.55)
+    expect(amountExpressionResult('12,40+', 'pt-PT')).toBeNull()
   })
 })

@@ -2,6 +2,7 @@
  * End-to-end proof of the household invite lifecycle against a
  * schema-only disposable DB. Seeds an owner + tenant, then exercises the service:
  * create invite → seat cap → validate (email match/mismatch) → consume (member joins).
+ * The seat cap is set to two people here, so one invite fills the household.
  *
  *   createdb wmdb_hh && DB_*=... pnpm migrate:dev
  *   DB_*=... NODE_ENV=development SHOULD_INTERCEPT_EMAILS=true NODE_OPTIONS="--import=tsx" \
@@ -20,7 +21,8 @@ import {
   createHouseholdInvite,
   getHousehold,
   getInviteForValidation,
-  validateInviteForSignup,
+  revokeHouseholdInvite,
+  validateInviteForEmail,
 } from '@service/household/household-invite.service';
 import { leaveOrRemoveMember, tearDownHouseholdOnOwnerDeletion } from '@service/household/household-membership.service';
 
@@ -46,6 +48,7 @@ async function expectThrows(fn: () => Promise<unknown>, label: string): Promise<
 }
 
 async function main() {
+  process.env['HOUSEHOLD_MAX_MEMBERS'] = '2';
   const orm = await MikroORM.init(config);
   const em = orm.em.fork();
   const conn = em.getConnection();
@@ -64,25 +67,29 @@ async function main() {
     const owner = await em.findOneOrFail(Appuser, { appuserKey: ownerKey });
     const tenant = await em.findOneOrFail(Tenant, { tenantKey });
 
-    // 0. Inviting an email that already has an account is rejected before sending.
-    await expectThrows(() => createHouseholdInvite(em, owner, tenant, 'existing@hh.test'), 'invite rejected — email already belongs to an existing account');
+    // 0. An email that already has an account can be invited (they accept from the app); a
+    //    member cannot invite at all.
+    const existingInvite = await createHouseholdInvite(em, owner, HouseholdRole.OWNER, tenant, 'existing@hh.test');
+    assert(existingInvite.status === HouseholdInviteStatus.PENDING, 'an existing account can be invited');
+    await revokeHouseholdInvite(em, tenant, HouseholdRole.OWNER, existingInvite.householdInviteKey);
+    await expectThrows(() => createHouseholdInvite(em, owner, HouseholdRole.MEMBER, tenant, 'x@hh.test'), 'a member cannot invite');
 
     // 1. Owner creates an invite.
-    const invite = await createHouseholdInvite(em, owner, tenant, 'Partner@HH.test');
+    const invite = await createHouseholdInvite(em, owner, HouseholdRole.OWNER, tenant, 'Partner@HH.test');
     assert(invite.status === HouseholdInviteStatus.PENDING && invite.emailAddress === 'partner@hh.test', 'invite created (pending, email normalized)');
 
     // 2. Seat cap: owner (1 membership) + pending invite (1) = full → second invite rejected.
-    await expectThrows(() => createHouseholdInvite(em, owner, tenant, 'other@hh.test'), 'second invite rejected — household full (pending invite consumes the seat)');
+    await expectThrows(() => createHouseholdInvite(em, owner, HouseholdRole.OWNER, tenant, 'other@hh.test'), 'second invite rejected — household full (pending invite consumes the seat)');
 
     // 3. getHousehold reflects the owner + pending invite.
-    const household = await getHousehold(em, tenant);
+    const household = await getHousehold(em, tenant, ownerKey);
     assert(household.members.length === 1 && household.members[0]!.role === HouseholdRole.OWNER, 'household shows the owner');
     assert(household.pendingInvite?.email === 'partner@hh.test', 'household shows the pending invite');
 
     // 4. Validation: wrong email rejected, matching email accepted.
-    await expectThrows(() => validateInviteForSignup(em, invite.token, 'someone-else@hh.test'), 'validate rejects an email mismatch');
-    await expectThrows(() => validateInviteForSignup(em, 'not-a-real-token', 'partner@hh.test'), 'validate rejects an unknown token');
-    const validated = await validateInviteForSignup(em, invite.token, 'partner@hh.test');
+    await expectThrows(() => validateInviteForEmail(em, invite.token, 'someone-else@hh.test'), 'validate rejects an email mismatch');
+    await expectThrows(() => validateInviteForEmail(em, 'not-a-real-token', 'partner@hh.test'), 'validate rejects an unknown token');
+    const validated = await validateInviteForEmail(em, invite.token, 'partner@hh.test');
     assert(validated.householdInviteKey === invite.householdInviteKey, 'validate accepts the matching email/token');
 
     // 4b. Public pre-signup validation (the /join page) — token only, no tenant context.
@@ -100,7 +107,7 @@ async function main() {
     assert(joinedTenant.tenantKey === tenantKey, 'consume returns the owner tenant');
     em.clear();
     const memberLink = await em.findOneOrFail(AppuserTenant, { appuserKey: { appuserKey: memberKey }, tenantKey: { tenantKey } });
-    assert(memberLink.role === HouseholdRole.MEMBER, 'joining partner is linked with role=member');
+    assert(memberLink.role === HouseholdRole.MEMBER, 'joining person is linked with the invite role (member)');
     const acceptedInvite = await em.findOneOrFail(HouseholdInvite, { householdInviteKey: invite.householdInviteKey });
     assert(acceptedInvite.status === HouseholdInviteStatus.ACCEPTED, 'invite marked accepted');
     await expectThrows(() => getInviteForValidation(em, invite.token), 'public validation rejects an already-accepted invite');
@@ -108,18 +115,18 @@ async function main() {
     // 6. Household is now full (owner + member); a further invite is rejected.
     const afterOwner = await em.findOneOrFail(Appuser, { appuserKey: ownerKey });
     const afterTenant = await em.findOneOrFail(Tenant, { tenantKey });
-    await expectThrows(() => createHouseholdInvite(em, afterOwner, afterTenant, 'third@hh.test'), 'no further invites once the household has two members');
+    await expectThrows(() => createHouseholdInvite(em, afterOwner, HouseholdRole.OWNER, afterTenant, 'third@hh.test'), 'no further invites once the household is full');
 
     // 7. B3 — the member has a bank connection; owner removes them.
     const reqKey = (await one(`insert into nordigen_requisition (created_at, updated_at, requisition_id, status, appuser_key, internal_reference, tenant_key) values (now(),now(),'req-member','linked',?,'ref-member',?) returning nordigen_requisition_key`, [memberKey, tenantKey]))['nordigen_requisition_key']!;
-    await expectThrows(() => leaveOrRemoveMember(em, afterTenant, afterOwner, ownerKey), 'owner cannot be removed via member removal');
-    await leaveOrRemoveMember(em, afterTenant, afterOwner, memberKey);
+    await expectThrows(() => leaveOrRemoveMember(em, afterTenant, afterOwner, HouseholdRole.OWNER, ownerKey), 'owner cannot be removed via member removal');
+    await leaveOrRemoveMember(em, afterTenant, afterOwner, HouseholdRole.OWNER, memberKey, { endSessions: () => Promise.resolve() });
     em.clear();
     const removedLink = await em.findOne(AppuserTenant, { appuserKey: { appuserKey: memberKey }, deletedAt: undefined, recordActive: true, tenantKey: { tenantKey } });
     assert(removedLink === null, 'removed member no longer has an active membership');
     const revokedReq = await em.findOneOrFail(NordigenRequisition, { nordigenRequisitionKey: reqKey });
     assert(revokedReq.deletedAt != null, "removed member's bank connection was revoked");
-    const afterRemoval = await getHousehold(em, await em.findOneOrFail(Tenant, { tenantKey }));
+    const afterRemoval = await getHousehold(em, await em.findOneOrFail(Tenant, { tenantKey }), ownerKey);
     assert(afterRemoval.members.length === 1, 'household shows only the owner after removal');
 
     // 8. B3 — owner-deletion teardown: re-link the member, then tearing down removes them.
@@ -132,7 +139,7 @@ async function main() {
     await em.flush();
     em.clear();
     const afterTeardown = await em.findOne(AppuserTenant, { appuserKey: { appuserKey: memberKey }, deletedAt: undefined, recordActive: true, tenantKey: { tenantKey } });
-    assert(afterTeardown === null, 'owner-deletion teardown deactivates the partner');
+    assert(afterTeardown === null, 'owner-deletion teardown deactivates the other member');
 
     console.log('\n✅ household invite + membership lifecycle verified');
   } finally {

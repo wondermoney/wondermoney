@@ -33,6 +33,17 @@ describe('isOlderVersion', () => {
 })
 
 describe('checkServer', () => {
+  it('reads the crypto wallet chains, dropping unknown ones, and none from an older server or a malformed value', async () => {
+    const check = async (features: Record<string, unknown>) => {
+      const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, ...features } })) })
+      return result.status === 'ok' ? result.instance.features.cryptoWalletChains : 'rejected'
+    }
+    await expect(check({ cryptoWalletChains: ['bitcoin', 'solana', 'ethereum'] })).resolves.toEqual(['bitcoin', 'ethereum'])
+    await expect(check({ cryptoWalletChains: [] })).resolves.toEqual([])
+    await expect(check({})).resolves.toBeUndefined()
+    await expect(check({ cryptoWalletChains: 'bitcoin' })).resolves.toBeUndefined()
+  })
+
   it('accepts a WonderMoney server and returns its description', async () => {
     const fetchImpl = respond(instance())
     await expect(checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl })).resolves.toEqual({ instance: expect.objectContaining({ name: 'Casa' }), status: 'ok' })
@@ -54,6 +65,15 @@ describe('checkServer', () => {
     const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(body) })
     expect(result).toMatchObject({ status: 'ok', instance: { signupMode: 'unknown' } })
     expect(result.status === 'ok' && result.instance).not.toHaveProperty('region')
+  })
+
+  it('reads the enabled bank-data providers, and still parses a server that sends none or a malformed list', async () => {
+    const withProviders = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, bankSyncProviders: ['enable_banking', 'simplefin'] } })) })
+    expect(withProviders).toMatchObject({ status: 'ok', instance: { features: { bankSyncProviders: ['enable_banking', 'simplefin'] } } })
+    const without = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance()) })
+    expect(without.status === 'ok' && without.instance.features.bankSyncProviders).toBeUndefined()
+    const malformed = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ features: { ...instance().features, bankSyncProviders: 'simplefin' } })) })
+    expect(malformed.status === 'ok' && malformed.instance.features.bankSyncProviders).toBeUndefined()
   })
 
   it('asks for an app update when the server needs a newer version', async () => {

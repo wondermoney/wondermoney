@@ -28,13 +28,15 @@ import { usePalette } from '@/theme/use-palette'
 import { FailureState, LoadingState } from '@/features/accounts/screen-states'
 
 import type { RecurringDetectionResult, RecurringMetadataInput } from './recurring-contract'
+import { shiftMonth } from './recurring-calendar'
 import type { RecurringMutation } from './use-recurring-mutations'
-import type { RecurringRowViewModel, RecurringSummaryViewModel } from './recurring-view-model'
+import type { RecurringAgendaGroup } from './recurring-calendar'
+import type { RecurringAgendaEntry, RecurringRowViewModel, RecurringSummaryViewModel } from './recurring-view-model'
 
 export type RecurringViewState =
   | { status: 'loading' | 'error' | 'invalid-response' | 'access-transition' | 'no-account' }
-  | { status: 'loaded' | 'refresh-error'; rows: readonly RecurringRowViewModel[]; summary: RecurringSummaryViewModel | null; refreshing: boolean; itemsUnavailable?: boolean; summaryUnavailable?: boolean }
-export type RecurringActionResult = 'success' | 'unknown' | 'demo' | 'mfa' | 'cancelled' | 'network' | 'invalid' | 'access' | 'category' | 'error'
+  | { status: 'loaded' | 'refresh-error'; rows: readonly RecurringRowViewModel[]; summary: RecurringSummaryViewModel | null; refreshing: boolean; itemsUnavailable?: boolean; summaryUnavailable?: boolean; agenda?: readonly RecurringAgendaGroup[]; agendaMonth?: string; agendaLoading?: boolean; agendaUnavailable?: boolean }
+export type RecurringActionResult = 'success' | 'unknown' | 'demo' | 'read-only' | 'account-read-only' | 'mfa' | 'cancelled' | 'network' | 'invalid' | 'access' | 'category' | 'error'
 export type RecurringScanResult = RecurringActionResult | { status: 'success'; counts: RecurringDetectionResult }
 type CategoryOption = Readonly<{ id: number; name: string }>
 type Props = Readonly<{
@@ -53,6 +55,7 @@ type Props = Readonly<{
   onDismiss?: (id: number) => Promise<RecurringActionResult>
   onRestore?: (id: number) => Promise<RecurringActionResult>
   onUpdate?: (id: number, metadata: RecurringMetadataInput) => Promise<RecurringActionResult>
+  onAgendaMonthChange?: (month: string) => void
 }>
 
 const CADENCE_PER_MONTH: Record<string, number> = { weekly: 52 / 12, biweekly: 26 / 12, monthly: 1, quarterly: 1 / 3, yearly: 1 / 12 }
@@ -64,10 +67,10 @@ const isCurrency = (value: string | null | undefined): value is string => typeof
  * title-row glyph, "Scan again" (the screen's only secondary action, so its
  * own glyph rather than a one-item menu); the estimated monthly total as the
  * headline figure with "Last checked" as its status line, subscriptions, bills
- * and the review count as rows; then Needs review, Upcoming, Category impact
- * and Payment history as open sections.
+ * and the review count as rows; then Needs review, Upcoming, Calendar, Category
+ * impact and Payment history as open sections.
  */
-export function RecurringScreen({ state, onRefresh, onAddAccount, categories = [], categoriesUnavailable = false, demoReadOnly = false, pending = null, scanNeedsRefresh = false, onScan, onConfirm, onDismiss, onRestore, onUpdate }: Props) {
+export function RecurringScreen({ state, onRefresh, onAddAccount, categories = [], categoriesUnavailable = false, demoReadOnly = false, pending = null, scanNeedsRefresh = false, onScan, onConfirm, onDismiss, onRestore, onUpdate, onAgendaMonthChange }: Props) {
   const { hidden } = usePrivacyMode()
   const { t, i18n } = useTranslation()
   const palette = usePalette()
@@ -237,6 +240,20 @@ export function RecurringScreen({ state, onRefresh, onAddAccount, categories = [
               <Text style={styles.sectionNote} tone="muted" variant="meta">{t('recurring.timelineDescription')}</Text>
               <Upcoming currencyOf={currencyOf} locale={locale} now={now} rows={includedRows} />
             </Section>
+
+            {state.agendaMonth ? (
+              <Section title={t('recurring.calendar')} variant="open">
+                <Text style={styles.sectionNote} tone="muted" variant="meta">{t('recurring.calendarDescription')}</Text>
+                <Agenda
+                  groups={state.agenda ?? []}
+                  loading={state.agendaLoading ?? false}
+                  locale={locale}
+                  month={state.agendaMonth}
+                  onMonthChange={onAgendaMonthChange}
+                  unavailable={state.agendaUnavailable ?? false}
+                />
+              </Section>
+            ) : null}
 
             <Section title={t('recurring.categoryImpact')} variant="open">
               <Text style={styles.sectionNote} tone="muted" variant="meta">{t('recurring.categoryImpactDescription')}</Text>
@@ -462,6 +479,54 @@ function Upcoming({ rows, currencyOf, locale, now }: { rows: readonly RecurringR
   )
 }
 
+/**
+ * Web's month calendar as a phone agenda: one month at a time, the bills grouped under the day
+ * they fall on, each with its paid, due, overdue or projected state.
+ */
+function Agenda({ month, groups, loading, unavailable, locale, onMonthChange }: { month: string; groups: readonly RecurringAgendaGroup[]; loading: boolean; unavailable: boolean; locale: string; onMonthChange?: (month: string) => void }) {
+  const { hidden } = usePrivacyMode()
+  const { t } = useTranslation()
+  const [year, monthIndex] = [Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1]
+  const label = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(year, monthIndex, 1))
+  return (
+    <View>
+      <View style={styles.monthNav}>
+        <IconButton accessibilityLabel={t('recurring.calendarPreviousMonth')} icon="chevron-left" onPress={() => onMonthChange?.(shiftMonth(month, -1))} />
+        <Text variant="metaStrong">{label}</Text>
+        <IconButton accessibilityLabel={t('recurring.calendarNextMonth')} icon="chevron-right" onPress={() => onMonthChange?.(shiftMonth(month, 1))} />
+      </View>
+      {loading ? (
+        <Text style={styles.emptyLine} tone="muted" variant="meta">{t('recurring.calendarLoading')}</Text>
+      ) : unavailable ? (
+        <Text style={styles.emptyLine} tone="muted" variant="meta">{t('recurring.calendarUnavailable')}</Text>
+      ) : groups.length === 0 ? (
+        <Text style={styles.emptyLine} tone="muted" variant="meta">{t('recurring.calendarEmpty')}</Text>
+      ) : groups.map((group) => (
+        <View key={group.day} style={styles.agendaGroup}>
+          <Text tone="muted" variant="label">{formatTransactionDate(`${group.day}T00:00:00.000Z`, locale, { day: 'numeric', month: 'short', weekday: 'short' })}</Text>
+          {group.entries.map((entry) => (
+            <View key={`${entry.seriesKey}-${entry.date}`} style={styles.agendaRow}>
+              <View style={styles.inline}>
+                <Text numberOfLines={1} style={styles.shrink} variant="metaStrong">{entry.name}</Text>
+                <OccurrenceBadge status={entry.status} />
+              </View>
+              <Text variant="amount">{entry.amount === null || !isCurrency(entry.currency) ? '—' : money(entry.amount, entry.currency, locale, hidden)}</Text>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  )
+}
+
+/** Web's occurrence badge: paid is neutral, due amber, overdue red, projected quiet. */
+function OccurrenceBadge({ status }: { status: RecurringAgendaEntry['status'] }) {
+  const { t } = useTranslation()
+  if (status === 'unknown') return null
+  const tone: BadgeTone = status === 'overdue' ? 'destructive' : status === 'due' ? 'warning' : status === 'paid' ? 'secondary' : 'muted'
+  return <Badge label={t(`recurring.occurrenceStatus.${status}`)} tone={tone} />
+}
+
 /** Web's `RecurringCategoryImpact`: each category's monthly-normalised range and its share of the total. */
 function CategoryImpact({ rows, currencyOf, locale }: { rows: readonly RecurringRowViewModel[]; currencyOf: (row: RecurringRowViewModel) => string | null; locale: string }) {
   const { hidden } = usePrivacyMode()
@@ -677,6 +742,9 @@ const styles = StyleSheet.create({
   fact: { flex: 1, gap: 2 },
   emptyLine: { paddingVertical: themeTokens.spacing[4] },
   timelineRow: { flexDirection: 'row', gap: themeTokens.spacing[4] },
+  monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[2] },
+  agendaGroup: { gap: themeTokens.spacing[2], marginTop: themeTokens.spacing[4] },
+  agendaRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: themeTokens.spacing[3] },
   rail: { alignItems: 'center', paddingTop: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   railLine: { width: 1, flex: 1, minHeight: 32, marginTop: themeTokens.spacing[2] },

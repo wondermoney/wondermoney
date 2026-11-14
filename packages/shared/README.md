@@ -12,6 +12,11 @@ A private workspace package: the API depends on it as `workspace:*`. Build it wi
 - **Transaction helpers**: `generateInternalTransactionId` (a stable id used to de-duplicate
   imported bank transactions), `generateInternalFinancialTransactionId`,
   `normalizePortfolioTransactionQuantity` and `extractDataFromTransactionDescription`.
+- **Locale rule presets** (`RULE_PRESETS`, `getRulePreset`, `matchRulePreset`,
+  `findRulePresetViolations`): reviewed `wondermoney-rules` files in `lib/rule-presets/` that
+  recognise well-known national merchants. A preset only sets categories, merchants and
+  descriptions on money out; `tests/rule-presets.test.ts` checks every file, and
+  `apps/docs/scripts/rule-presets.mjs` writes their contents into the Rules docs page.
 - **EODHD client** (`Eodhd`, `EodhdError`, `EodhdTypes`): market data — ticker search, quotes,
   historical prices, dividends, splits, fundamentals and news.
 

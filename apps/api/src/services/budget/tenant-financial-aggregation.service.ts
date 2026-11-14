@@ -1,5 +1,7 @@
 import Big from 'big.js';
 
+import { savingsRatePercent } from '@utils/savings-rate';
+
 import {
   classifyBudgetThreshold,
   classifyTransactions,
@@ -8,7 +10,7 @@ import {
   money,
 } from './aggregation-classifier';
 import { getLisbonBudgetPeriod, getLisbonWeeklyPeriod } from './aggregation-periods';
-import type { LisbonBudgetPeriod } from './aggregation-periods';
+import type { InstantRange, LisbonBudgetPeriod } from './aggregation-periods';
 import type {
   AggregationSuppressedResult,
   BudgetAggregationResult,
@@ -36,12 +38,10 @@ export class TenantFinancialAggregationService {
       return { appuserKey: input.appuserKey, diagnostics, facts: [], period, reason: 'inactive_membership', status: 'suppressed', tenantKey: input.tenantKey };
     }
 
-    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, period.month, period.year);
+    // Each budget in the budget month today is in, measured over that month's days so far.
+    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, { day: localDay(period) });
     const allocations = partitionByEligibility(allocationRows, { appuserKey: input.appuserKey, tenantKey: input.tenantKey });
-    const transactionRows = await this.repository.loadTransactions(input.appuserKey, input.tenantKey, {
-      end: new Date(Math.min(period.monthRange.end.getTime(), period.scheduledFor.getTime())),
-      start: period.monthRange.start,
-    });
+    const transactionRows = await this.repository.loadTransactions(input.appuserKey, input.tenantKey, until(covering(allocations.rows.map((row) => row.period), period.monthRange), period.scheduledFor));
     const transactions = classifyTransactions(transactionRows, input.appuserKey, input.tenantKey, diagnostics);
     const facts = allocations.rows.flatMap((allocation) => {
       const spent = spendForAllocation(allocation, transactions, allocations.rows);
@@ -62,12 +62,12 @@ export class TenantFinancialAggregationService {
         categoryName: allocation.categoryName,
         claimThresholds: threshold.claimThresholds,
         currencyCode: allocation.currencyCode,
-        month: period.month,
+        month: allocation.month,
         parentCategoryName: allocation.parentCategoryName,
         remainingOrOverAmount: money(threshold.state === 'over' ? spent.minus(budgeted) : budgeted.minus(spent)),
         state: threshold.state,
         threshold: threshold.threshold,
-        year: period.year,
+        year: allocation.year,
       }];
     });
 
@@ -82,13 +82,13 @@ export class TenantFinancialAggregationService {
       return { appuserKey: input.appuserKey, diagnostics, facts: [], period, reason: 'inactive_membership', status: 'suppressed', tenantKey: input.tenantKey };
     }
 
-    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, period.month, period.year);
+    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, { day: localDay(period) });
     const allocations = partitionByEligibility(allocationRows, { appuserKey: input.appuserKey, tenantKey: input.tenantKey });
     if (allocations.rows.length === 0) {
       return { appuserKey: input.appuserKey, diagnostics, facts: [], period, reason: 'no_useful_sections', status: 'suppressed', tenantKey: input.tenantKey };
     }
 
-    const rows = await this.repository.loadTransactions(input.appuserKey, input.tenantKey, period.monthRange);
+    const rows = await this.repository.loadTransactions(input.appuserKey, input.tenantKey, covering(allocations.rows.map((row) => row.period), period.monthRange));
     const transactions = classifyTransactions(rows, input.appuserKey, input.tenantKey, diagnostics);
     let totalBudgeted = new Big(0);
     let totalSpent = new Big(0);
@@ -266,9 +266,10 @@ export class TenantFinancialAggregationService {
           Number(new Big(left.subjectAmount).minus(left.baselineAmount).abs()),
       );
 
-    const savingsRate = (income: Big, spending: Big) => (income.gt(0) ? income.minus(spending).div(income).times(100) : null);
-    const savingsRateSubject = savingsRate(subjectTotals.income, subjectTotals.spending);
-    const savingsRateBaseline = savingsRate(incomeBaseline, spendingBaseline);
+    // The same helper the cash-flow report uses, so the email and the dashboard
+    // state the same rate for the same month.
+    const savingsRateSubject = savingsRatePercent(subjectTotals.income, subjectTotals.spending);
+    const savingsRateBaseline = savingsRatePercent(incomeBaseline, spendingBaseline);
 
     const budgetPressure = await this.monthlyBudgetPressure(
       input.appuserKey,
@@ -286,8 +287,8 @@ export class TenantFinancialAggregationService {
         incomeBaseline: money(incomeBaseline),
         incomeSubject: money(subjectTotals.income),
         recurringChanges: [],
-        savingsRateBaseline: savingsRateBaseline?.toFixed(2) ?? null,
-        savingsRateSubject: savingsRateSubject?.toFixed(2) ?? null,
+        savingsRateBaseline,
+        savingsRateSubject,
         spendingBaseline: money(spendingBaseline),
         spendingSubject: money(subjectTotals.spending),
       },
@@ -318,24 +319,21 @@ export class TenantFinancialAggregationService {
       return { appuserKey: input.appuserKey, diagnostics, facts: [], period, reason: 'inactive_membership', status: 'suppressed', tenantKey: input.tenantKey };
     }
 
-    const transactionRange = {
-      end: new Date(Math.min(Math.max(period.subjectWeek.end.getTime(), period.monthRange.end.getTime()), period.scheduledFor.getTime())),
-      start: new Date(Math.min(period.comparisonWeek.start.getTime(), period.monthRange.start.getTime())),
-    };
+    // The active budget badge reads each budget's current budget month, over that month's days.
+    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, { day: localDay(getLisbonBudgetPeriod(input.scheduledFor)) });
+    const allocations = partitionByEligibility(allocationRows, { appuserKey: input.appuserKey, tenantKey: input.tenantKey });
+    const transactionRange = until(covering([...allocations.rows.map((row) => row.period), period.comparisonWeek, period.subjectWeek], period.monthRange), period.scheduledFor);
     const rows = await this.repository.loadTransactions(input.appuserKey, input.tenantKey, transactionRange);
     const transactions = classifyTransactions(rows, input.appuserKey, input.tenantKey, diagnostics);
     const subject = transactions.filter((transaction) => inRange(transaction.transactionDate, period.subjectWeek));
     const comparison = transactions.filter((transaction) => inRange(transaction.transactionDate, period.comparisonWeek));
-    const monthTransactions = transactions.filter((transaction) => inRange(transaction.transactionDate, period.monthRange));
-    const allocationRows = await this.repository.loadBudgetAllocations(input.appuserKey, period.month, period.year);
-    const allocations = partitionByEligibility(allocationRows, { appuserKey: input.appuserKey, tenantKey: input.tenantKey });
 
     const subjectSignedTotal = subject.reduce((sum, transaction) => sum.plus(transaction.amount), new Big(0));
     const subjectTotal = floorMoney(subjectSignedTotal);
     const comparisonSignedTotal = comparison.reduce((sum, transaction) => sum.plus(transaction.amount), new Big(0));
     const comparisonTotal = floorMoney(comparison.reduce((sum, transaction) => sum.plus(transaction.amount), new Big(0)));
     const topCategory = subject.length ? topCategoryFor(subject) : { amount: '0', categoryKey: 0, displayName: '' };
-    const activeStatus = activeBudgetStatus(allocations.rows, monthTransactions);
+    const activeStatus = activeBudgetStatus(allocations.rows, transactions);
     const comparisonAvailable = comparison.length > 0 && comparisonTotal.gt(0);
     const weeklyComponents = { activeBudgetStatus: activeStatus, categoryTotals: signedCategoryTotalsFor(subject), comparisonSignedTotal: comparisonAvailable ? money(comparisonSignedTotal) : null, hasSubjectTransactions: subject.length > 0, subjectSignedTotal: money(subjectSignedTotal) };
     if (subject.length === 0) return { appuserKey: input.appuserKey, diagnostics, facts: [], period, reason: 'no_uniquely_categorized_transactions', status: 'suppressed', tenantKey: input.tenantKey, weeklyComponents };
@@ -372,7 +370,8 @@ export class TenantFinancialAggregationService {
     month: number,
     year: number,
   ): Promise<'near' | 'over' | 'within_plan' | null> {
-    const allocations = await this.repository.loadBudgetAllocations(appuserKey, month, year);
+    // The budget month named like the month the story narrates, over the days its start day gives it.
+    const allocations = await this.repository.loadBudgetAllocations(appuserKey, { month, year });
     const validAllocations = allocations.filter(
       (allocation) =>
         allocation.accountKey != null &&
@@ -383,8 +382,7 @@ export class TenantFinancialAggregationService {
         new Big(allocation.amountBudgeted).gt(0),
     );
     if (validAllocations.length === 0) return null;
-    const monthRange = getLisbonBudgetPeriod(`${year}-${String(month).padStart(2, '0')}-15T12:00:00Z`).monthRange;
-    const rows = await this.repository.loadTransactions(appuserKey, tenantKey, monthRange);
+    const rows = await this.repository.loadTransactions(appuserKey, tenantKey, covering(validAllocations.map((allocation) => allocation.period)));
     const diagnostics = createDiagnostics();
     const transactions = classifyTransactions(rows, appuserKey, tenantKey, diagnostics);
     const thresholds = validAllocations.map((allocation) =>
@@ -423,8 +421,22 @@ function categoryTotalsFor(transactions: ReturnType<typeof classifyTransactions>
   return sorted.map((value) => ({ amount: money(value.amount), categoryKey: value.categoryKey, displayName: value.displayName }));
 }
 
+/** The smallest range holding every one of `ranges`. */
+function covering(ranges: readonly InstantRange[], ...more: InstantRange[]): InstantRange {
+  const all = [...ranges, ...more];
+  return {
+    end: new Date(Math.max(...all.map((range) => range.end.getTime()))),
+    start: new Date(Math.min(...all.map((range) => range.start.getTime()))),
+  };
+}
+
 function inRange(date: Date, range: { end: Date; start: Date }): boolean {
   return date >= range.start && date < range.end;
+}
+
+/** UTC midnight of the period's Lisbon calendar day: the day budget months are looked up by. */
+function localDay(period: LisbonBudgetPeriod): Date {
+  return new Date(`${period.localDate}T00:00:00.000Z`);
 }
 
 function signedCategoryTotalsFor(transactions: ReturnType<typeof classifyTransactions>) {
@@ -444,3 +456,7 @@ function uniqueFacts<T extends { budgetTemplateCategoryKey: number }>(facts: T[]
   return [...new Map(facts.map((fact) => [fact.budgetTemplateCategoryKey, fact])).values()];
 }
 
+/** `range`, ending no later than `end`. */
+function until(range: InstantRange, end: Date): InstantRange {
+  return { end: new Date(Math.min(range.end.getTime(), end.getTime())), start: range.start };
+}

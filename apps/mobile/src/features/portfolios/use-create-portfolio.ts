@@ -8,7 +8,7 @@ import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
 import { createPortfolioWriteEndpoint, portfolioCreateWriteSchema, type PortfolioCreateWrite } from './portfolios-contract'
 import { aggregatePortfolioDashboardPrefix, portfolioCreateUnknownKey, portfoliosKey } from './query-keys'
 
-export type PortfolioCreateFailure = 'validation' | 'demo' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'request' | 'general'
+export type PortfolioCreateFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'request' | 'general'
 export type PortfolioCreateUnknown = Readonly<{ payload: Readonly<PortfolioCreateWrite> }>
 
 const activeCreates = new WeakMap<object, Set<number>>()
@@ -21,6 +21,7 @@ const locksFor = (client: object) => {
 export function classifyPortfolioCreateFailure(error: unknown): PortfolioCreateFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

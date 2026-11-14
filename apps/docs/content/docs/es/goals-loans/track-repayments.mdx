@@ -9,8 +9,8 @@ Esto mantiene el saldo restante alineado con los pagos registrados.
 
 <DocsImage
   src="/images/docs/es/goals-loans/track-repayments-detail.png"
-  alt="Loan detail page with outstanding principal, regular payment, annual rate, and a repayments table."
-  caption="The loan detail shows the outstanding balance, repayment terms, and the repayments table."
+  alt="Página de detalles del préstamo con capital pendiente, cuota periódica, tasa anual y tabla de reembolsos."
+  caption="Los detalles del préstamo muestran el saldo pendiente, las condiciones de pago y la tabla de reembolsos."
   width={1440}
   height={900}
 />
@@ -37,6 +37,22 @@ Registra el reembolso en la fecha en que se efectuó realmente si quieres que el
 
 Si un pago fue reembolsado o revertido, anótalo antes de añadir una nueva entrada de reembolso.
 
+## Corregir el saldo
+
+Cuando el extracto de tu prestamista muestre otro saldo, registra su cifra. En la página del préstamo, elige **Ajustar saldo**, deja **Corregir saldo** e introduce el saldo y la fecha del extracto. Se permite cero, para un préstamo que el prestamista da por pagado.
+
+- Una corrección sustituye el saldo registrado desde su fecha; no es un pago adicional. Los reembolsos anteriores a esa fecha ya están en la cifra del prestamista, y los posteriores reducen el saldo corregido.
+- Una corrección con fecha futura no cambia el saldo de hoy. Entra en vigor en su fecha.
+- Los demás tipos cambian el saldo en un importe: una comisión o unos intereses capitalizados lo aumentan, y una reducción de capital o una condonación lo reducen.
+
+Cada ajuste aparece en **Ajustes de saldo**, donde puedes editarlo o eliminarlo. El saldo, el calendario y la proyección de pago se actualizan.
+
+## Registrar cambios de tasa
+
+Para un préstamo de tipo variable, elige el tipo de interés **Variable** al añadir o editar el préstamo e introduce el tipo con el que empezó. Después, en la página del préstamo, añade cada cambio en **Historial de tasas** con la fecha en que entra en vigor.
+
+- Los intereses de cada mes usan la tasa vigente al empezar ese mes. Cuando una nueva tasa está vigente en una fecha de pago, la cuota se recalcula para que el préstamo termine en la misma fecha de vencimiento.
+- WonderMoney no obtiene índices como el Euríbor ni predice cambios. Añade cada cambio cuando tu prestamista lo anuncie.
 
 ## Páginas relacionadas
 

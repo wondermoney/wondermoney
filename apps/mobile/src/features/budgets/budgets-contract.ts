@@ -12,6 +12,19 @@ const yearSchema = z.number().int().min(MIN_BUDGET_YEAR).max(MAX_BUDGET_YEAR)
 const monthSchema = z.number().int().min(1).max(12)
 const emptyWriteResponseSchema = z.undefined()
 
+/**
+ * Who sees a budget: everyone in the household, or only the member who created it (not even the
+ * household's owner or admins). Chosen at creation only; the budget PATCH does not take it.
+ */
+export const BUDGET_VISIBILITIES = ['household', 'personal'] as const
+export type BudgetVisibility = (typeof BUDGET_VISIBILITIES)[number]
+export const budgetVisibilitySchema = z.enum(BUDGET_VISIBILITIES)
+
+// Read side: a server without personal budgets leaves the field out, and every budget it has is a
+// household one. A kind this build doesn't know reads as household too, so the stricter account
+// rule applies to it, instead of failing the whole response.
+const budgetVisibilityResponseSchema = tolerantEnum(BUDGET_VISIBILITIES, 'household').default('household')
+
 export const budgetCreateIncomeSchema = z.discriminatedUnion('isRecurrent', [
   z.object({
     amount: z.number().finite().nonnegative().max(999999999),
@@ -30,6 +43,7 @@ export const budgetCreateWriteSchema = z.object({
   dependentsNum: z.number().int().min(0).max(9),
   houseHoldSize: z.number().int().min(1).max(10),
   incomes: z.array(budgetCreateIncomeSchema),
+  visibility: budgetVisibilitySchema.optional(),
 }).strict().refine((value) => value.dependentsNum < value.houseHoldSize, { path: ['dependentsNum'] })
 
 export const budgetCreateResponseSchema = z.object({
@@ -44,6 +58,7 @@ const budgetInventoryItemSchema = z.object({
   budgetTemplates: z.array(z.object({ budgetTemplateCategoryKey: positiveSafeIdSchema })),
   description: z.string().nullable().optional(),
   name: z.string(),
+  visibility: budgetVisibilityResponseSchema,
 })
 
 export const budgetInventoryResponseSchema = z.object({ budgets: z.array(budgetInventoryItemSchema) })
@@ -56,13 +71,25 @@ export const budgetAddCategoryWriteSchema = z.object({
 }).strict()
 export type BudgetAddCategoryWrite = z.input<typeof budgetAddCategoryWriteSchema>
 
-// `name` (with `description`, which is replaced along with it) and `rolloverCarriesOverspend` can
-// each be sent alone; the API needs at least one of them.
+/** The day of the month a budget month starts on: 1 (the calendar month) to 28, a day every month has. */
+export const budgetPeriodStartDaySchema = z.number().int().min(1).max(28)
+
+/** The days a budget month covers (`YYYY-MM-DD`, both inclusive), which its start day decides. */
+export const budgetPeriodSchema = z.object({
+  firstDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+  lastDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+})
+
+export type BudgetPeriodDto = z.infer<typeof budgetPeriodSchema>
+
+// `name` (with `description`, which is replaced along with it), `periodStartDay` and
+// `rolloverCarriesOverspend` can each be sent alone; the API needs at least one of them.
 export const budgetMetadataWriteSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
+  periodStartDay: budgetPeriodStartDaySchema.optional(),
   rolloverCarriesOverspend: z.boolean().optional(),
-}).strict().refine((value) => value.name !== undefined || value.rolloverCarriesOverspend !== undefined, { path: ['name'] })
+}).strict().refine((value) => value.name !== undefined || value.periodStartDay !== undefined || value.rolloverCarriesOverspend !== undefined, { path: ['name'] })
 
 export type BudgetMetadataWrite = z.input<typeof budgetMetadataWriteSchema>
 
@@ -76,12 +103,34 @@ export const budgetCategoryWriteSchema = z.object({
 
 export type BudgetCategoryWrite = z.input<typeof budgetCategoryWriteSchema>
 
+export const budgetSuggestionSchema = z.object({
+  average: moneySchema,
+  categoryKey: positiveSafeIdSchema,
+  categoryName: z.string(),
+  hasEnoughData: z.boolean(),
+  median: moneySchema,
+  monthsWithData: z.number().int().nonnegative(),
+  suggested: moneySchema.nullable(),
+})
+
+export const budgetSuggestionsResponseSchema = z.object({
+  categories: z.array(budgetSuggestionSchema),
+  currencyCode: currencyCodeSchema,
+  months: z.number().int().positive(),
+  targetMonth: z.object({ month: monthSchema, year: yearSchema }),
+})
+
+export type BudgetSuggestionDto = z.infer<typeof budgetSuggestionSchema>
+
 const budgetDetailSchema = z.object({
   budgetKey: positiveSafeIdSchema,
   description: z.string().max(500).nullable().optional(),
   name: z.string().min(1).max(100),
+  /** Absent from servers without month start days: the setting is then not offered. */
+  periodStartDay: budgetPeriodStartDaySchema.optional(),
   /** Absent from servers without rollover: the setting is then not offered. */
   rolloverCarriesOverspend: z.boolean().optional(),
+  visibility: budgetVisibilityResponseSchema,
 })
 
 export const budgetDetailResponseSchema = z.object({
@@ -167,10 +216,15 @@ export const budgetSchema = z.object({
   incomes: z.array(budgetIncomeSchema),
   month: monthSchema,
   name: z.string(),
+  /** The days `month` covers; absent from servers without month start days. */
+  period: budgetPeriodSchema.optional(),
+  /** The API's default, and what a server without the setting means, is 1: the calendar month. */
+  periodStartDay: budgetPeriodStartDaySchema.default(1),
   /** Off: only unspent money rolls over, an overspend is dropped. The API's default is on. */
   rolloverCarriesOverspend: z.boolean().default(true),
   /** `/v1/budget/full` only; the month endpoint reports it at the top level. */
   rolloverComplete: z.boolean().optional(),
+  visibility: budgetVisibilityResponseSchema,
   year: yearSchema,
 })
 
@@ -196,6 +250,7 @@ export const budgetYearSchema = z.object({
   description: z.string().nullable().optional(),
   incomes: z.array(budgetIncomeSchema),
   name: z.string(),
+  visibility: budgetVisibilityResponseSchema,
   year: yearSchema,
 })
 
@@ -213,6 +268,21 @@ export const budgetsEndpoint = readEndpoint({
   path: '/v1/budget/full',
   schema: budgetsResponseSchema,
 })
+
+/**
+ * The budgets list with the member filter (`memberKeys`: a member's key or `shared`): each budget
+ * counts only that member's part of its spending. It never changes which budgets are listed, so a
+ * personal budget stays its owner's whoever they filter by (the API's rule, #89). Without a member,
+ * the plain list.
+ */
+export function createBudgetsEndpoint(member?: string) {
+  if (member === undefined) return budgetsEndpoint
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/budget/full?${new URLSearchParams({ memberKeys: member }).toString()}`,
+    schema: budgetsResponseSchema,
+  })
+}
 
 export const budgetInventoryEndpoint = readEndpoint({
   method: 'GET',
@@ -278,6 +348,17 @@ export function createBudgetMonthEndpoint(budgetId: number, year: number, month:
     method: 'GET',
     path: `/v1/budget/${budgetId}/${year}/${month}`,
     schema: budgetMonthResponseSchema,
+  })
+}
+
+export function createBudgetSuggestionsEndpoint(budgetId: number, year: number, month: number, months: 3 | 6 | 12 = 3) {
+  if (!isValidBudgetId(budgetId) || !isValidBudgetPeriod(year, month)) {
+    throw new Error('A positive safe budget id and valid budget period are required.')
+  }
+  return readEndpoint({
+    method: 'GET',
+    path: `/v1/budget/${budgetId}/suggestions?year=${year}&month=${month}&months=${months}`,
+    schema: budgetSuggestionsResponseSchema,
   })
 }
 

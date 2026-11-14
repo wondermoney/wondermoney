@@ -1,7 +1,8 @@
 import { QueryOrder } from '@mikro-orm/core';
 
 import { Appuser } from '../entity/Appuser';
-import { EnableBankingConnection, EnableBankingConnectionStatus } from '../entity/EnableBankingConnection';
+import { BankConnection, BankConnectionStatus } from '../entity/BankConnection';
+import { EnableBankingConnection, EnableBankingConnectionStatus, INSTANCE_CREDENTIAL_REFERENCE } from '../entity/EnableBankingConnection';
 import { EnableBankingCredential } from '../entity/EnableBankingCredential';
 import { Tenant } from '../entity/Tenant';
 
@@ -17,6 +18,8 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
 
   public changeToError = async (connection: EnableBankingConnection) => {
     connection.status = EnableBankingConnectionStatus.ERROR;
+    const bankConnection = await this.bankConnectionOf(connection);
+    if (bankConnection) bankConnection.status = BankConnectionStatus.ERROR;
     await this.persist(connection).flush();
     return connection;
   };
@@ -37,6 +40,13 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
     connection.accessValidUntil = accessValidUntil;
     connection.maxConsentValiditySeconds = maxConsentValiditySeconds;
     connection.status = EnableBankingConnectionStatus.LINKED;
+    const bankConnection = await this.bankConnectionOf(connection);
+    if (bankConnection) {
+      bankConnection.externalId = sessionId;
+      bankConnection.accessValidUntil = accessValidUntil;
+      bankConnection.maxConsentValiditySeconds = maxConsentValiditySeconds;
+      bankConnection.status = BankConnectionStatus.LINKED;
+    }
     await this.persist(connection).flush();
     return connection;
   };
@@ -46,12 +56,13 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
    * connection: the tenant is sourced from the active tenant context
    * (`req.tenant`), never from a membership lookup, so household
    * account-sharing keeps working even though the *credential* itself is
-   * personal (BYOK, one Enable Banking application per user).
+   * personal (BYOK, one Enable Banking application per user). `credential` is null for a link
+   * made with the instance-wide credential.
    */
   public createConnection = async (
     appuser: Appuser,
     tenant: Tenant,
-    credential: EnableBankingCredential,
+    credential: EnableBankingCredential | null,
     state: EnableBankingConnection['state'],
     aspspName: EnableBankingConnection['aspspName'],
     aspspCountry: EnableBankingConnection['aspspCountry'],
@@ -71,6 +82,20 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
     connection.maxConsentValiditySeconds = maxConsentValiditySeconds;
     connection.returnTo = returnTo;
     connection.status = EnableBankingConnectionStatus.CREATED;
+
+    // The provider-agnostic row the sync path reads. Created alongside the Enable Banking row
+    // so a new connection never depends on the start-up backfill.
+    const bankConnection = new BankConnection();
+    bankConnection.provider = 'enable_banking';
+    bankConnection.appuserKey = appuser;
+    bankConnection.tenantKey = tenant;
+    bankConnection.credentialReference = credential ? String(credential.enableBankingCredentialKey) : INSTANCE_CREDENTIAL_REFERENCE;
+    bankConnection.state = state;
+    bankConnection.maxConsentValiditySeconds = maxConsentValiditySeconds;
+    bankConnection.status = BankConnectionStatus.CREATED;
+    await this.persist(bankConnection).flush();
+    connection.bankConnectionKey = bankConnection;
+
     await this.persist(connection).flush();
     return connection;
   };
@@ -85,7 +110,7 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
   public findByState = (state: EnableBankingConnection['state']) => {
     return this.findOne(
       { deletedAt: undefined, state },
-      { populate: ['appuserKey', 'enableBankingCredentialKey', 'tenantKey'] },
+      { populate: ['appuserKey', 'bankConnectionKey', 'enableBankingCredentialKey', 'tenantKey'] },
     );
   };
 
@@ -102,5 +127,12 @@ export class EnableBankingConnectionRepository extends ExtendedEntityRepository<
       { appuserKey: appuser, deletedAt: undefined, status: EnableBankingConnectionStatus.LINKED, tenantKey: tenant },
       { orderBy: { createdAt: QueryOrder.DESC } },
     );
+  };
+
+  /** The generic row backing this Enable Banking connection, or null before the backfill ran. */
+  private bankConnectionOf = async (connection: EnableBankingConnection): Promise<BankConnection | null> => {
+    const key = (connection.bankConnectionKey as unknown as undefined | { bankConnectionKey?: number })?.bankConnectionKey;
+    if (!key) return null;
+    return this.em.findOne(BankConnection, { bankConnectionKey: key });
   };
 }

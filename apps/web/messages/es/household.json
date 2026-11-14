@@ -1,63 +1,134 @@
 {
   "household": {
     "title": "Hogar",
-    "description": "Comparte cuentas, presupuestos y objetivos con tu pareja.",
+    "description": "Comparte cuentas, presupuestos y objetivos con las personas con las que vives.",
+    "roles": {
+      "owner": "Titular",
+      "admin": "Administrador",
+      "member": "Miembro",
+      "viewer": "Observador"
+    },
+    "roleDescriptions": {
+      "owner": "Gestiona a todas las personas del hogar y puede pasar la titularidad a otra persona.",
+      "admin": "Invita y gestiona a miembros y observadores, y cambia las finanzas compartidas.",
+      "member": "Ve y cambia las cuentas, presupuestos y objetivos compartidos.",
+      "viewer": "Ve las finanzas compartidas, pero no puede cambiar nada."
+    },
     "members": {
       "heading": "Miembros",
       "you": "Tú",
-      "roleOwner": "Titular",
-      "roleMember": "Pareja"
+      "seats": "{used} de {max} plazas ocupadas, invitaciones pendientes incluidas",
+      "actionsLabel": "Acciones para {name}",
+      "changeRole": "Cambiar rol",
+      "makeOwner": "Hacer titular",
+      "remove": "Quitar del hogar"
     },
     "invite": {
-      "heading": "Invita a tu pareja",
-      "description": "Tendrá su propio acceso y verá las finanzas compartidas. Las cuentas que marques como privadas siguen siendo privadas.",
-      "emailLabel": "Email de tu pareja",
-      "emailPlaceholder": "pareja@ejemplo.com",
+      "heading": "Invitar a alguien",
+      "description": "Tendrá su propio acceso y verá las finanzas compartidas. Las cuentas que marques como privadas siguen siendo privadas. Quien ya tiene cuenta acepta desde el enlace de la invitación.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nombre@ejemplo.com",
       "invalidEmail": "Introduce un email válido",
-      "submit": "Enviar invitación"
+      "roleLabel": "Rol",
+      "submit": "Enviar invitación",
+      "full": "Tu hogar tiene sitio para {max} personas, invitaciones pendientes incluidas. Anula una invitación o quita a alguien para invitar a otra persona."
     },
     "pending": {
-      "heading": "Invitación pendiente",
+      "heading": "Invitaciones pendientes",
       "sentTo": "Invitación enviada a {email}",
       "expires": "Caduca el {date}",
       "resend": "Reenviar",
       "revoke": "Anular"
     },
     "actions": {
-      "remove": "Quitar pareja",
       "leave": "Salir del hogar"
     },
     "removeDialog": {
       "title": "¿Quitar a {name}?",
-      "description": "Perderá el acceso a este hogar de inmediato. Los datos compartidos se quedan contigo y sus conexiones bancarias vinculadas se desconectan.",
-      "confirm": "Quitar pareja"
+      "description": "Perderá el acceso a este hogar de inmediato y se cerrará su sesión en todos sus dispositivos. Las cuentas y transacciones que añadió se quedan en el hogar, y sus conexiones bancarias vinculadas se desconectan.",
+      "confirm": "Quitar"
     },
     "leaveDialog": {
       "title": "¿Salir de este hogar?",
       "description": "Perderás el acceso a las cuentas, presupuestos y objetivos compartidos, y tus conexiones bancarias se desconectan. Esta acción no se puede deshacer.",
       "confirm": "Salir del hogar"
     },
+    "roleDialog": {
+      "title": "Cambiar el rol de {name}",
+      "description": "El nuevo rol se aplica la próxima vez que abra la aplicación.",
+      "save": "Guardar rol"
+    },
+    "transferDialog": {
+      "title": "¿Hacer titular a {name}?",
+      "description": "{name} pasa a ser titular: gestiona a todas las personas del hogar, tú incluido, y solo esa persona puede volver a pasar la titularidad. Tú pasas a ser administrador.",
+      "confirm": "Hacer titular a {name}"
+    },
     "cancel": "Cancelar",
+    "errors": {
+      "already_household_member": "Esa persona ya forma parte de este hogar.",
+      "demo_read_only": "La cuenta de demostración es de solo lectura.",
+      "household_full": "Este hogar está completo. Anula una invitación o quita a alguien primero.",
+      "household_has_data": "Tu hogar actual ya tiene cuentas o transacciones, así que todavía no puede unirse a otro. Elimínalas primero o acepta con otra cuenta.",
+      "household_has_members": "Compartes tu hogar actual con otras personas. Pasa la titularidad a una de ellas, o quítalas, antes de unirte a otro hogar.",
+      "household_owner_required": "Solo el titular puede hacer eso.",
+      "household_role_required": "Tu rol no lo permite. Pídeselo al titular o a un administrador.",
+      "invite_already_used": "Esta invitación ya se ha usado.",
+      "invite_email_mismatch": "Esta invitación es para un email distinto del de la cuenta con la que has iniciado sesión.",
+      "invite_expired": "Esta invitación ha caducado. Pide una nueva.",
+      "invite_invalid": "Este enlace de invitación no es válido. Pide uno nuevo."
+    },
+    "readOnly": {
+      "title": "Acceso de solo lectura",
+      "description": "Puedes ver las finanzas de este hogar, pero no cambiarlas. Pide otro rol al titular o a un administrador."
+    },
     "join": {
       "greetingNamed": "{name} te invitó a su hogar en {instanceName}",
       "greetingGeneric": "Te han invitado a un hogar en {instanceName}",
       "subtitle": "Crea tu cuenta para compartir cuentas, presupuestos y objetivos.",
       "emailLockedHint": "Esta invitación es para {email}",
+      "signInToAccept": "¿Ya tienes cuenta? <link>Inicia sesión para aceptar</link>",
       "invalidTitle": "Este enlace de invitación no es válido",
-      "invalidBody": "Puede que ya se haya usado, anulado o caducado. Pídele a tu pareja que te envíe una invitación nueva.",
-      "loggedInTitle": "Ya has iniciado sesión",
-      "loggedInBody": "Las invitaciones de hogar solo se pueden aceptar con una cuenta nueva. Cierra sesión y crea una con el email invitado para unirte.",
-      "logoutAndJoin": "Cerrar sesión y crear cuenta",
-      "backToApp": "Ir a {instanceName}"
+      "invalidBody": "Puede que ya se haya usado, anulado o caducado. Pide a quien te invitó que te envíe una invitación nueva.",
+      "backToApp": "Ir a {instanceName}",
+      "confirmTitleNamed": "¿Unirte a {household}?",
+      "confirmTitleInviter": "¿Unirte al hogar de {name}?",
+      "confirmTitleGeneric": "¿Unirte a este hogar?",
+      "confirmRole": "Entrarás como {role}.",
+      "signedInAs": "Sesión iniciada como {email}",
+      "dataHeading": "Qué pasa con tu hogar actual",
+      "dataRequirement": "Solo puedes unirte si tu hogar actual no tiene cuentas ni transacciones.",
+      "dataStaysBehind": "Los presupuestos, categorías, reglas y objetivos que creaste allí se quedan atrás. No se mueven.",
+      "dataBanks": "Las conexiones bancarias de ese hogar se desconectan.",
+      "dataYours": "Tu perfil, acceso, preferencias y dispositivos siguen siendo tuyos.",
+      "accept": "Unirme al hogar",
+      "useDifferentAccount": "Cerrar sesión y usar otra cuenta",
+      "emailMismatchTitle": "Esta invitación es para otro email",
+      "emailMismatchBody": "Se envió a {invited}, pero has iniciado sesión como {current}. Cierra sesión y luego inicia sesión o crea una cuenta con {invited} para aceptarla.",
+      "errorTitle": "Todavía no puedes unirte"
     },
     "toast": {
       "inviteSent": "Invitación enviada",
       "inviteResent": "Invitación reenviada",
       "inviteRevoked": "Invitación anulada",
-      "memberRemoved": "Pareja eliminada",
+      "memberRemoved": "Se quitó a {name}",
+      "roleChanged": "El rol de {name} es ahora {role}",
+      "ownershipTransferred": "{name} es ahora titular",
       "left": "Has salido del hogar",
       "error": "Algo salió mal. Inténtalo de nuevo."
     },
-    "loadError": "No pudimos cargar tu hogar. Inténtalo de nuevo."
+    "loadError": "No pudimos cargar tu hogar. Inténtalo de nuevo.",
+    "attribution": {
+      "filterLabel": "Miembro",
+      "everyone": "Todos",
+      "shared": "Compartido",
+      "spentBy": "Gastado por",
+      "spentByDescription": "A quién se atribuye este gasto en los informes, los presupuestos y el filtro por miembro.",
+      "accountDefault": "Predeterminado de la cuenta ({name})",
+      "accountDefaultPlain": "Predeterminado de la cuenta",
+      "spentBySaved": "Gastado por actualizado",
+      "spentByError": "No se ha podido cambiar quién hizo este gasto",
+      "jointAccount": "Cuenta conjunta",
+      "jointAccountDescription": "Sus gastos cuentan como Compartido. Esto no cambia quién puede verla."
+    }
   }
 }

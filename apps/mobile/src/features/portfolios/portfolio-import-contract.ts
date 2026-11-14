@@ -17,23 +17,6 @@ const PORTFOLIO_IMPORT_SESSION_STATUSES = [
 // flow ends on the generic processing-failed screen instead of an invalid-response error.
 const importSessionStatusSchema = tolerantEnum(PORTFOLIO_IMPORT_SESSION_STATUSES, 'unknown')
 
-// Mirrors core/api's portfolioColumnMappingRequestSchema exactly (validators/portfolio.ts) so a
-// server-suggested mapping can be relayed straight back into the confirm call unmodified.
-const portfolioImportColumnMappingSchema = z.object({
-  assetName: z.string().min(1).optional(),
-  brokerExchange: z.string().min(1).optional(),
-  currency: z.string().min(1).optional(),
-  externalTransactionId: z.string().min(1).optional(),
-  feeAmount: z.string().min(1).optional(),
-  isin: z.string().min(1).optional(),
-  quantity: z.string().min(1).optional(),
-  ticker: z.string().min(1).optional(),
-  totalAmount: z.string().min(1).optional(),
-  transactionDate: z.string().min(1).optional(),
-  transactionType: z.string().min(1).optional(),
-  unitPrice: z.string().min(1).optional(),
-}).strict()
-
 export const portfolioImportSessionCreateResponseSchema = z.object({
   broker: z.object({ id: z.number().int().positive(), name: z.string() }).optional(),
   correlationId: z.string(),
@@ -69,15 +52,53 @@ export const createTriggerPortfolioImportParseEndpoint = (importSessionId: numbe
   method: 'POST' as const, path: importSessionPath(importSessionId, '/parse'), schema: parseTriggerResponseSchema, successStatuses: [202],
 })
 
+// The column-mapping step. The suggest route answers with a whole suggestion (the columns plus the
+// layout, transformations and fixed/derived values the server inferred), and confirming relays
+// all of it back. The confirm validator (validators/portfolio.ts
+// confirmPortfolioImportColumnMappingRequestSchema) is strict about keys, so the suggestion is
+// read key by key: a key this build does not know is dropped instead of being sent back to fail.
+// Values are relayed as the server suggested them and the server validates them.
+const relayedText = z.string().min(1).nullish().transform((value) => value ?? undefined)
+const relayedCount = z.number().int().nonnegative().nullish().transform((value) => value ?? undefined)
+const relayedFlag = z.boolean().nullish().transform((value) => value ?? undefined)
+
+const COLUMN_MAPPING_FIELDS = [
+  'assetName', 'brokerExchange', 'currency', 'externalTransactionId', 'feeAmount', 'isin',
+  'quantity', 'ticker', 'totalAmount', 'transactionDate', 'transactionType', 'unitPrice',
+] as const
+type ColumnMappingField = (typeof COLUMN_MAPPING_FIELDS)[number]
+
+function columnMappingShape<Schema extends z.ZodType>(field: Schema) {
+  return Object.fromEntries(COLUMN_MAPPING_FIELDS.map((key) => [key, field])) as Record<ColumnMappingField, Schema>
+}
+
+export const portfolioImportColumnMappingSuggestionSchema = z.object({
+  columnMapping: z.object(columnMappingShape(relayedText)),
+  derivedValues: z.object({ transactionType: relayedText }).nullish(),
+  fixedValues: z.object({ currency: relayedText, transactionType: relayedText }).nullish(),
+  layout: z.object({
+    dataStartRowIndex: relayedCount,
+    footerMatchers: z.array(z.string().min(1)).nullish().transform((value) => value ?? undefined),
+    footerRowCount: relayedCount,
+    headerRowIndex: relayedCount,
+  }).nullish(),
+  transformations: z.object({
+    dateFormat: relayedText,
+    decimalSeparator: relayedText,
+    negativeAmountMeansBuy: relayedFlag,
+    quantitySignIndicatesDirection: relayedFlag,
+    thousandsSeparator: relayedText,
+  }).nullish(),
+})
+export type PortfolioImportColumnMappingSuggestionDto = z.infer<typeof portfolioImportColumnMappingSuggestionSchema>
+
 const suggestColumnMappingResponseSchema = z.object({
   // Absent (not merely empty) when the server could not suggest a mapping at all
   // (see AUTOMATIC_COLUMN_MAPPING_UNAVAILABLE_WARNING) — JSON drops the undefined key entirely.
-  // Relayed back to the confirm call unmodified, so a column the API learns to map later must
-  // survive the round trip: passthrough, not strip.
-  columnMapping: portfolioImportColumnMappingSchema.passthrough().optional(),
+  columnMapping: portfolioImportColumnMappingSuggestionSchema.optional(),
   importSessionId: z.number().int().positive(),
-  mappingSource: z.string(),
-  status: z.string(),
+  mappingSource: z.string().optional(),
+  status: importSessionStatusSchema,
   warning: z.string().optional(),
 })
 
@@ -85,9 +106,39 @@ export const createSuggestPortfolioImportColumnMappingEndpoint = (importSessionI
   method: 'POST' as const, path: importSessionPath(importSessionId, '/column-mapping/suggest'), schema: suggestColumnMappingResponseSchema, successStatuses: [200],
 })
 
+const writtenText = z.string().min(1).optional()
+
+/** The confirm body, key for key the API's strict confirmPortfolioImportColumnMappingRequestSchema. */
 export const portfolioImportColumnMappingWriteSchema = z.object({
-  columnMapping: portfolioImportColumnMappingSchema,
+  columnMapping: z.object(columnMappingShape(writtenText)).strict(),
+  derivedValues: z.object({ transactionType: writtenText }).strict().optional(),
+  fixedValues: z.object({ currency: writtenText, transactionType: writtenText }).strict().optional(),
+  layout: z.object({
+    dataStartRowIndex: z.number().int().nonnegative().optional(),
+    footerMatchers: z.array(z.string().min(1)).optional(),
+    footerRowCount: z.number().int().nonnegative().optional(),
+    headerRowIndex: z.number().int().nonnegative().optional(),
+  }).strict().optional(),
+  transformations: z.object({
+    dateFormat: writtenText,
+    decimalSeparator: writtenText,
+    negativeAmountMeansBuy: z.boolean().optional(),
+    quantitySignIndicatesDirection: z.boolean().optional(),
+    thousandsSeparator: writtenText,
+  }).strict().optional(),
 }).strict()
+export type PortfolioImportColumnMappingWrite = z.infer<typeof portfolioImportColumnMappingWriteSchema>
+
+/** The confirm body that accepts a server suggestion as it stands. */
+export function columnMappingWriteFromSuggestion(suggestion: PortfolioImportColumnMappingSuggestionDto): PortfolioImportColumnMappingWrite {
+  return portfolioImportColumnMappingWriteSchema.parse({
+    columnMapping: suggestion.columnMapping,
+    ...(suggestion.derivedValues ? { derivedValues: suggestion.derivedValues } : {}),
+    ...(suggestion.fixedValues ? { fixedValues: suggestion.fixedValues } : {}),
+    ...(suggestion.layout ? { layout: suggestion.layout } : {}),
+    ...(suggestion.transformations ? { transformations: suggestion.transformations } : {}),
+  })
+}
 
 const confirmColumnMappingResponseSchema = z.object({
   importSessionId: z.number().int().positive(),
@@ -109,72 +160,102 @@ export const createConfirmPortfolioImportSessionEndpoint = (importSessionId: num
   method: 'POST' as const, path: importSessionPath(importSessionId, '/confirm'), schema: confirmImportResponseSchema, successStatuses: [202],
 })
 
+// Columns the server leaves empty arrive as `null` (MikroORM hydrates NULL as null), not absent,
+// so every optional value read from a stored row is nullish.
+const storedText = z.string().nullish()
+const storedId = z.number().int().positive().nullish()
+
 const importPreviewRowSchema = z.object({
-  assetGroupId: z.number().int().positive().optional(),
-  failureReason: z.string().optional(),
-  financialAssetId: z.number().int().positive().optional(),
+  assetGroupId: storedId,
+  failureReason: storedText,
+  financialAssetId: storedId,
   id: z.number().int().positive(),
-  internalTransactionId: z.string().optional(),
-  normalized: z.record(z.string(), z.unknown()).optional(),
+  internalTransactionId: storedText,
+  normalized: z.record(z.string(), z.unknown()).nullish(),
   raw: z.record(z.string(), z.unknown()),
   rowNumber: z.number().int().nonnegative(),
-  skipReason: z.string().optional(),
+  skipReason: storedText,
   status: tolerantEnum(['duplicate', 'failed', 'imported', 'invalid', 'needs_asset_review', 'ready', 'skipped', 'valid'], 'unknown'),
 })
 
-// Asset-matching review. Mirrors web's reconciliation UI: each ambiguous/unmatched raw
-// asset in the file is grouped once (assetGroupId ties back to importPreviewRowSchema rows above),
-// server-suggested candidates are ranked matches the user can accept with one tap, and any group
-// can otherwise be resolved by searching for a different ticker or skipped outright.
-const PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES = ['ambiguous', 'matched', 'provider_error', 'unmatched'] as const
+// Asset review, as the preview service builds it (portfolio-import-session-preview.service.ts):
+// one group per distinct broker identity in the file, with the provider listings found for it.
+// Rows point back at their group through importPreviewRowSchema.assetGroupId.
+const PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES = ['ambiguous', 'matched', 'provider_error', 'selected', 'skipped', 'unmatched'] as const
 
-const portfolioImportAssetGroupCandidateSchema = z.object({
-  confidence: z.number().min(0).max(1).nullable().optional(),
-  exchange: z.string().nullable().optional(),
-  financialAssetId: z.number().int().positive(),
-  name: z.string().nullable().optional(),
-  symbol: z.string().trim().min(1).max(20),
+const portfolioImportAssetCandidateSchema = z.object({
+  confidence: z.number().nullish(),
+  currency: storedText,
+  exchange: storedText,
+  id: z.number().int().positive(),
+  isin: storedText,
+  isRecommended: z.boolean().optional(),
+  name: storedText,
+  rejectedReason: storedText,
+  // A listing without a symbol cannot be chosen: the API refuses it ("Candidate symbol is required").
+  symbol: storedText,
 })
+export type PortfolioImportAssetCandidateDto = z.infer<typeof portfolioImportAssetCandidateSchema>
 
 export const portfolioImportAssetGroupSchema = z.object({
-  candidates: z.array(portfolioImportAssetGroupCandidateSchema),
+  // Absent, not empty, when the provider returned nothing for the group.
+  candidates: z.array(portfolioImportAssetCandidateSchema).nullish().transform((candidates) => candidates ?? []),
   id: z.number().int().positive(),
-  isin: z.string().nullable().optional(),
-  rawAssetName: z.string().nullable().optional(),
-  rawSymbol: z.string().nullable().optional(),
-  rowCount: z.number().int().nonnegative(),
-  // An unknown group status is anything but 'matched', so the group stays in the review list.
+  identity: z.object({
+    brokerAssetName: storedText,
+    brokerExchange: storedText,
+    brokerTicker: storedText,
+    currency: storedText,
+    isin: storedText,
+  }),
+  recommendedCandidateId: storedId,
+  selectedAction: storedText,
+  selectedFinancialAssetId: storedId,
+  // An unknown status reads as 'unknown', which the review treats as not needing a decision:
+  // the server, not this build, decides whether the session can be confirmed.
   status: tolerantEnum(PORTFOLIO_IMPORT_ASSET_GROUP_STATUSES, 'unknown'),
 })
 export type PortfolioImportAssetGroupDto = z.infer<typeof portfolioImportAssetGroupSchema>
 
-export const portfolioImportAssetGroupResolutionSchema = z.discriminatedUnion('type', [
-  z.object({ financialAssetId: z.number().int().positive(), type: z.literal('match') }).strict(),
-  z.object({ symbol: z.string().trim().min(1).max(20), type: z.literal('external_symbol') }).strict(),
-  z.object({ type: z.literal('skip') }).strict(),
-])
-export type PortfolioImportAssetGroupResolution = z.infer<typeof portfolioImportAssetGroupResolutionSchema>
+// The statuses the API counts as blocking (portfolio-import-session-state BLOCKING_GROUP_STATUSES):
+// each such group needs a decision before the session can be confirmed.
+const BLOCKING_ASSET_GROUP_STATUSES: ReadonlySet<string> = new Set(['ambiguous', 'provider_error', 'unmatched'])
+export const isBlockingAssetGroup = (group: Pick<PortfolioImportAssetGroupDto, 'status'>) => BLOCKING_ASSET_GROUP_STATUSES.has(group.status)
 
-export const portfolioImportAssetGroupMappingWriteSchema = z.object({
-  mappings: z.array(z.object({
-    assetGroupId: z.number().int().positive(),
-    resolution: portfolioImportAssetGroupResolutionSchema,
-  }).strict()).min(1),
+// Mirrors validators/portfolio.ts confirmPortfolioImportAssetMappingsRequestSchema.
+const tickerSymbolSchema = z.string().trim().min(1).max(20).regex(/^[A-Z0-9][\w.:\-/]{0,19}$/i)
+const positiveId = z.number().int().positive()
+
+export const portfolioImportAssetMappingDecisionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('use_candidate'), candidateId: positiveId, groupId: positiveId }).strict(),
+  z.object({ action: z.literal('use_external_symbol'), groupId: positiveId, symbol: tickerSymbolSchema }).strict(),
+  z.object({ action: z.literal('use_existing_asset'), financialAssetId: positiveId, groupId: positiveId }).strict(),
+  z.object({ action: z.literal('skip_group'), groupId: positiveId, skipReason: z.string().trim().min(1).max(255).optional() }).strict(),
+])
+export type PortfolioImportAssetMappingDecision = z.infer<typeof portfolioImportAssetMappingDecisionSchema>
+
+/** The API takes at most this many decisions per request. */
+export const PORTFOLIO_IMPORT_ASSET_MAPPING_BATCH_SIZE = 100
+
+export const portfolioImportAssetMappingsWriteSchema = z.object({
+  decisions: z.array(portfolioImportAssetMappingDecisionSchema).min(1).max(PORTFOLIO_IMPORT_ASSET_MAPPING_BATCH_SIZE)
+    // The API refuses a request that decides one group twice.
+    .refine((decisions) => new Set(decisions.map((decision) => decision.groupId)).size === decisions.length, 'Each asset group may be decided once per request.'),
 }).strict()
 
-const confirmAssetGroupMappingsResponseSchema = z.object({
+const confirmAssetMappingsResponseSchema = z.object({
   importSessionId: z.number().int().positive(),
   status: importSessionStatusSchema,
 })
 
-export const createConfirmPortfolioImportAssetGroupsEndpoint = (importSessionId: number) => writeEndpoint({
-  method: 'PATCH' as const, path: importSessionPath(importSessionId, '/asset-groups'), schema: confirmAssetGroupMappingsResponseSchema, successStatuses: [200],
+export const createConfirmPortfolioImportAssetMappingsEndpoint = (importSessionId: number) => writeEndpoint({
+  method: 'PATCH' as const, path: importSessionPath(importSessionId, '/asset-mappings'), schema: confirmAssetMappingsResponseSchema, successStatuses: [200],
 })
 
 export const portfolioImportPreviewResponseSchema = z.object({
   assetGroups: z.array(portfolioImportAssetGroupSchema),
-  broker: z.object({ id: z.number().int().positive(), name: z.string() }).optional(),
-  columnMapping: z.object({ confirmed: z.unknown().optional(), suggestion: z.unknown().optional(), warning: z.string().optional() }).optional(),
+  broker: z.object({ id: z.number().int().positive(), name: z.string() }).nullish(),
+  columnMapping: z.object({ confirmed: z.unknown().optional(), suggestion: z.unknown().optional(), warning: z.string().optional() }).nullish(),
   importSessionId: z.number().int().positive(),
   limits: z.object({ rowsPerBucket: z.number().int().positive() }),
   portfolioId: z.number().int().positive(),

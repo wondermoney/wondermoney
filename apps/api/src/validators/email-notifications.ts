@@ -6,6 +6,7 @@ export const patchEmailNotificationPreferencesSchema = z.object({
       accountRecoveryEnabled: z.boolean().optional(),
       bankSyncAlertsEnabled: z.boolean().optional(),
       budgetAlertsEnabled: z.boolean().optional(),
+      creditCardDueRemindersEnabled: z.boolean().optional(),
       growthEmailsEnabled: z.boolean().optional(),
       marketingOptOut: z.boolean().optional(),
       weeklyInsightsEnabled: z.boolean().optional(),

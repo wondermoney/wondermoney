@@ -1,30 +1,47 @@
 ---
 title: Qué es un hogar
-description: Entiende el modelo de hogar, los roles de titular y pareja, y cómo funcionan los datos compartidos.
+description: Entiende el modelo de hogar, los cuatro roles y cómo funcionan los datos compartidos.
 ---
 
 Un hogar es el modelo multiusuario de WonderMoney. Un hogar tiene una o más personas, cada una con su propio inicio de sesión. Los datos viven en el hogar, no en la cuenta de una sola persona.
 
-Un hogar es útil cuando dos personas quieren gestionar el dinero juntas: facturas compartidas, cuentas conjuntas o una vista común de las finanzas del hogar, sin mantener dos configuraciones separadas.
+Un hogar es útil cuando varias personas quieren gestionar el dinero juntas: facturas compartidas, cuentas conjuntas o una vista común de las finanzas del hogar, sin mantener configuraciones separadas.
+
+## Cuántas personas
+
+Un hogar admite hasta 6 personas por defecto, incluido el titular. Quien gestiona tu servidor puede subir o bajar ese número (consulta [Configurar tu instancia](/es/docs/self-hosting/configure#tu-instancia)). Una invitación que aún no se ha aceptado ocupa una plaza hasta que se acepta, se revoca o caduca, así que, cuando el hogar está lleno, revoca una invitación pendiente para liberar una plaza.
 
 ## Roles
 
-Cada persona en un hogar tiene un rol:
+Cada persona en un hogar tiene un rol. Quien invita a alguien elige su rol, y se puede cambiar más tarde.
 
-- **Titular** — la persona que creó el hogar al registrarse. El titular genera enlaces de invitación y puede eliminar miembros.
-- **Pareja** — una persona que se unió mediante un enlace de invitación. La pareja puede usar los datos compartidos y gestionar sus propias cuentas privadas.
+| Rol | Qué puede hacer |
+|---|---|
+| **Titular** | Todo: invitar a personas con cualquier rol por debajo de titular, reenviar y revocar invitaciones, cambiar roles, eliminar a cualquier persona y transferir la titularidad. Hay exactamente un titular, la persona que creó el hogar, salvo que se haya transferido la titularidad. |
+| **Administrador** | Leer y cambiar los datos compartidos, y gestionar a las personas por debajo de él: invitar solo como miembro u observador, reenviar y revocar esas invitaciones, cambiar roles entre miembro y observador, y eliminar a miembros y observadores. Un administrador no puede cambiar ni eliminar a otro administrador ni al titular. |
+| **Miembro** | Leer y cambiar los datos compartidos: cuentas, transacciones, presupuestos, categorías, reglas, objetivos y el resto. Los miembros no pueden invitar ni eliminar a nadie. |
+| **Observador** | Ver solo los datos compartidos. Un observador no puede añadir, cambiar ni eliminar nada de lo que comparte el hogar, pero su configuración personal sigue funcionando: perfil, preferencias, notificaciones, dispositivos, tokens de API personales, el feed de calendario, la exportación de datos y el asistente. |
 
-El rol se asigna en la relación entre el usuario y el hogar, y es lo que determina quién puede enviar invitaciones o eliminar miembros.
+Todos, salvo el titular, pueden salir del hogar en cualquier momento. Consulta [Salir del hogar o eliminar a un miembro](/es/docs/household/leave-or-remove).
+
+## Cambiar un rol
+
+El titular y los administradores cambian los roles desde la lista de miembros en la configuración del hogar. Solo puedes dar un rol por debajo del tuyo, y solo a alguien por debajo de ti: el titular puede hacer a cualquier otra persona administrador, miembro u observador, y un administrador puede cambiar a las personas entre miembro y observador. Nadie puede cambiar su propio rol.
+
+## Transferir la titularidad
+
+Solo el titular puede transferir la titularidad. Elige a otra persona del hogar y transfiérela: esa persona pasa a ser el titular y tú pasas a ser administrador. El hogar siempre tiene exactamente un titular.
 
 ## Datos compartidos y privacidad
 
-Los datos del hogar están limitados a él. Las cuentas, las transacciones, las categorías, los objetivos, los presupuestos, la cartera, el flujo de caja y el patrimonio neto viven dentro del hogar, y cada miembro solo ve lo que tiene permitido ver.
+Los datos del hogar están limitados a él. Las cuentas, las transacciones, las categorías, los objetivos, los presupuestos, la cartera, el flujo de caja y el patrimonio neto viven dentro del hogar, y cada persona solo ve lo que tiene permitido ver.
 
-Las cuentas tienen su propia configuración de privacidad. Una cuenta compartida es visible para ambos miembros; una cuenta privada es visible solo para el miembro que la posee. El titular también puede configurar qué series recurrentes son privadas. Consulta [Privacidad de la cuenta](/es/docs/household/account-privacy) para más detalles.
+Las cuentas tienen su propia configuración de uso compartido. Una cuenta compartida es visible para todas las personas del hogar. Una cuenta privada es visible solo para la persona a la que pertenece y para los miembros con quienes la comparte, cada uno de los cuales puede verla o editarla; un observador solo ve. El titular y los administradores no ven la cuenta privada de otra persona, salvo que esté compartida con ellos. Consulta [Privacidad de la cuenta](/es/docs/household/account-privacy) para más detalles.
 
 ## Páginas relacionadas
 
 - [Hogar y soporte multiusuario](/es/docs/household)
 - [Crear un hogar](/es/docs/household/create-a-household)
+- [Invitar a un miembro](/es/docs/household/invite-a-member)
 - [Privacidad de la cuenta](/es/docs/household/account-privacy)
 - [Contexto compartido](/es/docs/household/shared-context)

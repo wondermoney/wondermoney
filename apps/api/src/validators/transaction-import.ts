@@ -3,18 +3,39 @@ import { z } from 'zod';
 
 import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
 import { MAX_PAGE_SIZE } from '@service/transaction-import/transaction-import.service';
-import { positiveIntId } from '@validators/shared';
+import { importFileNameInput, positiveIntId } from '@validators/shared';
 
 const sessionParams = z.object({ importId: z.uuid() });
-const options = z.object({ mapping: statementMappingSchema.optional() }).strict();
+const options = z
+  .object({
+    /** How a QIF, YNAB or Actual Budget date whose day and month are both 12 or less reads. */
+    dateOrder: z.enum(['day-first', 'month-first']).optional(),
+    mapping: statementMappingSchema.optional(),
+  })
+  .strict();
 
-/** `POST /v1/transaction-import-sessions`: the account, the format, and the file when it is already uploaded for that account. */
+/** `POST /v1/transaction-import-sessions`: the account, the format, and the file when it is already uploaded for that account (with the name it had). */
 export const createTransactionImportSchema = z.object({
   body: z.object({
     accountId: positiveIntId,
-    format: z.enum(transactionImport.IMPORT_FORMATS),
+    fileName: importFileNameInput.optional(),
+    // A PDF statement starts at `POST /pdf`, behind the AI checks.
+    format: z.enum(transactionImport.IMPORT_FORMATS).exclude(['pdf']),
     key: z.string().min(1).max(170).optional(),
     options: options.optional(),
+  }).strict(),
+});
+
+/**
+ * `POST /v1/transaction-import-sessions/pdf`: a PDF bank statement for one account, read by the
+ * vision model. `contentLength` is the file's size in bytes; the upload link is signed for exactly
+ * that, and a statement over the instance's limit is refused before any link exists.
+ */
+export const createPdfTransactionImportSchema = z.object({
+  body: z.object({
+    accountId: positiveIntId,
+    contentLength: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+    fileName: importFileNameInput.optional(),
   }).strict(),
 });
 
@@ -29,6 +50,15 @@ export const getTransactionImportSchema = z.object({
 });
 
 export const transactionImportRequestSchema = z.object({ params: sessionParams });
+
+/**
+ * `POST /:importId/commit`. `acknowledgeMismatch`: the person saw that a PDF statement's balances do
+ * not add up and imports it anyway; without it such a statement is refused (409).
+ */
+export const commitTransactionImportSchema = z.object({
+  body: z.object({ acknowledgeMismatch: z.boolean().optional() }).strict().optional(),
+  params: sessionParams,
+});
 
 export const parseTransactionImportSchema = z.object({
   body: z.object({ options: options.optional() }).strict().optional(),
@@ -45,8 +75,20 @@ export const decideTransactionImportRowsSchema = z.object({
   params: sessionParams,
 });
 
-/** `PATCH /:importId/account-mapping`: the file's account labels to account ids. */
+/**
+ * `PATCH /:importId/account-mapping`: the file's account labels to account ids, and the labels to
+ * import into a new manual account each (`create`).
+ */
 export const mapTransactionImportAccountsSchema = z.object({
-  body: z.object({ mapping: z.record(z.string().min(1).max(255), positiveIntId) }).strict(),
+  body: z.object({
+    create: z.array(z.string().min(1).max(255)).max(100).optional(),
+    mapping: z.record(z.string().min(1).max(255), positiveIntId),
+  }).strict(),
+  params: sessionParams,
+});
+
+/** `PATCH /:importId/category-mapping`: the file's category labels to category ids, or null for uncategorised. */
+export const mapTransactionImportCategoriesSchema = z.object({
+  body: z.object({ mapping: z.record(z.string().min(1).max(255), positiveIntId.nullable()) }).strict(),
   params: sessionParams,
 });

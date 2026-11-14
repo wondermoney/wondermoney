@@ -4,9 +4,11 @@ import type { MonthlyStoryFacts } from '@service/budget/aggregation-types';
 
 import { MonthlyStoryNarrativeService } from '../monthly-story-narrative.service';
 
+const tokens = { completionTokens: 1, promptTokens: 2, totalTokens: 3 };
+
 describe('MonthlyStoryNarrativeService', () => {
-  const promptWithText = vi.fn();
-  const service = new MonthlyStoryNarrativeService({ promptWithText });
+  const completeJson = vi.fn();
+  const service = new MonthlyStoryNarrativeService({ completeJson });
 
   beforeEach(() => vi.clearAllMocks());
 
@@ -14,37 +16,57 @@ describe('MonthlyStoryNarrativeService', () => {
   // the subject total (1820.00) — see `spendingMoreExpensive` in monthly-story-narrative-skeleton.ts
   // — so a guardrail-passing polished sentence must preserve both numbers, not just the delta.
   it('returns the LLM-polished sentences when the guardrail passes', async () => {
-    promptWithText.mockResolvedValue({ answer: JSON.stringify({ sentences: ['Julho de 2026 foi 420,00 € mais caro do que o habitual, tendo gasto 1.820,00 € no total.'] }) });
+    completeJson.mockResolvedValue({ object: { sentences: ['Julho de 2026 foi 420,00 € mais caro do que o habitual, tendo gasto 1.820,00 € no total.'] }, tokens });
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');
     expect(result).toMatchObject({ source: 'llm' });
   });
 
   it('falls back to the deterministic skeleton when the guardrail rejects a mismatched number', async () => {
-    promptWithText.mockResolvedValue({ answer: JSON.stringify({ sentences: ['Julho foi 999,00 € mais caro do que o habitual, tendo gasto 1.820,00 € no total.'] }) });
+    completeJson.mockResolvedValue({ object: { sentences: ['Julho foi 999,00 € mais caro do que o habitual, tendo gasto 1.820,00 € no total.'] }, tokens });
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');
     expect(result.source).toBe('skeleton');
   });
 
   it('falls back to the deterministic skeleton when the LLM call throws', async () => {
-    promptWithText.mockRejectedValue(new Error('timeout'));
+    completeJson.mockRejectedValue(new Error('timeout'));
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');
     expect(result.source).toBe('skeleton');
   });
 
-  it('falls back to the deterministic skeleton when the LLM returns malformed JSON', async () => {
-    promptWithText.mockResolvedValue({ answer: 'not json' });
+  it('falls back to the deterministic skeleton when the LLM returns a malformed object', async () => {
+    completeJson.mockResolvedValue({ object: { sentences: 'not an array' }, tokens });
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');
     expect(result.source).toBe('skeleton');
+  });
+
+  it('returns the deterministic skeleton without calling the model when AI is hidden', async () => {
+    const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt', { allowModel: false });
+
+    expect(completeJson).not.toHaveBeenCalled();
+    expect(result.source).toBe('skeleton');
+    expect(result.sentences.length).toBeGreaterThan(0);
   });
 
   it('never returns an empty sentence list even on total LLM failure', async () => {
-    promptWithText.mockRejectedValue(new Error('boom'));
+    completeJson.mockRejectedValue(new Error('boom'));
     const result = await service.generate(factsWithOneDriver(), null, 'julho de 2026', 'pt');
     expect(result.sentences.length).toBeGreaterThan(0);
   });
 
+  it.each([['en', 'English'], ['pt', 'European Portuguese'], ['es', 'Spanish']] as const)('asks the model to polish a %s story in %s', async (language, name) => {
+    completeJson.mockRejectedValue(new Error('boom'));
+    await service.generate(factsWithOneDriver(), null, 'julio de 2026', language);
+    expect(completeJson.mock.calls[0]?.[0].user).toContain(`Respond in ${name}.`);
+  });
+
+  it('produces the Spanish skeleton fallback when language is es', async () => {
+    completeJson.mockRejectedValue(new Error('boom'));
+    const result = await service.generate(factsWithOneDriver(), null, 'julio de 2026', 'es');
+    expect(result).toEqual({ sentences: ['En julio de 2026 gastaste 420.00 € más de lo habitual: 1820.00 € en total.'], source: 'skeleton' });
+  });
+
   it('produces the English skeleton fallback when language is en', async () => {
-    promptWithText.mockRejectedValue(new Error('boom'));
+    completeJson.mockRejectedValue(new Error('boom'));
     const result = await service.generate(factsWithOneDriver(), null, 'July 2026', 'en');
     expect(result.sentences[0]).toContain('more expensive');
   });

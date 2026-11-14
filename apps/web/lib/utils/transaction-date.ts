@@ -43,3 +43,14 @@ export function transactionDateEnd(value: Date | string): Date {
   date.setHours(23, 59, 59, 999);
   return date;
 }
+
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/** The local calendar day (`YYYY-MM-DD`) a transaction date falls on: its own date when it is date-only. */
+export function localCalendarDay(value: Date | string): string {
+  const date = transactionDisplayDate(value);
+  if (Number.isNaN(date.getTime())) {
+    return typeof value === "string" ? value.slice(0, 10) : "";
+  }
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

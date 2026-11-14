@@ -180,6 +180,8 @@ export interface BalanceSheetRow {
    * every total so the money counts once.
    */
   countedInAccountId?: number;
+  /** One member's figure: their share of a split account, in percent, when not all of it. */
+  sharePercent?: number;
 }
 
 const counted = (row: BalanceSheetRow) => row.countedInAccountId === undefined;
@@ -215,14 +217,17 @@ function rowType(key: string): BalanceSheetType {
     : "other";
 }
 
-function groupRows(rows: BalanceSheetRow[]): BalanceSheetGroup[] {
+function groupRows(
+  rows: BalanceSheetRow[],
+  accountOrder: number[],
+): BalanceSheetGroup[] {
   return GROUP_ORDER.flatMap((type) => {
     const members = rows.filter((row) => rowType(row.key) === type);
     if (members.length === 0) return [];
     return [
       {
         type,
-        rows: members,
+        rows: type === "accounts" ? inAccountOrder(members, accountOrder) : members,
         total: totalOf(members),
       },
     ];
@@ -230,36 +235,60 @@ function groupRows(rows: BalanceSheetRow[]): BalanceSheetGroup[] {
 }
 
 /**
+ * The accounts group in the member's own account order (`GET /v1/account`). An account the
+ * order does not name keeps its place after the named ones, so the sheet never drops a row.
+ */
+function inAccountOrder(
+  rows: BalanceSheetRow[],
+  accountOrder: number[],
+): BalanceSheetRow[] {
+  if (accountOrder.length === 0) return rows;
+  const place = new Map(accountOrder.map((accountKey, index) => [accountKey, index]));
+  return [...rows].sort(
+    (a, b) =>
+      (place.get(a.recordId ?? -1) ?? Number.MAX_SAFE_INTEGER) -
+      (place.get(b.recordId ?? -1) ?? Number.MAX_SAFE_INTEGER),
+  );
+}
+
+/**
  * Net worth as two sides: what is owned and what is owed, grouped by kind,
  * and each side's total. A negative account balance
  * is debt, so it moves to the owed side (as `useNetWorth` already flags it).
+ * `accountOrder` is the member's account list, so the accounts group reads in
+ * the same order as the accounts page.
  */
-export function balanceSheet(netWorth: NetWorth): BalanceSheet {
+export function balanceSheet(
+  netWorth: NetWorth,
+  accountOrder: number[] = [],
+): BalanceSheet {
   const rows = netWorth.rows ?? [];
   const owned = rows
     .filter((row) => !row.isLiability)
-    .map(({ key, recordId, label, amount, countedInAccountId }) => ({
+    .map(({ key, recordId, label, amount, countedInAccountId, sharePercent }) => ({
       key,
       recordId,
       label,
       amount,
       ...(countedInAccountId === undefined ? {} : { countedInAccountId }),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }));
   const owed = rows
     .filter((row) => row.isLiability)
-    .map(({ key, recordId, label, amount }) => ({
+    .map(({ key, recordId, label, amount, sharePercent }) => ({
       key,
       recordId,
       label,
       amount: Math.abs(amount),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }));
 
   const ownTotal = totalOf(owned);
   const oweTotal = totalOf(owed);
 
   return {
-    own: groupRows(owned),
-    owe: groupRows(owed),
+    own: groupRows(owned, accountOrder),
+    owe: groupRows(owed, accountOrder),
     ownTotal,
     oweTotal,
   };
@@ -312,7 +341,118 @@ export function netWorthChanges(
   };
 }
 
-export interface CashflowBar extends AccountCashflow {
+export interface MonthTotals {
+  income: number;
+  expenses: number;
+  savingsRate: number | null;
+}
+
+export interface MonthComparisonRange {
+  /** First day of the previous month, local. */
+  from: Date;
+  /** End of the comparison day, local. */
+  to: Date;
+  /** The previous month's first day, for the label. */
+  month: Date;
+  /** True when the range ends on the same day of the month, not the month's end. */
+  samePoint: boolean;
+}
+
+/**
+ * The period to compare this month against. While the month is still running,
+ * a full previous month would compare a part with a whole, so the range ends
+ * on the same day of the previous month (clamped to its length). On the last
+ * day it is the whole previous month.
+ */
+export function monthComparisonRange(today: Date): MonthComparisonRange {
+  const month = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const daysInPreviousMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    0,
+  ).getDate();
+  const daysInCurrentMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    0,
+  ).getDate();
+  const samePoint = today.getDate() < daysInCurrentMonth;
+  const day = samePoint
+    ? Math.min(today.getDate(), daysInPreviousMonth)
+    : daysInPreviousMonth;
+
+  return {
+    from: month,
+    month,
+    samePoint,
+    to: new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      day,
+      23,
+      59,
+      59,
+      999,
+    ),
+  };
+}
+
+export interface SavingsSummary {
+  income: number;
+  spending: number;
+  savingsRate: number | null;
+  /** The same figures for the comparison period; null when it has no data. */
+  comparison: (MonthTotals & { month: Date; samePoint: boolean }) | null;
+  incomeDelta: number | null;
+  spendingDelta: number | null;
+  /** Percentage points, e.g. 3 for +3 pts. */
+  savingsRateDelta: number | null;
+}
+
+/**
+ * This month's income, spending and savings rate beside the comparison
+ * period's. A figure the comparison period has no data for has no delta, not
+ * a zero one.
+ */
+export function savingsSummary(
+  current: MonthTotals | undefined,
+  previous: MonthTotals | undefined,
+  range: MonthComparisonRange,
+): SavingsSummary | null {
+  if (
+    !current ||
+    typeof current.income !== "number" ||
+    typeof current.expenses !== "number"
+  ) {
+    return null;
+  }
+
+  const currentRate =
+    typeof current.savingsRate === "number" ? current.savingsRate : null;
+  const previousRate =
+    previous && typeof previous.savingsRate === "number"
+      ? previous.savingsRate
+      : null;
+
+  return {
+    income: current.income,
+    spending: current.expenses,
+    savingsRate: currentRate,
+    comparison: previous
+      ? { ...previous, month: range.month, samePoint: range.samePoint }
+      : null,
+    incomeDelta: previous ? current.income - previous.income : null,
+    spendingDelta: previous ? current.expenses - previous.expenses : null,
+    savingsRateDelta:
+      previous && currentRate !== null && previousRate !== null
+        ? (currentRate - previousRate) * 100
+        : null,
+  };
+}
+
+export interface CashflowBar {
+  date: string;
+  amount: number;
   /** Percentage of the track, measured from the zero line. */
   width: number;
 }
@@ -327,7 +467,9 @@ export interface CashflowScale {
  * Monthly net cash flow as bars diverging from one zero line: outflows to the
  * left, inflows to the right, both on the same scale. Oldest month first.
  */
-export function cashflowScale(points: AccountCashflow[]): CashflowScale {
+export function cashflowScale(
+  points: Array<Pick<AccountCashflow, "date" | "amount">>,
+): CashflowScale {
   const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
   const mostOut = Math.max(0, ...sorted.map((point) => -point.amount));
   const mostIn = Math.max(0, ...sorted.map((point) => point.amount));

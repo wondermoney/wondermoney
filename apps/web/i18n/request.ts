@@ -21,9 +21,16 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...(await import(`../messages/${locale}/assets.json`)).default,
     ...(await import(`../messages/${locale}/home.json`)).default,
     ...(await import(`../messages/${locale}/transactions.json`)).default,
+    ...(await import(`../messages/${locale}/expense-groups.json`)).default,
     ...(await import(`../messages/${locale}/budget.json`)).default,
     ...(await import(`../messages/${locale}/rules.json`)).default,
+    ...(await import(`../messages/${locale}/rule-presets.json`)).default,
     ...(await import(`../messages/${locale}/currencies.json`)).default,
+    ...(await import(`../messages/${locale}/command-palette.json`)).default,
+    ...(await import(`../messages/${locale}/api-tokens.json`)).default,
+    ...(await import(`../messages/${locale}/calendar-feed.json`)).default,
+    ...(await import(`../messages/${locale}/connect-ai-client.json`)).default,
+    ...(await import(`../messages/${locale}/admin.json`)).default,
   };
 
   return { locale, messages };

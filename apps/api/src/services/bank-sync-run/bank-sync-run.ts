@@ -17,7 +17,10 @@
  *  - {@link runBankSyncPhases}: runs account + transaction phases with an
  *    optional pre-phase hook (the credential check used by auto-sync).
  */
-import { type ProviderRateLimit, providerRateLimitOf } from './provider-failure';
+import type { BankReportedErrorCode } from '@service/bank-providers/errors';
+import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
+
+import { providerIncidentCodeOf, type ProviderRateLimit, providerRateLimitOf } from './provider-failure';
 
 export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
 
@@ -30,6 +33,8 @@ export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
 export interface BankSyncPhaseSignals {
   everyAccountRejected?: boolean;
   rateLimited?: ProviderRateLimit;
+  /** What the aggregator itself reported (SimpleFIN's error list); the run is recorded under it. */
+  reportedErrorCode?: BankReportedErrorCode;
 }
 
 /**
@@ -108,23 +113,26 @@ export function safeInstitutionId(values: string[] | undefined): string | undefi
 export interface RunBankSyncPhasesInput {
   accountService: {
     syncAccountsForRequisition: (input: {
+      connection: BankConnectionRef;
       correlationId: string;
-      enableBankingConnectionKey: number;
       queueJobId: string;
-    }) => Promise<ServicePhaseResult>;
+    }, deps?: { provider?: BankProvider }) => Promise<ServicePhaseResult>;
   };
+  /** The provider-agnostic connection both phases sync. */
+  connection: BankConnectionRef;
   correlationId: string;
-  enableBankingConnectionKey: number;
   enqueue?: import('@service/queue/enqueue').Enqueue;
   fetchWindowDays: number;
+  /** The aggregator both phases sync through. */
+  provider: BankProvider;
   queueJobId: string;
   transactionService: {
     syncTransactionsForRequisition: (input: {
+      connection: BankConnectionRef;
       correlationId: string;
-      enableBankingConnectionKey: number;
       fetchWindowDays: number;
       queueJobId: string;
-    }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue }) => Promise<ServicePhaseResult>;
+    }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue; provider?: BankProvider }) => Promise<ServicePhaseResult>;
   };
   /**
    * Optional hook that runs before the account phase. Auto-sync uses this for
@@ -136,6 +144,13 @@ export interface RunBankSyncPhasesInput {
 export function classifyBankSyncError(error: unknown, opts: ClassifyBankSyncErrorOpts): BankSyncErrorClassification {
   for (const rule of opts.extraCodes ?? []) {
     if (rule.match(error)) return { code: rule.code, isPermanent: true };
+  }
+  // A provider implementation's typed failure already names the incident code. Consent and
+  // authentication need the user; a rate limit and an outage are retried later.
+  const incidentCode = providerIncidentCodeOf(error);
+  if (incidentCode) {
+    const permanent = incidentCode === 'consent_expired' || incidentCode === 'authentication';
+    return { code: incidentCode, isPermanent: permanent, ...(incidentCode === 'rate_limited' ? providerRateLimitOf(error) : {}) };
   }
   // Before the status checks below: a rate limit is temporary, so never permanent, but retrying
   // it straight away spends quota the provider has just refused. Callers decide when to try again.
@@ -185,20 +200,20 @@ export interface RunBankSyncPhasesResult extends BankSyncPhaseSignals {
 export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<RunBankSyncPhasesResult> {
   await input.prePhase?.();
   const rawAccount = await input.accountService.syncAccountsForRequisition({
+    connection: input.connection,
     correlationId: input.correlationId,
-    enableBankingConnectionKey: input.enableBankingConnectionKey,
     queueJobId: input.queueJobId,
-  });
+  }, { provider: input.provider });
   const account = toPhaseResult(rawAccount);
   if (account.status === 'failed' || account.rateLimited) {
     return { account, ...signalsOf(account), failedAt: 'account', status: account.status === 'failed' ? 'failed' : 'partial', transaction: undefined };
   }
   const rawTransaction = await input.transactionService.syncTransactionsForRequisition({
+    connection: input.connection,
     correlationId: input.correlationId,
-    enableBankingConnectionKey: input.enableBankingConnectionKey,
     fetchWindowDays: input.fetchWindowDays,
     queueJobId: input.queueJobId,
-  }, { enqueue: input.enqueue });
+  }, { enqueue: input.enqueue, provider: input.provider });
   const transaction = toPhaseResult(rawTransaction);
   if (transaction.status === 'failed') {
     return { account, ...signalsOf(transaction), failedAt: 'transaction', status: 'failed', transaction };
@@ -207,7 +222,8 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
     return { account, failedAt: 'transaction', rateLimited: transaction.rateLimited, status: 'partial', transaction };
   }
   if (account.status === 'partial' || transaction.status === 'partial') {
-    return { account, failedAt: undefined, status: 'partial', transaction };
+    const reportedErrorCode = account.reportedErrorCode ?? transaction.reportedErrorCode;
+    return { account, failedAt: undefined, ...(reportedErrorCode ? { reportedErrorCode } : {}), status: 'partial', transaction };
   }
   return { account, failedAt: undefined, status: 'full_success', transaction };
 }
@@ -216,5 +232,6 @@ function signalsOf(phase: BankSyncPhaseResult): BankSyncPhaseSignals {
   return {
     ...(phase.everyAccountRejected ? { everyAccountRejected: true } : {}),
     ...(phase.rateLimited ? { rateLimited: phase.rateLimited } : {}),
+    ...(phase.reportedErrorCode ? { reportedErrorCode: phase.reportedErrorCode } : {}),
   };
 }

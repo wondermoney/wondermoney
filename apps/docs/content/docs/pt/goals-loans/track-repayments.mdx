@@ -9,8 +9,8 @@ Isto mantém o saldo restante alinhado com os pagamentos registados.
 
 <DocsImage
   src="/images/docs/pt/goals-loans/track-repayments-detail.png"
-  alt="Loan detail page with outstanding principal, regular payment, annual rate, and a repayments table."
-  caption="The loan detail shows the outstanding balance, repayment terms, and the repayments table."
+  alt="Página de detalhes do empréstimo com capital em dívida, prestação regular, taxa anual e tabela de reembolsos."
+  caption="Os detalhes do empréstimo mostram o saldo em dívida, as condições de reembolso e a tabela de reembolsos."
   width={1440}
   height={900}
 />
@@ -35,8 +35,24 @@ Regista o reembolso na data em que foi efetivamente liquidado, se quiseres que o
 - Introduzir um reembolso no empréstimo errado.
 - Assumir que um reembolso altera o saldo de um objetivo. Empréstimos e objetivos são separados.
 
-Se um pagamento foi reembolsado ou revertido, anota-o antes de adicionar uma nova entrada de reembolso.
+Se um pagamento foi reembolsado ou revertido, anota-o antes de adicionares uma nova entrada de reembolso.
 
+## Corrigir o saldo
+
+Quando o extrato do credor mostrar um saldo diferente, regista o valor dele. Na página do empréstimo, escolhe **Ajustar saldo**, mantém **Corrigir saldo** e introduz o saldo e a data do extrato. Zero é permitido, para um empréstimo que o credor dá como liquidado.
+
+- Uma correção substitui o saldo acompanhado a partir da sua data; não é um pagamento adicional. Os reembolsos anteriores a essa data já estão no valor do credor, e os posteriores reduzem o saldo corrigido.
+- Uma correção com data futura não altera o saldo de hoje. Entra em vigor na sua data.
+- Os outros tipos alteram o saldo num montante: uma comissão ou juros capitalizados somam-se, e uma redução de capital ou uma anulação reduzem-no.
+
+Cada ajuste aparece em **Ajustes de saldo**, onde o podes editar ou eliminar. O saldo, o plano e a projeção de liquidação acompanham a alteração.
+
+## Registar alterações de taxa
+
+Para um empréstimo com taxa variável, escolhe o tipo de taxa **Variável** ao adicionar ou editar o empréstimo e introduz a taxa com que o empréstimo começou. Depois, na página do empréstimo, adiciona cada alteração em **Histórico de taxas** com a data em que entra em vigor.
+
+- Os juros de cada mês usam a taxa em vigor no início desse mês. Quando uma nova taxa está em vigor numa data de pagamento, a prestação é recalculada para que o empréstimo termine na mesma data de vencimento.
+- O WonderMoney não obtém taxas de referência como a Euribor nem prevê alterações. Adiciona cada alteração quando o credor a anunciar.
 
 ## Páginas relacionadas
 

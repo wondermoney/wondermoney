@@ -8,6 +8,7 @@ import type { Tenant } from '@entity/Tenant';
 import type { Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
+import { isAccountVisibleTo, visibleAccountWhere } from '@service/account/account-access';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
 
 import { TransactionAuditService } from './transaction-audit.service';
@@ -123,11 +124,11 @@ export async function retypeTransaction(em: EntityManager, input: RetypeInput): 
  * The row's destination for display. An account the viewer cannot see (a partner's private one) is
  * not named. Populate {@link TRANSFER_DESTINATION_POPULATE} first.
  */
-export function transferDestinationOf(transaction: Transaction, viewerAppuserKey: number): null | TransferDestinationDto {
+export function transferDestinationOf(transaction: Transaction, viewerAppuserKey: number, sharedAccountKeys: ReadonlySet<number>): null | TransferDestinationDto {
   const account = transaction.transferDestinationAccountKey;
   if (account) {
     // Not loaded: the tenant filter kept it from this viewer.
-    if (!wrap(account).isInitialized() || account.deletedAt || (account.isPrivate && account.accountOwnerAppuserKey?.appuserKey !== viewerAppuserKey)) return null;
+    if (!wrap(account).isInitialized() || account.deletedAt || !isAccountVisibleTo(account, viewerAppuserKey, sharedAccountKeys)) return null;
     return { key: account.accountKey, name: account.accountName ?? '', type: 'account' };
   }
   const portfolio = transaction.transferDestinationPortfolioKey;
@@ -151,7 +152,7 @@ function sameDestination(a: null | TransferDestinationInput, b: null | TransferD
 /** A live destination in the household that the actor may see; 404 otherwise. */
 async function findDestination(em: EntityManager, destination: TransferDestinationInput, actor: Appuser, tenant: Tenant): Promise<Account | Goal | Portfolio> {
   const found = destination.type === 'account'
-    ? await em.findOne(Account, { $or: [{ isPrivate: false }, { accountOwnerAppuserKey: actor }], accountKey: destination.key, deletedAt: null, tenantKey: tenant })
+    ? await em.findOne(Account, { $and: [visibleAccountWhere(actor.appuserKey), { accountKey: destination.key, deletedAt: null, tenantKey: tenant }] })
     : destination.type === 'portfolio'
       ? await em.findOne(Portfolio, { deletedAt: null, portfolioKey: destination.key, tenantKey: tenant })
       : await em.findOne(Goal, { deletedAt: null, goalKey: destination.key, tenantKey: tenant });

@@ -5,7 +5,7 @@ description: Corre o teu próprio servidor WonderMoney com Docker Compose, para 
 
 O WonderMoney é gratuito e de código aberto, e podes corrê-lo no teu próprio servidor. Uma instância própria tem a mesma aplicação que o wonder.money: contas, transações, sincronização bancária, orçamentos, objetivos, créditos, agregados familiares e portefólios. Os teus dados ficam na tua própria base de dados.
 
-O servidor completo é um único ficheiro Docker Compose com quatro contentores: Postgres, a API, um processo de tarefas em segundo plano e a aplicação web. Não é preciso mais nada.
+O servidor completo é um único ficheiro Docker Compose com quatro contentores: Postgres, a API, um processo de tarefas em segundo plano e a aplicação web. Não é preciso mais nada. Em Kubernetes, um [chart Helm](/pt/docs/self-hosting/kubernetes) usa as mesmas imagens. Sem servidor próprio, a [Render](/pt/docs/self-hosting/managed-hosting) pode corrê-las por ti.
 
 ## O que precisas
 
@@ -22,14 +22,17 @@ A aplicação base precisa apenas do Postgres. Estas funcionalidades ligam-se qu
 | Emails (recuperação de palavra-passe, convites, alertas) | Um servidor SMTP ou uma conta Resend |
 | Importações CSV e cópias de recibos | Armazenamento compatível com S3, ou o armazenamento incluído |
 | Leitura de recibos, categorização inteligente, o assistente | Qualquer endpoint de IA compatível com OpenAI, incluindo um Ollama local |
-| Pesquisa de tickers e cotações em tempo real | Uma chave de API da EODHD |
-| Sincronização bancária | Nada no servidor: cada pessoa adiciona a sua própria chave Enable Banking nas Definições |
+| Pesquisa de tickers e cotações em tempo real | Uma chave de API da EODHD, ou os fornecedores gratuitos Stooq e CoinGecko para as cotações |
+| Carteiras de criptomoedas avaliadas a partir de endereços públicos | Um explorador de blocos Bitcoin ou Ethereum (um nó teu com mempool, Esplora ou Blockscout, ou um público), e dados de mercado com preços de criptomoedas |
+| Sincronização bancária | Nada no servidor: cada pessoa adiciona a sua própria chave Enable Banking nas Definições. Para bancos dos EUA e do Canadá, o [SimpleFIN](/pt/docs/self-hosting/simplefin) através de `BANK_PROVIDERS` |
 
 Consulta [Configurar a tua instância](/pt/docs/self-hosting/configure).
 
 ## Nesta secção
 
 - [Instalar](/pt/docs/self-hosting/install)
+- [Kubernetes (Helm)](/pt/docs/self-hosting/kubernetes)
+- [Opções de alojamento gerido](/pt/docs/self-hosting/managed-hosting)
 - [Configurar a tua instância](/pt/docs/self-hosting/configure)
 - [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains)
 - [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app)

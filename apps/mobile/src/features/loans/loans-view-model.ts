@@ -1,4 +1,4 @@
-import type { LoanDto, LoanRepaymentDto } from './loans-contract'
+import type { LoanDto, LoanProjectionDto, LoanRepaymentDto } from './loans-contract'
 
 export type LoanViewModel = Readonly<{
   id: number
@@ -35,6 +35,17 @@ export type LoanViewModel = Readonly<{
   openingBalanceDate: string
   providerName: string | null
   notes: string | null
+  /** The name of the manual asset the loan is secured against, or null. */
+  securedAssetName: string | null
+}>
+
+export type LoanProjectionViewModel = Readonly<{
+  paysOff: boolean
+  payoffDate: string | null
+  /** Whole months sooner than the contract maturity; 0 when on schedule or behind. */
+  monthsSaved: number
+  /** Interest the contract would still charge minus the projected interest; 0 when not lower. */
+  interestSaved: number
 }>
 
 export type LoanRepaymentViewModel = Readonly<{
@@ -100,9 +111,22 @@ export const mapLoan = (dto: LoanDto, now: Date = new Date()): LoanViewModel => 
   openingBalanceDate: dto.openingBalanceDate,
   providerName: dto.providerName ?? null,
   notes: dto.notes ?? null,
+  securedAssetName: dto.securedAsset?.name ?? null,
 })
 
 export const mapLoans = (response: { loans: LoanDto[] }): LoanViewModel[] => response.loans.map((dto) => mapLoan(dto))
+
+/**
+ * Mobile has no extra-payment input, so the two savings figures compare the projection
+ * with the contract: months sooner than maturity, and interest the contract would still
+ * charge minus the projected interest. Both are 0 when the loan is on schedule or behind.
+ */
+export const mapLoanProjection = (dto: LoanProjectionDto): LoanProjectionViewModel => ({
+  paysOff: dto.paysOff,
+  payoffDate: dto.payoffDate,
+  monthsSaved: Math.max(0, dto.aheadOrBehindMonths ?? 0),
+  interestSaved: Math.max(0, +(dto.contractInterest - dto.totalInterest).toFixed(2)),
+})
 
 export const mapRepayments = (response: { repayments: LoanRepaymentDto[] }): LoanRepaymentViewModel[] => (
   response.repayments.map((dto) => ({

@@ -81,7 +81,32 @@ numbers belong in commit messages. **Tests never touch the network or `.env`:**
 `vitest.setup.ts` mocks `dotenv` to a no-op and makes `globalThis.fetch` throw; stub it
 explicitly (`vi.stubGlobal('fetch', vi.fn())`).
 
-Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverage`).
+Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverage`). Locally,
+run the files you touch, then `pnpm verify:changed` from the repository root before pushing (the
+root `CLAUDE.md`, "Verifying a change"); CI runs the whole suite.
+
+## Running tests
+
+The suite is split into vitest projects (`vitest.config.ts`); `pnpm test` (`vitest run`) runs
+`unit` and `db`, and a file path narrows any of them.
+
+| Script | Project | What |
+|---|---|---|
+| `pnpm test:unit` | `unit` | Files that start no database; the quick inner loop |
+| `pnpm test:db` | `db` | Files that import `__helpers__/pg-test-db.ts` (found by that import, no naming rule) |
+| `pnpm test:perf` | `perf` | `*.perf.test.ts`: timing budgets, only meaningful on a quiet machine; needs `TEST_POSTGRES_URL`. Not in `pnpm test` |
+
+- `pg-test-db.ts` runs most database tests on in-process PGlite. Tests of concurrent sessions
+  pass `postgresUrl: process.env.TEST_POSTGRES_URL` and are skipped without it; point it at a
+  throwaway server only (`postgres://user:pass@localhost:<port>/<maintenance db>`).
+- On that server each file gets a copy of a template database (`wm_tpl_<schema>_<hash>`, built once
+  per schema and shared by every run with the same hash) named `<WM_TEST_DB_PREFIX>_<pid>_<time>_<hex>`
+  (prefix default `wm_test`; give each worktree its own). A run drops its databases when it ends
+  and sweeps those of dead runs under its prefix when it starts (`__helpers__/pg-test-run.ts`).
+- `VITEST_MAX_WORKERS` caps the workers (vitest reads it, overriding `--maxWorkers`).
+- A pg-boss double wrapped in `withPgBossNameRules` (`__helpers__/pgboss-names.ts`) refuses the
+  queue names and schedule keys pg-boss refuses; `worker.bootstrap.test.ts` boots the worker
+  through it, so every queue and schedule the worker registers is checked.
 
 ## Code conventions
 
@@ -104,31 +129,72 @@ Coverage thresholds in `vitest.config.ts` are enforced in CI (`pnpm test:coverag
 ## Auth, users and tenancy
 
 - **better-auth** is mounted at `/api/auth` (before `express.json()`), with its tables in the
-  `better_auth` schema and the twoFactor/jwt/bearer plugins. `getAuthSession()` reads the
+  `better_auth` schema and the twoFactor/jwt/bearer/passkey plugins, plus generic OAuth for
+  single sign-on when `OIDC_*` is set (`services/auth/oidc.ts`: provider `oidc`, allowed and admin
+  groups, `OIDC_ONLY`; the admin claim is kept as `user.oidcAdmin` and mirrored onto
+  `Appuser.accountType`). `getAuthSession()` reads the
   session cookie or `Authorization: Bearer` and sets `req.authUser`. MFA is implicit: no full
-  session exists until 2FA completes. Middleware: `requireAuth`, `optionalAuth`,
+  session exists until 2FA completes; a passkey sign-in (user verification required) counts as
+  both factors. better-auth tables have no MikroORM entities: change them with hand-written DDL
+  migrations that leave `.snapshot-wmdb.json` alone. Middleware: `requireAuth`, `optionalAuth`,
   `requireBearerAuth` (the auth callback); `adminAuth`/`serviceAuth` are API-key auth.
 - `getUser` sets **`req.user`** (the `Appuser`); `resolveTenantForRequest` sets **`req.tenant`**
-  and arms the tenant filter. Keep the two distinct. Authed data routes use the `authedTenant`
-  stack (`middleware/stacks.ts`): `requireAuth → getUser → resolveTenantForRequest →
-  assertTenantResolved → blockDemoMutation`.
-- **A tenant is a household**: an owner plus at most one partner (`AppuserTenant.role`
-  `owner`/`member`), sharing accounts, transactions, budgets, categories, goals and portfolios.
+  and `req.householdRole`, and arms the tenant filter. Keep the two distinct. Authed data routes
+  use the `authedTenant` stack (`middleware/stacks.ts`): `requireAuth → getUser →
+  resolveTenantForRequest → assertTenantResolved → blockDemoMutation → blockViewerWrite`.
+- **A tenant is a household** of up to `HOUSEHOLD_MAX_MEMBERS` people (default 6; pending invites
+  hold a seat), sharing accounts, transactions, budgets, categories, goals and portfolios.
+  `AppuserTenant.role` is `owner` (exactly one, `Tenant.ownerAppuserKey`), `admin`, `member` or
+  `viewer`. `householdCan(role, action)` (`services/household/household-permissions.ts`) is the
+  one rule: a manager (owner, admin) acts on and grants only roles below their own; only the
+  owner transfers ownership (`POST /v1/household/transfer-ownership`). A viewer's writes answer
+  403 `household_read_only` except the personal ones in `VIEWER_PERSONAL_WRITES`
+  (`middleware/household.ts`); `household-viewer-policy.test.ts` walks every mounted route.
 - **Tenant filter** (`database/filters/tenant-filter.ts`): a global default-deny MikroORM
   filter. With no tenant context set (workers, invite provisioning) it is a deliberate system
   bypass. `assertTenantResolved` throws when `req.user` is set but `req.tenant` is not.
-- **Privacy**: `Account.isPrivate` hides an account, its transactions, its `RecurringSeries`
-  and every aggregate from the other member. Raw SQL, Kysely and QueryBuilder paths (account
-  metrics, cashflow, budget spending, portfolio) bypass the ORM filter, so they carry explicit
-  tenant and privacy predicates. Any new raw query needs both.
-- **Invites**: `HouseholdInvite` is a 7-day single-use token, and a pending one holds the seat.
-  Joining is for new signups only (the auth callback consumes `inviteToken` and skips creating
-  a tenant). `GET /v1/household/invites/validate` is public. Leaving deactivates the
-  membership and soft-deletes the member's bank connections; the owner cannot be removed.
+- **Privacy and sharing** (`services/account/account-access.ts` holds the rule): a shared account
+  (`isPrivate = false`) is seen and changed by every member; a private one by its owner and the
+  members with an `AccountShare` (`read` or `write`), and by nobody else, in any list, detail or
+  aggregate (a 404, never a 403). A viewer reads only. The tenant filter applies it through
+  `visibleAccountCond`; raw SQL, Kysely and QueryBuilder paths (account metrics, cashflow, budget
+  spending, portfolio, exports) bypass the filter, so they carry explicit tenant predicates and
+  `visibleAccountSql`. Any new raw query needs both. Writes to an account's data go through
+  `assertAccountWritable` (403 `account_read_only`), or the `requireWritableAccount` /
+  `requireWritableTransaction` route guards; `account-write-guard.http.test.ts` walks every write
+  route and `hidden-account-aggregates.http.test.ts` every aggregate. Shares are changed by the
+  account owner or the household owner (`PUT /v1/account/:accountId/shares`); a removed member's
+  shares stay, and nobody else gains access to their private accounts.
+- **Member attribution** (`services/household/member-attribution.ts`) is who money belongs to for
+  reporting, never who sees it: a transaction's own "Spent by" (`attributedAppuserKey`,
+  `attributedToShared`), else its account's owner, or Shared on a joint account (`isJoint`) or
+  for someone who left. The `memberKeys` filter (`TransactionScope.members`) only narrows rows
+  the visibility rule already allows.
+- **Ownership shares** (`services/household/account-ownership.ts`, `AccountOwnership`) split an
+  account between members in basis points, for per-member net worth only (`?member=`); spending
+  reports keep member attribution. No rows: attribution stands (owner, or Shared when joint).
+  Rows add up to 10000 (checked by the service and a deferred trigger) and replace the joint
+  switch for net worth; a former member's share counts as Shared until they rejoin. Parts are
+  split by largest remainder (`Money.allocate`), so members plus Shared equal the household total.
+  Changed by the account owner or the household owner (`PUT /v1/account/:accountId/ownership`),
+  only for active members who can see the account.
+- **Invites**: `HouseholdInvite` is a 7-day single-use token carrying the role to join with; a
+  pending one holds a seat. The seat count and the write run under the tenant row lock
+  (`lockTenant`). A new signup joins through the auth callback's `inviteToken`; an existing,
+  signed-in user joins only by confirming (`POST /v1/household/invites/:token/accept`), and
+  only from a household holding no accounts or transactions (nothing is merged). Signing in
+  never moves anyone: `provisionHomeTenant` keeps an active membership, else restores the
+  user's own household, else creates one. `GET /v1/household/invites/validate` is public.
+  Leaving or removal deactivates the membership and soft-deletes the member's bank
+  connections; a removed member's sessions and push devices end too. The owner cannot leave.
 - Verify scripts in `database/scripts/`: `verify-tenant-filter.ts`, `verify-household-invite.ts`,
   `e2e-household-flow.sh`.
 - `blockDemoMutation` keeps the demo account read-only; demo is recognised by
-  `Appuser.accountType` / `tenantType === DEMO`.
+  `Appuser.accountType` / `tenantType === DEMO`. `blockDemoAuthAccountChanges` does the same on
+  better-auth's own `/api/auth` routes. `POST /v1/auth/demo` (`DEMO_SIGN_IN_ENABLED`, off by
+  default) signs in the one demo account without a password after the checks in
+  `services/auth/demo-sign-in.service.ts`; every demo session ends two hours after it starts
+  (`services/auth/demo-session.ts`). `pnpm demo:seed` creates the account on a real database.
 - **Rate limits** are named families in `middleware/rate-limit.ts`. An auth or credential family
   is never `relaxable` and is keyed on IP only. `TRUST_PROXY` sets Express `trust proxy`;
   `configureClientIp` copies the resolved `req.ip` into `x-wondermoney-client-ip`, the header
@@ -141,8 +207,13 @@ Every integration is optional and fails closed: unconfigured, its feature report
 (`GET /v1/instance`, HTTP 501 `feature_disabled`) instead of failing at boot.
 
 - **Bank sync: Enable Banking, bring-your-own-key.** Each user supplies their own Enable
-  Banking application credential. There is no sandbox bank; testing the connect flow needs a
-  real credential. Legacy `nordigen*` names (`NordigenRequisition`,
+  Banking application credential, unless the operator sets an instance-wide one
+  (`ENABLE_BANKING_APP_ID`, `ENABLE_BANKING_PRIVATE_KEY_FILE`; the rule is in
+  `services/enable-banking/instance-credential-policy.ts`). A user's own credential always wins;
+  without `ENABLE_BANKING_PRODUCTION_CONTRACT` the instance one serves a single household
+  (Restricted Production mode). A connection keeps the credential it was made with
+  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). There is no
+  sandbox bank; testing the connect flow needs a real credential. Legacy `nordigen*` names (`NordigenRequisition`,
   `Account.nordigenRequisitionKey`, `Transaction.nordigenInternalTransactionId`, the
   `DELETE /v1/banking/requisition/:requisitionId` route) are from the removed GoCardless
   integration. They stay: the unique constraint on `nordigenInternalTransactionId` deduplicates
@@ -155,7 +226,10 @@ Every integration is optional and fails closed: unconfigured, its feature report
   rate for its day (no rate, no pair) and accepts it within `TRANSFER_MATCH_FX_TOLERANCE`
   (default 0.02), only between accounts the same members can see. A user-set type is never
   overwritten; the file header has the full rule.
-- **Market data: EODHD** (`EODHD_API_KEY`, read by the API and the worker's price jobs).
+- **Market data** goes through one registry (`services/market-data/registry.ts`) over the ordered
+  `MARKET_DATA_PROVIDERS` (default `eodhd`; `stooq` and `coingecko` are opt-in for operators). It
+  falls through per capability and per symbol, and stored prices record their `source`.
+  **EODHD** (`EODHD_API_KEY`, read by the API and the worker's price jobs):
   `services/market-data/eodhd.service.ts` builds the client lazily and maps every failure
   through `handleEodhdError`: 404 → 404, `rate_limit` → 429 with the provider's `retryAfter`
   (default 60 s), `auth_error` → 500 (our credential; it should alert), or 502 when the status is
@@ -165,16 +239,33 @@ Every integration is optional and fails closed: unconfigured, its feature report
   that stores only 2xx responses; watchlist routes are uncached. A failed call with no cached
   entry fails loud; nothing serves stale data.
 - **AI** (`services/ai/ai-provider.ts`): per feature (assistant, CSV mapping, enrichment,
-  monthly story, OCR), Azure when `AZURE_OPENAI_*` (or `AZURE_AI_FOUNDRY_*` for enrichment) is
-  complete, else any OpenAI-compatible endpoint via `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`
-  and `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent.
+  monthly story, OCR, PDF statement import), Azure when `AZURE_OPENAI_*` (or `AZURE_AI_FOUNDRY_*` for enrichment) is
+  complete, else Anthropic when `AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY` are set, else any
+  OpenAI-compatible endpoint via `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` and
+  `AI_MODEL_<FEATURE>`, else disabled. A half-configured provider counts as absent. PDF statement import sends page
+  images, so it needs a model named for it (`AI_MODEL_STATEMENT_IMPORT`) on an OpenAI-compatible
+  endpoint. The assistant
+  streams through `services/ai/ai-model.ts`; every other feature calls `completeJson` in
+  `services/ai/complete-json.ts` (`generateObject`).
 - **Email** (`services/email/email-transport.ts`): Resend when `RESEND_API_KEY` is set, SMTP
   when `SMTP_HOST` is, otherwise the log driver writes the whole message, links included, to
   the log. `EMAIL_DRIVER` overrides; `EMAIL_FROM`/`EMAIL_FROM_NAME` set the sender (`RESEND_FROM_*`
   are deprecated fallbacks; don't document them). Templates come from `@wondermoney/react-email`. Sends run as
   pg-boss jobs.
+- **Mobile push** (`services/push`): off unless `PUSH_ENABLED=true`; sends through the Expo push
+  service over HTTP (`expo-push-client.ts`, optional `EXPO_ACCESS_TOKEN`) from the `push-send`
+  queue, which also reads Expo's receipts and disables tokens reported as `DeviceNotRegistered`.
+  A `PushDevice` belongs to the better-auth session it registered with and ends with it. Push
+  categories are separate `push*` switches on `EmailNotificationPreference`, all off by default.
+  Notification text never carries an amount or a merchant (`push-messages.ts`).
 - **File storage** (`services/storage/s3.ts`): AWS S3 or any S3-compatible store (`S3_ENDPOINT`,
   `S3_PUBLIC_ENDPOINT`, `S3_BUCKET`).
+- **Merchant logos** (`services/transaction/merchant-logo.ts`): off unless
+  `MERCHANT_LOGO_URL_TEMPLATE` (an https URL with `{domain}`) is set; then the API fetches the
+  logo for a merchant's website domain itself and serves it from
+  `GET /v1/account/transaction-merchants/:merchantId/logo`, so the provider never sees a viewer.
+  A household's own `logoUrl` wins and is loaded by the clients directly. Unset, nothing is
+  fetched and no logo URL is built.
 - Sentry and PostHog are optional too. Analytics outbox rows are written and delivered only
   with `ANALYTICS_OUTBOX_MODE=live` (`isAnalyticsOutboxEnabled`); the worker purges undelivered
   rows older than 30 days.

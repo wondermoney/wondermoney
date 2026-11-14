@@ -1,6 +1,9 @@
-import OpenAI from '@service/ai/openai';
+import { jsonSchema } from 'ai';
 
-import { parsePortfolioColumnMappingSuggestionJson, portfolioColumnMappingJsonSchema, type PortfolioColumnMappingSuggestion } from './portfolio-csv-column-mapping.schema';
+import { AiCompletionError, completeJson } from '@service/ai/complete-json';
+import { FeatureDisabledError } from '@utils/errors';
+
+import { parsePortfolioColumnMappingSuggestion, portfolioColumnMappingJsonSchema, type PortfolioColumnMappingSuggestion } from './portfolio-csv-column-mapping.schema';
 
 export interface PortfolioCsvColumnMappingOpenAIInput {
   headers: string[];
@@ -20,30 +23,35 @@ const MAX_SAMPLE_ROWS = 5;
 export async function requestPortfolioColumnMappingSuggestion(input: PortfolioCsvColumnMappingOpenAIInput): Promise<PortfolioCsvColumnMappingOpenAIResult> {
   const { headers, rowShapes, sampleRows } = sanitizePortfolioColumnMappingPromptInput(input);
 
-  const { answer, completionTokens, promptTokens, tokens } = await OpenAI.promptWithText({
-    feature: 'csvMapping',
-    messages: [
-      { content: 'You map portfolio CSV columns to WonderMoney portfolio import fields. Identify the real table header row and any footer rows, then return only valid JSON matching the schema.', role: 'system' },
-      { content: JSON.stringify({ headers, rowShapes, sampleRows }), role: 'user' },
-    ],
-    model: 'gpt-5.4-nano',
-    responseFormat: {
-      json_schema: { name: 'portfolio_column_mapping', schema: portfolioColumnMappingJsonSchema, strict: true },
-      type: 'json_schema',
-    },
-  });
-
-  const trimmedAnswer = answer?.trim();
-  if (!trimmedAnswer) throw new Error('portfolio column mapping response missing');
+  let object: unknown;
+  let tokens: { completionTokens: number; promptTokens: number; totalTokens: number };
+  try {
+    const completion = await completeJson({
+      feature: 'csvMapping',
+      schema: jsonSchema(portfolioColumnMappingJsonSchema),
+      schemaName: 'portfolio_column_mapping',
+      system: 'You map portfolio CSV columns to WonderMoney portfolio import fields. Identify the real table header row and any footer rows, then return only valid JSON matching the schema.',
+      user: JSON.stringify({ headers, rowShapes, sampleRows }),
+      // The Azure deployment. Off Azure, `AI_MODEL_CSV_MAPPING` decides.
+      azureDeployment: 'gpt-5.4-nano',
+    });
+    object = completion.object;
+    tokens = completion.tokens;
+  } catch (error) {
+    if (error instanceof FeatureDisabledError) throw error;
+    const empty = error instanceof AiCompletionError && error.empty;
+    // eslint-disable-next-line preserve-caught-error -- deliberately dropped: the provider error carries the model's raw output, which may echo the user's CSV rows, and the logger serializes `cause`.
+    throw new Error(empty ? 'portfolio column mapping response missing' : 'portfolio column mapping invalid response');
+  }
 
   let suggestion: PortfolioColumnMappingSuggestion;
   try {
-    suggestion = parsePortfolioColumnMappingSuggestionJson(trimmedAnswer);
+    suggestion = parsePortfolioColumnMappingSuggestion(object);
   } catch {
     throw new Error('portfolio column mapping invalid response');
   }
 
-  return { suggestion, tokens: { completionTokens, promptTokens, totalTokens: tokens } };
+  return { suggestion, tokens: { completionTokens: tokens.completionTokens, promptTokens: tokens.promptTokens, totalTokens: tokens.totalTokens } };
 }
 
 export function sanitizePortfolioColumnMappingPromptInput(input: PortfolioCsvColumnMappingOpenAIInput): PortfolioCsvColumnMappingOpenAIInput {

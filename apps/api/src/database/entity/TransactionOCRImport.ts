@@ -25,6 +25,13 @@ export class TransactionOCRImport extends Base {
   @Property({ nullable: false })
   fileUrl!: string;
 
+  /**
+   * The object key the receipt was stored under, when file storage is configured. Used to link
+   * the image to the created transaction as its first attachment; null when no copy was kept.
+   */
+  @Property({ length: 512, nullable: true })
+  fileKey?: string;
+
   @Property({ length: 1024, nullable: true })
   llmResponse?: string;
 

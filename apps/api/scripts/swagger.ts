@@ -29,6 +29,7 @@ const doc = {
     { name: 'Configs', description: 'Configuration endpoints' },
     { name: 'Financial Markets', description: 'Financial market data' },
     { name: 'Health', description: 'Health check' },
+    { name: 'Insights', description: 'Deterministic spending and budget insights' },
     { name: 'Marketing', description: 'Marketing operations' },
     { name: 'Portfolio', description: 'Investment portfolio management' },
     { name: 'Support', description: 'Support and feedback' },
@@ -49,9 +50,14 @@ const doc = {
         name: 'x-api-key',
         description: 'Admin API key for admin endpoints',
       },
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Personal API token (`wm_pat_...`) from Settings → API tokens',
+      },
     },
   },
-  security: [{ cookieAuth: [] }],
+  security: [{ cookieAuth: [] }, { bearerAuth: [] }],
 };
 
 const outputFile = './src/generated/swagger.json';

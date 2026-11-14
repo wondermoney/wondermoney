@@ -1,11 +1,15 @@
+import { wrap } from '@mikro-orm/core';
 import { Big } from 'big.js';
 
 import type { Category } from '@entity/Category';
 import type { Transaction } from '@entity/Transaction';
+import type { TransactionSplit } from '@entity/TransactionSplit';
+import { outsideShareLineSql } from '@service/expense-group/expense-group-sql';
 import { amountInCurrencySql } from '@service/reports/report-currency';
 import { big, toNumber } from '@utils/money';
 
 import { type CategorySpendingFlags, effectiveCountsAsSpendingSql } from './category-spending';
+import { netOfReimbursementsSql, reimbursedAmountsSql } from './reimbursement-sql';
 
 /**
  * "Category lines": the parts of a transaction that count towards a category.
@@ -31,6 +35,31 @@ import { type CategorySpendingFlags, effectiveCountsAsSpendingSql } from './cate
  *
  * The JavaScript and SQL versions compute the same numbers: same rounding, same tie-break (largest
  * absolute amount, then position, then key).
+ *
+ * ## Reimbursements
+ *
+ * A refund linked to the expense it offsets (`TransactionReimbursement`) takes the linked amount
+ * off both: the expense spends that much less in its category (pro rata across its split lines),
+ * and the refund is that much less income. Totals read the transaction's amount net of its
+ * reimbursed amount ({@link netOfReimbursements}, `netOfReimbursementsSql`): the amount scaled by
+ * `max(|settlement| - reimbursed, 0) / |settlement|`, rounded half away from zero to 4 decimals,
+ * so in the settlement currency it is exactly the amount less the linked total, and in any other
+ * currency it follows the transaction's own conversion. The lines then share out the net amount
+ * as above. A fully reimbursed expense still has its lines, for nothing.
+ *
+ * ## Expense groups
+ *
+ * A transaction shared in an expense group is split by person (`TransactionSplit` lines carrying
+ * `expenseGroupMemberKey`). A share of a member of the household is a line like any other. A share
+ * of someone outside the household is not the household's money: it is taken off the transaction
+ * with the reimbursements (`expense-group/expense-group-sql.ts`) and the line itself is left out,
+ * so the household's own lines share out what is left and each count exactly their amount. A 60
+ * dinner shared by three, one of them you, counts 20 in its category. A linked settlement is taken
+ * off the same way, so a friend paying you back is not income.
+ *
+ * {@link spendingLinesOf} and {@link categoryLinesSql} (every total) read the net amount over the
+ * household's own lines; {@link categoryLinesOf} is the plain allocation of whatever amount it is
+ * handed over every line (a split's lines shown on a row).
  */
 
 /** Scale of the money columns (`numeric(18,4)`). */
@@ -77,6 +106,8 @@ export const CATEGORY_LINE_POPULATE = [
   'appuserTransactionCategories.categoryKey.parentCategory',
   'splits.categoryKey',
   'splits.categoryKey.parentCategory',
+  'splits.expenseGroupMemberKey',
+  'reimbursedAmount',
 ] as const;
 
 /**
@@ -88,6 +119,34 @@ export function categoryLinesOf(transaction: Transaction, amount: null | number)
   if (splits.length === 0) {
     return [{ amount, category: transaction.appuserTransactionCategories.getItems()[0]?.categoryKey ?? null, notes: null, transactionSplitKey: null }];
   }
+  return allocateOver(splits, amount);
+}
+
+/**
+ * The household's own category lines of `transaction` for `amount`: as {@link categoryLinesOf},
+ * without the shares of people outside the household (see "Expense groups" above), which count
+ * nowhere. A transaction shared only by others has none.
+ */
+export function householdLinesOf(transaction: Transaction, amount: null | number): CategoryLine[] {
+  const splits = liveSplitsOf(transaction);
+  if (splits.length === 0) return categoryLinesOf(transaction, amount);
+  const own = splits.filter((split) => !isOutsideShare(split));
+  return own.length === 0 ? [] : allocateOver(own, amount);
+}
+
+/**
+ * Whether the split line is the share of someone outside the household. The member must be
+ * populated (`CATEGORY_LINE_POPULATE`), or it throws: the line would count as the household's.
+ */
+export function isOutsideShare(split: TransactionSplit): boolean {
+  const member = split.expenseGroupMemberKey;
+  if (!member) return false;
+  const helper = wrap(member, true);
+  if (helper.__managed && !helper.isInitialized()) throw new Error('Populate Transaction.splits.expenseGroupMemberKey (CATEGORY_LINE_POPULATE) before reading category lines');
+  return member.appuserKey == null;
+}
+
+function allocateOver(splits: TransactionSplit[], amount: null | number): CategoryLine[] {
   const ordered = [...splits].sort((a, b) => a.position - b.position || a.transactionSplitKey - b.transactionSplitKey);
   const shares = amount === null ? ordered.map(() => null) : allocateProRata(amount, ordered.map((split) => split.amount));
   return ordered.map((split, index) => ({
@@ -113,10 +172,31 @@ function liveSplitsOf(transaction: Transaction) {
 /**
  * The category lines of `transaction` that are spending for the household whose `flags` these are
  * (`category-spending.ts`): a line in "Investments and savings", or in any category the household
- * does not count as spending, is left out, and only that line of a split.
+ * does not count as spending, is left out, and only that line of a split. The lines share out
+ * `amount` net of the transaction's reimbursements ({@link netOfReimbursements}).
  */
 export function spendingLinesOf(transaction: Transaction, amount: null | number, flags: CategorySpendingFlags): CategoryLine[] {
-  return categoryLinesOf(transaction, amount).filter((line) => flags.countsAsSpending(line.category));
+  return householdLinesOf(transaction, netOfReimbursements(transaction, amount)).filter((line) => flags.countsAsSpending(line.category));
+}
+
+/**
+ * `amount` (the transaction's amount in the caller's currency) net of what the reimbursement links
+ * on the transaction take off it; see "Reimbursements" above. A loaded transaction must have
+ * `reimbursedAmount` populated ({@link CATEGORY_LINE_POPULATE}), or it throws: it would count a
+ * refunded expense whole. A plain object without it (a hand-built row) has none.
+ */
+export function netOfReimbursements(transaction: Pick<Transaction, 'editedSettlementAmount' | 'reimbursedAmount' | 'settlementAmount'>, amount: null | number): null | number {
+  const reimbursed = transaction.reimbursedAmount;
+  if (reimbursed === undefined) {
+    if (wrap(transaction, true).__managed) throw new Error('Populate Transaction.reimbursedAmount (CATEGORY_LINE_POPULATE) before reading spending lines');
+    return amount;
+  }
+  const settlement = transaction.editedSettlementAmount ?? transaction.settlementAmount;
+  if (amount === null || big(reimbursed).eq(0) || settlement == null || big(settlement).eq(0)) return amount;
+  const whole = big(settlement).abs();
+  const kept = whole.minus(big(reimbursed));
+  if (kept.lte(0)) return 0;
+  return toNumber(big(amount).times(kept).div(whole).round(SHARE_SCALE, Big.roundHalfUp), SHARE_SCALE);
 }
 
 /** Whether the transaction is split. Populate `splits` first. */
@@ -134,7 +214,8 @@ export function hasLineInCategories(transaction: Transaction, categoryKeys: Iter
  * The category lines of a household's transactions as a SQL derived table, the counterpart of
  * {@link categoryLinesOf}. One row per line, with columns:
  *
- * - `transaction_key`, `category_key` (null: uncategorized);
+ * - `transaction_key`, `category_key` (null: uncategorized); the household's own lines only, so a
+ *   share of someone outside the household in an expense group has no row (see "Expense groups");
  * - `appuser_settlement_amount`: the line's share of the transaction's amount in the user's
  *   currency, null when the transaction has none. Named like the transaction column so the
  *   amount helpers in `utils/account-amounts.ts` read it unchanged;
@@ -149,13 +230,18 @@ export function hasLineInCategories(transaction: Transaction, categoryKeys: Iter
  * settlement amount when the transaction was settled in that currency, else the amount in the
  * user's currency. The column keeps its name.
  *
+ * Either way the amount is net of the transaction's reimbursements (`netOfReimbursementsSql`), as
+ * {@link spendingLinesOf} reads it.
+ *
  * Scoped to `tenantKey`, which is inlined (validated as an integer) so the fragment can be used
  * from both Kysely and raw SQL. Callers still apply their own transaction conditions (tenant,
  * privacy, status, dates) through their join to `transaction`.
  */
 export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyKey?: number } = {}): string {
   if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
-  const base = options.amountInCurrencyKey === undefined ? 't.appuser_settlement_amount' : amountInCurrencySql('t', options.amountInCurrencyKey);
+  const gross = options.amountInCurrencyKey === undefined ? 't.appuser_settlement_amount' : amountInCurrencySql('t', options.amountInCurrencyKey);
+  const base = netOfReimbursementsSql('t', gross, 'line_reimbursed.reimbursed_amount');
+  const reimbursed = `left join ${reimbursedAmountsSql(tenantKey)} line_reimbursed on line_reimbursed.transaction_key = t.transaction_key`;
   const shares = `
     select ranked.*, sum(ranked.share) over (partition by ranked.transaction_key) as share_total
     from (
@@ -165,7 +251,8 @@ export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyK
         row_number() over (partition by s.transaction_key order by abs(s.amount) desc, s.position asc, s.transaction_split_key asc) as line_rank
       from "transaction_split" s
       join "transaction" t on t.transaction_key = s.transaction_key
-      where s.deleted_at is null and s.tenant_key = ${tenantKey}
+      ${reimbursed}
+      where s.deleted_at is null and s.tenant_key = ${tenantKey} and not ${outsideShareLineSql('s')}
     ) ranked`;
   const lines = `
     select split.transaction_key, split.category_key,
@@ -177,6 +264,7 @@ export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyK
       null::int as transaction_split_key, a.appuser_transaction_category_key, a.appuser_key
     from "appuser_transaction_category" a
     join "transaction" t on t.transaction_key = a.transaction_key
+    ${reimbursed}
     where a.deleted_at is null and t.tenant_key = ${tenantKey}
       and not exists (select 1 from "transaction_split" s where s.transaction_key = a.transaction_key and s.deleted_at is null)`;
   return `(
@@ -191,7 +279,7 @@ export function categoryLinesSql(tenantKey: number, options: { amountInCurrencyK
  * SQL: the transaction aliased `alias` has a category line that counts as spending for the
  * household `tenantKey`, the row-level counterpart of {@link spendingLinesOf} (some line kept). An
  * unsplit transaction has one line, its category assignment (none: uncategorized, which counts); a
- * split one counts when any live line does. `tenantKey` is inlined, validated as an integer.
+ * split one counts when any live line of the household's own does. `tenantKey` is inlined, validated as an integer.
  */
 export function hasSpendingLineSql(alias: string, tenantKey: number): string {
   if (!Number.isSafeInteger(tenantKey)) throw new TypeError('tenantKey must be an integer');
@@ -201,7 +289,7 @@ export function hasSpendingLineSql(alias: string, tenantKey: number): string {
       left join "category" spending_parent on spending_parent.category_key = spending_category.parent_category_category_key`;
   return `(case when exists (select 1 from "transaction_split" live_split where live_split.transaction_key = ${row}."transaction_key" and live_split.deleted_at is null)
     then exists (select 1 from "transaction_split" spending_line ${categories}
-      where spending_line.transaction_key = ${row}."transaction_key" and spending_line.deleted_at is null and ${counts})
+      where spending_line.transaction_key = ${row}."transaction_key" and spending_line.deleted_at is null and not ${outsideShareLineSql('spending_line')} and ${counts})
     else not exists (select 1 from "appuser_transaction_category" spending_line ${categories}
       where spending_line.transaction_key = ${row}."transaction_key" and spending_line.deleted_at is null and not ${counts})
   end)`;

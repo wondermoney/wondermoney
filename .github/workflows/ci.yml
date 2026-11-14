@@ -5,8 +5,16 @@ name: CI
 # the packages that have it. Pushes and manual runs check everything; a pull request that changes
 # only apps/ and packages/ checks the packages it affects and skips the jobs of the apps it does
 # not (.github/scripts/ci-scope.sh, the "Affected apps" job).
+#
+# "Type-check, lint, test and build", the last job, is the one check to wait on: it needs every
+# other job and passes only when none of them failed or was cancelled.
 on:
+  # Not the release pull request (develop into main, release-pr.yml): its head is develop's head
+  # commit, whose push run below already reports the required check on it, and the merge it would
+  # test has develop's tree exactly (main only ever receives develop). Running it again took a
+  # second full set of runners on every merge to develop.
   pull_request:
+    branches-ignore: [main]
   push:
     branches: [develop, main]
   workflow_dispatch:
@@ -33,6 +41,9 @@ jobs:
   # Which apps a pull request affects, for the jobs that don't run through turbo (the API, web
   # E2E and mobile extras): every app on a full run, otherwise the ones `turbo ls --affected`
   # lists (an app is affected by its own changes and by those of the packages it depends on).
+  # It also reports whether the self-hosting files changed, for the shellcheck and install jobs,
+  # and whether the Helm chart did, for the chart job: those build images, so they stay off an
+  # unrelated change.
   changes:
     name: Affected apps
     runs-on: ubuntu-latest
@@ -41,6 +52,8 @@ jobs:
       api: ${{ steps.apps.outputs.api }}
       web: ${{ steps.apps.outputs.web }}
       mobile: ${{ steps.apps.outputs.mobile }}
+      selfhost: ${{ steps.apps.outputs.selfhost }}
+      chart: ${{ steps.apps.outputs.chart }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -48,15 +61,6 @@ jobs:
           persist-credentials: false
       - id: scope
         run: .github/scripts/ci-scope.sh
-      - if: steps.scope.outputs.affected != ''
-        uses: pnpm/action-setup@v6
-      - if: steps.scope.outputs.affected != ''
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - if: steps.scope.outputs.affected != ''
-        run: pnpm install --frozen-lockfile --ignore-scripts
       - id: apps
         env:
           AFFECTED: ${{ steps.scope.outputs.affected }}
@@ -64,16 +68,45 @@ jobs:
           if [ -z "$AFFECTED" ]; then
             packages='["@wondermoney/api","@wondermoney/web","@wondermoney/mobile"]'
           else
-            packages=$(pnpm turbo ls --affected --output=json | sed -n '/^{/,$p' | jq -c '[.packages.items[].name]')
+            # `turbo ls` reads the workspace's manifests and lockfile, not node_modules: the turbo
+            # version the lockfile pins, run through npx on the runner's own Node, answers in a
+            # few seconds instead of the ~45 that a pnpm install took on this job, which every
+            # gated job below waits for.
+            turbo=$(awk '/^  \.:$/ { root = 1; next } root && /^      turbo:$/ { getline; getline; print $2; exit }' pnpm-lock.yaml)
+            [ -n "$turbo" ] || { echo "::error::No turbo version for the workspace root in pnpm-lock.yaml"; exit 1; }
+            packages=$(npx --yes "turbo@$turbo" ls --affected --output=json | sed -n '/^{/,$p' | jq -c '[.packages.items[].name]')
           fi
           echo "Affected: $packages"
           for app in api web mobile; do
             echo "$app=$(jq -r --arg p "@wondermoney/$app" 'index($p) != null' <<<"$packages")" >> "$GITHUB_OUTPUT"
           done
 
+          # The self-hosting files the installer and the compose file live in, and the two
+          # workflows that ship them. A run with no base commit to compare against runs the jobs.
+          selfhost=false
+          if changed=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            if grep -qE '^(apps/api/deploy/selfhost/|\.github/workflows/(ci|publish-images)\.yml$)' <<<"$changed"; then
+              selfhost=true
+            fi
+          else
+            selfhost=true
+          fi
+          echo "selfhost=$selfhost" >> "$GITHUB_OUTPUT"
+
+          # The Helm chart and its kind test, for the chart job: it builds images too.
+          chart=false
+          if changed=$(git diff --name-only HEAD^1 HEAD 2>/dev/null); then
+            if grep -qE '^(charts/|\.github/scripts/chart-kind-test\.sh$)' <<<"$changed"; then
+              chart=true
+            fi
+          else
+            chart=true
+          fi
+          echo "chart=$chart" >> "$GITHUB_OUTPUT"
+
   # Type-check, lint, the tests of every package but the API, and the builds run as parallel jobs;
-  # "Type-check, lint, test and build", further down, gathers them under the one check name they
-  # used to share as a single job.
+  # "Type-check, lint, test and build", the last job, gathers them and every other job under one
+  # check.
   #
   # Each of these jobs keeps turbo's cache between runs with actions/cache, keyed by job, resolved
   # Node version and commit; a run restores the newest entry of its branch or of the base branch.
@@ -83,32 +116,60 @@ jobs:
   # globalDependencies in turbo.json (a lockfile or workspace change re-runs everything). On a
   # full run the prune step then drops the entries this run did not use, so the cache does not
   # grow; an affected-only pull request run keeps them all, as it used only some.
+  #
+  # The API's type-check and typed lint run on a runner of their own, the rest of the workspace on
+  # another: on one runner, two at a time (memory), the API's pair came last and the job took 4-5
+  # minutes, the longest of the run after the API tests.
   lint:
-    name: Type-check and lint
+    name: Type-check and lint (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: api
+            name: API
+            filter: '@wondermoney/api'
+          - id: rest
+            name: everything else
+            filter: '!@wondermoney/api'
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - id: scope
         run: .github/scripts/ci-scope.sh
-      - uses: pnpm/action-setup@v6
       - id: node
-        uses: actions/setup-node@v7
+        uses: ./.github/actions/setup-workspace
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          docs: ${{ matrix.id == 'rest' }}
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
-          key: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
-          restore-keys: turbo-lint-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
-      # Two at a time: the API's type-check and typed lint each need up to 4 GB.
-      - run: pnpm turbo run type-check lint ${{ steps.scope.outputs.affected }} --concurrency=2 --summarize
+          key: turbo-lint-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
+          restore-keys: turbo-lint-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
+      # Two at a time: the API's type-check and typed lint each need up to 4 GB, and so do web's.
+      - run: pnpm turbo run type-check lint ${{ steps.scope.outputs.affected }} --filter='${{ matrix.filter }}' --concurrency=2 --summarize
       - if: steps.scope.outputs.affected == ''
         run: .github/scripts/prune-turbo-cache.sh
+
+  # The self-hosting scripts are shell, which no turbo task covers: apps/api/deploy/selfhost is
+  # not a package. install.sh is what a new instance runs first, and backup/backup.sh runs on the
+  # Alpine (busybox) images of the backup services, so all of them are checked as POSIX sh.
+  shellcheck:
+    name: Shellcheck
+    needs: changes
+    if: needs.changes.outputs.selfhost == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      # The runner image ships shellcheck; the fallback is for the day it stops.
+      - name: Install shellcheck if the runner lacks it
+        run: command -v shellcheck >/dev/null || { sudo apt-get update && sudo apt-get install -y shellcheck; }
+      - name: shellcheck
+        run: shellcheck -s sh apps/api/deploy/selfhost/install.sh apps/api/deploy/selfhost/generate-env.sh apps/api/deploy/selfhost/backup/backup.sh
 
   # The tests of every package but the API (the "API tests" jobs, on runners of their own:
   # sharing a runner with other packages' tests pushed some past their timeouts) and the mobile
@@ -123,13 +184,11 @@ jobs:
           fetch-depth: 2
       - id: scope
         run: .github/scripts/ci-scope.sh
-      - uses: pnpm/action-setup@v6
       - id: node
-        uses: actions/setup-node@v7
+        uses: ./.github/actions/setup-workspace
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          # This job runs on every push, so it is the one that saves node_modules for Node 26.
+          save: 'true'
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -141,8 +200,12 @@ jobs:
       - if: steps.scope.outputs.affected == ''
         run: .github/scripts/prune-turbo-cache.sh
 
+  # Only when the mobile app is affected: on a pull request that leaves it alone, turbo would run
+  # nothing here, after the same minute and a half of setup on a runner other jobs are queued for.
   mobile-test:
     name: Mobile tests
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -151,13 +214,8 @@ jobs:
           fetch-depth: 2
       - id: scope
         run: .github/scripts/ci-scope.sh
-      - uses: pnpm/action-setup@v6
       - id: node
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-workspace
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
@@ -200,18 +258,26 @@ jobs:
           fetch-depth: 2
       - id: scope
         run: .github/scripts/ci-scope.sh
-      - uses: pnpm/action-setup@v6
       - id: node
-        uses: actions/setup-node@v7
+        uses: ./.github/actions/setup-workspace
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          docs: ${{ matrix.id == 'rest' }}
       - uses: actions/cache@v6
         with:
           path: .turbo/cache
           key: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ github.sha }}
           restore-keys: turbo-build-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-
+      # Next.js's own build cache (webpack's persistent cache, for web and docs), for the builds
+      # turbo cannot replay because their inputs changed: an incremental webpack build instead of
+      # a cold one. Restored on every run, saved only by pushes (develop's newest build, which
+      # pull requests read too), so pull requests don't each add a few hundred megabytes to the
+      # repository's cache. Keyed by lockfile; webpack checks the rest itself.
+      - id: next-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: apps/*/.next/cache
+          key: next-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: next-${{ matrix.id }}-${{ runner.os }}-node${{ steps.node.outputs.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}-
       - name: Build
         run: pnpm turbo run build ${{ steps.scope.outputs.affected }} --filter='${{ matrix.filter }}' --concurrency=1 --summarize
         env:
@@ -219,6 +285,203 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://docs.wonder.money
       - if: steps.scope.outputs.affected == ''
         run: .github/scripts/prune-turbo-cache.sh
+      # Only when a Next.js build ran (turbo did not replay it), or the save would store again
+      # the cache it restored.
+      - id: next-built
+        if: github.event_name == 'push'
+        run: |
+          built=$(jq -s '[.[].tasks[] | select((.taskId | test("#build$")) and (.taskId | test("^@wondermoney/(web|docs)#")) and .cache.status == "MISS")] | length > 0' .turbo/runs/*.json)
+          echo "built=$built" >> "$GITHUB_OUTPUT"
+      - if: steps.next-built.outputs.built == 'true' && hashFiles('apps/*/.next/cache/**') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: apps/*/.next/cache
+          key: ${{ steps.next-cache.outputs.cache-primary-key }}
+
+  # The installer, end to end: builds the three images from this commit, runs install.sh --yes
+  # against them (the --source flag copies the compose file and generate-env.sh from the
+  # checkout instead of a release tag), waits for the health endpoint, then runs it again and
+  # checks that .env is unchanged. Gated on the self-hosting files: the image build is the
+  # expensive part, and nothing else in the tree can break the compose contract.
+  install:
+    name: Install script
+    needs: changes
+    if: needs.changes.outputs.selfhost == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VERSION: ci
+    steps:
+      - uses: actions/checkout@v7
+      # The Dockerfiles use `RUN --mount=type=cache`, which the classic builder does not support.
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the images the installer starts
+        run: |
+          set -euo pipefail
+          for target in api worker; do
+            docker buildx build --load --target "$target" \
+              -f apps/api/Dockerfile \
+              --build-arg WM_VERSION="$VERSION" \
+              -t "ghcr.io/wondermoney/wondermoney-$target:$VERSION" .
+          done
+          docker buildx build --load --target runner \
+            -f apps/web/Dockerfile \
+            --build-arg WM_VERSION="$VERSION" \
+            -t "ghcr.io/wondermoney/wondermoney-web:$VERSION" .
+      - name: Install
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+          # A runner's first boot is slower than a real host's; the installer's own default is
+          # 180 seconds.
+          WM_HEALTH_TIMEOUT: '300'
+        run: |
+          sh apps/api/deploy/selfhost/install.sh --yes --version "$VERSION" \
+            --source apps/api/deploy/selfhost --dir "$DIR"
+          curl -fsS "http://127.0.0.1:3001/v1/health"
+      - name: Re-running leaves .env alone
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          set -euo pipefail
+          before=$(sha256sum "$DIR/.env")
+          sh apps/api/deploy/selfhost/install.sh --yes --version "$VERSION" \
+            --source apps/api/deploy/selfhost --dir "$DIR"
+          after=$(sha256sum "$DIR/.env")
+          if [ "$before" != "$after" ]; then
+            echo "::error::.env changed on a re-run: $before -> $after"
+            exit 1
+          fi
+          echo "Re-run left .env byte-for-byte unchanged."
+      # The backup services' one-off commands on the installed stack (README.md, "Back up"): a
+      # marker table survives backup now, a drop and restore; restore refuses while the API runs;
+      # backup-offsite copies the backup to a local path (a valid rclone destination).
+      - name: Backup, restore and off-site copy
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          set -euo pipefail
+          cd "$DIR"
+          sql() {
+            docker compose exec -T postgres psql -U wondermoney -d wondermoney -XAtq -v ON_ERROR_STOP=1 -c "$1"
+          }
+          sql "CREATE TABLE ci_backup_marker (v text); INSERT INTO ci_backup_marker VALUES ('kept')"
+          docker compose run --rm -T backup now
+          stamp=$(docker compose run --rm -T backup list | awk 'END { print $1 }')
+          sql "DROP TABLE ci_backup_marker"
+          if docker compose run --rm -T backup restore latest --yes; then
+            echo "::error::restore ran while the API was running"
+            exit 1
+          fi
+          docker compose stop web worker api
+          docker compose run --rm -T backup restore "$stamp" --yes
+          test "$(sql 'SELECT v FROM ci_backup_marker')" = kept
+          docker compose up -d
+          curl -fsS --retry 60 --retry-delay 5 --retry-all-errors -o /dev/null "http://127.0.0.1:3001/v1/health"
+
+          docker compose run --rm -T -v "$RUNNER_TEMP/offsite:/offsite" \
+            -e BACKUP_DESTINATION=/offsite/wondermoney backup-offsite now
+          docker compose run --rm -T -v "$RUNNER_TEMP/offsite:/offsite" \
+            -e BACKUP_DESTINATION=/offsite/wondermoney backup-offsite list | grep -qx "$stamp"
+          sudo test -s "$RUNNER_TEMP/offsite/wondermoney/$stamp/wondermoney.dump"
+      - name: Compose logs
+        if: failure()
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          if [ -f "$DIR/docker-compose.yml" ]; then
+            docker compose -f "$DIR/docker-compose.yml" logs --tail 100
+          fi
+      - name: Stop
+        if: always()
+        env:
+          DIR: ${{ runner.temp }}/wondermoney
+        run: |
+          if [ -f "$DIR/docker-compose.yml" ]; then
+            docker compose -f "$DIR/docker-compose.yml" down -v
+          fi
+
+  # The Helm chart (charts/wondermoney): lint, render the one- and two-hostname variants, then
+  # install it into a kind cluster with images built from this checkout, the images a release
+  # publishes alongside the chart. .github/scripts/chart-kind-test.sh checks readiness, routing,
+  # that an upgrade keeps the generated secrets, and that the worker refuses to scale. Gated on
+  # the chart's files: the image build is the expensive part.
+  chart:
+    name: Helm chart
+    needs: changes
+    if: needs.changes.outputs.chart == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CHART: charts/wondermoney
+      IMAGE_TAG: ci
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
+      - name: helm lint
+        run: |
+          set -euo pipefail
+          helm lint --strict "$CHART" --set postgresql.enabled=true
+          for values in "$CHART"/ci/*-values.yaml; do
+            helm lint --strict "$CHART" -f "$values"
+          done
+      - name: helm template
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/rendered"
+          helm template wm "$CHART" --set postgresql.enabled=true > "$RUNNER_TEMP/rendered/bundled-postgres.yaml"
+          for values in "$CHART"/ci/*-values.yaml; do
+            helm template wm "$CHART" -f "$values" > "$RUNNER_TEMP/rendered/$(basename "$values")"
+          done
+          # Settings the chart must refuse.
+          if helm template wm "$CHART" --set postgresql.enabled=true --set worker.replicas=2 >/dev/null 2>&1; then
+            echo "::error::helm template accepted worker.replicas=2"
+            exit 1
+          fi
+          if helm template wm "$CHART" >/dev/null 2>&1; then
+            echo "::error::helm template rendered without any database"
+            exit 1
+          fi
+      # The Dockerfiles use `RUN --mount=type=cache`, which the classic builder does not support.
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the images
+        run: |
+          set -euo pipefail
+          for target in api worker; do
+            docker buildx build --load --target "$target" \
+              -f apps/api/Dockerfile \
+              --build-arg WM_VERSION="$IMAGE_TAG" \
+              -t "ghcr.io/wondermoney/wondermoney-$target:$IMAGE_TAG" .
+          done
+          docker buildx build --load --target runner \
+            -f apps/web/Dockerfile \
+            --build-arg WM_VERSION="$IMAGE_TAG" \
+            -t "ghcr.io/wondermoney/wondermoney-web:$IMAGE_TAG" .
+      - uses: helm/kind-action@v1
+        with:
+          version: v0.33.0
+          cluster_name: chart
+      - name: Load the images into kind
+        run: |
+          set -euo pipefail
+          for image in api worker web; do
+            kind load docker-image --name chart "ghcr.io/wondermoney/wondermoney-$image:$IMAGE_TAG"
+          done
+      - name: Validate the rendered manifests against the cluster
+        run: kubectl apply --dry-run=server -f "$RUNNER_TEMP/rendered/"
+      - name: Install, upgrade and check
+        run: .github/scripts/chart-kind-test.sh
+      - name: Cluster state
+        if: failure()
+        run: |
+          kubectl get pods -A
+          kubectl -n wondermoney describe pods
+          for component in api worker web postgresql; do
+            kubectl -n wondermoney logs -l "app.kubernetes.io/component=$component" --all-containers --tail 100 || true
+          done
 
   # Secrets and text that must not be published in this public repository. gitleaks checks a pull
   # request's commits (a push: the whole tree) against the default rules and the allowlist in
@@ -272,24 +535,6 @@ jobs:
           fi
           .github/scripts/leak-check.sh ${HEAD_SHA:+"$BASE_SHA..$HEAD_SHA"}
 
-  # The single check these jobs replaced, kept so anything that looks for it by name still finds
-  # it: it passes only when every one of them passed. It gathers the leak check too, so the
-  # required check covers it, and "Affected apps", so a failure there can't pass by skipping the
-  # app jobs that depend on it.
-  checks:
-    name: Type-check, lint, test and build
-    needs: [changes, lint, test, mobile-test, build, leak-check]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Require every check job to have passed
-        env:
-          NEEDS: ${{ toJSON(needs) }}
-        run: |
-          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
-          jq -e 'all(.[]; .result == "success")' <<<"$NEEDS" >/dev/null
-
   api:
     name: API extras
     needs: changes
@@ -313,13 +558,26 @@ jobs:
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-workspace
       - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      - name: Check the public token OpenAPI document is current
+        run: pnpm run openapi -- --check
+      # The Render Blueprint (render.yaml) against Render's published schema, then against what
+      # the API, the worker and the web app need to start (scripts/render-blueprint.ts). Its pinned
+      # images must be a published release; a newer release only warns, as the reminder to bump
+      # them (CONTRIBUTING.md, "Releasing").
+      - name: Check the Render Blueprint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pipx run check-jsonschema==0.39.0 --schemafile https://render.com/schema/render.yaml.json ../../render.yaml
+          if WM_RELEASES=$(gh release list --repo wondermoney/wondermoney --exclude-drafts --exclude-pre-releases \
+            --json tagName,isLatest --jq '(map(select(.isLatest)) + map(select(.isLatest | not))) | map(.tagName)'); then
+            export WM_RELEASES
+          else
+            echo "::warning::Could not list the releases; skipping the check of the pinned version."
+          fi
+          pnpm run render:check
       - name: Check the OpenAPI spec is not stale
         run: |
           pnpm run swagger
@@ -356,11 +614,20 @@ jobs:
         continue-on-error: true
         run: pnpm audit --prod --audit-level high
 
-  # The API suite (~4,400 tests) split across runners. Each shard records its results and coverage
-  # in a blob report; "API coverage" merges them and enforces the thresholds once, on the whole
-  # suite (vitest.config.ts: a shard's own coverage is partial, so it checks none).
+  # The API suite (~6,500 tests in ~630 files) split across runners. Each shard records its
+  # results and coverage in a blob report; "API coverage" merges them and enforces the thresholds
+  # once, on the whole suite (vitest.config.ts: a shard's own coverage is partial, so it checks
+  # none).
+  #
+  # Six shards. With three, the test step took 260-470 s per shard (about 1,050 s in all, half of
+  # it importing modules, which is per file and so splits evenly), on top of ~75 s of setup, and
+  # the slowest shard plus the coverage merge set the run's wall clock at 9-10 minutes. Six bring a
+  # shard to ~4 minutes, level with the next-longest jobs (the web build, the API's type-check and
+  # lint), so more would mostly add runners: a pull request already starts ~15 jobs and the
+  # account runs 20 at a time, shared by every open pull request and develop's pushes. Vitest
+  # splits by file count, not duration, so shards still differ by up to a minute.
   api-tests:
-    name: API tests (${{ matrix.shard }}/3)
+    name: API tests (${{ matrix.shard }}/${{ strategy.job-total }})
     needs: changes
     if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
@@ -369,7 +636,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4, 5, 6]
     defaults:
       run:
         working-directory: apps/api
@@ -387,19 +654,15 @@ jobs:
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-workspace
       - run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
-      - name: Tests (shard ${{ matrix.shard }} of 3)
+      - name: Tests (shard ${{ matrix.shard }} of ${{ strategy.job-total }})
         env:
           # Lets the tests that need several real sessions (pg-test-db.ts) run; skipped elsewhere.
           TEST_POSTGRES_URL: postgres://postgres:ci@localhost:5432/wmdb
           VITEST_COVERAGE_PARTIAL: '1'
-        run: pnpm exec vitest run --coverage --shard=${{ matrix.shard }}/3 --reporter=dot --reporter=blob
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm exec vitest run --coverage --shard="$SHARD" --reporter=dot --reporter=blob
       - uses: actions/upload-artifact@v7
         with:
           name: api-test-blob-${{ matrix.shard }}
@@ -418,12 +681,7 @@ jobs:
         working-directory: apps/api
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-workspace
       - uses: actions/download-artifact@v8
         with:
           pattern: api-test-blob-*
@@ -433,6 +691,49 @@ jobs:
       # thresholds in vitest.config.ts on the merged coverage.
       - name: Merge shard reports and enforce coverage thresholds
         run: pnpm exec vitest run --merge-reports --coverage --reporter=dot
+
+  # The API's perf tier (issue #316): the suite's elapsed-time assertions (the large-import
+  # tests), kept out of the default run so a loaded machine can't fail them. `test:perf` sets
+  # VITEST_PERF=1 itself and records no coverage. It runs on a runner of its own, beside the
+  # shards, so no other work on the machine skews its timings.
+  #
+  # Until apps/api/package.json has the `test:perf` script (it arrives with the test
+  # infrastructure change of #316), the job stops after the checkout and passes: it can merge
+  # before or after that change. Once the script is on develop, the check step can go.
+  api-perf:
+    name: API perf tier
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: wmdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - id: script
+        run: |
+          if jq -e '.scripts["test:perf"]' apps/api/package.json >/dev/null; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::apps/api has no test:perf script yet; nothing to run."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.script.outputs.present == 'true'
+        uses: ./.github/actions/setup-workspace
+      - if: steps.script.outputs.present == 'true'
+        run: pnpm --filter @wondermoney/shared --filter @wondermoney/react-email run build:lib
+      - if: steps.script.outputs.present == 'true'
+        env:
+          TEST_POSTGRES_URL: postgres://postgres:ci@localhost:5432/wmdb
+        run: pnpm --filter @wondermoney/api test:perf
 
   # Browser smoke tests: the Cypress specs that need only the web dev server (anonymous
   # redirects, login page, mobile navigation). No API or database is started; the
@@ -450,12 +751,7 @@ jobs:
         working-directory: apps/web
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-workspace
       # `cypress: false` in allowBuilds keeps the binary out of every install, so fetch it
       # here only, cached per lockfile.
       - uses: actions/cache@v6
@@ -490,13 +786,12 @@ jobs:
         working-directory: apps/mobile
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
       # Expo tooling stays on Node 24 until Expo states Node 26 support.
-      - uses: actions/setup-node@v7
+      - uses: ./.github/actions/setup-workspace
         with:
           node-version-file: apps/mobile/.nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          # The only job on Node 24, so it saves that node_modules.
+          save: 'true'
       - name: Validate EAS configuration syntax
         run: node -e "JSON.parse(require('node:fs').readFileSync('eas.json', 'utf8'))"
       # Reported, not enforced, for the same reason as Expo Doctor below: Expo's SDK patch
@@ -510,3 +805,48 @@ jobs:
       - name: Run Expo Doctor
         continue-on-error: true
         run: pnpm dlx expo-doctor@1.20.1
+
+  # The one check to wait on, and the one branch protection requires on develop and main (it
+  # keeps the name of the single job the parallel ones above replaced, so that setting, the
+  # release pull request and anything else that looks for it by name still find it). It needs
+  # every other job in this file and passes when none of them failed or was cancelled. A job
+  # skipped by its gate (an app the pull request doesn't affect, the self-hosting or chart files
+  # untouched) counts as passed: a job is skipped otherwise only when a job it needs failed, and
+  # that job is in the list too. "Affected apps", which the gates read, must have succeeded.
+  #
+  # Every job must be listed in needs: the first step fails, naming it, when one is not.
+  checks:
+    name: Type-check, lint, test and build
+    needs: [changes, lint, shellcheck, test, mobile-test, build, install, chart, leak-check, api, api-tests, api-coverage, api-perf, web-e2e, mobile]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/workflows/ci.yml
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Require every job of this workflow to be listed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          SELF: ${{ github.job }}
+        run: |
+          jobs=$(yq -o=json '.jobs | keys' .github/workflows/ci.yml | jq -r --arg self "$SELF" '.[] | select(. != $self)' | sort)
+          listed=$(jq -r 'keys[]' <<<"$NEEDS" | sort)
+          missing=$(comm -23 <(echo "$jobs") <(echo "$listed"))
+          if [ -n "$missing" ]; then
+            echo "::error::Jobs missing from the needs of \"Type-check, lint, test and build\": $(paste -sd ' ' <<<"$missing")"
+            exit 1
+          fi
+      - name: Require every job to have passed or been skipped by its gate
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "::error::Affected apps did not succeed"; exit 1; }
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | .key' <<<"$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Not passed: $(paste -sd ' ' <<<"$failed")"
+            exit 1
+          fi

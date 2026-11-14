@@ -1,0 +1,730 @@
+{
+  "version": 1,
+  "description": "Synthetic golden set for CSV column mapping: bank statement exports (`account`) and broker exports (`portfolio`). Invented rows; tickers are placeholders. `account` expects 0-based column indexes per field, `portfolio` expects the header name per field.",
+  "items": [
+    {
+      "id": "acc-01",
+      "kind": "account",
+      "language": "en",
+      "note": "plain signed amount and balance",
+      "csv": "Date,Description,Amount,Balance\n02/04/2026,Corner Grocers,-23.40,1520.11\n03/04/2026,Salary Acme Widgets,2100.00,3620.11\n05/04/2026,Bean There Coffee,-3.20,3616.91\n08/04/2026,Fibrenet Broadband,-29.99,3586.92\n11/04/2026,Riverside Lettings rent,-950.00,2636.92\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-02",
+      "kind": "account",
+      "language": "pt",
+      "note": "booking and value dates, signed amount",
+      "csv": "Data Movimento;Data Valor;Descrição;Montante;Saldo\n01-04-2026;01-04-2026;Continente Matosinhos;-45,20;1.230,55\n02-04-2026;03-04-2026;Vencimento Empresa Exemplo;1.850,00;3.080,55\n04-04-2026;04-04-2026;Cafe Central;-2,10;3.078,45\n07-04-2026;07-04-2026;Galp posto Alverca;-60,00;3.018,45\n09-04-2026;10-04-2026;Farmacia Central;-12,35;3.006,10\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 2,
+          "amount": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-03",
+      "kind": "account",
+      "language": "es",
+      "note": "signed amount and balance",
+      "csv": "Fecha;Concepto;Importe;Saldo\n01/05/2026;Mercadona Valencia;-38,10;980,40\n02/05/2026;Nomina Empresa Ejemplo;1.700,00;2.680,40\n04/05/2026;Bar La Esquina;-6,50;2.673,90\n06/05/2026;Repsol estacion;-52,00;2.621,90\n09/05/2026;Farmacia La Salud;-9,80;2.612,10\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-04",
+      "kind": "account",
+      "language": "pt",
+      "note": "split debit and credit",
+      "csv": "Data;Descritivo;Débito;Crédito;Saldo Contabilístico\n02/03/2026;Pingo Doce Avenidas;31,75;;845,10\n03/03/2026;Ordenado mensal;;1.640,00;2.485,10\n05/03/2026;Tasca do Ze;18,00;;2.467,10\n08/03/2026;Fatura MEO;39,99;;2.427,11\n12/03/2026;Devolucao loja;;14,90;2.442,01\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "debit": 2,
+          "credit": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-05",
+      "kind": "account",
+      "language": "en",
+      "note": "split paid out and paid in",
+      "csv": "Date,Transaction details,Paid out,Paid in,Balance\n01/04/2026,FRESHMART SUPERMARKET,54.30,,890.00\n02/04/2026,PAYROLL NORTHWIND,,1980.00,2870.00\n04/04/2026,CITY METRO,2.80,,2867.20\n06/04/2026,PUREGYM,24.99,,2842.21\n09/04/2026,BOOTS PHARMACY,7.45,,2834.76\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "debit": 2,
+          "credit": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-06",
+      "kind": "account",
+      "language": "en",
+      "note": "preamble before the header row",
+      "csv": "Current account statement\nPeriod,01/04/2026 to 30/04/2026\n\nDate,Description,Amount,Balance\n01/04/2026,Corner Grocers,-15.20,700.00\n03/04/2026,Payroll Northwind,1800.00,2500.00\n06/04/2026,Shell petrol,-48.00,2452.00\n09/04/2026,Spotify Premium,-10.99,2441.01\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": 3,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-07",
+      "kind": "account",
+      "language": "pt",
+      "note": "preamble lines then header",
+      "csv": "Extrato de conta à ordem\nTitular;Exemplo\nPeríodo;01-03-2026 a 31-03-2026\n\nData Lançamento;Descrição;Valor;Saldo\n01-03-2026;Minipreco Rua Nova;-12,40;450,00\n02-03-2026;Salário março;1.500,00;1.950,00\n05-03-2026;Metro Lisboa;-1,80;1.948,20\n07-03-2026;Netflix;-11,99;1.936,21\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": 4,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-08",
+      "kind": "account",
+      "language": "en",
+      "note": "no header row at all",
+      "csv": "2026-04-01,CORNER GROCERS,-18.20,1002.30\n2026-04-02,SALARY ACME WIDGETS,2050.00,3052.30\n2026-04-04,BEAN THERE COFFEE,-2.90,3049.40\n2026-04-07,CLEARWATER UTILITIES,-31.00,3018.40\n2026-04-10,QUICKFIT TYRES,-120.00,2898.40\n2026-04-12,SKYWAYS AIRLINES,-210.00,2688.40\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": -1,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-09",
+      "kind": "account",
+      "language": "en",
+      "note": "unsigned amount with a D/C marker",
+      "csv": "Date,Description,Amount,D/C\n03/04/2026,Corner Grocers,21.10,D\n04/04/2026,Payroll Northwind,1900.00,C\n06/04/2026,Red Lion Pub,14.50,D\n08/04/2026,Volt Power electricity,62.00,D\n10/04/2026,Refund Homefix,9.99,C\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "direction": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-10",
+      "kind": "account",
+      "language": "pt",
+      "note": "unsigned amount with Débito/Crédito marker",
+      "csv": "Data;Descrição;Montante;Tipo\n01/04/2026;Continente;40,00;Débito\n02/04/2026;Vencimento;1.400,00;Crédito\n03/04/2026;Cafe Central;1,90;Débito\n06/04/2026;Aguas municipais;18,30;Débito\n09/04/2026;Devolução;5,00;Crédito\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "direction": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-11",
+      "kind": "account",
+      "language": "en",
+      "note": "id first, currency column",
+      "csv": "Transaction ID,Booking Date,Payee,Amount,Currency\nTX-1001,2026-04-01,Corner Grocers,-12.00,EUR\nTX-1002,2026-04-02,Acme Widgets payroll,2300.00,EUR\nTX-1003,2026-04-03,City Metro,-2.40,EUR\nTX-1004,2026-04-05,Bright Smile dental,-60.00,EUR\nTX-1005,2026-04-08,Bookshelf bookstore,-17.50,EUR\n",
+      "expected": {
+        "columns": {
+          "reference": 0,
+          "date": 1,
+          "description": 2,
+          "amount": 3,
+          "currency": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-12",
+      "kind": "account",
+      "language": "en",
+      "note": "credit card: purchases positive, payment negative",
+      "csv": "Transaction Date,Description,Amount\n01/04/2026,FRESHMART SUPERMARKET,45.20\n03/04/2026,SUSHI GARDEN,38.00\n05/04/2026,SKYWAYS AIRLINES,199.00\n07/04/2026,NETFLIX.COM,12.99\n12/04/2026,PAYMENT THANK YOU,-295.19\n14/04/2026,BP FUEL,51.00\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": true
+      }
+    },
+    {
+      "id": "acc-13",
+      "kind": "account",
+      "language": "es",
+      "note": "credit card: cargos positive, pago negative",
+      "csv": "Fecha operación;Comercio;Importe\n02/05/2026;CARREFOUR MARKET;61,30\n04/05/2026;CINES YELMO;18,00\n06/05/2026;VUELING;142,00\n09/05/2026;GLOVO;23,40\n15/05/2026;PAGO TARJETA;-244,70\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": true
+      }
+    },
+    {
+      "id": "acc-14",
+      "kind": "account",
+      "language": "de",
+      "note": "German export",
+      "csv": "Buchungstag;Valuta;Verwendungszweck;Betrag;Währung\n01.04.2026;01.04.2026;Supermarkt Frisch;-34,50;EUR\n02.04.2026;02.04.2026;Gehalt Beispiel GmbH;2.400,00;EUR\n04.04.2026;05.04.2026;Tankstelle Nord;-58,00;EUR\n07.04.2026;07.04.2026;Apotheke am Markt;-8,20;EUR\n09.04.2026;09.04.2026;Stadtwerke Strom;-71,00;EUR\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 2,
+          "amount": 3,
+          "currency": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-15",
+      "kind": "account",
+      "language": "fr",
+      "note": "French split debit and credit",
+      "csv": "Date opération;Libellé;Débit;Crédit;Solde\n01/04/2026;Supermarché Le Panier;27,60;;1 120,40\n02/04/2026;Salaire Exemple SA;;2 050,00;3 170,40\n05/04/2026;Boulangerie du Coin;4,30;;3 166,10\n08/04/2026;Électricité Lumière;55,00;;3 111,10\n10/04/2026;Pharmacie Centrale;11,20;;3 099,90\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "debit": 2,
+          "credit": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-16",
+      "kind": "account",
+      "language": "en",
+      "note": "unusual column names",
+      "csv": "When,What,How much,Left\n2026-04-01,Corner Grocers,-19.90,800.10\n2026-04-02,Wages,1750.00,2550.10\n2026-04-04,Bean There Coffee,-3.10,2547.00\n2026-04-06,Metro Buses,-2.00,2545.00\n2026-04-09,Shield Mutual insurance,-41.00,2504.00\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "balance": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-17",
+      "kind": "account",
+      "language": "pt",
+      "note": "amount first, unusual order",
+      "csv": "Montante;Data;Descrição\n-22,10;01/04/2026;Mercearia do Bairro\n1.300,00;02/04/2026;Salário\n-3,40;03/04/2026;Pastelaria Estrela\n-45,00;05/04/2026;Repsol combustível\n-9,99;08/04/2026;Spotify\n",
+      "expected": {
+        "columns": {
+          "amount": 0,
+          "date": 1,
+          "description": 2
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-18",
+      "kind": "account",
+      "language": "es",
+      "note": "operation and value dates, split cargo and abono",
+      "csv": "Fecha operación;Fecha valor;Concepto;Cargo;Abono;Saldo\n01/05/2026;01/05/2026;Supermercado El Arbol;28,40;;650,00\n02/05/2026;02/05/2026;Nómina mayo;;1.600,00;2.250,00\n04/05/2026;05/05/2026;Cafeteria El Sol;3,20;;2.246,80\n06/05/2026;06/05/2026;Recibo agua;24,10;;2.222,70\n09/05/2026;09/05/2026;Gimnasio Forma;35,00;;2.187,70\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 2,
+          "debit": 3,
+          "credit": 4,
+          "balance": 5
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-19",
+      "kind": "account",
+      "language": "en",
+      "note": "app export with state and fee columns",
+      "csv": "Type,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance\nCARD_PAYMENT,2026-04-01 09:12:00,2026-04-02 10:00:00,Corner Grocers,-14.20,0.00,EUR,COMPLETED,310.80\nTOPUP,2026-04-02 08:00:00,2026-04-02 08:00:01,Top-up,500.00,0.00,EUR,COMPLETED,810.80\nCARD_PAYMENT,2026-04-03 19:40:00,2026-04-04 10:00:00,Pizzeria Napoli,-27.00,0.00,EUR,COMPLETED,783.80\nCARD_PAYMENT,2026-04-05 07:55:00,2026-04-06 10:00:00,City Metro,-2.60,0.00,EUR,COMPLETED,781.20\nEXCHANGE,2026-04-07 12:00:00,2026-04-07 12:00:01,Exchanged to USD,-100.00,0.50,EUR,COMPLETED,680.70\n",
+      "expected": {
+        "columns": {
+          "date": 1,
+          "description": 3,
+          "amount": 4,
+          "currency": 6,
+          "balance": 8
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-20",
+      "kind": "account",
+      "language": "pt",
+      "note": "currency column, tab separated",
+      "csv": "Data\tDescrição\tValor\tMoeda\tSaldo\n2026-04-01\tContinente\t-50,10\tEUR\t900,00\n2026-04-02\tVencimento\t1.450,00\tEUR\t2.350,00\n2026-04-04\tCP Comboios\t-6,20\tEUR\t2.343,80\n2026-04-06\tSeguro automóvel\t-33,00\tEUR\t2.310,80\n2026-04-08\tCinema NOS\t-7,50\tEUR\t2.303,30\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "amount": 2,
+          "currency": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-21",
+      "kind": "account",
+      "language": "en",
+      "note": "money out and money in, no balance",
+      "csv": "Posting date,Narrative,Money out,Money in\n01/04/2026,GreenBasket weekly shop,62.15,\n02/04/2026,Payroll Acme Widgets,,2200.00\n05/04/2026,Esso forecourt,44.00,\n07/04/2026,Bowling Strike Lanes,18.00,\n09/04/2026,Refund Bookshelf,,6.99\n",
+      "expected": {
+        "columns": {
+          "date": 0,
+          "description": 1,
+          "debit": 2,
+          "credit": 3
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "acc-22",
+      "kind": "account",
+      "language": "es",
+      "note": "operation number as reference",
+      "csv": "Nº operación;Fecha;Descripción;Importe;Saldo\n500101;01/05/2026;Mercadona;-29,90;1.010,00\n500102;02/05/2026;Nómina;1.750,00;2.760,00\n500103;03/05/2026;Metro Madrid;-1,50;2.758,50\n500104;05/05/2026;Factura luz;-58,40;2.700,10\n500105;07/05/2026;Óptica Vista Clara;-89,00;2.611,10\n",
+      "expected": {
+        "columns": {
+          "reference": 0,
+          "date": 1,
+          "description": 2,
+          "amount": 3,
+          "balance": 4
+        },
+        "headerRowIndex": 0,
+        "spendingIsPositive": false
+      }
+    },
+    {
+      "id": "pf-01",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "minimal ticker export",
+      "csv": "Date,Type,Ticker,Quantity,Price,Currency\n2026-03-02,BUY,VWCE,10,112.40,EUR\n2026-03-16,BUY,VWCE,5,113.10,EUR\n2026-04-01,SELL,VWCE,3,115.00,EUR\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Date",
+          "transactionType": "Type",
+          "ticker": "Ticker",
+          "quantity": "Quantity",
+          "unitPrice": "Price",
+          "currency": "Currency"
+        }
+      }
+    },
+    {
+      "id": "pf-02",
+      "kind": "portfolio",
+      "language": "pt",
+      "note": "Portuguese names with ISIN and fee",
+      "csv": "Data,Tipo,Ativo,ISIN,Quantidade,Preço,Moeda,Comissão\n02/03/2026,Compra,Fundo Global Acções,IE00B4L5Y983,12,\"88,20\",EUR,\"1,50\"\n10/03/2026,Compra,Obrigações Europa,LU0290355717,4,\"210,10\",EUR,\"1,50\"\n01/04/2026,Venda,Fundo Global Acções,IE00B4L5Y983,2,\"90,05\",EUR,\"1,50\"\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Data",
+          "transactionType": "Tipo",
+          "assetName": "Ativo",
+          "isin": "ISIN",
+          "quantity": "Quantidade",
+          "unitPrice": "Preço",
+          "currency": "Moeda",
+          "feeAmount": "Comissão"
+        }
+      }
+    },
+    {
+      "id": "pf-03",
+      "kind": "portfolio",
+      "language": "es",
+      "note": "Spanish names with total amount",
+      "csv": "Fecha,Operación,Producto,ISIN,Títulos,Precio,Importe total,Divisa\n03/03/2026,Compra,Indice Mundial Acc,IE00BK5BQT80,8,\"105,30\",\"842,40\",EUR\n17/03/2026,Compra,Indice Mundial Acc,IE00BK5BQT80,4,\"106,00\",\"424,00\",EUR\n02/04/2026,Venta,Indice Mundial Acc,IE00BK5BQT80,2,\"108,40\",\"216,80\",EUR\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Fecha",
+          "transactionType": "Operación",
+          "assetName": "Producto",
+          "isin": "ISIN",
+          "quantity": "Títulos",
+          "unitPrice": "Precio",
+          "totalAmount": "Importe total",
+          "currency": "Divisa"
+        }
+      }
+    },
+    {
+      "id": "pf-04",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "broker export with exchange, commission and order id",
+      "csv": "Trade Date,Side,Symbol,Exchange,Shares,Price,Total,Currency,Commission,Order ID\n2026-02-10,BUY,EXMP,NASDAQ,15,42.10,631.50,USD,1.00,ORD-77001\n2026-02-24,BUY,SMPL,NYSE,6,98.75,592.50,USD,1.00,ORD-77002\n2026-03-12,SELL,EXMP,NASDAQ,5,45.30,226.50,USD,1.00,ORD-77003\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Trade Date",
+          "transactionType": "Side",
+          "ticker": "Symbol",
+          "brokerExchange": "Exchange",
+          "quantity": "Shares",
+          "unitPrice": "Price",
+          "totalAmount": "Total",
+          "currency": "Currency",
+          "feeAmount": "Commission",
+          "externalTransactionId": "Order ID"
+        }
+      }
+    },
+    {
+      "id": "pf-05",
+      "kind": "portfolio",
+      "language": "de",
+      "note": "German names",
+      "csv": "Datum,Typ,Wertpapier,ISIN,Stück,Kurs,Betrag,Währung,Gebühren\n05.03.2026,Kauf,Welt Aktien ETF,IE00B3RBWM25,7,\"120,40\",\"842,80\",EUR,\"1,00\"\n19.03.2026,Kauf,Europa Anleihen ETF,LU1650490474,3,\"55,10\",\"165,30\",EUR,\"1,00\"\n06.04.2026,Verkauf,Welt Aktien ETF,IE00B3RBWM25,2,\"123,00\",\"246,00\",EUR,\"1,00\"\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Datum",
+          "transactionType": "Typ",
+          "assetName": "Wertpapier",
+          "isin": "ISIN",
+          "quantity": "Stück",
+          "unitPrice": "Kurs",
+          "totalAmount": "Betrag",
+          "currency": "Währung",
+          "feeAmount": "Gebühren"
+        }
+      }
+    },
+    {
+      "id": "pf-06",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "security name, units and reference",
+      "csv": "Date,Action,Security Name,ISIN,Units,Unit Price,Amount,Currency,Fees,Reference\n2026-01-15,Buy,Global Equity Index Fund,GB00B41YBW71,20,3.12,62.40,GBP,0.00,REF-30001\n2026-02-15,Buy,Global Equity Index Fund,GB00B41YBW71,19,3.20,60.80,GBP,0.00,REF-30002\n2026-03-20,Sell,Global Equity Index Fund,GB00B41YBW71,10,3.35,33.50,GBP,0.00,REF-30003\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Date",
+          "transactionType": "Action",
+          "assetName": "Security Name",
+          "isin": "ISIN",
+          "quantity": "Units",
+          "unitPrice": "Unit Price",
+          "totalAmount": "Amount",
+          "currency": "Currency",
+          "feeAmount": "Fees",
+          "externalTransactionId": "Reference"
+        }
+      }
+    },
+    {
+      "id": "pf-07",
+      "kind": "portfolio",
+      "language": "fr",
+      "note": "French names",
+      "csv": "Date opération,Sens,Libellé,Code ISIN,Quantité,Cours,Montant net,Devise,Frais\n04/03/2026,Achat,Actions Monde ETF,FR0011869353,9,\"31,20\",\"280,80\",EUR,\"0,99\"\n18/03/2026,Achat,Actions Europe ETF,FR0010315770,5,\"28,40\",\"142,00\",EUR,\"0,99\"\n03/04/2026,Vente,Actions Monde ETF,FR0011869353,3,\"32,10\",\"96,30\",EUR,\"0,99\"\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Date opération",
+          "transactionType": "Sens",
+          "assetName": "Libellé",
+          "isin": "Code ISIN",
+          "quantity": "Quantité",
+          "unitPrice": "Cours",
+          "totalAmount": "Montant net",
+          "currency": "Devise",
+          "feeAmount": "Frais"
+        }
+      }
+    },
+    {
+      "id": "pf-08",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "terse trading-app headers",
+      "csv": "Exec time,Dir,Instrument,Venue,Qty,Avg px,Notional,Ccy,Exec ID\n2026-03-03T14:02:11Z,B,EXMP,XNAS,4,41.80,167.20,USD,EX-9001\n2026-03-10T15:30:45Z,B,SMPL,XNYS,2,99.10,198.20,USD,EX-9002\n2026-03-24T13:45:00Z,S,EXMP,XNAS,1,44.00,44.00,USD,EX-9003\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Exec time",
+          "transactionType": "Dir",
+          "ticker": "Instrument",
+          "brokerExchange": "Venue",
+          "quantity": "Qty",
+          "unitPrice": "Avg px",
+          "totalAmount": "Notional",
+          "currency": "Ccy",
+          "externalTransactionId": "Exec ID"
+        }
+      }
+    },
+    {
+      "id": "pf-09",
+      "kind": "portfolio",
+      "language": "pt",
+      "note": "ticker and total, no fee",
+      "csv": "Data da operação,Movimento,Símbolo,Nº de títulos,Cotação,Valor total,Divisa\n05/02/2026,Compra,EXMP,3,\"40,10\",\"120,30\",USD\n20/02/2026,Compra,SMPL,1,\"97,40\",\"97,40\",USD\n11/03/2026,Venda,EXMP,1,\"43,90\",\"43,90\",USD\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Data da operação",
+          "transactionType": "Movimento",
+          "ticker": "Símbolo",
+          "quantity": "Nº de títulos",
+          "unitPrice": "Cotação",
+          "totalAmount": "Valor total",
+          "currency": "Divisa"
+        }
+      }
+    },
+    {
+      "id": "pf-10",
+      "kind": "portfolio",
+      "language": "es",
+      "note": "ticker, market and commission",
+      "csv": "Fecha ejecución,Tipo de orden,Ticker,Mercado,Cantidad,Precio medio,Comisión,Moneda\n06/03/2026,Compra,EXMP,NASDAQ,6,\"42,00\",\"2,00\",USD\n13/03/2026,Compra,SMPL,NYSE,2,\"98,20\",\"2,00\",USD\n27/03/2026,Venta,EXMP,NASDAQ,3,\"44,50\",\"2,00\",USD\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Fecha ejecución",
+          "transactionType": "Tipo de orden",
+          "ticker": "Ticker",
+          "brokerExchange": "Mercado",
+          "quantity": "Cantidad",
+          "unitPrice": "Precio medio",
+          "feeAmount": "Comisión",
+          "currency": "Moneda"
+        }
+      }
+    },
+    {
+      "id": "pf-11",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "fund platform: name and value, currency in its own column",
+      "csv": "Settlement date,Transaction,Fund,Units,Price per unit,Value,Currency\n2026-01-05,Purchase,Balanced Growth Fund,50.1234,1.9950,100.00,GBP\n2026-02-05,Purchase,Balanced Growth Fund,49.5050,2.0200,100.00,GBP\n2026-03-05,Sale,Balanced Growth Fund,20.0000,2.0500,41.00,GBP\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Settlement date",
+          "transactionType": "Transaction",
+          "assetName": "Fund",
+          "quantity": "Units",
+          "unitPrice": "Price per unit",
+          "totalAmount": "Value",
+          "currency": "Currency"
+        }
+      }
+    },
+    {
+      "id": "pf-12",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "ISIN and name, cost column",
+      "csv": "Order date,Buy/Sell,Name,ISIN,Quantity,Execution price,Cost,Currency,Charges\n2026-02-02,Buy,World Index ETF,IE00B4L5Y983,5,89.20,446.00,EUR,2.00\n2026-02-16,Buy,World Index ETF,IE00B4L5Y983,5,90.10,450.50,EUR,2.00\n2026-03-02,Sell,World Index ETF,IE00B4L5Y983,4,92.00,368.00,EUR,2.00\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Order date",
+          "transactionType": "Buy/Sell",
+          "assetName": "Name",
+          "isin": "ISIN",
+          "quantity": "Quantity",
+          "unitPrice": "Execution price",
+          "totalAmount": "Cost",
+          "currency": "Currency",
+          "feeAmount": "Charges"
+        }
+      }
+    },
+    {
+      "id": "pf-13",
+      "kind": "portfolio",
+      "language": "pt",
+      "note": "ISIN only identity",
+      "csv": "Data,Operação,Código ISIN,Unidades,Preço unitário,Moeda\n03/03/2026,Subscrição,PTYYYYM0003,100,\"5,21\",EUR\n03/04/2026,Subscrição,PTYYYYM0003,100,\"5,24\",EUR\n05/05/2026,Resgate,PTYYYYM0003,50,\"5,30\",EUR\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Data",
+          "transactionType": "Operação",
+          "isin": "Código ISIN",
+          "quantity": "Unidades",
+          "unitPrice": "Preço unitário",
+          "currency": "Moeda"
+        }
+      }
+    },
+    {
+      "id": "pf-14",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "crypto-style export",
+      "csv": "Timestamp,Transaction Type,Asset,Quantity Transacted,Spot Price at Transaction,Total,Spot Price Currency,Fees,ID\n2026-03-01 10:00:00,Buy,BTC,0.0015,61000.00,91.50,EUR,1.49,c-001\n2026-03-15 10:00:00,Buy,ETH,0.0400,2900.00,116.00,EUR,1.49,c-002\n2026-04-01 10:00:00,Sell,BTC,0.0005,63000.00,31.50,EUR,0.99,c-003\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Timestamp",
+          "transactionType": "Transaction Type",
+          "ticker": "Asset",
+          "quantity": "Quantity Transacted",
+          "unitPrice": "Spot Price at Transaction",
+          "totalAmount": "Total",
+          "currency": "Spot Price Currency",
+          "feeAmount": "Fees",
+          "externalTransactionId": "ID"
+        }
+      }
+    },
+    {
+      "id": "pf-15",
+      "kind": "portfolio",
+      "language": "es",
+      "note": "ISIN, name and order number",
+      "csv": "Fecha,Tipo,Nombre del valor,ISIN,Número de títulos,Precio,Divisa,Gastos,Nº orden\n10/02/2026,Compra,Fondo Indexado Global,ES0000000001,15,\"12,40\",EUR,\"0,00\",A-501\n10/03/2026,Compra,Fondo Indexado Global,ES0000000001,15,\"12,55\",EUR,\"0,00\",A-502\n10/04/2026,Venta,Fondo Indexado Global,ES0000000001,10,\"12,90\",EUR,\"0,00\",A-503\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Fecha",
+          "transactionType": "Tipo",
+          "assetName": "Nombre del valor",
+          "isin": "ISIN",
+          "quantity": "Número de títulos",
+          "unitPrice": "Precio",
+          "currency": "Divisa",
+          "feeAmount": "Gastos",
+          "externalTransactionId": "Nº orden"
+        }
+      }
+    },
+    {
+      "id": "pf-16",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "columns in an unusual order",
+      "csv": "Currency,Qty,Ticker,Trade type,Executed on,Price\nUSD,3,EXMP,BUY,2026-03-05,41.25\nUSD,2,SMPL,BUY,2026-03-19,97.90\nUSD,1,EXMP,SELL,2026-04-02,44.10\n",
+      "expected": {
+        "columnMapping": {
+          "currency": "Currency",
+          "quantity": "Qty",
+          "ticker": "Ticker",
+          "transactionType": "Trade type",
+          "transactionDate": "Executed on",
+          "unitPrice": "Price"
+        }
+      }
+    },
+    {
+      "id": "pf-17",
+      "kind": "portfolio",
+      "language": "de",
+      "note": "German, ticker and venue",
+      "csv": "Ausführungsdatum,Art,Kürzel,Handelsplatz,Anzahl,Preis,Gesamt,Währung,Provision\n02.03.2026,Kauf,EXMP,Xetra,5,\"38,90\",\"194,50\",EUR,\"1,00\"\n16.03.2026,Kauf,SMPL,Xetra,2,\"91,00\",\"182,00\",EUR,\"1,00\"\n30.03.2026,Verkauf,EXMP,Xetra,2,\"40,20\",\"80,40\",EUR,\"1,00\"\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Ausführungsdatum",
+          "transactionType": "Art",
+          "ticker": "Kürzel",
+          "brokerExchange": "Handelsplatz",
+          "quantity": "Anzahl",
+          "unitPrice": "Preis",
+          "totalAmount": "Gesamt",
+          "currency": "Währung",
+          "feeAmount": "Provision"
+        }
+      }
+    },
+    {
+      "id": "pf-18",
+      "kind": "portfolio",
+      "language": "en",
+      "note": "currency written into the value column name",
+      "csv": "Date,Type,ISIN,Product,Quantity,Price,Total EUR\n2026-02-03,BUY,IE00B4L5Y983,World Index ETF,4,88.90,355.60\n2026-02-17,BUY,IE00B4L5Y983,World Index ETF,4,89.60,358.40\n2026-03-03,SELL,IE00B4L5Y983,World Index ETF,2,91.20,182.40\n",
+      "expected": {
+        "columnMapping": {
+          "transactionDate": "Date",
+          "transactionType": "Type",
+          "isin": "ISIN",
+          "assetName": "Product",
+          "quantity": "Quantity",
+          "unitPrice": "Price",
+          "totalAmount": "Total EUR"
+        },
+        "fixedCurrency": "EUR"
+      }
+    }
+  ]
+}

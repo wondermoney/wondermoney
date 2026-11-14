@@ -3,13 +3,38 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSyncExternalStore } from "react";
 
+import type { CryptoChain } from "../manual-asset/types";
+
 /** `GET /v1/instance`: what this server offers. See the API's `controller/instance.ts`. */
 export interface InstanceDescription {
   apiVersion: number;
+  /** The commit the server was built from; null for a local build. */
+  commit?: null | string;
   features: {
-    ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean };
+    ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean; statementImport?: boolean };
     bankSync: boolean;
+    /**
+     * `instance` when the operator set a shared Enable Banking credential, `user` when everyone
+     * adds their own. Whether the signed-in household may use the shared one is on the profile
+     * (`useBankLinkCredential`). Absent on an older API, which reads as `user`.
+     */
+    bankSyncCredentials?: "instance" | "user";
+    /**
+     * The bank-sync providers the operator enabled (`BANK_PROVIDERS`), such as `enable_banking`
+     * and `simplefin`. Absent on an API older than the field.
+     */
+    bankSyncProviders?: string[];
     contactForm: boolean;
+    /**
+     * The chains whose explorer the operator configured, so crypto wallets can be tracked on
+     * them. Empty when the feature is off; absent on an API older than crypto wallets.
+     */
+    cryptoWalletChains?: CryptoChain[];
+    /**
+     * One-click sign-in to the shared read-only demo account (`POST /v1/auth/demo`,
+     * `DEMO_SIGN_IN_ENABLED`). Absent on an API older than this field, which reads as off.
+     */
+    demo?: boolean;
     email: boolean;
     /**
      * In-app feedback can be emailed to the support inbox (`POST /v1/feedback`). Absent on an
@@ -20,6 +45,30 @@ export interface InstanceDescription {
     /** Both Google OAuth credentials are set, so "Continue with Google" works. */
     googleSignIn: boolean;
     marketData: boolean;
+    /** What this server's market-data providers can be asked (`search`, `quote`, `dailyHistory`, `dividends`, `splits`). Absent on an older API. */
+    marketDataCapabilities?: string[];
+    /** The set-up market-data providers, in the order the server asks them. Absent on an older API. */
+    marketDataProviders?: string[];
+    /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
+    mcp?: boolean;
+    /**
+     * Single sign-on through the operator's OIDC provider ("Sign in with <name>"). Null when
+     * none is configured; absent on an API older than single sign-on.
+     */
+    oidc?: null | { name: string };
+    /** Passkey sign-in and passkey management. Absent on an API older than passkeys. */
+    passkey?: boolean;
+    /**
+     * False under `OIDC_ONLY`: the server refuses password sign-in, sign-up and reset, so the
+     * forms are hidden. Absent on an older API, which reads as on.
+     */
+    passwordSignIn?: boolean;
+    /**
+     * PDF statement import: the largest statement taken and the provider's family. Null when the
+     * server has no model for it; absent on an older API. The provider's name, for the consent line,
+     * is on the signed-in profile (`useStatementImportProvider`).
+     */
+    statementImport?: null | StatementImportFeature;
   };
   minAppVersion: null | string;
   name: string;
@@ -28,6 +77,14 @@ export interface InstanceDescription {
   sponsorUrl?: null | string;
   /** The operator's `SUPPORT_EMAIL`; null when the instance has no support inbox. */
   supportEmail: null | string;
+  /** The release version the server runs (`dev` for a local build); absent on an older API. */
+  version?: string;
+}
+
+export interface StatementImportFeature {
+  maxBytes: number;
+  maxPages: number;
+  providerKind: "anthropic" | "azure-openai" | "openai-compatible";
 }
 
 const apiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -88,6 +145,59 @@ export function useConfirmedFeature(select: (features: InstanceDescription["feat
   return hydrated && data ? select(data.features) : false;
 }
 
+/** The single sign-on provider's button label, once the server has said it has one. */
+export function useOidcProvider(): null | { name: string } {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.features.oidc ?? null) : null;
+}
+
+/**
+ * PDF statement import, once the server has said it has a model for it; null otherwise (and while
+ * the description loads, so the entry never shows on a server without it).
+ */
+export function useStatementImport(): null | StatementImportFeature {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data?.features.ai.statementImport) return null;
+  return data.features.statementImport ?? null;
+}
+
+/**
+ * Who may create an account here, or null until the server has said: callers that offer
+ * sign-up show it only for `"open"`.
+ */
+export function useSignupMode(): InstanceDescription["signupMode"] | null {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.signupMode ?? null) : null;
+}
+
+/**
+ * Whether the server has a shared Enable Banking credential (`features.bankSyncCredentials`).
+ * Undefined until the description arrives.
+ */
+export function useInstanceBankSyncCredentials(): "instance" | "user" | undefined {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data) return undefined;
+  return data.features.bankSyncCredentials ?? "user";
+}
+
+const NO_CHAINS: CryptoChain[] = [];
+
+/**
+ * The chains a crypto wallet can be tracked on, once the server has said so; empty while the
+ * description loads, on a server without the feature and on an older API, so "Add crypto
+ * wallet" never shows where it would fail.
+ */
+export function useCryptoWalletChains(): CryptoChain[] {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated) return NO_CHAINS;
+  return data?.features.cryptoWalletChains ?? NO_CHAINS;
+}
+
 /** Where users can write for help, or null: no support links are shown then. */
 export function useSupportEmail(): null | string {
   const { data } = useInstance();
@@ -100,4 +210,18 @@ export function useSponsorUrl(): null | string {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated ? (data?.sponsorUrl ?? null) : null;
+}
+
+/**
+ * Which build the server runs, for the version line in the account menu. Null until the
+ * description arrives, and on an older API that does not report a version.
+ */
+export function useServerBuildInfo(): {
+  commit: null | string;
+  version: null | string;
+} {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  if (!hydrated || !data?.version) return { commit: null, version: null };
+  return { commit: data.commit ?? null, version: data.version };
 }

@@ -1,9 +1,12 @@
 import type { EntityMarkSource } from '@/components/ui/entity-mark'
+import type { TransactionAttributionDto } from '@/features/household/member-attribution'
+import type { MerchantAvatarSource } from '@/features/merchants/merchant-avatar'
 import type { TagDto } from '@/features/tags/tags-contract'
 import { type FxState, resolveFxState } from '@/lib/api/fx-status'
 
-import { transactionMark } from './transaction-mark'
-import { isTransferType, type TransactionDto } from './transactions-contract'
+import type { ReimbursementLinkDto } from './reimbursements-contract'
+import { transactionMark, transactionMerchantAvatar } from './transaction-mark'
+import { isTransferType, type TransactionDto, type TransactionInstallmentDto, type TransactionSplitLineDto } from './transactions-contract'
 
 export type TransactionViewModel = Readonly<{
   id: number
@@ -26,6 +29,8 @@ export type TransactionViewModel = Readonly<{
   convertedBalance: number | null
   convertedBalanceCurrency: string | null
   category: string | null
+  /** The category's key, for pre-filling a rule's "set category" action. */
+  categoryId: number | null
   /** False when the row's category is one that does not count as spending (investments, savings). */
   categoryCountsAsSpending: boolean
   /** Typed as a transfer between the household's own money: left out of spending and income. */
@@ -34,13 +39,27 @@ export type TransactionViewModel = Readonly<{
   transferDestination: NonNullable<TransactionDto['transferDestination']> | null
   /** The household tags on the row, by name; empty when the server sent none. */
   tags: readonly TagDto[]
+  /** The split's lines, in the API's order; empty when the row is not split. */
+  splits: readonly TransactionSplitLineDto[]
+  /** The row's amount is shared over several categories. */
+  isSplit: boolean
+  /** The installment of a plan this posted row was linked to ("3/12"), when it is one. */
+  installment: TransactionInstallmentDto | null
+  /** Refund-to-expense links on the row, either role; empty when none (or an older server). */
+  reimbursements: readonly ReimbursementLinkDto[]
+  /** Who the money is attributed to ("Spent by"); null when the server did not say. */
+  attribution?: TransactionAttributionDto | null
   reviewed: boolean
   hidden: boolean
+  /** The bank sent it: it can be hidden, never deleted. */
+  bankSynced: boolean
   recurring: TransactionDto['recurringSeries']
   repayment: TransactionDto['loanRepayment']
   synthetic: boolean
   /** The row's lead mark: category, transfer arrows, or the institution on the opening row. */
   mark?: EntityMarkSource
+  /** The merchant's avatar, which leads the row in place of `mark`; null keeps `mark`. */
+  merchantAvatar?: MerchantAvatarSource | null
   /**
    * How `amount` was converted. `missing`: there is no `amount`; show the original (signed) one it
    * carries, marked "Not converted". `provisional`: `amount` is an estimate at an older rate.
@@ -98,12 +117,19 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
       convertedBalance: transaction.appuserCurrencyBalance ?? null,
       convertedBalanceCurrency: transaction.appuserCurrencyKey?.code ?? null,
       category: transaction.appuserTransactionCategories[0]?.name ?? null,
+      categoryId: transaction.appuserTransactionCategories[0]?.categoryKey ?? null,
       categoryCountsAsSpending: transaction.appuserTransactionCategories[0]?.countsAsSpending !== false,
       isTransfer: isTransferType(type),
       transferDestination: transaction.transferDestination ?? null,
       tags: transaction.tags ?? [],
+      splits: transaction.splits ?? [],
+      isSplit: (transaction.splits?.length ?? 0) > 0,
+      installment: transaction.installment ?? null,
+      reimbursements: transaction.reimbursements ?? [],
+      attribution: transaction.attribution ?? null,
       reviewed: transaction.reviewed,
       hidden: transaction.hidden ?? false,
+      bankSynced: transaction.bankSynced === true,
       recurring: transaction.recurringSeries,
       repayment: transaction.loanRepayment,
       synthetic: transaction.transactionKey < 0,
@@ -112,6 +138,11 @@ export function mapTransactions(input: { transactions: readonly TransactionDto[]
         type,
         category: categoryOf(transaction.appuserTransactionCategories[0]),
         institutionLogoUrl: transaction.accountKey.accountFinancialInstitutionKey?.logoUrl ?? null,
+      }),
+      merchantAvatar: transactionMerchantAvatar({
+        synthetic: transaction.transactionKey < 0,
+        type,
+        merchant: transaction.transactionMerchantKey,
       }),
       fx,
     }

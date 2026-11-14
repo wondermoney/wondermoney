@@ -94,6 +94,14 @@ test("a delta is coloured by its direction", () => {
   assert.ok(!/destructive|success/.test(getDeltaClassName(0)));
 });
 
+test("a delta can take its direction from another value, as spending does", () => {
+  // Spending fell by €50: the figure is negative, but that is good news.
+  const element = renderAmount({ value: -50, tone: "delta", toneValue: 50 });
+  assert.ok(element.classList.contains("text-success-text"));
+  assert.ok(!element.classList.contains("text-destructive-text"));
+  assert.match(element.textContent ?? "", /−/);
+});
+
 test("a threshold marks only the breach, with the accessible destructive text token", () => {
   assert.ok(
     getThresholdClassName(-0.01).split(" ").includes("text-destructive-text"),

@@ -2,6 +2,8 @@ import * as csv from './csv';
 import * as transactionImport from './import';
 export { csv, transactionImport };
 
+export * from './bank-sync';
+
 // EODHD exports
 export {
   default as Eodhd,
@@ -12,3 +14,7 @@ export * as EodhdTypes from './services/eodhd/types';
 
 export * from './entities';
 export * from './decimal';
+export * from './amount-expression';
+export * from './dashboard-layout';
+export * from './rule-presets';
+export * from './crypto-wallet';

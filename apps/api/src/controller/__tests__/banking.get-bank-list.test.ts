@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const getDecryptedCredential = vi.hoisted(() => vi.fn());
+const resolveForNewLink = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
 const listInstitutions = vi.hoisted(() => vi.fn());
 
 vi.mock('@service/enable-banking/enable-banking-client.service', () => ({ createEnableBankingClient }));
 vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({
-  enableBankingCredentialService: { getDecryptedCredential },
+  enableBankingCredentialService: { resolveForNewLink },
 }));
 
 import { encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
@@ -23,14 +23,14 @@ const createRes = () => {
 
 describe('getBankList (Enable Banking)', () => {
   beforeEach(() => {
-    getDecryptedCredential.mockReset();
+    resolveForNewLink.mockReset();
     createEnableBankingClient.mockReset();
     listInstitutions.mockReset();
     createEnableBankingClient.mockReturnValue({ listInstitutions });
   });
 
   it('throws a typed 400 when the user has no Enable Banking credential configured', async () => {
-    getDecryptedCredential.mockResolvedValueOnce(null);
+    resolveForNewLink.mockResolvedValueOnce(null);
     const res = createRes();
 
     const error = await getBankList(createReq('PT') as unknown as Parameters<typeof getBankList>[0], res.res).catch((e: unknown) => e);
@@ -42,7 +42,7 @@ describe('getBankList (Enable Banking)', () => {
   });
 
   it('maps institutions to a stable synthesized id and the same name/logo/country field names', async () => {
-    getDecryptedCredential.mockResolvedValueOnce({ applicationId: 'app-1', privateKeyPem: 'pem' });
+    resolveForNewLink.mockResolvedValueOnce({ credential: { applicationId: 'app-1', privateKeyPem: 'pem' }, entity: null, source: 'instance' });
     listInstitutions.mockResolvedValueOnce([
       { country: 'PT', logo: 'https://logo/a', maximum_consent_validity: 15_552_000, name: 'Bank A' },
       { country: 'PT', name: 'Bank B' },
@@ -60,7 +60,7 @@ describe('getBankList (Enable Banking)', () => {
   });
 
   it('produces different ids for institutions that share a name in different countries', async () => {
-    getDecryptedCredential.mockResolvedValueOnce({ applicationId: 'app-1', privateKeyPem: 'pem' });
+    resolveForNewLink.mockResolvedValueOnce({ credential: { applicationId: 'app-1', privateKeyPem: 'pem' }, entity: null, source: 'instance' });
     listInstitutions.mockResolvedValueOnce([
       { country: 'PT', name: 'Revolut' },
       { country: 'ES', name: 'Revolut' },
@@ -73,15 +73,16 @@ describe('getBankList (Enable Banking)', () => {
     expect(payload[0]!.id).not.toBe(payload[1]!.id);
   });
 
-  it('propagates a typed Enable Banking provider error unchanged, without re-wrapping', async () => {
-    getDecryptedCredential.mockResolvedValueOnce({ applicationId: 'app-1', privateKeyPem: 'pem' });
+  it('maps a typed provider failure to the HTTP error the handler speaks', async () => {
+    resolveForNewLink.mockResolvedValueOnce({ credential: { applicationId: 'app-1', privateKeyPem: 'pem' }, entity: null, source: 'instance' });
     const providerError = new BadGatewayError('Enable Banking is temporarily unavailable');
     listInstitutions.mockRejectedValueOnce(providerError);
     const res = createRes();
 
     const error = await getBankList(createReq('PT') as unknown as Parameters<typeof getBankList>[0], res.res).catch((e: unknown) => e);
 
-    expect(error).toBe(providerError);
+    expect(error).toBeInstanceOf(BadGatewayError);
+    expect((error as BadGatewayError).status).toBe(502);
     expect(res.json).not.toHaveBeenCalled();
   });
 });

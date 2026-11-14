@@ -11,10 +11,11 @@ export interface NetWorthDriverInput {
  * The user's requested delivery language, per `fresh.language` in the eligibility check
  * (Task 15's caller). This skeleton is not just an LLM input — it is also the ungated
  * fallback text shipped verbatim when the LLM polish call fails or is guardrail-rejected,
- * so every driver sentence must exist in both languages. Never add a driver whose sentence
- * is only defined for one language.
+ * so every driver sentence must exist in every language. Never add a driver whose sentence
+ * is missing from one. An account in any other language reads English.
  */
-export type NarrativeLanguage = 'en' | 'pt';
+export const NARRATIVE_LANGUAGES = ['en', 'pt', 'es'] as const;
+export type NarrativeLanguage = (typeof NARRATIVE_LANGUAGES)[number];
 
 interface ScoredDriver {
   score: number;
@@ -58,6 +59,20 @@ const COPY: Record<
     savingsRateUp: (baseline, subject) => `Your savings rate rose from ${baseline}% to ${subject}%.`,
     spendingCheaper: (monthLabel, delta, subjectTotal) => `${monthLabel} was ${delta} cheaper than usual — you spent ${subjectTotal} in total.`,
     spendingMoreExpensive: (monthLabel, delta, subjectTotal) => `${monthLabel} was ${delta} more expensive than usual — you spent ${subjectTotal} in total.`,
+  },
+  es: {
+    budgetNear: 'Algunas categorías quedaron cerca del importe fijado en el presupuesto.',
+    budgetOver: 'Algunas categorías superaron el presupuesto planificado.',
+    categoriesExplain: (names, plural, direction) => `${names} ${plural ? 'explican' : 'explica'} la mayor parte del ${direction === 'increase' ? 'aumento' : 'descenso'}.`,
+    conjunction: ' y ',
+    incomeDown: (delta) => `Tus ingresos bajaron ${delta} respecto a lo habitual.`,
+    incomeUp: (delta) => `Tus ingresos subieron ${delta} respecto a lo habitual.`,
+    netWorthDown: (delta) => `Tu patrimonio neto bajó ${delta} este mes.`,
+    netWorthUp: (delta) => `Tu patrimonio neto aumentó ${delta} este mes.`,
+    savingsRateDown: (baseline, subject) => `Tu tasa de ahorro bajó del ${baseline}% al ${subject}%.`,
+    savingsRateUp: (baseline, subject) => `Tu tasa de ahorro subió del ${baseline}% al ${subject}%.`,
+    spendingCheaper: (monthLabel, delta, subjectTotal) => `En ${monthLabel} gastaste ${delta} menos de lo habitual: ${subjectTotal} en total.`,
+    spendingMoreExpensive: (monthLabel, delta, subjectTotal) => `En ${monthLabel} gastaste ${delta} más de lo habitual: ${subjectTotal} en total.`,
   },
   pt: {
     budgetNear: 'Algumas categorias ficaram perto do valor definido no orçamento.',

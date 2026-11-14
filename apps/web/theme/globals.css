@@ -103,6 +103,27 @@
   --chart-3: oklch(0.5 0.13 170); /* bluish-green 170 */
   --chart-4: oklch(0.58 0.19 30); /* vermillion 30 */
   --chart-5: oklch(0.54 0.13 235); /* sky 235 */
+  /* Merchant avatar fallbacks (an initial on a colour hashed from the name,
+     lib/merchant/merchant-avatar.ts), in the order web and mobile share: a
+     pale fill under a dark ink of the same hue. No green, red or brand
+     violet: those carry meaning here. Each slot keeps its hue in both
+     themes; every pair clears 4.5:1 (theme/contrast.test.ts). */
+  --merchant-blue: oklch(0.93 0.03 255);
+  --merchant-blue-foreground: oklch(0.45 0.1 255);
+  --merchant-teal: oklch(0.93 0.045 195);
+  --merchant-teal-foreground: oklch(0.45 0.075 195);
+  --merchant-amber: oklch(0.93 0.045 85);
+  --merchant-amber-foreground: oklch(0.45 0.09 85);
+  --merchant-fuchsia: oklch(0.93 0.04 335);
+  --merchant-fuchsia-foreground: oklch(0.45 0.11 335);
+  --merchant-sky: oklch(0.93 0.035 230);
+  --merchant-sky-foreground: oklch(0.45 0.085 230);
+  --merchant-orange: oklch(0.93 0.035 50);
+  --merchant-orange-foreground: oklch(0.45 0.1 50);
+  --merchant-stone: oklch(0.93 0.012 60);
+  --merchant-stone-foreground: oklch(0.45 0.025 60);
+  --merchant-slate: oklch(0.93 0.012 260);
+  --merchant-slate-foreground: oklch(0.45 0.025 260);
   /* 0.5rem, down from 0.625rem. DESIGN.md § 9: the reference draws a working
      instrument, not a marketing page, and its corners are tighter — badges
      4px, controls 6px, cards 8px. The derived steps below follow from this
@@ -153,6 +174,23 @@
   --chart-3: oklch(0.62 0.13 170);
   --chart-4: oklch(0.54 0.19 30);
   --chart-5: oklch(0.58 0.13 235);
+  /* Merchant avatars: a deep fill under a pale ink, same hues as the light half. */
+  --merchant-blue: oklch(0.34 0.06 255);
+  --merchant-blue-foreground: oklch(0.9 0.045 255);
+  --merchant-teal: oklch(0.34 0.055 195);
+  --merchant-teal-foreground: oklch(0.9 0.05 195);
+  --merchant-amber: oklch(0.34 0.06 85);
+  --merchant-amber-foreground: oklch(0.9 0.05 85);
+  --merchant-fuchsia: oklch(0.34 0.06 335);
+  --merchant-fuchsia-foreground: oklch(0.9 0.05 335);
+  --merchant-sky: oklch(0.34 0.055 230);
+  --merchant-sky-foreground: oklch(0.9 0.045 230);
+  --merchant-orange: oklch(0.34 0.06 50);
+  --merchant-orange-foreground: oklch(0.9 0.05 50);
+  --merchant-stone: oklch(0.34 0.015 60);
+  --merchant-stone-foreground: oklch(0.9 0.012 60);
+  --merchant-slate: oklch(0.34 0.015 260);
+  --merchant-slate-foreground: oklch(0.9 0.012 260);
 }
 
 @theme inline {
@@ -204,6 +242,22 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-merchant-blue: var(--merchant-blue);
+  --color-merchant-blue-foreground: var(--merchant-blue-foreground);
+  --color-merchant-teal: var(--merchant-teal);
+  --color-merchant-teal-foreground: var(--merchant-teal-foreground);
+  --color-merchant-amber: var(--merchant-amber);
+  --color-merchant-amber-foreground: var(--merchant-amber-foreground);
+  --color-merchant-fuchsia: var(--merchant-fuchsia);
+  --color-merchant-fuchsia-foreground: var(--merchant-fuchsia-foreground);
+  --color-merchant-sky: var(--merchant-sky);
+  --color-merchant-sky-foreground: var(--merchant-sky-foreground);
+  --color-merchant-orange: var(--merchant-orange);
+  --color-merchant-orange-foreground: var(--merchant-orange-foreground);
+  --color-merchant-stone: var(--merchant-stone);
+  --color-merchant-stone-foreground: var(--merchant-stone-foreground);
+  --color-merchant-slate: var(--merchant-slate);
+  --color-merchant-slate-foreground: var(--merchant-slate-foreground);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

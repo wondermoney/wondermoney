@@ -59,6 +59,17 @@ export class S3Service {
     return { key: objectKey, presignedUrl };
   }
 
+  /**
+   * A link to PUT one PDF statement of exactly `contentLength` bytes to, for an import on
+   * `accountKey`. The length and type are signed, so a larger file than the one announced (and
+   * checked against the statement size limit) is refused by the store itself.
+   */
+  async generatePresignedUrlForAccountPdf(accountKey: number, contentLength: number): Promise<{ key: string; presignedUrl: string }> {
+    const objectKey = `account-${accountKey}-statement-${uuidv4()}.pdf`;
+    const presignedUrl = await this.generatePresignedUploadUrl(this.getAccountCsvBucketName(), objectKey, { contentLength, contentType: 'application/pdf', expiresInSeconds: this.CSV_UPLOAD_URL_TTL_SECONDS });
+    return { key: objectKey, presignedUrl };
+  }
+
   async generatePresignedUrlForPortfolioCsv(portfolioKey: number, exchangeName: string, importToken?: string): Promise<{ key: string; presignedUrl: string }> {
     const uniqueId = importToken ? `${importToken}-${uuidv4()}` : uuidv4();
     const objectKey = buildCsvObjectKey({ maxLength: 200, name: exchangeName, prefix: `portfolio-${portfolioKey}-`, uniqueId });
@@ -110,6 +121,16 @@ export class S3Service {
    */
   async generatePresignedDownloadUrl(bucket: string, key: string, fileName: string, expiresInSeconds: number): Promise<string> {
     const command = new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: `attachment; filename="${fileName.replace(/["\\\r\n]/gu, '')}"` });
+    return getSignedUrl(this.presignClient(), command, { expiresIn: expiresInSeconds });
+  }
+
+  /**
+   * A short-lived link that shows an object inline in the browser (an image or a PDF), signed
+   * for the endpoint browsers reach. Transaction attachments are private: the link is the only
+   * way in, and it expires in minutes.
+   */
+  async generatePresignedViewUrl(bucket: string, key: string, contentType: string, expiresInSeconds: number): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key, ResponseContentDisposition: 'inline', ResponseContentType: contentType });
     return getSignedUrl(this.presignClient(), command, { expiresIn: expiresInSeconds });
   }
 

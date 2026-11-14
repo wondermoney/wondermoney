@@ -13,6 +13,8 @@ import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
 import { ACCOUNT_BALANCE_POPULATE, accountBalanceIn, loadAccountRates } from '@service/currency/account-balance';
 import { type CurrencyPair, loadRateTable, rateScope, type RateTable } from '@service/currency/exchange-rate';
+import { basisPointsMatching, loadAccountOwnership, memberPartOf, type OwnershipParts, ownershipPartsOf, WHOLE_SHARE } from '@service/household/account-ownership';
+import { accountAttributionOf, loadActiveMembers, matchesMemberFilter, type MemberFilter } from '@service/household/member-attribution';
 import { calculateOutstandingPrincipalWithAdjustments } from '@service/loan/loan-calculation.service';
 import { assetValueFor, currentAssetValueFor, loadAssetRates, type LoadedManualAsset, loadVisibleManualAssets, manualAssetRatePairs } from '@service/manual-asset/manual-asset.service';
 import { portfolioCountedInAccount, type PortfolioLinkFields, shouldSuggestPortfolioLink } from '@service/portfolio/portfolio-account-link';
@@ -77,7 +79,7 @@ export interface NetWorthSummary {
    * portfolio row with `countedInAccountId` is already inside that account's balance: it is shown
    * as a breakdown and adds nothing to the totals.
    */
-  rows: { balance: number; countedInAccountId?: number; id?: number; name: string; type: NetWorthRowType }[];
+  rows: { balance: number; countedInAccountId?: number; id?: number; name: string; sharePercent?: number; type: NetWorthRowType }[];
   /** The viewer can see an investment account no portfolio is linked to, and the household has an unlinked portfolio: ask whether they hold the same money. */
   suggestPortfolioLink: boolean;
   totalNetWorth: number;
@@ -100,27 +102,52 @@ interface NetWorthInputRow {
   countedInAccountId?: number;
   id?: number;
   name: string;
+  /** Accounts only, under a member filter: the percentage of the account counted, when it is not all of it. */
+  sharePercent?: number;
 }
 
 interface NetWorthSourceRow extends NetWorthInputRow {
   supportedCurrency?: boolean;
 }
 
+/** Which members' net worth to count (`member-attribution.ts`); absent: the household's. */
+export interface NetWorthOptions {
+  members?: MemberFilter;
+}
+
+type OwnerRef = null | undefined | { appuserKey: number };
+
+/**
+ * The part of the household's net worth a member filter keeps, from what the viewer already sees:
+ * an account by its ownership shares when it has them, else by its attribution (its owner, or Shared
+ * when joint; `account-ownership.ts`), a portfolio and a manual asset by their owner, and the
+ * viewer's loans only when the viewer is one of the members asked for (another member's loans are
+ * never the viewer's to see). An owner who has left the household counts as Shared. With no filter,
+ * everything, so the household's figures do not depend on the shares at all.
+ */
+interface MemberSelection {
+  /** The basis points of the account the filter keeps: 0 leaves it out, {@link WHOLE_SHARE} keeps all of it. */
+  basisPoints: (account: Account) => number;
+  loans: boolean;
+  /** Whether the filter keeps what this member owns outright (a portfolio, a manual asset). */
+  owner: (owner: OwnerRef) => boolean;
+  /** The part of the account's value, in the viewer's currency, the filter keeps. */
+  part: (account: Account, value: Money) => Money;
+}
+
 export class NetWorthService {
-  async getNetWorth(appuser: Appuser): Promise<NetWorthSummary> {
+  async getNetWorth(appuser: Appuser, options: NetWorthOptions = {}): Promise<NetWorthSummary> {
     const currencyCode = await this.resolveCurrencyCode(appuser);
     const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser);
     if (!appuserTenant) {
       throw new Error("User doesn't have AppuserTenant");
     }
-
-    const [accounts, portfolioRows, manualAssets, loans] = await Promise.all([
+    const [allAccounts, allManualAssets, allLoans] = await Promise.all([
       DI.em.find(
         Account,
         { deletedAt: undefined, tenantKey: appuserTenant.tenantKey },
         { orderBy: { createdAt: 'DESC' }, populate: [...ACCOUNT_BALANCE_POPULATE, 'accountTypeKey'] },
       ),
-      this.getPortfolioRows(appuser, appuserTenant.tenantKey),
       // Carries the tenant and the privacy rule itself: the other member's private asset is never loaded.
       loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(
@@ -129,16 +156,22 @@ export class NetWorthService {
         { populate: ['currencyKey'] },
       ),
     ]);
+    const selection = await memberSelection(resolveTenantKeyNumber(appuserTenant.tenantKey), appuser.appuserKey, options.members, allAccounts);
+    const manualAssets = allManualAssets.filter(({ asset }) => selection.owner(asset.ownerAppuserKey as OwnerRef));
+    const loans = selection.loans ? allLoans : [];
+    const portfolioRows = await this.getPortfolioRows(appuser, appuserTenant.tenantKey, selection.owner);
 
+    const asOf = new Date();
     const loanRows = await Promise.all(
       loans.map(async (loan) => {
         const [repayments, adjustments] = await Promise.all([
-          DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan }),
-          DI.em.find(LoanAdjustment, { deletedAt: undefined, loanKey: loan }),
+          DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, paymentDate: { $lte: asOf } }),
+          DI.em.find(LoanAdjustment, { deletedAt: undefined, effectiveDate: { $lte: asOf }, loanKey: loan }),
         ]);
 
         const outstandingPrincipal = calculateOutstandingPrincipalWithAdjustments({
           adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })),
+          asOfDate: asOf,
           openingPrincipalBalance: loan.openingPrincipalBalance,
           principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })),
         });
@@ -151,24 +184,30 @@ export class NetWorthService {
 
     // Each member keeps their own currency, and an account's stored user-currency balance is in its
     // owner's. Convert every account into the viewer's currency; one that cannot be converted is
-    // left out and counted, never added in a foreign currency.
-    const asOf = new Date();
-    const rates = await loadAccountRates(DI.em, accounts, currencyCode, asOf, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
+    // left out and counted, never added in a foreign currency. A member's figure takes their part of
+    // each account they hold a share of, split from the converted value so the parts add up exactly.
+    const rates = await loadAccountRates(DI.em, allAccounts, currencyCode, asOf, rateScope(resolveTenantKeyNumber(appuserTenant.tenantKey)));
     const accountRows: NetWorthInputRow[] = [];
     let unconvertedAccounts = 0;
     const unconvertedCurrencies = new Set<string>();
-    for (const account of accounts) {
+    // The household's counted accounts, whoever's figure this is: a portfolio inside one adds nothing
+    // to anyone, since the account's holders already carry it in their parts.
+    const countedAccountKeys = new Set<number>();
+    for (const account of allAccounts) {
       const value = accountBalanceIn(account, currencyCode, rates, asOf);
+      if (value) countedAccountKeys.add(account.accountKey);
+      const kept = selection.basisPoints(account);
+      if (kept === 0) continue;
       if (!value) {
         unconvertedAccounts += 1;
         if (account.currencyKey.code) unconvertedCurrencies.add(account.currencyKey.code);
         continue;
       }
-      accountRows.push({ balance: Money.toNumber(value), id: account.accountKey, name: account.accountName ?? 'Account' });
+      const balance = Money.toNumber(selection.part(account, Money.of(Money.toNumber(value), currencyCode)));
+      accountRows.push({ balance, id: account.accountKey, name: account.accountName ?? 'Account', ...(kept < WHOLE_SHARE ? { sharePercent: kept / 100 } : {}) });
     }
 
     // A portfolio inside a counted account's balance is shown but not added (`portfolio-account-link.ts`).
-    const countedAccountKeys = new Set(accountRows.map((row) => row.id).filter((id): id is number => id != null));
     const portfolios: NetWorthSourceRow[] = portfolioRows.map(({ link, ...row }) => {
       const countedInAccountId = portfolioCountedInAccount(link, countedAccountKeys);
       return countedInAccountId == null ? row : { ...row, countedInAccountId };
@@ -200,27 +239,31 @@ export class NetWorthService {
 
     return {
       ...buildNetWorthSummary({ accounts: accountRows, currencyCode, loans: loanRows, manualAssets: manualAssetRows, portfolios, unconvertedCurrencies: [...unconvertedCurrencies, ...unconvertedAssetCurrencies], unsupportedCurrencies }),
-      suggestPortfolioLink: shouldSuggestPortfolioLink(accounts, portfolioRows.map((row) => row.link)),
+      suggestPortfolioLink: shouldSuggestPortfolioLink(allAccounts, portfolioRows.map((row) => row.link)),
     };
   }
 
-  async getNetWorthHistory(appuser: Appuser, options?: { granularity?: NetWorthHistoryGranularity; months?: number; toDate?: Date }): Promise<NetWorthHistorySummary> {
+  async getNetWorthHistory(appuser: Appuser, options?: NetWorthOptions & { granularity?: NetWorthHistoryGranularity; months?: number; toDate?: Date }): Promise<NetWorthHistorySummary> {
     const currencyCode = await this.resolveCurrencyCode(appuser);
     const appuserTenant = await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser);
     if (!appuserTenant) throw new Error("User doesn't have AppuserTenant");
-
     const months = clampHistoryMonths(options?.months);
     const now = new Date();
     const toDate = resolveHistoryToDate(options?.toDate, now);
     const basePoints = buildMonthlyHistoryPointDates(months, toDate);
     const today = startOfUtcDay(now);
 
-    const [accounts, portfolios, manualAssets, loans] = await Promise.all([
+    const [allAccounts, allPortfolios, allManualAssets, allLoans] = await Promise.all([
       DI.em.find(Account, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ACCOUNT_BALANCE_POPULATE }),
       DI.em.find(Portfolio, { deletedAt: undefined, tenantKey: appuserTenant.tenantKey }, { populate: ['portfolioOwnerAppuserKey.currencyKey'] }),
       loadVisibleManualAssets(DI.em, { appuserKey: appuser.appuserKey, tenantKey: resolveTenantKeyNumber(appuserTenant.tenantKey) }),
       DI.em.find(Loan, { deletedAt: undefined, includeInNetWorth: true, ownerAppuserKey: appuser, tenantKey: appuserTenant.tenantKey }, { populate: ['currencyKey'] }),
     ]);
+    const selection = await memberSelection(resolveTenantKeyNumber(appuserTenant.tenantKey), appuser.appuserKey, options?.members, allAccounts);
+    const accounts = allAccounts.filter((account) => selection.basisPoints(account) > 0);
+    const portfolios = allPortfolios.filter((portfolio) => selection.owner(portfolio.portfolioOwnerAppuserKey));
+    const manualAssets = allManualAssets.filter(({ asset }) => selection.owner(asset.ownerAppuserKey as OwnerRef));
+    const loans = selection.loans ? allLoans : [];
 
     const pointDates = await buildHistoryPointDates({ accounts, appuser, basePoints, manualAssets, tenantKey: appuserTenant.tenantKey, toDate });
 
@@ -237,16 +280,17 @@ export class NetWorthService {
     // Today's point is the figure Home shows: `getNetWorth` values portfolios live, while
     // snapshots lag (yesterday's misses today's trades). Earlier points stay on snapshots.
     const currentSummary = pointDates.some((pointDate) => isCurrentHistoryPoint(pointDate, today))
-      ? await this.getNetWorth(appuser)
+      ? await this.getNetWorth(appuser, { members: options?.members })
       : undefined;
 
     const pointSummaries = await Promise.all(pointDates.map(async (pointDate) => {
       const isCurrentPoint = isCurrentHistoryPoint(pointDate, today);
-      const [accountsTotal, accountsComplete] = await calculateAccountsHistoryTotal(accounts, toViewer, appuserTenant.tenantKey, pointDate, isCurrentPoint, prefetchedBalances);
+      const [accountsTotal, accountsComplete] = await calculateAccountsHistoryTotal(accounts, toViewer, appuserTenant.tenantKey, pointDate, isCurrentPoint, prefetchedBalances, (account, value) => Money.toNumber(selection.part(account, Money.of(value, currencyCode))));
       if (isCurrentPoint && currentSummary) {
         return currentNetWorthHistoryPoint(currentSummary, formatUtcDate(pointDate), accountsComplete);
       }
-      const [portfoliosTotal, portfoliosComplete] = calculatePortfoliosHistoryTotal(portfolios, toViewer, pointDate, snapshotsByPoint.get(pointDate.getTime()) ?? new Map(), accountsCountedAt(accounts, pointDate));
+      // Counted against the household's accounts, as `getNetWorth` does: a portfolio inside one is in its holders' parts.
+      const [portfoliosTotal, portfoliosComplete] = calculatePortfoliosHistoryTotal(portfolios, toViewer, pointDate, snapshotsByPoint.get(pointDate.getTime()) ?? new Map(), accountsCountedAt(allAccounts, pointDate));
       const [manualAssetsTotal, manualAssetsComplete] = calculateManualAssetsHistoryTotal(manualAssets, currencyCode, rates, pointDate);
       const [loansTotal, loansComplete] = await calculateLoansHistoryTotal(loans, currencyCode, pointDate);
       const complete = accountsComplete && portfoliosComplete && manualAssetsComplete && loansComplete;
@@ -260,12 +304,12 @@ export class NetWorthService {
     return { currencyCode, granularity: 'monthly', points: pointSummaries, readiness: calculateHistoryReadiness(pointSummaries) };
   }
 
-  private async getPortfolioRows(appuser: Appuser, tenantKey: AppuserTenant['tenantKey']) {
-    const portfolios = await DI.em.find(
+  private async getPortfolioRows(appuser: Appuser, tenantKey: AppuserTenant['tenantKey'], keepOwner: (owner: OwnerRef) => boolean) {
+    const portfolios = (await DI.em.find(
       Portfolio,
       { deletedAt: undefined, tenantKey },
       { populate: ['currencyKey'] },
-    );
+    )).filter((portfolio) => keepOwner(portfolio.portfolioOwnerAppuserKey));
 
     // Each portfolio at its current value, the figure the portfolio screens show
     // (`valuePortfolioHoldings`), not the latest daily snapshot, which misses today's trades.
@@ -342,6 +386,30 @@ export function clampHistoryMonths(months?: number): number {
   return clamp(months ?? 6, 2, 12);
 }
 
+async function memberSelection(tenantKey: number, viewerAppuserKey: number, members: MemberFilter | undefined, accounts: readonly Account[]): Promise<MemberSelection> {
+  if (!members) return { basisPoints: () => WHOLE_SHARE, loans: true, owner: () => true, part: (_account, value) => value };
+  const [activeMembers, ownership] = await Promise.all([
+    loadActiveMembers(DI.em, tenantKey),
+    loadAccountOwnership(DI.em, tenantKey, accounts.map((account) => account.accountKey)),
+  ]);
+  const active = new Set(activeMembers.keys());
+  const parts = new Map<number, OwnershipParts>();
+  const partsOf = (account: Account): OwnershipParts => {
+    let found = parts.get(account.accountKey);
+    if (!found) {
+      found = ownershipPartsOf({ isJoint: account.isJoint, ownerAppuserKey: (account.accountOwnerAppuserKey as OwnerRef)?.appuserKey }, ownership.get(account.accountKey) ?? [], active);
+      parts.set(account.accountKey, found);
+    }
+    return found;
+  };
+  return {
+    basisPoints: (account) => basisPointsMatching(partsOf(account), members),
+    loans: members.appuserKeys.includes(viewerAppuserKey),
+    owner: (owner) => matchesMemberFilter(accountAttributionOf({ isJoint: false, ownerAppuserKey: owner?.appuserKey }, active), members),
+    part: (account, value) => memberPartOf(value, partsOf(account), members),
+  };
+}
+
 /**
  * The history point for today, taken from the live net worth summary so the trend's latest
  * value and Home agree to the cent. Totals are always reported (as Home reports them); a
@@ -400,13 +468,15 @@ export function resolveHistoryToDate(requestedDate: Date | undefined, now: Date)
 
 export function resolveLoanHistoryTotal(loans: { adjustments?: NetWorthHistoryLoanLike[]; currencyCode: string; openingBalanceDate: Date; openingPrincipalBalance: number; repayments?: NetWorthHistoryLoanLike[] }[], currencyCode: string, pointDate: Date): { complete: boolean; total: null | number } {
   let total = 0;
+  const asOfDate = new Date(nextUtcDay(pointDate).getTime() - 1);
   for (const loan of loans) {
     if (loan.currencyCode !== currencyCode) return { complete: false, total: null };
     if (loan.openingBalanceDate.getTime() > pointDate.getTime()) continue;
     total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({
-      adjustments: (loan.adjustments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= pointDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate, type: 'PRINCIPAL_INCREASE' })),
+      adjustments: (loan.adjustments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= asOfDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate, type: 'PRINCIPAL_INCREASE' })),
+      asOfDate,
       openingPrincipalBalance: loan.openingPrincipalBalance,
-      principalRepayments: (loan.repayments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= pointDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate })),
+      principalRepayments: (loan.repayments ?? []).filter((item) => item.effectiveDate == null || item.effectiveDate.getTime() <= asOfDate.getTime()).map((item) => ({ amount: item.amount, effectiveDate: item.effectiveDate })),
     }));
   }
   return { complete: true, total };
@@ -500,14 +570,18 @@ function accountsCountedAt(accounts: Account[], pointDate: Date): Set<number> {
  * reaches the date it was recorded. An account with neither, or whose opening balance cannot be
  * converted to the viewer's currency at the point's rate, leaves the point incomplete.
  */
-async function calculateAccountsHistoryTotal(accounts: Account[], toViewer: HistoryBalanceConverter, tenantKey: AppuserTenant['tenantKey'], pointDate: Date, isCurrentPoint: boolean, prefetched?: Map<number, Map<number, number>>): Promise<[null | number, boolean]> {
+async function calculateAccountsHistoryTotal(accounts: Account[], toViewer: HistoryBalanceConverter, tenantKey: AppuserTenant['tenantKey'], pointDate: Date, isCurrentPoint: boolean, prefetched?: Map<number, Map<number, number>>, partOf: (account: Account, value: number) => number = (_account, value) => value): Promise<[null | number, boolean]> {
   const relevantAccounts = relevantAccountsAt(accounts, pointDate);
   if (relevantAccounts.length === 0) return [0, true];
 
   // Every balance is converted to the viewer's currency before it is added; one that cannot be
-  // leaves the point incomplete.
+  // leaves the point incomplete. A member's history takes their part of each converted balance, by
+  // today's shares at every point.
   const totalOf = (valueOf: (account: Account) => null | number): [null | number, boolean] => {
-    const values = relevantAccounts.map(valueOf);
+    const values = relevantAccounts.map((account) => {
+      const value = valueOf(account);
+      return value == null ? null : partOf(account, value);
+    });
     if (values.some((value) => value == null)) return [null, false];
     return [sumMoney(values), true];
   };
@@ -534,6 +608,7 @@ interface HistoryBalanceConverter {
 
 async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, pointDate: Date): Promise<[null | number, boolean]> {
   let total = 0;
+  const asOfDate = new Date(nextUtcDay(pointDate).getTime() - 1);
   for (const loan of loans) {
     if (loan.currencyKey.code !== currencyCode) return [null, false];
     if (loan.openingBalanceDate > pointDate) continue;
@@ -541,7 +616,7 @@ async function calculateLoansHistoryTotal(loans: Loan[], currencyCode: string, p
       DI.em.find(LoanAdjustment, { deletedAt: undefined, effectiveDate: { $lt: nextUtcDay(pointDate) }, loanKey: loan }, { orderBy: { effectiveDate: 'ASC', loanAdjustmentKey: 'ASC' } }),
       DI.em.find(LoanRepaymentLink, { deletedAt: undefined, loanKey: loan, paymentDate: { $lt: nextUtcDay(pointDate) } }, { orderBy: { loanRepaymentLinkKey: 'ASC', paymentDate: 'ASC' } }),
     ]);
-    total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({ adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })), openingPrincipalBalance: loan.openingPrincipalBalance, principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })) }));
+    total = addMoney(total, calculateOutstandingPrincipalWithAdjustments({ adjustments: adjustments.map((adj) => ({ amount: adj.amount, effectiveDate: adj.effectiveDate, type: adj.type })), asOfDate, openingPrincipalBalance: loan.openingPrincipalBalance, principalRepayments: repayments.map((repayment) => ({ amount: repayment.principalAmount, effectiveDate: repayment.paymentDate })) }));
   }
   return [total, true];
 }

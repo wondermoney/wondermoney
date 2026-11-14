@@ -59,9 +59,6 @@ const {
   handlePortfolioSnapshotManualJobMock: vi.fn().mockResolvedValue(true),
   handleScheduledEmailsJobMock: vi.fn().mockResolvedValue(true),
 }));
-const { handleAccountCsvImportJobMock } = vi.hoisted(() => ({
-  handleAccountCsvImportJobMock: vi.fn().mockResolvedValue(true),
-}));
 const { recoverOnceMock } = vi.hoisted(() => ({
   recoverOnceMock: vi.fn().mockResolvedValue({ needsAction: 0, processed: 0, reenqueued: 0, skipped: 0 }),
 }));
@@ -128,12 +125,12 @@ vi.mock('@app/jobs/transaction-enrichment.worker', () => ({ handleTransactionEnr
 vi.mock('@app/jobs/bank-recovery-dispatch.worker', () => ({
   handleBankRecoveryDispatchJob: handleBankRecoveryDispatchJobMock,
 }));
-vi.mock('@app/jobs/account-csv-import.worker', () => ({ handleAccountCsvImportJob: handleAccountCsvImportJobMock }));
 vi.mock('@app/jobs/portfolio-csv-import-confirmed.worker', () => ({
   handlePortfolioCsvImportConfirmedJob: handlePortfolioCsvImportConfirmedJobMock,
 }));
 vi.mock('@service/operations/background-operation-recovery.service', () => ({ default: { recoverOnce: recoverOnceMock } }));
 
+import { withPgBossNameRules } from '@app/__tests__/__helpers__/pgboss-names';
 import {
   DEMO_DATA_REFRESH_SINGLETON_KEY,
 } from '@app/jobs/demo-data-refresh.queue';
@@ -168,7 +165,9 @@ describe('worker startup bootstrap', () => {
   });
 });
 
-const createBossMock = (overrides: Record<string, unknown> = {}) => ({
+// Refuses the queue names and schedule keys the real pg-boss refuses (`pgboss-names.ts`), so every
+// queue and schedule the worker registers is checked in every test below.
+const createBossMock = (overrides: Record<string, unknown> = {}) => withPgBossNameRules({
   createQueue: createQueueMock,
   deleteQueue: deleteQueueMock,
   findJobs: vi.fn().mockResolvedValue([]),
@@ -222,7 +221,6 @@ describe('createWorker', () => {
       'account.initial-sync',
       'bank-recovery.send',
       'bank-recovery.dispatch',
-      'account.csv-import',
       'user.data-export',
       'user.data-export.cleanup',
       'user.data-restore',
@@ -244,6 +242,7 @@ describe('createWorker', () => {
       'account.recalculate',
       'asset-price.historical-backfill',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'worker.heartbeat',
       // ensureFinancialEmailQueues always creates all six financial-email queues (budget,
@@ -260,6 +259,7 @@ describe('createWorker', () => {
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
+      'push-send',
       'transaction.enrichment.gpt.dlq',
       'transaction.enrichment.gpt',
     ]));
@@ -276,7 +276,6 @@ describe('createWorker', () => {
     expect(createQueueMock).toHaveBeenCalledBefore(workMock);
     expect(workMock).toHaveBeenCalledWith('foundation.health-check', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('account.initial-sync', { includeMetadata: true }, expect.any(Function));
-    expect(workMock).toHaveBeenCalledWith('account.csv-import', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('user.data-export', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('user.data-export.cleanup', expect.any(Function));
     expect(workMock).toHaveBeenCalledWith('user.data-restore', expect.any(Function));
@@ -308,7 +307,6 @@ describe('createWorker', () => {
       'account.initial-sync',
       'bank-recovery.send',
       'bank-recovery.dispatch',
-      'account.csv-import',
       'portfolio.csv-import-confirmed',
       'portfolio.csv-parse-preview',
       'account.auto-sync.schedule',
@@ -319,10 +317,12 @@ describe('createWorker', () => {
       'portfolio.snapshot.auto',
       'portfolio.snapshot.manual',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'bank-sync-alert.send',
+      'push-send',
       'email.monthly_story.user',
       'account.auto-sync.requisition',
       'background-operation.recovery',
@@ -343,6 +343,20 @@ describe('createWorker', () => {
     expect(scheduleMock).not.toHaveBeenCalled();
     expect(unscheduleMock).not.toHaveBeenCalled();
     expect(startMock).toHaveBeenCalledOnce();
+  });
+
+  it('starts with every optional schedule owned, under queue names and schedule keys pg-boss accepts', async () => {
+    vi.stubEnv('PGBOSS_SCHEDULE', 'true');
+    vi.stubEnv('ENABLE_PGBOSS_DEMO_DATA_REFRESH', 'true');
+    vi.stubEnv('HETRIX_WORKER_HEARTBEAT_URL', 'https://heartbeat.example.test/ping');
+    const worker = createWorker({
+      backgroundOperationService: backgroundOperationServiceMock(),
+      createBoss: vi.fn(() => createBossMock()),
+      logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+    });
+
+    await worker.start();
+    expect(callNames(scheduleMock.mock.calls)).toEqual(expect.arrayContaining(['demo-data.refresh', 'worker.heartbeat']));
   });
 
   it('registers schedules when PGBOSS_SCHEDULE is explicitly true', async () => {
@@ -399,6 +413,7 @@ describe('createWorker', () => {
       'exchange-rate.refresh',
       'portfolio.snapshot.auto',
       'certificado-aforro.rate-sync',
+      'crypto-wallet.sync',
       'budget.year-extension',
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
@@ -578,13 +593,6 @@ describe('createWorker', () => {
         boss,
         enqueue: expect.objectContaining({ send: expect.any(Function), sendAfter: expect.any(Function) }),
       }),
-    );
-
-    const csvImportHandler = getWorkHandler('account.csv-import') as (jobs: { data: unknown; id: string }[]) => Promise<unknown>;
-    await csvImportHandler([{ data: {}, id: 'csv-job' }]);
-    expect(handleAccountCsvImportJobMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'csv-job' }),
-      expect.objectContaining({ enqueue: expect.objectContaining({ send: expect.any(Function), sendAfter: expect.any(Function) }) }),
     );
 
     const autoSyncHandler = getWorkHandler('account.auto-sync.requisition') as (jobs: { data: unknown; id: string }[]) => Promise<unknown>;

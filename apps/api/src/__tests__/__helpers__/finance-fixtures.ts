@@ -9,6 +9,8 @@ import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { Account } from '@entity/Account';
+import { AccountOwnership } from '@entity/AccountOwnership';
+import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
@@ -122,10 +124,10 @@ export async function currencyFor(em: EntityManager, code: string): Promise<Curr
   return currency;
 }
 
-/** Add a second, invited member to a household, with their own currency if given. */
-export async function addPartner(em: EntityManager, household: Household, input: { currency?: Currency } = {}): Promise<Appuser> {
+/** Add an invited member to a household, with their own currency and role if given (default member). */
+export async function addPartner(em: EntityManager, household: Household, input: { currency?: Currency; role?: HouseholdRole } = {}): Promise<Appuser> {
   const partner = em.create(Appuser, { currencyKey: input.currency ?? household.currency, emailAddress: `partner${next()}@example.test`, externalUserId: randomUUID(), firstName: 'Partner' }, { partial: true });
-  em.create(AppuserTenant, { appuserKey: partner, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
+  em.create(AppuserTenant, { appuserKey: partner, recordActive: true, role: input.role ?? HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
   await em.flush();
   return partner;
 }
@@ -144,6 +146,19 @@ export async function addAccount(em: EntityManager, household: Household, input:
   }, { partial: true });
   await em.flush();
   return account;
+}
+
+/** Share a private account with a member, at `access` (default read). */
+export async function addShare(em: EntityManager, household: Household, account: Account, member: Appuser, access: 'read' | 'write' = 'read'): Promise<AccountShare> {
+  const share = em.create(AccountShare, { access: access === 'write' ? AccountShareAccess.WRITE : AccountShareAccess.READ, accountKey: account, appuserKey: member, tenantKey: household.tenant }, { partial: true });
+  await em.flush();
+  return share;
+}
+
+/** Give an account ownership shares, as `[member, basis points]` pairs (written as given, unchecked). */
+export async function addOwnership(em: EntityManager, household: Household, account: Account, shares: readonly (readonly [Appuser, number])[]): Promise<void> {
+  for (const [member, basisPoints] of shares) em.create(AccountOwnership, { accountKey: account, appuserKey: member, basisPoints, tenantKey: household.tenant }, { partial: true });
+  await em.flush();
 }
 
 /** One row per status the rule distinguishes, all on the same day, so a test can see which ones count. */

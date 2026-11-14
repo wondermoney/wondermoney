@@ -1,7 +1,7 @@
 "use client";
 
 import { startOfDay, subDays } from "date-fns";
-import { Lock, Plus, Upload, Users } from "lucide-react";
+import { Eye, Lock, Plus, Upload, Users } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -9,11 +9,16 @@ import { useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 import { accountDisplayBalance } from "@/components/account/AccountBalance";
+import AccountForecastCallout from "@/components/account/AccountForecastCallout";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import CreditCardStatements from "@/components/account/CreditCardStatements";
+import CreditCardStatementSummary from "@/components/account/CreditCardStatementSummary";
 import MetricsCards from "@/components/account/MetricsCards";
+import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { clampSyncedAt } from "@/components/account/sync-time";
+import CardInstallments from "@/components/installments/CardInstallments";
 import { Button } from "@/components/ui/button";
 import { DataProvenance } from "@/components/ui/DataProvenance";
 import { FxStatusBadge } from "@/components/ui/FxStatusBadge";
@@ -21,8 +26,15 @@ import { Link } from "@/components/ui/Link";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  canEditAccount,
+  readOnlyAccountKeys,
+} from "@/lib/account/account-access";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
+import type { GetAccountForecastResponse } from "@/lib/api/account/useAccountForecast";
+import useAccountForecast from "@/lib/api/account/useAccountForecast";
 import type { GetAccountMetricsResponse } from "@/lib/api/account/useAccountMetrics";
 import useAccountMetrics from "@/lib/api/account/useAccountMetrics";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
@@ -50,6 +62,9 @@ interface AccountClientProps {
   initialTransactionsData: GetAccountTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
   initialAccountMetricsData: GetAccountMetricsResponse;
+  initialForecastData: GetAccountForecastResponse;
+  /** `?tab=statements` opens a credit card's statements tab (the reminder email links there). */
+  initialTab?: string;
 }
 
 export default function AccountClient({
@@ -60,6 +75,8 @@ export default function AccountClient({
   initialTransactionsData,
   initialConfigsData,
   initialAccountMetricsData,
+  initialForecastData,
+  initialTab,
 }: AccountClientProps) {
   const t = useTranslations();
   const posthog = usePostHog();
@@ -103,10 +120,28 @@ export default function AccountClient({
     ...serverSeed(initialAccountMetricsData, serverRenderedAt),
   });
 
+  const forecastDays = 30;
+  const { data: forecastData } = useAccountForecast(
+    { accountKeys: [accountId], days: forecastDays },
+    {
+      enabled: !!accountId && !Number.isNaN(accountId),
+      ...serverSeed(initialForecastData, serverRenderedAt),
+    },
+  );
+  const accountForecast =
+    forecastData?.accounts.find((series) => series.accountKey === accountId) ??
+    null;
+
   // Table stuff
   const [transactionDateRange, setTransactionDateRange] = useState<
     DateRange | undefined
   >({ from: startOfDay(subDays(new Date(), 60)), to: startOfDay(new Date()) });
+
+  // A credit card's page splits into Overview and Statements; the reminder email links straight
+  // to the statements tab.
+  const [activeTab, setActiveTab] = useState(
+    initialTab === "statements" ? "statements" : "overview",
+  );
 
   // Add manual transaction modal
   const [isAddManualTransactionModalOpen, setIsAddManualTransactionOpen] =
@@ -149,6 +184,8 @@ export default function AccountClient({
     (candidate) => candidate.accountKey === account.accountKey,
   );
   const accountName = account.accountName ?? t("unknown");
+  // Shared to view only (or a household viewer): the page shows everything and changes nothing.
+  const canEdit = canEditAccount(account);
   // `?? t("unknown")` printed "Unknown" under the title of every manual
   // account — a placeholder posing as a fact about the bank. A manual account
   // has no institution; the honest rendering is no line at all. § 9 rule 4.
@@ -164,6 +201,146 @@ export default function AccountClient({
   const { value: primaryBalance, currency: balanceCurrency } = isMultiCurrency
     ? accountDisplayBalance(account)
     : { value: account.balance, currency: account.currencyKey.code };
+
+  const overviewSections = (
+    <>
+      {/* Metrics */}
+      <section>
+        {isLoadingAccountMetricsData && !isAccountMetricsPlaceholderData ? (
+          <div className="flex h-24 items-center justify-center">
+            <Spinner />
+          </div>
+        ) : accountMetricsData?.metrics &&
+          accountMetricsData.metrics.length > 0 ? (
+          <MetricsCards
+            metrics={accountMetricsData.metrics}
+            userCurrency={currency}
+          />
+        ) : (
+          <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
+        )}
+      </section>
+
+      {/* Credit card statement */}
+      {account.creditCard ? (
+        <CreditCardStatementSummary
+          accountKey={account.accountKey}
+          creditCard={account.creditCard}
+          currency={account.currencyKey.code}
+        />
+      ) : null}
+
+      {/* A card's purchases in installments: what is still to be charged, its plans and the
+          rows that look like one. */}
+      {account.creditCard ? (
+        <CardInstallments
+          accountKey={account.accountKey}
+          currency={account.currencyKey.code}
+          categories={configsData?.categories ?? []}
+          readOnly={!canEdit}
+        />
+      ) : null}
+
+      {/* Balance chart */}
+      <Section id="balance-growth-heading" title={t("balance-growth")}>
+        <div>
+          {isLoadingTransactionsData && !isTransactionsPlaceholderData ? (
+            <div className="flex h-75 items-center justify-center">
+              <Spinner />
+            </div>
+          ) : transactionsData?.transactions &&
+            transactionsData.transactions.length > 0 ? (
+            <>
+              <AccountTransactionsChart
+                currencyCode={currency}
+                forecast={
+                  accountForecast
+                    ? {
+                        currency: accountForecast.currency,
+                        points: accountForecast.points,
+                      }
+                    : null
+                }
+                transactions={transactionsData.transactions}
+              />
+              {accountForecast ? (
+                <div className="mt-4">
+                  <AccountForecastCallout
+                    days={forecastDays}
+                    series={accountForecast}
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
+              <p className="text-muted-foreground text-sm">
+                {t("empty-transactions-description")}
+              </p>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* Recent transactions */}
+      <Section
+        id="last-transactions-heading"
+        title={t("last-transactions")}
+        aside={
+          <Link
+            href={`/accounts/${accountId}/transactions`}
+            className="text-primary text-sm font-medium no-underline hover:underline"
+          >
+            {t("view-all")}
+          </Link>
+        }
+      >
+        <div>
+          {isLoading ? (
+            <div className="flex h-50 items-center justify-center">
+              <Spinner />
+            </div>
+          ) : transactionsData?.transactions &&
+            transactionsData.transactions.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              <ProjectedTransactions
+                occurrences={accountForecast?.projected ?? []}
+                installments={accountForecast?.projectedInstallments ?? []}
+              />
+              <AccountTransactionsTable
+                layout="ledger"
+                transactions={transactionsForTable ?? []}
+                categories={configsData?.categories ?? []}
+                withAccountFilter={false}
+                withFilters={false}
+                withPagination={false}
+                sticky={false}
+                readOnlyAccountKeys={readOnlyAccountKeys([account])}
+                transactionDateRange={transactionDateRange}
+                setTransactionDateRange={(dataRange) =>
+                  setTransactionDateRange(dataRange)
+                }
+              />
+            </div>
+          ) : (
+            <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
+              <p className="text-muted-foreground text-sm">
+                {t("empty-transactions-description")}
+              </p>
+              {canEdit ? (
+                <Button onClick={openAddManualTransactionModal}>
+                  <Plus className="size-4" />
+                  {t("add-transaction")}
+                </Button>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </Section>
+    </>
+  );
+
+  const isCreditCard = Boolean(account.creditCard);
 
   return (
     <div className="flex flex-col gap-10 lg:gap-12">
@@ -182,6 +359,12 @@ export default function AccountClient({
               <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
                 <Lock className="size-3" />
                 {t("account-private")}
+              </span>
+            )}
+            {!canEdit && (
+              <span className="text-muted-foreground border-border flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
+                <Eye className="size-3" />
+                {t("accountSharing.view-only")}
               </span>
             )}
             {!account.isOwnedByViewer && account.ownerFirstName && (
@@ -214,7 +397,7 @@ export default function AccountClient({
           />
         }
         actions={
-          transactionAccount ? (
+          transactionAccount && canEdit ? (
             <>
               <AccountTransactionImportModal
                 isOpen={isImportTransactionModalOpen}
@@ -255,92 +438,31 @@ export default function AccountClient({
         }
       />
 
-      {/* Metrics */}
-      <section>
-        {isLoadingAccountMetricsData && !isAccountMetricsPlaceholderData ? (
-          <div className="flex h-24 items-center justify-center">
-            <Spinner />
-          </div>
-        ) : accountMetricsData?.metrics &&
-          accountMetricsData.metrics.length > 0 ? (
-          <MetricsCards
-            metrics={accountMetricsData.metrics}
-            userCurrency={currency}
-          />
-        ) : (
-          <p className="text-muted-foreground text-sm">{t("no-metrics")}</p>
-        )}
-      </section>
-
-      {/* Balance chart */}
-      <Section id="balance-growth-heading" title={t("balance-growth")}>
-        <div>
-          {isLoadingTransactionsData && !isTransactionsPlaceholderData ? (
-            <div className="flex h-75 items-center justify-center">
-              <Spinner />
+      {isCreditCard ? (
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="self-start">
+            <TabsTrigger value="overview">
+              {t("credit-card-overview")}
+            </TabsTrigger>
+            <TabsTrigger value="statements">
+              {t("credit-card-statements")}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div className="flex flex-col gap-10 lg:gap-12">
+              {overviewSections}
             </div>
-          ) : transactionsData?.transactions &&
-            transactionsData.transactions.length > 0 ? (
-            <AccountTransactionsChart
-              currencyCode={currency}
-              transactions={transactionsData.transactions}
+          </TabsContent>
+          <TabsContent value="statements">
+            <CreditCardStatements
+              accountKey={account.accountKey}
+              currency={account.currencyKey.code}
             />
-          ) : (
-            <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
-              <p className="text-muted-foreground text-sm">
-                {t("empty-transactions-description")}
-              </p>
-            </div>
-          )}
-        </div>
-      </Section>
-
-      {/* Recent transactions */}
-      <Section
-        id="last-transactions-heading"
-        title={t("last-transactions")}
-        aside={
-          <Link
-            href={`/accounts/${accountId}/transactions`}
-            className="text-primary text-sm font-medium no-underline hover:underline"
-          >
-            {t("view-all")}
-          </Link>
-        }
-      >
-        <div>
-          {isLoading ? (
-            <div className="flex h-50 items-center justify-center">
-              <Spinner />
-            </div>
-          ) : transactionsData?.transactions &&
-            transactionsData.transactions.length > 0 ? (
-            <AccountTransactionsTable
-              layout="ledger"
-              transactions={transactionsForTable ?? []}
-              categories={configsData?.categories ?? []}
-              withAccountFilter={false}
-              withFilters={false}
-              withPagination={false}
-              sticky={false}
-              transactionDateRange={transactionDateRange}
-              setTransactionDateRange={(dataRange) =>
-                setTransactionDateRange(dataRange)
-              }
-            />
-          ) : (
-            <div className="flex h-50 flex-col items-center justify-center gap-3 px-5 text-center">
-              <p className="text-muted-foreground text-sm">
-                {t("empty-transactions-description")}
-              </p>
-              <Button onClick={openAddManualTransactionModal}>
-                <Plus className="size-4" />
-                {t("add-transaction")}
-              </Button>
-            </div>
-          )}
-        </div>
-      </Section>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        overviewSections
+      )}
     </div>
   );
 }

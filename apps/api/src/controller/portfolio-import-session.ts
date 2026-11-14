@@ -2,11 +2,13 @@ import type { Request, Response } from 'express';
 
 import { DI } from '@app/database/di';
 import { zParse } from '@app/validators/parser';
-import { confirmPortfolioImportAssetMappingsRequestSchema, confirmPortfolioImportColumnMappingRequestSchema, confirmPortfolioImportSessionRequestSchema, getPortfolioImportSessionPreviewRequestSchema, parsePortfolioImportSessionRequestSchema, suggestPortfolioImportColumnMappingRequestSchema } from '@app/validators/portfolio';
+import { confirmPortfolioImportAssetMappingsRequestSchema, confirmPortfolioImportColumnMappingRequestSchema, confirmPortfolioImportSessionRequestSchema, getPortfolioImportSessionPreviewRequestSchema, parsePortfolioImportSessionRequestSchema, suggestPortfolioImportColumnMappingRequestSchema, updatePortfolioImportRowInclusionRequestSchema } from '@app/validators/portfolio';
 import { canUseAi } from '@middleware/email-verification';
 import { spendAiAllowance } from '@service/ai/ai-allowance.service';
+import { isAiAllowedFor } from '@service/ai/ai-availability';
 import portfolioCsvColumnMappingService from '@service/portfolio/portfolio-csv-column-mapping.service';
 import portfolioImportAssetMappingService from '@service/portfolio/portfolio-import-asset-mapping.service';
+import { updatePositionRowInclusion } from '@service/portfolio/portfolio-import-positions';
 import portfolioImportSessionPreviewService from '@service/portfolio/portfolio-import-session-preview.service';
 import portfolioImportSessionTransitions from '@service/portfolio/portfolio-import-session-transitions';
 import portfolioImportSessionService from '@service/portfolio/portfolio-import-session.service';
@@ -36,14 +38,14 @@ export async function confirmPortfolioImportSessionAssetMappings(req: Request, r
 }
 
 export async function confirmPortfolioImportSessionColumnMapping(req: Request, res: Response) {
-  const { body: { columnMapping, derivedValues, fixedValues, layout, transformations }, params: { importSessionId } } = await zParse(confirmPortfolioImportColumnMappingRequestSchema, req);
+  const { body: { asOfDate, columnMapping, derivedValues, fixedValues, layout, transformations }, params: { importSessionId } } = await zParse(confirmPortfolioImportColumnMappingRequestSchema, req);
   if (!req.user) throw new BadRequestError('Unauthorized');
   if (!req.tenant) throw new NotFoundError('Tenant not found');
 
   const session = await portfolioImportSessionService.getOwnedSession({ appuser: req.user, importSessionId, tenant: req.tenant });
   if (portfolioImportSessionService.isExpired(session)) throw new NotFoundError('Import session has expired');
 
-  const result = await portfolioCsvColumnMappingService.confirmColumnMapping({ appuser: req.user, columnMapping, derivedValues, fixedValues, importSessionId, layout, tenant: req.tenant, transformations });
+  const result = await portfolioCsvColumnMappingService.confirmColumnMapping({ appuser: req.user, asOfDate, columnMapping, derivedValues, fixedValues, importSessionId, layout, tenant: req.tenant, transformations });
   return res.status(200).json({ importSessionId: result.importSessionId, status: result.status, summary: result });
 }
 
@@ -62,7 +64,11 @@ export async function suggestPortfolioImportSessionColumnMapping(req: Request, r
   const { tenant } = req;
   if (!tenant) throw new NotFoundError('Tenant not found');
 
-  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ allowModel: canUseAi(req), appuser: req.user, importSessionId, spendModelCall: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping'), tenant });
+  // A saved spec and the column names need no model, so this route is open without AI. The model
+  // is asked only when the server has a provider for it, the person has not hidden AI and, where
+  // required, has verified their email; the allowance is spent only when it is asked.
+  const allowModel = canUseAi(req) && isAiAllowedFor(req.user, 'csvMapping');
+  const result = await portfolioCsvColumnMappingService.suggestColumnMapping({ allowModel, appuser: req.user, importSessionId, spendModelCall: () => spendAiAllowance(DI.em, tenant.tenantKey, 'csvMapping'), tenant });
   return res.status(200).json({ columnMapping: result.columnMapping, importSessionId: result.importSessionId, mappingSource: result.mappingSource, status: result.status, warning: result.warning });
 }
 
@@ -75,4 +81,14 @@ export async function triggerPortfolioImportSessionParse(req: Request, res: Resp
 
   const outcome = await portfolioImportSessionTransitions.requestParse({ appuser, importSessionId, tenant }, { enqueue: req.enqueue });
   return res.status(202).json(outcome);
+}
+
+/** Positions files: include, or skip again, rows whose asset already has trades in the portfolio. */
+export async function updatePortfolioImportSessionRowInclusion(req: Request, res: Response) {
+  const { body: { rows }, params: { importSessionId } } = await zParse(updatePortfolioImportRowInclusionRequestSchema, req);
+  if (!req.user) throw new BadRequestError('Unauthorized');
+  if (!req.tenant) throw new NotFoundError('Tenant not found');
+
+  const result = await updatePositionRowInclusion({ appuser: req.user, importSessionId, rows, tenant: req.tenant });
+  return res.status(200).json(result);
 }

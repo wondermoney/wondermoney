@@ -3,13 +3,13 @@ import { type Request, type Response } from 'express';
 import { DI } from '@app/app';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { recordAnalyticsOutboxEvent } from '@service/analytics/analytics-outbox.service';
-import { ensureAppuserTenantLink, getOrCreateTenant, isAppError } from '@service/auth/auth-callback.service';
+import { isAppError, provisionHomeTenant } from '@service/auth/auth-callback.service';
 import { getAuthUserFullName } from '@service/auth/auth-callback.utils';
 import { type AuthContext, betterAuthUserExists, getPrimaryAuthProvider, sendReconnectVerificationEmail } from '@service/auth/better-auth';
 import { reconnectLegacyAppuser } from '@service/auth/legacy-account-reconnect.service';
 import { recordSignup } from '@service/auth/signup-record.service';
 import { sendSignupEmail } from '@service/email/email';
-import { consumeInvite, notifyExistingUserInviteAttempt, validateInviteForSignup } from '@service/household/household-invite.service';
+import { consumeInvite, validateInviteForEmail } from '@service/household/household-invite.service';
 import { ERROR } from '@utils/constants';
 import { BadRequestError, ERROR_CODE, InternalServerError } from '@utils/errors';
 import { fireAndForget } from '@utils/fire-and-forget';
@@ -37,10 +37,8 @@ export async function authCallback(req: Request, res: Response) {
     const existingUserByExternalId = await DI.em.getRepository(Appuser).getUserByExternalId(externalUserId);
     if (existingUserByExternalId) {
       logger.info({ appuserKey: existingUserByExternalId.appuserKey }, 'Existing user logging in');
-      if (body.inviteToken) {
-        // Existing accounts can't accept household invites yet — flag for demand.
-        notifyExistingUserInviteAttempt(email, existingUserByExternalId.appuserKey);
-      }
+      // An `inviteToken` on a sign-in joins nothing: an existing user moves household only by
+      // confirming on the /join screen (`POST /v1/household/invites/:token/accept`).
       const sessionId = getAuthSessionId(authUser);
       if (sessionId) {
         await recordAnalyticsOutboxEvent(DI.em, {
@@ -59,9 +57,7 @@ export async function authCallback(req: Request, res: Response) {
 
       committedSignupAppuserKey = existingUserByExternalId.appuserKey;
       provisioningStage = 'tenant';
-      const tenant = await getOrCreateTenant(DI.em, existingUserByExternalId);
-      provisioningStage = 'tenant-link';
-      await ensureAppuserTenantLink(DI.em, existingUserByExternalId, tenant);
+      await provisionHomeTenant(DI.em, existingUserByExternalId);
       return sendAuthCallbackSuccess(res, existingUserByExternalId.appuserKey, method, 'login');
     }
 
@@ -83,9 +79,7 @@ export async function authCallback(req: Request, res: Response) {
         if (!reconnected) throw new InternalServerError('Reconnected account not found');
         committedSignupAppuserKey = reconnected.appuserKey;
         provisioningStage = 'tenant';
-        const tenant = await getOrCreateTenant(DI.em, reconnected);
-        provisioningStage = 'tenant-link';
-        await ensureAppuserTenantLink(DI.em, reconnected, tenant);
+        await provisionHomeTenant(DI.em, reconnected);
         return sendAuthCallbackSuccess(res, reconnected.appuserKey, method, 'login');
       }
       if (reconnect === 'email-unverified') {
@@ -111,10 +105,13 @@ export async function authCallback(req: Request, res: Response) {
 
     // Validate the invite before creating anything, so an invalid/expired
     // token or an email mismatch aborts the signup cleanly.
-    const validatedInvite = body.inviteToken ? await validateInviteForSignup(DI.em, body.inviteToken, email) : null;
+    const validatedInvite = body.inviteToken ? await validateInviteForEmail(DI.em, body.inviteToken, email) : null;
 
     const [firstName, lastName] = fullName ? fullName.split(' ') : [undefined, undefined];
     const { appuser: appUser, created: signupCreated } = await recordSignup({
+      // Set from the identity provider's admin groups at sign-in (services/auth/oidc.ts); every
+      // later OIDC sign-in keeps it in step (instance-admin.service.ts).
+      admin: authUser.user.oidcAdmin === true,
       email,
       externalUserId,
       firstName: firstName ?? email.split('@')[0],
@@ -139,9 +136,7 @@ export async function authCallback(req: Request, res: Response) {
     }
 
     provisioningStage = 'tenant';
-    const tenant = await getOrCreateTenant(DI.em, appUser);
-    provisioningStage = 'tenant-link';
-    await ensureAppuserTenantLink(DI.em, appUser, tenant);
+    await provisionHomeTenant(DI.em, appUser);
     if (signupCreated) {
       fireAndForget(sendSignupEmail({ userEmail: appUser.emailAddress }, appUser.language), {
         appuserKey: appUser.appuserKey,

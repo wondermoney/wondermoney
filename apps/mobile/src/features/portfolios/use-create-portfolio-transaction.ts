@@ -11,11 +11,12 @@ import {
 } from './portfolios-contract'
 import { isPortfolioContentQueryForEpoch } from './query-keys'
 
-export type CreatePortfolioTransactionFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'invalid' | 'invalid-response' | 'unknown' | 'general'
+export type CreatePortfolioTransactionFailure = 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'invalid' | 'invalid-response' | 'unknown' | 'general'
 
 export function classifyCreatePortfolioTransactionFailure(error: unknown): CreatePortfolioTransactionFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (isPostDispatchCancellation(error)) return 'unknown'

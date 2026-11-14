@@ -216,7 +216,8 @@ describe('bank recovery email provider seam', () => {
 
   it.each([
     { heading: 'finish connecting your bank', language: 'EN' as const, subject: 'Your bank connection needs another try' },
-    { heading: 'Vamos concluir a liga', language: 'PT' as const, subject: 'A sua ligação bancária precisa de nova tentativa' },
+    { heading: 'Vamos concluir a liga', language: 'PT' as const, subject: 'A tua ligação bancária precisa de nova tentativa' },
+    { heading: 'Terminemos de conectar tu banco', language: 'ES' as const, subject: 'Tu conexión bancaria necesita otro intento' },
   ])('renders the $language bank-recovery nudge as branded HTML with a List-Unsubscribe header + idempotency key', async ({ heading, language, subject }) => {
     resendSendMock.mockResolvedValue({ data: { id: ACCEPTED_ID }, error: null });
     const { sendBankRecoveryEmail } = await loadModule('staging');
@@ -253,7 +254,7 @@ describe('bank recovery email provider seam', () => {
   });
 
   it.each([
-    [{ ...input, language: 'ES' }, 'invalid_language'],
+    [{ ...input, language: 'FR' }, 'invalid_language'],
     [{ ...input, recoveryUrl: 'http://app.wonder.money/accounts' }, 'invalid_recovery_url'],
     [{ ...input, recoveryUrl: 'https://user:secret@app.wonder.money/accounts' }, 'invalid_recovery_url'],
   ])('rejects invalid input before creating a client', async (invalidInput, code) => {
@@ -361,10 +362,58 @@ describe('transactional user emails (welcome)', () => {
     expect(payload.html).toContain('https://app.example.test/pt');
   });
 
+  it('renders the welcome email in Spanish when the user language is ES', async () => {
+    const { sendWelcomeEmail } = await loadModule('production');
+    await sendWelcomeEmail({ ...user, firstName: 'Lucía', language: 'ES' });
+    const payload = resendSendMock.mock.calls[0]?.[0];
+    expect(payload.subject).toBe('Te damos la bienvenida a WonderMoney 🎉');
+    expect(payload.html).toContain('Hola Lucía,');
+    expect(payload.text).toContain('Gracias por registrarte: tu cuenta ya está lista.');
+    expect(payload.text).toContain('Ajustes de notificaciones');
+    expect(payload.html).toContain('https://app.example.test/es/settings');
+    expect(payload.html).not.toContain('https://app.example.test/en');
+  });
+
   it('omits the recipient name when the user has no first name', async () => {
     const { sendWelcomeEmail } = await loadModule('production');
     await sendWelcomeEmail({ ...user, firstName: undefined });
     expect(resendSendMock.mock.calls[0]?.[0].to).toBe('user@example.com');
+  });
+});
+
+describe('account emails for a Spanish account', () => {
+  beforeEach(() => {
+    resendCtor.mockClear();
+    resendSendMock.mockReset();
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+    vi.unstubAllEnvs();
+  });
+
+  const lastPayload = () => resendSendMock.mock.calls.at(-1)?.[0] as { html: string; subject: string; text: string };
+
+  it('confirms a connected bank in Spanish, linking to the Spanish accounts page', async () => {
+    const { sendAccountSyncEmail } = await loadModule('production');
+    await sendAccountSyncEmail({ email: 'lucia@example.com', name: 'Lucía' }, { bankName: 'Banco Ejemplo' }, 'ES');
+    expect(lastPayload().subject).toBe('Banco Ejemplo está conectado a WonderMoney');
+    expect(lastPayload().text).toContain('Banco Ejemplo ya está vinculado a WonderMoney.');
+    expect(lastPayload().html).toContain('https://app.example.test/es/accounts');
+  });
+
+  it('warns about an expiring API token in Spanish', async () => {
+    const { sendApiTokenExpiryEmail } = await loadModule('production');
+    await sendApiTokenExpiryEmail({ email: 'lucia@example.com', name: 'Lucía' }, { expiresAt: new Date('2026-11-20T10:00:00Z'), language: 'ES', tokenName: 'Hoja <de> gastos' });
+    expect(lastPayload().subject).toBe('Tu token de API de WonderMoney caduca pronto');
+    expect(lastPayload().html).toContain('Hola Lucía,<p>El token de API <strong>Hoja &lt;de&gt; gastos</strong> que creaste en WonderMoney caduca el 2026-11-20.</p>');
+    expect(lastPayload().text).toContain('crea uno nuevo en Configuración -> Tokens de API');
+  });
+
+  it('says a data export is ready in Spanish, linking to the Spanish privacy settings', async () => {
+    const { sendDataExportReadyEmail } = await loadModule('production');
+    await sendDataExportReadyEmail({ appuserKey: 42, emailAddress: 'lucia@example.com', language: 'ES' });
+    expect(lastPayload().subject).toBe('La exportación de tus datos de WonderMoney está lista');
+    expect(lastPayload().text).toContain('Descárgala en Configuración > Privacidad en las próximas 24 horas.');
+    expect(lastPayload().text).toContain('Descargar tus datos');
+    expect(lastPayload().html).toContain('https://app.example.test/es/settings?tab=privacy');
   });
 });
 
@@ -382,13 +431,13 @@ describe('instance name in user emails', () => {
     const { sendAccountSyncEmail, sendEmailVerificationEmail, sendPasswordResetEmail, sendWelcomeEmail } = await loadModule('production');
     vi.stubEnv('INSTANCE_NAME', 'Casa Finance');
 
-    await sendPasswordResetEmail({ email: 'ada@example.com', name: 'Ada' }, 'https://money.example.com/reset?token=t');
+    await sendPasswordResetEmail({ email: 'ada@example.com', name: 'Ada' }, 'https://money.example.com/reset?token=t', 'EN');
     const reset = lastPayload();
-    expect(reset.subject).toBe('Reset your Casa Finance password');
-    expect(reset.text).toContain('— The Casa Finance team');
+    expect(reset.subject).toContain('Casa Finance');
+    expect(reset.text).toContain('Casa Finance');
 
-    await sendEmailVerificationEmail({ email: 'ada@example.com' }, 'https://money.example.com/verify?token=t');
-    expect(lastPayload().subject).toBe('Verify your Casa Finance email');
+    await sendEmailVerificationEmail({ email: 'ada@example.com' }, 'https://money.example.com/verify?token=t', 'EN');
+    expect(lastPayload().subject).toContain('Casa Finance');
 
     await sendWelcomeEmail({ appuserKey: 42, emailAddress: 'ada@example.com', language: 'EN' });
     expect(lastPayload().subject).toContain('Welcome to Casa Finance');
@@ -405,9 +454,57 @@ describe('instance name in user emails', () => {
     const { sendPasswordResetEmail } = await loadModule('production');
     vi.stubEnv('INSTANCE_NAME', '');
 
-    await sendPasswordResetEmail({ email: 'ada@example.com' }, 'https://app.example.test/reset?token=t');
-    expect(lastPayload().subject).toBe('Reset your WonderMoney password');
-    expect(lastPayload().text).toContain('— The WonderMoney team');
+    await sendPasswordResetEmail({ email: 'ada@example.com' }, 'https://app.example.test/reset?token=t', 'EN');
+    expect(lastPayload().subject).toContain('WonderMoney');
+  });
+});
+
+describe('password reset and email verification in the account language', () => {
+  beforeEach(() => {
+    resendCtor.mockClear();
+    resendSendMock.mockReset();
+    resendSendMock.mockResolvedValue({ data: { id: 'resend-id' }, error: null });
+    vi.unstubAllEnvs();
+  });
+
+  const lastPayload = () => resendSendMock.mock.calls.at(-1)?.[0] as { html: string; subject: string; text: string; to: string };
+  const languageOf = (payload: { html: string }) => /<html[^>]*lang="([a-z]+)"/u.exec(payload.html)?.[1];
+  const resetUrl = 'https://api.example.test/api/auth/reset-password/T0K3N?callbackURL=https%3A%2F%2Fapp.example.test%2Fes%2Fauth%2Freset';
+  const verificationUrl = 'https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=https%3A%2F%2Fapp.example.test%2Fes';
+
+  it.each([['PT', 'pt'], ['ES', 'es'], ['EN', 'en']] as const)('writes a %s account its emails in %s, carrying the link as given', async (language, locale) => {
+    const { sendEmailVerificationEmail, sendPasswordResetEmail } = await loadModule('production');
+
+    await sendPasswordResetEmail({ email: 'ana@example.test', name: 'Ana' }, resetUrl, language);
+    const reset = lastPayload();
+    await sendEmailVerificationEmail({ email: 'ana@example.test' }, verificationUrl, language);
+    const verification = lastPayload();
+
+    expect(languageOf(reset)).toBe(locale);
+    expect(reset.to).toBe('Ana <ana@example.test>');
+    expect(reset.text).toContain(resetUrl);
+    expect(reset.html).toContain(`href="${resetUrl}"`);
+    expect(languageOf(verification)).toBe(locale);
+    expect(verification.text).toContain(verificationUrl);
+  });
+
+  it('gives each language its own subject', async () => {
+    const { sendEmailVerificationEmail, sendPasswordResetEmail } = await loadModule('production');
+
+    for (const language of ['EN', 'PT', 'ES'] as const) {
+      await sendPasswordResetEmail({ email: 'ana@example.test' }, resetUrl, language);
+      await sendEmailVerificationEmail({ email: 'ana@example.test' }, verificationUrl, language);
+    }
+
+    expect(new Set(resendSendMock.mock.calls.map(([payload]) => (payload as { subject: string }).subject)).size).toBe(6);
+  });
+
+  it('reads English for a language it has no copy in', async () => {
+    const { sendPasswordResetEmail } = await loadModule('production');
+
+    await sendPasswordResetEmail({ email: 'ana@example.test' }, resetUrl, 'FR' as 'EN');
+
+    expect(languageOf(lastPayload())).toBe('en');
   });
 });
 

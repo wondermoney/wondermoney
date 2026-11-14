@@ -1,6 +1,14 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Filter, Info, MoreHorizontal, Pencil, X } from "lucide-react";
+import {
+  Filter,
+  Info,
+  MoreHorizontal,
+  Paperclip,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -14,6 +22,8 @@ import React, {
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 
+import { MemberBadge } from "@/components/household/MemberBadge";
+import { useRuleSuggestionPrompt } from "@/components/rules/useRuleSuggestionPrompt";
 import DatePickerRange from "@/components/ui/DatePickerRange";
 import { Table } from "@/components/ui/Table";
 import {
@@ -26,13 +36,18 @@ import { useRouter } from "@/i18n/navigation";
 import { dayBreaks, distinctMerchant, monthBreaks } from "@/lib/account/ledger";
 import { isTransferType } from "@/lib/account/transaction-transfer";
 import useEditTransaction from "@/lib/api/account/useEditTransaction";
-import type { Transaction } from "@/lib/api/account/useTransactions";
+import {
+  type Transaction,
+  type TransactionListFilter,
+  transactionSelectionFilter,
+} from "@/lib/api/account/useTransactions";
 import { isSplitTransaction } from "@/lib/api/account/useTransactionSplits";
 import type { Category } from "@/lib/api/category/useCategories";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import useTags from "@/lib/api/tag/useTags";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { transactionFxView } from "@/lib/fx/fx-status";
+import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
 import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
@@ -44,7 +59,12 @@ import {
   getCategoryTranslationKey,
 } from "../../lib/utils/categories";
 import CategorySelect, { CategoryCellContent } from "../CategorySelect";
+import { TransactionSharedBadge } from "../expense-group/TransactionSharedBadge";
 import FundTransactionFromGoalDialog from "../goals/FundTransactionFromGoalDialog";
+import { InstallmentBadge } from "../installments/InstallmentBadge";
+import { TransactionInstallmentLinkAction } from "../installments/TransactionInstallmentLink";
+import { MerchantAvatar } from "../merchant/MerchantAvatar";
+import { MerchantDetails } from "../merchant/MerchantDetails";
 import { TagChipList } from "../tags/TagChip";
 import { Amount } from "../ui/Amount";
 import { Badge } from "../ui/badge";
@@ -83,6 +103,10 @@ import {
 } from "./AccountTransactionEditSheet";
 import { LedgerDateCell, LedgerMonthLabel } from "./LedgerCells";
 import { TransactionAmount } from "./TransactionAmount";
+import {
+  TransactionReimbursementBadge,
+  TransactionReimbursementLinksList,
+} from "./TransactionReimbursementBadge";
 import TransactionReviewControl from "./TransactionReviewControl";
 import {
   TransactionSplitLinesList,
@@ -143,7 +167,21 @@ interface AccountTransactionTableProps {
     tagKeys: string[];
     transactionTypes: string[];
   }) => void;
+  /**
+   * The list request's own filters, when the server applied every one of them
+   * (`onServerFiltersChange`). With it, selecting a whole page offers "Select
+   * all N matching", whose bulk actions send these filters instead of ids.
+   */
+  selectionFilter?: TransactionListFilter;
+  /**
+   * Accounts the person can only view (`myAccess: "read"`), by `accountKey`. Their rows keep
+   * every fact but lose the edit actions: no menu, no category picker, no edit in the
+   * inspector, and they cannot be selected for a bulk change.
+   */
+  readOnlyAccountKeys?: ReadonlySet<number>;
 }
+
+const NO_READ_ONLY_ACCOUNTS: ReadonlySet<number> = new Set();
 
 const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
   React.memo(
@@ -166,6 +204,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       layout = "default",
       serverTotal,
       onServerFiltersChange,
+      selectionFilter,
+      readOnlyAccountKeys = NO_READ_ONLY_ACCOUNTS,
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
@@ -178,6 +218,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const [resetPagination, setResetPagination] = useState(false);
       const isDesktop = useBreakpoint("md");
       const isLedger = layout === "ledger";
+      // A row on an account shared to view only: shown, never changed.
+      const canEditRow = useCallback(
+        (transaction: Transaction) =>
+          !readOnlyAccountKeys.has(transaction.accountKey.accountKey),
+        [readOnlyAccountKeys],
+      );
+      // Whose spending each row is, shown only when there is more than one person to tell apart.
+      const showMembers = useHouseholdMembers().members.length > 1;
 
       // Edit transaction modal
       const [transactionData, setTransactionData] =
@@ -405,6 +453,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const [inspectedTransaction, setInspectedTransaction] =
         useState<Transaction | null>(null);
 
+      /*
+       * A reimbursement badge opens the transaction at the other end of its link, in the same
+       * inspector. The list holds only the rows it loaded, so one on another page or outside
+       * the filters cannot open; the badge then opens its own row, whose inspector lists the
+       * link.
+       */
+      const loadedTransaction = useCallback(
+        (transactionKey: number) =>
+          transactions.find((tx) => tx.transactionKey === transactionKey) ??
+          null,
+        [transactions],
+      );
+      const openLinkedTransaction = useCallback(
+        (from: Transaction, transactionKey: number) =>
+          setInspectedTransaction(loadedTransaction(transactionKey) ?? from),
+        [loadedTransaction],
+      );
+
       const onDateRangeFilterChange = useCallback(
         (dateRange: DateRange | undefined) => {
           posthog.capture("account_transaction_table_filter", {
@@ -430,12 +496,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         isPending: isPendingEditTransaction,
         variables: editTransactionVariables,
       } = useEditTransaction();
+      const offerRuleSuggestion = useRuleSuggestionPrompt();
       const onChangeCategory = useCallback(
         (transactionKey: number, categoryKey: string) => {
           editTransactionMutation(
             { transactionKey, categoryKey },
             {
-              onSuccess: async () => {
+              onSuccess: async (response) => {
+                offerRuleSuggestion(response.data);
                 posthog.capture("transaction_categorized", {
                   category_key: categoryKey,
                   source: "table_inline",
@@ -462,7 +530,14 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             },
           );
         },
-        [editTransactionMutation, notifyIfRateLimited, posthog, queryClient, t],
+        [
+          editTransactionMutation,
+          notifyIfRateLimited,
+          offerRuleSuggestion,
+          posthog,
+          queryClient,
+          t,
+        ],
       );
 
       const TransactionActionsMenu = useCallback(
@@ -490,10 +565,22 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               >
                 <Pencil className="text-muted-foreground size-4" /> {t("edit")}
               </DropdownMenuItem>
+              {/* The synthetic "Initial balance" rows (negative keys) are not transactions. */}
+              {transaction.transactionKey > 0 ? (
+                <DropdownMenuItem
+                  className="text-destructive-text flex items-center gap-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDeleteTransactionModal(transaction);
+                  }}
+                >
+                  <Trash2 className="size-4" /> {t("transactionBulk.delete")}
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         ),
-        [t, openEditTransactionModal],
+        [t, openEditTransactionModal, openDeleteTransactionModal],
       );
 
       // Read lazily: the page of phone rows is computed further down.
@@ -563,18 +650,26 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                       amount does not get: it is a level, not a delta. */}
                   <div className="space-y-1">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-foreground truncate text-sm font-medium">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        {transaction.transactionMerchantKey?.name.trim() ? (
+                          <MerchantAvatar
+                            merchant={transaction.transactionMerchantKey}
+                          />
+                        ) : null}
+                        <p className="text-foreground min-w-0 truncate text-sm font-medium">
                           {transaction.transactionMerchantKey?.name ??
                             transaction.description ??
                             "—"}
                         </p>
+                        <InstallmentBadge
+                          installment={transaction.installment}
+                        />
                       </div>
                       <TransactionAmount
                         transaction={transaction}
                         className="shrink-0 font-mono text-sm leading-tight font-semibold"
                       />
-                      {withRowActions && (
+                      {withRowActions && canEditRow(transaction) && (
                         <TransactionActionsMenu
                           transaction={transaction}
                           triggerClassName="-mt-1 flex size-8 shrink-0 p-0"
@@ -583,11 +678,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-muted-foreground truncate text-xs">
+                      <p className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                        {showMembers && transaction.attribution ? (
+                          <MemberBadge
+                            appuserKey={transaction.attribution.appuserKey}
+                            displayName={transaction.attribution.displayName}
+                          />
+                        ) : null}
+                        <span className="truncate">
                         {transaction.accountKey.accountName} ·{" "}
                         {formatShortDate(
                           transactionDisplayDate(transaction.transactionDate),
                         )}
+                        </span>
                       </p>
                       {categoryLabel ? (
                         <p className="text-muted-foreground truncate text-xs">
@@ -595,6 +698,20 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         </p>
                       ) : null}
                       <TagChipList tags={transaction.tags} className="mt-1" />
+                      <TransactionReimbursementBadge
+                        transaction={transaction}
+                        // A 20px chip with a 44px hit area, the touch floor.
+                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                        onOpenLinked={(transactionKey) =>
+                          openLinkedTransaction(transaction, transactionKey)
+                        }
+                        onShowLinks={() => setInspectedTransaction(transaction)}
+                      />
+                      <TransactionSharedBadge
+                        transaction={transaction}
+                        // A 20px chip with a 44px hit area, the touch floor.
+                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                      />
                       {isLedger && transaction.reviewed === false ? (
                         <p className="text-warning-text text-xs font-medium">
                           {t("transaction-review-filter")}
@@ -656,16 +773,15 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   id: "actions",
                   enableHiding: false,
                   size: 48,
-                  cell: ({ row }) => {
-                    return (
+                  cell: ({ row }) =>
+                    canEditRow(row.original) ? (
                       <TransactionActionsMenu transaction={row.original} />
-                    );
-                  },
+                    ) : null,
                 }),
               ]
             : []),
         ],
-        [withRowActions, columnHelper, TransactionActionsMenu],
+        [withRowActions, columnHelper, TransactionActionsMenu, canEditRow],
       );
       const columns: ColumnDef<Transaction, any>[] = useMemo(
         () => [
@@ -734,7 +850,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               const account = info.row.original.accountKey;
               const logoUrl =
                 account.accountFinancialInstitutionKey?.logoUrl ?? null;
-              const merchant = info.row.original.transactionMerchantKey?.name;
+              const merchantRecord = info.row.original.transactionMerchantKey;
+              const merchant = merchantRecord?.name;
               /*
                * The ledger leads with the merchant, as the mobile list does:
                * who was paid is what the eye looks for. The description
@@ -763,73 +880,128 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                */
               return (
                 <div className="flex min-w-36 items-center justify-between gap-2">
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <div className="flex min-w-0 items-center gap-2">
-                      {/* § 9 rule 3: an absent title is an em-dash, not
+                  {/* Who was paid, at a glance: the merchant's logo or initial.
+                      A row with no merchant keeps the plain title. */}
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    {merchantRecord?.name.trim() ? (
+                      <MerchantAvatar merchant={merchantRecord} />
+                    ) : null}
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {/* § 9 rule 3: an absent title is an em-dash, not
                           an empty cell. Returning null here would blank the
                           whole row, taking the account and date with it. */}
-                      <span
-                        className={cn(
-                          "truncate text-sm font-medium",
-                          title ? "text-foreground" : "text-muted-foreground",
-                        )}
-                      >
-                        {title || "—"}
-                      </span>
-                      {/* § 9 rule 8: the badge sits inline with the title, not
+                        <span
+                          className={cn(
+                            "truncate text-sm font-medium",
+                            title ? "text-foreground" : "text-muted-foreground",
+                          )}
+                        >
+                          {title || "—"}
+                        </span>
+                        {/* § 9 rule 8: the badge sits inline with the title, not
                           in a trailing column of its own. */}
-                      {recurringBadge ? (
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
-                        >
-                          {recurringBadge}
-                        </Badge>
-                      ) : null}
-                      {transferBadge ? (
-                        <Badge
-                          variant="secondary"
-                          className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
-                        >
-                          {transferBadge}
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
-                      {/* The account is supporting context: a small, desaturated
-                          logo so the bank's colours don't outshine the merchant. */}
-                      {logoUrl ? (
-                        <Image
-                          src={logoUrl}
-                          height={12}
-                          width={12}
-                          alt=""
-                          className="shrink-0 rounded-[2px] opacity-70 grayscale"
+                        {recurringBadge ? (
+                          <Badge
+                            variant="secondary"
+                            className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
+                          >
+                            {recurringBadge}
+                          </Badge>
+                        ) : null}
+                        {transferBadge ? (
+                          <Badge
+                            variant="secondary"
+                            className="text-muted-foreground h-5 shrink-0 rounded-full px-2 text-xs font-normal"
+                          >
+                            {transferBadge}
+                          </Badge>
+                        ) : null}
+                        {/* One installment of a card plan: "3/12", linking to the plan. */}
+                        <InstallmentBadge
+                          installment={info.row.original.installment}
                         />
+                        {/* Reimbursed, or a reimbursement: opens the other side. */}
+                        <TransactionReimbursementBadge
+                          transaction={info.row.original}
+                          onOpenLinked={(transactionKey) =>
+                            openLinkedTransaction(
+                              info.row.original,
+                              transactionKey,
+                            )
+                          }
+                          onShowLinks={() =>
+                            setInspectedTransaction(info.row.original)
+                          }
+                        />
+                        {/* Shared in an expense group: opens the group. */}
+                        <TransactionSharedBadge
+                          transaction={info.row.original}
+                        />
+                        {/* A receipt or invoice is attached: the row says so without opening it. */}
+                        {(info.row.original.attachmentCount ?? 0) > 0 ? (
+                          <span
+                            aria-label={t("transactionAttachments.count", {
+                              count: info.row.original.attachmentCount ?? 0,
+                            })}
+                            className="text-muted-foreground inline-flex shrink-0 items-center gap-0.5"
+                            role="img"
+                            title={t("transactionAttachments.count", {
+                              count: info.row.original.attachmentCount ?? 0,
+                            })}
+                          >
+                            <Paperclip className="size-3" aria-hidden="true" />
+                            <span className="text-xs">
+                              {info.row.original.attachmentCount}
+                            </span>
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                        {/* Whose spending it is, in a household of more than one. */}
+                        {showMembers && info.row.original.attribution ? (
+                          <MemberBadge
+                            appuserKey={info.row.original.attribution.appuserKey}
+                            displayName={
+                              info.row.original.attribution.displayName
+                            }
+                          />
+                        ) : null}
+                        {/* The account is supporting context: a small, desaturated
+                          logo so the bank's colours don't outshine the merchant. */}
+                        {logoUrl ? (
+                          <Image
+                            src={logoUrl}
+                            height={12}
+                            width={12}
+                            alt=""
+                            className="shrink-0 rounded-[2px] opacity-70 grayscale"
+                          />
+                        ) : null}
+                        {isLedger ? (
+                          <span className="truncate">{detail}</span>
+                        ) : (
+                          <>
+                            <span className="truncate">
+                              {account.accountName}
+                            </span>
+                            <span aria-hidden>·</span>
+                            <span className="shrink-0">
+                              {formatShortDate(
+                                transactionDisplayDate(
+                                  info.row.original.transactionDate,
+                                ),
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {isLedger && info.row.original.reviewed === false ? (
+                        <span className="text-warning-text text-xs font-medium">
+                          {t("transaction-review-filter")}
+                        </span>
                       ) : null}
-                      {isLedger ? (
-                        <span className="truncate">{detail}</span>
-                      ) : (
-                        <>
-                          <span className="truncate">
-                            {account.accountName}
-                          </span>
-                          <span aria-hidden>·</span>
-                          <span className="shrink-0">
-                            {formatShortDate(
-                              transactionDisplayDate(
-                                info.row.original.transactionDate,
-                              ),
-                            )}
-                          </span>
-                        </>
-                      )}
                     </div>
-                    {isLedger && info.row.original.reviewed === false ? (
-                      <span className="text-warning-text text-xs font-medium">
-                        {t("transaction-review-filter")}
-                      </span>
-                    ) : null}
                   </div>
                   <TooltipProvider>
                     <Tooltip>
@@ -920,7 +1092,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   <TransactionSplitSummary transaction={info.row.original} />
                   <TagChipList tags={info.row.original.tags} />
                 </div>
-              ) : info.row.original.transactionKey > 0 ? (
+              ) : info.row.original.transactionKey > 0 &&
+                canEditRow(info.row.original) ? (
                 <div className="flex min-w-0 flex-col gap-1">
                   <CategorySelect
                     categories={categories}
@@ -938,6 +1111,23 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                     }
                   />
                   {/* Tags sit small, after the category they qualify. */}
+                  <TagChipList tags={info.row.original.tags} />
+                </div>
+              ) : info.row.original.transactionKey > 0 ? (
+                // A view-only row names its category without offering to change it.
+                <div className="flex min-w-0 flex-col gap-1">
+                  <div className="flex items-center text-sm">
+                    <CategoryCellContent
+                      label={(() => {
+                        const category = info.getValue().at(0);
+                        if (!category) return "—";
+                        return category.isSystemCategory
+                          ? t(getCategoryTranslationKey(category.name))
+                          : category.name;
+                      })()}
+                      muted={info.getValue().length === 0}
+                    />
+                  </div>
                   <TagChipList tags={info.row.original.tags} />
                 </div>
               ) : (
@@ -1057,6 +1247,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           isDesktop,
           desktopColumns,
           isLedger,
+          openLinkedTransaction,
+          canEditRow,
+          showMembers,
         ],
       );
 
@@ -1065,6 +1258,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           return [
             columnHelper.display({
               id: "select",
+              header: ({ table }) =>
+                withMultiSelectRow ? (
+                  <div className="px-1">
+                    <Checkbox
+                      aria-label={t("transactionBulk.select-page")}
+                      checked={
+                        table.getIsAllPageRowsSelected()
+                          ? true
+                          : table.getIsSomePageRowsSelected()
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(value === true)
+                      }
+                    />
+                  </div>
+                ) : null,
               cell: ({ row }) => {
                 return (
                   <div className="px-1">
@@ -1081,7 +1292,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           ];
         }
         return columns;
-      }, [columnHelper, withSelectRow, withMultiSelectRow, columns]);
+      }, [columnHelper, withSelectRow, withMultiSelectRow, columns, t]);
 
       const transactionsCategories = useMemo(() => {
         // Extract unique category keys from transactions
@@ -1239,19 +1450,43 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           )
         : filteredTransactions;
 
+      // Every row on the table's page is selected: the moment "Select all N
+      // matching" is offered. Read from the table when it reports a change.
+      const [pageFullySelected, setPageFullySelected] = useState(false);
+      // The selection is every row the filters match, not only the loaded ones.
+      const [allMatchingSelected, setAllMatchingSelected] = useState(false);
+
       const onRowSelect = useCallback(
         (rows: Row<Transaction>[]) => {
           setSelectedTransactions(rows.map((row) => row.original));
+          setPageFullySelected(
+            rows.length > 0 &&
+              tableRef.current?.getIsAllPageRowsSelected() === true,
+          );
+          setAllMatchingSelected(false);
         },
         [setSelectedTransactions],
       );
 
       const resetRowSelection = useCallback(() => {
         setSelectedTransactions([]);
+        setPageFullySelected(false);
+        setAllMatchingSelected(false);
         if (tableRef.current) {
           tableRef.current.resetRowSelection();
         }
       }, []);
+
+      // A selection belongs to the rows it was made over: new filters start again.
+      const selectionFilterKey = JSON.stringify(
+        selectionFilter ? transactionSelectionFilter(selectionFilter) : null,
+      );
+      const lastSelectionFilterKey = useRef(selectionFilterKey);
+      useEffect(() => {
+        if (lastSelectionFilterKey.current === selectionFilterKey) return;
+        lastSelectionFilterKey.current = selectionFilterKey;
+        resetRowSelection();
+      }, [selectionFilterKey, resetRowSelection]);
 
       // Count active filters
       const activeFiltersCount = useMemo(() => {
@@ -1668,6 +1903,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               withSelectRow={withSelectRow}
               withMultiSelectRow={withMultiSelectRow}
               onRowSelectionChange={onRowSelect}
+              canSelectRow={canEditRow}
               sticky={sticky}
               footerActions={footerActions}
               serverTotal={serverTotalForFooter}
@@ -1707,22 +1943,44 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               ) : null
             }
             subtitle={
-              inspectedTransaction?.transactionMerchantKey?.name ??
-              inspectedTransaction?.description ??
-              undefined
+              inspectedTransaction?.transactionMerchantKey?.name.trim() ? (
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <MerchantAvatar
+                    merchant={inspectedTransaction.transactionMerchantKey}
+                    size="md"
+                  />
+                  <span className="text-foreground min-w-0 truncate font-medium">
+                    {inspectedTransaction.transactionMerchantKey.name}
+                  </span>
+                </span>
+              ) : (
+                (inspectedTransaction?.description ?? undefined)
+              )
             }
             actions={
-              inspectedTransaction ? (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    openEditTransactionModal(inspectedTransaction);
-                    setInspectedTransaction(null);
-                  }}
-                >
-                  <Pencil className="mr-2 size-3.5" />
-                  {t("edit")}
-                </Button>
+              inspectedTransaction && canEditRow(inspectedTransaction) ? (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      openEditTransactionModal(inspectedTransaction);
+                      setInspectedTransaction(null);
+                    }}
+                  >
+                    <Pencil className="mr-2 size-3.5" />
+                    {t("edit")}
+                  </Button>
+                  {/* A charge on a card with plans that pays no installment yet. */}
+                  <TransactionInstallmentLinkAction
+                    key={inspectedTransaction.transactionKey}
+                    transaction={inspectedTransaction}
+                    onLinked={(installment) =>
+                      setInspectedTransaction((current) =>
+                        current ? { ...current, installment } : current,
+                      )
+                    }
+                  />
+                </>
               ) : null
             }
           >
@@ -1765,6 +2023,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                           )
                         : "—",
                   },
+                  ...(inspectedTransaction.installment
+                    ? [
+                        {
+                          key: "installment",
+                          label: t("installments.title"),
+                          value: (
+                            <InstallmentBadge
+                              installment={inspectedTransaction.installment}
+                            />
+                          ),
+                        },
+                      ]
+                    : []),
                   {
                     key: "tags",
                     label: t("transactionTags.label"),
@@ -1802,6 +2073,36 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                 <TransactionSplitLinesList transaction={inspectedTransaction} />
               </section>
             ) : null}
+            {inspectedTransaction ? (
+              <TransactionReimbursementLinksList
+                transaction={inspectedTransaction}
+                canOpen={(transactionKey) =>
+                  loadedTransaction(transactionKey) !== null
+                }
+                onOpenLinked={(transactionKey) =>
+                  openLinkedTransaction(inspectedTransaction, transactionKey)
+                }
+              />
+            ) : null}
+            {inspectedTransaction?.transactionMerchantKey ? (
+              <MerchantDetails
+                // A fresh form per merchant, never one prefilled from the last row.
+                key={
+                  inspectedTransaction.transactionMerchantKey
+                    .transactionMerchantKey
+                }
+                merchant={inspectedTransaction.transactionMerchantKey}
+                // The drawer holds a snapshot of the row; show the saved merchant
+                // now rather than after the list refetches.
+                onSaved={(merchant) =>
+                  setInspectedTransaction((current) =>
+                    current
+                      ? { ...current, transactionMerchantKey: merchant }
+                      : current,
+                  )
+                }
+              />
+            ) : null}
           </InspectorDrawer>
 
           <MobileTransactionsList />
@@ -1809,6 +2110,25 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             <TransactionReviewControl
               transactions={selectedTransactions}
               onResetSelection={resetRowSelection}
+              selectAllMatching={
+                selectionFilter &&
+                filtersAppliedByServer &&
+                selectAllMatchingIsWritable(
+                  selectionFilter,
+                  readOnlyAccountKeys,
+                ) &&
+                pageFullySelected &&
+                serverTotal != null &&
+                serverTotal > selectedTransactions.length
+                  ? {
+                      total: serverTotal,
+                      filter: transactionSelectionFilter(selectionFilter),
+                      includesHidden: selectionFilter.includeHidden === true,
+                      selected: allMatchingSelected,
+                      onSelect: () => setAllMatchingSelected(true),
+                    }
+                  : undefined
+              }
             />
           )}
           {transactionData && (
@@ -1853,3 +2173,20 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 AccountTransactionsTable.displayName = "AccountTransactionsTable";
 
 export default AccountTransactionsTable;
+
+/**
+ * "Select all N matching" sends the list's filter, so the server would act on rows the page
+ * never loaded. It is offered only when no view-only account can be among them: the person has
+ * none, or the account filter names only accounts they may change.
+ */
+function selectAllMatchingIsWritable(
+  filter: TransactionListFilter,
+  readOnlyAccountKeys: ReadonlySet<number>,
+): boolean {
+  if (readOnlyAccountKeys.size === 0) return true;
+  const accountKeys = filter.accountKeys ?? [];
+  return (
+    accountKeys.length > 0 &&
+    accountKeys.every((key) => !readOnlyAccountKeys.has(Number(key)))
+  );
+}

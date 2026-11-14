@@ -1,9 +1,14 @@
 import { QueryOrder } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
+import { bankConnectionSyncsRequestSchema } from '@app/validators/banking';
+import { zParse } from '@app/validators/parser';
+import { BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
+import { SimplefinConnection } from '@entity/SimplefinConnection';
 import { authedUser } from '@middleware/authed-context';
+import { BankSyncHistoryService, type BankSyncLastError, connectionRequisitionId } from '@service/bank-sync/bank-sync-history.service';
 import { daysUntil, enableBankingConsentOf } from '@service/enable-banking/enable-banking-consent';
 import { encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import { InternalServerError } from '@utils/errors';
@@ -12,32 +17,63 @@ import { DI } from '../app.js';
 
 const PROVIDER = 'GoCardless' as const;
 const ENABLE_BANKING_PROVIDER = 'EnableBanking' as const;
+const SIMPLEFIN_PROVIDER = 'SimpleFIN' as const;
 const ACCESS_TYPE = 'open_banking' as const;
 
 interface AccountWithInstitution {
   accountFinancialInstitutionKey?: null | { displayName?: null | string; name?: null | string };
+  accountKey?: number;
+  accountName?: null | string;
   accountOwnerAppuserKey?: null | { appuserKey?: number };
   deletedAt?: Date | null;
   isPrivate?: boolean;
   refreshedAt?: Date | null;
+  tenantKey?: null | { tenantKey?: number };
   transactionsRefreshedAt?: Date | null;
 }
 
 interface BankConnectionDto {
   accessType: typeof ACCESS_TYPE;
   /**
+   * SimpleFIN only: the accounts this connection feeds that the viewer can see (in their household,
+   * not deleted, and not another member's private account). The other providers' accounts come
+   * with `GET /v1/user/:id/requisitions`.
+   */
+  accounts?: LinkedAccountDto[];
+  /**
    * The id `GET /v1/banking/bank/:bankId/start` takes to connect this bank again, so a client can
    * offer "Reconnect" without searching the bank list. Null for the legacy provider, which can no
    * longer be connected.
    */
   bankId: null | string;
+  /**
+   * The local connection id `GET /v1/banking/connections/:connectionId/syncs` takes, or for a
+   * SimpleFIN connection the one `/v1/banking/simplefin/connections/:connectionId` routes take
+   * (the two are separate id spaces; `provider` tells them apart). Null for the legacy provider,
+   * whose history is not exposed.
+   */
+  connectionId: null | number;
   dataFreshAsOf: null | string;
   /** Whole days until the consent ends, 0 once it has ended, null when there is no end date. */
   daysUntilExpiry: null | number;
   expiresAt: null | string;
   institutionName: null | string;
-  provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER;
+  /** The newest failure for this connection, or null when it has never failed. */
+  lastError: BankSyncLastError | null;
+  provider: typeof ENABLE_BANKING_PROVIDER | typeof PROVIDER | typeof SIMPLEFIN_PROVIDER;
   status: ConnectionStatus;
+}
+
+/** An account a connection feeds, as its owner named it. */
+interface LinkedAccountDto {
+  accountKey: number;
+  accountName: null | string;
+}
+
+/** Who is reading the list: the account-name rules need both. */
+interface Viewer {
+  appuserKey: number | undefined;
+  tenantKey: number;
 }
 
 /**
@@ -51,6 +87,9 @@ interface OwnedEnableBankingConnection {
   accounts: { getItems: () => AccountWithInstitution[] };
   aspspCountry?: null | string;
   aspspName?: null | string;
+  enableBankingConnectionKey: number;
+  sessionId?: null | string;
+  state: string;
   status: EnableBankingConnectionStatus;
 }
 
@@ -110,6 +149,21 @@ function resolveInstitutionName(accounts: AccountWithInstitution[], viewerAppuse
   if (counts.size === 0) return null;
   // Map preserves first-seen order and Array#sort is stable, so ties keep it.
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name).join(', ');
+}
+
+/**
+ * The accounts a viewer may see named on a connection: in the viewer's household, not deleted, and
+ * either shared or the viewer's own. The tenant filter already scopes the populated accounts; this
+ * holds the same rule where the names leave the API, so a connection never names an account the
+ * accounts list would hide.
+ */
+function visibleLinkedAccounts(accounts: AccountWithInstitution[], viewer: Viewer): LinkedAccountDto[] {
+  return accounts
+    .filter((account) => !account.deletedAt
+      && account.tenantKey?.tenantKey === viewer.tenantKey
+      && (!account.isPrivate || isOwnedBy(account, viewer.appuserKey)))
+    .flatMap((account) => (typeof account.accountKey === 'number' ? [{ accountKey: account.accountKey, accountName: account.accountName ?? null }] : []))
+    .sort((a, b) => a.accountKey - b.accountKey);
 }
 
 /**
@@ -192,15 +246,17 @@ function computeEnableBankingStatus(connection: OwnedEnableBankingConnection, ac
   }
 }
 
-function mapRequisition(req: OwnedRequisition, viewerAppuserKey?: number): BankConnectionDto {
+function mapRequisition(req: OwnedRequisition & { requisitionId?: null | string }, viewerAppuserKey?: number, lastError: BankSyncLastError | null = null): BankConnectionDto {
   const accounts = req.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
     bankId: null,
+    connectionId: null,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
     daysUntilExpiry: req.status === NordigenRequisitionStatus.LN ? daysUntil(req.expiresAt) : null,
     expiresAt: toIso(req.expiresAt),
     institutionName: resolveInstitutionName(accounts, viewerAppuserKey),
+    lastError,
     provider: PROVIDER,
     status: computeStatus(req, accounts),
   };
@@ -214,19 +270,53 @@ function mapRequisition(req: OwnedRequisition, viewerAppuserKey?: number): BankC
  * own registry, not a raw upstream id, so a direct (blank-guarded) mapping is
  * enough.
  */
-function mapEnableBankingConnection(connection: OwnedEnableBankingConnection): BankConnectionDto {
+interface OwnedSimplefinConnection {
+  bankConnectionKey: { accounts: { getItems: () => AccountWithInstitution[] }; status: BankConnectionStatus };
+  institutionName?: null | string;
+  simplefinConnectionKey: number;
+}
+
+function mapEnableBankingConnection(connection: OwnedEnableBankingConnection, lastError: BankSyncLastError | null = null): BankConnectionDto {
   const accounts = connection.accounts.getItems();
   return {
     accessType: ACCESS_TYPE,
     bankId: connection.aspspCountry && !isNullOrBlank(connection.aspspName)
       ? encodeEnableBankingInstitutionId({ country: connection.aspspCountry, name: connection.aspspName ?? '' })
       : null,
+    connectionId: connection.enableBankingConnectionKey,
     dataFreshAsOf: computeFreshnessAsOf(accounts),
     daysUntilExpiry: enableBankingConsentOf(connection).daysUntilExpiry,
     expiresAt: toIso(connection.accessValidUntil),
     institutionName: isNullOrBlank(connection.aspspName) ? null : (connection.aspspName?.trim() ?? null),
+    lastError,
     provider: ENABLE_BANKING_PROVIDER,
     status: computeEnableBankingStatus(connection, accounts),
+  };
+}
+
+/**
+ * A SimpleFIN connection has no consent end date: it is `revoked` once SimpleFIN refused the
+ * stored access (403), and otherwise follows the same account-freshness rules as the others.
+ * Nothing about the access URL, its host or its credentials is in the DTO.
+ */
+function mapSimplefinConnection(connection: OwnedSimplefinConnection, viewer: Viewer, lastError: BankSyncLastError | null = null): BankConnectionDto {
+  const linked = connection.bankConnectionKey.accounts.getItems();
+  const accounts = linked.filter((account) => !account.deletedAt);
+  const status = connection.bankConnectionKey.status;
+  return {
+    accessType: ACCESS_TYPE,
+    accounts: visibleLinkedAccounts(linked, viewer),
+    bankId: null,
+    connectionId: connection.simplefinConnectionKey,
+    dataFreshAsOf: computeFreshnessAsOf(accounts),
+    daysUntilExpiry: null,
+    expiresAt: null,
+    institutionName: isNullOrBlank(connection.institutionName) ? null : (connection.institutionName?.trim() ?? null),
+    lastError,
+    provider: SIMPLEFIN_PROVIDER,
+    status: status === BankConnectionStatus.REVOKED ? 'revoked'
+      : status === BankConnectionStatus.LINKED ? (areAllAccountsRefreshed(accounts) ? 'connected' : 'processing')
+        : status === BankConnectionStatus.EXPIRED ? 'expired' : 'error',
   };
 }
 
@@ -240,9 +330,11 @@ function toIso(value: Date | null | undefined): null | string {
  * Read-only, tenant-safe bank-connection status collection.
  *
  * Scopes by `req.tenant + req.user + deletedAt: undefined`, newest-first
- * within each provider's own query. The DTO is the *only* output: no entity
- * identifiers, no provider status payload, no nested entities. Empty list is
- * a 200.
+ * within each provider's own query. The DTO is the *only* output: no provider
+ * status payload and no nested entities. `connectionId` is the caller's own
+ * Enable Banking connection key, needed to open its sync history (and, on
+ * mobile, to disconnect it); it is not a provider identifier. Empty list is a
+ * 200.
  *
  * Like `getRequisitions` in `controller/user.ts`, surfaces `EnableBankingConnection`
  * rows alongside legacy `NordigenRequisition` rows, discriminated by the DTO's
@@ -256,7 +348,7 @@ export async function getBankConnections(req: Request, res: Response) {
   if (!req.tenant || !Number.isInteger(req.tenant.tenantKey) || req.tenant.tenantKey <= 0) {
     throw new InternalServerError('Authenticated tenant is required to read bank connections');
   }
-  const [requisitions, enableBankingConnections] = await Promise.all([
+  const [requisitions, enableBankingConnections, simplefinConnections] = await Promise.all([
     DI.em.find(
       NordigenRequisition,
       {
@@ -281,10 +373,63 @@ export async function getBankConnections(req: Request, res: Response) {
         populate: ['accounts'],
       },
     ),
+    DI.em.find(
+      SimplefinConnection,
+      {
+        appuserKey: user,
+        deletedAt: undefined,
+        tenantKey: req.tenant,
+      },
+      {
+        orderBy: { createdAt: QueryOrder.DESC },
+        populate: ['bankConnectionKey.accounts'],
+      },
+    ),
   ]);
+  const viewer: Viewer = { appuserKey: user.appuserKey, tenantKey: req.tenant.tenantKey };
+  const history = new BankSyncHistoryService(DI.em);
+  const lastErrorByRequisitionId = await history
+    .getLastErrorByRequisitionId(user, [
+      ...requisitions.map((requisition) => requisition.requisitionId).filter((id): id is string => Boolean(id)),
+      ...enableBankingConnections.map((connection) => connectionRequisitionId(connection)),
+      ...simplefinConnections.map((connection) => connection.bankConnectionKey.externalId ?? ''),
+    ])
+    .catch(() => new Map<string, BankSyncLastError>());
   return res.json({
-    connections: [...requisitions.map((requisition) => mapRequisition(requisition, user.appuserKey)), ...enableBankingConnections.map(mapEnableBankingConnection)],
+    connections: [
+      ...requisitions.map((requisition) => mapRequisition(
+        requisition,
+        user.appuserKey,
+        requisition.requisitionId ? lastErrorByRequisitionId.get(requisition.requisitionId) ?? null : null,
+      )),
+      ...enableBankingConnections.map((connection) => mapEnableBankingConnection(
+        connection,
+        lastErrorByRequisitionId.get(connectionRequisitionId(connection)) ?? null,
+      )),
+      ...simplefinConnections.map((connection) => mapSimplefinConnection(
+        connection,
+        viewer,
+        lastErrorByRequisitionId.get(connection.bankConnectionKey.externalId ?? '') ?? null,
+      )),
+    ],
   });
+}
+
+/**
+ * The last 20 runs of one bank connection, newest first.
+ *
+ * Owner-only: a connection is per-user, so a partner's connection — or one from
+ * another household — is a 404, not an empty history. See
+ * `BankSyncHistoryService.getConnectionHistory`.
+ */
+export async function getBankConnectionSyncs(req: Request, res: Response) {
+  const user = authedUser(req);
+  if (!req.tenant || !Number.isInteger(req.tenant.tenantKey) || req.tenant.tenantKey <= 0) {
+    throw new InternalServerError('Authenticated tenant is required to read bank sync history');
+  }
+  const { params: { connectionId } } = await zParse(bankConnectionSyncsRequestSchema, req);
+  const syncs = await new BankSyncHistoryService(DI.em).getConnectionHistory(connectionId, user, req.tenant);
+  return res.json({ syncs });
 }
 
 // Test-only helper: exposes the decision rules so the status matrix can be
@@ -300,10 +445,12 @@ export const __testOnly = {
   isProviderIdPlaceholder,
   mapEnableBankingConnection,
   mapRequisition,
+  mapSimplefinConnection,
   PROVIDER,
   resolveInstitutionName,
   resolveLinkedConnectionStatus,
+  SIMPLEFIN_PROVIDER,
   toIso,
 };
 
-export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, OwnedEnableBankingConnection, OwnedRequisition };
+export type { AccountWithInstitution, BankConnectionDto, ConnectionStatus, LinkedAccountDto, OwnedEnableBankingConnection, OwnedRequisition, OwnedSimplefinConnection };

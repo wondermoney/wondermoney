@@ -1,4 +1,4 @@
-import { projectPayoff } from './debt-projection.service';
+import { projectPayoff } from '@service/loan/payoff-projection';
 
 export interface DebtProjection {
   currentBalance: number;

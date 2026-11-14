@@ -7,12 +7,13 @@ import { ApiError } from '@/lib/api/errors'
 import { budgetCreateWriteSchema, createBudgetEndpoint, type BudgetCreateWrite } from './budgets-contract'
 import { isBudgetQueryForEpoch } from './query-keys'
 
-export type CreateBudgetFailure = 'unknown' | 'demo' | 'access' | 'invalid' | 'general'
+export type CreateBudgetFailure = 'unknown' | 'demo' | 'read-only' | 'access' | 'invalid' | 'general'
 
 export const classifyCreateBudgetFailure = (error: unknown): CreateBudgetFailure => {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'invalid' : 'general'
   if (error.code === 'cancelled' || error.code === 'network' || error.code === 'invalid-response' || (error.code === 'http' && (error.status ?? 0) >= 500)) return 'unknown'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   return 'general'
 }

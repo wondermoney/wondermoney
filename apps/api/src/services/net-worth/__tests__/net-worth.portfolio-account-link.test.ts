@@ -14,7 +14,7 @@ vi.mock('@service/portfolio/portfolio-holdings.service', () => ({
 
 import type { EntityManager } from '@mikro-orm/postgresql';
 
-import { addAccount, addPartner, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addOwnership, addPartner, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { Account } from '@entity/Account';
@@ -161,6 +161,24 @@ describe('net worth with a portfolio linked to its account', () => {
       expect(portfolioRow(body, portfolio)).not.toHaveProperty('countedInAccountId');
       expect(JSON.stringify(body)).not.toContain('Brokerage');
       expect(body.rows.map((row: { id?: number }) => row.id)).not.toContain(brokerage.accountKey);
+    });
+  });
+
+  describe('one member\'s net worth', () => {
+    it('leaves a portfolio inside an account to the account\'s holders, even when its own owner holds none of the account', async () => {
+      const { brokerage, household, partner } = await brokerageHousehold({ mode: PortfolioAccountBalanceMode.INCLUDES_HOLDINGS });
+      await addOwnership(db.em(), household, brokerage, [[partner, 10_000]]);
+      const figure = async (member: number, path = '/v1/net-worth') => {
+        const body: { points: { totalNetWorth: number }[]; totalNetWorth: number } = (await http.as(household.appuser).get(`${path}?member=${member}`)).body;
+        return body;
+      };
+
+      // The owner keeps the current account; the brokerage, holdings included, is all the partner's.
+      expect((await figure(household.appuser.appuserKey)).totalNetWorth).toBe(1000);
+      expect((await figure(partner.appuserKey)).totalNetWorth).toBe(10_000);
+      const ownersHistory = await figure(household.appuser.appuserKey, '/v1/net-worth/history');
+      // Before the accounts were opened the owner had nothing; never the portfolio's 8000.
+      expect(new Set(ownersHistory.points.map((point) => point.totalNetWorth))).toEqual(new Set([0, 1000]));
     });
   });
 

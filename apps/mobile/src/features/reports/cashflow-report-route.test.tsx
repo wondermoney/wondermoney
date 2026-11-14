@@ -1,9 +1,10 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
 import { ApiError } from '@/lib/api/errors'
 import { initMobileI18n } from '@/lib/i18n'
 
+import { customReportDateRange } from './report-date-presets'
 import { CashflowReportRoute } from './cashflow-report-route'
 
 jest.mock('victory-native', () => ({
@@ -55,5 +56,19 @@ describe('CashflowReportRoute', () => {
     expect(view.getByText('The report data received could not be verified')).toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Back' }))
     expect(mockReplace).toHaveBeenCalledWith('/reports')
+  })
+
+  it('requests exactly the custom range the person picked', async () => {
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: 'Date range, Last 3 months' }))
+    await fireEvent.press(view.getByRole('radio', { name: 'Custom range' }))
+    await fireEvent.changeText(view.getByLabelText('From'), '2026-08-03')
+    await fireEvent.changeText(view.getByLabelText('To'), '2026-08-17')
+    await fireEvent.press(view.getByRole('button', { name: 'Apply' }))
+    const custom = customReportDateRange('2026-08-03', '2026-08-17')
+    await waitFor(() => expect(mockUseCashflowReport).toHaveBeenLastCalledWith(expect.objectContaining({
+      fromDate: custom.from.toISOString(),
+      toDate: custom.to.toISOString(),
+    })))
   })
 })

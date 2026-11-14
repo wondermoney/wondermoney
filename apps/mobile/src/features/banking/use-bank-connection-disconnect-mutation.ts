@@ -3,14 +3,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
 
-import { createDisconnectBankConnectionEndpoint, isValidBankConnectionId } from './connection-status-contract'
+import { type BankConnectionTarget, createDisconnectBankConnectionEndpoint, isValidBankConnectionId } from './connection-status-contract'
 import { bankConnectionsKey } from './query-keys'
 
-export type BankConnectionDisconnectFailure = 'demo' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
+export type BankConnectionDisconnectFailure = 'demo' | 'read-only' | 'access' | 'cancelled' | 'not-found' | 'network-ambiguous' | 'invalid' | 'general'
 
 export function classifyBankConnectionDisconnectFailure(error: unknown): BankConnectionDisconnectFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
   if (error.code === 'mfa-required' || error.code === 'auth-session' || (error.code === 'http' && error.status === 403)) return 'access'
   if (error.code === 'cancelled') return 'cancelled'
   if (error.code === 'network') return 'network-ambiguous'
@@ -23,7 +24,8 @@ export function classifyBankConnectionDisconnectFailure(error: unknown): BankCon
  * Disconnect (unsync) a linked bank connection. Mirrors
  * use-account-delete-mutation.ts: no body, invalidate the read collection
  * on commit, route MFA rejections through blockAccess the same
- * way every other write mutation in this app does.
+ * way every other write mutation in this app does. The target carries the
+ * provider, which picks the route (SimpleFIN has its own).
  */
 export function useBankConnectionDisconnectMutation() {
   const { runtime, blockAccess } = useProductRuntime()
@@ -33,9 +35,9 @@ export function useBankConnectionDisconnectMutation() {
   return useMutation({
     retry: false,
     networkMode: 'always',
-    mutationFn: (connectionId: number) => {
+    mutationFn: ({ connectionId, provider }: BankConnectionTarget) => {
       if (!isValidBankConnectionId(connectionId)) throw new Error('A positive safe connection id is required.')
-      return runtime.apiClient.write(createDisconnectBankConnectionEndpoint(connectionId), {
+      return runtime.apiClient.write(createDisconnectBankConnectionEndpoint(connectionId, provider), {
         commit: () => {
           void queryClient.invalidateQueries({ queryKey: bankConnectionsKey(runtime.epochId), exact: true })
         },

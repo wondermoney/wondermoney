@@ -19,6 +19,8 @@ documentation and features.
 
 ## Finding something to work on
 
+- The public [roadmap](https://github.com/orgs/wondermoney/projects/1) groups the epics and
+  issues into Now, Next and Later. Maintainers move items as plans change.
 - Issues labelled [`good first issue`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22)
   are small and self-contained, a good way to learn the codebase.
 - Issues labelled [`help wanted`](https://github.com/wondermoney/wondermoney/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22)
@@ -80,8 +82,40 @@ If `develop` moves on while you work, rebase your branch onto it and force-push:
 `git fetch upstream && git rebase upstream/develop`, where `upstream` is this repository.
 
 User-facing text goes through the translation files (English, Portuguese and Spanish);
-please don't hardcode strings. If you can't translate, add the English text and say so
-in the pull request.
+please don't hardcode strings. Every key must exist in all three locales with the same
+ICU placeholders (`{name}`, plural and select arguments), and every documentation page
+and `meta.json` entry must exist in `en`, `pt` and `es`. CI enforces this: the web and
+mobile i18n tests, the transactional-email copy check and the docs locale-parity check
+fail with the locale, file and key to fix. If you can't translate, add the English text
+to all three locales and say so in the pull request.
+
+Portuguese copy is European Portuguese (pt-PT) and addresses the reader as **tu**, in the
+web app, the mobile app, emails, the docs and the marketing site. Write the verb in the
+second person singular, the possessive as teu/tua and the pronoun as te/ti/contigo; never
+"você" or the formal third person:
+
+| Not this | This |
+|---|---|
+| Introduza o seu email | Introduz o teu email |
+| Tem a certeza de que pretende eliminar esta conta? | Tens a certeza de que queres eliminar esta conta? |
+| Clique em Guardar para continuar | Clica em Guardar para continuar |
+| Não feche esta janela | Não feches esta janela |
+| Enviamos-lhe uma ligação | Enviamos-te uma ligação |
+
+Buttons and menu items stay in the infinitive ("Guardar", "Adicionar conta"), and "seu/sua"
+is still right for someone else's things ("{name} convidou-te para o seu agregado"), as is
+"vocês" for more than one person. The
+legal pages (terms, privacy, cookies) keep their formal "o utilizador" register, and
+Brazilian Portuguese, if it is ever added, uses "você". The web, mobile and email checks
+fail on "você" and on formal imperatives such as "Clique" or "Introduza" in pt copy.
+
+## Shipping a feature behind preview features
+
+A feature that is not ready for everyone can ship behind the per-user preview toggle
+instead of living on a long branch. The API route returns 404 for users without the flag,
+and the web and mobile entry points are hidden for them. Anyone can turn it on in
+Settings to try it. [docs/preview-features.md](docs/preview-features.md) covers the
+preference store, the API middleware, the client hooks and the tests.
 
 ## Using AI
 
@@ -113,6 +147,9 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
 
 ## Releasing (maintainers)
 
+There is no fixed release cadence: a release ships when enough has landed on `develop`, and a
+patch release when a security or data bug needs it.
+
 1. Use the open pull request titled "Release: develop → main". A workflow
    (`.github/workflows/release-pr.yml`) opens it on a push to `develop` and keeps its list of
    changes current; if there is none, open one from `develop` into `main`.
@@ -121,7 +158,99 @@ A bug here can get someone's money wrong or show it to the wrong person, so the 
 3. Merge it with a merge commit; squash and rebase merges are blocked on `main`. Merging
    deploys production.
 4. Optionally, tag the release to publish the self-hosting images and notes:
-   `gh release create vX.Y.Z --target main --generate-notes`.
+   `gh release create vX.Y.Z --target main --generate-notes`. The tag also runs
+   `.github/workflows/publish-images.yml`, which builds the images and attaches `install.sh` and
+   its SHA-256 checksum to the release: that is what the one-line install in
+   `apps/api/deploy/selfhost/README.md` downloads. It also publishes the Helm chart, with the
+   release's version, to `oci://ghcr.io/wondermoney/charts/wondermoney`. To edit the notes
+   before anyone sees them, create the release as a draft instead (see
+   [Release notes](#release-notes)).
+5. Once that workflow has published the images, bump the Render Blueprint in a pull request
+   against `develop` (the one that adds the "What's new" page will do): set the three image tags
+   in [`render.yaml`](render.yaml) (`wondermoney-api`, `wondermoney-worker`, `wondermoney-web`)
+   to the new version, without the `v`. Not before: a Render instance whose Blueprint has Auto Sync
+   on can pick up the new tag as soon as it reaches `develop`, which the "Deploy to Render" button
+   deploys from. CI's "API extras" job warns on every run while the tag is behind the latest
+   release, and fails if it names no release. The same check fails a pull request that makes a
+   setting required without adding it to `render.yaml`
+   (`pnpm --filter @wondermoney/api render:check`).
+
+## Release notes
+
+Each tagged release has notes on GitHub and a "What's new" page on the docs site. Whoever
+writes them follows these steps.
+
+1. **Label pull requests as they merge.** [`.github/release.yml`](.github/release.yml) groups
+   GitHub's generated notes by label, and a pull request goes into the first section that
+   matches one of its labels:
+
+   | Label | Section |
+   |---|---|
+   | `security`, `privacy` | Security and privacy |
+   | `self-hosting` | Self-hosting |
+   | `translations` | Translations |
+   | `enhancement` | Features |
+   | `bug` | Fixes |
+   | `documentation` | Documentation |
+   | `dependencies` (Dependabot adds it) | Dependencies |
+   | any other, or none | Other changes |
+
+   The title's Conventional Commits type is a guide: `feat` is `enhancement`, `fix` is `bug`.
+   Area labels such as `api`, `web` and `mobile` pick no section. A pull request labelled
+   `skip-release-notes` is left out, and so is the "Release: develop → main" pull request.
+2. **Generate a draft** once the release pull request is merged:
+   `gh release create vX.Y.Z --target main --generate-notes --notes-start-tag vA.B.C --draft`,
+   where `vA.B.C` is the previous release. A draft creates no tag yet, so nothing is published.
+3. **Edit the draft** for the people who run and use WonderMoney. Start with an
+   **Upgrading** section: migrations (and whether to back up first), new or changed
+   settings, and commands to run after updating, or "Nothing to do" when there are none.
+   Then rewrite the grouped lists in plain terms, referencing issues or pull requests, and
+   drop entries nobody outside the project would notice.
+4. **Credit contributors.** GitHub's "New Contributors" list names only first-time
+   contributors, and rewriting the lists drops the "by @author" on each line. Print a
+   "Thanks to" section that names every pull request author, with first-time contributors
+   marked, and paste it at the end of the notes:
+
+   ```bash
+   .github/scripts/release-thanks.sh vX.Y.Z vA.B.C
+   ```
+
+   It reads the same generated notes, so it credits exactly the pull requests in the draft.
+5. **Publish the draft.** That creates the tag, which runs `publish-images.yml` (see
+   [Releasing](#releasing-maintainers)).
+6. **Add the "What's new" page** in a pull request against `develop`: the same release in
+   user-facing words, in English, Portuguese and Spanish. Save it as
+   `apps/docs/content/docs/<locale>/whats-new/vX-Y-Z.mdx` for each of `en`, `pt` and `es`,
+   and list `vX-Y-Z` right after `index` in each locale's `whats-new/meta.json`, so the
+   newest release comes first. Start from this template:
+
+   ```mdx
+   ---
+   title: WonderMoney X.Y.Z
+   description: One sentence on what this release changes for people who use it.
+   ---
+
+   [Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/vX.Y.Z)
+
+   ## Upgrading
+
+   {/* Self-hosters: migrations, new or changed settings, commands to run. Otherwise
+   "Nothing to do." Link to the self-hosting pages rather than repeating them. */}
+
+   ## New
+
+   {/* One line per change people will notice, starting with what they can now do. */}
+
+   ## Fixes
+
+   ## Thanks to
+
+   {/* The output of .github/scripts/release-thanks.sh, as on GitHub. */}
+   ```
+
+   In Portuguese the headings are "Atualizar", "Novo", "Correções" and "Agradecimentos"; in
+   Spanish, "Actualizar", "Nuevo", "Correcciones" and "Agradecimientos". Leave out a section
+   with nothing in it, except Upgrading.
 
 ## Leak check
 

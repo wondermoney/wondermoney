@@ -73,6 +73,11 @@ export function TransactionSplitLinesList({
               label={categoryLabel(line.category)}
               muted={!line.category}
             />
+            {line.expenseGroupMember ? (
+              <p className="text-muted-foreground pl-6 text-xs break-words">
+                {line.expenseGroupMember.name}
+              </p>
+            ) : null}
             {line.notes ? (
               <p className="text-muted-foreground pl-6 text-xs break-words">
                 {line.notes}

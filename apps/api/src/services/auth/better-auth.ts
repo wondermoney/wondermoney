@@ -4,23 +4,34 @@ import type { IncomingHttpHeaders } from 'http';
 import { expo } from '@better-auth/expo';
 import bcrypt from 'bcryptjs';
 import { betterAuth } from 'better-auth';
-import { APIError } from 'better-auth/api';
-import { hashPassword, verifyPassword } from 'better-auth/crypto';
+import { hashPassword, makeSignature, verifyPassword } from 'better-auth/crypto';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer, jwt, twoFactor } from 'better-auth/plugins';
 import { Pool } from 'pg';
 
+import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
+import { SupportedLanguages } from '@entity/Appuser';
 import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
+import { type AccountLanguageLookup, authEmailLanguage, linkInAccountLocale } from '@service/auth/auth-email-language';
+import { resolveAuthCookieDomain } from '@service/auth/cookie-domain';
 import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
+import { capDemoSessionRefresh, isExpiredDemoSession } from '@service/auth/demo-session';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
-import { isSignupAllowed, type SignupPolicyDeps } from '@service/auth/signup-policy';
+import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
+import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
+import { androidCertFingerprints, passkeyPlugins } from '@service/auth/passkey';
+import { signUpLocale } from '@service/auth/sign-up-locale';
+import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
+import { removePushDevicesForSession } from '@service/push/push-session-cleanup';
+import { accountLocale } from '@utils/account-language';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
+import logger from '@utils/logger';
 
 // Validated better-auth / social sign-in env, resolved through the configuration module so
 // every key is shape-checked once and read from a single place. `assertEnv('api')` in the
@@ -92,7 +103,15 @@ const appleOptions = configuredAppleOptions(authConfig);
 // Set in staging/prod (e.g. `.wonder.money`) so the session cookie set by
 // api.wonder.money is readable by app.wonder.money. Left unset locally, where a
 // host-only cookie on localhost is correct — a `.wonder.money` domain would break it.
-const cookieDomain = authConfig.cookieDomain;
+// Ignored when the API and the web app share a hostname (one-hostname self-hosting): the
+// cookie is host-only there, so no domain needs configuring.
+const cookieDomain = resolveAuthCookieDomain(authConfig.cookieDomain, { apiUrl: BACKEND_URL, appUrl: FRONTEND_URL });
+if (authConfig.cookieDomain && !cookieDomain) {
+  logger.warn(
+    { cookieDomain: authConfig.cookieDomain },
+    'AUTH_COOKIE_DOMAIN is ignored: the web app and the API share a hostname, so the session cookie is host-only',
+  );
+}
 
 /**
  * Legacy-bcrypt password shim. Existing bcrypt hashes (`$2a$`/`$2b$`/`$2y$` prefixes)
@@ -140,6 +159,21 @@ const signupPolicyDeps: SignupPolicyDeps = {
   },
 };
 
+/**
+ * The account language of a better-auth user: its own account first, then one with its address
+ * (an account from before better-auth, which the auth callback reconnects). On the better-auth
+ * pool, which better-auth's own hooks already run beside, outside any MikroORM request context.
+ */
+const accountLanguageOf: AccountLanguageLookup = async (user) => {
+  const { rows } = await betterAuthPool.query<{ language: string }>(
+    `select language from public.appuser
+     where record_active and deleted_at is null and (external_user_id = $1 or lower(email_address) = lower($2))
+     order by (external_user_id = $1) desc limit 1`,
+    [user.id, user.email],
+  );
+  return rows[0]?.language ?? null;
+};
+
 // `auth` is kept module-internal on purpose: its fully-inferred type transitively
 // names zod's `zod/v4` subpath, which isn't portable in the emitted .d.ts (TS2742).
 // Consumers get portable-typed exports instead (`authHandler` here; a session-lookup
@@ -162,17 +196,16 @@ const auth = betterAuth({
   // Defaults to the API's own address (API_URL): better-auth lives inside the API.
   baseURL: authConfig.betterAuthUrl ?? BACKEND_URL,
   database: betterAuthPool,
-  // Every way of creating an account (email/password, Google, Apple) goes through here, so this
-  // is where SIGNUP_MODE is enforced (services/auth/signup-policy.ts).
   databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          if (!(await isSignupAllowed(user.email, signupPolicyDeps))) {
-            throw new APIError('FORBIDDEN', { code: 'SIGNUP_DISABLED', message: 'Sign-up is not open on this server.' });
-          }
-          return { data: user };
-        },
+    session: {
+      // A session that ends (sign-out, revoke, password change, account deletion) takes its push
+      // devices with it, so that phone gets no more notifications (services/push/push-device.service.ts).
+      delete: {
+        after: (session) => removePushDevicesForSession(session.id, (sql, params) => betterAuthPool.query(sql, params)),
+      },
+      update: {
+        // A refresh never moves a demo session past its two hours (services/auth/demo-session.ts).
+        before: (session, context) => Promise.resolve(capDemoSessionRefresh(session, context) as undefined | { data: typeof session & { expiresAt: Date } }),
       },
     },
   },
@@ -181,27 +214,67 @@ const auth = betterAuth({
     // Legacy bcrypt hashes verify through the shim; new and reset passwords use
     // better-auth's own default hasher.
     password: { hash: hashPasswordShim, verify: verifyPasswordShim },
-    // In-process (no cross-service call) branded WonderMoney reset email via Mailjet.
+    // In-process, in the account's language, landing on the reset page in its locale. better-auth
+    // calls this only for an address with an account and answers the same either way, so the
+    // language lookup never throws (services/auth/auth-email-language.ts).
     sendResetPassword: async ({ url, user }) => {
-      await sendPasswordResetEmail({ email: user.email, name: user.name }, url);
+      const language = await authEmailLanguage({ appUrl: FRONTEND_URL, link: url, user }, accountLanguageOf);
+      const link = language ? linkInAccountLocale(url, FRONTEND_URL, language) : url;
+      await sendPasswordResetEmail({ email: user.email, name: user.name }, link, language ?? SupportedLanguages.EN);
     },
   },
   emailVerification: {
     // A server that keeps AI to verified accounts mails the link at sign-up; otherwise nothing
     // asks for verification, so nothing is sent.
     sendOnSignUp: aiRequiresVerifiedEmail(),
+    // In the account's language, or the sign-up page's before the account exists, as above.
     sendVerificationEmail: async ({ url, user }) => {
-      await sendEmailVerificationEmail({ email: user.email, name: user.name }, verificationLinkLandingOnApp(url, FRONTEND_URL));
+      const language = await authEmailLanguage({ appUrl: FRONTEND_URL, link: url, user }, accountLanguageOf);
+      const landing = verificationLinkLandingOnApp(url, FRONTEND_URL, language && accountLocale(language));
+      const link = language ? linkInAccountLocale(landing, FRONTEND_URL, language) : landing;
+      await sendEmailVerificationEmail({ email: user.email, name: user.name }, link, language ?? SupportedLanguages.EN);
     },
   },
   // twoFactor (TOTP + backup codes), jwt (JWKS at /api/auth/jwks for web's local
   // session verification), and bearer (Authorization: Bearer) support.
   // twoFactorOAuthGuard extends 2FA enforcement to Google/OAuth sign-in (better-auth
   // only gates credential sign-ins by default — see that module + the 2FA docs).
+  // Passkeys belong to the web app's hostname, and a passkey sign-in is a full session
+  // even for a 2FA account (see services/auth/passkey.ts).
+  // A failed OAuth or OIDC sign-in (refused group, unverified email, sign-up closed) lands on the
+  // web app's sign-in error page, which explains the `error` code. Web passes the same page,
+  // localized, as its `errorCallbackURL`; this default covers the mobile app's browser flow,
+  // which shows the page in its sign-in sheet.
+  onAPIError: { errorURL: new URL('auth/auth-code-error', FRONTEND_URL.endsWith('/') ? FRONTEND_URL : `${FRONTEND_URL}/`).toString() },
+  // Plugin order matters for the after-hooks on the OAuth callback: the OIDC policy records the
+  // admin claim before twoFactorOAuthGuard takes the new session away from a 2FA account.
   plugins: [
+    // Every way of creating an account (email/password, Google, Apple, OIDC) goes through here,
+    // so this is where SIGNUP_MODE is enforced (services/auth/signup-policy.ts).
+    signupPolicy({ deps: signupPolicyDeps, oidc: authConfig.oidc }),
+    // A sign-up without a page of its own (the mobile app) takes its language from
+    // Accept-Language, for its verification email and landing page (services/auth/sign-up-locale.ts).
+    signUpLocale({ appUrl: FRONTEND_URL }),
+    ...(authConfig.oidc
+      ? oidcPlugins(authConfig.oidc, {
+        // Outside a request's MikroORM context: a fork of its own.
+        onAdminClaim: async (userId, admin) => {
+          if (!DI.orm) throw new Error('The database is not connected');
+          await syncInstanceAdmin(DI.orm.em.fork(), userId, admin);
+        },
+      })
+      : []),
     // The label authenticator apps show next to the code.
     twoFactor({ issuer: instanceName(), twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
-    twoFactorOAuthGuard(),
+    // OIDC_TRUST_IDP_MFA: the provider's own MFA stands in for the local TOTP code.
+    twoFactorOAuthGuard({ trustProviderMfa: authConfig.oidc?.trustIdpMfa ? [OIDC_PROVIDER_ID] : [] }),
+    // ANDROID_APP_CERT_SHA256 lets the Android app's assertions through (their origin is the
+    // signing certificate's hash, not the web app's).
+    ...passkeyPlugins({
+      androidCertFingerprints: androidCertFingerprints(process.env['ANDROID_APP_CERT_SHA256']),
+      appName: instanceName(),
+      appUrl: FRONTEND_URL,
+    }),
     jwt(),
     bearer(),
     expo(),
@@ -227,6 +300,18 @@ const auth = betterAuth({
 export const authHandler = toNodeHandler(auth);
 
 /**
+ * Re-verify the signed-in user's TOTP code.
+ *
+ * better-auth's `/two-factor/verify-totp` endpoint accepts a full session as well as the
+ * intermediate sign-in cookie: with a session it checks the submitted code against the
+ * stored secret and rejects it with an `UNAUTHORIZED` APIError when wrong. That is exactly
+ * the revalidation a sensitive action needs, so we reuse it instead of re-implementing TOTP.
+ */
+export const verifyTotpForSession = async (headers: IncomingHttpHeaders, code: string): Promise<void> => {
+  await auth.api.verifyTOTP({ body: { code }, headers: fromNodeHeaders(headers) });
+};
+
+/**
  * Portable-typed shape for the authenticated user, decoupled from better-auth's
  * internal (non-portable) inferred session type — see the module comment above.
  */
@@ -236,6 +321,8 @@ export interface AuthContext {
 }
 
 export interface AuthedSession {
+  /** better-auth session creation time; `requireSensitiveSession` uses it as the freshness clock. */
+  createdAt: Date;
   id: string;
 }
 
@@ -245,6 +332,8 @@ export interface AuthedUser {
   id: string;
   image?: null | string;
   name?: null | string;
+  /** The instance-admin claim from the last OIDC sign-in; null when no admin groups set it. */
+  oidcAdmin?: boolean | null;
   twoFactorEnabled?: boolean | null;
 }
 
@@ -260,14 +349,21 @@ export interface AuthedUser {
 export const getAuthSession = async (headers: IncomingHttpHeaders): Promise<AuthContext | null> => {
   const result = await auth.api.getSession({ headers: fromNodeHeaders(headers) });
   if (!result) return null;
+  // The demo account's sessions end two hours after they start, whatever better-auth's own expiry
+  // says (services/auth/demo-session.ts). One past it is deleted, so its cookie stops everywhere.
+  if (isExpiredDemoSession({ createdAt: result.session.createdAt, email: result.user.email })) {
+    await deleteAuthSession(result.session.id);
+    return null;
+  }
   return {
-    session: { id: result.session.id },
+    session: { createdAt: result.session.createdAt, id: result.session.id },
     user: {
       email: result.user.email,
       emailVerified: result.user.emailVerified,
       id: result.user.id,
       image: result.user.image,
       name: result.user.name,
+      oidcAdmin: (result.user as { oidcAdmin?: boolean | null }).oidcAdmin ?? null,
       twoFactorEnabled: (result.user as { twoFactorEnabled?: boolean | null }).twoFactorEnabled ?? null,
     },
   };
@@ -288,12 +384,12 @@ export const getPrimaryAuthProvider = async (userId: string): Promise<string> =>
   return !providerId || providerId === 'credential' ? 'email' : providerId;
 };
 
-/** Admin delete: removes a better-auth user (account/session/twoFactor rows cascade via FKs). */
+/** Admin delete: removes a better-auth user (account/session/twoFactor/passkey rows cascade via FKs). */
 export const deleteBetterAuthUser = async (userId: string): Promise<void> => {
   await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."user" where id = $1`, [userId]);
 };
 
-/** Remove any better-auth user with this email (idempotent seed/test helper). Cascades to account/session/twoFactor. */
+/** Remove any better-auth user with this email (idempotent seed/test helper). Cascades to account/session/twoFactor/passkey. */
 export const deleteBetterAuthUserByEmail = async (email: string): Promise<void> => {
   await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."user" where email = $1`, [email]);
 };
@@ -305,6 +401,205 @@ export const betterAuthUserExists = async (userId: string): Promise<boolean> => 
     [userId],
   );
   return rows[0]?.exists === true;
+};
+
+/**
+ * A better-auth session created for a paired mobile device, with everything the app needs to
+ * adopt it: the signed session-cookie value (the same value better-auth would have set on a
+ * sign-in response) and the cookie's name for this deployment.
+ *
+ * The app cannot mint this itself — the value is signed with `BETTER_AUTH_SECRET` — so the
+ * pairing exchange hands it over once, over HTTPS, instead of the app re-implementing the
+ * cookie format.
+ */
+export interface PairedSession {
+  /** The cookie's name, including any `__Secure-`/prefix decoration this deployment uses. */
+  cookieName: string;
+  /** URL-encoded signed cookie value (`token.signature`), ready to store as-is. */
+  cookieValue: string;
+  expiresAt: Date;
+  sessionId: string;
+  /** The raw session token. Never logged. */
+  token: string;
+}
+
+/** The session fields the device list shows. */
+export interface AuthSessionSummary {
+  createdAt: Date;
+  expiresAt: Date;
+  id: string;
+  ipAddress?: null | string;
+  updatedAt: Date;
+  userAgent?: null | string;
+}
+
+/** How the session cookie is set on this deployment, for a route that hands out a session itself. */
+export interface SessionCookieAttributes {
+  domain?: string;
+  httpOnly: boolean;
+  path: string;
+  sameSite?: 'lax' | 'none' | 'strict';
+  secure: boolean;
+}
+
+/** A session created outside a sign-in endpoint, with its cookie attributes so a route can set it. */
+export interface IssuedSession extends PairedSession {
+  cookieAttributes: SessionCookieAttributes;
+}
+
+type BetterAuthContext = Awaited<typeof auth.$context>;
+
+async function issueSession(
+  context: BetterAuthContext,
+  session: { expiresAt: Date; id: string; token: string },
+): Promise<IssuedSession> {
+  const cookie = context.authCookies.sessionToken;
+  const signature = await makeSignature(session.token, context.secret);
+  const sameSite = cookie.attributes.sameSite?.toLowerCase();
+  return {
+    cookieAttributes: {
+      ...(cookie.attributes.domain ? { domain: cookie.attributes.domain } : {}),
+      httpOnly: cookie.attributes.httpOnly ?? true,
+      path: cookie.attributes.path ?? '/',
+      ...(sameSite === 'lax' || sameSite === 'none' || sameSite === 'strict' ? { sameSite } : {}),
+      secure: cookie.attributes.secure ?? false,
+    },
+    cookieName: cookie.name,
+    cookieValue: encodeURIComponent(`${session.token}.${signature}`),
+    expiresAt: session.expiresAt,
+    sessionId: session.id,
+    token: session.token,
+  };
+}
+
+/**
+ * Create a full better-auth session for `userId` without a password or a second factor.
+ *
+ * Only the QR pairing exchange calls this, and only after it has claimed a single-use pairing
+ * code that a signed-in web session created — that session already satisfied MFA, which is why
+ * a 2FA account needs no TOTP here. The session is stamped with the phone's user agent so the
+ * device list has something to show.
+ */
+export const createPairedSession = async (input: {
+  ipAddress?: null | string;
+  userAgent?: null | string;
+  userId: string;
+}): Promise<PairedSession> => {
+  const context = await auth.$context;
+  const session = await context.internalAdapter.createSession(input.userId, false, {
+    ipAddress: input.ipAddress ?? '',
+    userAgent: input.userAgent ?? '',
+  });
+  const { cookieAttributes: _cookieAttributes, ...paired } = await issueSession(context, session);
+  return paired;
+};
+
+/**
+ * Create a session for the shared demo account, ending at `expiresAt`.
+ *
+ * Only `POST /v1/auth/demo` calls this, after `signInToDemo` has checked that `userId` is the demo
+ * account and that it has no TOTP. No IP address or user agent is stored: the demo's visitors are
+ * strangers to each other. better-auth's create hooks run as for any session; the expiry is set
+ * outright (`overrideAll`), since its default is the seven days an ordinary sign-in gets.
+ */
+export const createDemoSession = async (input: { expiresAt: Date; userId: string }): Promise<IssuedSession> => {
+  const context = await auth.$context;
+  const session = await context.internalAdapter.createSession(
+    input.userId,
+    false,
+    { expiresAt: input.expiresAt, ipAddress: '', userAgent: '' },
+    true,
+  );
+  return issueSession(context, session);
+};
+
+/** One better-auth user's identity and TOTP state, or null when there is none with this id. */
+export const findBetterAuthUser = async (
+  userId: string,
+): Promise<null | { email: string; id: string; twoFactorEnabled: boolean | null }> => {
+  const { rows } = await betterAuthPool.query<{ email: string; id: string; twoFactorEnabled: boolean | null }>(
+    `select id, email, "twoFactorEnabled" from "${BETTER_AUTH_SCHEMA}"."user" where id = $1`,
+    [userId],
+  );
+  return rows[0] ?? null;
+};
+
+/** Delete a user's sessions that are already past their expiry. Live sessions are untouched. */
+export const deleteExpiredAuthSessions = async (userId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where "userId" = $1 and "expiresAt" <= now()`, [userId]);
+};
+
+/**
+ * Create the demo account's better-auth user if there is none, then put it back in its demo state:
+ * its name, a verified address, no TOTP, no passkeys and no linked social logins. Touches that one
+ * user's rows only. A user created here has no password: the one-click sign-in needs none.
+ *
+ * Written against the pool rather than `signUpEmail` on purpose: a demo server usually runs with
+ * sign-up closed, and the sign-up policy hook would refuse the seeder too.
+ */
+export const ensureDemoAuthUser = async (input: { email: string; name: string }): Promise<{ created: boolean; id: string }> => {
+  const client = await betterAuthPool.connect();
+  try {
+    await client.query('begin');
+    const existing = await client.query<{ id: string }>(`select id from "${BETTER_AUTH_SCHEMA}"."user" where lower(email) = lower($1) for update`, [input.email]);
+    const found = existing.rows[0]?.id;
+    const id = found ?? randomUUID();
+    if (found) {
+      await client.query(
+        `update "${BETTER_AUTH_SCHEMA}"."user" set name = $2, "emailVerified" = true, "twoFactorEnabled" = false, "updatedAt" = now() where id = $1`,
+        [id, input.name],
+      );
+    } else {
+      await client.query(
+        `insert into "${BETTER_AUTH_SCHEMA}"."user" (id, name, email, "emailVerified", "twoFactorEnabled", "createdAt", "updatedAt") values ($1, $2, $3, true, false, now(), now())`,
+        [id, input.name, input.email],
+      );
+    }
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."twoFactor" where "userId" = $1`, [id]);
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."passkey" where "userId" = $1`, [id]);
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."account" where "userId" = $1 and "providerId" <> 'credential'`, [id]);
+    await client.query('commit');
+    return { created: !found, id };
+  } catch (error) {
+    await client.query('rollback');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+/** Session rows for the device list, newest first. Unknown ids are simply absent. */
+export const listAuthSessions = async (sessionIds: string[]): Promise<AuthSessionSummary[]> => {
+  if (sessionIds.length === 0) return [];
+  const { rows } = await betterAuthPool.query<{
+    createdAt: Date;
+    expiresAt: Date;
+    id: string;
+    ipAddress: null | string;
+    updatedAt: Date;
+    userAgent: null | string;
+  }>(
+    `select id, "createdAt", "updatedAt", "expiresAt", "ipAddress", "userAgent"
+       from "${BETTER_AUTH_SCHEMA}"."session"
+      where id = any($1::text[])
+      order by "createdAt" desc`,
+    [sessionIds],
+  );
+  return rows;
+};
+
+/** Delete one better-auth session by id. The next request with its cookie gets 401. */
+export const deleteAuthSession = async (sessionId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where id = $1`, [sessionId]);
+};
+
+/**
+ * End every better-auth session of one user: each device's next request gets 401. Used when a
+ * person is removed from a household, so they are signed out everywhere and sign in again to
+ * their own household.
+ */
+export const endAllAuthSessions = async (userId: string): Promise<void> => {
+  await betterAuthPool.query(`delete from "${BETTER_AUTH_SCHEMA}"."session" where "userId" = $1`, [userId]);
 };
 
 /**

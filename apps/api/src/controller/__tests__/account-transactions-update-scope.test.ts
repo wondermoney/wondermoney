@@ -25,10 +25,13 @@ const mocked = vi.hoisted(() => {
 });
 
 // Splits are covered by transaction-split.test.ts; none of these transactions is split.
+vi.mock('@service/account/account-access', async (importOriginal) => (await import('@app/__tests__/__helpers__/account-access-double')).allAccountsWritable(await importOriginal()));
 vi.mock('@service/transaction/transaction-split.service', () => ({
   reconcileSplitsWithAmount: vi.fn().mockResolvedValue('none'),
   removeSplitsBeforeCategorizing: vi.fn().mockResolvedValue(undefined),
 }));
+// The household's members name the response's attribution; this EM double holds none.
+vi.mock('@service/household/member-attribution', async (original) => ({ ...(await original<object>()), loadActiveMembers: vi.fn().mockResolvedValue(new Map()) }));
 vi.mock('@validators/parser', () => ({
   zParse: vi.fn((_schema, req: unknown) => Promise.resolve(req)),
 }));

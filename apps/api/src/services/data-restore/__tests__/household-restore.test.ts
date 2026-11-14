@@ -1,17 +1,18 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addOwnership, addPartner, addTransaction, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { allRowCounts, dataFiles, emptyHousehold, exportBytes, householdRowCounts, linkToBank, richHousehold, type Scope, scopeOf } from '@app/__tests__/__helpers__/restore-fixtures';
-import { Appuser } from '@entity/Appuser';
+import { Appuser, SupportedLanguages } from '@entity/Appuser';
 import { AppuserTransactionCategory, Source } from '@entity/AppuserTransactionCategory';
+import { Budget } from '@entity/Budget';
 import { Category } from '@entity/Category';
 import { Goal } from '@entity/Goal';
 import portfolioHoldingsService from '@service/portfolio/portfolio-holdings.service';
 
 import { restoreHousehold } from '../household-restore';
-import { REFERENCES } from '../restore-format';
+import { DATA_FILES, type DataFileName, REFERENCES } from '../restore-format';
 import { type ParsedExport, readRestoreArchive } from '../restore-reader';
 
 /*
@@ -74,6 +75,26 @@ describe('household restore', () => {
     }
     return out;
   }
+
+  describe('crypto wallets', () => {
+    it('restores only public addresses, whatever an edited export holds, ready to sync again', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const [address] = parsed.rows['crypto-wallet-addresses'];
+      // A private key slipped into the file by hand: it must not reach the database.
+      parsed.rows['crypto-wallet-addresses'].push({ ...address!, address: 'ab'.repeat(32), id: 99 });
+      parsed.rows['crypto-wallet-tokens'].push({ addressId: 99, balance: '1', contractAddress: null, decimals: 18, name: null, symbol: 'ETH', tracked: true });
+      const target = await emptyHousehold(db.em());
+
+      await restore(scopeOf(target), parsed);
+
+      const connection = db.em().getConnection();
+      const addresses = await connection.execute<{ address: string; sync_status: string }[]>('select address, sync_status from crypto_wallet_address where tenant_key = ?', [target.tenant.tenantKey]);
+      expect(addresses).toEqual([{ address: '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed', sync_status: 'pending' }]);
+      const tokens = await connection.execute<{ symbol: string; tracked: boolean }[]>('select symbol, tracked from crypto_wallet_token where tenant_key = ? order by symbol', [target.tenant.tenantKey]);
+      expect(tokens).toEqual([{ symbol: 'ETH', tracked: true }, { symbol: 'USDC', tracked: false }]);
+    });
+  });
 
   describe('round trip', () => {
     it('gives back the same export, file for file, from a fresh household', async () => {
@@ -152,8 +173,18 @@ describe('household restore', () => {
         [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey],
       );
       expect(strangers[0]!.n).toBe(0);
-      expect(restored['manual_asset']).toBe(2);
-      expect(restored['manual_asset_valuation']).toBe(3);
+      expect(restored['manual_asset']).toBe(3);
+      expect(restored['manual_asset_valuation']).toBe(4);
+      expect(restored['crypto_wallet_address']).toBe(1);
+      expect(restored['crypto_wallet_token']).toBe(2);
+      // The expense group comes back whole: its people (the household's one is the restoring member),
+      // the shared expense with one line per person, and the settlement.
+      expect([restored['expense_group'], restored['expense_group_member'], restored['expense_group_expense'], restored['expense_group_settlement']]).toEqual([1, 2, 1, 1]);
+      const shares = await connection.execute<{ amount: string; appuser_key: null | number }[]>(
+        'select s.amount::text as amount, m.appuser_key from transaction_split s join expense_group_member m on m.expense_group_member_key = s.expense_group_member_key where s.tenant_key = ? and s.deleted_at is null order by s.position',
+        [target.tenant.tenantKey],
+      );
+      expect(shares.map((share) => [Number(share.amount), share.appuser_key])).toEqual([[-6, target.appuser.appuserKey], [-6, null]]);
       // References stay inside the household: every restored transaction's account is the household's.
       const crossed = await connection.execute<{ n: number }[]>(
         'select count(*)::int as n from "transaction" t join account a on a.account_key = t.account_key where t.tenant_key = ? and a.tenant_key <> ?',
@@ -217,13 +248,14 @@ describe('household restore', () => {
 
       const { summary } = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
 
-      expect(summary.counts).toEqual(expect.objectContaining({ 'manual-asset-valuations': 3, 'manual-assets': 2 }));
+      expect(summary.counts).toEqual(expect.objectContaining({ 'crypto-wallet-addresses': 1, 'crypto-wallet-tokens': 2, 'manual-asset-valuations': 4, 'manual-assets': 3 }));
       const assets = await db.em().getConnection().execute<Record<string, unknown>[]>(
         `select a.name, a.kind, a.is_private, c.code as currency, a.purchase_price::text as purchase_price, to_char(a.purchase_date, 'YYYY-MM-DD') as purchase_date,
            a.growth_annual_rate_percent::text as growth, to_char(a.growth_start_date, 'YYYY-MM-DD') as growth_start, a.notes, (a.archived_at is not null) as archived,
            (select string_agg(to_char(v.valuation_date, 'YYYY-MM-DD') || '=' || v.value::text, ',' order by v.valuation_date) from manual_asset_valuation v where v.manual_asset_key = a.manual_asset_key and v.tenant_key = a.tenant_key) as valuations
          from manual_asset a join currency c on c.currency_key = a.currency_key where a.tenant_key = ? order by a.name`, [target.tenant.tenantKey]);
       expect(assets).toEqual([
+        { archived: false, currency: 'USD', growth: null, growth_start: null, is_private: false, kind: 'crypto_wallet', name: 'Cold wallet', notes: null, purchase_date: null, purchase_price: null, valuations: '2026-06-02=4500.0000' },
         { archived: false, currency: 'USD', growth: '2.5000', growth_start: '2026-01-01', is_private: false, kind: 'property', name: 'Home', notes: 'Top floor', purchase_date: '2020-03-01', purchase_price: '180000.5000', valuations: '2020-03-01=180000.5000,2026-05-10=240000.0000' },
         { archived: true, currency: 'EUR', growth: null, growth_start: null, is_private: true, kind: 'vehicle', name: 'Old car', notes: null, purchase_date: null, purchase_price: null, valuations: '2025-01-15=7000.0000' },
       ]);
@@ -234,11 +266,223 @@ describe('household restore', () => {
       const parsed = await parsedExportOf(scopeOf(owner));
       parsed.rows['manual-assets'] = [];
       parsed.rows['manual-asset-valuations'] = [];
+      parsed.rows['crypto-wallet-addresses'] = [];
+      parsed.rows['crypto-wallet-tokens'] = [];
+      for (const loan of parsed.rows.loans) delete loan.securedAssetId;
       const target = await emptyHousehold(db.em());
 
       const { summary } = await restore(scopeOf(target), parsed);
 
-      expect(summary.counts).toEqual(expect.objectContaining({ 'manual-assets': 0, transactions: 6 }));
+      expect(summary.counts).toEqual(expect.objectContaining({ loans: 1, 'manual-assets': 0, transactions: 6 }));
+    });
+
+    it('restores the day each budget\'s months start on, and the 1st for an export made before it existed', async () => {
+      expect(DATA_FILES.budgets.parse({ currency: 'EUR', description: null, id: 1, memberId: 1, name: 'Old', numAdults: 1, numDependents: 0 })).toMatchObject({ periodStartDay: 1 });
+
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const budgets = await db.em().getConnection().execute<{ period_start_day: number }[]>('select period_start_day from budget where tenant_key = ?', [target.tenant.tenantKey]);
+      expect(budgets).toEqual([{ period_start_day: 25 }]);
+    });
+
+    it('restores a personal budget as the restoring member\'s own, a household one as the household\'s, and an older export\'s as household budgets', async () => {
+      expect(DATA_FILES.budgets.parse({ currency: 'EUR', description: null, id: 1, memberId: 1, name: 'Old', numAdults: 1, numDependents: 0 })).toMatchObject({ ownerMemberId: null });
+
+      const { owner } = await richHousehold(db.em());
+      const em = db.em();
+      em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'Mine', numAdults: 1, numDependents: 0, ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+      await em.flush();
+      const target = await emptyHousehold(db.em());
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const budgets = await db.em().getConnection().execute<{ name: string; owner_appuser_key: null | number }[]>('select name, owner_appuser_key from budget where tenant_key = ? order by name', [target.tenant.tenantKey]);
+      expect(budgets).toEqual([{ name: 'Home', owner_appuser_key: null }, { name: 'Mine', owner_appuser_key: target.appuser.appuserKey }]);
+    });
+
+    it('restores the asset each loan is secured against', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      const loans = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        'select l.name, a.name as asset, a.tenant_key = l.tenant_key as same_household from loan l left join manual_asset a on a.manual_asset_key = l.secured_asset_key where l.tenant_key = ?', [target.tenant.tenantKey]);
+      expect(loans).toEqual([{ asset: 'Old car', name: 'Car loan', same_household: true }]);
+    });
+  });
+
+  describe('installment plans and card cycles', () => {
+    const planRows = (tenantKey: number) => db.em().getConnection().execute<Record<string, unknown>[]>(
+      `select p.description, p.installment_count, p.total_amount::text as total, to_char(p.purchase_date, 'YYYY-MM-DD') as purchase_date, a.account_name as card, c.name as category,
+         (select string_agg(i.installment_number || '=' || i.amount::text || '@' || to_char(i.scheduled_date, 'YYYY-MM-DD') || '/' || coalesce(to_char(i.statement_date, 'YYYY-MM-DD'), '-') || '/' || coalesce(to_char(i.due_date, 'YYYY-MM-DD'), '-'), ',' order by i.installment_number)
+          from installment i where i.installment_plan_key = p.installment_plan_key and i.tenant_key = p.tenant_key) as schedule,
+         (select string_agg(t.description || '#' || t.installment_number, ',') from "transaction" t where t.installment_plan_key = p.installment_plan_key and t.account_key = p.account_key) as paid_by,
+         (select string_agg(t.description, ',') from "transaction" t where t.installment_unlinked_plan_key = p.installment_plan_key and t.account_key = p.account_key) as unlinked_by_hand
+       from installment_plan p join account a on a.account_key = p.account_key and a.tenant_key = p.tenant_key left join category c on c.category_key = p.category_key
+       where p.tenant_key = ?`, [tenantKey]);
+
+    it('restores each plan on its card with its schedule and the transactions that paid it', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      expect(summary.counts).toEqual(expect.objectContaining({ 'credit-cards': 1, 'installment-plans': 1, installments: 3 }));
+      const restored = await planRows(target.tenant.tenantKey);
+      expect(restored).toEqual(await planRows(owner.tenant.tenantKey));
+      expect(restored).toEqual([expect.objectContaining({ card: 'Current account', category: 'Home', description: 'Sofa', installment_count: 3, paid_by: expect.stringMatching(/#2$/u), unlinked_by_hand: expect.any(String) })]);
+      const [card] = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        'select a.account_name, d.statement_close_day, d.payment_due_day, d.credit_limit::text as credit_limit, d.minimum_payment_percent::text as minimum from credit_card_detail d join account a using (account_key) where d.tenant_key = ?', [target.tenant.tenantKey]);
+      expect(card).toEqual({ account_name: 'Current account', credit_limit: '1500.0000', minimum: '5.00', payment_due_day: 10, statement_close_day: 25 });
+    });
+
+    it('draws a schedule that is not whole again from the plan and the restored card cycle', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      parsed.rows.installments = parsed.rows.installments.slice(0, 1);
+      const target = await emptyHousehold(db.em());
+
+      await restore(scopeOf(target), parsed);
+
+      // The same schedule the app draws for the plan on that card.
+      expect((await planRows(target.tenant.tenantKey))[0]!['schedule']).toBe((await planRows(owner.tenant.tenantKey))[0]!['schedule']);
+    });
+  });
+
+  describe('exchange-rate and price overrides', () => {
+    it('restores the household\'s rates as added by the restoring member, audited, and names the pairs to convert again', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const outcome = await restore(scopeOf(target), await parsedExportOf(scopeOf(owner)));
+
+      expect(outcome.fxOverridePairs).toEqual([{ fromCurrency: 'USD', toCurrency: 'EUR' }]);
+      const connection = db.em().getConnection();
+      const rates = await connection.execute<Record<string, unknown>[]>(
+        `select f.code as from_code, t.code as to_code, to_char(o.date at time zone 'UTC', 'YYYY-MM-DD') as date, o.rate::text as rate, o.created_by_appuser_key as member,
+           (select count(*)::int from exchange_rate_override_audit_log l where l.exchange_rate_override_key = o.exchange_rate_override_key and l.tenant_key = o.tenant_key and l.action = 'created' and l.actor_appuser_key = o.created_by_appuser_key) as audits
+         from exchange_rate_override o join currency f on f.currency_key = o.from_currency_key join currency t on t.currency_key = o.to_currency_key where o.tenant_key = ?`, [target.tenant.tenantKey]);
+      expect(rates).toEqual([{ audits: 1, date: '2026-02-06', from_code: 'USD', member: target.appuser.appuserKey, rate: '0.9166', to_code: 'EUR' }]);
+    });
+
+    it('keeps a rate the household already set for the same day', async () => {
+      const { owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const target = await emptyHousehold(db.em());
+      await db.em().getConnection().execute(
+        `insert into exchange_rate_override (created_at, updated_at, date, from_currency_key, to_currency_key, rate, tenant_key)
+         select now(), now(), '2026-02-06T00:00:00Z', f.currency_key, t.currency_key, 0.5, ? from currency f, currency t where f.code = 'USD' and t.code = 'EUR'`, [target.tenant.tenantKey]);
+
+      const { summary } = await restore(scopeOf(target), parsed);
+
+      expect(summary.counts['exchange-rate-overrides']).toBe(0);
+      const rates = await db.em().getConnection().execute<{ rate: string }[]>('select rate::text from exchange_rate_override where tenant_key = ?', [target.tenant.tenantKey]);
+      expect(rates).toEqual([{ rate: '0.5' }]);
+    });
+
+    it('puts each price on the catalogue\'s asset in its currency, and leaves out and lists one it cannot', async () => {
+      const { asset, owner } = await richHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const [price] = parsed.rows['price-overrides'];
+      // The same asset priced in another currency, and an asset nobody knows.
+      parsed.rows['price-overrides'].push({ ...price!, currency: 'EUR', date: '2026-03-30' }, { ...price!, asset: { ...price!.asset, isin: null, symbol: 'GONE' } });
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), parsed, { deps: { resolveAsset: () => Promise.resolve(null) } });
+
+      expect(summary.counts['price-overrides']).toBe(1);
+      expect(summary.warnings).toContainEqual({ code: 'price_overrides_skipped', count: 2, values: ['AAPL', 'GONE'] });
+      // Only traded assets are reported as left out with their trades.
+      expect(summary.warnings.map((warning) => warning.code)).not.toContain('assets_left_out');
+      const prices = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select o.financial_asset_key as asset, c.code as currency, to_char(o.date at time zone 'UTC', 'YYYY-MM-DD') as date, o.price::text as price, o.note
+         from financial_asset_price_override o join currency c on c.currency_key = o.currency_key where o.tenant_key = ?`, [target.tenant.tenantKey]);
+      expect(prices).toEqual([{ asset: asset.financialAssetKey, currency: 'USD', date: '2026-03-31', note: 'broker quote', price: '158.4' }]);
+    });
+  });
+
+  describe('older exports', () => {
+    /** What the reader makes of `parsed` once the 1.8 files and fields are taken out, as in a 1.7 export. */
+    function asVersion17(parsed: ParsedExport): ParsedExport {
+      const newFiles: DataFileName[] = ['credit-cards', 'exchange-rate-overrides', 'installment-plans', 'installments', 'price-overrides', 'transaction-templates'];
+      const newFields: Partial<Record<DataFileName, string[]>> = {
+        accounts: ['position'], 'budget-categories': ['rolloverEnabled'], budgets: ['rolloverCarriesOverspend'], loans: ['amortizationMethod', 'firstPaymentDate'], portfolios: ['costBasisMethod'],
+        transactions: ['installmentNumber', 'installmentPlanId', 'installmentUnlinkedPlanId', 'statementDateOverride', 'transferExchangeRate'],
+      };
+      const rows = { ...parsed.rows } as Record<DataFileName, Record<string, unknown>[]>;
+      for (const name of newFiles) rows[name] = [];
+      for (const [name, fields] of Object.entries(newFields) as [DataFileName, string[]][]) {
+        rows[name] = rows[name].map((row) => DATA_FILES[name].parse(Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key)))) as Record<string, unknown>);
+      }
+      rows.preferences = rows.preferences.map((row) => {
+        const { bankSyncAlerts: _bank, creditCardDueReminders: _card, ...emailNotifications } = row['emailNotifications'] as Record<string, unknown>;
+        return DATA_FILES.preferences.parse({ ...row, emailNotifications });
+      });
+      return { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.7' }, rows: rows as unknown as ParsedExport['rows'] };
+    }
+
+    it('restores a split account wholly the restoring member\'s, and an older export with no shares', async () => {
+      const { dollars, owner } = await richHousehold(db.em());
+      const partner = await addPartner(db.em(), owner);
+      await addOwnership(db.em(), owner, dollars, [[owner.appuser, 6000], [partner, 4000]]);
+      const target = await emptyHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+
+      await restore(scopeOf(target), parsed);
+
+      const ownership = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select a.account_name as name, o.appuser_key as member, o.basis_points as share from account_ownership o join account a using (account_key) where o.tenant_key = ?`,
+        [target.tenant.tenantKey]);
+      expect(ownership).toEqual([{ member: target.appuser.appuserKey, name: 'Dollar account', share: 10_000 }]);
+
+      const older = await emptyHousehold(db.em());
+      const rows = { ...parsed.rows, accounts: parsed.rows.accounts.map(({ ownership: _ownership, ...row }) => row) };
+      await restore(scopeOf(older), { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.10' }, rows });
+      const [count] = await db.em().getConnection().execute<Record<string, unknown>[]>(`select count(*)::int as n from account_ownership where tenant_key = ?`, [older.tenant.tenantKey]);
+      expect(count).toEqual({ n: 0 });
+    });
+
+    it('refuses an export whose shares of an account do not add up to the whole', () => {
+      const account = { accountNumber: null, balance: '1', bankLinked: false, closed: false, createdAt: null, currency: 'EUR', holderName: null, id: 1, institution: null, isPrivate: false, name: 'A', openingBalance: null, openingBalanceDate: null, ownerMemberId: 1, type: null };
+
+      expect(DATA_FILES.accounts.safeParse({ ...account, ownership: [{ basisPoints: 6000, memberId: 1 }, { basisPoints: 3000, memberId: 2 }] }).success).toBe(false);
+      expect(DATA_FILES.accounts.safeParse({ ...account, ownership: [{ basisPoints: 6000, memberId: 1 }, { basisPoints: 4000, memberId: null }] }).success).toBe(true);
+    });
+
+    it('restores a 1.9 export with no joint account and every transaction following its account', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+      const parsed = await parsedExportOf(scopeOf(owner));
+      const without = (rows: Record<string, unknown>[], fields: string[]) => rows.map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key))));
+      const rows = { ...parsed.rows, accounts: without(parsed.rows.accounts, ['isJoint']), transactions: without(parsed.rows.transactions, ['attributedMemberId', 'attributedToShared']) } as unknown as ParsedExport['rows'];
+
+      await restore(scopeOf(target), { ...parsed, manifest: { ...parsed.manifest, formatVersion: '1.9' }, rows });
+
+      const [counts] = await db.em().getConnection().execute<Record<string, unknown>[]>(
+        `select (select count(*)::int from account where tenant_key = ? and is_joint) as joint,
+           (select count(*)::int from "transaction" where tenant_key = ? and (attributed_appuser_key is not null or attributed_to_shared)) as attributed`,
+        [target.tenant.tenantKey, target.tenant.tenantKey]);
+      expect(counts).toEqual({ attributed: 0, joint: 0 });
+    });
+
+    it('restores a 1.7 export, giving every 1.8 field what the app gives a new row', async () => {
+      const { owner } = await richHousehold(db.em());
+      const target = await emptyHousehold(db.em());
+
+      const { summary } = await restore(scopeOf(target), asVersion17(await parsedExportOf(scopeOf(owner))));
+
+      expect(summary.counts).toEqual(expect.objectContaining({ accounts: 3, 'credit-cards': 0, 'installment-plans': 0, transactions: 6 }));
+      const connection = db.em().getConnection();
+      const [settings] = await connection.execute<Record<string, unknown>[]>(
+        `select (select rollover_carries_overspend from budget where tenant_key = ?) as carries,
+           (select bool_or(rollover_enabled) from budget_template_category btc join budget b using (budget_key) where b.tenant_key = ?) as rollover,
+           (select amortization_method from loan where tenant_key = ?) as amortization, (select cost_basis_method from portfolio where tenant_key = ?) as cost_basis,
+           (select count(*)::int from "transaction" where tenant_key = ? and (installment_plan_key is not null or installment_unlinked_plan_key is not null or statement_date_override is not null)) as linked,
+           (select credit_card_due_reminders_enabled from email_notification_preference where appuser_key = ?) as reminders`,
+        [target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.tenant.tenantKey, target.appuser.appuserKey]);
+      expect(settings).toEqual({ amortization: 'FRENCH', carries: true, cost_basis: 'FIFO', linked: 0, reminders: true, rollover: false });
     });
   });
 
@@ -311,6 +555,42 @@ describe('household restore', () => {
       expect(appuser.currencyKey.code).toBe('EUR');
       const [preference] = await db.em().getConnection().execute<{ budget_alerts_enabled: boolean; weekly_insights_enabled: boolean }[]>('select budget_alerts_enabled, weekly_insights_enabled from email_notification_preference where appuser_key = ?', [target.appuser.appuserKey]);
       expect(preference).toEqual({ budget_alerts_enabled: false, weekly_insights_enabled: false });
+    });
+
+    describe('account language', () => {
+      async function restoredLanguage(language: (parsed: ParsedExport) => void, owner?: { language: SupportedLanguages }) {
+        const em = db.em();
+        const source = await seedHousehold(em);
+        if (owner) {
+          em.assign(source.appuser, owner);
+          await em.flush();
+        }
+        const parsed = await parsedExportOf(scopeOf(source));
+        language(parsed);
+        const target = await emptyHousehold(db.em());
+        await restore(scopeOf(target), parsed);
+        return (await db.em().findOneOrFail(Appuser, { appuserKey: target.appuser.appuserKey }, { filters: false })).language;
+      }
+
+      it('carries a Spanish account language across', async () => {
+        expect(await restoredLanguage(() => undefined, { language: SupportedLanguages.ES })).toBe(SupportedLanguages.ES);
+      });
+
+      // Exports from before Spanish name EN or PT, in either case; the export shape is the same.
+      it.each([['PT', SupportedLanguages.PT], ['pt', SupportedLanguages.PT], ['EN', SupportedLanguages.EN]])('restores the %s an older export names', async (exported, restored) => {
+        const language = await restoredLanguage((parsed) => {
+          parsed.manifest.formatVersion = '1.0';
+          for (const row of parsed.rows.preferences) row.language = exported;
+        });
+        expect(language).toBe(restored);
+      });
+
+      it('keeps the member\'s own language for one this server does not have', async () => {
+        const language = await restoredLanguage((parsed) => {
+          for (const row of parsed.rows.preferences) row.language = 'FR';
+        });
+        expect(language).toBe(SupportedLanguages.EN);
+      });
     });
 
     it('refuses an export in a currency this server does not have, before writing', async () => {

@@ -2,6 +2,8 @@ import { Collection, LoadStrategy } from '@mikro-orm/core';
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Enum, Filter, ManyToOne, OneToMany, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
+
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
 import { Account } from './Account';
@@ -36,6 +38,13 @@ export class Portfolio extends Base {
   /** Set exactly when `linkedAccountKey` is; see {@link PortfolioAccountBalanceMode}. */
   @Enum({ items: () => PortfolioAccountBalanceMode, nullable: true })
   accountBalanceMode?: null | PortfolioAccountBalanceMode;
+
+  /**
+   * How a sale relieves cost: FIFO (oldest lots first) or the running average of the open
+   * position. See {@link PortfolioCostBasisMethod}.
+   */
+  @Enum({ default: PortfolioCostBasisMethod.FIFO, items: () => PortfolioCostBasisMethod })
+  costBasisMethod: PortfolioCostBasisMethod = PortfolioCostBasisMethod.FIFO;
 
   @Property({ length: 500, nullable: true })
   description?: string;

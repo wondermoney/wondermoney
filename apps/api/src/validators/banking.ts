@@ -27,8 +27,30 @@ export const bankSyncStatusRequestSchema = z.object({
   }),
 });
 
+export const bankConnectionSyncsRequestSchema = z.object({
+  params: z.object({
+    connectionId: positiveIntId,
+  }),
+});
+
 export const unlinkRequisitionRequestSchema = z.object({
   params: z.object({
     requisitionId: positiveIntId,
+  }),
+});
+
+/**
+ * A SimpleFIN setup token: base64 of a claim URL. Bounded so a pasted novel is refused before
+ * any decoding; the content is checked by the SimpleFIN URL guard.
+ */
+export const connectSimplefinRequestSchema = z.object({
+  body: z.object({
+    setupToken: z.string().trim().min(1).max(4096),
+  }),
+});
+
+export const simplefinConnectionRequestSchema = z.object({
+  params: z.object({
+    connectionId: positiveIntId,
   }),
 });

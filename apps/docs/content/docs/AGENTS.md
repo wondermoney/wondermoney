@@ -4,6 +4,7 @@
 
 - Each page has paired `en`, `pt`, and `es` siblings under `content/docs/`. Never ship a change to one locale without verifying the other two.
 - Locale navigation order is defined per-section in each section's `meta.json`. Add new pages there, not just on disk.
+- `pt` pages are European Portuguese and address the reader as **tu** ("Abre as Definições", "a tua conta", "Se quiseres…"), never "você" or the formal third person. `CONTRIBUTING.md` has the rule and examples. The legal pages under `app/(legal-pt)/` are the exception: they keep the formal "o utilizador" register.
 
 ## Images
 

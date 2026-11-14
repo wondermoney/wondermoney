@@ -12,8 +12,8 @@ import s3Service from '@service/storage/s3';
  *   expired  a session waiting for the person stops being usable when it expires; it is deleted,
  *            with its rows and its uploaded file.
  *   cleared  {@link COMMITTED_RETENTION_MS} after a commit (`succeeded`, `partial`), its rows and
- *            file are deleted and the session stays as a summary: status, dates and the row
- *            counts by status (`rowCounts`), with `detailsDeletedAt` set.
+ *            file are deleted and the session stays as a summary: the file's name, status,
+ *            dates and the row counts by status (`rowCounts`), with `detailsDeletedAt` set.
  *
  * Never touched: a session being committed (`importing`, whether its job is live or stopped and
  * waiting to be resumed), and one whose file a live job is still reading (`parsing`).

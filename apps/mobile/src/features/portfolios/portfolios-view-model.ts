@@ -20,10 +20,39 @@ export type PortfolioRowViewModel = Readonly<{
   weight?: number
 }>
 
+/**
+ * The dashboard period's time- and money-weighted returns, percentage points (10 = +10%).
+ * A null figure cannot be measured.
+ */
+export type PeriodReturnsViewModel = Readonly<{
+  timeWeighted: number | null
+  moneyWeighted: number | null
+  /** The money-weighted figure is a yearly rate (periods of a year or more), else over the period. */
+  moneyWeightedAnnualized: boolean
+  /** Days in the period with no snapshot, whose value was carried over from the day before. */
+  missingSnapshotDays: number
+}>
+
+type DashboardSummaryDto = AggregateDashboardResponseDto['summary'] | IndividualDashboardResponseDto['summary']
+
+/** The period returns, or undefined when the API did not send them (older servers). */
+export function mapPeriodReturns(summary: DashboardSummaryDto): PeriodReturnsViewModel | undefined {
+  const returns = summary.periodReturns
+  if (!returns) return undefined
+  return {
+    timeWeighted: returns.timeWeighted,
+    moneyWeighted: returns.moneyWeighted,
+    moneyWeightedAnnualized: returns.moneyWeightedAnnualized,
+    missingSnapshotDays: new Set(returns.missingSnapshotDates).size,
+  }
+}
+
 /** The five figures web's PortfolioDashboardSummary leads with. */
 type SummaryFigures = {
   /** 'YTD', '1M' … — names the period return ("YTD Return"). */
   periodLabel?: string
+  /** Absent when the API does not send them; the summary then leaves them out. */
+  periodReturns?: PeriodReturnsViewModel
   realizedGains?: number
   unrealizedGains?: number
 }
@@ -66,6 +95,7 @@ export function mapPortfolioOverview(
       weight: portfolio.weight,
     })),
     periodLabel: dashboard.summary.periodLabel,
+    periodReturns: mapPeriodReturns(dashboard.summary),
     realizedGains: dashboard.summary.realizedGains,
     unrealizedGains: dashboard.summary.unrealizedGains,
     totalGainLoss: dashboard.summary.totalGainLoss,
@@ -90,6 +120,8 @@ export type HoldingViewModel = Readonly<{
   /** Set on the household-wide list, where a row opens its own portfolio's holding. */
   portfolioId?: number | null
   quantity: number
+  /** Lifetime realized gain of the asset's sales; null when unknown (invalid holding, older API). */
+  realizedGain?: number | null
   symbol: string
   type: string
   /** The asset's logo, its mark; letters stand in without one. */
@@ -134,6 +166,7 @@ export function mapPortfolioDetail(
     nativeCurrency: metadata.portfolio.currencyKey.code,
     periodLabel: dashboard.summary.periodLabel,
     periodReturn: dashboard.summary.periodReturn,
+    periodReturns: mapPeriodReturns(dashboard.summary),
     realizedGains: dashboard.summary.realizedGains,
     totalGainLoss: dashboard.summary.totalGainLoss,
     totalGainLossPercent: dashboard.summary.totalGainLossPercent,
@@ -161,6 +194,7 @@ export function mapHoldings(holdings: PortfolioHoldingsResponseDto): HoldingView
       name: holding.financialAssetName,
       portfolioId: holding.portfolioKey ?? null,
       quantity: holding.quantity,
+      realizedGain: invalid ? null : holding.realizedGains ?? null,
       symbol: holding.financialAssetSymbol,
       type: holding.financialAssetType,
       logoUrl: holding.financialAssetLogoUrl ?? null,

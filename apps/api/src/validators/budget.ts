@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
+import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
+import { BUDGET_VISIBILITIES } from '@service/budget/budget-visibility';
+import { parseMemberFilter } from '@service/household/member-attribution';
 import { Recurrency } from '@utils/budget';
+import { memberKeysFilter } from '@validators/reports';
 
 // Matches the existing income-amount ceiling below (createBudgetRequestSchema.incomes[].amount) so
 // every budget-domain money field shares one sanity cap. Generous enough for any real household
@@ -14,11 +18,21 @@ export const updateBudgetRequestSchema = z.object({
     description: z.string().max(500).optional(),
     // Optional so a settings toggle can be saved alone; with a name, the description is replaced too.
     name: z.string().min(1).max(100).optional(),
+    /** The day of the month a budget month starts on: 1 (the calendar month) to 28, a day every month has. */
+    periodStartDay: z.number().int().min(BUDGET_PERIOD_START_DAY_MIN).max(BUDGET_PERIOD_START_DAY_MAX).optional(),
     rolloverCarriesOverspend: z.boolean().optional(),
-  }).refine((body) => body.name !== undefined || body.rolloverCarriesOverspend !== undefined, { message: 'Nothing to update' }),
+  }).refine((body) => body.name !== undefined || body.periodStartDay !== undefined || body.rolloverCarriesOverspend !== undefined, { message: 'Nothing to update' }),
   params: z.object({
     budgetKey: z.coerce.number().positive(),
   }),
+});
+
+/**
+ * `GET /v1/budget/full`: every budget's current month. `memberKeys` measures only what those members
+ * spent, or Shared (`member-attribution.ts`); the budgeted amounts stay the household's.
+ */
+export const getBudgetsFullRequestSchema = z.object({
+  query: z.object({ memberKeys: memberKeysFilter.transform((keys) => parseMemberFilter(keys)) }),
 });
 
 export const getBudgetRequestSchema = z.object({
@@ -55,6 +69,12 @@ export const createBudgetRequestSchema = z.object({
           }),
       )
       .optional(),
+    /**
+     * `household` (the default) shares the budget with the whole household; `personal` makes it the
+     * creator's own, which no other member sees, the household's owner and admins included. Fixed
+     * once the budget exists.
+     */
+    visibility: z.enum(BUDGET_VISIBILITIES).default('household'),
   }),
 });
 
@@ -84,6 +104,18 @@ export const getBudgetForecastRequestSchema = z.object({
   }),
   query: z.object({
     months: z.coerce.number().int().min(3).max(12).default(6),
+  }),
+});
+
+/** Suggestions use complete months only: 3, 6 or 12 before the requested month. */
+export const getBudgetSuggestionsRequestSchema = z.object({
+  params: z.object({
+    budgetKey: z.coerce.number().positive(),
+  }),
+  query: z.object({
+    month: z.coerce.number().int().min(1).max(12),
+    months: z.coerce.number().pipe(z.union([z.literal(3), z.literal(6), z.literal(12)])).default(3),
+    year: z.coerce.number().int().positive(),
   }),
 });
 

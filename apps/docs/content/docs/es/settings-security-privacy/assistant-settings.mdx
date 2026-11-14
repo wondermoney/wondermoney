@@ -20,16 +20,36 @@ La página de configuración del asistente te permite controlar el consentimient
 - Activar o desactivar el asistente.
 - Ocultar o mostrar el lanzador del asistente.
 - Revisar el registro de auditoría del asistente cuando está activado.
+- Aplicar o descartar los cambios en espera en **Cambios pendientes**.
 
 Si desactivas el asistente, el lanzador debería dejar de aparecer en el uso normal.
 
 ## Qué significan los ajustes
 
-- El asistente es de solo lectura.
+- El asistente lee tus datos y nunca los cambia por sí mismo. Puede proponer un cambio para que lo confirmes.
 - Solo usa las herramientas aprobadas cuando está activado.
 - Los chats temporales no conservan la conversación del mismo modo que los chats normales.
 
 
+## Propuestas y cambios pendientes
+
+El asistente, y un cliente de IA que conectaste por MCP con el ámbito de propuestas, pueden preparar tres tipos de cambio:
+
+- Poner una categoría en hasta 100 transacciones.
+- Marcar hasta 100 transacciones como revisadas.
+- Poner o borrar la nota de una transacción.
+
+Un cambio preparado es una propuesta: nada cambia hasta que la apliques. En el chat aparece como una tarjeta con el valor actual y el propuesto de cada transacción, y los botones **Aplicar** y **Descartar**. **Ajustes > Asistente > Cambios pendientes** muestra todas las propuestas en espera, incluidas las de un cliente MCP; en el móvil está en **Más > Cambios pendientes**, con el número de propuestas en espera.
+
+- Aplicar hace el mismo cambio, con la misma entrada en el historial de la transacción, que hacerlo tú. Aplicar dos veces no cambia nada más.
+- Una propuesta solo abarca transacciones que puedes ver. Si una se ha borrado o ahora está en una cuenta que no ves o que solo puedes ver, o se borró la categoría, aplicarla falla y nada cambia.
+- Una propuesta que no apliques caduca a los siete días.
+- Solo tú puedes aplicar o descartar una propuesta, con la sesión iniciada en la app. El asistente, un cliente MCP y un token de API no pueden.
+- Las propuestas son tuyas: otro miembro del hogar no las ve.
+
+## Desactivar todas las funciones de IA
+
+Esta página controla el asistente. Para desactivar todas las funciones de IA a la vez — el asistente, la lectura de recibos, la asignación de columnas con IA y el texto del resumen mensual escrito por IA — usa **Ajustes > Privacidad > Ocultar funciones de IA**. Las propuestas y los cambios pendientes también se ocultan, y no se puede proponer nada nuevo. Se aplica solo a tu cuenta y, al desactivarlo, el asistente vuelve exactamente como lo tenías.
 
 ## Páginas relacionadas
 

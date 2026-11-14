@@ -4,7 +4,7 @@ import { DI } from '@app/database/di';
 import { authedContext } from '@middleware/authed-context';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { zParse } from '@validators/parser';
-import { createTransactionImportSchema, decideTransactionImportRowsSchema, getTransactionImportSchema, mapTransactionImportAccountsSchema, parseTransactionImportSchema, transactionImportRequestSchema } from '@validators/transaction-import';
+import { commitTransactionImportSchema, createPdfTransactionImportSchema, createTransactionImportSchema, decideTransactionImportRowsSchema, getTransactionImportSchema, mapTransactionImportAccountsSchema, mapTransactionImportCategoriesSchema, parseTransactionImportSchema, transactionImportRequestSchema } from '@validators/transaction-import';
 
 /*
  * `/v1/transaction-import-sessions`: staged imports of a transaction file
@@ -22,6 +22,18 @@ const scopeOf = (req: Request) => {
 export async function createTransactionImport(req: Request, res: Response) {
   const { body } = await zParse(createTransactionImportSchema, req);
   const session = await serviceFor(req).create(scopeOf(req), body);
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(201).json({ session });
+}
+
+/**
+ * `POST /pdf`: start a PDF statement import on an account. The response carries the link to PUT the
+ * PDF to; `POST /:importId/parse` then has the vision model read it. The route has already checked
+ * that this person may use the `statementImport` model and spent the household's daily allowance.
+ */
+export async function createPdfTransactionImport(req: Request, res: Response) {
+  const { body } = await zParse(createPdfTransactionImportSchema, req);
+  const session = await serviceFor(req).createPdf(scopeOf(req), body);
   res.setHeader('Cache-Control', 'no-store');
   return res.status(201).json({ session });
 }
@@ -48,17 +60,27 @@ export async function decideTransactionImportRows(req: Request, res: Response) {
   return res.json({ session });
 }
 
-/** `PATCH /:importId/account-mapping`: which account each account in the file imports into. */
+/** `PATCH /:importId/account-mapping`: which account each account in the file imports into, or a new manual account. */
 export async function mapTransactionImportAccounts(req: Request, res: Response) {
   const { body, params } = await zParse(mapTransactionImportAccountsSchema, req);
-  const session = await serviceFor(req).setAccountMapping(scopeOf(req), params.importId, body.mapping);
+  const session = await serviceFor(req).setAccountMapping(scopeOf(req), params.importId, body.mapping, { create: body.create });
   return res.json({ session });
 }
 
-/** `POST /:importId/commit`: write the rows decided `import` (in the background). Asked again after its job stopped, it resumes. */
+/** `PATCH /:importId/category-mapping`: which category each category in the file imports as, or none. */
+export async function mapTransactionImportCategories(req: Request, res: Response) {
+  const { body, params } = await zParse(mapTransactionImportCategoriesSchema, req);
+  const session = await serviceFor(req).setCategoryMapping(scopeOf(req), params.importId, body.mapping);
+  return res.json({ session });
+}
+
+/**
+ * `POST /:importId/commit`: write the rows decided `import` (in the background). Asked again after its
+ * job stopped, it resumes. A PDF statement whose balances do not add up needs `acknowledgeMismatch`.
+ */
 export async function commitTransactionImport(req: Request, res: Response) {
-  const { params } = await zParse(transactionImportRequestSchema, req);
-  const session = await serviceFor(req).commit(scopeOf(req), params.importId);
+  const { body, params } = await zParse(commitTransactionImportSchema, req);
+  const session = await serviceFor(req).commit(scopeOf(req), params.importId, { acknowledgeMismatch: body?.acknowledgeMismatch });
   return res.status(202).json({ session });
 }
 

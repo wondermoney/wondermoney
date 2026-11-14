@@ -1,9 +1,11 @@
-import { startOfMonth } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 import { DI } from '@app/database/di';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
 import { Transaction } from '@entity/Transaction';
+import { type BudgetMonth, budgetMonthOf, budgetPeriodRange, type BudgetPeriodSettings, shiftBudgetMonth } from '@service/budget/budget-period';
+import { HOUSEHOLD_BUDGETS_FIRST } from '@service/budget/budget-visibility';
 import { rateScope } from '@service/currency/exchange-rate';
 import { CATEGORY_LINE_POPULATE, spendingLinesOf } from '@service/transaction/category-lines';
 import { loadCategorySpendingFlags } from '@service/transaction/category-spending';
@@ -12,7 +14,7 @@ import { addMoney } from '@utils/money';
 import { round2, toCsv } from './csv';
 import { isMoneyOut, loadLoanRepaymentLinks, loadReportCurrencyAmounts, loadViewerCurrencyAmounts, REPORT_CURRENCY_POPULATE, type ReportResult } from './report-currency';
 import { buildTransactionWhere, lineMatchesCategoryKeys, type ReportServiceInput } from './report-filters';
-import { getMonthKey, resolveReportTimeZone } from './report-months';
+import { resolveReportTimeZone } from './report-months';
 
 export interface BudgetVsActualRow {
   actual: number;
@@ -29,8 +31,9 @@ const CATEGORY_POPULATE = [...CATEGORY_LINE_POPULATE, ...REPORT_CURRENCY_POPULAT
 export async function getBudgetVsActualReport(input: ReportServiceInput): Promise<ReportResult<BudgetVsActualRow[]>> {
   const { filters, tenant, user } = input;
 
-  // Budgets are household-shared: tenant-scoped.
-  const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant }, { populate: ['currencyKey'] });
+  // The budgets the viewer can see (the tenant filter hides another member's personal budget). The
+  // report compares against one: the household's first budget, else the viewer's first personal one.
+  const budgets = await DI.em.find(Budget, { deletedAt: undefined, tenantKey: tenant }, { orderBy: HOUSEHOLD_BUDGETS_FIRST, populate: ['currencyKey'] });
   const budget = budgets[0];
   if (!budget) return { completeness: (await loadViewerCurrencyAmounts(DI.em, user, rateScope(tenant), [])).completeness(), data: [] };
   const nothingToReport = async () => ({ completeness: (await loadReportCurrencyAmounts(DI.em, budget.currencyKey.code, [], rateScope(tenant))).completeness(), data: [] });
@@ -42,9 +45,12 @@ export async function getBudgetVsActualReport(input: ReportServiceInput): Promis
   );
   if (templates.length === 0) return nothingToReport();
 
-  const fromDate = filters.fromDate ? new Date(filters.fromDate) : startOfMonth(new Date());
-  const toDate = filters.toDate ? new Date(filters.toDate) : new Date();
-  const coveredMonths = getMonthsInRange(fromDate, toDate, resolveReportTimeZone(filters.timezone));
+  // Without a period, the budget month today is in so far: from its first day, which the budget's start day decides.
+  const now = new Date();
+  const current = budgetMonthOf(budget, now);
+  const fromDate = filters.fromDate ? new Date(filters.fromDate) : budgetPeriodRange(budget, current.year, current.month).start;
+  const toDate = filters.toDate ? new Date(filters.toDate) : now;
+  const coveredMonths = getMonthsInRange(budget, fromDate, toDate, resolveReportTimeZone(filters.timezone));
 
   const budgetedByCategory = new Map<number, number>();
   const categoryInfo = new Map<number, { color: string; name: string }>();
@@ -146,27 +152,25 @@ function monthKey(year: number, month: number): string {
 }
 
 /**
- * The calendar months the requested period touches, read in the caller's zone.
+ * The budget months the requested period touches: those of its first and last calendar day, read
+ * in the caller's zone, and every month between. A day's budget month is the one its start day
+ * puts it in (`budget-period.ts`); with start day 1 that is the day's calendar month.
  *
  * Walking year/month as integers rather than stepping a `Date` keeps this free
  * of zoned-date arithmetic: only the two endpoints are resolved through `Intl`.
  */
-function getMonthsInRange(from: Date, to: Date, timeZone: string): Set<string> {
+function getMonthsInRange(budget: BudgetPeriodSettings, from: Date, to: Date, timeZone: string): Set<string> {
   const months = new Set<string>();
-  const [fromYear, fromMonth] = getMonthKey(from, timeZone).split('-').map(Number) as [number, number];
-  const [toYear, toMonth] = getMonthKey(to, timeZone).split('-').map(Number) as [number, number];
-
-  let year = fromYear;
-  let month = fromMonth;
-  while (year < toYear || (year === toYear && month <= toMonth)) {
-    months.add(monthKey(year, month));
-    month += 1;
-    if (month > 12) {
-      month = 1;
-      year += 1;
-    }
+  const last = budgetMonthOf(budget, calendarDay(to, timeZone));
+  for (let month: BudgetMonth = budgetMonthOf(budget, calendarDay(from, timeZone)); month.year * 12 + month.month <= last.year * 12 + last.month; month = shiftBudgetMonth(month, 1)) {
+    months.add(monthKey(month.year, month.month));
   }
   return months;
+}
+
+/** UTC midnight of the calendar day `instant` is on in `timeZone`. */
+function calendarDay(instant: Date, timeZone: string): Date {
+  return new Date(`${formatInTimeZone(instant, timeZone, 'yyyy-MM-dd')}T00:00:00.000Z`);
 }
 
 function resolveBudgetCategoryKey(

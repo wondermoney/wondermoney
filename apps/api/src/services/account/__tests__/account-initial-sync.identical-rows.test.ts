@@ -13,6 +13,7 @@ import { Transaction } from '@entity/Transaction';
 import { TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionType } from '@entity/TransactionType';
 import service, { type BankSyncTransaction, buildStableId, enableBankingTransactionIdFor, withStableIdOccurrences } from '@service/account/account-initial-sync-transaction.service';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 
 /*
  * Two purchases with identical content (same shop, day and amount) that the bank sends without an
@@ -52,10 +53,12 @@ describe('stable ids of id-less rows', () => {
 
 describe('syncing identical id-less rows', () => {
   const db = useTestDatabase({ schema: 'migrations' });
+  let testAppuserId = 0;
 
   async function linkedHousehold() {
     const em = db.em();
     const household = await seedHousehold(em);
+    testAppuserId = household.appuser.appuserKey;
     if (!(await em.findOne(TransactionType, { name: 'CARD_PAYMENT' }))) em.create(TransactionType, { displayName: 'Card payment', name: 'CARD_PAYMENT' }, { partial: true });
     const credential = em.create(EnableBankingCredential, { applicationId: `app-${household.appuser.appuserKey}`, appuserKey: household.appuser, encryptionKeyVersion: 1, privateKeyAuthTag: 'tag', privateKeyCiphertext: 'cipher', privateKeyIv: 'iv', tenantKey: household.tenant }, { partial: true });
     const connection = em.create(EnableBankingConnection, { accessValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), appuserKey: household.appuser, aspspCountry: 'PT', aspspName: 'Bank', enableBankingCredentialKey: credential, sessionId: 'session-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED, tenantKey: household.tenant }, { partial: true });
@@ -68,7 +71,7 @@ describe('syncing identical id-less rows', () => {
 
   async function sync(connectionKey: number, feed: { booked?: BankSyncTransaction[]; pending?: BankSyncTransaction[] }) {
     const client = { account: () => ({ getTransactions: () => Promise.resolve({ transactions: { booked: feed.booked ?? [], pending: feed.pending ?? [] } }) }) };
-    return service.syncTransactionsForRequisition({ enableBankingConnectionKey: connectionKey, fetchWindowDays: 3650 }, { em: db.em(), enableBankingSyncAdapterFactory: () => Promise.resolve(client) });
+    return service.syncTransactionsForRequisition({ connection: conn(connectionKey, { appuserId: testAppuserId }), fetchWindowDays: 3650 }, { em: db.em(), provider: providerFromClient(client) });
   }
 
   const storedRows = async () => (await db.em().find(Transaction, { deletedAt: undefined }, { filters: false, orderBy: { transactionKey: 'ASC' }, populate: ['transactionStatusKey'] }));

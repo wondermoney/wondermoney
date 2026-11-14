@@ -93,7 +93,7 @@ export const handlePortfolioSnapshotManualJob = async (job: Job<PortfolioSnapsho
   if (bg.attachQueueJob) await bg.attachQueueJob(correlationId, job.id);
   try {
     await bg.heartbeatJob(correlationId, job.id, { stage: 'portfolio.snapshot:manual:running' });
-    await (deps.portfolioSnapshotService ?? portfolioSnapshotService).backfillSnapshotsForPortfolio(portfolioId);
+    await (deps.portfolioSnapshotService ?? portfolioSnapshotService).backfillSnapshotsForPortfolio(portfolioId, job.data.startDate ? new Date(`${job.data.startDate}T00:00:00.000Z`) : undefined);
     return await finish(bg, correlationId, job.id, BackgroundOperationStatus.SUCCEEDED, false, 'portfolio.snapshot:manual:completed');
   } catch (error) {
     await finish(bg, correlationId, job.id, BackgroundOperationStatus.FAILED, false, 'portfolio.snapshot:manual:failed');

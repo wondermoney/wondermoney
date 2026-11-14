@@ -48,12 +48,50 @@ export const ERROR_CODE = {
   // --- Specific: a client can and should behave differently for each of these ---
   /** Account-level action reserved to the owner (privacy toggle), not the partner. */
   ACCOUNT_OWNER_REQUIRED: 'account_owner_required',
+  /**
+   * A change to an account or its data (its transactions, tags, splits, imports...) by a member
+   * who can only view it (403): a read-only share on a private account, or a household viewer.
+   */
+  ACCOUNT_READ_ONLY: 'account_read_only',
+  /** Changing who an account is shared with, by someone other than its owner or the household owner (403). */
+  ACCOUNT_SHARE_MANAGER_REQUIRED: 'account_share_manager_required',
+  /** A share for someone who is not a member of the household, or for the account's own owner (400). */
+  ACCOUNT_SHARE_INVALID: 'account_share_invalid',
+  /** Changing who owns what share of an account, by someone other than its owner or the household owner (403). */
+  ACCOUNT_OWNERSHIP_MANAGER_REQUIRED: 'account_ownership_manager_required',
+  /**
+   * Ownership shares that do not add up to 100%, carry more than two decimals, or name someone who is
+   * not an active member of the household able to see the account (400).
+   */
+  ACCOUNT_OWNERSHIP_INVALID: 'account_ownership_invalid',
   /** Changing whether a manual asset is private, by the member who does not own it (403). */
   MANUAL_ASSET_OWNER_REQUIRED: 'manual_asset_owner_required',
   /** Deleting the only valuation of a manual asset (409). An asset keeps one; delete the asset instead. */
   MANUAL_ASSET_LAST_VALUATION: 'manual_asset_last_valuation',
+  /**
+   * A crypto wallet address that looks like a private key or a recovery phrase (400). Only public
+   * addresses are accepted; the input is never stored, logged or sent back.
+   */
+  CRYPTO_WALLET_SECRET_REJECTED: 'crypto_wallet_secret_rejected',
+  /** Not a valid public address (or Bitcoin extended public key) for the chain (400). */
+  CRYPTO_WALLET_ADDRESS_INVALID: 'crypto_wallet_address_invalid',
+  /** The address is already on the wallet (409). */
+  CRYPTO_WALLET_ADDRESS_EXISTS: 'crypto_wallet_address_exists',
+  /** A crypto wallet's value comes from its sync; it takes no valuation by hand (409). */
+  CRYPTO_WALLET_VALUE_SYNCED: 'crypto_wallet_value_synced',
+  /** An address, token or sync route on a manual asset that is not a crypto wallet (400). */
+  CRYPTO_WALLET_REQUIRED: 'crypto_wallet_required',
   /** The assistant is not enabled for this user. */
   ASSISTANT_NOT_ENABLED: 'assistant_not_enabled',
+  /** Applying an assistant proposal past its seven days (409). It is now `expired`; nothing changed. */
+  ASSISTANT_PROPOSAL_EXPIRED: 'assistant_proposal_expired',
+  /**
+   * Applying an assistant proposal whose transaction or category is gone or no longer visible to
+   * the member (409). It is now `failed`; nothing changed. Refetch the list.
+   */
+  ASSISTANT_PROPOSAL_FAILED: 'assistant_proposal_failed',
+  /** Applying a proposal that was dismissed or failed, or dismissing one already applied or failed (409). */
+  ASSISTANT_PROPOSAL_NOT_PENDING: 'assistant_proposal_not_pending',
   /**
    * The feature needs an integration this server does not have configured (AI, market data,
    * file storage, ...). Self-hosted installs turn these off by leaving the settings unset; hide
@@ -62,19 +100,53 @@ export const ERROR_CODE = {
   FEATURE_DISABLED: 'feature_disabled',
   /** The demo account attempted a mutation. Show the read-only affordance. */
   DEMO_READ_ONLY: 'demo_read_only',
+  /**
+   * `POST /v1/auth/demo` on a server that enabled the demo but has no usable demo account (not
+   * seeded yet, or it failed a safety check) (503). Nobody was signed in.
+   */
+  DEMO_UNAVAILABLE: 'demo_unavailable',
   /** A per-user Enable Banking credential is missing, invalid or undecryptable. */
   BANK_CREDENTIAL_INVALID: 'bank_credential_invalid',
-  /** Route is household-owner-only and the caller is a member. */
+  /** A personal API token lacks the scope this route needs (403). */
+  API_TOKEN_SCOPE_REQUIRED: 'api_token_scope_required',
+  /** Creating a personal API token from a session older than the freshness window (403). Sign in again. */
+  SESSION_NOT_FRESH: 'session_not_fresh',
+  /** Creating a personal API token for a user with TOTP enabled, without a code (403). */
+  TOTP_REQUIRED: 'totp_required',
+  /** The submitted TOTP code was wrong or expired (403). */
+  INVALID_TOTP: 'invalid_totp',
+  /**
+   * QR pairing: the code is unknown, already used, or past its two-minute lifetime (404).
+   * Deliberately one code for all three — the phone's only useful response is "scan a new QR".
+   */
+  PAIRING_CODE_INVALID: 'pairing_code_invalid',
+  /** Route is household-owner-only and the caller is not the owner (403). */
   HOUSEHOLD_OWNER_REQUIRED: 'household_owner_required',
-  /** Joining a household: it already has its two members (409). */
+  /**
+   * Managing the household beyond the caller's role (403): a member or viewer managing it, or an
+   * admin acting on, or granting, a role at or above admin.
+   */
+  HOUSEHOLD_ROLE_REQUIRED: 'household_role_required',
+  /** A viewer tried to change the household's shared data (403). Viewers read only. */
+  HOUSEHOLD_READ_ONLY: 'household_read_only',
+  /** Inviting or joining: the household already holds `HOUSEHOLD_MAX_MEMBERS` people (409). */
   HOUSEHOLD_FULL: 'household_full',
+  /** Inviting or joining: the person already belongs to this household (409). */
+  ALREADY_HOUSEHOLD_MEMBER: 'already_household_member',
+  /**
+   * Accepting an invite as an existing user whose own household holds accounts or transactions
+   * (409). Nothing is merged; joining needs an empty household.
+   */
+  HOUSEHOLD_HAS_DATA: 'household_has_data',
+  /** Accepting an invite as the owner of a household that has other members (409). */
+  HOUSEHOLD_HAS_MEMBERS: 'household_has_members',
   /** Household invite (signup): accepted already, by this person or someone else (400/409). */
   INVITE_ALREADY_USED: 'invite_already_used',
   /** Household invite (signup): the invite went to a different email address (400). */
   INVITE_EMAIL_MISMATCH: 'invite_email_mismatch',
   /** Household invite (signup): past its 7-day lifetime (400). */
   INVITE_EXPIRED: 'invite_expired',
-  /** Household invite (signup): unknown token or revoked by the owner (400). */
+  /** Household invite (signup or accept): unknown token, or revoked (400). */
   INVITE_INVALID: 'invite_invalid',
   /**
    * Auth callback: the email belongs to an account from before better-auth, and this login has not
@@ -93,6 +165,23 @@ export const ERROR_CODE = {
   AI_ALLOWANCE_EXHAUSTED: 'ai_allowance_exhausted',
   /** The transaction is EXPIRED (the bank retracted it): no money moved, so it cannot be funded. */
   TRANSACTION_EXPIRED: 'transaction_expired',
+  /**
+   * Deleting a transaction the bank sent (409). The next sync would send it again, so it cannot be
+   * deleted; hide it instead. A bulk delete skips such rows and reports them, and answers this only
+   * when every selected row is one.
+   */
+  TRANSACTION_BANK_SYNCED: 'transaction_bank_synced',
+  /** A bulk change or delete whose filter or id list selects more than 5,000 transactions (400). Narrow the filter. */
+  BULK_SELECTION_TOO_LARGE: 'bulk_selection_too_large',
+  /** Connecting SimpleFIN: the pasted value is not a SimpleFIN setup token (400). */
+  SIMPLEFIN_TOKEN_INVALID: 'simplefin_token_invalid',
+  /**
+   * Connecting SimpleFIN: the setup token was already claimed (400). If the person did not claim
+   * it, someone else may have: they should disable it at their SimpleFIN server and make a new one.
+   */
+  SIMPLEFIN_TOKEN_ALREADY_CLAIMED: 'simplefin_token_already_claimed',
+  /** Connecting SimpleFIN: the token or the access it returned points to a server this instance does not allow (400). */
+  SIMPLEFIN_SERVER_NOT_ALLOWED: 'simplefin_server_not_allowed',
   /** Creating or renaming a tag: the household already has a tag with this name, ignoring case (409). */
   TAG_NAME_TAKEN: 'tag_name_taken',
   /** Adding an exchange-rate override: the household already has one for this pair and day (409). Change that one instead. */
@@ -123,6 +212,64 @@ export const ERROR_CODE = {
   SPLIT_INVALID: 'split_invalid',
   /** Splitting a transaction linked as a loan repayment, which already splits principal from interest (409). */
   TRANSACTION_HAS_LOAN_REPAYMENT: 'transaction_has_loan_repayment',
+  /**
+   * The transaction is shared in an expense group: its split is the group's (change the shares
+   * there), and it cannot also be a reimbursement or a settlement (409).
+   */
+  TRANSACTION_IN_EXPENSE_GROUP: 'transaction_in_expense_group',
+  /**
+   * Sharing a transaction in an expense group: the shares do not add up to its amount, one is zero
+   * or has too many decimals, percentages do not make 100, a person appears twice or is not in the
+   * group, or the payer is not someone of the household (400).
+   */
+  EXPENSE_GROUP_SHARES_INVALID: 'expense_group_shares_invalid',
+  /**
+   * The transaction already plays another part that would count it twice: it is a reimbursement
+   * or has reimbursements, settles a group debt, is a loan repayment or a transfer between own
+   * accounts, or is shared in another group (409).
+   */
+  EXPENSE_GROUP_TRANSACTION_CONFLICT: 'expense_group_transaction_conflict',
+  /**
+   * Recording a settlement: the same person on both sides, or a linked transaction that does not
+   * move money between someone of the household and someone outside it the right way (400).
+   */
+  EXPENSE_GROUP_SETTLEMENT_INVALID: 'expense_group_settlement_invalid',
+  /** Linking a settlement to a transaction settled in another currency than the settlement (400). */
+  EXPENSE_GROUP_CURRENCY_MISMATCH: 'expense_group_currency_mismatch',
+  /** Linking settlements for more than the linked transaction's amount (400). */
+  EXPENSE_GROUP_AMOUNT_EXCEEDED: 'expense_group_amount_exceeded',
+  /** Adding a group member: the household member is not in this household, or is already in the group (400). */
+  EXPENSE_GROUP_MEMBER_INVALID: 'expense_group_member_invalid',
+  /** Removing a group member who has shares, payments or settlements (409). */
+  EXPENSE_GROUP_MEMBER_IN_USE: 'expense_group_member_in_use',
+  /** Deleting a group that still has shared expenses or settlements; archive it instead (409). */
+  EXPENSE_GROUP_NOT_EMPTY: 'expense_group_not_empty',
+  /**
+   * Linking a reimbursement: the refund is not money in, the expense is not money out, they are
+   * the same transaction, or either is a transfer or a loan repayment (400).
+   */
+  REIMBURSEMENT_INVALID: 'reimbursement_invalid',
+  /** Linking a reimbursement to an expense settled in another currency; v1 links one currency only (400). */
+  REIMBURSEMENT_CURRENCY_MISMATCH: 'reimbursement_currency_mismatch',
+  /** Linking more than what is left to link on the expense or on the reimbursement (400). */
+  REIMBURSEMENT_AMOUNT_EXCEEDED: 'reimbursement_amount_exceeded',
+  /** Linking a private-account transaction to one the other member can see, or to another member's private one (400). */
+  REIMBURSEMENT_VISIBILITY_MISMATCH: 'reimbursement_visibility_mismatch',
+  /** The reimbursement and the expense are already linked; unlink first to change the amount (409). */
+  REIMBURSEMENT_LINK_EXISTS: 'reimbursement_link_exists',
+  /** A loan schedule needs a principal, an interest rate and a term (422). */
+  LOAN_SCHEDULE_UNAVAILABLE: 'loan_schedule_unavailable',
+  /** A loan payoff projection needs a principal, an interest rate and a term (422). */
+  LOAN_PROJECTION_UNAVAILABLE: 'loan_projection_unavailable',
+  /**
+   * Linking an installment to a charge the bank has not posted yet (400). A pending charge can still
+   * change or drop out; link it once it is posted.
+   */
+  TRANSACTION_PENDING: 'transaction_pending',
+  /** Linking a transaction to an installment while it already pays another one; unlink it first (409). */
+  TRANSACTION_ALREADY_LINKED: 'transaction_already_linked',
+  /** Linking a transaction to an installment that another transaction already pays; unlink that one first (409). */
+  INSTALLMENT_ALREADY_PAID: 'installment_already_paid',
   /** Linking a split transaction as a loan repayment; remove the split first (409). */
   TRANSACTION_IS_SPLIT: 'transaction_is_split',
   /**
@@ -143,6 +290,13 @@ export const ERROR_CODE = {
   DATA_RESTORE_NOT_READY: 'data_restore_not_ready',
   /** A restore file over the size limit (400). */
   DATA_RESTORE_TOO_LARGE: 'data_restore_too_large',
+  /** A PDF statement over `STATEMENT_IMPORT_MAX_BYTES` (400). */
+  STATEMENT_TOO_LARGE: 'statement_too_large',
+  /**
+   * Committing a PDF statement whose balances do not add up (opening balance plus its rows is not
+   * its closing balance) without acknowledging the difference (409). Show the difference and ask.
+   */
+  STATEMENT_RECONCILIATION_UNACKNOWLEDGED: 'statement_reconciliation_unacknowledged',
   /**
    * Changing a portfolio's link to an account only the other household member can see (403).
    * `details.linkedBy` is that member's display name, so the viewer knows who to ask.
@@ -224,6 +378,18 @@ export class NotFoundError extends ApplicationError {
   constructor(message?: string, code: ErrorCode = ERROR_CODE.NOT_FOUND) {
     super(message, StatusCodes.NOT_FOUND, code);
     logger.warn({ error: this }, `NotFoundError: ${message}`);
+  }
+}
+
+/**
+ * The request is well formed but the resource cannot answer it (422): a loan
+ * without the rate, term or principal a schedule needs, for example.
+ */
+export class UnprocessableEntityError extends ApplicationError {
+  constructor(message?: string, code: ErrorCode = ERROR_CODE.VALIDATION_FAILED, details?: Record<string, string>) {
+    super(message, StatusCodes.UNPROCESSABLE_ENTITY, code);
+    if (details) this.details = details;
+    logger.warn({ error: this }, `UnprocessableEntityError: ${message}`);
   }
 }
 

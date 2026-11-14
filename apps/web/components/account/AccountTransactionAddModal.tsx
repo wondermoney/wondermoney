@@ -20,6 +20,7 @@ import useCreateTransaction from "@/lib/api/account/useCreateTransaction";
 import useRejectTransactionOcr from "@/lib/api/account/useRejectTransactionOcr";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import { useFeature } from "@/lib/api/instance/useInstance";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { cn } from "@/lib/utils";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
@@ -186,8 +187,10 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
     setOcrData(undefined);
   };
 
-  // Receipt scanning needs a vision model on the server.
-  const canScanReceipt = useFeature((features) => features.ai.ocr);
+  // Receipt scanning needs a vision model on the server, and this person must not have hidden AI.
+  const ocrAvailable = useFeature((features) => features.ai.ocr);
+  const aiHidden = useAiHidden();
+  const canScanReceipt = ocrAvailable && !aiHidden;
 
   const renderFooterButtons = () => {
     switch (currentStep) {

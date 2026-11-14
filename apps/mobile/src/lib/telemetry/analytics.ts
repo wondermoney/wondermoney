@@ -44,6 +44,7 @@ export const featureScreens = [
   'onboarding_create_account',
   // Tabs
   'dashboard',
+  'home_customize',
   'accounts',
   'goals',
   'portfolio',
@@ -58,6 +59,9 @@ export const featureScreens = [
   'transaction_create',
   'transaction_import',
   'transaction_scan',
+  // Credit-card installment plans
+  'installment_plan_create',
+  'installment_plan_detail',
   // Budgets
   'budgets',
   'budget_create',
@@ -71,10 +75,16 @@ export const featureScreens = [
   'loan_create',
   'loan_detail',
   'loan_edit',
+  // Expense groups
+  'expense_groups',
+  'expense_group_create',
+  'expense_group_detail',
   // Manually valued assets
   'assets',
   'asset_create',
+  'crypto_wallet_create',
   'asset_detail',
+  'asset_edit',
   'asset_value',
   // Goals
   'goal_detail',
@@ -88,7 +98,11 @@ export const featureScreens = [
   // Banking
   'bank_connections',
   'bank_connect',
+  'bank_connect_simplefin',
   'bank_statement_import',
+  'bank_sync_history',
+  // Assistant proposals
+  'pending_changes',
   // Net worth
   'net_worth_history',
   // Portfolio
@@ -104,6 +118,7 @@ export const featureScreens = [
   'reports',
   'report_budget_vs_actual',
   'report_cashflow',
+  'report_month_comparison',
   'report_net_worth_history',
   'report_portfolio_performance',
   'report_sankey',
@@ -113,10 +128,12 @@ export const featureScreens = [
   'settings_category_create',
   'settings_category_edit',
   'settings_household',
+  'settings_household_join',
   'settings_notifications',
   'settings_preferences',
   'settings_profile',
   'settings_profile_edit',
+  'settings_rules',
   'settings_security',
 ] as const
 

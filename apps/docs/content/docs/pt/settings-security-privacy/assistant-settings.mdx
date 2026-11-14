@@ -9,8 +9,8 @@ Usa-a quando quiseres pausar o assistente, ocultar o launcher ou rever se está 
 
 <DocsImage
   src="/images/docs/pt/settings-security-privacy/assistant-settings-assistant.png"
-  alt="Assistant settings with the enable switch, consent details, hide-launcher switch, and audit log section."
-  caption="Assistant settings control whether the assistant is enabled, whether its launcher is visible, and what appears in its audit log."
+  alt="Definições do assistente com o interruptor para o ativar, os detalhes do consentimento, o interruptor para ocultar o botão de abertura e a secção do registo de auditoria."
+  caption="As definições do assistente controlam se o assistente está ativo, se o botão de abertura está visível e o que aparece no registo de auditoria."
   width={1216}
   height={900}
 />
@@ -20,16 +20,36 @@ Usa-a quando quiseres pausar o assistente, ocultar o launcher ou rever se está 
 - Ativar ou desativar o assistente.
 - Ocultar ou mostrar o launcher do assistente.
 - Rever o registo de auditoria do assistente quando está ativado.
+- Aplicar ou dispensar as alterações em espera em **Alterações pendentes**.
 
 Se desativares o assistente, o launcher deixa de aparecer no uso normal.
 
 ## O que significam as definições
 
-- O assistente é só de leitura.
+- O assistente lê os teus dados e nunca os altera sozinho. Pode propor uma alteração para confirmares.
 - Só usa ferramentas aprovadas quando está ativado.
 - Os chats temporários não conservam a conversação da mesma forma que os chats normais.
 
 
+## Propostas e alterações pendentes
+
+O assistente, e um cliente de IA que ligaste por MCP com o âmbito de propostas, podem preparar três tipos de alteração:
+
+- Pôr uma categoria em até 100 transações.
+- Marcar até 100 transações como revistas.
+- Definir ou limpar a nota de uma transação.
+
+Uma alteração preparada é uma proposta: nada muda até a aplicares. No chat aparece como um cartão com o valor atual e o proposto de cada transação, e os botões **Aplicar** e **Dispensar**. **Definições > Assistente > Alterações pendentes** lista todas as propostas em espera, incluindo as de um cliente MCP; no telemóvel está em **Mais > Alterações pendentes**, com o número de propostas em espera.
+
+- Aplicar faz a mesma alteração, com a mesma entrada no histórico da transação, que fazê-la tu. Aplicar duas vezes não muda mais nada.
+- Uma proposta só abrange transações que consegues ver. Se uma foi entretanto apagada ou está agora numa conta que não vês ou que só podes ver, ou se a categoria foi apagada, aplicar falha e nada muda.
+- Uma proposta que não apliques expira ao fim de sete dias.
+- Só tu podes aplicar ou dispensar uma proposta, com sessão iniciada na app. O assistente, um cliente MCP e um token de API não podem.
+- As propostas são tuas: outro membro do agregado não as vê.
+
+## Desativar todas as funcionalidades de IA
+
+Esta página controla o assistente. Para desativar todas as funcionalidades de IA de uma vez — o assistente, a leitura de recibos, o mapeamento de colunas com IA e o texto do resumo mensal escrito por IA — usa **Definições > Privacidade > Ocultar funcionalidades de IA**. As propostas e as alterações pendentes também ficam ocultas, e não se pode propor nada novo. Aplica-se apenas à tua conta e, ao desativá-la, o assistente volta exatamente como o tinhas.
 
 ## Páginas relacionadas
 

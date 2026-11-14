@@ -1,0 +1,10 @@
+Account,Date,Payee,Notes,Category,Amount,Split_Amount,Cleared
+Checking,2026-02-03,Savings,Monthly saving,,-400,0,Cleared
+Checking,2026-01-31,Example Employer,January salary,Income,1500,0,Reconciled
+Checking,2026-01-25,City Power,,Electricity,-1234.56,0,Cleared
+Checking,2026-01-20,Corner Market,(SPLIT INTO 2) Weekly shop,,0,-62.5,Cleared
+Checking,2026-01-20,Corner Market,(SPLIT 1 OF 2) ,Groceries,-50,0,Cleared
+Checking,2026-01-20,Corner Market,(SPLIT 2 OF 2) Batteries,Household,-12.5,0,Cleared
+Checking,2026-01-15,Corner Grocer,,Groceries,-42.5,0,Not cleared
+Savings,2026-02-03,Checking,Monthly saving,,400,0,Cleared
+Savings,2026-01-01,Starting Balance,,Starting Balances,2000,0,Reconciled

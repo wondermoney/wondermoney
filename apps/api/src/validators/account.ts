@@ -4,18 +4,12 @@ import { z } from 'zod';
 
 import { CategorizationConfidence } from '@entity/Transaction';
 import { statementMappingSchema } from '@service/account/account-statement-mapping.schema';
+import { MEMBER_FILTER_VALUE, parseMemberFilter, SHARED_MEMBER } from '@service/household/member-attribution';
 import { isSupportedTimeZone } from '@service/reports/report-months';
 import { TRANSFER_DESTINATION_TYPES, USER_SETTABLE_TYPES } from '@service/transaction/transaction-transfer.service';
-import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
+import { bytesMatchContentType } from '@utils/file-signature';
+import { boundedLimit, finiteAmount, importFileNameInput, positiveIntId, validDate } from '@validators/shared';
 import { tagIdList } from '@validators/tag';
-
-const MAGIC_BYTES: Record<string, readonly number[]> = {
-  'application/pdf': [0x25, 0x50, 0x44, 0x46],
-  'image/jpeg': [0xff, 0xd8, 0xff],
-  'image/jpg': [0xff, 0xd8, 0xff],
-  'image/png': [0x89, 0x50, 0x4e, 0x47],
-  'image/webp': [0x52, 0x49, 0x46, 0x46],
-};
 
 /**
  * The viewer's IANA time zone, sent with a date range so the API can match a bank booking (a date
@@ -25,23 +19,30 @@ const viewerTimeZone = z.string().refine(isSupportedTimeZone, { message: 'timezo
 
 function magicByteMatches(buffer: unknown, mimetype: string): boolean {
   if (!Buffer.isBuffer(buffer)) return false;
-  const signature = MAGIC_BYTES[mimetype];
-  if (!signature || buffer.length < signature.length) return false;
-  return signature.every((byte, idx) => buffer[idx] === byte);
+  return bytesMatchContentType(buffer, mimetype);
 }
 
 export const updateTransactionRequestSchema = z.object({
   body: z.object({
     categoryKey: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)),
+    /** The transaction's note; null or an empty string clears it. */
+    notes: z.string().max(1000).nullable().optional(),
     /** "Mark as transfer" and its undo; see `transaction-transfer.service.ts`. */
     transactionType: z.enum(USER_SETTABLE_TYPES).optional(),
     /** Where an outgoing transfer went; null clears it. */
     transferDestination: z.object({ key: positiveIntId, type: z.enum(TRANSFER_DESTINATION_TYPES) }).nullable().optional(),
+    /**
+     * "Spent by": the member the money is attributed to, `shared` for the household, or null to
+     * follow the account again (its owner, or Shared on a joint account). A member must belong to
+     * the transaction's household.
+     */
+    attributedAppuserKey: z.union([z.literal(SHARED_MEMBER), positiveIntId]).nullable().optional(),
+    /** Moves the row to the credit-card statement containing this date; null uses the transaction date. */
+    statementDateOverride: validDate.nullable().optional(),
     updatedAmount: finiteAmount.optional(),
   }),
   params: z.object({ transactionId: positiveIntId }),
 });
-export const updateTransactionsRequestSchema = z.object({ body: z.object({ categoryId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)), hidden: z.boolean().optional(), reviewed: z.boolean().optional(), transactionIds: z.array(positiveIntId).max(500, 'At most 500 transactions can be updated in one request') }) });
 export const getTransactionHistoryRequestSchema = z.object({ params: z.object({ transactionId: positiveIntId }) });
 
 /**
@@ -52,12 +53,13 @@ export const getTransactionHistoryRequestSchema = z.object({ params: z.object({ 
  * dropped so a cleared filter reads as "no filter" rather than as a filter matching nothing.
  */
 const csvList = z
-  .union([z.string(), z.array(z.string())])
+  .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()]))])
   .optional()
   .transform((val) => {
     if (val === undefined) return undefined;
+    // Numbers arrive only in a JSON body (a bulk request's `filter`); a query string is all text.
     const parts = (Array.isArray(val) ? val : [val])
-      .flatMap((entry) => entry.split(','))
+      .flatMap((entry) => String(entry).split(','))
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0);
     return parts.length > 0 ? parts : undefined;
@@ -77,6 +79,14 @@ const csvCategoryList = csvList.transform((parts) =>
       }
     : undefined,
 );
+/**
+ * The member filter (`member-attribution.ts`): members' appuser keys, or `shared` for the household's
+ * joint money; a row matches when it is attributed to any of them. Absent or empty: no filter.
+ */
+const csvMemberList = csvList
+  .refine((parts) => parts === undefined || parts.every((part) => MEMBER_FILTER_VALUE.test(part)), { message: 'Member keys must be positive integers or "shared"' })
+  .transform((parts) => parseMemberFilter(parts));
+
 /** `true`/`false` from a query string (any other value reads as false); absent stays undefined. */
 const queryBoolean = z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true'));
 
@@ -94,7 +104,64 @@ const transactionScopeQuery = {
   statuses: csvList.pipe(z.array(z.enum(['BOOKED', 'PENDING'])).optional()),
 };
 
-export const getTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountKeys: csvIntList, categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeEmptyAccounts: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
+/**
+ * The filters of `GET /v1/account/transaction`: which rows the list holds, apart from its paging.
+ * A bulk change or delete takes the same object as `filter`, so "select all matching" acts on
+ * exactly the rows the list shows.
+ */
+const transactionListFilterFields = {
+  ...transactionScopeQuery,
+  accountKeys: csvIntList,
+  categoryKeys: csvCategoryList,
+  confidence: z.enum(CategorizationConfidence).optional(),
+  fromDate: validDate.optional(),
+  includeHidden: queryBoolean,
+  memberKeys: csvMemberList,
+  tagKeys: csvIntList,
+  timezone: viewerTimeZone,
+  toDate: validDate.optional(),
+  transactionTypes: csvList,
+  unreviewedOnly: queryBoolean,
+};
+
+export const getTransactionsRequestSchema = z.object({ query: z.object({ ...transactionListFilterFields, cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), includeEmptyAccounts: queryBoolean, limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100) }) });
+
+/** The most transactions one bulk change or delete may select, by ids or by filter. */
+export const BULK_TRANSACTION_LIMIT = 5000;
+
+/**
+ * Which transactions a bulk request acts on: `transactionIds`, or `filter` (the list's filters,
+ * every matching row). Exactly one. The filter is strict: a key the list does not know is an error,
+ * never ignored, because ignoring it would widen the selection.
+ */
+const bulkSelectionFields = {
+  filter: z.object(transactionListFilterFields).strict().optional(),
+  transactionIds: z.array(positiveIntId).min(1).max(BULK_TRANSACTION_LIMIT, `At most ${BULK_TRANSACTION_LIMIT} transactions in one request`).optional(),
+};
+
+const exactlyOneSelection = (body: { filter?: unknown; transactionIds?: unknown }) => (body.filter === undefined) !== (body.transactionIds === undefined);
+const exactlyOneSelectionMessage = { message: 'Send either transactionIds or filter', path: ['transactionIds'] };
+
+export const updateTransactionsRequestSchema = z.object({
+  body: z
+    .object({
+      ...bulkSelectionFields,
+      /** Tags to put on every selected row that does not carry them yet. */
+      addTagIds: tagIdList.optional(),
+      categoryId: z.string().optional().transform((val) => (val ? positiveIntId.parse(val) : undefined)),
+      hidden: z.boolean().optional(),
+      /** Tags to take off every selected row that carries them. */
+      removeTagIds: tagIdList.optional(),
+      reviewed: z.boolean().optional(),
+    })
+    .refine(exactlyOneSelection, exactlyOneSelectionMessage)
+    .refine((body) => !(body.addTagIds ?? []).some((key) => (body.removeTagIds ?? []).includes(key)), { message: 'A tag cannot be both added and removed', path: ['removeTagIds'] }),
+});
+
+export const deleteTransactionsRequestSchema = z.object({
+  body: z.object(bulkSelectionFields).refine(exactlyOneSelection, exactlyOneSelectionMessage),
+});
+export const deleteTransactionRequestSchema = z.object({ params: z.object({ transactionId: positiveIntId }) });
 export const getAccountTransactionsRequestSchema = z.object({ query: z.object({ ...transactionScopeQuery, accountId: positiveIntId.optional(), categoryKeys: csvCategoryList, confidence: z.enum(CategorizationConfidence).optional(), cursor: z.string().trim().max(64).regex(/^\d+_\d+$/, 'Malformed cursor').optional(), fromDate: validDate.optional(), includeHidden: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), tagKeys: csvIntList, timezone: viewerTimeZone, toDate: validDate.optional(), transactionTypes: csvList, unreviewedOnly: z.union([z.boolean(), z.string()]).optional().transform((val) => (typeof val === 'undefined' ? undefined : typeof val === 'boolean' ? val : val.toLowerCase() === 'true')) }) });
 export const getTransactionMerchantsRequestSchema = z.object({ query: z.object({ limit: boundedLimit({ defaultValue: 20, max: 50 }).optional().default(20), search: z.string().trim().max(200).optional().default('') }) });
 export const createOfflineAccountRequestSchema = z.object({ body: z.object({ accountTypeId: positiveIntId.optional(), currencyId: positiveIntId, currentBalance: z.preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().max(999999999999)), financialInstitutionId: z.number().optional(), name: z.string().min(1).max(100) }) });
@@ -155,17 +222,91 @@ export const updateAccountRequestSchema = z.object({
   body: z.object({
     accountName: z.string().min(1).max(100).optional(),
     isPrivate: z.boolean().optional(),
+    /** A joint account's money is Shared in reports and the member filter; owner only. */
+    isJoint: z.boolean().optional(),
     openingBalance: finiteAmount.refine((value) => Math.abs(value) <= 999_999_999_999, { message: 'openingBalance is too large' }).optional(),
     openingBalanceDate: openingBalanceDate.optional(),
   }),
   params: z.object({ accountId: positiveIntId }),
 });
+/** The caller's account list in its new display order, each account once. */
+export const reorderAccountsRequestSchema = z.object({
+  body: z.object({
+    accountIds: z
+      .array(positiveIntId)
+      .max(1000)
+      .refine((keys) => new Set(keys).size === keys.length, { message: 'Each account may appear only once' }),
+  }),
+});
+/**
+ * `PUT /v1/account/:accountId/credit-card`: the card's cycle. Close and due days are 1–31 and the
+ * cycle service clamps them to a short month's end. A null limit or minimum clears it.
+ */
+const dayOfMonth = z.number().int().min(1).max(31);
+const nonNegativeAmount = finiteAmount.refine((value) => value >= 0, { message: 'Must not be negative' });
+export const updateCreditCardRequestSchema = z.object({
+  body: z.object({
+    creditLimit: nonNegativeAmount.refine((value) => value <= 999_999_999_999, { message: 'creditLimit is too large' }).nullable().optional(),
+    minimumPaymentPercent: finiteAmount.refine((value) => value >= 0 && value <= 100, { message: 'Must be between 0 and 100' }).nullable().optional(),
+    paymentDueDay: dayOfMonth,
+    statementCloseDay: dayOfMonth,
+  }),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const getCreditCardStatementsRequestSchema = z.object({
+  params: z.object({ accountId: positiveIntId }),
+  query: z.object({ from: validDate.optional(), to: validDate.optional() }),
+});
+/** `GET /:accountId/statements/:statementDate`: one statement, named by its close day. */
+export const getCreditCardStatementDetailRequestSchema = z.object({
+  params: z.object({ accountId: positiveIntId, statementDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u) }),
+});
 export const recalculateAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const deleteAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getRecentTransactionsRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
 export const getAccountPresignedUrlForUploadRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
-export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ bankName: z.string().optional(), correlationId: z.string().optional(), key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
+export const startAccountCsvImportRequestSchema = z.object({ body: z.object({ bankName: z.string().optional(), correlationId: z.string().optional(), fileName: importFileNameInput.optional(), key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
 export const previewAccountCsvImportRequestSchema = z.object({ body: z.object({ key: z.string().min(1), mapping: statementMappingSchema.optional() }), params: z.object({ accountId: positiveIntId }) });
-export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), timezone: viewerTimeZone, toDate: validDate.optional() }) });
+export const getCategorySpendingRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), limit: boundedLimit({ defaultValue: 100, max: 500 }).optional().default(100), memberKeys: csvMemberList, timezone: viewerTimeZone, toDate: validDate.optional() }) });
 export const getAccountRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
-export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), timezone: viewerTimeZone }) });
+export const getAccountSharesRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
+/**
+ * `PUT /v1/account/:accountId/shares`: who sees and who changes the account, replaced as a whole.
+ * `isPrivate: false` shares it with the whole household (everyone can edit) and takes no shares;
+ * `isPrivate: true` shows it to the owner and the members listed, each `read` or `write`.
+ */
+export const putAccountSharesRequestSchema = z.object({
+  body: z
+    .object({
+      isPrivate: z.boolean(),
+      shares: z
+        .array(z.object({ access: z.enum(['read', 'write']), appuserKey: positiveIntId }))
+        .max(50)
+        .refine((shares) => new Set(shares.map((share) => share.appuserKey)).size === shares.length, { message: 'Each member may appear only once' }),
+    })
+    .refine((body) => body.isPrivate || body.shares.length === 0, { message: 'A shared account takes no shares', path: ['shares'] }),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const getAccountOwnershipRequestSchema = z.object({ params: z.object({ accountId: positiveIntId }) });
+/**
+ * `PUT /v1/account/:accountId/ownership`: each member's share of the account, in percent, replaced
+ * as a whole. The shares add up to 100, each with at most two decimals, for active members who can
+ * see the account (checked by the service, 400 `account_ownership_invalid`). An empty list removes
+ * them: the account is its owner's again, or Shared when joint. Net worth only.
+ */
+export const putAccountOwnershipRequestSchema = z.object({
+  body: z.array(z.object({ appuserKey: positiveIntId, percent: z.number().min(0).max(100) })).max(50),
+  params: z.object({ accountId: positiveIntId }),
+});
+export const getAccountsCashflowRequestSchema = z.object({ query: z.object({ fromDate: validDate.optional(), memberKeys: csvMemberList, timezone: viewerTimeZone, toDate: validDate.optional() }) });
+/**
+ * `GET /v1/account/forecast`: the next `days` days of projected balances. The window is bounded
+ * (30..90) so one request cannot expand years of a weekly series; `accountKeys` is filtered by the
+ * caller's privacy scope in the service, never trusted as-is.
+ */
+export const getAccountsForecastRequestSchema = z.object({
+  query: z.object({
+    accountKeys: csvIntList,
+    days: z.coerce.number().int().min(30).max(90).optional().default(30),
+  }),
+});

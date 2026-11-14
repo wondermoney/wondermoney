@@ -1,0 +1,32 @@
+{
+  "connectAiClient": {
+    "title": "Connect an AI client",
+    "description": "Let Claude Desktop, Cursor or another MCP client ask about your finances. It gets a token of its own: it can read the same data you can see, including your private accounts, and it never changes anything itself.",
+    "endpoint": "MCP endpoint",
+    "endpoint-hint": "The client sends a personal API token with the mcp:read scope (and mcp:propose, if you allow proposals) in an Authorization header. A browser session cookie is never accepted here.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copy-failed": "Could not copy. Select the text and copy it manually.",
+    "create-token": "Create an AI client token",
+    "allow-proposals": "Let the client propose changes for me to confirm",
+    "allow-proposals-hint": "The client can suggest categories, mark transactions reviewed or change a note. Each suggestion waits in Settings › Assistant › Pending changes until you apply or dismiss it.",
+    "totp": "Authenticator code",
+    "totp-hint": "Only needed if you use two-factor authentication.",
+    "token-created-title": "Your AI client token",
+    "token-created-description": "Copy it now and paste it into the client config below. It is stored only as a hash, so this is the only time it is shown.",
+    "token-done": "I have copied it",
+    "config-title": "Client configuration",
+    "config-description": "Paste the token where the example shows YOUR_TOKEN. The first block is for Claude Desktop, which bridges remote servers with mcp-remote; the second is the direct HTTP form used by Cursor and other clients.",
+    "config-claude": "Claude Desktop",
+    "config-http": "Cursor and other HTTP clients",
+    "calls-title": "Recent AI client calls",
+    "calls-description": "Every tool an MCP client calls is recorded with its name and time. Amounts and descriptions are never written to the log.",
+    "calls-loading": "Loading calls…",
+    "calls-empty": "No AI client has called the server yet.",
+    "calls-unknown-tool": "Unknown tool",
+    "error-create": "Could not create the token. Try again.",
+    "error-totp-required": "Enter your authenticator code to create a token.",
+    "error-invalid-totp": "That authenticator code is not valid.",
+    "error-session-not-fresh": "Please sign in again before creating a token."
+  }
+}

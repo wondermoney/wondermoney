@@ -12,11 +12,14 @@ import {
 
 import type { ApiClient, HttpTransport } from '@/lib/api/client'
 import { createApiClient } from '@/lib/api/client'
+import { createImageAuthorization } from '@/lib/api/image-authorization'
 import { createAuthRecoveryCoordinator } from '@/lib/auth/auth-recovery'
 import { validateHouseholdInviteToken, type ValidateInviteOutcome } from '@/lib/auth/household-invite-validation'
 import { takePendingInviteToken } from '@/lib/auth/invite-token-store'
 import { provisionAppUser } from '@/lib/auth/provision-app-user'
-import { resolveSignupLocale } from '@/lib/auth/resolve-signup-locale'
+import { resolveSignupLocale, type SignupLocale, toSignupLocale } from '@/lib/auth/resolve-signup-locale'
+import { securePushTokenStore } from '@/lib/push/push-token-store'
+import { unregisterPushDevice } from '@/lib/push/push-sign-out'
 import {
   createSessionOperationScope,
   createTransitionAuthenticatedContext,
@@ -24,28 +27,41 @@ import {
   type SessionOperationScope,
 } from '@/lib/auth/session-operation-scope'
 import type { NativeIdentityProviderId } from '@/lib/auth/native-identity'
-import type {
-  AppAuthAdapter,
-  AuthSession,
-  ChangePasswordOutcome,
-  IdTokenSignInOutcome,
-  MfaChallengeOutcome,
-  MfaListFactorsOutcome,
-  MfaTotpEnrollOutcome,
-  MfaUnenrollOutcome,
-  MfaVerifyOutcome,
-  SendVerificationEmailOutcome,
-  SignInOutcome,
-  SignUpOutcome,
+import {
+  OIDC_PROVIDER_ID,
+  type AppAuthAdapter,
+  type AuthSession,
+  type BrowserSignInOutcome,
+  type ChangePasswordOutcome,
+  type IdTokenSignInOutcome,
+  type MfaChallengeOutcome,
+  type MfaListFactorsOutcome,
+  type MfaTotpEnrollOutcome,
+  type MfaUnenrollOutcome,
+  type MfaVerifyOutcome,
+  type PasskeyAddOutcome,
+  type PasskeyDeleteOutcome,
+  type PasskeyListOutcome,
+  type PasskeySignInOutcome,
+  type SendVerificationEmailOutcome,
+  type SignInOutcome,
+  type SignUpOutcome,
 } from '@/lib/auth/app-auth'
 
 import { useAppSession } from './app-session-context'
+import { useOptionalSessionPreferences } from './session-preferences-provider'
 
 export type AuthEpochId = number & { readonly __authEpoch: unique symbol }
 export type ProductRuntime = Readonly<{
   epochId: AuthEpochId
   principalId: string
   apiClient: ApiClient
+  /**
+   * The `Authorization` header value for an image the API itself serves (the merchant logo
+   * proxy), or null without a session. Only `lib/api/api-image-source` reads it, and only for a
+   * URL on the API's own origin. Optional so a test runtime can leave it out.
+   */
+  imageAuthorization?: () => Promise<string | null>
 }>
 
 export type ProductRouteState =
@@ -71,6 +87,10 @@ export type ProductRuntimeContextValue = Readonly<{
     token: string,
     nonce: string,
   ) => Promise<IdTokenSignInOutcome>
+  /** "Sign in with <name>" through the server's identity provider; same admission rules. */
+  signInWithSso: () => Promise<BrowserSignInOutcome>
+  /** "Sign in with a passkey"; same admission rules. A passkey sign-in is a full session. */
+  signInWithPasskey: () => Promise<PasskeySignInOutcome>
   signUp: (email: string, password: string) => Promise<SignUpOutcome>
   signOut: () => Promise<void>
   retrySignOut: () => Promise<void>
@@ -90,6 +110,10 @@ export type ProductRuntimeContextValue = Readonly<{
   mfaListFactors: () => Promise<MfaListFactorsOutcome>
   /** Thin proxy to the injected auth adapter's password-change operation; usable in any route state. */
   changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
+  /** Thin proxies to the injected auth adapter's passkey management (Settings, Security). */
+  listPasskeys: () => Promise<PasskeyListOutcome>
+  addPasskey: () => Promise<PasskeyAddOutcome>
+  deletePasskey: (id: string) => Promise<PasskeyDeleteOutcome>
   /** Thin proxy to the injected auth adapter's resend-verification-email operation. */
   sendVerificationEmail: (email: string) => Promise<SendVerificationEmailOutcome>
   /**
@@ -144,6 +168,8 @@ export type ProductRuntimeProviderProps = Readonly<{
   transport: HttpTransport
   children: ReactNode
   operationScope?: SessionOperationScope
+  /** Runs before a sign-out tears the session down, while the API still accepts it (push device removal). */
+  beforeSignOut?: (runtime: ProductRuntime) => Promise<void>
   createRuntime?: (input: {
     epochId: AuthEpochId
     principalId: string
@@ -172,14 +198,19 @@ export const createDefaultProductRuntime: NonNullable<ProductRuntimeProviderProp
       authRecovery,
       operationScope: input.operationScope,
     }),
+    imageAuthorization: createImageAuthorization(() => authRecovery.getTokenSnapshot()),
   }
 }
+
+/** Signing out removes this phone's push token from the account first (`lib/push/push-sign-out.ts`). */
+const defaultBeforeSignOut = (runtime: ProductRuntime) => unregisterPushDevice({ api: runtime.apiClient, store: securePushTokenStore })
 
 export function ProductRuntimeProvider({
   auth,
   transport,
   children,
   operationScope: injectedScope,
+  beforeSignOut = defaultBeforeSignOut,
   createRuntime = createDefaultProductRuntime,
 }: ProductRuntimeProviderProps) {
   const { session } = useAppSession<AuthSession>()
@@ -197,6 +228,14 @@ export function ProductRuntimeProvider({
   const terminalLocked = useRef(false)
   const retirementFlight = useRef<Promise<void> | null>(null)
   const activationVersion = useRef(0)
+  // The app language a new account is recorded in (`/v1/auth/callback`) and its first email is
+  // sent in (`signUp`). Read when they run, so a language change rebuilds neither; the device
+  // language stands in only where no preferences are mounted.
+  const appLocale = useOptionalSessionPreferences()?.resolvedLocale ?? null
+  const signupLocale = useRef<SignupLocale>('en')
+  useEffect(() => {
+    signupLocale.current = appLocale ? toSignupLocale(appLocale) : resolveSignupLocale()
+  }, [appLocale])
 
   const deactivate = useCallback((reason: AuthenticatedContextTransitionReason) => {
     runtimeRef.current = null
@@ -228,6 +267,8 @@ export function ProductRuntimeProvider({
     // reenter through auth/query observers.
     terminalFlight.current = flight
     const run = async () => {
+      const signingOut = reason === 'logout' ? runtimeRef.current : null
+      if (signingOut) await beforeSignOut(signingOut).catch(() => undefined)
       try {
         await transition(reason)
       } catch {
@@ -260,7 +301,7 @@ export function ProductRuntimeProvider({
       resolveFlight()
     })
     return flight
-  }, [auth, transition])
+  }, [auth, beforeSignOut, transition])
 
   const activate = useCallback(async (nextSession: AuthSession) => {
     const startVersion = activationVersion.current
@@ -277,7 +318,7 @@ export function ProductRuntimeProvider({
     // immediately before calling signUp, so it survives exactly one activation and is never
     // resent on a later, unrelated login.
     const pendingInviteToken = takePendingInviteToken() ?? undefined
-    const outcome = await provisionAppUser(next.apiClient, resolveSignupLocale(), pendingInviteToken)
+    const outcome = await provisionAppUser(next.apiClient, signupLocale.current, pendingInviteToken)
     // A fresher activation state transition may have occurred while this one awaited
     // provisioning — either a newer activate() call (epochCounter bumped), or the
     // session clearing to null and the activation effect setting signed-out directly
@@ -365,11 +406,25 @@ export function ProductRuntimeProvider({
     return auth.signInWithIdToken(provider, token, nonce)
   }, [auth])
 
+  const signInWithSso = useCallback(async () => {
+    if (terminalFlight.current) return { status: 'unavailable' as const }
+    terminalLocked.current = false
+    setActivationError(null)
+    return auth.signInWithBrowser(OIDC_PROVIDER_ID)
+  }, [auth])
+
+  const signInWithPasskey = useCallback(async () => {
+    if (terminalFlight.current) return { status: 'unavailable' as const }
+    terminalLocked.current = false
+    setActivationError(null)
+    return auth.signInWithPasskey()
+  }, [auth])
+
   const signUp = useCallback(async (email: string, password: string) => {
     if (terminalFlight.current) return { status: 'unavailable' as const }
     terminalLocked.current = false
     setActivationError(null)
-    return auth.signUp(email, password)
+    return auth.signUp(email, password, signupLocale.current)
   }, [auth])
 
   const clearActivationError = useCallback(() => setActivationError(null), [])
@@ -415,6 +470,9 @@ export function ProductRuntimeProvider({
     [auth],
   )
   const sendVerificationEmail = useCallback((email: string) => auth.sendVerificationEmail(email), [auth])
+  const listPasskeys = useCallback(() => auth.listPasskeys(), [auth])
+  const addPasskey = useCallback(() => auth.addPasskey(), [auth])
+  const deletePasskey = useCallback((id: string) => auth.deletePasskey(id), [auth])
   const validateHouseholdInvite = useCallback(
     (token: string) => validateHouseholdInviteToken(transport, token),
     [transport],
@@ -443,6 +501,8 @@ export function ProductRuntimeProvider({
     runtime,
     signInWithPassword,
     signInWithIdToken,
+    signInWithSso,
+    signInWithPasskey,
     signUp,
     signOut: runSignOut,
     retrySignOut: runSignOut,
@@ -458,9 +518,16 @@ export function ProductRuntimeProvider({
     mfaListFactors,
     changePassword,
     sendVerificationEmail,
+    listPasskeys,
+    addPasskey,
+    deletePasskey,
     completeMfaVerification,
     validateHouseholdInvite,
   }), [
+    addPasskey,
+    deletePasskey,
+    listPasskeys,
+    signInWithPasskey,
     acknowledgeDeactivation,
     activationError,
     blockAccess,
@@ -479,6 +546,7 @@ export function ProductRuntimeProvider({
     sendVerificationEmail,
     signInWithIdToken,
     signInWithPassword,
+    signInWithSso,
     signUp,
     validateHouseholdInvite,
   ])

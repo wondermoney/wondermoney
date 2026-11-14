@@ -1,0 +1,59 @@
+---
+title: Llaves de acceso
+description: Inicia sesión con tu huella, tu cara o el PIN del dispositivo en lugar de escribir tu correo y tu contraseña.
+---
+
+Una llave de acceso (passkey) te permite iniciar sesión sin escribir tu correo ni tu contraseña. Tu dispositivo guarda la llave de acceso, y la desbloqueas con tu huella, tu cara o el PIN del dispositivo, un teléfono o una llave de seguridad.
+
+Las llaves de acceso son una forma adicional de iniciar sesión. La contraseña y el inicio de sesión con Google y con Apple siguen funcionando, y conservas tu contraseña. No se puede crear una cuenta solo con una llave de acceso.
+
+Las llaves de acceso funcionan en la aplicación web y, en la aplicación móvil, en el servidor para el que se compiló la aplicación (consulta [Llaves de acceso en la aplicación móvil](#llaves-de-acceso-en-la-aplicación-móvil)).
+
+## Añadir una llave de acceso
+
+1. Abre **Configuración → Seguridad** y busca la sección **Llaves de acceso**.
+2. Selecciona **Añadir una llave de acceso**.
+3. Sigue la solicitud del navegador. Puede pedirte la huella, la cara, el PIN del dispositivo, un teléfono o una llave de seguridad.
+
+Añadir una llave de acceso exige un inicio de sesión reciente. Si iniciaste sesión hace más de un día, la aplicación te pide que vuelvas a iniciar sesión primero.
+
+Después de iniciar sesión con tu contraseña, la aplicación te ofrece una vez añadir una llave de acceso, si el navegador admite llaves de acceso y todavía no tienes ninguna. Selecciona **Ahora no** para descartarlo; ese navegador no volverá a preguntar.
+
+## Iniciar sesión con una llave de acceso
+
+En la página de inicio de sesión, selecciona **Iniciar sesión con una llave de acceso**. En los navegadores que admiten el autocompletado de llaves de acceso, también puedes elegir una llave guardada en las sugerencias del campo de correo.
+
+No hay correo ni contraseña que escribir.
+
+## Llaves de acceso y autenticación de dos factores
+
+Un inicio de sesión con llave de acceso no pide el código del autenticador. Una llave de acceso ya demuestra dos cosas: tienes el dispositivo, y lo desbloqueaste con tu huella, tu cara o tu PIN.
+
+Iniciar sesión con tu contraseña sigue pidiendo el código cuando la autenticación de dos factores está activada.
+
+## Gestionar tus llaves de acceso
+
+Cada llave de acceso en **Configuración → Seguridad → Llaves de acceso** muestra su nombre, cuándo se añadió (**Añadida** y una fecha) y cuándo se usó por última vez (**Último uso** y una fecha, o **Nunca usada**).
+
+Una llave de acceso nueva recibe el nombre del gestor de contraseñas que la guarda cuando el navegador lo indica, como "Google Password Manager", "Windows Hello" o "1Password". Si no, se llama "Passkey". Selecciona **Cambiar nombre** para dar a cada llave de acceso un nombre que permita distinguirlas.
+
+Selecciona **Eliminar** para quitar una llave de acceso. Deja de funcionar en WonderMoney de inmediato, pero sigue en tu gestor de contraseñas o en tu dispositivo hasta que la quites también allí.
+
+Los tokens de API personales no pueden listar, añadir ni quitar llaves de acceso.
+
+## Llaves de acceso en la aplicación móvil
+
+Las llaves de acceso en la aplicación publicada, en wonder.money, llegan en una próxima versión de la aplicación. Hasta entonces, inicia sesión en la aplicación con tu contraseña, Google o Apple.
+
+En la pantalla de inicio de sesión de la aplicación para iOS y Android, toca **Iniciar sesión con una llave de acceso** y desbloquea la llave con tu huella, tu cara o el PIN del dispositivo. Una llave de acceso que añadiste en la web funciona en la aplicación cuando tu teléfono la tiene, por ejemplo a través del Llavero de iCloud o del Gestor de contraseñas de Google, y una añadida en la aplicación funciona en la web.
+
+En la aplicación, **Configuración → Seguridad → Llaves de acceso** muestra tus llaves de acceso. Toca **Añadir una llave de acceso** para crear una en el teléfono, o **Eliminar** para quitar una. Para cambiar el nombre, usa la aplicación web.
+
+La aplicación solo ofrece llaves de acceso en el servidor para el que se compiló: la aplicación publicada, en wonder.money. Conectada a un servidor autoalojado, la aplicación oculta **Iniciar sesión con una llave de acceso** y **Añadir una llave de acceso**, e inicias sesión con tu contraseña, Google, Apple o el inicio de sesión único. [Usar la aplicación móvil con tu servidor](/es/docs/self-hosting/mobile-app) explica por qué.
+
+## Páginas relacionadas
+
+- [Autenticación de dos factores](/es/docs/settings-security-privacy/two-factor-authentication)
+- [Cambiar contraseña](/es/docs/settings-security-privacy/change-password)
+- [Tokens de API](/es/docs/settings-security-privacy/api-tokens)
+- [Configuración, seguridad y privacidad](/es/docs/settings-security-privacy)

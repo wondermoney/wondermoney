@@ -32,7 +32,7 @@ describe('budget allocations for emails, with rollover', () => {
   it('gives each allocation its budget plus last month\'s leftover', async () => {
     const household = await setup(true);
 
-    const rows = await new MikroOrmTenantAggregationRepository(db.em()).loadBudgetAllocations(household.appuser.appuserKey, 7, 2026);
+    const rows = await new MikroOrmTenantAggregationRepository(db.em()).loadBudgetAllocations(household.appuser.appuserKey, { month: 7, year: 2026 });
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ amountAvailable: '130', amountBudgeted: '100.0000' });
@@ -41,7 +41,7 @@ describe('budget allocations for emails, with rollover', () => {
   it('leaves the available amount out when rollover is off', async () => {
     const household = await setup(false);
 
-    const rows = await new MikroOrmTenantAggregationRepository(db.em()).loadBudgetAllocations(household.appuser.appuserKey, 7, 2026);
+    const rows = await new MikroOrmTenantAggregationRepository(db.em()).loadBudgetAllocations(household.appuser.appuserKey, { month: 7, year: 2026 });
 
     expect(rows[0]?.amountAvailable).toBeUndefined();
   });

@@ -14,7 +14,10 @@ import api from "../api";
 import type { Category } from "../category/useCategories";
 import type { AmountsCompleteness } from "../completeness";
 import { transactionDateRangeParams } from "../date-range";
+import type { TransactionInstallment } from "../installment-plans/types";
 import type { Tag } from "../tag/useTags";
+import type { TransactionMerchant } from "./useTransactionMerchants";
+import type { ReimbursementLink } from "./useTransactionReimbursements";
 import type { TransactionSplitLine } from "./useTransactionSplits";
 
 /**
@@ -63,6 +66,12 @@ export interface Transaction extends FxFields {
    * older API does not send it; read it through `isSplitTransaction`.
    */
   splits?: TransactionSplitLine[];
+  /**
+   * Its reimbursement links, in either role (an expense paid back, or money in paying one back),
+   * only those whose other side the viewer can see; empty when none. Optional because an older
+   * API does not send it; read it as `transaction.reimbursements ?? []`.
+   */
+  reimbursements?: ReimbursementLink[];
   loanRepayment?: {
     loanKey: number;
     loanKeys?: number[];
@@ -72,13 +81,41 @@ export interface Transaction extends FxFields {
     feeAmount: number;
     spendingAmount: number;
   };
-  transactionMerchantKey?: { name: string };
+  /**
+   * The installment of a plan this row is (shown as "3/12"), or null. Optional because an
+   * older API does not send it.
+   */
+  installment?: TransactionInstallment | null;
+  /** The row's merchant; absent when it has none. */
+  transactionMerchantKey?: TransactionMerchant;
   description: string;
   descriptionDirty: string;
+  /** How many live attachments the row has; absent on an older API, read as zero. */
+  attachmentCount?: number;
   reviewed: boolean;
   hidden: boolean;
+  /**
+   * The bank sent this row, so it cannot be deleted (only hidden). Optional because an older API
+   * does not send it; read it as `transaction.bankSynced === true`.
+   */
+  bankSynced?: boolean;
   categorizationConfidence?: "high" | "medium" | "low" | "none" | null;
   categorizationReason?: string | null;
+  /**
+   * Whose spending the row counts as: a member, or Shared (`appuserKey` null). Optional because an
+   * older API does not send it.
+   */
+  attribution?: TransactionAttribution;
+}
+
+/**
+ * `overridden` is true when the row sets its own "Spent by"; false when it follows its account
+ * (the account's owner, or Shared for a joint account).
+ */
+export interface TransactionAttribution {
+  appuserKey: number | null;
+  displayName: string | null;
+  overridden: boolean;
 }
 
 export interface GetTransactionsResponse {
@@ -157,6 +194,11 @@ export interface GetTransactionRequest {
   merchantKeys?: string[];
   memberCurrency?: string;
   /**
+   * The member filter: member appuser keys or `shared` (`lib/household/member-attribution.ts`).
+   * Absent or empty for everyone.
+   */
+  memberKeys?: string[];
+  /**
    * Continuation token from the previous page's `nextCursor`. Omit for page one.
    *
    * Keyset, not offset: the cursor names the last row seen, so inserts and
@@ -173,16 +215,22 @@ export interface GetTransactionRequest {
  * @param params - Query parameters for filtering transactions
  * @param apiClient - Optional Axios instance. Defaults to client-side API.
  */
-export async function getTransactions(
-  params: GetTransactionRequest = {},
-  apiClient: AxiosInstance = api,
-): Promise<GetTransactionsResponse> {
-  // An empty array means "no filter", not "match nothing", so it is dropped rather than
-  // sent as an empty value the API would have to guess at.
+/** The filters of a transaction list request, without its paging. */
+export type TransactionListFilter = Omit<
+  GetTransactionRequest,
+  "cursor" | "limit" | "includeEmptyAccounts"
+>;
+
+/**
+ * The list's query parameters, as the API reads them. An empty array means "no filter", not
+ * "match nothing", so it is dropped rather than sent as an empty value the API would have to
+ * guess at.
+ */
+export function transactionListParams(params: GetTransactionRequest) {
   const list = (values?: string[]) =>
     values && values.length > 0 ? values.join(",") : undefined;
 
-  const _params = {
+  return {
     ...params,
     ...transactionDateRangeParams(params),
     accountKeys: list(params.accountKeys),
@@ -191,10 +239,35 @@ export async function getTransactions(
     transactionTypes: list(params.transactionTypes),
     statuses: list(params.statuses),
     merchantKeys: list(params.merchantKeys),
+    memberKeys: list(params.memberKeys),
   };
+}
+
+/**
+ * The `filter` a bulk change or delete takes for "every row this list matches": the same
+ * parameters as the list, without paging, and without keys that are unset (the API refuses a key
+ * it does not know, and would read an explicit `undefined` as no key anyway).
+ */
+export function transactionSelectionFilter(
+  filter: TransactionListFilter,
+): Record<string, string | boolean> {
+  const paging = new Set(["cursor", "limit", "includeEmptyAccounts"]);
+  return Object.fromEntries(
+    Object.entries(transactionListParams(filter)).filter(
+      (entry): entry is [string, string | boolean] =>
+        !paging.has(entry[0]) &&
+        (typeof entry[1] === "string" || typeof entry[1] === "boolean"),
+    ),
+  );
+}
+
+export async function getTransactions(
+  params: GetTransactionRequest = {},
+  apiClient: AxiosInstance = api,
+): Promise<GetTransactionsResponse> {
   const { data } = await apiClient.get<GetTransactionsResponse>(
     "/v1/account/transaction",
-    { params: _params },
+    { params: transactionListParams(params) },
   );
   return data;
 }

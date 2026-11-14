@@ -8,6 +8,14 @@ and Android.
 - **Run your own:** one Docker Compose file with Postgres, the API, its worker and the web
   app. See [apps/api/deploy/selfhost](apps/api/deploy/selfhost/README.md). The mobile app
   connects to any server from its sign-in screen.
+- **Run it without a server:** deploy to [Render](https://render.com) from the
+  [`render.yaml`](render.yaml) Blueprint. It runs on paid Render plans; read
+  [Managed hosting options](https://docs.wonder.money/en/docs/self-hosting/managed-hosting)
+  first for what it asks for, what it costs and where your data lives.
+
+  [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wondermoney/wondermoney)
+- **See what's coming:** the public [roadmap](https://github.com/orgs/wondermoney/projects/1)
+  shows what we're working on now, next and later.
 - **Hack on it:** read on, then [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Help keep it running:** the hosted instance's servers, AI and market data cost money.
   [Sponsor the project on GitHub](https://github.com/sponsors/wondermoney) if you'd like to chip in.

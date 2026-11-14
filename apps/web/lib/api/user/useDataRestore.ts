@@ -42,6 +42,7 @@ export type DataRestoreWarningCode =
   | "categories_created"
   | "currency_changed"
   | "members_merged"
+  | "price_overrides_skipped"
   | "rules_skipped"
   | "unknown_account_types"
   | "unknown_brokers"

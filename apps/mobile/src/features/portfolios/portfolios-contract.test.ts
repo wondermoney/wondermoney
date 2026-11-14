@@ -1,5 +1,8 @@
 import {
   aggregateDashboardResponseSchema,
+  aggregatePortfolioDashboardEndpoint,
+  createAggregatePortfolioDashboardEndpoint,
+  individualDashboardResponseSchema,
   createCreatePortfolioTransactionEndpoint,
   createDeletePortfolioTransactionEndpoint,
   createEditPortfolioTransactionEndpoint,
@@ -25,6 +28,8 @@ import {
   portfolioCurrenciesEndpoint,
   portfolioCurrenciesResponseSchema,
   portfolioSettingsWriteSchema,
+  portfolioResponseSchema,
+  portfoliosResponseSchema,
   portfolioSettingsResponseSchema,
   portfolioTargetAllocationsEqual,
   portfolioTransactionTypesEndpoint,
@@ -55,7 +60,7 @@ const invalidHolding = {
 describe('portfolio endpoint contracts', () => {
   it('uses the five exact read paths and fixed YTD query', () => {
     expect(createPortfolioEndpoint(7).path).toBe('/v1/portfolio/7')
-    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD&include=feeConversion')
+    expect(createPortfolioDashboardEndpoint(7).path).toBe('/v1/portfolio/7/dashboard?period=YTD&include=feeConversion,periodReturns')
     expect(createPortfolioHoldingsEndpoint(7).path).toBe('/v1/portfolio/7/holdings')
     expect(createPortfolioDividendIncomeEndpoint(7).path).toBe('/v1/portfolio/7/dividend-income')
     expect(() => createPortfolioDividendIncomeEndpoint(0)).toThrow()
@@ -80,6 +85,25 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioSettingsWriteSchema.parse({ favored: true })).toEqual({ favored: true })
     expect(portfolioSettingsResponseSchema.parse({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })).toEqual({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })
     for (const body of [{}, { currencyId: 151 }, { targetAllocation: {} }, { benchmarkSymbol: 'x'.repeat(21) }]) expect(portfolioSettingsWriteSchema.safeParse(body).success).toBe(false)
+  })
+
+  it('reads a portfolio\'s account link as the viewer may see it, and a malformed one as none', () => {
+    const base = { portfolioKey: 7, name: 'Future', currencyKey: { code: 'EUR' } }
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, accountName: 'Broker', mode: 'cash_only' } } }).portfolio.accountLink).toEqual({ accountKey: 3, accountName: 'Broker', mode: 'cash_only' })
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, mode: 'includes_holdings' } } }).portfolio.accountLink).toEqual({ accountKey: 3, accountName: null, mode: 'includes_holdings' })
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: null } }).portfolio.accountLink).toBeNull()
+    expect(portfolioResponseSchema.parse({ portfolio: base }).portfolio.accountLink).toBeUndefined()
+    expect(portfolioResponseSchema.parse({ portfolio: { ...base, accountLink: { accountKey: 3, mode: 'everything' } } }).portfolio.accountLink).toBeNull()
+    const summary = { ...base, appuserCurrencyCode: 'EUR', balance: 10 }
+    expect(portfoliosResponseSchema.parse({ portfolios: [{ ...summary, accountLink: { accountKey: 3, accountName: null, mode: 'cash_only' } }] }).portfolios[0].accountLink).toEqual({ accountKey: 3, accountName: null, mode: 'cash_only' })
+  })
+
+  it('writes a link or an unlink, and nothing looser', () => {
+    expect(portfolioSettingsWriteSchema.parse({ accountLink: { accountId: 3, mode: 'cash_only' } })).toEqual({ accountLink: { accountId: 3, mode: 'cash_only' } })
+    expect(portfolioSettingsWriteSchema.parse({ accountLink: null })).toEqual({ accountLink: null })
+    for (const accountLink of [{ accountId: 3 }, { accountId: 0, mode: 'cash_only' }, { accountId: 3, mode: 'all' }, { accountId: 3, mode: 'cash_only', accountName: 'Broker' }]) {
+      expect(portfolioSettingsWriteSchema.safeParse({ accountLink }).success).toBe(false)
+    }
   })
 
   it('validates target allocation writes against the fixed asset-class set', () => {
@@ -118,6 +142,23 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioPerformanceResponseSchema.safeParse({ ...response, dataPoints: [{ date: '2026/07/01', value: 1000 }] }).success).toBe(false)
   })
 
+  it('reads the money put in or taken out on a value day, and still parses days and APIs without it', () => {
+    const base = { minDataPointsForComparison: 2, period: 'YTD' }
+    const dataPoints = [
+      { date: '2026-07-01', value: 1000 },
+      { date: '2026-07-02', value: 1500, netContribution: 500 },
+      { date: '2026-07-03', value: 1200, netContribution: -300 },
+      { date: '2026-07-04', value: 1200, netContribution: null },
+    ]
+    // The time-weighted series may skip a day it could not measure.
+    const normalizedDataPoints = [{ date: '2026-07-01', value: 0 }, { date: '2026-07-02', value: 0 }, { date: '2026-07-04', value: 0.5 }]
+    const parsed = portfolioPerformanceResponseSchema.parse({ ...base, dataPoints, normalizedDataPoints })
+    expect(parsed.dataPoints.map((point) => point.netContribution)).toEqual([undefined, 500, -300, null])
+    expect(parsed.normalizedDataPoints).toEqual(normalizedDataPoints)
+    expect(portfolioPerformanceResponseSchema.parse({ ...base, dataPoints: [{ date: '2026-07-01', value: 1000, netContribution: 5, extra: 1 }] }).dataPoints[0]).toEqual({ date: '2026-07-01', value: 1000, netContribution: 5 })
+    expect(portfolioPerformanceResponseSchema.safeParse({ ...base, dataPoints: [{ date: '2026-07-01', value: 1000, netContribution: '500' }] }).success).toBe(false)
+  })
+
   it('compares target allocations by asset-class membership and percentage, not key order', () => {
     expect(portfolioTargetAllocationsEqual(null, null)).toBe(true)
     expect(portfolioTargetAllocationsEqual(null, { 'Equities': 100 })).toBe(false)
@@ -130,6 +171,15 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioHoldingsResponseSchema.parse({ holdings: [invalidHolding] }).holdings[0]?.isInvalid).toBe(true)
     expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, currentValue: 0 }] }).success).toBe(false)
     expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, unrealizedGains: 0 }] }).success).toBe(false)
+  })
+
+  it('reads a holding\'s realized gain, and a server that sends none as no figure', () => {
+    const valid = { allocation: 100, averageBuyPrice: 90, currency: 'EUR', currentPrice: 110, currentValue: 1100, financialAssetKey: 9, financialAssetName: 'Example fund', financialAssetSymbol: 'EXF', financialAssetType: 'Fund', quantity: 10, unrealizedGains: 200, unrealizedGainsPercentage: 22.2 }
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...valid, realizedGains: -12.5 }] }).holdings[0]?.realizedGains).toBe(-12.5)
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...valid, realizedGains: 0 }] }).holdings[0]?.realizedGains).toBe(0)
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [valid] }).holdings[0]?.realizedGains).toBeUndefined()
+    expect(portfolioHoldingsResponseSchema.parse({ holdings: [{ ...invalidHolding, realizedGains: null }] }).holdings[0]?.realizedGains).toBeNull()
+    expect(portfolioHoldingsResponseSchema.safeParse({ holdings: [{ ...invalidHolding, realizedGains: 5 }] }).success).toBe(false)
   })
 
   it('keeps parsing holdings when the API adds fields or an invalid reason this build does not know', () => {
@@ -157,6 +207,29 @@ describe('portfolio endpoint contracts', () => {
     // The label echoes the requested period ('1M' … 'ALL'); only a missing one is rejected.
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: 'ALL' } }).success).toBe(true)
     expect(aggregateDashboardResponseSchema.safeParse({ portfolios: [], summary: { ...summary, periodLabel: '' } }).success).toBe(false)
+  })
+
+  it('asks both dashboards for the opt-in fee and period-return fields, for whichever period is shown', () => {
+    for (const path of [aggregatePortfolioDashboardEndpoint.path, createAggregatePortfolioDashboardEndpoint('1Y').path, createPortfolioDashboardEndpoint(7).path]) {
+      const include = new URLSearchParams(path.split('?')[1]).get('include')?.split(',')
+      expect(include).toEqual(expect.arrayContaining(['feeConversion', 'periodReturns']))
+    }
+    expect(new URLSearchParams(createAggregatePortfolioDashboardEndpoint('1Y').path.split('?')[1]).get('period')).toBe('1Y')
+  })
+
+  it('reads the period\'s time- and money-weighted returns, and still parses a summary without them', () => {
+    const summary = { assetCount: 1, currency: 'EUR', lastUpdated: '2026-07-19T10:00:00.000Z', periodLabel: '1Y', periodReturn: 12.4, realizedGains: 0, totalGainLoss: 4, totalGainLossPercent: 2, totalValue: 204, unrealizedGains: 4 }
+    const periodReturns = { timeWeighted: 10.25, moneyWeighted: null, moneyWeightedAnnualized: true, missingSnapshotDates: ['2026-03-02'] }
+    const quickStats = { bestPerformer: null, biggestPosition: null, holdingsCount: 1, worstPerformer: null }
+    expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, portfolioCount: 1, periodReturns } }).summary.periodReturns).toEqual(periodReturns)
+    expect(individualDashboardResponseSchema.parse({ quickStats, summary: { ...summary, periodReturns: { ...periodReturns, extra: 1 } } }).summary.periodReturns).toEqual(periodReturns)
+    // Older APIs send no block at all.
+    expect(aggregateDashboardResponseSchema.parse({ portfolios: [], summary: { ...summary, portfolioCount: 1 } }).summary.periodReturns).toBeUndefined()
+    expect(individualDashboardResponseSchema.parse({ quickStats, summary }).summary.periodReturns).toBeUndefined()
+    // A malformed block drops the figures, never the whole dashboard.
+    const malformed = individualDashboardResponseSchema.safeParse({ quickStats, summary: { ...summary, periodReturns: { timeWeighted: 'high' } } })
+    expect(malformed.success).toBe(true)
+    expect(malformed.data?.summary.periodReturns).toBeUndefined()
   })
 
   it('normalizes normal transaction numbers and decimal strings without inventing missing values', () => {

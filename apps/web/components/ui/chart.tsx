@@ -205,6 +205,9 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload.map((item, index) => {
+            // A series with no value at this point (the solid line ends where the
+            // projection begins) is not a zero: leave it out of the tooltip.
+            if (item.value === null || item.value === undefined) return null;
             const key = `${nameKey || item.name || item.dataKey || "value"}`;
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
             const indicatorColor = color || item.payload.fill || item.color;

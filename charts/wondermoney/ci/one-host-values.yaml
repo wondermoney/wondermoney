@@ -1,0 +1,9 @@
+# One hostname: /v1 and /api/auth to the API, everything else to the web app.
+postgresql:
+  enabled: true
+ingress:
+  enabled: true
+  host: money.example.com
+  tls:
+    - secretName: wondermoney-tls
+      hosts: [money.example.com]

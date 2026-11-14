@@ -6,7 +6,7 @@ import { ApiError } from '@/lib/api/errors'
 import { createResendHouseholdInviteEndpoint, createRevokeHouseholdInviteEndpoint } from './household-contract'
 import { householdKey } from './query-keys'
 
-/** Resend and revoke both act on the single pending invite — grouped like MFA's start/confirm. */
+/** Resend and revoke act on one pending invite, by its key; grouped like MFA's start/confirm. */
 export function useHouseholdInviteActions() {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('useHouseholdInviteActions requires an authenticated runtime')

@@ -44,6 +44,8 @@ public/                # Static assets
   `scripts/check-offer-alignment.mjs` (both run by `pnpm test`) fail on unsupported product
   claims or a stale offer in any locale.
 - Follow nearby formatting: this app has no Prettier config and existing Astro/TS style is mixed.
+- `pt` copy is European Portuguese and addresses the reader as **tu** ("Começa grátis", "as tuas
+  contas"), never "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples).
 - Analytics IDs in `src/lib/gtm.ts` and `src/lib/posthog.ts` are public client keys, and
   the Sanity project id in `astro.config.mjs` is public too. Secrets stay in Vercel environment
   variables, never in code.

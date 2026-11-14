@@ -9,7 +9,7 @@ import { getWeeklyInsightsPreheader } from "../weekly-insights-preheader";
 export type { WeeklyBudgetSummary, WeeklyInsightsProps } from "../types";
 export { getWeeklyInsightsPreheader } from "../weekly-insights-preheader";
 
-const COPY = {
+export const COPY = {
   en: {
     subject: "Your weekly money summary",
     heading: "Your weekly money summary",
@@ -37,6 +37,20 @@ const COPY = {
     ctaLabel: "Ver resumo",
     marketingFooterText: (brand: string) => `Recebeste este resumo porque ativaste os insights semanais na ${brand}.`,
     bodyParagraph: "No resumo completo podes rever as transações incluídas e consultar o detalhe das categorias e dos orçamentos apresentados.",
+  },
+  es: {
+    subject: "Tu resumen financiero semanal",
+    heading: "Tu resumen financiero semanal",
+    intro: (weekDateRange: string) => `Semana completa del ${weekDateRange}. Los puntos clave para ver dónde se concentró la actividad registrada.`,
+    ariaSummary: (weekDateRange: string) => `Resumen financiero de la semana del ${weekDateRange}`,
+    totalSpending: "Gasto total",
+    topCategory: "Categoría principal",
+    budgets: "Presupuestos",
+    budgetStatus: { over: "Hay categorías por encima de lo planificado", near: "Hay categorías cerca del importe fijado", within: "Dentro de los importes planificados" },
+    budgetCount: { within: (n: number) => `${n} dentro de lo planificado`, near: (n: number) => `${n} cerca del límite`, over: (n: number) => `${n} por encima de lo planificado` },
+    ctaLabel: "Ver resumen",
+    marketingFooterText: (brand: string) => `Recibes este resumen porque activaste el resumen semanal en ${brand}.`,
+    bodyParagraph: "En el resumen completo puedes revisar las transacciones incluidas y ver el detalle de las categorías y los presupuestos que aparecen.",
   },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
@@ -87,6 +101,7 @@ function getBudgetCountDetail(summary: WeeklyBudgetSummary, language: Transactio
 
 export default function WeeklyInsights({
   language = "pt",
+  appLocale = language,
   firstName,
   weekDateRange,
   formattedTotalSpending,
@@ -115,7 +130,7 @@ export default function WeeklyInsights({
       : undefined;
   const trackedCtaUrl = buildCampaignUrl({
     destinationUrl: ctaUrl,
-    nextPath: `/${language}`,
+    nextPath: `/${appLocale}`,
     utmSource,
     utmMedium,
     utmCampaign,

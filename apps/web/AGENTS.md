@@ -53,6 +53,10 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 - `@/*` imports. Merge classes with `cn()`; variants with `cva`.
 - All customer-facing copy goes through next-intl, in **en, pt and es**; the
   i18n-message-key check in `pnpm test` enforces key parity.
+- pt is European Portuguese and addresses the reader as **tu** ("Introduz o teu email",
+  "Podes alterar isto mais tarde"), never "você" or the formal third person; labels stay
+  infinitive. `CONTRIBUTING.md` has the rule and examples; `i18n/pt-form-of-address.test.ts`
+  enforces it.
 - Financial values: `font-mono`, locale-aware formatting (`lib/utils/formatCurrency.ts`,
   `formatDate.ts`), and a non-color cue beside every gain/loss color.
 - Calm, data-first UI: semantic tokens only; no emoji, promotional badges, generic
@@ -65,11 +69,22 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 
 ## Households
 
-A tenant is a household (owner plus one partner, joined at signup by invite). Web pieces:
-`lib/api/household/`, `components/settings/Household.tsx`, the `/join` page
-(`app/[locale]/(no-layout)/join/`; `inviteToken` rides through signup into `/v1/auth/callback`).
-Private accounts: the owner-only "Private account" switch sends `isPrivate` only when the
-viewer owns the account; members never receive private accounts from the API.
+A tenant is a household: one owner plus admins, members and viewers, up to the API's
+`maxMembers` (pending invites take a place). Who may invite, change roles, remove or transfer
+ownership is in `lib/household/permissions.ts`, which mirrors the API's rule (a manager acts on
+roles strictly below their own, never on themself). Web pieces: `lib/api/household/`,
+`components/settings/Household.tsx`, the `/join` page (`app/[locale]/(no-layout)/join/`). A new
+account joins at signup (`inviteToken` rides into `/v1/auth/callback`); a signed-in account joins
+only by pressing Join on `/join`, which calls `POST /v1/household/invites/:token/accept` and reloads
+the app. A viewer's writes answer `household_read_only`, explained by
+`components/household/HouseholdReadOnlyNotifier.tsx`.
+Per-account sharing: the account edit sheet lists every member as Hidden, Can view or Can edit
+(a viewer never edits) and saves it with `PUT /v1/account/:accountId/shares`
+(`lib/account/account-sharing.ts` maps the control to the body); only the account owner or the
+household owner gets the controls (`canManage`). Accounts carry `myAccess`; every edit action
+is hidden when it is `read` (`lib/account/account-access.ts`; transaction lists look each
+row's account up by `accountKey`), and a write that slips through answers `account_read_only`,
+explained by the same notifier. Members never receive accounts hidden from them.
 
 ## Tests
 

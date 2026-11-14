@@ -12,6 +12,7 @@ import type {
   GetBudgetTemplateByYearAndMonthResponse,
 } from "@/lib/api/budget/useBudgetTemplateByYearAndMonth";
 
+import budgetMessages from "../../messages/en/budget.json";
 import commonMessages from "../../messages/en/common.json";
 import homeMessages from "../../messages/en/home.json";
 import { ThisMonthSection } from "./ThisMonthSection";
@@ -65,7 +66,7 @@ vi.mock("@/lib/api/budget/useBudgetTemplateByYearAndMonth", () => ({
   },
 }));
 
-const messages = { ...commonMessages, ...homeMessages };
+const messages = { ...commonMessages, ...homeMessages, ...budgetMessages };
 
 function category(
   key: number,
@@ -100,6 +101,8 @@ function budget(budgetKey: number, name: string): BudgetFull {
     accounts: [],
     categories: [],
     incomes: [],
+    period: { firstDay: "2026-11-01", lastDay: "2026-11-30" },
+    periodStartDay: 1,
     rolloverCarriesOverspend: true,
     rolloverComplete: true,
   };
@@ -173,6 +176,57 @@ test("every budget gets its own row for the current month, each linking to that 
   assert.match(
     within(section).getByText(/days of November to go/).textContent ?? "",
     /26 days of November to go/,
+  );
+});
+
+test("a personal budget's row says it is personal; a household budget's says nothing", () => {
+  state.budgets = [
+    budget(2, "Household"),
+    { ...budget(5, "Mine"), visibility: "personal" },
+  ];
+  state.months.set(2, [category(1, "Food", 500, 320)]);
+  state.months.set(5, [category(3, "Travel", 1000, 250)]);
+
+  renderSection();
+
+  const rows = within(
+    screen.getByRole("region", { name: "This month" }),
+  ).getAllByRole("listitem");
+  const personal = budgetMessages.budgetVisibility.personal;
+  assert.equal(within(rows[0]).queryByText(personal), null);
+  assert.ok(within(rows[1]).getByText(personal));
+  // The label sits beside the name, not inside its heading.
+  assert.equal(
+    within(rows[1]).getByRole("heading", { level: 3 }).textContent,
+    "Mine",
+  );
+});
+
+test("a budget whose month starts on payday is read and linked in its own current month", () => {
+  // From 25 November a budget starting on the 25th is in its December month.
+  state.budgets = [
+    budget(2, "Household"),
+    {
+      ...budget(5, "Payday"),
+      month: 12,
+      period: { firstDay: "2026-11-25", lastDay: "2026-12-24" },
+      periodStartDay: 25,
+    },
+  ];
+  state.months.set(2, [category(1, "Food", 500, 320)]);
+  state.months.set(5, [category(3, "Travel", 1000, 250)]);
+
+  renderSection();
+
+  assert.deepEqual(state.requested.at(-1), [
+    { budgetKey: 2, year: 2026, month: 11 },
+    { budgetKey: 5, year: 2026, month: 12 },
+  ]);
+  assert.deepEqual(
+    screen
+      .getAllByRole("listitem")
+      .map((row) => within(row).getByRole("link").getAttribute("href")),
+    ["/budgets/2/2026/11", "/budgets/5/2026/12"],
   );
 });
 

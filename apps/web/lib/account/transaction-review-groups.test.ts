@@ -10,6 +10,16 @@ import {
   groupTransactionsByMerchant,
 } from "./transaction-review-groups";
 
+function merchant(name: string): Transaction["transactionMerchantKey"] {
+  return {
+    transactionMerchantKey: 1,
+    name,
+    website: null,
+    logoUrl: null,
+    resolvedLogoUrl: null,
+  };
+}
+
 function transaction(
   overrides: Partial<Transaction> & Pick<Transaction, "transactionKey">,
 ): Transaction {
@@ -77,7 +87,7 @@ test("display name prefers merchant name over dirty description", () => {
     getTransactionDisplayName(
       transaction({
         transactionKey: 1,
-        transactionMerchantKey: { name: "Continente" },
+        transactionMerchantKey: merchant("Continente"),
         descriptionDirty: "CONTINENTE 123",
       }),
     ),
@@ -109,7 +119,7 @@ test("display name trims whitespace and falls back to the next candidate", () =>
     getTransactionDisplayName(
       transaction({
         transactionKey: 1,
-        transactionMerchantKey: { name: "   " },
+        transactionMerchantKey: merchant("   "),
         descriptionDirty: " Dirty value ",
       }),
     ),
@@ -119,7 +129,7 @@ test("display name trims whitespace and falls back to the next candidate", () =>
     getTransactionDisplayName(
       transaction({
         transactionKey: 2,
-        transactionMerchantKey: { name: "   " },
+        transactionMerchantKey: merchant("   "),
         descriptionDirty: "   ",
         description: " Clean value ",
       }),
@@ -146,12 +156,12 @@ test("merchant grouping keeps unknown merchants separate by description", () => 
   const groups = groupTransactionsByMerchant([
     transaction({
       transactionKey: 1,
-      transactionMerchantKey: { name: "Spotify" },
+      transactionMerchantKey: merchant("Spotify"),
       settlementAmount: -7.99,
     }),
     transaction({
       transactionKey: 2,
-      transactionMerchantKey: { name: "Spotify" },
+      transactionMerchantKey: merchant("Spotify"),
       settlementAmount: -7.99,
     }),
     transaction({
@@ -172,17 +182,17 @@ test("merchant grouping is case-insensitive and sorts larger groups first", () =
   const groups = groupTransactionsByMerchant([
     transaction({
       transactionKey: 1,
-      transactionMerchantKey: { name: "spotify" },
+      transactionMerchantKey: merchant("spotify"),
       settlementAmount: -7.99,
     }),
     transaction({
       transactionKey: 2,
-      transactionMerchantKey: { name: "Spotify" },
+      transactionMerchantKey: merchant("Spotify"),
       settlementAmount: -7.99,
     }),
     transaction({
       transactionKey: 3,
-      transactionMerchantKey: { name: "Netflix" },
+      transactionMerchantKey: merchant("Netflix"),
       settlementAmount: -12.99,
     }),
   ]);
@@ -198,13 +208,13 @@ test("merchant grouping splits the same merchant across settlement currencies", 
   const groups = groupTransactionsByMerchant([
     transaction({
       transactionKey: 1,
-      transactionMerchantKey: { name: "Spotify" },
+      transactionMerchantKey: merchant("Spotify"),
       settlementAmount: -7.99,
       settlementCurrencyKey: { code: "EUR" },
     }),
     transaction({
       transactionKey: 2,
-      transactionMerchantKey: { name: "spotify" },
+      transactionMerchantKey: merchant("spotify"),
       settlementAmount: -9.99,
       settlementCurrencyKey: { code: "USD" },
     }),

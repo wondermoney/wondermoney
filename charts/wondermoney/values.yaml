@@ -1,0 +1,398 @@
+# WonderMoney on Kubernetes: the API, its background worker and the web app, with an external
+# Postgres (or the bundled one, `postgresql.enabled`). The docs site's self-hosting guide,
+# "Kubernetes (Helm)", walks through an install.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # Every image's tag, unless a component sets its own. Empty: the chart's appVersion, which a
+  # published chart sets to its release (1.4.0 for chart 1.4.0).
+  tag: ""
+  # Empty: Kubernetes' default, Always for `latest` and IfNotPresent for a release tag.
+  pullPolicy: ""
+  pullSecrets: []
+
+# Settings for the API and the worker, by the names and in the sections of the compose install's
+# .env.example (apps/api/deploy/selfhost). Empty values are left out. Anything not listed here
+# goes in `extraEnv`; credentials go in `secrets` or `existingSecret`, not here. Keys starting
+# with NEXT_PUBLIC_ also reach the web app, which sees nothing else from this map.
+config:
+  # ─── Required ────────────────────────────────────────────────────────────────
+  # Where people reach the web app and the API. Empty: from the Ingress hosts below (https when
+  # `ingress.tls` is set), or http://localhost:3000 and http://localhost:3001 for
+  # `kubectl port-forward` without an Ingress.
+  APP_URL: ""
+  API_URL: ""
+  # How many proxies sit in front of the API. Empty: 1 with the chart's Ingress (the ingress
+  # controller), otherwise unset. Add one for each proxy in front of the controller, such as a
+  # cloud load balancer that forwards X-Forwarded-For or Cloudflare's proxy.
+  TRUST_PROXY: ""
+
+  # ─── Your instance ───────────────────────────────────────────────────────────
+  INSTANCE_NAME: WonderMoney
+  # open: anyone can sign up · invite: only people invited to a household · closed: nobody.
+  # The first account on a new instance can always sign up.
+  SIGNUP_MODE: open
+  # The most people in one household, owner included; a pending invite holds a seat (6 when empty).
+  HOUSEHOLD_MAX_MEMBERS: ""
+  SUPPORT_EMAIL: ""
+  SPONSOR_URL: ""
+  # "true": a public read-only demo, with a "Try the demo" button that signs anyone in to one
+  # shared demo account. Create it first in the API pod:
+  # `node dist/database/scripts/seed-demo-household.js`. Empty: off.
+  DEMO_SIGN_IN_ENABLED: ""
+  NEXT_PUBLIC_TERMS_URL: ""
+  NEXT_PUBLIC_PRIVACY_URL: ""
+  PRIVACY_POLICY_URL: ""
+  # Only with two hostnames (`ingress.apiHost`): the shared parent domain with a leading dot,
+  # such as .example.com, in both. Empty with one hostname.
+  AUTH_COOKIE_DOMAIN: ""
+  NEXT_PUBLIC_AUTH_COOKIE_DOMAIN: ""
+  TRANSFER_MATCH_FX_TOLERANCE: ""
+
+  # ─── Google sign-in (optional) ───────────────────────────────────────────────
+  # GOOGLE_CLIENT_SECRET goes in `secrets`.
+  GOOGLE_CLIENT_ID: ""
+
+  # ─── Single sign-on (optional) ───────────────────────────────────────────────
+  # Your own OpenID Connect provider (Authentik, Keycloak, ...), with <API_URL>/api/auth/callback/oidc
+  # as the client's redirect URI. OIDC_ISSUER, OIDC_CLIENT_ID and OIDC_CLIENT_SECRET (in `secrets`)
+  # turn it on together; any other OIDC_ setting without them stops the API from starting.
+  # Guide: https://docs.wonder.money/en/docs/self-hosting/single-sign-on
+  OIDC_ISSUER: ""
+  OIDC_CLIENT_ID: ""
+  # The button reads "Sign in with <name>". Empty: SSO.
+  OIDC_DISPLAY_NAME: ""
+  # Space-separated, with openid. Empty: openid email profile.
+  OIDC_SCOPES: ""
+  # The claim that lists the person's groups. Empty: groups.
+  OIDC_GROUPS_CLAIM: ""
+  # Comma-separated: only members (and admin-group members) may sign in.
+  OIDC_ALLOWED_GROUPS: ""
+  # Comma-separated: members are instance admins, granted and revoked at every sign-in.
+  OIDC_ADMIN_GROUPS: ""
+  # "true": create accounts on first sign-in through the provider even when SIGNUP_MODE is
+  # invite or closed.
+  OIDC_AUTO_SIGNUP: ""
+  # "true": no password sign-in, sign-up or reset. Passkeys keep working.
+  OIDC_ONLY: ""
+  # "true": skip the WonderMoney authenticator code after a sign-in through the provider.
+  OIDC_TRUST_IDP_MFA: ""
+  # "true": accept an email the provider has not verified (never linked to an existing account).
+  OIDC_ALLOW_UNVERIFIED_EMAIL: ""
+
+  # ─── Email (optional) ────────────────────────────────────────────────────────
+  # Without a provider, emails are written to the API log:
+  #   kubectl logs deploy/<release>-api | grep "Email not sent"
+  # SMTP_PASSWORD and RESEND_API_KEY go in `secrets`.
+  EMAIL_FROM: ""
+  EMAIL_FROM_NAME: ""
+  SMTP_HOST: ""
+  SMTP_PORT: "587"
+  SMTP_USER: ""
+
+  # ─── File storage (optional) ─────────────────────────────────────────────────
+  # Any S3-compatible service. AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY go in `secrets`.
+  S3_ENDPOINT: ""
+  S3_PUBLIC_ENDPOINT: ""
+  S3_BUCKET: ""
+  S3_REGION: ""
+
+  # ─── AI (optional) ───────────────────────────────────────────────────────────
+  # Any OpenAI-compatible endpoint, or AI_PROVIDER=anthropic. AI_API_KEY and ANTHROPIC_API_KEY
+  # go in `secrets`.
+  AI_BASE_URL: ""
+  AI_MODEL: ""
+  AI_MODEL_OCR: ""
+  AI_MODEL_ASSISTANT: ""
+  # PDF statement import needs a model that reads images; on an OpenAI-compatible endpoint it is
+  # off until one is named here.
+  AI_MODEL_STATEMENT_IMPORT: ""
+  AI_PROVIDER: ""
+  AI_REQUIRES_VERIFIED_EMAIL: ""
+  AI_DAILY_LIMIT_ASSISTANT: ""
+  AI_DAILY_LIMIT_OCR: ""
+  AI_DAILY_LIMIT_CSV_MAPPING: ""
+  AI_DAILY_LIMIT_STATEMENT_IMPORT: ""
+  # The largest PDF statement read, in bytes and pages (10485760 and 20 when empty).
+  STATEMENT_IMPORT_MAX_BYTES: ""
+  STATEMENT_IMPORT_MAX_PAGES: ""
+
+  # ─── Market data (optional) ──────────────────────────────────────────────────
+  # EODHD_API_KEY goes in `secrets`. The providers to ask, in order, comma-separated: eodhd,
+  # stooq, coingecko. Empty means eodhd alone. Stooq and CoinGecko are free and keyless, and off
+  # until listed; their terms of use are yours to follow.
+  MARKET_DATA_PROVIDERS: ""
+
+  # ─── Bank sync (optional) ────────────────────────────────────────────────────
+  # Empty: each person adds their own Enable Banking key in Settings. Your own Enable Banking
+  # application for the instance: its application id here and its private key in
+  # `enableBanking.privateKeySecret` below; the two turn it on together. In Restricted Production
+  # mode it serves one household (the only one, or the first to link a bank with it). "true" in
+  # ENABLE_BANKING_PRODUCTION_CONTRACT, only with a full production contract, lets every household
+  # use it.
+  ENABLE_BANKING_APP_ID: ""
+  ENABLE_BANKING_PRODUCTION_CONTRACT: ""
+
+  # ─── Crypto wallets (optional, off by default) ───────────────────────────────
+  # The https block explorer each chain reads wallet balances from: a mempool.space/Esplora API
+  # root (https://mempool.example.org/api) and a Blockscout root (https://blockscout.example.org).
+  # The explorer sees every address it is asked about and your server's IP; prefer your own node.
+  # Empty: no explorer is called and wallets are hidden. Prices come from MARKET_DATA_PROVIDERS.
+  CRYPTO_BTC_EXPLORER_URL: ""
+  CRYPTO_ETH_EXPLORER_URL: ""
+
+  # The bank providers to offer, comma-separated: enable_banking, simplefin. Empty: enable_banking
+  # alone; "none" turns bank sync off. SimpleFIN (US and Canadian banks, through the paid
+  # SimpleFIN Bridge each user subscribes to) is off until listed, as in "enable_banking,simplefin".
+  # Guide: https://docs.wonder.money/en/docs/self-hosting/simplefin
+  BANK_PROVIDERS: ""
+  # The hosts the server may call for SimpleFIN, comma-separated. Empty: the SimpleFIN Bridge
+  # (bridge.simplefin.org, beta-bridge.simplefin.org). Set it only for another SimpleFIN server.
+  SIMPLEFIN_BRIDGE_HOSTS: ""
+
+  # ─── Merchant logos (optional, off by default) ───────────────────────────────
+  # An https logo service address with {domain}, such as https://logos.example.com/{domain}.png.
+  # The API fetches the logos itself, so the service never sees your users. Empty: no lookup.
+  MERCHANT_LOGO_URL_TEMPLATE: ""
+
+  # ─── Mobile push notifications (optional, off by default) ────────────────────
+  # "true": the mobile app can register phones, and the API and worker send notifications through
+  # the Expo push service. EXPO_ACCESS_TOKEN goes in `secrets`, for an Expo project that requires
+  # one. Empty: off. See the docs' "Mobile app" page for which app builds your server can reach.
+  PUSH_ENABLED: ""
+
+  # ─── Contact form captcha (optional) ─────────────────────────────────────────
+  # RECAPTCHA_SECRET_KEY goes in `secrets`; the web app gets it too.
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ""
+
+  # ─── Error tracking (optional) ───────────────────────────────────────────────
+  SENTRY_DSN: ""
+  NEXT_PUBLIC_SENTRY_DSN: ""
+
+  # ─── Analytics (optional, off by default) ────────────────────────────────────
+  # POSTHOG_API_KEY goes in `secrets`.
+  NEXT_PUBLIC_GTM_ID: ""
+  NEXT_PUBLIC_POSTHOG_KEY: ""
+  ANALYTICS_OUTBOX_MODE: ""
+
+  # ─── Monitoring (optional) ───────────────────────────────────────────────────
+  HEALTH_MAX_JOB_AGE_MINUTES: ""
+
+# Credentials for the optional integrations, stored in a Secret the chart writes. Set only the
+# ones you use; empty values are left out.
+secrets:
+  GOOGLE_CLIENT_SECRET: ""
+  OIDC_CLIENT_SECRET: ""
+  SMTP_PASSWORD: ""
+  RESEND_API_KEY: ""
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
+  AI_API_KEY: ""
+  ANTHROPIC_API_KEY: ""
+  EODHD_API_KEY: ""
+  EXPO_ACCESS_TOKEN: ""
+  RECAPTCHA_SECRET_KEY: ""
+  POSTHOG_API_KEY: ""
+
+# The private key of the instance-wide Enable Banking application (`config.ENABLE_BANKING_APP_ID`),
+# from a Secret you manage, mounted read-only into the API and the worker:
+#   kubectl -n <namespace> create secret generic wondermoney-enable-banking \
+#     --from-file=private-key.pem=./enable-banking.pem
+enableBanking:
+  privateKeySecret: ""
+  privateKeySecretKey: private-key.pem
+
+# A Secret you manage (by hand, Sealed Secrets, External Secrets), read by the API and the
+# worker after everything above, so its keys win. Any setting can go in it, including the
+# generated secrets below.
+existingSecret: ""
+
+# The secrets the API refuses to start without: BETTER_AUTH_SECRET, CREDENTIAL_ENCRYPTION_KEY_V1,
+# EMAIL_OPT_OUT_SIGNING_SECRET, ADMIN_API_KEY and INTERNAL_SERVICE_API_KEY. The chart generates
+# the missing ones on install into the Secret <fullname>-generated (the install notes print
+# its name), keeps them on every upgrade, and Helm leaves that Secret in place on uninstall. A
+# key set in `secrets` above is not generated.
+#
+# Back up CREDENTIAL_ENCRYPTION_KEY_V1: without it, every stored bank credential is unreadable.
+#
+# Generation needs Helm to read the cluster (`lookup`). Tools that render the chart without a
+# cluster, such as Argo CD, would generate new secrets on every sync: set `enabled: false` there
+# and provide all five in `existingSecret`.
+generatedSecrets:
+  enabled: true
+
+# Your own Postgres (the compose install runs 16). Ignored with `postgresql.enabled`.
+database:
+  # A connection string, which wins over the fields below: for TLS, add ?sslmode=require.
+  url: ""
+  host: ""
+  port: 5432
+  name: wondermoney
+  user: wondermoney
+  # Stored in the chart's Secret. Or leave it empty and name a Secret you manage:
+  password: ""
+  existingSecret: ""
+  existingSecretPasswordKey: password
+  # When set, DATABASE_URL is read from this key of `existingSecret` instead.
+  existingSecretUrlKey: ""
+
+# A bundled Postgres: one StatefulSet with a volume, for small installs. Its password is
+# generated and kept like the secrets above. Back it up (the docs page, "Back up").
+postgresql:
+  enabled: false
+  image:
+    repository: postgres
+    tag: 16-alpine
+  auth:
+    database: wondermoney
+    username: wondermoney
+  persistence:
+    size: 8Gi
+    # Empty: the cluster's default StorageClass.
+    storageClass: ""
+    accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Serves the API and applies the database migrations when it starts.
+api:
+  image:
+    repository: ghcr.io/wondermoney/wondermoney-api
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+  # The first start creates the schema and loads the reference data, which takes a minute or two.
+  # The startup probe allows 10 minutes before liveness takes over.
+  startupProbe:
+    httpGet:
+      path: /v1/health
+      port: http
+    periodSeconds: 5
+    failureThreshold: 120
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: http
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 4
+  # The process is serving. `/v1/health/ready` is for uptime monitors, not this probe: it also
+  # fails when the worker or the job queue falls behind, which would take the whole app offline
+  # for a background problem.
+  readinessProbe:
+    httpGet:
+      path: /v1/health
+      port: http
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Background jobs: bank and price syncs, imports, scheduled emails. It runs the schedules, so
+# there is always exactly one: the chart has no replica setting for it and refuses one, and an
+# upgrade stops the old pod before starting the new one.
+worker:
+  image:
+    repository: ghcr.io/wondermoney/wondermoney-worker
+    tag: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+  # Health on port 3002 (/health): unhealthy when pg-boss has stopped or Postgres is unreachable.
+  startupProbe:
+    httpGet:
+      path: /health
+      port: health
+    periodSeconds: 5
+    failureThreshold: 60
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: health
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: health
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 3
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# The web app. It reads only the URLs, the NEXT_PUBLIC_ settings and RECAPTCHA_SECRET_KEY: never
+# the database password or the API's secrets.
+web:
+  image:
+    repository: ghcr.io/wondermoney/wondermoney-web
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+  startupProbe:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 5
+    failureThreshold: 60
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 4
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  # Empty: the cluster's default IngressClass.
+  className: ""
+  annotations: {}
+  # One hostname: /v1 and /api/auth go to the API, everything else to the web app.
+  host: money.example.com
+  # Two hostnames: the API gets its own, and `host` serves the web app only. Set
+  # AUTH_COOKIE_DOMAIN and NEXT_PUBLIC_AUTH_COOKIE_DOMAIN in `config` too.
+  apiHost: ""
+  # For example, with cert-manager (and its annotation above):
+  #   - secretName: wondermoney-tls
+  #     hosts: [money.example.com]
+  tls: []
+
+# More environment variables for the API and the worker, as container env entries.
+extraEnv: []
+# More environment variables for the web app.
+webExtraEnv: []

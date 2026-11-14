@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { type Kysely, type RawBuilder, sql } from 'kysely';
 
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { visibleAccountSql } from '@service/account/account-visibility-sql';
 import { buildInfo } from '@utils/constants';
 
 import { type ExportFileSource, writeExportArchive } from './export-archive';
@@ -27,10 +28,17 @@ import { EXPORT_FORMAT, EXPORT_FORMAT_VERSION, type ExportManifest } from './exp
  * - Merchants: only those the member can reach (on a visible transaction, in their own merchant
  *   categories or in a rule), never the household's whole merchant table, whose names would
  *   describe the other member's private spending.
- * - Manual assets (homes, vehicles): the household's shared ones and the member's own private ones
- *   (`ManualAsset.isPrivate`), each with its valuations. The other member's private assets are absent.
- * - Loans and the watchlist are personal in the app, so only the member's own.
- * - Categories, category settings, tags, budgets, goals and portfolios are household-wide.
+ * - Manual assets (homes, vehicles, crypto wallets): the household's shared ones and the member's
+ *   own private ones (`ManualAsset.isPrivate`), each with its valuations, and a wallet with its
+ *   public addresses and their tokens. The other member's private assets are absent.
+ * - Credit-card settings and installment plans follow their card: those of every exported account.
+ *   A transaction names the plan installment it pays only when the plan is in the export.
+ * - Loans, the watchlist, transaction templates and the account order are personal in the app, so
+ *   only the member's own.
+ * - Budgets: the household's budgets and the member's own personal ones (`Budget.ownerAppuserKey`),
+ *   each with its lines and incomes. The other member's personal budgets are absent.
+ * - Categories, category settings, tags, goals, portfolios and the household's own exchange rates and
+ *   security prices are household-wide.
  *
  * ## Never exported
  *
@@ -38,6 +46,9 @@ import { EXPORT_FORMAT, EXPORT_FORMAT_VERSION, type ExportManifest } from './exp
  * transaction ids, requisitions, sessions), auth data (sessions, 2FA, password hashes, external
  * user ids, API keys), audit logs, AI usage and enrichment state, analytics and email delivery
  * records. A formerly bank-linked account says so (`bankLinked`) without any of its connection.
+ * Nor are transaction attachments (the files and their metadata), assistant consents and proposals,
+ * import sessions and learned import mappings, rule-suggestion dismissals, or what the server derives
+ * again (portfolio snapshots, category statistics, categorization confidence, installment matching).
  *
  * ## Size
  *
@@ -110,6 +121,8 @@ class IdMap {
 const tsx = (col: string) => `to_char(${col} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`;
 /** A date column as `YYYY-MM-DD`. */
 const dx = (col: string) => `to_char(${col}, 'YYYY-MM-DD')`;
+/** A timestamptz column stored at 00:00 UTC for a calendar day (the overrides' `date`), as that `YYYY-MM-DD`. */
+const utcDay = (col: string) => `to_char(${col} at time zone 'UTC', 'YYYY-MM-DD')`;
 
 /** A numeric column read as text, trimmed of trailing zeros: `-12.3400` -> `-12.34`. */
 function dec(value: unknown): null | string {
@@ -146,12 +159,20 @@ class HouseholdExport {
   private readonly accountKeys: number[] = [];
   private accountRows: Row[] = [];
   private readonly accounts = new IdMap();
+  /** The exporting member's place for each account in their list, by account key. */
+  private accountPositions = new Map<number, number>();
+  /** Who each private account is shared with, among the exported members: `[appuserKey, access]`. */
+  private accountShares = new Map<number, [number, string][]>();
+  /** Each split account's ownership shares, `[appuserKey, basisPoints]`, in key order. */
+  private accountOwnership = new Map<number, [number, number][]>();
   private readonly budgets = new IdMap();
   private readonly categories = new IdMap();
   private categoryRows: Row[] = [];
   private currency: null | string = null;
   private readonly db: Db;
   private readonly goals = new IdMap();
+  private readonly groupMembers = new IdMap();
+  private readonly groups = new IdMap();
   private readonly loans = new IdMap();
   private readonly manualAssets = new IdMap();
   private memberRows: Row[] = [];
@@ -159,11 +180,13 @@ class HouseholdExport {
   private merchantRows: Row[] = [];
   private readonly merchants = new IdMap();
   private ownerAppuserKey: null | number = null;
+  private readonly plans = new IdMap();
   private portfolioRows: Row[] = [];
   private readonly portfolios = new IdMap();
   private readonly series = new IdMap();
   private readonly tags = new IdMap();
   private readonly transactions = new IdMap();
+  private readonly walletAddresses = new IdMap();
 
   constructor(em: EntityManager, private readonly scope: ExportScope, private readonly deps: HouseholdExportDeps = {}) {
     this.db = sqlQuery(em);
@@ -197,7 +220,7 @@ class HouseholdExport {
     for (const row of this.memberRows) this.members.add(row['appuser_key']);
 
     this.accountRows = await rowsOf(db, sql`
-      select a.account_key, a.account_name, a.account_number, a.holder_name, a.account_owner_appuser_key, a.is_private, a.closed,
+      select a.account_key, a.account_name, a.account_number, a.holder_name, a.account_owner_appuser_key, a.is_private, a.is_joint, a.closed,
         a.balance::text as balance, a.opening_balance::text as opening_balance, ${sql.raw(tsx('a.opening_balance_date'))} as opening_balance_date,
         ${sql.raw(tsx('a.created_at'))} as created_at,
         c.code as currency, at.description as account_type, fi.name as institution,
@@ -206,11 +229,29 @@ class HouseholdExport {
       left join currency c on c.currency_key = a.currency_key
       left join account_type at on at.account_type_key = a.account_type_key
       left join account_financial_institution fi on fi.account_financial_institution_key = a.account_financial_institution_key
-      where a.tenant_key = ${tenantKey} and a.deleted_at is null and (a.is_private = false or a.account_owner_appuser_key = ${appuserKey})
+      where a.tenant_key = ${tenantKey} and a.deleted_at is null and ${sql.raw(visibleAccountSql('a', appuserKey))}
       order by a.account_key`);
     for (const row of this.accountRows) {
       this.accounts.add(row['account_key']);
       this.accountKeys.push(Number(row['account_key']));
+    }
+    for (const row of await rowsOf(db, sql`
+      select account_key, position from appuser_account_position
+      where appuser_key = ${appuserKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by appuser_account_position_key`)) this.accountPositions.set(Number(row['account_key']), Number(row['position']));
+    for (const row of await rowsOf(db, sql`
+      select account_key, appuser_key, access from account_share
+      where tenant_key = ${tenantKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by account_key, appuser_key`)) {
+      // A share for someone no longer in the household is not exported: they have no member id.
+      if (!this.members.has(row['appuser_key'])) continue;
+      const key = Number(row['account_key']);
+      this.accountShares.set(key, [...(this.accountShares.get(key) ?? []), [Number(row['appuser_key']), String(row['access'])]]);
+    }
+
+    for (const row of await rowsOf(db, sql`
+      select account_key, appuser_key, basis_points from account_ownership
+      where tenant_key = ${tenantKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by account_key, appuser_key`)) {
+      const key = Number(row['account_key']);
+      this.accountOwnership.set(key, [...(this.accountOwnership.get(key) ?? []), [Number(row['appuser_key']), Number(row['basis_points'])]]);
     }
 
     // The household's own categories and the global system ones a restore resolves by name.
@@ -229,16 +270,20 @@ class HouseholdExport {
       where ${this.visibleTransaction('t')} ${limit(after, 't.transaction_key')}`)) this.transactions.add(row['k']);
 
     this.merchantRows = await rowsOf(db, sql`
-      select m.transaction_merchant_key, m.name, (m.tenant_key is null) as global
+      select m.transaction_merchant_key, m.name, m.website, m.logo_url, (m.tenant_key is null) as global
       from transaction_merchant m
       where m.deleted_at is null and (m.tenant_key = ${tenantKey} or m.tenant_key is null) and (
         m.transaction_merchant_key in (select t.transaction_merchant_key from "transaction" t where ${this.visibleTransaction('t')})
         or exists (select 1 from appuser_merchant_category amc where amc.transaction_merchant_key = m.transaction_merchant_key and amc.appuser_key = ${appuserKey} and amc.deleted_at is null)
+        or m.transaction_merchant_key in (select tt.transaction_merchant_key from transaction_template tt where tt.tenant_key = ${tenantKey} and tt.owner_appuser_key = ${appuserKey} and tt.deleted_at is null)
         or m.transaction_merchant_key = any(${await this.ruleMerchantKeys()}))
       order by m.transaction_merchant_key`);
     for (const row of this.merchantRows) this.merchants.add(row['transaction_merchant_key']);
 
-    for (const row of await rowsOf(db, sql`select budget_key from budget where tenant_key = ${tenantKey} and deleted_at is null order by budget_key`)) this.budgets.add(row['budget_key']);
+    for (const row of await rowsOf(db, sql`
+      select budget_key from budget
+      where tenant_key = ${tenantKey} and deleted_at is null and (owner_appuser_key is null or owner_appuser_key = ${appuserKey})
+      order by budget_key`)) this.budgets.add(row['budget_key']);
     for (const row of await rowsOf(db, sql`select loan_key from loan where tenant_key = ${tenantKey} and owner_appuser_key = ${appuserKey} and deleted_at is null order by loan_key`)) this.loans.add(row['loan_key']);
     for (const row of await rowsOf(db, sql`
       select manual_asset_key from manual_asset
@@ -247,7 +292,7 @@ class HouseholdExport {
     for (const row of await rowsOf(db, sql`select goal_key from goal where tenant_key = ${tenantKey} and deleted_at is null order by goal_key`)) this.goals.add(row['goal_key']);
     this.portfolioRows = await rowsOf(db, sql`
       select p.portfolio_key, p.name, p.description, p.benchmark_symbol, ${sql.raw(tsx('p.closed_at'))} as closed_at, p.excluded, p.favored,
-        p.target_allocation, p.account_balance_mode, p.linked_account_key, p.portfolio_owner_appuser_key, c.code as currency, ${sql.raw(tsx('p.created_at'))} as created_at
+        p.target_allocation, p.account_balance_mode, p.cost_basis_method, p.linked_account_key, p.portfolio_owner_appuser_key, c.code as currency, ${sql.raw(tsx('p.created_at'))} as created_at
       from portfolio p left join currency c on c.currency_key = p.currency_key
       where p.tenant_key = ${tenantKey} and p.deleted_at is null
       order by p.portfolio_key`);
@@ -256,6 +301,10 @@ class HouseholdExport {
       select rs.recurring_series_key from recurring_series rs
       where rs.tenant_key = ${tenantKey} and rs.deleted_at is null and (rs.account_key is null or rs.account_key = any(${this.accountKeys}))
       order by rs.recurring_series_key`)) this.series.add(row['recurring_series_key']);
+    for (const row of await rowsOf(db, sql`
+      select installment_plan_key from installment_plan
+      where tenant_key = ${tenantKey} and deleted_at is null and account_key = any(${this.accountKeys})
+      order by installment_plan_key`)) this.plans.add(row['installment_plan_key']);
   }
 
   /** The archive's files, in the order they are written. Call {@link prepare} first. */
@@ -264,6 +313,7 @@ class HouseholdExport {
       { format: 'json', path: 'data/members.json', rows: () => this.memberJson() },
       { format: 'json', path: 'data/preferences.json', rows: () => this.preferences() },
       { format: 'json', path: 'data/accounts.json', rows: () => this.accountJson() },
+      { format: 'json', path: 'data/credit-cards.json', rows: () => this.creditCards() },
       { format: 'json', path: 'data/categories.json', rows: () => this.categoryJson() },
       { format: 'json', path: 'data/category-settings.json', rows: () => this.categorySettings() },
       { format: 'json', path: 'data/merchants.json', rows: () => this.merchantJson() },
@@ -271,8 +321,16 @@ class HouseholdExport {
       { format: 'json', path: 'data/tags.json', rows: () => this.tagJson() },
       { format: 'json', path: 'data/transactions.json', rows: () => this.transactionJson() },
       { format: 'json', path: 'data/transaction-categories.json', rows: () => this.transactionCategories() },
+      { format: 'json', path: 'data/expense-groups.json', rows: () => this.expenseGroups() },
+      { format: 'json', path: 'data/expense-group-members.json', rows: () => this.expenseGroupMembers() },
       { format: 'json', path: 'data/transaction-splits.json', rows: () => this.transactionSplits() },
+      { format: 'json', path: 'data/expense-group-expenses.json', rows: () => this.expenseGroupExpenses() },
+      { format: 'json', path: 'data/expense-group-settlements.json', rows: () => this.expenseGroupSettlements() },
+      { format: 'json', path: 'data/transaction-reimbursements.json', rows: () => this.transactionReimbursements() },
       { format: 'json', path: 'data/transaction-tags.json', rows: () => this.transactionTags() },
+      { format: 'json', path: 'data/installment-plans.json', rows: () => this.installmentPlans() },
+      { format: 'json', path: 'data/installments.json', rows: () => this.installments() },
+      { format: 'json', path: 'data/transaction-templates.json', rows: () => this.transactionTemplates() },
       { format: 'json', path: 'data/rules.json', rows: () => this.rules() },
       { format: 'json', path: 'data/recurring-series.json', rows: () => this.recurringSeries() },
       { format: 'json', path: 'data/recurring-occurrences.json', rows: () => this.recurringOccurrences() },
@@ -285,11 +343,16 @@ class HouseholdExport {
       { format: 'json', path: 'data/goal-transaction-fundings.json', rows: () => this.goalFundings() },
       { format: 'json', path: 'data/loans.json', rows: () => this.loanJson() },
       { format: 'json', path: 'data/loan-adjustments.json', rows: () => this.loanAdjustments() },
+      { format: 'json', path: 'data/loan-rate-periods.json', rows: () => this.loanRatePeriods() },
       { format: 'json', path: 'data/loan-repayments.json', rows: () => this.loanRepayments() },
       { format: 'json', path: 'data/manual-assets.json', rows: () => this.manualAssetJson() },
       { format: 'json', path: 'data/manual-asset-valuations.json', rows: () => this.manualAssetValuations() },
+      { format: 'json', path: 'data/crypto-wallet-addresses.json', rows: () => this.walletAddressJson() },
+      { format: 'json', path: 'data/crypto-wallet-tokens.json', rows: () => this.walletTokens() },
       { format: 'json', path: 'data/portfolios.json', rows: () => this.portfolioJson() },
       { format: 'json', path: 'data/portfolio-transactions.json', rows: () => this.portfolioTransactionJson() },
+      { format: 'json', path: 'data/price-overrides.json', rows: () => this.priceOverrides() },
+      { format: 'json', path: 'data/exchange-rate-overrides.json', rows: () => this.exchangeRateOverrides() },
       { format: 'json', path: 'data/watchlist.json', rows: () => this.watchlist() },
       { format: 'csv', header: ACCOUNT_CSV_HEADER, path: 'csv/accounts.csv', rows: () => this.accountCsv() },
       { format: 'csv', header: TRANSACTION_CSV_HEADER, path: 'csv/transactions.csv', rows: () => this.transactionCsv() },
@@ -333,16 +396,38 @@ class HouseholdExport {
         holderName: str(row['holder_name']),
         id: this.accounts.get(row['account_key']),
         institution: str(row['institution']),
+        // A joint account's money is Shared in reports (1.10).
+        isJoint: bool(row['is_joint']),
         isPrivate: bool(row['is_private']),
         name: str(row['account_name']),
         openingBalance: dec(row['opening_balance']),
         openingBalanceDate: str(row['opening_balance_date']),
         ownerMemberId: this.members.get(row['account_owner_appuser_key']),
+        // The exporting member's place for the account in their list; null when unordered.
+        position: this.accountPositions.get(Number(row['account_key'])) ?? null,
+        // Each member's share of the account in per-member net worth (1.13); empty when it has none.
+        ownership: this.ownershipOf(Number(row['account_key'])),
+        // Who else sees a private account, and whether they may change it. Empty for a shared one.
+        shares: bool(row['is_private']) ? (this.accountShares.get(Number(row['account_key'])) ?? []).map(([appuserKey, access]) => ({ access, memberId: this.members.get(appuserKey) })) : [],
         type: str(row['account_type']),
       };
     }
   }
 
+  /**
+   * An account's ownership shares by member id. The shares of people no longer in the household have
+   * no member id: they are one entry with `memberId: null`, Shared, so the shares still add up to 10000.
+   */
+  private ownershipOf(accountKey: number): { basisPoints: number; memberId: null | number }[] {
+    const byMember = new Map<null | number, number>();
+    for (const [appuserKey, basisPoints] of this.accountOwnership.get(accountKey) ?? []) {
+      const memberId = this.members.get(appuserKey);
+      byMember.set(memberId, (byMember.get(memberId) ?? 0) + basisPoints);
+    }
+    return [...byMember].map(([memberId, basisPoints]) => ({ basisPoints, memberId }));
+  }
+
+  /** The statement cycle, limit and minimum payment of every exported card account. */
   private *categoryJson() {
     for (const row of this.categoryRows) {
       yield {
@@ -367,6 +452,21 @@ class HouseholdExport {
     for (const row of rows) {
       const categoryId = this.categories.get(row['category_key']);
       if (categoryId !== null) yield { categoryId, countsAsSpending: bool(row['counts_as_spending']) };
+    }
+  }
+
+  private async* creditCards() {
+    const rows = await rowsOf(this.db, sql`
+      select account_key, statement_close_day, payment_due_day, credit_limit::text as credit_limit, minimum_payment_percent::text as minimum_payment_percent
+      from credit_card_detail where tenant_key = ${this.scope.tenantKey} and deleted_at is null and account_key = any(${this.accountKeys}) order by account_key`);
+    for (const row of rows) {
+      yield {
+        accountId: this.accounts.get(row['account_key']),
+        creditLimit: dec(row['credit_limit']),
+        minimumPaymentPercent: dec(row['minimum_payment_percent']),
+        paymentDueDay: int(row['payment_due_day']),
+        statementCloseDay: int(row['statement_close_day']),
+      };
     }
   }
 
@@ -397,13 +497,14 @@ class HouseholdExport {
   }
 
   private *merchantJson() {
-    for (const row of this.merchantRows) yield { global: bool(row['global']), id: this.merchants.get(row['transaction_merchant_key']), name: str(row['name']) };
+    for (const row of this.merchantRows) yield { global: bool(row['global']), id: this.merchants.get(row['transaction_merchant_key']), logoUrl: str(row['logo_url']), name: str(row['name']), website: str(row['website']) };
   }
 
   private async* preferences() {
     const [user] = await rowsOf(this.db, sql`
       select au.language, c.code as currency, ${sql.raw(tsx('au.onboarding_completed_at'))} as onboarding_completed_at, ${sql.raw(tsx('au.marketing_opt_in'))} as marketing_opt_in, ${sql.raw(tsx('au.marketing_opt_out'))} as marketing_opt_out,
-        enp.weekly_insights_enabled, enp.monthly_story_enabled, enp.budget_alerts_enabled, enp.growth_emails_enabled, enp.account_recovery_enabled, enp.bank_sync_alerts_enabled
+        enp.weekly_insights_enabled, enp.monthly_story_enabled, enp.budget_alerts_enabled, enp.growth_emails_enabled, enp.account_recovery_enabled, enp.bank_sync_alerts_enabled,
+        enp.credit_card_due_reminders_enabled
       from appuser au
       left join currency c on c.currency_key = au.currency_key
       left join email_notification_preference enp on enp.appuser_key = au.appuser_key and enp.deleted_at is null
@@ -416,6 +517,7 @@ class HouseholdExport {
         accountRecovery: flag(user['account_recovery_enabled']),
         bankSyncAlerts: flag(user['bank_sync_alerts_enabled']),
         budgetAlerts: flag(user['budget_alerts_enabled']),
+        creditCardDueReminders: flag(user['credit_card_due_reminders_enabled']),
         growthEmails: flag(user['growth_emails_enabled']),
         monthlyStory: flag(user['monthly_story_enabled']),
         weeklyInsights: flag(user['weekly_insights_enabled']),
@@ -451,6 +553,10 @@ class HouseholdExport {
     for await (const row of this.transactionRows()) {
       yield {
         accountId: this.accounts.get(row['account_key']),
+        // "Spent by" (1.10): the member the row is attributed to, or Shared; neither follows the account.
+        // Someone no longer in the household is not in `members.json` and reads as none.
+        attributedMemberId: this.members.get(row['attributed_appuser_key']),
+        attributedToShared: bool(row['attributed_to_shared']),
         balance: dec(row['balance']),
         bankSynced: bool(row['bank_synced']),
         createdAt: str(row['created_at']),
@@ -461,6 +567,11 @@ class HouseholdExport {
         editedSettlementAmount: dec(row['edited_settlement_amount']),
         hidden: bool(row['hidden']),
         id: this.transactions.get(row['k']),
+        // The plan installment this posted row pays, set together; both null on every other row.
+        installmentNumber: this.plans.has(row['installment_plan_key']) ? int(row['installment_number']) : null,
+        installmentPlanId: this.plans.get(row['installment_plan_key']),
+        // The plan a member unlinked this row from by hand, which the automatic linker leaves alone.
+        installmentUnlinkedPlanId: this.plans.get(row['installment_unlinked_plan_key']),
         memberId: this.members.get(row['appuser_key']),
         merchantEditedByUser: bool(row['merchant_edited_by_user']),
         merchantId: this.merchants.get(row['transaction_merchant_key']),
@@ -471,12 +582,14 @@ class HouseholdExport {
         settlementAmount: dec(row['settlement_amount']),
         settlementCurrency: str(row['settlement_currency']),
         settlementExchangeRate: dec(row['settlement_exchange_rate']),
+        statementDateOverride: str(row['statement_date_override']),
         status: str(row['status']),
         // Only references the member can see: a counterpart on a hidden account reads as none.
         transferCounterpartId: this.transactions.get(row['transfer_counterpart_key']),
         transferDestinationAccountId: this.accounts.get(row['transfer_destination_account_key']),
         transferDestinationGoalId: this.goals.get(row['transfer_destination_goal_key']),
         transferDestinationPortfolioId: this.portfolios.get(row['transfer_destination_portfolio_key']),
+        transferExchangeRate: this.transactions.has(row['transfer_counterpart_key']) ? dec(row['transfer_exchange_rate']) : null,
         type: str(row['type']),
         uneditedSettlementAmount: dec(row['unedited_settlement_amount']),
         userAmount: dec(row['appuser_settlement_amount']),
@@ -494,8 +607,9 @@ class HouseholdExport {
         t.settlement_amount::text as settlement_amount, sc.code as settlement_currency, t.settlement_exchange_rate::text as settlement_exchange_rate,
         t.edited_settlement_amount::text as edited_settlement_amount, t.unedited_settlement_amount::text as unedited_settlement_amount,
         t.appuser_settlement_amount::text as appuser_settlement_amount, ac.code as appuser_currency, t.appuser_currency_exchange_rate::text as appuser_currency_exchange_rate,
-        t.balance::text as balance, t.hidden, t.reviewed, t.description_edited_by_user, t.merchant_edited_by_user,
+        t.balance::text as balance, t.hidden, t.reviewed, t.description_edited_by_user, t.merchant_edited_by_user, t.attributed_appuser_key, t.attributed_to_shared,
         t.transfer_counterpart_key, t.transfer_destination_account_key, t.transfer_destination_goal_key, t.transfer_destination_portfolio_key,
+        t.transfer_exchange_rate::text as transfer_exchange_rate, t.installment_plan_key, t.installment_number, t.installment_unlinked_plan_key, ${sql.raw(dx('t.statement_date_override'))} as statement_date_override,
         (t.enable_banking_transaction_id is not null or t.nordigen_internal_transaction_id is not null) as bank_synced,
         ${sql.raw(tsx('t.created_at'))} as created_at
       from "transaction" t
@@ -509,13 +623,98 @@ class HouseholdExport {
 
   private async* transactionSplits() {
     const rows = paged(this.db, (after) => sql`
-      select s.transaction_split_key as k, s.transaction_key, s.category_key, s.amount::text as amount, s.notes, s.position
+      select s.transaction_split_key as k, s.transaction_key, s.category_key, s.amount::text as amount, s.notes, s.position, s.expense_group_member_key
       from transaction_split s join "transaction" t on t.transaction_key = s.transaction_key
       where s.deleted_at is null and s.tenant_key = ${this.scope.tenantKey} and ${this.visibleTransaction('t')} ${limit(after, 's.transaction_split_key')}`);
     let id = 0;
     for await (const row of rows) {
       id += 1;
-      yield { amount: dec(row['amount']), categoryId: this.categories.get(row['category_key']), id, notes: str(row['notes']), position: int(row['position']), transactionId: this.transactions.get(row['transaction_key']) };
+      yield { amount: dec(row['amount']), categoryId: this.categories.get(row['category_key']), id, memberId: this.groupMembers.get(row['expense_group_member_key']), notes: str(row['notes']), position: int(row['position']), transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  // --- expense groups ---
+
+  /** The household's live groups. Read before the split lines, which name their members. */
+  private async* expenseGroups() {
+    const rows = await rowsOf(this.db, sql`
+      select g.expense_group_key, g.name, g.archived, c.code as currency, ${sql.raw(tsx('g.created_at'))} as created_at
+      from expense_group g join currency c on c.currency_key = g.currency_key
+      where g.tenant_key = ${this.scope.tenantKey} and g.deleted_at is null order by g.expense_group_key`);
+    for (const row of rows) yield { archived: bool(row['archived']), createdAt: str(row['created_at']), currency: str(row['currency']), id: this.groups.add(row['expense_group_key']), name: str(row['name']) };
+  }
+
+  /** The groups' live members; a person of the household names their member, anyone else none. */
+  private async* expenseGroupMembers() {
+    const rows = await rowsOf(this.db, sql`
+      select m.expense_group_member_key, m.expense_group_key, m.name, m.email, m.appuser_key, m.position
+      from expense_group_member m join expense_group g on g.expense_group_key = m.expense_group_key
+      where m.tenant_key = ${this.scope.tenantKey} and m.deleted_at is null and g.deleted_at is null order by m.expense_group_member_key`);
+    for (const row of rows) {
+      yield {
+        email: str(row['email']),
+        groupId: this.groups.get(row['expense_group_key']),
+        householdMemberId: this.members.get(row['appuser_key']),
+        id: this.groupMembers.add(row['expense_group_member_key']),
+        name: str(row['name']),
+        position: int(row['position']),
+      };
+    }
+  }
+
+  /** Shared expenses whose transaction is in the export (one on a private account left out is left out too). */
+  private async* expenseGroupExpenses() {
+    const rows = await rowsOf(this.db, sql`
+      select e.expense_group_key, e.transaction_key, e.paid_by_member_key, e.split_method
+      from expense_group_expense e join "transaction" t on t.transaction_key = e.transaction_key
+      where e.tenant_key = ${this.scope.tenantKey} and e.deleted_at is null and ${this.visibleTransaction('t')} order by e.expense_group_expense_key`);
+    for (const row of rows) {
+      const groupId = this.groups.get(row['expense_group_key']);
+      const paidByMemberId = this.groupMembers.get(row['paid_by_member_key']);
+      if (groupId === null || paidByMemberId === null) continue;
+      yield { groupId, paidByMemberId, splitMethod: str(row['split_method']), transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  /** Every live settlement; the link to a transaction only when that transaction is in the export. */
+  private async* expenseGroupSettlements() {
+    const rows = await rowsOf(this.db, sql`
+      select s.expense_group_key, s.from_member_key, s.to_member_key, s.amount::text as amount, c.code as currency, ${sql.raw(dx('s.settled_on'))} as settled_on,
+        s.notes, s.transaction_key, ${sql.raw(tsx('s.created_at'))} as created_at
+      from expense_group_settlement s join currency c on c.currency_key = s.currency_key
+      where s.tenant_key = ${this.scope.tenantKey} and s.deleted_at is null order by s.expense_group_settlement_key`);
+    for (const row of rows) {
+      const groupId = this.groups.get(row['expense_group_key']);
+      const fromMemberId = this.groupMembers.get(row['from_member_key']);
+      const toMemberId = this.groupMembers.get(row['to_member_key']);
+      if (groupId === null || fromMemberId === null || toMemberId === null) continue;
+      yield {
+        amount: dec(row['amount']),
+        createdAt: str(row['created_at']),
+        currency: str(row['currency']),
+        fromMemberId,
+        groupId,
+        notes: str(row['notes']),
+        settledOn: str(row['settled_on']),
+        toMemberId,
+        transactionId: this.transactions.get(row['transaction_key']),
+      };
+    }
+  }
+
+  /** Live links whose two sides are both in the export (a link to a row left out is left out too). */
+  private async* transactionReimbursements() {
+    const rows = paged(this.db, (after) => sql`
+      select r.transaction_reimbursement_key as k, r.expense_transaction_key, r.reimbursement_transaction_key, r.amount::text as amount,
+        ${sql.raw(tsx('r.created_at'))} as created_at
+      from transaction_reimbursement r
+      join "transaction" e on e.transaction_key = r.expense_transaction_key
+      join "transaction" t on t.transaction_key = r.reimbursement_transaction_key
+      where r.deleted_at is null and r.tenant_key = ${this.scope.tenantKey} and ${this.visibleTransaction('e')} and ${this.visibleTransaction('t')} ${limit(after, 'r.transaction_reimbursement_key')}`);
+    let id = 0;
+    for await (const row of rows) {
+      id += 1;
+      yield { amount: dec(row['amount']), createdAt: str(row['created_at']), expenseTransactionId: this.transactions.get(row['expense_transaction_key']), id, reimbursementTransactionId: this.transactions.get(row['reimbursement_transaction_key']) };
     }
   }
 
@@ -527,6 +726,73 @@ class HouseholdExport {
     for await (const row of rows) {
       const tagId = this.tags.get(row['tag_key']);
       if (tagId !== null) yield { tagId, transactionId: this.transactions.get(row['transaction_key']) };
+    }
+  }
+
+  // --- installment plans and templates ---
+
+  /** Purchases paid in installments on an exported card. */
+  private async* installmentPlans() {
+    const rows = await rowsOf(this.db, sql`
+      select installment_plan_key, account_key, category_key, created_by_appuser_key, description, installment_count,
+        ${sql.raw(dx('purchase_date'))} as purchase_date, total_amount::text as total_amount, ${sql.raw(tsx('created_at'))} as created_at
+      from installment_plan where installment_plan_key = any(${this.plans.keys()}) order by installment_plan_key`);
+    for (const row of rows) {
+      yield {
+        accountId: this.accounts.get(row['account_key']),
+        categoryId: this.categories.get(row['category_key']),
+        createdAt: str(row['created_at']),
+        createdByMemberId: this.members.get(row['created_by_appuser_key']),
+        description: str(row['description']),
+        id: this.plans.get(row['installment_plan_key']),
+        installmentCount: int(row['installment_count']),
+        purchaseDate: str(row['purchase_date']),
+        totalAmount: dec(row['total_amount']),
+      };
+    }
+  }
+
+  /** Each plan's schedule: the day and amount of every installment, and the statement it falls in. */
+  private async* installments() {
+    const rows = await rowsOf(this.db, sql`
+      select installment_plan_key, installment_number, amount::text as amount, ${sql.raw(dx('scheduled_date'))} as scheduled_date,
+        ${sql.raw(dx('statement_date'))} as statement_date, ${sql.raw(dx('due_date'))} as due_date
+      from installment where tenant_key = ${this.scope.tenantKey} and deleted_at is null and installment_plan_key = any(${this.plans.keys()})
+      order by installment_plan_key, installment_number`);
+    for (const row of rows) {
+      yield {
+        amount: dec(row['amount']),
+        dueDate: str(row['due_date']),
+        installmentNumber: int(row['installment_number']),
+        planId: this.plans.get(row['installment_plan_key']),
+        scheduledDate: str(row['scheduled_date']),
+        statementDate: str(row['statement_date']),
+      };
+    }
+  }
+
+  /** The member's own saved entries; a reference the export does not hold reads as none. */
+  private async* transactionTemplates() {
+    const rows = await rowsOf(this.db, sql`
+      select account_key, amount::text as amount, category_key, description, direction, name, notes, position, transaction_merchant_key
+      from transaction_template where tenant_key = ${this.scope.tenantKey} and owner_appuser_key = ${this.scope.appuserKey} and deleted_at is null
+      order by position, transaction_template_key`);
+    let id = 0;
+    for (const row of rows) {
+      id += 1;
+      yield {
+        accountId: this.accounts.get(row['account_key']),
+        amount: dec(row['amount']),
+        categoryId: this.categories.get(row['category_key']),
+        description: str(row['description']),
+        direction: str(row['direction']),
+        id,
+        memberId: this.members.get(this.scope.appuserKey),
+        merchantId: this.merchants.get(row['transaction_merchant_key']),
+        name: str(row['name']),
+        notes: str(row['notes']),
+        position: int(row['position']),
+      };
     }
   }
 
@@ -652,7 +918,7 @@ class HouseholdExport {
 
   private async* budgetCategories() {
     const rows = paged(this.db, (after) => sql`
-      select btc.budget_template_category_key as k, btc.budget_key, btc.category_key, btc.year, btc.month, btc.amount_budgeted::text as amount_budgeted, btc.recurrency,
+      select btc.budget_template_category_key as k, btc.budget_key, btc.category_key, btc.year, btc.month, btc.amount_budgeted::text as amount_budgeted, btc.recurrency, btc.rollover_enabled,
         coalesce((select array_agg(l.account_account_key order by l.account_account_key) from budget_template_category_accounts l
           where l.budget_template_category_budget_template_category_key = btc.budget_template_category_key), '{}') as account_keys
       from budget_template_category btc
@@ -668,6 +934,7 @@ class HouseholdExport {
         categoryId,
         month: int(row['month']),
         recurrency: str(row['recurrency']),
+        rolloverEnabled: bool(row['rollover_enabled']),
         year: int(row['year']),
       };
     }
@@ -682,11 +949,11 @@ class HouseholdExport {
 
   private async* budgetJson() {
     const rows = await rowsOf(this.db, sql`
-      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.appuser_key, c.code as currency
+      select b.budget_key, b.name, b.description, b.num_adults, b.num_dependents, b.period_start_day, b.rollover_carries_overspend, b.appuser_key, b.owner_appuser_key, c.code as currency
       from budget b left join currency c on c.currency_key = b.currency_key
       where b.budget_key = any(${this.budgets.keys()}) order by b.budget_key`);
     for (const row of rows) {
-      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']) };
+      yield { currency: str(row['currency']), description: str(row['description']), id: this.budgets.get(row['budget_key']), memberId: this.members.get(row['appuser_key']), name: str(row['name']), numAdults: int(row['num_adults']), numDependents: int(row['num_dependents']), ownerMemberId: this.members.get(row['owner_appuser_key']), periodStartDay: int(row['period_start_day']), rolloverCarriesOverspend: bool(row['rollover_carries_overspend']) };
     }
   }
 
@@ -785,13 +1052,16 @@ class HouseholdExport {
       select l.loan_key, l.name, l.type, l.status, l.rate_type, l.payment_frequency, l.provider_name, l.notes, l.include_in_net_worth,
         l.opening_principal_balance::text as opening_principal_balance, ${sql.raw(dx('l.opening_balance_date'))} as opening_balance_date,
         l.original_principal::text as original_principal, l.annual_interest_rate_bps, l.regular_payment_amount::text as regular_payment_amount,
-        l.payment_day_of_month, l.term_months, ${sql.raw(dx('l.maturity_date'))} as maturity_date, c.code as currency
+        l.payment_day_of_month, l.term_months, ${sql.raw(dx('l.maturity_date'))} as maturity_date, l.secured_asset_key, c.code as currency,
+        l.amortization_method, ${sql.raw(dx('l.first_payment_date'))} as first_payment_date
       from loan l left join currency c on c.currency_key = l.currency_key
       where l.loan_key = any(${this.loans.keys()}) order by l.loan_key`);
     for (const row of rows) {
       yield {
+        amortizationMethod: str(row['amortization_method']),
         annualInterestRateBps: int(row['annual_interest_rate_bps']),
         currency: str(row['currency']),
+        firstPaymentDate: str(row['first_payment_date']),
         id: this.loans.get(row['loan_key']),
         includeInNetWorth: bool(row['include_in_net_worth']),
         maturityDate: str(row['maturity_date']),
@@ -806,11 +1076,20 @@ class HouseholdExport {
         providerName: str(row['provider_name']),
         rateType: str(row['rate_type']),
         regularPaymentAmount: dec(row['regular_payment_amount']),
+        // Null when the asset is not in this export (the other member's private one).
+        securedAssetId: this.manualAssets.get(row['secured_asset_key']),
         status: str(row['status']),
         termMonths: int(row['term_months']),
         type: str(row['type']),
       };
     }
+  }
+
+  private async* loanRatePeriods() {
+    const rows = await rowsOf(this.db, sql`
+      select loan_key, ${sql.raw(dx('effective_date'))} as effective_date, annual_interest_rate_bps from loan_rate_period
+      where deleted_at is null and loan_key = any(${this.loans.keys()}) order by loan_key, effective_date`);
+    for (const row of rows) yield { annualInterestRateBps: int(row['annual_interest_rate_bps']), effectiveDate: str(row['effective_date']), loanId: this.loans.get(row['loan_key']) };
   }
 
   private async* loanRepayments() {
@@ -873,6 +1152,43 @@ class HouseholdExport {
     for (const row of rows) yield { date: str(row['valuation_date']), manualAssetId: this.manualAssets.get(row['manual_asset_key']), note: str(row['note']), value: dec(row['value']) };
   }
 
+  /** A crypto wallet's public addresses (never anything secret: only public values are ever stored). */
+  private async* walletAddressJson() {
+    const rows = await rowsOf(this.db, sql`
+      select crypto_wallet_address_key, manual_asset_key, chain, address_kind, address, label from crypto_wallet_address
+      where deleted_at is null and tenant_key = ${this.scope.tenantKey} and manual_asset_key = any(${this.manualAssets.keys()})
+      order by crypto_wallet_address_key`);
+    for (const row of rows) {
+      yield {
+        address: str(row['address']),
+        chain: str(row['chain']),
+        id: this.walletAddresses.add(row['crypto_wallet_address_key']),
+        kind: str(row['address_kind']),
+        label: str(row['label']),
+        manualAssetId: this.manualAssets.get(row['manual_asset_key']),
+      };
+    }
+  }
+
+  /** The coins and tokens each address held at its last sync, and whether they count. */
+  private async* walletTokens() {
+    const rows = await rowsOf(this.db, sql`
+      select crypto_wallet_address_key, token_ref, symbol, name, decimals, raw_balance::text as raw_balance, tracked from crypto_wallet_token
+      where deleted_at is null and tenant_key = ${this.scope.tenantKey} and crypto_wallet_address_key = any(${this.walletAddresses.keys()})
+      order by crypto_wallet_address_key, crypto_wallet_token_key`);
+    for (const row of rows) {
+      yield {
+        addressId: this.walletAddresses.get(row['crypto_wallet_address_key']),
+        balance: str(row['raw_balance']),
+        contractAddress: row['token_ref'] === 'native' ? null : str(row['token_ref']),
+        decimals: Number(row['decimals']),
+        name: str(row['name']),
+        symbol: str(row['symbol']),
+        tracked: bool(row['tracked']),
+      };
+    }
+  }
+
   // --- portfolios ---
 
   private *portfolioJson() {
@@ -883,6 +1199,7 @@ class HouseholdExport {
         accountBalanceMode: linkedAccountId === null ? null : str(row['account_balance_mode']),
         benchmarkSymbol: str(row['benchmark_symbol']),
         closedAt: str(row['closed_at']),
+        costBasisMethod: str(row['cost_basis_method']),
         createdAt: str(row['created_at']),
         currency: str(row['currency']),
         description: str(row['description']),
@@ -944,6 +1261,45 @@ class HouseholdExport {
       left join financial_broker fb on fb.financial_broker_key = ft.financial_broker_key
       left join certificado_aforro_subscription_detail ca on ca.transaction_key = ft.transaction_key
       where ft.tenant_key = ${this.scope.tenantKey} and ft.deleted_at is null and ft.portfolio_key = any(${this.portfolios.keys()}) ${limit(after, 'ft.transaction_key')}`);
+  }
+
+  /** The household's own prices, per security and day, in the security's currency. */
+  private async* priceOverrides() {
+    const rows = await rowsOf(this.db, sql`
+      select ${sql.raw(utcDay('o.date'))} as date, o.price::text as price, c.code as currency, o.note, o.created_by_appuser_key,
+        fa.symbol, fa.name as asset_name, fa.isin, fat.name as asset_type, fae.acronym as exchange, ac.code as asset_currency
+      from financial_asset_price_override o
+      join financial_asset fa on fa.financial_asset_key = o.financial_asset_key
+      left join financial_asset_type fat on fat.financial_asset_type_key = fa.financial_asset_type_key
+      left join financial_asset_exchange fae on fae.financial_asset_exchange_key = fa.financial_asset_exchange_key
+      left join currency ac on ac.currency_key = fa.currency_key
+      left join currency c on c.currency_key = o.currency_key
+      where o.tenant_key = ${this.scope.tenantKey} and o.deleted_at is null
+      order by o.financial_asset_key, o.date`);
+    for (const row of rows) {
+      yield {
+        asset: { currency: str(row['asset_currency']), exchange: str(row['exchange']), isin: str(row['isin']), name: str(row['asset_name']), symbol: str(row['symbol']), type: str(row['asset_type']) },
+        createdByMemberId: this.members.get(row['created_by_appuser_key']),
+        currency: str(row['currency']),
+        date: str(row['date']),
+        note: str(row['note']),
+        price: dec(row['price']),
+      };
+    }
+  }
+
+  /** The household's own exchange rates: units of `toCurrency` for one `fromCurrency`, per day. */
+  private async* exchangeRateOverrides() {
+    const rows = await rowsOf(this.db, sql`
+      select ${sql.raw(utcDay('o.date'))} as date, o.rate::text as rate, f.code as from_currency, t.code as to_currency, o.created_by_appuser_key
+      from exchange_rate_override o
+      join currency f on f.currency_key = o.from_currency_key
+      join currency t on t.currency_key = o.to_currency_key
+      where o.tenant_key = ${this.scope.tenantKey} and o.deleted_at is null
+      order by o.date, f.code, t.code`);
+    for (const row of rows) {
+      yield { createdByMemberId: this.members.get(row['created_by_appuser_key']), date: str(row['date']), fromCurrency: str(row['from_currency']), rate: dec(row['rate']), toCurrency: str(row['to_currency']) };
+    }
   }
 
   private async* watchlist() {

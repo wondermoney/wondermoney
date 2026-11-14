@@ -29,6 +29,8 @@
       "interestRate": "Interest rate",
       "installment": "Monthly installment",
       "termMonths": "Term (months)",
+      "amortizationMethod": "Amortization method",
+      "amortizationMethodHint": "French keeps the payment level; constant principal pays the same principal each month, so the payment falls.",
       "startDate": "Start date",
       "dueDate": "Due date",
       "linkedAccount": "Linked account",
@@ -37,7 +39,12 @@
       "interestRatePlaceholder": "0.00",
       "termMonthsPlaceholder": "e.g. 360",
       "startDatePlaceholder": "Pick the start date",
-      "notesPlaceholder": "Anything worth remembering about this loan"
+      "notesPlaceholder": "Anything worth remembering about this loan",
+      "rateType": "Rate type",
+      "rateTypeVariableHelp": "Enter the rate the loan started with. Add each later change under Rate history on the loan page.",
+      "securedAsset": "Secured against",
+      "securedAssetNone": "None",
+      "securedAssetHint": "Optional. The asset this loan is secured against, such as the home bought with a mortgage. Its page then shows the equity: what it is worth less what is still owed."
     },
     "types": {
       "personal": "Personal",
@@ -45,6 +52,10 @@
       "auto": "Auto",
       "student": "Student",
       "other": "Other"
+    },
+    "methods": {
+      "french": "French (level payment)",
+      "constantPrincipal": "Constant principal (SAC)"
     },
     "statuses": {
       "active": "Active",
@@ -144,13 +155,110 @@
         "split": "<principal></principal> principal, <interest></interest> interest, <fees></fees> fees"
       },
       "amortization": {
-        "title": "Amortization preview",
-        "unavailable": "Amortization preview is unavailable with the current API response."
+        "title": "Amortization schedule",
+        "subtitle": "Each payment split into interest and principal, and the balance left after it.",
+        "unavailable": "The amortization schedule is unavailable right now.",
+        "missingInputs": "Add the interest rate and term to see the contract schedule.",
+        "empty": "No schedule rows to show.",
+        "totalInterest": "Total interest",
+        "totalPaid": "Total paid",
+        "principal": "Principal",
+        "interest": "Interest",
+        "balance": "Balance",
+        "paid": "Paid",
+        "scheduled": "Scheduled",
+        "rowLabel": "Payment {number}",
+        "split": "<principal></principal> principal, <interest></interest> interest",
+        "columns": {
+          "number": "#",
+          "date": "Date",
+          "payment": "Payment",
+          "principal": "Principal",
+          "interest": "Interest",
+          "balance": "Balance",
+          "status": "Status"
+        }
+      },
+      "payoff": {
+        "title": "Payoff projection",
+        "subtitle": "When the loan clears at the contract payment, and how much sooner an extra monthly payment gets you there.",
+        "extraLabel": "Extra monthly payment",
+        "extraPlaceholder": "0",
+        "extraHelper": "Added to the contract payment. Leave empty to see the contract-only payoff.",
+        "baseline": "Contract payment",
+        "withExtra": "With extra",
+        "payoffDate": "Projected payoff",
+        "monthsSaved": "Months saved",
+        "interestSaved": "Interest saved",
+        "monthCount": "{count, plural, one {# month} other {# months}}",
+        "noSavings": "—",
+        "never": "Does not pay off",
+        "neverBody": "At this payment the balance never clears: the payment does not cover the monthly interest. Raise the payment or add an extra.",
+        "missingInputs": "Add the interest rate and term to project the payoff.",
+        "unavailable": "The payoff projection is unavailable right now.",
+        "empty": "No projection to show."
       },
       "adjustment": {
-        "unavailableTitle": "Balance adjustment unavailable",
-        "unavailableDescription": "This action is not wired to an API yet.",
-        "unavailableBody": "The adjustment form is hidden until the API is available."
+        "title": "Adjust balance",
+        "editTitle": "Edit adjustment",
+        "description": "Record your lender's balance or another change to the loan. The balance, schedule and payoff projection follow it from its date.",
+        "type": "Adjustment type",
+        "date": "Effective date",
+        "amount": "Amount",
+        "balanceAmount": "Balance on this date",
+        "reason": "Reason (optional)",
+        "history": "Balance adjustments",
+        "loadError": "Could not load adjustments.",
+        "saveError": "Could not save this change.",
+        "empty": "No balance adjustments",
+        "emptyBody": "When your lender's balance differs from the one shown here, record their figure. It replaces the modelled balance from its date on, and later repayments reduce it from there.",
+        "add": "Add adjustment",
+        "save": "Save adjustment",
+        "edit": "Edit adjustment",
+        "delete": "Delete adjustment",
+        "deleteConfirm": "Delete this adjustment? The balance is worked out again without it.",
+        "invalidAmount": "Enter a valid amount.",
+        "amountPositive": "Enter an amount greater than zero.",
+        "invalidDate": "Pick the date it takes effect.",
+        "setTo": "Set to <amount></amount>",
+        "increases": "Increases the balance by",
+        "decreases": "Reduces the balance by",
+        "types": {
+          "BALANCE_CORRECTION": "Correct balance",
+          "FEE": "Fee",
+          "CAPITALIZED_INTEREST": "Capitalized interest",
+          "PRINCIPAL_INCREASE": "Principal increase",
+          "PRINCIPAL_DECREASE": "Principal decrease",
+          "WRITE_OFF": "Write-off"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Sets the balance to your lender's figure on this date. Zero is allowed.",
+          "FEE": "Adds a fee charged to the loan to the balance.",
+          "CAPITALIZED_INTEREST": "Adds unpaid interest to the balance.",
+          "PRINCIPAL_INCREASE": "Adds borrowed money to the balance.",
+          "PRINCIPAL_DECREASE": "Reduces the balance outside a linked repayment.",
+          "WRITE_OFF": "Reduces the balance by an amount the lender forgave."
+        }
+      },
+      "rateHistory": {
+        "title": "Rate history",
+        "description": "Each rate applies from its date until the next one. Rates are not fetched or predicted: add each change as your lender announces it.",
+        "effectiveDate": "Effective date",
+        "apr": "Annual interest rate (APR)",
+        "loadError": "Could not load rate history.",
+        "saveError": "Could not save this rate.",
+        "empty": "No rate changes yet.",
+        "emptyWithRate": "No rate changes yet: {rate} applies throughout.",
+        "from": "From {date}: <rate></rate>",
+        "add": "Add rate change",
+        "save": "Save rate change",
+        "cancel": "Cancel",
+        "edit": "Edit rate change",
+        "delete": "Delete rate change",
+        "deleteConfirm": "Delete this rate change?",
+        "invalidRate": "Enter a valid rate.",
+        "maxRate": "Rate must be between 0 and 100%.",
+        "invalidDate": "Pick the date it takes effect."
       }
     },
     "table": {
@@ -172,6 +280,11 @@
       "sampleProvider": "Bank",
       "sampleStatus": "Active",
       "sampleTerm": "28y 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fixed",
+      "VARIABLE": "Variable",
+      "UNKNOWN": "Not sure"
     }
   }
 }

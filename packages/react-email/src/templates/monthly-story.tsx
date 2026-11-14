@@ -8,7 +8,7 @@ import type { MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps
 
 export type { MonthlyStoryCategoryDelta, MonthlyStoryDataSufficientProps, MonthlyStoryInsufficientDataProps, MonthlyStoryMetric, MonthlyStoryProps, MonthlyStoryRecurringChange } from "../types";
 
-const COPY = {
+export const COPY = {
   en: {
     heading: "Your money story this month",
     insufficientHeading: "Building your money story",
@@ -49,6 +49,26 @@ const COPY = {
     marketingFooterText: (brand: string) => `Recebeste este email porque ativaste a história financeira mensal na ${brand}.`,
     dataContext: "Com base nas transações atualmente disponíveis.",
   },
+  es: {
+    heading: "Tu resumen financiero del mes",
+    insufficientHeading: "Preparando tu resumen financiero",
+    insufficientBody: (monthsNeeded: number) => `Necesitamos ${monthsNeeded} ${monthsNeeded === 1 ? "mes" : "meses"} más de historial antes de poder comparar este mes con lo habitual. Cuando lo tengamos, tu resumen empezará a aparecer aquí.`,
+    zeroActivityBody: "No encontramos transacciones de este mes, así que todavía no hay nada que comparar. Si no te parece correcto, comprueba que tus cuentas siguen conectadas.",
+    income: "Ingresos vs. lo habitual",
+    spending: "Gastos vs. lo habitual",
+    usual: "Habitual",
+    previousValue: (formattedBaseline: string) => `antes ${formattedBaseline}`,
+    metricsSummary: "Tus cifras",
+    categoryChanges: "Lo que más cambió",
+    recurringChanges: "Pagos recurrentes",
+    recurringNew: "Nuevo",
+    budgetPressure: "Presión sobre el presupuesto",
+    savingsRate: "Tasa de ahorro",
+    netWorth: "Patrimonio neto",
+    ctaLabel: "Ver tus informes",
+    marketingFooterText: (brand: string) => `Recibes este correo porque activaste el resumen mensual en ${brand}.`,
+    dataContext: "Según las transacciones disponibles actualmente.",
+  },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
 export function getMonthlyStorySubject(props: Pick<MonthlyStoryProps, "language" | "monthLabel" | "status">) {
@@ -71,12 +91,13 @@ function widthPercent(baseline: number, subject: number): [number, number] {
  * Parses a pre-formatted money string (e.g. `formatMoney` output) back into a
  * plain number, honoring the thousands/decimal separator convention of the
  * given language. `en` uses `,` for thousands and `.` for decimals (e.g.
- * `"1,200.50"`); `pt` uses `.` for thousands and `,` for decimals (e.g.
- * `"1.200,50 €"`) — a locale-blind digit strip mis-parses either one.
+ * `"1,200.50"`); `pt` and `es` use `.` for thousands and `,` for decimals (e.g.
+ * `"1.200,50 €"`, and es-ES leaves four-digit amounts ungrouped: `"1200,50 €"`) —
+ * a locale-blind digit strip mis-parses either one.
  */
 function parseFormattedAmount(formatted: string, language: TransactionalEmailLanguage): number {
   const digitsAndSeparators = formatted.replace(/[^\d.,-]/g, "");
-  const normalized = language === "pt" ? digitsAndSeparators.replaceAll(".", "").replace(",", ".") : digitsAndSeparators.replaceAll(",", "");
+  const normalized = language !== "en" ? digitsAndSeparators.replaceAll(".", "").replace(",", ".") : digitsAndSeparators.replaceAll(",", "");
   return Number(normalized) || 0;
 }
 
@@ -85,10 +106,10 @@ function metricDetail(metric: { detail?: string; formattedBaseline?: string }, p
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 
-function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps) {
+function SufficientBody({ language, appLocale = language, ...props }: MonthlyStoryDataSufficientProps) {
   const t = COPY[language];
   const brand = resolveBrandName(props.brandName);
-  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story" });
+  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${appLocale}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story" });
   const [incomeBaselineWidth, incomeSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedIncomeBaseline, language), parseFormattedAmount(props.formattedIncomeSubject, language));
   const [spendingBaselineWidth, spendingSubjectWidth] = widthPercent(parseFormattedAmount(props.formattedSpendingBaseline, language), parseFormattedAmount(props.formattedSpendingSubject, language));
 
@@ -161,10 +182,10 @@ function SufficientBody({ language, ...props }: MonthlyStoryDataSufficientProps)
   );
 }
 
-function InsufficientBody({ language, ...props }: MonthlyStoryInsufficientDataProps) {
+function InsufficientBody({ language, appLocale = language, ...props }: MonthlyStoryInsufficientDataProps) {
   const t = COPY[language];
   const brand = resolveBrandName(props.brandName);
-  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${language}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story_insufficient" });
+  const trackedCtaUrl = buildCampaignUrl({ destinationUrl: props.ctaUrl, nextPath: `/${appLocale}/reports`, utmSource: "mailjet", utmMedium: "email", utmCampaign: "monthly_story", utmContent: "monthly_story_insufficient" });
   const body = props.reason === "zero_activity" ? t.zeroActivityBody : t.insufficientBody(props.monthsNeeded);
 
   return (

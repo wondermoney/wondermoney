@@ -1,0 +1,50 @@
+---
+title: Import from Actual Budget
+description: Bring your Actual Budget transaction history into WonderMoney, with each Actual account and category mapped to yours.
+---
+
+The Actual Budget import reads the transactions CSV that Actual exports and imports each Actual account's transactions into an account of yours. Exported from **All accounts**, one file holds every account. Budget amounts, schedules and rules are not imported, and neither is Actual's full budget file (the zip with its database) or its sync server.
+
+## Before you start
+
+Export the transactions from Actual Budget:
+
+1. Open **All accounts**, so the file holds every account and both sides of each transfer. To import one account only, open that account instead.
+2. Clear any search or filter: Actual exports the transactions it shows.
+3. Open the menu above the transactions and choose **Export**. Actual saves a CSV file.
+
+On a self-hosted instance, imports also need [file storage](/en/docs/self-hosting/configure#file-storage).
+
+## Steps
+
+1. Open any account and choose **Import transactions**, then **Import from Actual Budget**. Accounts you create in the next steps use the currency of the account you start from.
+2. Add the CSV file (up to 5 MB) and choose **Review transactions**.
+3. Choose where each Actual account goes. Every account in the file is listed, with how many rows it has, and one of your accounts with the same name is filled in. For an account you don't have yet, choose **New manual account**: WonderMoney creates a manual account with the Actual account's name, opening at the balance the file ends on for it. Choose **Save accounts**.
+4. Choose a category for each Actual category. An Actual category whose name matches one of yours, in your language, is filled in; case and accents don't matter. The rest stay uncategorised unless you choose one.
+5. Check the rows, as for any [import](/en/docs/accounts-transactions/import-transactions-csv): new rows are included, rows already in the account are skipped.
+6. Choose **Import**. The import runs in the background and shows how many transactions it has written so far, and the category choices are saved with it.
+
+In the mobile app, an Actual export stops before importing anything, because its categories need the category step: cancel it there and import the file on the web.
+
+## How Actual rows import
+
+- **Amounts and dates.** Actual writes signed amounts (money out is negative) and ISO dates (`2026-01-31`). A file you opened and saved again in a spreadsheet can have another separator, number format or date order; WonderMoney reads those from the file, and asks you to choose day first or month first when the dates cannot say.
+- **Transfers.** Actual names a transfer's payee after the other account, so a row whose payee is another account in the file is one side of a transfer, and so is a payee written `Transfer: <Account>`. Both sides import as transfers, and when both accounts are imported the two rows are linked as one transfer, which reports leave out of income and spending.
+- **Splits.** A split transaction imports as one transaction for its total. Each part's category, amount and note go into the transaction's notes. When every part has the same category, the transaction takes it; otherwise it is uncategorised.
+- **Categories.** A category you mapped is set on the row as your choice, so later learned categorization does not replace it. A household rule that matches the row still applies, as for any new transaction.
+- **Duplicates.** Actual's export has no transaction ids, so each row is recognised by its date and amount within its account. Importing the same export again finds its rows already in the account and skips them. A row with the same amount as a transaction already in its account, up to 3 days apart (one bank sync brought in, say), is a [possible duplicate](/en/docs/accounts-transactions/import-transactions-csv#possible-duplicates): skipped unless you include it.
+- **Large files.** The import writes the rows in batches, so a file of thousands of transactions imports in minutes, and the review shows its progress while it runs.
+
+## Common issues
+
+- A transfer imports as an ordinary payment or deposit. The file was exported from one account, so the other account is not in it: export from **All accounts**.
+- Some transactions are missing. Actual exported only the transactions shown: clear the search or filter and export again.
+- Two transfers between the same accounts on the same day, for the same amount, both import as transfers, but are not linked to each other: WonderMoney cannot tell which pairs with which.
+
+## Related links
+
+- [Import transactions from CSV, OFX, QIF or CAMT.053](/en/docs/accounts-transactions/import-transactions-csv)
+- [Import from YNAB](/en/docs/accounts-transactions/import-from-ynab)
+- [Manual offline account](/en/docs/accounts-transactions/manual-offline-account)
+- [Categorize transactions](/en/docs/accounts-transactions/categorize-transactions)
+- [Transaction import problems](/en/docs/troubleshooting/transaction-import-problems)

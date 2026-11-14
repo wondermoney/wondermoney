@@ -1,13 +1,12 @@
 import Papa from 'papaparse'
 
 import type { CsvImportFormat } from '../accounts/accounts-contract'
-import type { ImportRowCounts } from './transaction-import-contract'
 
 /**
- * The generic CSV format the API reads for an account whose bank has no statement parser
- * (`AccountCsvImportService.importAccountCsv` without a bank name). The header names are fixed and
- * the API rejects any other column, so the template carries exactly these. Same spec as web's
- * lib/account/account-csv-generic-format.ts (apps never share source, so it is restated here).
+ * The generic CSV format the API reads for an account whose bank has no statement parser (the
+ * staged import's `generic-csv` adapter). The header names are fixed, so the template carries
+ * exactly these. Same spec as web's generic template (apps never share source, so it is restated
+ * here).
  */
 export const GENERIC_CSV_COLUMNS = [
   'date',
@@ -50,6 +49,15 @@ export function buildGenericCsvTemplate(transactionTypes: readonly TemplateTrans
 
 export const isCsvFileName = (name: string) => /\.csv$/i.test(name.trim())
 
+/** OFX/QFX: read by the API's OFX adapter, not the generic CSV columns. */
+export const isOfxFileName = (name: string) => /\.(ofx|qfx)$/i.test(name.trim())
+
+/** QIF: read by the API's QIF adapter, not the generic CSV columns. */
+export const isQifFileName = (name: string) => /\.qif$/i.test(name.trim())
+
+/** CAMT.053: read by the API's CAMT.053 adapter, not the generic CSV columns. */
+export const isCamtFileName = (name: string) => /\.xml$/i.test(name.trim())
+
 /**
  * The flow the import screen offers for an account. `legacy` is an older API that doesn't
  * report a format: the screen shows the old bank-statement copy and the upload response's
@@ -76,17 +84,4 @@ export function decideUpload(upload: Readonly<{ csvImportFormat?: CsvImportForma
     case undefined:
       return upload.isSupportedBank ? { action: 'import', format: 'bank' } : { action: 'stop', reason: 'unsupported-bank' }
   }
-}
-
-/**
- * The "{failed} of {total} rows couldn't be imported" counts, shown (as on web) for a generic
- * import that ended partial or failed with at least one rejected row.
- */
-export function rowsFailedCounts(
-  format: 'bank' | 'generic',
-  outcome: string,
-  rows: ImportRowCounts | null,
-): ImportRowCounts | null {
-  if (format !== 'generic' || (outcome !== 'partial' && outcome !== 'failed')) return null
-  return rows && rows.failed > 0 ? rows : null
 }

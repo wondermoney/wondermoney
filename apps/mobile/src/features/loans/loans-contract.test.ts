@@ -1,4 +1,4 @@
-import { createLoanEndpoint, createLoanRepaymentCandidatesEndpoint, createLoanRepaymentsEndpoint, createLoanWriteEndpoint, createDeleteLoanRepaymentEndpoint, createLinkLoanRepaymentEndpoint, createUpdateLoanRepaymentEndpoint, loanCreateEndpoint, loanCreateWriteSchema, loanRepaymentAllocationSchema, loanRepaymentCandidatesResponseSchema, loanRepaymentMutationResponseSchema, loanRepaymentsResponseSchema, loanResponseSchema, loansEndpoint, loansResponseSchema, loanWriteSchema, parseLoanId } from './loans-contract'
+import { createLoanEndpoint, createLoanProjectionEndpoint, createLoanRepaymentCandidatesEndpoint, createLoanRepaymentsEndpoint, createLoanWriteEndpoint, createDeleteLoanRepaymentEndpoint, createLinkLoanRepaymentEndpoint, createUpdateLoanRepaymentEndpoint, loanCreateEndpoint, loanCreateWriteSchema, loanProjectionResponseSchema, loanRepaymentAllocationSchema, loanRepaymentCandidatesResponseSchema, loanRepaymentMutationResponseSchema, loanRepaymentsResponseSchema, loanResponseSchema, loansEndpoint, loansResponseSchema, loanWriteSchema, parseLoanId } from './loans-contract'
 import { loanFixture, repaymentCandidateFixture, repaymentFixture } from './test-fixtures'
 
 describe('loan contracts', () => {
@@ -7,6 +7,25 @@ describe('loan contracts', () => {
     expect(createLoanEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7' })
     expect(createLoanRepaymentsEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7/repayments' })
     expect(JSON.stringify([loansEndpoint, createLoanEndpoint(7), createLoanRepaymentsEndpoint(7)])).not.toContain('overview')
+  })
+
+  it('pins the payoff projection endpoint and parses its response', () => {
+    expect(createLoanProjectionEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/loan/7/projection' })
+    expect(createLoanProjectionEndpoint(7, 100)).toMatchObject({ method: 'GET', path: '/v1/loan/7/projection?extra=100' })
+    const projection = {
+      aheadOrBehindMonths: 4,
+      contractInterest: 100,
+      contractMonths: 12,
+      interestSaved: 40,
+      months: 8,
+      monthsSaved: 4,
+      payoffDate: '2027-05-15',
+      paysOff: true,
+      reason: null,
+      series: [{ baselineBalance: 1000, date: '2026-01-15T00:00:00.000Z', month: 0, withExtraBalance: 1000 }],
+      totalInterest: 60,
+    }
+    expect(loanProjectionResponseSchema.parse({ projection })).toEqual({ projection })
   })
 
   it('pins the descriptive PATCH to the canonical loan response', () => {
@@ -86,6 +105,23 @@ describe('loan contracts', () => {
     expect(loanCreateWriteSchema.safeParse({ ...full, unknownField: true }).success).toBe(false)
   })
 
+  it('reads the asset a loan is secured against, and none from an API that predates the link', () => {
+    const securedAsset = { key: 9, name: 'Family home', currency: 'EUR', value: 250_000 }
+    expect(loanResponseSchema.parse({ loan: { ...loanFixture, securedAsset } }).loan.securedAsset).toEqual(securedAsset)
+    expect(loanResponseSchema.parse({ loan: { ...loanFixture, securedAsset: { ...securedAsset, value: null } } }).loan.securedAsset?.value).toBeNull()
+    const { securedAsset: _omit, ...older } = loanFixture
+    expect(loansResponseSchema.parse({ loans: [older] }).loans[0].securedAsset).toBeNull()
+    expect(loanResponseSchema.safeParse({ loan: { ...loanFixture, securedAsset: { ...securedAsset, key: 0 } } }).success).toBe(false)
+  })
+
+  it('links a loan to an asset on create and edit, and unlinks it with null on edit', () => {
+    expect(loanWriteSchema.parse({ securedAssetKey: 9 })).toEqual({ securedAssetKey: 9 })
+    expect(loanWriteSchema.parse({ securedAssetKey: null })).toEqual({ securedAssetKey: null })
+    const full = { name: 'Home loan', type: 'MORTGAGE' as const, currencyKey: 1, openingPrincipalBalance: 250_000, openingBalanceDate: '2026-01-01', includeInNetWorth: true }
+    expect(loanCreateWriteSchema.parse({ ...full, securedAssetKey: 9 })).toEqual({ ...full, securedAssetKey: 9 })
+    for (const value of [0, -1, 1.5, '9']) expect(loanWriteSchema.safeParse({ securedAssetKey: value }).success).toBe(false)
+  })
+
   it('accepts actual nullable and omitted loan fields', () => {
     const parsed = loansResponseSchema.parse({ loans: [{ ...loanFixture, annualInterestRateBps: null, maturityDate: null, notes: undefined, originalPrincipal: null, paymentDayOfMonth: undefined, providerName: null, regularPaymentAmount: null, termMonths: null }] })
     expect(parsed.loans[0]).toMatchObject({ annualInterestRateBps: null, originalPrincipal: null, regularPaymentAmount: null })
@@ -110,13 +146,18 @@ describe('loan contracts', () => {
       ...loanFixture,
       type: 'CARD',
       status: 'OVERDUE',
-      rateType: 'VARIABLE',
+      rateType: 'INDEXED',
       paymentFrequency: 'WEEKLY',
       progressBasis: 'CURRENT_BALANCE',
       overviewTotal: 123,
     }] }).loans
     expect(loan).toMatchObject({ type: 'OTHER', status: 'UNKNOWN', rateType: 'UNKNOWN', paymentFrequency: 'UNKNOWN', progressBasis: 'UNKNOWN' })
     expect(loan).not.toHaveProperty('overviewTotal')
+  })
+
+  it('reads a variable-rate loan as variable', () => {
+    const [loan] = loansResponseSchema.parse({ loans: [{ ...loanFixture, rateType: 'VARIABLE' }] }).loans
+    expect(loan?.rateType).toBe('VARIABLE')
   })
 
   it.each([

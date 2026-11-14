@@ -145,6 +145,36 @@ export const Money = {
     return { amount: left.amount.plus(right.amount), currency: left.currency };
   },
 
+  /**
+   * Split `value`, rounded to `scale`, into one part per weight, in proportion, so the parts add
+   * back up to it exactly (largest remainder: what rounding down leaves over goes one unit at a time
+   * to the parts with the largest remainders, the earlier part first on a tie). A negative amount
+   * splits the same way, every part negative. Weights are non-negative and not all zero.
+   */
+  allocate(value: Money, weights: readonly number[], scale: number = MONEY_SCALE): Money[] {
+    if (weights.some((weight) => !Number.isFinite(weight) || weight < 0)) throw new RangeError('Weights must be non-negative numbers');
+    const totalWeight = weights.reduce((total, weight) => total.plus(weight), new Big(0));
+    if (totalWeight.eq(0)) throw new RangeError('Weights must not all be zero');
+    const unit = new Big(10).pow(scale);
+    const units = value.amount.times(unit).round(0);
+    const negative = units.lt(0);
+    const whole = units.abs();
+    const shares = weights.map((weight, index) => {
+      const exact = whole.times(weight).div(totalWeight);
+      const floor = exact.round(0, Big.roundDown);
+      return { floor, index, remainder: exact.minus(floor) };
+    });
+    let leftover = Number(shares.reduce((total, share) => total.minus(share.floor), whole).toFixed(0));
+    const extra = new Set<number>();
+    for (const { index } of shares.toSorted((a, b) => b.remainder.cmp(a.remainder) || a.index - b.index)) {
+      if (leftover <= 0) break;
+      extra.add(index);
+      leftover -= 1;
+    }
+    const parts = shares.map((share) => (extra.has(share.index) ? share.floor.plus(1) : share.floor));
+    return parts.map((part) => ({ amount: (negative && !part.eq(0) ? part.neg() : part).div(unit), currency: value.currency }));
+  },
+
   /** Convert at an explicit rate. Within one currency only a rate of 1 makes sense. */
   convert(value: Money, conversion: { rate: Numeric; to: string }): Money {
     const rate = big(conversion.rate);

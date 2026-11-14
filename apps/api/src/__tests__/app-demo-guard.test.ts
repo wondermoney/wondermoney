@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { HouseholdRole } from '@entity/AppuserTenant';
 import { ERROR_CODE } from '@utils/errors';
 
 /**
@@ -75,6 +76,7 @@ vi.mock('@middleware/tenant', () => ({
     if (!req.headers['x-test-no-tenant']) {
       const demo = req.headers['x-test-user'] === 'demo';
       req.tenant = { tenantKey: demo ? 1 : 2, tenantType: demo ? 'demo' : 'regular' } as unknown as express.Request['tenant'];
+      req.householdRole = HouseholdRole.OWNER;
     }
     next();
   },
@@ -87,7 +89,7 @@ vi.mock('@controller/banking', () => ({
   startBankConnection: handler,
   unlinkRequisition: handler,
 }));
-vi.mock('@controller/banking-connections', () => ({ getBankConnections: handler }));
+vi.mock('@controller/banking-connections', () => ({ getBankConnections: handler, getBankConnectionSyncs: handler }));
 
 vi.mock('@route/account', () => ({ default: makeRouter() }));
 vi.mock('@route/admin', () => ({ default: makeRouter() }));

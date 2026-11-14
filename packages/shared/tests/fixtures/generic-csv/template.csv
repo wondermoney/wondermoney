@@ -1,0 +1,4 @@
+﻿date,amount,merchant,internalTransactionId,transactionTypeKey,description
+2026-01-15,23.40,Grocery store,example-1,3,Weekly shop
+2026-01-31,1500.00,Employer,example-2,8,Salary
+2026-02-03,12.00,Coffee shop,example-3,3,

@@ -130,14 +130,54 @@ const parseSuccess = <Value>(
   }
 }
 
-const mapHttpFailure = (response: HttpResponse): never => {
+/** Longest 400 message kept for a `keepsBadRequestMessage` endpoint; anything longer is dropped. */
+const MAX_SERVER_MESSAGE_LENGTH = 500
+
+/** The shape of the API's `ERROR_CODE` values; anything else is not kept. */
+const SERVER_CODE = /^[a-z][a-z0-9_]{0,63}$/
+
+const readBadRequest = (response: HttpResponse): { serverCode?: string; serverMessage?: string } | undefined => {
+  const envelope = parseCommonErrorEnvelope(response.body)
+  const message = envelope?.message?.trim()
+  const serverMessage = message && message.length <= MAX_SERVER_MESSAGE_LENGTH ? message : undefined
+  const serverCode = envelope?.code && SERVER_CODE.test(envelope.code) ? envelope.code : undefined
+  if (!serverMessage && !serverCode) return undefined
+  return { ...(serverCode ? { serverCode } : {}), ...(serverMessage ? { serverMessage } : {}) }
+}
+
+const mapHttpFailure = (response: HttpResponse, options?: { keepsBadRequestMessage?: boolean }): never => {
+  if (response.status === 400 && options?.keepsBadRequestMessage) {
+    throw new ApiError('http', 400, readBadRequest(response))
+  }
   if (response.status === 403) {
     const envelope = parseCommonErrorEnvelope(response.body)
     if (envelope?.code === 'demo_read_only') throw new ApiError('demo-forbidden', 403)
+    // A household viewer reads shared data only; every shared write answers this.
+    if (envelope?.code === 'household_read_only') throw new ApiError('household-read-only', 403)
+    // An account shared with the caller to view only (#95); its writes answer this.
+    if (envelope?.code === 'account_read_only') throw new ApiError('account-read-only', 403)
+    if (envelope?.code === 'account_share_manager_required') throw new ApiError('account-share-manager-required', 403)
     if (envelope?.code === 'email_verification_required') throw new ApiError('email-verification-required', 403)
     if (envelope?.code === 'ai_allowance_exhausted') throw new ApiError('ai-allowance-exhausted', 403)
+    if (envelope?.code === 'portfolio_link_held_by_member') {
+      const linkedBy = envelope.details?.linkedBy
+      throw new ApiError('portfolio-link-held', 403, typeof linkedBy === 'string' && linkedBy.trim().length > 0 ? { linkedBy: linkedBy.trim() } : undefined)
+    }
   }
-  throw new ApiError('http', response.status)
+  // A 4xx keeps the API's code (a snake_case word from a fixed list), so a screen can tell
+  // "the amount is too large" from "these are already linked" though both are a 400 or 409.
+  const envelope = response.status >= 400 && response.status < 500 ? parseCommonErrorEnvelope(response.body) : undefined
+  const code = envelope?.code
+  const serverCode = code !== undefined && SERVER_CODE.test(code) ? code : undefined
+  // A crypto wallet write names the address it refused; the API's error details are strings ("0").
+  const index = envelope?.details?.addressIndex
+  const indexValue = typeof index === 'string' && /^\d{1,6}$/.test(index) ? Number(index) : index
+  const addressIndex = typeof indexValue === 'number' && Number.isSafeInteger(indexValue) && indexValue >= 0 ? indexValue : undefined
+  if (serverCode === undefined && addressIndex === undefined) throw new ApiError('http', response.status)
+  throw new ApiError('http', response.status, {
+    ...(serverCode === undefined ? {} : { serverCode }),
+    ...(addressIndex === undefined ? {} : { addressIndex }),
+  })
 }
 
 export const createApiClient = ({
@@ -307,7 +347,7 @@ export const createApiClient = ({
             ? endpoint.successStatuses.includes(response.status)
             : response.status >= 200 && response.status < 300
           if (accepted) return parseSuccess(endpoint, response)
-          return mapHttpFailure(response)
+          return mapHttpFailure(response, endpoint)
         },
         commit,
       )

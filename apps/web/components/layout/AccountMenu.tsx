@@ -1,10 +1,10 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronsUpDown,
+  Command as CommandIcon,
   FlaskConical,
   HelpCircleIcon,
   Lightbulb,
@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 import { Link } from "@/components/ui/Link";
@@ -25,13 +24,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "@/i18n/navigation";
-import { authClient } from "@/lib/auth/client";
+import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { useUser } from "@/lib/auth/user-context";
+import { useSignOut } from "@/lib/auth/useSignOut";
 import { instanceConfig } from "@/lib/instance";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
+import { openCommandPalette } from "./command-palette-store";
 import Feedback from "./Feedback";
+import VersionInfo from "./VersionInfo";
 
 const CHANGELOG_URL = "https://wondermoney.canny.io/changelog";
 
@@ -73,10 +74,9 @@ export default function AccountMenu({
   placement: "sidebar" | "bar";
 }) {
   const t = useTranslations();
-  const posthog = usePostHog();
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const signOut = useSignOut();
   const user = useUser();
+  const isDemoProfile = useIsDemoProfile({ fetch: false });
   const [open, setOpen] = useState(false);
   const handle = user?.email?.split("@")[0];
   const displayName = user?.name?.trim() || handle;
@@ -91,19 +91,12 @@ export default function AccountMenu({
       : handle?.slice(0, 2)
   )?.toUpperCase();
   const isDemo =
-    instanceConfig.demoEmail !== null &&
-    user?.email === instanceConfig.demoEmail;
+    isDemoProfile ||
+    (instanceConfig.demoEmail !== null &&
+      user?.email === instanceConfig.demoEmail);
   const inSidebar = placement === "sidebar";
 
-  const logout = async () => {
-    await queryClient.cancelQueries();
-    queryClient.removeQueries();
-    await authClient.signOut().catch((signOutError) => {
-      console.error("Error logging out", signOutError);
-    });
-    posthog.reset();
-    router.push("/auth/login");
-  };
+  const logout = () => signOut("/auth/login");
 
   const avatar = (
     <Avatar className="bg-muted text-foreground border-input flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold">
@@ -168,6 +161,26 @@ export default function AccountMenu({
           </p>
         ) : null}
         <ul className="flex flex-col">
+          <li>
+            <button
+              type="button"
+              className={menuRowClass}
+              aria-keyshortcuts="Meta+K Control+K"
+              onClick={() => {
+                setOpen(false);
+                openCommandPalette();
+              }}
+            >
+              <CommandIcon className="size-4 shrink-0" aria-hidden="true" />
+              {t("command-palette.menu-item")}
+              <span
+                className="text-muted-foreground ml-auto text-xs"
+                aria-hidden="true"
+              >
+                {t("command-palette.shortcut")}
+              </span>
+            </button>
+          </li>
           {inSidebar ? null : (
             <li>
               <Link
@@ -213,9 +226,9 @@ export default function AccountMenu({
           <LogOut className="size-4 shrink-0" aria-hidden="true" />
           {t("logout")}
         </button>
-        <p className="text-muted-foreground px-3 pt-1 text-right text-xs">
-          v{process.env.PKG_VERSION}
-        </p>
+        <div className="px-3 pt-1">
+          <VersionInfo />
+        </div>
       </PopoverContent>
     </Popover>
   );

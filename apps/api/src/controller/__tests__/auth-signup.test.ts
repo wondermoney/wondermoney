@@ -2,10 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
   consumeInvite: vi.fn(),
-  ensureAppuserTenantLink: vi.fn(),
   findOne: vi.fn(),
   flush: vi.fn(),
-  getOrCreateTenant: vi.fn(),
   getPrimaryAuthProvider: vi.fn(),
   getRepository: vi.fn(),
   getUserByEmail: vi.fn(),
@@ -13,11 +11,12 @@ const mocked = vi.hoisted(() => ({
   isAppError: vi.fn(),
   loggerError: vi.fn(),
   persist: vi.fn(),
+  provisionHomeTenant: vi.fn(),
   recordAnalyticsOutboxEvent: vi.fn(),
   recordSignup: vi.fn(),
   sendSignupEmail: vi.fn(),
   sendWelcomeEmail: vi.fn(),
-  validateInviteForSignup: vi.fn(),
+  validateInviteForEmail: vi.fn(),
   zParse: vi.fn(),
 }));
 
@@ -25,9 +24,8 @@ vi.mock('@app/app', () => ({
   DI: { em: { findOne: mocked.findOne, flush: mocked.flush, getRepository: mocked.getRepository, persist: mocked.persist } },
 }));
 vi.mock('@service/auth/auth-callback.service', () => ({
-  ensureAppuserTenantLink: mocked.ensureAppuserTenantLink,
-  getOrCreateTenant: mocked.getOrCreateTenant,
   isAppError: mocked.isAppError,
+  provisionHomeTenant: mocked.provisionHomeTenant,
 }));
 vi.mock('@service/auth/auth-callback.utils', () => ({ getAuthUserFullName: vi.fn(() => 'New User') }));
 vi.mock('@service/auth/better-auth', () => ({ getPrimaryAuthProvider: mocked.getPrimaryAuthProvider }));
@@ -37,8 +35,7 @@ vi.mock('@service/email/email', () => ({
 }));
 vi.mock('@service/household/household-invite.service', () => ({
   consumeInvite: mocked.consumeInvite,
-  notifyExistingUserInviteAttempt: vi.fn(),
-  validateInviteForSignup: mocked.validateInviteForSignup,
+  validateInviteForEmail: mocked.validateInviteForEmail,
 }));
 vi.mock('@service/analytics/analytics-outbox.service', () => ({ recordAnalyticsOutboxEvent: mocked.recordAnalyticsOutboxEvent }));
 vi.mock('@service/auth/signup-record.service', () => ({ recordSignup: mocked.recordSignup }));
@@ -88,7 +85,7 @@ describe('auth callback signup', () => {
     mocked.getPrimaryAuthProvider.mockResolvedValue('email');
     mocked.isAppError.mockReturnValue(false);
     mocked.recordSignup.mockResolvedValue({ appuser, created: true, snapshot });
-    mocked.getOrCreateTenant.mockResolvedValue({ tenantKey: 99 });
+    mocked.provisionHomeTenant.mockResolvedValue({ tenantKey: 99 });
     mocked.recordAnalyticsOutboxEvent.mockResolvedValue(undefined);
   });
 
@@ -101,15 +98,26 @@ describe('auth callback signup', () => {
     );
 
     expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ email: appuser.emailAddress, externalUserId }));
-    expect(mocked.getOrCreateTenant).toHaveBeenCalledWith(expect.anything(), appuser);
-    expect(mocked.ensureAppuserTenantLink).toHaveBeenCalledWith(expect.anything(), appuser, { tenantKey: 99 });
+    expect(mocked.provisionHomeTenant).toHaveBeenCalledWith(expect.anything(), appuser);
     expect(response.json).toHaveBeenCalledWith({ appuserKey: 42, method: 'email', outcome: 'signup' });
   });
+
+  it.each([[true, true], [false, false], [null, false], [undefined, false]])(
+    'creates the app user as an admin only when the identity provider granted it (oidcAdmin=%s)',
+    async (oidcAdmin, admin) => {
+      await authCallback(
+        { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId, oidcAdmin } } } as Parameters<typeof authCallback>[0],
+        makeResponse(),
+      );
+
+      expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ admin }));
+    },
+  );
 
   it('reports provisioning failures separately after canonical signup commits', async () => {
     const provisioningError = new Error('tenant unavailable');
     provisioningError.name = externalUserId;
-    mocked.getOrCreateTenant.mockRejectedValueOnce(provisioningError);
+    mocked.provisionHomeTenant.mockRejectedValueOnce(provisioningError);
 
     const action = authCallback(
       { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId } } } as Parameters<typeof authCallback>[0],
@@ -133,7 +141,7 @@ describe('auth callback signup', () => {
     const provisioningError = new Error('replay provisioning unavailable');
     mocked.getUserByExternalId.mockResolvedValueOnce(appuser);
     mocked.findOne.mockResolvedValueOnce(snapshot);
-    mocked.getOrCreateTenant.mockRejectedValueOnce(provisioningError);
+    mocked.provisionHomeTenant.mockRejectedValueOnce(provisioningError);
 
     const action = authCallback(
       { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId } } } as Parameters<typeof authCallback>[0],
@@ -150,23 +158,23 @@ describe('auth callback signup', () => {
   it('validates and consumes a household invite without provisioning a second tenant', async () => {
     const invite = { householdInviteKey: 17, tenantKey: { tenantKey: 99 } };
     mocked.zParse.mockResolvedValueOnce({ body: { inviteToken: 'invite-token', locale: 'en' } });
-    mocked.validateInviteForSignup.mockResolvedValueOnce(invite);
+    mocked.validateInviteForEmail.mockResolvedValueOnce(invite);
     mocked.consumeInvite.mockResolvedValueOnce(invite.tenantKey);
     const response = makeResponse();
 
     await authCallback({ authUser: { user: { email: appuser.emailAddress, id: externalUserId  } } } as Parameters<typeof authCallback>[0], response);
 
-    expect(mocked.validateInviteForSignup).toHaveBeenCalledWith(expect.anything(), 'invite-token', appuser.emailAddress);
+    expect(mocked.validateInviteForEmail).toHaveBeenCalledWith(expect.anything(), 'invite-token', appuser.emailAddress);
     expect(mocked.recordSignup).toHaveBeenCalledOnce();
     expect(mocked.consumeInvite).toHaveBeenCalledWith(expect.anything(), invite, appuser);
-    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
+    expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(response.json).toHaveBeenCalledWith({ appuserKey: appuser.appuserKey, method: 'email', outcome: 'signup' });
   });
 
   it('propagates an invalid invite during signup before creating the account', async () => {
     const error = new BadRequestError('This invitation was sent to a different email address.');
     mocked.zParse.mockResolvedValueOnce({ body: { inviteToken: 'invite-token', locale: 'en' } });
-    mocked.validateInviteForSignup.mockRejectedValueOnce(error);
+    mocked.validateInviteForEmail.mockRejectedValueOnce(error);
     mocked.isAppError.mockReturnValueOnce(true);
 
     await expect(authCallback(
@@ -182,7 +190,7 @@ describe('auth callback signup', () => {
   it('reports a household that filled up during signup by its own code, not as a server error', async () => {
     const error = new ConflictError('This household is already full.', ERROR_CODE.HOUSEHOLD_FULL);
     mocked.zParse.mockResolvedValueOnce({ body: { inviteToken: 'invite-token', locale: 'en' } });
-    mocked.validateInviteForSignup.mockResolvedValueOnce({ householdInviteKey: 17, tenantKey: { tenantKey: 99 } });
+    mocked.validateInviteForEmail.mockResolvedValueOnce({ householdInviteKey: 17, tenantKey: { tenantKey: 99 } });
     mocked.consumeInvite.mockRejectedValueOnce(error);
     mocked.isAppError.mockReturnValue(true);
 
@@ -190,6 +198,6 @@ describe('auth callback signup', () => {
       { authUser: { user: { email: appuser.emailAddress, id: externalUserId } } } as Parameters<typeof authCallback>[0],
       makeResponse(),
     )).rejects.toMatchObject({ code: ERROR_CODE.HOUSEHOLD_FULL, status: 409 });
-    expect(mocked.getOrCreateTenant).not.toHaveBeenCalled();
+    expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
   });
 });

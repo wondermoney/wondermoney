@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { dashboardScope, transactionScopeSql } from '@service/transaction/transaction-scope';
 import { getTransactionTotals } from '@service/transaction/transaction-totals';
 import { roundDisplay } from '@utils/money';
+import { savingsRateNumber } from '@utils/savings-rate';
 import { getAccountsCashflowRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
 
@@ -21,7 +22,7 @@ import { DI } from '../../app.js';
  */
 export async function getAccountsCashflow(req: Request, res: Response) {
   const {
-    query: { fromDate, timezone },
+    query: { fromDate, memberKeys, timezone, toDate },
   } = await zParse(getAccountsCashflowRequestSchema, req);
 
   if (!req.user || !req.tenant) throw new Error('User not found');
@@ -29,7 +30,8 @@ export async function getAccountsCashflow(req: Request, res: Response) {
   if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
   const tenantKey = req.tenant.tenantKey;
 
-  const scope = dashboardScope({ dateRange: { from: fromDate, timeZone: timezone }, tenantKey, viewerAppuserKey: viewer.appuserKey });
+  // `memberKeys`: one member's part of the month, or Shared (`member-attribution.ts`).
+  const scope = dashboardScope({ dateRange: { from: fromDate, timeZone: timezone, to: toDate }, members: memberKeys, tenantKey, viewerAppuserKey: viewer.appuserKey });
   const { completeness, months } = await getTransactionTotals(DI.em, {
     byMonth: { timeZone: timezone },
     currency: { code: viewer.currencyKey.code, currencyKey: viewer.currencyKey.currencyKey },
@@ -38,6 +40,17 @@ export async function getAccountsCashflow(req: Request, res: Response) {
     tenantKey,
   });
 
-  const cashflow = [...months.entries()].map(([month, total]) => ({ amount: roundDisplay(total.amount), date: `${month}-01T00:00:00.000Z` }));
+  const cashflow = [...months.entries()].map(([month, total]) => {
+    const income = roundDisplay(total.moneyIn);
+    const expenses = roundDisplay(total.moneyOut);
+    return {
+      amount: roundDisplay(total.amount),
+      date: `${month}-01T00:00:00.000Z`,
+      expenses,
+      income,
+      // The same rate the cash-flow report and the monthly email state.
+      savingsRate: savingsRateNumber(income, expenses),
+    };
+  });
   return res.json({ cashflow, completeness });
 }

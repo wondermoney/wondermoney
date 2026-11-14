@@ -19,17 +19,25 @@ import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV, TRUST_PROXY } from '@config/env'
 import { enableBankingCallback } from '@controller/enable-banking-callback';
 import { validateInviteController } from '@controller/household';
 import { adminAuth, optionalAuth } from '@middleware/auth';
+import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
 import { csrfOriginProtection } from '@middleware/csrf-origin';
+import { blockDemoAuthAccountChanges } from '@middleware/demo-auth-guard';
 import { errorHandler } from '@middleware/error-handler';
+import { requireInstanceAdmin } from '@middleware/instance-admin';
 import {
   adminApiRateLimit,
   assistantRateLimit,
   authExchangeRateLimit,
+  calendarFeedRateLimit,
+  demoSignInRateLimit,
   feedbackRateLimit,
   globalBackstopRateLimit,
   importSessionRateLimit,
   inviteLookupRateLimit,
+  oidcCallbackRateLimit,
+  pairingRateLimit,
+  passkeyRateLimit,
   publicMarketingRateLimit,
   publicReadRateLimit,
   supportRateLimit,
@@ -39,23 +47,29 @@ import { authedTenant, readOnlyTenantGated } from '@middleware/stacks';
 import { getUserOptional } from '@middleware/user';
 import accountRoutes from '@route/account';
 import adminRoutes from '@route/admin';
+import adminBankSyncRoutes from '@route/admin-bank-sync';
 import assistantRoutes from '@route/assistant';
 import authRoutes from '@route/auth';
 import backgroundOperationRoutes from '@route/background-operation';
 import bankingRoutes from '@route/banking';
 import budgetRoutes from '@route/budget';
+import calendarRoutes from '@route/calendar';
 import categoryRoutes from '@route/category';
 import configsRoutes from '@route/configs';
 import currencyRoutes from '@route/currency';
+import expenseGroupRoutes from '@route/expense-group';
 import feedbackRoutes from '@route/feedback';
 import financialMarketsRoutes from '@route/financial-markets';
 import goalRoutes from '@route/goal';
 import healthRoutes from '@route/health';
 import householdRoutes from '@route/household';
+import insightsRoutes from '@route/insights';
+import installmentPlanRoutes from '@route/installment-plan';
 import instanceRoutes from '@route/instance';
 import loanRoutes from '@route/loan';
 import manualAssetRoutes from '@route/manual-asset';
 import marketingRoutes from '@route/marketing';
+import mcpRoutes from '@route/mcp';
 import netWorthRoutes from '@route/net-worth';
 import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
@@ -65,6 +79,7 @@ import ruleRoutes from '@route/rule';
 import supportRoutes from '@route/support';
 import tagRoutes from '@route/tag';
 import transactionImportRoutes from '@route/transaction-import';
+import transactionTemplateRoutes from '@route/transaction-template';
 import userRoutes from '@route/user';
 import { authHandler } from '@service/auth/better-auth';
 import { GITHUB_SHA, isCorsOriginAllowed } from '@utils/constants';
@@ -155,6 +170,13 @@ export default class Application {
         ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor'],
         authExchangeRateLimit(),
       );
+      // Passkey sign-in and passkey management: the same family, its own store (see the factory).
+      this.host.use('/api/auth/passkey', passkeyRateLimit());
+      // The OIDC callback: the same family, its own store.
+      this.host.use('/api/auth/callback/oidc', oidcCallbackRateLimit());
+      // The shared demo account cannot change itself through better-auth's account routes
+      // (name, email, password, TOTP, passkeys, sessions); see the middleware.
+      this.host.use('/api/auth', blockDemoAuthAccountChanges);
 
       // better-auth runs embedded in `api`. Mount its handler BEFORE express.json
       // (it reads the raw request body itself — express.json would consume it and
@@ -187,12 +209,27 @@ export default class Application {
       this.host.get('/v1/household/invites/validate', inviteLookupRateLimit(), validateInviteController);
 
       this.host.use('/v1/account', ...authedTenant(), accountRoutes);
+      // Read from the web app's admin page as well as by scripts, so it takes an instance admin
+      // session or the admin API key, and answers 404 to everyone else. Ahead of `/v1/admin`,
+      // whose API-key-only gate would otherwise answer first.
+      this.host.use('/v1/admin/bank-sync', adminApiRateLimit(), requireInstanceAdmin, adminBankSyncRoutes);
       this.host.use('/v1/admin', adminApiRateLimit(), adminAuth, adminRoutes);
       this.host.use('/v1/health', healthRoutes);
+      // QR pairing's public exchange. Its own strict, IP-keyed family: the code it accepts is a
+      // credential, even though it is single-use and short-lived.
+      this.host.use('/v1/auth/pair', pairingRateLimit());
+      // One-click demo sign-in: it creates a session without a credential, so it gets an
+      // IP-keyed `authExchange` budget of its own as well as the `/v1/auth` one below.
+      this.host.use('/v1/auth/demo', demoSignInRateLimit());
       // Credential surface: strict, per-IP, and never relaxed outside production.
       this.host.use('/v1/auth', authExchangeRateLimit(), optionalAuth, getUserOptional, authRoutes);
       this.host.use('/v1/banking', ...authedTenant(), bankingRoutes);
       this.host.use('/v1/budget', ...authedTenant(), budgetRoutes);
+      // A read-only ICS feed of upcoming bills. Calendar apps cannot send an Authorization
+      // header, so the token travels in the query: `requireCalendarFeedToken` resolves it before
+      // the limiter, which then keys its bucket on the token's own row. This mount is
+      // deliberately outside `requireAuth`, and no bearer token can reach it.
+      this.host.use('/v1/calendar', requireCalendarFeedToken, calendarFeedRateLimit(), calendarRoutes);
       // `resolveTenantForRequest`/`assertTenantResolved` are here for the same fail-loud invariant
       // every other authenticated data mount holds: without them this router ran on an EM with no
       // tenant context, so the global tenant filter stayed in system-bypass mode for the whole
@@ -207,14 +244,21 @@ export default class Application {
       this.host.use('/v1/loan', ...authedTenant(), loanRoutes);
       this.host.use('/v1/configs', ...authedTenant(), configsRoutes);
       this.host.use('/v1/currency', ...authedTenant(), currencyRoutes);
+      this.host.use('/v1/expense-groups', ...authedTenant(), expenseGroupRoutes);
       this.host.use('/v1/feedback', ...authedTenant(feedbackRateLimit), feedbackRoutes);
       this.host.use('/v1/goals', ...authedTenant(), goalRoutes);
       this.host.use('/v1/household', ...authedTenant(), householdRoutes);
       this.host.use('/v1/financial-markets', ...authedTenant(), financialMarketsRoutes);
       // Public: clients read it before sign-in (feature flags, signup mode, server identity).
+      this.host.use('/v1/insights', ...authedTenant(), insightsRoutes);
       this.host.use('/v1/instance', instanceRoutes);
       this.host.use('/v1/manual-assets', ...authedTenant(), manualAssetRoutes);
       this.host.use('/v1/marketing', publicMarketingRateLimit(), marketingRoutes);
+      // The read-only MCP server. Deliberately outside `authedTenant`: an MCP client is a
+      // machine credential, so the route accepts only a personal API token with `mcp:read`
+      // and never a session cookie (see `middleware/mcp-auth.ts`).
+      this.host.use('/v1/installment-plans', ...authedTenant(), installmentPlanRoutes);
+      this.host.use('/v1/mcp', mcpRoutes);
       // Net worth is protected at mount level; route stays auth-agnostic.
       this.host.use('/v1/net-worth', ...authedTenant(), netWorthRoutes);
       this.host.use('/v1/portfolio', ...authedTenant(), portfolioRoutes);
@@ -226,6 +270,7 @@ export default class Application {
       this.host.use('/v1/support', supportRateLimit(), supportRoutes);
       this.host.use('/v1/tag', ...authedTenant(), tagRoutes);
       this.host.use('/v1/transaction-import-sessions', ...authedTenant(importSessionRateLimit), transactionImportRoutes);
+      this.host.use('/v1/transaction-template', ...authedTenant(), transactionTemplateRoutes);
       this.host.use('/v1/user', ...authedTenant(), userRoutes);
 
       this.host.use((req, res, next: NextFunction) => {

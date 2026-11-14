@@ -12,9 +12,10 @@ import { bankInstitutionsKey } from './query-keys'
  * Read-only institution picker source. Genuinely idempotent GET
  * (unlike start-bank-connection), so this is a plain cached useQuery, same
  * shape as use-bank-connections: no retry, no focus/reconnect refetch,
- * MFA routed through blockAccess.
+ * MFA routed through blockAccess. `enabled` holds it back until the person can link
+ * (`useBankLinkCredential`).
  */
-export function useBankInstitutions() {
+export function useBankInstitutions({ enabled = true }: { enabled?: boolean } = {}) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('useBankInstitutions requires an authenticated runtime')
   const countryCode = resolveBankCountryCode()
@@ -22,6 +23,8 @@ export function useBankInstitutions() {
   const query = useQuery({
     queryKey: bankInstitutionsKey(runtime.epochId, countryCode),
     queryFn: () => runtime.apiClient.read(createBankInstitutionsEndpoint(countryCode)),
+    // Off until a key is known to be usable: without one the API refuses the list.
+    enabled,
     retry: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

@@ -47,6 +47,7 @@ describe('EmailNotificationPreferenceService', () => {
       accountRecovery: { effectiveEnabled: true, storedEnabled: true },
       bankSyncAlerts: { effectiveEnabled: true, storedEnabled: true },
       budgetAlerts: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
+      creditCardDueReminders: { effectiveEnabled: true, storedEnabled: true },
       growth: { effectiveEnabled: true, storedEnabled: true },
       marketingOptOut: false,
       monthlyStory: { deliverySupported: true, effectiveEnabled: true, storedEnabled: true },
@@ -81,7 +82,7 @@ describe('EmailNotificationPreferenceService', () => {
   it('persists a bank sync alerts opt-out without touching the other categories', async () => {
     execute.mockImplementation((sql: string) => Promise.resolve(sql.startsWith('select')
       ? eligibleUser()
-      : { account_recovery_enabled: true, bank_sync_alerts_enabled: false, budget_alerts_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
+      : { account_recovery_enabled: true, bank_sync_alerts_enabled: false, budget_alerts_enabled: true, credit_card_due_reminders_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
 
     const result = await service.patchForAppuser(7, { bankSyncAlertsEnabled: false });
 
@@ -127,7 +128,7 @@ describe('EmailNotificationPreferenceService', () => {
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: false, effectiveEnabled: false, storedEnabled: true });
   });
 
-  it.each([SupportedLanguages.EN, SupportedLanguages.PT])('supports delivery (and returns the language) for %s locale', async (language) => {
+  it.each([SupportedLanguages.EN, SupportedLanguages.PT, SupportedLanguages.ES])('supports delivery (and returns the language) for %s locale', async (language) => {
     execute.mockResolvedValue(freshRow({ budgetAlertsEnabled: true, language }));
     await expect(service.getFreshWorkerEligibility(7, 'budgetAlerts')).resolves.toMatchObject({ deliverySupported: true, effectiveEnabled: true, language, storedEnabled: true });
   });
@@ -140,7 +141,7 @@ describe('EmailNotificationPreferenceService', () => {
   it('partially upserts without updating the omitted field', async () => {
     execute.mockImplementation((sql: string) => Promise.resolve(sql.startsWith('select')
       ? eligibleUser()
-      : { account_recovery_enabled: true, budget_alerts_enabled: false, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
+      : { account_recovery_enabled: true, budget_alerts_enabled: false, credit_card_due_reminders_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
 
     const result = await service.patchForAppuser(7, { budgetAlertsEnabled: false });
 
@@ -149,7 +150,7 @@ describe('EmailNotificationPreferenceService', () => {
     expect(sql).toContain('"budget_alerts_enabled" = excluded."budget_alerts_enabled"');
     expect(sql).not.toContain('do update set "weekly_insights_enabled"');
     expect(sql).toContain('"deleted_at" = null');
-    expect(sql).toContain('returning "account_recovery_enabled", "bank_sync_alerts_enabled", "budget_alerts_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"');
+    expect(sql).toContain('returning "account_recovery_enabled", "bank_sync_alerts_enabled", "budget_alerts_enabled", "credit_card_due_reminders_enabled", "growth_emails_enabled", "monthly_story_enabled", "weekly_insights_enabled"');
     expect(execute.mock.calls[1]?.[2]).toBe('get');
     expect(result.weeklyInsights.storedEnabled).toBe(true);
     expect(result.budgetAlerts.storedEnabled).toBe(false);
@@ -158,7 +159,7 @@ describe('EmailNotificationPreferenceService', () => {
   it('also upserts the account-recovery and growth category flags', async () => {
     execute.mockImplementation((sql: string) => Promise.resolve(sql.startsWith('select')
       ? eligibleUser()
-      : { account_recovery_enabled: false, budget_alerts_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
+      : { account_recovery_enabled: false, budget_alerts_enabled: true, credit_card_due_reminders_enabled: true, growth_emails_enabled: true, monthly_story_enabled: true, weekly_insights_enabled: true }));
 
     const result = await service.patchForAppuser(7, { accountRecoveryEnabled: false });
 

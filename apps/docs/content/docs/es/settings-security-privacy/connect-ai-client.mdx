@@ -1,0 +1,106 @@
+---
+title: Conectar un cliente de IA
+description: Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por tus propias finanzas con un token de solo lectura.
+---
+
+WonderMoney incluye un servidor [Model Context Protocol](https://modelcontextprotocol.io) (MCP) de solo lectura. Un cliente MCP como Claude Desktop, Cursor o VS Code puede preguntarle por tus cuentas, gastos, presupuestos, objetivos, patrimonio neto y cartera, y responder en el propio chat del cliente.
+
+El servidor está en `POST /v1/mcp` de tu API. No es una cuenta aparte y no tiene herramientas de escritura: puede leer y, si lo permites, proponer un cambio para que lo confirmes. Nunca cambia nada por sí mismo.
+
+## Qué puede ver el cliente
+
+El cliente ve exactamente lo que ves tú:
+
+- Las cuentas, transacciones, presupuestos, categorías, objetivos y carteras compartidos del hogar.
+- Tus cuentas privadas y las cuentas privadas compartidas contigo, y **no** las cuentas privadas de otro miembro del hogar que están ocultas para ti.
+- Nunca los datos de otro hogar.
+
+Cada herramienta toma tu identidad del token, así que aquí se aplican las mismas reglas de privacidad que en la aplicación.
+
+## Qué puede hacer el cliente
+
+El cliente puede llamar a estas herramientas de solo lectura:
+
+- `get_account_balance_summary`, `list_accounts`, `get_net_worth_summary`
+- `get_cashflow_summary`, `get_spending_by_category`, `get_spending_trend`, `get_large_transactions_summary`
+- `search_transactions` (rango de fechas, cuenta, categoría, rango de importes, hasta 100 filas)
+- `get_budget_status`, `compare_budget_periods`, `list_budgets`, `list_categories`
+- `get_goal_progress_summary`, `get_recurring_payments_summary`
+- `get_portfolio_summary`, `get_portfolio_income_summary`
+- `get_insights`
+
+No puede crear, cambiar ni borrar nada, y no llega al hogar, a las conexiones bancarias, a las exportaciones ni a la gestión de tokens.
+
+## Propuestas
+
+Con el ámbito de propuestas (`mcp:propose`), el cliente también puede llamar a `propose_categorize_transactions`, `propose_mark_transactions_reviewed` y `propose_update_transaction_note`. Cada una comprueba que todas las transacciones son visibles para ti y prepara una propuesta; no cambia la transacción. La propuesta espera en **Ajustes > Asistente > Cambios pendientes** (y en **Más > Cambios pendientes** en el móvil) hasta que la apliques o descartes, y caduca a los siete días. El cliente no puede aplicarla, ni ningún token de API. Consulta [Configuración del asistente](/es/docs/settings-security-privacy/assistant-settings#propuestas-y-cambios-pendientes).
+
+## Crear un token
+
+1. Abre **Ajustes → Tokens de API**.
+2. En **Conectar un cliente de IA**, selecciona **Crear un token de cliente de IA**.
+3. Copia el token de inmediato. Solo se muestra una vez.
+
+El atajo crea un token llamado "AI client" con el ámbito **Cliente de IA (MCP)** y una caducidad de 90 días. Si usas autenticación de dos factores, introduce antes el código del autenticador. Para añadir el ámbito de propuestas, marca antes **Dejar que el cliente proponga cambios para que yo los confirme**. También puedes crear el token a mano en el formulario de arriba, eligiendo los mismos ámbitos.
+
+Los ámbitos `mcp:read` y `mcp:propose` solo llegan al endpoint MCP: `mcp:read` da las herramientas de solo lectura y `mcp:propose` las de propuestas. No dan acceso a las rutas de datos normales, y un token `read` no llega al MCP: son credenciales separadas a propósito.
+
+## Configuración del cliente
+
+Claude Desktop conecta con un servidor MCP remoto mediante `mcp-remote`. Añade esto a su `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "wondermoney": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.example.com/v1/mcp",
+        "--header",
+        "Authorization: Bearer <your-token>"
+      ]
+    }
+  }
+}
+```
+
+Cursor y otros clientes que hablan Streamable HTTP directamente usan la URL y la cabecera:
+
+```json
+{
+  "mcpServers": {
+    "wondermoney": {
+      "url": "https://api.example.com/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-token>"
+      }
+    }
+  }
+}
+```
+
+Sustituye la dirección de la API por la tuya y `<your-token>` por el valor que copiaste. El endpoint no guarda estado: el cliente envía el token en cada petición y no hay sesión que mantener.
+
+## Registro de auditoría
+
+Cada llamada a una herramienta se escribe en el registro de auditoría del asistente con el nombre de la herramienta, el token y la hora. Los importes y las descripciones nunca se escriben allí. **Ajustes → Tokens de API → Conectar un cliente de IA** lista las llamadas más recientes.
+
+## Revocar el acceso
+
+Selecciona **Revocar** junto al token en **Ajustes → Tokens de API**. La revocación es inmediata: la siguiente petición del cliente recibe `401 Unauthorized`. Borra también la entrada del servidor en la configuración del cliente, para que deje de intentarlo.
+
+## Límites de uso
+
+El tráfico MCP usa el presupuesto de peticiones del propio token, y cada token puede hacer un número limitado de llamadas a herramientas por minuto (60 por defecto). Un cliente que supere cualquiera de los límites recibe un error y puede reintentarlo en breve. El presupuesto es independiente de tu sesión del navegador.
+
+## Autoalojamiento
+
+El servidor está activado por defecto. Define `MCP_ENABLED=false` en la API para desactivarlo: `POST /v1/mcp` pasa a responder `404`, y `GET /v1/instance` informa de `features.mcp: false`, así que el panel de ajustes desaparece. Consulta [Configurar](/es/docs/self-hosting/configure).
+
+## Páginas relacionadas
+
+- [Tokens de API](/es/docs/settings-security-privacy/api-tokens)
+- [Consentimiento del asistente de IA](/es/docs/settings-security-privacy/ai-assistant-consent)
+- [Privacidad de los datos](/es/docs/settings-security-privacy/data-privacy)

@@ -1,10 +1,13 @@
 import { fireEvent, render, waitFor, within } from '@testing-library/react-native'
+import * as Clipboard from 'expo-clipboard'
 import { I18nextProvider } from 'react-i18next'
 import { StyleSheet } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
 import { MoreScreen } from './more-screen'
+
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn().mockResolvedValue(undefined) }))
 
 async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreScreen>> = {}) {
   const i18n = await initMobileI18n('en')
@@ -21,6 +24,7 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreS
     onOpenSettings: jest.fn(),
     onOpenMarkets: jest.fn(),
     onOpenLoans: jest.fn(),
+    onOpenGroups: jest.fn(),
     onOpenAssets: jest.fn(),
     onOpenGoals: jest.fn(),
     onOpenReports: jest.fn(),
@@ -37,6 +41,10 @@ async function renderScreen(overrides: Partial<React.ComponentProps<typeof MoreS
 }
 
 describe('MoreScreen', () => {
+  beforeEach(() => {
+    jest.mocked(Clipboard.setStringAsync).mockClear()
+  })
+
   it('shows only help, not the hosted instance\'s legal pages, changelog or support, on a self-hosted server', async () => {
     const { view } = await renderScreen({
       onOpenPrivacy: undefined,
@@ -60,6 +68,7 @@ describe('MoreScreen', () => {
       ['Settings', 'onOpenSettings'],
       ['Financial Markets', 'onOpenMarkets'],
       ['Loans', 'onOpenLoans'],
+      ['Groups', 'onOpenGroups'],
       ['Assets', 'onOpenAssets'],
       ['Goals', 'onOpenGoals'],
       ['Reports', 'onOpenReports'],
@@ -167,5 +176,50 @@ describe('MoreScreen', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Cancel' }))
     expect(view.queryByRole('radio', { name: 'Bug' })).not.toBeOnTheScreen()
     expect(onSubmitFeedback).not.toHaveBeenCalled()
+  })
+
+  it('shows the connected server version and commit next to the app version', async () => {
+    const { view } = await renderScreen({
+      serverInfo: { version: '1.2.0', commit: 'abc1234' },
+    })
+    expect(view.getByText('Version 1.0.0')).toBeOnTheScreen()
+    expect(view.getByText('Server 1.2.0 (abc1234)')).toBeOnTheScreen()
+  })
+
+  it('copies the app and server versions on one line for a bug report', async () => {
+    const { view } = await renderScreen({
+      serverInfo: { version: '1.2.0', commit: 'abc1234' },
+    })
+    await fireEvent.press(view.getByRole('button', { name: 'Copy version info' }))
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith(
+      'WonderMoney app 1.0.0, server 1.2.0 (abc1234)',
+    )
+    expect(view.getByText('Version info copied')).toBeOnTheScreen()
+  })
+
+  it('leaves out the server line when the server does not report a version', async () => {
+    const { view } = await renderScreen({ serverInfo: null })
+    expect(view.queryByText(/^Server /)).not.toBeOnTheScreen()
+  })
+  it('shows the pending changes row with its count, and opens it', async () => {
+    const onOpen = jest.fn()
+    const { view } = await renderScreen({ pendingChanges: { count: 3, onOpen } })
+
+    expect(view.getByTestId('more-pending-changes-count')).toHaveTextContent('3')
+    await fireEvent.press(view.getByRole('button', { name: 'Pending changes, 3 waiting, opens in the app' }))
+    expect(onOpen).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the pending changes row without a badge when nothing is waiting', async () => {
+    const { view } = await renderScreen({ pendingChanges: { count: 0, onOpen: jest.fn() } })
+
+    expect(view.getByRole('button', { name: 'Pending changes, opens in the app' })).toBeOnTheScreen()
+    expect(view.queryByTestId('more-pending-changes-count')).toBeNull()
+  })
+
+  it('has no pending changes row when proposals are unavailable (AI hidden)', async () => {
+    const { view } = await renderScreen()
+
+    expect(view.queryByText('Pending changes')).toBeNull()
   })
 })

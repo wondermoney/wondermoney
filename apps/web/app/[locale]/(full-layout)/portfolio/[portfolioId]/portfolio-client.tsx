@@ -9,12 +9,14 @@ import { toast } from "sonner";
 import PortfolioAllocationChart from "@/components/portfolio/PortfolioAllocationChart";
 import PortfolioAllocationEmptyState from "@/components/portfolio/PortfolioAllocationEmptyState";
 import PortfolioAllocationGuidance from "@/components/portfolio/PortfolioAllocationGuidance";
+import PortfolioClosedPositions from "@/components/portfolio/PortfolioClosedPositions";
 import PortfolioDashboardSummary from "@/components/portfolio/PortfolioDashboardSummary";
 import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendIncome";
 import PortfolioHistoryStatusBanner from "@/components/portfolio/PortfolioHistoryStatusBanner";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
 import PortfolioPerformanceChart from "@/components/portfolio/PortfolioPerformanceChart";
 import PortfolioQuickStats from "@/components/portfolio/PortfolioQuickStats";
+import PortfolioRealizedGains from "@/components/portfolio/PortfolioRealizedGains";
 import PortfolioSettingsModal from "@/components/portfolio/PortfolioSettingsModal";
 import PortfolioTargetAllocation from "@/components/portfolio/PortfolioTargetAllocation";
 import PortfolioTargetAllocationEditor from "@/components/portfolio/PortfolioTargetAllocationEditor";
@@ -347,6 +349,12 @@ export default function PortfolioClient({
           </section>
         </>
       )}
+
+      {/* Sales and closed positions stay visible after everything is sold,
+          when the holdings above are empty. Each renders nothing until the
+          portfolio has a sale. */}
+      <PortfolioRealizedGains portfolioId={portfolioId} />
+      <PortfolioClosedPositions portfolioId={portfolioId} />
     </div>
   );
 }

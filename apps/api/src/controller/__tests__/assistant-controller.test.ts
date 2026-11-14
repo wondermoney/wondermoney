@@ -38,7 +38,7 @@ vi.mock('@entity/AssistantAuditLog', () => ({
 
 vi.mock('@entity/Appuser', () => ({
   Appuser: {},
-  SupportedLanguages: { EN: 'EN', PT: 'PT' },
+  SupportedLanguages: { EN: 'EN', ES: 'ES', PT: 'PT' },
 }));
 
 vi.mock('@entity/Tenant', () => ({
@@ -209,8 +209,8 @@ describe('assistant controller', () => {
     expect(mocked.streamChat).toHaveBeenCalledWith(expect.objectContaining({ currency: 'EUR', locale: 'pt' }));
   });
 
-  it('falls back to the account language when the client sends no locale', async () => {
-    const user = { appuserKey: 7, currencyKey: { code: 'EUR' }, emailAddress: 'someone@example.com', language: 'PT' };
+  it.each([['PT', 'pt'], ['ES', 'es']])('falls back to the account language (%s) when the client sends no locale', async (language, locale) => {
+    const user = { appuserKey: 7, currencyKey: { code: 'EUR' }, emailAddress: 'someone@example.com', language };
     mocked.findOne.mockResolvedValueOnce({ tenantKey: { tenantKey: 9 } }).mockResolvedValueOnce({ assistantEnabled: true, consentVersion: 4 });
 
     await chatWithAssistant(
@@ -218,7 +218,7 @@ describe('assistant controller', () => {
       mockRes(),
     );
 
-    expect(mocked.streamChat).toHaveBeenCalledWith(expect.objectContaining({ currency: 'EUR', locale: 'pt' }));
+    expect(mocked.streamChat).toHaveBeenCalledWith(expect.objectContaining({ currency: 'EUR', locale }));
   });
 
   // Any account reaches the assistant: the only thing that stops a chat is the

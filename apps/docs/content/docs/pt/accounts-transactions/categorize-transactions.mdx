@@ -16,6 +16,14 @@ Cada linha mostra um indicador de confiança para a sugestão — alta, média o
 
 Os itens que corriges são usados para aprender a associação com esse comerciante, pelo que a próxima transação do mesmo comerciante será mais fácil de categorizar.
 
+## Sugestões locais
+
+O WonderMoney pode sugerir uma categoria sem enviar nada para um serviço de IA. Aprende com as categorias que já confirmaste — as que escolheste e as que o sistema atribuiu com confiança — e compara o comerciante, a descrição, a conta, o sentido e a ordem de grandeza do montante de uma transação nova com esse histórico. Quando a correspondência é clara, preenche a categoria e marca-a com confiança média, por isso a transação continua na Bandeja de revisão para aprovares ou alterares.
+
+Só sugere uma categoria quando está segura; caso contrário, fica calado e a transação fica para categorizares tu ou, se a IA estiver configurada, para uma sugestão por IA. A sugestão local corre antes de qualquer passo de IA e não precisa de nenhum fornecedor de IA. Nunca envia os teus dados para lado nenhum, por isso também corre quando escondeste a IA nas definições. Levantamentos e transferências nunca são categorizados assim, porque a descrição não diz para que serviu o dinheiro.
+
+Quanto mais transações confirmares, melhores ficam as sugestões locais. As contas privadas que não vês nunca treinam as tuas sugestões.
+
 Se o teu agregado tiver regras, elas correm primeiro em cada transação nova, venha ela da sincronização bancária, de um ficheiro importado, de um recibo ou de uma que adicionas à mão. Uma categoria definida por uma regra prevalece sobre a associação aprendida, e essa transação não é enviada para sugestão por IA. As regras nunca alteram uma categoria que escolheste, nem uma descrição ou comerciante que escreveste ou editaste, e correm uma só vez, quando a transação chega: uma sincronização posterior não desfaz as tuas alterações. O histórico de atividade da transação indica a regra que a alterou.
 
 ## Antes de começar
@@ -37,67 +45,69 @@ Quando aplicas uma categoria a várias transações de uma vez, a categoria esco
 
 Alguns pagamentos cobrem mais do que uma coisa: um talão do supermercado com comida e artigos para a casa, ou uma conta da farmácia que é em parte um presente. Dividir reparte o montante de uma transação por várias categorias, para que cada parte conte no seu próprio orçamento e relatório.
 
-1. Abra o menu da transação e escolha **Editar**.
-2. Em **Categoria**, escolha **Dividir**. Começa com duas linhas: a categoria atual com o montante total e uma linha vazia.
-3. Dê a cada linha uma categoria e um montante. Escreva o montante como valor ou como percentagem da transação, por exemplo `25%`. Pode juntar uma nota curta a qualquer linha.
-4. Acompanhe **Falta atribuir** por baixo das linhas. Use **Preencher o restante** numa linha para lhe juntar o que falta, ou **Dividir em partes iguais** para repartir o montante por igual. **Guardar** fica desativado até as linhas somarem exatamente o montante da transação.
+1. Abre o menu da transação e escolhe **Editar**.
+2. Em **Categoria**, escolhe **Dividir**. Começa com duas linhas: a categoria atual com o montante total e uma linha vazia.
+3. Dá a cada linha uma categoria e um montante. Escreve o montante como valor ou como percentagem da transação, por exemplo `25%`. Podes juntar uma nota curta a qualquer linha.
+4. Acompanha **Falta atribuir** por baixo das linhas. Usa **Preencher o restante** numa linha para lhe juntar o que falta, ou **Dividir em partes iguais** para repartir o montante por igual. **Guardar** fica desativado até as linhas somarem exatamente o montante da transação.
 
 Os montantes estão na moeda da conta e escrevem-se sem sinal: cada linha fica com o sinal da transação. Uma divisão precisa de pelo menos duas linhas e nenhuma linha pode ser zero.
 
-Na lista de transações, uma transação dividida mostra **Dividida** com o número de categorias que usa, em vez de uma só categoria. Selecione-a para ver cada linha, ou abra os detalhes da transação para ver as linhas com as respetivas notas. Um filtro de categoria inclui uma transação dividida quando alguma das suas linhas está nessa categoria.
+Na lista de transações, uma transação dividida mostra **Dividida** com o número de categorias que usa, em vez de uma só categoria. Seleciona-a para ver cada linha, ou abre os detalhes da transação para ver as linhas com as respetivas notas. Um filtro de categoria inclui uma transação dividida quando alguma das suas linhas está nessa categoria.
 
-Para alterar uma divisão, abra **Editar** de novo e mude as linhas. Para a desfazer, escolha **Remover divisão** e confirme: a transação volta a ter uma só categoria, a da sua maior linha. Dar uma só categoria a uma transação dividida por outra via, como a categorização em massa, também remove a divisão, por isso o WonderMoney pergunta primeiro.
+Para alterar uma divisão, abre **Editar** de novo e muda as linhas. Para a desfazer, escolhe **Remover divisão** e confirma: a transação volta a ter uma só categoria, a da sua maior linha. Dar uma só categoria a uma transação dividida por outra via, como a categorização em massa, também remove a divisão, por isso o WonderMoney pergunta primeiro.
 
 Se o montante de uma transação dividida mudar mais tarde, por exemplo quando um pagamento pendente é liquidado, as linhas são ajustadas ao novo montante e a transação fica marcada para revisão. O pagamento de um empréstimo não pode ser dividido, porque já separa capital de juros.
 
 ## Etiquetas
 
-As etiquetas marcam transações de várias categorias. Uma transação tem uma categoria, mas pode ter várias etiquetas, por isso uma etiqueta serve para tudo o que atravessa categorias: uma viagem, uma obra em casa, uma despesa de trabalho que vai pedir reembolso. As etiquetas pertencem ao agregado, por isso os dois membros veem e usam a mesma lista.
+As etiquetas marcam transações de várias categorias. Uma transação tem uma categoria, mas pode ter várias etiquetas, por isso uma etiqueta serve para tudo o que atravessa categorias: uma viagem, uma obra em casa, uma despesa de trabalho que vais pedir para ser reembolsada. As etiquetas pertencem ao agregado, por isso todas as pessoas do agregado veem e usam a mesma lista.
 
 ### Adicionar ou retirar etiquetas
 
-- **Na web**, abra o menu de uma transação e escolha **Editar**; depois use o campo **Etiquetas**. Escolha etiquetas existentes ou escreva um nome novo e escolha **Criar etiqueta** para a criar de imediato. O mesmo campo aparece quando adiciona uma transação manualmente.
-- **Na aplicação móvel**, toque numa transação para abrir os detalhes e escolha **Editar etiquetas**, ou use **Editar etiquetas** no menu da linha. Escreva um nome em **Nova etiqueta** para criar uma. Quando adiciona uma transação manualmente, a linha **Etiquetas** abre o mesmo seletor.
+- **Na web**, abre o menu de uma transação e escolhe **Editar**; depois usa o campo **Etiquetas**. Escolhe etiquetas existentes ou escreve um nome novo e escolhe **Criar etiqueta** para a criar de imediato. O mesmo campo aparece quando adicionas uma transação manualmente.
+- **Na aplicação móvel**, toca numa transação para abrir os detalhes e escolhe **Editar etiquetas**, ou usa **Editar etiquetas** no menu da linha. Escreve um nome em **Nova etiqueta** para criar uma. Quando adicionas uma transação manualmente, a linha **Etiquetas** abre o mesmo seletor.
 
 Uma transação pode ter até 50 etiquetas. Os nomes das etiquetas são únicos no agregado, sem distinguir maiúsculas de minúsculas: "Viagem" e "viagem" são a mesma etiqueta.
+
+Para etiquetar várias transações de uma vez, seleciona-as e escolhe **Etiqueta** na barra (também na barra de seleção da aplicação móvel) e depois uma etiqueta em **Adicionar etiqueta** ou **Remover etiqueta**. Ali só aparecem etiquetas existentes; cria novas em **Definições → Etiquetas** ou ao editar uma transação. Com todas as transações correspondentes selecionadas, a etiqueta é aplicada a todas (vê [Alterar várias transações de uma vez](/pt/docs/accounts-transactions/understand-transactions#alterar-várias-transações-de-uma-vez)).
 
 ### Ver e filtrar por etiqueta
 
 As etiquetas aparecem como pequenos chips a seguir à categoria, na lista de transações e nos detalhes de uma transação. Cada chip mostra o nome da etiqueta com a cor num ponto, para que o nome se leia bem nos temas claro e escuro.
 
-Para ver só transações com etiqueta, abra **Filtros** e escolha uma ou mais etiquetas. Uma transação corresponde quando tem qualquer uma das etiquetas escolhidas, e o filtro abrange todo o período, não só as linhas já carregadas. Na web, o painel de filtros dos relatórios tem o mesmo filtro de etiquetas.
+Para ver só transações com etiqueta, abre **Filtros** e escolhe uma ou mais etiquetas. Uma transação corresponde quando tem qualquer uma das etiquetas escolhidas, e o filtro abrange todo o período, não só as linhas já carregadas. Na web, o painel de filtros dos relatórios tem o mesmo filtro de etiquetas.
 
 ### Mudar o nome, a cor ou eliminar etiquetas
 
-Na web, vá a **Definições → Etiquetas**. Aí pode mudar o nome de uma etiqueta, alterar a cor, adicionar uma nova ou eliminar uma. Eliminar uma etiqueta retira-a de todas as transações do agregado; as transações em si não mudam.
+Na web, vai a **Definições → Etiquetas**. Aí podes mudar o nome de uma etiqueta, alterar a cor, adicionar uma nova ou eliminar uma. Eliminar uma etiqueta retira-a de todas as transações do agregado; as transações em si não mudam.
 
 ## Dinheiro que não é despesa
 
-Mover dinheiro para uma corretora, um plano de reforma ou um mealheiro de poupança não é uma despesa. A WonderMoney deixa-o fora das despesas de duas formas.
+Mover dinheiro para uma corretora, um plano de reforma ou um mealheiro de poupança não é uma despesa. O WonderMoney deixa-o fora das despesas de duas formas.
 
 ### Investimentos e poupanças
 
-Todos os agregados têm a categoria de sistema **Investimentos e poupanças**, com **Investimentos** e **Poupanças** por baixo. Por omissão, estas categorias não contam como despesa: as transações nelas ficam fora dos relatórios, dos orçamentos e do fluxo de caixa da página inicial. Nada é movido para elas automaticamente; escolha a categoria nas transações a que se aplica, como com qualquer outra. Numa transação dividida, só as partes nestas categorias ficam de fora.
+Todos os agregados têm a categoria de sistema **Investimentos e poupanças**, com **Investimentos** e **Poupanças** por baixo. Por omissão, estas categorias não contam como despesa: as transações nelas ficam fora dos relatórios, dos orçamentos e do fluxo de caixa da página inicial. Nada é movido para elas automaticamente; escolhe a categoria nas transações a que se aplica, como com qualquer outra. Numa transação dividida, só as partes nestas categorias ficam de fora.
 
-Todas as categorias, incluindo as de sistema, têm o interruptor **Conta como despesa**. Está ligado por omissão, exceto em Investimentos e poupanças. Desligue-o numa categoria, como um mealheiro de poupança seu, e as transações dela também saem das despesas. Ligue-o em Investimentos e poupanças se quiser que essas transações contem como despesa. Mudar uma categoria muda também as categorias dentro dela, e uma categoria dentro de outra que não conta como despesa também não conta.
+Todas as categorias, incluindo as de sistema, têm o interruptor **Conta como despesa**. Está ligado por omissão, exceto em Investimentos e poupanças. Desliga-o numa categoria, como um mealheiro de poupança teu, e as transações dela também saem das despesas. Liga-o em Investimentos e poupanças se quiseres que essas transações contem como despesa. Mudar uma categoria muda também as categorias dentro dela, e uma categoria dentro de outra que não conta como despesa também não conta.
 
-O interruptor aplica-se apenas ao seu agregado: os dois membros veem a mesma definição, e nenhum outro agregado é afetado.
+O interruptor aplica-se apenas ao teu agregado: todas as pessoas do agregado veem a mesma definição, e nenhum outro agregado é afetado.
 
-- **Na web**, vá a **Definições → Categorias** e use o interruptor **Conta como despesa** em qualquer linha. Numa categoria sua, também está no formulário ao criá-la ou editá-la.
-- **Na aplicação móvel**, uma categoria de sistema tem o interruptor **Conta como despesa** na sua linha em **Definições → Categorias**. Numa categoria sua, use **Conta como despesa** ao criá-la ou editá-la. As categorias que não contam aparecem assinaladas na lista.
+- **Na web**, vai a **Definições → Categorias** e usa o interruptor **Conta como despesa** em qualquer linha. Numa categoria tua, também está no formulário ao criá-la ou editá-la.
+- **Na aplicação móvel**, uma categoria de sistema tem o interruptor **Conta como despesa** na sua linha em **Definições → Categorias**. Numa categoria tua, usa **Conta como despesa** ao criá-la ou editá-la. As categorias que não contam aparecem assinaladas na lista.
 
 ### Marcar como transferência
 
-A WonderMoney reconhece uma transferência entre duas contas suas quando encontra os dois lados: o dinheiro que sai de uma conta e o mesmo valor a chegar à outra, no máximo uns dias depois. As duas linhas ficam então fora das receitas e das despesas. Um pagamento a uma corretora, ou a uma conta que não ligou, não tem o outro lado, por isso continua a ser um pagamento até o marcar.
+O WonderMoney reconhece uma transferência entre duas contas tuas quando encontra os dois lados: o dinheiro que sai de uma conta e o mesmo valor a chegar à outra, no máximo uns dias depois. As duas linhas ficam então fora das receitas e das despesas. Um pagamento a uma corretora, ou a uma conta que não ligaste, não tem o outro lado, por isso continua a ser um pagamento até o marcares.
 
-Entre duas contas em moedas diferentes, os valores não coincidem. A WonderMoney converte o valor que saiu à taxa de câmbio desse dia e junta os dois quando o valor que chegou fica a menos de 2 por cento dele, o que acomoda a margem cambial e as comissões do banco. Se não houver taxa de câmbio para esse dia, ou se houver duas correspondências igualmente prováveis, deixa as duas linhas como estão e podes marcar tu a transferência. Nunca junta uma conta partilhada com uma conta privada, nem contas privadas de dois membros diferentes.
+Entre duas contas em moedas diferentes, os valores não coincidem. O WonderMoney converte o valor que saiu à taxa de câmbio desse dia e junta os dois quando o valor que chegou fica a menos de 2 por cento dele, o que acomoda a margem cambial e as comissões do banco. Se não houver taxa de câmbio para esse dia, ou se houver duas correspondências igualmente prováveis, deixa as duas linhas como estão e podes marcar tu a transferência. Só junta duas contas quando exatamente as mesmas pessoas veem as duas: nunca uma conta partilhada com uma privada, nem duas contas privadas partilhadas com pessoas diferentes.
 
-- **Na web**, abra o menu da transação, escolha **Editar** e ligue **Marcar como transferência**.
-- **Na aplicação móvel**, abra o menu da linha e escolha **Marcar como transferência**.
+- **Na web**, abre o menu da transação, escolhe **Editar** e liga **Marcar como transferência**.
+- **Na aplicação móvel**, abre o menu da linha e escolhe **Marcar como transferência**.
 
-Para dinheiro que sai, pode também indicar para onde foi: outra das suas contas, uma carteira ou um objetivo. É uma nota na transação; não acrescenta nada à carteira nem ao objetivo. Para anular, desligue o interruptor na web, ou escolha **Não é uma transferência** na aplicação móvel.
+Para dinheiro que sai, podes também indicar para onde foi: outra das tuas contas, uma carteira ou um objetivo. É uma nota na transação; não acrescenta nada à carteira nem ao objetivo. Para anular, desliga o interruptor na web, ou escolhe **Não é uma transferência** na aplicação móvel.
 
-Uma transação que marcou continua a ser uma transferência: a deteção automática de transferências nunca a volta a alterar. Se mais tarde encontrar o outro lado noutra das suas contas, liga as duas.
+Uma transação que marcaste continua a ser uma transferência: a deteção automática de transferências nunca a volta a alterar. Se mais tarde encontrar o outro lado noutra das tuas contas, liga as duas.
 
 ## Rever
 
@@ -105,7 +115,7 @@ No fim da semana ou do mês, verifica as categorias e corrige o que foi atribuí
 
 ## Problemas comuns
 
-- Um só pagamento cobriu mais do que um objetivo: divida-o em vez de escolher a maior parte.
+- Um só pagamento cobriu mais do que um objetivo: divide-o em vez de escolher a maior parte.
 - A categoria é demasiado genérica para ser útil.
 - Reembolsos ou estornos receberam a mesma categoria da cobrança original.
 - Transações importadas herdaram uma categoria que não se ajusta à tua configuração.

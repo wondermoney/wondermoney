@@ -1,0 +1,36 @@
+---
+title: Insights
+description: Early warnings when a category runs hot or a budget will overrun.
+---
+
+Insights appear on your home, under net worth. They are deterministic: the same month and the same transactions always produce the same cards. No AI model is involved, so they work even when no AI provider is configured.
+
+## Spending vs normal
+
+For each top-level category, this compares what you have spent so far this month with the same days of the previous three full months.
+
+- It starts on day 7 of the month. Before that there is not enough of the month to compare.
+- It needs three full months of history. A new household sees nothing until then.
+- The category's usual spend must be at least 20 in your currency. Below that, a few euros can swing the percentage wildly.
+- It fires when spending is 25% or more above or below that baseline.
+- At most three cards appear, ranked by how far they deviate.
+
+The card shows the amount so far, the usual amount by this point, and a link to the matching transactions.
+
+## Budget pace
+
+For each budget category, this scales what you have spent so far to the whole month at the current pace.
+
+- It starts on day 7 of the month.
+- It fires when the projected month-end spend is more than the amount the category may spend, including any rollover carried in.
+- The card shows what is spent, the projection and the planned amount, with a link to the budget month.
+
+## What is left out
+
+Transfers between your own accounts and money in categories that are not spending (investments and savings) are excluded, as in the budget and report totals. Amounts are in your base currency.
+
+## Related links
+
+- [Track monthly spending](/en/docs/budgets/track-monthly-spending)
+- [Create your first budget](/en/docs/budgets/create-first-budget)
+- [Compare months](/en/docs/budgets/compare-months)

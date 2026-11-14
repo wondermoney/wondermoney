@@ -8,8 +8,10 @@ import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { InviteInvalidScreen } from '@/features/auth/invite-invalid-screen'
 import { SignUpScreen } from '@/features/auth/sign-up-screen'
 import { SocialSignIn } from '@/features/auth/social-sign-in'
+import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import type { InviteValidationDto } from '@/lib/auth/household-invite-validation'
 import { setPendingInviteToken, takePendingInviteToken } from '@/lib/auth/invite-token-store'
+import { usePasswordSignIn } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 type InviteState =
@@ -24,6 +26,8 @@ export default function SignUpRoute() {
   const router = useRouter()
   const [pendingToken] = useState(() => takePendingInviteToken())
   const [invite, setInvite] = useState<InviteState>(() => (pendingToken ? { status: 'validating' } : { status: 'none' }))
+  // OIDC_ONLY: accounts come through the identity provider only.
+  const passwordSignIn = usePasswordSignIn()
 
   useEffect(() => {
     if (!pendingToken) return
@@ -78,13 +82,22 @@ export default function SignUpRoute() {
         />
       )}
       footer={(
-        <SocialSignIn
-          flow="sign_up"
-          onBeforeSignIn={() => {
-            if (invite.status === 'valid') setPendingInviteToken(invite.token)
-          }}
-        />
+        <>
+          <SsoSignIn
+            onBeforeSignIn={() => {
+              if (invite.status === 'valid') setPendingInviteToken(invite.token)
+            }}
+            primary={!passwordSignIn}
+          />
+          <SocialSignIn
+            flow="sign_up"
+            onBeforeSignIn={() => {
+              if (invite.status === 'valid') setPendingInviteToken(invite.token)
+            }}
+          />
+        </>
       )}
+      passwordSignIn={passwordSignIn}
     />
   )
 }

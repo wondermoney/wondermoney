@@ -3,7 +3,24 @@ export const externalDestinations = {
   terms: 'https://docs.wonder.money/about/terms-of-service',
   help: 'https://docs.wonder.money/',
   whatsNew: 'https://wondermoney.canny.io/changelog',
+  // Where a person creates the one-time setup token Connect with SimpleFIN asks for.
+  simplefinBridge: 'https://bridge.simplefin.org/',
 } as const
+
+/** The self-hosting guide in each docs language (the docs site always prefixes the locale). */
+export const selfHostingDocs = {
+  en: 'https://docs.wonder.money/en/docs/self-hosting',
+  es: 'https://docs.wonder.money/es/docs/self-hosting',
+  pt: 'https://docs.wonder.money/pt/docs/self-hosting',
+} as const
+
+/** The self-hosting guide in the app's language: pt-PT reads the pt docs, anything unknown en. */
+export function selfHostingDocsUrl(locale: string): string {
+  const base = locale.trim().toLowerCase().split(/[-_]/)[0]
+  if (base === 'pt') return selfHostingDocs.pt
+  if (base === 'es') return selfHostingDocs.es
+  return selfHostingDocs.en
+}
 
 export type ApprovedEnvironment = 'local' | 'staging'
 export type AppDisplayInfo = Readonly<{
@@ -11,7 +28,7 @@ export type AppDisplayInfo = Readonly<{
   environment: ApprovedEnvironment
 }>
 
-const approvedExternalDestinations = new Set<string>(Object.values(externalDestinations))
+const approvedExternalDestinations = new Set<string>([...Object.values(externalDestinations), ...Object.values(selfHostingDocs)])
 const approvedVersion = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
 
 export function isApprovedExternalDestination(candidate: string): boolean {

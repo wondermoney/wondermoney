@@ -9,7 +9,7 @@ import type { AccountConnectedEmailProps } from "../types";
 
 export type { AccountConnectedEmailProps } from "../types";
 
-const COPY = {
+export const COPY = {
   en: {
     subject: (bank: string, brand: string) => `${bank} is connected to ${brand}`,
     preheader: (bank: string) => `${bank} is now linked — your accounts will start syncing.`,
@@ -27,6 +27,15 @@ const COPY = {
     cta: "Ver as minhas contas",
     note: "Não foste tu? Responde a este email e vamos verificar.",
     footer: (brand: string) => `Recebes este email porque foi ligado um banco à tua conta ${brand}.`,
+  },
+  es: {
+    subject: (bank: string, brand: string) => `${bank} está conectado a ${brand}`,
+    preheader: (bank: string) => `${bank} ya está vinculado: tus cuentas empezarán a sincronizarse.`,
+    heading: "Tu banco está conectado",
+    intro: (bank: string, brand: string) => `${bank} ya está vinculado a ${brand}. Tus cuentas y transacciones empezarán a sincronizarse automáticamente, sin que tengas que hacer nada.`,
+    cta: "Ver tus cuentas",
+    note: "¿No fuiste tú? Responde a este correo y lo revisaremos.",
+    footer: (brand: string) => `Recibes este correo porque se conectó un banco a tu cuenta de ${brand}.`,
   },
 } as const;
 

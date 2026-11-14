@@ -9,6 +9,7 @@ import { afterAll, afterEach, beforeAll, test } from "vitest";
 import { AreaLineChartBase } from "@/components/ui/charts/area-line-chart-base";
 import { BarChartBase } from "@/components/ui/charts/bar-chart-base";
 import { PieChartBase } from "@/components/ui/charts/pie-chart-base";
+import { TreemapChartBase } from "@/components/ui/charts/treemap-chart-base";
 
 // What a user sees from the shared chart bases: marks drawn for the data,
 // formatted axis ticks, legend entries named from the ChartConfig, and a
@@ -254,4 +255,53 @@ test("a pie chart draws a slice per category and a legend named from the config"
   // which is how the indicator receives its colour.
   const indicator = tooltip?.querySelector<HTMLElement>("[style*='--color-bg']");
   assert.equal(indicator?.style.getPropertyValue("--color-bg"), "var(--color-rent)");
+});
+
+test("a treemap draws a labelled tile per datum, coloured and keyboard-activatable", async () => {
+  const activated: string[] = [];
+  const hovered: (string | null)[] = [];
+  const { container } = await renderChart(
+    <TreemapChartBase
+      config={{ spent: { color: "var(--chart-1)", label: "Spent" } }}
+      data={[
+        {
+          ariaLabel: "Food. Spent €200.00. Change +50% above normal",
+          detail: "+50%",
+          fill: "var(--warning)",
+          name: "Food",
+          textClassName: "text-warning-foreground",
+          value: 200,
+        },
+        {
+          ariaLabel: "Home. Spent €300.00. Change 0% near normal",
+          detail: "0%",
+          fill: "var(--muted)",
+          name: "Home",
+          textClassName: "text-foreground",
+          value: 300,
+        },
+      ]}
+      isAnimationActive={false}
+      onActivate={(tile) => activated.push(tile.name)}
+      onHoverChange={(tile) => hovered.push(tile?.name ?? null)}
+    />,
+  );
+
+  const tiles = [...container.querySelectorAll<SVGGElement>('g[role="link"]')];
+  assert.equal(tiles.length, 2);
+  const food = tiles.find((tile) => tile.getAttribute("aria-label")?.startsWith("Food"));
+  const home = tiles.find((tile) => tile.getAttribute("aria-label")?.startsWith("Home"));
+  assert.ok(food && home, "a tile per datum");
+
+  // Tile size is the value, and the fill is the colour the report chose.
+  assert.equal(food.querySelector("rect")?.getAttribute("fill"), "var(--warning)");
+  assert.equal(home.querySelector("rect")?.getAttribute("fill"), "var(--muted)");
+  assert.match(food.textContent ?? "", /Food/);
+  assert.match(food.textContent ?? "", /\+50%/);
+
+  fireEvent.click(food);
+  assert.deepEqual(activated, ["Food"]);
+
+  fireEvent.focus(home);
+  assert.deepEqual(hovered, ["Home"]);
 });

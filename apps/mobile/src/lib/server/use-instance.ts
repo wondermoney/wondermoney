@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
+import { nativePasskeyAuthenticator } from '@/lib/auth/native-passkeys'
+import { appPasskeyDomains, isPasskeyAvailable } from '@/lib/auth/passkey-availability'
 
 import { fetchInstance, type InstanceDescription } from './server-connection'
 
@@ -36,4 +38,75 @@ function useInstance() {
 export function useConfirmedFeature(select: (features: Features) => boolean | undefined): boolean {
   const { data } = useInstance()
   return data ? select(data.features) === true : false
+}
+
+/** The server's single sign-on provider, once it has said it has one. */
+export function useOidcProvider(): { name: string } | null {
+  const { data } = useInstance()
+  return data?.features.oidc ?? null
+}
+
+/**
+ * Whether to offer passkeys: the server has them, its passkey hostname (`passkeyRpId`) is one of
+ * this build's associated domains, and the device can use them (lib/auth/passkey-availability).
+ * False while the description loads, on an older server and on any self-hosted server the build
+ * wasn't made for.
+ */
+export function usePasskeyAvailable(): boolean {
+  const { data } = useInstance()
+  return isPasskeyAvailable({
+    serverPasskey: data?.features.passkey,
+    rpId: data?.features.passkeyRpId,
+    appDomains: appPasskeyDomains(),
+    deviceSupported: nativePasskeyAuthenticator.isSupported(),
+  })
+}
+
+/**
+ * Whether the server takes passwords. Off only once it has said so (`OIDC_ONLY`): while the
+ * description loads, or on an older server, the password form stays.
+ */
+export function usePasswordSignIn(): boolean {
+  const { data } = useInstance()
+  return data?.features.passwordSignIn !== false
+}
+
+/**
+ * Whether anyone may create an account on this server (`signupMode: 'open'`). False while the
+ * description loads and for invite-only, closed or unknown modes, so a sign-up link that would
+ * only be refused stays hidden.
+ */
+export function useSignupOpen(): boolean {
+  const { data } = useInstance()
+  return data?.signupMode === 'open'
+}
+
+/**
+ * The chains the server reads crypto wallets on (`features.cryptoWalletChains`). Empty while the
+ * description loads, when it can't be fetched, on an older server and when the operator has not
+ * configured an explorer: "Add crypto wallet" stays hidden then.
+ */
+export function useCryptoWalletChains(): readonly ('bitcoin' | 'ethereum')[] {
+  const { data } = useInstance()
+  return data?.features.cryptoWalletChains ?? NO_CHAINS
+}
+
+const NO_CHAINS: readonly ('bitcoin' | 'ethereum')[] = []
+
+/**
+ * Which build the connected server runs, for the More screen's version line. Null until the
+ * description arrives, and on an older server that does not report a version.
+ */
+export function useServerBuildInfo(): { commit: string | null; version: string | null } {
+  const { data } = useInstance()
+  return { commit: data?.commit ?? null, version: data?.version ?? null }
+}
+
+/**
+ * Whether the server has a shared Enable Banking credential (`features.bankSyncCredentials`).
+ * Undefined while the description loads or when it can't be fetched.
+ */
+export function useInstanceBankSyncCredentials(): 'instance' | 'user' | undefined {
+  const { data } = useInstance()
+  return data ? (data.features.bankSyncCredentials ?? 'user') : undefined
 }

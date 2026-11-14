@@ -1,3 +1,4 @@
+import { evaluateAmountExpression } from "@wondermoney/shared/amount-expression";
 import { parseDecimal } from "@wondermoney/shared/decimal";
 
 import { formatWireDecimalInput } from "@/lib/utils/number";
@@ -105,6 +106,15 @@ function roundToCent(units: bigint): bigint {
 }
 
 /**
+ * An arithmetic expression ("12.40+3.15") as a canonical decimal string, or null. The shared
+ * evaluator rounds to cents, which is what a split line is counted in.
+ */
+function expressionAsDecimal(input: string, locale: string): string | null {
+  const value = evaluateAmountExpression(input, locale);
+  return value === null ? null : value.toFixed(2);
+}
+
+/**
  * Reads one line as typed. Blank is no amount yet (not an error until saving); a percentage is
  * a share of `totalUnits`, rounded to the cent. The result carries the transaction's sign.
  */
@@ -117,7 +127,9 @@ export function parseSplitLineAmount(
   if (text === "") return { units: null, error: null };
 
   const percent = /^(.*?)\s*%$/.exec(text);
-  const parsed = parseDecimal(percent ? percent[1] : text, { locale });
+  const parsed =
+    parseDecimal(percent ? percent[1] : text, { locale }) ??
+    (percent ? null : expressionAsDecimal(text, locale));
   if (parsed === null) return { units: null, error: "invalid" };
 
   let magnitude: bigint | null;

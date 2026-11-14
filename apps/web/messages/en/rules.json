@@ -159,6 +159,43 @@
     },
     "from-transaction": "Create rule",
     "from-transaction-hint": "Handle transactions like this one automatically.",
+    "export": {
+      "action": "Export",
+      "hint": "Download this household's rules as a JSON file.",
+      "done": "Rules exported",
+      "error": "The rules could not be exported."
+    },
+    "import": {
+      "action": "Import",
+      "title": "Import rules",
+      "description": "Choose a WonderMoney rules file. Nothing changes until you confirm.",
+      "file-label": "Rules file",
+      "file-hint": "A JSON file exported from WonderMoney, up to 1 MB.",
+      "file-invalid": "That file is not valid JSON.",
+      "file-too-large": "The file is larger than 1 MB.",
+      "mode-label": "What to do with the rules already here",
+      "mode-append": "Keep them and add the imported rules",
+      "mode-replace": "Replace them with the imported rules",
+      "replace-warning": "{count, plural, =0 {There are no rules to replace.} one {This removes the # rule already here.} other {This removes the # rules already here.}}",
+      "reviewing": "Checking the file…",
+      "review-error": "The file could not be checked.",
+      "summary-title": "What will happen",
+      "creates": "{count, plural, =0 {No rules will be created} one {# rule will be created} other {# rules will be created}}",
+      "duplicates": "{count, plural, =0 {No duplicates} one {# rule already exists and will be skipped} other {# rules already exist and will be skipped}}",
+      "unresolved": "{count, plural, =0 {Every reference was found} one {# reference was not found} other {# references were not found}}",
+      "unresolved-hint": "A rule naming an account this household does not have is imported switched off. A rule naming a missing category or tag is skipped.",
+      "create-categories": "Create the missing categories: {names}",
+      "nothing": "Nothing to import.",
+      "confirm": "{count, plural, one {Import # rule} other {Import # rules}}",
+      "replace": "{count, plural, one {Replace with # rule} other {Replace with # rules}}",
+      "done": "{count, plural, =0 {No rules imported} one {# rule imported} other {# rules imported}}",
+      "error": "The rules could not be imported.",
+      "kind": {
+        "account": "Account",
+        "category": "Category",
+        "tag": "Tag"
+      }
+    },
     "apply": {
       "action-all": "Apply to existing transactions",
       "action-all-hint": "Run every active rule over the transactions you already have.",
@@ -182,6 +219,13 @@
       "failed": "The rules could not be applied. Try again later.",
       "in-progress": "Rules are already being applied. Wait for that to finish, then try again.",
       "error": "The rules could not be applied right now."
+    },
+    "suggestion": {
+      "title": "Always categorize transactions like this as {category}?",
+      "description": "{count, plural, one {You moved # transaction like this in the last {days} days.} other {You moved # transactions like this in the last {days} days.}} A rule can do it for you.",
+      "create": "Create rule",
+      "dismiss": "Don't suggest again",
+      "dismiss-error": "The suggestion could not be dismissed. Try again."
     }
   }
 }

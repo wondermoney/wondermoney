@@ -52,6 +52,10 @@ beforeAll(() => {
     unobserve() {}
     disconnect() {}
   };
+  // Radix Select reads these, which jsdom lacks.
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
 });
 
 afterEach(() => {
@@ -122,6 +126,53 @@ test("turning off carried overspending sends only that change with the name", as
   assert.deepEqual(h.edit.mock.calls, [
     [{ budgetKey: 4, name: "Home", rolloverCarriesOverspend: false }],
   ]);
+});
+
+test("changing the day the budget month starts on sends only that change with the name", async () => {
+  const onOpenChange = vi.fn();
+  renderWithClient(
+    <BudgetEditModal
+      isOpen
+      onOpenChange={onOpenChange}
+      budgetName="Home"
+      budgetKey={4}
+      periodStartDay={1}
+    />,
+  );
+
+  const startDay = screen.getByRole("combobox", {
+    name: enMessages["budget-period-start-day"],
+  });
+  await userEvent.click(startDay);
+  await userEvent.click(await screen.findByRole("option", { name: "Day 25" }));
+  await userEvent.click(screen.getByRole("button", { name: enMessages.save }));
+
+  await vi.waitFor(() => assert.deepEqual(onOpenChange.mock.calls, [[false]]));
+  assert.deepEqual(h.edit.mock.calls, [
+    [{ budgetKey: 4, name: "Home", periodStartDay: 25 }],
+  ]);
+});
+
+test("the start day offers only days every month has, 1 to 28", async () => {
+  renderWithClient(
+    <BudgetEditModal
+      isOpen
+      onOpenChange={() => {}}
+      budgetName="Home"
+      budgetKey={4}
+      periodStartDay={25}
+    />,
+  );
+
+  const startDay = screen.getByRole("combobox", {
+    name: enMessages["budget-period-start-day"],
+  });
+  assert.match(startDay.textContent ?? "", /Day 25/);
+  await userEvent.click(startDay);
+  const options = await screen.findAllByRole("option");
+  assert.equal(options.length, 28);
+  assert.equal(options[0].textContent, "Day 1");
+  assert.equal(options.at(-1)?.textContent, "Day 28");
 });
 
 test("deleting a budget refreshes the route-backed overview and closes the dialog", async () => {

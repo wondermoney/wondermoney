@@ -24,9 +24,11 @@ export type SignUpScreenProps = {
   greeting?: string
   /** The muted line under the title ("Free and open source. Already a member? Login here"). */
   lead?: ReactNode
+  /** False under `OIDC_ONLY`: no password sign-up; the footer's single sign-on button creates the account. */
+  passwordSignIn?: boolean
 }
 
-export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = false, greeting, lead }: SignUpScreenProps) {
+export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = false, greeting, lead, passwordSignIn = true }: SignUpScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
   const [email, setEmail] = useState(initialEmail ?? '')
@@ -83,103 +85,107 @@ export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = fal
       lead={lead ?? <Text tone="muted" variant="meta">{t('auth.signup.helper')}</Text>}
       title={t('auth.signup.title')}
     >
-      <AuthField error={errors.email} label={t('auth.email')} required>
-        <AuthTextInput
-          accessibilityHint={emailLocked ? t('auth.join.emailLockedHint', { email: initialEmail ?? '' }) : undefined}
-          accessibilityLabel={t('auth.email')}
-          accessibilityState={{ disabled: emailLocked }}
-          autoCapitalize="none"
-          autoComplete="email"
-          editable={!emailLocked}
-          invalid={Boolean(errors.email)}
-          keyboardType="email-address"
-          onChangeText={(value) => {
-            emailRef.current = value
-            setEmail(value)
-          }}
-          placeholder={t('auth.email')}
-          returnKeyType="next"
-          value={email}
-        />
-      </AuthField>
+      {passwordSignIn ? (
+        <>
+          <AuthField error={errors.email} label={t('auth.email')} required>
+            <AuthTextInput
+              accessibilityHint={emailLocked ? t('auth.join.emailLockedHint', { email: initialEmail ?? '' }) : undefined}
+              accessibilityLabel={t('auth.email')}
+              accessibilityState={{ disabled: emailLocked }}
+              autoCapitalize="none"
+              autoComplete="email"
+              editable={!emailLocked}
+              invalid={Boolean(errors.email)}
+              keyboardType="email-address"
+              onChangeText={(value) => {
+                emailRef.current = value
+                setEmail(value)
+              }}
+              placeholder={t('auth.email')}
+              returnKeyType="next"
+              value={email}
+            />
+          </AuthField>
 
-      <AuthField error={errors.password} label={t('auth.password')} required>
-        <AuthTextInput
-          accessibilityLabel={t('auth.password')}
-          autoCapitalize="none"
-          autoComplete="password-new"
-          invalid={Boolean(errors.password)}
-          onChangeText={(value) => {
-            passwordRef.current = value
-            setPassword(value)
-          }}
-          placeholder={t('auth.password')}
-          returnKeyType="next"
-          secureTextEntry
-          value={password}
-        />
-      </AuthField>
+          <AuthField error={errors.password} label={t('auth.password')} required>
+            <AuthTextInput
+              accessibilityLabel={t('auth.password')}
+              autoCapitalize="none"
+              autoComplete="password-new"
+              invalid={Boolean(errors.password)}
+              onChangeText={(value) => {
+                passwordRef.current = value
+                setPassword(value)
+              }}
+              placeholder={t('auth.password')}
+              returnKeyType="next"
+              secureTextEntry
+              value={password}
+            />
+          </AuthField>
 
-      <AuthField error={errors.confirmPassword} label={t('auth.signup.confirmPassword')} required>
-        <AuthTextInput
-          accessibilityLabel={t('auth.signup.confirmPassword')}
-          autoCapitalize="none"
-          autoComplete="password-new"
-          invalid={Boolean(errors.confirmPassword)}
-          onChangeText={(value) => {
-            confirmPasswordRef.current = value
-            setConfirmPassword(value)
-          }}
-          onSubmitEditing={submit}
-          placeholder={t('auth.signup.confirmPassword')}
-          returnKeyType="done"
-          secureTextEntry
-          value={confirmPassword}
-        />
-      </AuthField>
+          <AuthField error={errors.confirmPassword} label={t('auth.signup.confirmPassword')} required>
+            <AuthTextInput
+              accessibilityLabel={t('auth.signup.confirmPassword')}
+              autoCapitalize="none"
+              autoComplete="password-new"
+              invalid={Boolean(errors.confirmPassword)}
+              onChangeText={(value) => {
+                confirmPasswordRef.current = value
+                setConfirmPassword(value)
+              }}
+              onSubmitEditing={submit}
+              placeholder={t('auth.signup.confirmPassword')}
+              returnKeyType="done"
+              secureTextEntry
+              value={confirmPassword}
+            />
+          </AuthField>
 
-      <View style={termsStyles.group}>
-        <View style={termsStyles.row}>
-          <Pressable
-            accessibilityLabel={t('auth.signup.termsConsent')}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: termsAccepted }}
-            hitSlop={12}
-            onPress={() => {
-              const next = !termsAcceptedRef.current
-              termsAcceptedRef.current = next
-              setTermsAccepted(next)
-            }}
-            style={[
-              termsStyles.box,
-              { borderColor: errors.terms ? palette.destructiveText : palette.input, backgroundColor: palette.card },
-              termsAccepted && { backgroundColor: palette.primary, borderColor: palette.primary },
-            ]}
-          >
-            {termsAccepted ? <Icon color={palette.primaryForeground} name="check" size={14} weight="bold" /> : null}
-          </Pressable>
-          <View accessible={false} style={termsStyles.copy}>
-            <Text tone="muted" variant="meta">{t('auth.signup.consentPrefix')} </Text>
-            <AuthLink label={t('auth.signup.termsLink')} onPress={() => void Linking.openURL(externalDestinations.terms)} />
-            <Text tone="muted" variant="meta"> {t('auth.signup.consentAnd')} </Text>
-            <AuthLink label={t('auth.signup.privacyLink')} onPress={() => void Linking.openURL(externalDestinations.privacy)} />
+          <View style={termsStyles.group}>
+            <View style={termsStyles.row}>
+              <Pressable
+                accessibilityLabel={t('auth.signup.termsConsent')}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: termsAccepted }}
+                hitSlop={12}
+                onPress={() => {
+                  const next = !termsAcceptedRef.current
+                  termsAcceptedRef.current = next
+                  setTermsAccepted(next)
+                }}
+                style={[
+                  termsStyles.box,
+                  { borderColor: errors.terms ? palette.destructiveText : palette.input, backgroundColor: palette.card },
+                  termsAccepted && { backgroundColor: palette.primary, borderColor: palette.primary },
+                ]}
+              >
+                {termsAccepted ? <Icon color={palette.primaryForeground} name="check" size={14} weight="bold" /> : null}
+              </Pressable>
+              <View accessible={false} style={termsStyles.copy}>
+                <Text tone="muted" variant="meta">{t('auth.signup.consentPrefix')} </Text>
+                <AuthLink label={t('auth.signup.termsLink')} onPress={() => void Linking.openURL(externalDestinations.terms)} />
+                <Text tone="muted" variant="meta"> {t('auth.signup.consentAnd')} </Text>
+                <AuthLink label={t('auth.signup.privacyLink')} onPress={() => void Linking.openURL(externalDestinations.privacy)} />
+              </View>
+            </View>
+            {errors.terms ? <FieldError>{errors.terms}</FieldError> : null}
           </View>
-        </View>
-        {errors.terms ? <FieldError>{errors.terms}</FieldError> : null}
-      </View>
 
-      {errors.submit ? (
-        <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
-          {errors.submit}
-        </Text>
+          {errors.submit ? (
+            <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
+              {errors.submit}
+            </Text>
+          ) : null}
+
+          <Button
+            block
+            disabled={submitting}
+            label={submitting ? t('auth.signup.submitting') : t('auth.signup.submit')}
+            onPress={submit}
+          />
+        </>
       ) : null}
-
-      <Button
-        block
-        disabled={submitting}
-        label={submitting ? t('auth.signup.submitting') : t('auth.signup.submit')}
-        onPress={submit}
-      />
     </AuthLayout>
   )
 }

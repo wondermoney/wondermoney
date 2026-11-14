@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
+import { PortfolioCostBasisMethod } from '@app/constants/portfolio-cost-basis';
+import { TransactionTemplateDirection } from '@entity/TransactionTemplate';
+import { BUDGET_PERIOD_START_DAY_MAX, BUDGET_PERIOD_START_DAY_MIN } from '@service/budget/budget-period';
 import { EXPORT_FORMAT } from '@service/data-export/export-format';
+import { LoanAmortizationMethod } from '@service/loan/loan-types';
+import { MAX_INSTALLMENT_COUNT, MIN_INSTALLMENT_COUNT } from '@validators/installment-plan';
+import { isSafeImageUrl, MERCHANT_LOGO_URL_MAX_LENGTH, MERCHANT_WEBSITE_MAX_LENGTH } from '@validators/merchant';
 
 /**
  * What a restore accepts: the WonderMoney export format (`data-export/export-format.ts`), file by
@@ -9,9 +15,18 @@ import { EXPORT_FORMAT } from '@service/data-export/export-format';
  *
  * Versions: a restore reads every 1.x export. Rows are parsed leniently about fields (an unknown
  * field from a newer minor version is dropped), strictly about values. An older minor version is
- * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 only
- * added files (manual assets), which a 1.0 export simply does not have, so there is nothing to
- * migrate yet. Another major version is refused.
+ * brought up to the current one by {@link MINOR_MIGRATIONS} before the rows are checked. 1.1 to
+ * 1.13 only added files (manual assets, loan rate periods, reimbursement links, crypto wallet addresses
+ * and tokens, card settings, installment plans and schedules, transaction templates, exchange-rate
+ * and price overrides), a loan rate type, a manual asset kind and optional fields (a loan's secured
+ * asset, a budget's month start day, which defaults to the 1st, a merchant's website and logo URL,
+ * the 1.8 fields, 1.9's account shares, 1.10's joint accounts and transaction attribution, and 1.13's
+ * ownership shares, each defaulting to what the
+ * app gives a row created without it), which an
+ * older export simply does not have, so there is nothing to migrate yet. 1.11 added the expense
+ * group files and a split line's `memberId`, likewise absent from older exports. 1.12 added a
+ * budget's owner (`ownerMemberId`); an older export has none, so every budget in it is a household
+ * budget. Another major version is refused.
  */
 export const RESTORE_MAJOR_VERSION = 1;
 
@@ -53,12 +68,16 @@ const int = z.number().int().min(-2_147_483_648).max(2_147_483_647);
 const flag = z.boolean().nullable();
 
 const RECURRENCY = ['ANNUALLY', 'BI_ANNUALLY', 'MONTHLY', 'MONTHLY_14', 'QUARTERLY'] as const;
+const positiveDecimal = decimal.refine((value) => Number(value) > 0, 'a positive amount');
+/** A day an override may be set for: no later than tomorrow in UTC, as when it is set in the app (`validators/currency.ts`). */
+const overrideDay = day.refine((value) => value <= new Date(Date.now() + 86_400_000).toISOString().slice(0, 10), 'not in the future');
 
-const member = z.object({ email: text(320), firstName: text(255), id, isExporter: z.boolean(), lastName: text(255), role: z.enum(['member', 'owner']).nullable() });
+const member = z.object({ email: text(320), firstName: text(255), id, isExporter: z.boolean(), lastName: text(255), role: z.enum(['admin', 'member', 'owner', 'viewer']).nullable() });
 
 const preferences = z.object({
   currency: currency.nullable(),
-  emailNotifications: z.object({ accountRecovery: flag, budgetAlerts: flag, growthEmails: flag, monthlyStory: flag, weeklyInsights: flag }),
+  /** `bankSyncAlerts` and `creditCardDueReminders` are absent from older exports. */
+  emailNotifications: z.object({ accountRecovery: flag, bankSyncAlerts: flag.optional(), budgetAlerts: flag, creditCardDueReminders: flag.optional(), growthEmails: flag, monthlyStory: flag, weeklyInsights: flag }),
   language: text(10),
   memberId: ref,
 });
@@ -73,12 +92,42 @@ const account = z.object({
   holderName: text(255),
   id,
   institution: text(255),
+  /** A joint account (1.10); absent: not joint, the account is its owner's. */
+  isJoint: z.boolean().optional(),
   isPrivate: z.boolean(),
   name: text(255),
   openingBalance: optionalDecimal,
   openingBalanceDate: optionalTimestamp,
   ownerMemberId: ref,
+  /** The member's place for the account in their list (1.8); absent or null: unordered. */
+  position: z.number().int().min(-2_147_483_648).max(2_147_483_647).nullable().optional(),
+  /**
+   * Each member's share of the account in per-member net worth (1.13), adding up to 10000 basis
+   * points; null `memberId` is people who had left. Every member of the export becomes the restoring
+   * member, so a split account is restored wholly theirs: one share of 100%.
+   */
+  ownership: z
+    .array(z.object({ basisPoints: z.number().int().min(0).max(10_000), memberId: ref }))
+    .max(50)
+    .refine((shares) => shares.length === 0 || shares.reduce((total, share) => total + share.basisPoints, 0) === 10_000, 'the shares add up to 10000 basis points')
+    .optional(),
+  /**
+   * Who a private account was shared with (1.9). Read and checked, not restored: every member of
+   * the export becomes the restoring member, so a restored private account is theirs alone, to share
+   * again with the people in their household now.
+   */
+  shares: z.array(z.object({ access: z.enum(['read', 'write']), memberId: ref })).max(50).optional(),
   type: text(255),
+});
+
+/** A card account's statement cycle (1.8), within the bounds the card settings accept (`validators/account.ts`). */
+const dayOfMonth = z.number().int().min(1).max(31);
+const creditCard = z.object({
+  accountId: id,
+  creditLimit: optionalDecimal.refine((value) => value === null || (Number(value) >= 0 && Number(value) <= 999_999_999_999), 'between 0 and 999999999999'),
+  minimumPaymentPercent: optionalDecimal.refine((value) => value === null || (Number(value) >= 0 && Number(value) <= 100), 'between 0 and 100'),
+  paymentDueDay: dayOfMonth,
+  statementCloseDay: dayOfMonth,
 });
 
 const category = z.object({
@@ -95,12 +144,18 @@ const category = z.object({
 });
 
 const categorySetting = z.object({ categoryId: id, countsAsSpending: z.boolean() });
-const merchant = z.object({ global: z.boolean(), id, name: name(500) });
+/** An https address the clients may render, under the same rule as an edit (`validators/merchant.ts`). */
+const httpsUrl = (max: number) => z.string().max(max).refine(isSafeImageUrl, 'an https address').nullable().optional();
+/** `website` and `logoUrl` arrived in 1.5; absent from older exports. */
+const merchant = z.object({ global: z.boolean(), id, logoUrl: httpsUrl(MERCHANT_LOGO_URL_MAX_LENGTH), name: name(500), website: httpsUrl(MERCHANT_WEBSITE_MAX_LENGTH) });
 const merchantCategory = z.object({ categoryId: id, memberId: ref, merchantId: id, source: z.enum(['manual', 'openai', 'user']) });
 const tag = z.object({ color: z.string().regex(/^#[0-9a-f]{3,6}$/iu), createdByMemberId: ref, id, name: name(64) });
 
 const transaction = z.object({
   accountId: ref,
+  /** "Spent by" (1.10): a member, or Shared; absent or neither: the account's default. */
+  attributedMemberId: ref.optional(),
+  attributedToShared: z.boolean().optional(),
   balance: optionalDecimal,
   bankSynced: z.boolean(),
   createdAt: optionalTimestamp,
@@ -111,6 +166,11 @@ const transaction = z.object({
   editedSettlementAmount: optionalDecimal,
   hidden: z.boolean(),
   id,
+  /** The plan installment this row pays (1.8), set together with `installmentPlanId`. */
+  installmentNumber: z.number().int().min(1).max(MAX_INSTALLMENT_COUNT).nullable().optional(),
+  installmentPlanId: ref.optional(),
+  /** The plan a member unlinked this row from by hand, which the automatic linker leaves alone (1.8). */
+  installmentUnlinkedPlanId: ref.optional(),
   memberId: ref,
   merchantEditedByUser: z.boolean(),
   merchantId: ref,
@@ -121,21 +181,83 @@ const transaction = z.object({
   settlementAmount: optionalDecimal,
   settlementCurrency: currency.nullable(),
   settlementExchangeRate: optionalDecimal,
+  /** The card statement the row counts in, when not its own date's (1.8). */
+  statementDateOverride: day.nullable().optional(),
   status: text(64),
   transferCounterpartId: ref,
   transferDestinationAccountId: ref,
   transferDestinationGoalId: ref,
   transferDestinationPortfolioId: ref,
+  /** The rate a cross-currency transfer pair settled at (1.8). */
+  transferExchangeRate: optionalDecimal.optional(),
   type: text(64),
   uneditedSettlementAmount: optionalDecimal,
   userAmount: optionalDecimal,
   userCurrency: currency.nullable(),
   userExchangeRate: optionalDecimal,
-}).refine((row) => [row.transferDestinationAccountId, row.transferDestinationGoalId, row.transferDestinationPortfolioId].filter((value) => value !== null).length <= 1, { message: 'at most one transfer destination' });
+}).refine((row) => [row.transferDestinationAccountId, row.transferDestinationGoalId, row.transferDestinationPortfolioId].filter((value) => value !== null).length <= 1, { message: 'at most one transfer destination' })
+  .refine((row) => (row.installmentPlanId == null) === (row.installmentNumber == null), { message: 'an installment plan and number together', path: ['installmentNumber'] })
+  .refine((row) => !(row.attributedToShared === true && row.attributedMemberId != null), { message: 'a member or Shared, not both', path: ['attributedToShared'] });
 
 const transactionCategory = z.object({ categoryId: id, memberId: ref, source: z.enum(['deterministic', 'manual', 'openai', 'rule', 'user']), transactionId: id });
-const transactionSplit = z.object({ amount: decimal, categoryId: ref, id, notes: text(500), position: z.number().int().min(0).max(10_000), transactionId: id });
+/** A refund linked to the expense it offsets (1.6); `amount` is positive, in the expense's currency. */
+const transactionReimbursement = z.object({ amount: decimal.refine((value) => Number(value) > 0, 'a positive amount'), createdAt: optionalTimestamp, expenseTransactionId: id, id, reimbursementTransactionId: id });
+/** `memberId` (1.11): the expense group member whose share the line is. */
+const transactionSplit = z.object({ amount: decimal, categoryId: ref, id, memberId: ref.optional().default(null), notes: text(500), position: z.number().int().min(0).max(10_000), transactionId: id });
+
+/** Expense groups (1.11): people sharing costs, their shared expenses and settlements. */
+const expenseGroup = z.object({ archived: z.boolean(), createdAt: optionalTimestamp, currency, id, name: name(100) });
+/** `householdMemberId` names a member of the export for a person of the household; null for anyone else. */
+const expenseGroupMember = z.object({ email: text(254), groupId: id, householdMemberId: ref, id, name: name(100), position: z.number().int().min(0).max(10_000) });
+const expenseGroupExpense = z.object({ groupId: id, paidByMemberId: id, splitMethod: z.enum(['amounts', 'equal', 'percentages']), transactionId: id });
+const expenseGroupSettlement = z.object({
+  amount: decimal.refine((value) => Number(value) > 0, 'a positive amount'),
+  createdAt: optionalTimestamp,
+  currency,
+  fromMemberId: id,
+  groupId: id,
+  notes: text(500),
+  settledOn: day,
+  toMemberId: id,
+  transactionId: ref,
+}).refine((row) => row.fromMemberId !== row.toMemberId, { message: 'two different people', path: ['toMemberId'] });
 const transactionTag = z.object({ tagId: id, transactionId: id });
+
+/** A purchase paid in installments (1.8), within the bounds a plan is created with (`validators/installment-plan.ts`). */
+const installmentPlan = z.object({
+  accountId: id,
+  categoryId: ref,
+  createdAt: optionalTimestamp,
+  createdByMemberId: ref,
+  description: name(255),
+  id,
+  installmentCount: z.number().int().min(MIN_INSTALLMENT_COUNT).max(MAX_INSTALLMENT_COUNT),
+  purchaseDate: day,
+  totalAmount: positiveDecimal.refine((value) => Number(value) <= 1_000_000_000, 'at most 1000000000'),
+});
+const installment = z.object({
+  amount: positiveDecimal,
+  dueDate: day.nullable(),
+  installmentNumber: z.number().int().min(1).max(MAX_INSTALLMENT_COUNT),
+  planId: id,
+  scheduledDate: day,
+  statementDate: day.nullable(),
+});
+
+/** A saved entry (1.8), as `validators/transaction-template.ts` accepts one. */
+const transactionTemplate = z.object({
+  accountId: ref,
+  amount: positiveDecimal.nullable(),
+  categoryId: ref,
+  description: text(500),
+  direction: z.enum(TransactionTemplateDirection),
+  id,
+  memberId: ref,
+  merchantId: ref,
+  name: name(120),
+  notes: text(1000),
+  position: z.number().int().min(0).max(2_147_483_647),
+});
 
 const rule = z.object({
   actions: z.array(z.record(z.string(), z.unknown())).max(50),
@@ -177,8 +299,21 @@ const recurringSeries = z.object({
 
 const recurringOccurrence = z.object({ amount: optionalDecimal, currency: currency.nullable(), date: timestamp, matchStatus: z.enum(['manual_added', 'manual_removed', 'matched', 'missed', 'predicted']), seriesId: id, transactionId: ref });
 
-const budget = z.object({ currency, description: text(10_000), id, memberId: ref, name: name(255), numAdults: z.number().int().min(0).max(1000), numDependents: z.number().int().min(0).max(1000) });
-const budgetCategory = z.object({ accountIds: z.array(id).max(1000), amount: optionalDecimal, budgetId: id, categoryId: id, month: z.number().int().min(0).max(12), recurrency: z.enum(RECURRENCY).nullable(), year: z.number().int().min(1900).max(9999) });
+const budget = z.object({
+  currency, description: text(10_000), id, memberId: ref, name: name(255), numAdults: z.number().int().min(0).max(1000), numDependents: z.number().int().min(0).max(1000),
+  /** The member a personal budget belongs to (1.9); null, and in an older export, a household budget. */
+  ownerMemberId: ref.default(null),
+  /** The day the budget's months start on (1.4); an older export's budgets start on the 1st. */
+  periodStartDay: z.number().int().min(BUDGET_PERIOD_START_DAY_MIN).max(BUDGET_PERIOD_START_DAY_MAX).default(1),
+  /** Whether rollover carries an overspend too (1.8); the app's default otherwise. */
+  rolloverCarriesOverspend: z.boolean().default(true),
+});
+const budgetCategory = z.object({
+  accountIds: z.array(id).max(1000), amount: optionalDecimal, budgetId: id, categoryId: id, month: z.number().int().min(0).max(12), recurrency: z.enum(RECURRENCY).nullable(),
+  /** Whether the month takes part in rollover (1.8); off otherwise. */
+  rolloverEnabled: z.boolean().default(false),
+  year: z.number().int().min(1900).max(9999),
+});
 const budgetIncome = z.object({ amount: optionalDecimal, budgetId: id, name: name(255), recurrency: z.enum(RECURRENCY).nullable() });
 
 const goal = z.object({
@@ -222,8 +357,12 @@ const goalActivity = z.object({
 const goalFunding = z.object({ amount: decimal, currency, fundingType: z.literal('funded_expense'), goalId: id, reversedAt: optionalTimestamp, transactionId: id });
 
 const loan = z.object({
+  /** How payments split into principal and interest (1.8); French (level payments) otherwise. */
+  amortizationMethod: z.enum(LoanAmortizationMethod).default(LoanAmortizationMethod.FRENCH),
   annualInterestRateBps: int.nullable(),
   currency,
+  /** The first payment's day (1.8). */
+  firstPaymentDate: day.nullable().default(null),
   id,
   includeInNetWorth: z.boolean(),
   maturityDate: day.nullable(),
@@ -236,8 +375,10 @@ const loan = z.object({
   paymentDayOfMonth: z.number().int().min(1).max(31).nullable(),
   paymentFrequency: z.literal('MONTHLY'),
   providerName: text(255),
-  rateType: z.enum(['FIXED', 'UNKNOWN']),
+  rateType: z.enum(['FIXED', 'UNKNOWN', 'VARIABLE']),
   regularPaymentAmount: optionalDecimal,
+  /** The manual asset the loan finances (1.3); absent from older exports. */
+  securedAssetId: ref.optional(),
   status: z.enum(['ACTIVE', 'CLOSED', 'PAID_OFF']),
   termMonths: z.number().int().min(0).max(2000).nullable(),
   type: z.enum(['AUTO_LOAN', 'MORTGAGE', 'OTHER', 'PERSONAL_LOAN', 'STUDENT_LOAN']),
@@ -250,15 +391,27 @@ const manualAsset = z.object({
   growthStartDate: day.nullable(),
   id,
   isPrivate: z.boolean(),
-  kind: z.enum(['other', 'property', 'valuable', 'vehicle']),
+  kind: z.enum(['crypto_wallet', 'other', 'property', 'valuable', 'vehicle']),
   name: name(255),
   notes: text(10_000),
   ownerMemberId: ref,
   purchaseDate: day.nullable(),
   purchasePrice: optionalDecimal,
 });
+// The address is checked again as a public one when it is restored (`household-restore.ts`).
+const cryptoWalletAddress = z.object({ address: z.string().min(1).max(200), chain: z.enum(['bitcoin', 'ethereum']), id, kind: z.enum(['address', 'xpub']), label: text(100), manualAssetId: id });
+const cryptoWalletToken = z.object({
+  addressId: id,
+  balance: z.string().regex(/^\d{1,78}$/u),
+  contractAddress: z.string().regex(/^0x[0-9a-f]{40}$/u).nullable(),
+  decimals: z.number().int().min(0).max(36),
+  name: text(255),
+  symbol: name(32),
+  tracked: z.boolean(),
+});
 const manualAssetValuation = z.object({ date: day, manualAssetId: id, note: text(10_000), value: decimal });
 const loanAdjustment = z.object({ amount: decimal, effectiveDate: day, loanId: id, reason: text(10_000), type: z.enum(['BALANCE_CORRECTION', 'CAPITALIZED_INTEREST', 'FEE', 'PRINCIPAL_DECREASE', 'PRINCIPAL_INCREASE', 'WRITE_OFF']) });
+const loanRatePeriod = z.object({ annualInterestRateBps: z.number().int().min(0).max(10_000), effectiveDate: day, loanId: id });
 const loanRepayment = z.object({
   allocationSource: z.enum(['AMORTIZATION_ESTIMATE', 'AUTO_MATCHED', 'MANUAL']),
   feeAmount: decimal,
@@ -276,6 +429,8 @@ const portfolio = z.object({
   accountBalanceMode: z.enum(['cash_only', 'includes_holdings']).nullable(),
   benchmarkSymbol: text(64),
   closedAt: optionalTimestamp,
+  /** How a sale relieves cost (1.8); FIFO otherwise. */
+  costBasisMethod: z.enum(PortfolioCostBasisMethod).default(PortfolioCostBasisMethod.FIFO),
   createdAt: optionalTimestamp,
   currency,
   description: text(10_000),
@@ -314,6 +469,24 @@ const portfolioTransaction = z.object({
 
 const watchlist = z.object({ memberId: ref, symbol: name(64) });
 
+/** A household's own price for a security on a day (1.8), as `validators/portfolio.ts` accepts one. */
+const priceOverride = z.object({
+  asset: assetSchema,
+  createdByMemberId: ref,
+  currency,
+  date: overrideDay,
+  note: z.string().trim().max(500).nullable(),
+  price: positiveDecimal.refine((value) => Number(value) <= 1_000_000_000_000, 'at most 1000000000000'),
+});
+/** A household's own exchange rate for a pair on a day (1.8), as `validators/currency.ts` accepts one. */
+const exchangeRateOverride = z.object({
+  createdByMemberId: ref,
+  date: overrideDay,
+  fromCurrency: currency,
+  rate: positiveDecimal.refine((value) => Number(value) <= 1_000_000_000, 'at most 1000000000'),
+  toCurrency: currency,
+}).refine((row) => row.fromCurrency !== row.toCurrency, { message: 'two different currencies', path: ['toCurrency'] });
+
 /** Every data file a restore reads, by its name in `data/<name>.json`. */
 export const DATA_FILES = {
   'accounts': account,
@@ -322,11 +495,22 @@ export const DATA_FILES = {
   'budgets': budget,
   'categories': category,
   'category-settings': categorySetting,
+  'credit-cards': creditCard,
+  'crypto-wallet-addresses': cryptoWalletAddress,
+  'crypto-wallet-tokens': cryptoWalletToken,
+  'exchange-rate-overrides': exchangeRateOverride,
+  'expense-group-expenses': expenseGroupExpense,
+  'expense-group-members': expenseGroupMember,
+  'expense-group-settlements': expenseGroupSettlement,
+  'expense-groups': expenseGroup,
   'goal-account-links': goalAccountLink,
   'goal-activities': goalActivity,
   'goal-transaction-fundings': goalFunding,
   'goals': goal,
+  'installment-plans': installmentPlan,
+  'installments': installment,
   'loan-adjustments': loanAdjustment,
+  'loan-rate-periods': loanRatePeriod,
   'loan-repayments': loanRepayment,
   'loans': loan,
   'manual-asset-valuations': manualAssetValuation,
@@ -337,13 +521,16 @@ export const DATA_FILES = {
   'portfolio-transactions': portfolioTransaction,
   'portfolios': portfolio,
   preferences,
+  'price-overrides': priceOverride,
   'recurring-occurrences': recurringOccurrence,
   'recurring-series': recurringSeries,
   'rules': rule,
   'tags': tag,
   'transaction-categories': transactionCategory,
+  'transaction-reimbursements': transactionReimbursement,
   'transaction-splits': transactionSplit,
   'transaction-tags': transactionTag,
+  'transaction-templates': transactionTemplate,
   'transactions': transaction,
   watchlist,
 } as const;
@@ -358,6 +545,7 @@ export type DataRows = { [Name in DataFileName]: z.output<(typeof DATA_FILES)[Na
  */
 export const REFERENCES: readonly { field: string; file: DataFileName; target: DataFileName }[] = [
   { field: 'ownerMemberId', file: 'accounts', target: 'members' },
+  { field: 'accountId', file: 'credit-cards', target: 'accounts' },
   { field: 'parentId', file: 'categories', target: 'categories' },
   { field: 'categoryId', file: 'category-settings', target: 'categories' },
   { field: 'categoryId', file: 'merchant-categories', target: 'categories' },
@@ -372,11 +560,33 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'transferDestinationAccountId', file: 'transactions', target: 'accounts' },
   { field: 'transferDestinationGoalId', file: 'transactions', target: 'goals' },
   { field: 'transferDestinationPortfolioId', file: 'transactions', target: 'portfolios' },
+  { field: 'installmentPlanId', file: 'transactions', target: 'installment-plans' },
+  { field: 'installmentUnlinkedPlanId', file: 'transactions', target: 'installment-plans' },
+  { field: 'accountId', file: 'installment-plans', target: 'accounts' },
+  { field: 'categoryId', file: 'installment-plans', target: 'categories' },
+  { field: 'createdByMemberId', file: 'installment-plans', target: 'members' },
+  { field: 'planId', file: 'installments', target: 'installment-plans' },
+  { field: 'accountId', file: 'transaction-templates', target: 'accounts' },
+  { field: 'categoryId', file: 'transaction-templates', target: 'categories' },
+  { field: 'memberId', file: 'transaction-templates', target: 'members' },
+  { field: 'merchantId', file: 'transaction-templates', target: 'merchants' },
   { field: 'categoryId', file: 'transaction-categories', target: 'categories' },
   { field: 'memberId', file: 'transaction-categories', target: 'members' },
   { field: 'transactionId', file: 'transaction-categories', target: 'transactions' },
+  { field: 'expenseTransactionId', file: 'transaction-reimbursements', target: 'transactions' },
+  { field: 'reimbursementTransactionId', file: 'transaction-reimbursements', target: 'transactions' },
   { field: 'categoryId', file: 'transaction-splits', target: 'categories' },
   { field: 'transactionId', file: 'transaction-splits', target: 'transactions' },
+  { field: 'memberId', file: 'transaction-splits', target: 'expense-group-members' },
+  { field: 'groupId', file: 'expense-group-members', target: 'expense-groups' },
+  { field: 'householdMemberId', file: 'expense-group-members', target: 'members' },
+  { field: 'groupId', file: 'expense-group-expenses', target: 'expense-groups' },
+  { field: 'paidByMemberId', file: 'expense-group-expenses', target: 'expense-group-members' },
+  { field: 'transactionId', file: 'expense-group-expenses', target: 'transactions' },
+  { field: 'groupId', file: 'expense-group-settlements', target: 'expense-groups' },
+  { field: 'fromMemberId', file: 'expense-group-settlements', target: 'expense-group-members' },
+  { field: 'toMemberId', file: 'expense-group-settlements', target: 'expense-group-members' },
+  { field: 'transactionId', file: 'expense-group-settlements', target: 'transactions' },
   { field: 'tagId', file: 'transaction-tags', target: 'tags' },
   { field: 'transactionId', file: 'transaction-tags', target: 'transactions' },
   { field: 'ownerMemberId', file: 'rules', target: 'members' },
@@ -386,6 +596,7 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'seriesId', file: 'recurring-occurrences', target: 'recurring-series' },
   { field: 'transactionId', file: 'recurring-occurrences', target: 'transactions' },
   { field: 'memberId', file: 'budgets', target: 'members' },
+  { field: 'ownerMemberId', file: 'budgets', target: 'members' },
   { field: 'accountIds', file: 'budget-categories', target: 'accounts' },
   { field: 'budgetId', file: 'budget-categories', target: 'budgets' },
   { field: 'categoryId', file: 'budget-categories', target: 'categories' },
@@ -402,15 +613,21 @@ export const REFERENCES: readonly { field: string; file: DataFileName; target: D
   { field: 'goalId', file: 'goal-transaction-fundings', target: 'goals' },
   { field: 'transactionId', file: 'goal-transaction-fundings', target: 'transactions' },
   { field: 'ownerMemberId', file: 'loans', target: 'members' },
+  { field: 'securedAssetId', file: 'loans', target: 'manual-assets' },
   { field: 'loanId', file: 'loan-adjustments', target: 'loans' },
+  { field: 'loanId', file: 'loan-rate-periods', target: 'loans' },
   { field: 'loanId', file: 'loan-repayments', target: 'loans' },
   { field: 'transactionId', file: 'loan-repayments', target: 'transactions' },
   { field: 'ownerMemberId', file: 'manual-assets', target: 'members' },
   { field: 'manualAssetId', file: 'manual-asset-valuations', target: 'manual-assets' },
+  { field: 'manualAssetId', file: 'crypto-wallet-addresses', target: 'manual-assets' },
+  { field: 'addressId', file: 'crypto-wallet-tokens', target: 'crypto-wallet-addresses' },
   { field: 'linkedAccountId', file: 'portfolios', target: 'accounts' },
   { field: 'ownerMemberId', file: 'portfolios', target: 'members' },
   { field: 'memberId', file: 'portfolio-transactions', target: 'members' },
   { field: 'portfolioId', file: 'portfolio-transactions', target: 'portfolios' },
+  { field: 'createdByMemberId', file: 'price-overrides', target: 'members' },
+  { field: 'createdByMemberId', file: 'exchange-rate-overrides', target: 'members' },
   { field: 'memberId', file: 'watchlist', target: 'members' },
 ];
 

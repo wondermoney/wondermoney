@@ -1,5 +1,6 @@
 "use client";
 
+import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { Control } from "react-hook-form";
@@ -23,6 +24,22 @@ import {
 } from "@/components/ui/Select";
 import { PORTFOLIO_IMPORT_DEFAULT_MAX_UPLOAD_SIZE_BYTES } from "@/lib/api/portfolio/importSessionTypes";
 import type { FinancialBroker } from "@/lib/api/portfolio/useFInancialBrokers";
+import { buildPortfolioPositionsTemplateCsv } from "@/lib/portfolio/import-session-column-mapping";
+
+import type { PortfolioImportMode } from "./PortfolioImportModeSelector";
+
+function downloadPositionsTemplate() {
+  const blob = new Blob([buildPortfolioPositionsTemplateCsv()], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "wondermoney-positions-template.csv";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 export interface PortfolioImportUploadStepFormValues {
   brokerId?: string;
@@ -41,9 +58,13 @@ interface PortfolioImportUploadStepProps {
   brokers: FinancialBroker[];
   control: Control<PortfolioImportUploadStepFormValues>;
   defaultPortfolioId?: string;
+  /** What the file holds; a positions file offers its template. */
+  importMode?: PortfolioImportMode;
   isLoadingBrokers: boolean;
   isSubmitting: boolean;
   maxUploadSizeBytes?: number;
+  /** The import mode choice, shown above the form. */
+  modeSelector?: ReactNode;
   onClose: () => void;
   onAnalyze: () => void;
   onFileChange: (files: File[]) => void;
@@ -55,9 +76,11 @@ export function PortfolioImportUploadStep({
   brokers,
   control,
   defaultPortfolioId,
+  importMode = "trades",
   isLoadingBrokers,
   isSubmitting,
   maxUploadSizeBytes,
+  modeSelector,
   onClose,
   onAnalyze,
   onFileChange,
@@ -72,6 +95,22 @@ export function PortfolioImportUploadStep({
   return (
     <section className="flex flex-col gap-4">
       {recovery}
+
+      {modeSelector}
+
+      {importMode === "positions" ? (
+        <div className="flex flex-col gap-2 rounded-md border px-3 py-3">
+          <p className="text-muted-foreground text-sm leading-6">
+            {t("portfolio-import-positions-upload-hint")}
+          </p>
+          <div>
+            <Button type="button" variant="secondary" onClick={downloadPositionsTemplate}>
+              <Download className="size-4" aria-hidden="true" />
+              {t("portfolio-import-positions-download-template")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -1,5 +1,62 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar inicio",
+      "description": "Elige qué aparece en tu inicio y en qué orden.",
+      "sections": {
+        "net-worth": "Patrimonio neto",
+        "insights": "Información",
+        "this-month": "Este mes",
+        "balance-sheet": "Balance",
+        "cashflow": "Flujo de caja neto",
+        "loans": "Préstamos",
+        "latest-transactions": "Últimas transacciones"
+      },
+      "moveUp": "Mover {section} hacia arriba",
+      "moveDown": "Mover {section} hacia abajo",
+      "pinned": "Siempre aparece primero",
+      "reset": "Restablecer",
+      "saving": "Guardando…",
+      "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "loadError": "No se pudo cargar tu inicio.",
+      "done": "Hecho"
+    },
+    "insights": {
+      "title": "Información",
+      "empty": {
+        "title": "Nada fuera de lo normal este mes",
+        "body": "El gasto sigue su ritmo habitual y ningún presupuesto va camino de superar su límite."
+      },
+      "severity": {
+        "critical": "Requiere atención",
+        "warning": "Vale la pena mirar",
+        "info": "Buena noticia"
+      },
+      "spending": {
+        "above": "{category} está un {percent}% por encima de su ritmo habitual.",
+        "below": "{category} está un {percent}% por debajo de su ritmo habitual.",
+        "figures": "<current></current> hasta ahora, normalmente <baseline></baseline> a estas alturas.",
+        "link": "Ver transacciones"
+      },
+      "budget": {
+        "pace": "{category} va camino de superar su presupuesto.",
+        "figures": "<projected></projected> previstos frente a <budgeted></budgeted> planificados.",
+        "link": "Ver presupuesto"
+      },
+      "ask": {
+        "link": "Preguntar al asistente",
+        "prompt": {
+          "spending": {
+            "above": "¿Por qué mi gasto en {category} está {percent} por encima de lo normal este mes?",
+            "below": "¿Por qué mi gasto en {category} está {percent} por debajo de lo normal este mes?"
+          },
+          "budget": "¿Por qué mi presupuesto de {category} está previsto en {projected} frente a {budgeted} planificados este mes?",
+          "budgetHidden": "¿Por qué mi presupuesto de {category} va camino de superarse este mes?"
+        }
+      }
+    },
     "bank-alerts": {
       "label": "Alertas de conexiones bancarias",
       "consent-expiring": "{days, plural, =0 {El acceso a {bank} termina en menos de un día.} one {El acceso a {bank} termina en # día.} other {El acceso a {bank} termina en # días.}} Vuelve a conectar para mantener tus transacciones al día.",
@@ -54,14 +111,25 @@
         "loans": "Préstamos",
         "other": "Otros"
       },
-      "counted-in": "Incluida en {account}"
+      "counted-in": "Incluida en {account}",
+      "share-of-account": "{percent} de esta cuenta"
     },
     "cashflow": {
       "title": "Flujo de caja neto por mes",
       "list-label": "Flujo de caja neto, de {from} a {to}",
       "caption": "Entradas menos salidas en todas tus cuentas.",
       "empty-title": "Aún no hay flujo de caja",
-      "empty-body": "Aparece cuando tus cuentas tengan transacciones."
+      "empty-body": "Aparece cuando tus cuentas tengan transacciones.",
+      "this-month": "Este mes",
+      "income": "Ingresos",
+      "spending": "Gastos",
+      "savings-rate": "Tasa de ahorro",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} p.p.",
+      "vs": "vs {month}",
+      "vs-same-point": "vs el mismo punto del mes pasado",
+      "formula": "La tasa de ahorro es los ingresos menos los gastos, dividido por los ingresos. Es — cuando los ingresos son cero."
     },
     "loans": {
       "title": "Próximos pagos de préstamos",
@@ -75,7 +143,9 @@
     },
     "latest": {
       "title": "Últimas transacciones",
-      "review": "{count, plural, one {# por revisar} other {# por revisar}}",
+      "review-summary": "{count, plural, one {# transacción por revisar} other {# transacciones por revisar}} · {amount} en total",
+      "review-now": "Revisar ahora",
+      "all-caught-up": "Todo al día",
       "all": "Todas las transacciones",
       "caption": "{count, plural, one {La transacción más reciente} other {Las # transacciones más recientes}}",
       "date": "Fecha",

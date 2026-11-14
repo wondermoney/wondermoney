@@ -12,6 +12,8 @@ export const netWorthRowSchema = z.object({
   balance: z.number().finite(),
   /** A portfolio already inside this account's balance: shown, but not part of any total. */
   countedInAccountId: z.number().int().positive().optional(),
+  /** One member's figure: their share of a split account, in percent, when not all of it. */
+  sharePercent: z.number().finite().min(0).max(100).optional(),
 })
 
 // A row of a type this build doesn't know (a new asset class, say) is dropped from the breakdown
@@ -23,6 +25,7 @@ const netWorthRowsSchema = z.array(z.object({
   name: z.string().min(1).max(255),
   balance: z.number().finite(),
   countedInAccountId: z.number().int().positive().optional().catch(undefined),
+  sharePercent: z.number().finite().min(0).max(100).optional().catch(undefined),
 })).transform((rows) => rows.filter((row): row is NetWorthRowDto => row.type !== 'unknown'))
 
 export const netWorthDtoSchema = z.object({
@@ -47,6 +50,11 @@ export const netWorthDtoSchema = z.object({
   }),
   /** The currencies of the accounts and loans left out, so the note can name them. Optional. */
   unconvertedCurrencies: z.array(z.string().regex(/^[A-Z]{3}$/)).optional().catch(undefined),
+  /**
+   * Ask "Is this the same money?": an investment account this member can see that no portfolio is
+   * linked to (by either member), and a portfolio with no link. Absent from older APIs.
+   */
+  suggestPortfolioLink: z.boolean().optional().catch(undefined),
 })
 
 export type NetWorthRowDto = z.infer<typeof netWorthRowSchema>
@@ -57,6 +65,12 @@ export const netWorthEndpoint = readEndpoint({
   path: '/v1/net-worth',
   schema: netWorthDtoSchema,
 })
+
+/** One member's net worth, or Shared's (`member`: an appuser key or `shared`); absent, the household's. */
+export function createNetWorthEndpoint(member?: string) {
+  if (!member) return netWorthEndpoint
+  return readEndpoint({ method: 'GET', path: `/v1/net-worth?member=${encodeURIComponent(member)}`, schema: netWorthDtoSchema })
+}
 
 /**
  * Net-worth history (monthly trend). Totals are nullable per point because a month's
@@ -91,11 +105,11 @@ export type NetWorthHistorySummaryDto = z.infer<typeof netWorthHistorySummarySch
 /** Server bounds: monthly granularity, months in [2, 12]. */
 export const NET_WORTH_HISTORY_MONTHS = 6
 
-export function createNetWorthHistoryEndpoint(months: number = NET_WORTH_HISTORY_MONTHS) {
+export function createNetWorthHistoryEndpoint(months: number = NET_WORTH_HISTORY_MONTHS, member?: string) {
   const bounded = Math.min(12, Math.max(2, Math.trunc(months)))
   return readEndpoint({
     method: 'GET',
-    path: `/v1/net-worth/history?granularity=monthly&months=${bounded}`,
+    path: `/v1/net-worth/history?granularity=monthly&months=${bounded}${member ? `&member=${encodeURIComponent(member)}` : ''}`,
     schema: netWorthHistorySummarySchema,
   })
 }

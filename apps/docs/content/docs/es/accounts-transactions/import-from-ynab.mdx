@@ -1,0 +1,46 @@
+---
+title: Importar desde YNAB
+description: Trae tu historial de transacciones de YNAB a WonderMoney, con cada cuenta y categoría de YNAB asociada a las tuyas.
+---
+
+La importación de YNAB lee el registro que YNAB exporta, con todas las cuentas del presupuesto en un solo archivo, e importa las transacciones de cada cuenta en una cuenta tuya. Sirve la exportación del YNAB actual (web y app) y la de YNAB 4. Los importes presupuestados y los objetivos no se importan.
+
+## Antes de empezar
+
+Exporta el registro en YNAB:
+
+- **YNAB**: abre el menú bajo el nombre de tu presupuesto y exporta el presupuesto. YNAB descarga un archivo zip; descomprímelo y guarda el archivo cuyo nombre termina en `Register.csv`. El otro archivo del zip (`Plan.csv`) contiene los importes presupuestados, que no se importan.
+- **YNAB 4**: elige **File** y luego **Export**, y guarda el archivo de registro que crea.
+
+En una instancia autoalojada, las importaciones también necesitan [almacenamiento de archivos](/es/docs/self-hosting/configure#file-storage).
+
+## Pasos
+
+1. Abre cualquier cuenta y elige **Importar transacciones** y luego **Importar desde YNAB**. Las cuentas que crees en los pasos siguientes usan la moneda de la cuenta desde la que empiezas.
+2. Añade el archivo `Register.csv` (hasta 5 MB) y elige **Revisar transacciones**.
+3. Elige adónde va cada cuenta de YNAB. Aparecen todas las cuentas del archivo, con cuántas filas tiene cada una, y una cuenta tuya con el mismo nombre queda ya elegida. Para una cuenta que aún no tienes, elige **Nueva cuenta manual**: WonderMoney crea una cuenta manual con el nombre de la cuenta de YNAB, que abre con el saldo con el que termina el archivo para ella. Elige **Guardar cuentas**.
+4. Elige una categoría para cada categoría de YNAB. Una categoría de YNAB cuyo nombre coincide con una tuya, en tu idioma, queda ya rellenada; las mayúsculas y los acentos no cuentan. Las demás quedan sin categoría, salvo que elijas una.
+5. Revisa las filas, como en cualquier [importación](/es/docs/accounts-transactions/import-transactions-csv): las filas nuevas se incluyen y las que ya están en la cuenta se omiten.
+6. Elige **Importar**. La importación se ejecuta en segundo plano, y las elecciones de categoría se guardan con ella.
+
+## Cómo se importan las filas de YNAB
+
+- **Importes.** El importe de cada fila es la entrada menos la salida, así que el dinero que sale es negativo y el que entra positivo. El símbolo de la moneda y el separador de miles se leen en el formato de números del propio presupuesto (`$1,234.56`, `1.234,56 €`, `CHF 1'234.50`).
+- **Fechas.** YNAB escribe las fechas en el formato de fecha del presupuesto. WonderMoney lee todas las fechas del archivo para saber si va primero el día o el mes, y cuando el archivo no lo dice (todos los días y meses son 12 o menos) te pide que elijas antes de importar.
+- **Transferencias.** Una fila cuyo beneficiario es `Transfer : <Cuenta>` es un lado de una transferencia. Los dos lados se importan como transferencias y, cuando se importan las dos cuentas, las dos filas quedan enlazadas como una sola transferencia, que los informes dejan fuera de los ingresos y los gastos.
+- **Ready to Assign.** Las entradas en Ready to Assign (To be Budgeted en presupuestos más antiguos, Income en YNAB 4) se importan como ingresos sin categoría.
+- **Categorías.** Una categoría que asociaste queda en la fila como elección tuya, así que la categorización aprendida no la sustituye más adelante. Una regla del hogar que coincida con la fila se sigue aplicando, como en cualquier transacción nueva.
+- **Duplicados.** La exportación de YNAB no tiene identificadores de transacción, así que cada fila se reconoce por su fecha y su importe dentro de su cuenta. Importar de nuevo la misma exportación encuentra sus filas ya en la cuenta y las omite. Una fila con el mismo importe que una transacción que ya está en su cuenta, con hasta 3 días de diferencia (una que trajo la sincronización bancaria, por ejemplo), es un [posible duplicado](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados): se omite a menos que la incluyas.
+
+## Problemas comunes
+
+- El archivo es el `Plan.csv` del zip y no el `Register.csv`. Solo el registro contiene transacciones.
+- Las fechas pueden tener primero el día o el mes, y la importación pregunta cuál antes de continuar.
+- Dos transferencias entre las mismas cuentas el mismo día, por el mismo importe, se importan como transferencias, pero no quedan enlazadas entre sí: WonderMoney no puede saber cuál corresponde a cuál.
+
+## Enlaces relacionados
+
+- [Importar transacciones desde CSV, OFX, QIF o CAMT.053](/es/docs/accounts-transactions/import-transactions-csv)
+- [Cuenta manual sin conexión](/es/docs/accounts-transactions/manual-offline-account)
+- [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
+- [Problemas con la importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)

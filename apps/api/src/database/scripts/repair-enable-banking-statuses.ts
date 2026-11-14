@@ -11,7 +11,7 @@
  * Per changed row: status → PENDING or EXPIRED, running balance cleared (neither status is in the
  * chain), and a SYSTEM_EDIT audit row with the reason. Per account: one database transaction, then
  * the chain is rebuilt tail-anchored on the stored `account.balance`, which is never modified.
- * Hidden and soft-deleted rows are included: both are chain members.
+ * Hidden rows are included: they are chain members. Soft-deleted rows are not.
  *
  * Read-only unless `--apply` is passed. Run the dry run first and review its per-account counts and
  * the rows listed for review (those are never changed). `--days=N` sets the re-fetch window

@@ -5,8 +5,10 @@ import {
   decideUpload,
   GENERIC_CSV_COLUMNS,
   importFlowForAccount,
+  isCamtFileName,
   isCsvFileName,
-  rowsFailedCounts,
+  isOfxFileName,
+  isQifFileName,
 } from './generic-csv-format'
 
 describe('importFlowForAccount', () => {
@@ -63,17 +65,17 @@ describe('isCsvFileName', () => {
   it.each(['a.xlsx', 'a.csv.txt', 'csv'])('refuses %s', (name) => expect(isCsvFileName(name)).toBe(false))
 })
 
-describe('rowsFailedCounts', () => {
-  const rows = { failed: 1, total: 2 }
+describe('isOfxFileName', () => {
+  it.each(['a.ofx', 'A.OFX', 'statement.qfx', 'statement.qfx '])('accepts %s', (name) => expect(isOfxFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.ofx.txt', 'ofx'])('refuses %s', (name) => expect(isOfxFileName(name)).toBe(false))
+})
 
-  it.each(['partial', 'failed'])('reports the rejected rows of a %s generic import', (outcome) => {
-    expect(rowsFailedCounts('generic', outcome, rows)).toEqual(rows)
-  })
+describe('isQifFileName', () => {
+  it.each(['a.qif', 'A.QIF', 'statement.qif '])('accepts %s', (name) => expect(isQifFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.qif.txt', 'qif'])('refuses %s', (name) => expect(isQifFileName(name)).toBe(false))
+})
 
-  it('says nothing for a bank import, a succeeded import, no rejected rows, or no counts', () => {
-    expect(rowsFailedCounts('bank', 'partial', rows)).toBeNull()
-    expect(rowsFailedCounts('generic', 'succeeded', rows)).toBeNull()
-    expect(rowsFailedCounts('generic', 'failed', { failed: 0, total: 2 })).toBeNull()
-    expect(rowsFailedCounts('generic', 'partial', null)).toBeNull()
-  })
+describe('isCamtFileName', () => {
+  it.each(['a.xml', 'A.XML', 'statement.xml '])('accepts %s', (name) => expect(isCamtFileName(name)).toBe(true))
+  it.each(['a.csv', 'a.xml.txt', 'xml'])('refuses %s', (name) => expect(isCamtFileName(name)).toBe(false))
 })

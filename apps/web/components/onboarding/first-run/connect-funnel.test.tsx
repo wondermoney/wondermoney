@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import assert from "node:assert/strict";
 
+import { QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,6 +9,7 @@ import { afterEach, beforeAll, beforeEach, test, vi } from "vitest";
 
 import { ACTIVATION_EVENTS } from "@/lib/analytics";
 import type { BankConnection } from "@/lib/api/banking/useBankConnections";
+import { queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
 import { FIRST_RUN_EVENTS, getFirstRunState } from "@/lib/onboarding/firstRunOnboarding";
 
 import commonMessages from "../../../messages/en/common.json";
@@ -41,8 +43,8 @@ vi.mock("@/i18n/navigation", () => ({
 vi.mock("@/lib/auth/user-context", () => ({ useUser: () => ({ id: "user-1" }) }));
 vi.mock("./FirstRunOnboardingRouteShell", () => ({ useFirstRunOnboardingFooter: () => () => {} }));
 vi.mock("@/lib/utils/bank-connections-paused", () => ({ isBankConnectionsPaused: () => false }));
-vi.mock("@/lib/api/user/useEnableBankingCredential", () => ({
-  default: () => ({ data: { status: "active" }, isLoading: false }),
+vi.mock("@/lib/api/user/useBankLinkCredential", () => ({
+  default: () => ({ canLink: true, credentialRequired: false, loading: false, sharedCredentialUnavailable: false }),
 }));
 vi.mock("@/lib/api/banking/useBankList", () => ({
   default: () => ({ data: [{ id: "BANK_1", name: "Test Bank", logo: "" }], isLoading: false }),
@@ -115,10 +117,16 @@ afterEach(() => {
 const captured = () => h.capture.mock.calls.map(([name]) => name as string);
 
 function renderStep(step: React.ReactNode) {
+  const client = queryClientWithInstance();
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
       {step}
     </NextIntlClientProvider>,
+    {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      ),
+    },
   );
 }
 

@@ -1,4 +1,7 @@
-export const budgetsKey = (epochId: number) => ['budgets', 'list', epochId] as const
+/** The list, and under it one entry per member filter, so invalidating the list refreshes them all. */
+export const budgetsKey = (epochId: number, member?: string) => (
+  member === undefined ? ['budgets', 'list', epochId] as const : ['budgets', 'list', epochId, member] as const
+)
 export const budgetInventoryKey = (epochId: number) => ['budgets', 'inventory', epochId] as const
 
 export const budgetDetailKey = (epochId: number, budgetId: number) => (
@@ -24,9 +27,13 @@ export const budgetYearToDateKey = (epochId: number, budgetId: number, year: num
   ['budgets', 'year-to-date', epochId, budgetId, year, month] as const
 )
 
+export const budgetSuggestionsKey = (epochId: number, budgetId: number, year: number, month: number) => (
+  ['budgets', 'suggestions', epochId, budgetId, year, month] as const
+)
+
 export const isBudgetQueryForEpoch = (queryKey: readonly unknown[], epochId: number): boolean => (
   queryKey[0] === 'budgets'
-  && (queryKey[1] === 'list' || queryKey[1] === 'inventory' || queryKey[1] === 'detail' || queryKey[1] === 'month' || queryKey[1] === 'accounts' || queryKey[1] === 'year' || queryKey[1] === 'year-to-date')
+  && (queryKey[1] === 'list' || queryKey[1] === 'inventory' || queryKey[1] === 'detail' || queryKey[1] === 'month' || queryKey[1] === 'accounts' || queryKey[1] === 'year' || queryKey[1] === 'year-to-date' || queryKey[1] === 'suggestions')
   && queryKey[2] === epochId
 )
 

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "../api";
+import { invalidateSecuredAssets } from "./secured-assets";
 import type { CreateLoanRequest } from "./types";
 
 const useCreateLoan = () => {
@@ -12,6 +13,7 @@ const useCreateLoan = () => {
       queryClient.invalidateQueries({ queryKey: ["loans"] });
       queryClient.invalidateQueries({ queryKey: ["loans", "overview"] });
       queryClient.invalidateQueries({ queryKey: ["net-worth"] });
+      void invalidateSecuredAssets(queryClient);
     },
   });
 };

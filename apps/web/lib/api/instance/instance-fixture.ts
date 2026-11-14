@@ -15,6 +15,9 @@ export function instanceFeatures(
     fileStorage: true,
     googleSignIn: true,
     marketData: true,
+    oidc: null,
+    passkey: true,
+    passwordSignIn: true,
     ...overrides,
   };
 }
@@ -27,11 +30,13 @@ export function queryClientWithInstance(
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData<InstanceDescription>(["instance"], {
     apiVersion: 1,
+    commit: "abc1234",
     features,
     minAppVersion: null,
     name: "Test instance",
     signupMode: "open",
     supportEmail: "help@example.com",
+    version: "1.1.0",
     ...overrides,
   });
   return client;

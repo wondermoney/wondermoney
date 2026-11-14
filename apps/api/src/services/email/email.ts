@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import { renderAccountConnectedEmail, renderInternalAlertEmail, renderLifecycleNudgeEmail } from '@wondermoney/react-email';
+import {
+  renderAccountConnectedEmail,
+  renderEmailVerificationEmail,
+  renderInternalAlertEmail,
+  renderLifecycleNudgeEmail,
+  renderPasswordResetEmail,
+} from '@wondermoney/react-email';
 import dotenv from 'dotenv';
 import { type CreateEmailOptions, type CreateEmailRequestOptions, type CreateEmailResponse, type CreateEmailResponseSuccess, Resend } from 'resend';
 
@@ -9,13 +15,14 @@ import { instanceName } from '@config/instance-name';
 import { SupportedLanguages } from '@entity/Appuser';
 import { emailGlobalOptOutService, GLOBAL_EMAIL_OPT_OUT_CATEGORY } from '@service/email/email-global-opt-out.service';
 import { type EmailOutcome, emailSender, resolveEmailDriver, sendWithTransport, supportInbox } from '@service/email/email-transport';
+import { type AccountLanguage, accountLocale, copyLocale } from '@utils/account-language';
 import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
 /**
- * Minimal HTML escape for interpolating user-controlled values into inline email HTML
- * (the better-auth password-reset / email-verification callbacks). Newline-preserving,
- * double-quote/escape-safe; intentionally not a general-purpose escaper.
+ * Minimal HTML escape for interpolating user-controlled values into inline email HTML (the API
+ * token expiry email). Newline-preserving, double-quote/escape-safe; intentionally not a
+ * general-purpose escaper.
  */
 function escapeHtml(value: string): string {
   return value
@@ -28,8 +35,13 @@ function escapeHtml(value: string): string {
 
 dotenv.config({ quiet: true });
 
-/** Maps the API's `EN`/`PT` to the react-email renderers' `en`/`pt`. */
-const toRenderLang = (language: LANGUAGE): 'en' | 'pt' => (language.toUpperCase() === 'PT' ? 'pt' : 'en');
+/**
+ * The copy languages of the texts in this file and of the react-email shells they render
+ * (`TransactionalEmailLanguage`): English, Portuguese and Spanish. An account language outside
+ * this list reads English. Links into the app use the account's own locale (`accountLocale`).
+ */
+const COPY_LOCALES = ['en', 'pt', 'es'] as const;
+const copyLang = (language: LANGUAGE) => copyLocale(language, COPY_LOCALES);
 const appBase = () => FRONTEND_URL.replace(/\/$/u, '');
 const backendBase = () => BACKEND_URL.replace(/\/$/u, '');
 
@@ -76,7 +88,8 @@ export interface RenderedEmailInput {
 
 export type RenderedEmailOutcome = EmailOutcome;
 
-type LANGUAGE = keyof typeof SupportedLanguages;
+type LANGUAGE = AccountLanguage;
+const LANGUAGES: readonly string[] = Object.values(SupportedLanguages);
 
 export function isEmailInterceptionEnabled() {
   return SHOULD_INTERCEPT_EMAILS;
@@ -155,7 +168,7 @@ export interface BankRecoveryEmailInput {
   /** Display name of the bank the interrupted attempt was with, if known. */
   bankName?: string;
   incidentId: string;
-  language: 'EN' | 'PT';
+  language: LANGUAGE;
   recipient: string;
   recoveryUrl: string;
   signal?: AbortSignal;
@@ -240,7 +253,7 @@ async function sendInternalAlert(
 }
 
 const BANK_RECOVERY_COPY = {
-  EN: {
+  en: {
     body: [
       (brand: string) => `Your bank connection didn't finish, so your accounts may be out of date in ${brand}.`,
       (brand: string) => `Reopen ${brand} and retry the connection from the app. It only takes a moment. If it still doesn't work, just reply and we'll help.`,
@@ -254,19 +267,33 @@ const BANK_RECOVERY_COPY = {
     step2Label: 'Resume the connection',
     subject: 'Your bank connection needs another try',
   },
-  PT: {
+  es: {
     body: [
-      (brand: string) => `A sua ligação bancária não ficou concluída, por isso as suas contas podem não estar atualizadas na ${brand}.`,
-      (brand: string) => `Volte a abrir a ${brand} e tente novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responda a este email e ajudamos.`,
+      (brand: string) => `Tu conexión bancaria no llegó a completarse, así que es posible que tus cuentas no estén al día en ${brand}.`,
+      (brand: string) => `Vuelve a abrir ${brand} e intenta de nuevo la conexión desde la aplicación. Solo lleva un momento. Si sigue sin funcionar, responde a este correo y te ayudamos.`,
+    ],
+    cta: 'Reintentar la conexión',
+    heading: 'Terminemos de conectar tu banco',
+    step1DetailFallback: 'El último intento no llegó a quedar conectado',
+    step1DetailWithBank: (bankName: string) => `Intento con ${bankName}`,
+    step1Label: 'Intento interrumpido',
+    step2Detail: 'Vuelve a confirmar la autorización con tu banco',
+    step2Label: 'Retomar la conexión',
+    subject: 'Tu conexión bancaria necesita otro intento',
+  },
+  pt: {
+    body: [
+      (brand: string) => `A tua ligação bancária não ficou concluída, por isso as tuas contas podem não estar atualizadas na ${brand}.`,
+      (brand: string) => `Volta a abrir a ${brand} e tenta novamente a ligação a partir da aplicação. Demora só um momento. Se continuar a falhar, responde a este email e ajudamos.`,
     ],
     cta: 'Tentar novamente',
-    heading: 'Vamos concluir a ligação ao seu banco',
+    heading: 'Vamos concluir a ligação ao teu banco',
     step1DetailFallback: 'A última tentativa não chegou ao estado ligado',
     step1DetailWithBank: (bankName: string) => `Tentativa com ${bankName}`,
     step1Label: 'Tentativa interrompida',
-    step2Detail: 'Volte a confirmar a autorização junto do banco',
+    step2Detail: 'Volta a confirmar a autorização junto do banco',
     step2Label: 'Retomar a ligação',
-    subject: 'A sua ligação bancária precisa de nova tentativa',
+    subject: 'A tua ligação bancária precisa de nova tentativa',
   },
 } as const;
 
@@ -293,59 +320,91 @@ export function sendAccountDeletedEmail(data: AccountDeletedData) {
  * "New bank connected" confirmation to the user after an account sync links a bank.
  */
 export async function sendAccountSyncEmail(to: { email: string; name?: string }, data: AccountSyncData, language: LANGUAGE) {
-  const lang = toRenderLang(language);
+  const lang = copyLang(language);
   const rendered = await renderAccountConnectedEmail({
     bankName: data.bankName,
     brandName: instanceName(),
-    dashboardUrl: `${appBase()}/${lang}/accounts`,
+    dashboardUrl: `${appBase()}/${accountLocale(language)}/accounts`,
     firstName: to.name ?? undefined,
     language: lang,
   });
   return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to });
 }
 
-export function sendPasswordResetEmail(to: { email: string; name?: string }, resetUrl: string) {
-  const name = to.name ?? to.email.split('@')[0] ?? '';
+const API_TOKEN_EXPIRY_COPY = {
+  en: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hi ${name},<p>The API token <strong>${tokenName}</strong> you created in ${brand} expires on ${expiresOn}.</p><p>If a script, spreadsheet or dashboard uses it, create a replacement in Settings → API tokens before then. The old token stops working on its expiry date.</p><p>If you no longer need it, you can revoke it now in the same place.</p>`,
+    subject: (brand: string) => `Your ${brand} API token expires soon`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hi ${name},\n\nThe API token "${tokenName}" you created in ${brand} expires on ${expiresOn}.\n\nIf a script, spreadsheet or dashboard uses it, create a replacement in Settings -> API tokens before then. The old token stops working on its expiry date.\n\nIf you no longer need it, you can revoke it now in the same place.`,
+  },
+  es: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hola ${name},<p>El token de API <strong>${tokenName}</strong> que creaste en ${brand} caduca el ${expiresOn}.</p><p>Si un script, una hoja de cálculo o un panel lo usa, crea uno nuevo en Configuración → Tokens de API antes de esa fecha. El token antiguo deja de funcionar el día que caduca.</p><p>Si ya no lo necesitas, puedes revocarlo ahora en el mismo sitio.</p>`,
+    subject: (brand: string) => `Tu token de API de ${brand} caduca pronto`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Hola ${name},\n\nEl token de API "${tokenName}" que creaste en ${brand} caduca el ${expiresOn}.\n\nSi un script, una hoja de cálculo o un panel lo usa, crea uno nuevo en Configuración -> Tokens de API antes de esa fecha. El token antiguo deja de funcionar el día que caduca.\n\nSi ya no lo necesitas, puedes revocarlo ahora en el mismo sitio.`,
+  },
+  pt: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Olá ${name},<p>O token de API <strong>${tokenName}</strong> que criaste na ${brand} expira a ${expiresOn}.</p><p>Se um script, folha de cálculo ou dashboard o utiliza, cria um substituto em Definições → Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.</p><p>Se já não precisas dele, podes revogá-lo agora no mesmo sítio.</p>`,
+    subject: (brand: string) => `O teu token de API da ${brand} expira em breve`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Olá ${name},\n\nO token de API "${tokenName}" que criaste na ${brand} expira a ${expiresOn}.\n\nSe um script, folha de cálculo ou dashboard o utiliza, cria um substituto em Definições -> Tokens de API antes dessa data. O token antigo deixa de funcionar no dia em que expira.\n\nSe já não precisas dele, podes revogá-lo agora no mesmo sítio.`,
+  },
+} as const;
+
+/** Seven-day warning that a personal API token is about to expire. */
+export function sendApiTokenExpiryEmail(
+  to: { email: string; name?: string },
+  data: { expiresAt: Date; language: LANGUAGE; tokenName: string },
+) {
   const brand = instanceName();
+  const copy = API_TOKEN_EXPIRY_COPY[copyLang(data.language)];
+  const name = to.name ?? to.email.split('@')[0] ?? '';
+  const tokenName = escapeHtml(data.tokenName);
+  const expiresOn = data.expiresAt.toISOString().slice(0, 10);
   return sendRenderedEmail({
     headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>We received a request to reset your ${escapeHtml(brand)} password. Click the link below to choose a new one:</p><p><a href="${escapeHtml(resetUrl)}">${escapeHtml(resetUrl)}</a></p><p>If you didn't request this, you can safely ignore this email — your password won't change.</p><p>— The ${escapeHtml(brand)} team</p>`,
-    subject: `Reset your ${brand} password`,
-    text: `Hi ${name},
-
-We received a request to reset your ${brand} password. Click the link below to choose a new one:
-
-${resetUrl}
-
-If you didn't request this, you can safely ignore this email — your password won't change.
-
-— The ${brand} team`,
+    html: copy.body(escapeHtml(name), tokenName, expiresOn, escapeHtml(brand)),
+    subject: copy.subject(brand),
+    text: copy.text(name, data.tokenName, expiresOn, brand),
     to,
   });
 }
 
+const displayName = (to: { email: string; name?: null | string }) => to.name?.trim() || to.email.split('@')[0] || undefined;
+const recipient = (to: { email: string; name?: null | string }) => ({ email: to.email, ...(to.name ? { name: to.name } : {}) });
+
 /**
- * Email-verification email for better-auth's `sendVerificationEmail` callback (branded,
- * in-process, plain-text, carrying the verification link).
+ * Password-reset email for better-auth's `sendResetPassword` callback, in the account's language.
+ * `resetUrl` is better-auth's link, carrying the single-use token.
  */
-export function sendEmailVerificationEmail(to: { email: string; name?: string }, verificationUrl: string) {
-  const name = to.name ?? to.email.split('@')[0] ?? '';
-  const brand = instanceName();
-  return sendRenderedEmail({
-    headers: {},
-    html: `<p>Hi ${escapeHtml(name)},</p><p>Welcome to ${escapeHtml(brand)}! Please confirm your email address by clicking the link below:</p><p><a href="${escapeHtml(verificationUrl)}">${escapeHtml(verificationUrl)}</a></p><p>If you didn't create a ${escapeHtml(brand)} account, you can safely ignore this email.</p><p>— The ${escapeHtml(brand)} team</p>`,
-    subject: `Verify your ${brand} email`,
-    text: `Hi ${name},
-
-Welcome to ${brand}! Please confirm your email address by clicking the link below:
-
-${verificationUrl}
-
-If you didn't create a ${brand} account, you can safely ignore this email.
-
-— The ${brand} team`,
-    to,
+export async function sendPasswordResetEmail(to: { email: string; name?: null | string }, resetUrl: string, language: LANGUAGE) {
+  const firstName = displayName(to);
+  const rendered = await renderPasswordResetEmail({
+    brandName: instanceName(),
+    ...(firstName ? { firstName } : {}),
+    language: copyLang(language),
+    resetUrl,
   });
+  return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: recipient(to) });
+}
+
+/**
+ * Email-verification email for better-auth's `sendVerificationEmail` callback, in the account's
+ * language. `verificationUrl` is better-auth's link, carrying the token.
+ */
+export async function sendEmailVerificationEmail(to: { email: string; name?: null | string }, verificationUrl: string, language: LANGUAGE) {
+  const firstName = displayName(to);
+  const rendered = await renderEmailVerificationEmail({
+    brandName: instanceName(),
+    ...(firstName ? { firstName } : {}),
+    language: copyLang(language),
+    verificationUrl,
+  });
+  return sendRenderedEmail({ headers: {}, html: rendered.html, subject: rendered.subject, text: rendered.text, to: recipient(to) });
 }
 
 /**
@@ -357,7 +416,7 @@ export async function sendBankRecoveryEmail(
   seam: BankRecoveryEmailProviderSeam = {},
 ): Promise<BankRecoveryEmailOutcome> {
   if (input.signal?.aborted) return { code: 'provider_timeout', status: 'ambiguous' };
-  if (!Object.hasOwn(BANK_RECOVERY_COPY, input.language)) {
+  if (!LANGUAGES.includes(input.language)) {
     return { code: 'invalid_language', status: 'pre_acceptance_permanent' };
   }
   if (!isValidRecoveryUrl(input.recoveryUrl)) {
@@ -370,7 +429,8 @@ export async function sendBankRecoveryEmail(
     return { code: 'invalid_recipient', status: 'pre_acceptance_permanent' };
   }
 
-  const copy = BANK_RECOVERY_COPY[input.language];
+  const lang = copyLang(input.language);
+  const copy = BANK_RECOVERY_COPY[lang];
   const brand = instanceName();
   let rendered;
   try {
@@ -380,7 +440,7 @@ export async function sendBankRecoveryEmail(
       ctaLabel: copy.cta,
       ctaUrl: input.recoveryUrl,
       heading: copy.heading,
-      language: input.language === 'PT' ? 'pt' : 'en',
+      language: lang,
       steps: [
         { detail: input.bankName ? copy.step1DetailWithBank(input.bankName) : copy.step1DetailFallback, label: copy.step1Label },
         { detail: copy.step2Detail, label: copy.step2Label },
@@ -433,7 +493,7 @@ export async function sendBankRecoveryEmail(
 
 /** Maps a non-Resend transport outcome onto the bank-recovery delivery states. */
 export function sendSignupEmail(data: SignupData, language: LANGUAGE) {
-  const subject = language === 'PT' ? `${instanceName()} - INTERNAL Registo de Utilizador` : `${instanceName()} - INTERNAL User Signup`;
+  const subject = copyLang(language) === 'pt' ? `${instanceName()} - INTERNAL Registo de Utilizador` : `${instanceName()} - INTERNAL User Signup`;
   return sendInternalAlert(
     { details: [{ label: 'Email', value: data.userEmail }], subject, title: 'New user signup', variant: 'info' },
   );
@@ -490,7 +550,8 @@ function toBankRecoveryOutcome(outcome: RenderedEmailOutcome): BankRecoveryEmail
  * `lifecycle-nudge` shell, which renders an unsubscribe/settings footer — so `unsubscribeUrl` points at
  * a real account-wide opt-out (honest: it turns off optional email, never these transactional sends) and
  * `settingsUrl` at the relevant page. Footer-free transactional templates would need a separate
- * react-email publish (out of scope; noted in the handoff). Copy is EN + PT, selected by `language`. */
+ * react-email publish (out of scope; noted in the handoff). Copy is EN, PT and ES, selected by
+ * `language`. */
 
 /** Minimal user identity every transactional sender needs. */
 export interface TransactionalUserEmailInput {
@@ -518,7 +579,7 @@ async function sendTransactionalNudge(
   copy: TransactionalNudgeCopy,
   links: { ctaUrl: string; settingsUrl: string },
 ) {
-  const lang = toRenderLang(input.language);
+  const lang = copyLang(input.language);
   const unsubscribeUrl = accountOptOutUrl(input.appuserKey);
   const rendered = await renderLifecycleNudgeEmail({
     body: copy.body,
@@ -543,8 +604,8 @@ async function sendTransactionalNudge(
 }
 
 /* Task 2 — Welcome / onboarding (trigger: signup). CTA → app home. */
-const welcomeCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy> => ({
-  EN: {
+const welcomeCopy = (brand: string): Record<(typeof COPY_LOCALES)[number], TransactionalNudgeCopy> => ({
+  en: {
     body: [
       'Thanks for signing up — your account is ready to go.',
       `${brand} brings your accounts, budgets and investments together in one place. Connect your first account to watch everything come to life.`,
@@ -555,7 +616,18 @@ const welcomeCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy>
     preheader: 'Your account is ready — here is how to get started.',
     subject: `Welcome to ${brand} 🎉`,
   },
-  PT: {
+  es: {
+    body: [
+      'Gracias por registrarte: tu cuenta ya está lista.',
+      `${brand} reúne tus cuentas, presupuestos e inversiones en un solo lugar. Conecta tu primera cuenta para ver cómo todo cobra vida.`,
+      '¿Tienes alguna pregunta? Responde a este correo: lo lee una persona de verdad.',
+    ],
+    ctaLabel: `Abrir ${brand}`,
+    heading: `Te damos la bienvenida a ${brand}`,
+    preheader: 'Tu cuenta está lista: así puedes empezar.',
+    subject: `Te damos la bienvenida a ${brand} 🎉`,
+  },
+  pt: {
     body: [
       'Obrigado por te registares — a tua conta está pronta.',
       `A ${brand} reúne as tuas contas, orçamentos e investimentos num só lugar. Liga a tua primeira conta para veres tudo a ganhar vida.`,
@@ -569,8 +641,8 @@ const welcomeCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy>
 });
 
 export function sendWelcomeEmail(input: TransactionalUserEmailInput) {
-  const lang = toRenderLang(input.language);
-  return sendTransactionalNudge(input, welcomeCopy(instanceName())[input.language], {
+  const lang = accountLocale(input.language);
+  return sendTransactionalNudge(input, welcomeCopy(instanceName())[copyLang(input.language)], {
     ctaUrl: `${appBase()}/${lang}`,
     settingsUrl: `${appBase()}/${lang}/settings`,
   });
@@ -578,8 +650,8 @@ export function sendWelcomeEmail(input: TransactionalUserEmailInput) {
 
 /* Data export ready (trigger: the export job stored the archive). CTA → Settings > Privacy, which
  * makes a fresh download link; the email never carries the file or a link to it. */
-const dataExportReadyCopy = (brand: string): Record<'EN' | 'PT', TransactionalNudgeCopy> => ({
-  EN: {
+const dataExportReadyCopy = (brand: string): Record<(typeof COPY_LOCALES)[number], TransactionalNudgeCopy> => ({
+  en: {
     body: [
       `The export of your ${brand} data you asked for is ready.`,
       'Download it from Settings > Privacy within 24 hours. After that the file is deleted and you can start a new export.',
@@ -590,7 +662,18 @@ const dataExportReadyCopy = (brand: string): Record<'EN' | 'PT', TransactionalNu
     preheader: 'Download it within 24 hours.',
     subject: `Your ${brand} data export is ready`,
   },
-  PT: {
+  es: {
+    body: [
+      `La exportación de tus datos de ${brand} que pediste está lista.`,
+      'Descárgala en Configuración > Privacidad en las próximas 24 horas. Después, el archivo se elimina y puedes pedir una nueva exportación.',
+      'Si no pediste esta exportación, cambia tu contraseña y revisa los dispositivos con sesión iniciada en tu cuenta.',
+    ],
+    ctaLabel: 'Descargar tus datos',
+    heading: 'La exportación de tus datos está lista',
+    preheader: 'Descárgala en las próximas 24 horas.',
+    subject: `La exportación de tus datos de ${brand} está lista`,
+  },
+  pt: {
     body: [
       `A exportação dos teus dados da ${brand} que pediste está pronta.`,
       'Descarrega-a em Definições > Privacidade nas próximas 24 horas. Depois disso o ficheiro é apagado e podes pedir uma nova exportação.',
@@ -604,8 +687,8 @@ const dataExportReadyCopy = (brand: string): Record<'EN' | 'PT', TransactionalNu
 });
 
 export function sendDataExportReadyEmail(input: TransactionalUserEmailInput) {
-  const lang = toRenderLang(input.language);
-  return sendTransactionalNudge(input, dataExportReadyCopy(instanceName())[input.language], {
+  const lang = accountLocale(input.language);
+  return sendTransactionalNudge(input, dataExportReadyCopy(instanceName())[copyLang(input.language)], {
     ctaUrl: `${appBase()}/${lang}/settings?tab=privacy`,
     settingsUrl: `${appBase()}/${lang}/settings?tab=privacy`,
   });

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { compareStrategies, projectPayoff } from '../debt-projection.service';
+import { projectPayoff } from '@service/loan/payoff-projection';
+
+import { compareStrategies } from '../debt-projection.service';
 
 describe('projectPayoff', () => {
   it('pays off a 0% debt in exact whole months', () => {

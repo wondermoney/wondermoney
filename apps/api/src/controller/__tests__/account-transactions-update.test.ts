@@ -15,10 +15,13 @@ const mocked = vi.hoisted(() => ({
 }));
 
 // Splits are covered by transaction-split.test.ts; none of these transactions is split.
+vi.mock('@service/account/account-access', async (importOriginal) => (await import('@app/__tests__/__helpers__/account-access-double')).allAccountsWritable(await importOriginal()));
 vi.mock('@service/transaction/transaction-split.service', () => ({
   reconcileSplitsWithAmount: vi.fn().mockResolvedValue('none'),
   removeSplitsBeforeCategorizing: vi.fn().mockResolvedValue(undefined),
 }));
+// The household's members name the response's attribution; this EM double holds none.
+vi.mock('@service/household/member-attribution', async (original) => ({ ...(await original<object>()), loadActiveMembers: vi.fn().mockResolvedValue(new Map()) }));
 vi.mock('@validators/parser', () => ({
   zParse: vi.fn((_schema, req: unknown) => Promise.resolve(req)),
 }));
@@ -88,12 +91,12 @@ describe('account transaction update regressions', () => {
     ]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { reviewed: true, transactionIds: [1, 2] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
@@ -103,13 +106,15 @@ describe('account transaction update regressions', () => {
       { deletedAt: undefined, tenantKey: { tenantKey: 7 }, transactionKey: { $in: [1, 2] } },
       expect.objectContaining({ filters: { hidden: false } }),
     );
-    expect(sendStatus).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ ruleSuggestion: null });
     // The reviewed flag is written with a single bulk UPDATE, not one persist/flush per row.
     expect(mocked.nativeUpdate).toHaveBeenCalledTimes(1);
     expect(mocked.nativeUpdate).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ transactionKey: { $in: [1, 2] } }),
       { reviewed: true },
+      // Hidden rows among the selected keys are updated too (an unhide must reach them).
+      { filters: { hidden: false } },
     );
     expect(mocked.persist).not.toHaveBeenCalled();
   });
@@ -169,17 +174,17 @@ describe('account transaction update regressions', () => {
     ]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { categoryId: 27, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
     expect(next).not.toHaveBeenCalled();
-    expect(sendStatus).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ ruleSuggestion: null });
     expect(mocked.findOne).toHaveBeenNthCalledWith(2, Category, {
       $or: [
         { isSystemCategory: false, tenantKey: { tenantKey: 7 } },
@@ -207,17 +212,17 @@ describe('account transaction update regressions', () => {
     ]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { categoryId: 27, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
     expect(next).not.toHaveBeenCalled();
-    expect(sendStatus).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ ruleSuggestion: null });
     expect(mocked.findOne).toHaveBeenNthCalledWith(2, Category, {
       $or: [
         { isSystemCategory: false, tenantKey: { tenantKey: 7 } },
@@ -254,12 +259,12 @@ describe('account transaction update regressions', () => {
     mocked.find.mockResolvedValueOnce([transaction]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { categoryId: 27, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
@@ -282,12 +287,12 @@ describe('account transaction update regressions', () => {
     mocked.find.mockResolvedValueOnce([transaction]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { categoryId: 27, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
@@ -306,23 +311,24 @@ describe('account transaction update regressions', () => {
     ]);
     mocked.flush.mockResolvedValue(undefined);
 
-    const sendStatus = vi.fn();
+    const json = vi.fn();
     const next = vi.fn();
 
     await updateTransactions(
       { body: { hidden: true, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus }),
+      mockRes({ json }),
       next,
     );
 
     expect(next).not.toHaveBeenCalled();
-    expect(sendStatus).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({ ruleSuggestion: null });
     // Hiding must not silently reset `reviewed` when the caller only intends to change `hidden` —
     // an unconditional `{ reviewed: !!reviewed || !!category }` payload would reset it to false here.
     expect(mocked.nativeUpdate).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ transactionKey: { $in: [1] } }),
       { hidden: true },
+      { filters: { hidden: false } },
     );
   });
 
@@ -335,7 +341,7 @@ describe('account transaction update regressions', () => {
 
     await updateTransactions(
       { body: { hidden: false, transactionIds: [1] }, tenant: { tenantKey: 7 }, user: { appuserKey: 1 } } as Parameters<typeof updateTransactions>[0],
-      mockRes({ sendStatus: vi.fn() }),
+      mockRes({ json: vi.fn() }),
       vi.fn(),
     );
 

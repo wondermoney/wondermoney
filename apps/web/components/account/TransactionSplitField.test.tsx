@@ -13,6 +13,7 @@ import type { Category } from "@/lib/api/category/useCategories";
 
 import enCategories from "../../messages/en/categories.json";
 import enCommon from "../../messages/en/common.json";
+import enExpenseGroups from "../../messages/en/expense-groups.json";
 import enTransactions from "../../messages/en/transactions.json";
 import { TransactionSplitField, useSplitDraft } from "./TransactionSplitField";
 
@@ -88,7 +89,12 @@ function renderField(transaction = purchase(), locale = "en") {
     <QueryClientProvider client={new QueryClient()}>
       <NextIntlClientProvider
         locale={locale}
-        messages={{ ...enCommon, ...enCategories, ...enTransactions }}
+        messages={{
+          ...enCommon,
+          ...enCategories,
+          ...enTransactions,
+          ...enExpenseGroups,
+        }}
       >
         <Harness transaction={transaction} />
       </NextIntlClientProvider>
@@ -238,4 +244,44 @@ test("a loan repayment cannot be split", () => {
   );
   assert.equal(screen.queryByRole("button", { name: "Split" }), null);
   assert.ok(screen.getByText(/loan repayment/));
+});
+
+test("a transaction shared in a group offers no split editing: its shares are the group's", () => {
+  const share = (key: number, name: string) => ({
+    transactionSplitKey: key,
+    amount: -50,
+    appuserAmount: -50,
+    category: {
+      categoryKey: 11,
+      name: "Groceries",
+      icon: "",
+      bgColor: "",
+      isSystemCategory: false,
+    },
+    notes: null,
+    position: key,
+    expenseGroupMember: {
+      expenseGroupKey: 4,
+      expenseGroupMemberKey: key,
+      isHouseholdMember: key === 1,
+      name,
+    },
+  });
+  renderField(purchase({ splits: [share(1, "Ana"), share(2, "Sam")] }));
+
+  // No editor, no "Split", no "Remove split"; the reader is pointed at the group's shares.
+  assert.equal(
+    screen.queryByRole("textbox", { name: "Amount for line 1" }) === null,
+    true,
+  );
+  assert.equal(screen.queryByRole("button", { name: "Split" }) === null, true);
+  assert.equal(
+    screen.queryByRole("button", { name: "Remove split" }) === null,
+    true,
+  );
+  assert.ok(
+    screen.getByText(/Shared in a group: change its shares with Edit shares/),
+  );
+  assert.ok(screen.getByText("Groceries"));
+  assert.equal((save() as HTMLButtonElement).disabled, true);
 });

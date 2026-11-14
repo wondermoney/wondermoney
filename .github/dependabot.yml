@@ -57,13 +57,6 @@ updates:
       # by hand together with the runtime.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
-      # ESLint 10 is blocked upstream: eslint-plugin-react, eslint-plugin-import and
-      # eslint-plugin-jsx-a11y (pulled in by eslint-config-next and eslint-config-expo) have no
-      # ESLint 10 release, and eslint-plugin-react crashes under it.
-      - dependency-name: eslint
-        update-types: ['version-update:semver-major']
-      - dependency-name: '@eslint/js'
-        update-types: ['version-update:semver-major']
       # TypeScript 7.0 (the Go port) ships no programmatic API: `require('typescript')` only
       # exports the version. typescript-eslint 8.x throws on load under it (peer range
       # <6.1.0), which breaks lint in every package, and apps/web's i18n check script uses

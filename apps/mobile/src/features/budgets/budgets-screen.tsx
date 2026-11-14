@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { BackControl } from '@/components/ui/back-control'
 import { Card } from '@/components/ui/card'
 import { EntityMark } from '@/components/ui/entity-mark'
 import { FLOATING_ACTION_SIZE, FloatingActionButton } from '@/components/ui/floating-action-button'
-import { List, ListRow } from '@/components/ui/list-row'
+import { List, ListGroupHeading, ListRow } from '@/components/ui/list-row'
 import { PageHeader } from '@/components/ui/page-header'
 import { PreviewLabel } from '@/components/ui/preview-label'
 import { ProgressBar } from '@/components/ui/progress-bar'
@@ -17,8 +18,11 @@ import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 import { usePalette } from '@/theme/use-palette'
 
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
+
 import { formatPercent } from './budget-parts'
-import { budgetedLineCount, monthlyIncome, type BudgetViewModel } from './budgets-view-model'
+import { budgetedLineCount, groupBudgetsByVisibility, monthlyIncome, type BudgetViewModel } from './budgets-view-model'
 
 export type BudgetsViewState =
   | { status: 'loading' }
@@ -35,10 +39,15 @@ export type BudgetsScreenProps = {
   onRefresh: () => void | Promise<void>
   onBack: () => void
   onCreateBudget?: () => void
+  /**
+   * Whose part of each budget: everyone, one member or Shared. It never changes which budgets are
+   * listed. Omitted (a household of one), not shown; nor on an empty list, which it could not fill.
+   */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 
-export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, onBack, onCreateBudget }: BudgetsScreenProps) {
+export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, onBack, onCreateBudget, memberFilter }: BudgetsScreenProps) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -72,6 +81,11 @@ export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, on
           ) : (
             <View style={[styles.page, styles.listPage]}>
               <PageHeader title={t('budgets.overviewTitle')} />
+              {memberFilter ? (
+                <View style={styles.memberFilter}>
+                  <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} />
+                </View>
+              ) : null}
               {state.status === 'refresh-error' ? <StaleBanner label={t('budgets.stale')} palette={palette} /> : null}
               <BudgetsList budgets={state.budgets} locale={locale} onEditBudget={onEditBudget} onOpenBudget={onOpenBudget} />
             </View>
@@ -83,18 +97,30 @@ export function BudgetsScreen({ state, onOpenBudget, onEditBudget, onRefresh, on
   )
 }
 
-/** The budgets as flat rows separated by hairlines, the same treatment as a budget's lines. */
+/**
+ * The budgets as flat rows separated by hairlines, the same treatment as a budget's lines. With
+ * both household and personal budgets, each kind is its own group under a heading, which then
+ * labels the personal rows; otherwise each personal row carries its own badge.
+ */
 function BudgetsList({ budgets, locale, onOpenBudget, onEditBudget }: { budgets: readonly BudgetViewModel[]; locale: string; onOpenBudget: BudgetsScreenProps['onOpenBudget']; onEditBudget?: (budgetId: number) => void }) {
+  const { t } = useTranslation()
   return (
-    <List>
-      {budgets.map((budget, index) => (
-        <BudgetRow key={budget.id} budget={budget} locale={locale} separated={index > 0} onPress={() => onOpenBudget(budget.id, budget.year, budget.month)} onEdit={onEditBudget ? () => onEditBudget(budget.id) : undefined} />
+    <View>
+      {groupBudgetsByVisibility(budgets).map((group, groupIndex) => (
+        <View key={group.visibility ?? 'all'}>
+          {group.visibility ? <ListGroupHeading first={groupIndex === 0} title={t(group.visibility === 'personal' ? 'budgets.groupPersonal' : 'budgets.groupHousehold')} variant="heading" /> : null}
+          <List>
+            {group.budgets.map((budget, index) => (
+              <BudgetRow key={budget.id} budget={budget} grouped={group.visibility !== null} locale={locale} separated={index > 0} onPress={() => onOpenBudget(budget.id, budget.year, budget.month)} onEdit={onEditBudget ? () => onEditBudget(budget.id) : undefined} />
+            ))}
+          </List>
+        </View>
       ))}
-    </List>
+    </View>
   )
 }
 
-function BudgetRow({ budget, locale, separated, onPress, onEdit }: { budget: BudgetViewModel; locale: string; separated: boolean; onPress: () => void; onEdit?: () => void }) {
+function BudgetRow({ budget, grouped, locale, separated, onPress, onEdit }: { budget: BudgetViewModel; grouped: boolean; locale: string; separated: boolean; onPress: () => void; onEdit?: () => void }) {
   const formatMoney = useFormatMoney()
   const { t } = useTranslation()
   const palette = usePalette()
@@ -106,8 +132,10 @@ function BudgetRow({ budget, locale, separated, onPress, onEdit }: { budget: Bud
   ].filter((fact): fact is string => Boolean(fact))
   const { planned, spent, overspent, meterPercentage } = budget.totals
   const progressText = planned <= 0 ? t('budgets.nothingBudgeted') : spent === 0 ? t('budgets.nothingSpent') : formatPercent(spent / planned, locale)
+  const personal = budget.visibility === 'personal'
   const label = [
     budget.name,
+    personal ? t('budgets.personal') : null,
     ...facts,
     `${t('budgets.planned')}, ${money(planned)}`,
     `${t('budgets.spent')}, ${money(spent)}`,
@@ -118,6 +146,7 @@ function BudgetRow({ budget, locale, separated, onPress, onEdit }: { budget: Bud
   return (
     <ListRow
       accessibilityLabel={label}
+      badge={personal && !grouped ? <Badge label={t('budgets.personal')} testID={`budget-personal-${budget.id}`} tone="outline" /> : undefined}
       density="comfortable"
       figure={hasProgress ? <UiText tone={overspent ? 'destructive' : 'default'} variant="amount">{progressText}</UiText> : undefined}
       leading={<EntityMark glyph="wallet-cards" />}
@@ -215,6 +244,8 @@ export function Action({ label, onPress, palette, primary = false, disabled = fa
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
+  // The member filter sits under the title, at the start of the row, sized to its label.
+  memberFilter: { flexDirection: 'row' },
   content: { flexGrow: 1, padding: themeTokens.layout.screenPadding, paddingBottom: themeTokens.spacing[8] },
   contentUnderButton: { paddingBottom: FLOATING_ACTION_SIZE + themeTokens.spacing[8] },
   page: { width: '100%', maxWidth: 760, alignSelf: 'center', gap: themeTokens.spacing[6] },

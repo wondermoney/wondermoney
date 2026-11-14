@@ -3,15 +3,26 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Link } from "@/i18n/navigation";
-import { useConfirmedFeature } from "@/lib/api/instance/useInstance";
+import {
+  useConfirmedFeature,
+  useFeature,
+  useOidcProvider,
+} from "@/lib/api/instance/useInstance";
 import { authClient } from "@/lib/auth/client";
 import { completeAuthAndRedirect } from "@/lib/auth/complete-auth";
+import { markPasskeyOfferPending } from "@/lib/auth/passkey-offer";
+import {
+  browserSupportsPasskeyAutofill,
+  browserSupportsPasskeys,
+  isPasskeyCancelled,
+  signInWithPasskey,
+} from "@/lib/auth/passkeys";
 import { getSafeNextPath, withNextParam } from "@/lib/auth/safe-next-path";
 import { getCallbackURL } from "@/lib/utils/url";
 
@@ -25,6 +36,8 @@ import {
   FormMessage,
 } from "../ui/Form";
 import { Input } from "../ui/input";
+import { DemoSignInButton } from "./DemoSignInButton";
+import { OidcSignInButton } from "./OidcSignInButton";
 
 const formSchema = z.object({
   email: z.email("Invalid email"),
@@ -49,6 +62,21 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   const t = useTranslations();
   // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
+  // An API older than passkeys has no passkey endpoints. False until hydrated, so reading the
+  // browser's support below never differs between the server and the first client render.
+  const passkeyServer = useConfirmedFeature(
+    (features) => features.passkey === true,
+  );
+  const passkeySignIn = passkeyServer && browserSupportsPasskeys();
+  // Single sign-on through the operator's identity provider, once the server has named it.
+  const oidc = useOidcProvider();
+  // Off only once the server says so (`OIDC_ONLY`): an older API, or one still loading, keeps
+  // the password form. Passkeys stay either way.
+  const passwordSignIn = useFeature(
+    (features) => features.passwordSignIn !== false,
+  );
+  // The shared read-only demo account, only on a server that has said it offers one.
+  const demoSignIn = useConfirmedFeature((features) => features.demo === true);
   const [isNavigating, setIsNavigating] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -63,6 +91,55 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   // unsafe value is dropped here rather than carried into MFA or OAuth.
   const getNext = () => getSafeNextPath(nextParam, window.location.origin);
 
+  // A passkey sign-in is a full session, two-factor accounts included (the passkey is both
+  // factors), so it goes straight to provisioning: no MFA step.
+  const finishPasskeySignIn = async () => {
+    setIsNavigating(true);
+    const completed = await completeAuthAndRedirect(
+      locale,
+      {},
+      "auth_complete",
+      getNext(),
+    );
+    if (!completed.ok) {
+      setIsNavigating(false);
+      toast.error(t("toast-login-error"));
+    }
+  };
+
+  const onPasskeySignIn = async () => {
+    try {
+      await signInWithPasskey();
+    } catch (error) {
+      if (!isPasskeyCancelled(error)) toast.error(t("passkeys-sign-in-error"));
+      return;
+    }
+    await finishPasskeySignIn();
+  };
+
+  // Conditional UI: the browser offers saved passkeys in the email field's suggestions and
+  // the request waits until the user picks one. The passkey button starts a fresh request,
+  // which aborts this one; that and any other failure here stay silent.
+  useEffect(() => {
+    // Autofill offers passkeys from the email field, which OIDC_ONLY hides.
+    if (!passkeySignIn || !passwordSignIn) return;
+    let active = true;
+    void (async () => {
+      if (!(await browserSupportsPasskeyAutofill()) || !active) return;
+      try {
+        await signInWithPasskey({ autoFill: true });
+      } catch {
+        return;
+      }
+      if (active) await finishPasskeySignIn();
+    })();
+    return () => {
+      active = false;
+    };
+    // Started once per mount; `finishPasskeySignIn` reads the current props when it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [passkeySignIn, passwordSignIn]);
+
   const onSubmit: SubmitHandler<FormSchema> = async (values, e) => {
     e?.preventDefault();
     form.clearErrors();
@@ -76,6 +153,10 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
       toast.error(t("toast-login-error"));
       return;
     }
+
+    // The password was right: the first page after sign-in (after MFA, when it applies)
+    // offers once to add a passkey.
+    markPasskeyOfferPending();
 
     // A pending 2FA challenge means the credential session better-auth
     // briefly created was deleted server-side — no full session exists yet.
@@ -111,79 +192,117 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
     }
   };
 
+  const passkeyButton = passkeySignIn && (
+    <Button
+      type="button"
+      variant="secondary"
+      className="w-full font-semibold"
+      disabled={isLoading}
+      onClick={() => void onPasskeySignIn()}
+    >
+      {t("passkeys-sign-in")}
+    </Button>
+  );
+
+  // With password sign-in on, single sign-on sits with Google under "Or continue with"; under
+  // OIDC_ONLY it is the main action.
+  const oidcWithOthers = oidc && passwordSignIn;
+
   return (
     <div className="mt-10">
-      <Form {...form}>
-        <form
-          method="post"
-          className="space-y-6"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("email")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder={t("email")}
-                    required
-                    autoComplete="email"
-                    autoFocus
-                    className="bg-card"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t("password")}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder={t("password")}
-                    required
-                    autoComplete="current-password"
-                    className="bg-card"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Was muted grey with an underline that only appeared on hover, so
+      {passwordSignIn ? (
+        <Form {...form}>
+          <form
+            method="post"
+            className="space-y-6"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("email")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder={t("email")}
+                      required
+                      // `webauthn` lets the browser offer saved passkeys here.
+                      autoComplete="username webauthn"
+                      autoFocus
+                      className="bg-card"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("password")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder={t("password")}
+                      required
+                      autoComplete="current-password"
+                      className="bg-card"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Was muted grey with an underline that only appeared on hover, so
               at rest the one route back into a locked-out account looked
               quieter than body text — and on touch, where there is no hover,
               it never announced itself as a link at all. */}
-          <div className="flex items-center justify-end">
-            <Link
-              href="/auth/forgot"
-              className="text-primary text-sm underline underline-offset-2 hover:decoration-2"
+            <div className="flex items-center justify-end">
+              <Link
+                href="/auth/forgot"
+                className="text-primary text-sm underline underline-offset-2 hover:decoration-2"
+              >
+                {t("forgot-pw")}
+              </Link>
+            </div>
+            <Button
+              type="submit"
+              className="w-full font-semibold"
+              loading={isLoading}
+              disabled={isLoading}
             >
-              {t("forgot-pw")}
-            </Link>
-          </div>
-          <Button
-            type="submit"
-            className="w-full font-semibold"
-            loading={isLoading}
-            disabled={isLoading}
-          >
-            {t("log-in")}
-          </Button>
-        </form>
-      </Form>
+              {t("log-in")}
+            </Button>
+            {passkeyButton}
+          </form>
+        </Form>
+      ) : (
+        <div className="space-y-6">
+          {oidc && (
+            <>
+              <p className="text-muted-foreground text-sm leading-6">
+                {t("sso-only-notice", { provider: oidc.name })}
+              </p>
+              <OidcSignInButton
+                primary
+                disabled={isLoading}
+                locale={locale}
+                name={oidc.name}
+                nextParam={nextParam}
+              />
+            </>
+          )}
+          {passkeyButton}
+        </div>
+      )}
 
-      {googleSignIn && (
+      {(googleSignIn || oidcWithOthers) && (
         <div className="mt-10">
           <div className="relative">
             <div
@@ -199,36 +318,54 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
             </div>
           </div>
 
-          <div className="mt-6">
-            <Button
-              variant="secondary"
-              className="flex w-full items-center justify-center gap-3"
-              onClick={signInWithGoogle}
-            >
-              <svg className="size-5" aria-hidden="true" viewBox="0 0 24 24">
-                <path
-                  d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                  fill="#EA4335"
-                />
-                <path
-                  d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                  fill="#34A853"
-                />
-              </svg>
-              <span className="text-sm leading-6 font-semibold">
-                {t("google")}
-              </span>
-            </Button>
+          <div className="mt-6 space-y-4">
+            {oidcWithOthers && (
+              <OidcSignInButton
+                disabled={isLoading}
+                locale={locale}
+                name={oidc.name}
+                nextParam={nextParam}
+              />
+            )}
+            {googleSignIn && (
+              <Button
+                variant="secondary"
+                className="flex w-full items-center justify-center gap-3"
+                onClick={signInWithGoogle}
+              >
+                <svg className="size-5" aria-hidden="true" viewBox="0 0 24 24">
+                  <path
+                    d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
+                    fill="#EA4335"
+                  />
+                  <path
+                    d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
+                    fill="#34A853"
+                  />
+                </svg>
+                <span className="text-sm leading-6 font-semibold">
+                  {t("google")}
+                </span>
+              </Button>
+            )}
           </div>
         </div>
+      )}
+
+      {demoSignIn && (
+        <DemoSignInButton
+          disabled={isLoading}
+          locale={locale}
+          nextParam={nextParam}
+        />
       )}
     </div>
   );

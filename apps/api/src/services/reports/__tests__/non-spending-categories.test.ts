@@ -98,7 +98,7 @@ describe('categories that do not count as spending', () => {
 
   it('in budget spending', async () => {
     const s = await scenario();
-    const { categories } = await getBudgetSpending({ accountKeys: s.accountKeys, currency: { code: 'EUR', currencyKey: s.household.currency.currencyKey }, period: 'monthly', templateKeys: s.templateKeys, tenantKey: s.household.tenant.tenantKey, viewerAppuserKey: s.household.appuser.appuserKey });
+    const { categories } = await getBudgetSpending({ accountKeys: s.accountKeys, currency: { code: 'EUR', currencyKey: s.household.currency.currencyKey }, period: 'monthly', periodStartDay: 1, templateKeys: s.templateKeys, tenantKey: s.household.tenant.tenantKey, viewerAppuserKey: s.household.appuser.appuserKey });
 
     expect(Object.fromEntries(categories.filter((row) => row.child_category_name).map((row) => [row.child_category_name, row.category_amount]))).toEqual({ Broker: 0, Groceries: 70 });
   });
@@ -225,7 +225,7 @@ describe('a household\'s choice for a built-in category', () => {
   it('in budget spending', async () => {
     const { ours, theirs } = await scenario();
     const spending = async ({ household, templateKeys }: Side) => {
-      const { categories } = await getBudgetSpending({ accountKeys: [household.account.accountKey], currency: { code: 'EUR', currencyKey: household.currency.currencyKey }, period: 'monthly', templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
+      const { categories } = await getBudgetSpending({ accountKeys: [household.account.accountKey], currency: { code: 'EUR', currencyKey: household.currency.currencyKey }, period: 'monthly', periodStartDay: 1, templateKeys, tenantKey: household.tenant.tenantKey, viewerAppuserKey: household.appuser.appuserKey });
       return Object.fromEntries(categories.filter((row) => row.child_category_name).map((row): [string, number] => [String(row.child_category_name), row.category_amount]));
     };
 

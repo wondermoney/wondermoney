@@ -5,6 +5,7 @@
     "profile-preferences",
     "email-preferences",
     "appearance",
+    "preview-features",
     "privacy-mode",
     "manage-categories",
     "exchange-rates",
@@ -12,6 +13,9 @@
     "ai-assistant-consent",
     "change-password",
     "two-factor-authentication",
+    "passkeys",
+    "api-tokens",
+    "connect-ai-client",
     "read-only-bank-access",
     "data-privacy",
     "delete-account"

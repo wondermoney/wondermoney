@@ -41,7 +41,7 @@ interface RawRow {
  *
  * Scopes: `all` for the daily sweep (a worker runs with no tenant filter); `viewer` for the
  * in-app alerts, which must return only the viewer's own connections in their household (the
- * partner's connections, and so their private accounts, stay out); `connection` for a send
+ * other members' connections, and so their private accounts, stay out); `connection` for a send
  * re-checking its alert.
  */
 export async function loadConnectionHealth(em: EntityManager, scope: ConnectionHealthScope): Promise<ConnectionHealthRow[]> {

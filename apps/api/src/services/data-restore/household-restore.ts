@@ -4,6 +4,10 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { type Kysely, sql } from 'kysely';
 
 import { type SqlDatabase, sqlQuery } from '@app/database/sql';
+import { SupportedLanguages } from '@entity/Appuser';
+import { ExchangeRateOverrideAuditAction } from '@entity/ExchangeRateOverrideAuditLog';
+import { classifyWalletInput } from '@service/crypto-wallet/address';
+import { buildInstallmentSchedule } from '@service/installment/installment-schedule';
 import { ruleActionsSchema, ruleConditionsSchema } from '@service/rules/rule-schema';
 import { normalizeMerchantName } from '@service/transaction/merchant-normalization';
 
@@ -41,12 +45,26 @@ import { type ParsedExport, RestoreError } from './restore-reader';
  *   portfolio itself is restored.
  * - System categories by name (and parent's name), else created as the household's own.
  * - Tags, merchants and category settings reuse a matching row the household already has.
+ * - Expense groups come back with their people: a person of the household becomes the restoring
+ *   member, anyone else keeps their name and email; shared expenses keep their per-person split
+ *   lines, and settlements stay linked to their transaction when the export holds it.
  * - Formerly bank-linked accounts come back as manual accounts with their full history; no
  *   connection or credential is restored, and the summary lists them for reconnecting.
- * - The member's preferences (currency, language, email notifications) are applied.
+ * - The member's preferences (currency, language, email notifications) and account order are applied.
+ * - Installment plans come back on their card with the schedule as exported, and each posted
+ *   transaction pays the installment it paid; a transaction unlinked from a plan by hand stays
+ *   unlinked from it. A schedule that is not whole is drawn again from the
+ *   plan and the card's restored cycle, as editing the plan in the app would.
+ * - The household's exchange-rate overrides are written as the restoring member's, each with its
+ *   audit entry as when it is added in the app; price overrides go on the catalogue's asset (found
+ *   as for trades) and only in that asset's currency, else they are left out and listed
+ *   (`price_overrides_skipped`). An override the household already has for the same day wins.
  *
  * Balances are written as exported. The member-currency columns are derived for accounts in the
  * member's own currency and left for the FX re-conversion job ({@link RestoreOutcome}) otherwise.
+ * What the app rebuilds after an override change is queued by the caller from the outcome: a
+ * re-conversion of every restored exchange-rate pair, and a full snapshot rebuild of every restored
+ * portfolio (which covers every price override's day).
  */
 export interface RestoreDeps {
   now?: () => Date;
@@ -59,6 +77,8 @@ export interface RestoreDeps {
 }
 
 export interface RestoreOutcome {
+  /** The currency pairs of the restored exchange-rate overrides, each to re-convert as after an override change. */
+  fxOverridePairs: { fromCurrency: string; toCurrency: string }[];
   /** Whether an account is in a currency other than the member's, for the FX re-conversion job. */
   hasForeignCurrencyAccounts: boolean;
   /** The restored portfolios' keys, for snapshot rebuilds. */
@@ -95,6 +115,8 @@ export type RestoreWarningCode =
   | 'currency_changed'
   /** The export held another member; their rows now belong to the restoring member. */
   | 'members_merged'
+  /** Manual prices for a security this server does not know, or knows in another currency: not restored. */
+  | 'price_overrides_skipped'
   /** Rules that do not fit this server's rule format, or name rows the export left out: not restored. */
   | 'rules_skipped'
   | 'unknown_account_types'
@@ -108,7 +130,8 @@ const BATCH = 500;
 const MAX_WARNING_VALUES = 10;
 /** Advisory-lock namespace that serialises restores into one household (any constant int4). */
 const RESTORE_LOCK_NAMESPACE = 650_067;
-const LANGUAGES = new Set(['EN', 'PT']);
+/** Every account language. An older export carries EN or PT; one this server cannot hold keeps the member's own. */
+const LANGUAGES = new Set<string>(Object.values(SupportedLanguages));
 
 class DryRunRollback extends Error {
   constructor(readonly outcome: RestoreOutcome) {
@@ -184,9 +207,11 @@ async function findAssets(db: Db, assets: AssetRef[]): Promise<Map<string, numbe
   return found;
 }
 
+/** The assets the export names: those traded, then those only priced by hand. */
 function uniqueAssets(rows: DataRows): AssetRef[] {
   const assets = new Map<string, AssetRef>();
   for (const row of rows['portfolio-transactions']) assets.set(assetKey(row.asset), row.asset);
+  for (const row of rows['price-overrides']) if (!assets.has(assetKey(row.asset))) assets.set(assetKey(row.asset), row.asset);
   return [...assets.values()];
 }
 
@@ -249,15 +274,20 @@ class HouseholdRestore {
   private readonly counts: Partial<Record<DataFileName, number>> = {};
   private currencies = new Map<string, number>();
   private readonly goals = new Keys();
+  private readonly groupMembers = new Keys();
+  private readonly groups = new Keys();
   private readonly loans = new Keys();
+  private readonly manualAssets = new Keys();
   private memberCurrency: null | string = null;
   private readonly merchants = new Keys();
   private readonly now: Date;
+  private readonly plans = new Keys();
   private readonly portfolios = new Keys();
   private readonly rows: DataRows;
   private readonly series = new Keys();
   private readonly tags = new Keys();
   private readonly transactions = new Keys();
+  private readonly walletAddresses = new Keys();
   private readonly warnings = new Warnings();
 
   constructor(
@@ -276,32 +306,40 @@ class HouseholdRestore {
     await this.resolveCurrencies();
     await this.preferences();
     await this.accountRows();
+    await this.creditCards();
     await this.categoryRows();
     await this.categorySettings();
     await this.merchantRows();
     await this.merchantCategories();
     await this.tagRows();
-    await this.loanRows();
     await this.manualAssetRows();
+    await this.loanRows();
     await this.goalRows();
     await this.portfolioRows();
+    await this.installmentPlans();
     await this.transactionRows();
     await this.transactionCategories();
+    await this.expenseGroups();
     await this.transactionSplits();
+    await this.expenseGroupActivity();
+    await this.transactionReimbursements();
     await this.transactionTags();
     await this.ruleRows();
     await this.recurring();
     await this.budgetRows();
     await this.goalChildren();
     await this.loanChildren();
+    await this.transactionTemplates();
     await this.portfolioTransactions();
+    await this.priceOverrides();
+    const fxOverridePairs = await this.exchangeRateOverrides();
     await this.watchlist();
 
     const others = this.rows.members.filter((member) => member.id !== this.parsed.manifest.exportedBy.memberId);
     if (others.length > 0) this.warnings.add('members_merged', null, others.length);
     const portfolioKeys = this.rows.portfolios.map((row) => this.portfolios.get(row.id)).filter((key): key is number => key !== null);
     const hasForeignCurrencyAccounts = this.rows.accounts.some((row) => row.currency !== this.memberCurrency);
-    return { hasForeignCurrencyAccounts, portfolioKeys, summary: { counts: this.counts, warnings: this.warnings.list() } };
+    return { fxOverridePairs, hasForeignCurrencyAccounts, portfolioKeys, summary: { counts: this.counts, warnings: this.warnings.list() } };
   }
 
   private count(file: DataFileName, rows: number): void {
@@ -342,6 +380,9 @@ class HouseholdRestore {
     for (const row of rows['manual-assets']) add(row.currency);
     for (const row of rows.portfolios) add(row.currency);
     for (const row of rows['portfolio-transactions']) [row.feeCurrency, row.originalCurrency, row.settlementCurrency].forEach(add);
+    for (const row of rows['exchange-rate-overrides']) [row.fromCurrency, row.toCurrency].forEach(add);
+    for (const row of rows['expense-groups']) add(row.currency);
+    for (const row of rows['expense-group-settlements']) add(row.currency);
     const known = await lookup(this.db, sql`select currency_key as k, code as name from currency where code = any(${[...codes]})`);
     const missing = [...codes].filter((code) => !known.has(code)).sort();
     if (missing.length > 0) throw new RestoreError('unknown_currency', `Unknown currencies: ${missing.join(', ')}`, { values: missing });
@@ -377,7 +418,9 @@ class HouseholdRestore {
     const flags = preferences.emailNotifications;
     const values = {
       account_recovery_enabled: flags.accountRecovery ?? true,
+      bank_sync_alerts_enabled: flags.bankSyncAlerts ?? true,
       budget_alerts_enabled: flags.budgetAlerts ?? true,
+      credit_card_due_reminders_enabled: flags.creditCardDueReminders ?? true,
       growth_emails_enabled: flags.growthEmails ?? true,
       monthly_story_enabled: flags.monthlyStory ?? true,
       weekly_insights_enabled: flags.weeklyInsights ?? true,
@@ -419,6 +462,7 @@ class HouseholdRestore {
         currency_key: this.currency(row.currency),
         fx_status: own ? null : 'missing',
         holder_name: row.holderName,
+        is_joint: row.isJoint ?? false,
         is_private: row.isPrivate,
         opening_balance: row.openingBalance,
         opening_balance_date: row.openingBalanceDate,
@@ -427,9 +471,18 @@ class HouseholdRestore {
       };
     });
     await insertRows(this.db, 'account', values);
+    // The member's own order of their account list.
+    const positions = list.flatMap((row) => (row.position == null ? [] : [{ account_key: this.accounts.get(row.id), appuser_key: this.target.appuserKey, position: row.position, ...this.stamp() }]));
+    await insertRows(this.db, 'appuser_account_position', positions);
+    // A split account (1.13): every member of the export is the restoring member now, so it is wholly theirs.
+    const ownership = list.flatMap((row) => ((row.ownership ?? []).some((share) => share.basisPoints > 0)
+      ? [{ account_key: this.accounts.get(row.id), appuser_key: this.target.appuserKey, basis_points: 10_000, tenant_key: this.target.tenantKey, ...this.stamp() }]
+      : []));
+    await insertRows(this.db, 'account_ownership', ownership);
     this.count('accounts', values.length);
   }
 
+  /** Card settings, on the restored card. Every account is new, so none has settings yet. */
   private async categoryRows(): Promise<void> {
     const system = (await sql<{ k: number; name: string; parent: null | string }>`
       select c.category_key as k, c.name, p.name as parent from category c left join category p on p.category_key = c.parent_category_category_key
@@ -505,6 +558,20 @@ class HouseholdRestore {
     this.count('category-settings', seen.size);
   }
 
+  private async creditCards(): Promise<void> {
+    const values = this.rows['credit-cards'].map((row) => ({
+      account_key: this.accounts.get(row.accountId),
+      credit_limit: row.creditLimit,
+      minimum_payment_percent: row.minimumPaymentPercent,
+      payment_due_day: row.paymentDueDay,
+      statement_close_day: row.statementCloseDay,
+      tenant_key: this.target.tenantKey,
+      ...this.stamp(),
+    }));
+    await insertRows(this.db, 'credit_card_detail', values);
+    this.count('credit-cards', values.length);
+  }
+
   private async merchantCategories(): Promise<void> {
     const values = this.rows['merchant-categories'].map((row) => ({
       appuser_key: this.target.appuserKey,
@@ -526,7 +593,7 @@ class HouseholdRestore {
     const list = this.rows.merchants;
     const global = await lookup(this.db, sql`select transaction_merchant_key as k, name from transaction_merchant where tenant_key is null and deleted_at is null and name = any(${list.filter((row) => row.global).map((row) => row.name)}) order by transaction_merchant_key`);
     const own = await lookup(this.db, sql`select transaction_merchant_key as k, normalized_name as name from transaction_merchant where tenant_key = ${this.target.tenantKey} and deleted_at is null and normalized_name is not null order by transaction_merchant_key`);
-    const toCreate: { id: number; name: string; normalized: string }[] = [];
+    const toCreate: { id: number; logoUrl: null | string; name: string; normalized: string; website: null | string }[] = [];
     const planned = new Map<string, number[]>();
     for (const row of list) {
       const globalKey = row.global ? global.get(row.name) : undefined;
@@ -544,13 +611,13 @@ class HouseholdRestore {
       if (ids) ids.push(row.id);
       else {
         planned.set(normalized, [row.id]);
-        toCreate.push({ id: row.id, name: row.name, normalized });
+        toCreate.push({ id: row.id, logoUrl: row.logoUrl ?? null, name: row.name, normalized, website: row.website ?? null });
       }
     }
     const keys = await allocateKeys(this.db, 'transaction_merchant', 'transaction_merchant_key', toCreate.length);
     const values = toCreate.map((row, index) => {
       for (const id of planned.get(row.normalized)!) this.merchants.set(id, keys[index]!);
-      return { name: row.name, normalized_name: row.normalized, tenant_key: this.target.tenantKey, transaction_merchant_key: keys[index], ...this.stamp() };
+      return { logo_url: row.logoUrl, name: row.name, normalized_name: row.normalized, tenant_key: this.target.tenantKey, transaction_merchant_key: keys[index], website: row.website, ...this.stamp() };
     });
     await insertRows(this.db, 'transaction_merchant', values);
     this.count('merchants', list.length);
@@ -623,8 +690,10 @@ class HouseholdRestore {
     await insertRows(this.db, 'loan', list.map((row, index) => {
       this.loans.set(row.id, keys[index]!);
       return {
+        amortization_method: row.amortizationMethod,
         annual_interest_rate_bps: row.annualInterestRateBps,
         currency_key: this.currency(row.currency),
+        first_payment_date: row.firstPaymentDate,
         include_in_net_worth: row.includeInNetWorth,
         loan_key: keys[index],
         maturity_date: row.maturityDate,
@@ -639,6 +708,7 @@ class HouseholdRestore {
         provider_name: row.providerName,
         rate_type: row.rateType,
         regular_payment_amount: row.regularPaymentAmount,
+        secured_asset_key: this.manualAssets.get(row.securedAssetId),
         status: row.status,
         tenant_key: this.target.tenantKey,
         term_months: row.termMonths,
@@ -653,9 +723,8 @@ class HouseholdRestore {
   private async manualAssetRows(): Promise<void> {
     const list = this.rows['manual-assets'];
     const keys = await allocateKeys(this.db, 'manual_asset', 'manual_asset_key', list.length);
-    const assets = new Keys();
     await insertRows(this.db, 'manual_asset', list.map((row, index) => {
-      assets.set(row.id, keys[index]!);
+      this.manualAssets.set(row.id, keys[index]!);
       return {
         archived_at: row.archivedAt,
         currency_key: this.currency(row.currency),
@@ -676,7 +745,7 @@ class HouseholdRestore {
     this.count('manual-assets', list.length);
 
     const valuations = this.rows['manual-asset-valuations'].map((row) => ({
-      manual_asset_key: assets.get(row.manualAssetId),
+      manual_asset_key: this.manualAssets.get(row.manualAssetId),
       note: row.note,
       tenant_key: this.target.tenantKey,
       valuation_date: row.date,
@@ -685,8 +754,14 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'manual_asset_valuation', valuations);
     this.count('manual-asset-valuations', valuations.length);
+    await this.walletRows();
   }
 
+  /**
+   * A crypto wallet's addresses and tokens. Each address is checked again as a public one for its
+   * chain: one that is not (an edited file could hold a private key) is left out with its tokens,
+   * never written. Restored addresses sync again from the start.
+   */
   private async portfolioRows(): Promise<void> {
     const list = this.rows.portfolios;
     const keys = await allocateKeys(this.db, 'portfolio', 'portfolio_key', list.length);
@@ -697,6 +772,7 @@ class HouseholdRestore {
         account_balance_mode: linked === null ? null : row.accountBalanceMode,
         benchmark_symbol: row.benchmarkSymbol,
         closed_at: row.closedAt,
+        cost_basis_method: row.costBasisMethod,
         currency_key: this.currency(row.currency),
         description: row.description,
         excluded: row.excluded,
@@ -711,6 +787,86 @@ class HouseholdRestore {
       };
     }));
     this.count('portfolios', list.length);
+  }
+
+  private async walletRows(): Promise<void> {
+    const addresses = this.rows['crypto-wallet-addresses'].flatMap((row) => {
+      const asset = this.manualAssets.get(row.manualAssetId);
+      const parsed = classifyWalletInput(row.chain, row.address);
+      if (asset === null || !parsed.ok || parsed.kind !== row.kind) return [];
+      return [{ address: parsed.address, asset, row }];
+    });
+    const keys = await allocateKeys(this.db, 'crypto_wallet_address', 'crypto_wallet_address_key', addresses.length);
+    await insertRows(this.db, 'crypto_wallet_address', addresses.map(({ address, asset, row }, index) => {
+      this.walletAddresses.set(row.id, keys[index]!);
+      return { address, address_kind: row.kind, chain: row.chain, crypto_wallet_address_key: keys[index], label: row.label, manual_asset_key: asset, sync_status: 'pending', tenant_key: this.target.tenantKey, ...this.stamp() };
+    }));
+    this.count('crypto-wallet-addresses', addresses.length);
+
+    const assetOf = new Map(addresses.map(({ asset, row }) => [row.id, asset]));
+    const seen = new Set<string>();
+    const tokens = this.rows['crypto-wallet-tokens'].flatMap((row) => {
+      const address = this.walletAddresses.get(row.addressId);
+      const tokenRef = row.contractAddress ?? 'native';
+      if (address === null || seen.has(`${address}:${tokenRef}`)) return [];
+      seen.add(`${address}:${tokenRef}`);
+      return [{
+        crypto_wallet_address_key: address,
+        decimals: row.decimals,
+        manual_asset_key: assetOf.get(row.addressId),
+        name: row.name,
+        price_missing: false,
+        raw_balance: row.balance,
+        symbol: row.symbol,
+        tenant_key: this.target.tenantKey,
+        token_ref: tokenRef,
+        tracked: row.tracked,
+        ...this.stamp(),
+      }];
+    });
+    await insertRows(this.db, 'crypto_wallet_token', tokens);
+    this.count('crypto-wallet-tokens', tokens.length);
+  }
+
+  // --- installment plans (before the transactions that pay them) ---
+
+  /**
+   * Plans and their schedules. A schedule that holds every installment of its plan is written as
+   * exported; otherwise it is drawn again from the plan and its card's cycle (`installment-schedule.ts`).
+   */
+  private async installmentPlans(): Promise<void> {
+    const list = this.rows['installment-plans'];
+    const keys = await allocateKeys(this.db, 'installment_plan', 'installment_plan_key', list.length);
+    await insertRows(this.db, 'installment_plan', list.map((row, index) => {
+      this.plans.set(row.id, keys[index]!);
+      return {
+        account_key: this.accounts.get(row.accountId),
+        category_key: this.categories.get(row.categoryId),
+        created_by_appuser_key: this.member(row.createdByMemberId),
+        description: row.description,
+        installment_count: row.installmentCount,
+        installment_plan_key: keys[index],
+        purchase_date: row.purchaseDate,
+        tenant_key: this.target.tenantKey,
+        total_amount: row.totalAmount,
+        ...this.stamp(row.createdAt),
+      };
+    }));
+    this.count('installment-plans', list.length);
+
+    const exported = new Map<number, DataRows['installments']>();
+    for (const row of this.rows.installments) exported.set(row.planId, [...(exported.get(row.planId) ?? []), row]);
+    const cycles = new Map(this.rows['credit-cards'].map((row) => [row.accountId, { paymentDueDay: row.paymentDueDay, statementCloseDay: row.statementCloseDay }]));
+    const values = list.flatMap((plan) => {
+      const schedule = exported.get(plan.id) ?? [];
+      const rows = schedule.length === plan.installmentCount
+        ? schedule.map((row) => ({ amount: row.amount, due_date: row.dueDate, installment_number: row.installmentNumber, scheduled_date: row.scheduledDate, statement_date: row.statementDate }))
+        : buildInstallmentSchedule({ cycle: cycles.get(plan.accountId) ?? null, installmentCount: plan.installmentCount, purchaseDate: new Date(`${plan.purchaseDate}T00:00:00.000Z`), totalAmount: Number(plan.totalAmount) })
+          .map((row) => ({ amount: String(row.amount), due_date: calendarDay(row.dueDate), installment_number: row.installmentNumber, scheduled_date: calendarDay(row.scheduledDate)!, statement_date: calendarDay(row.statementDate) }));
+      return rows.map((row) => ({ ...row, installment_plan_key: this.plans.get(plan.id), tenant_key: this.target.tenantKey, ...this.stamp() }));
+    });
+    await insertRows(this.db, 'installment', values);
+    this.count('installments', values.length);
   }
 
   // --- transactions ---
@@ -748,6 +904,10 @@ class HouseholdRestore {
         appuser_currency_key: this.currency(row.userCurrency),
         appuser_key: this.member(row.memberId),
         appuser_settlement_amount: row.userAmount,
+        // Every member merges into the restoring one, so a row another member spent stays a
+        // member's (not Shared), and Shared stays Shared.
+        attributed_appuser_key: this.member(row.attributedMemberId ?? null),
+        attributed_to_shared: row.attributedToShared ?? false,
         balance: row.balance,
         description: row.description,
         description_dirty: row.descriptionRaw,
@@ -756,6 +916,9 @@ class HouseholdRestore {
         // A row with no amount in the member's currency is left for the FX job to convert.
         fx_status: row.userAmount !== null ? (foreign ? 'exact' : null) : (foreign ? 'missing' : null),
         hidden: row.hidden,
+        installment_number: row.installmentNumber ?? null,
+        installment_plan_key: this.plans.get(row.installmentPlanId),
+        installment_unlinked_plan_key: this.plans.get(row.installmentUnlinkedPlanId),
         merchant_edited_by_user: row.merchantEditedByUser,
         notes: row.notes,
         original_amount: row.originalAmount,
@@ -765,6 +928,7 @@ class HouseholdRestore {
         settlement_amount: row.settlementAmount,
         settlement_currency_key: this.currency(row.settlementCurrency),
         settlement_exchange_rate: row.settlementExchangeRate,
+        statement_date_override: row.statementDateOverride ?? null,
         tenant_key: this.target.tenantKey,
         transaction_date: row.date,
         transaction_key: keys[index],
@@ -774,6 +938,7 @@ class HouseholdRestore {
         transfer_destination_account_key: this.accounts.get(row.transferDestinationAccountId),
         transfer_destination_goal_key: this.goals.get(row.transferDestinationGoalId),
         transfer_destination_portfolio_key: this.portfolios.get(row.transferDestinationPortfolioId),
+        transfer_exchange_rate: row.transferExchangeRate ?? null,
         unedited_settlement_amount: row.uneditedSettlementAmount,
         ...this.stamp(row.createdAt),
       };
@@ -794,6 +959,7 @@ class HouseholdRestore {
     const values = this.rows['transaction-splits'].map((row) => ({
       amount: row.amount,
       category_key: this.categories.get(row.categoryId),
+      expense_group_member_key: this.groupMembers.get(row.memberId),
       notes: row.notes,
       position: row.position,
       tenant_key: this.target.tenantKey,
@@ -802,6 +968,82 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'transaction_split', values);
     this.count('transaction-splits', values.length);
+  }
+
+  /**
+   * Expense groups and their people, before the split lines that name them. A person of the
+   * household becomes the restoring member, as every member of the export does; anyone else keeps
+   * only a name and email.
+   */
+  private async expenseGroups(): Promise<void> {
+    const groups = this.rows['expense-groups'];
+    const groupKeys = await allocateKeys(this.db, 'expense_group', 'expense_group_key', groups.length);
+    await insertRows(this.db, 'expense_group', groups.map((row, index) => {
+      this.groups.set(row.id, groupKeys[index]!);
+      return { archived: row.archived, created_by_appuser_key: this.target.appuserKey, currency_key: this.currency(row.currency), expense_group_key: groupKeys[index], name: row.name, tenant_key: this.target.tenantKey, ...this.stamp(row.createdAt) };
+    }));
+    this.count('expense-groups', groups.length);
+
+    const members = this.rows['expense-group-members'];
+    const memberKeys = await allocateKeys(this.db, 'expense_group_member', 'expense_group_member_key', members.length);
+    await insertRows(this.db, 'expense_group_member', members.map((row, index) => {
+      this.groupMembers.set(row.id, memberKeys[index]!);
+      return {
+        appuser_key: row.householdMemberId === null ? null : this.target.appuserKey,
+        email: row.email,
+        expense_group_key: this.groups.get(row.groupId),
+        expense_group_member_key: memberKeys[index],
+        name: row.name,
+        position: row.position,
+        tenant_key: this.target.tenantKey,
+        ...this.stamp(),
+      };
+    }));
+    this.count('expense-group-members', members.length);
+  }
+
+  /** Who paid each shared expense, and the settlements, linked to their transaction when the export holds it. */
+  private async expenseGroupActivity(): Promise<void> {
+    const expenses = this.rows['expense-group-expenses'];
+    await insertRows(this.db, 'expense_group_expense', expenses.map((row) => ({
+      expense_group_key: this.groups.get(row.groupId),
+      paid_by_member_key: this.groupMembers.get(row.paidByMemberId),
+      split_method: row.splitMethod,
+      tenant_key: this.target.tenantKey,
+      transaction_key: this.transactions.get(row.transactionId),
+      ...this.stamp(),
+    })));
+    this.count('expense-group-expenses', expenses.length);
+
+    const settlements = this.rows['expense-group-settlements'];
+    await insertRows(this.db, 'expense_group_settlement', settlements.map((row) => ({
+      amount: row.amount,
+      currency_key: this.currency(row.currency),
+      expense_group_key: this.groups.get(row.groupId),
+      from_member_key: this.groupMembers.get(row.fromMemberId),
+      notes: row.notes,
+      recorded_by_appuser_key: this.target.appuserKey,
+      settled_on: row.settledOn,
+      tenant_key: this.target.tenantKey,
+      to_member_key: this.groupMembers.get(row.toMemberId),
+      transaction_key: this.transactions.get(row.transactionId),
+      ...this.stamp(row.createdAt),
+    })));
+    this.count('expense-group-settlements', settlements.length);
+  }
+
+  /** Reimbursement links, made by the restoring member. The export kept only live links whose sides it holds. */
+  private async transactionReimbursements(): Promise<void> {
+    const values = this.rows['transaction-reimbursements'].map((row) => ({
+      amount: row.amount,
+      expense_transaction_key: this.transactions.get(row.expenseTransactionId),
+      linked_by_appuser_key: this.target.appuserKey,
+      reimbursement_transaction_key: this.transactions.get(row.reimbursementTransactionId),
+      tenant_key: this.target.tenantKey,
+      ...this.stamp(row.createdAt),
+    }));
+    await insertRows(this.db, 'transaction_reimbursement', values);
+    this.count('transaction-reimbursements', values.length);
   }
 
   private async transactionTags(): Promise<void> {
@@ -889,7 +1131,8 @@ class HouseholdRestore {
     const keys = await allocateKeys(this.db, 'budget', 'budget_key', list.length);
     await insertRows(this.db, 'budget', list.map((row, index) => {
       this.budgets.set(row.id, keys[index]!);
-      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, tenant_key: this.target.tenantKey, ...this.stamp() };
+      // A personal budget stays personal: the restoring member's own, as everything personal is here.
+      return { appuser_key: this.target.appuserKey, budget_key: keys[index], currency_key: this.currency(row.currency), description: row.description, name: row.name, num_adults: row.numAdults, num_dependents: row.numDependents, owner_appuser_key: this.member(row.ownerMemberId), period_start_day: row.periodStartDay, rollover_carries_overspend: row.rolloverCarriesOverspend, tenant_key: this.target.tenantKey, ...this.stamp() };
     }));
     this.count('budgets', list.length);
 
@@ -902,6 +1145,7 @@ class HouseholdRestore {
       category_key: this.categories.get(row.categoryId),
       month: row.month,
       recurrency: row.recurrency,
+      rollover_enabled: row.rolloverEnabled,
       year: row.year,
     })));
     const links = lines.flatMap((row, index) => [...new Set(row.accountIds)].map((accountId) => ({ account_account_key: this.accounts.get(accountId), budget_template_category_budget_template_category_key: lineKeys[index] })));
@@ -968,6 +1212,16 @@ class HouseholdRestore {
     }));
     await insertRows(this.db, 'loan_adjustment', adjustments);
     this.count('loan-adjustments', adjustments.length);
+
+    const ratePeriods = this.rows['loan-rate-periods'].map((row) => ({
+      annual_interest_rate_bps: row.annualInterestRateBps,
+      effective_date: row.effectiveDate,
+      loan_key: this.loans.get(row.loanId),
+      tenant_key: this.target.tenantKey,
+      ...this.stamp(),
+    }));
+    await insertRows(this.db, 'loan_rate_period', ratePeriods);
+    this.count('loan-rate-periods', ratePeriods.length);
 
     const repayments = this.rows['loan-repayments'].map((row) => ({
       allocation_source: row.allocationSource,
@@ -1037,11 +1291,16 @@ class HouseholdRestore {
   // --- portfolio transactions and the watchlist ---
 
   /** The catalogue's key for every asset of the export it knows, by {@link assetKey}. Never writes to the catalogue. */
+  private assetKeysCache: Map<string, number> | null = null;
+
   private async assetKeys(): Promise<Map<string, number>> {
+    if (this.assetKeysCache) return this.assetKeysCache;
     const assets = uniqueAssets(this.rows);
     const keys = new Map(this.catalogued);
     for (const [key, value] of await findAssets(this.db, assets.filter((asset) => !keys.has(assetKey(asset))))) keys.set(key, value);
-    for (const asset of assets) if (!keys.has(assetKey(asset))) this.warnings.add('assets_left_out', asset.symbol);
+    const traded = new Set(this.rows['portfolio-transactions'].map((row) => assetKey(row.asset)));
+    for (const asset of assets) if (!keys.has(assetKey(asset)) && traded.has(assetKey(asset))) this.warnings.add('assets_left_out', asset.symbol);
+    this.assetKeysCache = keys;
     return keys;
   }
 
@@ -1104,6 +1363,119 @@ class HouseholdRestore {
     this.count('portfolio-transactions', list.length);
   }
 
+  /**
+   * The household's prices, on the catalogue's asset and only in that asset's currency, as the app
+   * accepts them. A price for an unknown asset, or one the catalogue holds in another currency, is
+   * left out and listed; a day the household already priced keeps its own price.
+   */
+  private async priceOverrides(): Promise<void> {
+    const list = this.rows['price-overrides'];
+    if (list.length === 0) {
+      this.count('price-overrides', 0);
+      return;
+    }
+    const assets = await this.assetKeys();
+    const keys = [...new Set(list.flatMap((row) => assets.get(assetKey(row.asset)) ?? []))];
+    const { rows: catalogue } = await sql<{ code: null | string; currency_key: null | number; k: number }>`
+      select fa.financial_asset_key as k, fa.currency_key, c.code from financial_asset fa left join currency c on c.currency_key = fa.currency_key
+      where fa.financial_asset_key = any(${keys})`.execute(this.db);
+    const currencyOf = new Map(catalogue.map((row) => [row.k, row]));
+    const seen = new Set<string>();
+    const values = list.flatMap((row) => {
+      const asset = assets.get(assetKey(row.asset));
+      const currency = asset === undefined ? undefined : currencyOf.get(asset);
+      if (asset === undefined || !currency?.currency_key || currency.code?.toUpperCase() !== row.currency || seen.has(`${asset}:${row.date}`)) {
+        this.warnings.add('price_overrides_skipped', row.asset.symbol);
+        return [];
+      }
+      seen.add(`${asset}:${row.date}`);
+      return [{
+        created_by_appuser_key: this.member(row.createdByMemberId),
+        currency_key: currency.currency_key,
+        date: `${row.date}T00:00:00.000Z`,
+        financial_asset_key: asset,
+        note: row.note?.trim() ? row.note.trim() : null,
+        price: row.price,
+        tenant_key: this.target.tenantKey,
+        ...this.stamp(),
+      }];
+    });
+    let written = 0;
+    for (let index = 0; index < values.length; index += BATCH) {
+      const result = await this.db.insertInto('financial_asset_price_override').values(values.slice(index, index + BATCH))
+        .onConflict((conflict) => conflict.columns(['tenant_key', 'financial_asset_key', 'date']).where('deleted_at', 'is', null).doNothing())
+        .returning('financial_asset_price_override_key').execute();
+      written += result.length;
+    }
+    this.count('price-overrides', written);
+  }
+
+  /**
+   * The household's exchange rates, each recorded in the audit trail as added by the restoring
+   * member, as when one is added in the app. A day the household already has a rate for keeps it.
+   * Returns the restored pairs, for re-conversion.
+   */
+  private async exchangeRateOverrides(): Promise<{ fromCurrency: string; toCurrency: string }[]> {
+    const values = this.rows['exchange-rate-overrides'].map((row) => ({
+      created_by_appuser_key: this.member(row.createdByMemberId),
+      date: `${row.date}T00:00:00.000Z`,
+      from_currency_key: this.currency(row.fromCurrency),
+      rate: row.rate,
+      tenant_key: this.target.tenantKey,
+      to_currency_key: this.currency(row.toCurrency),
+      ...this.stamp(),
+    }));
+    const pairs = new Map<string, { fromCurrency: string; toCurrency: string }>();
+    let written = 0;
+    for (let index = 0; index < values.length; index += BATCH) {
+      const batch = this.rows['exchange-rate-overrides'].slice(index, index + BATCH);
+      const result = await this.db.insertInto('exchange_rate_override').values(values.slice(index, index + BATCH))
+        .onConflict((conflict) => conflict.columns(['tenant_key', 'from_currency_key', 'to_currency_key', 'date']).where('deleted_at', 'is', null).doNothing())
+        .returning(['exchange_rate_override_key', 'from_currency_key', 'to_currency_key', 'date']).execute();
+      const byKey = new Map(batch.map((row) => [`${this.currency(row.fromCurrency)}:${this.currency(row.toCurrency)}:${row.date}`, row]));
+      const audits = result.map((inserted) => {
+        const row = byKey.get(`${String(inserted.from_currency_key)}:${String(inserted.to_currency_key)}:${new Date(inserted.date as Date | string).toISOString().slice(0, 10)}`)!;
+        pairs.set(`${row.fromCurrency}:${row.toCurrency}`, { fromCurrency: row.fromCurrency, toCurrency: row.toCurrency });
+        return {
+          action: ExchangeRateOverrideAuditAction.CREATED,
+          actor_appuser_key: this.target.appuserKey,
+          changes: JSON.stringify({ date: { from: null, to: row.date }, rate: { from: null, to: Number(row.rate) } }),
+          exchange_rate_override_key: inserted.exchange_rate_override_key,
+          tenant_key: this.target.tenantKey,
+          ...this.stamp(),
+        };
+      });
+      await insertRows(this.db, 'exchange_rate_override_audit_log', audits);
+      written += result.length;
+    }
+    this.count('exchange-rate-overrides', written);
+    return [...pairs.values()];
+  }
+
+  /** The member's saved entries, after any they already have. */
+  private async transactionTemplates(): Promise<void> {
+    const { rows } = await sql<{ top: null | number }>`
+      select max(position) as top from transaction_template where tenant_key = ${this.target.tenantKey} and owner_appuser_key = ${this.target.appuserKey} and deleted_at is null`.execute(this.db);
+    const top = rows[0]?.top;
+    const base = top === null || top === undefined ? 0 : top + 1;
+    const values = this.rows['transaction-templates'].map((row) => ({
+      account_key: this.accounts.get(row.accountId),
+      amount: row.amount,
+      category_key: this.categories.get(row.categoryId),
+      description: row.description,
+      direction: row.direction,
+      name: row.name,
+      notes: row.notes,
+      owner_appuser_key: this.target.appuserKey,
+      position: base + row.position,
+      tenant_key: this.target.tenantKey,
+      transaction_merchant_key: this.merchants.get(row.merchantId),
+      ...this.stamp(),
+    }));
+    await insertRows(this.db, 'transaction_template', values);
+    this.count('transaction-templates', values.length);
+  }
+
   private async watchlist(): Promise<void> {
     const values = [...new Set(this.rows.watchlist.map((row) => row.symbol))].map((symbol) => ({ appuser_key: this.target.appuserKey, symbol, tenant_key: this.target.tenantKey, ...this.stamp() }));
     let written = 0;
@@ -1116,10 +1488,15 @@ class HouseholdRestore {
   }
 }
 
+/** A UTC calendar day as `YYYY-MM-DD`, so a `date` column reads it the same in any time zone. */
 async function allocateKeys(db: Db, table: string, column: string, count: number): Promise<number[]> {
   if (count === 0) return [];
   const { rows } = await sql<{ k: number }>`select nextval(pg_get_serial_sequence(${table}, ${column}))::int as k from generate_series(1, ${count})`.execute(db);
   return rows.map((row) => row.k).sort((a, b) => a - b);
+}
+
+function calendarDay(date: Date | null): null | string {
+  return date ? date.toISOString().slice(0, 10) : null;
 }
 
 async function lookup(db: Db, query: ReturnType<typeof sql<{ k: number; name: string }>>): Promise<Map<string, number>> {

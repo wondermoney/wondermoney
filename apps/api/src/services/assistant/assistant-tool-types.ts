@@ -1,9 +1,6 @@
-export interface AssistantDataUsed {
-  granularity?: string;
-  period?: string;
-  recordCount?: number;
-  source: string;
-}
+import type { AiToolDataUsed, AiToolResult } from '@service/ai-tools/ai-tool-types';
+
+export type AssistantDataUsed = AiToolDataUsed;
 
 export interface AssistantToolContext {
   appuserKey: number;
@@ -13,8 +10,4 @@ export interface AssistantToolContext {
   currency: string;
   tenantKey: number;
 }
-
-export interface AssistantToolResult<TData> {
-  data: TData;
-  dataUsed: AssistantDataUsed;
-}
+export type AssistantToolResult<TData> = AiToolResult<TData>;

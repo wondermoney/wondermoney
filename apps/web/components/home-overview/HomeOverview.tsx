@@ -1,18 +1,32 @@
 "use client";
 
+import {
+  type DashboardSectionId,
+  mergeDashboardLayout,
+} from "@wondermoney/shared/dashboard-layout";
+import { SlidersHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Fragment, type ReactNode, useState } from "react";
+
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
 import { NetWorthViewedEvent } from "@/components/dashboard/NetWorthViewedEvent";
+import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
+import { Button } from "@/components/ui/button";
 import useAccounts, { type Account } from "@/lib/api/account/useAccounts";
 import useTransactions from "@/lib/api/account/useTransactions";
 import useBudgetsFull from "@/lib/api/budget/useBudgetsFull";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
+import useUserPreferences from "@/lib/api/user-preferences/useUserPreferences";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import { isValidFirstNetWorthState } from "@/lib/utils/analytics";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 import { BalanceSheetSection } from "./BalanceSheetSection";
 import { BankAlertsBanner } from "./BankAlertsBanner";
 import { CashflowSection } from "./CashflowSection";
+import { CustomizeHomeSheet } from "./CustomizeHomeSheet";
+import { InsightsSection } from "./InsightsSection";
 import { LatestTransactionsSection } from "./LatestTransactionsSection";
 import { LoansSection } from "./LoansSection";
 import { NetWorthHero } from "./NetWorthHero";
@@ -90,34 +104,66 @@ function HomeActivation() {
 
 /**
  * The home screen. Net worth leads, with its trend, because it is the one
- * figure that sums up the household; every budget's month follows as a
- * compact row each, then the balance sheet behind the figure, cash flow and
- * loans, and the latest transactions close the page.
+ * figure that sums up the household; the rest follow in the person's own order
+ * (see `CustomizeHomeSheet`), and a hidden section is not rendered at all.
+ *
+ * The activation checklist and the bank alerts are not sections: they appear
+ * when they have something to say and keep their own dismissal.
  */
 export function HomeOverview() {
   // The activation checklist reads the browser's query cache: render it once
   // hydrated.
   const hydrated = useHydrated();
+  const t = useTranslations("homeOverview.customize");
+  const preferences = useUserPreferences();
+  const [customizing, setCustomizing] = useState(false);
+  const layout = mergeDashboardLayout(preferences.data?.dashboardLayout);
+  // One member's (or Shared) home, from the URL's `member`. The budget month and loans stay the
+  // household's: their figures come from endpoints that do not take the filter.
+  const { filter: member } = useMemberFilter();
+
+  const sections: Record<
+    Exclude<DashboardSectionId, "net-worth">,
+    ReactNode
+  > = {
+    insights: <InsightsSection />,
+    "this-month": <ThisMonthSection />,
+    "balance-sheet": <BalanceSheetSection member={member} />,
+    cashflow: <CashflowSection member={member} />,
+    loans: <LoansSection />,
+    "latest-transactions": <LatestTransactionsSection member={member} />,
+  };
 
   return (
     <div className="flex flex-col gap-12 lg:gap-16">
       {hydrated ? <BankAlertsBanner /> : null}
 
-      <NetWorthHero />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-end gap-2">
+          <MemberFilterControl className="w-40 sm:w-44" />
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setCustomizing(true)}
+          >
+            <SlidersHorizontal className="size-4" />
+            {t("action")}
+          </Button>
+        </div>
+        <NetWorthHero member={member} />
+      </div>
 
       {hydrated ? <HomeActivation /> : null}
 
-      <ThisMonthSection />
+      {layout
+        .filter((entry) => entry.id !== "net-worth" && !entry.hidden)
+        .map((entry) => (
+          <Fragment key={entry.id}>
+            {sections[entry.id as Exclude<DashboardSectionId, "net-worth">]}
+          </Fragment>
+        ))}
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16">
-        <BalanceSheetSection />
-        <div className="flex min-w-0 flex-col gap-12 lg:gap-16">
-          <CashflowSection />
-          <LoansSection />
-        </div>
-      </div>
-
-      <LatestTransactionsSection />
+      <CustomizeHomeSheet open={customizing} onOpenChange={setCustomizing} />
     </div>
   );
 }

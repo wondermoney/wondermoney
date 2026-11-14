@@ -4,6 +4,40 @@ import { portfolioCsvLayoutSchema, portfolioImportDerivedValuesSchema, portfolio
 import { tickerSymbolSchema } from '@validators/financial-markets';
 import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
 
+/** A calendar day, `YYYY-MM-DD` (a real date: no 30 February). */
+const isoCalendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD').refine((value) => {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}, 'Date is not a calendar day');
+
+/**
+ * The day a manual price is for: no later than tomorrow in UTC, so a member ahead of UTC can
+ * still set today's price (the same bound as an exchange-rate override).
+ */
+const priceOverrideDay = isoCalendarDate.refine((value) => {
+  const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+  return value <= tomorrow;
+}, 'Date cannot be in the future');
+
+export const getAssetPriceOverrideRequestSchema = z.object({
+  params: z.object({ date: isoCalendarDate, financialAssetKey: positiveIntId }),
+});
+
+export const getAssetPriceHistoryRequestSchema = z.object({
+  params: z.object({ financialAssetKey: positiveIntId }),
+  query: z.object({ from: isoCalendarDate.optional(), to: isoCalendarDate.optional() }).strict(),
+});
+
+export const putAssetPriceOverrideRequestSchema = z.object({
+  body: z.object({
+    /** Must be the security's own currency; checked against the catalogue. */
+    currency: z.string().trim().regex(/^[a-z]{3}$/i, 'Currency must be a three-letter code').transform((value) => value.toUpperCase()),
+    note: z.string().trim().max(500).nullable().optional(),
+    price: z.number().positive('Price must be greater than zero').max(1_000_000_000_000),
+  }).strict(),
+  params: z.object({ date: priceOverrideDay, financialAssetKey: positiveIntId }),
+});
+
 const portfolioColumnMappingRequestSchema = z.object({
   assetName: z.string().min(1).optional(),
   brokerExchange: z.string().min(1).optional(),
@@ -55,9 +89,14 @@ const assetMappingDecisionSchema = z.discriminatedUnion('action', [
 ]);
 
 
+/** The as-of day of a positions file: a day that has happened (tomorrow in UTC is still today east of it). */
+const positionsAsOfDay = priceOverrideDay;
+
 export const createPortfolioImportSessionRequestSchema = z.object({
   body: z.object({
     brokerId: positiveIntId.optional(),
+    /** `trades` (the default) is a trade history; `positions` is what is held today, one opening buy per row. */
+    importType: z.enum(['positions', 'trades']).default('trades'),
     mode: z.literal('review'),
   }).strict(),
   params: z.object({
@@ -92,6 +131,8 @@ export const suggestPortfolioImportColumnMappingRequestSchema = z.object({
 
 export const confirmPortfolioImportColumnMappingRequestSchema = z.object({
   body: z.object({
+    /** Positions files only: the day a row without an acquisition date is bought on. */
+    asOfDate: positionsAsOfDay.optional(),
     columnMapping: portfolioColumnMappingRequestSchema,
     derivedValues: portfolioImportDerivedValuesSchema.default({}),
     fixedValues: portfolioImportFixedValuesSchema.default({}),
@@ -104,6 +145,14 @@ export const confirmPortfolioImportColumnMappingRequestSchema = z.object({
 });
 
 export const confirmPortfolioImportSessionRequestSchema = z.object({
+  params: z.object({ importSessionId: positiveIntId }),
+});
+
+/** Positions files: include or skip rows whose asset already has trades in the portfolio. */
+export const updatePortfolioImportRowInclusionRequestSchema = z.object({
+  body: z.object({
+    rows: z.array(z.object({ include: z.boolean(), rowId: positiveIntId }).strict()).min(1).max(500),
+  }).strict(),
   params: z.object({ importSessionId: positiveIntId }),
 });
 
@@ -136,6 +185,7 @@ export const updatePortfolioRequestSchema = z.object({
   body: z.object({
     accountLink: portfolioAccountLinkSchema.optional(),
     benchmarkSymbol: z.string().max(20).optional(),
+    costBasisMethod: z.enum(['FIFO', 'AVERAGE']).optional(),
     currencyId: positiveIntId.optional(),
     description: z.string().max(500).nullable().optional(),
     excluded: z.boolean().optional(),
@@ -182,6 +232,21 @@ export const getPortfolioTransactionRequestSchema = z.object({
 
 export const getPortfolioHoldingsRequestSchema = z.object({
   params: z.object({
+    portfolioId: positiveIntId,
+  }),
+});
+
+/** Realized gains: one portfolio or all of the household's, one UTC calendar year or every year. */
+export const getRealizedGainsRequestSchema = z.object({
+  query: z.object({
+    portfolioId: positiveIntId.optional(),
+    year: z.string().regex(/^\d{4}$/, 'Year must be YYYY').transform(Number).optional(),
+  }),
+});
+
+export const getPortfolioHoldingLotsRequestSchema = z.object({
+  params: z.object({
+    financialAssetKey: positiveIntId,
     portfolioId: positiveIntId,
   }),
 });
@@ -247,8 +312,20 @@ export const getPortfoliosMetricsRequestSchema = z.object({
 });
 
 const periodSchema = z.enum(['1M', '3M', '6M', 'YTD', '1Y', 'ALL']).default('YTD');
-// Opt-in summary additions; see DashboardOptions in portfolio-dashboard.service.ts.
-const dashboardIncludeSchema = z.enum(['feeConversion']).optional();
+// Opt-in summary additions; see DashboardOptions in portfolio-dashboard.service.ts. One or more,
+// comma-separated: `include=feeConversion,periodReturns`.
+const DASHBOARD_INCLUDES = ['feeConversion', 'periodReturns'] as const;
+const dashboardIncludeSchema = z
+  .string()
+  .regex(new RegExp(`^(${DASHBOARD_INCLUDES.join('|')})(,(${DASHBOARD_INCLUDES.join('|')}))*$`))
+  .optional()
+  .describe('Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`.');
+
+/** The dashboard options an `include` query value asks for. */
+export function dashboardOptionsFrom(include: string | undefined): { includeFeeConversion: boolean; includePeriodReturns: boolean } {
+  const parts = new Set(include?.split(',') ?? []);
+  return { includeFeeConversion: parts.has('feeConversion'), includePeriodReturns: parts.has('periodReturns') };
+}
 
 export const getAggregateDashboardRequestSchema = z.object({
   query: z.object({

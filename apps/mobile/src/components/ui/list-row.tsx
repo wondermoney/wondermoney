@@ -22,6 +22,8 @@ export type ListRowProps = {
   /** Any extra content under the meta lines (a progress bar, a review note). */
   children?: React.ReactNode
   onPress?: () => void
+  /** A pressable row that picks one of a list (a statement): tinted and announced as selected. */
+  selected?: boolean
   /**
    * Web's row actions menu: a trailing "…" (32pt, 44pt to the finger). The
    * row's own press still opens the row; this opens the menu.
@@ -57,6 +59,7 @@ export function ListRow({
   leading,
   children,
   onPress,
+  selected,
   onMorePress,
   moreAccessibilityLabel,
   separated = false,
@@ -106,7 +109,7 @@ export function ListRow({
         styles.row,
         separated && { borderTopWidth: 1, borderTopColor: palette.border },
         style,
-        pressed && { backgroundColor: palette.muted },
+        (pressed || selected) && { backgroundColor: palette.muted },
       ]}
     >
       {leading ? <View style={styles.leading}>{leading}</View> : null}
@@ -114,6 +117,7 @@ export function ListRow({
         <Pressable
           accessibilityLabel={accessibilityLabel ?? title}
           accessibilityRole="button"
+          accessibilityState={selected === undefined ? undefined : { selected }}
           onPress={onPress}
           onPressIn={() => setPressed(true)}
           onPressOut={() => setPressed(false)}

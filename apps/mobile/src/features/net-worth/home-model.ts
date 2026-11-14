@@ -99,7 +99,7 @@ export type BalanceSheetType = 'accounts' | 'portfolios' | 'manualAssets' | 'loa
  * `id` is the account, portfolio or loan key when the API sends it, so the row can wear its record's mark.
  * `countedInAccountId` marks a portfolio already inside that account's balance: listed, never added.
  */
-export type BalanceSheetRow = Readonly<{ key: string; label: string; amount: number; id?: number; countedInAccountId?: number }>
+export type BalanceSheetRow = Readonly<{ key: string; label: string; amount: number; id?: number; countedInAccountId?: number; sharePercent?: number }>
 
 const totalOf = (rows: readonly BalanceSheetRow[]) => rows.filter((row) => row.countedInAccountId === undefined).reduce((sum, row) => sum + row.amount, 0)
 export type BalanceSheetGroup = Readonly<{ type: BalanceSheetType; rows: readonly BalanceSheetRow[]; total: number }>
@@ -116,12 +116,13 @@ const GROUP_ORDER: readonly BalanceSheetType[] = ['accounts', 'portfolios', 'man
 
 function groupRows(rows: readonly (BalanceSheetRow & { type: BalanceSheetType })[]): BalanceSheetGroup[] {
   return GROUP_ORDER.flatMap((type) => {
-    const members = rows.filter((row) => row.type === type).map(({ key, label, amount, id, countedInAccountId }) => ({
+    const members = rows.filter((row) => row.type === type).map(({ key, label, amount, id, countedInAccountId, sharePercent }) => ({
       key,
       label,
       amount,
       ...(id === undefined ? {} : { id }),
       ...(countedInAccountId === undefined ? {} : { countedInAccountId }),
+      ...(sharePercent === undefined ? {} : { sharePercent }),
     }))
     if (members.length === 0) return []
     return [{ type, rows: members, total: totalOf(members) }]
@@ -140,6 +141,7 @@ export function balanceSheet(rows: readonly NetWorthRowDto[] | null | undefined)
     amount: row.balance,
     id: row.id,
     countedInAccountId: row.countedInAccountId,
+    sharePercent: row.sharePercent,
     isLiability: row.type === 'loans' || row.balance < 0,
   }))
   const owned = keyed.filter((row) => !row.isLiability)
@@ -208,6 +210,13 @@ export function daysLeftInMonth(today: Date): number {
 
 export type CashflowBar = Readonly<{ date: string; amount: number; width: number }>
 export type CashflowScale = Readonly<{ zero: number; bars: readonly CashflowBar[] }>
+export type CashflowView = CashflowScale & Readonly<{ summary?: SavingsSummary | null }>
+
+/** The API dates each row at the first of its UTC month; read it back in UTC. */
+export function isCurrentCashflowMonth(iso: string, today: Date): boolean {
+  const date = new Date(iso)
+  return date.getUTCFullYear() === today.getFullYear() && date.getUTCMonth() === today.getMonth()
+}
 
 /** Monthly net cash flow as bars diverging from one zero line, oldest month first. */
 export function cashflowScale(points: readonly CashflowDto[] | null | undefined): CashflowScale {
@@ -228,6 +237,116 @@ export function cashflowScale(points: readonly CashflowDto[] | null | undefined)
 /** The first of the month `count - 1` months before today: the window the cash-flow list shows. */
 export function cashflowFromDate(today: Date, count: number): Date {
   return new Date(today.getFullYear(), today.getMonth() - (count - 1), 1)
+}
+
+// ── Savings rate and the comparison period ────────────────────────────────
+
+export type MonthTotals = Readonly<{
+  income: number
+  expenses: number
+  savingsRate: number | null
+}>
+
+/**
+ * A cash-flow row as month totals. Older APIs send only the net, so a row
+ * without income and expenses has no summary rather than a fake zero.
+ */
+export function monthTotalsOf(row: CashflowDto | null | undefined): MonthTotals | null {
+  if (!row || !isFiniteNumber(row.income) || !isFiniteNumber(row.expenses)) return null
+  return {
+    income: row.income,
+    expenses: row.expenses,
+    savingsRate: isFiniteNumber(row.savingsRate) ? row.savingsRate : null,
+  }
+}
+
+export type MonthComparisonRange = Readonly<{
+  /** First day of the previous month, local. */
+  from: Date
+  /** End of the comparison day, local. */
+  to: Date
+  /** The previous month's first day, for the label. */
+  month: Date
+  /** True when the range ends on the same day of the month, not the month's end. */
+  samePoint: boolean
+}>
+
+/**
+ * The period to compare this month against. While the month is still running,
+ * a full previous month would compare a part with a whole, so the range ends
+ * on the same day of the previous month (clamped to its length). On the last
+ * day it is the whole previous month. Web's `monthComparisonRange`.
+ */
+export function monthComparisonRange(today: Date): MonthComparisonRange {
+  const month = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const daysInPreviousMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate()
+  const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const samePoint = today.getDate() < daysInCurrentMonth
+  const day = samePoint ? Math.min(today.getDate(), daysInPreviousMonth) : daysInPreviousMonth
+  return {
+    from: month,
+    month,
+    samePoint,
+    to: new Date(today.getFullYear(), today.getMonth() - 1, day, 23, 59, 59, 999),
+  }
+}
+
+export type SavingsSummary = Readonly<{
+  income: number
+  spending: number
+  savingsRate: number | null
+  comparison: (MonthTotals & Readonly<{ month: Date; samePoint: boolean }>) | null
+  incomeDelta: number | null
+  spendingDelta: number | null
+  /** Percentage points, e.g. 3 for +3 pts. */
+  savingsRateDelta: number | null
+}>
+
+/** This month's figures beside the comparison period's, with no delta where it has no data. */
+export function savingsSummary(
+  current: MonthTotals | null | undefined,
+  previous: MonthTotals | null | undefined,
+  range: MonthComparisonRange,
+): SavingsSummary | null {
+  if (!current) return null
+  const currentRate = isFiniteNumber(current.savingsRate) ? current.savingsRate : null
+  const previousRate = previous && isFiniteNumber(previous.savingsRate) ? previous.savingsRate : null
+  return {
+    income: current.income,
+    spending: current.expenses,
+    savingsRate: currentRate,
+    comparison: previous ? { ...previous, month: range.month, samePoint: range.samePoint } : null,
+    incomeDelta: previous ? current.income - previous.income : null,
+    spendingDelta: previous ? current.expenses - previous.expenses : null,
+    savingsRateDelta:
+      previous && currentRate !== null && previousRate !== null
+        ? (currentRate - previousRate) * 100
+        : null,
+  }
+}
+
+/** A signed number of percentage points, without the percent sign Intl adds. */
+export function formatPercentagePoints(points: number, locale: string): string {
+  const magnitude = Math.abs(points)
+  let formatted: string
+  try {
+    formatted = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(magnitude)
+  } catch {
+    formatted = magnitude.toFixed(1)
+  }
+  // Written here rather than with `signDisplay`, which Hermes does not
+  // implement on every runtime the app supports.
+  return points > 0 ? `+${formatted}` : points < 0 ? `-${formatted}` : formatted
+}
+
+/** A savings rate as a whole percentage, or the em dash when there is no rate. */
+export function formatSavingsRate(rate: number | null, locale: string): string {
+  if (rate === null) return '—'
+  try {
+    return new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(rate)
+  } catch {
+    return `${Math.round(rate * 100)}%`
+  }
 }
 
 // ── Loans ──────────────────────────────────────────────────────────────────

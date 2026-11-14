@@ -5,6 +5,7 @@ import { mockRes } from '@app/__tests__/__helpers__/mock-request';
 const mocked = vi.hoisted(() => ({
   auditLog: vi.fn(),
   convertToModelMessages: vi.fn(),
+  createAnthropic: vi.fn(),
   createAzure: vi.fn(),
   createOpenAI: vi.fn(),
   pipeUIMessageStreamToResponse: vi.fn(),
@@ -15,6 +16,10 @@ const mocked = vi.hoisted(() => ({
 
 vi.mock('@app/app', () => ({
   DI: { em: { flush: vi.fn().mockResolvedValue(undefined), getReference: vi.fn(), persist: vi.fn().mockReturnThis() } },
+}));
+
+vi.mock('@ai-sdk/anthropic', () => ({
+  createAnthropic: mocked.createAnthropic,
 }));
 
 vi.mock('@ai-sdk/azure', () => ({
@@ -66,6 +71,8 @@ describe('AssistantService', () => {
     delete process.env['AI_BASE_URL'];
     delete process.env['AI_MODEL'];
     delete process.env['AI_MODEL_ASSISTANT'];
+    delete process.env['AI_PROVIDER'];
+    delete process.env['ANTHROPIC_API_KEY'];
   });
 
   it('rejects when consent is null before model call', async () => {
@@ -298,6 +305,35 @@ describe('AssistantService', () => {
       instructions: buildAssistantInstructions({ currency: 'EUR', locale: 'pt' }),
       model: { model: 'compatible-model' },
     }));
+  });
+
+  it('streams chat from Anthropic when AI_PROVIDER names it', async () => {
+    process.env['AI_PROVIDER'] = 'anthropic';
+    process.env['ANTHROPIC_API_KEY'] = 'sk-ant-test';
+    process.env['AI_MODEL_ASSISTANT'] = 'claude-sonnet-4-5';
+    const provider = vi.fn(() => ({ model: 'anthropic-model' }));
+    mocked.createAnthropic.mockReturnValue(provider);
+    mocked.convertToModelMessages.mockResolvedValueOnce([{ content: 'Hello', role: 'user' }]);
+    mocked.tools.mockReturnValue({});
+    mocked.streamText.mockReturnValue({ stream: 'model-stream' });
+
+    await AssistantService.streamChat({
+      appuserKey: 11,
+      consent: { assistantEnabled: true, consentVersion: 7 },
+      conversationId: 'conversation-1',
+      currency: 'EUR',
+      locale: 'pt',
+      messages: [{ content: 'Hello', role: 'user' }],
+      req: {},
+      res: mockRes(),
+      tenantKey: 22,
+    });
+
+    expect(mocked.createAzure).not.toHaveBeenCalled();
+    expect(mocked.createOpenAI).not.toHaveBeenCalled();
+    expect(mocked.createAnthropic).toHaveBeenCalledWith({ apiKey: 'sk-ant-test' });
+    expect(provider).toHaveBeenCalledWith('claude-sonnet-4-5');
+    expect(mocked.streamText).toHaveBeenCalledWith(expect.objectContaining({ model: { model: 'anthropic-model' } }));
   });
 
   it('logs response completion with safe metadata', async () => {

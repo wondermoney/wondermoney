@@ -9,6 +9,7 @@ import { Tag } from '@entity/Tag';
 import { Tenant } from '@entity/Tenant';
 import { TransactionMerchant } from '@entity/TransactionMerchant';
 import { TransactionType } from '@entity/TransactionType';
+import { visibleAccountWhere } from '@service/account/account-access';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError, ConflictError, ERROR_CODE, NotFoundError } from '@utils/errors';
@@ -27,7 +28,7 @@ import { RULE_DEFINITION_VERSION, type RuleAction, type RuleCondition, type Rule
  */
 
 /** Bounds the rules evaluated per transaction. */
-const MAX_RULES_PER_HOUSEHOLD = 200;
+export const MAX_RULES_PER_HOUSEHOLD = 200;
 const CREATE_ATTEMPTS = 3;
 
 export interface Actor {
@@ -220,7 +221,7 @@ export async function assertReferencesVisible(em: EntityManager, actor: Actor, c
 /** Accounts of the household that are shared or the actor's own: the `Account` filter's rule, stated explicitly. */
 async function accountsVisible(em: EntityManager, actor: Actor, accountKeys: number[]): Promise<boolean> {
   const found = await em.count(Account, {
-    $or: [{ isPrivate: false }, { accountOwnerAppuserKey: getRef(em, Appuser, actor.appuserKey) }],
+    ...visibleAccountWhere(actor.appuserKey),
     accountKey: { $in: accountKeys },
     deletedAt: null,
     tenantKey: getRef(em, Tenant, actor.tenantKey),

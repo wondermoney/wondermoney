@@ -73,6 +73,15 @@ describe('Amount', () => {
     expect(label(down)).toContain('-')
   })
 
+  it('can take a delta’s direction from another value, as spending does', async () => {
+    // Spending fell by €42: the figure is negative, but that is good news.
+    const downButGood = await render(<Amount currency="EUR" delta locale="en" toneValue={42} value={-42} />)
+
+    const color = StyleSheet.flatten(downButGood.getByLabelText(/-€42[.,]00/).props.style).color
+    expect(color).toBe(palette.successText)
+    expect(downButGood.getByLabelText(/-€42[.,]00/)).toBeTruthy()
+  })
+
   it('formats like the rest of the app on a runtime without formatToParts or signDisplay (Hermes)', async () => {
     const original = Intl.NumberFormat
     const prototype = original.prototype

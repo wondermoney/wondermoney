@@ -1,9 +1,14 @@
 import { z } from 'zod'
 
+import { parseRuleSuggestion } from '@/features/rules/rules-contract'
+import { transactionRowMerchantSchema } from '@/features/merchants/merchant-contract'
+import { SHARED_MEMBER, transactionAttributionSchema, type SpentByValue } from '@/features/household/member-attribution'
 import { tagSchema } from '@/features/tags/tags-contract'
 import { fxRateDateSchema, fxStatusSchema } from '@/lib/api/fx-status'
 import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 import { deviceTimeZone } from '@/lib/dates/transaction-date'
+
+import { reimbursementLinkSchema } from './reimbursements-contract'
 
 const money = z.number().finite()
 const currency = z.object({ code: z.string().regex(/^[A-Z]{3}$/) })
@@ -30,6 +35,34 @@ const transferDestination = z.object({
   name: z.string().max(1000).nullish(),
 })
 
+/**
+ * One line of a split transaction, as the list and the split endpoints return it. A split shares
+ * one transaction's amount over several categories; the lines always add up to that amount, each
+ * with its sign. A row that is not split has no lines.
+ */
+const transactionSplitLine = z.object({
+  transactionSplitKey: positiveId,
+  /** In the transaction's settlement (account) currency, signed. */
+  amount: money,
+  /** The line's share in the owner's currency; null when the transaction has no converted amount. */
+  appuserAmount: money.nullable().optional(),
+  /** Null for an uncategorized line. */
+  category: category.nullable().optional(),
+  notes: z.string().max(500).nullable().optional(),
+  position: z.number().int().nonnegative(),
+  /**
+   * The person whose share this line is, when the transaction is shared in an expense group
+   * (#98); such a split is the group's, and the split endpoints refuse it. Optional: an older
+   * server omits it. A malformed value reads as none rather than failing the ledger.
+   */
+  expenseGroupMember: z.object({
+    expenseGroupKey: positiveId,
+    expenseGroupMemberKey: positiveId,
+    isHouseholdMember: z.boolean(),
+    name: z.string().max(255),
+  }).nullable().optional().catch(null),
+})
+
 const recurringSeries = z.object({
   recurringSeriesKey: positiveId,
   displayName: z.string().min(1).max(255),
@@ -39,6 +72,17 @@ const recurringSeries = z.object({
   amountType: tolerantEnum(['fixed', 'variable'], 'unknown'),
   status: tolerantEnum(['candidate', 'confirmed', 'dismissed', 'ended', 'paused'], 'unknown'),
 })
+
+/**
+ * The installment a posted row was linked to ("3/12"). Optional: a server from before installment
+ * plans omits it, and the row reads as an ordinary one. A malformed value reads as none.
+ */
+const transactionInstallment = z.object({
+  installmentPlanKey: positiveId,
+  installmentNumber: positiveId,
+  installmentCount: positiveId,
+})
+export type TransactionInstallmentDto = z.infer<typeof transactionInstallment>
 
 const transactionBaseShape = {
   transactionKey: transactionId,
@@ -62,16 +106,29 @@ const transactionBaseShape = {
   // How `appuserSettlementAmount` was converted; optional, an older API doesn't send them.
   fxStatus: fxStatusSchema,
   fxRateDate: fxRateDateSchema,
-  transactionMerchantKey: z.object({ name: z.string().min(1).max(200) }).nullable().optional(),
+  // The merchant with its logo fields (MerchantDto); a server from before logos sends only `{ name }`.
+  transactionMerchantKey: transactionRowMerchantSchema.nullable().optional(),
   reviewed: z.boolean(),
   hidden: z.boolean().optional(),
+  // The bank sent the row, so it can be hidden but not deleted. Optional: an older API omits it.
+  bankSynced: z.boolean().optional(),
   appuserTransactionCategories: z.array(category),
   // Optional: a server from before tags omits the field, and the row reads as untagged.
   tags: z.array(tagSchema).optional(),
+  // Optional: a server from before splits omits the field, and the row reads as unsplit.
+  splits: z.array(transactionSplitLine).optional(),
   recurringSeries: recurringSeries.nullable(),
   // Optional: a server from before transfer destinations omits it. A destination of a type this
   // build does not know reads as none rather than failing the list.
   transferDestination: transferDestination.nullable().optional().catch(null),
+  installment: transactionInstallment.nullable().optional().catch(null),
+  // Reimbursement links (refund to expense), only those whose other side the reader can see.
+  // Optional: a server from before them omits the field, and the row reads as unlinked. A
+  // malformed list reads as none rather than failing the whole ledger.
+  reimbursements: z.array(reimbursementLinkSchema).optional().catch([]),
+  // Who the money is attributed to ("Spent by"). Optional: an older API omits it, and a malformed
+  // value reads as none rather than failing the ledger.
+  attribution: transactionAttributionSchema.nullable().optional().catch(null),
 } as const
 
 const accountTransactionSchema = z.object(transactionBaseShape)
@@ -107,6 +164,18 @@ export const accountTransactionsResponseSchema = z.object({
   ...pageFacts,
 })
 
+/**
+ * The home's review status: how many transactions await review and what their
+ * absolute amounts add up to in the reader's base currency. `count` is the
+ * list's `total` for `unreviewedOnly=true`; the API computes both from one query.
+ */
+export const transactionReviewSummarySchema = z.object({
+  count: z.number().int().nonnegative(),
+  totalAbs: money,
+  currency: z.string().regex(/^[A-Z]{3}$/),
+})
+export type TransactionReviewSummaryDto = z.infer<typeof transactionReviewSummarySchema>
+
 export type TransactionFilters = Readonly<{
   fromDate?: string
   toDate?: string
@@ -114,6 +183,18 @@ export type TransactionFilters = Readonly<{
   includeHidden?: boolean
   /** Tag keys; the server returns rows carrying any of them. */
   tagIds?: readonly number[]
+  /** Category keys; the server returns rows assigned to any of them. */
+  categoryIds?: readonly number[]
+  /** Money in or money out only. */
+  direction?: 'in' | 'out'
+  /** Leave out transfers between the household's own accounts. */
+  excludeTransfers?: boolean
+  /** Leave out rows wholly in categories that are not spending. */
+  excludeNonSpending?: boolean
+  /** The statuses that count; omitted leaves the API's default. */
+  statuses?: readonly ('BOOKED' | 'PENDING')[]
+  /** Members' appuser keys or `shared`: only the rows attributed to them (the member filter). */
+  memberKeys?: readonly (number | typeof SHARED_MEMBER)[]
   limit?: 100 | 500
 }>
 export type TransactionDto = z.infer<typeof aggregateTransactionSchema>
@@ -122,14 +203,30 @@ export type TransactionDto = z.infer<typeof aggregateTransactionSchema>
  * The query for `filters`. A date range goes with the device's time zone (`timeZone`), so the API
  * counts a bank booking (a date with no time) on the calendar day the range was picked in.
  */
+/**
+ * The list's server filters as the API names them, without paging: the query of the list, and the
+ * `filter` a bulk change or delete takes for "every matching row". Unset filters are left out
+ * (the API refuses a key it does not know, so nothing extra is sent).
+ */
+export const transactionFilterParams = (filters: TransactionFilters, timeZone: string | undefined = deviceTimeZone()): Record<string, string> => {
+  const values: Record<string, string> = {}
+  if (filters.fromDate) values.fromDate = String(Date.parse(filters.fromDate))
+  if (filters.toDate) values.toDate = String(Date.parse(filters.toDate))
+  if ((filters.fromDate || filters.toDate) && timeZone) values.timezone = timeZone
+  if (filters.needsReview) values.unreviewedOnly = 'true'
+  if (filters.includeHidden) values.includeHidden = 'true'
+  if (filters.tagIds && filters.tagIds.length > 0) values.tagKeys = filters.tagIds.join(',')
+  if (filters.categoryIds && filters.categoryIds.length > 0) values.categoryKeys = filters.categoryIds.join(',')
+  if (filters.direction) values.direction = filters.direction
+  if (filters.excludeTransfers) values.excludeTransfers = 'true'
+  if (filters.excludeNonSpending) values.excludeNonSpending = 'true'
+  if (filters.statuses && filters.statuses.length > 0) values.statuses = filters.statuses.join(',')
+  if (filters.memberKeys && filters.memberKeys.length > 0) values.memberKeys = filters.memberKeys.join(',')
+  return values
+}
+
 const encodeFilters = (filters: TransactionFilters, timeZone: string | undefined): string => {
-  const values: string[] = []
-  if (filters.fromDate) values.push(`fromDate=${encodeURIComponent(String(Date.parse(filters.fromDate)))}`)
-  if (filters.toDate) values.push(`toDate=${encodeURIComponent(String(Date.parse(filters.toDate)))}`)
-  if ((filters.fromDate || filters.toDate) && timeZone) values.push(`timezone=${encodeURIComponent(timeZone)}`)
-  if (filters.needsReview) values.push('unreviewedOnly=true')
-  if (filters.includeHidden) values.push('includeHidden=true')
-  if (filters.tagIds && filters.tagIds.length > 0) values.push(`tagKeys=${encodeURIComponent(filters.tagIds.join(','))}`)
+  const values = Object.entries(transactionFilterParams(filters, timeZone)).map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
   if (filters.limit) values.push(`limit=${filters.limit}`)
   return values.length ? `?${values.join('&')}` : ''
 }
@@ -153,11 +250,46 @@ export function createAccountTransactionsEndpoint(accountId: number, filters: Tr
   })
 }
 
+export const transactionReviewSummaryEndpoint = readEndpoint({
+  method: 'GET',
+  path: '/v1/account/transaction/review-summary',
+  schema: transactionReviewSummarySchema,
+})
+
+/**
+ * The bulk update answers `{ ruleSuggestion }`: a rule to offer after a recategorization that
+ * repeats a pattern, or null. Anything else (an older API's empty body) reads as no suggestion.
+ */
 export const updateTransactionsEndpoint = writeEndpoint({
   method: 'PATCH',
   path: '/v1/account/transaction',
-  schema: z.unknown(),
+  schema: z.unknown().transform((body) => ({ ruleSuggestion: parseRuleSuggestion(body) })),
 })
+
+/** The API's cap on one bulk change or delete, by ids or by filter. */
+export const BULK_TRANSACTION_LIMIT = 5000
+
+/**
+ * What a bulk delete did. Rows the bank sent are never deleted (the next sync would send them
+ * again); they come back as skipped, with their ids, so the app can offer to hide them.
+ */
+export const deleteTransactionsResponseSchema = z.object({
+  deletedTransactionIds: z.array(positiveId),
+  skipped: z.array(z.object({ reason: z.string(), transactionIds: z.array(positiveId) })),
+})
+export type DeleteTransactionsResult = z.infer<typeof deleteTransactionsResponseSchema>
+
+export const deleteTransactionsEndpoint = writeEndpoint({
+  method: 'DELETE',
+  path: '/v1/account/transaction',
+  schema: deleteTransactionsResponseSchema,
+})
+
+/** One row: 204, or 409 for a row the bank sent. */
+export function createDeleteTransactionEndpoint(transactionId: number) {
+  if (!Number.isSafeInteger(transactionId) || transactionId <= 0) throw new Error('A positive safe transaction id is required.')
+  return writeEndpoint({ method: 'DELETE', path: `/v1/account/transaction/${transactionId}`, schema: z.undefined(), successStatuses: [204] })
+}
 
 export type EditTransactionAmountDraft = Readonly<{ transactionId: number; updatedAmount: string; description?: string }>
 export type FrozenEditTransactionAmount = Readonly<{
@@ -188,6 +320,20 @@ export function createEditTransactionAmountEndpoint(transactionId: number) {
     method: 'PATCH',
     path: `/v1/account/transaction/${positiveId.parse(transactionId)}`,
     schema: z.unknown(),
+  })
+}
+
+/** "Spent by": a member, Shared, or `null` to follow the account again. */
+export type SpentByDraft = Readonly<{ transactionId: number; attributedAppuserKey: SpentByValue }>
+export type FrozenSpentBy = Readonly<{ transactionId: number; payload: Readonly<{ attributedAppuserKey: SpentByValue }> }>
+
+const spentByValue = z.union([z.literal(SHARED_MEMBER), positiveId]).nullable()
+
+/** The exact `PATCH /v1/account/transaction/:id` body that sets (or clears) "Spent by". */
+export function freezeSpentBy(draft: SpentByDraft): FrozenSpentBy {
+  return Object.freeze({
+    transactionId: positiveId.parse(draft.transactionId),
+    payload: Object.freeze({ attributedAppuserKey: spentByValue.parse(draft.attributedAppuserKey) }),
   })
 }
 
@@ -227,5 +373,87 @@ export function freezeTransferEdit(draft: TransferEditDraft): FrozenTransferEdit
   return Object.freeze({
     transactionId,
     payload: Object.freeze(destination === undefined || !draft.transfer || !outgoing ? { transactionType } : { transactionType, transferDestination: destination }),
+  })
+}
+
+/** One line of a split transaction, as the list and the split endpoints return it. */
+export type TransactionSplitLineDto = z.infer<typeof transactionSplitLine>
+
+/** One line of a `PUT .../splits` request. */
+export type TransactionSplitLineRequest = Readonly<{
+  /** Null for an uncategorized line. */
+  categoryId: number | null
+  /** A dot decimal in the settlement currency, with the transaction's sign ("-12.5"). */
+  amount: string
+  notes: string | null
+}>
+
+export type SetTransactionSplitsDraft = Readonly<{
+  transactionId: number
+  lines: readonly TransactionSplitLineRequest[]
+}>
+export type FrozenSetTransactionSplits = Readonly<{
+  transactionId: number
+  payload: readonly TransactionSplitLineRequest[]
+}>
+
+/** The API stores line amounts with four decimals and takes at most this many lines. */
+const SPLIT_LINE_AMOUNT = /^-?(?:\d+(?:\.\d{1,4})?|\.\d{1,4})$/
+export const MAX_SPLIT_LINES = 50
+
+const splitLineRequest = z.object({
+  categoryId: positiveId.nullable(),
+  amount: z.string().trim().regex(SPLIT_LINE_AMOUNT),
+  notes: z.string().trim().max(500).nullable(),
+}).strict()
+
+/**
+ * Resolves the editor's lines into the exact `PUT .../splits` body. The API checks the rules that
+ * need the transaction (at least two lines, the signs, the sum); this only guarantees the shape.
+ */
+export function freezeSetTransactionSplits(draft: SetTransactionSplitsDraft): FrozenSetTransactionSplits {
+  const transactionId = positiveId.parse(draft.transactionId)
+  if (draft.lines.length < 2) throw new Error('A split needs at least two lines.')
+  if (draft.lines.length > MAX_SPLIT_LINES) throw new Error(`A split takes at most ${MAX_SPLIT_LINES} lines.`)
+  const lines = draft.lines.map((line) => {
+    const parsed = splitLineRequest.parse({
+      categoryId: line.categoryId,
+      amount: line.amount,
+      notes: line.notes === null ? null : line.notes.trim() === '' ? null : line.notes,
+    })
+    return Object.freeze({
+      categoryId: parsed.categoryId,
+      amount: parsed.amount,
+      notes: parsed.notes,
+    })
+  })
+  return Object.freeze({ transactionId, payload: Object.freeze(lines) })
+}
+
+/** `PUT /v1/account/transaction/:id/splits`: replace every line of the transaction's split. */
+export function createSetTransactionSplitsEndpoint(transactionId: number) {
+  return writeEndpoint({
+    method: 'PUT',
+    path: `/v1/account/transaction/${positiveId.parse(transactionId)}/splits`,
+    schema: z.object({
+      transaction: z.object({
+        transactionKey: z.number().int(),
+        splits: z.array(transactionSplitLine),
+      }).passthrough(),
+    }),
+  })
+}
+
+/** `DELETE /v1/account/transaction/:id/splits`: remove the split, keeping the largest line's category. */
+export function createRemoveTransactionSplitsEndpoint(transactionId: number) {
+  return writeEndpoint({
+    method: 'DELETE',
+    path: `/v1/account/transaction/${positiveId.parse(transactionId)}/splits`,
+    schema: z.object({
+      transaction: z.object({
+        transactionKey: z.number().int(),
+        splits: z.array(transactionSplitLine),
+      }).passthrough(),
+    }),
   })
 }

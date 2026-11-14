@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
@@ -15,11 +16,14 @@ import { usePalette } from '@/theme/use-palette'
 import { FeedbackDialog } from './feedback-dialog'
 import { SettingsGroup, SettingsNavRow } from './settings-ui'
 import type { AppDisplayInfo, FeedbackCategory } from './link-policy'
+import { formatBuild, formatVersionInfo } from './version-info'
 
 type MoreAction = 'privacy' | 'terms' | 'support' | 'help' | 'whatsNew'
 
 export type MoreScreenProps = {
   appInfo: AppDisplayInfo | null
+  /** The connected server's build (`GET /v1/instance`); null while it loads or on an older server. */
+  serverInfo?: { commit: string | null; version: string | null } | null
   email?: string | null
   onOpenHelp: () => Promise<void>
   /**
@@ -37,23 +41,31 @@ export type MoreScreenProps = {
   onOpenSettings: () => void
   onOpenMarkets: () => void
   onOpenLoans: () => void
+  /** Expense groups: shared costs, balances and settlements. */
+  onOpenGroups: () => void
   onOpenAssets: () => void
   onOpenGoals: () => void
   onOpenReports: () => void
+  /**
+   * Changes the assistant or an MCP client proposed, waiting for the person. Left out when AI
+   * is hidden or the server has no proposals, and the row is not shown.
+   */
+  pendingChanges?: { count: number; onOpen: () => void }
   onLogout: () => void | Promise<void>
   onSubmitFeedback?: (input: { category: FeedbackCategory; message: string }) => Promise<void>
 }
 
 /**
  * Web's mobile "More" sheet (`components/layout/BottomNavMoreSheet.tsx`) as a settings
- * list: the person, the Accounts pages, the other destinations (Financial Markets, Loans, Assets,
- * Goals, Reports), then Settings / Help / Feedback / What's new. Each group is one subtle
+ * list: the person, the Accounts pages, the other destinations (Financial Markets, Loans, Groups,
+ * Assets, Goals, Reports), then Settings / Help / Feedback / What's new. Each group is one subtle
  * rounded container of 56pt rows (glyph, label, chevron), with space between groups. The
  * hosted instance's legal pages and support inbox are mobile-only and sit last, above
  * sign out and the version.
  */
 export function MoreScreen({
   appInfo,
+  serverInfo,
   email,
   onOpenHelp,
   onOpenWhatsNew,
@@ -66,9 +78,11 @@ export function MoreScreen({
   onOpenSettings,
   onOpenMarkets,
   onOpenLoans,
+  onOpenGroups,
   onOpenAssets,
   onOpenGoals,
   onOpenReports,
+  pendingChanges,
   onLogout,
   onSubmitFeedback,
 }: MoreScreenProps) {
@@ -79,6 +93,24 @@ export function MoreScreen({
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [feedbackPending, setFeedbackPending] = useState(false)
   const [feedbackFailed, setFeedbackFailed] = useState(false)
+  const [versionCopy, setVersionCopy] = useState<'copied' | 'failed' | 'idle'>('idle')
+  const serverBuild = serverInfo?.version
+    ? { commit: serverInfo.commit, version: serverInfo.version }
+    : null
+
+  const copyVersionInfo = async () => {
+    try {
+      await Clipboard.setStringAsync(
+        formatVersionInfo({
+          app: appInfo ? { commit: null, version: appInfo.version } : null,
+          server: serverBuild,
+        }),
+      )
+      setVersionCopy('copied')
+    } catch {
+      setVersionCopy('failed')
+    }
+  }
   const actions: Partial<Record<MoreAction, () => Promise<void>>> = {
     help: onOpenHelp,
     whatsNew: onOpenWhatsNew,
@@ -140,12 +172,23 @@ export function MoreScreen({
           <Group>
             <MoreRow announcement={inside} icon="bar-chart" label={t('navigation.financialMarkets')} onPress={onOpenMarkets} />
             <MoreRow announcement={inside} icon="hand-coins" label={t('navigation.loans')} onPress={onOpenLoans} />
+            <MoreRow announcement={inside} icon="users" label={t('navigation.groups')} onPress={onOpenGroups} />
             <MoreRow announcement={inside} icon="home" label={t('navigation.assets')} onPress={onOpenAssets} />
             <MoreRow announcement={inside} icon="target" label={t('navigation.goals')} onPress={onOpenGoals} />
             <MoreRow announcement={inside} icon="book-open" label={t('navigation.reports')} onPress={onOpenReports} />
           </Group>
 
           <Group>
+            {pendingChanges ? (
+              <MoreRow
+                announcement={pendingChanges.count > 0 ? `${t('more.pendingChangesCount', { count: pendingChanges.count })}, ${inside}` : inside}
+                count={pendingChanges.count}
+                icon="check-circle"
+                label={t('more.pendingChanges')}
+                onPress={pendingChanges.onOpen}
+                testID="more-pending-changes"
+              />
+            ) : null}
             <MoreRow announcement={inside} icon="settings" label={t('navigation.settings')} onPress={onOpenSettings} />
             {external('help', 'circle-help')}
             {onSubmitFeedback ? (
@@ -181,6 +224,23 @@ export function MoreScreen({
                   {t('more.environment', { environment: t(`more.environments.${appInfo.environment}`) })}
                 </Text>
               </View>
+            ) : null}
+            {serverBuild ? (
+              <Text align="center" tone="muted" variant="meta">
+                {t('more.serverVersion', { version: formatBuild(serverBuild) })}
+              </Text>
+            ) : null}
+            <Button
+              label={t('more.copyVersionInfo')}
+              onPress={() => void copyVersionInfo()}
+              size="sm"
+              variant="link"
+            />
+            {versionCopy === 'copied' ? (
+              <Text align="center" tone="muted" variant="meta">{t('more.versionInfoCopied')}</Text>
+            ) : null}
+            {versionCopy === 'failed' ? (
+              <Text align="center" tone="destructive" variant="meta">{t('more.versionInfoCopyFailed')}</Text>
             ) : null}
           </View>
         </View>
@@ -218,8 +278,10 @@ function Group({ children, label }: { children: React.ReactNode; label?: string 
   return <Section title={label} variant="open">{group}</Section>
 }
 
-function MoreRow({ label, announcement, icon, onPress, external = false, busy = false, trailing = true }: {
+function MoreRow({ label, announcement, icon, onPress, count, testID, external = false, busy = false, trailing = true }: {
   label: string
+  count?: number
+  testID?: string
   announcement: string
   icon: IconName
   onPress: () => void
@@ -231,10 +293,12 @@ function MoreRow({ label, announcement, icon, onPress, external = false, busy = 
     <SettingsNavRow
       accessibilityLabel={`${label}, ${announcement}`}
       busy={busy}
+      count={count}
       external={external}
       icon={icon}
       label={label}
       onPress={onPress}
+      testID={testID}
       trailing={trailing}
     />
   )

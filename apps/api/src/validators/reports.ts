@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { MEMBER_FILTER_VALUE } from '@service/household/member-attribution';
 import { isSupportedTimeZone, REPORT_DEFAULT_TIME_ZONE } from '@service/reports/report-months';
 
 /**
@@ -42,6 +43,12 @@ const querySwitch = z
  */
 export const MAX_REPORT_RANGE_DAYS = 10 * 366;
 
+/**
+ * Members' appuser keys, or `shared` for the household's joint money (`member-attribution.ts`); a
+ * row counts when it is attributed to any of them.
+ */
+export const memberKeysFilter = optionalStringArray.refine((keys) => keys === undefined || keys.every((key) => MEMBER_FILTER_VALUE.test(key)), { message: 'Member keys must be positive integers or "shared"' });
+
 export const reportFiltersSchema = z.object({
   accountKeys: optionalStringArray,
   categoryKeys: optionalStringArray,
@@ -49,6 +56,8 @@ export const reportFiltersSchema = z.object({
   fromDate: z.iso.datetime({ offset: true }).optional(),
   includePending: querySwitch,
   includeTransfers: querySwitch,
+  /** Only what these members spent and earned, or Shared; see `memberKeysFilter`. */
+  memberKeys: memberKeysFilter,
   merchantKeys: optionalStringArray,
   /** Tag keys; a transaction counts when it carries any of them. */
   tagKeys: optionalKeyArray,
@@ -75,3 +84,28 @@ export const reportsQuerySchema = z.object({
 });
 
 export type ReportFilters = z.infer<typeof reportFiltersSchema>;
+
+/** A calendar month key, `YYYY-MM`, as the month-comparison report's pickers send it. */
+const monthKeySchema = z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/, { message: 'Month must be YYYY-MM' });
+
+/**
+ * The month-comparison envelope: the shared report filters (accounts, currency,
+ * timezone, tags, ...) plus the two months to compare. The months replace the
+ * date range, so `fromDate`/`toDate` are accepted but ignored by the report.
+ */
+export const monthComparisonQuerySchema = z.object({
+  query: reportFiltersSchema.extend({ base: monthKeySchema, compare: monthKeySchema }),
+});
+
+export type MonthComparisonFilters = z.infer<typeof monthComparisonQuerySchema>['query'];
+
+/**
+ * The spending-vs-normal envelope: the shared report filters plus the one month to read. The
+ * month replaces the date range (accepted but ignored), and the report's calendar is the
+ * `timezone` filter, so the same month means the same days for both the report and its links.
+ */
+export const spendingVsNormalQuerySchema = z.object({
+  query: reportFiltersSchema.extend({ month: monthKeySchema }),
+});
+
+export type SpendingVsNormalFilters = z.infer<typeof spendingVsNormalQuerySchema>['query'];

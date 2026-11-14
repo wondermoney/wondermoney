@@ -4,6 +4,7 @@ import { Check, TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import CategorySelect from "@/components/CategorySelect";
+import { MerchantAvatar } from "@/components/merchant/MerchantAvatar";
 import { Amount } from "@/components/ui/Amount";
 import { Button } from "@/components/ui/button";
 import { getCategorizationReviewHint } from "@/lib/account/categorization-confidence-copy";
@@ -36,6 +37,7 @@ export default function TransactionReviewRow({
   const t = useTranslations();
   const locale = useLocale();
   const hint = getCategorizationReviewHint(transaction);
+  const merchant = transaction.transactionMerchantKey;
   const suggestedCategory = transaction.appuserTransactionCategories[0];
   const transactionDate = new Intl.DateTimeFormat(locale, {
     day: "2-digit",
@@ -46,28 +48,33 @@ export default function TransactionReviewRow({
   return (
     <div className="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_14rem_7rem_auto] md:items-center md:gap-4">
       <div className="flex min-w-0 items-start justify-between gap-4 md:contents">
-        <div className="min-w-0 space-y-1">
-          <div className="text-foreground truncate text-sm font-medium">
-            {getTransactionDisplayName(transaction)}
-          </div>
-          <div className="text-muted-foreground truncate text-xs">
-            {transaction.accountKey.accountName} · {transactionDate}
-          </div>
-          {hint && (
-            <div
-              className={cn(
-                "flex items-center gap-1 text-xs",
-                hint.tone === "warning"
-                  ? "text-warning-text"
-                  : "text-muted-foreground",
-              )}
-            >
-              {hint.tone === "warning" && (
-                <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
-              )}
-              <span>{t(hint.messageKey)}</span>
+        <div className="flex min-w-0 items-start gap-3">
+          {merchant?.name.trim() ? (
+            <MerchantAvatar merchant={merchant} className="mt-0.5" />
+          ) : null}
+          <div className="min-w-0 space-y-1">
+            <div className="text-foreground truncate text-sm font-medium">
+              {getTransactionDisplayName(transaction)}
             </div>
-          )}
+            <div className="text-muted-foreground truncate text-xs">
+              {transaction.accountKey.accountName} · {transactionDate}
+            </div>
+            {hint && (
+              <div
+                className={cn(
+                  "flex items-center gap-1 text-xs",
+                  hint.tone === "warning"
+                    ? "text-warning-text"
+                    : "text-muted-foreground",
+                )}
+              >
+                {hint.tone === "warning" && (
+                  <TriangleAlert className="size-3.5 shrink-0" aria-hidden />
+                )}
+                <span>{t(hint.messageKey)}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <Amount

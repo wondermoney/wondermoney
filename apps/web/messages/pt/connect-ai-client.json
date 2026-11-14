@@ -1,0 +1,32 @@
+{
+  "connectAiClient": {
+    "title": "Ligar um cliente de IA",
+    "description": "Permite que o Claude Desktop, o Cursor ou outro cliente MCP pergunte sobre as tuas finanças. Recebe um token próprio: pode ler os mesmos dados que tu vês, incluindo as tuas contas privadas, e nunca altera nada sozinho.",
+    "endpoint": "Endpoint MCP",
+    "endpoint-hint": "O cliente envia um token de API pessoal com o âmbito mcp:read (e mcp:propose, se permitires propostas) num cabeçalho Authorization. Um cookie de sessão do navegador nunca é aceite aqui.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copy-failed": "Não foi possível copiar. Seleciona o texto e copia-o manualmente.",
+    "create-token": "Criar um token de cliente de IA",
+    "allow-proposals": "Deixar o cliente propor alterações para eu confirmar",
+    "allow-proposals-hint": "O cliente pode sugerir categorias, marcar transações como revistas ou alterar uma nota. Cada sugestão fica em Definições › Assistente › Alterações pendentes até a aplicares ou descartares.",
+    "totp": "Código do autenticador",
+    "totp-hint": "Só é necessário se usares autenticação de dois fatores.",
+    "token-created-title": "O teu token de cliente de IA",
+    "token-created-description": "Copia-o agora e cola-o na configuração do cliente abaixo. É guardado apenas como hash, por isso esta é a única vez que é mostrado.",
+    "token-done": "Já copiei",
+    "config-title": "Configuração do cliente",
+    "config-description": "Cola o token onde o exemplo mostra YOUR_TOKEN. O primeiro bloco é para o Claude Desktop, que liga a servidores remotos com o mcp-remote; o segundo é a forma HTTP direta usada pelo Cursor e por outros clientes.",
+    "config-claude": "Claude Desktop",
+    "config-http": "Cursor e outros clientes HTTP",
+    "calls-title": "Chamadas recentes do cliente de IA",
+    "calls-description": "Cada ferramenta que um cliente MCP chama é registada com o nome e a hora. Os montantes e as descrições nunca são escritos no registo.",
+    "calls-loading": "A carregar chamadas…",
+    "calls-empty": "Ainda nenhum cliente de IA chamou o servidor.",
+    "calls-unknown-tool": "Ferramenta desconhecida",
+    "error-create": "Não foi possível criar o token. Tenta novamente.",
+    "error-totp-required": "Introduz o código do autenticador para criar um token.",
+    "error-invalid-totp": "Esse código do autenticador não é válido.",
+    "error-session-not-fresh": "Inicia sessão novamente antes de criar um token."
+  }
+}

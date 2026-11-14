@@ -57,6 +57,7 @@ vi.mock('@controller/portfolio', controllerStub);
 vi.mock('@controller/banking', controllerStub);
 vi.mock('@controller/banking-alerts', controllerStub);
 vi.mock('@controller/banking-connections', controllerStub);
+vi.mock('@controller/banking-simplefin', controllerStub);
 vi.mock('@controller/admin/background-operation', controllerStub);
 vi.mock('@controller/admin/demo-data', controllerStub);
 vi.mock('@controller/admin/transaction-audit', controllerStub);
@@ -66,6 +67,9 @@ vi.mock('@controller/admin/transaction-enrichment', controllerStub);
 // passthrough that tags the response, so the "is this endpoint rate limited?" question is
 // answered by an observable header instead of by counting entries in `route.stack`.
 vi.mock('@middleware/rate-limit', () => ({
+  bankConnectRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
   dataExportRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
     next();
   },
@@ -74,6 +78,9 @@ vi.mock('@middleware/rate-limit', () => ({
   },
   marketDataRateLimit: () => (_req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.setHeader('x-market-data-limiter', 'applied');
+    next();
+  },
+  pushTestRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
     next();
   },
 }));
@@ -182,6 +189,7 @@ describe('route ordering', () => {
       ['get', '/metrics', 'getPortfoliosMetrics'],
       ['get', '/calendar', 'getPortfolioCalendar'],
       ['get', '/dividend-income', 'getDividendIncome'],
+      ['get', '/realized-gains', 'getRealizedGains'],
     ];
 
     it.each(cases)('%s %s is not swallowed by /:portfolioId', async (method, path, handler) => {

@@ -1,40 +1,61 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@service/account/account-initial-sync-account.service', () => ({ default: {} }));
 vi.mock('@service/account/account-initial-sync-transaction.service', () => ({ default: {} }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: {} }));
 vi.mock('@service/account/account-auto-sync-scheduler.service', () => ({ default: {} }));
-vi.mock('@service/enable-banking/enable-banking-credential.service', () => ({ enableBankingCredentialService: {} }));
-vi.mock('@service/enable-banking/enable-banking-connection-sync-state.service', () => ({ enableBankingConnectionSyncState: {} }));
+const provider = vi.hoisted(() => ({ preflight: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('@service/bank-providers/registry', () => ({
+  bankConnectionRef: (connection: { appuserKey?: { appuserKey?: number }; bankConnectionKey: number; externalId?: string; provider: string; state?: string; status: string; tenantKey?: { tenantKey?: number } }) => ({
+    appuserId: connection.appuserKey?.appuserKey ?? 0,
+    bankConnectionKey: connection.bankConnectionKey,
+    externalId: connection.externalId ?? connection.state ?? String(connection.bankConnectionKey),
+    provider: connection.provider,
+    status: connection.status,
+    tenantId: connection.tenantKey?.tenantKey,
+  }),
+  getBankProvider: () => provider,
+}));
 const em = vi.hoisted(() => ({ findOne: vi.fn() }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 
 import { handleAccountAutoSyncRequisitionJob, handleAccountAutoSyncScheduleJob } from '@app/jobs/account-auto-sync.worker';
+import { UserActionRequiredError } from '@service/bank-providers/errors';
 
 import { pgBossJob } from '../../__tests__/__helpers__/pgboss-job';
 
-const payload = { appuserKey: 7, connectionId: 'req-12', correlationId: 'account.auto-sync.requisition:run-1:12', enableBankingConnectionKey: '12', incidentId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', provider: 'enable_banking', scheduleRunId: 'run-1' };
+const payload = { appuserKey: 7, bankConnectionKey: '12', connectionId: 'req-12', correlationId: 'account.auto-sync.requisition:run-1:12', incidentId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', provider: 'enable_banking', scheduleRunId: 'run-1' };
+
+function connectionFor(bankConnectionKey: number) {
+  return { appuserKey: { appuserKey: 7 }, bankConnectionKey, externalId: `session-${bankConnectionKey}`, provider: 'enable_banking', state: `state-${bankConnectionKey}`, status: 'linked', tenantKey: { tenantKey: 3 } };
+}
+
 function harness() {
-  const order: string[] = [];
-  const bankSyncIncidentService = { assertIncident: vi.fn().mockResolvedValue({}), completeOrAllocateLegacyIncident: vi.fn().mockResolvedValue({ incidentId: payload.incidentId }), finalizeAttempt: vi.fn(async () => { order.push('finalize'); }), startAttempt: vi.fn(async (input: { queueAttempt: number }) => { order.push('start'); return { attempt: input.queueAttempt }; }) };
+  const order: string[] = [];  const bankSyncIncidentService = { assertIncident: vi.fn().mockResolvedValue({}), completeOrAllocateLegacyIncident: vi.fn().mockResolvedValue({ incidentId: payload.incidentId }), finalizeAttempt: vi.fn(async () => { order.push('finalize'); }), startAttempt: vi.fn(async (input: { queueAttempt: number }) => { order.push('start'); return { attempt: input.queueAttempt }; }) };
   const accountService = { syncAccountsForRequisition: vi.fn(async (): Promise<{ status: string }> => { order.push('provider'); return { status: 'completed' }; }) };
   const transactionService = { syncTransactionsForRequisition: vi.fn().mockResolvedValue({ status: 'completed' }) };
   const backgroundOperationService = { attachQueueJob: vi.fn(), claimJobStart: vi.fn().mockResolvedValue(true), createQueuedOperation: vi.fn(), finishJob: vi.fn().mockResolvedValue(true), heartbeatJob: vi.fn().mockResolvedValue(true), markAttemptFailedForRetry: vi.fn().mockResolvedValue(true) };
-  const enableBankingCredentialService = { getDecryptedCredential: vi.fn().mockResolvedValue({ applicationId: 'app-1', privateKeyPem: 'pem-1' }) };
-  const connectionSyncState = { checkConsent: vi.fn().mockResolvedValue('active'), deferNextSync: vi.fn().mockResolvedValue(new Date()) };
-  return { accountService, backgroundOperationService, bankSyncIncidentService, connectionSyncState, enableBankingCredentialService, order, transactionService };
+  const connectionSyncState = { checkConsent: vi.fn().mockResolvedValue('active'), deferNextSync: vi.fn().mockResolvedValue(new Date()), markAttempt: vi.fn(async () => { order.push('attempt'); return new Date(); }) };
+  return { accountService, backgroundOperationService, bankSyncIncidentService, connectionSyncState, order, transactionService };
 }
 
 describe('scheduled bank sync producer contract worker', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    provider.preflight.mockResolvedValue(undefined);
+    em.findOne.mockImplementation((_entity: unknown, where: Record<string, unknown>) => connectionFor(Number(where['bankConnectionKey'])));
+  });
+
   it('starts with the original incident and finalizes success after provider work', async () => {
     const h = harness();
     const enqueue = { send: vi.fn(), sendAfter: vi.fn() };
     await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-1', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], { ...h, enqueue } as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(true);
     expect(h.bankSyncIncidentService.assertIncident).toHaveBeenCalledWith(expect.objectContaining({ flow: 'scheduled-refresh', incidentId: payload.incidentId, producer: 'pgboss-scheduled', userVisible: false }));
     expect(h.bankSyncIncidentService.startAttempt).toHaveBeenCalledWith({ incidentId: payload.incidentId, queueAttempt: 1, queueJobId: 'job-1' });
-    expect(h.order).toEqual(['start', 'provider', 'finalize']);
+    expect(h.order).toEqual(['start', 'attempt', 'provider', 'finalize']);
+    expect(h.connectionSyncState.markAttempt).toHaveBeenCalledWith(12);
     expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ final: true, result: 'full_success', treatmentEligible: false }));
-    expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.any(Object), { enqueue });
+    expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.any(Object), { enqueue, provider });
   });
 
   it('finalizes partial nonterminal before throwing and never enables recovery treatment', async () => {
@@ -76,45 +97,37 @@ describe('scheduled bank sync producer contract worker', () => {
     expect(h.backgroundOperationService.finishJob).toHaveBeenCalledWith(expect.any(String), 'schedule-terminal-error', expect.objectContaining({ retryable: false, status: 'failed' }));
   });
 
-  describe('Enable Banking connections', () => {
-    const ebPayload = (overrides: Record<string, unknown> = {}) => ({
+  describe('bank connections', () => {
+    const bankPayload = (overrides: Record<string, unknown> = {}) => ({
       appuserKey: 9,
+      bankConnectionKey: '20',
       connectionId: 'session-20',
       correlationId: 'account.auto-sync.requisition:run-1:20',
-      enableBankingConnectionKey: '20',
       incidentId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
       provider: 'enable_banking' as const,
       scheduleRunId: 'run-1',
       ...overrides,
     });
 
-    it('resolves the owning appuser credential and syncs successfully when it is valid', async () => {
+    it('resolves the provider, runs the pre-flight and syncs successfully when it passes', async () => {
       const h = harness();
       const enqueue = { send: vi.fn(), sendAfter: vi.fn() };
-      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload(), { id: 'eb-job-1', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], { ...h, enqueue } as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(true);
-      expect(h.enableBankingCredentialService.getDecryptedCredential).toHaveBeenCalledWith(9);
-      expect(h.accountService.syncAccountsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 20 }));
-      expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 20 }), { enqueue });
+      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(bankPayload(), { id: 'eb-job-1', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], { ...h, enqueue } as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(true);
+      expect(provider.preflight).toHaveBeenCalledWith(expect.objectContaining({ bankConnectionKey: 20 }));
+      expect(h.accountService.syncAccountsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ connection: expect.objectContaining({ bankConnectionKey: 20 }) }), { provider });
+      expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ connection: expect.objectContaining({ bankConnectionKey: 20 }) }), { enqueue, provider });
       expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ final: true, result: 'full_success' }));
     });
 
-    it('fails permanently (not retried) without calling the sync services when the credential is missing', async () => {
+    it('fails permanently (not retried) without calling the sync services when the pre-flight needs the user', async () => {
       const h = harness();
-      h.enableBankingCredentialService.getDecryptedCredential.mockResolvedValueOnce(null);
-      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload({ appuserKey: 8, connectionId: 'session-21', correlationId: 'account.auto-sync.requisition:run-1:21', enableBankingConnectionKey: '21' }), { id: 'eb-job-2', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
+      provider.preflight.mockRejectedValueOnce(new UserActionRequiredError('credential missing'));
+      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(bankPayload({ appuserKey: 8, bankConnectionKey: '21', connectionId: 'session-21', correlationId: 'account.auto-sync.requisition:run-1:21' }), { id: 'eb-job-2', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
       expect(h.accountService.syncAccountsForRequisition).not.toHaveBeenCalled();
       expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'authentication', errorCode: 'authentication', final: true, result: 'failed' }));
     });
 
-    it('fails permanently when the credential fails to decrypt', async () => {
-      const h = harness();
-      h.enableBankingCredentialService.getDecryptedCredential.mockRejectedValueOnce(new Error('authentication tag verification failed'));
-      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload({ appuserKey: 8, connectionId: 'session-21', correlationId: 'account.auto-sync.requisition:run-1:21', enableBankingConnectionKey: '21' }), { id: 'eb-job-3', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
-      expect(h.accountService.syncAccountsForRequisition).not.toHaveBeenCalled();
-      expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'authentication', errorCode: 'authentication', final: true }));
-    });
-
-    const run = (h: ReturnType<typeof harness>, id: string, retryCount = 0) => handleAccountAutoSyncRequisitionJob(pgBossJob(ebPayload(), { id, retryCount, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1]);
+    const run = (h: ReturnType<typeof harness>, id: string, retryCount = 0) => handleAccountAutoSyncRequisitionJob(pgBossJob(bankPayload(), { id, retryCount, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1]);
 
     it('records a thrown provider 429 as rate_limited, defers the connection and skips the pg-boss retry', async () => {
       const h = harness();
@@ -172,17 +185,30 @@ describe('scheduled bank sync producer contract worker', () => {
       expect(h.connectionSyncState.checkConsent).not.toHaveBeenCalled();
     });
 
-    it('does not let one connection credential failure affect a sibling job for a different connection', async () => {
+    it('records what the aggregator reported instead of a generic code for a partial or failed run', async () => {
+      const partial = harness();
+      partial.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ reportedErrorCode: 'institution_action_required', status: 'partial' } as { status: string });
+      await expect(run(partial, 'sfin-partial')).rejects.toThrow('partial');
+      expect(partial.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'provider', errorCode: 'institution_action_required', result: 'partial' }));
+
+      const failed = harness();
+      failed.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ reportedErrorCode: 'unsupported_currency', status: 'failed' } as { status: string });
+      await expect(run(failed, 'sfin-failed')).rejects.toThrow('failed');
+      expect(failed.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCategory: 'data_validation', errorCode: 'unsupported_currency', result: 'failed' }));
+    });
+
+    it('records the attempt before a failing provider call, so the retry waits out the interval', async () => {
       const h = harness();
-      h.enableBankingCredentialService.getDecryptedCredential.mockImplementation(async (appuserKey: number) => (appuserKey === 8 ? null : { applicationId: 'app-1', privateKeyPem: 'pem-1' }));
-      const badPayload = ebPayload({ appuserKey: 8, connectionId: 'session-22', correlationId: 'account.auto-sync.requisition:run-1:22', enableBankingConnectionKey: '22' });
-      const goodPayload = ebPayload({ appuserKey: 9, connectionId: 'session-23', correlationId: 'account.auto-sync.requisition:run-1:23', enableBankingConnectionKey: '23' });
+      h.accountService.syncAccountsForRequisition.mockRejectedValueOnce(Object.assign(new Error('bank unreachable'), { name: 'ProviderUnavailableError', status: 503 }));
+      await expect(run(h, 'eb-attempt-failure')).rejects.toThrow('bank unreachable');
+      expect(h.connectionSyncState.markAttempt).toHaveBeenCalledWith(20);
+    });
 
-      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(badPayload, { id: 'eb-job-bad', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
-      await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(goodPayload, { id: 'eb-job-good', retryCount: 0, retryLimit: 3 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(true);
-
+    it('still syncs when the attempt time cannot be recorded', async () => {
+      const h = harness();
+      h.connectionSyncState.markAttempt.mockRejectedValueOnce(new Error('db down'));
+      await expect(run(h, 'eb-attempt-write-failed')).resolves.toBe(true);
       expect(h.accountService.syncAccountsForRequisition).toHaveBeenCalledTimes(1);
-      expect(h.accountService.syncAccountsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ enableBankingConnectionKey: 23 }));
     });
   });
 });

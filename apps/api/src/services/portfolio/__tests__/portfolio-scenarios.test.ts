@@ -157,6 +157,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'EUR', currencyKey: 2 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -242,6 +243,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: currency,
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: currency },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -305,7 +307,7 @@ describe('portfolio aggregation scenarios', () => {
       }),
       findOne: vi.fn((entity): null | Record<string, unknown> => {
         if (entity?.name === 'Portfolio') {
-          return { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd } };
+          return { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd }, tenantKey: { tenantKey: 1 } };
         }
         return null;
       }),
@@ -354,7 +356,7 @@ describe('portfolio aggregation scenarios', () => {
         return [];
       }),
       findOne: vi.fn((entity): null | Record<string, unknown> => (entity?.name === 'Portfolio'
-        ? { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd } }
+        ? { currencyKey: usd, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: usd }, tenantKey: { tenantKey: 1 } }
         : null)),
       flush: vi.fn(),
       getKysely: makeDatabaseMock([
@@ -407,7 +409,7 @@ describe('portfolio aggregation scenarios', () => {
       }),
       findOne: vi.fn((entity): null | Record<string, unknown> => {
         if (entity?.name === 'Portfolio') {
-          return { currencyKey: currency, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: currency } };
+          return { currencyKey: currency, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: currency }, tenantKey: { tenantKey: 1 } };
         }
         return null;
       }),
@@ -453,7 +455,7 @@ describe('portfolio aggregation scenarios', () => {
         return [];
       }),
       findOne: vi.fn((entity): null | Record<string, unknown> => entity?.name === 'Portfolio'
-        ? { currencyKey: eur, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: eur } }
+        ? { currencyKey: eur, portfolioKey: 1, portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: eur }, tenantKey: { tenantKey: 1 } }
         : null),
       flush: vi.fn(),
       getKysely: makeDatabaseMock([{ date: '2024-01-02 00:00:00+00', financial_asset_key: 11, price: 100 }]),
@@ -515,6 +517,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: gbp,
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: eur },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -580,6 +583,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'USD', currencyKey: 1 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -636,6 +640,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'USD', currencyKey: 1 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -704,6 +709,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'EUR', currencyKey: 2 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'EUR', currencyKey: 2 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -752,6 +758,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'EUR', currencyKey: 2 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -785,6 +792,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'USD', currencyKey: 1 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         if (entity?.name === 'PortfolioSnapshot' && where?.snapshotDate) {
@@ -847,6 +855,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'USD', currencyKey: 1 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;
@@ -904,6 +913,7 @@ describe('portfolio aggregation scenarios', () => {
             currencyKey: { code: 'USD', currencyKey: 1 },
             portfolioKey: 1,
             portfolioOwnerAppuserKey: { appuserKey: 1, currencyKey: { code: 'EUR', currencyKey: 2 } },
+            tenantKey: { tenantKey: 1 },
           };
         }
         return null;

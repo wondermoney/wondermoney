@@ -5,6 +5,18 @@ import { pgBossJob } from '../../__tests__/__helpers__/pgboss-job';
 vi.mock('@service/account/account-initial-sync-account.service', () => ({ default: {} }));
 vi.mock('@service/account/account-initial-sync-transaction.service', () => ({ default: {} }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: {} }));
+const provider = vi.hoisted(() => ({ id: 'enable_banking' }));
+vi.mock('@service/bank-providers/registry', () => ({
+  bankConnectionRef: (connection: { appuserKey?: { appuserKey?: number }; bankConnectionKey: number; externalId?: string; provider: string; state?: string; status: string; tenantKey?: { tenantKey?: number } }) => ({
+    appuserId: connection.appuserKey?.appuserKey ?? 0,
+    bankConnectionKey: connection.bankConnectionKey,
+    externalId: connection.externalId ?? connection.state ?? String(connection.bankConnectionKey),
+    provider: connection.provider,
+    status: connection.status,
+    tenantId: connection.tenantKey?.tenantKey,
+  }),
+  getBankProvider: () => provider,
+}));
 const em = vi.hoisted(() => ({ findOne: vi.fn() }));
 vi.mock('@app/database/di', () => ({ DI: { em } }));
 
@@ -37,7 +49,7 @@ const accountsResult = (status: AccountsResult['status']): AccountsResult => ({
 
 const correlationId = 'account.initial-sync:12';
 const incidentId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-const payload = { connectionId: 'req-12', correlationId, enableBankingConnectionKey: '12', incidentId, provider: 'enable_banking' };
+const payload = { bankConnectionKey: '12', connectionId: 'req-12', correlationId, incidentId, provider: 'enable_banking' };
 
 function harness() {
   const order: string[] = [];
@@ -58,7 +70,17 @@ function harness() {
 }
 
 describe('account initial sync producer contract worker', () => {
-  beforeEach(() => vi.unstubAllEnvs());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    em.findOne.mockImplementation((_entity: unknown, where: Record<string, unknown>) => ({
+      appuserKey: { appuserKey: 1 },
+      bankConnectionKey: Number(where['bankConnectionKey']),
+      externalId: 'req-12',
+      provider: 'enable_banking',
+      status: 'linked',
+      tenantKey: { tenantKey: 3 },
+    }));
+  });
 
   it('verifies, starts attempt 1 before provider work, then finalizes full success', async () => {
     const h = harness();
@@ -76,6 +98,14 @@ describe('account initial sync producer contract worker', () => {
     await expect(handleAccountInitialSyncJob(job(payload, 'job-2', 1), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).rejects.toThrow('partial');
     expect(h.incident.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ attempt: 2, final: false, result: 'partial' }));
     expect(h.order.at(-1)).toBe('finalize');
+  });
+
+  it('records the aggregator\'s reported code on a partial first sync', async () => {
+    const h = harness();
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    vi.mocked(h.account.syncAccountsForRequisition).mockResolvedValueOnce({ ...accountsResult('partial'), reportedErrorCode: 'institution_action_required' });
+    await expect(handleAccountInitialSyncJob(job(payload, 'job-2', 1), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).rejects.toThrow('partial');
+    expect(h.incident.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'institution_action_required', result: 'partial' }));
   });
 
   it('makes an exhausted failure terminal and snapshots live treatment', async () => {
@@ -141,17 +171,17 @@ describe('account initial sync producer contract worker', () => {
 // same code the tests above exercise.
 describe('account initial sync producer contract worker — Enable Banking', () => {
   const ebCorrelationId = 'account.initial-sync:5';
-  const ebPayload = { connectionId: 'session-1', correlationId: ebCorrelationId, enableBankingConnectionKey: '5', incidentId, provider: 'enable_banking' as const };
+  const ebPayload = { bankConnectionKey: '5', connectionId: 'session-1', correlationId: ebCorrelationId, incidentId, provider: 'enable_banking' as const };
 
-  it('calls the sync services with enableBankingConnectionKey (not nordigenRequisitionKey) and finalizes full success', async () => {
+  it('calls the sync services with the generic connection and finalizes full success', async () => {
     const h = harness();
     const enqueue = { send: vi.fn(), sendAfter: vi.fn() };
     await expect(handleAccountInitialSyncJob(job(ebPayload, 'eb-job-1'), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident, enqueue })).resolves.toBe(true);
     expect(h.incident.assertIncident).toHaveBeenCalledWith({ correlationId: ebCorrelationId, flow: 'initial-add', incidentId, producer: 'pgboss-initial', requisitionId: 'session-1', userVisible: true });
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(h.account.syncAccountsForRequisition).toHaveBeenCalledWith({ correlationId: ebCorrelationId, enableBankingConnectionKey: 5, queueJobId: 'eb-job-1' });
+    expect(h.account.syncAccountsForRequisition).toHaveBeenCalledWith({ connection: expect.objectContaining({ bankConnectionKey: 5 }), correlationId: ebCorrelationId, queueJobId: 'eb-job-1' }, { provider });
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(h.transactions.syncTransactionsForRequisition).toHaveBeenCalledWith({ correlationId: ebCorrelationId, enableBankingConnectionKey: 5, fetchWindowDays: 365, queueJobId: 'eb-job-1' }, { enqueue });
+    expect(h.transactions.syncTransactionsForRequisition).toHaveBeenCalledWith({ connection: expect.objectContaining({ bankConnectionKey: 5 }), correlationId: ebCorrelationId, fetchWindowDays: 365, queueJobId: 'eb-job-1' }, { enqueue, provider });
   });
 
   it('rejects an Enable Banking payload missing incidentId rather than falling into legacy reconciliation', async () => {
@@ -163,7 +193,7 @@ describe('account initial sync producer contract worker — Enable Banking', () 
 
   it('rejects a malformed Enable Banking payload (bad key) without touching the claim', async () => {
     const h = harness();
-    await expect(handleAccountInitialSyncJob(job({ ...ebPayload, enableBankingConnectionKey: 'not-a-number' }, 'eb-job-3'), { accountInitialSyncAccountService: h.account, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).resolves.toBe(false);
+    await expect(handleAccountInitialSyncJob(job({ ...ebPayload, bankConnectionKey: 'not-a-number' }, 'eb-job-3'), { accountInitialSyncAccountService: h.account, backgroundOperationService: h.background, bankSyncIncidentService: h.incident })).resolves.toBe(false);
     expect(h.background.claimJobStart).not.toHaveBeenCalled();
   });
 

@@ -1,4 +1,7 @@
 import { big, DISPLAY_SCALE, moneyEquals, roundDisplay, subtractMoney, sumMoney } from '@utils/money';
+
+import { addMonthsClamped } from './amortization-schedule';
+import { type LoanRatePeriodInput, resolveLoanRate } from './rate-resolver';
 type ProgressBasis = 'OPENING_BALANCE' | 'ORIGINAL_PRINCIPAL';
 
 export function calculateLoanProgress(input: {
@@ -46,12 +49,15 @@ export function calculateOutstandingPrincipal(input: {
 
 export function calculateOutstandingPrincipalWithAdjustments(input: {
   adjustments?: { amount: number; effectiveDate?: Date | null; type: 'BALANCE_CORRECTION' | 'CAPITALIZED_INTEREST' | 'FEE' | 'PRINCIPAL_DECREASE' | 'PRINCIPAL_INCREASE' | 'WRITE_OFF' }[];
+  asOfDate?: Date;
   openingPrincipalBalance: number;
   principalRepayments?: { amount: number; effectiveDate?: Date | null }[];
 }): number {
+  const isInScope = (event: { effectiveDate?: Date | null }) =>
+    input.asOfDate == null || event.effectiveDate == null || event.effectiveDate <= input.asOfDate;
   const events = [
-    ...(input.adjustments ?? []).map((adjustment) => ({ kind: 'adjustment' as const, ...adjustment })),
-    ...(input.principalRepayments ?? []).map((repayment) => ({ kind: 'repayment' as const, ...repayment })),
+    ...(input.adjustments ?? []).filter(isInScope).map((adjustment) => ({ kind: 'adjustment' as const, ...adjustment })),
+    ...(input.principalRepayments ?? []).filter(isInScope).map((repayment) => ({ kind: 'repayment' as const, ...repayment })),
   ].sort((a, b) => (a.effectiveDate?.getTime() ?? Number.POSITIVE_INFINITY) - (b.effectiveDate?.getTime() ?? Number.POSITIVE_INFINITY));
 
   // Accumulated exactly: a float running sum drifts (168382.32999999996 instead of
@@ -113,6 +119,9 @@ export function calculateRemainingTermMonths(input: {
 export function estimateRepaymentAllocation(input: {
   annualInterestRateBps: number;
   outstandingPrincipal: number;
+  paymentDate?: Date;
+  periodOpeningDate?: Date;
+  ratePeriods?: readonly LoanRatePeriodInput[];
   totalPaymentAmount: number;
 }): {
   feeAmount: number;
@@ -125,8 +134,14 @@ export function estimateRepaymentAllocation(input: {
   // Interest is money charged to a user and principal is the residual, so it absorbs every
   // upstream rounding error. Computed exactly and rounded once, at display scale (the loan
   // columns are 2dp).
+  const periodOpeningDate = input.periodOpeningDate ?? (input.paymentDate
+    ? addMonthsClamped(input.paymentDate, -1, input.paymentDate.getUTCDate())
+    : undefined);
+  const rate = periodOpeningDate
+    ? resolveLoanRate(input.ratePeriods ?? [], periodOpeningDate, input.annualInterestRateBps)
+    : input.annualInterestRateBps;
   const interestAmount = roundDisplay(
-    big(input.outstandingPrincipal).times(big(input.annualInterestRateBps).div(10_000)).div(12),
+    big(input.outstandingPrincipal).times(big(rate).div(10_000)).div(12),
   );
   const principalAmount = subtractMoney(input.totalPaymentAmount, interestAmount, DISPLAY_SCALE);
   const negativeAmortization = principalAmount < 0;

@@ -1,9 +1,29 @@
+import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig, type TestProjectInlineConfiguration } from 'vitest/config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const TEST_FILES = 'src/**/*.{test,spec}.{ts,tsx}';
+// Timing assertions (`*.perf.test.ts`) only mean something on a quiet machine, so they are not part
+// of `vitest run`: `pnpm test:perf` (VITEST_PERF=1) runs them, against TEST_POSTGRES_URL.
+const PERF_FILES = 'src/**/*.perf.test.ts';
+const perfEnabled = process.env['VITEST_PERF'] === '1';
+// The test files that start a database (`__helpers__/pg-test-db.ts`). They form the "db" project and
+// the rest the "unit" project, so `--project unit` is the quick loop that needs no database.
+const databaseTests = globSync(TEST_FILES, { cwd: __dirname, exclude: [PERF_FILES] })
+  .filter((file) => /__helpers__\/pg-test-db['"]/.test(readFileSync(path.join(__dirname, file), 'utf8')))
+  .sort();
+// Registers the run on TEST_POSTGRES_URL that owns, and cleans up, the run's test databases.
+const pgTestRun = './src/__tests__/__helpers__/pg-test-run.ts';
+
+const projects: TestProjectInlineConfiguration[] = [
+  { extends: true, test: { exclude: [...configDefaults.exclude, PERF_FILES, ...databaseTests], include: [TEST_FILES], name: 'unit' } },
+  { extends: true, test: { globalSetup: [pgTestRun], include: databaseTests, name: 'db' } },
+  ...(perfEnabled ? [{ extends: true, test: { globalSetup: [pgTestRun], include: [PERF_FILES], name: 'perf' } }] : []),
+];
 
 // CI splits the suite across runners (`--shard=i/n --reporter=blob`). A shard's coverage is
 // partial by construction, so a shard (VITEST_COVERAGE_PARTIAL=1) only records it into its blob;
@@ -19,6 +39,7 @@ export default defineConfig({
       '@controller': path.resolve(__dirname, 'src/controller'),
       '@entity': path.resolve(__dirname, 'src/database/entity'),
       '@middleware': path.resolve(__dirname, 'src/middleware'),
+      '@openapi': path.resolve(__dirname, 'src/openapi'),
       '@route': path.resolve(__dirname, 'src/routes/v1'),
       '@service': path.resolve(__dirname, 'src/services'),
       '@utils': path.resolve(__dirname, 'src/utils'),
@@ -77,7 +98,12 @@ export default defineConfig({
     },
     environment: 'node',
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // Under load (parallel worktrees on one machine) a hook that boots the app or a database can
+    // outlast vitest's 10 s default; a slow setup is not a failing test.
+    hookTimeout: 30_000,
+    // Each project names its own files: `extends: true` concatenates arrays, so a root `include`
+    // would add every test file to every project.
+    projects,
     setupFiles: ['./vitest.setup.ts', './src/test/setup.ts'],
     // Several suites boot the whole app; on a 2-vCPU CI runner with coverage on, that can
     // exceed vitest's 5s default.

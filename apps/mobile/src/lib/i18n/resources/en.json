@@ -14,6 +14,7 @@
     "signOut": "Sign out",
     "preview": "Preview",
     "unavailable": "Not available",
+    "expressionResult": "Expression result: {{amount}}",
     "mixedCurrencies_one": "{{count}} currency",
     "mixedCurrencies_other": "{{count}} currencies",
     "relativeTime": {
@@ -46,7 +47,9 @@
       "years_other": "{{count}} years ago"
     },
     "close": "Close",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "householdReadOnly": "You have view-only access to this household, so nothing was changed. Ask an owner or admin if you need to make changes.",
+    "accountReadOnly": "You can view this account but not change it."
   },
   "navigation": {
     "home": "Home",
@@ -62,6 +65,7 @@
     "watchlist": "Watchlist",
     "goals": "Goals",
     "loans": "Loans",
+    "groups": "Groups",
     "assets": "Assets",
     "reports": "Reports",
     "help": "Help",
@@ -120,6 +124,13 @@
         "unavailable": "That sign-in didn't work. Try again"
       }
     },
+    "sso": {
+      "signIn": "Sign in with {{provider}}",
+      "onlyNotice": "This server signs in through {{provider}}.",
+      "errors": {
+        "unavailable": "Sign-in with {{provider}} didn't finish. If your provider refused it, it showed why. Try again"
+      }
+    },
     "forgotPassword": {
       "title": "Send reset email",
       "helper": "Enter your email and we'll send you a reset link",
@@ -169,7 +180,38 @@
     "notMember": "Not a member?",
     "createAccountLink": "Create an account",
     "alreadyMember": "Already a member?",
-    "loginLink": "Login here"
+    "loginLink": "Login here",
+    "pairing": {
+      "scanButton": "Scan QR code",
+      "scanTitle": "Scan the QR code",
+      "scanHint": "Point your camera at the code in Settings → Security on the web.",
+      "cameraPermission": "Allow camera access to scan the pairing code.",
+      "grantCamera": "Allow camera",
+      "cancel": "Cancel",
+      "connecting": "Connecting to the server…",
+      "invalidCode": "That isn't a WonderMoney pairing code.",
+      "errors": {
+        "invalidCode": "That code has expired or was already used. Show a new one on the web.",
+        "unavailable": "Couldn't connect to that server. Try again."
+      }
+    },
+    "demo": {
+      "button": "Try the demo",
+      "signingIn": "Opening the demo…",
+      "errors": {
+        "disabled": "This server doesn't offer the demo.",
+        "rateLimited": "Too many demo sign-ins. Try again in a few minutes.",
+        "unavailable": "The demo isn't available right now. Try again later.",
+        "unreachable": "Couldn't reach the server. Check your connection and try again."
+      }
+    },
+    "passkey": {
+      "signIn": "Sign in with a passkey",
+      "signingIn": "Signing in…",
+      "errors": {
+        "unavailable": "Signing in with that passkey didn't work. Try again, or use your password."
+      }
+    }
   },
   "access": {
     "mfa": {
@@ -232,7 +274,23 @@
       "title": "Insights",
       "loading": "Loading insights",
       "error": "Could not load insights",
-      "topCategory": "{{name}} — {{amount}} this month"
+      "topCategory": "{{name}} — {{amount}} this month",
+      "severity": {
+        "critical": "Needs attention",
+        "warning": "Worth a look",
+        "info": "Good news"
+      },
+      "spending": {
+        "above": "{{category}} is {{percent}}% above its usual pace.",
+        "below": "{{category}} is {{percent}}% below its usual pace.",
+        "figures": "{{current}} so far, normally {{baseline}} by this point.",
+        "link": "View transactions"
+      },
+      "budget": {
+        "pace": "{{category}} is on course to overrun its budget.",
+        "figures": "{{projected}} projected against {{budgeted}} planned.",
+        "link": "View budget"
+      }
     },
     "helpText": "A quick overview of your accounts, portfolio, and liabilities.",
     "unsupportedAccount_one": "{{count}} account balance is not included",
@@ -240,6 +298,29 @@
     "unconvertedCurrencies": "No exchange rate yet for {{currencies}}."
   },
   "home": {
+    "customize": {
+      "action": "Customize",
+      "title": "Customize home",
+      "description": "Choose what appears on your home and in what order.",
+      "back": "Back to Home",
+      "sections": {
+        "net-worth": "Net worth",
+        "this-month": "This month",
+        "balance-sheet": "Balance sheet",
+        "cashflow": "Net cash flow",
+        "loans": "Loans",
+        "latest-transactions": "Latest transactions"
+      },
+      "moveUp": "Move {{section}} up",
+      "moveDown": "Move {{section}} down",
+      "pinned": "Always shown first",
+      "reset": "Reset to default",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "retry": "Try again",
+      "loadError": "Could not load your home layout.",
+      "loading": "Loading your home layout"
+    },
     "netWorth": {
       "title": "Net worth",
       "since": "since the end of {{month}}",
@@ -304,14 +385,23 @@
         "manualAssets": "Property and other assets",
         "loans": "Loans"
       },
-      "countedIn": "Counted in {{account}}"
+      "countedIn": "Counted in {{account}}",
+      "shareOfAccount": "{{percent}} of this account"
     },
     "cashflow": {
       "title": "Net cash flow by month",
       "listLabel": "Net cash flow, {{from}} to {{to}}",
       "caption": "Money in less money out across your accounts.",
       "emptyTitle": "No cash flow yet",
-      "emptyBody": "It appears once your accounts have transactions."
+      "emptyBody": "It appears once your accounts have transactions.",
+      "thisMonth": "This month",
+      "income": "Income",
+      "spending": "Spending",
+      "savingsRate": "Savings rate",
+      "vs": "vs {{month}}",
+      "vsSamePoint": "vs same point last month",
+      "points": "{{points}} pts",
+      "formula": "Savings rate is income minus spending, divided by income. It is — when income is zero."
     },
     "loans": {
       "title": "Next loan payments",
@@ -325,8 +415,10 @@
     },
     "latest": {
       "title": "Latest transactions",
-      "review_one": "{{count}} needs review",
-      "review_other": "{{count}} need review",
+      "reviewSummary_one": "{{count}} transaction to review · {{amount}} in total",
+      "reviewSummary_other": "{{count}} transactions to review · {{amount}} in total",
+      "reviewNow": "Review now",
+      "allCaughtUp": "All caught up",
       "all": "All transactions",
       "uncategorised": "Uncategorised",
       "needsReview": "Needs review",
@@ -455,6 +547,7 @@
     "errors": {
       "validation": "The server did not accept these values. Edit the details and review them again.",
       "demo": "Demo profiles are read-only. No account was created.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not currently have access to create an account.",
       "mfa": "Additional verification is required before an account can be created.",
       "cancelled": "Account creation was cancelled before it was sent. No account was created.",
@@ -478,6 +571,7 @@
     "stale": "Could not refresh. Showing previously loaded account details",
     "viewTransactions": "View account transactions",
     "edit": "Edit account",
+    "sharing": "Sharing",
     "error": {
       "title": "Could not load account",
       "message": "Check your connection and try again"
@@ -495,6 +589,14 @@
       "message": "The account data received could not be verified"
     }
   },
+  "accountForecast": {
+    "title": "Forecast",
+    "lowPoint": "Low point in the next {{days}} days",
+    "unavailable": "Not enough data to project this account yet.",
+    "next": "Next expected payments",
+    "notCounted": "Not counted in reports",
+    "nextInstallments": "Next installments"
+  },
   "accountRecalculate": {
     "action": "Recalculate balances",
     "confirmTitle": "Recalculate balances?",
@@ -510,6 +612,8 @@
     "failures": {
       "too-soon": "This account was recalculated less than a minute ago. Try again shortly.",
       "demo": "Recalculating is not available in the demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Sign in again to recalculate this account.",
       "not-found": "This account is no longer available.",
       "network": "Could not reach the server. Check your connection and try again.",
@@ -530,13 +634,47 @@
     "saveDetails": "Save details",
     "saving": "Saving…",
     "privacyTitle": "Private account",
-    "privacyHelper": "Only you can see this account and its transactions — your household partner won't see it anywhere.",
+    "privacyHelper": "Only you can see this account and its transactions. Other people in your household won't see it anywhere.",
     "privacySwitch": "Private account",
+    "sharing": {
+      "title": "Sharing",
+      "screenTitle": "Account sharing",
+      "helper": "Choose what each person in your household can do with this account.",
+      "readOnlyHelper": "Only the account's owner or the household owner can change who it's shared with.",
+      "owner": "Owner",
+      "choices": {
+        "hidden": "Hidden",
+        "read": "Can view",
+        "write": "Can edit"
+      },
+      "memberAccess": "Access for {{name}}",
+      "viewerHint": "Viewers can only view, never edit.",
+      "unnamedMember": "Household member",
+      "laterShared": "People who join the household later can see and edit it too.",
+      "laterPrivate": "People who join the household later won't see it until someone shares it with them.",
+      "alone": "There's nobody else in your household to share it with yet.",
+      "loading": "Loading who can see this account…",
+      "error": "Couldn't load who this account is shared with.",
+      "failures": {
+        "demo": "Demo mode is read-only. Sharing was not changed.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "manager-required": "Only the account's owner or the household owner can change who it's shared with.",
+        "access": "You no longer have access to change this account's sharing.",
+        "cancelled": "The save was cancelled because your signed-in context changed.",
+        "not-found": "This account no longer exists.",
+        "invalid": "Someone joined or left the household since this list loaded. Refresh and try again.",
+        "network-ambiguous": "The connection was lost while saving. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
+        "general": "Sharing could not be saved."
+      }
+    },
     "discardTitle": "Discard unsaved changes?",
     "discardMessage": "Your unsaved account changes will be lost.",
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You no longer have access to change this account.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
       "not-found": "This account no longer exists. Your form has not been cleared.",
@@ -553,6 +691,8 @@
     "deleteConfirmAction": "Delete account",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This account was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You no longer have access to delete this account.",
       "cancelled": "The deletion was cancelled because your signed-in context changed.",
       "not-found": "This account no longer exists.",
@@ -569,7 +709,14 @@
       "not-foundMessage": "This account may have been removed.",
       "invalid-idTitle": "Account not available",
       "invalid-idMessage": "Return to Accounts and choose an available account."
-    }
+    },
+    "creditCardTitle": "Credit card account",
+    "creditCardHelper": "Track this card's statement cycle: when it closes, when it is due and how much credit is left.",
+    "statementCloseDay": "Statement closes on (1–31)",
+    "paymentDueDay": "Payment due on (1–31)",
+    "creditLimit": "Credit limit",
+    "minimumPaymentPercent": "Minimum payment (% of balance)",
+    "optional": "Optional"
   },
   "transactions": {
     "title": "Transactions",
@@ -705,9 +852,12 @@
     },
     "reviewResult": {
       "demo": "Demo profiles are read-only. The selected transactions were not changed",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Multi-factor authentication is required. The selected transactions were not changed",
       "cancelled": "The change was cancelled because your session changed. The selected transactions were not changed",
       "network": "The request had an uncertain network result. Inspect the selected transactions before trying again",
+      "in-group": "This transaction is shared in a group, so its split is the group’s. Change it with Edit shares.",
       "error": "The selected transactions could not be changed. Try again"
     },
     "moreFilters_zero": "Filters",
@@ -730,6 +880,105 @@
     "rowActions": "Actions for {{name}}",
     "showDetails": "Show details",
     "hideDetails": "Hide details",
+    "split": {
+      "action": "Split",
+      "edit": "Edit split",
+      "title": "Split transaction",
+      "close": "Close",
+      "save": "Save split",
+      "lines": "Split lines",
+      "line": "Line {{number}}",
+      "total": "Amount to split",
+      "remaining": "Remaining to assign",
+      "over": "Over by",
+      "balanced": "Fully assigned",
+      "saveBlocked": "The lines must add up to the transaction's amount before you can save.",
+      "needsAmounts": "Give every line an amount.",
+      "category": "Category",
+      "amount": "Amount",
+      "note": "Note",
+      "notePlaceholder": "Note (optional)",
+      "lineCategory": "Category for line {{number}}",
+      "lineAmount": "Amount for line {{number}}",
+      "lineNote": "Note for line {{number}}",
+      "removeLine": "Remove line {{number}}",
+      "addLine": "Add line",
+      "splitEvenly": "Split evenly",
+      "amountHint": "Type an amount, or a percentage such as 25%. Every line takes the transaction's sign.",
+      "uncategorized": "Uncategorized",
+      "remove": "Remove split",
+      "removeTitle": "Remove the split?",
+      "removeDescription": "The transaction goes back to a single category: {{category}}, from its largest line.",
+      "summary_one": "Split · {{count}} category",
+      "summary_other": "Split · {{count}} categories",
+      "lineErrors": {
+        "invalid": "Enter an amount or a percentage.",
+        "too-precise": "Use at most 4 decimals.",
+        "zero": "A line can't be zero."
+      },
+      "errors": {
+        "save": "The split could not be saved.",
+        "remove": "The split could not be removed."
+      }
+    },
+    "reimbursement": {
+      "action": "Mark as reimbursement",
+      "title": "Mark as reimbursement",
+      "close": "Close",
+      "save": "Link to expense",
+      "amountIn": "Reimbursement",
+      "left": "Left to link",
+      "currencyHint": "Only expenses in {{currency}} can be linked for now.",
+      "reimbursedBy": "Reimbursed by",
+      "reimburses": "Reimburses",
+      "searchLabel": "Search expenses",
+      "searchPlaceholder": "Merchant or description",
+      "suggested": "Suggested expenses",
+      "results": "Matching expenses",
+      "loading": "Loading expenses",
+      "loadError": "The expenses could not be loaded.",
+      "empty": "No expense to suggest. Search by merchant or description.",
+      "emptySearch": "No expense matches “{{search}}”.",
+      "sameMerchant": "Same merchant",
+      "notYetReimbursed": "{{amount}} not yet reimbursed",
+      "chooseFirst": "Choose the expense this pays back.",
+      "fullyLinked": "This reimbursement is fully linked. Unlink an expense to link another.",
+      "amount": "Amount",
+      "amountLabel": "Amount to link",
+      "amountHint": "Up to {{amount}}: what is left of this reimbursement and of the expense.",
+      "amountErrors": {
+        "invalid": "Enter an amount.",
+        "too-precise": "Use at most 4 decimals.",
+        "zero": "The amount can't be zero.",
+        "over": "At most {{amount}} can be linked."
+      },
+      "unlink": "Unlink",
+      "unlinkNamed": "Unlink {{name}}",
+      "unlinkTitle": "Unlink this reimbursement?",
+      "unlinkDescription": "{{amount}} linked with {{name}} counts as spending and income again.",
+      "open": "Open {{name}}",
+      "badges": {
+        "reimbursed": "Reimbursed",
+        "partly-reimbursed": "Partly reimbursed",
+        "reimbursement": "Reimbursement"
+      },
+      "errors": {
+        "currency-mismatch": "Only transactions in the same currency can be linked for now.",
+        "amount-exceeded": "That is more than what is left of the expense or of this reimbursement.",
+        "visibility-mismatch": "Both transactions must be on shared accounts, or on private accounts of the same person.",
+        "invalid": "Only money in can reimburse money out, and neither can be a transfer or a loan repayment.",
+        "exists": "These two are already linked. Unlink them first to change the amount.",
+        "not-found": "That transaction or link is no longer available. Refresh and try again.",
+        "in-group": "This transaction is shared in a group or settles one, so it can’t be linked as a reimbursement.",
+        "demo": "Demo profiles are read-only. Nothing was changed.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
+        "mfa": "Multi-factor authentication is required. Nothing was changed.",
+        "cancelled": "The change was cancelled because your session changed. Nothing was changed.",
+        "network": "The request had an uncertain network result. Check the transaction before trying again.",
+        "error": "The change could not be saved. Try again."
+      }
+    },
     "transfer": {
       "mark": "Mark as transfer",
       "unmark": "Not a transfer",
@@ -746,6 +995,57 @@
       "excluded": "Between your own money: left out of spending and income",
       "spendingLabel": "Spending",
       "notSpending": "Its category does not count as spending"
+    },
+    "attachments": {
+      "title": "Attachments",
+      "empty": "No files yet.",
+      "addPhoto": "Add photo",
+      "chooseFiles": "Choose files",
+      "open": "Open {{name}}",
+      "delete": "Delete {{name}}",
+      "uploading": "Uploading…",
+      "limit": "A transaction can have at most 10 attachments.",
+      "size": "The file is larger than 10 MB.",
+      "type": "That file type is not supported.",
+      "access": "Verify your session and try again.",
+      "network": "Check your connection and try again.",
+      "general": "Could not finish that. Try again."
+    },
+    "bulk": {
+      "tag": "Tag",
+      "tagTitle_one": "Tag {{count}} transaction",
+      "tagTitle_other": "Tag {{count}} transactions",
+      "addTag": "Add tag",
+      "removeTag": "Remove tag",
+      "delete": "Delete",
+      "deleteOne": "Delete",
+      "deleteTitle_one": "Delete {{count}} transaction?",
+      "deleteTitle_other": "Delete {{count}} transactions?",
+      "deleteMessage": "Deleted transactions leave every list and total, and the account's balances are recalculated without them. Their history stays in the audit log, but they can't be restored.",
+      "syncedNote_one": "{{count}} of them came from your bank and will be skipped: the bank would send it again. Hide it instead to keep it out of lists and totals.",
+      "syncedNote_other": "{{count}} of them came from your bank and will be skipped: the bank would send them again. Hide them instead to keep them out of lists and totals.",
+      "matchingSyncedNote": "Transactions that came from your bank are skipped: the bank would send them again. You can hide them instead.",
+      "onlySyncedTitle_one": "This transaction came from your bank",
+      "onlySyncedTitle_other": "These transactions came from your bank",
+      "deleteOnlySynced_one": "It can't be deleted: the bank would send it again. Hide it instead to keep it out of lists and totals.",
+      "deleteOnlySynced_other": "They can't be deleted: the bank would send them again. Hide them instead to keep them out of lists and totals.",
+      "confirmDelete_one": "Delete {{count}} transaction",
+      "confirmDelete_other": "Delete {{count}} transactions",
+      "hideInstead_one": "Hide it instead",
+      "hideInstead_other": "Hide {{count}} bank transactions instead",
+      "deleted_one": "{{count}} transaction deleted.",
+      "deleted_other": "{{count}} transactions deleted.",
+      "skipped_one": "{{count}} bank transaction was not deleted: the bank would send it again.",
+      "skipped_other": "{{count}} bank transactions were not deleted: the bank would send them again.",
+      "hideSkipped": "Hide them",
+      "selectLoaded_one": "Select the {{count}} loaded transaction",
+      "selectLoaded_other": "Select all {{count}} loaded transactions",
+      "selectAllMatching_one": "Select the {{count}} matching transaction",
+      "selectAllMatching_other": "Select all {{count}} matching transactions",
+      "allMatchingSelected_one": "The {{count}} matching transaction is selected",
+      "allMatchingSelected_other": "All {{count}} matching transactions are selected",
+      "matchingScope": "Every transaction the date range and filters match, loaded or not.",
+      "tooManyMatching": "Narrow the filters to change more than {{max}} transactions at once."
     }
   },
   "tags": {
@@ -775,6 +1075,7 @@
     "result": {
       "taken": "A tag with this name already exists.",
       "demo": "Demo profiles are read-only. The tag was not created.",
+      "read-only": "$t(common.householdReadOnly)",
       "mfa": "Multi-factor authentication is required. The tag was not created.",
       "network": "The request had an uncertain network result. Check your tags before trying again.",
       "error": "The tag could not be created. Try again."
@@ -840,6 +1141,8 @@
     "submitting": "Recording…",
     "result": {
       "demo": "Demo profiles are read-only. Nothing was recorded.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "You do not have access to record this transaction. Nothing was recorded.",
       "mfa": "Additional verification is required. Nothing was recorded.",
       "validation": "These details were rejected. Edit them before submitting again.",
@@ -912,27 +1215,20 @@
       "templateFailed": "Could not share the template on this device.",
       "typeCodes": "Type codes",
       "showTypeCodes": "Show type codes",
-      "hideTypeCodes": "Hide type codes",
-      "rowsFailed": "{{failed}} of {{total}} rows couldn't be imported. Check their columns, dates, amounts and type codes against the format."
+      "hideTypeCodes": "Hide type codes"
     },
     "chooseFile": "Choose file",
     "phases": {
       "uploading": "Uploading file…",
-      "starting": "Starting import…",
-      "processing": "Processing your statement…"
-    },
-    "outcomes": {
-      "succeeded": "Import complete. New transactions were added.",
-      "partial": "Import complete. Some rows could not be imported.",
-      "needs_action": "This import needs manual review. Finish it on wonder.money on the web.",
-      "stale": "This import could not be completed in time. Try again.",
-      "failed": "This file could not be imported."
+      "starting": "Starting import…"
     },
     "importAnother": "Import another file",
     "done": "Done",
     "tryAgain": "Try again",
     "failures": {
       "demo": "Importing transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The import was cancelled before it was sent.",
@@ -941,7 +1237,66 @@
       "unsupported-bank": "This bank format is not supported yet.",
       "general": "Could not complete the import. Check your connection and try again.",
       "unknown-format": "This version of the app can't import into this account. Update the app, or import on the web.",
-      "csv-only": "This account imports a CSV file in the format shown. Choose a .csv file."
+      "csv-only": "This account imports a CSV file in the format shown. Choose a .csv, .ofx, .qfx, .qif or .xml file.",
+      "conflict": "This import changed in the meantime. Check it and try again."
+    },
+    "review": {
+      "reading": "Reading your file…",
+      "readStalled": "Reading the file stopped before it finished. Try again to read it again.",
+      "importing": "Importing… {{imported}} of {{total}} transactions so far.",
+      "stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
+      "readFailed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
+      "expired": "This import expired before it was finished. Start again with the file.",
+      "unsupported": "This version of the app can't show this import. Update the app, or finish it on the web.",
+      "needsWeb": "This file has its own categories to match, which the app can't do yet. Nothing was imported: cancel this import and import the file on the web.",
+      "needsWebPdf": "This is a PDF statement, whose balances the app can't check yet. Nothing was imported: cancel this import and review the statement on the web.",
+      "loadFailed": "Could not load this import. Check your connection and try again.",
+      "unnamed": "Import of {{date}}",
+      "summary": "Nothing is imported until you confirm. New transactions are included; ones already in the account are skipped.",
+      "filter": "Show",
+      "filters": {
+        "all": "All ({{count}})",
+        "new": "New ({{count}})",
+        "duplicate": "Already in the account ({{count}})",
+        "possible_duplicate": "Possible duplicates ({{count}})",
+        "invalid": "Couldn't be read ({{count}})"
+      },
+      "status": {
+        "new": "New",
+        "duplicate": "Already in the account",
+        "possible_duplicate": "Possible duplicate",
+        "invalid": "Couldn't be read",
+        "imported": "Imported",
+        "skipped": "Skipped",
+        "failed": "Couldn't be imported"
+      },
+      "row": "Row {{row}}",
+      "includeRow": "Import row {{row}}",
+      "includeAll": "Include all",
+      "skipAll": "Skip all",
+      "commit_one": "Import {{count}} transaction",
+      "commit_other": "Import {{count}} transactions",
+      "commitNothing": "Nothing to import",
+      "cancel": "Cancel import",
+      "page": "Page {{page}} of {{pages}}",
+      "previous": "Previous",
+      "next": "Next",
+      "empty": "No rows here.",
+      "mappingTitle": "This file holds several accounts. Choose where each one goes.",
+      "mappingSource_one": "{{label}} ({{count}} row)",
+      "mappingSource_other": "{{label}} ({{count}} rows)",
+      "mappingChoose": "Choose an account",
+      "mappingSave": "Save accounts",
+      "dateOrderTitle": "These dates could be day first or month first.",
+      "dateOrderHintDayFirst": "The file doesn't say, so they were read day first (15/01/2026 is 15 January). Choose the other order if that's wrong.",
+      "dateOrderHintMonthFirst": "The file doesn't say, so they were read month first (01/15/2026 is 15 January). Choose the other order if that's wrong.",
+      "dayFirst": "Day first (31/01/2026)",
+      "monthFirst": "Month first (01/31/2026)",
+      "done_one": "{{count}} transaction imported, {{skipped}} skipped.",
+      "done_other": "{{count}} transactions imported, {{skipped}} skipped.",
+      "doneFailed_one": "{{count}} row couldn't be imported.",
+      "doneFailed_other": "{{count}} rows couldn't be imported.",
+      "detailsDeleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account."
     }
   },
   "transactionOcr": {
@@ -981,6 +1336,8 @@
     },
     "failures": {
       "demo": "Scanning receipts is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "allowance": "Your household has used today's receipt-scanning allowance. It resets at midnight UTC.",
       "unverified": "Verify your email address to use receipt scanning.",
       "access": "Your access changed. Try again.",
@@ -1033,6 +1390,8 @@
     },
     "actionResult": {
       "demo": "Demo profiles are read-only. Nothing was changed",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
       "mfa": "Additional verification is required. Nothing was changed",
       "cancelled": "The change was cancelled because your session changed",
       "network": "The result is uncertain because the connection was lost. Check the list before trying again",
@@ -1188,6 +1547,19 @@
       "paused": "Paused",
       "ended": "Ended",
       "dismissed": "Dismissed"
+    },
+    "calendar": "Calendar",
+    "calendarDescription": "Which bills fall on which day this month",
+    "calendarPreviousMonth": "Previous month",
+    "calendarNextMonth": "Next month",
+    "calendarEmpty": "No recurring payments this month",
+    "calendarLoading": "Loading this month's payments…",
+    "calendarUnavailable": "This month's payments are unavailable",
+    "occurrenceStatus": {
+      "paid": "Paid",
+      "due": "Due",
+      "overdue": "Overdue",
+      "projected": "Projected"
     }
   },
   "more": {
@@ -1232,6 +1604,10 @@
     },
     "appInformation": "App information",
     "version": "Version {{version}}",
+    "serverVersion": "Server {{version}}",
+    "copyVersionInfo": "Copy version info",
+    "versionInfoCopied": "Version info copied",
+    "versionInfoCopyFailed": "Could not copy the version info. Try again.",
     "environment": "Environment {{environment}}",
     "environments": {
       "local": "Local",
@@ -1239,7 +1615,10 @@
     },
     "goals": "Goals",
     "help": "Help",
-    "whatsNew": "What's new"
+    "whatsNew": "What's new",
+    "pendingChanges": "Pending changes",
+    "pendingChangesCount_one": "{{count}} waiting",
+    "pendingChangesCount_other": "{{count}} waiting"
   },
   "preferences": {
     "title": "Appearance & Language",
@@ -1258,7 +1637,7 @@
       "pt-PT": "Português (Portugal)",
       "es": "Español"
     },
-    "languageScope": "Language changes the app interface only. It does not change email or account profile language."
+    "languageScope": "Language changes the app interface on this device and the language of your emails. Emails that are not translated yet arrive in English."
   },
   "categories": {
     "title": "Categories",
@@ -1404,6 +1783,7 @@
     "failures": {
       "validation": "The category details are invalid.",
       "demo": "Demo profiles are read-only. No category changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to change categories.",
       "mfa": "Additional verification is required before changing categories.",
       "not-found": "This category or selected main category is no longer available. Refresh Categories.",
@@ -1500,7 +1880,8 @@
     },
     "rateType": {
       "FIXED": "Fixed rate",
-      "UNKNOWN": "Rate type unavailable"
+      "UNKNOWN": "Rate type unavailable",
+      "VARIABLE": "Variable rate"
     },
     "loanDetails": "Loan details",
     "openingDate": "Opening balance date",
@@ -1536,7 +1917,14 @@
     "loanType": "Loan type",
     "statusLabel": "Status",
     "description": "Description",
-    "repaymentsTitle": "Repayments"
+    "repaymentsTitle": "Repayments",
+    "payoff": "Payoff projection",
+    "payoffDate": "Projected payoff",
+    "monthsSaved": "Months saved",
+    "interestSaved": "Interest saved",
+    "never": "Does not pay off",
+    "payoffLoading": "Loading payoff projection",
+    "payoffUnavailable": "The payoff projection is unavailable right now."
   },
   "loanRepayment": {
     "title": "Repayment matching",
@@ -1585,6 +1973,7 @@
     "refreshBoth": "Refresh history and candidates",
     "result": {
       "demo": "Demo profiles are read-only. No repayment classification changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You do not have access to change this repayment classification.",
       "mfa": "Additional verification is required before changing repayment classifications.",
       "cancelled": "The request was cancelled before dispatch. Nothing changed and you may confirm again.",
@@ -1629,6 +2018,7 @@
     "saving": "Saving…",
     "failures": {
       "demo": "Demo mode is read-only. This loan was not created.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to add a loan.",
       "mfa": "Additional verification is required before adding a loan.",
       "invalid": "The server rejected these values. Review the amounts and dates entered.",
@@ -1685,6 +2075,7 @@
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this loan.",
       "mfa": "Additional verification is required before this loan can be changed.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
@@ -1703,6 +2094,207 @@
       "not-foundMessage": "This loan may have been removed.",
       "invalid-routeTitle": "Loan not available",
       "invalid-routeMessage": "Return to Loans and choose an available loan."
+    }
+  },
+  "loanForm": {
+    "securedAsset": "Secured against",
+    "securedAssetNone": "None",
+    "securedAssetHint": "Optional. The asset this loan is secured against, such as the home bought with a mortgage. Its page then shows the equity: what it is worth less what is still owed."
+  },
+  "expenseGroups": {
+    "title": "Groups",
+    "description": "Share costs with friends and family, see who owes whom, and settle up.",
+    "loading": "Loading groups",
+    "errorTitle": "Groups could not be loaded",
+    "errorMessage": "Check your connection and try again.",
+    "stale": "These groups may be out of date. Pull to refresh.",
+    "emptyTitle": "No groups yet",
+    "emptyMessage": "Create a group for a trip, a shared flat or a dinner, then share costs from your transactions.",
+    "new": "New group",
+    "archived": "Archived",
+    "archivedSection": "Archived",
+    "backToGroups": "Back to Groups",
+    "people_one": "{{count}} person",
+    "people_other": "{{count}} people",
+    "settledUp": "Settled up",
+    "youAreOwed": "You are owed {{amount}}",
+    "youOwe": "You owe {{amount}}",
+    "notInGroup": "You are not in this group",
+    "you": "You",
+    "youNamed": "{{name}} (you)",
+    "someone": "Someone",
+    "householdMember": "Household",
+    "outsideHousehold": "Not in the household",
+    "addPerson": "Add person",
+    "create": {
+      "title": "New group",
+      "save": "Create",
+      "close": "Close",
+      "name": "Name",
+      "namePlaceholder": "Lisbon trip",
+      "nameRequired": "Give the group a name.",
+      "currency": "Currency",
+      "currencyHint": "Settlements default to this currency. Balances are kept per currency.",
+      "choose": "Choose",
+      "household": "Household members",
+      "householdHint": "You are in the group already. Household members' shares count in your spending.",
+      "people": "People",
+      "peopleHint": "People without a WonderMoney account, by name. An email is only kept for reference; nothing is sent to it.",
+      "personName": "Name",
+      "personNameNumbered": "Name of person {{number}}",
+      "personNameRequired": "Each person needs a name.",
+      "personEmail": "Email (optional)",
+      "personEmailNumbered": "Email of person {{number}} (optional)",
+      "emailInvalid": "That email does not look right.",
+      "remove": "Remove",
+      "removePerson": "Remove {{name}}"
+    },
+    "edit": {
+      "action": "Edit group",
+      "title": "Edit group",
+      "save": "Save",
+      "currencyHint": "New settlements default to it. Shared expenses and settlements already recorded keep their own currency, and balances stay per currency."
+    },
+    "detail": {
+      "notFoundTitle": "Group not found",
+      "notFoundMessage": "This group was deleted or is not in your household.",
+      "sectionError": "This could not be loaded. Pull to refresh.",
+      "recordSettlement": "Record settlement",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "archivedNotice": "This group is archived. It is not offered for new expenses.",
+      "balances": "Balances",
+      "noBalances": "Nothing shared yet.",
+      "isOwed": "Is owed {{amount}}",
+      "owes": "Owes {{amount}}",
+      "settled": "Settled up",
+      "suggestedPayments": "Suggested payments",
+      "allSettled": "Everyone is settled up.",
+      "payment": {
+        "you-owe": "You owe {{to}} {{amount}}",
+        "owes-you": "{{from}} owes you {{amount}}",
+        "owes": "{{from}} owes {{to}} {{amount}}"
+      },
+      "record": "Record",
+      "recordPayment": "Record settlement: {{sentence}}",
+      "people": "People",
+      "remove": "Remove",
+      "removeNamed": "Remove {{name}}",
+      "removeTitle": "Remove {{name}}?",
+      "removeMessage": "They leave the group. Someone with shared expenses or settlements cannot be removed.",
+      "sharedExpenses": "Shared expenses",
+      "noExpenses": "No shared expenses yet. Share one from a transaction with Split with group.",
+      "paidBy": "Paid by {{name}}",
+      "settlements": "Settlements",
+      "noSettlements": "No settlements yet.",
+      "paid": "{{from}} paid {{to}}",
+      "linked": "Linked",
+      "deleteSettlement": "Delete",
+      "deleteSettlementTitle": "Delete this settlement?",
+      "deleteSettlementMessage": "{{from}} paid {{to}} {{amount}}. Balances go back to what they were before it.",
+      "delete": "Delete group",
+      "deleteHelper": "Only a group with no shared expenses or settlements can be deleted.",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteMessage": "This cannot be undone.",
+      "notEmptyTitle": "This group has history",
+      "notEmptyMessage": "A group with shared expenses or settlements cannot be deleted. Archive it instead to hide it from new expenses."
+    },
+    "settlement": {
+      "title": "Record settlement",
+      "save": "Save",
+      "close": "Close",
+      "from": "From",
+      "to": "To",
+      "choose": "Choose",
+      "samePerson": "Choose two different people.",
+      "amount": "Amount",
+      "amountIn": "Amount in {{currency}}",
+      "currency": "Currency",
+      "currencyHint": "In {{currency}}.",
+      "date": "Date",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional",
+      "amountErrors": {
+        "invalid": "Enter an amount, such as 12.50.",
+        "too-precise": "Use at most 4 decimals.",
+        "zero": "Enter more than zero.",
+        "over": "At most {{amount}} is left on the linked transaction."
+      },
+      "linkTitle": "Linked transaction",
+      "linkHint": "Optional: the money that moved. It then stops counting as income or spending.",
+      "searchLabel": "Search transactions",
+      "searchPlaceholder": "Description or merchant",
+      "loading": "Looking for transactions…",
+      "loadError": "Transactions could not be loaded.",
+      "empty": "No matching transactions.",
+      "left": "{{amount}} left to link"
+    },
+    "split": {
+      "action": "Split with group",
+      "title": "Split with group",
+      "save": "Save",
+      "close": "Close",
+      "group": "Group",
+      "choose": "Choose",
+      "noGroups": "No groups to share with. Create one in Groups first.",
+      "groupsError": "Groups could not be loaded.",
+      "paidBy": "Paid by",
+      "method": "Split",
+      "methods": {
+        "equal": "Equally",
+        "amounts": "By amount",
+        "percentages": "By percentage"
+      },
+      "include": "Include {{name}}",
+      "amount": "Amount",
+      "amountOf": "Amount for {{name}}",
+      "percent": "Percentage",
+      "percentOf": "Percentage for {{name}}",
+      "remaining": "{{amount}} left to assign",
+      "over": "{{amount}} over the total",
+      "remainingPercent": "{{percent}}% left to assign",
+      "overPercent": "{{percent}}% over 100%",
+      "balanced": "Adds up",
+      "lineErrors": {
+        "invalid": "Enter a number.",
+        "too-precise": "Too many decimals.",
+        "zero": "Enter more than zero.",
+        "over-100": "At most 100%."
+      },
+      "problems": {
+        "no-amount": "This transaction has no amount to share.",
+        "no-people": "Choose at least one person.",
+        "zero-share": "Every share must be more than zero."
+      },
+      "outsiderHint": "Shares of people outside the household don't count as your spending.",
+      "current": "Current shares",
+      "paidByInGroup": "Paid by {{name}} · {{group}}",
+      "shares": "Shares",
+      "sharedIn": "Shared in a group",
+      "editShares": "Edit shares",
+      "stopSharing": "Stop sharing",
+      "stopSharingHelper": "The transaction becomes whole again, in one category.",
+      "stopTitle": "Stop sharing?",
+      "stopMessage": "The shares are removed from the group and the transaction is whole again, in one category."
+    },
+    "errors": {
+      "in-group": "This transaction is shared in a group or settles one. Change it from the group.",
+      "shares-invalid": "The shares don't add up. Check the amounts or percentages.",
+      "transaction-conflict": "This transaction can't be shared: it is a transfer, a loan repayment, a reimbursement, a settlement, or already shared in another group.",
+      "settlement-invalid": "This settlement isn't possible. A linked transaction must be money between someone of the household and someone outside it, in the right direction.",
+      "currency-mismatch": "The linked transaction is in another currency.",
+      "amount-exceeded": "That is more than what is left on the linked transaction.",
+      "member-invalid": "That person can't be added. A household member can only be in a group once.",
+      "member-in-use": "This person has shared expenses or settlements, so they can't be removed.",
+      "not-empty": "A group with shared expenses or settlements can't be deleted. Archive it instead.",
+      "not-found": "That group, person or transaction is no longer available. Refresh and try again.",
+      "demo": "Demo profiles are read-only. Nothing was changed.",
+      "read-only": "$t(common.householdReadOnly)",
+      "mfa": "Multi-factor authentication is required. Nothing was changed.",
+      "cancelled": "The change was cancelled because your session changed. Nothing was changed.",
+      "network": "The request had an uncertain network result. Check the group before trying again.",
+      "error": "The change could not be saved. Try again.",
+      "account-read-only": "$t(common.accountReadOnly)"
     }
   },
   "manualAssets": {
@@ -1729,10 +2321,12 @@
       "property": "Property",
       "vehicle": "Vehicle",
       "valuable": "Valuable",
-      "other": "Other"
+      "other": "Other",
+      "crypto_wallet": "Crypto wallet"
     },
     "failures": {
       "demo": "The demo is read-only, so nothing was saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You can no longer change this asset. Sign in again or check with your household.",
       "mfa": "Confirm it is you to continue.",
       "not-found": "This asset no longer exists, or it is private to the other member of your household.",
@@ -1762,7 +2356,17 @@
     "historyTitle": "Value over time",
     "chartLabel": "Value over time, from {{from}} to {{to}}",
     "valuationsTitle": "Valuations",
-    "manageOnWeb": "Edit, archive or delete this asset, or correct a valuation, in WonderMoney on the web.",
+    "valuationsOnWeb": "Correct or remove a valuation in WonderMoney on the web.",
+    "manage": {
+      "edit": "Edit asset",
+      "archive": "Archive",
+      "unarchive": "Bring back",
+      "delete": "Delete asset",
+      "archiveTitle": "Archive this asset?",
+      "archiveMessage": "It stops counting in net worth from today. Its history stays.",
+      "deleteTitle": "Delete this asset?",
+      "deleteMessage": "Its valuations go with it, and it leaves your net worth history. This cannot be undone."
+    },
     "facts": {
       "title": "Details",
       "kind": "Kind",
@@ -1776,6 +2380,17 @@
       "shared": "Shared with your household",
       "owner": "Owner",
       "notes": "Notes"
+    },
+    "equity": {
+      "title": "Equity",
+      "value": "Value today",
+      "linkedDebt": "Owed on secured loans",
+      "equity": "Equity",
+      "loans": "Loans secured against it",
+      "converted": "{{amount}} at today's rate",
+      "noRate": "Equity cannot be worked out: there is no exchange rate from {{currencies}} to {{currency}} yet.",
+      "archived": "An archived asset has no value today, so it has no equity.",
+      "underwater": "Underwater: more is owed on its loans than it is worth."
     }
   },
   "manualAssetCreate": {
@@ -1799,14 +2414,30 @@
     "growthRateOptional": "Yearly change in percent, optional",
     "growthRateHint": "The value changes by this percentage each year after the latest valuation. Use a negative number for something that loses value, such as a car.",
     "private": "Private asset",
-    "privateDescription": "Only you see this asset. It stays out of the other household member's net worth.",
+    "privateDescription": "Only you see this asset. It stays out of the net worth of the other people in your household.",
     "notes": "Notes",
     "notesOptional": "Notes, optional",
     "optional": "Optional",
     "fieldErrors": {
       "value": "Enter zero or more",
       "amount": "Enter zero or more",
-      "growthRate": "Enter a percentage above -100 and up to 1000"
+      "growthRate": "Enter a percentage above -100 and up to 1000",
+      "date": "Enter a valid date (YYYY-MM-DD)."
+    }
+  },
+  "manualAssetEdit": {
+    "title": "Edit asset",
+    "loading": "Loading asset",
+    "error": "This asset could not be loaded. Close and try again.",
+    "invalid": "The server sent something this version of the app cannot read. Close and try again, or update the app.",
+    "notFound": "This asset no longer exists, or it is private to the other member of your household.",
+    "save": "Save changes",
+    "saving": "Saving",
+    "growthStartDate": "Changes from",
+    "growthStartDateHint": "The value stays as it is until this date.",
+    "ownerOnlyPrivacy": "Only the asset's owner can change whether it is private.",
+    "fieldErrors": {
+      "name": "This field is required"
     }
   },
   "manualAssetValuation": {
@@ -1819,6 +2450,107 @@
     "noteOptional": "Note, optional",
     "notePlaceholder": "e.g. Agent estimate",
     "description": "Recording a value never creates a transaction. A value already recorded for the same date is replaced."
+  },
+  "cryptoWallet": {
+    "add": "Add crypto wallet",
+    "notValuedYet": "Not valued yet",
+    "publicOnly": "Only public addresses are accepted: a Bitcoin or Ethereum address, or an xpub, ypub or zpub for Bitcoin. Never enter a private key or a recovery phrase. Anyone who has one can spend your coins.",
+    "secretBlocked": "That looked like a private key or a recovery phrase, so it was cleared and not sent. Enter a public address instead.",
+    "chain": "Network",
+    "address": "Address",
+    "label": "Label",
+    "labelOptional": "Label, optional",
+    "chains": {
+      "bitcoin": "Bitcoin",
+      "ethereum": "Ethereum",
+      "unknown": "Other network"
+    },
+    "kinds": {
+      "address": "Address",
+      "xpub": "Extended public key"
+    },
+    "status": {
+      "pending": "Pending",
+      "ok": "Synced",
+      "failed": "Failed"
+    },
+    "errors": {
+      "timeout": "The explorer took too long to answer.",
+      "rate_limited": "The explorer is limiting requests. It will be tried again later.",
+      "unavailable": "The explorer could not be reached.",
+      "rejected": "The explorer did not accept this address.",
+      "invalid_response": "The explorer sent an answer that could not be read.",
+      "disabled": "This network is no longer turned on on this server.",
+      "unknown": "The last read failed."
+    },
+    "addressHints": {
+      "bitcoin": "An address starting with 1, 3 or bc1, or an xpub, ypub or zpub.",
+      "ethereum": "An address starting with 0x. ETH and its tokens are read."
+    },
+    "fieldErrors": {
+      "address": "Enter an address",
+      "name": "Enter a name"
+    },
+    "failures": {
+      "secret-rejected": "That looked like a private key or a recovery phrase, so it was not accepted. Enter a public address instead.",
+      "address-invalid": "This is not a valid address for the chosen network.",
+      "address-exists": "This address is already on the wallet.",
+      "feature-disabled": "Crypto wallets are not turned on for this network on this server.",
+      "demo": "The demo is read-only, so nothing was saved.",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "You can no longer change this wallet. Sign in again or check with your household.",
+      "mfa": "Confirm it is you to continue.",
+      "not-found": "This wallet no longer exists, or it is private to the other member of your household.",
+      "invalid": "Something entered is not valid. Check the fields and try again.",
+      "invalid-response": "It may have been saved, but the server's answer could not be read. Refresh before trying again.",
+      "network-ambiguous": "The connection dropped, so it is not known whether it was saved. Refresh before trying again.",
+      "general": "It could not be saved. Try again."
+    },
+    "create": {
+      "title": "Add crypto wallet",
+      "save": "Add wallet",
+      "saving": "Adding",
+      "name": "Name",
+      "namePlaceholder": "e.g. Hardware wallet",
+      "private": "Private wallet",
+      "addressHeading": "Address {{number}}",
+      "removeAddress": "Remove",
+      "removeAddressNumber": "Remove address {{number}}",
+      "addAddress": "Add another address",
+      "numbered": "{{label}}, address {{number}}"
+    },
+    "detail": {
+      "title": "Addresses",
+      "lastSynced": "Balances read {{time}}. They are read again every day.",
+      "neverSynced": "The balances have not been read yet. The first read is on its way.",
+      "tickHint": "Only ticked tokens count towards the value. Tokens found on an address are ignored until you tick them.",
+      "unpriced": "No price for {{symbols}}, so today's value was not updated. Untick a token to leave it out.",
+      "removeTitle": "Remove this address?",
+      "removeMessage": "{{address}} and its tokens stop counting towards this wallet.",
+      "remove": "Remove",
+      "removeFor": "Remove {{address}}",
+      "addAddress": "Add address",
+      "adding": "Adding",
+      "syncNow": "Sync now",
+      "syncQueued": "Sync requested. Pull to refresh in a moment to see the balances.",
+      "synced": "Synced {{time}}",
+      "balancesAsOf": "Balances as of {{time}}.",
+      "pending": "Waiting for the first read",
+      "editLabel": "Edit label",
+      "editLabelFor": "Edit label of {{address}}",
+      "saveLabel": "Save label",
+      "noPrice": "No price",
+      "countToken": "Count {{symbol}}",
+      "notValuedYet": "Not valued yet: the value appears after the first sync."
+    },
+    "manage": {
+      "edit": "Edit wallet",
+      "editTitle": "Edit wallet",
+      "save": "Save",
+      "remove": "Remove wallet",
+      "removeTitle": "Remove this wallet?",
+      "removeMessage": "{{name}}, its addresses and its value history are deleted. This cannot be undone."
+    }
   },
   "budgets": {
     "title": "Budgets",
@@ -1856,7 +2588,10 @@
     "nothingSpent": "Nothing spent yet",
     "createFirst": "Create your first budget",
     "total": "Total",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {{name}}",
+    "personal": "Personal",
+    "groupHousehold": "Household",
+    "groupPersonal": "Personal"
   },
   "budgetMonth": {
     "back": "Back to Budgets",
@@ -1873,6 +2608,7 @@
     "previous": "Previous",
     "next": "Next",
     "periodNavigation": "Budget period, {{period}}",
+    "periodWithRange": "Budget period, {{period}}, {{range}}",
     "categories": "Categories",
     "categoriesHelper": "Parent totals include their subcategories",
     "noCategories": "No categories are available for this month",
@@ -1908,6 +2644,7 @@
       "forward": "Remove from this month onward",
       "failures": {
         "demo": "Demo mode is read-only. This category was not removed.",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "You no longer have access to change this budget.",
         "cancelled": "The removal was cancelled because your signed-in context changed.",
         "not-found": "This category is no longer part of the budget.",
@@ -1973,6 +2710,9 @@
     "scopeForward_one": "Selected month through December ({{count}} month)",
     "scopeForward_other": "Selected month through December ({{count}} months)",
     "scopeNote": "The selected route month is the starting point. Earlier months and future years are never changed.",
+    "suggestionLabel": "Suggested from your spending: {{amount}}",
+    "suggestionApply": "Apply",
+    "suggestionNotEnoughData": "Not enough history yet for a suggestion.",
     "save": "Save category budget",
     "saving": "Saving category budget…",
     "confirmTitle": "Apply through December?",
@@ -1981,6 +2721,7 @@
     "confirmAction": "Apply through December",
     "failures": {
       "demo": "Demo mode is read-only. No category change was saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget category.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the retained values before trying again.",
       "not-found": "This category or budget month is no longer available. Future month rows may not exist. Your values were retained.",
@@ -2046,6 +2787,7 @@
     "failures": {
       "unknown": "The creation result is unknown. The app is checking both budget lists and will not submit again",
       "demo": "Demo profiles are read-only. No budget was created",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to create a budget",
       "invalid": "Review the household and income values",
       "general": "The budget could not be created. Your entries were retained"
@@ -2070,7 +2812,14 @@
       "question": "What is your total household income?",
       "description": "It's important that you add your current income in order to have full visibility of your finances."
     },
-    "progress": "Step {{current}} of {{total}}"
+    "progress": "Step {{current}} of {{total}}",
+    "visibility": {
+      "label": "Who can see this budget",
+      "household": "Household",
+      "personal": "Personal",
+      "householdDescription": "Everyone in your household can see this budget.",
+      "personalDescription": "Only you can see this budget. Other household members, including the household’s owner and admins, can’t."
+    }
   },
   "budgetAddCategory": {
     "title": "Add existing category",
@@ -2097,6 +2846,7 @@
       "unknown": "The result is uncertain. The current month is being refreshed before another attempt is allowed",
       "duplicate": "The server reported a duplicate. The current month was refreshed because the category may already exist",
       "demo": "Demo profiles are read-only. No category was added",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to add a budget category",
       "not-found": "The budget or category is no longer available",
       "invalid": "Choose a leaf category, positive amount, and recurrence",
@@ -2122,13 +2872,15 @@
     "saving": "Saving…",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget.",
       "cancelled": "The save was cancelled because your signed-in context changed.",
       "not-found": "This budget no longer exists.",
       "network-ambiguous": "The connection was lost while saving. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
       "invalid": "One or more accounts don't exist or aren't yours.",
       "general": "The linked accounts could not be saved."
-    }
+    },
+    "privateHidden": "Private accounts can’t be linked to a household budget, so they aren’t listed. A personal budget can use your private accounts."
   },
   "budgetYear": {
     "helper": "{{year}} overview",
@@ -2165,6 +2917,9 @@
     "description": "Description",
     "carryOverspend": "Carry overspending into next month",
     "carryOverspendHint": "Spending past a category’s amount is taken off next month. When off, only unspent money rolls over.",
+    "periodStartDay": "Month starts on",
+    "periodStartDayHint": "Day 1 follows the calendar. A later day, such as payday, starts each budget month on it: with 25, November runs from 25 October to 24 November.",
+    "periodStartDayOption": "Day {{day}}",
     "descriptionHint": "Optional, up to 500 characters",
     "characterCount": "{{count}} / {{max}}",
     "saveDetails": "Save details",
@@ -2174,6 +2929,7 @@
     "discard": "Discard changes",
     "failures": {
       "demo": "Demo mode is read-only. No changes were saved.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this budget.",
       "cancelled": "The save was cancelled because your signed-in context changed. Review the current form before trying again.",
       "not-found": "This budget no longer exists. Your form has not been cleared.",
@@ -2190,6 +2946,7 @@
     "deleteConfirmAction": "Delete budget",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This budget was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to delete this budget.",
       "cancelled": "The deletion was cancelled because your signed-in context changed.",
       "not-found": "This budget no longer exists.",
@@ -2345,6 +3102,7 @@
       "validation": "The server did not accept these details. Review the fields before confirming again",
       "request": "The server rejected this request. Review the frozen details or return to Goals",
       "demo": "Demo mode is read-only. No goal was created",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed before this goal could be created",
       "mfa": "Complete multi-factor authentication before creating a goal",
       "cancelled": "Creation was cancelled before the request was sent. No goal was created",
@@ -2430,6 +3188,7 @@
         "validation": "Enter a positive amount with no more than four decimal places",
         "insufficient-reserve": "The amount cannot exceed the available reserve. Refresh before trying a different amount",
         "demo": "Demo mode is read-only. No reserve change was made",
+        "read-only": "$t(common.householdReadOnly)",
         "access": "Your access changed before this reserve change could be saved",
         "mfa": "Complete multi-factor authentication before changing this reserve",
         "not-found": "This goal is no longer available",
@@ -2442,6 +3201,7 @@
     "writeFailures": {
       "validation": "Check the highlighted details. Amounts must be positive and use no more than four decimal places",
       "demo": "Demo mode is read-only. No change was made",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed before this could be saved",
       "mfa": "Complete multi-factor authentication before making this change",
       "not-found": "This goal or account is no longer available. Refresh before trying again",
@@ -2571,6 +3331,14 @@
       "insufficientHistory": "Not enough history yet to chart performance",
       "currencyIncomplete": "Some days leave out a portfolio in a currency with no exchange rate for that day, so those totals are partial.",
       "totalReturn": "{{value}}%",
+      "returnLabel": "Return (time-weighted)",
+      "returnAsOf": "as of {{date}}",
+      "flowMarkers": "Dots on the line mark days with a deposit or withdrawal.",
+      "deposit": "Deposit {{amount}}",
+      "withdrawal": "Withdrawal {{amount}}",
+      "flowUnknown": "Deposit or withdrawal, amount unknown",
+      "flowsMore_one": "and {{count}} more day",
+      "flowsMore_other": "and {{count}} more days",
       "range": "{{start}} – {{end}}",
       "periods": {
         "1M": "1M",
@@ -2661,6 +3429,7 @@
     "failures": {
       "validation": "Check the name and currency",
       "demo": "Portfolio creation is unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed. Return to the app and try again",
       "mfa": "Additional verification is required",
       "cancelled": "Creation was cancelled before it was sent",
@@ -2742,6 +3511,7 @@
     "failures": {
       "validation": "Check the fields",
       "demo": "Portfolio settings are unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed",
       "mfa": "Additional verification is required",
       "not-found": "This portfolio is no longer available",
@@ -2749,6 +3519,38 @@
       "unknown": "The save outcome is unknown",
       "request": "These changes were not accepted",
       "general": "Could not save portfolio settings"
+    }
+  },
+  "portfolioAccountLink": {
+    "accountLabel": "Account that holds this portfolio",
+    "notLinked": "Not linked",
+    "selectAccount": "Select an account",
+    "question": "Does this account's balance include your investments?",
+    "includesHoldings": "Yes, it includes them",
+    "includesHoldingsHint": "Net worth counts the account and shows this portfolio without adding it again.",
+    "cashOnly": "No, cash only",
+    "cashOnlyHint": "Net worth counts the account's cash and this portfolio.",
+    "managedByPartner": "This portfolio is linked to an account only another household member can see, so only they can change the link.",
+    "alreadyLinkedBy": "Already linked by {{name}}",
+    "suggestionTitle": "Is this the same money?",
+    "suggestionBody": "You have an investment account and a portfolio that isn't linked to an account. If the account already holds the portfolio, link them so net worth counts it once.",
+    "suggestionLink": "Link a portfolio",
+    "dismiss": "Dismiss",
+    "dialogTitle": "Link a portfolio to its account",
+    "portfolioLabel": "Portfolio",
+    "selectPortfolio": "Select a portfolio",
+    "save": "Save",
+    "saving": "Saving",
+    "saved": "Link saved",
+    "failures": {
+      "demo": "Linking is unavailable in demo mode",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "Your access changed",
+      "mfa": "Additional verification is required",
+      "not-found": "This portfolio or account is no longer available",
+      "unknown": "Could not confirm the link was saved. Try again",
+      "request": "This link was not accepted",
+      "general": "Could not save the link"
     }
   },
   "portfolioActivity": {
@@ -2763,6 +3565,7 @@
     "deleteConfirmMessage": "This permanently removes {{name}} from this portfolio. This cannot be undone.",
     "deleteFailures": {
       "demo": "Demo mode is read-only. This transaction was not deleted.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Multi-factor authentication is required to make this change.",
       "not-found": "This transaction no longer exists.",
@@ -2780,6 +3583,7 @@
     "savingEdit": "Saving…",
     "editFailures": {
       "demo": "Demo mode is read-only. This transaction was not changed.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Multi-factor authentication is required to make this change.",
       "not-found": "This transaction no longer exists.",
@@ -2918,7 +3722,7 @@
   },
   "household": {
     "title": "Household",
-    "helper": "Share your WonderMoney plan with one partner",
+    "helper": "Share your WonderMoney plan with the people in your household",
     "loading": "Loading your household…",
     "back": "Back",
     "stale": "Showing the last known household. Pull to refresh for the latest.",
@@ -2926,66 +3730,134 @@
       "heading": "Members",
       "you": "You",
       "roleOwner": "Owner",
-      "roleMember": "Member"
+      "roleMember": "Member",
+      "roleAdmin": "Admin",
+      "roleViewer": "Viewer"
     },
     "actions": {
-      "remove": "Remove",
-      "leave": "Leave household"
+      "remove": "Remove from household",
+      "leave": "Leave household",
+      "changeRole": "Change role",
+      "transferOwnership": "Make owner",
+      "menuFor": "Actions for {{name}}"
     },
     "leaving": "Leaving…",
     "removeDialog": {
       "title": "Remove {{name}}?",
-      "description": "They will lose access to this household's shared finances. Their existing data stays, but their bank connections will be disconnected.",
+      "description": "They lose access to this household right away and are signed out. The accounts and transactions they added stay with the household, and their bank connections are disconnected.",
       "confirm": "Remove"
     },
     "leaveDialog": {
       "title": "Leave this household?",
-      "description": "You will lose access to this household's shared finances. Your existing data stays, but your bank connections will be disconnected.",
+      "description": "You lose access to its shared accounts, budgets and goals, and your bank connections are disconnected. You'll be signed out; sign in again to start with a household of your own.",
       "confirm": "Leave"
     },
-    "removeFailures": {
-      "demo": "This action is unavailable in demo mode.",
-      "access": "You no longer have access to manage this household.",
-      "cancelled": "This was cancelled because your signed-in context changed.",
-      "conflict": "This member could not be removed right now.",
-      "invalid": "This member could not be removed.",
-      "not-found": "This member is no longer part of the household.",
-      "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
-      "general": "This could not be completed. Try again."
-    },
     "pending": {
-      "heading": "Pending invite",
+      "heading": "Pending invites",
       "sentTo": "Invited {{email}}",
       "expires": "Expires {{date}}",
       "resend": "Resend",
       "resending": "Resending…",
       "revoke": "Revoke",
-      "revoking": "Revoking…"
+      "revoking": "Revoking…",
+      "resendFor": "Resend invite to {{email}}",
+      "revokeFor": "Revoke invite to {{email}}"
     },
     "invite": {
-      "heading": "Invite a partner",
-      "description": "Invite one partner to share this household's plan. They'll get an email with a link to join.",
+      "heading": "Invite someone",
+      "description": "They'll get an email with a link to join. Someone who already has an account joins from the app.",
       "emailLabel": "Email",
-      "emailPlaceholder": "partner@example.com",
+      "emailPlaceholder": "name@example.com",
       "invalidEmail": "Enter a valid email address",
       "submit": "Send invite",
-      "sending": "Sending…"
+      "sending": "Sending…",
+      "roleLabel": "Role",
+      "full": "Your household is full: it has room for {{max}} people, counting pending invites."
     },
     "inviteFailures": {
       "demo": "Invites are unavailable in demo mode.",
-      "access": "You no longer have access to invite a partner.",
+      "access": "You no longer have access to invite people.",
       "cancelled": "This was cancelled because your signed-in context changed.",
-      "conflict": "Your household is full, or that email already has an account.",
+      "conflict": "This invite could not be sent right now. Refresh and try again.",
       "invalid": "Enter a valid email address that isn't your own.",
       "not-found": "This household could not be found.",
       "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
-      "general": "The invite could not be sent. Try again."
+      "general": "The invite could not be sent. Try again.",
+      "read-only": "You have view-only access to this household, so no invite was sent.",
+      "role-required": "Your role can't invite people with that role.",
+      "full": "Your household is full. Revoke an invite or remove someone first.",
+      "already-member": "That person is already in this household."
     },
     "states": {
       "errorTitle": "Could not load your household",
       "errorMessage": "Check your connection and try again.",
       "invalid-responseTitle": "Could not verify household data",
       "invalid-responseMessage": "This screen will not use unverified household data."
+    },
+    "roles": {
+      "adminDescription": "Can invite people and manage members and viewers.",
+      "memberDescription": "Can see and change shared accounts, budgets and goals.",
+      "viewerDescription": "Can see shared finances but not change them."
+    },
+    "roleDialog": {
+      "title": "{{name}}'s role"
+    },
+    "transferDialog": {
+      "title": "Make {{name}} the owner?",
+      "description": "{{name}} becomes the owner of this household and can manage everyone in it. You become an admin. Only the new owner can undo this.",
+      "confirm": "Make owner",
+      "transferring": "Transferring…"
+    },
+    "memberFailures": {
+      "demo": "This action is unavailable in demo mode.",
+      "read-only": "You have view-only access to this household, so nothing was changed.",
+      "role-required": "Your role doesn't allow this change. Refresh to see the current roles.",
+      "access": "You no longer have access to manage this household.",
+      "cancelled": "This was cancelled because your signed-in context changed.",
+      "network-ambiguous": "The connection was lost. The result is unknown, so this app will not retry automatically. Refresh before trying again.",
+      "full": "Your household is full.",
+      "already-member": "That person is already in this household.",
+      "conflict": "This change could not be made right now. Refresh and try again.",
+      "invalid": "This change could not be made.",
+      "not-found": "This member is no longer part of the household.",
+      "general": "This could not be completed. Try again."
+    },
+    "joinExisting": {
+      "validating": "Checking your invite…",
+      "invalidTitle": "This invite isn't valid",
+      "invalidBody": "It may have been used, revoked or expired. Ask for a new invite.",
+      "unavailableTitle": "Couldn't check this invite",
+      "unavailableBody": "Check your connection and try again.",
+      "titleHousehold": "Join {{name}}?",
+      "titleInviter": "Join {{name}}'s household?",
+      "titleGeneric": "Join this household?",
+      "role": "You'll join as: {{role}}",
+      "invitedEmail": "Invite for {{email}}",
+      "consequencesHeading": "What happens to what you have now",
+      "consequences": {
+        "emptyOnly": "You can join only if your current household has no accounts or transactions.",
+        "leftBehind": "Budgets, categories, rules and goals you set up there stay behind. They are not moved.",
+        "banksDisconnected": "Bank connections there are disconnected.",
+        "yoursStays": "Your sign-in, profile and settings stay yours."
+      },
+      "failureTitle": "You couldn't join this household",
+      "failures": {
+        "household-has-data": "Your current household has accounts or transactions. Delete them first, or accept with another account.",
+        "household-has-members": "You own a household with other members. Transfer ownership or remove them first.",
+        "already-member": "You're already in this household.",
+        "household-full": "This household is full. Ask whoever invited you to make room.",
+        "email-mismatch": "This invite is for another email address. Sign in with the invited email to join.",
+        "expired": "This invite has expired. Ask for a new one.",
+        "invalid": "This invite isn't valid any more. Ask for a new one.",
+        "already-used": "This invite has already been used.",
+        "demo": "The demo can't join a household.",
+        "cancelled": "This was cancelled because your signed-in context changed.",
+        "network-ambiguous": "The connection was lost and the result is unknown. Open your household to check before trying again.",
+        "general": "Something went wrong. Try again."
+      },
+      "join": "Join household",
+      "joining": "Joining…",
+      "notNow": "Not now"
     }
   },
   "security": {
@@ -3027,7 +3899,7 @@
     },
     "dataExport": {
       "heading": "Export your data",
-      "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Your partner's private accounts are not included.",
+      "helper": "Download everything in your household that you can see (accounts, transactions, budgets, goals, loans and investments) as a zip of JSON and CSV files. Other members' private accounts are not included.",
       "start": "Export all data",
       "protect": "Protect the file with a password",
       "password": "Password",
@@ -3088,6 +3960,33 @@
       "access": "Your session could not authorize this action. Your account is unchanged.",
       "mfa": "Multi-factor authentication is required before deleting your account.",
       "cancelled": "Account deletion was cancelled. Your account is unchanged."
+    },
+    "passkeys": {
+      "heading": "Passkeys",
+      "helper": "Sign in with your fingerprint, face or device PIN instead of your password. A passkey sign-in doesn't ask for an authenticator code.",
+      "loading": "Loading passkeys…",
+      "loadFailed": "Your passkeys couldn't be loaded. Try again later.",
+      "retry": "Retry",
+      "empty": "You haven't added a passkey yet.",
+      "defaultName": "Passkey",
+      "addedOn": "Added {{date}}",
+      "lastUsed": "Last used {{date}}",
+      "neverUsed": "Never used",
+      "add": "Add a passkey",
+      "adding": "Adding…",
+      "added": "Passkey added.",
+      "unsupported": "This device can't use passkeys here. You can add one on the web app.",
+      "delete": "Delete",
+      "deleteNamed": "Delete {{name}}",
+      "deleteTitle": "Delete this passkey?",
+      "deleteDescription": "You won't be able to sign in with {{name}} any more. Your password and your other passkeys keep working. Remove it from your password manager too.",
+      "deleteConfirm": "Delete passkey",
+      "deleted": "Passkey deleted.",
+      "errors": {
+        "add": "The passkey couldn't be added. Try again.",
+        "sessionNotFresh": "Sign out and sign in again before adding a passkey.",
+        "delete": "The passkey couldn't be deleted. Try again."
+      }
     }
   },
   "notifications": {
@@ -3112,6 +4011,11 @@
       "title": "Bank connection alerts",
       "description": "Get an email when a bank's access is about to end (7 days and 1 day before), when a bank ends access early, or when a bank has failed to sync for more than 2 days.",
       "detail": "Only the bank connections you set up are included."
+    },
+    "creditCardDueReminders": {
+      "title": "Card payment reminders",
+      "description": "Get an email a few days before a closed credit card statement is due, if it still has a balance to pay.",
+      "detail": "At most one email per statement."
     },
     "marketingOptOut": {
       "title": "Unsubscribe from all marketing emails",
@@ -3143,7 +4047,32 @@
     },
     "retry": "Try again",
     "saving": "Saving change…",
-    "saveError": "This change could not be confirmed. Your preferences are being refreshed from the server."
+    "saveError": "This change could not be confirmed. Your preferences are being refreshed from the server.",
+    "push": {
+      "title": "Push notifications",
+      "description": "Get alerts on this phone. Each one is off until you turn it on, and the phone asks for permission the first time.",
+      "budgetAlerts": {
+        "title": "Budget alerts",
+        "description": "When a budget category reaches 80% or 100% of its plan."
+      },
+      "creditCardDueReminders": {
+        "title": "Card payment reminders",
+        "description": "A few days before a closed card statement is due."
+      },
+      "bankSyncAlerts": {
+        "title": "Bank connection alerts",
+        "description": "When a bank connection is about to expire, was ended by the bank, or keeps failing to sync."
+      },
+      "privacy": "Notifications never show amounts or merchants. Open the app to see the figures.",
+      "denied": "Notifications are turned off for WonderMoney in your phone's settings. Turn them on there, then try again.",
+      "unavailable": "This phone can't receive push notifications from this version of the app.",
+      "saveError": "This change could not be saved. Try again.",
+      "sendTest": "Send test notification",
+      "sendingTest": "Sending…",
+      "testSent": "Test notification sent. It should arrive in a few seconds.",
+      "testNoDevice": "Turn on a push notification first, so this phone is registered.",
+      "testError": "The test notification could not be sent. Try again."
+    }
   },
   "onboarding": {
     "firstRun": {
@@ -3275,6 +4204,7 @@
       "emptyMessage": "Connect a bank to bring read-only account data into WonderMoney.",
       "readOnlyTrust": "Open Banking access is read-only. WonderMoney cannot move money or make payments.",
       "rowLabel": "{{institution}}, status {{status}}, expires {{expiry}}, data {{freshness}}",
+      "rowLabelNoExpiry": "{{institution}}, status {{status}}, data {{freshness}}",
       "expiresOn": "Consent expires {{date}}",
       "freshnessOn": "Data fresh as of {{date}}",
       "freshnessUnknown": "Data freshness unavailable",
@@ -3299,6 +4229,8 @@
         "message": "The connection status received could not be verified. Try again to load a fresh copy."
       },
       "connectCta": "Connect a bank",
+      "simplefinCta": "Connect with SimpleFIN",
+      "simplefinHint": "For banks in the US and Canada, through SimpleFIN Bridge.",
       "result": {
         "success": {
           "title": "Bank connected",
@@ -3322,6 +4254,7 @@
         "confirmAction": "Disconnect",
         "failures": {
           "demo": "This action is unavailable in demo mode.",
+          "read-only": "$t(common.householdReadOnly)",
           "access": "You don't have access to disconnect this bank.",
           "cancelled": "The disconnect request was cancelled.",
           "not-found": "That connection is no longer available.",
@@ -3345,6 +4278,12 @@
         "action": "Reconnect",
         "actionLabel": "Reconnect {{institution}}",
         "starting": "Opening your bank…"
+      },
+      "simplefin": {
+        "statusRevoked": "Access revoked",
+        "accessEnded": "SimpleFIN access was revoked. Connect again with a new setup token.",
+        "accounts": "Accounts: {{names}}",
+        "noAccounts": "No accounts yet"
       }
     },
     "connect": {
@@ -3372,6 +4311,38 @@
         "notFound": "That bank is no longer available. Choose another one.",
         "unavailable": "That didn't go through. Check your connection and try again.",
         "general": "Something went wrong starting that connection. Please try again."
+      },
+      "credentialRequired": {
+        "title": "Add your Enable Banking key first",
+        "message": "Linking a bank needs your own Enable Banking application ID and key. Add them in Settings, under Bank Provider, in the WonderMoney web app, then come back here.",
+        "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
+      }
+    },
+    "simplefin": {
+      "heading": "Connect with SimpleFIN",
+      "helper": "Paste a setup token from SimpleFIN Bridge, which connects banks in the US and Canada.",
+      "tokenExplainer": "A setup token is a one-time code you create at SimpleFIN Bridge after linking your banks there. It works only once.",
+      "storageExplainer": "WonderMoney exchanges it once for read-only access to your accounts and stores that access encrypted. The token itself is not kept.",
+      "bridgeLink": "Get a setup token at SimpleFIN Bridge",
+      "bridgeLinkHint": "Opens bridge.simplefin.org in your browser",
+      "tokenLabel": "Setup token",
+      "tokenPlaceholder": "Paste your setup token",
+      "submit": "Connect",
+      "connecting": "Connecting…",
+      "failures": {
+        "token-invalid": "That isn't a valid SimpleFIN setup token. Copy the whole token from SimpleFIN Bridge and try again.",
+        "token-already-claimed": "This setup token was already used. If you didn't use it, disable it at SimpleFIN Bridge, since someone else may have claimed it, then create a new one.",
+        "server-not-allowed": "This setup token points to a SimpleFIN server this WonderMoney server doesn't allow. Create one at SimpleFIN Bridge instead.",
+        "rejected": "SimpleFIN did not accept this setup token. Create a new one at SimpleFIN Bridge and try again.",
+        "demo": "This action is unavailable in demo mode.",
+        "read-only": "$t(common.householdReadOnly)",
+        "access": "You don't have access to connect a bank.",
+        "mfa": "Additional verification is required before you can connect a bank.",
+        "disabled": "SimpleFIN isn't turned on for this server.",
+        "unreachable": "SimpleFIN couldn't be reached. Try again in a moment.",
+        "rate-limited": "Too many attempts. Wait a moment, then try again.",
+        "network": "We couldn't confirm the connection. Check your bank connections before trying again: a setup token works only once.",
+        "general": "Something went wrong connecting SimpleFIN. Please try again."
       }
     },
     "statementImport": {
@@ -3398,6 +4369,8 @@
       },
       "failures": {
         "demo": "This action is unavailable in demo mode.",
+        "read-only": "$t(common.householdReadOnly)",
+        "account-read-only": "$t(common.accountReadOnly)",
         "access": "You don't have access to import a statement.",
         "mfa": "Additional verification is required before you can import a statement.",
         "cancelled": "The import was cancelled.",
@@ -3618,6 +4591,7 @@
     "tryAgain": "Try again",
     "failures": {
       "demo": "Importing transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "Your access changed. Try again.",
       "mfa": "Additional verification is required.",
       "cancelled": "The import was cancelled before it was sent.",
@@ -3633,17 +4607,16 @@
     },
     "assetReview": {
       "title": "Resolve ambiguous assets",
-      "helper": "Some rows in this file could not be automatically matched to a security. Choose a suggested match, search for the right ticker, or skip the group.",
+      "helper": "Some rows in this file could not be automatically matched to a security. Choose a suggested match, search for the right ticker, pick a holding already in this portfolio, or skip the group.",
       "progress": "{{resolved}} of {{total}} resolved",
       "unknownAsset": "Unknown asset",
-      "rowCount_one": "{{count}} row",
-      "rowCount_other": "{{count}} rows",
       "candidatesTitle": "Suggested matches",
       "searchLabel": "Search for a ticker",
+      "chooseHolding": "Choose a holding in this portfolio",
+      "holdingsTitle": "Holdings in this portfolio",
       "skip": "Skip this group",
       "change": "Change",
       "resolvedAs": "Mapped to {{symbol}}",
-      "resolvedAsMatch": "Matched to a suggested security",
       "resolvedSkipped": "Skipped — no transactions will be imported for this group",
       "submit": "Confirm asset mappings",
       "submitting": "Confirming…"
@@ -3688,6 +4661,7 @@
     "metadataError": "Could not load the details needed to add a transaction",
     "failures": {
       "demo": "Adding transactions is unavailable in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
       "access": "You no longer have access to change this portfolio.",
       "mfa": "Additional verification is required.",
       "cancelled": "The save was cancelled because your signed-in context changed.",
@@ -3714,7 +4688,8 @@
     "loading": "Loading holding details",
     "unavailable": "Unavailable",
     "currentValue": "Current value",
-    "gainLoss": "Gain or loss",
+    "gainLoss": "Unrealized gain or loss",
+    "realizedGain": "Realized gain",
     "portfolioWeight": "Portfolio weight",
     "quantity": "Quantity",
     "currentPrice": "Current price",
@@ -3767,6 +4742,10 @@
     "sankey": {
       "label": "Cash flow Sankey",
       "description": "From income, through categories, into accounts"
+    },
+    "monthComparison": {
+      "label": "Compare months",
+      "description": "What changed between two months, category by category"
     }
   },
   "reports": {
@@ -3806,7 +4785,13 @@
       "searchPlaceholder": "Search {{label}}",
       "noResults": "No results found",
       "unknownAccount": "Unknown account",
-      "dateRange": "Date range"
+      "dateRange": "Date range",
+      "customRange": "Custom range",
+      "customRangeFrom": "From",
+      "customRangeTo": "To",
+      "customRangeApply": "Apply",
+      "customRangeInvalid": "Enter a valid date range.",
+      "customRangeOrder": "The start date must not be after the end date."
     },
     "budgetVsActual": {
       "title": "Budget vs actual",
@@ -3836,7 +4821,10 @@
       "emptyTitle": "No portfolios to show",
       "emptyMessage": "Add a portfolio to see its performance here",
       "portfolio": "Portfolio",
-      "total": "Total"
+      "total": "Total",
+      "notCombined": "Measured per portfolio",
+      "daysWithoutSnapshot_one": "{{count}} day without a snapshot",
+      "daysWithoutSnapshot_other": "{{count}} days without a snapshot"
     },
     "netWorthHistory": {
       "title": "Net worth over time",
@@ -3889,6 +4877,22 @@
       "down": "Down",
       "flat": "Flat",
       "vsPriorPeriod": "vs. prior period"
+    },
+    "monthComparison": {
+      "title": "Compare months",
+      "subtitle": "What changed between two months, category by category.",
+      "baseMonth": "Month",
+      "compareMonth": "Compared with",
+      "metric": "Metric",
+      "income": "Income",
+      "expenses": "Expenses",
+      "net": "Net",
+      "savingsRate": "Savings rate",
+      "change": "Change",
+      "category": "Category",
+      "loading": "Loading month comparison",
+      "emptyTitle": "No spending in either month",
+      "emptyMessage": "Try two other months, or check that accounts are connected."
     }
   },
   "accountsOverview": {
@@ -3921,6 +4925,11 @@
     "balanceGrowth": "Balance growth",
     "emptyTransactions": "Your cashflow will appear here once transactions are available. Connect a bank account, add transactions manually, or import a bank statement to start tracking money in and out.",
     "accounts": "Accounts",
+    "reorder": "Reorder",
+    "done": "Done",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "reorderError": "The new order could not be saved.",
     "total": "Total",
     "lastTransactions": "Last transactions",
     "viewAll": "View all",
@@ -3928,6 +4937,7 @@
     "accountBalance": "Account balance",
     "available": "Available",
     "private": "Private",
+    "viewOnly": "View only",
     "sharedBy": "Shared by {{name}}",
     "edit": "Edit",
     "delete": "Delete",
@@ -3957,6 +4967,7 @@
       "household": "Household",
       "connections": "Connections",
       "categories": "Categories",
+      "rules": "Rules",
       "appearance": "Appearance",
       "notifications": "Notifications"
     },
@@ -3964,17 +4975,35 @@
       "heading": "Personal information",
       "email": "Email address"
     },
+    "ai": {
+      "heading": "AI features",
+      "description": "Turn off every AI feature for your account.",
+      "label": "Hide AI features",
+      "hint": "Turns off the assistant, receipt scanning, AI column mapping and the AI-written monthly story text. Transactions are no longer sent to a model for categorization.",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again.",
+      "loadError": "Could not load your preferences."
+    },
     "appearance": {
       "heading": "Appearance",
       "description": "Change the appearance of the app.",
       "theme": "Theme",
-      "language": "Language"
+      "language": "Language",
+      "previewFeatures": {
+        "heading": "Preview features",
+        "description": "Try features before they are ready for everyone.",
+        "label": "Enable preview features",
+        "hint": "Preview features are unfinished. They may change, break or be removed without notice.",
+        "saving": "Saving…",
+        "saveError": "Could not save. Try again.",
+        "loadError": "Could not load your preferences."
+      }
     },
     "categories": {
       "description": "Manage your categories"
     },
     "household": {
-      "description": "Share accounts, budgets, and goals with your partner."
+      "description": "Share accounts, budgets, and goals with the people in your household."
     },
     "connections": {
       "heading": "Bank connections",
@@ -3994,6 +5023,13 @@
     "realizedGains": "Realized Gains",
     "needsHistory": "Needs more history",
     "periodReturnUnavailable": "We need a period baseline before this can be shown.",
+    "timeWeighted": "Time-weighted",
+    "timeWeightedHelp": "How the investments did, whatever you put in or took out.",
+    "moneyWeighted": "Money-weighted",
+    "moneyWeightedHelp": "How your money did, counting when you added or withdrew it.",
+    "perYear": "per year",
+    "missingSnapshots_one": "{{count}} day without a snapshot; its value was carried over.",
+    "missingSnapshots_other": "{{count}} days without a snapshot; their value was carried over.",
     "noHoldings": "No holdings",
     "emptyTitle": "No transactions yet",
     "emptyDescription": "Add your first transaction to start tracking performance, allocation, and gains.",
@@ -4075,5 +5111,501 @@
       "hint": "Converted at the rate from {{date}}, the latest available. It is updated when a newer rate arrives.",
       "hintNoDate": "Converted at an older rate, the latest available. It is updated when a newer rate arrives."
     }
+  },
+  "bank-sync": {
+    "errors": {
+      "account-phase-failed": "Your bank didn't send the account list.",
+      "authentication": "Your bank sign-in needs to be set up again.",
+      "cancelled": "The bank connection was cancelled before it finished.",
+      "consent-expired": "Your access to this bank has expired.",
+      "data-validation": "Your bank sent data we couldn't read.",
+      "institution-action-required": "A bank inside your bank data provider needs your attention. Sign in to it again there, for example at SimpleFIN Bridge.",
+      "institution-unavailable": "Your bank isn't available right now.",
+      "internal": "Something went wrong on our side.",
+      "invalid-requisition": "This bank connection is no longer valid.",
+      "provider-unavailable": "Your bank didn't respond.",
+      "queue-unavailable": "The sync couldn't start.",
+      "rate-limited": "The bank limited how often we can sync.",
+      "timeout": "Your bank took too long to respond.",
+      "transaction-phase-failed": "Your bank didn't send the transactions.",
+      "unknown": "The sync failed.",
+      "unsupported-currency": "An account uses a currency WonderMoney can't track, so it was left out."
+    },
+    "actions": {
+      "contact-support": "Contact support",
+      "fix-at-provider": "Fix it at your bank data provider",
+      "reconnect": "Reconnect your bank",
+      "wait": "We'll try again automatically"
+    },
+    "history": {
+      "action": "Sync history",
+      "actionLabel": "Sync history for {{institution}}",
+      "title": "Sync history",
+      "description": "The last 20 times we tried to sync this connection.",
+      "loading": "Loading sync history",
+      "error": "Could not load sync history.",
+      "empty": "No syncs yet.",
+      "started": "Started",
+      "finished": "Finished",
+      "inProgress": "In progress",
+      "accounts_one": "{{count}} account",
+      "accounts_other": "{{count}} accounts",
+      "rows_one": "{{count}} new transaction",
+      "rows_other": "{{count}} new transactions",
+      "nextAttempt": "Next attempt {{date}}",
+      "flow": {
+        "initial-add": "First sync",
+        "scheduled-refresh": "Scheduled sync"
+      },
+      "result": {
+        "failed": "Failed",
+        "full_success": "Succeeded",
+        "partial": "Partly succeeded"
+      }
+    }
+  },
+  "transactionTemplates": {
+    "newTemplate": "New template",
+    "use": "Use template {{name}}",
+    "longPressHint": "Long press to edit or delete",
+    "newTitle": "New template",
+    "editTitle": "Edit template",
+    "name": "Name",
+    "namePlaceholder": "Weekly groceries",
+    "nameRequired": "Give the template a name.",
+    "amount": "Amount",
+    "amountInvalid": "Enter an amount greater than zero.",
+    "optional": "Optional",
+    "description": "Description",
+    "notes": "Notes",
+    "direction": "Direction",
+    "directionOut": "Money out",
+    "directionIn": "Money in",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete template"
+  },
+  "creditCardStatement": {
+    "title": "Current statement",
+    "loading": "Loading statement…",
+    "error": "Could not load this statement. Pull to refresh to try again.",
+    "invalidResponse": "The statement could not be verified, so it is not shown.",
+    "empty": "No statement for this period yet.",
+    "balance": "Statement balance",
+    "period": "{{start}} – {{end}}",
+    "dueDate": "Due date",
+    "dueHelper": "Pay by this day to avoid interest.",
+    "availableCredit": "Available credit",
+    "limitOf": "Of {{limit}}",
+    "limitNotSet": "No credit limit set",
+    "historyTitle": "Statement history",
+    "historyDue": "Due {{date}}",
+    "historyRow": "Statement {{start}} to {{end}}, balance {{balance}}, {{status}}",
+    "status": {
+      "open": "Open",
+      "closed": "Closed",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "transactionsTitle": "Statement transactions",
+    "transactionsLoading": "Loading statement transactions…",
+    "transactionsError": "Could not load these transactions. Try again.",
+    "transactionsInvalid": "These transactions could not be verified, so they are not shown.",
+    "transactionsEmpty": "No transactions in this statement.",
+    "transactionUnavailable": "Transaction details unavailable"
+  },
+  "installments": {
+    "title": "Installments",
+    "badgeLabel": "Installment {{number}} of {{total}}",
+    "transactionDetail": "Installment",
+    "viewPlan": "View installment plan",
+    "total": "Total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "paidCount": "{{paid}} of {{total}} paid",
+    "remainingCount_one": "{{count}} installment to come",
+    "remainingCount_other": "{{count}} installments to come",
+    "unmatchedCount_one": "{{count}} past installment not matched",
+    "unmatchedCount_other": "{{count}} past installments not matched",
+    "activePlans_one": "{{count}} active plan",
+    "activePlans_other": "{{count}} active plans",
+    "commitment": "Still to charge",
+    "commitmentError": "Could not load what the installments still have to charge.",
+    "next": "Next: {{amount}} on {{date}}, {{name}}",
+    "nextDate": "Next on {{date}}",
+    "finished": "Paid off",
+    "plansError": "Could not load the installment plans.",
+    "empty": "No installment plans on this card yet.",
+    "projectionNote": "Upcoming installments are projections: they are not transactions and are not counted in balances.",
+    "status": {
+      "paid": "Paid",
+      "upcoming": "Upcoming",
+      "unmatched": "Not matched"
+    },
+    "detail": {
+      "loading": "Loading installment plan…",
+      "descriptor": "Purchased {{date}} · {{total}} installments",
+      "totalMeta": "In {{total}} installments",
+      "scheduleTitle": "Schedule",
+      "scheduled": "Scheduled {{date}}",
+      "statementDue": "Statement due {{date}}",
+      "posted": "Posted {{date}}",
+      "stale": "Could not refresh this plan, so it may be out of date.",
+      "notFound": {
+        "title": "Plan not found",
+        "message": "This installment plan was deleted or is not visible to you."
+      },
+      "invalidId": {
+        "title": "Plan not found",
+        "message": "This link does not point to an installment plan."
+      },
+      "invalidResponse": {
+        "title": "Plan unavailable",
+        "message": "The plan could not be verified, so it is not shown."
+      },
+      "error": {
+        "title": "Could not load the plan",
+        "message": "Check your connection and try again."
+      }
+    },
+    "delete": {
+      "action": "Delete plan",
+      "confirmTitle": "Delete this installment plan?",
+      "confirmMessage": "The schedule is removed. Posted transactions stay on the card, no longer linked to it.",
+      "confirm": "Delete"
+    },
+    "failures": {
+      "demo": "This is not available in demo mode.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
+      "access": "You do not have access to this card’s plans.",
+      "invalid": "The plan was refused. Check the details and try again.",
+      "conflict": "One of these transactions is already linked to another installment.",
+      "not-found": "This card or plan is no longer available.",
+      "network": "Could not reach the server. Check the card’s plans before trying again.",
+      "general": "Something went wrong. Try again."
+    },
+    "create": {
+      "action": "Add plan",
+      "title": "New installment plan",
+      "fromSuggestionTitle": "Plan from detected installments",
+      "save": "Create plan",
+      "saving": "Creating plan…",
+      "loading": "Loading…",
+      "description": "Description",
+      "purchaseDate": "Purchase date",
+      "count": "Installments",
+      "links_one": "Creating the plan links {{count}} posted transaction to its installment.",
+      "links_other": "Creating the plan links {{count}} posted transactions to their installments.",
+      "previewTitle": "Preview",
+      "each": "Each",
+      "remainder": "Takes the rounding",
+      "range": "Installments {{from}} to {{to}} of {{total}}",
+      "errors": {
+        "total": "Enter an amount above zero with at most two decimals.",
+        "count": "Enter a number from {{min}} to {{max}}.",
+        "countLinks": "A detected transaction is installment {{number}}, so the plan needs at least that many."
+      }
+    },
+    "suggestions": {
+      "title": "Detected installments",
+      "helper": "These card transactions look like installments of a purchase with no plan. Nothing changes until you create one.",
+      "schedule": "{{total}} installments of {{amount}}",
+      "found_one": "{{count}} found · purchased {{date}}",
+      "found_other": "{{count}} found · purchased {{date}}",
+      "accept": "Create plan",
+      "acceptNamed": "Create plan for {{name}}",
+      "unavailable": "This suggestion is no longer available. You can still create the plan yourself."
+    },
+    "link": {
+      "action": "Link transaction",
+      "unlink": "Unlink",
+      "actionsLabel": "Actions for installment {{number}} of {{total}}",
+      "title": "Link installment {{number}} of {{total}}",
+      "helper": "Posted charges on this card within a month of {{date}}, for about {{amount}}.",
+      "helperAll": "Posted charges on this card within a month of {{date}}, any amount.",
+      "showOther": "Show other amounts",
+      "showClose": "Show close amounts only",
+      "searching": "Looking for transactions…",
+      "loadFailed": "Could not load the transactions.",
+      "empty": "No posted charge on this card fits this installment.",
+      "emptyHint": "Show other amounts to see every charge in this period.",
+      "more": "{{amount}} more than the installment",
+      "less": "{{amount}} less than the installment",
+      "confirm": "Link",
+      "unlinkConfirmTitle": "Unlink installment {{number}} of {{total}}?",
+      "unlinkConfirmMessage": "The installment no longer counts as paid. Its transaction stays on the card as an ordinary row.",
+      "failures": {
+        "wrongCard": "That transaction is not on this plan’s card.",
+        "pending": "That transaction is still pending. Link it once the bank posts it.",
+        "expired": "The bank dropped that transaction, so it paid nothing.",
+        "transactionLinked": "That transaction already pays another installment. Unlink it there first. The plan has been refreshed.",
+        "installmentPaid": "This installment is already paid by another transaction. Unlink that one first. The plan has been refreshed.",
+        "alreadyLinked": "That transaction already pays an installment, or this installment is already paid by another transaction. The plan has been refreshed.",
+        "notFound": "That transaction or plan no longer exists. The plan has been refreshed.",
+        "linkFailed": "Could not link the transaction. Try again.",
+        "unlinkFailed": "Could not unlink the installment. Try again."
+      }
+    }
+  },
+  "rules": {
+    "title": "Rules",
+    "description": "Rules tidy up transactions for you: when a transaction matches a rule's conditions, its actions run. Rules run from top to bottom and never change what you set by hand. Both members of a household share them.",
+    "back": "Back to More",
+    "loading": "Loading rules",
+    "stale": "Could not refresh. Showing previously loaded rules",
+    "errorTitle": "Could not load rules",
+    "errorMessage": "Check your connection and try again",
+    "invalidTitle": "Could not verify rule data",
+    "invalidMessage": "The rule data received could not be verified",
+    "empty": "No rules yet. Open a transaction and choose Create rule to categorize, rename or tag transactions automatically.",
+    "createFromTransaction": "Create rule",
+    "inactive": "Off",
+    "stops": "Stops here",
+    "readOnly": "Edit on web",
+    "readOnlyTitle": "This rule can't be edited here",
+    "readOnlyMessage": "It uses fields the app doesn't edit yet. Open the web app to change it.",
+    "toggleNamed": "{{name}}, active",
+    "rowActions": "Actions for {{name}}",
+    "deleteTitle": "Delete \"{{name}}\"?",
+    "deleteMessage": "The rule stops running. Transactions it already changed stay as they are.",
+    "delete": "Delete",
+    "toggleFailedTitle": "Couldn't update the rule",
+    "toggleFailedMessage": "Check your connection and try again.",
+    "deleteFailedTitle": "Couldn't delete the rule",
+    "deleteFailedMessage": "Check your connection and try again.",
+    "writeBlocked": "Rule changes are paused while the result of an earlier request is checked.",
+    "demoWriteBlocked": "Demo profiles are read-only. Rule changes are unavailable for this sign-in.",
+    "uncategorized": "Uncategorized",
+    "summary": {
+      "textCondition": "{{field}} {{operator}} {{value}}",
+      "amountCondition": "Amount {{operator}} {{value}}",
+      "amountBetween": "Amount between {{min}} and {{max}}",
+      "directionIn": "Money in",
+      "directionOut": "Money out",
+      "listCondition": "{{field}} {{operator}} {{values}}",
+      "listMore": "{{names}} and {{count}} more",
+      "and": "and",
+      "or": "or",
+      "unknown": "(deleted)",
+      "setCategory": "set category {{name}}",
+      "setMerchant": "set merchant {{name}}",
+      "setMerchantSaved": "set merchant",
+      "setDescription": "rename to \"{{value}}\"",
+      "setNotes": "add notes \"{{value}}\"",
+      "addTags": "add tags",
+      "markReviewed": "mark as reviewed",
+      "hide": "hide",
+      "unsupportedCondition": "a condition this app doesn't show",
+      "unsupportedAction": "an action this app doesn't show"
+    },
+    "fields": {
+      "description": "Description",
+      "rawDescription": "Original description",
+      "merchant": "Merchant",
+      "amount": "Amount",
+      "category": "Category"
+    },
+    "operators": {
+      "contains": "contains",
+      "not_contains": "does not contain",
+      "equals": "is",
+      "starts_with": "starts with",
+      "ends_with": "ends with",
+      "eq": "is",
+      "gt": "is more than",
+      "gte": "is at least",
+      "lt": "is less than",
+      "lte": "is at most",
+      "between": "is between"
+    },
+    "actions": {
+      "set_category": "Set category",
+      "set_merchant": "Set merchant",
+      "mark_reviewed": "Mark as reviewed"
+    },
+    "editor": {
+      "createTitle": "New rule",
+      "editTitle": "Edit rule",
+      "description": "Choose which transactions the rule matches and what it does to them. The preview shows the transactions it would match.",
+      "name": "Name",
+      "namePlaceholder": "Coffee at the corner shop",
+      "nameRequired": "Give the rule a name.",
+      "match": "Match",
+      "matchAll": "All conditions",
+      "matchAny": "Any condition",
+      "conditions": "When a transaction matches",
+      "addCondition": "Add condition",
+      "removeCondition": "Remove condition {{index}}",
+      "actions": "Then",
+      "addAction": "Add action",
+      "removeAction": "Remove action {{index}}",
+      "fieldFor": "Field for condition {{index}}",
+      "operatorFor": "Comparison for condition {{index}}",
+      "sourceFor": "Which description for condition {{index}}",
+      "sourceCleaned": "As shown",
+      "sourceRaw": "Bank's original text",
+      "valueFor": "Value for condition {{index}}",
+      "min": "From",
+      "max": "To",
+      "actionFor": "Action {{index}}",
+      "category": "Category",
+      "merchant": "Merchant",
+      "merchantPlaceholder": "Type a merchant name",
+      "choose": "Choose",
+      "save": "Save rule",
+      "saving": "Saving…",
+      "saveFailed": "The rule could not be saved.",
+      "duplicateActions": "Each kind of action can appear only once.",
+      "readOnlyTitle": "This rule can't be edited here",
+      "readOnlyMessage": "It uses fields the app doesn't edit yet. Open the web app to change it.",
+      "valueRequired": "Enter a value.",
+      "valueTooLong": "Use at most 255 characters.",
+      "amountInvalid": "Enter an amount of 0 or more, with at most 4 decimals.",
+      "rangeInvalid": "\"From\" must not be more than \"To\".",
+      "categoryRequired": "Choose a category.",
+      "merchantRequired": "Type a merchant name."
+    },
+    "preview": {
+      "title": "Preview",
+      "incomplete": "Complete the conditions and actions to see which transactions match.",
+      "loading": "Checking your transactions…",
+      "error": "The preview is not available right now.",
+      "matches_one": "{{count}} transaction matches",
+      "matches_other": "{{count}} transactions match",
+      "changes_one": "{{count}} would change",
+      "changes_other": "{{count}} would change",
+      "scopeHint": "Judged on its own, on the transactions you can see. Saving does not change existing transactions."
+    },
+    "apply": {
+      "title": "Apply \"{{name}}\" to existing transactions?",
+      "description_one": "{{count}} existing transaction would change.",
+      "description_other": "{{count}} existing transactions would change.",
+      "scopeHint": "The rule is judged on its own. Hidden transactions are included; values set by hand and other members' private accounts stay as they are.",
+      "confirm_one": "Apply to {{count}} transaction",
+      "confirm_other": "Apply to {{count}} transactions",
+      "notNow": "Not now",
+      "close": "Close",
+      "running": "Applying…",
+      "continues": "The rule keeps being applied in the background.",
+      "backgroundHint": "You can close this; it keeps going in the background.",
+      "done_one": "Done: {{count}} transaction changed",
+      "done_other": "Done: {{count}} transactions changed",
+      "inProgress": "Rules are already being applied. Wait for that to finish, then try again.",
+      "demo": "Demo profiles are read-only. Existing transactions can't be changed.",
+      "read-only": "$t(common.householdReadOnly)",
+      "access": "Your session needs attention before rules can be applied.",
+      "error": "The rule could not be applied right now."
+    },
+    "suggestion": {
+      "title": "Always categorize transactions like this as {{category}}?",
+      "description_one": "You moved {{count}} transaction like this in the last {{days}} days. A rule can do it for you.",
+      "description_other": "You moved {{count}} transactions like this in the last {{days}} days. A rule can do it for you.",
+      "create": "Create rule",
+      "dismiss": "Don't suggest again"
+    }
+  },
+  "pendingChanges": {
+    "back": "Back to More",
+    "description": "Changes the assistant or an MCP client proposed. Nothing changes until you apply one, and each expires after 7 days.",
+    "loading": "Loading pending changes",
+    "errorTitle": "Couldn't load pending changes",
+    "errorMessage": "Check your connection and try again.",
+    "invalidMessage": "The server sent something this version of the app can't read. Update the app and try again.",
+    "stale": "These may be out of date. Pull to refresh.",
+    "empty": "No pending changes. When the assistant or an MCP client proposes a change, it waits here for you.",
+    "aiHidden": "AI features are hidden for your account. Turn them back on in Settings › Appearance to see proposed changes.",
+    "apply": "Apply",
+    "dismiss": "Dismiss",
+    "applyNamed": "Apply: {{title}}",
+    "dismissNamed": "Dismiss: {{title}}",
+    "expires": "Expires {{date}}",
+    "untitledTransaction": "Transaction",
+    "unavailable_one": "{{count}} more transaction can't be shown: you can no longer see it.",
+    "unavailable_other": "{{count}} more transactions can't be shown: you can no longer see them.",
+    "rowAccessibility": "{{label}}: {{before}} to {{after}}",
+    "source": {
+      "assistant": "From the assistant",
+      "mcp": "From an MCP client"
+    },
+    "title": {
+      "page": "Pending changes",
+      "categorize_one": "Categorize {{count}} transaction as {{category}}",
+      "categorize_other": "Categorize {{count}} transactions as {{category}}",
+      "categorizeUnnamed_one": "Categorize {{count}} transaction",
+      "categorizeUnnamed_other": "Categorize {{count}} transactions",
+      "review_one": "Mark {{count}} transaction as reviewed",
+      "review_other": "Mark {{count}} transactions as reviewed",
+      "note": "Update the note on a transaction"
+    },
+    "value": {
+      "uncategorized": "Uncategorized",
+      "reviewed": "Reviewed",
+      "notReviewed": "Not reviewed",
+      "noNote": "No note"
+    },
+    "failure": {
+      "gone": "That change can no longer be applied: it expired, was already decided, or a transaction or category is gone. The list is up to date.",
+      "demo": "Changes are turned off in the demo.",
+      "read-only": "$t(common.householdReadOnly)",
+      "account-read-only": "$t(common.accountReadOnly)",
+      "general": "Couldn't save that. Try again."
+    }
+  },
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portugal",
+      "es-ES": "Spain",
+      "pt-BR": "Brazil",
+      "en": "the UK and US"
+    },
+    "offer": {
+      "title": "Start with rules for {{name}}",
+      "description_one": "{{count}} rule recognizes well-known shops and utilities and gives them a category. Nothing changes until you add it.",
+      "description_other": "{{count}} rules recognize well-known shops and utilities and give them a category. Nothing changes until you add them.",
+      "preview": "See the rules",
+      "dismiss": "Not now"
+    },
+    "dialog": {
+      "title": "Rules for {{name}}",
+      "description": "Each rule recognizes a merchant in the bank's description of money going out, then sets its category and merchant. Income, transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
+      "loading": "Loading the rules…",
+      "error": "The rules could not be loaded.",
+      "matches": "Description contains “{{values}}”",
+      "excludes": "but not “{{value}}”",
+      "merchant": "Merchant: {{name}}",
+      "nothing": "Every rule here is already in your rules.",
+      "install_zero": "Nothing to add",
+      "install_one": "Add {{count}} rule",
+      "install_other": "Add {{count}} rules"
+    },
+    "status": {
+      "installed": "Already added",
+      "unavailable": "Category not available"
+    },
+    "installed_zero": "No rules added",
+    "installed_one": "{{count}} rule added",
+    "installed_other": "{{count}} rules added",
+    "installError": "The rules could not be added."
+  },
+  "demo": {
+    "banner": {
+      "message": "You're exploring a shared, read-only demo. Its data resets every day.",
+      "signUp": "Create your account",
+      "selfHost": "Self-host WonderMoney"
+    }
+  },
+  "memberAttribution": {
+    "everyone": "Everyone",
+    "shared": "Shared",
+    "filterTitle": "Member",
+    "filterNamed": "Member: {{name}}",
+    "attributedTo": "Attributed to {{name}}",
+    "spentBy": "Spent by",
+    "spentByAction": "Change spent by",
+    "accountDefault": "Account default ({{name}})",
+    "accountDefaultUnnamed": "Account default",
+    "jointTitle": "Joint account",
+    "jointHelper": "Its spending counts as Shared. It doesn't change who can see it."
   }
 }

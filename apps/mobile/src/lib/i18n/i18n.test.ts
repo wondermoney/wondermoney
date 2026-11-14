@@ -5,10 +5,62 @@ import ptPT from './resources/pt-PT.json'
 
 const resources = { en, 'pt-PT': ptPT, es } as const
 
+type LocaleResource = Record<string, unknown>
+
+const leafValues = (value: unknown, prefix = ''): [string, string][] => {
+  if (typeof value === 'string') return [[prefix, value]]
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return []
+  return Object.entries(value as LocaleResource).flatMap(([key, child]) =>
+    leafValues(child, prefix ? `${prefix}.${key}` : key),
+  )
+}
+
+/*
+ * i18next interpolates `{{name}}` (and `{{count, number}}`). A translation that
+ * drops or renames one renders a literal `{{name}}` to that locale's reader, so
+ * every locale must keep the English message's placeholders.
+ */
+const placeholders = (message: string): string[] => [
+  ...new Set(
+    [...message.matchAll(/\{\{\s*([\w.-]+)(?:\s*,\s*[\w]+)?\s*\}\}/g)].map((match) => match[1]),
+  ),
+].sort()
+
 describe('mobile product i18n', () => {
   it('keeps exact locale and key parity', () => {
     expect(Object.keys(foundationResources).sort()).toEqual(['en', 'es', 'pt-PT'])
     expect(validateFoundationResources(resources)).toBe(true)
+  })
+
+  it('keeps every locale’s interpolation placeholders in step with English', () => {
+    const reference = new Map(leafValues(en))
+
+    for (const [locale, resource] of [
+      ['pt-PT', ptPT],
+      ['es', es],
+    ] as const) {
+      const translated = new Map(leafValues(resource))
+
+      for (const [key, source] of reference) {
+        const target = translated.get(key)
+        // Key parity above reports a missing key; there is nothing to compare.
+        if (target === undefined) continue
+
+        const expected = placeholders(source)
+        const actual = placeholders(target)
+        const missing = expected.filter((name) => !actual.includes(name))
+        const extra = actual.filter((name) => !expected.includes(name))
+        const file = `resources/${locale}.json`
+
+        expect({ file, locale, key, missing, extra }).toEqual({
+          file,
+          locale,
+          key,
+          missing: [],
+          extra: [],
+        })
+      }
+    }
   })
 
   it('provides exact estimated net worth semantics in every locale', async () => {
@@ -60,7 +112,7 @@ describe('mobile product i18n', () => {
     expect(enI18n.t('goals.assignedThisMonth')).toBe('Assigned this month')
     expect(pt.t('goals.linkedAccounts')).toBe('Contexto das contas associadas')
     expect(esI18n.t('goals.hideDetails', { name: 'Viaje' })).toBe('Ocultar detalles de Viaje')
-    expect(pt.t('goals.empty')).toBe('Crie um objetivo para reservar dinheiro orçamentado para algo específico, como um fundo de emergência, férias, impostos ou a entrada de uma casa.')
+    expect(pt.t('goals.empty')).toBe('Cria um objetivo para reservar dinheiro orçamentado para algo específico, como um fundo de emergência, férias, impostos ou a entrada de uma casa.')
     expect(esI18n.t('goals.empty')).toBe('Crea un objetivo para reservar dinero presupuestado para algo específico, como un fondo de emergencia, vacaciones, impuestos o la entrada de una vivienda.')
     expect(enI18n.t('profile.notFoundTitle')).toBe('Profile not available')
   })
@@ -162,7 +214,7 @@ describe('mobile product i18n', () => {
     const pt = await initMobileI18n('pt-PT')
     const esI18n = await initMobileI18n('es')
     expect(enI18n.t('budgetAddCategory.reconciliation.duplicate-unknown')).toBe('The category state could not be confirmed. Refresh the current month again before starting any new attempt')
-    expect(pt.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Atualize novamente o mês atual')
+    expect(pt.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Atualiza novamente o mês atual')
     expect(esI18n.t('budgetAddCategory.reconciliation.duplicate-unknown')).toContain('Actualiza de nuevo el mes actual')
   })
 
@@ -174,6 +226,18 @@ describe('mobile product i18n', () => {
     const i18n = await initMobileI18n(locale)
     expect(i18n.t('netWorth.unsupportedLoan', { count: 1 })).toBe(singular)
     expect(i18n.t('netWorth.unsupportedLoan', { count: 2 })).toBe(plural)
+  })
+
+  it('keeps split copy in every locale', async () => {
+    const enI18n = await initMobileI18n('en')
+    const pt = await initMobileI18n('pt-PT')
+    const esI18n = await initMobileI18n('es')
+    expect(enI18n.t('transactions.split.summary', { count: 1 })).toBe('Split · 1 category')
+    expect(enI18n.t('transactions.split.summary', { count: 2 })).toBe('Split · 2 categories')
+    expect(pt.t('transactions.split.remaining')).toBe('Falta atribuir')
+    expect(pt.t('transactions.split.summary', { count: 3 })).toBe('Dividida · 3 categorias')
+    expect(esI18n.t('transactions.split.saveBlocked')).toContain('antes de guardar')
+    expect(esI18n.t('transactions.split.remaining')).toBe('Falta asignar')
   })
 
   it('normalizes supported variants and falls back safely', async () => {

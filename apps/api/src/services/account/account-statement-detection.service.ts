@@ -4,7 +4,7 @@ import logger from '@utils/logger';
 
 import { requestStatementMapping } from './account-statement-mapping-openai';
 import type { StatementColumns, StatementMapping } from './account-statement-mapping.schema';
-import { type AppliedStatement, applyStatementMapping, findHeaderRow, inferFormats, isMappingComplete, profileColumns, readStatementGrid, reconcileColumns, type StatementGrid, statementHeaders, statementRowShapes, suggestColumnsByName } from './account-statement-reader';
+import { type AppliedStatement, applyStatementMapping, findHeaderRow, inferFormats, isMappingComplete, readStatementGrid, reconcileColumns, type StatementGrid, statementHeaders, statementMappingPromptInput, suggestColumnsByName } from './account-statement-reader';
 
 /**
  * Works out how to read a statement file, cheapest first:
@@ -73,8 +73,7 @@ export async function detectStatement(input: DetectStatementInput): Promise<Stat
 
   if (input.model?.allowed && (await input.model.spend())) {
     try {
-      const shapes = statementRowShapes(grid);
-      const guess = await requestStatementMapping({ columns: profileColumns(grid, headerRowIndex), rowShapes: shapes });
+      const guess = await requestStatementMapping(statementMappingPromptInput(grid, headerRowIndex));
       // A small model can misplace a column the values already settle; each header row it or the
       // file suggests is tried with its answer checked against the values, and the one reading most rows wins.
       const headerRows = [...new Set([guess.headerRowIndex, headerRowIndex])].filter((index) => index >= -1 && index < grid.length);

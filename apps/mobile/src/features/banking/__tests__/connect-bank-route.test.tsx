@@ -20,6 +20,8 @@ let mockInstitutionsState: {
   isInitialFailure: boolean
   error: unknown
 } = { data: [{ id: '1', name: 'Revolut', logo: 'https://logo' }], isAccessTransition: false, isInitialFailure: false, error: null }
+let mockCredential: { status: string; sharedUnavailable?: boolean } = { status: 'ready' }
+const mockInstitutionsOptions: unknown[] = []
 let mockStartPending = false
 let mockStartVariables: string | undefined
 
@@ -29,14 +31,20 @@ jest.mock('expo-router', () => ({
 jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: (...args: unknown[]) => mockOpenAuthSessionAsync(...args),
 }))
-jest.mock('../use-bank-institutions', () => ({ useBankInstitutions: () => ({ ...mockInstitutionsState, refetch: mockRefetch }) }))
+jest.mock('../use-bank-institutions', () => ({
+  useBankInstitutions: (options: unknown) => {
+    mockInstitutionsOptions.push(options)
+    return { ...mockInstitutionsState, refetch: mockRefetch }
+  },
+}))
+jest.mock('../use-bank-link-credential', () => ({ useBankLinkCredential: () => mockCredential }))
 jest.mock('../use-start-bank-connection', () => ({
   useStartBankConnection: () => ({ isPending: mockStartPending, variables: mockStartVariables, mutate: mockMutate }),
   classifyStartBankConnectionFailure: (error: unknown) => (error as { code?: string } | null)?.code ?? 'general',
 }))
 jest.mock('../connect-bank-screen', () => ({
   ConnectBankScreen: (props: {
-    state: { status: string; rows?: { id: string; name: string }[] }
+    state: { status: string; rows?: { id: string; name: string }[]; sharedUnavailable?: boolean }
     startFailure: string | null
     onBack: () => void
     onRetry: () => void
@@ -46,6 +54,7 @@ jest.mock('../connect-bank-screen', () => ({
     return (
       <>
         <Native.Text testID="state">{props.state.status}</Native.Text>
+        <Native.Text testID="sharedUnavailable">{String(props.state.sharedUnavailable ?? '')}</Native.Text>
         <Native.Text testID="startFailure">{props.startFailure ?? ''}</Native.Text>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={props.onBack}><Native.Text>Back</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Retry" onPress={props.onRetry}><Native.Text>Retry</Native.Text></Native.Pressable>
@@ -61,7 +70,38 @@ describe('ConnectBankRoute', () => {
     mockRefetch.mockClear(); mockMutate.mockReset(); mockOpenAuthSessionAsync.mockReset().mockResolvedValue({ type: 'dismiss' })
     mockInstitutionsState = { data: [{ id: '1', name: 'Revolut', logo: 'https://logo' }], isAccessTransition: false, isInitialFailure: false, error: null }
     mockStartPending = false; mockStartVariables = undefined
+    mockCredential = { status: 'ready' }; mockInstitutionsOptions.length = 0
     captured.mockClear()
+  })
+
+  it('lists banks straight away when the person can link, with their own key or the server\'s shared one', async () => {
+    const view = await render(<ConnectBankRoute />)
+
+    expect(view.getByTestId('state').props.children).toBe('loaded')
+    expect(mockInstitutionsOptions.at(-1)).toEqual({ enabled: true })
+  })
+
+  it('asks for a key, without asking for the bank list, when the person has none to use', async () => {
+    mockCredential = { sharedUnavailable: false, status: 'credential-required' }
+    const view = await render(<ConnectBankRoute />)
+
+    expect(view.getByTestId('state').props.children).toBe('credential-required')
+    expect(view.getByTestId('sharedUnavailable').props.children).toBe('false')
+    expect(mockInstitutionsOptions.at(-1)).toEqual({ enabled: false })
+  })
+
+  it('passes on why the server\'s shared credential does not cover this household', async () => {
+    mockCredential = { sharedUnavailable: true, status: 'credential-required' }
+    const view = await render(<ConnectBankRoute />)
+
+    expect(view.getByTestId('sharedUnavailable').props.children).toBe('true')
+  })
+
+  it('shows loading while it is still finding out', async () => {
+    mockCredential = { status: 'loading' }
+    const view = await render(<ConnectBankRoute />)
+
+    expect(view.getByTestId('state').props.children).toBe('loading')
   })
 
   it('captures bank_connection_started with no institution and no consent redirect URL', async () => {

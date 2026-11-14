@@ -1,12 +1,14 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Amount } from '@/components/ui/amount'
+import { Amount, MISSING } from '@/components/ui/amount'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { EntityMark } from '@/components/ui/entity-mark'
 import { HeadlineFigure } from '@/components/ui/headline-figure'
 import { ListRow } from '@/components/ui/list-row'
+import { Notice } from '@/components/ui/notice'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { Section } from '@/components/ui/section'
 import { Text } from '@/components/ui/text'
@@ -16,9 +18,26 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
+import { archiveOrBringBack, confirmAction } from './asset-archive'
 import { currencyList, kindGlyph } from './assets-screen'
-import type { ManualAssetResponse } from './manual-assets-contract'
+import { CryptoWalletManage, CryptoWalletSection, type CryptoWalletActions } from './crypto-wallet-section'
+import type { ManualAssetDto, ManualAssetResponse } from './manual-assets-contract'
 import { changeSincePurchase, formatDay, isEstimated, monthlyChartPoints, shownValue } from './manual-assets-view-model'
+import type { ManualAssetWriteFailure } from './use-manual-asset-writes'
+
+type Outcome = Promise<ManualAssetWriteFailure | null>
+
+/** What a hand-valued asset's page can change on it; each write resolves with why it failed, or null. */
+export type ManualAssetManageActions = Readonly<{
+  /** A write is in flight: the controls wait. */
+  pending: boolean
+  /** Opens Edit asset. */
+  onEdit: () => void
+  /** Archive (once confirmed) or Bring back. */
+  onSetArchived: (archived: boolean) => Outcome
+  /** Delete, once confirmed; on success the route leaves the page. */
+  onDelete: () => Outcome
+}>
 
 export type AssetDetailViewState =
   | { status: 'loading' }
@@ -34,13 +53,22 @@ export type AssetDetailViewState =
  * Web's asset page (`assets/[assetId]/asset-detail-client.tsx`) at phone width: "← Assets"; the
  * asset's mark, name and kind; today's value as the headline figure (and in the viewer's currency
  * when it is in another one); Update value as the one control; the value over time; the
- * valuations, newest first; then the details. Editing, archiving and deleting are on the web.
+ * valuations, newest first; then the details, with Archive (or Bring back) and Delete under them.
+ * Edit sits beside Update value, as on the web; correcting or removing a valuation stays on the web.
+ *
+ * A crypto wallet is valued by its daily sync, not by hand: it has no Update value and no list of
+ * valuations, and shows its addresses and tokens (`CryptoWalletSection`) instead. Its own Edit
+ * wallet, Archive (or Bring back) and Remove wallet sit under the details (`CryptoWalletManage`).
  */
-export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
+export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh, wallet: walletActions, manage }: {
   state: AssetDetailViewState
   onBack: () => void
   onUpdateValue: () => void
   onRefresh: () => void | Promise<void>
+  /** A crypto wallet's writes; without them its section is read-only. */
+  wallet?: CryptoWalletActions
+  /** Edit, archive and delete for a hand-valued asset; without them the page offers none. */
+  manage?: ManualAssetManageActions
 }) {
   const { t, i18n } = useTranslation()
   const formatMoney = useFormatMoney()
@@ -52,7 +80,8 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
     const key = state.status === 'invalid-response' ? 'invalid' : state.status === 'not-found' ? 'notFound' : state.status === 'invalid-id' ? 'invalidId' : 'error'
     return <Failure title={t(`manualAssetDetail.${key}Title`)} message={t(`manualAssetDetail.${key}Message`)} onRetry={state.status === 'invalid-id' || state.status === 'not-found' ? undefined : onRefresh} onBack={onBack} fallback="/assets" backLabel={t('manualAssetDetail.back')} />
   }
-  const { asset, valuations, history } = state.data
+  const { asset, valuations, history, wallet } = state.data
+  const isWallet = asset.kind === 'crypto_wallet'
   const money = (value: number) => formatMoney(value, { locale, currency: asset.currency })
   const value = shownValue(asset)
   const foreign = asset.currency !== asset.userCurrency
@@ -93,12 +122,24 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
             />
             {noRate ? <Text accessibilityRole="alert" tone="muted" variant="meta">{t('manualAssets.unconverted', { count: 1, currencies: currencyList([asset.currency], locale) })}</Text> : null}
             {state.status === 'refresh-error' ? <Alert label={t('manualAssetDetail.stale')} /> : null}
-            {!asset.archived ? (
+            {isWallet && asset.value === null && !asset.archived ? <Text tone="muted" variant="meta">{t('cryptoWallet.detail.notValuedYet')}</Text> : null}
+            {!isWallet && (!asset.archived || manage) ? (
               <View style={styles.actions}>
-                <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} />
+                {!asset.archived ? <Button icon="refresh-cw" label={t('manualAssetDetail.updateValue')} onPress={onUpdateValue} /> : null}
+                {manage ? <Button disabled={manage.pending} icon="pencil" label={t('manualAssetDetail.manage.edit')} onPress={manage.onEdit} variant="outline" /> : null}
               </View>
             ) : null}
           </View>
+
+          {isWallet && wallet ? (
+            <CryptoWalletSection
+              actions={walletActions ?? READ_ONLY_WALLET}
+              readOnly={asset.archived || walletActions === undefined}
+              wallet={wallet}
+            />
+          ) : null}
+
+          {asset.linkedLoans.length > 0 ? <AssetEquity asset={asset} locale={locale} /> : null}
 
           {points.length > 1 ? (
             <Section title={t('manualAssetDetail.historyTitle')} variant="open">
@@ -111,7 +152,7 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
             </Section>
           ) : null}
 
-          <Section title={t('manualAssetDetail.valuationsTitle')} variant="open" testID="asset-valuations">
+          {!isWallet ? <Section title={t('manualAssetDetail.valuationsTitle')} variant="open" testID="asset-valuations">
             <View>
               {valuations.map((valuation, index) => (
                 <ListRow
@@ -124,7 +165,7 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
                 />
               ))}
             </View>
-          </Section>
+          </Section> : null}
 
           <Section title={t('manualAssetDetail.facts.title')} variant="open" testID="asset-facts">
             <View>
@@ -156,7 +197,9 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
               {!asset.isOwner && asset.ownerFirstName ? <Fact label={t('manualAssetDetail.facts.owner')} value={asset.ownerFirstName} /> : null}
               {asset.notes ? <Fact label={t('manualAssetDetail.facts.notes')} value={asset.notes} /> : null}
             </View>
-            <Text style={styles.webNote} tone="muted" variant="meta">{t('manualAssetDetail.manageOnWeb')}</Text>
+            {isWallet && walletActions ? <CryptoWalletManage actions={walletActions} asset={asset} /> : null}
+            {!isWallet && manage ? <AssetManage actions={manage} archived={asset.archived} /> : null}
+            {!isWallet ? <Text style={styles.webNote} tone="muted" variant="meta">{t('manualAssetDetail.valuationsOnWeb')}</Text> : null}
           </Section>
         </View>
       </ScrollView>
@@ -164,12 +207,113 @@ export function AssetDetailScreen({ state, onBack, onUpdateValue, onRefresh }: {
   )
 }
 
-function Fact({ label, value, first = false }: { label: string; value: string; first?: boolean }) {
+/**
+ * Web's `AssetEquity`: what the asset is worth less what is still owed on the loans secured
+ * against it, all in the asset's currency, then those loans in their own. A loan the API has no
+ * rate for leaves no total and no equity (`—`), and the note says why rather than adding amounts
+ * in different currencies. A negative equity keeps its minus sign and gets the "Underwater" note,
+ * so it never rests on colour.
+ */
+function AssetEquity({ asset, locale }: { asset: ManualAssetDto; locale: string }) {
+  const { t } = useTranslation()
+  const formatMoney = useFormatMoney()
+  const money = (value: number | null, currency = asset.currency) => value === null ? MISSING : formatMoney(value, { locale, currency })
+  const unconverted = asset.unconvertedLoanCurrencies.length > 0
+    ? asset.unconvertedLoanCurrencies
+    : [...new Set(asset.linkedLoans.filter((loan) => loan.outstandingPrincipalInAssetCurrency === null).map((loan) => loan.currency))].sort()
+  const note = asset.linkedDebt === null
+    ? t('manualAssetDetail.equity.noRate', { currencies: currencyList(unconverted, locale), currency: asset.currency })
+    : asset.value === null
+      ? t('manualAssetDetail.equity.archived')
+      : asset.equity !== null && asset.equity < 0 ? t('manualAssetDetail.equity.underwater') : null
+  return (
+    <Section title={t('manualAssetDetail.equity.title')} variant="open" testID="asset-equity">
+      <View>
+        <Fact first figure label={t('manualAssetDetail.equity.value')} value={money(asset.value)} />
+        <Fact figure label={t('manualAssetDetail.equity.linkedDebt')} value={money(asset.linkedDebt)} />
+        <Fact figure label={t('manualAssetDetail.equity.equity')} value={money(asset.equity)} />
+      </View>
+      {note ? <Text accessibilityRole={asset.linkedDebt === null ? 'alert' : undefined} style={styles.equityNote} tone="muted" variant="meta">{note}</Text> : null}
+      <Text accessibilityRole="header" style={styles.loansHead} variant="action">{t('manualAssetDetail.equity.loans')}</Text>
+      <View testID="asset-equity-loans">
+        {asset.linkedLoans.map((loan, index) => (
+          <Fact
+            key={loan.loanKey}
+            first={index === 0}
+            figure
+            label={loan.name}
+            value={money(loan.outstandingPrincipal, loan.currency)}
+            detail={loan.currency !== asset.currency && loan.outstandingPrincipalInAssetCurrency !== null
+              ? t('manualAssetDetail.equity.converted', { amount: money(loan.outstandingPrincipalInAssetCurrency) })
+              : undefined}
+          />
+        ))}
+      </View>
+    </Section>
+  )
+}
+
+/**
+ * Web's Archive / Bring back and Delete asset, under the details. Archiving asks first (it stops
+ * counting in net worth from today; the history stays); bringing it back does not. Deleting asks
+ * first, with web's warning, and cannot be undone.
+ */
+function AssetManage({ actions, archived }: { actions: ManualAssetManageActions; archived: boolean }) {
+  const { t } = useTranslation()
+  const [failure, setFailure] = useState<ManualAssetWriteFailure | null>(null)
+  const [busy, setBusy] = useState<'archive' | 'delete' | null>(null)
+  const run = async (which: 'archive' | 'delete', write: () => Outcome) => {
+    setFailure(null)
+    setBusy(which)
+    try {
+      setFailure(await write())
+    } finally {
+      setBusy(null)
+    }
+  }
+  const archive = async () => {
+    if (actions.pending) return
+    await archiveOrBringBack(archived, t, (next) => run('archive', () => actions.onSetArchived(next)))
+  }
+  const remove = async () => {
+    if (actions.pending) return
+    const confirmed = await confirmAction(t('manualAssetDetail.manage.deleteTitle'), t('manualAssetDetail.manage.deleteMessage'), t('common.cancel'), t('manualAssetDetail.manage.delete'), true)
+    if (confirmed) await run('delete', actions.onDelete)
+  }
+  return (
+    <View style={styles.manage} testID="asset-manage">
+      <View style={styles.actions}>
+        <Button disabled={actions.pending} icon="archive" label={archived ? t('manualAssetDetail.manage.unarchive') : t('manualAssetDetail.manage.archive')} loading={busy === 'archive'} onPress={archive} variant="outline" />
+        <Button disabled={actions.pending} icon="trash" label={t('manualAssetDetail.manage.delete')} loading={busy === 'delete'} onPress={remove} variant="destructive-quiet" />
+      </View>
+      {failure ? <Notice message={t(`manualAssets.failures.${failure}`)} tone="destructive" testID="asset-manage-failure" /> : null}
+    </View>
+  )
+}
+
+const noWrite = async () => null
+const READ_ONLY_WALLET: CryptoWalletActions = {
+  chains: [],
+  pending: false,
+  onToggleToken: noWrite,
+  onAddAddress: noWrite,
+  onSetLabel: noWrite,
+  onRemoveAddress: noWrite,
+  onSyncNow: noWrite,
+  onUpdateWallet: noWrite,
+  onSetArchived: noWrite,
+  onDeleteWallet: noWrite,
+}
+
+function Fact({ label, value, detail, figure = false, first = false }: { label: string; value: string; detail?: string; figure?: boolean; first?: boolean }) {
   const palette = usePalette()
   return (
-    <View accessible accessibilityLabel={`${label}, ${value}`} style={[styles.fact, { borderBottomColor: palette.border }, first && styles.firstFact]}>
+    <View accessible accessibilityLabel={[label, value, detail].filter(Boolean).join(', ')} style={[styles.fact, { borderBottomColor: palette.border }, first && styles.firstFact]}>
       <Text style={styles.factLabel} tone="muted" variant="meta">{label}</Text>
-      <Text style={styles.factValue} variant="meta">{value}</Text>
+      <View style={styles.factValue}>
+        <Text style={styles.factValueText} variant={figure ? 'amount' : 'meta'}>{value}</Text>
+        {detail ? <Text style={styles.factValueText} tone="muted" variant="label">{detail}</Text> : null}
+      </View>
     </View>
   )
 }
@@ -183,6 +327,10 @@ const styles = StyleSheet.create({
   fact: { flexDirection: 'row', justifyContent: 'space-between', gap: themeTokens.spacing[4], paddingVertical: themeTokens.spacing[3], borderBottomWidth: StyleSheet.hairlineWidth },
   firstFact: { paddingTop: 0 },
   factLabel: { flexShrink: 0 },
-  factValue: { flexShrink: 1, textAlign: 'right' },
+  factValue: { flexShrink: 1, alignItems: 'flex-end' },
+  factValueText: { textAlign: 'right' },
+  equityNote: { marginTop: themeTokens.spacing[3] },
+  loansHead: { marginTop: themeTokens.spacing[6], marginBottom: themeTokens.spacing[1] },
   webNote: { marginTop: themeTokens.spacing[4] },
+  manage: { gap: themeTokens.spacing[3], marginTop: themeTokens.spacing[4] },
 })

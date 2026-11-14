@@ -5,23 +5,31 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 
-import { addAccount, addCategory, addMerchant, addPartner, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addCategory, addMerchant, addOwnership, addPartner, addShare, addTransaction, currencyFor, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { seedPortfolio } from '@app/__tests__/__helpers__/portfolio-fixtures';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
 import type { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserMerchantCategory, Source } from '@entity/AppuserMerchantCategory';
+import { AppuserTenant } from '@entity/AppuserTenant';
 import { Budget } from '@entity/Budget';
 import { BudgetTemplateCategory } from '@entity/BudgetTemplateCategory';
+import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
+import { CreditCardDetail } from '@entity/CreditCardDetail';
+import { CryptoWalletAddress } from '@entity/CryptoWalletAddress';
+import { CryptoWalletToken } from '@entity/CryptoWalletToken';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
+import { ExchangeRateOverride } from '@entity/ExchangeRateOverride';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { Goal } from '@entity/Goal';
 import { GoalAccountLink } from '@entity/GoalAccountLink';
 import { GoalActivity, GoalActivityType } from '@entity/GoalActivity';
 import { GoalTransactionFunding } from '@entity/GoalTransactionFunding';
+import { Installment } from '@entity/Installment';
+import { InstallmentPlan } from '@entity/InstallmentPlan';
 import { Loan } from '@entity/Loan';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { ManualAsset } from '@entity/ManualAsset';
@@ -34,10 +42,12 @@ import { Tag } from '@entity/Tag';
 import { Transaction } from '@entity/Transaction';
 import { TransactionSplit } from '@entity/TransactionSplit';
 import { TransactionTag } from '@entity/TransactionTag';
+import { TransactionTemplate, TransactionTemplateDirection } from '@entity/TransactionTemplate';
 import { Watchlist } from '@entity/Watchlist';
 import { LoanAllocationSource, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
 import { ManualAssetKind } from '@service/manual-asset/manual-asset-types';
 
+import { EXPORT_FORMAT_VERSION } from '../export-format';
 import { type ExportScope, writeHouseholdExport } from '../household-export';
 
 /*
@@ -95,6 +105,13 @@ describe('household export', () => {
     const series = em.create(RecurringSeries, { accountKey: account, displayName: `${prefix}-SERIES`, normalizedMerchantKey: `${prefix.toLowerCase()}-series`, tenantKey: household.tenant }, { partial: true });
     em.create(RecurringOccurrence, { amount: -42.5, occurrenceDate: new Date('2026-07-11T12:00:00Z'), recurringSeriesKey: series, transactionKey: transaction }, { partial: true });
     em.create(Rule, { actions: [{ categoryId: category.categoryKey, type: 'set_category' }], conditions: [{ field: 'account', operator: 'in', values: [account.accountKey] }], name: `${prefix}-RULE`, position: await nextRulePosition(em, household), tenantKey: household.tenant }, { partial: true });
+    // The account is a card with a purchase in two installments, the first paid by the transaction.
+    em.create(CreditCardDetail, { accountKey: account, paymentDueDay: 10, statementCloseDay: 25, tenantKey: household.tenant }, { partial: true });
+    const plan = em.create(InstallmentPlan, { accountKey: account, description: `${prefix}-PLAN`, installmentCount: 2, purchaseDate: new Date('2026-07-11T00:00:00Z'), tenantKey: household.tenant, totalAmount: 85 }, { partial: true });
+    em.create(Installment, { amount: 42.5, installmentNumber: 1, installmentPlanKey: plan, scheduledDate: new Date('2026-07-11'), tenantKey: household.tenant }, { partial: true });
+    em.create(Installment, { amount: 42.5, installmentNumber: 2, installmentPlanKey: plan, scheduledDate: new Date('2026-08-11'), tenantKey: household.tenant }, { partial: true });
+    transaction.installmentPlanKey = plan;
+    transaction.installmentNumber = 1;
     await em.flush();
     return { category, merchant, series, tag, transaction };
   }
@@ -130,12 +147,20 @@ describe('household export', () => {
     const budget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'Home', numAdults: 2, numDependents: 0, tenantKey: owner.tenant }, { partial: true });
     const line = em.create(BudgetTemplateCategory, { amountBudgeted: 300, budgetKey: budget, categoryKey: shared.category, month: 7, year: 2026 }, { partial: true });
     line.accounts.add([sharedAccount, privateAccount]);
+    // The owner's personal budget is theirs alone: in their export, never in the partner's.
+    const personalBudget = em.create(Budget, { appuserKey: owner.appuser, currencyKey: owner.currency, name: 'SECRET-BUDGET', numAdults: 1, numDependents: 0, ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    em.create(BudgetTemplateCategory, { amountBudgeted: 50, budgetKey: personalBudget, categoryKey: shared.category, month: 7, year: 2026 }, { partial: true });
+    em.create(BudgetTemplateIncome, { amount: 10, budgetKey: personalBudget, name: 'SECRET-INCOME' }, { partial: true });
     const portfolio = em.create(Portfolio, { accountBalanceMode: PortfolioAccountBalanceMode.INCLUDES_HOLDINGS, currencyKey: owner.currency, linkedAccountKey: privateAccount, name: 'Shares', portfolioOwnerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
 
     // The owner's loan is personal: the partner never sees it.
     const loan = em.create(Loan, { currencyKey: owner.currency, name: 'OWNER-LOAN', openingBalanceDate: new Date('2026-01-01'), openingPrincipalBalance: 5000, ownerAppuserKey: owner.appuser, paymentFrequency: LoanPaymentFrequency.MONTHLY, rateType: LoanRateType.FIXED, status: LoanStatus.ACTIVE, tenantKey: owner.tenant, type: LoanType.PERSONAL_LOAN }, { partial: true });
     em.create(LoanRepaymentLink, { allocationSource: LoanAllocationSource.MANUAL, feeAmount: 0, interestAmount: 2.5, linkedByAppuserKey: owner.appuser, loanKey: loan, paymentDate: new Date('2026-07-11'), principalAmount: 40, tenantKey: owner.tenant, totalPaymentAmount: 42.5, transactionKey: secret.transaction }, { partial: true });
     em.create(Watchlist, { appuserKey: owner.appuser, symbol: 'OWNERWATCH', tenantKey: owner.tenant }, { partial: true });
+    em.create(TransactionTemplate, { accountKey: sharedAccount, direction: TransactionTemplateDirection.OUT, name: 'OWNER-TEMPLATE', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    // A household rate either member set: both see it.
+    const usd = await currencyFor(em, 'USD');
+    em.create(ExchangeRateOverride, { createdByAppuserKey: partner, date: new Date('2026-07-01T00:00:00Z'), fromCurrency: usd, rate: 0.92, tenantKey: owner.tenant, toCurrency: owner.currency }, { partial: true });
     em.create(AppuserMerchantCategory, { appuserKey: owner.appuser, categoryKey: secret.category, source: Source.MANUAL, transactionMerchantKey: secret.merchant }, { partial: true });
 
     // A shared home with two valuations, and a watch only the owner knows about.
@@ -145,6 +170,8 @@ describe('household export', () => {
     const watch = em.create(ManualAsset, { currencyKey: owner.currency, isPrivate: true, kind: ManualAssetKind.VALUABLE, name: 'SECRET-WATCH', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
     em.create(ManualAssetValuation, { manualAssetKey: watch, note: 'SECRET-APPRAISAL', tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 4000 }, { partial: true });
     const sold = em.create(ManualAsset, { currencyKey: owner.currency, deletedAt: new Date(), isPrivate: false, kind: ManualAssetKind.VEHICLE, name: 'DELETED-CAR', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+    // The owner's loan finances the shared home.
+    loan.securedAssetKey = home;
     em.create(ManualAssetValuation, { manualAssetKey: sold, tenantKey: owner.tenant, valuationDate: new Date('2026-02-01'), value: 1 }, { partial: true });
     em.create(ManualAssetValuation, { deletedAt: new Date(), manualAssetKey: home, note: 'DELETED-VALUATION', tenantKey: owner.tenant, valuationDate: new Date('2026-03-01'), value: 2 }, { partial: true });
 
@@ -159,6 +186,8 @@ describe('household export', () => {
     em.create(Goal, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-GOAL', targetAmount: 1, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Budget, { appuserKey: neighbour.appuser, currencyKey: neighbour.currency, name: 'NEIGHBOUR-BUDGET', numAdults: 1, numDependents: 0, tenantKey: neighbour.tenant }, { partial: true });
     em.create(Portfolio, { currencyKey: neighbour.currency, name: 'NEIGHBOUR-PORTFOLIO', portfolioOwnerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    em.create(TransactionTemplate, { direction: TransactionTemplateDirection.IN, name: 'NEIGHBOUR-TEMPLATE', ownerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
+    em.create(ExchangeRateOverride, { date: new Date('2026-07-01T00:00:00Z'), fromCurrency: usd, rate: 7.7777, tenantKey: neighbour.tenant, toCurrency: neighbour.currency }, { partial: true });
     const flat = em.create(ManualAsset, { currencyKey: neighbour.currency, isPrivate: false, kind: ManualAssetKind.PROPERTY, name: 'NEIGHBOUR-FLAT', ownerAppuserKey: neighbour.appuser, tenantKey: neighbour.tenant }, { partial: true });
     em.create(ManualAssetValuation, { manualAssetKey: flat, note: 'NEIGHBOUR-ESTIMATE', tenantKey: neighbour.tenant, valuationDate: new Date('2026-02-01'), value: 90_000 }, { partial: true });
     await em.flush();
@@ -182,6 +211,11 @@ describe('household export', () => {
       expect(archive.data['recurring-occurrences']).toHaveLength(1);
       expect(archive.data['rules']!.map((row) => row['name'])).toEqual(['SHARED-RULE']);
       expect(archive.data['goal-transaction-fundings']).toHaveLength(1);
+      // The private card's settings and plans go with it.
+      expect(archive.data['credit-cards']).toHaveLength(1);
+      expect(archive.data['installment-plans']!.map((row) => row['description'])).toEqual(['SHARED-PLAN']);
+      expect(archive.data['installments']).toHaveLength(2);
+      expect(archive.data['transactions']!.filter((row) => row['installmentPlanId'] !== null)).toEqual([expect.objectContaining({ description: 'SHARED-DESCRIPTION', installmentNumber: 1, installmentPlanId: 1 })]);
     });
 
     it('keeps household rows that link to it, without the link', async () => {
@@ -213,6 +247,57 @@ describe('household export', () => {
     });
   });
 
+  describe('a private account shared with the member', () => {
+    it('is in their export with its transactions, and the owner\'s export says who it is shared with', async () => {
+      const { owner, partner, privateAccount } = await households();
+      await addShare(db.em(), owner, privateAccount, partner, 'read');
+
+      const theirs = await exportFor(scopeOf(owner, partner));
+      expect(theirs.data['accounts']!.map((row) => row['name'])).toEqual(['Joint current account', 'SECRET-ACCOUNT']);
+      expect(theirs.data['transactions']!.map((row) => row['description'])).toContain('SECRET-DESCRIPTION');
+
+      const mine = await exportFor(scopeOf(owner));
+      const partnerId = mine.data['members']!.find((row) => row['id'] !== mine.manifest.exportedBy.memberId)!['id'];
+      expect(mine.data['accounts']!.map((row) => ({ name: row['name'], shares: row['shares'] }))).toEqual([
+        { name: 'Joint current account', shares: [] },
+        { name: 'SECRET-ACCOUNT', shares: [{ access: 'read', memberId: partnerId }] },
+      ]);
+    });
+  });
+
+  it("carries the member's own personal budget, naming its owner, and never the other member's", async () => {
+    const { owner, partner } = await households();
+
+    const ownExport = await exportFor(scopeOf(owner));
+    const partnerExport = await exportFor(scopeOf(owner, partner));
+
+    expect(ownExport.data['budgets']!.map((row) => ({ name: row['name'], ownerMemberId: row['ownerMemberId'] }))).toEqual([
+      { name: 'Home', ownerMemberId: null },
+      { name: 'SECRET-BUDGET', ownerMemberId: ownExport.manifest.exportedBy.memberId },
+    ]);
+    expect(ownExport.data['budget-categories']).toHaveLength(2);
+    expect(ownExport.data['budget-incomes']!.map((row) => row['name'])).toEqual(['SECRET-INCOME']);
+    expect(partnerExport.data['budgets']!.map((row) => ({ name: row['name'], ownerMemberId: row['ownerMemberId'] }))).toEqual([{ name: 'Home', ownerMemberId: null }]);
+    expect(partnerExport.data['budget-categories']).toHaveLength(1);
+    expect(partnerExport.data['budget-incomes']).toEqual([]);
+  });
+
+  it('carries each member\'s ownership share of an account, a former member\'s as Shared', async () => {
+    const { owner, partner, privateAccount } = await households();
+    const former = await addPartner(db.em(), owner);
+    await addOwnership(db.em(), owner, owner.account, [[owner.appuser, 5000], [partner, 3000], [former, 2000]]);
+    await db.em().nativeUpdate(AppuserTenant, { appuserKey: former }, { recordActive: false });
+
+    const mine = await exportFor(scopeOf(owner));
+    const ownerId = mine.manifest.exportedBy.memberId;
+    const partnerId = mine.data['members']!.find((row) => row['id'] !== ownerId)!['id'];
+
+    expect(Object.fromEntries(mine.data['accounts']!.map((row) => [row['name'], row['ownership']]))).toEqual({
+      'Joint current account': [{ basisPoints: 5000, memberId: ownerId }, { basisPoints: 3000, memberId: partnerId }, { basisPoints: 2000, memberId: null }],
+      [privateAccount.accountName!]: [],
+    });
+  });
+
   it("leaves out the other member's personal loans and watchlist", async () => {
     const { owner, partner } = await households();
 
@@ -220,9 +305,23 @@ describe('household export', () => {
 
     expect(archive.text).not.toContain('OWNER-LOAN');
     expect(archive.text).not.toContain('OWNERWATCH');
+    expect(archive.text).not.toContain('OWNER-TEMPLATE');
     expect(archive.data['loans']).toEqual([]);
     expect(archive.data['loan-repayments']).toEqual([]);
     expect(archive.data['watchlist']).toEqual([]);
+    expect(archive.data['transaction-templates']).toEqual([]);
+  });
+
+  it("holds the household's own exchange rates and the member's own templates, never a neighbour's", async () => {
+    const { owner, partner } = await households();
+
+    const archive = await exportFor(scopeOf(owner));
+
+    expect(archive.data['transaction-templates']).toEqual([expect.objectContaining({ accountId: 1, direction: 'out', name: 'OWNER-TEMPLATE' })]);
+    const expected = [{ createdByMemberId: 2, date: '2026-07-01', fromCurrency: 'USD', rate: '0.92', toCurrency: 'EUR' }];
+    expect(archive.data['exchange-rate-overrides']).toEqual(expected);
+    // The partner sees the same household rate, set by themselves (member 1 of their export).
+    expect((await exportFor(scopeOf(owner, partner))).data['exchange-rate-overrides']).toEqual([{ ...expected[0], createdByMemberId: 1 }]);
   });
 
   describe('manual assets', () => {
@@ -241,6 +340,31 @@ describe('household export', () => {
         { date: '2026-02-01', manualAssetId: 2, note: 'SECRET-APPRAISAL', value: '4000' },
       ]);
       expect(archive.text).not.toContain('DELETED');
+    });
+
+    it('holds a crypto wallet\'s public addresses and tokens, and leaves a private wallet out of the other member\'s', async () => {
+      const { owner, partner } = await households();
+      const em = db.em();
+      const wallet = em.create(ManualAsset, { currencyKey: await currencyFor(em, 'USD'), isPrivate: true, kind: ManualAssetKind.CRYPTO_WALLET, name: 'SECRET-WALLET', ownerAppuserKey: owner.appuser, tenantKey: owner.tenant }, { partial: true });
+      const address = em.create(CryptoWalletAddress, { address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', addressKind: 'address', chain: 'bitcoin', label: 'Cold', manualAssetKey: wallet, tenantKey: owner.tenant }, { partial: true });
+      em.create(CryptoWalletToken, { cryptoWalletAddressKey: address, decimals: 8, manualAssetKey: wallet, name: 'Bitcoin', rawBalance: '125000000', symbol: 'BTC', tenantKey: owner.tenant, tokenRef: 'native', tracked: true }, { partial: true });
+      await em.flush();
+
+      const archive = await exportFor(scopeOf(owner));
+      expect(archive.data['crypto-wallet-addresses']).toEqual([{ address: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq', chain: 'bitcoin', id: 1, kind: 'address', label: 'Cold', manualAssetId: 3 }]);
+      expect(archive.data['crypto-wallet-tokens']).toEqual([{ addressId: 1, balance: '125000000', contractAddress: null, decimals: 8, name: 'Bitcoin', symbol: 'BTC', tracked: true }]);
+
+      const theirs = await exportFor(scopeOf(owner, partner));
+      expect(theirs.data['crypto-wallet-addresses']).toEqual([]);
+      expect(theirs.text).not.toContain('bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq');
+    });
+
+    it('names the asset a loan is secured against by its export id', async () => {
+      const { owner } = await households();
+
+      const archive = await exportFor(scopeOf(owner));
+
+      expect(archive.data['loans']).toEqual([expect.objectContaining({ name: 'OWNER-LOAN', securedAssetId: 1 })]);
     });
 
     it("leaves the other member's private asset and its valuations out", async () => {
@@ -264,7 +388,7 @@ describe('household export', () => {
       expect((await exportFor(scope)).text.toUpperCase()).not.toContain('NEIGHBOUR');
     }
     const theirs = await exportFor(scopeOf(neighbour));
-    expect(theirs.text.toUpperCase()).not.toContain('SHARED');
+    expect(theirs.text.toUpperCase()).not.toContain('SHARED-');
     expect(theirs.text.toUpperCase()).not.toContain('SECRET');
     expect(theirs.data['accounts']!.map((row) => row['name'])).toEqual(['NEIGHBOUR-ACCOUNT']);
   });
@@ -308,7 +432,7 @@ describe('household export', () => {
 
       const archive = await exportFor(scopeOf(owner));
 
-      expect(archive.manifest.formatVersion).toBe('1.1');
+      expect(archive.manifest.formatVersion).toBe(EXPORT_FORMAT_VERSION);
       const paths = Object.keys(archive.entries).filter((path) => path !== 'manifest.json').sort();
       expect(archive.manifest.files.map((file) => file.path).sort()).toEqual(paths);
       for (const file of archive.manifest.files) {

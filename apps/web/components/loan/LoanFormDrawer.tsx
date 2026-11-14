@@ -34,12 +34,20 @@ import useCurrencies from "@/lib/api/account/useCurrencies";
 import { getApiErrorMessage, isDemoReadOnlyError } from "@/lib/api/errors";
 import type {
   CreateLoanRequest,
+  LoanAmortizationMethod,
   LoanDetail,
   LoanListItem,
+  LoanRateType,
   LoanType,
 } from "@/lib/api/loan/types";
 import useCreateLoan from "@/lib/api/loan/useCreateLoan";
 import useUpdateLoan from "@/lib/api/loan/useUpdateLoan";
+import type { ManualAsset } from "@/lib/api/manual-asset/types";
+import useManualAssets from "@/lib/api/manual-asset/useManualAssets";
+import {
+  formatDateInputValue,
+  parseDateInputValue,
+} from "@/lib/loans/calendar-day";
 import { LOAN_TYPE_LABEL_KEY } from "@/lib/loans/loan-labels";
 import {
   formatLocaleNumberInput,
@@ -47,22 +55,34 @@ import {
   zOptionalLocaleNumber,
 } from "@/lib/utils/number";
 
-/**
- * Convert a `yyyy-mm-dd` string into a local Date, avoiding the UTC-midnight
- * parsing of `new Date("yyyy-mm-dd")` that can shift the day in negative-offset zones.
- */
-function parseDateInputValue(value: string | undefined): Date | undefined {
-  if (!value) return undefined;
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  if (!match) return undefined;
-  const [, year, month, day] = match;
-  return new Date(Number(year), Number(month) - 1, Number(day));
+/** The loan's own rate (before any rate change); older payloads only carry today's. */
+function initialRateBps(
+  loan: LoanListItem | LoanDetail | null | undefined,
+): number | null | undefined {
+  if (!loan) return undefined;
+  return loan.initialAnnualInterestRateBps !== undefined
+    ? loan.initialAnnualInterestRateBps
+    : loan.annualInterestRateBps;
 }
 
-/** Format a Date back into the `yyyy-mm-dd` string the API expects. */
-function formatDateInputValue(date: Date | undefined): string {
-  if (!date) return "";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+/** The secured-asset picker's value for "not secured": a Select item cannot be empty. */
+const NO_SECURED_ASSET = "none";
+
+/**
+ * The assets a loan can be secured against: every asset still held, plus the one it
+ * is secured against now even when that is archived (or no longer in the list), so
+ * opening the form never silently drops the link.
+ */
+function securedAssetOptions(
+  assets: ManualAsset[],
+  current: LoanListItem["securedAsset"] | undefined,
+): Array<{ key: number; name: string }> {
+  const options = assets
+    .filter((asset) => !asset.archived || asset.manualAssetKey === current?.key)
+    .map((asset) => ({ key: asset.manualAssetKey, name: asset.name }));
+  if (current && !options.some((option) => option.key === current.key))
+    options.push({ key: current.key, name: current.name });
+  return options;
 }
 
 /**
@@ -107,6 +127,7 @@ function buildBaseSchema(
       "STUDENT_LOAN",
       "OTHER",
     ]),
+    amortizationMethod: z.enum(["FRENCH", "CONSTANT_PRINCIPAL"]),
     providerName: z.string().optional(),
     currencyKey: z.coerce.number<number>().int().positive(),
     openingPrincipalBalance: amount().pipe(z.number().min(0)),
@@ -124,9 +145,12 @@ function buildBaseSchema(
     interestRatePercent: optionalAmount().pipe(
       z.number().min(0).max(100).optional(),
     ),
+    rateType: z.enum(["FIXED", "VARIABLE", "UNKNOWN"]),
     paymentDayOfMonth: z.coerce.number<number>().min(1).max(31).optional(),
     termMonths: z.coerce.number<number>().int().positive().optional(),
     includeInNetWorth: z.boolean(),
+    // An asset's key, or NO_SECURED_ASSET.
+    securedAssetKey: z.string(),
     notes: z.string().optional(),
   });
 }
@@ -148,10 +172,18 @@ export default function LoanFormDrawer({
   const updateMutation = useUpdateLoan();
   const { data: currenciesData } = useCurrencies({ enabled: open });
   const currencies = currenciesData?.currencies ?? [];
-  const defaultValues = useMemo<FormInput>(
-    () => ({
+  const { data: assetsData } = useManualAssets({ enabled: open });
+  const currentSecuredAsset = loan?.securedAsset ?? null;
+  const assetOptions = securedAssetOptions(
+    assetsData?.assets ?? [],
+    currentSecuredAsset,
+  );
+  const defaultValues = useMemo<FormInput>(() => {
+    const initialRate = initialRateBps(loan);
+    return {
       name: loan?.name ?? "",
       type: loan?.type ?? "PERSONAL_LOAN",
+      amortizationMethod: loan?.amortizationMethod ?? "FRENCH",
       providerName: loan?.providerName ?? "",
       currencyKey: loan?.currency.currencyKey ?? 1,
       openingPrincipalBalance: loan?.openingPrincipalBalance ?? 0,
@@ -167,17 +199,20 @@ export default function LoanFormDrawer({
       // annualInterestRateBps is stored server-side as basis points; the
       // form field is a percentage, so convert on the way in (divide by
       // 100) and back on the way out (multiply by 100, see `submit()`).
-      interestRatePercent:
-        loan?.annualInterestRateBps != null
-          ? loan.annualInterestRateBps / 100
-          : undefined,
+      // The field is the loan's own rate, which applies until its first
+      // rate change; `annualInterestRateBps` is today's, and saving it here
+      // would rewrite the rate before every change.
+      interestRatePercent: initialRate != null ? initialRate / 100 : undefined,
+      rateType: (loan as LoanDetail | undefined)?.rateType ?? "FIXED",
       paymentDayOfMonth: loan?.paymentDayOfMonth ?? 1,
       termMonths: loan?.termMonths ?? undefined,
       includeInNetWorth: loan?.includeInNetWorth ?? true,
+      securedAssetKey: loan?.securedAsset
+        ? String(loan.securedAsset.key)
+        : NO_SECURED_ASSET,
       notes: loan?.notes ?? "",
-    }),
-    [loan],
-  );
+    };
+  }, [loan]);
   const schema = useMemo(
     () =>
       buildBaseSchema(t, locale, tCommon("invalid-amount")).superRefine(
@@ -213,9 +248,14 @@ export default function LoanFormDrawer({
   }));
   const optionalNumber = (value: string) => (value === "" ? undefined : value);
   const submit = async (values: FormValues) => {
+    const securedAssetKey =
+      values.securedAssetKey === NO_SECURED_ASSET
+        ? null
+        : Number(values.securedAssetKey);
     const payload: CreateLoanRequest = {
       name: values.name,
       type: values.type,
+      amortizationMethod: values.amortizationMethod,
       providerName: values.providerName || undefined,
       currencyKey: values.currencyKey,
       openingPrincipalBalance: values.openingPrincipalBalance,
@@ -227,6 +267,7 @@ export default function LoanFormDrawer({
         values.interestRatePercent != null
           ? Math.round(values.interestRatePercent * 100)
           : undefined,
+      rateType: values.rateType,
       paymentDayOfMonth: values.paymentDayOfMonth ?? undefined,
       termMonths: values.termMonths ?? undefined,
       // No maturityDate input exists in this form yet; derive it from the
@@ -239,6 +280,12 @@ export default function LoanFormDrawer({
       ),
       includeInNetWorth: values.includeInNetWorth,
       notes: values.notes || undefined,
+      // Sent only when it changes: a new loan sends the asset it is secured
+      // against, an edit the new one or `null` to unlink. Leaving it out keeps
+      // the link, which an edit that did not touch it must not resend.
+      ...(securedAssetKey !== (currentSecuredAsset?.key ?? null)
+        ? { securedAssetKey }
+        : {}),
     };
     try {
       if (loan)
@@ -321,6 +368,43 @@ export default function LoanFormDrawer({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="amortizationMethod"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.amortizationMethod")}</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(
+                      [
+                        "FRENCH",
+                        "CONSTANT_PRINCIPAL",
+                      ] satisfies LoanAmortizationMethod[]
+                    ).map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {t(
+                          `methods.${v === "FRENCH" ? "french" : "constantPrincipal"}`,
+                        )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {t("fields.amortizationMethodHint")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -410,6 +494,37 @@ export default function LoanFormDrawer({
           />
           <FormField
             control={form.control}
+            name="rateType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.rateType")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(
+                      ["FIXED", "VARIABLE", "UNKNOWN"] satisfies LoanRateType[]
+                    ).map((rate) => (
+                      <SelectItem key={rate} value={rate}>
+                        {t(`rateTypes.${rate}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {field.value === "VARIABLE" ? (
+                  <FormDescription>
+                    {t("fields.rateTypeVariableHelp")}
+                  </FormDescription>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="termMonths"
             render={({ field }) => (
               <FormItem>
@@ -448,6 +563,36 @@ export default function LoanFormDrawer({
                   }
                   placeholder={t("fields.startDatePlaceholder")}
                 />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="securedAssetKey"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("fields.securedAsset")}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={NO_SECURED_ASSET}>
+                      {t("fields.securedAssetNone")}
+                    </SelectItem>
+                    {assetOptions.map((asset) => (
+                      <SelectItem key={asset.key} value={String(asset.key)}>
+                        {asset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {t("fields.securedAssetHint")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

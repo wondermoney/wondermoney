@@ -1,32 +1,108 @@
 ---
 title: Privacidad de la cuenta
-description: Controla qué cuentas se comparten con el hogar y cuáles son visibles solo para un miembro.
+description: Comparte una cuenta con todo el hogar, o mantenla privada y elige, para cada miembro, si no la ve, si puede verla o si puede editarla.
 ---
 
-Cada cuenta de un hogar tiene una configuración de privacidad. Una cuenta compartida es visible para ambos miembros; una cuenta privada es visible solo para el miembro que la posee.
+Cada cuenta de un hogar está compartida con el hogar o es privada. Una cuenta compartida es visible para todas las personas, y todas pueden cambiarla. Una cuenta privada es visible solo para la persona a la que pertenece y para los miembros con quienes está compartida, y para cada uno de ellos eliges si solo puede verla o si también puede editarla.
 
-Por defecto, una cuenta se comparte con el hogar. Cambia la configuración de la cuenta cuando quieras que permanezca privada.
+Por defecto, una cuenta se comparte con el hogar. Nada cambia en una cuenta hasta que cambias cómo se comparte.
 
-## Configurar la privacidad de la cuenta
+## Compartida con el hogar
 
-Abre la cuenta y elige su configuración de privacidad:
+Una cuenta compartida, con sus transacciones y su saldo, aparece en la vista de todos: en la lista de cuentas, los totales, el patrimonio neto, los informes y los presupuestos. Todas las personas del hogar pueden editarla, a ella y a sus transacciones, salvo los observadores, que solo la ven.
 
-- **Compartida** — ambos miembros ven la cuenta, sus transacciones y su saldo.
-- **Privada** — solo el miembro que posee la cuenta la ve. Las vistas del otro miembro, incluido el patrimonio neto, excluyen la cuenta.
+Las personas que se unen al hogar más tarde tienen el mismo acceso a una cuenta compartida que todas las demás.
 
-Las cuentas privadas mantienen los gastos personales de un miembro fuera de la vista compartida, mientras que las cuentas compartidas siguen formando parte de la imagen común del hogar.
+## Privada, con acceso por miembro
 
-## Privacidad de las series recurrentes
+Una cuenta privada define el acceso de cada persona del hogar, una por una:
 
-El titular también puede configurar la privacidad de las series recurrentes. Una serie recurrente privada es visible solo para el miembro que la posee; una compartida aparece en las vistas de ambos miembros. Esto funciona de forma independiente de la configuración a nivel de cuenta.
+- **Oculta**: la persona no ve la cuenta en absoluto.
+- **Puede ver**: la persona ve la cuenta, sus transacciones y su saldo, y la cuenta cuenta en sus totales, pero no puede cambiar nada en ella.
+- **Puede editar**: la persona ve la cuenta y puede cambiarla, a ella y a sus transacciones, como en una cuenta compartida.
 
-## Privacidad por tipo de datos
+La persona a la que pertenece la cuenta siempre tiene acceso total. Dar a todas las personas el máximo acceso que pueden tener (**Puede editar**, o **Puede ver** para un observador) vuelve a compartir la cuenta con el hogar.
 
-La privacidad se aplica por tipo de datos. Las cuentas, las transacciones, las categorías, los objetivos, los presupuestos, la cartera, el flujo de caja y el patrimonio neto siguen las mismas reglas del hogar, y el titular decide cuáles de estos elementos permanecen visibles para ambos miembros y cuáles se limitan a un solo miembro.
+Quien se une al hogar más tarde no ve una cuenta privada hasta que alguien la comparte con esa persona.
+
+### Cambiar cómo se comparte
+
+Abre la pantalla de edición de la cuenta: en la web, elige **Editar** en la cuenta, en la lista de cuentas; en la aplicación móvil, abre la cuenta y edítala. La sección de uso compartido lista a todas las personas del hogar, con **Oculta**, **Puede ver** o **Puede editar** junto a cada nombre. Elige el acceso de cada persona y guarda.
+
+Si eres la única persona del hogar, todavía no hay nadie con quien compartir, y solo puedes marcar la cuenta como privada. Quien se una más tarde no la verá hasta que la compartas.
+
+Los miembros que ven la cuenta pero no pueden cambiar cómo se comparte ven cómo está compartida, sin las opciones.
+
+### Qué permite "Puede ver"
+
+Un miembro que puede ver una cuenta la ve como las demás personas: la cuenta y su saldo, sus transacciones con sus categorías, etiquetas, divisiones y archivos, y su lugar en los totales, el patrimonio neto, los informes y los presupuestos.
+
+No puede cambiar nada en ella. En esa cuenta no puede:
+
+- editar, recalcular ni eliminar la cuenta;
+- añadir, importar, editar ni eliminar transacciones;
+- cambiar la categoría, las etiquetas o las notas de una transacción, dividirla, adjuntar archivos ni vincular un reembolso;
+- cambiar la configuración de la tarjeta de crédito ni las compras a plazos.
+
+La aplicación oculta estas acciones en una cuenta que solo puedes ver. Si aun así se intenta un cambio, por ejemplo desde una versión anterior de la aplicación, se rechaza con un mensaje que dice que puedes ver la cuenta, pero no cambiarla.
+
+### Observadores
+
+Un observador del hogar solo ve, diga lo que diga la configuración de la cuenta. Para un observador, una cuenta privada ofrece solo **Oculta** y **Puede ver**.
+
+## Qué significa "Oculta"
+
+Para un miembro que no la ve, una cuenta privada y sus transacciones no existen. Quedan fuera de todo lo que ese miembro ve:
+
+- las listas de cuentas y de transacciones, y las búsquedas;
+- los totales, el patrimonio neto, el flujo de caja y los informes;
+- los presupuestos, los pagos recurrentes, las previsiones y la información semanal;
+- el feed de calendario y los correos, como el resumen mensual;
+- la exportación de datos;
+- el asistente, los clientes MCP y los tokens de API.
+
+## Quién puede cambiar cómo se comparte
+
+Dos personas pueden cambiar cómo se comparte una cuenta:
+
+- la persona a la que pertenece la cuenta;
+- el titular del hogar, en las cuentas que puede ver.
+
+El titular del hogar no ve automáticamente las cuentas privadas de los demás miembros: una cuenta privada que no está compartida con él también queda oculta para él, y no puede cambiar cómo se comparte. Los administradores solo pueden cambiar cómo se comparten sus propias cuentas.
+
+## Cuando alguien sale o es eliminado
+
+Cuando un miembro sale del hogar o es eliminado, sus cuentas privadas se quedan en el hogar, compartidas como estaban:
+
+- Los miembros con quienes una cuenta estaba compartida mantienen su acceso, para ver o para editar.
+- Nadie más gana acceso, ni siquiera el titular del hogar.
+- Si la persona vuelve a unirse al hogar, vuelve a ver sus cuentas, con acceso total.
+
+Consulta [Salir del hogar o eliminar a un miembro](/es/docs/household/leave-or-remove).
+
+## Vínculos entre cuentas
+
+Una transferencia o un reembolso que vincula dos cuentas solo cuenta cuando las mismas personas ven las dos cuentas, para que nadie vea la mitad de un vínculo. Consulta [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions) y [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions).
+
+## Qué sigue a la cuenta
+
+Los pagos recurrentes, las previsiones y los pagos del feed de calendario siguen cómo se comparte su cuenta: quien ve la cuenta los ve. Las carteras se comparten con el hogar; consulta [Vincular una cartera a su cuenta](/es/docs/portfolio-investments/link-portfolio-account#cuentas-privadas-en-un-hogar). Los bienes con valor manual tienen su propia configuración de privacidad; consulta [Bienes privados en un hogar](/es/docs/portfolio-investments/manual-assets#bienes-privados-en-un-hogar).
+
+## Presupuestos personales
+
+Un presupuesto es del hogar o de una persona. Un presupuesto personal solo lo ve quien lo creó, aunque las demás personas sean el titular o administradores, y solo un presupuesto personal puede vincular cuentas privadas. Cuenta las transacciones que ve quien lo creó, así que una cuenta privada compartida con esa persona también cuenta. Consulta [Crea tu primer presupuesto](/es/docs/budgets/create-first-budget#presupuesto-del-hogar-o-personal).
+
+## Exportaciones
+
+La exportación de datos incluye las cuentas que puedes ver, con cómo se comparten: si cada una está compartida con el hogar o es privada, y quién puede verla o editarla. Consulta [Privacidad de los datos](/es/docs/settings-security-privacy/data-privacy#exportar-tus-datos).
+
+Al restaurar una exportación, todas las cuentas vuelven como tuyas, porque las personas con las que estaban compartidas no se asocian a las personas de tu hogar. Una cuenta privada vuelve privada para ti, lista para compartirla de nuevo.
 
 ## Páginas relacionadas
 
+- [Filtrar por miembro](/es/docs/household/filter-by-member)
 - [Hogar y soporte multiusuario](/es/docs/household)
+- [Qué es un hogar](/es/docs/household/what-is-a-household)
 - [Contexto compartido](/es/docs/household/shared-context)
-- [Conectar cuenta bancaria](/es/docs/accounts-transactions/connect-bank-account)
-- [Privacidad de datos](/es/docs/settings-security-privacy/data-privacy)
+- [Salir del hogar o eliminar a un miembro](/es/docs/household/leave-or-remove)
+- [Privacidad de los datos](/es/docs/settings-security-privacy/data-privacy)

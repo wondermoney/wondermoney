@@ -1,6 +1,6 @@
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
@@ -33,10 +33,14 @@ vi.mock('../../services/email/email', () => {
 describe('user controller', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // No AI provider configured, so the profile's effective capabilities are all off.
+    for (const key of ['AI_BASE_URL', 'AI_MODEL', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT']) vi.stubEnv(key, '');
     mocks.flush.mockResolvedValue(undefined);
     mocks.persist.mockReturnValue({ flush: mocks.flush });
     mocks.getRepository.mockReturnValue({ getUserById: mocks.getUserById });
   });
+
+  afterEach(() => vi.unstubAllEnvs());
 
   it('returns the authenticated user profile with the mobile MFA field', async () => {
     const { getCurrentUserProfile } = await import('../user');
@@ -46,18 +50,91 @@ describe('user controller', () => {
       emailAddress: 'person@example.com',
       firstName: 'Ada',
       lastName: 'Lovelace',
+      preferences: {},
     };
 
-    getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: {
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
+        aiProviders: { statementImport: null },
+        bankSyncCredentials: 'user',
+        demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',
         mfaEnabled: false,
       },
     });
+  });
+
+  it('tells the shared demo account apart, so clients show the demo banner', async () => {
+    const { getCurrentUserProfile } = await import('../user');
+    const json = vi.fn();
+    const user = { accountType: 'demo', appuserKey: 1, emailAddress: 'demo@wonder.money', firstName: 'Sofia', lastName: 'Martins', preferences: {} };
+
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+
+    expect(json).toHaveBeenCalledWith({ profile: expect.objectContaining({ demo: true }) });
+  });
+
+  it('reports every AI feature off once the person hid AI', async () => {
+    vi.stubEnv('AI_BASE_URL', 'http://localhost:11434/v1');
+    vi.stubEnv('AI_MODEL', 'llama3.1');
+    const { getCurrentUserProfile } = await import('../user');
+    const json = vi.fn();
+    const user = {
+      appuserKey: 1,
+      emailAddress: 'person@example.com',
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      preferences: { aiHidden: true },
+    };
+
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+
+    expect(json).toHaveBeenCalledWith({
+      profile: expect.objectContaining({
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
+      }),
+    });
+  });
+
+  it('reports the instance capabilities when AI is not hidden', async () => {
+    vi.stubEnv('AI_BASE_URL', 'http://localhost:11434/v1');
+    vi.stubEnv('AI_MODEL', 'llama3.1');
+    const { getCurrentUserProfile } = await import('../user');
+    const json = vi.fn();
+    const user = { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences: {} };
+
+    await getCurrentUserProfile({ user } as unknown as Request, { json } as unknown as Response);
+
+    expect(json).toHaveBeenCalledWith({
+      profile: expect.objectContaining({
+        ai: { assistant: true, csvMapping: true, enrichment: true, monthlyStory: true, ocr: true, statementImport: false },
+      }),
+    });
+  });
+
+  it('names who PDF statement pages go to, by family alone for an OpenAI-compatible endpoint, and nothing once AI is hidden', async () => {
+    vi.stubEnv('AI_BASE_URL', 'http://ollama.lan.internal:11434/v1');
+    vi.stubEnv('AI_MODEL_STATEMENT_IMPORT', 'qwen2.5vl');
+    const { getCurrentUserProfile } = await import('../user');
+    const profileOf = (preferences: Record<string, unknown>) => {
+      const json = vi.fn();
+      void getCurrentUserProfile({ user: { appuserKey: 1, emailAddress: 'person@example.com', firstName: 'Ada', lastName: 'Lovelace', preferences } } as unknown as Request, { json } as unknown as Response);
+      return (json.mock.calls[0]?.[0] as { profile: { aiProviders: unknown } }).profile;
+    };
+    expect(profileOf({}).aiProviders).toEqual({ statementImport: { kind: 'openai-compatible', name: null } });
+    expect(JSON.stringify(profileOf({}))).not.toContain('ollama.lan.internal');
+    expect(profileOf({ aiHidden: true }).aiProviders).toEqual({ statementImport: null });
+
+    vi.stubEnv('AI_BASE_URL', '');
+    vi.stubEnv('AI_PROVIDER', 'anthropic');
+    vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-test');
+    vi.stubEnv('AI_MODEL', 'claude-sonnet-4-5');
+    expect(profileOf({}).aiProviders).toEqual({ statementImport: { kind: 'anthropic', name: 'Anthropic' } });
   });
 
   it('reports mfaEnabled from req.authUser when two-factor is enabled', async () => {
@@ -73,10 +150,14 @@ describe('user controller', () => {
       },
     } as unknown as Request;
 
-    getCurrentUserProfile(req, { json } as unknown as Response);
+    await getCurrentUserProfile(req, { json } as unknown as Response);
 
     expect(json).toHaveBeenCalledWith({
       profile: {
+        ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
+        aiProviders: { statementImport: null },
+        bankSyncCredentials: 'user',
+        demo: false,
         emailAddress: 'person@example.com',
         firstName: 'Ada',
         lastName: 'Lovelace',

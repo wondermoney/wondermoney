@@ -1,13 +1,14 @@
 import { DI } from '@app/database/di';
 import { ACCOUNT_AUTO_SYNC_REQUISITION_OPERATION_TYPE, type AccountAutoSyncRequisitionJobPayload, buildAccountAutoSyncRequisitionCorrelationId, enqueueAccountAutoSyncRequisitionJob } from '@app/jobs/account-auto-sync.queue';
-import { Account } from '@entity/Account';
 import type { Appuser } from '@entity/Appuser';
-import { EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
+import { enabledBankProviderIds, nonExpiringBankProviderIds } from '@service/bank-providers/registry';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
+import { accountAutoSyncConnectionSingletonKey, bankConnectionResourceId, bankSyncConnectionId, buildAccountAutoSyncRequisitionJobPayload } from '@service/bank-sync/bank-sync-job-payload';
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
 
-import { DEFAULT_ACCOUNT_SYNC_INTERVAL_HOURS } from './account-sync-interval';
+import { bankSyncMinIntervalHours } from './account-sync-interval';
 
 const assertPositiveInteger = (name: string, value: number) => {
   if (!Number.isInteger(value) || value <= 0) throw new Error(`${name} must be a positive integer`);
@@ -41,60 +42,52 @@ interface EligibleSyncTarget {
 export default {
   async enqueueDueAccountSyncs(input: { backgroundOperationService?: { attachQueueJob: (correlationId: string, queueJobId: string) => Promise<boolean>; createQueuedOperation: (input: Record<string, unknown>, transaction?: unknown) => Promise<unknown>; findByCorrelation?: (correlationId: string) => Promise<null | { queueJobId?: null | string; retryable?: boolean; status: string }>; markNeedsAction?: (correlationId: string, errorCode: string, stage?: string) => Promise<unknown>; resetRetryableQueueing?: (correlationId: string, transaction?: unknown) => Promise<boolean> }; bankSyncIncidentService?: BankSyncIncidentService; boss?: { send: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown> }; limit?: number; maxEnqueued?: number; now?: Date; scheduleRunId?: string; send?: (queue: string, data: Record<string, unknown>, options?: Record<string, unknown>) => Promise<unknown>; staleHours?: number } = {}) {
     const now = input.now ?? new Date();
-    const staleHours = input.staleHours ?? DEFAULT_ACCOUNT_SYNC_INTERVAL_HOURS;
+    const staleHours = input.staleHours ?? bankSyncMinIntervalHours();
     const limit = input.limit ?? 100;
     const maxEnqueuedInput = input.maxEnqueued === undefined
       ? (process.env['ACCOUNT_AUTO_SYNC_MAX_ENQUEUED'] === undefined ? undefined : parsePositiveInteger('ACCOUNT_AUTO_SYNC_MAX_ENQUEUED', process.env['ACCOUNT_AUTO_SYNC_MAX_ENQUEUED'], Number.MAX_SAFE_INTEGER))
       : assertPositiveInteger('maxEnqueued', input.maxEnqueued);
     const staleBefore = new Date(now.getTime() - staleHours * 60 * 60 * 1000);
     const staleOr = [{ refreshedAt: null }, { refreshedAt: { $lte: staleBefore } }];
-    // Gated on the connection's real provider-returned `accessValidUntil`, and on
+    // Gated on the connection's real provider-returned `accessValidUntil`, on `lastSyncAttemptAt`
+    // (so a failed attempt waits out the same interval as a successful one), and on
     // `nextEligibleSyncAt`, which a rate-limited sync sets from the provider's `Retry-After`.
-    const enableBankingAccounts = await DI.em.find(Account, {
+    // One row per connection, whichever provider it belongs to: the scheduler never branches on
+    // provider, it only reads the generic `BankConnection`.
+    // A provider whose access never expires (SimpleFIN) leaves `accessValidUntil` null.
+    const nonExpiring = nonExpiringBankProviderIds();
+    const connections = await DI.em.find(BankConnection, {
       $and: [
-        { $or: staleOr },
-        { $or: [{ enableBankingConnectionKey: { nextEligibleSyncAt: null } }, { enableBankingConnectionKey: { nextEligibleSyncAt: { $lte: now } } }] },
+        { $or: [{ lastSyncAttemptAt: null }, { lastSyncAttemptAt: { $lte: staleBefore } }] },
+        { $or: [{ nextEligibleSyncAt: null }, { nextEligibleSyncAt: { $lte: now } }] },
+        ...(nonExpiring.length > 0 ? [{ $or: [{ accessValidUntil: { $gt: now } }, { accessValidUntil: null, provider: { $in: nonExpiring } }] }] : []),
       ],
-      closed: false,
+      ...(nonExpiring.length > 0 ? {} : { accessValidUntil: { $gt: now } }),
+      accounts: { $some: { $and: [{ $or: staleOr }, { closed: false }, { deletedAt: undefined }] } },
+      appuserKey: { $ne: null },
       deletedAt: undefined,
-      enableBankingConnectionKey: { accessValidUntil: { $gt: now }, appuserKey: { $ne: null }, deletedAt: undefined, status: EnableBankingConnectionStatus.LINKED },
-    }, { limit, orderBy: { accountKey: 'ASC' }, populate: ['enableBankingConnectionKey', 'enableBankingConnectionKey.appuserKey'] });
-    const accounts = enableBankingAccounts as { enableBankingConnectionKey?: unknown }[];
+      provider: { $in: enabledBankProviderIds() },
+      status: BankConnectionStatus.LINKED,
+    }, { limit, orderBy: { bankConnectionKey: 'ASC' }, populate: ['appuserKey'] });
     const scheduleRunId = input.scheduleRunId ?? String(now.getTime());
     if (!scheduleRunId.trim()) throw new Error('scheduleRunId is required');
     const eligible = new Map<string, EligibleSyncTarget>();
-    for (const account of accounts) {
-      const enableBankingConnection = account.enableBankingConnectionKey as
-        | undefined
-        | { appuserKey?: unknown; enableBankingConnectionKey: number; sessionId?: string; state: string };
-      if (enableBankingConnection) {
-        const connectionKey = enableBankingConnection.enableBankingConnectionKey;
-        const mapKey = `enable_banking:${connectionKey}`;
-        if (eligible.has(mapKey)) continue;
-        const owner = enableBankingConnection.appuserKey as undefined | { externalUserId?: string };
-        const correlationId = buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, String(connectionKey));
-        // Enable Banking has no requisition-style opaque id post-link; `sessionId` is the closest
-        // provider-issued identity (falling back to the pre-link correlation `state`) — same
-        // judgment call as `account-initial-sync-enqueue.service.ts`'s `requisitionIdForAnalytics`.
-        const connectionId = enableBankingConnection.sessionId ?? enableBankingConnection.state;
-        eligible.set(mapKey, {
-          appuserKey: enableBankingConnection.appuserKey,
-          buildJobPayload: (incidentId) => ({
-            appuserKey: getAppuserKeyNumber(enableBankingConnection.appuserKey),
-            connectionId,
-            correlationId,
-            enableBankingConnectionKey: String(connectionKey),
-            incidentId,
-            provider: 'enable_banking',
-            scheduleRunId,
-          }),
-          correlationId,
-          distinctId: canonicalBankSyncDistinctId(owner?.externalUserId),
-          requisitionId: connectionId,
-          resourceId: `enable-banking-connection:${connectionKey}`,
-          singletonKey: `account.auto-sync.connection:${connectionKey}`,
-        });
-      }
+    for (const connection of connections) {
+      const connectionKey = connection.bankConnectionKey;
+      const mapKey = `${connection.provider}:${connectionKey}`;
+      if (eligible.has(mapKey)) continue;
+      const owner = connection.appuserKey as undefined | { externalUserId?: string };
+      const correlationId = buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, String(connectionKey));
+      // The admin retry rebuilds the job with the same builders (`bank-sync-job-payload.ts`).
+      eligible.set(mapKey, {
+        appuserKey: connection.appuserKey,
+        buildJobPayload: (incidentId) => buildAccountAutoSyncRequisitionJobPayload(connection, { incidentId, scheduleRunId }),
+        correlationId,
+        distinctId: canonicalBankSyncDistinctId(owner?.externalUserId),
+        requisitionId: bankSyncConnectionId(connection),
+        resourceId: bankConnectionResourceId(connectionKey),
+        singletonKey: accountAutoSyncConnectionSingletonKey(connectionKey),
+      });
     }
     const failures: { error: unknown; requisitionId: string }[] = [];
     let enqueued = 0;
@@ -136,12 +129,6 @@ export default {
         failures.push({ error, requisitionId: target.requisitionId });
       }
     }
-    return { enqueued, failed: failures.length, failures, rateLimited, skipped: accounts.length - eligible.size + rateLimited, total: accounts.length };
+    return { enqueued, failed: failures.length, failures, rateLimited, skipped: connections.length - eligible.size + rateLimited, total: connections.length };
   },
 };
-
-function getAppuserKeyNumber(appuserKey: unknown): number {
-  if (typeof appuserKey === 'number') return appuserKey;
-  if (appuserKey && typeof appuserKey === 'object' && typeof (appuserKey as { appuserKey?: unknown }).appuserKey === 'number') return (appuserKey as { appuserKey: number }).appuserKey;
-  return 0;
-}

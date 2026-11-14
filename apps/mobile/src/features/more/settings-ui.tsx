@@ -37,6 +37,7 @@ export type SettingsSectionId =
   | 'household'
   | 'connections'
   | 'categories'
+  | 'rules'
   | 'appearance'
   | 'notifications'
 
@@ -46,6 +47,7 @@ export const SETTINGS_HREF: Record<SettingsSectionId, string> = {
   household: '/settings/household',
   connections: '/more/banking',
   categories: '/settings/categories',
+  rules: '/settings/rules',
   appearance: '/settings/preferences',
   notifications: '/settings/notifications',
 }
@@ -53,7 +55,7 @@ export const SETTINGS_HREF: Record<SettingsSectionId, string> = {
 /** Web's `TAB_GROUPS`, minus the sections this app has no screen for (Privacy, Bank Provider, Assistant). */
 const SETTINGS_GROUPS: readonly { key: 'account' | 'money' | 'preferences'; sections: readonly SettingsSectionId[] }[] = [
   { key: 'account', sections: ['profile', 'security', 'household'] },
-  { key: 'money', sections: ['connections', 'categories'] },
+  { key: 'money', sections: ['connections', 'categories', 'rules'] },
   { key: 'preferences', sections: ['appearance', 'notifications'] },
 ]
 
@@ -187,8 +189,13 @@ export function SettingsGroup({ children, testID }: { children: ReactNode; testI
  * the label in body, an optional muted value and a trailing chevron (or the
  * external-link glyph when it leaves the app). Put it in a `SettingsGroup`.
  */
-export function SettingsNavRow({ label, icon, value, onPress, accessibilityLabel, external = false, busy = false, destructive = false, trailing = true, testID }: {
+export function SettingsNavRow({ label, icon, value, count, onPress, accessibilityLabel, external = false, busy = false, destructive = false, trailing = true, testID }: {
   label: string
+  /**
+   * A count pill before the chevron (web's muted Badge, as in `Button`'s `count`). Hidden at 0.
+   * Put the count in `accessibilityLabel` too; the pill itself is not read separately.
+   */
+  count?: number
   /** `false` drops the chevron, for a row that acts in place (Sign out). */
   trailing?: boolean
   icon?: IconName
@@ -220,6 +227,11 @@ export function SettingsNavRow({ label, icon, value, onPress, accessibilityLabel
       {icon ? <Icon color={destructive ? palette.destructiveText : palette.foreground} name={icon} size={themeTokens.size.icon} /> : null}
       <Text numberOfLines={1} style={styles.navLabel} tone={destructive ? 'destructive' : 'default'} variant="body">{label}</Text>
       {value ? <Text numberOfLines={1} style={styles.navValue} tone="muted" variant="body">{value}</Text> : null}
+      {count !== undefined && count > 0 ? (
+        <View style={[styles.count, { backgroundColor: palette.secondary, borderColor: palette.border }]} testID={testID ? `${testID}-count` : undefined}>
+          <Text style={[styles.countLabel, { color: palette.secondaryForeground }]} variant="label">{count}</Text>
+        </View>
+      ) : null}
       {destructive || !trailing ? null : <Icon color={palette.mutedForeground} name={external ? 'external-link' : 'chevron-right'} size={themeTokens.size.iconSmall} />}
     </Pressable>
   )
@@ -421,6 +433,16 @@ const styles = StyleSheet.create({
   rowFocused: { borderWidth: 2, borderRadius: themeTokens.radius.xl },
   navLabel: { flex: 1, minWidth: 0 },
   valueLabel: { flexShrink: 0, maxWidth: '50%' },
+  count: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderRadius: themeTokens.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countLabel: { fontWeight: '500' },
   navValue: { flexShrink: 1, minWidth: 0, maxWidth: '50%', textAlign: 'right' },
   valueText: { flex: 1, minWidth: 0, textAlign: 'right' },
   input: {

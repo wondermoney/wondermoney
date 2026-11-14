@@ -12,6 +12,13 @@ import { useCallback, useMemo } from "react";
 
 import { useRouter } from "@/i18n/navigation";
 import { dateRangeParams } from "@/lib/api/date-range";
+import {
+  MEMBER_FILTER_PARAM,
+  type MemberFilter,
+  memberKeysFor,
+  parseMemberFilter,
+} from "@/lib/household/member-attribution";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import { resolveViewerTimeZone } from "@/lib/reports/viewer-timezone";
 
 /**
@@ -32,6 +39,11 @@ export interface ReportFilters {
   merchantKeys: string[];
   /** Any-of: a transaction counts when it carries one of these tags. */
   tagKeys: string[];
+  /**
+   * One household member's money, or Shared (`["shared"]`); absent for everyone. Kept in the URL
+   * as `member`, the parameter every page's member filter uses.
+   */
+  memberKeys?: string[];
   currencyKey?: string;
   includePending: boolean;
   includeTransfers: boolean;
@@ -109,11 +121,14 @@ function setRangeParams(params: URLSearchParams, range: DateRangeValue) {
  *
  * @param searchParams - The URL state that owns the navigable filters
  * @param timezone - The viewer's IANA zone, or `undefined` when unknown
+ * @param member - The member filter, once checked against the household; defaults to the URL's
  */
 export function buildReportFilters(
   searchParams: URLSearchParams,
   timezone: string | undefined,
+  member: MemberFilter = parseMemberFilter(searchParams.get(MEMBER_FILTER_PARAM)),
 ): ReportFilters {
+  const memberKeys = memberKeysFor(member);
   const defaultRange = getDefaultDateRange();
   const from =
     parseDateParam(searchParams.get(PARAM_FROM)) ?? defaultRange.from;
@@ -126,6 +141,8 @@ export function buildReportFilters(
     categoryKeys: parseArrayParam(searchParams.get(PARAM_CATEGORIES)),
     merchantKeys: parseArrayParam(searchParams.get(PARAM_MERCHANTS)),
     tagKeys: parseArrayParam(searchParams.get(PARAM_TAGS)),
+    // Absent for everyone, so an unfiltered report keeps its request and query key.
+    ...(memberKeys ? { memberKeys } : {}),
     currencyKey: searchParams.get(PARAM_CURRENCY) ?? undefined,
     includePending: parseBoolParam(searchParams.get(PARAM_PENDING)),
     includeTransfers: parseBoolParam(searchParams.get(PARAM_TRANSFERS)),
@@ -154,10 +171,11 @@ export function useReportFilters() {
   // parameterise requests — so the server render and the hydration render
   // produce identical markup despite disagreeing about it.
   const timezone = useMemo(() => resolveViewerTimeZone(), []);
+  const { filter: member, setFilter: setMember } = useMemberFilter();
 
   const filters = useMemo(
-    () => buildReportFilters(searchParams, timezone),
-    [searchParams, timezone],
+    () => buildReportFilters(searchParams, timezone, member),
+    [searchParams, timezone, member],
   );
 
   const dateRange = useMemo<DateRangeValue>(
@@ -281,6 +299,7 @@ export function useReportFilters() {
       params.delete(PARAM_CURRENCY);
       params.delete(PARAM_PENDING);
       params.delete(PARAM_TRANSFERS);
+      params.delete(MEMBER_FILTER_PARAM);
     });
   }, [updateParams]);
 
@@ -296,6 +315,8 @@ export function useReportFilters() {
     setCurrencyKey,
     setIncludePending,
     setIncludeTransfers,
+    member,
+    setMember,
     resetFilters,
   };
 }

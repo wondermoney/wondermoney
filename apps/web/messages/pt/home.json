@@ -1,12 +1,69 @@
 {
   "homeOverview": {
+    "customize": {
+      "action": "Personalizar",
+      "title": "Personalizar início",
+      "description": "Escolhe o que aparece no teu início e em que ordem.",
+      "sections": {
+        "net-worth": "Património",
+        "insights": "Estatísticas",
+        "this-month": "Este mês",
+        "balance-sheet": "Balanço",
+        "cashflow": "Fluxo de caixa líquido",
+        "loans": "Empréstimos",
+        "latest-transactions": "Últimas transações"
+      },
+      "moveUp": "Mover {section} para cima",
+      "moveDown": "Mover {section} para baixo",
+      "pinned": "Aparece sempre primeiro",
+      "reset": "Repor predefinição",
+      "saving": "A guardar…",
+      "saveError": "Não foi possível guardar. Tenta novamente.",
+      "retry": "Tentar novamente",
+      "loadError": "Não foi possível carregar o teu início.",
+      "done": "Concluído"
+    },
+    "insights": {
+      "title": "Estatísticas",
+      "empty": {
+        "title": "Nada fora do normal este mês",
+        "body": "Os gastos seguem o ritmo habitual e nenhum orçamento está a caminho de exceder o limite."
+      },
+      "severity": {
+        "critical": "Requer atenção",
+        "warning": "Vale a pena ver",
+        "info": "Boa notícia"
+      },
+      "spending": {
+        "above": "{category} está {percent}% acima do ritmo habitual.",
+        "below": "{category} está {percent}% abaixo do ritmo habitual.",
+        "figures": "<current></current> até agora, normalmente <baseline></baseline> a esta altura.",
+        "link": "Ver transações"
+      },
+      "budget": {
+        "pace": "{category} está a caminho de exceder o orçamento.",
+        "figures": "<projected></projected> previstos face a <budgeted></budgeted> planeados.",
+        "link": "Ver orçamento"
+      },
+      "ask": {
+        "link": "Perguntar ao assistente",
+        "prompt": {
+          "spending": {
+            "above": "Porque é que os meus gastos em {category} estão {percent} acima do normal este mês?",
+            "below": "Porque é que os meus gastos em {category} estão {percent} abaixo do normal este mês?"
+          },
+          "budget": "Porque é que o meu orçamento de {category} está previsto em {projected} face a {budgeted} planeados este mês?",
+          "budgetHidden": "Porque é que o meu orçamento de {category} está a caminho de exceder o limite este mês?"
+        }
+      }
+    },
     "bank-alerts": {
       "label": "Alertas de ligações bancárias",
-      "consent-expiring": "{days, plural, =0 {O acesso a {bank} termina em menos de um dia.} one {O acesso a {bank} termina daqui a # dia.} other {O acesso a {bank} termina daqui a # dias.}} Volte a ligar para manter as transações atualizadas.",
-      "consent-revoked": "{bank} terminou o acesso às suas contas. Volte a ligar para manter as transações atualizadas.",
+      "consent-expiring": "{days, plural, =0 {O acesso a {bank} termina em menos de um dia.} one {O acesso a {bank} termina daqui a # dia.} other {O acesso a {bank} termina daqui a # dias.}} Volta a ligar para manter as transações atualizadas.",
+      "consent-revoked": "{bank} terminou o acesso às tuas contas. Volta a ligar para manter as transações atualizadas.",
       "sync-failing": "{bank} não atualiza desde {date}. Voltar a ligar costuma resolver.",
       "sync-failing-no-date": "{bank} não atualiza há mais de 2 dias. Voltar a ligar costuma resolver.",
-      "unknown-bank": "O seu banco",
+      "unknown-bank": "O teu banco",
       "more": "{count, plural, one {E mais # ligação precisa de atenção.} other {E mais # ligações precisam de atenção.}}",
       "reconnect": "Voltar a ligar",
       "dismiss": "Dispensar"
@@ -18,7 +75,7 @@
       "history-error": "Não foi possível carregar a evolução.",
       "retry": "Tentar novamente",
       "empty-title": "Ainda sem contas",
-      "empty-body": "Adicione uma conta para ver o que tem e o que deve.",
+      "empty-body": "Adiciona uma conta para ver o que tens e o que deves.",
       "empty-action": "Adicionar conta"
     },
     "shell": {
@@ -38,13 +95,13 @@
     },
     "budget-empty": {
       "title": "Ainda sem orçamento",
-      "body": "Defina um plano mensal para ver quanto ainda pode gastar e o que está acima do plano.",
+      "body": "Define um plano mensal para ver quanto ainda podes gastar e o que está acima do plano.",
       "action": "Criar orçamento"
     },
     "sheet": {
       "title": "Balanço",
-      "own": "O que tem",
-      "owe": "O que deve",
+      "own": "O que tens",
+      "owe": "O que deves",
       "total": "Total",
       "side-empty": "Nada aqui.",
       "groups": {
@@ -54,28 +111,41 @@
         "loans": "Empréstimos",
         "other": "Outros"
       },
-      "counted-in": "Incluído em {account}"
+      "counted-in": "Incluído em {account}",
+      "share-of-account": "{percent} desta conta"
     },
     "cashflow": {
       "title": "Fluxo de caixa líquido por mês",
       "list-label": "Fluxo de caixa líquido, de {from} a {to}",
-      "caption": "Entradas menos saídas em todas as suas contas.",
+      "caption": "Entradas menos saídas em todas as tuas contas.",
       "empty-title": "Ainda sem fluxo de caixa",
-      "empty-body": "Aparece quando as suas contas tiverem transações."
+      "empty-body": "Aparece quando as tuas contas tiverem transações.",
+      "this-month": "Este mês",
+      "income": "Entradas",
+      "spending": "Saídas",
+      "savings-rate": "Taxa de poupança",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} p.p.",
+      "vs": "vs {month}",
+      "vs-same-point": "vs o mesmo ponto do mês passado",
+      "formula": "A taxa de poupança é o rendimento menos as despesas, dividido pelo rendimento. É — quando o rendimento é zero."
     },
     "loans": {
       "title": "Próximos pagamentos de empréstimos",
       "outstanding": "<amount></amount> em dívida",
       "rate": "a {rate}",
       "empty-title": "Sem empréstimos",
-      "empty-body": "Adicione um empréstimo para ver aqui os próximos pagamentos.",
+      "empty-body": "Adiciona um empréstimo para ver aqui os próximos pagamentos.",
       "none-due-title": "Sem pagamentos de empréstimos previstos",
       "none-due-body": "Os empréstimos ativos com uma próxima data de pagamento aparecem aqui.",
       "action": "Ver empréstimos"
     },
     "latest": {
       "title": "Últimas transações",
-      "review": "{count, plural, one {# por rever} other {# por rever}}",
+      "review-summary": "{count, plural, one {# transação por rever} other {# transações por rever}} · {amount} no total",
+      "review-now": "Rever agora",
+      "all-caught-up": "Tudo em dia",
       "all": "Todas as transações",
       "caption": "{count, plural, one {A transação mais recente} other {As # transações mais recentes}}",
       "date": "Data",
@@ -85,7 +155,7 @@
       "uncategorised": "Sem categoria",
       "needs-review": "Por rever",
       "empty-title": "Ainda sem transações",
-      "empty-body": "Ligue um banco ou adicione uma transação para a ver aqui.",
+      "empty-body": "Liga um banco ou adiciona uma transação para a ver aqui.",
       "action": "Ver contas"
     }
   }

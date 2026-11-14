@@ -22,6 +22,7 @@ import {
   type NetWorthChange,
   netWorthChanges,
 } from "@/lib/home/month-overview";
+import { type MemberFilter, memberKeysFor } from "@/lib/household/member-attribution";
 import {
   monthlyNetWorthPoints,
   netWorthAxisLabels,
@@ -95,14 +96,20 @@ function Change({
  * trend beside it. The history is secondary: if it fails, the figure stands
  * and only the chart's slot says so.
  */
-export function NetWorthHero() {
+export function NetWorthHero({
+  member = null,
+}: {
+  /** One member's net worth, or Shared's; null for the household's. */
+  member?: MemberFilter;
+} = {}) {
   const t = useTranslations("homeOverview.net-worth");
   const tSheet = useTranslations("homeOverview.sheet");
   const locale = useLocale();
   const formatAmountText = useFormatCurrency();
   const today = useMemo(() => new Date(), []);
-  const netWorth = useNetWorth();
-  const history = useNetWorthHistory();
+  const netWorth = useNetWorth(undefined, member);
+  const memberKeys = memberKeysFor(member);
+  const history = useNetWorthHistory(memberKeys ? { memberKeys } : {});
 
   const points = useMemo(
     () => (history.data ? monthlyNetWorthPoints(history.data.data) : []),

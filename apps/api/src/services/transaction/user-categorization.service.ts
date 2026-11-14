@@ -27,7 +27,8 @@ export interface UserCategorizationInput {
  * - an outstanding AI suggestion is marked accepted or overridden;
  * - the actor's merchant→category vote moves from the old category to the new one, and the
  *   per-user merchant mapping is learned — only where the transaction has a merchant;
- * - a split transaction stops being split: one category now covers its whole amount.
+ * - a split transaction stops being split: one category now covers its whole amount (a transaction
+ *   shared in an expense group keeps its shares, all moved to the new category).
  *
  * Returns each transaction's previous category (`undefined` when it had none) by `transactionKey`,
  * so callers can write their audit entries.
@@ -35,7 +36,7 @@ export interface UserCategorizationInput {
 export async function applyUserCategorization(em: EntityManager, input: UserCategorizationInput): Promise<Map<number, Category | undefined>> {
   const { actor, category, transactions } = input;
   const previousCategories = new Map<number, Category | undefined>();
-  await removeSplitsBeforeCategorizing(em, transactions, actor.appuserKey);
+  await removeSplitsBeforeCategorizing(em, transactions, actor.appuserKey, category);
 
   for (const transaction of transactions) {
     const assignment = transaction.appuserTransactionCategories.getItems()[0];

@@ -24,12 +24,28 @@ export enum TransactionImportSessionStatus {
   WAITING_FOR_UPLOAD = 'waiting_for_upload',
 }
 
+/** A PDF statement's progress and balance check (`services/transaction-import/pdf-statement/reconcile.ts`). */
+export interface StatementExtraction {
+  /** Null until the PDF is opened. */
+  pageCount: null | number;
+  pagesRead: number;
+  reconciliation?: {
+    closingBalance: null | number;
+    currency: null | string;
+    difference: null | number;
+    openingBalance: null | number;
+    rowsTotal: number;
+    status: 'matched' | 'mismatch' | 'unavailable';
+  };
+}
+
 /**
  * One staged import of a transaction file (`services/transaction-import/`): the uploaded file, how
- * to read it, which WonderMoney account each of its source accounts goes to, and its rows
+ * to read it, which WonderMoney account each of its source accounts goes to (and, for a file with
+ * categories, which category each of its categories goes to), and its rows
  * (`TransactionImportRow`). Nothing reaches `transaction` until it is committed. Seven days after a
- * commit the daily sweep deletes its rows and file and keeps only a summary: the status, the dates
- * and the row counts (`rowCounts`, `detailsDeletedAt`).
+ * commit the daily sweep deletes its rows and file and keeps only a summary: the file's name, the
+ * status, the dates and the row counts (`rowCounts`, `detailsDeletedAt`).
  *
  * Owner-scoped: only the member who started it sees it, not their partner (the filter, and an
  * explicit `appuserKey` in every query the service builds). Its rows carry no tenant of their own
@@ -52,6 +68,13 @@ export class TransactionImportSession extends Base {
 
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key' })
   appuserKey!: Rel<Appuser>;
+
+  /**
+   * Source category label → `categoryKey`, or null to leave its rows uncategorised, for files whose
+   * categories are mapped (`sourceCategories`). A label it does not name takes its suggestion.
+   */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  categoryMapping?: Record<string, null | number>;
 
   /** Commit as soon as the file is read, with the default decisions (the one-step import). */
   @Property({ default: false })
@@ -76,6 +99,14 @@ export class TransactionImportSession extends Base {
   /** An uncommitted session stops being usable then. */
   @Property({ columnType: 'timestamptz' })
   expiresAt!: Date;
+
+  /**
+   * The name the file had on the person's device, cleaned and capped (`import-file-name.ts`); the
+   * sweep keeps it with the summary. Unset on sessions started before it was kept, and from clients
+   * that do not send it.
+   */
+  @Property({ length: 255, nullable: true })
+  fileName?: string;
 
   @Property({ length: 30, type: 'string' })
   format!: transactionImport.ImportFormat;
@@ -103,6 +134,18 @@ export class TransactionImportSession extends Base {
   /** The file's accounts, for the mapping step; empty for a one-account file. */
   @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
   sourceAccounts?: transactionImport.ImportSourceAccount[];
+
+  /** The file's categories, for the category-mapping step; unset for a format that maps none. */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  sourceCategories?: transactionImport.ImportSourceCategory[];
+
+  /**
+   * A PDF statement's read (`format: pdf`): its pages, how many the model has read so far, and once
+   * all are read, whether its balances add up. The only part of the model's answer kept beyond the
+   * staged rows. Unset for every other format.
+   */
+  @Property({ columnType: 'jsonb', nullable: true, type: 'json' })
+  statementExtraction?: StatementExtraction;
 
   @Enum(() => TransactionImportSessionStatus)
   status: TransactionImportSessionStatus = TransactionImportSessionStatus.WAITING_FOR_UPLOAD;

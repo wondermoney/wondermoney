@@ -22,7 +22,7 @@ vi.mock('@app/database/di', () => ({ DI: { em: { find: mocks.find, findOne: mock
 vi.mock('@service/auth/better-auth', () => ({ deleteBetterAuthUser: mocks.deleteBetterAuthUser }));
 vi.mock('@utils/logger', () => ({ default: { error: mocks.loggerError, info: mocks.loggerInfo } }));
 vi.mock('@entity/Appuser', () => ({ Appuser: () => undefined }));
-vi.mock('@entity/AppuserTenant', () => ({ AppuserTenant: () => undefined }));
+vi.mock('@entity/AppuserTenant', async (importOriginal) => ({ ...(await importOriginal<object>()), AppuserTenant: () => undefined }));
 vi.mock('@entity/AssistantConsent', () => ({ AssistantConsent: () => undefined }));
 vi.mock('@entity/EmailNotificationPreference', () => ({ EmailNotificationPreference: () => undefined }));
 vi.mock('@entity/NordigenRequisition', () => ({ NordigenRequisition: () => undefined }));

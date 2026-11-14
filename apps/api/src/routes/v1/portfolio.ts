@@ -4,10 +4,13 @@ import {
   createPortfolio,
   createPortfolioImportSession,
   createPortfolioTransaction,
+  deleteAssetPriceOverride,
   deletePortfolio,
   deletePortfolioTransaction,
   getAggregateDashboard,
   getAllocation,
+  getAssetPriceHistory,
+  getAssetPriceOverride,
   getBrokers,
   getDividendIncome,
   getHoldingAnalystData,
@@ -19,6 +22,7 @@ import {
   getPortfolioDashboard,
   getPortfolioDividendIncome,
   getPortfolioHistoryStatus,
+  getPortfolioHoldingLots,
   getPortfolioHoldings,
   getPortfolioPerformance,
   getPortfolios,
@@ -27,8 +31,10 @@ import {
   getPortfoliosTransactions,
   getPortfolioTopMovers,
   getPortfolioTransactions,
+  getRealizedGains,
   getTopMovers,
   getTransactionTypes,
+  putAssetPriceOverride,
   rebuildPortfolioSnapshot,
   updatePortfolio,
   updatePortfolioTransaction,
@@ -60,9 +66,17 @@ router.get('/calendar', marketDataLimiter, getPortfolioCalendar);
 // Dividend income (aggregate)
 router.get('/dividend-income', getDividendIncome);
 
+// Realized gains per sale, asset and year (aggregate, or one portfolio via ?portfolioId)
+router.get('/realized-gains', getRealizedGains);
+
 // Holding-level market-data endpoints (analyst/valuation stubbed — not covered by the EODHD plan)
 router.get('/holding/:symbol/analyst', marketDataLimiter, getHoldingAnalystData);
 router.get('/holding/:symbol/valuation', marketDataLimiter, getHoldingValuation);
+// A household's manual prices for a security, over the shared market prices
+router.get('/holding/:financialAssetKey/prices', getAssetPriceHistory);
+router.get('/holding/:financialAssetKey/prices/:date', getAssetPriceOverride);
+router.put('/holding/:financialAssetKey/prices/:date', putAssetPriceOverride);
+router.delete('/holding/:financialAssetKey/prices/:date', deleteAssetPriceOverride);
 
 // Individual portfolio endpoints
 router.put('/:portfolioId', updatePortfolio);
@@ -80,6 +94,7 @@ router.post('/:portfolioId/transaction', createPortfolioTransaction);
 router.put('/:portfolioId/transaction/:transactionId', updatePortfolioTransaction);
 router.delete('/:portfolioId/transaction/:transactionId', deletePortfolioTransaction);
 router.get('/:portfolioId/holdings', marketDataLimiter, getPortfolioHoldings);
+router.get('/:portfolioId/holding/:financialAssetKey/lots', getPortfolioHoldingLots);
 router.get('/:portfolioId/dividend-income', marketDataLimiter, getPortfolioDividendIncome);
 router.post('/', createPortfolio);
 

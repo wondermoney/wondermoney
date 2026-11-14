@@ -7,11 +7,15 @@ import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, readBankConnectionResult } from './bank-connection-return'
 import type { ConnectBankScreenState } from './connect-bank-screen'
 import { ConnectBankScreen } from './connect-bank-screen'
+import type { BankLinkCredentialState } from './bank-link-credential-policy'
 import { mapBankInstitutions } from './institutions-view-model'
 import { useBankInstitutions } from './use-bank-institutions'
+import { useBankLinkCredential } from './use-bank-link-credential'
 import { classifyStartBankConnectionFailure, type StartBankConnectionFailure, useStartBankConnection } from './use-start-bank-connection'
 
-function resolveViewState(query: ReturnType<typeof useBankInstitutions>): ConnectBankScreenState {
+function resolveViewState(credential: BankLinkCredentialState, query: ReturnType<typeof useBankInstitutions>): ConnectBankScreenState {
+  if (credential.status === 'loading') return { status: 'loading' }
+  if (credential.status === 'credential-required') return { sharedUnavailable: credential.sharedUnavailable, status: 'credential-required' }
   if (query.isAccessTransition) return { status: 'access-transition' }
   if (query.data) return { status: 'loaded', rows: mapBankInstitutions(query.data) }
   if (query.isInitialFailure) {
@@ -22,7 +26,10 @@ function resolveViewState(query: ReturnType<typeof useBankInstitutions>): Connec
 }
 
 /**
- * Institution picker → start authorization → consent in an auth session.
+ * Institution picker → start authorization → consent in an auth session. Without a usable
+ * Enable Banking key (their own, or the server's shared one for their household) the screen asks
+ * for one instead of listing banks.
+ *
  * The connection is started with `returnTo=mobile`, so the API's callback
  * redirects to the app's own return link and the session closes itself.
  * However the session ends (it saw the return link, or the user closed it),
@@ -31,13 +38,14 @@ function resolveViewState(query: ReturnType<typeof useBankInstitutions>): Connec
  */
 export function ConnectBankRoute() {
   const router = useRouter()
-  const institutions = useBankInstitutions()
+  const credential = useBankLinkCredential()
+  const institutions = useBankInstitutions({ enabled: credential.status === 'ready' })
   const start = useStartBankConnection()
   const [startFailure, setStartFailure] = useState<StartBankConnectionFailure | null>(null)
 
   return (
     <ConnectBankScreen
-      state={resolveViewState(institutions)}
+      state={resolveViewState(credential, institutions)}
       pendingBankId={start.isPending ? (start.variables ?? null) : null}
       startFailure={startFailure}
       onBack={() => {

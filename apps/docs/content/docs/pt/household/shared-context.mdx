@@ -1,46 +1,46 @@
 ---
 title: Contexto partilhado
-description: Vê como contas partilhadas, orçamentos, objetivos e património líquido aparecem nas vistas de ambos os membros.
+description: Vê como contas partilhadas, orçamentos, objetivos e património líquido aparecem na vista de cada membro.
 ---
 
-Os dados partilhados aparecem nas vistas de ambos os membros. Quando uma conta, um orçamento, um objetivo ou um valor de património líquido é partilhado, cada membro vê os mesmos números ao nível do agregado a partir do seu próprio início de sessão.
+Os dados partilhados aparecem na vista de cada membro. Quando uma conta, um orçamento, um objetivo ou um valor de património líquido é partilhado, cada membro vê os mesmos números ao nível do agregado a partir do seu próprio início de sessão.
 
-O agregado familiar contém contas, transações, categorias, objetivos, orçamentos, carteira, fluxo de caixa e património líquido, pelo que ambos os membros trabalham a partir dos mesmos dados subjacentes.
+O agregado familiar contém contas, transações, categorias, objetivos, orçamentos, carteira, fluxo de caixa e património líquido, pelo que todos trabalham a partir dos mesmos dados subjacentes.
 
 <DocsImage
   src="/images/docs/pt/household/shared-context-shared-accounts.png"
-  alt="The accounts view showing the accounts that are shared and visible to both household members."
-  caption="Shared accounts appear in both members' views of the household data."
+  alt="Vista de contas com as contas partilhadas, visíveis para todas as pessoas do agregado."
+  caption="As contas partilhadas aparecem na vista de cada membro sobre os dados do agregado."
   width={448}
   height={165}
 />
 
 ## O que é partilhado
 
-- Contas marcadas como partilhadas, com as suas transações e saldos.
+- As contas partilhadas com o agregado, com as suas transações e saldos, e as contas privadas partilhadas contigo.
 - Orçamentos e [categorias](/pt/docs/settings-security-privacy/manage-categories), quando pertencem ao agregado familiar.
 - Objetivos e o seu progresso.
-- Carteira, fluxo de caixa e património líquido, calculados a partir das contas partilhadas.
+- Carteira, fluxo de caixa e património líquido, calculados a partir das contas que consegues ver.
 
-Como ambos os membros leem os mesmos dados, as alterações feitas por um membro aparecem na vista do outro.
+Como todos leem os mesmos dados, as alterações feitas por um membro aparecem na vista dos restantes. Os observadores veem os dados partilhados, mas não os podem alterar, e um membro que só pode ver uma conta privada também não a pode alterar.
 
 ## Quando os membros usam moedas diferentes
 
-Cada membro escolhe a sua moeda e vê todos os totais nela. O património líquido, o fluxo de caixa, os gastos por categoria, as entradas e saídas da página de transações e o dinheiro disponível para atribuir a objetivos convertem os saldos e as transações do outro membro para a sua moeda, à taxa de câmbio do dia, antes de os somar, para que o total tenha um só significado.
+Cada membro escolhe a sua moeda e vê todos os totais nela. O património líquido, o fluxo de caixa, os gastos por categoria, as entradas e saídas da página de transações e o dinheiro disponível para atribuir a objetivos convertem os saldos e as transações dos outros membros para a sua moeda, à taxa de câmbio do dia, antes de os somar, para que o total tenha um só significado.
 
-Um orçamento é a exceção: mantém a moeda em que foi criado, porque os valores planeados estão nessa moeda. Ambos os membros veem os gastos do orçamento na moeda do orçamento, com as transações do outro membro convertidas para ela à taxa de câmbio da data de cada uma. O pagamento de um empréstimo conta pelos juros e comissões, que são convertidos da moeda do empréstimo à taxa de câmbio da data do pagamento. O relatório Orçamento vs realizado segue também o orçamento: os seus valores estão na moeda do orçamento, seja quem for que o veja. Os gastos por categoria, no relatório e na página de contas, contam os pagamentos de empréstimos da mesma forma, na sua moeda. Os rendimentos de dividendos convertem cada dividendo para a sua moeda à taxa de câmbio do dia em que foi pago.
+Um orçamento é a exceção: mantém a moeda em que foi criado, porque os valores planeados estão nessa moeda. Todos veem os gastos do orçamento na moeda do orçamento, com as transações dos outros membros convertidas para ela à taxa de câmbio da data de cada uma. O pagamento de um empréstimo conta pelos juros e comissões, que são convertidos da moeda do empréstimo à taxa de câmbio da data do pagamento. O relatório Orçamento vs realizado segue também o orçamento: os seus valores estão na moeda do orçamento, seja quem for que o veja. Os gastos por categoria, no relatório e na página de contas, contam os pagamentos de empréstimos da mesma forma, na sua moeda. Os rendimentos de dividendos convertem cada dividendo para a sua moeda à taxa de câmbio do dia em que foi pago.
 
 Quando não existe taxa de câmbio para uma moeda, os valores nessa moeda ficam de fora em vez de serem somados pelo valor nominal, e o total aparece como incompleto. Nos relatórios de gastos por categoria e de orçamento vs realizado, nos gastos por categoria da página de contas, nas entradas e saídas da página de transações e nos rendimentos de dividendos, uma nota indica quantos valores ficaram de fora e em que moedas. Na aplicação móvel, a mesma nota aparece também nos relatórios de fluxo de caixa e Sankey de fluxo de caixa.
 
 O gráfico do histórico do portefólio funciona da mesma forma: o valor do portefólio de cada membro num dia é convertido para a sua moeda à taxa de câmbio desse dia. Num dia sem taxa, esse portefólio fica de fora do total do dia e uma nota por baixo do gráfico indica que o histórico está incompleto.
 
-O histórico do património líquido e o retorno do período no painel do portefólio convertem os valores do portefólio da mesma forma, cada um à taxa de câmbio do dia em que o valor foi registado. As compras e vendas feitas durante o período são convertidas à taxa de câmbio da data de cada uma. Um dividendo é convertido à taxa de câmbio do dia em que foi pago, incluindo um pago numa moeda que não é a de nenhum dos membros. Um ponto do património líquido com um valor de portefólio que não pode ser convertido aparece como incompleto, e um retorno do período cujo valor inicial, ou alguma das compras ou vendas, não pode ser convertido não é mostrado.
+O histórico do património líquido e o retorno do período no painel do portefólio convertem os valores do portefólio da mesma forma, cada um à taxa de câmbio do dia em que o valor foi registado. As compras e vendas feitas durante o período são convertidas à taxa de câmbio da data de cada uma. Um dividendo é convertido à taxa de câmbio do dia em que foi pago, incluindo um pago numa moeda que nenhum membro usa. Um ponto do património líquido com um valor de portefólio que não pode ser convertido aparece como incompleto, e um retorno do período cujo valor inicial, ou alguma das compras ou vendas, não pode ser convertido não é mostrado.
 
 O rendimento anual, a volatilidade e a perda máxima do portefólio leem todas as compras, vendas e dividendos, e os valores diários do portefólio, na sua moeda, convertidos da mesma forma. Quando algum deles não tem taxa de câmbio, esse valor não é mostrado em vez de ser calculado a partir de duas moedas.
 
 ## O que permanece separado
 
-As contas privadas são excluídas do panorama partilhado. Não aparecem nas listas, orçamentos ou património líquido do outro membro, e não fazem parte do contexto ao nível do agregado. Consulta [Privacidade das contas](/pt/docs/household/account-privacy) para saber como isto é definido.
+Uma conta privada fica fora do panorama de cada membro com quem não está partilhada. Não aparece nas suas listas, totais, orçamentos, relatórios nem património líquido. Consulta [Privacidade das contas](/pt/docs/household/account-privacy) para saber como isto é definido.
 
 ## Páginas relacionadas
 

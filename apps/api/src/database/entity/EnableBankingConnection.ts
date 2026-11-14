@@ -8,6 +8,7 @@ import { EnableBankingConnectionRepository } from '../repositories/EnableBanking
 
 import { Account } from './Account';
 import { Appuser } from './Appuser';
+import { BankConnection } from './BankConnection';
 import { Base } from './BaseEntity';
 import { EnableBankingCredential } from './EnableBankingCredential';
 import { Tenant } from './Tenant';
@@ -19,6 +20,9 @@ export enum EnableBankingConnectionStatus {
   EXPIRED = 'expired',
   LINKED = 'linked',
 }
+
+/** `BankConnection.credentialReference` of a connection made with the instance-wide credential. */
+export const INSTANCE_CREDENTIAL_REFERENCE = 'instance';
 
 /**
  * An Enable Banking bank connection, shaped around its real two-step flow
@@ -47,6 +51,10 @@ export class EnableBankingConnection extends Base {
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key', nullable: false })
   appuserKey!: Rel<Appuser>;
 
+  /**
+   * The provider-agnostic connection this Enable Banking row backs. One-to-one; a row linked
+   * before the `BankProvider` interface existed gets one from the start-up backfill.
+   */
   @Property({ length: 2 })
   aspspCountry!: string;
 
@@ -56,13 +64,32 @@ export class EnableBankingConnection extends Base {
   @Property({ length: 255, nullable: true })
   authorizationId?: string;
 
+  @ManyToOne({ cascade: [], entity: () => BankConnection, fieldName: 'bank_connection_key', nullable: true })
+  @Unique({ name: 'enable_banking_connection_bank_connection_uindex' })
+  bankConnectionKey?: Rel<BankConnection>;
+
   @PrimaryKey()
   enableBankingConnectionKey!: number;
 
-  @ManyToOne({ cascade: [], entity: () => EnableBankingCredential, fieldName: 'enable_banking_credential_key', nullable: false })
-  enableBankingCredentialKey!: Rel<EnableBankingCredential>;
+  /**
+   * The user's own credential this connection was made with, or null when it was made with the
+   * instance-wide credential (`ENABLE_BANKING_APP_ID`, `services/enable-banking/instance-credential.ts`).
+   * A connection keeps the credential it started with: replacing or adding a key later changes
+   * only new links. `no action` on delete, so removing a credential row can never turn its
+   * connections into instance ones.
+   */
+  @ManyToOne({ cascade: [], deleteRule: 'no action', entity: () => EnableBankingCredential, fieldName: 'enable_banking_credential_key', nullable: true })
+  enableBankingCredentialKey?: null | Rel<EnableBankingCredential>;
 
   [EntityRepositoryType]: EnableBankingConnectionRepository;
+
+  /**
+   * When a sync last tried to reach the bank, whatever the outcome. The scheduler waits
+   * `BANK_SYNC_MIN_INTERVAL_HOURS` from this time, so a failed attempt also waits out the
+   * interval instead of spending another of the bank's PSD2 unattended-access calls.
+   */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  lastSyncAttemptAt?: Date;
 
   @Property({ nullable: true })
   maxConsentValiditySeconds?: number;

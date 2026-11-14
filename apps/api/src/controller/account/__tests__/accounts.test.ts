@@ -15,6 +15,16 @@ const mocks = vi.hoisted(() => ({
   persist: vi.fn(),
 }));
 
+// Account access reads the database directly; these controller tests run on a mocked EntityManager.
+vi.mock('@service/account/account-access', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@service/account/account-access')>()),
+  accountActor: (req: Request) => ({ appuserKey: req.user?.appuserKey ?? 0, householdRole: req.householdRole, tenantKey: req.tenant?.tenantKey ?? 0 }),
+  assertAccountWritable: vi.fn(async () => undefined),
+  loadAccountAccess: vi.fn(async () => new Map()),
+}));
+
+// The household's members name each account's attribution; this EM double holds none.
+vi.mock('@service/household/member-attribution', async (original) => ({ ...(await original<object>()), loadActiveMembers: vi.fn().mockResolvedValue(new Map()) }));
 vi.mock('../../../app.js', () => ({
   DI: {
     em: {
@@ -55,6 +65,7 @@ const account = (overrides: AccountFixtureOverrides = {}) => ({
   appuserCurrencyBalance: 0,
   balance: 0,
   currencyKey: { code: 'EUR' },
+  isJoint: false,
   isPrivate: false,
   nordigenRequisitionKey: undefined,
   refreshedAt: undefined,
@@ -67,6 +78,7 @@ const accountSummaryPopulate = [
   'currencyKey',
   'accountOwnerAppuserKey',
   'accountOwnerAppuserKey.currencyKey',
+  'enableBankingConnectionKey',
   'nordigenRequisitionKey',
 ];
 
@@ -94,18 +106,18 @@ describe('getAccount', () => {
       },
       { populate: accountSummaryPopulate },
     );
-    // Plus the open-incident lookup (stale-sync) and the pending-sums lookup (available balance).
+    // Plus the sync-incident lookup (stale-sync + last error) and the pending-sums lookup
+    // (available balance).
     expect(mocks.find).toHaveBeenCalledWith(
       expect.anything(),
-      { appuserKey: user, deletedAt: undefined, finality: 'non_terminal', userVisible: true },
-      { fields: ['requisitionId'] },
+      { appuserKey: user, deletedAt: undefined },
+      { fields: ['errorCode', 'finality', 'requisitionId', 'updatedAt', 'userVisible'], orderBy: { updatedAt: 'DESC' } },
     );
     expect(mocks.persist).not.toHaveBeenCalled();
   });
 
   it('returns the exact shared account summary without leaking entity fields', async () => {
-    mocks.findOne.mockResolvedValue(
-      account({
+    const fixture = account({
         accountFinancialInstitutionKey: { displayName: null, logoUrl: 'https://legacy.example/logo.svg' },
         accountKey: 41,
         accountName: undefined,
@@ -117,7 +129,10 @@ describe('getAccount', () => {
         nordigenRequisitionKey: { nordigenRequisitionKey: 9 },
         refreshedAt: new Date('2026-07-18T10:15:00.000Z'),
         tenantKey: { tenantKey: 113 },
-      }),
+    });
+    // The card lookup is a second `findOne`; this account is not a card.
+    mocks.findOne.mockImplementation((entity: unknown) =>
+      (entity as { name?: string }).name === 'CreditCardDetail' ? null : fixture,
     );
     mocks.find.mockResolvedValue([]);
     const res = makeResponse();
@@ -145,17 +160,22 @@ describe('getAccount', () => {
         appuserCurrencyBalance: null,
         availableBalance: 0,
         balance: 0,
+        creditCard: null,
         csvImportFormat: 'generic',
         currencyKey: { code: 'GBP' },
         // A foreign balance with no converted amount was not converted.
+        attribution: { appuserKey: null, displayName: null },
         fxRateDate: null,
         fxStatus: 'missing',
+        isJoint: false,
         isOwnedByViewer: false,
         isPrivate: false,
+        myAccess: 'write',
+        ownerAppuserKey: null,
         ownerFirstName: null,
         refreshedAt: '2026-07-18T10:15:00.000Z',
         source: 'open_banking',
-        syncStatus: { hasOpenIncident: false, lastSyncedAt: '2026-07-18T10:15:00.000Z', staleness: 'very_stale' },
+        syncStatus: { hasOpenIncident: false, lastError: null, lastSyncedAt: '2026-07-18T10:15:00.000Z', staleness: 'very_stale' },
       },
     });
     const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { account: Record<string, unknown> };
@@ -244,6 +264,7 @@ describe('getAccounts', () => {
           'currencyKey',
           'accountOwnerAppuserKey',
           'accountOwnerAppuserKey.currencyKey',
+          'enableBankingConnectionKey',
           'nordigenRequisitionKey',
         ],
       },
@@ -307,18 +328,23 @@ describe('getAccounts', () => {
           accountType: null,
           appuserCurrencyAvailableBalance: 0,
           appuserCurrencyBalance: 0,
+          attribution: { appuserKey: null, displayName: null },
           availableBalance: 0,
           balance: 0,
+          creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           fxRateDate: null,
           fxStatus: 'exact',
+          isJoint: false,
           isOwnedByViewer: false,
           isPrivate: false,
+          myAccess: 'write',
+          ownerAppuserKey: null,
           ownerFirstName: null,
           refreshedAt: '2026-07-17T09:30:00.000Z',
           source: 'open_banking',
-          syncStatus: { hasOpenIncident: false, lastSyncedAt: '2026-07-17T09:30:00.000Z', staleness: 'very_stale' },
+          syncStatus: { hasOpenIncident: false, lastError: null, lastSyncedAt: '2026-07-17T09:30:00.000Z', staleness: 'very_stale' },
         },
         {
           accountFinancialInstitutionKey: null,
@@ -328,14 +354,19 @@ describe('getAccounts', () => {
           accountType: null,
           appuserCurrencyAvailableBalance: null,
           appuserCurrencyBalance: null,
+          attribution: { appuserKey: null, displayName: null },
           availableBalance: null,
           balance: null,
+          creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
           fxRateDate: null,
           fxStatus: 'exact',
+          isJoint: false,
           isOwnedByViewer: false,
           isPrivate: false,
+          myAccess: 'write',
+          ownerAppuserKey: null,
           ownerFirstName: null,
           refreshedAt: null,
           source: 'manual',
@@ -367,13 +398,35 @@ describe('getAccounts', () => {
           transactionsRefreshedAt: new Date(),
         }),
       ])
-      .mockResolvedValueOnce([{ requisitionId: 'req-1' }]);
+      .mockResolvedValueOnce([{ errorCode: null, finality: 'non_terminal', requisitionId: 'req-1', updatedAt: new Date(), userVisible: true }]);
     const res = makeResponse();
 
     await getAccounts({ tenant: { tenantKey: 11 }, user: { appuserKey: 7 } } as unknown as Request, res);
 
     const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { accounts: { syncStatus: unknown }[] };
-    expect(payload.accounts[0]?.syncStatus).toEqual({ hasOpenIncident: true, lastSyncedAt: expect.any(String), staleness: 'error' });
+    expect(payload.accounts[0]?.syncStatus).toEqual({ hasOpenIncident: true, lastError: null, lastSyncedAt: expect.any(String), staleness: 'error' });
+  });
+
+  it('reports the newest failure for the account connection as lastError', async () => {
+    const occurredAt = new Date('2026-07-20T08:00:00.000Z');
+    mocks.find
+      .mockResolvedValueOnce([
+        account({
+          accountKey: 6,
+          nordigenRequisitionKey: { requisitionId: 'req-2' },
+          refreshedAt: new Date(),
+          transactionsRefreshedAt: new Date(),
+        }),
+      ])
+      .mockResolvedValueOnce([{ errorCode: 'rate_limited', finality: 'terminal_failure', requisitionId: 'req-2', updatedAt: occurredAt, userVisible: false }]);
+    const res = makeResponse();
+
+    await getAccounts({ tenant: { tenantKey: 11 }, user: { appuserKey: 7 } } as unknown as Request, res);
+
+    const payload = vi.mocked(res.json).mock.calls[0]?.[0] as { accounts: { syncStatus: unknown }[] };
+    expect(payload.accounts[0]?.syncStatus).toMatchObject({
+      lastError: { code: 'rate_limited', occurredAt: occurredAt.toISOString() },
+    });
   });
 
   it('exposes available balance as the current balance net of pending transactions', async () => {
@@ -444,6 +497,7 @@ describe('mapAccountSummary', () => {
       isPrivate: true,
     });
     const asOwner = mapAccountSummary(owned, {
+      lastErrorByRequisitionId: new Map(),
       now: new Date(),
       openIncidentRequisitionIds: new Set(),
       viewerAppuserKey: 7,
@@ -451,6 +505,7 @@ describe('mapAccountSummary', () => {
     expect(asOwner).toMatchObject({ isOwnedByViewer: true, isPrivate: true, ownerFirstName: 'Ana' });
 
     const asOther = mapAccountSummary(owned, {
+      lastErrorByRequisitionId: new Map(),
       now: new Date(),
       openIncidentRequisitionIds: new Set(),
       viewerAppuserKey: 8,
@@ -506,13 +561,11 @@ describe('updateAccount privacy', () => {
     mocks.findOne.mockResolvedValue(account);
     const next = vi.fn();
 
-    await updateAccount(
+    await expect(updateAccount(
       { body: { isPrivate: true }, params: { accountId: '5' }, user: { appuserKey: 2 } } as unknown as Request,
       { sendStatus: vi.fn() } as unknown as Response,
       next,
-    );
-
-    expect(next).toHaveBeenCalledWith(expect.any(ForbiddenError));
+    )).rejects.toBeInstanceOf(ForbiddenError);
     expect(account.isPrivate).toBe(false);
   });
 });

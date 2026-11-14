@@ -4,13 +4,19 @@
     "index",
     "connect-bank-account",
     "manual-offline-account",
+    "credit-cards",
     "currencies-exchange-rates",
     "manage-bank-connections",
     "understand-transactions",
+    "shared-expense-groups",
     "import-transactions-csv",
+    "import-from-ynab",
+    "import-from-actual-budget",
+    "import-pdf-statements",
     "categorize-transactions",
     "rules",
     "recurring-payments",
+    "calendar-feed",
     "missing-duplicate-transactions"
   ]
 }

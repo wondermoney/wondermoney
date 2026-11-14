@@ -9,10 +9,17 @@ import { DateRange } from "react-day-picker";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import TransactionsTable from "@/components/account/AccountTransactionsTable";
+import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import {
+  canEditAccount,
+  readOnlyAccountKeys,
+} from "@/lib/account/account-access";
 import type { GetAccountResponse } from "@/lib/api/account/useAccount";
 import useAccount from "@/lib/api/account/useAccount";
+import type { GetAccountForecastResponse } from "@/lib/api/account/useAccountForecast";
+import useAccountForecast from "@/lib/api/account/useAccountForecast";
 import useAccounts from "@/lib/api/account/useAccounts";
 import type { GetAccountTransactionsResponse } from "@/lib/api/account/useAccountTransactions";
 import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
@@ -27,6 +34,7 @@ interface AccountTransactionsClientProps {
   initialAccountData: GetAccountResponse;
   initialTransactionsData: GetAccountTransactionsResponse;
   initialConfigsData: GetConfigsResponse;
+  initialForecastData: GetAccountForecastResponse;
   hasAnyTransactions: boolean;
   defaultDateRange: { from: Date; to: Date };
 }
@@ -38,6 +46,7 @@ export default function AccountTransactionsClient({
   initialAccountData,
   initialTransactionsData,
   initialConfigsData,
+  initialForecastData,
   hasAnyTransactions,
   defaultDateRange,
 }: AccountTransactionsClientProps) {
@@ -167,6 +176,18 @@ export default function AccountTransactionsClient({
     serverSeed(initialConfigsData, serverRenderedAt),
   );
 
+  const { data: forecastData } = useAccountForecast(
+    { accountKeys: [accountId], days: 30 },
+    {
+      enabled: !!accountId && !Number.isNaN(accountId),
+      ...serverSeed(initialForecastData, serverRenderedAt),
+    },
+  );
+  const accountForecast =
+    forecastData?.accounts.find(
+      (series) => series.accountKey === accountId,
+    ) ?? null;
+
   const isLoading =
     isLoadingTransactions ||
     isLoadingConfigs ||
@@ -174,11 +195,13 @@ export default function AccountTransactionsClient({
     isLoadingAccountsList;
 
   const accountName = accountsData?.account.accountName;
+  // The detail's own access, so a view-only account's page offers no add, import or edits.
+  const canEdit = canEditAccount(accountsData?.account);
 
   const renderTransactionActions = ({
     addVariant,
   }: { addVariant?: "default" | "outline" } = {}) =>
-    transactionAccount ? (
+    transactionAccount && canEdit ? (
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <AccountTransactionImportModal
           isOpen={isImportTransactionModalOpen}
@@ -260,13 +283,15 @@ export default function AccountTransactionsClient({
           <p className="text-muted-foreground mx-auto mt-1.5 max-w-sm text-sm">
             {t("empty-transactions-description")}
           </p>
-          <Button
-            className="mt-4 gap-1.5"
-            onClick={openAddManualTransactionModal}
-          >
-            <Plus className="size-3.5" />
-            {t("add-transaction")}
-          </Button>
+          {canEdit ? (
+            <Button
+              className="mt-4 gap-1.5"
+              onClick={openAddManualTransactionModal}
+            >
+              <Plus className="size-3.5" />
+              {t("add-transaction")}
+            </Button>
+          ) : null}
         </div>
       </div>
     );
@@ -291,7 +316,11 @@ export default function AccountTransactionsClient({
 
       {/* Transactions ledger, as on the all-accounts page */}
       <section aria-label={t("all-transactions")}>
-        <div>
+        <div className="flex flex-col gap-4">
+          <ProjectedTransactions
+            occurrences={accountForecast?.projected ?? []}
+            installments={accountForecast?.projectedInstallments ?? []}
+          />
           <TransactionsTable
             layout="ledger"
             transactions={transactionsData?.transactions ?? []}
@@ -300,6 +329,9 @@ export default function AccountTransactionsClient({
             transactionDateRange={transactionDateRange}
             setTransactionDateRange={handleDateRangeChange}
             withAccountFilter={false}
+            readOnlyAccountKeys={readOnlyAccountKeys(
+              accountsData ? [accountsData.account] : [],
+            )}
             serverTotal={transactionsData?.total}
             onServerFiltersChange={handleTableFiltersChange}
           />

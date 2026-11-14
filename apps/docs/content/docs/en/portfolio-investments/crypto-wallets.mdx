@@ -1,0 +1,77 @@
+---
+title: Crypto Wallets
+description: Count Bitcoin and Ethereum held at public addresses in your net worth, valued from the blockchain once a day.
+---
+
+A crypto wallet is an asset whose value WonderMoney works out for you. You give it one or more public addresses; once a day the server reads what they hold from a block explorer and values it at that day's prices. Like a home or a car, it counts in your net worth (see [Homes, vehicles and other assets](/en/docs/portfolio-investments/manual-assets)), but you never type its value.
+
+<Callout type="warn" title="Public addresses only">
+Never enter a private key or a recovery phrase (the 12 to 24 words your wallet asked you to write down). Anyone who has either can spend your coins, and WonderMoney never needs them to read a balance. The app refuses anything that looks like one, clears the field and does not send, store or log it.
+</Callout>
+
+## When crypto wallets are available
+
+Crypto wallets appear only when your server's operator has turned them on, by choosing a block explorer for each chain ([Configure your instance](/en/docs/self-hosting/configure#crypto-wallets)). Without one, Add crypto wallet is not shown. A server can turn on Bitcoin, Ethereum or both, and the app offers only the chains it has. WonderMoney's hosted service does not turn them on.
+
+## What you can add
+
+| Chain | What to enter | What is read |
+|---|---|---|
+| Bitcoin | An address (starting with `1`, `3`, `bc1q` or `bc1p`), or an extended public key (`xpub`, `ypub` or `zpub`) | The BTC balance |
+| Ethereum | An `0x` address | The ETH balance and the ERC-20 tokens the address holds |
+
+An extended public key covers every address a wallet account has used. WonderMoney reads its receive and change addresses in order, until it finds 20 unused in a row. Most wallet apps show it in the account's settings or details, sometimes as "account public key". Use the one that starts with `xpub`, `ypub` or `zpub`, never one starting with `xprv`, `yprv` or `zprv`.
+
+Only Ethereum itself is read: tokens on other networks that use the same `0x` addresses are not.
+
+## Add a wallet
+
+1. Open Assets and choose Add crypto wallet.
+2. Enter a name for the wallet.
+3. Add each address: choose its chain, paste the public address, and give it a label if you like. A wallet holds up to 20 addresses, and the same address can be added only once.
+4. Choose whether the wallet is private, and add notes if you like.
+5. Save.
+
+The first sync starts at once. Until it finishes, the wallet has no value and does not count in your net worth.
+
+You can add, relabel and remove addresses later from the wallet's page. Rename the wallet, change its notes or privacy, archive it or delete it as for any other asset.
+
+## Sync
+
+The server syncs every wallet once a day, early in the morning (UTC). It also syncs a wallet straight after you create it, add an address or tick a token. To sync now, open the wallet and choose Sync now.
+
+Each address shows its own status:
+
+- **Waiting**: it has not been read yet.
+- **Synced**: the time it was last read. Its balances are as of then.
+- **Failed**: the last attempt did not work, and why: the explorer timed out, was busy, was unavailable or refused the address, sent an answer the server could not read, or the chain has been turned off on the server.
+
+An address that fails does not stop the others: they still sync, and the failed one keeps the balances from its last successful read. The server tries it again at the next sync.
+
+## Choose which tokens count
+
+The native coins, BTC and ETH, count from the start. ERC-20 tokens found on an Ethereum address start unticked: tick the ones you want to count. An unticked token is ignored, whatever it holds.
+
+Addresses often receive tokens nobody asked for, sent in the hope that you look them up or try to sell them. Leave those unticked.
+
+Tokens are priced by their symbol, not their contract. A worthless token can call itself `USDC` and would then be valued as USDC. Tick only tokens you recognise, and check the contract address shown next to each one.
+
+## How the value is worked out
+
+- Each day's value is the sum, over the ticked tokens, of the quantity held times that day's price in US dollars. A wallet has one value a day; between syncs it stays at the last one.
+- A wallet is always in US dollars, because crypto is priced in dollars. Your net worth converts it into your currency like any other asset in another currency.
+- Prices come from the server's market-data providers. If a ticked token with a balance has no price, that day's value is not updated: the wallet keeps its last value and names the token with no price. Untick it, or wait until it has a price. On a server whose providers do not price crypto, a wallet shows its balances but has no value.
+- You cannot record a value by hand. You can still remove a valuation from the Valuations list on the wallet's page.
+- An asset of another kind cannot become a crypto wallet, and a wallet cannot become another kind.
+
+## Privacy
+
+A wallet is shared with your household unless you make it private, exactly as for other assets: a shared wallet, with its addresses, is visible to everyone in the household; a private one only to you. See [Private assets in a household](/en/docs/portfolio-investments/manual-assets#private-assets-in-a-household).
+
+An address is public, but it is still about you. To read balances, the server asks the block explorer its operator chose about each address, including every address derived from an extended public key. The explorer sees those addresses and the server's IP address, and can tell they are being read together. It is not sent your name, your account, your amounts or anything else from WonderMoney. If that matters to you, ask your operator which explorer the server uses.
+
+## Related pages
+
+- [Homes, vehicles and other assets](/en/docs/portfolio-investments/manual-assets)
+- [Configure your instance](/en/docs/self-hosting/configure#crypto-wallets)
+- [Account privacy](/en/docs/household/account-privacy)

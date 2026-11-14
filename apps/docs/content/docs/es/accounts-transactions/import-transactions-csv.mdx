@@ -1,44 +1,63 @@
 ---
-title: Importar transacciones desde CSV
-description: Importa el historial de transacciones desde un archivo CSV cuando la sincronización bancaria no esté disponible.
+title: Importar transacciones desde CSV, OFX, QIF o CAMT.053
+description: Importa el historial de transacciones desde un archivo CSV, Excel, OFX, QFX, QIF o CAMT.053 XML cuando la sincronización bancaria no esté disponible.
 ---
 
 La importación por CSV trae un extracto bancario a una cuenta cuando no hay conexión con el banco, o añade el historial anterior al inicio de la conexión.
 
 ## Antes de empezar
 
-Sirve el extracto exportado por cualquier banco, en CSV (con cualquier separador) o Excel (`.xls`, `.xlsx`). Descárgalo desde la web de tu banco y déjalo tal como lo generó el banco: las filas antes de los nombres de las columnas y los totales después de las transacciones no son un problema.
+Sirve el extracto exportado por cualquier banco, en CSV (con cualquier separador), Excel (`.xls`, `.xlsx`), OFX/QFX (`.ofx`, `.qfx`), QIF (`.qif`) o CAMT.053 (`.xml`). Descárgalo desde la web de tu banco y déjalo tal como lo generó el banco: las filas antes de los nombres de las columnas y los totales después de las transacciones no son un problema.
+
+OFX y QFX son los formatos que la mayoría de los bancos y Quicken ofrecen para descargar. WonderMoney lee OFX 1.x (SGML) y OFX 2.x (XML), y descodifica el archivo según la codificación que declara, así que los nombres de comercios con acentos se mantienen intactos incluso cuando el banco escribió Windows-1252 o ISO-8859-1. El identificador bancario de cada transacción (`FITID`) es lo que la marca como ya importada, por lo que reimportar el mismo archivo no añade nada. Una transacción sin identificador, o con un identificador que otra fila del archivo repite, usa la fecha y el importe como alternativa. Un archivo con varias cuentas pregunta a cuál de tus cuentas va cada una. Los extractos de inversión (`INVSTMTRS`) y los extractos que solo tienen un saldo se omiten, con una nota en la importación.
+
+QIF es el formato que exportan Quicken, Microsoft Money y GnuCash. WonderMoney lee archivos QIF de cuenta bancaria, tarjeta de crédito, efectivo y otras, y mantiene el signo de cada registro: el dinero que sale es negativo y el que entra, positivo. Un registro con líneas divididas se importa como una sola transacción con el total del registro; el detalle de las divisiones va a la descripción de la transacción. El QIF no tiene identificador de transacción, así que reimportar el mismo archivo encuentra cada fila por su fecha e importe. Las fechas QIF tampoco tienen un formato estándar: WonderMoney lee todas las fechas del archivo para distinguir día primero de mes primero, y cuando el archivo no lo permite (todos los días y meses son 12 o menos) te pide que elijas antes de importar. Una categoría del archivo (`L`) se guarda con la fila, y una transferencia a otra cuenta (`L[Account]`) se importa como transferencia. Un archivo con varias cuentas (bloques `!Account`) pregunta a cuál de tus cuentas va cada una. Los registros de inversión (`!Type:Invst`) se omiten, con una nota en la importación.
+
+CAMT.053 es el extracto de fin de día ISO 20022 con el que los bancos de la zona SEPA están sustituyendo al MT940, y el archivo más fiable que ofrece un banco europeo. WonderMoney lee los extractos de un documento `BkToCstmrStmt`: la fecha de contabilización de cada movimiento (`BookgDt`, o su fecha valor cuando el banco no escribe la de contabilización) es la fecha de la transacción, y `CdtDbtInd` decide el sentido, así que un cargo es negativo y un abono positivo. El nombre de la contraparte y la información de remesa pasan a ser el comercio y la descripción. El `AcctSvcrRef` del movimiento, y después su `NtryRef`, es lo que lo marca como ya importado; un movimiento sin ninguno de los dos usa su fecha e importe. Un apunte agrupado con varios movimientos se importa como una fila por movimiento cuando suman el importe del apunte, y como el apunte único en caso contrario. Los movimientos que el banco aún no ha contabilizado (`Sts` distinto de `BOOK`) se omiten, con una nota en la importación. Cada extracto se identifica por su IBAN, y un archivo con varios pregunta a cuál de tus cuentas va cada uno, ya rellenado cuando una de tus cuentas tiene ese IBAN como número de cuenta. Un archivo que declara un tipo de documento (`DOCTYPE`) se rechaza: un extracto bancario nunca lo tiene, y es como un archivo XML intenta leer datos que no debería.
 
 Para Millennium BCP, ActivoBank, Bankinter, Banco BPI y Montepio, WonderMoney lee el formato del propio banco cuando la cuenta tiene ese banco como institución financiera. Para cualquier otro archivo, encuentra las columnas de fecha, descripción e importe por sus nombres, y deduce el formato de fecha y el separador decimal a partir de los valores. Cuando los nombres no bastan, un modelo de IA indica qué columna es cada una: ve los nombres de las columnas y el tipo de valores de cada una (fechas, números, texto), nunca tus descripciones, importes ni fechas. Eso gasta una de las llamadas diarias de mapeo de CSV de tu hogar; en una instancia sin IA, o cuando se acaban las llamadas del día, eliges tú las columnas.
 
-Un archivo en la antigua plantilla CSV de WonderMoney (con las columnas `internalTransactionId` y `transactionTypeKey`) se sigue importando como antes.
+Un archivo en la antigua plantilla CSV de WonderMoney (con las columnas `internalTransactionId` y `transactionTypeKey`) pasa por la misma revisión; la columna de tipo decide si cada fila es dinero que entra o que sale.
 
 En una instancia autoalojada, las importaciones también necesitan [almacenamiento de archivos](/es/docs/self-hosting/configure#almacenamiento-de-archivos).
 
 ## Pasos
 
-1. Descarga el extracto de tu banco en CSV o Excel.
+1. Descarga el extracto de tu banco en CSV, Excel, OFX, QFX, QIF o CAMT.053 XML.
 2. Abre la cuenta y elige **Importar transacciones**.
-3. Añade el archivo (hasta 5 MB). WonderMoney lo lee al momento y muestra cuántas transacciones encontró, las fechas que abarcan y las primeras filas.
+3. Añade el archivo (hasta 5 MB). WonderMoney lo lee al momento y muestra cuántas transacciones encontró, las fechas que abarcan y las primeras filas. Un archivo OFX/QFX, QIF o CAMT.053 no tiene columnas que previsualizar: pasa directamente a la revisión.
 4. Revisa las filas. Si una columna es incorrecta, abre **Ajustar columnas** y elige la correcta, o cambia el formato de fecha, el formato de números o si los gastos aparecen como importe positivo (como en algunos extractos de tarjeta de crédito). La vista previa se actualiza a medida que cambias.
 5. Elige **Revisar transacciones**. WonderMoney lee todas las filas del archivo y las muestra, sin importar nada todavía:
    - **Nuevas**: aún no están en la cuenta. Están incluidas.
    - **Ya en la cuenta**: la misma transacción ya se importó, de este archivo o de un extracto que se solapa. Se omiten.
+   - **Posible duplicado**: nada en el archivo la identifica como una transacción que ya está en la cuenta, pero la cuenta tiene una con el mismo importe con pocos días de diferencia. Se omiten a menos que las incluyas. Consulta [Posibles duplicados](#posibles-duplicados).
    - **No se pudieron leer**: una fila cuya fecha o importe no se pudo leer, con el motivo. Nunca se importan.
 6. Revisa la lista. Desmarca una fila para omitirla, o márcala para incluirla. Muestra un tipo de fila y elige **Incluir todas** u **Omitir todas** para decidirlas a la vez.
 7. Elige **Importar**, que muestra cuántas transacciones va a añadir. La importación se ejecuta en segundo plano y muestra su progreso. Si se detiene a mitad (por ejemplo, si el servidor se reinicia), elige **Intentar de nuevo**: sigue donde se quedó, y nada se importa dos veces.
 
-Un archivo con varias cuentas pregunta a cuál de tus cuentas va cada una antes de poder importarse.
+Un archivo con varias cuentas pregunta a cuál de tus cuentas va cada una antes de poder importarse. En un archivo OFX/QFX, cada cuenta se identifica por el número de cuenta del banco (`ACCTID`); en un archivo QIF, por el nombre de su bloque `!Account`; en un archivo CAMT.053, por su IBAN, con el mapeo ya rellenado cuando una de tus cuentas tiene ese IBAN.
 
-Una importación que no termines caduca a los siete días. Siete días después de una importación, WonderMoney elimina el archivo que subiste y la lista fila a fila; la importación conserva solo cuántas transacciones se importaron y omitieron, y las transacciones importadas siguen en la cuenta. En la aplicación móvil la importación se hace en un solo paso: las transacciones nuevas se importan y las que ya están en la cuenta se omiten.
+Un archivo QIF cuyas fechas puedan ser día primero o mes primero muestra la elección en la revisión: elige el orden que usa el archivo y las filas se leen otra vez antes de importar.
+
+Una importación que no termines caduca a los siete días. Siete días después de una importación, WonderMoney elimina el archivo que subiste y la lista fila a fila; la importación conserva solo el nombre del archivo y cuántas transacciones se importaron y omitieron, y las transacciones importadas siguen en la cuenta. En la aplicación móvil la importación se hace en un solo paso: las transacciones nuevas se importan, las que ya están en la cuenta se omiten y los posibles duplicados se importan (nadie los ha revisado); allí, un archivo QIF con fechas ambiguas se lee con el día primero.
 
 <DocsImage
   src="/images/docs/accounts-transactions/import-transactions-csv-import-modal.png"
   alt="Ventana de importación de transacciones con un área para arrastrar el archivo."
-  caption="La ventana de importación acepta un archivo CSV o Excel de hasta 5 MB."
+  caption="La ventana de importación acepta un archivo CSV, Excel, OFX, QFX, QIF o CAMT.053 de hasta 5 MB."
   width={1440}
   height={900}
 />
+
+## Posibles duplicados
+
+La misma compra suele llegar dos veces: una por la sincronización bancaria y otra por un archivo, con un día de diferencia o con otra descripción. Una fila del archivo que nada identifica como ya importada es un posible duplicado cuando la cuenta a la que va tiene una transacción con el mismo importe, de entrada o de salida, en la misma moneda, con fecha de hasta 3 días antes o después. La revisión muestra la fila junto a esa transacción, con la fecha, la descripción y el importe de cada una, para que puedas compararlas.
+
+- Cuando varias transacciones de la cuenta pueden ser la fila, no se asocia ninguna, y la revisión lo indica. Cuando solo una de ellas tiene el mismo comercio, se asocia esa.
+- Una transacción de la cuenta corresponde a una sola fila. Dos cafés iguales en el archivo y uno en la cuenta dejan una fila como posible duplicado y la otra como nueva.
+- Solo se comprueba la cuenta a la que va la fila, y solo las transacciones que puedes ver en ella. Las transacciones eliminadas no cuentan; las ocultas sí.
+- Un posible duplicado se omite a menos que lo incluyas, y nada se descarta sin tu decisión: márcalo y la importación lo añade como una transacción nueva.
+- En un archivo con varias cuentas, cada fila se comprueba en la cuenta que elegiste para ella, y de nuevo cuando cambias esa elección.
 
 ## Revisión
 
@@ -52,10 +71,17 @@ Las filas importadas se categorizan con el mismo categorizador determinista que 
 - Los importes están guardados con el separador decimal incorrecto.
 - Los abonos y los cargos están invertidos.
 - Los mismos datos ya se importaron desde otra fuente.
+- El archivo OFX/QFX es un extracto de inversión, o solo tiene un saldo. WonderMoney lo omite y lo indica en la importación.
+- Las fechas del archivo QIF pueden ser día primero o mes primero, y la importación pregunta cuál antes de continuar.
+- El archivo QIF es una exportación de inversión (`!Type:Invst`). WonderMoney omite esos registros y lo indica en la importación.
+- El archivo CAMT.053 declara un tipo de documento (`DOCTYPE`). WonderMoney lo rechaza en lugar de leerlo.
 
 ## Enlaces relacionados
 
 - [Problemas con la importación de transacciones](/es/docs/troubleshooting/transaction-import-problems)
+- [Importar desde YNAB](/es/docs/accounts-transactions/import-from-ynab)
+- [Importar desde Actual Budget](/es/docs/accounts-transactions/import-from-actual-budget)
+- [Importar extractos bancarios en PDF](/es/docs/accounts-transactions/import-pdf-statements)
 - [Entender las transacciones](/es/docs/accounts-transactions/understand-transactions)
 - [Categorizar transacciones](/es/docs/accounts-transactions/categorize-transactions)
 - [Cuenta manual sin conexión](/es/docs/accounts-transactions/manual-offline-account)

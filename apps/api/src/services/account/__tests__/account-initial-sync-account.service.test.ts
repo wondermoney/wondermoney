@@ -7,7 +7,8 @@ vi.mock('@app/database/di', () => ({ DI: { em: {} } }));
 vi.mock('@sentry/node', () => ({ captureException: sentry.captureException, captureMessage: sentry.captureMessage }));
 vi.mock('@service/operations/background-operation.service', () => ({ default: { heartbeatJob } }));
 
-import { EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
+import { BankConnectionStatus } from '@entity/BankConnection';
+import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
 
 import service, { selectProviderBalanceAmount } from '../account-initial-sync-account.service';
 
@@ -55,26 +56,23 @@ describe('provider balance selection', () => {
 interface Client {
   account: (accountId: string) => {
     getBalances: () => Promise<{ balances: { balanceAmount: { amount: string } }[] }>;
-    getDetails: () => Promise<{ account?: { currency: string; name: string; ownerName: string } }>;
+    getDetails: () => Promise<{ account?: { cashAccountType?: string; currency: string; name: string; ownerName: string } }>;
     getMetadata: () => Promise<{ iban?: string; institution_id: string }>;
   };
   requisition: { getRequisitionById: (id: string) => Promise<{ accounts: string[]; institution_id?: string }> };
 }
 
-interface Connection { appuserKey: { appuserKey: number }; enableBankingConnectionKey: number; sessionId: string; state: string; status: EnableBankingConnectionStatus }
-
 interface Currency { code: string }
 
 interface Tenant { appuserKey: { appuserKey: number; currencyKey?: Currency }; tenantKey: { tenantKey: number } }
 
-const linkedConnection = (): Connection => ({ appuserKey: { appuserKey: 9 }, enableBankingConnectionKey: 1, sessionId: 'sess-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED });
 const tenant = (): Tenant => ({ appuserKey: { appuserKey: 9 }, tenantKey: { tenantKey: 3 } });
 const currency = (): Currency => ({ code: 'EUR' });
 
-const client = (opts: { accounts?: string[]; balance?: string; fail?: string; failWith?: Error } = {}): Client => ({
+const client = (opts: { accounts?: string[]; balance?: string; cashAccountType?: string; fail?: string; failWith?: Error } = {}): Client => ({
   account: (accountId: string) => ({
-    getBalances: () => Promise.resolve({ balances: [{ balanceAmount: { amount: opts.balance ?? '10' } }] }),
-    getDetails: () => opts.fail === accountId ? Promise.reject(opts.failWith ?? new Error('details failed')) : Promise.resolve({ account: { currency: 'EUR', name: `Name ${accountId}`, ownerName: 'Owner' } }),
+    getBalances: () => opts.fail === accountId ? Promise.reject(opts.failWith ?? new Error('balances failed')) : Promise.resolve({ balances: [{ balanceAmount: { amount: opts.balance ?? '10' } }] }),
+    getDetails: () => Promise.resolve({ account: { cashAccountType: opts.cashAccountType, currency: 'EUR', name: `Name ${accountId}`, ownerName: 'Owner' } }),
     getMetadata: () => Promise.resolve({ iban: 'DE123', institution_id: 'bank-1' }),
   }),
   requisition: { getRequisitionById: () => Promise.resolve({ accounts: opts.accounts ?? ['acc-1'] }) },
@@ -84,15 +82,15 @@ const client = (opts: { accounts?: string[]; balance?: string; fail?: string; fa
 const axiosLikeError = (status: number, data: unknown) =>
   Object.assign(new Error(`Request failed with status code ${status}`), { isAxiosError: true, name: 'AxiosError', response: { data, status } });
 
-const createEm = (overrides: Partial<{ connection: Connection | null; currency: Currency | null; deletedAccount: unknown; exchangeRate: unknown; existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
+const createEm = (overrides: Partial<{ accountType: unknown; currency: Currency | null; deletedAccount: unknown; exchangeRate: unknown; existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
   create: vi.fn((_entity: unknown, data: unknown) => data),
   findOne: vi.fn((entity: unknown, where: Record<string, unknown>) => {
     const name = (entity as { name?: string }).name;
-    if (name === 'EnableBankingConnection') return Object.hasOwn(overrides, 'connection') ? overrides.connection : linkedConnection();
     if (name === 'AppuserTenant') return Object.hasOwn(overrides, 'tenant') ? overrides.tenant : tenant();
     if (name === 'Currency') return Object.hasOwn(overrides, 'currency') ? overrides.currency : currency();
     if (name === 'ExchangeRate') return Object.hasOwn(overrides, 'exchangeRate') ? overrides.exchangeRate : null;
     if (name === 'AccountFinancialInstitution') return Object.hasOwn(overrides, 'institution') ? overrides.institution : null;
+    if (name === 'AccountType') return Object.hasOwn(overrides, 'accountType') ? overrides.accountType : null;
     if (name === 'Account') return Object.hasOwn(where, 'deletedAt') ? (Object.hasOwn(overrides, 'deletedAccount') ? overrides.deletedAccount : null) : (Object.hasOwn(overrides, 'existingAccount') ? overrides.existingAccount : null);
     return null;
   }),
@@ -116,31 +114,31 @@ const emWithActiveAccount = (account: Record<string, unknown>) => {
 beforeEach(() => vi.clearAllMocks());
 
 describe('account initial sync account service', () => {
-  it('fails when requisition is missing', async () => {
-    const em = createEm({ connection: null });
-    await expect(service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) })).rejects.toThrow('Enable Banking connection not found');
+  it('fails when the connection is not linked', async () => {
+    const em = createEm();
+    await expect(service.syncAccountsForRequisition({ connection: conn(1, { status: BankConnectionStatus.CREATED }) }, { em: asEm(em), provider: providerFromClient(client()) })).rejects.toThrow('Bank connection is not linked');
   });
 
-  it('fails when requisition is not linked', async () => {
-    const em = createEm({ connection: { ...linkedConnection(), status: EnableBankingConnectionStatus.CREATED } });
-    await expect(service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) })).rejects.toThrow('Enable Banking connection is not linked');
+  it('fails when no provider is configured', async () => {
+    const em = createEm();
+    await expect(service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em) })).rejects.toThrow('Bank sync provider is not configured');
   });
 
   it('fails when tenant is missing', async () => {
     const em = createEm({ tenant: null });
-    await expect(service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) })).rejects.toThrow('Active tenant not found for requisition');
+    await expect(service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) })).rejects.toThrow('Active tenant not found for requisition');
   });
 
   it('creates institution and account on happy path', async () => {
     const em = createEm();
-    const result = await service.syncAccountsForRequisition({ correlationId: 'c1', enableBankingConnectionKey: 1, queueJobId: 'j1' }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1), correlationId: 'c1', queueJobId: 'j1' }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(result).toMatchObject({ accountsCreated: 1, accountsFailed: 0, accountsFetched: 1, status: 'completed' });
-    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), { appuserKey: { appuserKey: 9 }, deletedAt: undefined, recordActive: true }, { populate: ['appuserKey.currencyKey'] });
+    expect(em.findOne).toHaveBeenCalledWith(expect.any(Function), { appuserKey: 9, deletedAt: undefined, recordActive: true }, { populate: ['appuserKey.currencyKey'] });
   });
 
   it('sets appuserCurrencyBalance to balance for same currency', async () => {
     const em = createEm({ tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } } });
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
     expect(created?.['appuserCurrencyBalance']).toBe(10);
     expect(created?.['fxStatus']).toBe('exact');
@@ -148,15 +146,30 @@ describe('account initial sync account service', () => {
 
   it('stores no converted balance, and marks it missing, when no rate exists', async () => {
     const em = createEm({ exchangeRate: null, tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'USD' } }, tenantKey: { tenantKey: 3 } } });
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
     expect(created?.['appuserCurrencyBalance']).toBeNull();
     expect(created?.['fxStatus']).toBe('missing');
   });
 
+  it('types an account the provider reports as a card', async () => {
+    const creditCardType = { description: 'CREDIT_CARD' };
+    const em = createEm({ accountType: creditCardType });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ cashAccountType: 'CARD' })) });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['accountTypeKey']).toBe(creditCardType);
+  });
+
+  it('leaves the account type alone when the provider reports no card', async () => {
+    const em = createEm({ accountType: { description: 'CREDIT_CARD' } });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ cashAccountType: 'CACC' })) });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['accountTypeKey']).toBeUndefined();
+  });
+
   it('returns partial when one account fails', async () => {
     const em = createEm();
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
     expect(result.status).toBe('partial');
     expect(result.failedAccountIds).toEqual(['acc-2']);
   });
@@ -184,7 +197,7 @@ describe('account initial sync account service', () => {
     it('stops calling the provider at the first rate limit and reports Retry-After', async () => {
       const { balanceCalls, fake } = balancesClient(['acc-1', 'acc-2', 'acc-3'], { 'acc-1': providerError(429, { retryAfter: 900 }) });
       const em = createEm();
-      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(fake) });
       expect(balanceCalls).toEqual(['acc-1']);
       expect(result).toMatchObject({ accountsFailed: 3, accountsFetched: 0, rateLimited: { retryAfterSeconds: 900 }, status: 'failed' });
       expect(em.persist).not.toHaveBeenCalled();
@@ -192,20 +205,20 @@ describe('account initial sync account service', () => {
 
     it('keeps accounts synced before the rate limit and reports a partial result', async () => {
       const { balanceCalls, fake } = balancesClient(['acc-1', 'acc-2', 'acc-3'], { 'acc-2': providerError(429) });
-      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(createEm()), provider: providerFromClient(fake) });
       expect(balanceCalls).toEqual(['acc-1', 'acc-2']);
       expect(result).toMatchObject({ accountsFailed: 2, accountsFetched: 1, failedAccountIds: ['acc-2', 'acc-3'], rateLimited: {}, status: 'partial' });
     });
 
     it('reports every account rejected when each one fails with 400 or 401', async () => {
       const { fake } = balancesClient(['acc-1', 'acc-2'], { 'acc-1': providerError(400), 'acc-2': providerError(401) });
-      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(createEm()), provider: providerFromClient(fake) });
       expect(result).toMatchObject({ everyAccountRejected: true, status: 'failed' });
     });
 
     it('does not report every account rejected when one failed for another reason', async () => {
       const { fake } = balancesClient(['acc-1', 'acc-2'], { 'acc-1': providerError(400), 'acc-2': providerError(502) });
-      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(createEm()), provider: providerFromClient(fake) });
       expect(result.status).toBe('failed');
       expect(result.everyAccountRejected).toBeFalsy();
     });
@@ -215,7 +228,7 @@ describe('account initial sync account service', () => {
       const { fake } = balancesClient(['acc-1'], { 'acc-1': { balances: [] } });
       // Served from the first `Account` lookup, so the sync would update it if it got that far.
       const em = createEm({ deletedAccount: existingAccount });
-      const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(fake) });
+      const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(fake) });
       expect(result).toMatchObject({ accountsFailed: 1, status: 'failed' });
       expect(existingAccount.balance).toBe(250);
       expect(existingAccount.refreshedAt).toEqual(new Date('2026-01-01T00:00:00Z'));
@@ -225,7 +238,7 @@ describe('account initial sync account service', () => {
   it('marks non-duplicate institution create errors as failed', async () => {
     const em = createEm({ institution: null });
     em.flush.mockRejectedValueOnce(new Error('boom'));
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(result.status).toBe('failed');
     expect(result.accountsFailed).toBe(1);
   });
@@ -233,7 +246,7 @@ describe('account initial sync account service', () => {
   it('marks non-duplicate account create errors as failed', async () => {
     const em = createEm({ institution: null });
     em.flush.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('boom'));
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(result.status).toBe('failed');
     expect(result.accountsFailed).toBe(1);
   });
@@ -241,14 +254,14 @@ describe('account initial sync account service', () => {
   it('handles duplicate institution create by reloading', async () => {
     const em = createEm({ institution: null });
     em.flush.mockRejectedValueOnce(new UniqueConstraintViolationException(new Error('unique'))).mockResolvedValue(undefined);
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(result.accountsFailed).toBe(0);
   });
 
   it('handles duplicate account create by reloading', async () => {
     const em = createEm({ existingAccount: { accountKey: 9 }, institution: { accountFinancialInstitutionKey: 1 } });
     em.flush.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new UniqueConstraintViolationException(new Error('unique'))).mockResolvedValue(undefined);
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(result.accountsFailed).toBe(0);
   });
 
@@ -258,7 +271,6 @@ describe('account initial sync account service', () => {
     let reloadCount = 0;
     em.findOne.mockImplementation((entity: unknown) => {
       const name = (entity as { name?: string }).name;
-      if (name === 'EnableBankingConnection') return linkedConnection();
       if (name === 'AppuserTenant') return { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } };
       if (name === 'Currency') return { code: 'EUR' };
       if (name === 'AccountFinancialInstitution') return { accountFinancialInstitutionKey: 1 };
@@ -266,14 +278,14 @@ describe('account initial sync account service', () => {
       return null;
     });
     em.flush.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new UniqueConstraintViolationException(new Error('unique'))).mockResolvedValue(undefined);
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     const createdAccount = em.persist.mock.calls[0]?.[0] as undefined | { appuserCurrencyBalance?: number };
     expect(createdAccount?.appuserCurrencyBalance).toBe(10);
   });
 
   it('records the first provider balance it sees as the opening balance', async () => {
     const em = createEm();
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '250.5' })) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '250.5' })) });
     const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
     expect(created?.['openingBalance']).toBe(250.5);
     expect(created?.['openingBalanceDate']).toBeInstanceOf(Date);
@@ -282,7 +294,7 @@ describe('account initial sync account service', () => {
   it('records an opening balance for an account linked without a balance', async () => {
     const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9 };
     const em = emWithActiveAccount(existingAccount);
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '40' })) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '40' })) });
     expect(existingAccount['openingBalance']).toBe(40);
   });
 
@@ -290,21 +302,21 @@ describe('account initial sync account service', () => {
     const openingBalanceDate = new Date('2026-01-01T00:00:00Z');
     const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9, balance: 100, openingBalance: 100, openingBalanceDate };
     const em = emWithActiveAccount(existingAccount);
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '75' })) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '75' })) });
     expect(existingAccount).toMatchObject({ balance: 75, openingBalance: 100, openingBalanceDate });
   });
 
   it('leaves the opening balance of an account synced before opening balances existed to the backfill', async () => {
     const existingAccount: Record<string, unknown> = { accountId: 'acc-1', accountKey: 9, balance: 100 };
     const em = emWithActiveAccount(existingAccount);
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '75' })) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '75' })) });
     expect(existingAccount['openingBalance']).toBeUndefined();
   });
 
   it('preserves existing account fields when syncing existing accounts', async () => {
     const existingAccount = { accountId: 'acc-1', accountKey: 9, accountName: 'User Override', accountNumber: '123', holderName: 'Existing Holder' };
     const em = createEm({ existingAccount, institution: { accountFinancialInstitutionKey: 1 } });
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client()) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
     expect(existingAccount.accountName).toBe('User Override');
     expect(existingAccount.accountNumber).toBe('123');
     expect(existingAccount.holderName).toBe('Existing Holder');
@@ -312,14 +324,14 @@ describe('account initial sync account service', () => {
 
   it('marks invalid balance as failed', async () => {
     const em = createEm();
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ balance: '10abc' })) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '10abc' })) });
     expect(result.status).toBe('failed');
     expect(result.accountsFailed).toBe(1);
   });
 
   it('returns failed when requisition has no accounts', async () => {
     const em = createEm();
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: [] })) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ accounts: [] })) });
     expect(result.status).toBe('failed');
     expect(result.accountsTotal).toBe(0);
     expect(result.accountsFetched).toBe(0);
@@ -339,14 +351,14 @@ describe('account initial sync account service', () => {
       }),
       requisition: { getRequisitionById: () => Promise.resolve(({ accounts: ['acc-1', 'acc-2'] })) },
     });
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: bankSyncFactory });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(await bankSyncFactory()) });
     expect(result.status).toBe('completed');
-    expect(callOrder.indexOf('details:acc-2')).toBeGreaterThan(callOrder.indexOf('balances:acc-1'));
+    expect(callOrder).toEqual(expect.arrayContaining(['balances:acc-1', 'balances:acc-2']));
   });
 
   it('marks all fetch failures as failed', async () => {
     const em = createEm();
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1'], fail: 'acc-1' })) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ accounts: ['acc-1'], fail: 'acc-1' })) });
     expect(result.status).toBe('failed');
     expect(result.accountsFetched).toBe(0);
   });
@@ -354,18 +366,18 @@ describe('account initial sync account service', () => {
   it('logs the real per-account error instead of swallowing it', async () => {
     const em = createEm();
     const warn = vi.fn();
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })), logger: { error: vi.fn(), info: vi.fn(), warn } });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), logger: { error: vi.fn(), info: vi.fn(), warn }, provider: providerFromClient(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
     expect(warn).toHaveBeenCalledWith(
-      expect.objectContaining({ accountId: 'acc-2', error: expect.objectContaining({ message: 'details failed' }), requisitionId: 'sess-1' }),
+      expect.objectContaining({ accountId: 'acc-2', error: expect.objectContaining({ message: 'balances failed' }), requisitionId: 'sess-1' }),
       'Account initial sync account fetch failed',
     );
   });
 
   it('reports the real per-account error to Sentry instead of swallowing it', async () => {
     const em = createEm();
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ accounts: ['acc-1', 'acc-2'], fail: 'acc-2' })) });
     expect(sentry.captureException).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'details failed' }),
+      expect.objectContaining({ message: 'balances failed' }),
       { tags: { accountId: 'acc-2', requisitionId: 'sess-1', stage: 'account-phase' } },
     );
   });
@@ -380,8 +392,8 @@ describe('account initial sync account service', () => {
 
     const runWith = (failWith: Error) =>
       service.syncAccountsForRequisition(
-        { enableBankingConnectionKey: 1 },
-        { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1'], fail: 'acc-1', failWith })) },
+        { connection: conn(1) },
+        { em: asEm(createEm()), provider: providerFromClient(client({ accounts: ['acc-1'], fail: 'acc-1', failWith })) },
       );
 
     it("attaches the provider's explanation to the Sentry event instead of only the status code", async () => {
@@ -399,8 +411,8 @@ describe('account initial sync account service', () => {
     it('puts the same explanation in the log line', async () => {
       const warn = vi.fn();
       await service.syncAccountsForRequisition(
-        { enableBankingConnectionKey: 1 },
-        { em: asEm(createEm()), enableBankingSyncAdapterFactory: () => Promise.resolve(client({ accounts: ['acc-1'], fail: 'acc-1', failWith: axiosLikeError(409, gocardless409) })), logger: { error: vi.fn(), info: vi.fn(), warn } },
+        { connection: conn(1) },
+        { em: asEm(createEm()), logger: { error: vi.fn(), info: vi.fn(), warn }, provider: providerFromClient(client({ accounts: ['acc-1'], fail: 'acc-1', failWith: axiosLikeError(409, gocardless409) })) },
       );
 
       expect(warn).toHaveBeenCalledWith(
@@ -427,9 +439,9 @@ describe('account initial sync account service', () => {
     });
 
     it('adds no extra scaffolding for an error that carries no provider response', async () => {
-      await runWith(new Error('details failed'));
+      await runWith(new Error('balances failed'));
 
-      expect(sentry.captureException).toHaveBeenCalledWith(expect.objectContaining({ message: 'details failed' }), {
+      expect(sentry.captureException).toHaveBeenCalledWith(expect.objectContaining({ message: 'balances failed' }), {
         tags: { accountId: 'acc-1', requisitionId: 'sess-1', stage: 'account-phase' },
       });
     });
@@ -439,13 +451,13 @@ describe('account initial sync account service', () => {
     const em = createEm();
     const bankSyncFactory = () => Promise.resolve<Client>({
       account: () => ({
-        getBalances: () => Promise.resolve({ balances: [{ balanceAmount: { amount: '10' } }] }),
-        getDetails: () => Promise.reject(new Error('details failed')),
+        getBalances: () => Promise.reject(new Error('balances failed')),
+        getDetails: () => Promise.resolve({}),
         getMetadata: () => Promise.resolve({ iban: 'DE123', institution_id: 'bank-1' }),
       }),
       requisition: { getRequisitionById: () => Promise.resolve({ accounts: ['acc-1'], institution_id: 'bank-1' }) },
     });
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: bankSyncFactory });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(await bankSyncFactory()) });
     expect(result.status).toBe('failed');
     expect(result.institutionIds).toEqual(['bank-1']);
   });
@@ -456,7 +468,7 @@ describe('account initial sync account service', () => {
       account: () => ({ getBalances: () => Promise.resolve({ balances: [] }), getDetails: () => Promise.resolve({}), getMetadata: () => Promise.resolve({ institution_id: 'bank-1' }) }),
       requisition: { getRequisitionById: () => Promise.resolve({ accounts: [], institution_id: 'bank-1' }) },
     });
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: bankSyncFactory });
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(await bankSyncFactory()) });
     expect(result.status).toBe('failed');
     expect(result.institutionIds).toEqual(['bank-1']);
   });
@@ -468,7 +480,7 @@ describe('account initial sync account service', () => {
       account: () => ({ getBalances: () => Promise.resolve({ balances: [] }), getDetails: () => Promise.resolve({}), getMetadata: () => Promise.resolve({ institution_id: 'bank-1' }) }),
       requisition: { getRequisitionById: () => Promise.resolve({ accounts: [], institution_id: 'bank-1', status: 'SU' }) },
     });
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: bankSyncFactory, logger: { error: vi.fn(), info: vi.fn(), warn } });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), logger: { error: vi.fn(), info: vi.fn(), warn }, provider: providerFromClient(await bankSyncFactory()) });
     expect(warn).toHaveBeenCalledWith(
       expect.objectContaining({ institutionId: 'bank-1', providerStatus: 'SU', requisitionId: 'sess-1' }),
       'Account initial sync: provider returned zero accounts for a linked requisition',
@@ -514,7 +526,7 @@ describe('duplicate-requisition account dedup', () => {
    * `connectionsByKey` and `tenantRecord` are fixed fixtures; `Account` / `AccountFinancialInstitution`
    * rows are tracked in-memory across calls.
    */
-  function createStatefulEm(connectionsByKey: Record<number, Connection>, tenantRecord: Tenant) {
+  function createStatefulEm(tenantRecord: Tenant) {
     const accounts: Record<string, unknown>[] = [];
     const institutions: Record<string, unknown>[] = [];
     let nextAccountKey = 1;
@@ -523,7 +535,6 @@ describe('duplicate-requisition account dedup', () => {
       create: vi.fn((entityClass: unknown, data: unknown) => ({ ...(data as object), __entity: (entityClass as { name: string }).name })),
       findOne: vi.fn((entityClass: unknown, where: Record<string, unknown>) => {
         const name = (entityClass as { name: string }).name;
-        if (name === 'EnableBankingConnection') return Promise.resolve(connectionsByKey[where['enableBankingConnectionKey'] as number] ?? null);
         if (name === 'AppuserTenant') return Promise.resolve(tenantRecord);
         if (name === 'Currency') return Promise.resolve({ code: 'EUR' });
         if (name === 'AccountFinancialInstitution') return Promise.resolve(institutions.find((row) => row['id'] === where['id']) ?? null);
@@ -558,16 +569,12 @@ describe('duplicate-requisition account dedup', () => {
   it('collapses a second, independently-linked connection onto the account the first created (matched by IBAN)', async () => {
     const owner = { appuserKey: 9 };
     const tenantRecord: Tenant = { appuserKey: owner, tenantKey: { tenantKey: 3 } };
-    const connectionsByKey: Record<number, Connection> = {
-      1: { appuserKey: owner, enableBankingConnectionKey: 1, sessionId: 'sess-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED },
-      2: { appuserKey: owner, enableBankingConnectionKey: 2, sessionId: 'sess-2', state: 'state-2', status: EnableBankingConnectionStatus.LINKED },
-    };
-    const { accounts, em } = createStatefulEm(connectionsByKey, tenantRecord);
+    const { accounts, em } = createStatefulEm(tenantRecord);
 
     // Session 1: the user completes the sandbox consent flow once — creates exactly one account.
     const first = await service.syncAccountsForRequisition(
-      { enableBankingConnectionKey: 1 },
-      { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(sandboxClient('sandbox-acc-session-1')) },
+      { connection: conn(1) },
+      { em: asEm(em), provider: providerFromClient(sandboxClient('sandbox-acc-session-1')) },
     );
     expect(first).toMatchObject({ accountsCreated: 1, accountsFailed: 0 });
     expect(accounts).toHaveLength(1);
@@ -578,8 +585,8 @@ describe('duplicate-requisition account dedup', () => {
     // IBAN. It must collapse onto the existing account instead of creating a second Account row and
     // re-running the full transaction sync against it.
     const second = await service.syncAccountsForRequisition(
-      { enableBankingConnectionKey: 2 },
-      { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(sandboxClient('sandbox-acc-session-2')) },
+      { connection: conn(2) },
+      { em: asEm(em), provider: providerFromClient(sandboxClient('sandbox-acc-session-2')) },
     );
     expect(second).toMatchObject({ accountsCreated: 0, accountsFailed: 0, accountsUpdated: 1 });
     expect(accounts).toHaveLength(1);
@@ -589,11 +596,7 @@ describe('duplicate-requisition account dedup', () => {
   it('still creates a separate account when the provider supplies no IBAN (no false merge)', async () => {
     const owner = { appuserKey: 9 };
     const tenantRecord: Tenant = { appuserKey: owner, tenantKey: { tenantKey: 3 } };
-    const connectionsByKey: Record<number, Connection> = {
-      1: { appuserKey: owner, enableBankingConnectionKey: 1, sessionId: 'sess-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED },
-      2: { appuserKey: owner, enableBankingConnectionKey: 2, sessionId: 'sess-2', state: 'state-2', status: EnableBankingConnectionStatus.LINKED },
-    };
-    const { accounts, em } = createStatefulEm(connectionsByKey, tenantRecord);
+    const { accounts, em } = createStatefulEm(tenantRecord);
     const noIbanClient = (accountId: string) => ({
       account: () => ({
         getBalances: () => Promise.resolve({ balances: [{ balanceAmount: { amount: '10.00' }, balanceType: 'closingBooked' }] }),
@@ -603,22 +606,18 @@ describe('duplicate-requisition account dedup', () => {
       requisition: { getRequisitionById: () => Promise.resolve({ accounts: [accountId], institution_id: 'REAL_BANK' }) },
     });
 
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 1 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(noIbanClient('real-acc-1')) });
-    const second = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 2 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(noIbanClient('real-acc-2')) });
+    await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(noIbanClient('real-acc-1')) });
+    const second = await service.syncAccountsForRequisition({ connection: conn(2) }, { em: asEm(em), provider: providerFromClient(noIbanClient('real-acc-2')) });
 
     expect(second).toMatchObject({ accountsCreated: 1 });
     expect(accounts).toHaveLength(2);
   });
 });
 
-// The Enable Banking path through the same `syncAccountsForRequisition`.
-// `enableBankingSyncAdapterFactory` stands in for `createEnableBankingSyncAdapter` so these tests
-// never touch real Enable Banking credentials/HTTP — only the client-construction seam differs
-// from the requisition tests above; the reconciliation/institution/balance logic they exercise is
-// identical code.
+// The Enable Banking path through the same `syncAccountsForRequisition`, with a fake provider
+// built from an Enable-Banking-shaped client. The reconciliation/institution/balance logic is
+// identical to the requisition tests above; only the provider differs.
 describe('account initial sync account service — Enable Banking', () => {
-  const linkedConnection = () => ({ appuserKey: { appuserKey: 9 }, aspspCountry: 'PT', aspspName: 'Test Bank', enableBankingConnectionKey: 5, sessionId: 'session-1', status: 'linked' });
-
   const enableBankingClient = (opts: { accounts?: string[]; institutionId?: string } = {}) => ({
     account: () => ({
       getBalances: () => Promise.resolve({ balances: [{ balanceAmount: { amount: '42.00' }, balanceType: 'closingBooked' }] }),
@@ -628,11 +627,10 @@ describe('account initial sync account service — Enable Banking', () => {
     requisition: { getRequisitionById: () => Promise.resolve({ accounts: opts.accounts ?? ['eb-acc-1'], institution_id: opts.institutionId ?? 'enable_banking:pt:test-bank' }) },
   });
 
-  const createEbEm = (overrides: Partial<{ connection: null | ReturnType<typeof linkedConnection>; existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
+  const createEbEm = (overrides: Partial<{ existingAccount: unknown; institution: unknown; tenant: null | Tenant }> = {}) => ({
     create: vi.fn((_entity: unknown, data: unknown) => data),
     findOne: vi.fn((entity: unknown, where: Record<string, unknown>) => {
       const name = (entity as { name?: string }).name;
-      if (name === 'EnableBankingConnection') return Object.hasOwn(overrides, 'connection') ? overrides.connection : linkedConnection();
       if (name === 'AppuserTenant') return Object.hasOwn(overrides, 'tenant') ? overrides.tenant : tenant();
       if (name === 'Currency') return currency();
       if (name === 'AccountFinancialInstitution') return Object.hasOwn(overrides, 'institution') ? overrides.institution : null;
@@ -644,37 +642,26 @@ describe('account initial sync account service — Enable Banking', () => {
     persist: vi.fn().mockReturnThis(),
   });
 
-  it('fails when the connection is missing', async () => {
-    const em = createEbEm({ connection: null });
-    await expect(service.syncAccountsForRequisition({ enableBankingConnectionKey: 5 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(enableBankingClient()) })).rejects.toThrow('Enable Banking connection not found');
-  });
-
   it('fails when the connection is not linked', async () => {
-    const em = createEbEm({ connection: { ...linkedConnection(), status: 'created' } });
-    await expect(service.syncAccountsForRequisition({ enableBankingConnectionKey: 5 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(enableBankingClient()) })).rejects.toThrow('Enable Banking connection is not linked');
+    const em = createEbEm();
+    await expect(service.syncAccountsForRequisition({ connection: conn(5, { status: BankConnectionStatus.CREATED }) }, { em: asEm(em), provider: providerFromClient(enableBankingClient()) })).rejects.toThrow('Bank connection is not linked');
   });
 
   it('creates an account via the injected Enable Banking adapter, tagging the institution provider', async () => {
     const em = createEbEm();
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 5 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(enableBankingClient()) });
+    const result = await service.syncAccountsForRequisition({ connection: conn(5, { externalId: 'session-1' }) }, { em: asEm(em), provider: providerFromClient(enableBankingClient()) });
 
     expect(result).toMatchObject({ accountsCreated: 1, accountsFailed: 0, requisitionId: 'session-1', requisitionKey: 5, status: 'completed' });
     const createdInstitution = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([entity]) => (entity as { name?: string }).name === 'AccountFinancialInstitution')?.[1];
     expect(createdInstitution?.['provider']).toBe('enable_banking');
   });
 
-  it('sets Account.enableBankingConnectionKey (not nordigenRequisitionKey) on the persisted account', async () => {
+  it('sets Account.bankConnectionKey (not nordigenRequisitionKey) on the persisted account', async () => {
     // Pre-existing institution so the only `em.persist` call is the account itself.
     const em = createEbEm({ institution: { accountFinancialInstitutionKey: 1 } });
-    await service.syncAccountsForRequisition({ enableBankingConnectionKey: 5 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(enableBankingClient()) });
+    await service.syncAccountsForRequisition({ connection: conn(5) }, { em: asEm(em), provider: providerFromClient(enableBankingClient()) });
     const persisted = em.persist.mock.calls[0]?.[0] as Record<string, unknown>;
-    expect(persisted['enableBankingConnectionKey']).toMatchObject({ enableBankingConnectionKey: 5 });
+    expect(persisted['bankConnectionKey']).toBe(5);
     expect(persisted['nordigenRequisitionKey']).toBeUndefined();
-  });
-
-  it('falls back to the pre-link state as requisitionId when no sessionId exists yet (defensive)', async () => {
-    const em = createEbEm({ connection: { ...linkedConnection(), sessionId: undefined, state: 'pre-link-state' } as unknown as ReturnType<typeof linkedConnection> });
-    const result = await service.syncAccountsForRequisition({ enableBankingConnectionKey: 5 }, { em: asEm(em), enableBankingSyncAdapterFactory: () => Promise.resolve(enableBankingClient()) });
-    expect(result.requisitionId).toBe('pre-link-state');
   });
 });

@@ -2,10 +2,10 @@ import { renderBankSyncAlertEmail } from '@wondermoney/react-email';
 
 import { FINANCIAL_EMAIL_TIME_ZONE } from '@app/jobs/financial-emails.queue';
 import { instanceName } from '@config/instance-name';
-import { SupportedLanguages } from '@entity/Appuser';
 import { type RenderedEmailInput, type RenderedEmailOutcome, sendRenderedEmail } from '@service/email/email';
 import { EmailGlobalOptOutService } from '@service/email/email-global-opt-out.service';
 import { categoryEnabled, EmailCategory, isRecipientReachable } from '@service/email/email-preferences';
+import { accountLocale, copyLocale, INTL_LOCALE } from '@utils/account-language';
 import { BACKEND_URL, FRONTEND_URL } from '@utils/constants';
 
 import type { BankSyncAlertChannelHandler, BankSyncAlertChannelOutcome, BankSyncAlertMessage } from './bank-sync-alert-channel';
@@ -18,7 +18,9 @@ interface EmailChannelDependencies {
 const trimSlash = (url: string) => url.replace(/\/$/u, '');
 
 /**
- * Bank sync alerts by email, in the owner's language (EN or PT, the languages emails support).
+ * Bank sync alerts by email, in the owner's language: EN, PT or ES, the languages this template is
+ * written in. Any other account language reads English, with links that open the app in its own
+ * locale.
  * Optional mail: the bank-sync-alerts category and the account-wide unsubscribe both stop it, and
  * every message carries a one-click unsubscribe for its category.
  */
@@ -28,9 +30,10 @@ export function createBankSyncAlertEmailChannel(dependencies: EmailChannelDepend
 
   return {
     async deliver(message: BankSyncAlertMessage): Promise<BankSyncAlertChannelOutcome> {
-      const lang = message.recipient.language === SupportedLanguages.PT ? 'pt' : 'en';
+      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es']);
+      const link = accountLocale(message.recipient.language);
       const date = (value: Date | null) => (value
-        ? new Intl.DateTimeFormat(lang === 'pt' ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'long', timeZone: FINANCIAL_EMAIL_TIME_ZONE }).format(value)
+        ? new Intl.DateTimeFormat(INTL_LOCALE[lang], { day: 'numeric', month: 'long', timeZone: FINANCIAL_EMAIL_TIME_ZONE }).format(value)
         : undefined);
       const app = trimSlash(FRONTEND_URL);
       const rendered = await renderBankSyncAlertEmail({
@@ -41,8 +44,8 @@ export function createBankSyncAlertEmailChannel(dependencies: EmailChannelDepend
         firstName: message.recipient.firstName ?? undefined,
         kind: message.event,
         language: lang,
-        reconnectUrl: `${app}/${lang}/settings?tab=connections`,
-        settingsUrl: `${app}/${lang}/settings?tab=notifications`,
+        reconnectUrl: `${app}/${link}/settings?tab=connections`,
+        settingsUrl: `${app}/${link}/settings?tab=notifications`,
       });
       const token = optOut.generateCategoryToken(message.recipient.appuserKey, EmailCategory.BANK_SYNC_ALERTS);
       const unsubscribeUrl = `${trimSlash(BACKEND_URL)}/v1/marketing/email-opt-out?token=${encodeURIComponent(token)}`;

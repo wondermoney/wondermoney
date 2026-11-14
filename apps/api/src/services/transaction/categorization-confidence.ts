@@ -1,7 +1,7 @@
 import { CategorizationConfidence, type Transaction } from '@entity/Transaction';
 import type { DeterministicCategorizationReason } from '@service/transaction/transaction-deterministic-categorization.service';
 
-export type CategorizationReason = 'ai_suggested' | 'user_edit' | DeterministicCategorizationReason;
+export type CategorizationReason = 'ai_suggested' | 'bayes_suggested' | 'user_edit' | DeterministicCategorizationReason;
 
 /** The subset of a Transaction the confidence writers touch — keeps the helpers unit-testable with a plain object. */
 export type CategorizableTransaction = Pick<Transaction, 'categorizationConfidence' | 'categorizationReason' | 'reviewed'>;
@@ -15,6 +15,9 @@ export function categorizationConfidenceFor(reason: CategorizationReason): Categ
   switch (reason) {
     case 'ai_suggested':
       // An AI-applied category the user should confirm; medium tier, stays in the review queue.
+      return CategorizationConfidence.MEDIUM;
+    case 'bayes_suggested':
+      // A local, token-free suggestion from the viewer's own history: also medium, also for review.
       return CategorizationConfidence.MEDIUM;
     case 'category_invalid':
     case 'merchant_ambiguous':
@@ -39,7 +42,7 @@ export function categorizationConfidenceFor(reason: CategorizationReason): Categ
  * Automated-path writer (sync / CSV / backfill): stamp the confidence tier + reason, and — only for
  * `high` — auto-clear the transaction from the review queue.
  */
-export function applyCategorizationOutcome(transaction: CategorizableTransaction, reason: DeterministicCategorizationReason): void {
+export function applyCategorizationOutcome(transaction: CategorizableTransaction, reason: CategorizationReason): void {
   const tier = categorizationConfidenceFor(reason);
   if (tier === null) return;
   transaction.categorizationConfidence = tier;

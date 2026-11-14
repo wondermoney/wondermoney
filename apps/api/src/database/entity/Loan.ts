@@ -1,22 +1,33 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
-import { LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types.js';
+import { LoanAmortizationMethod, LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types.js';
 
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
 import { Currency } from './Currency';
+import { ManualAsset } from './ManualAsset';
 import { Tenant } from './Tenant';
 
 @Entity()
 @Index({ name: 'loan_tenant_key_status_idx', properties: ['tenantKey', 'status'] })
 @Index({ name: 'loan_tenant_key_owner_appuser_key_idx', properties: ['tenantKey', 'ownerAppuserKey'] })
 export class Loan extends Base {
+  @Enum({ default: LoanAmortizationMethod.FRENCH, items: () => LoanAmortizationMethod })
+  amortizationMethod: LoanAmortizationMethod = LoanAmortizationMethod.FRENCH;
+
+  /**
+   * The rate the loan was entered with, in basis points. It applies until the first
+   * `LoanRatePeriod`; the rate in force on a date comes from `resolveLoanRate`.
+   */
   @Property({ columnType: 'int', nullable: true })
   annualInterestRateBps?: number;
 
   @ManyToOne({ cascade: [], entity: () => Currency, fieldName: 'currency_key' })
   currencyKey!: Rel<Currency>;
+
+  @Property({ columnType: 'date', nullable: true })
+  firstPaymentDate?: Date;
 
   @Property({ default: true })
   includeInNetWorth = true;
@@ -59,6 +70,14 @@ export class Loan extends Base {
 
   @Property({ columnType: 'numeric(18, 4)', nullable: true })
   regularPaymentAmount?: number;
+
+  /**
+   * The household asset this loan finances (a mortgage on the home), if any. Presentation only:
+   * the asset shows its equity against it, and net worth is unchanged. Deleting the asset clears it.
+   */
+  @Index({ name: 'loan_secured_asset_key_idx' })
+  @ManyToOne({ cascade: [], deleteRule: 'set null', entity: () => ManualAsset, fieldName: 'secured_asset_key', nullable: true })
+  securedAssetKey?: null | Rel<ManualAsset>;
 
   @Enum(() => LoanStatus)
   @Index({ name: 'loan_status_idx' })

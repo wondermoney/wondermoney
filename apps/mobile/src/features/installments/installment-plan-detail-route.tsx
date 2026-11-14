@@ -1,0 +1,65 @@
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useState } from 'react'
+
+import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { ApiError } from '@/lib/api/errors'
+import { readOnlyAccountKeys } from '@/features/accounts/account-access'
+import { parseAccountId } from '@/features/accounts/accounts-contract'
+import { useAccounts } from '@/features/accounts/use-accounts'
+
+import { InstallmentPlanDetailScreen, type InstallmentPlanDetailViewState } from './installment-plan-detail-screen'
+import { parseInstallmentPlanId } from './installments-contract'
+import { useInstallmentLinking } from './use-installment-linking'
+import { classifyInstallmentWriteFailure, useDeleteInstallmentPlan, type InstallmentWriteFailure } from './use-installment-plan-mutations'
+import { useInstallmentPlan } from './use-installment-plans'
+
+export function InstallmentPlanDetailRoute() {
+  const params = useLocalSearchParams<{ accountId?: string | string[]; planId?: string | string[] }>()
+  const routeAccountId = parseAccountId(params.accountId)
+  const planId = parseInstallmentPlanId(params.planId)
+  const query = useInstallmentPlan(planId)
+  const remove = useDeleteInstallmentPlan()
+  const [deleteFailure, setDeleteFailure] = useState<InstallmentWriteFailure | null>(null)
+  const router = useRouter()
+  const { signOut } = useProductRuntime()
+  const linking = useInstallmentLinking(query.data?.installmentPlan ?? null)
+  // The plan knows its card; the route's account only stands in until it has loaded.
+  const accountId = query.data?.installmentPlan.accountKey ?? routeAccountId
+  const accountHref = accountId === null ? '/accounts' as const : `/accounts/${accountId}` as const
+  // A card the caller can only view (#95): its plan shows, with no delete and no linking.
+  const accounts = useAccounts()
+  const readOnly = accountId !== null && readOnlyAccountKeys(accounts.data?.accounts).has(accountId)
+
+  let state: InstallmentPlanDetailViewState
+  if (query.isInvalidId) state = { status: 'invalid-id' }
+  else if (query.isAccessTransition) state = { status: 'access-transition' }
+  else if (query.data) state = { status: 'loaded', plan: query.data.installmentPlan, stale: query.isRefreshFailure }
+  else if (query.isLoading) state = { status: 'loading' }
+  else if (query.isNotFound) state = { status: 'not-found' }
+  else if (query.error instanceof ApiError && query.error.code === 'invalid-response') state = { status: 'invalid-response' }
+  else state = { status: 'error' }
+
+  const leave = () => { if (router.canGoBack()) router.back(); else router.replace(accountHref) }
+
+  return (
+    <InstallmentPlanDetailScreen
+      backHref={accountHref}
+      deleteFailure={deleteFailure}
+      deleting={remove.isPending}
+      linking={query.data && !readOnly ? linking : undefined}
+      onBack={leave}
+      onDelete={planId === null || accountId === null || readOnly ? undefined : async () => {
+        setDeleteFailure(null)
+        try {
+          await remove.mutateAsync({ planId, accountId })
+          leave()
+        } catch (error) {
+          setDeleteFailure(classifyInstallmentWriteFailure(error))
+        }
+      }}
+      onLogout={signOut}
+      onRetry={async () => { await query.refetch() }}
+      state={state}
+    />
+  )
+}

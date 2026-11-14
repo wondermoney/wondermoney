@@ -11,6 +11,7 @@ const mockUseReportMerchants = jest.fn()
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
 jest.mock('@/features/categories/use-categories', () => ({ useCategories: () => mockUseCategories() }))
 jest.mock('./use-report-merchants', () => ({ useReportMerchants: () => mockUseReportMerchants() }))
+jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS }))
 
 const account = (accountKey: number, accountName: string | null, currency: string) => ({
   accountKey, accountName, accountOwnerAppuserKey: { currencyKey: { code: currency } }, currencyKey: { code: currency },
@@ -41,6 +42,8 @@ describe('useReportFilterOptions', () => {
     mockUseCategories.mockReturnValue({ data: undefined })
     mockUseReportMerchants.mockReturnValue({ data: undefined })
     const hook = await renderWithI18n()
-    expect(hook.result.current).toEqual({ accounts: [], categories: [], merchants: [], currencies: [] })
+    expect(hook.result.current).toMatchObject({ accounts: [], categories: [], merchants: [], currencies: [] })
+    // While the household loads it reads as one member: no member filter.
+    expect(hook.result.current.members?.multiMember).toBe(false)
   })
 })

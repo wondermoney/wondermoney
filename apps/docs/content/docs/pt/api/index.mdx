@@ -1,0 +1,46 @@
+---
+title: Guia da API
+description: Autentica-te na API REST do WonderMoney, escolhe o acesso do token e trata as respostas.
+---
+
+A API REST do WonderMoney permite que integrações leiam ou alterem dados de uma conta. A [referência da API](/pt/docs/api/reference) lista as operações disponíveis, o acesso necessário, os parâmetros e os esquemas de resposta.
+
+## URL base
+
+O URL base da API alojada é `https://api.wonder.money`. Se alojas a tua própria instância do WonderMoney, usa a origem dela; a referência permite configurar o URL do servidor. Os caminhos são relativos a essa origem.
+
+## Criar um token
+
+No WonderMoney, abre **Definições → Tokens de API** e cria um token pessoal. Escolhe só o acesso de que a tua integração precisa. O token é mostrado uma única vez: copia-o e guarda-o como um segredo. Os tokens começam por `wm_pat_`.
+
+Cada operação na referência indica o âmbito necessário. A maioria usa `read` ou `write`; o endpoint MCP usa `mcp:read` ou `mcp:propose`. Nenhum âmbito pode aplicar uma proposta do assistente. Algumas operações aceitam `read` ou `write`. O token só pode aceder às rotas abrangidas pelos seus âmbitos. Não incluas o token em código do navegador, URLs, controlo de versões ou registos.
+
+## Autenticação
+
+Envia o token no cabeçalho HTTP `Authorization` com o esquema Bearer:
+
+```bash
+export WONDERMONEY_API_TOKEN='wm_pat_substitui-pelo-teu-token'
+curl --fail-with-body \
+  -H "Authorization: Bearer $WONDERMONEY_API_TOKEN" \
+  -H 'Accept: application/json' \
+  https://api.wonder.money/v1/account
+```
+
+O exemplo pede as contas; consulta [Contas na referência](/pt/docs/api/reference#accounts). Guarda o token num gestor de segredos ou numa variável de ambiente, em vez de o incorporares na aplicação.
+
+## Limites de pedidos
+
+Quando um pedido excede o limite, a API devolve `429`. Espera o período indicado no cabeçalho `Retry-After` antes de tentares novamente. Evita ciclos de repetição imediata; limita as tentativas.
+
+## Erros
+
+A referência documenta os códigos e esquemas de resposta de cada operação. As falhas de autenticação e de permissão podem devolver `401` ou `403`; verifica se o token é válido e inclui o âmbito indicado para a operação. O token de um observador do agregado familiar pode ler mas não escrever: uma escrita devolve `403` com o código `household_read_only`. `422` indica que o pedido não passou na validação. Para `429`, segue o `Retry-After`. Consulta o esquema de resposta da operação, sem presumires que todos os erros têm o mesmo corpo.
+
+## Paginação
+
+Usa a paginação só nos endpoints que a documentam. Nas respostas paginadas por chave, envia o valor devolvido em `nextCursor` como `cursor` no pedido seguinte; para quando não houver cursor seguinte. O tamanho da página e o suporte de cursor variam por operação: usa os parâmetros e o esquema de resposta correspondentes na [referência](/pt/docs/api/reference).
+
+## Referência da API
+
+Consulta a [referência da API](/pt/docs/api/reference) para veres as operações e os esquemas de pedido e de resposta. As descrições das operações estão atualmente em inglês em todos os idiomas.

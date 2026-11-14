@@ -34,7 +34,10 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
+import { CRYPTO_EXPLORER_ENV, isCryptoExplorerUrl } from './crypto-explorers';
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { parseMarketDataProviders } from './market-data-providers';
+import { isMerchantLogoTemplate } from './merchant-logo-template';
 import { parseTrustProxy, TrustProxyError } from './trust-proxy';
 
 export interface ConfigurationIssue {
@@ -70,6 +73,10 @@ const base64Key = (bytes: number, description: string) => z.string({ error: desc
     return Buffer.from(value, 'base64').length === bytes;
   }, `${description} (must be base64 decoding to exactly ${bytes} bytes; generate with \`openssl rand -base64 ${bytes}\`)`);
 
+/** An explorer base URL: https only, no credentials, query or fragment. */
+const cryptoExplorerUrl = (name: string, example: string) => z.string().trim()
+  .refine(isCryptoExplorerUrl, `${name} must be an https URL without credentials, query or fragment (${example})`)
+  .optional();
 const httpUrl = (description: string) => z.string().trim().pipe(z.url(description))
   .refine((v) => v.startsWith('http://') || v.startsWith('https://'), `${description} (must be http or https)`);
 
@@ -81,6 +88,9 @@ const wholeNumber = (description: string) => z.string().trim()
 
 const fraction = (description: string, max: number) => z.string().trim()
   .refine((v) => /^\d+(?:\.\d+)?$/.test(v) && Number(v) <= max, `${description} (must be a fraction from 0 to ${max}, such as 0.02 for 2 percent)`);
+
+const positiveNumber = (description: string) => z.string().trim()
+  .refine((v) => /^\d+(?:\.\d+)?$/.test(v) && Number.isFinite(Number(v)) && Number(v) > 0, `${description} (must be a finite positive number, such as 6)`);
 
 const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], {
   error: `${description} (must be one of 1/0/true/false/on/off/yes/no)`,
@@ -97,6 +107,8 @@ const runtimeSchema = z.object({
   DEPLOY_ENV: z.string().trim().optional(),
   // Minutes a due job may wait before `GET /v1/health/ready` reports the queue as backed up.
   HEALTH_MAX_JOB_AGE_MINUTES: positiveInt('Readiness maximum job age').optional(),
+  // The most people in one household, owner and pending invites included (`config/household.ts`).
+  HOUSEHOLD_MAX_MEMBERS: positiveInt('Household member cap').optional(),
   INSTANCE_NAME: z.string().trim().optional(),
   MIN_APP_VERSION: z.string().trim().regex(/^\d+\.\d+\.\d+$/u, 'MIN_APP_VERSION must be a semver version such as 2.1.0').optional(),
   NODE_ENV: z.enum(['development', 'production', 'staging', 'test']).default('development'),
@@ -106,6 +118,15 @@ const runtimeSchema = z.object({
   PRIVACY_POLICY_URL: z.string().trim().optional(),
   PUBLIC_DIAGNOSTICS_ENABLED: boolFlag('Public diagnostics flag').optional(),
   SIGNUP_MODE: z.enum(['open', 'invite', 'closed']).optional(),
+  // The largest PDF statement, in bytes and pages, an import reads (`config/statement-import.ts`).
+  // Read by the API (the upload link) and the worker (the read).
+  STATEMENT_IMPORT_MAX_BYTES: positiveInt('PDF statement size limit in bytes').optional(),
+  STATEMENT_IMPORT_MAX_PAGES: positiveInt('PDF statement page limit').optional(),
+  // The local, token-free categorizer (`services/transaction/bayes-categorizer.ts`). On unless
+  // explicitly disabled; it sends nothing to a model, so it also runs for a person who hid AI.
+  TRANSACTION_BAYES_CATEGORIZATION_ENABLED: boolFlag('Local Bayes categorization flag').optional(),
+  TRANSACTION_BAYES_MIN_MARGIN: fraction('Local Bayes minimum posterior margin', 1).optional(),
+  TRANSACTION_BAYES_MIN_POSTERIOR: fraction('Local Bayes minimum posterior', 1).optional(),
   // How far the converted outgoing half of a cross-currency transfer may be from the incoming half
   // (`services/transaction/transfer-matching.service.ts`). Read by the API and the worker.
   TRANSFER_MATCH_FX_TOLERANCE: fraction('Cross-currency transfer matching tolerance', 0.25).optional(),
@@ -134,6 +155,20 @@ const authSchema = z.object({
   BETTER_AUTH_URL: httpUrl('Better Auth base URL').optional(),
   GOOGLE_CLIENT_ID: z.string().trim().optional(),
   GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
+  // Single sign-on through an OpenID Connect provider (`services/auth/oidc.ts`). The issuer,
+  // client id and secret turn it on together; every other OIDC_* key needs them (`oidcIssues`).
+  OIDC_ADMIN_GROUPS: z.string().trim().optional(),
+  OIDC_ALLOW_UNVERIFIED_EMAIL: boolFlag('OIDC unverified-email flag').optional(),
+  OIDC_ALLOWED_GROUPS: z.string().trim().optional(),
+  OIDC_AUTO_SIGNUP: boolFlag('OIDC automatic sign-up flag').optional(),
+  OIDC_CLIENT_ID: z.string().trim().optional(),
+  OIDC_CLIENT_SECRET: z.string().trim().optional(),
+  OIDC_DISPLAY_NAME: z.string().trim().max(60, 'OIDC_DISPLAY_NAME must be at most 60 characters').optional(),
+  OIDC_GROUPS_CLAIM: z.string().trim().optional(),
+  OIDC_ISSUER: z.string().trim().refine(isSecureIssuer, 'OIDC_ISSUER must be an https URL (http only on localhost or 127.0.0.1)').optional(),
+  OIDC_ONLY: boolFlag('OIDC-only sign-in flag').optional(),
+  OIDC_SCOPES: z.string().trim().refine((value) => splitList(value, /\s+/u).includes('openid'), 'OIDC_SCOPES must include openid').optional(),
+  OIDC_TRUST_IDP_MFA: boolFlag('OIDC trust-provider-MFA flag').optional(),
 });
 
 // Third-party integrations are all optional: a self-hosted install boots with Postgres and its own
@@ -150,6 +185,16 @@ const sharedSchema = z.object({
   DB_PORT: z.string().trim().optional(),
   DB_USERNAME: z.string().trim().optional(),
   EMAIL_OPT_OUT_SIGNING_SECRET: nonEmpty('Unsubscribe-link signing secret is required (minted by worker emails, verified by the API)'),
+  // The instance-wide Enable Banking credential (`config/enable-banking-instance.ts`), read by the
+  // API (linking) and the worker (syncing). The two turn it on together; `config/env.ts` reads the
+  // key file at start-up and refuses one that is unreadable or not an RSA private key.
+  ENABLE_BANKING_APP_ID: z.string().trim().optional(),
+  ENABLE_BANKING_PRIVATE_KEY_FILE: z.string().trim().optional(),
+  // Lifts the single-household limit on the instance credential (`instance-credential-policy.ts`).
+  ENABLE_BANKING_PRODUCTION_CONTRACT: boolFlag('Enable Banking production contract flag').optional(),
+  // Mobile push through the Expo push service (`config/push.ts`). Off unless set.
+  EXPO_ACCESS_TOKEN: z.string().trim().optional(),
+  PUSH_ENABLED: boolFlag('Push notifications flag').optional(),
   S3_BUCKET: z.string().trim().optional(),
   S3_ENDPOINT: httpUrl('S3 endpoint').optional(),
   S3_FORCE_PATH_STYLE: boolFlag('S3 path-style flag').optional(),
@@ -157,7 +202,7 @@ const sharedSchema = z.object({
 
   S3_REGION: z.string().trim().optional(),
 
-  // AI: Azure (see services/ai/ai-provider.ts) or any OpenAI-compatible endpoint.
+  // AI: Azure, Anthropic or any OpenAI-compatible endpoint (see services/ai/ai-provider.ts).
   AI_API_KEY: z.string().trim().optional(),
   AI_BASE_URL: httpUrl('AI base URL').optional(),
   AI_MODEL: z.string().trim().optional(),
@@ -166,6 +211,9 @@ const sharedSchema = z.object({
   AI_MODEL_ENRICHMENT: z.string().trim().optional(),
   AI_MODEL_MONTHLY_STORY: z.string().trim().optional(),
   AI_MODEL_OCR: z.string().trim().optional(),
+  AI_MODEL_STATEMENT_IMPORT: z.string().trim().optional(),
+  AI_PROVIDER: z.string().trim().toLowerCase().pipe(z.enum(['anthropic'])).optional(),
+  ANTHROPIC_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_KEY: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_API_VERSION: z.string().trim().optional(),
   AZURE_AI_FOUNDRY_ENDPOINT: httpUrl('Azure AI Foundry endpoint').optional(),
@@ -174,7 +222,18 @@ const sharedSchema = z.object({
   AZURE_OPENAI_DEPLOYMENT: z.string().trim().optional(),
   AZURE_OPENAI_ENDPOINT: httpUrl('Azure OpenAI endpoint').optional(),
   AZURE_OPENAI_OCR_DEPLOYMENT: z.string().trim().optional(),
+  AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT: z.string().trim().optional(),
   EODHD_API_KEY: z.string().trim().optional(),
+  // Crypto wallets (`config/crypto-explorers.ts`): the block explorer each chain reads balances
+  // from. Read by the API (the feature is on) and the worker (the sync). Unset: off, nothing sent.
+  CRYPTO_BTC_EXPLORER_URL: cryptoExplorerUrl(CRYPTO_EXPLORER_ENV.bitcoin, 'mempool.space / Esplora API root, such as https://mempool.example.org/api'),
+  CRYPTO_ETH_EXPLORER_URL: cryptoExplorerUrl(CRYPTO_EXPLORER_ENV.ethereum, 'Blockscout root, such as https://blockscout.example.org'),
+  // The market-data providers to ask, in order (`services/market-data/registry.ts`). Read by the
+  // API and the worker's price jobs; unset means EODHD alone.
+  MARKET_DATA_PROVIDERS: z.string().superRefine((value, ctx) => {
+    const parsed = parseMarketDataProviders(value);
+    if (!parsed.ok) ctx.addIssue({ code: 'custom', message: parsed.error });
+  }).optional(),
 
   // Defaults live in jobs/pgboss.config.ts.
   PGBOSS_MIGRATE: boolFlag('pg-boss migrate flag').optional(),
@@ -206,13 +265,28 @@ const apiSchema = sharedSchema.extend({
   AI_DAILY_LIMIT_ASSISTANT: wholeNumber('Daily assistant messages per household').optional(),
   AI_DAILY_LIMIT_CSV_MAPPING: wholeNumber('Daily AI CSV column mappings per household').optional(),
   AI_DAILY_LIMIT_OCR: wholeNumber('Daily receipt scans per household').optional(),
+  AI_DAILY_LIMIT_STATEMENT_IMPORT: wholeNumber('Daily PDF statement imports per household').optional(),
   AI_REQUIRES_VERIFIED_EMAIL: boolFlag('AI verified-email requirement').optional(),
+  // One-click sign-in to the read-only demo account (`config/demo.ts`). Off unless set.
+  DEMO_SIGN_IN_ENABLED: boolFlag('Demo sign-in flag').optional(),
   INTERNAL_SERVICE_API_KEY: nonEmpty('Internal service key is required'),
+  // Merchant logo lookup (`services/transaction/merchant-logo.ts`): an https URL with `{domain}`,
+  // fetched by the API (never by clients) for a merchant's website domain. Unset: off.
+  MERCHANT_LOGO_URL_TEMPLATE: z.string().trim()
+    .refine(isMerchantLogoTemplate, 'Merchant logo URL template (must be an https URL whose path or query holds {domain}, such as https://logos.example.com/{domain}.png)')
+    .optional(),
   RECAPTCHA_SECRET_KEY: z.string().trim().optional(),
   SPONSOR_URL: httpUrl('Sponsor page URL').optional(),
 });
 
 const workerSchema = sharedSchema.extend({
+  // Minimum hours between unattended bank syncs per connection
+  // (`services/account/account-auto-sync-scheduler.service.ts`). PSD2 lets a bank cap
+  // unattended access at four calls a day per account, so 6 or more keeps one app inside it.
+  BANK_SYNC_MIN_INTERVAL_HOURS: positiveNumber('Minimum unattended bank sync interval').optional(),
+  // Days before a credit-card statement's due date its payment reminder goes out
+  // (`services/account/credit-card-due-reminder.service.ts`).
+  CREDIT_CARD_DUE_REMINDER_DAYS: wholeNumber('Credit card due reminder lead days').optional(),
   ENABLE_PGBOSS_DEMO_DATA_REFRESH: boolFlag('Demo-data refresh flag (worker only)').optional(),
   HETRIX_WORKER_HEARTBEAT_URL: z.string().trim().optional(),
   PGBOSS_QUEUE_DEPTH_MONITOR_ENABLED: boolFlag('Queue depth monitor flag').optional(),
@@ -248,6 +322,30 @@ function bool(value: string | undefined): boolean {
   return value === '1' || value === 'true' || value === 'on' || value === 'yes';
 }
 
+function splitList(value: string, separator: RegExp): string[] {
+  return value.split(separator).map((item) => item.trim()).filter((item) => item !== '');
+}
+
+/** https, or plain http on the machine itself (a provider run beside the API for testing). */
+function isSecureIssuer(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.protocol === 'https:') return true;
+  return url.protocol === 'http:' && ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname);
+}
+
+const OIDC_REQUIRED = ['OIDC_ISSUER', 'OIDC_CLIENT_ID', 'OIDC_CLIENT_SECRET'] as const;
+
+/**
+ * A half-configured OIDC provider fails the boot instead of quietly turning sign-in off: an
+ * operator who set `OIDC_ONLY` or `OIDC_ADMIN_GROUPS` expects single sign-on to be on.
+ */
+export type OidcConfiguration = NonNullable<ReturnType<typeof buildOidc>>;
+
 function buildAuth(parsed: z.infer<typeof authSchema>) {
   return {
     appleClientId: parsed.APPLE_CLIENT_ID ?? null,
@@ -258,6 +356,7 @@ function buildAuth(parsed: z.infer<typeof authSchema>) {
     cookieDomain: parsed.AUTH_COOKIE_DOMAIN ?? null,
     googleClientId: parsed.GOOGLE_CLIENT_ID ?? null,
     googleClientSecret: parsed.GOOGLE_CLIENT_SECRET ?? null,
+    oidc: buildOidc(parsed),
   };
 }
 
@@ -309,6 +408,7 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
     credentialEncryptionKey: parsed.CREDENTIAL_ENCRYPTION_KEY_V1,
     emailOptOutSigningSecret: parsed.EMAIL_OPT_OUT_SIGNING_SECRET,
     eodhdApiKey: parsed.EODHD_API_KEY,
+    marketDataProviders: marketDataProviders(parsed.MARKET_DATA_PROVIDERS),
     resend: {
       apiKey: parsed.RESEND_API_KEY,
     },
@@ -316,6 +416,28 @@ function buildIntegrations(parsed: z.infer<typeof sharedSchema>) {
       accessKeyId: parsed.AWS_ACCESS_KEY_ID,
       secretAccessKey: parsed.AWS_SECRET_ACCESS_KEY,
     },
+  };
+}
+
+function buildOidc(parsed: z.infer<typeof authSchema>) {
+  const { OIDC_CLIENT_ID: clientId, OIDC_CLIENT_SECRET: clientSecret, OIDC_ISSUER: issuer } = parsed;
+  if (!issuer || !clientId || !clientSecret) return null;
+  return {
+    /** Members of any of these groups are instance admins; empty leaves the admin flag alone. */
+    adminGroups: splitList(parsed.OIDC_ADMIN_GROUPS ?? '', /,/u),
+    allowUnverifiedEmail: bool(parsed.OIDC_ALLOW_UNVERIFIED_EMAIL),
+    /** Only members of these groups (or of `adminGroups`) may sign in; empty allows everyone. */
+    allowedGroups: splitList(parsed.OIDC_ALLOWED_GROUPS ?? '', /,/u),
+    autoSignup: bool(parsed.OIDC_AUTO_SIGNUP),
+    clientId,
+    clientSecret,
+    discoveryUrl: `${issuer.replace(/\/+$/u, '')}/.well-known/openid-configuration`,
+    displayName: parsed.OIDC_DISPLAY_NAME ?? 'SSO',
+    groupsClaim: parsed.OIDC_GROUPS_CLAIM ?? 'groups',
+    issuer,
+    only: bool(parsed.OIDC_ONLY),
+    scopes: splitList(parsed.OIDC_SCOPES ?? 'openid email profile', /\s+/u),
+    trustIdpMfa: bool(parsed.OIDC_TRUST_IDP_MFA),
   };
 }
 
@@ -358,6 +480,22 @@ function freeze<T>(value: T): T {
     return Object.freeze(next) as unknown as T;
   }
   return value;
+}
+
+function marketDataProviders(raw: string | undefined) {
+  const parsed = parseMarketDataProviders(raw);
+  // The schema already refused an invalid list.
+  return parsed.ok ? [...parsed.ids] : [];
+}
+
+function oidcIssues(parsed: z.infer<typeof authSchema>): ConfigurationIssue[] {
+  // An absent optional key is not in the parsed object at all.
+  if (!Object.keys(parsed).some((key) => key.startsWith('OIDC_'))) return [];
+  return OIDC_REQUIRED.filter((key) => !parsed[key]).map((key) => ({
+    code: 'missing' as const,
+    message: `${key} is required when any OIDC_* variable is set (OIDC_ISSUER, OIDC_CLIENT_ID and OIDC_CLIENT_SECRET turn single sign-on on together)`,
+    path: key,
+  }));
 }
 
 function parseAppEnvironment(value: string | undefined): 'development' | 'production' | 'staging' | 'test' {
@@ -499,7 +637,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = apiSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
+    const issues = [...requireDbOrThrow(db, role), ...oidcIssues(parsed.data)];
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: ApiConfiguration = {
       auth: buildAuth(parsed.data),
@@ -648,6 +786,8 @@ export function loadAuthConfiguration(source: ConfigurationSource): ReturnType<t
   const cleaned = withoutEmptyValues(source);
   const parsed = authSchema.safeParse(cleaned);
   if (!parsed.success) throw new ConfigurationError('api', parseIssues(parsed.error, cleaned));
+  const issues = oidcIssues(parsed.data);
+  if (issues.length > 0) throw new ConfigurationError('api', issues);
   return freeze(buildAuth(parsed.data));
 }
 

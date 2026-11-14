@@ -23,9 +23,14 @@ export type SignInScreenProps = {
   forgotPasswordLink?: ReactNode
   /** Social sign-in, other links and the server switcher, under the submit button. */
   footer?: ReactNode
+  /**
+   * False when the server signs in through its identity provider only (`OIDC_ONLY`): the email
+   * and password form is left out and the footer's single sign-on button is the way in.
+   */
+  passwordSignIn?: boolean
 }
 
-export function SignInScreen({ onSubmit, notice, noticeTone = 'destructive', title, lead, forgotPasswordLink, footer }: SignInScreenProps) {
+export function SignInScreen({ onSubmit, notice, noticeTone = 'destructive', title, lead, forgotPasswordLink, footer, passwordSignIn = true }: SignInScreenProps) {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -64,55 +69,59 @@ export function SignInScreen({ onSubmit, notice, noticeTone = 'destructive', tit
       lead={lead}
       title={title ?? t('auth.title')}
     >
-      <AuthField error={errors.email} label={t('auth.email')}>
-        <AuthTextInput
-          accessibilityLabel={t('auth.email')}
-          autoCapitalize="none"
-          autoComplete="email"
-          invalid={Boolean(errors.email)}
-          keyboardType="email-address"
-          onChangeText={(value) => {
-            emailRef.current = value
-            setEmail(value)
-          }}
-          placeholder={t('auth.email')}
-          returnKeyType="next"
-          value={email}
-        />
-      </AuthField>
+      {passwordSignIn ? (
+        <>
+          <AuthField error={errors.email} label={t('auth.email')}>
+            <AuthTextInput
+              accessibilityLabel={t('auth.email')}
+              autoCapitalize="none"
+              autoComplete="email"
+              invalid={Boolean(errors.email)}
+              keyboardType="email-address"
+              onChangeText={(value) => {
+                emailRef.current = value
+                setEmail(value)
+              }}
+              placeholder={t('auth.email')}
+              returnKeyType="next"
+              value={email}
+            />
+          </AuthField>
 
-      <AuthField error={errors.password} label={t('auth.password')}>
-        <AuthTextInput
-          accessibilityLabel={t('auth.password')}
-          autoCapitalize="none"
-          autoComplete="password"
-          invalid={Boolean(errors.password)}
-          onChangeText={(value) => {
-            passwordRef.current = value
-            setPassword(value)
-          }}
-          onSubmitEditing={submit}
-          placeholder={t('auth.password')}
-          returnKeyType="done"
-          secureTextEntry
-          value={password}
-        />
-      </AuthField>
+          <AuthField error={errors.password} label={t('auth.password')}>
+            <AuthTextInput
+              accessibilityLabel={t('auth.password')}
+              autoCapitalize="none"
+              autoComplete="password"
+              invalid={Boolean(errors.password)}
+              onChangeText={(value) => {
+                passwordRef.current = value
+                setPassword(value)
+              }}
+              onSubmitEditing={submit}
+              placeholder={t('auth.password')}
+              returnKeyType="done"
+              secureTextEntry
+              value={password}
+            />
+          </AuthField>
 
-      {forgotPasswordLink ? <View style={localStyles.forgot}>{forgotPasswordLink}</View> : null}
+          {forgotPasswordLink ? <View style={localStyles.forgot}>{forgotPasswordLink}</View> : null}
 
-      {errors.submit ? (
-        <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
-          {errors.submit}
-        </Text>
+          {errors.submit ? (
+            <Text accessible accessibilityLabel={errors.submit} accessibilityRole="alert" tone="destructive" variant="meta">
+              {errors.submit}
+            </Text>
+          ) : null}
+
+          <Button
+            block
+            disabled={submitting}
+            label={submitting ? t('auth.submitting') : t('auth.submit')}
+            onPress={submit}
+          />
+        </>
       ) : null}
-
-      <Button
-        block
-        disabled={submitting}
-        label={submitting ? t('auth.submitting') : t('auth.submit')}
-        onPress={submit}
-      />
     </AuthLayout>
   )
 }

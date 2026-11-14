@@ -138,6 +138,7 @@ export function TransactionSplitEditor({
                   onChange={(event) =>
                     update(index, { amount: event.target.value })
                   }
+                  onEvaluated={(value) => update(index, { amount: value })}
                   onBlur={() => settlePercentage(index)}
                 />
               </div>

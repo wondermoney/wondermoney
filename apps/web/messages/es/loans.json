@@ -29,6 +29,8 @@
       "interestRate": "Tipo de interés",
       "installment": "Cuota mensual",
       "termMonths": "Plazo (meses)",
+      "amortizationMethod": "Método de amortización",
+      "amortizationMethodHint": "El francés mantiene la cuota constante; el de capital constante paga el mismo capital cada mes, así que la cuota baja.",
       "startDate": "Fecha de inicio",
       "dueDate": "Fecha de vencimiento",
       "linkedAccount": "Cuenta vinculada",
@@ -37,7 +39,12 @@
       "interestRatePlaceholder": "0,00",
       "termMonthsPlaceholder": "Ej.: 360",
       "startDatePlaceholder": "Elige la fecha de inicio",
-      "notesPlaceholder": "Algo que convenga recordar sobre este préstamo"
+      "notesPlaceholder": "Algo que convenga recordar sobre este préstamo",
+      "rateType": "Tipo de interés",
+      "rateTypeVariableHelp": "Introduce el tipo con el que empezó el préstamo. Añade cada cambio posterior en el historial de tasas, en la página del préstamo.",
+      "securedAsset": "Garantizado con",
+      "securedAssetNone": "Ninguno",
+      "securedAssetHint": "Opcional. El bien que garantiza este préstamo, como la casa comprada con una hipoteca. Su página muestra entonces el capital propio: lo que vale menos lo que aún se debe."
     },
     "types": {
       "personal": "Personal",
@@ -45,6 +52,10 @@
       "auto": "Automóvil",
       "student": "Estudiantil",
       "other": "Otro"
+    },
+    "methods": {
+      "french": "Francés (cuota constante)",
+      "constantPrincipal": "Capital constante (SAC)"
     },
     "statuses": {
       "active": "Activo",
@@ -144,13 +155,110 @@
         "split": "<principal></principal> de capital, <interest></interest> de intereses, <fees></fees> de comisiones"
       },
       "amortization": {
-        "title": "Vista previa de amortización",
-        "unavailable": "La vista previa de amortización no está disponible con la respuesta actual de la API."
+        "title": "Plan de amortización",
+        "subtitle": "Cada pago dividido entre intereses y capital, y el saldo que queda después.",
+        "unavailable": "El plan de amortización no está disponible en este momento.",
+        "missingInputs": "Añade el tipo de interés y el plazo para ver el plan del contrato.",
+        "empty": "No hay filas de amortización que mostrar.",
+        "totalInterest": "Intereses totales",
+        "totalPaid": "Total pagado",
+        "principal": "Capital",
+        "interest": "Interés",
+        "balance": "Saldo",
+        "paid": "Pagado",
+        "scheduled": "Previsto",
+        "rowLabel": "Pago {number}",
+        "split": "<principal></principal> de capital, <interest></interest> de interés",
+        "columns": {
+          "number": "#",
+          "date": "Fecha",
+          "payment": "Pago",
+          "principal": "Capital",
+          "interest": "Interés",
+          "balance": "Saldo",
+          "status": "Estado"
+        }
+      },
+      "payoff": {
+        "title": "Proyección de liquidación",
+        "subtitle": "Cuándo queda liquidado el préstamo con la cuota contractual, y cuánto antes te lleva un pago mensual extra.",
+        "extraLabel": "Pago mensual extra",
+        "extraPlaceholder": "0",
+        "extraHelper": "Se suma a la cuota contractual. Déjalo vacío para ver solo la liquidación contractual.",
+        "baseline": "Cuota contractual",
+        "withExtra": "Con extra",
+        "payoffDate": "Liquidación prevista",
+        "monthsSaved": "Meses ahorrados",
+        "interestSaved": "Intereses ahorrados",
+        "monthCount": "{count, plural, one {# mes} other {# meses}}",
+        "noSavings": "—",
+        "never": "No se liquida",
+        "neverBody": "Con este pago el saldo nunca llega a cero: el pago no cubre los intereses mensuales. Sube la cuota o añade un extra.",
+        "missingInputs": "Añade el tipo de interés y el plazo para proyectar la liquidación.",
+        "unavailable": "La proyección de liquidación no está disponible en este momento.",
+        "empty": "No hay proyección que mostrar."
       },
       "adjustment": {
-        "unavailableTitle": "Ajuste de saldo no disponible",
-        "unavailableDescription": "Esta acción aún no está conectada a una API.",
-        "unavailableBody": "El formulario de ajuste permanece oculto hasta que la API esté disponible."
+        "title": "Ajustar saldo",
+        "editTitle": "Editar ajuste",
+        "description": "Registra el saldo que indica tu prestamista u otro cambio del préstamo. El saldo, el calendario y la proyección de pago lo siguen desde su fecha.",
+        "type": "Tipo de ajuste",
+        "date": "Fecha de efecto",
+        "amount": "Importe",
+        "balanceAmount": "Saldo en esta fecha",
+        "reason": "Motivo (opcional)",
+        "history": "Ajustes de saldo",
+        "loadError": "No se pudieron cargar los ajustes.",
+        "saveError": "No se pudo guardar este cambio.",
+        "empty": "Sin ajustes de saldo",
+        "emptyBody": "Cuando el saldo de tu prestamista no coincida con el que ves aquí, registra su cifra. Sustituye el saldo calculado desde su fecha, y los pagos posteriores lo reducen a partir de ahí.",
+        "add": "Añadir ajuste",
+        "save": "Guardar ajuste",
+        "edit": "Editar ajuste",
+        "delete": "Eliminar ajuste",
+        "deleteConfirm": "¿Eliminar este ajuste? El saldo se vuelve a calcular sin él.",
+        "invalidAmount": "Introduce un importe válido.",
+        "amountPositive": "Introduce un importe mayor que cero.",
+        "invalidDate": "Elige la fecha en que entra en vigor.",
+        "setTo": "Fijado en <amount></amount>",
+        "increases": "Aumenta el saldo en",
+        "decreases": "Reduce el saldo en",
+        "types": {
+          "BALANCE_CORRECTION": "Corregir saldo",
+          "FEE": "Comisión",
+          "CAPITALIZED_INTEREST": "Intereses capitalizados",
+          "PRINCIPAL_INCREASE": "Aumento de capital",
+          "PRINCIPAL_DECREASE": "Reducción de capital",
+          "WRITE_OFF": "Condonación"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Fija el saldo en la cifra de tu prestamista en esta fecha. Se permite cero.",
+          "FEE": "Suma al saldo una comisión cargada al préstamo.",
+          "CAPITALIZED_INTEREST": "Suma al saldo intereses no pagados.",
+          "PRINCIPAL_INCREASE": "Suma al saldo dinero prestado.",
+          "PRINCIPAL_DECREASE": "Reduce el saldo fuera de un pago vinculado.",
+          "WRITE_OFF": "Reduce el saldo en un importe que el prestamista condonó."
+        }
+      },
+      "rateHistory": {
+        "title": "Historial de tasas",
+        "description": "Cada tasa se aplica desde su fecha hasta la siguiente. Las tasas no se obtienen ni se predicen: añade cada cambio cuando tu prestamista lo anuncie.",
+        "effectiveDate": "Fecha de efecto",
+        "apr": "Tasa de interés anual (TAE)",
+        "loadError": "No se pudo cargar el historial de tasas.",
+        "saveError": "No se pudo guardar esta tasa.",
+        "empty": "Aún no hay cambios de tasa.",
+        "emptyWithRate": "Aún no hay cambios de tasa: se aplica {rate} durante todo el plazo.",
+        "from": "Desde el {date}: <rate></rate>",
+        "add": "Añadir cambio de tasa",
+        "save": "Guardar cambio de tasa",
+        "cancel": "Cancelar",
+        "edit": "Editar cambio de tasa",
+        "delete": "Eliminar cambio de tasa",
+        "deleteConfirm": "¿Eliminar este cambio de tasa?",
+        "invalidRate": "Introduce una tasa válida.",
+        "maxRate": "La tasa debe estar entre 0 y 100%.",
+        "invalidDate": "Elige la fecha en que entra en vigor."
       }
     },
     "table": {
@@ -172,6 +280,11 @@
       "sampleProvider": "Banco",
       "sampleStatus": "Activo",
       "sampleTerm": "28a 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fijo",
+      "VARIABLE": "Variable",
+      "UNKNOWN": "No lo sé"
     }
   }
 }

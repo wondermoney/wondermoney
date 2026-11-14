@@ -4,6 +4,7 @@ import type { QBFilterQuery } from '@mikro-orm/postgresql';
 import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { CategorizationConfidence, Transaction } from '@entity/Transaction';
+import type { MemberFilter } from '@service/household/member-attribution';
 import type { ReportCompleteness } from '@service/reports/report-currency';
 
 import { type TransactionScope, transactionScopeWhere, type TransactionStatusName } from './transaction-scope';
@@ -54,6 +55,8 @@ export interface TransactionFilterInput {
   includeHidden?: boolean;
   /** Only rows stored in this member currency, by code (a report's currency filter). */
   memberCurrencyCode?: string;
+  /** Only rows attributed to these members, or to Shared (`member-attribution.ts`). */
+  members?: MemberFilter;
   /** Merchant keys; a transaction matches when it has one of them. */
   merchantKeys?: number[];
   /** Only these statuses; absent means every status but EXPIRED, legacy rows with none included. */
@@ -104,6 +107,7 @@ export function listScope(filters: TransactionFilterInput, viewer: Pick<Transact
     includeNonSpending: filters.excludeNonSpending !== true,
     includeTransfers: filters.excludeTransfers !== true,
     memberCurrencyCode: filters.memberCurrencyCode,
+    members: filters.members,
     merchantKeys: filters.merchantKeys,
     statuses: filters.statuses && filters.statuses.length > 0 ? filters.statuses : 'not-expired',
     tenantKey: viewer.tenantKey,
@@ -114,7 +118,7 @@ export function listScope(filters: TransactionFilterInput, viewer: Pick<Transact
 /** Whether the request asked for a report's scope rather than the table's default one. */
 export function hasReportScope(filters: TransactionFilterInput): boolean {
   return (filters.statuses?.length ?? 0) > 0 || filters.excludeTransfers === true || filters.excludeNonSpending === true || filters.direction !== undefined
-    || filters.memberCurrencyCode !== undefined || (filters.merchantKeys?.length ?? 0) > 0;
+    || filters.memberCurrencyCode !== undefined || (filters.merchantKeys?.length ?? 0) > 0 || filters.members !== undefined;
 }
 
 /**

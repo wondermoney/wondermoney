@@ -10,16 +10,27 @@ import service from '../account-auto-sync-scheduler.service';
 type EnqueueBg = NonNullable<EnqueueInput['backgroundOperationService']>;
 type EnqueueBoss = NonNullable<EnqueueInput['boss']>;
 type EnqueueInput = NonNullable<Parameters<typeof service.enqueueDueAccountSyncs>[0]>;
+
+const owner = { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' };
+/** A `BankConnection` row as the scheduler reads it. */
+const connection = (bankConnectionKey: number, overrides: Record<string, unknown> = {}) => ({
+  accessValidUntil: new Date('2026-12-31T00:00:00Z'),
+  appuserKey: owner,
+  bankConnectionKey,
+  externalId: `req-${bankConnectionKey}`,
+  provider: 'enable_banking',
+  state: `state-${bankConnectionKey}`,
+  status: 'linked',
+  ...overrides,
+});
+
 // Defaulting the mock to `[]` gives any `em.find` call a test does not arrange an empty result.
 beforeEach(() => { em.find.mockReset().mockResolvedValue([]); sendMock.mockReset(); incidentService.allocateIncident.mockReset().mockResolvedValue({ incidentId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' }); });
 const backgroundOperationService = () => ({ attachQueueJob: vi.fn().mockResolvedValue(true), createQueuedOperation: vi.fn().mockResolvedValue({}), markNeedsAction: vi.fn().mockResolvedValue(true), resetRetryableQueueing: vi.fn().mockResolvedValue(true) });
+
 describe('account auto sync scheduler service', () => {
-  it('queries accounts first with stale/open filters and dedupes connections', async () => {
-    em.find.mockResolvedValueOnce([
-      { accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null },
-      { accountKey: 2, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null },
-      { accountKey: 3, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 11, sessionId: 'req-11', state: 'state-11' }, refreshedAt: null },
-    ]);
+  it('queries generic connections and enqueues one job per connection', async () => {
+    em.find.mockResolvedValueOnce([connection(10), connection(11)]);
     sendMock.mockResolvedValueOnce('job-1').mockResolvedValueOnce('job-2');
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, boss: { send: vi.fn() } as unknown as EnqueueBoss, now: new Date('2026-01-01T00:00:00Z'), staleHours: 20 });
     expect(em.find).toHaveBeenCalledTimes(1);
@@ -28,26 +39,13 @@ describe('account auto sync scheduler service', () => {
     expect(sendMock.mock.calls[0]?.[1]).toMatchObject({ singletonKey: 'account.auto-sync.connection:10' });
   });
 
-  it('ignores expired connections', async () => {
-    em.find.mockResolvedValueOnce([
-      { accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2025-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null },
-      { accountKey: 2, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 11, sessionId: 'req-11', state: 'state-11' }, refreshedAt: null },
-    ]);
-    sendMock.mockResolvedValueOnce('job-1');
-
-    const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, now: new Date('2026-01-01T00:00:00Z') });
-
-    expect(result.total).toBe(2);
-    expect(em.find).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enableBankingConnectionKey: expect.objectContaining({ accessValidUntil: { $gt: expect.any(Date) } }) }), expect.anything());
-  });
-
-  it('asks only for linked connections that are not waiting out a rate limit', async () => {
+  it('asks only for linked connections with a future consent and no pending deferral', async () => {
     const now = new Date('2026-01-01T00:00:00Z');
     await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, now });
     const where = em.find.mock.calls[0]?.[1] as Record<string, unknown>;
-    // A connection whose consent ended is EXPIRED, so the LINKED filter drops it.
-    expect(where['enableBankingConnectionKey']).toMatchObject({ status: 'linked' });
-    expect(where['$and']).toContainEqual({ $or: [{ enableBankingConnectionKey: { nextEligibleSyncAt: null } }, { enableBankingConnectionKey: { nextEligibleSyncAt: { $lte: now } } }] });
+    expect(where).toMatchObject({ accessValidUntil: { $gt: now }, status: 'linked' });
+    expect(where['$and']).toContainEqual({ $or: [{ nextEligibleSyncAt: null }, { nextEligibleSyncAt: { $lte: now } }] });
+    expect(where['$and']).toContainEqual({ $or: [{ lastSyncAttemptAt: null }, { lastSyncAttemptAt: { $lte: expect.any(Date) } }] });
   });
 
   it('creates retryable queued operations and attaches queue jobs before returning', async () => {
@@ -56,16 +54,17 @@ describe('account auto sync scheduler service', () => {
       createQueuedOperation: vi.fn().mockResolvedValue({ correlationId: 'created-operation' }),
       markNeedsAction: vi.fn(),
     };
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     sendMock.mockResolvedValueOnce('job-1');
 
     await expect(service.enqueueDueAccountSyncs({ backgroundOperationService: bg as unknown as EnqueueBg, now: new Date('2026-01-01T00:00:00Z') })).resolves.toMatchObject({ enqueued: 1, failed: 0 });
 
-    expect(bg.createQueuedOperation).toHaveBeenCalledWith(expect.objectContaining({ appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, correlationId: 'account.auto-sync.requisition:1767225600000:10', operationType: 'account.auto-sync.requisition', resourceId: 'enable-banking-connection:10', retryable: true }), { transaction: 'tx' });
+    expect(bg.createQueuedOperation).toHaveBeenCalledWith(expect.objectContaining({ appuserKey: owner, correlationId: 'account.auto-sync.requisition:1767225600000:10', operationType: 'account.auto-sync.requisition', resourceId: 'bank-connection:10', retryable: true }), { transaction: 'tx' });
     expect(bg.attachQueueJob).toHaveBeenCalledWith('account.auto-sync.requisition:1767225600000:10', 'job-1');
   });
+
   it('continues after send failures and counts null as failure', async () => {
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     sendMock.mockResolvedValueOnce(null);
     const bg = backgroundOperationService();
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: bg as unknown as EnqueueBg, boss: { send: vi.fn() } as unknown as EnqueueBoss });
@@ -74,7 +73,7 @@ describe('account auto sync scheduler service', () => {
   });
 
   it('keeps a crash-after-send attach failure queued with no job id', async () => {
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     const bg = backgroundOperationService();
     bg.attachQueueJob.mockResolvedValueOnce(false);
     sendMock.mockResolvedValueOnce('original-job');
@@ -84,10 +83,7 @@ describe('account auto sync scheduler service', () => {
   });
 
   it('leaves duplicate singleton null queued and claimable by the eventual original job', async () => {
-    const account = { accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null };
-    // One `em.find` per `enqueueDueAccountSyncs` call, so the mocked-once queue supplies the
-    // same account to each of the two runs below.
-    em.find.mockResolvedValueOnce([account]).mockResolvedValueOnce([account]);
+    em.find.mockResolvedValueOnce([connection(10)]).mockResolvedValueOnce([connection(10)]);
     const state = { queueJobId: null as null | string, retryable: true, status: 'queued' };
     const bg = { ...backgroundOperationService(), attachQueueJob: vi.fn(async (_correlationId: string, jobId: string) => { state.queueJobId = jobId; return true; }), findByCorrelation: vi.fn().mockImplementation(async () => state) };
     sendMock.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
@@ -100,12 +96,8 @@ describe('account auto sync scheduler service', () => {
     await expect(claimJobStart('account.auto-sync.requisition:duplicate-run:10', 'original-job')).resolves.toBe(true);
   });
 
-  it('limits enqueues per run and reports rate-limited requisitions as skipped', async () => {
-    em.find.mockResolvedValueOnce([
-      { accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null },
-      { accountKey: 2, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 11, sessionId: 'req-11', state: 'state-11' }, refreshedAt: null },
-      { accountKey: 3, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 12, sessionId: 'req-12', state: 'state-12' }, refreshedAt: null },
-    ]);
+  it('limits enqueues per run and reports rate-limited connections as skipped', async () => {
+    em.find.mockResolvedValueOnce([connection(10), connection(11), connection(12)]);
     sendMock.mockResolvedValueOnce('job-1').mockResolvedValueOnce('job-2');
 
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, maxEnqueued: 2, now: new Date('2026-01-01T00:00:00Z') });
@@ -116,10 +108,7 @@ describe('account auto sync scheduler service', () => {
 
   it('uses ACCOUNT_AUTO_SYNC_MAX_ENQUEUED when maxEnqueued is not provided', async () => {
     vi.stubEnv('ACCOUNT_AUTO_SYNC_MAX_ENQUEUED', '1');
-    em.find.mockResolvedValueOnce([
-      { accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null },
-      { accountKey: 2, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 11, sessionId: 'req-11', state: 'state-11' }, refreshedAt: null },
-    ]);
+    em.find.mockResolvedValueOnce([connection(10), connection(11)]);
     sendMock.mockResolvedValueOnce('job-1');
 
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg });
@@ -128,9 +117,9 @@ describe('account auto sync scheduler service', () => {
     vi.unstubAllEnvs();
   });
 
-  it('reuses a previously enqueued requisition operation on a scan retry', async () => {
+  it('reuses a previously enqueued connection operation on a scan retry', async () => {
     const bg = { ...backgroundOperationService(), findByCorrelation: vi.fn().mockResolvedValue({ queueJobId: 'existing-job', status: 'queued' }) };
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: bg, now: new Date('2026-01-01T00:00:00Z'), scheduleRunId: 'stable-run' });
     expect(result).toMatchObject({ enqueued: 1, failed: 0 });
     expect(bg.createQueuedOperation).not.toHaveBeenCalled();
@@ -140,7 +129,7 @@ describe('account auto sync scheduler service', () => {
   it('allocates incident and operation in one transaction and does not send after rollback', async () => {
     const bg = backgroundOperationService();
     bg.createQueuedOperation.mockRejectedValueOnce(new Error('operation write failed'));
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: bg, now: new Date('2026-01-01T00:00:00Z'), scheduleRunId: 'rollback-run' });
     expect(result.failed).toBe(1);
     expect(incidentService.allocateIncident.mock.calls[0]?.[1]).toBe(bg.createQueuedOperation.mock.calls[0]?.[1]);
@@ -149,7 +138,7 @@ describe('account auto sync scheduler service', () => {
 
   it.each(['queued', 'needs_action'])('requeues a retryable %s operation with no job on scan rerun', async (status) => {
     const bg = { ...backgroundOperationService(), findByCorrelation: vi.fn().mockResolvedValue({ queueJobId: null, retryable: true, status }) };
-    em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: { accessValidUntil: new Date('2026-12-31T00:00:00Z'), appuserKey: { appuserKey: 7, externalUserId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }, enableBankingConnectionKey: 10, sessionId: 'req-10', state: 'state-10' }, refreshedAt: null }]);
+    em.find.mockResolvedValueOnce([connection(10)]);
     sendMock.mockResolvedValueOnce('replacement-job');
     const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: bg, scheduleRunId: 'retry-run' });
     expect(result).toMatchObject({ enqueued: 1, failed: 0 });
@@ -169,41 +158,22 @@ describe('account auto sync scheduler service', () => {
     vi.unstubAllEnvs();
   });
 
-  describe('Enable Banking connections', () => {
-    it('enqueues a due Enable Banking connection with a real, future accessValidUntil', async () => {
-      const connection = { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, enableBankingConnectionKey: 20, sessionId: 'session-20', state: 'state-20' };
-      em.find.mockResolvedValueOnce([{ accountKey: 1, enableBankingConnectionKey: connection, refreshedAt: null }]);
-      sendMock.mockResolvedValueOnce('job-eb-1');
+  it('refuses to scan with an invalid BANK_SYNC_MIN_INTERVAL_HOURS rather than silently using the default', async () => {
+    vi.stubEnv('BANK_SYNC_MIN_INTERVAL_HOURS', 'six');
+    await expect(service.enqueueDueAccountSyncs()).rejects.toThrow(/BANK_SYNC_MIN_INTERVAL_HOURS/);
+    vi.unstubAllEnvs();
+  });
 
-      const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, boss: { send: vi.fn() } as unknown as EnqueueBoss, now: new Date('2026-01-01T00:00:00Z') });
+  it('enqueues a due connection with a real, future accessValidUntil', async () => {
+    em.find.mockResolvedValueOnce([connection(20, { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, externalId: 'session-20' })]);
+    sendMock.mockResolvedValueOnce('job-eb-1');
 
-      expect(em.find).toHaveBeenCalledTimes(1);
-      expect(em.find.mock.calls[0]?.[1]).toMatchObject({ enableBankingConnectionKey: expect.objectContaining({ accessValidUntil: { $gt: expect.any(Date) }, status: 'linked' }) });
-      expect(result.enqueued).toBe(1);
-      expect(sendMock.mock.calls[0]?.[0]).toMatchObject({ connectionId: 'session-20', enableBankingConnectionKey: '20', provider: 'enable_banking' });
-      expect(sendMock.mock.calls[0]?.[1]).toMatchObject({ singletonKey: 'account.auto-sync.connection:20' });
-    });
+    const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, boss: { send: vi.fn() } as unknown as EnqueueBoss, now: new Date('2026-01-01T00:00:00Z') });
 
-    it('queries for expired-consent exclusion via accessValidUntil rather than a guessed window', async () => {
-      const active = { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, enableBankingConnectionKey: 21, sessionId: 'session-21', state: 'state-21' };
-      const expired = { appuserKey: { appuserKey: 9, externalUserId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd' }, enableBankingConnectionKey: 22, sessionId: 'session-22', state: 'state-22' };
-      em.find.mockResolvedValueOnce([
-        { accountKey: 1, enableBankingConnectionKey: active, refreshedAt: null },
-        { accountKey: 2, enableBankingConnectionKey: expired, refreshedAt: null },
-      ]);
-      sendMock.mockResolvedValueOnce('job-1').mockResolvedValueOnce('job-2');
-
-      const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService() as unknown as EnqueueBg, now: new Date('2026-01-01T00:00:00Z') });
-
-      expect(result.total).toBe(2);
-      // Mirrors the "ignores expired connections" test above: the actual
-      // exclusion of an expired connection happens at the database level (`$gt: now` in the real
-      // query), which a mocked `em.find` can't itself enforce — so this asserts the query
-      // criteria that makes the database do it, reading the connection's own real
-      // `accessValidUntil` rather than any hardcoded/guessed window.
-      expect(em.find).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enableBankingConnectionKey: expect.objectContaining({ accessValidUntil: { $gt: expect.any(Date) } }) }), expect.anything());
-    });
-
-
+    expect(em.find).toHaveBeenCalledTimes(1);
+    expect(em.find.mock.calls[0]?.[1]).toMatchObject({ accessValidUntil: { $gt: expect.any(Date) }, status: 'linked' });
+    expect(result.enqueued).toBe(1);
+    expect(sendMock.mock.calls[0]?.[0]).toMatchObject({ bankConnectionKey: '20', connectionId: 'session-20', provider: 'enable_banking' });
+    expect(sendMock.mock.calls[0]?.[1]).toMatchObject({ singletonKey: 'account.auto-sync.connection:20' });
   });
 });

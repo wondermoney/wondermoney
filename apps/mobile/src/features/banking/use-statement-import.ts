@@ -14,7 +14,7 @@ import {
 } from './statement-import-contract'
 import { uploadStatementImportFile } from './statement-import-upload'
 
-export type StatementImportFailure = 'demo' | 'access' | 'mfa' | 'cancelled' | 'network' | 'upload-failed' | 'processing-failed' | 'general'
+export type StatementImportFailure = 'demo' | 'read-only' | 'account-read-only' | 'access' | 'mfa' | 'cancelled' | 'network' | 'upload-failed' | 'processing-failed' | 'general'
 
 export type StatementImportPhase =
   | { phase: 'idle' }
@@ -32,6 +32,8 @@ const SUCCESS_STATUSES: ReadonlySet<string> = new Set(['succeeded', 'partial'])
 function classifyFailure(error: unknown): StatementImportFailure {
   if (!(error instanceof ApiError)) return 'general'
   if (error.code === 'demo-forbidden') return 'demo'
+  if (error.code === 'household-read-only') return 'read-only'
+  if (error.code === 'account-read-only') return 'account-read-only'
   if (error.code === 'mfa-required') return 'mfa'
   if (error.code === 'auth-session' || (error.code === 'http' && (error.status === 401 || error.status === 403))) return 'access'
   if (error.code === 'cancelled') return isPostDispatchCancellation(error) ? 'general' : 'cancelled'

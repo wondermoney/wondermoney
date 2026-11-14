@@ -1,0 +1,67 @@
+{{- if .Values.ingress.enabled }}
+{{- $api := include "wondermoney.componentName" (dict "root" . "component" "api") }}
+{{- $web := include "wondermoney.componentName" (dict "root" . "component" "web") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "wondermoney.fullname" . }}
+  labels:
+    {{- include "wondermoney.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.apiHost }}
+    # Two hostnames: one for the web app, one for the API.
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $web }}
+                port:
+                  name: http
+    - host: {{ .Values.ingress.apiHost | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $api }}
+                port:
+                  name: http
+    {{- else }}
+    # One hostname: /v1 and /api/auth to the API, everything else to the web app.
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          {{- range $path := list "/v1" "/api/auth" }}
+          - path: {{ $path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $api }}
+                port:
+                  name: http
+          {{- end }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $web }}
+                port:
+                  name: http
+    {{- end }}
+{{- end }}

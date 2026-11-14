@@ -42,6 +42,11 @@ const streamConfig = {
     descriptionKey: "bankSyncAlerts.description",
     detailKey: "bankSyncAlerts.detail",
   },
+  creditCardDueReminders: {
+    titleKey: "creditCardDueReminders.title",
+    descriptionKey: "creditCardDueReminders.description",
+    detailKey: "creditCardDueReminders.detail",
+  },
 } as const;
 
 const NOTIFICATION_STREAMS = [
@@ -49,6 +54,7 @@ const NOTIFICATION_STREAMS = [
   "weeklyInsights",
   "accountRecovery",
   "bankSyncAlerts",
+  "creditCardDueReminders",
 ] as const satisfies readonly NotificationStream[];
 
 type MutationTarget = NotificationStream | "marketingOptOut" | null;
@@ -61,6 +67,8 @@ function getMutationTarget(
   if (input.weeklyInsightsEnabled !== undefined) return "weeklyInsights";
   if (input.accountRecoveryEnabled !== undefined) return "accountRecovery";
   if (input.bankSyncAlertsEnabled !== undefined) return "bankSyncAlerts";
+  if (input.creditCardDueRemindersEnabled !== undefined)
+    return "creditCardDueReminders";
   if (input.marketingOptOut !== undefined) return "marketingOptOut";
   return null;
 }
@@ -148,11 +156,15 @@ export default function Notifications() {
               />
 
               <div className="border-border bg-card rounded-lg border px-5">
-                {NOTIFICATION_STREAMS.map((stream, index) => (
+                {NOTIFICATION_STREAMS.flatMap((stream) => {
+                  // A category an older API does not return gets no row.
+                  const preference = preferencesQuery.data[stream];
+                  return preference ? [{ preference, stream }] : [];
+                }).map(({ preference, stream }, index) => (
                   <NotificationPreferenceControl
                     key={stream}
                     stream={stream}
-                    preference={preferencesQuery.data[stream]}
+                    preference={preference}
                     isMarketingOptedOut={preferencesQuery.data.marketingOptOut}
                     isFirst={index === 0}
                     mutationStream={mutationTarget}
@@ -166,7 +178,7 @@ export default function Notifications() {
                     onChange={(nextEnabled) =>
                       handleStreamChange(
                         stream,
-                        preferencesQuery.data[stream],
+                        preference,
                         preferencesQuery.data.marketingOptOut,
                         nextEnabled,
                       )

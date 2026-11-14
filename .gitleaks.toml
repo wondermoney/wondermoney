@@ -32,3 +32,18 @@ regexes = ['''^phc_KlDfjBgreGCfTKJnwwP5W9I2PEGJsboIKFoedyTHGg4$''']
 description = "Translation keys in the marketing site's landing pages"
 targetRules = ["generic-api-key"]
 regexes = ['''^lp\.[a-zA-Z]+\.[a-zA-Z0-9]+$''']
+
+# Bitwarden's passkey authenticator model id (AAGUID), a public identifier from the passkey
+# AAGUID registry. Web maps it to a display name; the rule reads the "1Password" line above it
+# as a password key name.
+[[allowlists]]
+description = "Bitwarden's public passkey AAGUID in web's authenticator names"
+targetRules = ["generic-api-key"]
+regexes = ['''^d548826e-79b4-db40-a3d8-11116f7e8349$''']
+
+# USDC's ERC-20 contract on Ethereum mainnet, a public address. Crypto wallet tests store it as a
+# token's `tokenRef`, and the rule reads "token" as a secret's key name.
+[[allowlists]]
+description = "USDC's public Ethereum contract address in crypto wallet tests"
+targetRules = ["generic-api-key"]
+regexes = ['''^0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48$''']

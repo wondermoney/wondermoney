@@ -1,15 +1,17 @@
 ---
 title: Ligar a primeira conta bancária
-description: Regista a tua própria aplicação gratuita na Enable Banking e depois liga uma conta bancária real à WonderMoney.
+description: Regista a tua própria aplicação gratuita na Enable Banking e depois liga uma conta bancária real ao WonderMoney.
 ---
 
-A WonderMoney deixou de ter um serviço de ligação bancária próprio e partilhado por todos os utilizadores — manter esse modelo de forma gratuita tornou-se insustentável. Em vez disso, as ligações bancárias passam a usar a Enable Banking num modelo "traz a tua própria chave" (BYOK): registas a tua própria aplicação gratuita na Enable Banking, e os servidores da WonderMoney usam as credenciais dessa aplicação — nunca uma credencial partilhada — para ligar e ler os teus dados bancários. Assim as ligações bancárias mantêm-se gratuitas, tanto para ti como para a WonderMoney.
+O WonderMoney deixou de ter um serviço de ligação bancária próprio e partilhado por todos os utilizadores — manter esse modelo de forma gratuita tornou-se insustentável. Em vez disso, as ligações bancárias passam a usar a Enable Banking num modelo "traz a tua própria chave" (BYOK): registas a tua própria aplicação gratuita na Enable Banking, e os servidores do WonderMoney usam as credenciais dessa aplicação — nunca uma credencial partilhada — para ligar e ler os teus dados bancários. Assim as ligações bancárias mantêm-se gratuitas, tanto para ti como para o WonderMoney.
 
 A configuração abaixo é feita uma única vez. Durante o primeiro arranque podes ser convidado a ligar um banco no passo da conta; se ainda não tiveres configurado a tua chave da Enable Banking, faz isso primeiro seguindo os passos abaixo e depois volta para ligar o banco. Depois de guardada, a chave fica guardada: qualquer banco que ligues mais tarde, mesmo a partir das Definições, usa a mesma chave.
 
+Num servidor próprio, quem o gere pode ter configurado uma aplicação Enable Banking para o teu agregado. Se a lista de bancos abrir logo quando adicionas uma conta ligada, não precisas de uma chave tua e podes saltar a configuração abaixo; se mesmo assim adicionares uma, as novas ligações bancárias usam a tua. Vê [Configurar a tua instância](/pt/docs/self-hosting/configure#sincronização-bancária).
+
 ## Antes de começar
 
-Vais precisar de uns minutos, do email que queres usar na Enable Banking e de acesso ao início de sessão do teu banco para aprovar a ligação mais à frente neste mesmo fluxo. Não é preciso nenhum conhecimento técnico além de copiar dois valores — um identificador e uma chave — da Enable Banking para a WonderMoney.
+Vais precisar de uns minutos, do email que queres usar na Enable Banking e de acesso ao início de sessão do teu banco para aprovar a ligação mais à frente neste mesmo fluxo. Não é preciso nenhum conhecimento técnico além de copiar dois valores — um identificador e uma chave — da Enable Banking para o WonderMoney.
 
 ## Configura a tua aplicação na Enable Banking
 
@@ -26,8 +28,8 @@ Vais precisar de uns minutos, do email que queres usar na Enable Banking e de ac
   O Sandbox só liga a dados bancários fictícios — nunca vai conseguir ligar a tua conta real, por mais que esteja tudo o resto bem configurado. É o passo mais fácil de errar em toda esta página, e o que mais vale a pena confirmar duas vezes antes de submeteres o formulário.
 </Callout>
 
-<Callout type="info" title="O URL de redirecionamento é da WonderMoney, não teu">
-  `https://api.wonder.money/v1/banking/enable-banking/callback` é o endereço do próprio backend da WonderMoney. Estás a registar uma aplicação que fala com os servidores da WonderMoney, por isso este valor é fixo — introduz exatamente como está escrito, não o teu próprio domínio.
+<Callout type="info" title="O URL de redirecionamento é do WonderMoney, não teu">
+  `https://api.wonder.money/v1/banking/enable-banking/callback` é o endereço do próprio backend do WonderMoney. Estás a registar uma aplicação que fala com os servidores do WonderMoney, por isso este valor é fixo — introduz exatamente como está escrito, não o teu próprio domínio.
 </Callout>
 
 <Callout type="warn" title="Privacy URL e Terms URL são obrigatórios em Production, mesmo que o formulário não o diga">
@@ -57,28 +59,28 @@ Depois de submeteres o formulário, a página da aplicação mostra **"Restricte
 2. Escolhe o teu banco e inicia sessão, aprovando o acesso da mesma forma que farias em qualquer ligação Open Banking.
 3. Assim que o banco confirmar o consentimento, volta ao Painel de Controlo — o estado da aplicação atualiza-se para refletir que já está ativada.
 
-## Adiciona a tua chave à WonderMoney
+## Adiciona a tua chave ao WonderMoney
 
 1. Na página da aplicação, copia o **Application ID** — um UUID apresentado perto do topo.
 2. Localiza o ficheiro `.pem` que descarregaste antes.
-3. Na WonderMoney, abre **Definições → Fornecedor bancário**.
+3. No WonderMoney, abre **Definições → Fornecedor bancário**.
 4. Cola o Application ID em **Application ID**, e o conteúdo completo do ficheiro `.pem` em **Private key**.
-5. Guarda. A WonderMoney valida a credencial junto da Enable Banking antes de a guardar, por isso um identificador mal copiado ou uma chave incompleta são rejeitados de imediato em vez de falharem mais tarde.
+5. Guarda. O WonderMoney valida a credencial junto da Enable Banking antes de a guardar, por isso um identificador mal copiado ou uma chave incompleta são rejeitados de imediato em vez de falharem mais tarde.
 
-## O que a WonderMoney faz com a tua chave
+## O que o WonderMoney faz com a tua chave
 
-A tua chave privada é encriptada em repouso (AES-256-GCM) e nunca volta a ser mostrada depois de guardada. A WonderMoney usa-a apenas para autenticar os teus próprios pedidos à Enable Banking — não é partilhada com mais ninguém, nem sequer com outros utilizadores da WonderMoney.
+A tua chave privada é encriptada em repouso (AES-256-GCM) e nunca volta a ser mostrada depois de guardada. O WonderMoney usa-a apenas para autenticar os teus próprios pedidos à Enable Banking — não é partilhada com mais ninguém, nem sequer com outros utilizadores do WonderMoney.
 
 ## Liga o teu primeiro banco
 
-Depois de a tua chave estar guardada e ativa, ligar um banco funciona como qualquer ligação bancária na WonderMoney: escolhe o país, escolhe o banco, inicia sessão e aprova o acesso no teu banco, e aguarda a primeira sincronização. Consulta [Ligar conta bancária](/pt/docs/accounts-transactions/connect-bank-account) para essa parte do fluxo em detalhe.
+Depois de a tua chave estar guardada e ativa, ligar um banco funciona como qualquer ligação bancária no WonderMoney: escolhe o país, escolhe o banco, inicia sessão e aprova o acesso no teu banco, e aguarda a primeira sincronização. Consulta [Ligar conta bancária](/pt/docs/accounts-transactions/connect-bank-account) para essa parte do fluxo em detalhe.
 
 ## Problemas comuns
 
 - A aplicação foi criada com **Sandbox** em vez de **Production** — nunca vai encontrar o teu banco real.
 - O formulário da aplicação não foi submetido porque **Privacy URL** ou **Terms URL** ficaram vazios.
 - Foi clicado **Request activation** em vez de **Activate by linking accounts**, iniciando por engano o caminho de verificação empresarial.
-- O ficheiro `.pem` descarregado perdeu-se antes de ser copiado para a WonderMoney.
+- O ficheiro `.pem` descarregado perdeu-se antes de ser copiado para o WonderMoney.
 
 Para ajuda com qualquer um destes casos, consulta [Problemas de ligação bancária](/pt/docs/troubleshooting/bank-connection-problems).
 

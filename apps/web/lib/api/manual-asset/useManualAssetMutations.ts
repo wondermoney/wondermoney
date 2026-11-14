@@ -8,6 +8,7 @@ import api from "../api";
 import { reportsKeys } from "../reports/keys";
 import type {
   CreateManualAssetRequest,
+  EditableManualAssetKind,
   ManualAsset,
   ManualAssetValuation,
   SaveValuationRequest,
@@ -16,7 +17,9 @@ import type {
 
 /**
  * An asset's value is part of net worth, today and in its history, so every
- * change to an asset or a valuation refreshes those along with the asset.
+ * change to an asset or a valuation refreshes those along with the asset. A
+ * loan shows the asset it is secured against by name and value, so the loans
+ * refresh too.
  */
 export function invalidateManualAssets(
   queryClient: QueryClient,
@@ -33,6 +36,8 @@ export function invalidateManualAssets(
   queryClient.invalidateQueries({
     queryKey: [...reportsKeys.all, "net-worth-history"],
   });
+  queryClient.invalidateQueries({ queryKey: ["loans"] });
+  queryClient.invalidateQueries({ queryKey: ["loan"] });
 }
 
 export function useCreateManualAsset() {
@@ -126,5 +131,29 @@ export function useDeleteValuation() {
       ),
     onSuccess: (_data, { manualAssetId }) =>
       invalidateManualAssets(queryClient, manualAssetId),
+  });
+}
+
+/** One row of a manual-assets file, as the import endpoint takes it. */
+export interface ImportManualAssetRequestRow {
+  name: string;
+  kind: EditableManualAssetKind;
+  value: number;
+  valuationDate?: string;
+  currencyCode: string;
+  isPrivate?: boolean;
+}
+
+/** Creates every row of a manual-assets file as an asset with its valuation, or none of them. */
+export function useImportManualAssets() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (assets: ImportManualAssetRequestRow[]) => {
+      const { data } = await api.post<{
+        assets: { manualAssetKey: number; name: string }[];
+      }>("/v1/manual-assets/import", { assets });
+      return data.assets;
+    },
+    onSuccess: () => invalidateManualAssets(queryClient),
   });
 }

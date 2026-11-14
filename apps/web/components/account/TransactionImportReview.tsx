@@ -1,7 +1,8 @@
 "use client";
 
+import { suggestCategory } from "@wondermoney/shared/name-match";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { Badge } from "@/components/ui/badge";
@@ -15,19 +16,29 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import type { Account } from "@/lib/api/account/useAccounts";
+import useCategories, { type Category } from "@/lib/api/category/useCategories";
 import {
   FINISHED_IMPORT_STATUSES,
   type ImportRowStatus,
   type ImportSessionStatus,
+  type ImportSourceCategory,
+  type StatementReconciliation,
+  type TransactionImportAccountMapping,
   type TransactionImportRow,
   type TransactionImportSession,
   useCancelTransactionImport,
   useCommitTransactionImport,
   useDecideTransactionImportRows,
   useMapTransactionImportAccounts,
+  useMapTransactionImportCategories,
+  useParseTransactionImport,
   useTransactionImport,
 } from "@/lib/api/transaction-import/useTransactionImport";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import {
+  getCategoryDisplayName,
+  getSelectableCategories,
+} from "@/lib/utils/categories";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
 const PAGE_SIZE = 50;
@@ -39,6 +50,28 @@ const DECIDABLE: ReadonlySet<ImportRowStatus> = new Set<ImportRowStatus>([
   "duplicate",
   "possible_duplicate",
 ]);
+
+/** The mapping select's value for "import into a new manual account named after it". */
+const NEW_ACCOUNT = "new";
+/** The category select's value for "leave these rows uncategorised". */
+const UNCATEGORISED = "none";
+
+/** A QIF or YNAB file whose dates the reader could not order: it read them day-first and asks. */
+const dateOrderAmbiguous = (session: TransactionImportSession) =>
+  session.warnings.some(
+    (warning) =>
+      warning.code === "date_order_ambiguous" ||
+      warning.code === "date_order_conflict",
+  );
+
+/** Why a PDF statement could not be read, as the session records it; anything else reads as `unreadable`. */
+const PDF_FAILURES = [
+  "too_large",
+  "too_many_pages",
+  "extraction_failed",
+  "no_rows",
+  "unreadable",
+] as const;
 
 /** A row date (an ISO timestamp) as its calendar day, wherever the reader is. */
 const calendarDay = (iso: string) => {
@@ -58,10 +91,14 @@ interface TransactionImportReviewProps {
 
 /**
  * The review step of a staged import: the file's rows by status (new, already
- * in the account, unreadable), each included or skipped, in bulk or one by
- * one; an account per source account when the file holds several; then the
+ * in the account, possible duplicates, unreadable), each included or skipped,
+ * in bulk or one by one, a possible duplicate beside the transaction it likely
+ * repeats; an account per source account when the file holds several (one of the
+ * person's, or a new manual account); a category per category the file uses
+ * (YNAB), matched by name in the person's language where one matches; then the
  * commit, which runs in the background and can be retried where it stopped.
- * Seven days after a commit only its summary is kept, and the outcome says so.
+ * Seven days after a commit only its summary is kept, and the outcome says so;
+ * the file's name stays with it.
  */
 export default function TransactionImportReview({
   importId,
@@ -73,6 +110,8 @@ export default function TransactionImportReview({
   const formatDate = useFormatShortDate();
   const notifyIfRateLimited = useRateLimitToast();
   const [filter, setFilter] = useState<Filter>("all");
+  // The person confirmed they checked a PDF statement whose balances do not add up.
+  const [mismatchAcknowledged, setMismatchAcknowledged] = useState(false);
   const [page, setPage] = useState(1);
   const query = useTransactionImport(importId, {
     page,
@@ -81,10 +120,37 @@ export default function TransactionImportReview({
   });
   const decide = useDecideTransactionImportRows();
   const mapAccounts = useMapTransactionImportAccounts();
+  const mapCategories = useMapTransactionImportCategories();
+  const parse = useParseTransactionImport();
   const commit = useCommitTransactionImport();
   const cancel = useCancelTransactionImport();
   const session = query.data?.session;
   const rows = query.data?.rows;
+  const sourceCategories = session?.sourceCategories ?? [];
+  const categoriesQuery = useCategories(undefined, {
+    enabled: sourceCategories.length > 0,
+  });
+  // The person's picks in the category step; a category they have not touched shows its suggestion.
+  const [categoryPicks, setCategoryPicks] = useState<Record<string, string>>(
+    {},
+  );
+  const categoryOptions = useMemo(
+    () =>
+      getSelectableCategories(categoriesQuery.data?.categories ?? []).map(
+        (category) => ({
+          category,
+          label: getCategoryDisplayName(t, category.name),
+        }),
+      ),
+    [categoriesQuery.data, t],
+  );
+  const categoryChoice = (source: ImportSourceCategory): string =>
+    categoryPicks[source.label] ??
+    initialCategoryChoice(
+      source,
+      session?.categoryMapping ?? {},
+      categoryOptions,
+    );
 
   const finishedRef = useRef(false);
   useEffect(() => {
@@ -106,6 +172,8 @@ export default function TransactionImportReview({
   const busy =
     decide.isPending ||
     mapAccounts.isPending ||
+    mapCategories.isPending ||
+    parse.isPending ||
     commit.isPending ||
     cancel.isPending;
   const onError = (error: unknown) => {
@@ -115,21 +183,76 @@ export default function TransactionImportReview({
 
   if (session.status === "parsing" || session.status === "importing") {
     return (
-      <Working
-        session={session}
-        disabled={busy}
-        onRetry={() =>
-          void run(commit.mutateAsync({ id: importId, input: undefined }))
-        }
-      />
+      <div className="flex flex-col gap-3">
+        <ImportName session={session} />
+        <Working
+          session={session}
+          disabled={busy}
+          onRetry={() =>
+            void run(commit.mutateAsync({ id: importId, input: undefined }))
+          }
+        />
+        {/* A PDF statement is read page by page, and can be stopped between pages. */}
+        {session.status === "parsing" && session.format === "pdf" ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="self-end"
+            disabled={busy}
+            onClick={() =>
+              void run(
+                cancel
+                  .mutateAsync({ id: importId, input: undefined })
+                  .then(onCancelled),
+              )
+            }
+          >
+            {t("import-review-cancel")}
+          </Button>
+        ) : null}
+      </div>
     );
   }
 
   if (FINISHED_IMPORT_STATUSES.has(session.status)) {
-    return <Outcome status={session.status} session={session} />;
+    return (
+      <div className="flex flex-col gap-3">
+        <ImportName session={session} />
+        <Outcome status={session.status} session={session} />
+      </div>
+    );
   }
 
   const pages = Math.max(1, Math.ceil(rows.total / rows.pageSize));
+
+  const reconciliation = session.statementExtraction?.reconciliation;
+  const mismatch = reconciliation?.status === "mismatch";
+  const otherCurrencies = session.warnings
+    .filter((warning) => warning.code === "pdf_currency_differs")
+    .map((warning) => warning.detail)
+    .filter((currency): currency is string => !!currency);
+
+  /** Commit, with the category step's choices saved first: every file category, picked or as suggested. */
+  const commitWithCategories = async () => {
+    if (sourceCategories.length > 0) {
+      await mapCategories.mutateAsync({
+        id: importId,
+        input: Object.fromEntries(
+          sourceCategories.map((source) => {
+            const choice = categoryChoice(source);
+            return [
+              source.label,
+              choice === UNCATEGORISED ? null : Number(choice),
+            ];
+          }),
+        ),
+      });
+    }
+    await commit.mutateAsync({
+      id: importId,
+      input: { acknowledgeMismatch: mismatch && mismatchAcknowledged },
+    });
+  };
   const reviewable =
     session.status === "ready" || session.status === "needs_mapping";
 
@@ -139,7 +262,22 @@ export default function TransactionImportReview({
       data-testid="transaction-import-review"
       aria-live="polite"
     >
+      <ImportName session={session} />
       <p className="text-muted-foreground">{t("import-review-summary")}</p>
+
+      {reconciliation ? (
+        <BalanceCheck
+          acknowledged={mismatchAcknowledged}
+          disabled={busy}
+          reconciliation={reconciliation}
+          onAcknowledge={setMismatchAcknowledged}
+        />
+      ) : null}
+      {otherCurrencies.map((currency) => (
+        <p key={currency} className="text-muted-foreground">
+          {t("import-review-pdf-currency-differs", { currency })}
+        </p>
+      ))}
 
       {session.status === "needs_mapping" ? (
         <AccountMapping
@@ -148,6 +286,29 @@ export default function TransactionImportReview({
           session={session}
           onSave={(mapping) =>
             void run(mapAccounts.mutateAsync({ id: importId, input: mapping }))
+          }
+        />
+      ) : null}
+
+      {sourceCategories.length > 0 ? (
+        <CategoryMapping
+          choiceOf={categoryChoice}
+          disabled={busy}
+          format={session.format}
+          options={categoryOptions}
+          sources={sourceCategories}
+          onChoose={(label, value) =>
+            setCategoryPicks((current) => ({ ...current, [label]: value }))
+          }
+        />
+      ) : null}
+
+      {dateOrderAmbiguous(session) ? (
+        <DateOrder
+          disabled={busy}
+          session={session}
+          onChoose={(dateOrder) =>
+            void run(parse.mutateAsync({ id: importId, input: { dateOrder } }))
           }
         />
       ) : null}
@@ -293,15 +454,36 @@ export default function TransactionImportReview({
           type="button"
           size="lg"
           loading={commit.isPending}
-          disabled={busy || !session.canCommit}
-          onClick={() =>
-            void run(commit.mutateAsync({ id: importId, input: undefined }))
+          disabled={
+            busy || !session.canCommit || (mismatch && !mismatchAcknowledged)
           }
+          onClick={() => void run(commitWithCategories())}
         >
           {t("import-review-commit", { count: session.decisions.import })}
         </Button>
       </div>
     </section>
+  );
+}
+
+/**
+ * Which import this is: the name the file had, or for an import started before names were kept,
+ * the day it was started.
+ */
+function ImportName({ session }: { session: TransactionImportSession }) {
+  const t = useTranslations();
+  const formatDate = useFormatShortDate();
+  return (
+    <p
+      className="truncate text-sm font-medium"
+      data-testid="transaction-import-name"
+      title={session.fileName ?? undefined}
+    >
+      {session.fileName ??
+        t("import-review-unnamed", {
+          date: formatDate(session.createdAt, { alwaysShowYear: true }),
+        })}
+    </p>
   );
 }
 
@@ -360,8 +542,82 @@ function ReviewRow({
           </Badge>
           {row.error ? <span>{row.error}</span> : null}
         </div>
+        {row.status === "possible_duplicate" ? (
+          <PossibleDuplicate row={row} formatDate={formatDate} />
+        ) : null}
       </div>
     </li>
+  );
+}
+
+/**
+ * Why a row may already be in the account: the row beside the transaction it likely repeats, so
+ * the person can compare them before including it, or, when several transactions could be it,
+ * that none was matched.
+ */
+function PossibleDuplicate({
+  row,
+  formatDate,
+}: {
+  row: TransactionImportRow;
+  formatDate: (iso: string) => string;
+}) {
+  const t = useTranslations();
+  const matched = row.matchedTransaction;
+  if (row.matchReason === "ambiguous" || !matched) {
+    return (
+      <p
+        className="text-muted-foreground text-xs"
+        data-testid="transaction-import-ambiguous"
+      >
+        {t("import-review-match-ambiguous")}
+      </p>
+    );
+  }
+  const sides = [
+    {
+      amount: row.normalized?.amount ?? null,
+      date: row.normalized?.date ?? null,
+      description:
+        row.normalized?.merchant ?? row.normalized?.description ?? null,
+      label: t("import-review-match-file"),
+    },
+    {
+      amount: matched.amount,
+      date: matched.date,
+      description: matched.description,
+      label: t("import-review-match-account"),
+    },
+  ];
+  return (
+    <div
+      className="border-border bg-muted/40 mt-1 flex flex-col gap-2 rounded-md border p-2 text-xs"
+      data-testid="transaction-import-match"
+    >
+      <p className="text-muted-foreground">{t("import-review-match-likely")}</p>
+      <dl className="grid grid-cols-2 gap-3">
+        {sides.map((side) => (
+          <div key={side.label} className="flex min-w-0 flex-col gap-0.5">
+            <dt className="text-muted-foreground">{side.label}</dt>
+            <dd className="truncate">{side.description ?? "—"}</dd>
+            <dd className="text-muted-foreground tabular-nums">
+              {side.date ? formatDate(side.date) : "—"}
+            </dd>
+            <dd>
+              {side.amount === null ? (
+                "—"
+              ) : (
+                <Amount
+                  value={side.amount}
+                  currency={row.normalized?.currency}
+                  tone="delta"
+                />
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
@@ -396,7 +652,14 @@ function Working({
       aria-live="polite"
     >
       {session.status === "parsing"
-        ? t("import-review-reading")
+        ? session.format === "pdf"
+          ? session.statementExtraction?.pageCount
+            ? t("import-review-pdf-progress", {
+                pages: session.statementExtraction.pageCount,
+                read: session.statementExtraction.pagesRead,
+              })
+            : t("import-review-pdf-opening")
+          : t("import-review-reading")
         : t("import-review-importing", {
             imported,
             total: imported + session.decisions.import,
@@ -422,9 +685,13 @@ function Outcome({
   }
   // A file that could not be read ends the session with a code; a commit whose rows failed does not.
   if (status === "failed" && session.errorCode) {
+    const pdfFailure =
+      PDF_FAILURES.find((code) => code === session.errorCode) ?? "unreadable";
     return (
       <p className="text-destructive-text text-sm" role="alert">
-        {t("import-review-read-failed")}
+        {session.format === "pdf"
+          ? t(`import-review-pdf-failed-${pdfFailure}`)
+          : t("import-review-read-failed")}
       </p>
     );
   }
@@ -453,6 +720,148 @@ function Outcome({
   );
 }
 
+/**
+ * A PDF statement's own check: its opening balance plus the transactions read is its closing
+ * balance. When it is not, the difference shows and the commit waits for the person to say they
+ * checked the rows; when the statement prints no balances, it says nothing could be checked.
+ */
+function BalanceCheck({
+  acknowledged,
+  disabled,
+  reconciliation,
+  onAcknowledge,
+}: {
+  acknowledged: boolean;
+  disabled: boolean;
+  reconciliation: StatementReconciliation;
+  onAcknowledge: (acknowledged: boolean) => void;
+}) {
+  const t = useTranslations();
+  const currency = reconciliation.currency ?? undefined;
+  const mismatch = reconciliation.status === "mismatch";
+  const lines = [
+    {
+      label: t("import-review-reconcile-opening"),
+      value: reconciliation.openingBalance,
+    },
+    {
+      label: t("import-review-reconcile-rows"),
+      value: reconciliation.rowsTotal,
+    },
+    {
+      label: t("import-review-reconcile-closing"),
+      value: reconciliation.closingBalance,
+    },
+    ...(mismatch
+      ? [
+          {
+            label: t("import-review-reconcile-difference"),
+            value: reconciliation.difference,
+          },
+        ]
+      : []),
+  ];
+  return (
+    <div
+      className={
+        mismatch
+          ? "border-warning-text/50 flex flex-col gap-3 rounded-md border p-4"
+          : "bg-muted flex flex-col gap-3 rounded-md p-4"
+      }
+      data-testid="statement-balance-check"
+      role={mismatch ? "alert" : "status"}
+    >
+      <p className="font-medium">{t("import-review-reconcile-title")}</p>
+      <p className={mismatch ? "text-warning-text" : "text-muted-foreground"}>
+        {mismatch
+          ? t("import-review-reconcile-mismatch")
+          : reconciliation.status === "matched"
+            ? t("import-review-reconcile-matched")
+            : t("import-review-reconcile-unavailable")}
+      </p>
+      {reconciliation.status !== "unavailable" ? (
+        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
+          {lines.map((line) => (
+            <div key={line.label} className="contents">
+              <dt className="text-muted-foreground">{line.label}</dt>
+              <dd
+                className="text-right"
+                data-testid={
+                  line.label === t("import-review-reconcile-difference")
+                    ? "statement-difference"
+                    : undefined
+                }
+              >
+                <Amount value={line.value} currency={currency} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      {mismatch ? (
+        <label className="flex items-start gap-2">
+          <Checkbox
+            checked={acknowledged}
+            disabled={disabled}
+            onCheckedChange={(checked) => onAcknowledge(checked === true)}
+          />
+          <span>{t("import-review-reconcile-acknowledge")}</span>
+        </label>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * A QIF file whose dates could be day first or month first: the reader read them day-first and
+ * asks. Choosing reads the file again, so the rows below are the ones that will import.
+ */
+function DateOrder({
+  disabled,
+  session,
+  onChoose,
+}: {
+  disabled: boolean;
+  session: TransactionImportSession;
+  onChoose: (dateOrder: "day-first" | "month-first") => void;
+}) {
+  const t = useTranslations();
+  const assumed = session.warnings.find(
+    (warning) => warning.code === "date_order_ambiguous",
+  )?.detail;
+  return (
+    <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
+      <legend className="sr-only">{t("import-review-date-order-title")}</legend>
+      <p className="font-medium">{t("import-review-date-order-title")}</p>
+      <p className="text-muted-foreground">
+        {assumed === "month-first"
+          ? t("import-review-date-order-hint-month-first")
+          : t("import-review-date-order-hint-day-first")}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => onChoose("day-first")}
+        >
+          {t("import-statement-date-dmy")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => onChoose("month-first")}
+        >
+          {t("import-statement-date-mdy")}
+        </Button>
+      </div>
+    </fieldset>
+  );
+}
+
 function AccountMapping({
   accounts,
   disabled,
@@ -462,19 +871,50 @@ function AccountMapping({
   accounts: Account[];
   disabled: boolean;
   session: TransactionImportSession;
-  onSave: (mapping: Record<string, number>) => void;
+  onSave: (mapping: TransactionImportAccountMapping) => void;
 }) {
   const t = useTranslations();
-  const [mapping, setMapping] = useState<Record<string, number>>(
-    session.accountMapping,
-  );
+  const [mapping, setMapping] = useState<
+    Record<string, number | typeof NEW_ACCOUNT>
+  >(() => {
+    // The file's own identifier pre-fills the mapping where the server matched it (a CAMT.053
+    // statement's IBAN against the account's number, an account of the same name); the person
+    // still confirms it.
+    const initial: Record<string, number | typeof NEW_ACCOUNT> = {
+      ...session.accountMapping,
+    };
+    for (const source of session.sourceAccounts) {
+      if (
+        initial[source.label] === undefined &&
+        source.suggestedAccountId !== undefined
+      ) {
+        initial[source.label] = source.suggestedAccountId;
+      }
+    }
+    return initial;
+  });
   const complete = session.sourceAccounts.every(
     (source) => mapping[source.label] !== undefined,
   );
+  const title =
+    session.format === "ynab"
+      ? t("import-review-mapping-title-ynab")
+      : session.format === "actual"
+        ? t("import-review-mapping-title-actual")
+        : t("import-review-mapping-title");
+  const save = () => {
+    const chosen: Record<string, number> = {};
+    const create: string[] = [];
+    for (const [label, value] of Object.entries(mapping)) {
+      if (value === NEW_ACCOUNT) create.push(label);
+      else chosen[label] = value;
+    }
+    onSave({ create, mapping: chosen });
+  };
   return (
     <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
-      <legend className="sr-only">{t("import-review-mapping-title")}</legend>
-      <p className="font-medium">{t("import-review-mapping-title")}</p>
+      <legend className="sr-only">{title}</legend>
+      <p className="font-medium">{title}</p>
       {session.sourceAccounts.map((source) => (
         <label key={source.label} className="flex flex-col gap-1">
           <span>
@@ -492,7 +932,8 @@ function AccountMapping({
             onValueChange={(value) =>
               setMapping((current) => ({
                 ...current,
-                [source.label]: Number(value),
+                [source.label]:
+                  value === NEW_ACCOUNT ? NEW_ACCOUNT : Number(value),
               }))
             }
             disabled={disabled}
@@ -509,6 +950,9 @@ function AccountMapping({
                   {account.accountName ?? t("unknown")}
                 </SelectItem>
               ))}
+              <SelectItem value={NEW_ACCOUNT}>
+                {t("import-review-mapping-new", { label: source.label })}
+              </SelectItem>
             </SelectContent>
           </Select>
         </label>
@@ -518,10 +962,120 @@ function AccountMapping({
         size="sm"
         className="self-start"
         disabled={disabled || !complete}
-        onClick={() => onSave(mapping)}
+        onClick={save}
       >
         {t("import-review-mapping-save")}
       </Button>
+    </fieldset>
+  );
+}
+
+interface CategoryOption {
+  category: Category;
+  /** The name as the person's language shows it. */
+  label: string;
+}
+
+/**
+ * What a file category imports as before the person picks: their saved choice, else the category
+ * whose name matches in their language (or as stored), else the server's match, else uncategorised.
+ */
+function initialCategoryChoice(
+  source: ImportSourceCategory,
+  saved: Record<string, number | null>,
+  options: CategoryOption[],
+): string {
+  const selectable = new Set(
+    options.map((option) => option.category.categoryKey),
+  );
+  if (Object.hasOwn(saved, source.label)) {
+    const chosen = saved[source.label];
+    return chosen === null || !selectable.has(chosen)
+      ? UNCATEGORISED
+      : String(chosen);
+  }
+  const local = suggestCategory(
+    source,
+    options.map((option) => ({
+      id: option.category.categoryKey,
+      names: [option.label, option.category.name],
+    })),
+  );
+  const suggested =
+    local ??
+    (source.suggestedCategoryId !== undefined &&
+    selectable.has(source.suggestedCategoryId)
+      ? source.suggestedCategoryId
+      : undefined);
+  return suggested === undefined ? UNCATEGORISED : String(suggested);
+}
+
+/**
+ * The file's categories (YNAB, Actual Budget), each with the category its rows import as. A category whose name
+ * matches one of the household's is pre-filled; the rest stay uncategorised unless the person
+ * picks one. The choices are saved with the commit.
+ */
+function CategoryMapping({
+  choiceOf,
+  disabled,
+  format,
+  options,
+  sources,
+  onChoose,
+}: {
+  choiceOf: (source: ImportSourceCategory) => string;
+  disabled: boolean;
+  format: TransactionImportSession["format"];
+  options: CategoryOption[];
+  sources: ImportSourceCategory[];
+  onChoose: (label: string, value: string) => void;
+}) {
+  const t = useTranslations();
+  const title =
+    format === "actual"
+      ? t("import-review-categories-title-actual")
+      : t("import-review-categories-title");
+  return (
+    <fieldset className="bg-muted flex flex-col gap-3 rounded-md p-4">
+      <legend className="sr-only">{title}</legend>
+      <p className="font-medium">{title}</p>
+      <p className="text-muted-foreground">
+        {format === "actual"
+          ? t("import-review-categories-hint-actual")
+          : t("import-review-categories-hint")}
+      </p>
+      {sources.map((source) => (
+        <label key={source.label} className="flex flex-col gap-1">
+          <span>
+            {t("import-review-mapping-source", {
+              label: source.label,
+              count: source.rowCount,
+            })}
+          </span>
+          <Select
+            value={choiceOf(source)}
+            onValueChange={(value) => onChoose(source.label, value)}
+            disabled={disabled}
+          >
+            <SelectTrigger aria-label={source.label}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={UNCATEGORISED}>
+                {t("import-review-categories-none")}
+              </SelectItem>
+              {options.map((option) => (
+                <SelectItem
+                  key={option.category.categoryKey}
+                  value={String(option.category.categoryKey)}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+      ))}
     </fieldset>
   );
 }

@@ -17,6 +17,7 @@ const CATEGORY_COLUMN: Record<EmailCategory, string> = {
   [EmailCategory.ACCOUNT_RECOVERY]: 'account_recovery_enabled',
   [EmailCategory.BANK_SYNC_ALERTS]: 'bank_sync_alerts_enabled',
   [EmailCategory.BUDGET_ALERTS]: 'budget_alerts_enabled',
+  [EmailCategory.CREDIT_CARD_DUE_REMINDERS]: 'credit_card_due_reminders_enabled',
   [EmailCategory.GROWTH]: 'growth_emails_enabled',
   [EmailCategory.WEEKLY_INSIGHTS]: 'weekly_insights_enabled',
 };

@@ -95,7 +95,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: 'Share with your household',
-        description: 'Invite a partner, keep accounts private, and manage who is in your household.',
+        description: 'Invite the people you live with, choose their roles, and keep accounts private.',
         href: '/docs/household',
       },
       {
@@ -129,51 +129,51 @@ const copy: Record<Locale, LandingCopy> = {
   },
   pt: {
     eyebrow: 'Documentação WonderMoney',
-    title: 'Em que precisa de ajuda?',
+    title: 'Em que precisas de ajuda?',
     description:
-      'Encontre o guia certo para configuração, dados de contas, orçamentos, métricas de carteira, agregado familiar, segurança e resolução de problemas.',
+      'Encontra o guia certo para configuração, dados de contas, orçamentos, métricas de carteira, agregado familiar, segurança e resolução de problemas.',
     primaryCta: 'Começar pelo guia inicial',
     secondaryCta: 'Abrir toda a documentação',
-    tasksTitle: 'Escolha uma tarefa',
+    tasksTitle: 'Escolhe uma tarefa',
     tasks: [
       {
         title: 'Começar',
-        description: 'Crie a conta, inicie sessão e compreenda as bases do painel.',
+        description: 'Cria a conta, inicia sessão e percebe as bases do painel.',
         href: '/docs/start-here',
       },
       {
         title: 'Ligar ou importar dados de contas',
-        description: 'Ligue bancos, adicione contas manuais, importe ficheiros CSV e reveja movimentos.',
+        description: 'Liga bancos, adiciona contas manuais, importa ficheiros CSV e revê movimentos.',
         href: '/docs/accounts-transactions',
       },
       {
         title: 'Planear o orçamento',
-        description: 'Use o método dos envelopes, escolha categorias e acompanhe os gastos mensais.',
+        description: 'Usa o método dos envelopes, escolhe categorias e acompanha os gastos mensais.',
         href: '/docs/budgets',
       },
       {
         title: 'Compreender os valores da carteira',
-        description: 'Veja o valor da carteira, rentabilidades, distribuição, índices de referência e efeitos cambiais.',
+        description: 'Vê o valor da carteira, rentabilidades, distribuição, índices de referência e efeitos cambiais.',
         href: '/docs/portfolio-investments/portfolio-metrics-explained',
       },
       {
         title: 'Resolver um problema',
-        description: 'Resolva problemas de acesso, ligações bancárias, importações, orçamentos e carteira.',
+        description: 'Resolve problemas de acesso, ligações bancárias, importações, orçamentos e carteira.',
         href: '/docs/troubleshooting',
       },
       {
-        title: 'Partilhar com o seu agregado',
-        description: 'Convide um parceiro, mantenha contas privadas e gira quem faz parte do agregado.',
+        title: 'Partilhar com o teu agregado',
+        description: 'Convida as pessoas com quem vives, escolhe as suas funções e mantém contas privadas.',
         href: '/docs/household',
       },
       {
         title: 'Gerir segurança e privacidade',
-        description: 'Veja definições de privacidade, acesso apenas de leitura e autenticação de dois fatores.',
+        description: 'Vê as definições de privacidade, acesso apenas de leitura e autenticação de dois fatores.',
         href: '/docs/settings-security-privacy',
       },
     ],
     pathTitle: 'Caminho recomendado',
-    pathDescription: 'Está a começar na WonderMoney? Siga esta ordem para começar por adicionar os dados mais úteis.',
+    pathDescription: 'Estás a começar no WonderMoney? Segue esta ordem para começares pelos dados mais úteis.',
     pathSteps: [
       { title: 'Ligar a primeira conta', href: '/docs/start-here/connect-first-bank-account' },
       { title: 'Compreender movimentos', href: '/docs/accounts-transactions/understand-transactions' },
@@ -190,9 +190,9 @@ const copy: Record<Locale, LandingCopy> = {
       { title: 'Glossário', href: '/docs/glossary' },
       { title: 'Contactar suporte', href: '/docs/troubleshooting/contact-support' },
     ],
-    supportTitle: 'Ainda precisa de ajuda?',
+    supportTitle: 'Ainda precisas de ajuda?',
     supportDescription:
-      'Se a documentação não responder à sua pergunta, contacte o suporte ou volte ao site principal da WonderMoney.',
+      'Se a documentação não responder à tua pergunta, contacta o suporte ou volta ao site principal do WonderMoney.',
     supportCta: 'Contactar suporte',
     mainSiteCta: 'Visitar WonderMoney',
   },
@@ -232,7 +232,7 @@ const copy: Record<Locale, LandingCopy> = {
       },
       {
         title: 'Compartir con tu hogar',
-        description: 'Invita a tu pareja, mantén cuentas privadas y gestiona quién forma parte del hogar.',
+        description: 'Invita a las personas con las que vives, elige sus roles y mantén cuentas privadas.',
         href: '/docs/household',
       },
       {

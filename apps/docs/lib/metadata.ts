@@ -8,7 +8,7 @@ export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.wonder.
 
 export const localizedSiteDescription: Record<Locale, string> = {
   en: siteDescription,
-  pt: 'Guias e documentação de suporte para gerir o seu dinheiro com a WonderMoney.',
+  pt: 'Guias e documentação de suporte para gerires o teu dinheiro com o WonderMoney.',
   es: 'Guías y documentación de soporte para gestionar tu dinero con WonderMoney.',
 };
 

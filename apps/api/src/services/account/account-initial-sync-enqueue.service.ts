@@ -5,9 +5,10 @@ import { DI } from '@app/database/di';
 import { type AccountInitialSyncJobPayload, buildAccountInitialSyncCorrelationId, enqueueAccountInitialSyncJob } from '@app/jobs/account-initial-sync.queue';
 import type { Appuser } from '@entity/Appuser';
 import { BackgroundOperation } from '@entity/BackgroundOperation';
+import { BankConnection } from '@entity/BankConnection';
 import { BankSyncFlow, BankSyncIncident, BankSyncProducer } from '@entity/BankSyncIncident';
-import type { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { BankSyncIncidentService } from '@service/bank-sync/bank-sync-incident.service';
+import { bankConnectionResourceId, bankSyncConnectionId, buildAccountInitialSyncJobPayload } from '@service/bank-sync/bank-sync-job-payload';
 import { bankSyncEnvironment, canonicalBankSyncDistinctId } from '@service/bank-sync/bank-sync-producer-policy';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -40,7 +41,7 @@ interface NormalizedSyncTarget {
 }
 
 class AccountInitialSyncEnqueueService {
-  async enqueue(syncTarget: EnableBankingConnection, deps: { bankSyncIncidentService?: BankSyncIncidentService; enqueue: Enqueue; }): Promise<AccountInitialSyncEnqueueResult> {
+  async enqueue(syncTarget: BankConnection, deps: { bankSyncIncidentService?: BankSyncIncidentService; enqueue: Enqueue; }): Promise<AccountInitialSyncEnqueueResult> {
     const target = this.normalizeSyncTarget(syncTarget);
     const { appuser, buildJobPayload, correlationId, requisitionIdForAnalytics, resourceId } = target;
     if (!Number.isSafeInteger(appuser?.appuserKey) || (appuser?.appuserKey ?? 0) <= 0) {
@@ -136,28 +137,23 @@ class AccountInitialSyncEnqueueService {
    * discriminator so plain-object test fixtures keep working — see `NormalizedSyncTarget`'s
    * docblock above.
    */
-  private normalizeSyncTarget(syncTarget: EnableBankingConnection): NormalizedSyncTarget {
-    {
-      const connection = syncTarget;
-      if (!Number.isSafeInteger(connection.enableBankingConnectionKey) || connection.enableBankingConnectionKey <= 0) {
-        throw new AccountInitialSyncQueueError('Account initial sync connection identifiers are invalid', false);
-      }
-      const enableBankingConnectionKey = String(connection.enableBankingConnectionKey);
-      const correlationId = buildAccountInitialSyncCorrelationId(enableBankingConnectionKey);
-      // Enable Banking has no requisition-style opaque id post-link; `sessionId` is the closest
-      // provider-issued identity (falling back to the pre-link correlation `state` — defensive,
-      // shouldn't happen since only a `linked` connection reaches this enqueue call).
-      const requisitionIdForAnalytics = connection.sessionId ?? connection.state;
-      return {
-        appuser: connection.appuserKey,
-        buildJobPayload: (incidentId) => ({ connectionId: requisitionIdForAnalytics, correlationId, enableBankingConnectionKey, incidentId, provider: 'enable_banking' }),
-        correlationId,
-        requisitionIdForAnalytics,
-        resourceId: `enable-banking-connection:${enableBankingConnectionKey}`,
-        tenantKey: connection.tenantKey?.tenantKey,
-      };
+  private normalizeSyncTarget(syncTarget: BankConnection): NormalizedSyncTarget {
+    const connection = syncTarget;
+    if (!Number.isSafeInteger(connection.bankConnectionKey) || connection.bankConnectionKey <= 0) {
+      throw new AccountInitialSyncQueueError('Account initial sync connection identifiers are invalid', false);
     }
-
+    const correlationId = buildAccountInitialSyncCorrelationId(String(connection.bankConnectionKey));
+    // The provider-issued session/consent id is the analytics identity; `bankSyncConnectionId`
+    // falls back to the pre-link correlation `state` (defensive — only a linked connection
+    // reaches this call). The admin retry rebuilds the job with the same builder.
+    return {
+      appuser: connection.appuserKey,
+      buildJobPayload: (incidentId) => buildAccountInitialSyncJobPayload(connection, incidentId),
+      correlationId,
+      requisitionIdForAnalytics: bankSyncConnectionId(connection),
+      resourceId: bankConnectionResourceId(connection.bankConnectionKey),
+      tenantKey: connection.tenantKey?.tenantKey,
+    };
   }
 
   private async reconcileExistingOperation(operation: BackgroundOperation, correlationId: string, appuserKey: number): Promise<AccountInitialSyncEnqueueResult> {

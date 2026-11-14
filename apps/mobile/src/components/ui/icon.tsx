@@ -48,6 +48,7 @@ const ICONS = {
   link: { ios: 'link', android: 'link', web: 'link' },
   pencil: { ios: 'pencil', android: 'edit', web: 'edit' },
   trash: { ios: 'trash', android: 'delete', web: 'delete' },
+  archive: { ios: 'archivebox', android: 'archive', web: 'archive' },
   search: { ios: 'magnifyingglass', android: 'search', web: 'search' },
   x: { ios: 'xmark', android: 'close', web: 'close' },
   check: { ios: 'checkmark', android: 'check', web: 'check' },
@@ -56,6 +57,8 @@ const ICONS = {
   'bar-chart': { ios: 'chart.bar.xaxis', android: 'bar_chart', web: 'bar_chart' },
   'candlestick-chart': { ios: 'chart.bar.xaxis', android: 'candlestick_chart', web: 'candlestick_chart' },
   upload: { ios: 'square.and.arrow.up', android: 'upload', web: 'upload' },
+  camera: { ios: 'camera', android: 'photo_camera', web: 'photo_camera' },
+  paperclip: { ios: 'paperclip', android: 'attach_file', web: 'attach_file' },
   'external-link': { ios: 'arrow.up.right.square', android: 'open_in_new', web: 'open_in_new' },
   star: { ios: 'star', android: 'star', web: 'star' },
   'star-filled': { ios: 'star.fill', android: 'star', web: 'star' },
@@ -64,6 +67,8 @@ const ICONS = {
   'file-down': { ios: 'arrow.down.doc', android: 'file_download', web: 'file_download' },
   'rotate-ccw': { ios: 'arrow.counterclockwise', android: 'restart_alt', web: 'restart_alt' },
   'arrow-left-right': { ios: 'arrow.left.arrow.right', android: 'swap_horiz', web: 'swap_horiz' },
+  // A transaction's amount shared over several categories (web's lucide `Split`).
+  split: { ios: 'arrow.triangle.branch', android: 'call_split', web: 'call_split' },
   'alert-circle': { ios: 'exclamationmark.circle', android: 'error', web: 'error' },
   'alert-triangle': { ios: 'exclamationmark.triangle', android: 'warning', web: 'warning' },
   'chevron-up': { ios: 'chevron.up', android: 'keyboard_arrow_up', web: 'keyboard_arrow_up' },
@@ -78,6 +83,7 @@ const ICONS = {
   shield: { ios: 'shield', android: 'shield', web: 'shield' },
   mail: { ios: 'envelope', android: 'mail', web: 'mail' },
   layers: { ios: 'square.3.layers.3d', android: 'layers', web: 'layers' },
+  'sliders-horizontal': { ios: 'slider.horizontal.3', android: 'tune', web: 'tune' },
   'shield-check': { ios: 'checkmark.shield', android: 'verified_user', web: 'verified_user' },
   'wallet-cards': { ios: 'wallet.pass', android: 'wallet', web: 'wallet' },
   'line-chart': { ios: 'chart.xyaxis.line', android: 'show_chart', web: 'show_chart' },
@@ -94,6 +100,7 @@ const ICONS = {
   // Privacy mode: amounts shown / hidden.
   eye: { ios: 'eye', android: 'visibility', web: 'visibility' },
   'eye-off': { ios: 'eye.slash', android: 'visibility_off', web: 'visibility_off' },
+  users: { ios: 'person.2', android: 'group', web: 'group' },
 } as const satisfies Record<string, SymbolName>
 
 export type IconName = keyof typeof ICONS

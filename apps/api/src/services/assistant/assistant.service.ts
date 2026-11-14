@@ -1,12 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
-import { createAzure } from '@ai-sdk/azure';
-import { createOpenAI } from '@ai-sdk/openai';
 import * as Sentry from '@sentry/node';
 import {
   convertToModelMessages,
   isStepCount,
-  type LanguageModel,
   pipeUIMessageStreamToResponse,
   streamText,
   toUIMessageStream,
@@ -14,6 +11,7 @@ import {
 
 import { DI } from '@app/app';
 import { AssistantAuditEventType } from '@entity/AssistantAuditLog';
+import { resolveChatModel } from '@service/ai/ai-model';
 import { resolveAiRoute } from '@service/ai/ai-provider';
 import { FeatureDisabledError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -23,8 +21,11 @@ import { AssistantAuditService } from './assistant-audit.service';
 import { AssistantToolsService } from './assistant-tools.service';
 
 export const ASSISTANT_SYSTEM_PROMPT = [
-  'You are a read-only financial assistant.',
-  'Never mutate user data or perform writes.',
+  'You are a financial assistant that reads the user\'s data and can propose changes, never make them.',
+  'You cannot change any data yourself. When the user asks to categorize transactions, mark them reviewed or set a transaction note, use the matching propose_* tool: it drafts a proposal the user applies or dismisses in the app.',
+  'After proposing, say that a proposal is waiting for their confirmation; never say or imply that a change was applied, saved or done.',
+  'If a propose_* tool returns status "refused", explain that the change could not be proposed and why, without retrying with other ids.',
+  'For any other change (rules, budgets, goals, accounts), say you cannot do it here and point to the place in the app.',
   'Only use approved tools for data access; do not invent financial records.',
   'Use tools for calculations and summarize only the returned data.',
   'Do not provide regulated financial, investment, tax, legal, or credit advice.',
@@ -176,43 +177,12 @@ function formatExample(currency: string, locale: string): string {
 }
 
 /**
- * The chat model behind the assistant: Azure OpenAI on the hosted instance, otherwise any
- * OpenAI-compatible endpoint (see `services/ai/ai-provider.ts`).
- *
- * Both use the chat-completions API on purpose. On Azure, `azure(deployment)` builds a
- * *Responses API* model, and combined with `useDeploymentBasedUrls` that posts to
- * `/openai/deployments/{deployment}/responses` — a path this Azure resource does not serve at
- * any api-version, so every chat request comes back `404 Resource not found`. Verified directly
- * against the resource prod points at:
- *
- *   /deployments/{d}/responses        → 404 on 2024-08-01, 2025-03-01, 2025-04-01
- *   /openai/responses                 → 200, but only from 2025-04-01-preview
- *   /deployments/{d}/chat/completions → 200 on the configured 2024-08-01-preview
- *
- * Moving to the Responses API later means dropping `useDeploymentBasedUrls` *and* bumping
- * `AZURE_OPENAI_API_VERSION` — which the OCR client shares — so it is a deliberate change. Off
- * Azure, chat completions is the one API every compatible server (Ollama, LM Studio, vLLM...)
- * implements.
+ * The chat model behind the assistant: Azure OpenAI on the hosted instance, Anthropic when the
+ * operator chose it, otherwise any OpenAI-compatible endpoint (see
+ * `services/ai/ai-provider.ts` and `services/ai/ai-model.ts`).
  */
-function normalizeAzureOpenAIBaseUrl(endpoint: string): string {
-  const trimmedEndpoint = endpoint.replace(/\/+$/, '');
-  return trimmedEndpoint.endsWith('/openai') ? trimmedEndpoint : `${trimmedEndpoint}/openai`;
-}
-
-function resolveAssistantModel(): { model: LanguageModel; modelName: string; provider: 'azure' | 'openai-compatible' } {
+function resolveAssistantModel() {
   const route = resolveAiRoute('assistant');
-  if (route.kind === 'azure-openai' && route.model) {
-    const azure = createAzure({
-      apiKey: route.apiKey,
-      apiVersion: route.apiVersion,
-      baseURL: normalizeAzureOpenAIBaseUrl(route.endpoint),
-      useDeploymentBasedUrls: true,
-    });
-    return { model: azure.chat(route.model), modelName: route.model, provider: 'azure' };
-  }
-  if (route.kind === 'openai-compatible') {
-    const compatible = createOpenAI({ apiKey: route.apiKey ?? 'not-needed', baseURL: route.baseURL, name: 'openai-compatible' });
-    return { model: compatible.chat(route.model), modelName: route.model, provider: 'openai-compatible' };
-  }
-  throw new FeatureDisabledError('The assistant');
+  if (route.kind === 'disabled') throw new FeatureDisabledError('The assistant');
+  return resolveChatModel(route);
 }

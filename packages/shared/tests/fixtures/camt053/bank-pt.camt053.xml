@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>BCP-2026-01-0001</MsgId>
+      <CreDtTm>2026-02-01T06:00:00</CreDtTm>
+      <AddtlInf>Extrato de conta</AddtlInf>
+    </GrpHdr>
+    <Stmt>
+      <Id>STMT-2026-01</Id>
+      <Acct>
+        <Id>
+          <IBAN>PT50000201231234567890154</IBAN>
+        </Id>
+        <Ccy>EUR</Ccy>
+      </Acct>
+      <Ntry>
+        <NtryRef>2026011500001</NtryRef>
+        <Amt Ccy="EUR">42.50</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-01-15</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-01-16</Dt>
+        </ValDt>
+        <AcctSvcrRef>BCP-0001</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <SubFmlyCd>CCRD</SubFmlyCd>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>BCP-0001</AcctSvcrRef>
+            </Refs>
+            <RltdPties>
+              <Cdtr>
+                <Nm>CONTINENTE MATOSINHOS</Nm>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>COMPRA 4321 CONTINENTE</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2026013100002</NtryRef>
+        <Amt Ccy="EUR">1500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-01-31</Dt>
+        </BookgDt>
+        <AcctSvcrRef>BCP-0002</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>BCP-0002</AcctSvcrRef>
+            </Refs>
+            <RltdPties>
+              <Dbtr>
+                <Nm>ACME LDA</Nm>
+              </Dbtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>SALARIO JANEIRO</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2026020300003</NtryRef>
+        <Amt Ccy="EUR">12.30</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <ValDt>
+          <Dt>2026-02-03</Dt>
+        </ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr>
+                <Nm>FARMACIA CENTRAL</Nm>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>FARMACIA CENTRAL LISBOA</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <Amt Ccy="EUR">3.10</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-02-05</Dt>
+        </BookgDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr>
+                <Nm>PADARIA DO BAIRRO</Nm>
+              </Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>PADARIA</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

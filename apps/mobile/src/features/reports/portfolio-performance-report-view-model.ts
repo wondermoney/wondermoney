@@ -9,6 +9,8 @@ export type PortfolioPerformanceReportViewModel = Readonly<{
   aggregateChange: number | null
   /** Web's `totalPortfolioPerformance`: the household row under the table. */
   totals: PortfolioPerformanceTotals
+  /** The API sent time- and money-weighted returns (older APIs do not), so the table shows them. */
+  hasPeriodReturns: boolean
 }>
 
 export type PortfolioPerformanceTotals = Readonly<{
@@ -50,5 +52,7 @@ export function mapPortfolioPerformanceReport(response: { data: readonly Portfol
   const rows = [...response.data].sort((a, b) => Math.abs(b.change ?? -1) - Math.abs(a.change ?? -1))
   const changes = response.data.map((row) => row.change)
   const aggregateChange = changes.some((change) => change === null) ? null : sumCents(changes as number[])
-  return { rows, generatedAt: response.generatedAt, aggregateChange, totals: totalsOf(response.data) }
+  // Weighted returns don't add up across portfolios, so the totals carry none.
+  const hasPeriodReturns = response.data.some((row) => row.timeWeightedReturn !== undefined || row.moneyWeightedReturn !== undefined)
+  return { rows, generatedAt: response.generatedAt, aggregateChange, totals: totalsOf(response.data), hasPeriodReturns }
 }

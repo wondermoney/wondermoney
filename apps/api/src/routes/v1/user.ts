@@ -1,10 +1,15 @@
 import express from 'express';
 
+import { createApiTokenController, listApiTokens, revokeApiToken } from '@controller/api-token';
+import { getCalendarFeedToken, resetCalendarFeedToken, revokeCalendarFeedToken } from '@controller/calendar';
 import { downloadDataExport, getDataExport, listDataExports, startDataExport } from '@controller/data-export';
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
 import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
+import { listMcpCalls } from '@controller/mcp';
+import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
+import { getPushPreferences, patchPushPreferences, registerPushDevice, sendTestPush, unregisterPushDevice } from '@controller/push';
 import {
   completeOnboardingStep,
   deleteCurrentUserAccount,
@@ -15,14 +20,44 @@ import {
   getUserAccountInformation,
   updateData,
 } from '@controller/user';
-import { dataExportRateLimit, dataRestoreRateLimit } from '@middleware/rate-limit';
+import { getPreferences, patchPreferences } from '@controller/user-preferences';
+import { dataExportRateLimit, dataRestoreRateLimit, pushTestRateLimit } from '@middleware/rate-limit';
+import { requireSensitiveSession } from '@middleware/sensitive-session';
 
 const router = express.Router();
 
 router.delete('/me', deleteCurrentUserAccount);
 router.get('/me/profile', getCurrentUserProfile);
+// Personal API tokens. Registered before `/:userId` (single path segment, would otherwise
+// shadow it). Tokens themselves can never reach this mount: the API-token scope allowlist
+// excludes `/v1/user`, and `requireSensitiveSession` rejects a token bearer explicitly.
+router.get('/api-tokens', listApiTokens);
+router.post('/api-tokens', requireSensitiveSession, createApiTokenController);
+router.delete('/api-tokens/:id', revokeApiToken);
+// Recent calls made by an MCP client with one of the member's tokens. Read-only, and like the
+// rest of `/v1/user` it is never reachable with a token.
+router.get('/mcp-calls', listMcpCalls);
+// The calendar feed's own credential. Same mount and the same sensitive-session gate for the
+// reset, which both mints and revokes; the feed itself lives at `/v1/calendar/bills.ics`.
+router.get('/calendar-feed-token', getCalendarFeedToken);
+router.post('/calendar-feed-token', requireSensitiveSession, resetCalendarFeedToken);
+router.delete('/calendar-feed-token', revokeCalendarFeedToken);
+// QR pairing with the mobile app. Minting a code hands out a session, so it needs a fresh
+// session and TOTP when the account has it — the phone then skips the second factor.
+router.post('/pairing-codes', requireSensitiveSession, createPairingCodeController);
+router.get('/devices', listDevices);
+router.delete('/devices/:sessionId', revokeDevice);
 router.get('/me/email-notification-preferences', getEmailNotificationPreferences);
 router.patch('/me/email-notification-preferences', patchEmailNotificationPreferences);
+// Mobile push (`services/push`). The device routes need a signed-in session, which the device ends
+// with; the demo account cannot register one (`blockDemoMutation` on this mount).
+router.get('/me/push-preferences', getPushPreferences);
+router.patch('/me/push-preferences', patchPushPreferences);
+router.post('/me/push-devices', registerPushDevice);
+router.delete('/me/push-devices/:token', unregisterPushDevice);
+router.post('/me/push-test', pushTestRateLimit(), sendTestPush);
+router.get('/me/preferences', getPreferences);
+router.patch('/me/preferences', patchPreferences);
 router.get('/me/onboarding', getOnboardingBootstrap);
 router.get('/me/exports', listDataExports);
 router.post('/me/exports', dataExportRateLimit(), startDataExport);

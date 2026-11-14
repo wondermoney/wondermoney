@@ -6,13 +6,18 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant } from '@entity/Tenant';
+import { accountActor, assertAccountWritable } from '@service/account/account-access';
+import { toCalendarDate } from '@service/account/credit-card-cycle';
+import { loadUpcomingInstallments } from '@service/installment/installment-plan.service';
+import { startOfUtcDay } from '@service/installment/installment-schedule';
 import { detectRecurringCandidatesForTenant } from '@service/recurring/recurring-detection.service';
 import { isExpectedRecurring } from '@service/recurring/recurring-expectation';
+import { loadRecurringSchedule } from '@service/recurring/recurring-schedule.service';
 import { RecurringAmountType, RecurringCadence, RecurringSeriesStatus, RecurringSeriesType } from '@service/recurring/recurring-types';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { BadRequestError, NotFoundError } from '@utils/errors';
 import { zParse } from '@validators/parser';
-import { recurringIdParamSchema, recurringListSchema, updateRecurringSchema } from '@validators/recurring';
+import { recurringIdParamSchema, recurringListSchema, recurringOccurrencesQuerySchema, updateRecurringSchema } from '@validators/recurring';
 
 interface AuthedRequest extends Request {
   appuser?: Appuser;
@@ -34,8 +39,9 @@ interface SummaryTotals {
   variableMinTotal: number;
 }
 
+/** A series follows its account: changing it needs write access to that account. */
 export async function confirmRecurringSeries(req: AuthedRequest, res: Response) {
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   recurringSeries.status = RecurringSeriesStatus.confirmed;
   await DI.em.flush();
   return res.sendStatus(200);
@@ -48,7 +54,7 @@ export async function detectRecurring(req: AuthedRequest, res: Response) {
 }
 
 export async function dismissRecurringSeries(req: AuthedRequest, res: Response) {
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   recurringSeries.status = RecurringSeriesStatus.dismissed;
   await DI.em.flush();
   return res.sendStatus(200);
@@ -77,6 +83,41 @@ export async function getRecurringItems(req: AuthedRequest, res: Response) {
     { orderBy: { nextExpectedAt: 'asc' }, populate: ['accountKey', 'categoryKey', 'currencyKey'] },
   );
   return res.json({ items: items.map(recurringDto) });
+}
+
+export async function getRecurringOccurrences(req: AuthedRequest, res: Response) {
+  const {
+    query: { from, to },
+  } = await zParse(recurringOccurrencesQuerySchema, req);
+  const tenantKey = await resolveTenantKey(req);
+  const entries = await loadRecurringSchedule({ from, tenantKey, to });
+  // Card installments on their scheduled day: paid once posted, otherwise a projection. A past one
+  // that was never matched to a posted row is left out; the plan's own page shows it. The plans are
+  // read through the tenant filter, so the other member's private card contributes none.
+  const today = startOfUtcDay(new Date());
+  const installments = (await loadUpcomingInstallments(DI.em, { from, tenantKey, to }))
+    .filter((installment) => installment.paid || installment.date.getTime() >= today.getTime())
+    .map((installment) => ({
+      amount: installment.amount,
+      currency: installment.currency,
+      date: toCalendarDate(installment.date),
+      installmentCount: installment.installmentCount,
+      installmentNumber: installment.installmentNumber,
+      installmentPlanKey: installment.installmentPlanKey,
+      name: installment.name,
+      status: installment.paid ? 'paid' as const : 'projected' as const,
+    }));
+  return res.json({
+    installments,
+    items: entries.map((entry) => ({
+      currency: entry.currency,
+      date: entry.date,
+      expectedAmount: entry.expectedAmount,
+      name: entry.name,
+      seriesKey: entry.seriesKey,
+      status: entry.status,
+    })),
+  });
 }
 
 export async function getRecurringSummary(req: AuthedRequest, res: Response) {
@@ -132,7 +173,7 @@ export async function updateRecurringSeries(req: AuthedRequest, res: Response) {
   const {
     body: { categoryKey, ...updates },
   } = await zParse(updateRecurringSchema, req);
-  const recurringSeries = await getRecurringSeriesOrFail(req);
+  const recurringSeries = await getWritableRecurringSeriesOrFail(req);
   Object.assign(recurringSeries, updates);
   if (categoryKey !== undefined) {
     recurringSeries.categoryKey =
@@ -200,6 +241,12 @@ async function getRecurringSeriesOrFail(req: AuthedRequest) {
   if (!recurringSeries) {
     throw new NotFoundError('Recurring payment not found');
   }
+  return recurringSeries;
+}
+
+async function getWritableRecurringSeriesOrFail(req: AuthedRequest) {
+  const recurringSeries = await getRecurringSeriesOrFail(req);
+  if (recurringSeries.accountKey) await assertAccountWritable(DI.em, recurringSeries.accountKey, accountActor(req));
   return recurringSeries;
 }
 

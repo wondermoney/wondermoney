@@ -19,6 +19,47 @@ The available balance is the current balance net of pending activity, so money t
 
 Every change to a transaction — including duplicate handling and status changes — is recorded in an audit log. If you need to understand why a transaction is in a particular state, the audit history has the record.
 
+## Attachments
+
+Attach the paperwork for a purchase — a receipt, an invoice, a warranty — to its transaction. Open the transaction and use **Attachments** to drag files in or choose them; in the mobile app, take a photo or pick files from the device. Select a file to open it, and remove one with its delete control.
+
+Each transaction holds up to 10 files of up to 10 MB each: JPEG, PNG, WebP, HEIC or PDF. The server checks the file's own bytes, so renaming a file does not change what it is. Attachments are private: download links are short-lived and only your household can see them. When you scan a receipt to create a transaction, the image is attached automatically.
+
+Attachments need file storage on the server. If your instance has none, the section stays hidden.
+
+## Change several transactions at once
+
+Select transactions to categorize them, mark them as reviewed, hide or unhide them, add or remove a tag, or delete them in one step.
+
+- **On the web**, tick the rows in the transactions list; the checkbox in the header selects every row on the page. A bar with the actions appears below the list.
+- **In the mobile app**, open a row's menu and choose **Select**, then tick more rows, or choose **Select all loaded transactions**.
+
+When every row on the page (in the mobile app, every loaded row) is selected and the date range and filters match more, choose **Select all matching transactions**. The action then covers every transaction the list matches, including the ones not loaded yet, and nothing outside it: never another household's transactions, nor private accounts you can't see. In the mobile app it is not offered while a filter that only narrows the loaded results (merchant, account, category or type) is on.
+
+One action covers at most 5,000 transactions. If the filters match more, narrow them first.
+
+## Delete transactions
+
+You can delete transactions you added by hand, imported from a file or created from a receipt.
+
+- **On the web**, open a transaction's menu and choose **Delete**, or select several and choose **Delete** in the bar.
+- **In the mobile app**, open a row's menu and choose **Delete**, or select several and choose **Delete**.
+
+WonderMoney asks first and says how many transactions will be deleted. A deleted transaction leaves every list, total and report, and the account's running balances are recalculated without it: the balance after each later transaction, and the balance of an account you keep by hand, are what they would have been had it never been entered. The audit log keeps a record of the deletion, but a deleted transaction cannot be restored.
+
+Transactions your bank sent cannot be deleted, because the next sync would send them again. When a selection includes some, they are skipped and WonderMoney offers to hide them instead. A hidden transaction is left out of lists and totals; turn on **Show hidden transactions** in the filters to see it again.
+
+## Merchant logos
+
+A transaction with a merchant shows a small circle beside it in the list, the review inbox and the transaction's details. With no logo, the circle holds the merchant's first letter, and its color comes from the name, so the same merchant always has the same color.
+
+To give a merchant a logo on the web, open one of its transactions, and under **Merchant** choose **Edit merchant details**:
+
+- **Website**: the merchant's own site, such as `https://example.com`. If your instance has merchant logos turned on, WonderMoney fetches the logo for that site itself and shows it to you; the logo service never learns who you are. On an instance without them, the website is only stored.
+- **Logo URL**: the address of an image to use instead. It must start with `https://`. Everyone in your household who sees the merchant loads that image from its own address, so only use one from a site you trust.
+
+Leave a field empty to remove it. The merchant's details are shared with your household, and anyone in it but a viewer can change them. The mobile app shows the same logos and initials in its lists. When an image cannot be loaded, the first letter is shown instead.
+
 ## Before you start
 
 Make sure the account has finished its first sync or has manual entries available. If you are reviewing a budget month, confirm the date range first.
@@ -48,13 +89,30 @@ The accounts page's periods follow your calendar too: **1 Month** starts on the 
 
 Every total WonderMoney shows for a period adds up transactions you can list, and each one says which:
 
-- **Money in** and **Money out** above the transactions list add up every transaction the list holds for the date range, on every account and whatever the table's filters, in your currency: the other member's transactions are converted at the exchange rate of their date.
+- **Money in** and **Money out** above the transactions list add up every transaction the list holds for the date range, on every account and whatever the table's filters, in your currency: other members' transactions are converted at the exchange rate of their date.
 - **Reports** count posted transactions only, unless you turn on **Include pending transactions**, and leave out transfers between your own accounts, unless you turn on **Include transfers**.
 - **The home page's** cash flow and spending by category count pending transactions too, and never transfers between your own accounts.
 
 Hidden and expired transactions, and the parts of a transaction in a category that does not count as spending, are never in a report or home page total.
 
 On the spending by category report, select the total to open the transactions list with exactly the transactions behind it: the same dates, filters and switches, money out only. The list shows what they add up to, which is the report's total. Your own filters on the list narrow them further, and **Show all transactions** goes back to the whole list.
+
+## Reimbursements
+
+A refund, or a friend paying you back, arrives as money in, while the purchase it covers still counts in full. Link the two and WonderMoney counts only what you really spent: the linked amount comes off the expense's category, and off your income.
+
+- **On the web**, open the incoming transaction and choose **Mark as reimbursement**. **In the mobile app**, open it and choose **Mark as reimbursement**.
+- Choose the expense it pays back. WonderMoney suggests expenses from the 60 days before it, from the same merchant or for at least its amount; search by description or merchant to look further back.
+- Enter the amount to link. It starts at what both transactions still have free; a refund can cover part of an expense.
+
+For example, a 20 refund linked to a 50 purchase in Groceries leaves 30 spent in Groceries, and 20 less income. Budgets, reports, the home page and the totals above the transactions list all count it this way. Account balances do not change: the money really moved.
+
+- An expense can have several reimbursements, and one reimbursement can cover several expenses. What is linked never adds up to more than either transaction.
+- When the expense is split, the linked amount comes off each line in proportion.
+- The expense shows **Reimbursed** and the refund **Reimbursement**. Select the badge to open the other transaction. Open either to see its links, and choose **Unlink** to remove one; the totals go back to what they were.
+- Deleting either transaction removes its links.
+- For now, both transactions must be in the same currency. A transaction on a private account can only be linked to one on an account that exactly the same people can see, so nobody in the household sees half of a link. You also need to be able to edit both accounts.
+- A transaction shared in an [expense group](/en/docs/accounts-transactions/shared-expense-groups), or one that settles a group debt, cannot also be a reimbursement: your friends' part is already left out of your totals.
 
 ## Typing amounts
 

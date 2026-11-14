@@ -68,4 +68,18 @@ describe('Enable Banking connection sync state', () => {
     await h.service.deferNextSync(20, 90 * 24 * 60 * 60);
     expect(connection.nextEligibleSyncAt).toEqual(new Date('2026-11-13T10:00:00Z'));
   });
+
+  it('records when a sync reached out to the bank, whatever its outcome', async () => {
+    const connection = linked();
+    const h = harness(connection);
+    await expect(h.service.markAttempt(20)).resolves.toEqual(new Date('2026-11-06T10:00:00Z'));
+    expect(connection.lastSyncAttemptAt).toEqual(new Date('2026-11-06T10:00:00Z'));
+    expect(h.em.flush).toHaveBeenCalled();
+  });
+
+  it('records no attempt for a connection that no longer exists', async () => {
+    const h = harness(null);
+    await expect(h.service.markAttempt(20)).resolves.toBeUndefined();
+    expect(h.em.flush).not.toHaveBeenCalled();
+  });
 });

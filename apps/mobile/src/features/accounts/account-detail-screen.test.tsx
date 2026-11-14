@@ -8,6 +8,11 @@ import { initMobileI18n } from '@/lib/i18n'
 import { AccountDetailScreen, type AccountDetailData } from './account-detail-screen'
 import { touchHeight } from '@/test/touch-target'
 
+const mockStatementDetail = jest.fn()
+jest.mock('./use-credit-card-statement-detail', () => ({
+  useCreditCardStatementDetail: () => mockStatementDetail(),
+}))
+
 const openBanking: AccountDetailData = {
   accountId: 42,
   accountName: 'Everyday',
@@ -55,6 +60,28 @@ jest.mock('victory-native', () => ({
 }))
 
 describe('AccountDetailScreen', () => {
+  it('shows a card’s remaining installment commitment and its plans', async () => {
+    const onOpenInstallmentPlan = jest.fn()
+    const plan = { installmentPlanKey: 11, accountKey: 42, currency: 'USD', description: 'Laptop', purchaseDate: '2026-08-20', totalAmount: 100, installmentCount: 4, paidCount: 2, paidAmount: 50, remainingCount: 2, remainingAmount: 50 }
+    const { view } = await renderScreen({ status: 'loaded', data: {
+      ...openBanking,
+      installmentPlans: {
+        commitment: { status: 'loaded', data: { accountKey: 42, currency: 'USD', remainingAmount: 50, remainingCount: 2, activePlanCount: 1, nextInstallment: null } },
+        plans: { status: 'loaded', data: [plan] },
+        suggestions: { status: 'loaded', data: [] },
+      },
+    } }, { onOpenInstallmentPlan, onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn() })
+    const remaining = formatCurrency(50, { locale: 'en', currency: 'USD' })
+    expect(view.getByLabelText(`Still to charge, ${remaining}, 2 installments to come · 1 active plan`)).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: new RegExp('^Laptop, Remaining') }))
+    expect(onOpenInstallmentPlan).toHaveBeenCalledWith(11)
+  })
+
+  it('shows no installments section on an account that is not a card', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: openBanking }, { onOpenInstallmentPlan: jest.fn(), onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn() })
+    expect(view.queryByTestId('installment-plans')).not.toBeOnTheScreen()
+  })
+
   it('matches web: back link, name and institution, the balance figure, Edit and Back', async () => {
     const { view, back, edit } = await renderScreen({ status: 'loaded', data: openBanking })
     const converted = formatCurrency(90.25, { locale: 'en', currency: 'EUR' })
@@ -107,6 +134,37 @@ describe('AccountDetailScreen', () => {
     expect(onImportTransactions).toHaveBeenCalledTimes(1)
     await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
     await fireEvent.press(view.getByRole('menuitem', { name: 'Edit account' }))
+    expect(edit).toHaveBeenCalledTimes(1)
+  })
+
+  it('on an account the caller can only view, offers no change: only its sharing, marked View only', async () => {
+    const handlers = {
+      onCreateTransaction: jest.fn(), onImportTransactions: jest.fn(), onRecalculate: jest.fn(),
+      onOpenInstallmentPlan: jest.fn(), onCreateInstallmentPlan: jest.fn(), onAcceptInstallmentSuggestion: jest.fn(),
+    }
+    const suggestion = { key: 's1', description: 'Phone', currency: 'USD', installmentAmount: 25, installmentCount: 4, matchedCount: 2, firstDate: '2026-08-01', lastDate: '2026-09-01', transactionKeys: [1, 2] }
+    const plan = { installmentPlanKey: 11, accountKey: 42, currency: 'USD', description: 'Laptop', purchaseDate: '2026-08-20', totalAmount: 100, installmentCount: 4, paidCount: 2, paidAmount: 50, remainingCount: 2, remainingAmount: 50 }
+    const { view, edit } = await renderScreen({ status: 'loaded', data: {
+      ...openBanking,
+      isOwnedByViewer: false,
+      myAccess: 'read',
+      installmentPlans: {
+        commitment: { status: 'loaded', data: null },
+        plans: { status: 'loaded', data: [plan] },
+        suggestions: { status: 'loaded', data: [suggestion] as never },
+      },
+    } }, { ...handlers, recalculation: { phase: 'idle' } })
+    expect(view.getByTestId('account-view-only')).toHaveTextContent('View only')
+    expect(view.queryByTestId('account-add-transaction')).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Add transaction' })).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Edit account' })).not.toBeOnTheScreen()
+    // The plans still open (their own screen is view-only too); nothing adds or accepts one.
+    expect(view.getByRole('button', { name: new RegExp('^Laptop, Remaining') })).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Add plan' })).not.toBeOnTheScreen()
+    expect(view.queryByTestId('installment-suggestions')).not.toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'More actions' }))
+    expect(view.getAllByRole('menuitem').map((item) => item.props.accessibilityLabel)).toEqual(['Sharing'])
+    await fireEvent.press(view.getByRole('menuitem', { name: 'Sharing' }))
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
@@ -169,6 +227,51 @@ describe('AccountDetailScreen', () => {
     expect(unavailable.view.getAllByText('Balance unavailable').length).toBeGreaterThan(0)
   })
 
+  it('shows the forecast card with the low point and the next projected payments', async () => {
+    const low = formatCurrency(880, { locale: 'en', currency: 'USD' })
+    const projected = formatCurrency(-120, { locale: 'en', currency: 'USD' })
+    const { view } = await renderScreen({
+      status: 'loaded',
+      data: {
+        ...openBanking,
+        forecast: {
+          status: 'loaded',
+          series: {
+            accountKey: 42,
+            complete: true,
+            currency: 'USD',
+            lowPoint: { balance: 880, date: '2026-03-06' },
+            openingBalance: 1000,
+            points: [
+              { balance: 1000, date: '2026-03-01' },
+              { balance: 880, date: '2026-03-06' },
+            ],
+            projected: [
+              { accountKey: 42, amount: 120, currency: 'USD', date: '2026-03-06', name: 'Rent', seriesKey: 1 },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(view.getByRole('header', { name: 'Forecast' })).toBeOnTheScreen()
+    expect(view.getByText('Low point in the next 30 days')).toBeOnTheScreen()
+    expect(view.getByLabelText(low)).toBeOnTheScreen()
+    expect(view.getByText('Rent')).toBeOnTheScreen()
+    expect(view.getByLabelText(projected)).toBeOnTheScreen()
+    expect(view.getByText('Not counted in reports')).toBeOnTheScreen()
+  })
+
+  it('says the account cannot be projected yet instead of showing a zero', async () => {
+    const { view } = await renderScreen({
+      status: 'loaded',
+      data: { ...openBanking, forecast: { status: 'unavailable' } },
+    })
+
+    expect(view.getByText('Not enough data to project this account yet.')).toBeOnTheScreen()
+    expect(view.queryByText('Low point in the next 30 days')).not.toBeOnTheScreen()
+  })
+
   it('shows inflow, outflow and savings rate with last period beside each', async () => {
     const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, metrics: { status: 'loaded', summary: { inflowCurrent: 100, inflowPast: 50, outflowCurrent: 40, outflowPast: 20, inflowPct: 1, outflowPct: 1, netSavings: 60, netSavingsPast: 30, savingsRate: 0.6 } } } })
     for (const label of ['Inflow', 'Outflow', 'Savings rate']) expect(view.getByText(label)).toBeOnTheScreen()
@@ -198,5 +301,57 @@ describe('AccountDetailScreen', () => {
     for (const [name, text] of [['Back', 'Accounts'], ['Retry', 'Retry'], ['Sign out', 'Sign out']] as const) {
       expect(within(view.getByRole('button', { name })).getByText(text).props.allowFontScaling).not.toBe(false)
     }
+  })
+})
+
+describe('credit card statement', () => {
+  const statement = {
+    periodStart: '2026-01-01',
+    periodEnd: '2026-01-31',
+    dueDate: '2026-02-10',
+    charges: 300,
+    payments: 100,
+    balance: 200,
+    availableCredit: 800,
+    isCurrent: true,
+    status: 'closed' as const,
+  }
+
+  beforeEach(() => {
+    mockStatementDetail.mockReturnValue({ isLoading: false, error: null, data: { statement: { ...statement, transactions: [{ transactionKey: 1, amount: 42, description: 'Cafe', merchantName: 'North Cafe', transactionDate: '2026-01-12' }] } }, refetch: jest.fn() })
+  })
+
+  it('shows the current statement balance, due date and available credit', async () => {
+    const { view } = await renderScreen(
+      { status: 'loaded', data: { ...openBanking, creditCard: { statementCloseDay: 31, paymentDueDay: 10, creditLimit: 1000, minimumPaymentPercent: null }, creditCardStatement: { status: 'loaded', statement, statements: [statement], creditLimit: 1000 } } },
+    )
+    expect(view.getByTestId('credit-card-statement')).toBeOnTheScreen()
+    expect(view.getByText('Statement balance')).toBeOnTheScreen()
+    expect(view.getAllByText(formatCurrency(200, { locale: 'en', currency: 'USD' })).length).toBeGreaterThan(0)
+    expect(view.getByText('Due date')).toBeOnTheScreen()
+    expect(view.getAllByText(/Feb 10, 2026/).length).toBeGreaterThan(0)
+    expect(view.getByText('Available credit')).toBeOnTheScreen()
+    expect(view.getAllByText(formatCurrency(800, { locale: 'en', currency: 'USD' })).length).toBeGreaterThan(0)
+    expect(view.getByTestId('credit-card-statement-history')).toBeOnTheScreen()
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31')).toBeOnTheScreen()
+    expect(view.getByText('North Cafe')).toBeOnTheScreen()
+  })
+
+  it('opens a chosen statement and shows a recoverable detail error without leaking rows', async () => {
+    mockStatementDetail.mockReturnValue({ isLoading: false, error: new Error('offline'), data: undefined, refetch: jest.fn() })
+    const older = { ...statement, periodStart: '2025-12-01', periodEnd: '2025-12-31', isCurrent: false, status: 'paid' as const }
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, creditCardStatement: { status: 'loaded', statement, statements: [older, statement], creditLimit: null } } })
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31').props.accessibilityState).toEqual({ selected: true })
+    await fireEvent.press(view.getByTestId('credit-card-statement-row-2025-12-31'))
+    expect(view.getByTestId('credit-card-statement-row-2025-12-31').props.accessibilityState).toEqual({ selected: true })
+    expect(view.getByTestId('credit-card-statement-row-2026-01-31').props.accessibilityState).toEqual({ selected: false })
+    expect(view.getByText('Could not load these transactions. Try again.')).toBeOnTheScreen()
+    expect(view.queryByText('North Cafe')).not.toBeOnTheScreen()
+    expect(view.getByRole('button', { name: 'Retry' })).toBeOnTheScreen()
+  })
+
+  it('omits the section for an account that is not a card', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: openBanking })
+    expect(view.queryByTestId('credit-card-statement')).not.toBeOnTheScreen()
   })
 })

@@ -1,0 +1,94 @@
+---
+title: Opções de alojamento gerido
+description: Corre o WonderMoney num fornecedor de alojamento em vez de no teu próprio servidor, com o que custa e onde ficam os teus dados.
+---
+
+Se não queres tratar de um servidor, um fornecedor de alojamento pode correr a tua instância por ti. Continua a ser a tua instância, com a tua própria base de dados, mas é o fornecedor que gere as máquinas, e pagas-lhe por isso.
+
+| | O teu próprio servidor | Render | PikaPods |
+|---|---|---|---|
+| Como | [Script de instalação](/pt/docs/self-hosting/install) ou [chart Helm](/pt/docs/self-hosting/kubernetes) | O botão "Deploy to Render" | Ainda não disponível |
+| Custo | A máquina que já tens, ou um VPS pequeno | Cinco recursos pagos da Render, cobrados todos os meses: [preços da Render](https://render.com/pricing) | |
+| Onde ficam os teus dados | Onde estiver a máquina | Na região da Render indicada no Blueprint (Frankfurt), mais a região do teu bucket de armazenamento | |
+| Quem gere as máquinas | Tu, ou o teu fornecedor de VPS | A Render, Inc., uma empresa dos EUA | |
+| Cópias de segurança | O serviço de cópias de segurança incluído | As cópias e exportações da base de dados da Render, nos planos pagos | |
+| Atualizações | Corres tu | Automáticas com o Auto Sync, ou com uma sincronização manual | |
+
+## Render
+
+A [Render](https://render.com) é uma empresa de alojamento. O [`render.yaml`](https://github.com/wondermoney/wondermoney/blob/develop/render.yaml) do repositório é um Blueprint da Render: a descrição de tudo o que uma instância precisa, que a Render cria na tua conta de uma só vez.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wondermoney/wondermoney)
+
+### O que cria
+
+| Recurso | O que é |
+|---|---|
+| `wondermoney` | O endereço que as pessoas usam. Um pequeno proxy que envia `/v1/*` e `/api/auth/*` para a API e tudo o resto para a aplicação web, para que as duas partilhem um só domínio e não seja preciso domínio de cookie. |
+| `wondermoney-api` | A API. Aplica as migrações da base de dados quando arranca. |
+| `wondermoney-web` | A aplicação web. |
+| `wondermoney-worker` | As tarefas em segundo plano: sincronizações bancárias e de cotações, importações, emails agendados. |
+| `wondermoney-db` | Postgres 16, acessível só a partir dos serviços acima. |
+
+A API e a aplicação web também recebem endereços `onrender.com` próprios. Usa o endereço do serviço `wondermoney`: só aí é possível iniciar sessão.
+
+### Custo
+
+Todos os recursos correm num tipo de instância pago da Render, por isso uma instância custa a soma de quatro serviços e uma base de dados. A [página de preços da Render](https://render.com/pricing) tem os preços atuais. Os [tipos de instância gratuitos](https://render.com/docs/free) da Render não servem: os workers em segundo plano não os têm, os serviços web gratuitos param ao fim de 15 minutos sem tráfego e demoram cerca de um minuto a acordar, e as bases de dados gratuitas expiram 30 dias depois de criadas e não têm cópias de segurança.
+
+Depois do deploy, podes mudar o tipo de instância de cada recurso no painel da Render. O bucket de armazenamento, o fornecedor de email e o fornecedor de IA cobram à parte, se os usares.
+
+### Onde ficam os teus dados
+
+Tudo corre na região de Frankfurt da Render, na UE. A Render não consegue mudar um serviço ou uma base de dados para outra região mais tarde. Para usares outra região (Oregon, Ohio, Virginia ou Singapura), faz um fork do repositório, muda todas as linhas `region` no `render.yaml` e faz o deploy a partir do teu fork.
+
+É a Render que corre a base de dados e os servidores, por isso os teus dados ficam guardados na infraestrutura dela e a Render, Inc., uma empresa dos EUA, trata-os por ti. Lê a [política de privacidade](https://render.com/privacy) e o [acordo de tratamento de dados](https://render.com/dpa) se isso for importante para ti ou para quem usa a tua instância. Os ficheiros carregados (importações CSV, cópias de recibos) ficam no bucket que escolheres, na região desse fornecedor.
+
+A base de dados não aceita ligações de fora da rede da Render. Para correres `pg_dump` a partir da tua máquina, adiciona o teu endereço no controlo de acesso da base de dados, no painel.
+
+### Antes do deploy
+
+1. **Escolhe o endereço.** As passkeys pertencem a um domínio, por isso mudar de endereço mais tarde obriga toda a gente a adicionar as passkeys outra vez. Usa o teu próprio domínio (`https://money.example.com`) se tiveres um. Caso contrário, recebes um endereço `onrender.com`, que a Render escolhe durante o deploy.
+2. **Gera a chave de encriptação** que protege as credenciais bancárias de cada pessoa, e guarda uma cópia num sítio seguro fora da Render. Sem ela, uma base de dados restaurada fica ilegível.
+
+   ```sh
+   openssl rand -base64 32
+   ```
+
+3. **Opcional: um bucket de armazenamento** para importações CSV e cópias de recibos, de qualquer serviço compatível com S3, como Cloudflare R2, Backblaze B2 ou AWS S3. Os browsers carregam os ficheiros diretamente para ele, por isso permite pedidos `PUT` vindos do endereço da tua instância nas definições de CORS do bucket. Podes adicioná-lo mais tarde.
+
+### Deploy
+
+Carrega no botão acima e inicia sessão na Render. A Render mostra os recursos que vai criar e pede estes valores:
+
+| Definição | Serviço | O que introduzir |
+|---|---|---|
+| `APP_URL` | `wondermoney` | O endereço do passo 1, com `https://`. Para um endereço `onrender.com` que ainda não conheces, introduz `https://wondermoney.onrender.com` e corrige-o depois do deploy. |
+| `CREDENTIAL_ENCRYPTION_KEY_V1` | `wondermoney-api` | A chave do passo 2. Nunca a mudes depois de estar em uso. |
+| `SIGNUP_MODE` | `wondermoney-api` | `invite`: só as pessoas que convidares para o teu agregado se podem registar. A primeira conta pode sempre registar-se, por isso continuas a poder criar a tua. `open` deixa qualquer pessoa registar-se; `closed` não deixa ninguém. |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_ENDPOINT`, `S3_BUCKET`, `S3_REGION` | `wondermoney-api` e `wondermoney-worker` | O bucket do passo 3, igual nos dois serviços. Deixa-os vazios para correres sem armazenamento de ficheiros. |
+
+Os outros segredos (o segredo de sessão, as chaves de administração e interna, a chave dos links para cancelar a subscrição e a palavra-passe da base de dados) são gerados pela Render e nunca saem da tua conta. O primeiro deploy demora alguns minutos: a API cria as tabelas da base de dados e carrega os dados de referência antes de responder.
+
+### Depois do deploy
+
+1. Abre o serviço `wondermoney` no painel. O endereço dele está no topo da página.
+2. Se não for o `APP_URL` que introduziste, define o `APP_URL` no Environment desse serviço com esse endereço. Os outros serviços copiam o `APP_URL` de lá quando o Blueprint sincroniza: abre a página do Blueprint e carrega em **Manual Sync**.
+3. Para o teu próprio domínio, adiciona-o em **Custom Domains** no serviço `wondermoney` e cria o registo DNS que a Render mostra. A Render obtém o certificado. Consulta o [guia de domínios personalizados da Render](https://render.com/docs/custom-domains).
+4. Abre o endereço e cria a tua conta.
+
+A aplicação móvel liga-se ao mesmo endereço: consulta [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app).
+
+### Mais definições
+
+Tudo o que está em [Configurar a tua instância](/pt/docs/self-hosting/configure) funciona aqui também: adiciona as definições no Environment do `wondermoney-api` e do `wondermoney-worker`, iguais nos dois, e as `NEXT_PUBLIC_` no `wondermoney-web`. As definições que adicionares tu mantêm-se quando o Blueprint sincroniza; as que o `render.yaml` define (como `PORT` ou `TRUST_PROXY`) voltam ao valor dele em cada sincronização. Sem fornecedor de email, os emails ficam escritos nos registos do `wondermoney-api`.
+
+### Atualizações
+
+O Blueprint corre uma versão do WonderMoney, e cada versão nova passa-o para a seguinte. Com o Auto Sync ligado (a predefinição da Render), a Render aplica a mudança assim que é publicada: descarrega as imagens novas, e a API migra a base de dados ao arrancar.
+
+Para escolheres quando atualizar, põe o Auto Sync em **No** na página de definições do Blueprint. Depois, em cada versão, lê as [notas da versão](/pt/docs/whats-new), faz uma cópia de segurança (**Create export** na página Recovery da base de dados) e carrega em **Manual Sync** na página do Blueprint. As bases de dados pagas da Render também guardam cópias contínuas que podes restaurar para um momento no tempo: consulta o [guia de cópias de segurança da Render](https://render.com/docs/postgresql-backups). Uma base de dados restaurada precisa da mesma `CREDENTIAL_ENCRYPTION_KEY_V1`.
+
+## PikaPods
+
+A [PikaPods](https://www.pikapods.com) corre aplicações de código aberto do seu catálogo por uma mensalidade. O WonderMoney ainda não está no catálogo; o pedido é acompanhado na [issue #128](https://github.com/wondermoney/wondermoney/issues/128). Até lá, usa a Render ou o teu próprio servidor.

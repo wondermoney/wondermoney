@@ -10,10 +10,12 @@ import {
   balanceSheet,
   cashflowScale,
   measureGeometry,
+  monthComparisonRange,
   monthPosition,
   monthSummary,
   netWorthChanges,
   overPlanLines,
+  savingsSummary,
   upcomingLoanPayments,
 } from "./month-overview";
 
@@ -335,6 +337,25 @@ test("the balance sheet totals what is owned and owed, and they net to net worth
   );
 });
 
+test("accounts in the balance sheet follow the member's account order", () => {
+  const sheet = balanceSheet(
+    {
+      netWorth: 300,
+      rows: [
+        { key: "accounts:1", recordId: 1, label: "Alpha", amount: 100 },
+        { key: "accounts:2", recordId: 2, label: "Beta", amount: 100 },
+        { key: "accounts:3", recordId: 3, label: "Gamma", amount: 100 },
+      ],
+    },
+    [3, 1],
+  );
+
+  assert.deepEqual(
+    sheet.own[0]?.rows.map((row) => row.label),
+    ["Gamma", "Alpha", "Beta"],
+  );
+});
+
 test("an account with a negative balance is owed, not owned", () => {
   const sheet = balanceSheet({
     netWorth: 400,
@@ -371,6 +392,19 @@ test("a portfolio already inside its account's balance is listed but not added",
   const portfolios = sheet.own.find((group) => group.type === "portfolios");
   assert.equal(portfolios?.total, 0);
   assert.deepEqual(portfolios?.rows.map((row) => [row.amount, row.countedInAccountId]), [[8000, 5]]);
+});
+
+test("a member's share of a split account travels with its row, on either side", () => {
+  const sheet = balanceSheet({
+    netWorth: 400,
+    rows: [
+      { key: "accounts:House fund", label: "House fund", amount: 600, sharePercent: 60 },
+      { key: "accounts:Card", label: "Card", amount: -200, isLiability: true, sharePercent: 50 },
+    ],
+  });
+
+  assert.deepEqual(sheet.own[0]?.rows.map((row) => [row.amount, row.sharePercent]), [[600, 60]]);
+  assert.deepEqual(sheet.owe[0]?.rows.map((row) => [row.amount, row.sharePercent]), [[200, 50]]);
 });
 
 test("a manually valued asset is owned, in its own group after portfolios", () => {
@@ -508,6 +542,72 @@ test("a yearly subcategory is over plan against its monthly share, not its yearl
   assert.equal(lines[0].name, "VEHICLE_INSURANCE");
   close(lines[0].planned, 50, "monthly plan");
   close(lines[0].over, 10, "over");
+});
+
+test("month-to-date compares against the same days of last month", () => {
+  // 5 November: compare 1-5 November with 1-5 October.
+  const early = monthComparisonRange(new Date(2026, 10, 5, 12));
+  assert.equal(early.samePoint, true);
+  assert.equal(early.from.getTime(), new Date(2026, 9, 1).getTime());
+  assert.equal(early.to.getTime(), new Date(2026, 9, 5, 23, 59, 59, 999).getTime());
+
+  // The last day of November: the whole of October.
+  const lastDay = monthComparisonRange(new Date(2026, 10, 30, 12));
+  assert.equal(lastDay.samePoint, false);
+  assert.equal(lastDay.to.getTime(), new Date(2026, 9, 31, 23, 59, 59, 999).getTime());
+});
+
+test("a short previous month clamps the same-point comparison to its last day", () => {
+  // 30 March: February has 28 days, so the comparison ends on 28 February.
+  const range = monthComparisonRange(new Date(2026, 2, 30, 12));
+  assert.equal(range.samePoint, true);
+  assert.equal(range.to.getTime(), new Date(2026, 1, 28, 23, 59, 59, 999).getTime());
+});
+
+test("the savings summary states this month beside the comparison period", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 1400, income: 2000, savingsRate: 0.3 },
+    { expenses: 1450, income: 1900, savingsRate: 0.2368 },
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.income, 2000);
+  assert.equal(summary.spending, 1400);
+  assert.equal(summary.savingsRate, 0.3);
+  assert.equal(summary.incomeDelta, 100);
+  assert.equal(summary.spendingDelta, -50);
+  close(summary.savingsRateDelta ?? 0, 6.32, "rate delta in points");
+  assert.equal(summary.comparison?.samePoint, true);
+});
+
+test("a comparison period with no data has no deltas, not zero ones", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 1400, income: 2000, savingsRate: 0.3 },
+    undefined,
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.comparison, null);
+  assert.equal(summary.incomeDelta, null);
+  assert.equal(summary.spendingDelta, null);
+  assert.equal(summary.savingsRateDelta, null);
+});
+
+test("a month with no income has no savings rate and no rate delta", () => {
+  const range = monthComparisonRange(new Date(2026, 10, 5, 12));
+  const summary = savingsSummary(
+    { expenses: 400, income: 0, savingsRate: null },
+    { expenses: 300, income: 1000, savingsRate: 0.7 },
+    range,
+  );
+
+  assert.ok(summary);
+  assert.equal(summary.savingsRate, null);
+  assert.equal(summary.savingsRateDelta, null);
 });
 
 test("a carry from last month moves what is left and what counts as over plan", () => {

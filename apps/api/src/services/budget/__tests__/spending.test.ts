@@ -9,6 +9,7 @@ const baseInput = {
   accountKeys: [202],
   currency: { code: 'EUR', currencyKey: 1 },
   period: 'monthly' as const,
+  periodStartDay: 1,
   templateKeys: [101],
   tenantKey: 17,
   viewerAppuserKey: 42,

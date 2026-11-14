@@ -12,21 +12,92 @@ docker compose up -d
 
 La API aplica los cambios en la base de datos al arrancar. Para quedarte en una versión concreta en lugar de la más reciente, define `WM_VERSION` en el `.env`, por ejemplo `WM_VERSION=1.4`.
 
+Para comprobar qué versión ejecuta una instancia, abre el menú de la cuenta en la aplicación web (o **Más** en la aplicación móvil): muestra la versión de la aplicación web y la del servidor, con el commit de cada una. `GET /v1/instance` también devuelve `version` y `commit`.
+
 ## Hacer una copia de seguridad
 
 Todo lo importante está en la base de datos Postgres, además del volumen `storage-data` si usas el almacenamiento incluido.
 
-```sh
-docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+Guarda una copia del `.env` en otro sitio que no sea el servidor, por ejemplo en un gestor de contraseñas. `CREDENTIAL_ENCRYPTION_KEY_V1` cifra las credenciales bancarias que guardan las personas, y una base de datos restaurada no puede usarlas sin ella. Las copias de seguridad de abajo nunca incluyen el `.env`.
+
+### Copias de seguridad programadas
+
+Añade `backup` a `COMPOSE_PROFILES` en el `.env` (por ejemplo `COMPOSE_PROFILES=proxy,backup`) y ejecuta `docker compose up -d`. Cada día a las 02:00, el servicio `backup` escribe una carpeta en `./backups`:
+
+```text
+backups/2026-11-12T020000Z/
+  wondermoney.dump    pg_dump -Fc de la base de datos
+  storage.tar.gz      el volumen storage-data (vacío si no usas el almacenamiento incluido)
+  SHA256SUMS
 ```
 
-Guarda una copia del `.env` con tus copias de seguridad. `CREDENTIAL_ENCRYPTION_KEY_V1` cifra las credenciales bancarias que guardan las personas, y una base de datos restaurada no puede usarlas sin ella. Guarda las copias de seguridad en otro sitio que no sea el propio servidor.
+Tras cada copia correcta, se borran las carpetas de más de siete días. Cada copia se escribe en una carpeta `.tmp-` oculta y solo cambia de nombre cuando está completa, así que una ejecución interrumpida nunca deja una carpeta que parezca terminada; la siguiente ejecución elimina lo que quedó.
+
+| Ajuste | Por defecto | |
+|---|---|---|
+| `BACKUP_DIR` | `./backups` | Dónde van las carpetas en el servidor |
+| `BACKUP_SCHEDULE` | `0 2 * * *` | Una expresión cron: minuto, hora, día, mes, día de la semana |
+| `BACKUP_KEEP_DAYS` | `7` | Días que se guardan; `0` guarda todas las copias |
+| `BACKUP_TZ` | `UTC` | Zona horaria de las programaciones, por ejemplo `Europe/Madrid` (los nombres de las carpetas siguen en UTC) |
+
+El mismo servicio ejecuta órdenes puntuales, con o sin el perfil:
+
+```sh
+docker compose run --rm backup now     # hace una copia ahora
+docker compose run --rm backup list    # las copias en BACKUP_DIR
+docker compose logs backup             # lo que hicieron las ejecuciones programadas
+```
+
+Los archivos guardados en un servicio S3 externo (R2, B2, AWS) no forman parte de estas copias: usa el control de versiones o la replicación del propio proveedor para el bucket.
+
+### Copias fuera del servidor
+
+Una copia en el mismo disco no sobrevive al disco. El servicio `backup-offsite` copia las carpetas de copias terminadas a cualquier destino de [rclone](https://rclone.org/overview/) (S3, Backblaze B2, SFTP, Google Drive y muchos más) cada día a las 02:30. Configura primero el destino; se guarda en `./rclone/rclone.conf`:
+
+```sh
+docker compose run --rm backup-offsite config
+```
+
+Después define el perfil y el destino en el `.env` y ejecuta `docker compose up -d`:
+
+```text
+COMPOSE_PROFILES=backup,backup-offsite
+BACKUP_DESTINATION=b2:my-bucket/wondermoney
+```
+
+`docker compose run --rm backup-offsite now` copia al momento, y `list` muestra lo que hay en el destino. Copia y nunca replica borrados, así que una copia borrada en el servidor sigue en el destino hasta que tiene más de `BACKUP_OFFSITE_KEEP_DAYS` días (30 por defecto, `0` lo guarda todo). `BACKUP_OFFSITE_SCHEDULE` (`30 2 * * *`) define cuándo se ejecuta. Solo se copian las carpetas con fecha y hora: nada más de `BACKUP_DIR`, y nunca el `.env`, que el servicio no ve.
 
 ## Restaurar
 
-Detén la aplicación, vuelve a crear la base de datos, carga la copia e inicia de nuevo:
+La restauración se detiene si la API, el worker o el almacenamiento incluido están en marcha, así que detenlos primero:
 
 ```sh
+docker compose stop proxy web worker api storage
+docker compose run --rm backup restore 2026-11-12T020000Z    # o: restore latest
+docker compose up -d
+```
+
+Comprueba los archivos con `SHA256SUMS`, pide confirmación (`--yes` se salta la pregunta), carga la copia en una base de datos nueva y solo la cambia por la actual cuando ha terminado de cargar, y después sustituye el contenido de `storage-data` por `storage.tar.gz`. Restaura con la misma versión o una más reciente: la API aplica los cambios en la base de datos más recientes al arrancar, pero no puede deshacerlos.
+
+La restauración sustituye todo lo que hay ahora en la base de datos. Si puedes llegar a necesitarlo, ejecuta primero `docker compose run --rm backup now` y después restaura la carpeta por su nombre en lugar de `latest`.
+
+Para restaurar desde la copia fuera del servidor, por ejemplo en un servidor nuevo, vuelve a poner el `.env` y el `./rclone/rclone.conf` y trae primero la carpeta a `BACKUP_DIR`:
+
+```sh
+docker compose run --rm backup-offsite fetch latest    # o el nombre de una carpeta de list
+```
+
+Esto restaura el servidor entero. Para mover los datos de una persona (por ejemplo del servicio alojado a tu propio servidor), esa persona los exporta y los restaura en un hogar nuevo y vacío: consulta [Restaurar desde una exportación](/es/docs/settings-security-privacy/data-privacy#restaurar-desde-una-exportación). El servidor que los recibe necesita almacenamiento de archivos.
+
+## Copias y restauración a mano
+
+Sin el perfil `backup`, `pg_dump` y `pg_restore` en el contenedor de postgres hacen lo mismo con la base de datos:
+
+```sh
+# Copia de seguridad
+docker compose exec -T postgres pg_dump -U wondermoney -Fc wondermoney > wondermoney-$(date +%F).dump
+
+# Restauración: detén la aplicación, vuelve a crear la base de datos, carga la copia e inicia de nuevo
 docker compose stop api worker web
 docker compose exec -T postgres dropdb -U wondermoney wondermoney
 docker compose exec -T postgres createdb -U wondermoney wondermoney
@@ -35,5 +106,3 @@ docker compose up -d
 ```
 
 Si cambiaste `POSTGRES_USER` o `POSTGRES_DB` en el `.env`, usa esos valores en lugar de `wondermoney`.
-
-Esto restaura el servidor entero. Para mover los datos de una persona (por ejemplo del servicio alojado a tu propio servidor), esa persona los exporta y los restaura en un hogar nuevo y vacío: consulta [Restaurar desde una exportación](/es/docs/settings-security-privacy/data-privacy#restaurar-desde-una-exportación). El servidor que los recibe necesita almacenamiento de archivos.

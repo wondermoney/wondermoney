@@ -110,6 +110,9 @@ test("supports finalized detail payloads", async () => {
     isPrivate: false,
     isOwnedByViewer: false,
     ownerFirstName: null,
+    isJoint: true,
+    ownerAppuserKey: 4,
+    attribution: { appuserKey: null, displayName: null },
   };
   const apiClient = {
     get: async () => ({ data: { account: finalizedAccount } }),
@@ -130,5 +133,7 @@ test("supports finalized detail payloads", async () => {
     syncStatus: null,
     fxStatus: null,
     fxRateDate: null,
+    creditCard: null,
+    myAccess: "write",
   });
 });

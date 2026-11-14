@@ -1,0 +1,117 @@
+{{- $component := dict "root" . "component" "web" }}
+{{- $api := include "wondermoney.componentName" (dict "root" . "component" "api") }}
+{{- $secrets := include "wondermoney.secretValues" . | fromYaml }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wondermoney.componentName" $component }}
+  labels:
+    {{- include "wondermoney.componentLabels" $component | nindent 4 }}
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      {{- include "wondermoney.componentSelectorLabels" $component | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "wondermoney.componentSelectorLabels" $component | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.web.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- include "wondermoney.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: web
+          image: {{ include "wondermoney.image" (dict "root" . "image" .Values.web.image) }}
+          {{- with .Values.image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
+          securityContext:
+            {{- include "wondermoney.containerSecurityContext" . | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            # What browsers use.
+            - name: NEXT_PUBLIC_APP_URL
+              value: {{ include "wondermoney.appUrl" . | quote }}
+            - name: NEXT_PUBLIC_API_URL
+              value: {{ include "wondermoney.apiUrl" . | quote }}
+            # What the web server uses for its own requests, inside the cluster.
+            - name: API_INTERNAL_URL
+              value: {{ printf "http://%s:3001" $api | quote }}
+            {{- range $key, $value := .Values.config }}
+            {{- if and (hasPrefix "NEXT_PUBLIC_" $key) (ne (toString $value) "") }}
+            - name: {{ $key }}
+              value: {{ toString $value | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if hasKey $secrets "RECAPTCHA_SECRET_KEY" }}
+            - name: RECAPTCHA_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "wondermoney.secretName" . }}
+                  key: RECAPTCHA_SECRET_KEY
+            {{- else if .Values.existingSecret }}
+            - name: RECAPTCHA_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret }}
+                  key: RECAPTCHA_SECRET_KEY
+                  optional: true
+            {{- end }}
+            {{- with .Values.webExtraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.web.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.web.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.web.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.web.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.web.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wondermoney.componentName" $component }}
+  labels:
+    {{- include "wondermoney.componentLabels" $component | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "wondermoney.componentSelectorLabels" $component | nindent 4 }}
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

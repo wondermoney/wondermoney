@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 
 import FullLayoutClientOverlays from "@/app/[locale]/(full-layout)/FullLayoutClientOverlays";
 import BottomNav from "@/components/layout/BottomNav";
+import CommandPalette from "@/components/layout/CommandPalette";
+import DemoBanner from "@/components/layout/DemoBanner";
 import { PrivacyModeShortcut } from "@/components/layout/PrivacyModeToggle";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
@@ -20,6 +22,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <div className="bg-background min-h-dvh pb-16 lg:flex lg:pb-0">
       <Sidebar />
       <div className="min-w-0 flex-1">
+        {/* Above the top bar, which then sticks once the page scrolls past it. */}
+        <DemoBanner />
         <TopBar />
         {/* pb-20 on mobile: the assistant launcher is fixed at bottom-24 above
             the 64px bottom tab bar, so the last row of a page must clear both. */}
@@ -29,6 +33,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomNav />
       <FullLayoutClientOverlays />
+      <CommandPalette />
       <PrivacyModeShortcut />
     </div>
   );

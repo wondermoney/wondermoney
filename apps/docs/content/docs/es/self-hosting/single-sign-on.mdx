@@ -1,0 +1,118 @@
+---
+title: Inicio de sesión único
+description: Deja que la gente inicie sesión con tu propio proveedor de identidad, como Authentik o Keycloak, y usa sus grupos para decidir quién entra y quién es administrador.
+---
+
+Si ya tienes un proveedor de identidad para tus otros servicios, WonderMoney puede usarlo mediante OpenID Connect (OIDC). Las páginas de inicio de sesión y de registro, en la web y en la aplicación móvil, muestran entonces **Iniciar sesión con &lt;nombre&gt;**, y los grupos de tu proveedor deciden quién puede iniciar sesión y quién es administrador de la instancia.
+
+Los ejemplos usan `money.example.com` para la aplicación web, `api.money.example.com` para la API y `sso.example.com` o `auth.example.com` para el proveedor de identidad. En una instalación con un solo nombre de host, la dirección de la API es la de la aplicación web.
+
+## Cómo funciona
+
+1. La persona elige **Iniciar sesión con &lt;nombre&gt;** e inicia sesión en la página de tu proveedor, con el segundo factor y las políticas que hayas definido allí.
+2. El proveedor la devuelve a `<API_URL>/api/auth/callback/oidc`. La API intercambia el código por un token de ID, con PKCE y el secreto del cliente, y comprueba la firma del token con las claves que publica el proveedor.
+3. WonderMoney lee la dirección de correo, la claim `email_verified` y la claim de grupos, e inicia la sesión.
+
+La API encuentra el proveedor a través de `<OIDC_ISSUER>/.well-known/openid-configuration`, así que el proveedor debe ser accesible desde el contenedor de la API por HTTPS.
+
+## Configurar el proveedor
+
+### Authentik
+
+1. En la interfaz de administración, abre **Applications → Providers → Create** y elige **OAuth2/OpenID Provider**.
+2. Pon **Client type** en **Confidential** y añade el URI de redirección `https://api.money.example.com/api/auth/callback/oidc` (strict).
+3. En **Signing Key**, elige un certificado. WonderMoney comprueba tokens firmados con RS256 con las claves publicadas por el proveedor; sin clave de firma, Authentik firma con el secreto del cliente y el inicio de sesión falla.
+4. Mantén los ámbitos `openid`, `email` y `profile`. El ámbito `profile` de Authentik incluye la claim `groups`.
+5. Abre **Applications → Applications → Create**, llámala WonderMoney, dale el slug `wondermoney` y elige el proveedor. Si quieres que el propio Authentik rechace a los demás, vincula los grupos que pueden usarla en **Policy / Group / User Bindings**.
+
+Copia el ID y el secreto del cliente desde el proveedor. El emisor es la URL de la aplicación, terminada en barra:
+
+```sh
+OIDC_ISSUER=https://sso.example.com/application/o/wondermoney/
+OIDC_CLIENT_ID=<ID del cliente en Authentik>
+OIDC_CLIENT_SECRET=<secreto del cliente en Authentik>
+OIDC_DISPLAY_NAME=Authentik
+```
+
+### Keycloak
+
+1. En tu realm (aquí `home`), abre **Clients → Create client**, mantén **OpenID Connect** y pon **Client ID** en `wondermoney`.
+2. Activa **Client authentication** y mantén **Standard flow**. Añade `https://api.money.example.com/api/auth/callback/oidc` en **Valid redirect URIs** y `https://money.example.com` en **Web origins**.
+3. Copia el secreto de la pestaña **Credentials** del cliente.
+4. Por defecto, Keycloak no pone los grupos en el token de ID. Abre **Client scopes → wondermoney-dedicated → Configure a new mapper → Group Membership**, pon **Token Claim Name** en `groups`, desactiva **Full group path** (si no, los grupos aparecen como `/family` en lugar de `family`) y mantén **Add to ID token** activado.
+5. Keycloak envía `email_verified` a partir del ajuste **Email verified** de cada usuario. Actívalo para las personas que van a iniciar sesión, o deja que Keycloak verifique sus direcciones.
+
+```sh
+OIDC_ISSUER=https://auth.example.com/realms/home
+OIDC_CLIENT_ID=wondermoney
+OIDC_CLIENT_SECRET=<secreto de la pestaña Credentials>
+OIDC_DISPLAY_NAME=Keycloak
+```
+
+### Otros proveedores
+
+Cualquier proveedor que publique un documento de descubrimiento y firme los tokens de ID con una clave publicada funciona igual: Authelia, Zitadel, Pocket ID y otros. Registra `<API_URL>/api/auth/callback/oidc` como URI de redirección y comprueba que el token de ID lleva `email`, `email_verified` y, si usas grupos, la claim de grupos.
+
+## Configurar WonderMoney
+
+Añade las variables al archivo `.env` junto a `docker-compose.yml` y ejecuta `docker compose up -d`. Defínelas en la API; la aplicación web y la móvil conocen el proveedor a través de la API. Si hay alguna variable `OIDC_` sin el emisor, el ID y el secreto del cliente, la API no arranca y dice qué falta.
+
+| Ajuste | Qué hace |
+|---|---|
+| `OIDC_ISSUER` | La URL del emisor del proveedor. Debe ser HTTPS |
+| `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | El cliente que registraste |
+| `OIDC_DISPLAY_NAME` | El nombre del botón: **Iniciar sesión con &lt;nombre&gt;**. Por defecto, `SSO` |
+| `OIDC_SCOPES` | Ámbitos separados por espacios; debe incluir `openid`. Por defecto, `openid email profile`. Añade el ámbito que tu proveedor necesite para los grupos, si tiene uno |
+| `OIDC_GROUPS_CLAIM` | La claim del token de ID que lista los grupos de la persona. Por defecto, `groups` |
+| `OIDC_ALLOWED_GROUPS` | Grupos separados por comas que pueden iniciar sesión |
+| `OIDC_ADMIN_GROUPS` | Grupos separados por comas cuyos miembros son administradores de la instancia |
+| `OIDC_AUTO_SIGNUP` | `true` crea cuentas en el primer inicio de sesión aunque el registro esté cerrado |
+| `OIDC_ONLY` | `true` desactiva el inicio de sesión con contraseña |
+| `OIDC_TRUST_IDP_MFA` | `true` omite el código del autenticador de WonderMoney tras un inicio de sesión por OIDC |
+| `OIDC_ALLOW_UNVERIFIED_EMAIL` | `true` acepta una dirección de correo que el proveedor no ha verificado |
+
+## Quién puede iniciar sesión
+
+Con `OIDC_ALLOWED_GROUPS=family,friends`, solo los miembros de `family` o `friends` pueden iniciar sesión a través del proveedor. Los miembros de un grupo de administración siempre pueden. La comprobación se hace en cada inicio de sesión, así que a quien saques de los grupos se le rechaza la vez siguiente, con un mensaje que dice que su cuenta no está en un grupo que pueda usar este servidor. Las sesiones que ya tenga siguen funcionando hasta que cierre sesión o caduquen; elimina su cuenta de WonderMoney para cortarle el acceso de inmediato.
+
+Las cuentas nuevas siguen `SIGNUP_MODE` como cualquier otro registro: con `invite` solo entran direcciones invitadas, y con `closed` no entra nadie nuevo. Define `OIDC_AUTO_SIGNUP=true` para que decida tu proveedor: quien pueda iniciar sesión allí obtiene una cuenta en su primer inicio de sesión. El registro con contraseña sigue a `SIGNUP_MODE`. La primera cuenta de un servidor vacío siempre se permite, sea cual sea el modo.
+
+## Administradores
+
+Con `OIDC_ADMIN_GROUPS=wondermoney-admins`, los miembros de ese grupo son administradores de la instancia. WonderMoney lee los grupos en cada inicio de sesión a través del proveedor y concede o retira la administración en consecuencia, así que sacar a alguien del grupo le retira la administración en su siguiente inicio de sesión. Solo se guarda esa respuesta de sí o no; WonderMoney no guarda los tokens del proveedor ni la lista de grupos. Sin `OIDC_ADMIN_GROUPS`, el inicio de sesión no toca la administración.
+
+Los administradores pueden abrir la página del [estado de la sincronización bancaria](/es/docs/self-hosting/bank-sync-health). Esa página explica también cómo hacer administrador a alguien sin inicio de sesión único.
+
+## Direcciones de correo y cuentas existentes
+
+El token de ID debe decir que la dirección está verificada (`email_verified: true`); si no, el inicio de sesión se rechaza. Si tu proveedor no verifica direcciones, `OIDC_ALLOW_UNVERIFIED_EMAIL=true` deja entrar a esas personas, como cuentas nuevas con la dirección sin verificar.
+
+Cuando alguien ya tiene una cuenta de WonderMoney con la misma dirección, por ejemplo una creada con contraseña antes de añadir el inicio de sesión único, el primer inicio de sesión a través del proveedor se vincula a ella, pero solo cuando las dos partes han verificado la dirección: la claim `email_verified` del proveedor y el enlace de verificación de la propia cuenta. Si no, el inicio de sesión se rechaza, para que nadie se apodere de una cuenta registrando su dirección en otro sitio. Para vincular una cuenta cuya dirección nunca se verificó, inicia sesión con la contraseña y sigue primero un enlace de verificación (el aviso de verificación de las funciones de IA envía uno; con el envío de correo al registro, el enlace queda escrito en el registro de la API) y después inicia sesión a través del proveedor.
+
+## Autenticación en dos pasos
+
+Una cuenta con una aplicación de autenticación configurada en WonderMoney pide su código después de iniciar sesión a través del proveedor, igual que tras un inicio de sesión con Google. Si tu proveedor ya exige un segundo factor, define `OIDC_TRUST_IDP_MFA=true` para omitir el código de WonderMoney en los inicios de sesión a través del proveedor. Los inicios de sesión con contraseña y con Google lo siguen pidiendo.
+
+## Solo inicio de sesión único
+
+Cuando el inicio de sesión único funcione, `OIDC_ONLY=true` desactiva en el servidor el inicio de sesión, el registro y el restablecimiento con contraseña, y las aplicaciones web y móvil ocultan esos formularios. Comprueba que puedes iniciar sesión a través del proveedor antes de definirlo; para deshacerlo, quita la variable y reinicia.
+
+Las llaves de acceso siguen funcionando con `OIDC_ONLY`. Una llave de acceso solo la puede añadir alguien que ya ha iniciado sesión, no se puede robar con phishing y permite entrar mientras el proveedor está caído. Si quitas a alguien en el proveedor y tenía una llave de acceso, elimina también su cuenta de WonderMoney.
+
+## La aplicación móvil
+
+La aplicación abre la página de inicio de sesión de tu proveedor en un navegador dentro de la aplicación, igual que con el consentimiento bancario, y vuelve a la aplicación al terminar. Para eso, la dirección del proveedor debe usar HTTPS. Cuando se rechaza el inicio de sesión, el motivo aparece en esa ventana del navegador.
+
+## Cuando falla el inicio de sesión
+
+La aplicación web muestra el motivo en su página de error de inicio de sesión. El valor `error` en la dirección de esa página lo identifica:
+
+| `error` | Significado |
+|---|---|
+| `OIDC_GROUP_NOT_ALLOWED` | La persona no está en `OIDC_ALLOWED_GROUPS` ni en `OIDC_ADMIN_GROUPS`. Comprueba el nombre de la claim de grupos y, en Keycloak, **Full group path** |
+| `OIDC_EMAIL_NOT_VERIFIED` | El `email_verified` del token de ID no es `true` |
+| `account_not_linked` | Existe una cuenta con esta dirección, pero una de las dos direcciones no está verificada |
+| `SIGNUP_DISABLED` | Es una cuenta nueva y `SIGNUP_MODE` no la permite. Consulta `OIDC_AUTO_SIGNUP` |
+| `invalid_code`, `unable_to_get_user_info` | Falló el intercambio del código o la comprobación del token de ID. Comprueba el secreto del cliente, el URI de redirección y, en Authentik, la clave de firma. El registro de la API tiene los detalles |
+
+Si el botón no aparece, abre `<API_URL>/v1/instance`: `features.oidc` es null hasta que las tres variables obligatorias están definidas. Si la API no puede llegar al proveedor al arrancar, lo intenta de nuevo en el siguiente inicio de sesión.

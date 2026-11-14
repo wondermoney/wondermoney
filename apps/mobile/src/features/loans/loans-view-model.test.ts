@@ -1,4 +1,4 @@
-import { mapLoan, mapLoans, mapRepayments, monthsUntil } from './loans-view-model'
+import { mapLoan, mapLoanProjection, mapLoans, mapRepayments, monthsUntil } from './loans-view-model'
 import { loanFixture, repaymentFixture } from './test-fixtures'
 
 describe('loan view models', () => {
@@ -21,6 +21,36 @@ describe('loan view models', () => {
   it('keeps total payment separate from principal reduction and consumes nested transaction fields', () => {
     const value = mapRepayments({ repayments: [repaymentFixture] })[0]
     expect(value).toMatchObject({ principal: 645, interest: 300, fee: 5, total: 950, transaction: { id: 81, merchantName: 'Example lender', settlementAmount: -950 } })
+  })
+
+  it('compares the payoff projection with the contract and never reports negative savings', () => {
+    expect(mapLoanProjection({
+      aheadOrBehindMonths: 4,
+      contractInterest: 100,
+      contractMonths: 12,
+      interestSaved: 0,
+      months: 8,
+      monthsSaved: 0,
+      payoffDate: '2027-05-15',
+      paysOff: true,
+      reason: null,
+      series: [],
+      totalInterest: 60,
+    })).toEqual({ paysOff: true, payoffDate: '2027-05-15', monthsSaved: 4, interestSaved: 40 })
+
+    expect(mapLoanProjection({
+      aheadOrBehindMonths: -2,
+      contractInterest: 100,
+      contractMonths: 12,
+      interestSaved: 0,
+      months: 14,
+      monthsSaved: 0,
+      payoffDate: '2027-11-15',
+      paysOff: true,
+      reason: null,
+      series: [],
+      totalInterest: 120,
+    })).toEqual({ paysOff: true, payoffDate: '2027-11-15', monthsSaved: 0, interestSaved: 0 })
   })
 
   describe('remaining term', () => {
