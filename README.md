@@ -5,6 +5,9 @@ sync, budgets, goals, loans, households and investment portfolios, on the web an
 and Android.
 
 - **Use it:** the hosted instance at [wonder.money](https://wonder.money) is free.
+- **Try the demo:** look around a sample household without an account. Open the
+  [hosted sign-in page](https://app.wonder.money/auth/login) and choose **Try the demo**; the
+  demo is shared, read-only and resets every day.
 - **Run your own:** one Docker Compose file with Postgres, the API, its worker and the web
   app. See [apps/api/deploy/selfhost](apps/api/deploy/selfhost/README.md). The mobile app
   connects to any server from its sign-in screen.
