@@ -523,7 +523,7 @@ importers:
     dependencies:
       '@scalar/api-client-react':
         specifier: ^2.0.64
-        version: 2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+        version: 2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       fumadocs-core:
         specifier: 16.18.1
         version: 16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7)
@@ -532,7 +532,7 @@ importers:
         version: 15.5.0(@types/mdast@4.0.4)(@types/mdx@2.0.14)(@types/react@19.3.0)(fumadocs-core@16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(rolldown@1.2.5)(supports-color@8.1.1)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
       fumadocs-openapi:
         specifier: 12.6.0
-        version: 12.6.0(0719e3a7fffb139584b4c94d2502ad9a)
+        version: 12.6.0(3d1109148e80e25d7eba74ddf87027fd)
       fumadocs-ui:
         specifier: 16.18.1
         version: 16.18.1(@types/mdx@2.0.14)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(fumadocs-core@16.18.1(@mdx-js/mdx@3.1.1(supports-color@8.1.1))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(algoliasearch@5.59.0)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.0))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(zod@4.6.7))(next@16.4.5(@babel/core@7.29.7(supports-color@8.1.1))(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.5)
@@ -12715,10 +12715,6 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
-  minimatch@10.2.5:
-    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
-    engines: {node: 18 || 20 || >=22}
-
   minimatch@10.2.6:
     resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
     engines: {node: 18 || 20 || >=22}
@@ -21330,9 +21326,9 @@ snapshots:
       - typescript
       - vitest
 
-  '@scalar/api-client-react@2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
+  '@scalar/api-client-react@2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
     dependencies:
-      '@scalar/api-client': 3.25.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+      '@scalar/api-client': 3.25.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@scalar/blocks': 0.7.0(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@scalar/helpers': 0.17.1
       '@scalar/workspace-store': 0.71.0(typescript@6.0.3)
@@ -21356,7 +21352,7 @@ snapshots:
       - typescript
       - universal-cookie
 
-  '@scalar/api-client@3.25.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
+  '@scalar/api-client@3.25.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)':
     dependencies:
       '@headlessui/tailwindcss': 0.2.2(tailwindcss@4.3.5)
       '@headlessui/vue': 1.7.23(vue@3.5.45(typescript@6.0.3))
@@ -21377,7 +21373,7 @@ snapshots:
       '@scalar/use-toasts': 0.10.6(typescript@6.0.3)
       '@scalar/workspace-store': 0.71.0(typescript@6.0.3)
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@6.0.3))
-      '@vueuse/integrations': 15.0.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))
+      '@vueuse/integrations': 15.0.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))
       focus-trap: 8.2.4
       fuse.js: 7.5.0
       js-base64: 3.9.6
@@ -22933,8 +22929,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.72.1(supports-color@8.1.1)(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.72.1(typescript@6.0.3)
-      '@typescript-eslint/types': 8.72.1
+      '@typescript-eslint/tsconfig-utils': 8.72.2(typescript@6.0.3)
+      '@typescript-eslint/types': 8.72.2
       debug: 4.4.3(supports-color@8.1.1)
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -23071,7 +23067,7 @@ snapshots:
       '@typescript-eslint/types': 8.72.1
       '@typescript-eslint/visitor-keys': 8.72.1
       debug: 4.4.3(supports-color@8.1.1)
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
@@ -23577,7 +23573,7 @@ snapshots:
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@6.0.3))
       vue: 3.5.45(typescript@6.0.3)
 
-  '@vueuse/integrations@15.0.0(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))':
+  '@vueuse/integrations@15.0.0(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(focus-trap@8.2.4)(fuse.js@7.5.0)(vue@3.5.45(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 15.0.0(vue@3.5.45(typescript@6.0.3))
       '@vueuse/shared': 15.0.0(vue@3.5.45(typescript@6.0.3))
@@ -26748,7 +26744,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  fumadocs-openapi@12.6.0(0719e3a7fffb139584b4c94d2502ad9a):
+  fumadocs-openapi@12.6.0(3d1109148e80e25d7eba74ddf87027fd):
     dependencies:
       '@base-ui/react': 1.9.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@fuma-translate/react': 1.0.2(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -26772,7 +26768,7 @@ snapshots:
       undici: 8.12.4
       yaml: 2.9.1
     optionalDependencies:
-      '@scalar/api-client-react': 2.0.65(axios@1.21.0(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
+      '@scalar/api-client-react': 2.0.65(axios@1.21.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(change-case@5.4.4)(react@19.3.0)(supports-color@8.1.1)(tailwindcss@4.3.5)(typescript@6.0.3)
       '@types/react': 19.3.0
       json-schema-typed: 9.0.0
     transitivePeerDependencies:
@@ -29184,10 +29180,6 @@ snapshots:
   mimic-response@3.1.0: {}
 
   min-indent@1.0.1: {}
-
-  minimatch@10.2.5:
-    dependencies:
-      brace-expansion: 5.0.12
 
   minimatch@10.2.6:
     dependencies:
