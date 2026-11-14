@@ -70,6 +70,10 @@ const instanceSchema = z.object({
     // Single sign-on through the operator's OIDC provider ("Sign in with <name>"); null when
     // off, absent on a server older than it.
     oidc: z.object({ name: z.string().min(1) }).nullable().optional(),
+    // Passkey sign-in (better-auth's passkey plugin) and the hostname passkeys belong to, the web
+    // app's. Absent on an older server: no passkeys. A malformed hostname reads as absent.
+    passkey: z.boolean().optional(),
+    passkeyRpId: z.string().min(1).optional().catch(undefined),
     // False under OIDC_ONLY: no password sign-in or sign-up. Absent on an older server (on).
     passwordSignIn: z.boolean().optional(),
     // Mobile push notifications (`PUSH_ENABLED`). Absent on an older server: off.

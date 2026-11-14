@@ -7,7 +7,7 @@ Una llave de acceso (passkey) te permite iniciar sesión sin escribir tu correo 
 
 Las llaves de acceso son una forma adicional de iniciar sesión. La contraseña y el inicio de sesión con Google y con Apple siguen funcionando, y conservas tu contraseña. No se puede crear una cuenta solo con una llave de acceso.
 
-Las llaves de acceso funcionan en la aplicación web. La aplicación móvil todavía no las admite.
+Las llaves de acceso funcionan en la aplicación web y, en la aplicación móvil, en el servidor para el que se compiló la aplicación (consulta [Llaves de acceso en la aplicación móvil](#llaves-de-acceso-en-la-aplicación-móvil)).
 
 ## Añadir una llave de acceso
 
@@ -40,6 +40,16 @@ Una llave de acceso nueva recibe el nombre del gestor de contraseñas que la gua
 Selecciona **Eliminar** para quitar una llave de acceso. Deja de funcionar en WonderMoney de inmediato, pero sigue en tu gestor de contraseñas o en tu dispositivo hasta que la quites también allí.
 
 Los tokens de API personales no pueden listar, añadir ni quitar llaves de acceso.
+
+## Llaves de acceso en la aplicación móvil
+
+Las llaves de acceso en la aplicación publicada, en wonder.money, llegan en una próxima versión de la aplicación. Hasta entonces, inicia sesión en la aplicación con tu contraseña, Google o Apple.
+
+En la pantalla de inicio de sesión de la aplicación para iOS y Android, toca **Iniciar sesión con una llave de acceso** y desbloquea la llave con tu huella, tu cara o el PIN del dispositivo. Una llave de acceso que añadiste en la web funciona en la aplicación cuando tu teléfono la tiene, por ejemplo a través del Llavero de iCloud o del Gestor de contraseñas de Google, y una añadida en la aplicación funciona en la web.
+
+En la aplicación, **Configuración → Seguridad → Llaves de acceso** muestra tus llaves de acceso. Toca **Añadir una llave de acceso** para crear una en el teléfono, o **Eliminar** para quitar una. Para cambiar el nombre, usa la aplicación web.
+
+La aplicación solo ofrece llaves de acceso en el servidor para el que se compiló: la aplicación publicada, en wonder.money. Conectada a un servidor autoalojado, la aplicación oculta **Iniciar sesión con una llave de acceso** y **Añadir una llave de acceso**, e inicias sesión con tu contraseña, Google, Apple o el inicio de sesión único. [Usar la aplicación móvil con tu servidor](/es/docs/self-hosting/mobile-app) explica por qué.
 
 ## Páginas relacionadas
 

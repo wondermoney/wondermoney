@@ -6,7 +6,7 @@ import { symmetricEncrypt } from 'better-auth/crypto';
 import { bearer, twoFactor } from 'better-auth/plugins';
 import { describe, expect, it } from 'vitest';
 
-import { passkeyPlugins, passkeyRelyingParty } from '../passkey';
+import { androidApkKeyHashOrigin, androidCertFingerprints, passkeyOrigins, passkeyPlugins, passkeyRelyingParty } from '../passkey';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '../two-factor-oauth-guard';
 
 import { type AuthenticationOptions, type RegistrationOptions, softAuthenticator } from './__helpers__/soft-authenticator';
@@ -23,6 +23,8 @@ const secret = 'passkey-integration-secret-at-least-thirty-two-chars';
 const apiURL = 'https://api.money.example.test';
 const appOrigin = 'https://money.example.test';
 const password = 'correct horse battery staple';
+// A made-up signing certificate for the Android app, as `keytool` prints one.
+const androidFingerprint = Array.from({ length: 32 }, (_, index) => (index * 7 + 16).toString(16).toUpperCase().padStart(2, '0')).join(':');
 const totpSecret = 'passkey-test-totp-secret';
 
 type MemoryDB = Record<string, Row[]>;
@@ -53,7 +55,7 @@ class Jar {
   }
 }
 
-function fixture() {
+function fixture({ androidCertFingerprints: fingerprints = [] }: { androidCertFingerprints?: string[] } = {}) {
   const db: MemoryDB = { account: [], passkey: [], session: [], twoFactor: [], user: [], verification: [] };
   const auth = betterAuth({
     // Better Auth turns these off under NODE_ENV=test; keep the production checks on.
@@ -64,7 +66,7 @@ function fixture() {
     plugins: [
       twoFactor({ twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
       twoFactorOAuthGuard(),
-      ...passkeyPlugins({ appName: 'WonderMoney', appUrl: `${appOrigin}/` }),
+      ...passkeyPlugins({ androidCertFingerprints: fingerprints, appName: 'WonderMoney', appUrl: `${appOrigin}/` }),
       bearer(),
     ],
     rateLimit: { enabled: false },
@@ -106,8 +108,9 @@ function fixture() {
     return body?.user.email ?? null;
   };
 
-  const addPasskey = async (jar: Jar, name?: string) => {
-    const authenticator = softAuthenticator({ origin: appOrigin });
+  /** `origin` is where the ceremony runs: the web app's page by default, or the Android app's. */
+  const addPasskey = async (jar: Jar, name?: string, origin = appOrigin) => {
+    const authenticator = softAuthenticator({ origin });
     const options = await (await call(jar, '/passkey/generate-register-options')).json() as RegistrationOptions;
     const response = await call(jar, '/passkey/verify-registration', { name, response: authenticator.register(options) });
     expect(response.status).toBe(200);
@@ -148,6 +151,28 @@ describe('passkey relying party', () => {
     expect(passkeyRelyingParty('https://money.example.com/')).toEqual({ origin: 'https://money.example.com', rpID: 'money.example.com' });
     expect(passkeyRelyingParty('http://localhost:3000')).toEqual({ origin: 'http://localhost:3000', rpID: 'localhost' });
     expect(passkeyRelyingParty('https://example.com:8443/money')).toEqual({ origin: 'https://example.com:8443', rpID: 'example.com' });
+  });
+});
+
+describe('passkey origins for the mobile app', () => {
+  it('reads the Android signing certificates as keytool prints them, or as bare hex, and drops anything else', () => {
+    const bare = androidFingerprint.replaceAll(':', '');
+    expect(androidCertFingerprints(undefined)).toEqual([]);
+    expect(androidCertFingerprints('')).toEqual([]);
+    expect(androidCertFingerprints(` ${androidFingerprint.toLowerCase()} , ${bare}, not-a-fingerprint, AB:CD`)).toEqual([bare]);
+    expect(androidCertFingerprints(`${bare},${'0'.repeat(64)}`)).toEqual([bare, '0'.repeat(64)]);
+  });
+
+  it('turns a certificate fingerprint into the origin Android reports: its unpadded base64url', () => {
+    expect(androidApkKeyHashOrigin('AA'.repeat(32))).toBe(`android:apk-key-hash:${'q'.repeat(42)}o`);
+  });
+
+  it('accepts the web app\'s origin, plus one per Android certificate', () => {
+    expect(passkeyOrigins('https://money.example.com/')).toEqual(['https://money.example.com']);
+    expect(passkeyOrigins('https://money.example.com', ['AA'.repeat(32)])).toEqual([
+      'https://money.example.com',
+      `android:apk-key-hash:${'q'.repeat(42)}o`,
+    ]);
   });
 });
 
@@ -262,6 +287,35 @@ describe('passkeys: real Better Auth pipeline with a software authenticator', ()
     expect([rename.status, remove.status, missing.status]).toEqual([404, 404, 404]);
     expect(f.db['passkey']).toEqual([expect.objectContaining({ id: passkey.id, name: 'Laptop' })]);
     expect(await (await f.call(other, '/passkey/list-user-passkeys')).json()).toEqual([]);
+  });
+
+  it('accepts the Android app\'s assertions only when its signing certificate is configured', async () => {
+    const androidOrigin = androidApkKeyHashOrigin(androidCertFingerprints(androidFingerprint)[0] ?? '');
+
+    const without = fixture();
+    const ana = await without.signUp('ana@example.test');
+    const { authenticator: webOnly } = await without.addPasskey(ana);
+    const refused = await without.signInWithPasskey(webOnly, { origin: androidOrigin });
+    expect(refused.response.status).toBe(400);
+    expect(await without.sessionUser(refused.jar)).toBeNull();
+
+    const f = fixture({ androidCertFingerprints: androidCertFingerprints(androidFingerprint) });
+    const bea = await f.signUp('bea@example.test');
+    // A passkey added on the web (and synced to the phone) signs in from the app…
+    const { authenticator: synced } = await f.addPasskey(bea);
+    const fromApp = await f.signInWithPasskey(synced, { origin: androidOrigin });
+    expect(fromApp.response.status).toBe(200);
+    expect(await f.sessionUser(fromApp.jar)).toBe('bea@example.test');
+
+    // …and one added in the app signs in on the web: one relying party for both.
+    const { authenticator: madeInApp } = await f.addPasskey(bea, 'Phone', androidOrigin);
+    const onWeb = await f.signInWithPasskey(madeInApp, { origin: appOrigin });
+    expect(onWeb.response.status).toBe(200);
+    expect(await f.sessionUser(onWeb.jar)).toBe('bea@example.test');
+
+    // Another app's certificate is still refused.
+    const otherApp = await f.signInWithPasskey(synced, { origin: androidApkKeyHashOrigin('0'.repeat(64)) });
+    expect(otherApp.response.status).toBe(400);
   });
 
   it('does not let a personal API token list or delete passkeys', async () => {

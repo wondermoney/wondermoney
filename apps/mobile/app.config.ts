@@ -31,7 +31,7 @@ const withReleaseGradleProperties: ConfigPlugin = (expoConfig) =>
 // The Expo CLI loads .env files before evaluating this config, but EAS CLI turns that off
 // (EXPO_NO_DOTENV), so read these keys from the gitignored .env.local here. A value already
 // in the environment (an EAS Build worker, or the shell) wins.
-const EAS_PROJECT_KEYS = ['WONDERMONEY_EXPO_OWNER', 'WONDERMONEY_EAS_PROJECT_ID', 'WONDERMONEY_GOOGLE_SERVICES_FILE'] as const
+const EAS_PROJECT_KEYS = ['WONDERMONEY_EXPO_OWNER', 'WONDERMONEY_EAS_PROJECT_ID', 'WONDERMONEY_GOOGLE_SERVICES_FILE', 'WONDERMONEY_PASSKEY_DOMAINS'] as const
 const localEnvFile = join(__dirname, '.env.local')
 if (existsSync(localEnvFile)) {
   const localEnv = parseEnv(readFileSync(localEnvFile, 'utf8'))
@@ -46,6 +46,17 @@ const EAS_PROJECT_ID = process.env.WONDERMONEY_EAS_PROJECT_ID
 // google-services.json in the build. A path (an EAS file environment variable, or a local file
 // kept out of the repository); without it the app builds and runs, but Android gets no push token.
 const GOOGLE_SERVICES_FILE = process.env.WONDERMONEY_GOOGLE_SERVICES_FILE
+// Passkeys (react-native-passkeys): the hostnames whose passkeys this build may use, comma-separated
+// (`money.example.com`). A passkey belongs to the web app's hostname, the relying party ID the
+// server reports as `features.passkeyRpId`, and iOS and Android hand one to an app only when that
+// hostname's `/.well-known` files name the app (served by the web app, from its environment).
+// iOS also needs a `webcredentials:` entitlement per hostname, which needs the Associated Domains
+// capability on the App ID. Fixed at build time, so the app hides passkeys on any other server.
+// Empty: no entitlement and no passkeys. README.md, "Passkeys".
+const PASSKEY_DOMAINS = [...new Set((process.env.WONDERMONEY_PASSKEY_DOMAINS ?? '')
+  .split(',')
+  .map((domain: string) => domain.trim().toLowerCase())
+  .filter((domain: string) => /^[a-z\d-]+(?:\.[a-z\d-]+)+$/.test(domain)))]
 
 const config: ExpoConfig = {
   name: 'WonderMoney',
@@ -61,6 +72,7 @@ const config: ExpoConfig = {
     icon: './assets/images/icon.png',
     // Adds the com.apple.developer.applesignin entitlement the native flow needs.
     usesAppleSignIn: true,
+    ...(PASSKEY_DOMAINS.length > 0 ? { associatedDomains: PASSKEY_DOMAINS.map((domain) => `webcredentials:${domain}`) } : {}),
     infoPlist: {
       // The app only uses standard HTTPS/TLS (exempt) and SHA-256 hashing for
       // OAuth nonces (not encryption) — no proprietary/non-exempt encryption.
@@ -156,7 +168,11 @@ const config: ExpoConfig = {
   // source: they come from the environment, with no defaults. Without them the app still
   // runs locally; EAS commands need both. See README.md, "EAS configuration".
   ...(EXPO_OWNER ? { owner: EXPO_OWNER } : {}),
-  ...(EAS_PROJECT_ID ? { extra: { eas: { projectId: EAS_PROJECT_ID } } } : {}),
+  extra: {
+    ...(EAS_PROJECT_ID ? { eas: { projectId: EAS_PROJECT_ID } } : {}),
+    // Read at runtime by src/lib/auth/passkey-availability.ts.
+    passkeyDomains: PASSKEY_DOMAINS,
+  },
 }
 
 export default withReleaseGradleProperties(config)

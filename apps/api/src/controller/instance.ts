@@ -8,13 +8,14 @@ import { isPushEnabled } from '@config/push';
 import { statementImportLimits } from '@config/statement-import';
 import { aiCapabilities, aiProviderLabel } from '@service/ai/ai-provider';
 import { signInMethods } from '@service/auth/oidc-provider';
+import { passkeyRelyingParty } from '@service/auth/passkey';
 import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
 import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
 import { isMarketDataEnabled, marketDataFeatures } from '@service/market-data/registry';
 import { resolveStorageConfig } from '@service/storage/s3';
-import { buildInfo } from '@utils/constants';
+import { buildInfo, FRONTEND_URL } from '@utils/constants';
 
 /**
  * Public description of this server: what it is called, who may sign up, where to ask for help
@@ -66,6 +67,9 @@ export function getInstance(_req: Request, res: Response) {
       oidc: signIn.oidc,
       // Passkey sign-in on the web app (better-auth's passkey plugin, always on, OIDC_ONLY too).
       passkey: true,
+      // The hostname passkeys belong to (the web app's, from `APP_URL`). The mobile app offers
+      // passkeys only when its build lists this hostname among its associated domains.
+      passkeyRpId: passkeyRelyingParty(FRONTEND_URL).rpID,
       // False under OIDC_ONLY: the server refuses password sign-in, sign-up and reset.
       passwordSignIn: signIn.passwordSignIn,
       // Mobile push notifications through the Expo push service (`PUSH_ENABLED`, off by default).

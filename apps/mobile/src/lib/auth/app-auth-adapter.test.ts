@@ -431,3 +431,160 @@ describe('app auth adapter — email sign-up', () => {
     await expect(adapter.signUp('ana@example.com', PASSWORD, 'es')).resolves.toEqual({ status })
   })
 })
+
+describe('app auth adapter — passkeys', () => {
+  const authenticateOptions = { challenge: 'challenge-1', rpId: 'money.example.com', allowCredentials: [] }
+  const assertion = {
+    id: 'cred-1',
+    rawId: 'cred-1',
+    type: 'public-key',
+    response: { authenticatorData: 'ad', clientDataJSON: 'cd', signature: 'sig', userHandle: 'uh' },
+    clientExtensionResults: { prf: {} },
+  }
+
+  const fakeAuthenticator = (overrides: Partial<{ isSupported: jest.Mock; create: jest.Mock; get: jest.Mock }> = {}) => ({
+    isSupported: overrides.isSupported ?? jest.fn(() => true),
+    create: overrides.create ?? jest.fn(),
+    get: overrides.get ?? jest.fn().mockResolvedValue(assertion),
+  })
+
+  /** better-auth's `$fetch`, answering by path. */
+  const fakeFetch = (answers: Record<string, unknown>) => jest.fn(async (path: string) => {
+    const answer = answers[path]
+    if (answer === undefined) throw new Error(`unexpected ${path}`)
+    return answer as { data: unknown; error: unknown }
+  })
+
+  it('signs in: the server\'s options to the device, its assertion back, then the new session', async () => {
+    const $fetch = fakeFetch({
+      '/passkey/generate-authenticate-options': { data: authenticateOptions, error: null },
+      '/passkey/verify-authentication': { data: { session: { token: 't' } }, error: null },
+    })
+    const getSession = jest.fn().mockResolvedValue({ data: sessionData('u1'), error: null })
+    const port = createPort({ getSession })
+    port.$fetch = $fetch
+    const authenticator = fakeAuthenticator()
+    const adapter = createAppAuthAdapter(port, authenticator)
+
+    await expect(adapter.signInWithPasskey()).resolves.toEqual({ status: 'accepted' })
+
+    expect(authenticator.get).toHaveBeenCalledWith(authenticateOptions)
+    expect($fetch).toHaveBeenNthCalledWith(1, '/passkey/generate-authenticate-options', { method: 'GET', throw: false })
+    // The extension results stay on the device, as better-auth's own client does it.
+    expect($fetch).toHaveBeenNthCalledWith(2, '/passkey/verify-authentication', {
+      method: 'POST',
+      body: { response: { id: 'cred-1', rawId: 'cred-1', type: 'public-key', response: assertion.response } },
+      throw: false,
+    })
+    expect(getSession).toHaveBeenCalledWith({ query: { disableCookieCache: true } })
+    await expect(adapter.getState()).resolves.toMatchObject({ status: 'authenticated' })
+  })
+
+  it('reports a closed prompt as cancelled and sends nothing to verify', async () => {
+    const $fetch = fakeFetch({ '/passkey/generate-authenticate-options': { data: authenticateOptions, error: null } })
+    const port = createPort()
+    port.$fetch = $fetch
+    const cancelled = Object.assign(new Error('User cancelled the passkey interaction'), { code: 'ERR_USER_CANCELLED' })
+    const adapter = createAppAuthAdapter(port, fakeAuthenticator({ get: jest.fn().mockRejectedValue(cancelled) }))
+
+    await expect(adapter.signInWithPasskey()).resolves.toEqual({ status: 'cancelled' })
+    expect($fetch).toHaveBeenCalledTimes(1)
+
+    const silent = createAppAuthAdapter(port, fakeAuthenticator({ get: jest.fn().mockResolvedValue(null) }))
+    await expect(silent.signInWithPasskey()).resolves.toEqual({ status: 'cancelled' })
+  })
+
+  it('reports a refused assertion, a device error or a failed options request as unavailable', async () => {
+    const refused = createPort()
+    refused.$fetch = fakeFetch({
+      '/passkey/generate-authenticate-options': { data: authenticateOptions, error: null },
+      '/passkey/verify-authentication': { data: null, error: errorLike(401, 'PASSKEY_NOT_FOUND') },
+    })
+    await expect(createAppAuthAdapter(refused, fakeAuthenticator()).signInWithPasskey()).resolves.toEqual({ status: 'unavailable' })
+
+    const notConfigured = createPort()
+    notConfigured.$fetch = fakeFetch({ '/passkey/generate-authenticate-options': { data: authenticateOptions, error: null } })
+    const deviceError = fakeAuthenticator({ get: jest.fn().mockRejectedValue(new Error('NotConfigured')) })
+    await expect(createAppAuthAdapter(notConfigured, deviceError).signInWithPasskey()).resolves.toEqual({ status: 'unavailable' })
+
+    const noOptions = createPort()
+    noOptions.$fetch = fakeFetch({ '/passkey/generate-authenticate-options': { data: null, error: errorLike(500) } })
+    await expect(createAppAuthAdapter(noOptions, fakeAuthenticator()).signInWithPasskey()).resolves.toEqual({ status: 'unavailable' })
+  })
+
+  it('does nothing on a device without passkeys, or without an authenticator at all', async () => {
+    const port = createPort()
+    const $fetch = jest.fn()
+    port.$fetch = $fetch
+    await expect(createAppAuthAdapter(port, fakeAuthenticator({ isSupported: jest.fn(() => false) })).signInWithPasskey()).resolves.toEqual({ status: 'unavailable' })
+    await expect(createAppAuthAdapter(port).addPasskey()).resolves.toEqual({ status: 'unavailable' })
+    expect($fetch).not.toHaveBeenCalled()
+  })
+
+  it('adds a passkey on this device and leaves its name to the list\'s label', async () => {
+    const registerOptions = { challenge: 'c', rp: { id: 'money.example.com', name: 'WonderMoney' }, user: { id: 'dXNlcg', name: 'ana' } }
+    const credential = {
+      id: 'new-cred',
+      response: { attestationObject: 'ao', clientDataJSON: 'cd', getPublicKey: () => 'pk' },
+      clientExtensionResults: {},
+    }
+    const $fetch = fakeFetch({
+      '/passkey/generate-register-options': { data: registerOptions, error: null },
+      '/passkey/verify-registration': { data: { id: 'pk-1' }, error: null },
+    })
+    const port = createPort()
+    port.$fetch = $fetch
+    const authenticator = fakeAuthenticator({ create: jest.fn().mockResolvedValue(credential) })
+
+    await expect(createAppAuthAdapter(port, authenticator).addPasskey()).resolves.toEqual({ status: 'added' })
+    expect(authenticator.create).toHaveBeenCalledWith(registerOptions)
+    expect($fetch).toHaveBeenLastCalledWith('/passkey/verify-registration', {
+      method: 'POST',
+      body: { response: { id: 'new-cred', response: { attestationObject: 'ao', clientDataJSON: 'cd' } } },
+      throw: false,
+    })
+  })
+
+  it('says when the server wants a recent sign-in before adding a passkey', async () => {
+    const port = createPort()
+    port.$fetch = fakeFetch({ '/passkey/generate-register-options': { data: null, error: errorLike(403, 'SESSION_NOT_FRESH') } })
+    const authenticator = fakeAuthenticator()
+
+    await expect(createAppAuthAdapter(port, authenticator).addPasskey()).resolves.toEqual({ status: 'session-not-fresh' })
+    expect(authenticator.create).not.toHaveBeenCalled()
+  })
+
+  it('lists the user\'s passkeys, keeping only what the screen shows', async () => {
+    const port = createPort()
+    port.$fetch = fakeFetch({
+      '/passkey/list-user-passkeys': {
+        data: [
+          { id: 'pk-1', name: 'Laptop', aaguid: 'ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4', createdAt: '2026-11-01T10:00:00.000Z', lastUsedAt: null, publicKey: 'secret-ish' },
+          { id: 'pk-2', name: null, createdAt: '2026-11-02T10:00:00.000Z', lastUsedAt: '2026-11-03T10:00:00.000Z' },
+          { name: 'no id' },
+        ],
+        error: null,
+      },
+    })
+
+    await expect(createAppAuthAdapter(port).listPasskeys()).resolves.toEqual({
+      status: 'available',
+      passkeys: [
+        { id: 'pk-1', name: 'Laptop', aaguid: 'ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4', createdAt: '2026-11-01T10:00:00.000Z', lastUsedAt: null },
+        { id: 'pk-2', name: null, aaguid: null, createdAt: '2026-11-02T10:00:00.000Z', lastUsedAt: '2026-11-03T10:00:00.000Z' },
+      ],
+    })
+  })
+
+  it('deletes a passkey by id', async () => {
+    const port = createPort()
+    const $fetch = fakeFetch({ '/passkey/delete-passkey': { data: { status: true }, error: null } })
+    port.$fetch = $fetch
+
+    await expect(createAppAuthAdapter(port).deletePasskey('pk-1')).resolves.toEqual({ status: 'deleted' })
+    expect($fetch).toHaveBeenCalledWith('/passkey/delete-passkey', { method: 'POST', body: { id: 'pk-1' }, throw: false })
+
+    port.$fetch = fakeFetch({ '/passkey/delete-passkey': { data: null, error: errorLike(404, 'PASSKEY_NOT_FOUND') } })
+    await expect(createAppAuthAdapter(port).deletePasskey('pk-1')).resolves.toEqual({ status: 'unavailable' })
+  })
+})

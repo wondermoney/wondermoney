@@ -23,7 +23,7 @@ import { capDemoSessionRefresh, isExpiredDemoSession } from '@service/auth/demo-
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
 import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
 import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
-import { passkeyPlugins } from '@service/auth/passkey';
+import { androidCertFingerprints, passkeyPlugins } from '@service/auth/passkey';
 import { signUpLocale } from '@service/auth/sign-up-locale';
 import { signupPolicy, type SignupPolicyDeps } from '@service/auth/signup-policy';
 import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service/auth/two-factor-oauth-guard';
@@ -268,7 +268,13 @@ const auth = betterAuth({
     twoFactor({ issuer: instanceName(), twoFactorCookieMaxAge: TWO_FACTOR_COOKIE_MAX_AGE_SECONDS }),
     // OIDC_TRUST_IDP_MFA: the provider's own MFA stands in for the local TOTP code.
     twoFactorOAuthGuard({ trustProviderMfa: authConfig.oidc?.trustIdpMfa ? [OIDC_PROVIDER_ID] : [] }),
-    ...passkeyPlugins({ appName: instanceName(), appUrl: FRONTEND_URL }),
+    // ANDROID_APP_CERT_SHA256 lets the Android app's assertions through (their origin is the
+    // signing certificate's hash, not the web app's).
+    ...passkeyPlugins({
+      androidCertFingerprints: androidCertFingerprints(process.env['ANDROID_APP_CERT_SHA256']),
+      appName: instanceName(),
+      appUrl: FRONTEND_URL,
+    }),
     jwt(),
     bearer(),
     expo(),

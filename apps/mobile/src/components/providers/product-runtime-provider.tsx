@@ -39,6 +39,10 @@ import {
   type MfaTotpEnrollOutcome,
   type MfaUnenrollOutcome,
   type MfaVerifyOutcome,
+  type PasskeyAddOutcome,
+  type PasskeyDeleteOutcome,
+  type PasskeyListOutcome,
+  type PasskeySignInOutcome,
   type SendVerificationEmailOutcome,
   type SignInOutcome,
   type SignUpOutcome,
@@ -85,6 +89,8 @@ export type ProductRuntimeContextValue = Readonly<{
   ) => Promise<IdTokenSignInOutcome>
   /** "Sign in with <name>" through the server's identity provider; same admission rules. */
   signInWithSso: () => Promise<BrowserSignInOutcome>
+  /** "Sign in with a passkey"; same admission rules. A passkey sign-in is a full session. */
+  signInWithPasskey: () => Promise<PasskeySignInOutcome>
   signUp: (email: string, password: string) => Promise<SignUpOutcome>
   signOut: () => Promise<void>
   retrySignOut: () => Promise<void>
@@ -104,6 +110,10 @@ export type ProductRuntimeContextValue = Readonly<{
   mfaListFactors: () => Promise<MfaListFactorsOutcome>
   /** Thin proxy to the injected auth adapter's password-change operation; usable in any route state. */
   changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
+  /** Thin proxies to the injected auth adapter's passkey management (Settings, Security). */
+  listPasskeys: () => Promise<PasskeyListOutcome>
+  addPasskey: () => Promise<PasskeyAddOutcome>
+  deletePasskey: (id: string) => Promise<PasskeyDeleteOutcome>
   /** Thin proxy to the injected auth adapter's resend-verification-email operation. */
   sendVerificationEmail: (email: string) => Promise<SendVerificationEmailOutcome>
   /**
@@ -403,6 +413,13 @@ export function ProductRuntimeProvider({
     return auth.signInWithBrowser(OIDC_PROVIDER_ID)
   }, [auth])
 
+  const signInWithPasskey = useCallback(async () => {
+    if (terminalFlight.current) return { status: 'unavailable' as const }
+    terminalLocked.current = false
+    setActivationError(null)
+    return auth.signInWithPasskey()
+  }, [auth])
+
   const signUp = useCallback(async (email: string, password: string) => {
     if (terminalFlight.current) return { status: 'unavailable' as const }
     terminalLocked.current = false
@@ -453,6 +470,9 @@ export function ProductRuntimeProvider({
     [auth],
   )
   const sendVerificationEmail = useCallback((email: string) => auth.sendVerificationEmail(email), [auth])
+  const listPasskeys = useCallback(() => auth.listPasskeys(), [auth])
+  const addPasskey = useCallback(() => auth.addPasskey(), [auth])
+  const deletePasskey = useCallback((id: string) => auth.deletePasskey(id), [auth])
   const validateHouseholdInvite = useCallback(
     (token: string) => validateHouseholdInviteToken(transport, token),
     [transport],
@@ -482,6 +502,7 @@ export function ProductRuntimeProvider({
     signInWithPassword,
     signInWithIdToken,
     signInWithSso,
+    signInWithPasskey,
     signUp,
     signOut: runSignOut,
     retrySignOut: runSignOut,
@@ -497,9 +518,16 @@ export function ProductRuntimeProvider({
     mfaListFactors,
     changePassword,
     sendVerificationEmail,
+    listPasskeys,
+    addPasskey,
+    deletePasskey,
     completeMfaVerification,
     validateHouseholdInvite,
   }), [
+    addPasskey,
+    deletePasskey,
+    listPasskeys,
+    signInWithPasskey,
     acknowledgeDeactivation,
     activationError,
     blockAccess,

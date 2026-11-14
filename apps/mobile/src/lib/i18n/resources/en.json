@@ -204,6 +204,13 @@
         "unavailable": "The demo isn't available right now. Try again later.",
         "unreachable": "Couldn't reach the server. Check your connection and try again."
       }
+    },
+    "passkey": {
+      "signIn": "Sign in with a passkey",
+      "signingIn": "Signing in…",
+      "errors": {
+        "unavailable": "Signing in with that passkey didn't work. Try again, or use your password."
+      }
     }
   },
   "access": {
@@ -3953,6 +3960,33 @@
       "access": "Your session could not authorize this action. Your account is unchanged.",
       "mfa": "Multi-factor authentication is required before deleting your account.",
       "cancelled": "Account deletion was cancelled. Your account is unchanged."
+    },
+    "passkeys": {
+      "heading": "Passkeys",
+      "helper": "Sign in with your fingerprint, face or device PIN instead of your password. A passkey sign-in doesn't ask for an authenticator code.",
+      "loading": "Loading passkeys…",
+      "loadFailed": "Your passkeys couldn't be loaded. Try again later.",
+      "retry": "Retry",
+      "empty": "You haven't added a passkey yet.",
+      "defaultName": "Passkey",
+      "addedOn": "Added {{date}}",
+      "lastUsed": "Last used {{date}}",
+      "neverUsed": "Never used",
+      "add": "Add a passkey",
+      "adding": "Adding…",
+      "added": "Passkey added.",
+      "unsupported": "This device can't use passkeys here. You can add one on the web app.",
+      "delete": "Delete",
+      "deleteNamed": "Delete {{name}}",
+      "deleteTitle": "Delete this passkey?",
+      "deleteDescription": "You won't be able to sign in with {{name}} any more. Your password and your other passkeys keep working. Remove it from your password manager too.",
+      "deleteConfirm": "Delete passkey",
+      "deleted": "Passkey deleted.",
+      "errors": {
+        "add": "The passkey couldn't be added. Try again.",
+        "sessionNotFresh": "Sign out and sign in again before adding a passkey.",
+        "delete": "The passkey couldn't be deleted. Try again."
+      }
     }
   },
   "notifications": {

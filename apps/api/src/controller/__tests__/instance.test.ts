@@ -57,6 +57,8 @@ describe('GET /v1/instance', () => {
         mcp: true,
         oidc: null,
         passkey: true,
+        // APP_URL's hostname (vitest.setup.ts): passkeys belong to the web app.
+        passkeyRpId: 'app.example.test',
         passwordSignIn: true,
         push: false,
         statementImport: null,

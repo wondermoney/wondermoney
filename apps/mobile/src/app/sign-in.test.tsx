@@ -13,7 +13,8 @@ const mockParams: { notice?: string; pairCode?: string; pairServer?: string } = 
 const mockPair = jest.fn()
 const mockSignInWithSso = jest.fn()
 const mockBlockAccess = jest.fn()
-const mockServer: { demo: boolean; oidc: { name: string } | null; passwordSignIn: boolean } = { demo: false, oidc: null, passwordSignIn: true }
+const mockServer: { demo: boolean; oidc: { name: string } | null; passkey: boolean; passwordSignIn: boolean } = { demo: false, oidc: null, passkey: false, passwordSignIn: true }
+const mockSignInWithPasskey = jest.fn()
 const mockReplace = jest.fn()
 jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
 const captured = jest.mocked(captureAnalyticsEvent)
@@ -32,6 +33,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({
     signInWithPassword: mockSignInWithPassword,
     signInWithSso: mockSignInWithSso,
+    signInWithPasskey: mockSignInWithPasskey,
     blockAccess: mockBlockAccess,
     activationError: null,
     clearActivationError: mockClearActivationError,
@@ -42,6 +44,7 @@ jest.mock('@/lib/server/use-instance', () => ({
   useConfirmedFeature: (select: (features: { demo?: boolean }) => boolean | undefined) => select({ demo: mockServer.demo }) === true,
   useOidcProvider: () => mockServer.oidc,
   usePasswordSignIn: () => mockServer.passwordSignIn,
+  usePasskeyAvailable: () => mockServer.passkey,
 }))
 
 jest.mock('@/features/auth/social-sign-in', () => {
@@ -74,6 +77,8 @@ describe('SignInRoute', () => {
     mockServer.oidc = null
     mockServer.passwordSignIn = true
     mockServer.demo = false
+    mockServer.passkey = false
+    mockSignInWithPasskey.mockReset()
     mockReplace.mockReset()
     takeSignUpAfterSignOut()
     mockSignInWithSso.mockReset()
@@ -122,6 +127,21 @@ describe('SignInRoute', () => {
     mockServer.demo = true
     const view = await renderRoute()
     expect(view.getByRole('button', { name: i18n.t('auth.demo.button') })).toBeOnTheScreen()
+  })
+
+  it('offers a passkey only where the app can use this server\'s passkeys, beside the password form', async () => {
+    const without = await renderRoute()
+    expect(without.queryByRole('button', { name: 'Sign in with a passkey' })).toBeNull()
+    expect(without.getByRole('button', { name: 'Sign in' })).toBeOnTheScreen()
+    await without.unmount()
+
+    mockServer.passkey = true
+    mockSignInWithPasskey.mockResolvedValue({ status: 'accepted' })
+    const view = await renderRoute()
+    expect(view.getByRole('button', { name: 'Sign in' })).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Sign in with a passkey' }))
+    await waitFor(() => expect(mockSignInWithPasskey).toHaveBeenCalledTimes(1))
+    expect(mockSignInWithPassword).not.toHaveBeenCalled()
   })
 
   it('carries on to sign-up when signing out of the demo was to create an account', async () => {
