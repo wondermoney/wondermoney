@@ -22,8 +22,9 @@ pnpm run web
 ```
 
 The app talks to the backend through the HTTP API boundary. Keep the other
-apps out of the mobile source tree: do not import source from `apps/api`,
-`apps/web` or `packages/*`.
+apps out of the mobile source tree: do not import source from `apps/api`
+or `apps/web`, and use `packages/*` only through the dependency-free entry points of
+`@wondermoney/shared` (such as `@wondermoney/shared/decimal`), never by relative path.
 
 ## Validation
 
@@ -38,10 +39,11 @@ Bump `version` in `app.config.ts`; EAS increments the build numbers itself
 
 - **iOS:** `eas build -p ios --profile production`, then
   `eas submit -p ios --profile production --id <build id>`.
-- **Android:** build locally. EAS's free Android builders run out of memory
-  compiling the native modules, and the Gradle process is killed mid-build;
-  the larger builder needs a paid Expo plan. With JDK 17 and the Android SDK
-  and NDK installed:
+- **Android:** `eas build -p android --profile production`, then
+  `eas submit -p android --profile production --id <build id>`. `app.config.ts`
+  caps the Kotlin daemon's heap and the parallel C++ compiles so the release
+  build fits in the memory of EAS's free Android builder. To build on your own
+  machine instead, with JDK 17 and the Android SDK and NDK installed:
 
   ```bash
   eas build -p android --profile production --local --output wondermoney.aab

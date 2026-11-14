@@ -13,7 +13,7 @@ binds handlers.
 | Worker composition | `worker.ts` | Registers every queue family and graceful stop |
 | Queue contract | `*.queue.ts` | Names, retry/expiry policy, enqueue helpers |
 | Job execution | `*.worker.ts` | Handler, lifecycle, error semantics |
-| Scheduling | `*.schedule.ts`, `config.ts` | Ownership controlled by environment flags |
+| Scheduling | schedule helpers in `*.queue.ts`, `pgboss.config.ts` | Ownership controlled by environment flags |
 | Durable progress | `background-operation*` | Correlation, claim, heartbeat, terminal state |
 | Recovery | `recover-background-operations.ts` | Bounded operational recovery command |
 | Worker wiring | `__tests__/worker.bootstrap.test.ts` | Queues, consumers, schedules, dead-letter queues, shutdown budget |

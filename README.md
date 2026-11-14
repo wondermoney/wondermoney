@@ -31,8 +31,8 @@ and Android.
 | [`apps/web`](apps/web) | Web app | Next.js 16, React 19, Tailwind 4 |
 | [`apps/mobile`](apps/mobile) | iOS and Android app | Expo SDK 58, React Native 0.88 |
 | [`apps/docs`](apps/docs) | User documentation ([docs.wonder.money](https://docs.wonder.money)) | Next.js 16, Fumadocs |
-| [`apps/landing`](apps/landing) | Marketing site ([wonder.money](https://wonder.money)) | Astro 5, React 19, Tailwind 4 |
-| [`packages/shared`](packages/shared) | Market-data client and CSV parsers used by the API | TypeScript |
+| [`apps/landing`](apps/landing) | Marketing site ([wonder.money](https://wonder.money)) | Astro 7, React 19, Tailwind 4 |
+| [`packages/shared`](packages/shared) | Market-data client and statement parsers used by the API; small dependency-free helpers shared with web and mobile | TypeScript |
 | [`packages/react-email`](packages/react-email) | Email templates used by the API | React Email |
 
 Optional integrations (AI, market data, file storage, email, error tracking) switch on

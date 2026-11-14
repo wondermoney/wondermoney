@@ -13,10 +13,12 @@ points, translations, tests and the user documentation. The user-facing page is
 
 Preferences live in `appuser.preferences`, a `jsonb` document validated by
 `apps/api/src/validators/preferences.ts`. It is a document rather than a column per setting,
-so adding a preference does not need a migration. `previewFeatures` is the first key:
+so adding a preference does not need a migration. `previewFeatures` is one of its keys:
 
 ```ts
 export const userPreferencesSchema = z.object({
+  aiHidden: z.boolean().default(false),
+  dashboardLayout: dashboardLayoutSchema.default([]),
   previewFeatures: z.boolean().default(false),
 });
 ```

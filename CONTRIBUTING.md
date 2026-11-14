@@ -251,6 +251,11 @@ writes them follows these steps.
    In Portuguese the headings are "Atualizar", "Novo", "Correções" and "Agradecimentos"; in
    Spanish, "Actualizar", "Nuevo", "Correcciones" and "Agradecimientos". Leave out a section
    with nothing in it, except Upgrading.
+7. **Move the pinned version** in the same pull request, now that the images and the chart
+   exist for it: the three image tags in `render.yaml`, and the release named in
+   `apps/docs/content/docs/<locale>/self-hosting/kubernetes.mdx` and `install.mdx` (the
+   `--version` and `--branch` examples) for each locale. The examples in
+   `apps/api/deploy/selfhost/README.md` and `install.sh` follow.
 
 ## Leak check
 

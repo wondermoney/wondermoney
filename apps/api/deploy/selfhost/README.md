@@ -102,10 +102,10 @@ To read outgoing mail without a real provider, add `mail` to `COMPOSE_PROFILES` 
 Nothing leaves your server for the WonderMoney project. Without configuration, the only
 outside call is the worker's daily download of euro exchange rates from the European Central
 Bank. Everything else is switched on by its setting: email (SMTP or Resend), AI (`AI_BASE_URL` or
-`ANTHROPIC_API_KEY`), market data (EODHD), crypto wallet explorers (`CRYPTO_BTC_EXPLORER_URL`,
-`CRYPTO_ETH_EXPLORER_URL`), file storage (S3), off-site backups
+`ANTHROPIC_API_KEY`), market data (EODHD, or Stooq and CoinGecko once listed in `MARKET_DATA_PROVIDERS`), crypto wallet explorers (`CRYPTO_BTC_EXPLORER_URL`,
+`CRYPTO_ETH_EXPLORER_URL`), merchant logos (`MERCHANT_LOGO_URL_TEMPLATE`), push notifications (`PUSH_ENABLED`), file storage (S3), off-site backups
 (`BACKUP_DESTINATION`), error tracking (`SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`), analytics
-(above), Google sign-in, reCAPTCHA, and bank sync (Enable Banking, once a user adds their key or
+(above), Google sign-in, single sign-on (`OIDC_ISSUER`), reCAPTCHA, and bank sync (Enable Banking, once a user adds their key or
 you set `ENABLE_BANKING_APP_ID`; SimpleFIN, once you list it in `BANK_PROVIDERS` and a user
 connects with a setup token). The docs site's self-hosting guide lists each one.
 
