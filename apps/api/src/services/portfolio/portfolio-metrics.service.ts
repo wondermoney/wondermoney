@@ -1,13 +1,15 @@
 import { sql } from 'kysely';
 
 import { DI } from '@app/app';
-import { sqlQuery } from '@app/database/sql';
+import { anyOf, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
+import type { MemberFilter } from '@service/household/member-attribution';
 
 import { historyInViewerCurrency, historyRatePairs, type PortfolioSnapshotValue } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
+import { memberPortfolioKeys } from './portfolio-member-scope';
 import {
   calculateMaxDrawdown,
   calculateMoneyWeightedAnnualYield,
@@ -101,6 +103,7 @@ class PortfolioMetricsService {
     viewerCurrency: string,
     fromDate?: Date,
     tenantKey?: number,
+    portfolios?: readonly number[],
   ): Promise<{ complete: boolean; days: number; snapshots: PortfolioValueSnapshot[] }> {
     const rows = (await sqlQuery(DI.em)
       .selectFrom('portfolio_snapshot as ps')
@@ -124,6 +127,7 @@ class PortfolioMetricsService {
       .where('p.deleted_at', 'is', null)
       .where('ps.deleted_at', 'is', null)
       .$if(Boolean(fromDate), (query) => query.where('ps.snapshot_date', '>=', fromDate))
+      .$if(portfolios != null, (query) => query.where(anyOf('p.portfolio_key', portfolios ?? [])))
       .orderBy('ps.snapshot_date', 'asc')
       .execute()) as { currency_code: null | string; snapshot_day: string; total_value: null | number | string }[];
 
@@ -143,11 +147,14 @@ class PortfolioMetricsService {
   }
 
   /**
-   * Get comprehensive portfolio metrics
+   * The metrics of every household portfolio together, or with `members` of the portfolios those
+   * members own (a former member's as Shared): value, allocation, returns and risk alike.
    */
-  async getPortfoliosMetrics(appuser: Appuser, fromDate?: Date, tenantKey?: number): Promise<{ metrics: PortfolioMetrics }> {
+  async getPortfoliosMetrics(appuser: Appuser, fromDate?: Date, tenantKey?: number, members?: MemberFilter): Promise<{ metrics: PortfolioMetrics }> {
+    // The household's portfolios, or those the member filter keeps (`memberPortfolioKeys`).
+    const selected = await memberPortfolioKeys(DI.em, tenantKey, members);
     // Get current holdings and their values
-    const currentHoldings = await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey);
+    const currentHoldings = await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, selected);
     const validHoldings = filterValidHoldings(currentHoldings);
 
     // Calculate total portfolio value
@@ -170,7 +177,7 @@ class PortfolioMetricsService {
     // metrics that read it unknown.
     const hasInvalidHoldings = currentHoldings.some((holding) => holding.isInvalid);
     const viewerCurrency = await resolveViewerCurrency(appuser);
-    const recorded = hasInvalidHoldings ? [] : await portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey);
+    const recorded = hasInvalidHoldings ? [] : await portfolioHoldingsService.getInvestmentCashFlows(appuser, tenantKey, selected);
     const cashFlows = await loadCashFlowsInViewerCurrency(recorded, viewerCurrency, new Date(0));
 
     // Annual yield: money-weighted over every dated buy, sale and dividend, so later
@@ -179,7 +186,7 @@ class PortfolioMetricsService {
     const annualYield = hasInvalidHoldings || !allFlows ? null : calculateMoneyWeightedAnnualYield(allFlows, totalValue, new Date());
 
     // Get portfolio snapshots for risk metrics
-    const history = hasInvalidHoldings ? { complete: true, days: 0, snapshots: [] } : await this.getPortfolioSnapshots(appuser, viewerCurrency, fromDate, tenantKey);
+    const history = hasInvalidHoldings ? { complete: true, days: 0, snapshots: [] } : await this.getPortfolioSnapshots(appuser, viewerCurrency, fromDate, tenantKey, selected);
     const { snapshots } = history;
 
     // Calculate risk metrics. They take each day's trades out of its return, so they need every

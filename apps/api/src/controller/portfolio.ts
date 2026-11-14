@@ -17,6 +17,7 @@ import {
   getAggregateAllocationRequestSchema,
   getAggregateDashboardRequestSchema,
   getAggregatePerformanceRequestSchema,
+  getAggregatePortfolioReadRequestSchema,
   getAggregateTopMoversRequestSchema,
   getAssetPriceHistoryRequestSchema,
   getAssetPriceOverrideRequestSchema,
@@ -50,6 +51,7 @@ import backgroundOperationService from '@service/operations/background-operation
 import { loadVisiblePortfolioAccountLinks, setPortfolioAccountLink } from '@service/portfolio/portfolio-account-link';
 import { latestImportBrokers } from '@service/portfolio/portfolio-brokers';
 import portfolioImportSessionService from '@service/portfolio/portfolio-import-session.service';
+import { memberPortfolioKeys } from '@service/portfolio/portfolio-member-scope';
 import s3Service from '@service/storage/s3';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -248,7 +250,8 @@ export async function getBrokers(_req: Request, res: Response) {
 
 export async function getDividendIncome(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  const income = await portfolioHoldingsService.getDividendIncome(user, undefined, tenant.tenantKey);
+  const { query: { memberKeys } } = await zParse(getAggregatePortfolioReadRequestSchema, req);
+  const income = await portfolioHoldingsService.getDividendIncome(user, await memberPortfolioKeys(DI.em, tenant.tenantKey, memberKeys), tenant.tenantKey);
   return res.json(income);
 }
 
@@ -352,16 +355,17 @@ export async function getPortfolios(req: Request, res: Response) {
 
 export async function getPortfoliosHoldings(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  const holdings = await portfolioHoldingsService.getPortfoliosHoldings(user, tenant.tenantKey);
+  const { query: { memberKeys } } = await zParse(getAggregatePortfolioReadRequestSchema, req);
+  const holdings = await portfolioHoldingsService.getPortfoliosHoldings(user, tenant.tenantKey, await memberPortfolioKeys(DI.em, tenant.tenantKey, memberKeys));
   return res.json({ holdings });
 }
 
 export async function getPortfoliosMetrics(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { fromDate },
+    query: { fromDate, memberKeys },
   } = await zParse(getPortfoliosMetricsRequestSchema, req);
-  return res.json(await portfolioMetricsService.getPortfoliosMetrics(user, fromDate, tenant.tenantKey));
+  return res.json(await portfolioMetricsService.getPortfoliosMetrics(user, fromDate, tenant.tenantKey, memberKeys));
 }
 
 export async function getPortfoliosTransactions(req: Request, res: Response) {
@@ -392,7 +396,7 @@ export async function getPortfolioTransactions(req: Request, res: Response) {
 export async function getRealizedGains(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { portfolioId, year },
+    query: { memberKeys, portfolioId, year },
   } = await zParse(getRealizedGainsRequestSchema, req);
   if (portfolioId != null) {
     const portfolio = await DI.em.findOne(Portfolio, {
@@ -402,7 +406,11 @@ export async function getRealizedGains(req: Request, res: Response) {
     });
     if (!portfolio) throw new NotFoundError('Portfolio not found');
   }
-  return res.json(await portfolioHoldingsService.getRealizedGainsReport(user, { portfolioId, tenantKey: tenant.tenantKey, year }));
+  // The member filter narrows the household's portfolios, or the one named: another member's
+  // portfolio filtered to you has no sales of yours.
+  const members = await memberPortfolioKeys(DI.em, tenant.tenantKey, memberKeys);
+  const portfolios = members === undefined ? portfolioId : portfolioId == null ? members : members.filter((key) => key === portfolioId);
+  return res.json(await portfolioHoldingsService.getRealizedGainsReport(user, { portfolioId: portfolios, tenantKey: tenant.tenantKey, year }));
 }
 
 export async function getTransactionTypes(_req: Request, res: Response) {
@@ -538,34 +546,34 @@ async function queuePortfolioSnapshotRebuild(
 export async function getAggregateDashboard(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { include, period },
+    query: { include, memberKeys, period },
   } = await zParse(getAggregateDashboardRequestSchema, req);
-  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey, dashboardOptionsFrom(include));
+  const dashboard = await portfolioDashboardService.getAggregateDashboard(user, period || 'YTD', tenant.tenantKey, dashboardOptionsFrom(include), memberKeys);
   return res.json(dashboard);
 }
 
 export async function getAllocation(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  await zParse(getAggregateAllocationRequestSchema, req);
-  const allocation = await portfolioDashboardService.getAllocation(user, null, tenant.tenantKey);
+  const { query: { memberKeys } } = await zParse(getAggregateAllocationRequestSchema, req);
+  const allocation = await portfolioDashboardService.getAllocation(user, null, tenant.tenantKey, memberKeys);
   return res.json(allocation);
 }
 
 export async function getPerformance(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { period },
+    query: { memberKeys, period },
   } = await zParse(getAggregatePerformanceRequestSchema, req);
-  const performance = await portfolioDashboardService.getPerformanceData(user, null, period || 'YTD', tenant.tenantKey);
+  const performance = await portfolioDashboardService.getPerformanceData(user, null, period || 'YTD', tenant.tenantKey, memberKeys);
   return res.json(performance);
 }
 
 export async function getTopMovers(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
   const {
-    query: { limit, period },
+    query: { limit, memberKeys, period },
   } = await zParse(getAggregateTopMoversRequestSchema, req);
-  const topMovers = await portfolioDashboardService.getTopMovers(user, null, period || 'YTD', limit || 5, tenant.tenantKey);
+  const topMovers = await portfolioDashboardService.getTopMovers(user, null, period || 'YTD', limit || 5, tenant.tenantKey, memberKeys);
   return res.json(topMovers);
 }
 
@@ -593,7 +601,8 @@ export async function getPortfolioAllocation(req: Request, res: Response) {
 
 export async function getPortfolioCalendar(req: Request, res: Response) {
   const { tenant, user } = authedContext(req);
-  const holdings = await portfolioHoldingsService.getPortfoliosHoldings(user, tenant.tenantKey);
+  const { query: { memberKeys } } = await zParse(getAggregatePortfolioReadRequestSchema, req);
+  const holdings = await portfolioHoldingsService.getPortfoliosHoldings(user, tenant.tenantKey, await memberPortfolioKeys(DI.em, tenant.tenantKey, memberKeys));
   const symbols = [...new Set(holdings.filter((h) => !h.isInvalid).map((h) => h.financialAssetSymbol))];
   const from = new Date();
   const to = new Date();

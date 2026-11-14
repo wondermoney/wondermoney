@@ -24,6 +24,20 @@ describe('portfolio view models', () => {
     expect(result.portfolioCount).toBe(2)
   })
 
+  it('filtered by member, counts only the member\'s portfolios yet knows the household has some, and still offers every portfolio a transaction', () => {
+    const list = { portfolios: [
+      { appuserCurrencyCode: 'EUR', balance: 220, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },
+      { appuserCurrencyCode: 'EUR', balance: 80, currencyKey: { code: 'EUR' }, name: 'Tech picks', portfolioKey: 8 },
+    ] }
+    const members = mapPortfolioOverview(list, { portfolios: [{ currency: 'EUR', gainPercent: 10, name: 'Tech picks', portfolioKey: 8, value: 80, weight: 100 }], summary: { ...summary, portfolioCount: 1 } }, true)
+    expect(members).toMatchObject({ householdHasPortfolios: true, portfolioCount: 1 })
+    expect(members.portfolios.map((portfolio) => portfolio.name)).toEqual(['Tech picks'])
+    expect(members.transactionTargets).toEqual([{ id: 8, name: 'Tech picks' }, { id: 7, name: 'Long-term' }])
+
+    const nobody = mapPortfolioOverview(list, { portfolios: [], summary: { ...summary, portfolioCount: 0 } }, true)
+    expect(nobody).toMatchObject({ householdHasPortfolios: true, portfolioCount: 0, portfolios: [] })
+  })
+
   it('names each portfolio\'s broker from the list, and reads a server that sends none as no broker', () => {
     const list = portfoliosResponseSchema.parse({ portfolios: [
       { appuserCurrencyCode: 'EUR', balance: 220, broker: { displayName: 'Degiro', id: 1, name: 'degiro' }, currencyKey: { code: 'EUR' }, name: 'Long-term', portfolioKey: 7 },

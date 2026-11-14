@@ -37,6 +37,15 @@ import {
   PORTFOLIO_ALLOCATION_PRESETS,
   createPortfolioPerformanceEndpoint,
   portfolioPerformanceResponseSchema,
+  aggregatePortfolioHoldingsEndpoint,
+  createAggregateDividendIncomeEndpoint,
+  createAggregatePortfolioHoldingsEndpoint,
+  createPortfolioAllocationAggregateEndpoint,
+  createPortfolioMetricsEndpoint,
+  createPortfolioTopMoversEndpoint,
+  portfolioAllocationEndpoint,
+  portfolioDividendIncomeEndpoint,
+  portfolioMetricsEndpoint,
 } from './portfolios-contract'
 
 const invalidHolding = {
@@ -119,6 +128,26 @@ describe('portfolio endpoint contracts', () => {
     expect(createPortfolioPerformanceEndpoint(7, '1M')).toMatchObject({ method: 'GET', path: '/v1/portfolio/7/performance?period=1M' })
     expect(createPortfolioPerformanceEndpoint(7)).toMatchObject({ method: 'GET', path: '/v1/portfolio/7/performance?period=YTD' })
     expect(() => createPortfolioPerformanceEndpoint(0, 'YTD')).toThrow()
+  })
+
+  it('sends the member filter on the household chart only: one portfolio has one owner', () => {
+    expect(createPortfolioPerformanceEndpoint(null, '1M').path).toBe('/v1/portfolio/performance?period=1M')
+    expect(createPortfolioPerformanceEndpoint(null, '1M', '12').path).toBe('/v1/portfolio/performance?period=1M&memberKeys=12')
+    expect(createPortfolioPerformanceEndpoint(null, 'YTD', 'shared').path).toBe('/v1/portfolio/performance?period=YTD&memberKeys=shared')
+    expect(createPortfolioPerformanceEndpoint(7, 'YTD', '12').path).toBe('/v1/portfolio/7/performance?period=YTD')
+  })
+
+  it('sends the member filter on every household read of the tab, and nothing without one', () => {
+    expect(createAggregatePortfolioDashboardEndpoint('1M', '12').path).toBe('/v1/portfolio/dashboard?period=1M&include=feeConversion,periodReturns&memberKeys=12')
+    expect(createAggregatePortfolioDashboardEndpoint('1M').path).toBe('/v1/portfolio/dashboard?period=1M&include=feeConversion,periodReturns')
+    expect(createPortfolioAllocationAggregateEndpoint('shared').path).toBe('/v1/portfolio/allocation?memberKeys=shared')
+    expect(createAggregatePortfolioHoldingsEndpoint('12').path).toBe('/v1/portfolio/holdings?memberKeys=12')
+    expect(createAggregateDividendIncomeEndpoint('12').path).toBe('/v1/portfolio/dividend-income?memberKeys=12')
+    expect(createPortfolioMetricsEndpoint('12').path).toBe('/v1/portfolio/metrics?memberKeys=12')
+    expect(createPortfolioTopMoversEndpoint(null, 'YTD', '12').path).toBe('/v1/portfolio/top-movers?period=YTD&limit=5&memberKeys=12')
+    expect(createPortfolioTopMoversEndpoint(7, 'YTD', '12').path).toBe('/v1/portfolio/7/top-movers?period=YTD&limit=5')
+    expect([portfolioAllocationEndpoint, aggregatePortfolioHoldingsEndpoint, portfolioDividendIncomeEndpoint, portfolioMetricsEndpoint].map((endpoint) => endpoint.path))
+      .toEqual(['/v1/portfolio/allocation', '/v1/portfolio/holdings', '/v1/portfolio/dividend-income', '/v1/portfolio/metrics'])
   })
 
   it('parses a full performance response and strips fields the API adds', () => {

@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+import { parseMemberFilter } from '@service/household/member-attribution';
 import { portfolioCsvLayoutSchema, portfolioImportDerivedValuesSchema, portfolioImportFixedValuesSchema } from '@service/portfolio/portfolio-csv-column-mapping.schema';
 import { tickerSymbolSchema } from '@validators/financial-markets';
+import { memberKeysFilter } from '@validators/reports';
 import { boundedLimit, finiteAmount, positiveIntId, validDate } from '@validators/shared';
 
 /** A calendar day, `YYYY-MM-DD` (a real date: no 30 February). */
@@ -236,9 +238,27 @@ export const getPortfolioHoldingsRequestSchema = z.object({
   }),
 });
 
-/** Realized gains: one portfolio or all of the household's, one UTC calendar year or every year. */
+/**
+ * `memberKeys` on the portfolios overview's aggregate reads (`GET /v1/portfolio/dashboard`,
+ * `/performance`, `/allocation`, ...): keeps the portfolios those members own, or Shared for a
+ * former member's (`member-attribution.ts`). Absent, every household portfolio.
+ */
+const portfolioMemberKeys = memberKeysFilter.transform((keys) => parseMemberFilter(keys));
+
+/** `GET /v1/portfolio/holdings`, `/calendar` and `/dividend-income`: every household portfolio, or the member filter's. */
+export const getAggregatePortfolioReadRequestSchema = z.object({
+  query: z.object({
+    memberKeys: portfolioMemberKeys,
+  }),
+});
+
+/**
+ * Realized gains: one portfolio or all of the household's, one UTC calendar year or every year.
+ * `memberKeys` narrows either to the portfolios those members own.
+ */
 export const getRealizedGainsRequestSchema = z.object({
   query: z.object({
+    memberKeys: portfolioMemberKeys,
     portfolioId: positiveIntId.optional(),
     year: z.string().regex(/^\d{4}$/, 'Year must be YYYY').transform(Number).optional(),
   }),
@@ -308,6 +328,7 @@ export const deletePortfolioTransactionRequestSchema = z.object({
 export const getPortfoliosMetricsRequestSchema = z.object({
   query: z.object({
     fromDate: z.coerce.date().optional(),
+    memberKeys: portfolioMemberKeys,
   }),
 });
 
@@ -330,6 +351,7 @@ export function dashboardOptionsFrom(include: string | undefined): { includeFeeC
 export const getAggregateDashboardRequestSchema = z.object({
   query: z.object({
     include: dashboardIncludeSchema,
+    memberKeys: portfolioMemberKeys,
     period: periodSchema.optional(),
   }),
 });
@@ -344,17 +366,27 @@ export const getPortfolioDashboardRequestSchema = z.object({
   }),
 });
 
+/**
+ * `GET /v1/portfolio/performance`: the household's portfolios over the period. `memberKeys` keeps
+ * the portfolios those members own, or Shared for a former member's (`member-attribution.ts`).
+ */
 export const getAggregatePerformanceRequestSchema = z.object({
   query: z.object({
+    memberKeys: portfolioMemberKeys,
     period: periodSchema.optional(),
   }),
 });
 
-export const getAggregateAllocationRequestSchema = z.object({});
+export const getAggregateAllocationRequestSchema = z.object({
+  query: z.object({
+    memberKeys: portfolioMemberKeys,
+  }),
+});
 
 export const getAggregateTopMoversRequestSchema = z.object({
   query: z.object({
     limit: z.string().optional().transform((v) => (v ? boundedLimit({ defaultValue: 5, max: 100 }).parse(v) : 5)),
+    memberKeys: portfolioMemberKeys,
     period: periodSchema.optional(),
   }),
 });

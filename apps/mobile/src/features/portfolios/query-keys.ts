@@ -3,21 +3,27 @@ export const portfolioCurrenciesKey = (epochId: number) => ['portfolio-create', 
 export const portfolioTransactionTypesKey = (epochId: number) => ['portfolio-transaction-create', epochId, 'transaction-types'] as const
 export const portfolioCreateUnknownKey = (epochId: number) => ['portfolio-create', epochId, 'unknown-outcome'] as const
 export const portfolioSettingsUnknownKey = (epochId: number, portfolioId: number) => ['portfolio-settings', epochId, portfolioId, 'unknown-outcome'] as const
-export const aggregatePortfolioDashboardKey = (epochId: number, period: string = 'YTD') => (
-  ['portfolio-dashboard', epochId, 'aggregate', period] as const
+/**
+ * The Portfolios tab's member filter (a member's key or `shared`) is the last entry of an
+ * aggregate read's key, so invalidating the read refreshes every member's.
+ */
+const memberTail = (member?: string) => (member === undefined ? [] as const : [member] as const)
+
+export const aggregatePortfolioDashboardKey = (epochId: number, period: string = 'YTD', member?: string) => (
+  ['portfolio-dashboard', epochId, 'aggregate', period, ...memberTail(member)] as const
 )
 /** Every period of the aggregate dashboard, for invalidation. */
 export const aggregatePortfolioDashboardPrefix = (epochId: number) => (
   ['portfolio-dashboard', epochId, 'aggregate'] as const
 )
-export const aggregatePortfolioHoldingsKey = (epochId: number) => (
-  ['portfolio-holdings', epochId, 'aggregate'] as const
+export const aggregatePortfolioHoldingsKey = (epochId: number, member?: string) => (
+  ['portfolio-holdings', epochId, 'aggregate', ...memberTail(member)] as const
 )
 export const portfolioAllocationKey = (epochId: number, portfolioId: number) => (
   ['portfolio-analytics', epochId, portfolioId, 'allocation'] as const
 )
-export const portfolioTopMoversKey = (epochId: number, portfolioId: number | 'aggregate', period: string) => (
-  ['portfolio-top-movers', epochId, portfolioId, period, 5] as const
+export const portfolioTopMoversKey = (epochId: number, portfolioId: number | 'aggregate', period: string, member?: string) => (
+  ['portfolio-top-movers', epochId, portfolioId, period, 5, ...memberTail(member)] as const
 )
 export const portfolioKey = (epochId: number, portfolioId: number) => (
   ['portfolio', epochId, portfolioId] as const
@@ -31,14 +37,14 @@ export const portfolioHoldingsKey = (epochId: number, portfolioId: number) => (
 export const portfolioActivityKey = (epochId: number, portfolioId: number | 'aggregate', fromDate?: string, toDate?: string) => (
   ['portfolio-activity', epochId, portfolioId, fromDate ?? null, toDate ?? null, 50] as const
 )
-export const portfolioAnalyticsKey = (epochId: number, resource: 'allocation' | 'dividends' | 'metrics') => (
-  ['portfolio-analytics', epochId, resource] as const
+export const portfolioAnalyticsKey = (epochId: number, resource: 'allocation' | 'dividends' | 'metrics', member?: string) => (
+  ['portfolio-analytics', epochId, resource, ...memberTail(member)] as const
 )
 export const portfolioDividendIncomeKey = (epochId: number, portfolioId: number) => (
   ['portfolio-analytics', epochId, portfolioId, 'dividend-income'] as const
 )
-export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string) => (
-  ['portfolio-performance', epochId, portfolioId, period] as const
+export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string, member?: string) => (
+  ['portfolio-performance', epochId, portfolioId, period, ...memberTail(member)] as const
 )
 
 const PORTFOLIO_CONTENT_QUERY_TAGS = new Set([

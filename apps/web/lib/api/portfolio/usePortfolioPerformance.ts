@@ -75,18 +75,27 @@ export interface PerformanceResponse {
 
 /**
  * Fetches performance chart data
- * Uses path param for individual portfolio, aggregate endpoint for all
+ * Uses path param for individual portfolio, aggregate endpoint for all.
+ * `memberKeys` (the aggregate only; `lib/household/member-attribution.ts`)
+ * keeps the portfolios those members own, a former member's under Shared;
+ * absent for everyone, so an unfiltered request is unchanged.
  */
-async function getPortfolioPerformance(
+export async function getPortfolioPerformance(
   portfolioId: number | null,
   period: Period = "YTD",
   apiClient: AxiosInstance = api,
+  memberKeys?: readonly string[],
 ): Promise<PerformanceResponse> {
   const url = portfolioId
     ? `/v1/portfolio/${portfolioId}/performance`
     : `/v1/portfolio/performance`;
   const { data } = await apiClient.get<PerformanceResponse>(url, {
-    params: { period },
+    params: {
+      period,
+      ...(!portfolioId && memberKeys?.length
+        ? { memberKeys: memberKeys.join(",") }
+        : {}),
+    },
   });
   return data;
 }
@@ -98,10 +107,22 @@ export default function usePortfolioPerformance<R = PerformanceResponse>(
     UseQueryOptions<PerformanceResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  memberKeys?: readonly string[],
 ) {
+  // A member filter is its own entry under the chart's key, so invalidating
+  // the portfolio's performance refreshes every member's.
+  const members = !portfolioId && memberKeys?.length ? memberKeys.join(",") : null;
   return useQuery({
-    queryKey: ["portfolio-performance", portfolioId, period],
-    queryFn: () => getPortfolioPerformance(portfolioId, period),
+    queryKey: members
+      ? ["portfolio-performance", portfolioId, period, members]
+      : ["portfolio-performance", portfolioId, period],
+    queryFn: () =>
+      getPortfolioPerformance(
+        portfolioId,
+        period,
+        api,
+        members ? memberKeys : undefined,
+      ),
     ...options,
   });
 }

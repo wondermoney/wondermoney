@@ -57,7 +57,7 @@ export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palet
   const returnLagging = state.status === 'loaded' && state.data.returnEndDate !== null && state.data.endDate !== null && state.data.returnEndDate < state.data.endDate
   return (
     // Web's ruled "Performance" section: the chart on the canvas, no card around it.
-    <Section title={t('portfolioDetail.performance.heading')} variant="open" style={styles.card}>
+    <Section style={styles.card} testID="portfolio-performance" title={t('portfolioDetail.performance.heading')} variant="open">
       {onSelectPeriod ? <SegmentedControl
         accessibilityLabel={t('portfolioDetail.performance.title')}
         onChange={onSelectPeriod}

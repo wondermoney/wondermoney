@@ -25,6 +25,16 @@ overrides:
   # One copy, so the API's Request augmentation reaches the type Express actually uses.
   '@types/express-serve-static-core': 5.1.3
   eslint-plugin-react-hooks>zod-validation-error: ^4.0.0
+  # Security fixes (Dependabot) for versions these parents pin exactly or below the fix.
+  # Drop each once a release of the parent ships the fixed version.
+  # typography pins 6.0.10; 6.1.x is the same major, and the landing CSS builds byte-identical.
+  '@tailwindcss/typography>postcss-selector-parser': ^6.1.5
+  # routing-utils already runs 6.3.0 beside 6.1.0 (as `path-to-regexp-updated`) and logs any
+  # route whose regex differs; the landing build logs none, so its routes are unchanged.
+  '@vercel/routing-utils>path-to-regexp': 6.3.0
+  # @bossbench/core lists zod ^3 and @hono/zod-validator but its build imports neither, so
+  # nothing loads this copy; zod 3 has no fixed release. Remove when bossbench drops them.
+  '@bossbench/core>zod': ^4.6.6
 
   react-native-worklets: 0.13.0
   react-native-reanimated: 4.7.1
