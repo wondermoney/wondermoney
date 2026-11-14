@@ -204,9 +204,9 @@
   "2fa-recovery-code": "O teu código de recuperação:",
   "2fa-manual-code": "Ou introduz o código manualmente:",
   "2fa-recovery-code-save": "Aconselhamos-te vivamente a guardar o código de recuperação abaixo num lugar seguro, vais precisar dele se perderes o teu telefone.",
-  "enable-2fa": "Ativar 2FA",
+  "enable-2fa": "Ativar autenticação de dois fatores",
   "2fa-already-enabled-title": "A autenticação de dois fatores já está ativada",
-  "2fa-already-enabled-description": "Esta conta já tem uma aplicação de autenticação configurada. Atualiza a página ou usa \"Desativar 2FA\" antes de adicionar uma nova.",
+  "2fa-already-enabled-description": "Esta conta já tem uma aplicação de autenticação configurada. Atualiza a página ou desativa a autenticação de dois fatores antes de adicionares uma nova.",
   "2fa-conflict-title": "Uma configuração incompleta está a bloquear a ativação",
   "2fa-conflict-description": "Uma tentativa anterior de configurar a autenticação de dois fatores não foi concluída. Remove-a para começar de novo.",
   "2fa-remove-incomplete-setup": "Remover e começar de novo",
@@ -1664,7 +1664,7 @@
   "add-fees": "Adicionar Comissões",
   "select-currency": "Seleciona moeda",
   "enter-code-from-authenticator-app": "Introduz o código da tua aplicação de autenticação",
-  "scan-qr-code-using-mfa-app": "Digitaliza o código QR abaixo usando uma aplicação MFA (ex: Authenticator)",
+  "scan-qr-code-using-mfa-app": "Lê o código QR abaixo com uma aplicação de autenticação (por exemplo, Google Authenticator)",
   "2fa-verify-description": "Introduz o código de 6 dígitos que a tua aplicação de autenticação mostra agora para o WonderMoney, para concluir a ativação da autenticação de dois fatores.",
   "otp-length-error": "Introduz os 6 dígitos do código.",
   "delete-account-confirm": "Sim, eliminar a minha conta",
@@ -1677,7 +1677,7 @@
   "or-continue-with": "Ou continuar com",
   "join-now": "Criar conta agora",
   "welcome-empty-state": "Começa por <link1>adicionar uma conta</link1> e depois <link2>cria um orçamento</link2> para acompanhares as tuas despesas",
-  "disable-2fa": "Desativar 2FA",
+  "disable-2fa": "Desativar autenticação de dois fatores",
   "amount-cannot-be-greater-than-original": "O montante não pode ser maior que o montante original",
   "transaction-reviewed": "Transação revista",
   "unhide": "Mostrar",
@@ -3206,5 +3206,6 @@
     "load-error": "Não foi possível carregar a titularidade. Podes guardar as outras alterações.",
     "save-error": "Não foi possível guardar a titularidade. Tenta novamente.",
     "save-invalid": "As partes têm de somar 100%."
-  }
+  },
+  "portfolio-metric-sharpe-basis": "Rendimento e volatilidade de todo o histórico; taxa de referência fixa de 4,5% para todas as moedas."
 }

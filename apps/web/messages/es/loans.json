@@ -8,7 +8,6 @@
       "add": "Añadir préstamo",
       "edit": "Editar préstamo",
       "delete": "Eliminar préstamo",
-      "recordPayment": "Registrar pago",
       "linkRepayment": "Vincular pago",
       "unlinkRepayment": "Desvincular pago",
       "save": "Guardar cambios"
@@ -33,7 +32,6 @@
       "amortizationMethodHint": "El francés mantiene la cuota constante; el de capital constante paga el mismo capital cada mes, así que la cuota baja.",
       "startDate": "Fecha de inicio",
       "dueDate": "Fecha de vencimiento",
-      "linkedAccount": "Cuenta vinculada",
       "linkedTransaction": "Pago vinculado",
       "namePlaceholder": "Ej.: Hipoteca",
       "interestRatePlaceholder": "0,00",

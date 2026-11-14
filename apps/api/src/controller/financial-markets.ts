@@ -80,19 +80,19 @@ export async function getCompanyInformation(req: Request, res: Response) {
 export async function getEarnings(req: Request, _res: Response) {
   await zParse(getEarningsRequestSchema, req)
   // Not covered by the current EODHD plan tier (Fundamentals-gated).
-  throw new NotFoundError('Earnings data is temporarily unavailable')
+  throw new NotFoundError('Earnings data is not covered by the current market-data plan')
 }
 
 export async function getFinancials(req: Request, _res: Response) {
   await zParse(getFinancialsRequestSchema, req)
   // Not covered by the current EODHD plan tier (Fundamentals-gated).
-  throw new NotFoundError('Financials data is temporarily unavailable')
+  throw new NotFoundError('Financials data is not covered by the current market-data plan')
 }
 
 export async function getFundamentals(req: Request, _res: Response) {
   await zParse(getFundamentalsRequestSchema, req)
   // Not covered by the current EODHD plan tier (Fundamentals-gated).
-  throw new NotFoundError('Fundamentals data is temporarily unavailable')
+  throw new NotFoundError('Fundamentals data is not covered by the current market-data plan')
 }
 
 export async function getHistoricalDividend(req: Request, res: Response) {
@@ -172,7 +172,7 @@ export async function getHistoricalPrice(req: Request, res: Response) {
 export async function getNews(req: Request, _res: Response) {
   await zParse(getNewsRequestSchema, req)
   // Not covered by the current EODHD plan tier (Fundamentals-gated).
-  throw new NotFoundError('News data is temporarily unavailable')
+  throw new NotFoundError('News data is not covered by the current market-data plan')
 }
 
 export async function getQuote(req: Request, res: Response) {

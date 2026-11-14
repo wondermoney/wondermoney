@@ -215,7 +215,7 @@ export function PortfolioMetricsSection({ state, locale }: { state: PortfolioRes
               <StatList>
                 <Stat label={t('portfolioSections.annualYield')} locale={locale} valueNode={metrics.annualYield === null ? missing('annualYield') : <StatValue size="amountLarge">{signedPoints(metrics.annualYield, locale)}</StatValue>} />
                 <Stat label={t('portfolioSections.volatility')} locale={locale} valueNode={metrics.volatility === null ? missing('volatility') : <StatValue size="amountLarge">{points(metrics.volatility, locale)}</StatValue>} />
-                <Stat label={t('portfolioSections.sharpeRatio')} locale={locale} valueNode={metrics.sharpeRatio === null ? missing('sharpeRatio') : <StatValue size="amountLarge">{ratio(metrics.sharpeRatio)}</StatValue>} />
+                <Stat label={t('portfolioSections.sharpeRatio')} helper={t('portfolioSections.sharpeBasis')} locale={locale} valueNode={metrics.sharpeRatio === null ? missing('sharpeRatio') : <StatValue size="amountLarge">{ratio(metrics.sharpeRatio)}</StatValue>} />
                 <Stat label={t('portfolioSections.maxDrawdown')} locale={locale} valueNode={metrics.maxDrawdown === null ? missing('maxDrawdown') : <StatValue size="amountLarge">{points(metrics.maxDrawdown, locale)}</StatValue>} />
                 <Stat label={t('portfolioSections.riskLevel')} locale={locale} valueNode={metrics.riskLevel === null ? missing('riskLevel') : <StatValue size="amountLarge" tone={metrics.riskLevel === 'Low' ? 'default' : 'warning'}>{t(`portfolioSections.riskLevels.${metrics.riskLevel}`)}</StatValue>} />
               </StatList>

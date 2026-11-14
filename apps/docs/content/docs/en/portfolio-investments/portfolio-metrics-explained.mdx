@@ -190,7 +190,7 @@ The **Advanced metrics** section of the Portfolios page, on the web and in the m
 ### Which history it reads
 - **Annual yield** reads every buy, sale and dividend you have recorded, whatever period is selected.
 - On the web, **Volatility**, **Max Drawdown** and **Risk level** read the portfolio's daily history from the first day of the selected period. In the mobile app they read the whole history, and the period selector does not change them.
-- **Sharpe Ratio** combines the annual yield with the volatility, so on the web it sets an all-time yield against the selected period's volatility.
+- **Sharpe Ratio** combines the all-time annual yield with volatility over all available daily history, on both web and mobile. Selecting a period does not change it.
 
 ### When a figure is missing
 A figure that cannot be calculated shows a short reason in place of a number. It is never shown as zero.
@@ -264,18 +264,18 @@ Price moves, exchange rates, the mix of holdings and, on the web, the selected p
 The return earned above a risk-free rate for each unit of volatility.
 
 ### How it is calculated
-`(annual yield - 4.5) / volatility`, with all three as yearly percentages. The risk-free rate is fixed at 4.5% per year, an approximate US Treasury rate. It is the same for every currency and does not follow market rates.
+`(annual yield - 4.5) / volatility`, with all three as yearly percentages. Both yield and volatility use all available history, regardless of the selected period. The risk-free reference rate remains fixed at 4.5% per year for every currency; it is an assumption, not a live or currency-specific market rate.
 
 ### How to read it
 A higher ratio means more return for the swings taken. A negative ratio means the annual yield was below 4.5%.
 
 ### What can make it change
-Anything that changes the annual yield or the volatility.
+Anything that changes the all-time annual yield or all-time volatility. Web and mobile show the same ratio for the same portfolios, viewer currency and data.
 
 ### What it does not account for
 - It needs both a year of transactions and 90 daily values, and it is not shown when the volatility is zero.
 - The fixed rate may be far from the rate available in your currency, which shifts the ratio up or down.
-- On the web, the yield covers your whole history and the volatility the selected period, so the two halves can cover different stretches of time.
+- It uses all available daily history for volatility; selecting a shorter period does not change the ratio. Snapshot history may start later than your first recorded transaction.
 
 ### Common misunderstanding
 A Sharpe ratio is only comparable with another one that uses the same risk-free rate and the same way of annualising.

@@ -190,7 +190,7 @@ Na secção **Métricas avançadas** da página Portefólios, na web e na app m�
 ### Que histórico lê
 - O **Rendimento anual** lê todas as compras, vendas e dividendos registados, seja qual for o período escolhido.
 - Na web, a **Volatilidade**, o **Drawdown Máximo** e o **Nível de risco** leem o histórico diário do portefólio a partir do primeiro dia do período escolhido. Na app móvel leem o histórico todo, e o seletor de período não os altera.
-- O **Índice de Sharpe** combina o rendimento anual com a volatilidade, por isso na web compara um rendimento de todo o histórico com a volatilidade do período escolhido.
+- O **Índice de Sharpe** combina o rendimento anual de todo o histórico com a volatilidade de todo o histórico diário disponível, na web e na app móvel. Escolher um período não o altera.
 
 ### Quando falta um valor
 Um valor que não pode ser calculado mostra um motivo curto em vez de um número. Nunca aparece como zero.
@@ -264,18 +264,18 @@ Movimentos de preço, taxas de câmbio, a composição das posições e, na web,
 O retorno obtido acima de uma taxa sem risco por cada unidade de volatilidade.
 
 ### Como é calculado
-`(rendimento anual - 4,5) / volatilidade`, com os três em percentagem anual. A taxa sem risco está fixada em 4,5% por ano, uma taxa aproximada das obrigações do Tesouro dos EUA. É a mesma para todas as moedas e não acompanha as taxas de mercado.
+`(rendimento anual - 4,5) / volatilidade`, com os três em percentagem anual. O rendimento e a volatilidade usam todo o histórico disponível, independentemente do período escolhido. A taxa de referência sem risco mantém-se fixa em 4,5% por ano para todas as moedas; é um pressuposto, não uma taxa de mercado atual ou específica de cada moeda.
 
 ### Como ler
 Um índice mais alto significa mais retorno para as variações suportadas. Um índice negativo significa que o rendimento anual ficou abaixo de 4,5%.
 
 ### O que o pode alterar
-Tudo o que altere o rendimento anual ou a volatilidade.
+Tudo o que altere o rendimento anual ou a volatilidade de todo o histórico. A web e a app móvel mostram o mesmo índice para os mesmos portefólios, moeda de apresentação e dados.
 
 ### O que não tem em conta
 - Precisa de um ano de transações e de 90 valores diários, e não é mostrado quando a volatilidade é zero.
 - A taxa fixa pode estar longe da taxa disponível na tua moeda, o que desloca o índice para cima ou para baixo.
-- Na web, o rendimento abrange o teu histórico todo e a volatilidade o período escolhido, por isso as duas metades podem abranger intervalos de tempo diferentes.
+- Usa todo o histórico diário disponível para a volatilidade; escolher um período mais curto não altera o índice. O histórico de snapshots pode começar depois da tua primeira transação registada.
 
 ### Má interpretação comum
 Um índice de Sharpe só é comparável com outro que use a mesma taxa sem risco e a mesma forma de anualizar.

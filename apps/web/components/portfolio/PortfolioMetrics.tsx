@@ -203,7 +203,10 @@ const PortfolioMetrics: React.FC<PortfolioMetricsProps> = ({ metrics }) => {
           </div>
         </MetricCard>
 
-        <MetricCard label={t("sharpe-ratio")} helperText={undefined}>
+        <MetricCard
+          label={t("sharpe-ratio")}
+          helperText={t("portfolio-metric-sharpe-basis")}
+        >
           <div
             className={cn(
               sharpeUnavailable

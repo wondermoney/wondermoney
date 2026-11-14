@@ -386,6 +386,46 @@ describe('portfolio metrics calculations', () => {
   });
 
   describe('portfolio metrics service minimum history', () => {
+    it.each([
+      { periodDays: 90, selectedVolatility: expect.closeTo(38.2099, 3) },
+      { periodDays: 30, selectedVolatility: null },
+      { periodDays: 0, selectedVolatility: null },
+    ])('keeps Sharpe on an all-time basis with a $periodDays-day selected period', async ({ periodDays, selectedVolatility }) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(day(730));
+      try {
+        // 90 returns at ±1%, then 90 at ±2%: all-time volatility is 30.2076%.
+        let value = 1000;
+        const values = [value];
+        for (let i = 0; i < 180; i++) {
+          const move = i < 90 ? 0.01 : 0.02;
+          value *= i % 2 === 0 ? 1 + move : 1 - move;
+          values.push(value);
+        }
+        const rows = values.map((value, i) => ({ currency_code: 'EUR', snapshot_day: dayKey(day(550 + i)), total_value: String(value) }));
+        const { db } = kyselyDouble((query) => {
+          const from = query.parameters.find((parameter) => parameter instanceof Date);
+          return from ? rows.filter((row) => row.snapshot_day >= dayKey(from)) : rows;
+        });
+        Object.assign(DI.em, { getKysely: vi.fn().mockReturnValue(db) });
+        portfolioHoldingsServiceMock.getInvestmentCashFlows.mockResolvedValue([{ ...buy(1000, 0), currencyCode: 'EUR' }]);
+        portfolioHoldingsServiceMock.getPortfoliosHoldings.mockResolvedValue([
+          { averageBuyPrice: 1000, currentValue: 1210, financialAssetType: 'Stock', quantity: 1 },
+        ]);
+
+        const allTime = await portfolioMetricsService.getPortfoliosMetrics(VIEWER);
+        const selected = await portfolioMetricsService.getPortfoliosMetrics(VIEWER, day(730 - periodDays));
+
+        // A 10% yield with the fixed 4.5% reference rate and all-time volatility: 0.1821.
+        expect(allTime.metrics.sharpeRatio).toBeCloseTo(0.1821, 4);
+        expect(selected.metrics.sharpeRatio).toBeCloseTo(0.1821, 4);
+        expect(selected.metrics.annualYield).toBeCloseTo(10, 6);
+        expect(selected.metrics.volatility).toEqual(selectedVolatility);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('keeps the cumulative return but withholds annualised figures after five weeks', async () => {
       arrangeMetrics({ firstBuyDaysAgo: 35, snapshots: 35 });
 

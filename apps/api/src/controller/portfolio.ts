@@ -590,12 +590,12 @@ export async function getHoldingAnalystData(req: Request, _res: Response) {
   await zParse(getHoldingMarketDataRequestSchema, req);
   // Not covered by the current EODHD plan tier (Fundamentals-gated, same as
   // financial-markets.ts's getFundamentals/getEarnings).
-  throw new NotFoundError('Analyst data is temporarily unavailable');
+  throw new NotFoundError('Analyst data is not covered by the current market-data plan');
 }
 
 export async function getHoldingValuation(req: Request, _res: Response) {
   await zParse(getHoldingMarketDataRequestSchema, req);
-  throw new NotFoundError('Valuation data is temporarily unavailable');
+  throw new NotFoundError('Valuation data is not covered by the current market-data plan');
 }
 
 export async function getPortfolioAllocation(req: Request, res: Response) {

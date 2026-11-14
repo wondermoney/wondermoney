@@ -79,7 +79,8 @@ class PortfolioMetricsService {
 
   /**
    * Calculate Sharpe Ratio: (annualized return - risk-free rate) / volatility
-   * Uses a default risk-free rate of 4.5% (approximate US treasury rate).
+   * Uses a fixed 4.5% reference rate for every currency, not a live market rate.
+   * Both return and volatility always read the whole available history.
    * Every term is an annual percentage — the yield, the rate, and the volatility
    * annualised from calendar-day returns by sqrt(365) — so the ratio is per year.
    * It inherits both minimum-history gates and is null until a year of cash flows
@@ -192,11 +193,17 @@ class PortfolioMetricsService {
 
     // Calculate risk metrics. They take each day's trades out of its return, so they need every
     // snapshot, and every trade from the first snapshot on, in the viewer's currency.
-    const firstDay = snapshots[0]?.day;
-    const riskFlows = history.complete && firstDay ? knownFlows(cashFlows.filter((flow) => flow.kind !== 'DIVIDEND' && utcDay(flow.date) >= firstDay)) : null;
+    const riskFlows = historyCashFlows(history, cashFlows);
     const volatility = riskFlows ? calculateVolatility(snapshots, riskFlows) : null;
     const riskLevel = determineRiskLevel(volatility);
-    const sharpeRatio = this.calculateSharpeRatio(annualYield, volatility);
+    // Annual yield is all-time, so Sharpe must use all-time volatility too. Keep the selected
+    // period for the displayed volatility, risk level and drawdown; reuse it for all-time calls.
+    const sharpeHistory = fromDate && annualYield !== null
+      ? await this.getPortfolioSnapshots(appuser, viewerCurrency, undefined, tenantKey, selected)
+      : history;
+    const sharpeFlows = historyCashFlows(sharpeHistory, cashFlows);
+    const sharpeVolatility = sharpeHistory === history ? volatility : sharpeFlows ? calculateVolatility(sharpeHistory.snapshots, sharpeFlows) : null;
+    const sharpeRatio = this.calculateSharpeRatio(annualYield, sharpeVolatility);
     const maxDrawdown = riskFlows ? calculateMaxDrawdown(snapshots, riskFlows) : null;
     const performanceStatus: MetricsHistoryStatus = history.days === 0 ? 'empty' : history.days < MIN_METRICS_HISTORY_SNAPSHOTS ? 'insufficient_history' : 'ready';
 
@@ -221,6 +228,12 @@ class PortfolioMetricsService {
       },
     };
   }
+}
+
+/** Trades that can be valued for every day of this history, excluding dividend income. */
+function historyCashFlows(history: { complete: boolean; snapshots: PortfolioValueSnapshot[] }, cashFlows: PeriodCashFlow[]): InvestmentCashFlow[] | null {
+  const firstDay = history.snapshots[0]?.day;
+  return history.complete && firstDay ? knownFlows(cashFlows.filter((flow) => flow.kind !== 'DIVIDEND' && utcDay(flow.date) >= firstDay)) : null;
 }
 
 /** The flows as `InvestmentCashFlow`s, or null when one has no amount in the viewer's currency. */

@@ -410,7 +410,8 @@ describe('SecurityRoute', () => {
       mockAppLockSetEnabled.mockResolvedValue({ status: 'unavailable', capability: 'not-enrolled' })
       const view = await renderRoute()
       await fireEvent.press(view.getByRole('button', { name: 'Turn on app lock' }))
-      await waitFor(() => expect(view.getByRole('alert')).toHaveTextContent(/set up face id/i))
+      const i18n = await initMobileI18n('en')
+      await waitFor(() => expect(view.getByRole('alert')).toHaveTextContent(i18n.t('security.appLock.errors.not-enrolled')))
     })
 
     it('turns off without requiring a device prompt confirmation from the caller', async () => {

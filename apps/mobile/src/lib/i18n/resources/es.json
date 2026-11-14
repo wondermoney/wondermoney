@@ -2716,18 +2716,14 @@
     "legacyRecurrence": "Esta categoría no tiene una periodicidad guardada. Selecciona una explícitamente antes de guardar.",
     "scope": "Aplicar cambio a",
     "scopeMonth": "Solo al mes seleccionado",
-    "scopeForward_one": "Del mes seleccionado a diciembre ({{count}} mes)",
-    "scopeForward_other": "Del mes seleccionado a diciembre ({{count}} meses)",
-    "scopeNote": "El mes de la ruta seleccionada es el punto de partida. Los meses anteriores y los años futuros nunca cambian.",
+    "scopeNote": "La opción de meses siguientes también actualiza los años siguientes. Los meses anteriores no cambian.",
     "suggestionLabel": "Sugerido a partir de tus gastos: {{amount}}",
     "suggestionApply": "Aplicar",
     "suggestionNotEnoughData": "Todavía no hay historial suficiente para una sugerencia.",
     "save": "Guardar presupuesto de categoría",
     "saving": "Guardando presupuesto de categoría…",
-    "confirmTitle": "¿Aplicar hasta diciembre?",
-    "confirmMessage_one": "¿Aplicar este importe y periodicidad desde {{start}} hasta {{end}} ({{count}} mes)? Los meses anteriores, años futuros, saldos de cuentas y transacciones de gastos no cambiarán.",
-    "confirmMessage_other": "¿Aplicar este importe y periodicidad desde {{start}} hasta {{end}} ({{count}} meses)? Los meses anteriores, años futuros, saldos de cuentas y transacciones de gastos no cambiarán.",
-    "confirmAction": "Aplicar hasta diciembre",
+    "confirmTitle": "¿Aplicar a los meses siguientes?",
+    "confirmAction": "Aplicar a los meses siguientes",
     "failures": {
       "demo": "El modo de demostración es de solo lectura. No se guardó ningún cambio de categoría.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2738,7 +2734,9 @@
       "invalid-response": "El servidor no confirmó el cambio de categoría de forma segura. Se conservaron los valores.",
       "invalid": "Introduce un importe positivo y selecciona explícitamente una periodicidad.",
       "general": "No se pudo guardar el cambio de categoría. Se conservaron los valores."
-    }
+    },
+    "scopeForward": "Mes seleccionado y todos los meses siguientes",
+    "confirmMessage": "¿Aplicar este importe y periodicidad desde {{start}}, incluidos los años siguientes? Los meses anteriores, saldos de cuentas y transacciones de gastos no cambiarán."
   },
   "budgetCreate": {
     "title": "Crear presupuesto",
@@ -3891,7 +3889,7 @@
     },
     "appLock": {
       "heading": "Bloqueo de la aplicación",
-      "helper": "Exige Face ID, Touch ID o el código de tu dispositivo para abrir WonderMoney.",
+      "helper": "Configura el reconocimiento facial o de huella digital para activar el bloqueo de la aplicación. Al desbloquear, puedes usar el código del dispositivo como alternativa.",
       "loading": "Comprobando el estado del bloqueo de la aplicación…",
       "onLabel": "El bloqueo de la aplicación está activado",
       "offLabel": "El bloqueo de la aplicación está desactivado",
@@ -3901,8 +3899,8 @@
       "turningOff": "Desactivando…",
       "confirmPrompt": "Confirma para activar el bloqueo de la aplicación",
       "errors": {
-        "no-hardware": "No hay biometría ni código configurado en este dispositivo.",
-        "not-enrolled": "Configura primero Face ID, Touch ID o un código en los ajustes de tu dispositivo.",
+        "no-hardware": "Este dispositivo no admite reconocimiento facial o de huella digital.",
+        "not-enrolled": "Registra tu rostro o una huella digital en los ajustes del dispositivo antes de activar el bloqueo de la aplicación.",
         "auth-failed": "No se pudo confirmar. Inténtalo de nuevo."
       }
     },
@@ -5104,7 +5102,8 @@
     "loading": "Cargando",
     "sectionError": "No se pudo cargar esta sección. Desliza hacia abajo para volver a intentarlo.",
     "more": "Más sobre esta cartera",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "Rentabilidad y volatilidad de todo el historial; tasa de referencia fija del 4,5 % para todas las monedas."
   },
   "privacy": {
     "hiddenAmount": "Importe oculto",

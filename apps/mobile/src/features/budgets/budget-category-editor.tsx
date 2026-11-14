@@ -11,11 +11,9 @@ import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
-export type BudgetCategoryScope = 'month' | 'through-december'
+export type BudgetCategoryScope = 'month' | 'following-months'
 
 const recurrences: readonly BudgetRecurrence[] = ['MONTHLY_14', 'MONTHLY', 'QUARTERLY', 'BI_ANNUALLY', 'ANNUALLY']
-
-export const monthsInCategoryScope = (month: number, scope: BudgetCategoryScope): number => scope === 'month' ? 1 : 13 - month
 
 /** The typed amount, read in the app's language; `null` unless it is positive. */
 export function parseRawBudgetAmount(value: string, locale: string): number | null {
@@ -43,7 +41,7 @@ export function BudgetCategoryEditor({ child, currency, year, month, locale, pen
   const value = amount === null || recurrence === null ? null : {
     amount,
     recurrency: recurrence,
-    applyToFollowingMonths: scope === 'through-december',
+    applyToFollowingMonths: scope === 'following-months',
     // Only a change is sent: an unchanged switch leaves each month's own setting alone.
     ...(rolloverEnabled !== child.rolloverEnabled ? { rolloverEnabled } : {}),
   }
@@ -51,13 +49,12 @@ export function BudgetCategoryEditor({ child, currency, year, month, locale, pen
 
   const save = async () => {
     if (pending || !valid || !value) { setFailure('invalid'); return }
-    if (scope === 'through-december') {
+    if (scope === 'following-months') {
       const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' })
       const start = formatter.format(new Date(Date.UTC(year, month - 1, 15)))
-      const end = formatter.format(new Date(Date.UTC(year, 11, 15)))
       const confirmed = await confirmForwardScope(
         t('budgetCategory.confirmTitle'),
-        t('budgetCategory.confirmMessage', { start, end, count: monthsInCategoryScope(month, scope) }),
+        t('budgetCategory.confirmMessage', { start }),
         t('common.cancel'),
         t('budgetCategory.confirmAction'),
       )
@@ -102,7 +99,7 @@ export function BudgetCategoryEditor({ child, currency, year, month, locale, pen
     <Text style={[styles.label, { color: palette.foreground }]}>{t('budgetCategory.scope')}</Text>
     <View accessibilityRole="radiogroup" style={styles.choices}>
       <Choice label={t('budgetCategory.scopeMonth')} selected={scope === 'month'} disabled={pending} onPress={() => setScope('month')} palette={palette} />
-      <Choice label={t('budgetCategory.scopeForward', { count: monthsInCategoryScope(month, 'through-december') })} selected={scope === 'through-december'} disabled={pending} onPress={() => setScope('through-december')} palette={palette} />
+      <Choice label={t('budgetCategory.scopeForward')} selected={scope === 'following-months'} disabled={pending} onPress={() => setScope('following-months')} palette={palette} />
     </View>
     <Text style={[styles.scopeNote, { color: palette.mutedForeground }]}>{t('budgetCategory.scopeNote')}</Text>
     <View style={styles.actions}>

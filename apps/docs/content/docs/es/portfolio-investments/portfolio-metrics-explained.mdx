@@ -190,7 +190,7 @@ En la sección **Métricas avanzadas** de la página Carteras, en la web y en la
 ### Qué historial lee
 - La **Rentabilidad anual** lee todas las compras, ventas y dividendos registrados, sea cual sea el periodo elegido.
 - En la web, la **Volatilidad**, la **Caída máxima** y el **Nivel de riesgo** leen el historial diario de la cartera desde el primer día del periodo elegido. En la app móvil leen todo el historial, y el selector de periodo no los cambia.
-- El **Ratio de Sharpe** combina la rentabilidad anual con la volatilidad, así que en la web compara una rentabilidad de todo el historial con la volatilidad del periodo elegido.
+- El **Ratio de Sharpe** combina la rentabilidad anual de todo el historial con la volatilidad de todo el historial diario disponible, tanto en la web como en la app móvil. Elegir un periodo no lo cambia.
 
 ### Cuando falta una cifra
 Una cifra que no se puede calcular muestra un motivo breve en lugar de un número. Nunca aparece como cero.
@@ -264,18 +264,18 @@ Los movimientos de precio, los tipos de cambio, la composición de las posicione
 La rentabilidad obtenida por encima de una tasa sin riesgo por cada unidad de volatilidad.
 
 ### Cómo se calcula
-`(rentabilidad anual - 4,5) / volatilidad`, con los tres como porcentajes anuales. La tasa sin riesgo está fijada en el 4,5 % anual, una tasa aproximada de los bonos del Tesoro de EE. UU. Es la misma para todas las monedas y no sigue los tipos de mercado.
+`(rentabilidad anual - 4,5) / volatilidad`, con los tres como porcentajes anuales. La rentabilidad y la volatilidad usan todo el historial disponible, independientemente del periodo elegido. La tasa de referencia sin riesgo sigue fija en el 4,5 % anual para todas las monedas; es una suposición, no una tasa de mercado actual o específica de cada moneda.
 
 ### Cómo interpretarlo
 Un ratio más alto significa más rentabilidad por las oscilaciones asumidas. Un ratio negativo significa que la rentabilidad anual quedó por debajo del 4,5 %.
 
 ### Qué puede hacer que cambie
-Todo lo que cambie la rentabilidad anual o la volatilidad.
+Todo lo que cambie la rentabilidad anual o la volatilidad de todo el historial. La web y la app móvil muestran el mismo ratio para las mismas carteras, moneda de visualización y datos.
 
 ### Qué no tiene en cuenta
 - Necesita un año de transacciones y 90 valores diarios, y no se muestra cuando la volatilidad es cero.
 - La tasa fija puede estar lejos de la tasa disponible en tu moneda, lo que desplaza el ratio hacia arriba o hacia abajo.
-- En la web, la rentabilidad abarca todo tu historial y la volatilidad el periodo elegido, así que las dos mitades pueden abarcar tramos de tiempo distintos.
+- Usa todo el historial diario disponible para la volatilidad; elegir un periodo más corto no cambia el ratio. El historial de snapshots puede empezar después de tu primera transacción registrada.
 
 ### Malentendido habitual
 Un ratio de Sharpe solo es comparable con otro que use la misma tasa sin riesgo y la misma forma de anualizar.
