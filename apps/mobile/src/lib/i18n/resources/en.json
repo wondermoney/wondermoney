@@ -3324,7 +3324,7 @@
   "portfolioDetail": {
     "benchmark": {
       "title": "Benchmark Comparison",
-      "summary": "Portfolio {portfolio} · {symbol} {benchmark}",
+      "summary": "Portfolio {{portfolio}} · {{symbol}} {{benchmark}}",
       "unavailable": "The comparison needs portfolio and benchmark price history."
     },
     "back": "Back to Portfolio",

@@ -3324,7 +3324,7 @@
   "portfolioDetail": {
     "benchmark": {
       "title": "Comparativa con benchmark",
-      "summary": "Cartera {portfolio} · {symbol} {benchmark}",
+      "summary": "Cartera {{portfolio}} · {{symbol}} {{benchmark}}",
       "unavailable": "La comparación necesita el historial de la cartera y los precios del índice de referencia."
     },
     "back": "Volver a Cartera",

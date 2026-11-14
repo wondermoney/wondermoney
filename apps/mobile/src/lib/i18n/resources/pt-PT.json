@@ -3324,7 +3324,7 @@
   "portfolioDetail": {
     "benchmark": {
       "title": "Comparação com Benchmark",
-      "summary": "Portefólio {portfolio} · {symbol} {benchmark}",
+      "summary": "Portefólio {{portfolio}} · {{symbol}} {{benchmark}}",
       "unavailable": "A comparação precisa de histórico do portefólio e dos preços do benchmark."
     },
     "back": "Voltar a Portefólio",

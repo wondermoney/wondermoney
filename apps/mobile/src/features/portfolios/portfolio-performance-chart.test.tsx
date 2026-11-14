@@ -4,7 +4,7 @@ import { I18nextProvider } from 'react-i18next'
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
 
-import { formatDay, PortfolioPerformanceChart, type PortfolioPerformanceState } from './portfolio-performance-chart'
+import { formatDay, PortfolioBenchmarkChart, PortfolioPerformanceChart, type PortfolioPerformanceState } from './portfolio-performance-chart'
 
 const palette = themeTokens.colors.light
 
@@ -34,6 +34,14 @@ async function renderChart(state: PortfolioPerformanceState, onSelectPeriod = je
 }
 
 describe('PortfolioPerformanceChart', () => {
+  it.each(['en', 'pt-PT', 'es'] as const)('shows the selected benchmark and both numeric returns in %s', async (locale) => {
+    const i18n = await initMobileI18n(locale)
+    const view = await render(<I18nextProvider i18n={i18n}><PortfolioBenchmarkChart palette={palette} state={{ status: 'loaded', data: {
+      points: [], totalReturnPercent: 10, returnEndDate: '2026-08-01', startDate: '2026-07-01', endDate: '2026-08-01', historyStatus: 'ready', flows: [],
+      benchmark: { symbol: 'QQQ', status: 'ready', points: [{ x: 0, portfolio: 0, benchmark: 0 }, { x: 1, portfolio: 10, benchmark: 12 }] },
+    } }} /></I18nextProvider>)
+    expect(view.getByLabelText(/10\s*%.*QQQ.*12\s*%/)).toBeOnTheScreen()
+  })
   it('shows a loading indicator while the history loads', async () => {
     const { view } = await renderChart({ status: 'loading' })
     expect(view.getByRole('progressbar')).toBeOnTheScreen()
