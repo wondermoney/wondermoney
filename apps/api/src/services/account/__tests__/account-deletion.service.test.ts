@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   flush: vi.fn(),
   getConnection: vi.fn(),
   getReference: vi.fn(() => ({ appuserKey: 7 })),
+  getTransactionContext: vi.fn(),
   loggerError: vi.fn(),
   loggerInfo: vi.fn(),
   nativeDelete: vi.fn(),
@@ -33,6 +34,7 @@ import { deleteWonderMoneyAccount } from '../account-deletion.service';
 
 describe('deleteWonderMoneyAccount', () => {
   const now = new Date('2026-07-07T12:00:00.000Z');
+  const transactionContext = { transaction: 'deletion' };
   let sentEmailQueryWhere: Record<string, unknown> | undefined;
 
   beforeEach(() => {
@@ -41,6 +43,7 @@ describe('deleteWonderMoneyAccount', () => {
     mocks.findOne.mockResolvedValue(null);
     mocks.execute.mockResolvedValue({ appuserKey: 7 });
     mocks.getConnection.mockReturnValue({ execute: mocks.execute });
+    mocks.getTransactionContext.mockReturnValue(transactionContext);
     mocks.transactional.mockImplementation((cb: (em: typeof mocks) => unknown) => Promise.resolve(cb(mocks)));
   });
 
@@ -58,7 +61,7 @@ describe('deleteWonderMoneyAccount', () => {
       recordActive: true,
     };
 
-    const tenantMembership = { appuserTenantKey: 1, deletedAt: null, recordActive: true };
+    const tenantMembership = { appuserTenantKey: 1, deletedAt: null, recordActive: true, tenantKey: { tenantKey: 3 } };
     const requisition = { deletedAt: null, nordigenRequisitionKey: 2, requisitionId: 'req_1' };
     const assistantConsent = { assistantConsentKey: 5, assistantEnabled: true, deletedAt: null, disabledAt: null };
     const retryableSentEmail = { deletedAt: null, sentEmailKey: 6, status: 'failed' };
@@ -119,7 +122,7 @@ describe('deleteWonderMoneyAccount', () => {
 
     expect(mocks.flush).toHaveBeenCalled();
     expect(mocks.nativeDelete).toHaveBeenCalledWith(expect.any(Function), { appuserKey: appuser });
-    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('for update'), [7], 'get');
+    expect(mocks.execute).toHaveBeenCalledWith(expect.stringContaining('for update'), [7], 'get', transactionContext);
   });
 
   it('awaits each transactional lookup before starting the next one', async () => {
@@ -171,7 +174,7 @@ describe('deleteWonderMoneyAccount', () => {
       recordActive: true,
     };
 
-    const tenantMembership = { appuserTenantKey: 1, deletedAt: null, recordActive: true };
+    const tenantMembership = { appuserTenantKey: 1, deletedAt: null, recordActive: true, tenantKey: { tenantKey: 3 } };
     const requisition = { deletedAt: null, nordigenRequisitionKey: 2, requisitionId: 'req_1' };
     const assistantConsent = { assistantConsentKey: 5, assistantEnabled: true, deletedAt: null, disabledAt: null };
     const sentEmail = { deletedAt: null, sentEmailKey: 6, status: 'failed' };
