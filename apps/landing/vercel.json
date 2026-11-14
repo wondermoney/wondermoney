@@ -268,6 +268,204 @@
       ],
       "destination": "https://app.wonder.money/faq",
       "statusCode": 301
+    },
+    {
+      "source": "/en/alternativa-excel",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/en/excel-alternative",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/app-financas-portugal",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/en/personal-finance-app-portugal",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/controlo-gastos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/en/expense-tracker",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/gestao-financeira",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/en/personal-financial-management",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/app-financas-portugal",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/es/app-finanzas-personales",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/controlo-gastos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/es/control-gastos",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/gestao-financeira",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/es/gestion-financiera",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/alternativa-excel",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/fr/alternative-excel",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/app-financas-portugal",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/fr/app-finances-personnelles",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/controlo-gastos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/fr/suivi-depenses",
+      "statusCode": 301
+    },
+    {
+      "source": "/fr/gestao-financeira",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/fr/gestion-financiere",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/alternativa-excel",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/de/excel-alternative",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/app-financas-portugal",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/de/persoenliche-finanz-app",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/controlo-gastos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/de/ausgaben-verfolgen",
+      "statusCode": 301
+    },
+    {
+      "source": "/de/gestao-financeira",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/de/finanzverwaltung",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/app-financas-portugal",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/it/app-finanze-personali",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/controlo-gastos",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/it/controllo-spese",
+      "statusCode": 301
+    },
+    {
+      "source": "/it/gestao-financeira",
+      "has": [
+        {
+          "type": "host",
+          "value": "wonder.money"
+        }
+      ],
+      "destination": "/it/gestione-finanziaria",
+      "statusCode": 301
     }
   ]
 }

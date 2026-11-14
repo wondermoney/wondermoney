@@ -13,16 +13,14 @@ import AdOpenBankingSection from "@/components/landing/AdOpenBanking";
 import StructuredData from "@/components/shared/StructuredData.astro";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
-import { buildAlternateLinksForPath, toLocalizedPath } from "@/lib/routes";
+import {
+  buildAlternateLinksForPath,
+  toLocalizedPath,
+  type AdLandingRouteId,
+  type StandalonePageRouteId,
+} from "@/lib/routes";
 
-type StandaloneLandingPageId =
-  | "alternativaExcel"
-  | "appFinancasPortugal"
-  | "controloGastos"
-  | "gestaoFinanceira"
-  | "adNetWorth"
-  | "adFragmentation"
-  | "adOpenBanking";
+type StandaloneLandingPageId = StandalonePageRouteId | AdLandingRouteId;
 
 interface Props {
   locale: Lang;
@@ -103,6 +101,7 @@ const meta = metaByPageId[pageId];
   locale={locale}
   title={meta.title}
   description={meta.description}
+  canonicalUrl={localizedUrl}
   alternateLinks={alternateLinks}
   noindexFollow={isAdLandingPage}
 >
