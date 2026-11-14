@@ -57,6 +57,20 @@ describe('portfolio csv column mapping confirmation service', () => {
   const transformations: PortfolioColumnMappingTransformations = { dateFormat: 'yyyy-MM-dd', decimalSeparator: ',', negativeAmountMeansBuy: true, thousandsSeparator: '.' };
   const input = { appuser: { appuserKey: 1 } as unknown as ConfirmPortfolioColumnMappingInput['appuser'], columnMapping: { assetName: 'Asset', currency: 'Currency', externalTransactionId: 'ExtId', quantity: 'Qty', totalAmount: 'Total', transactionDate: 'Date' }, importSessionId: 11, layout: { dataStartRowIndex: 1, headerRowIndex: 0 }, tenant: { tenantKey: 2 }, transformations };
 
+  it('keeps broker dividends as income even when sign-based trade derivation is enabled', async () => {
+    mocked.getOwnedSession.mockResolvedValue(session());
+    mocked.getLimitedCsvObjectText.mockResolvedValue('csv');
+    mocked.parseCsvRows.mockReturnValue([{ Action: 'Dividend (Ordinary)', Asset: 'ACME', Currency: 'EUR', Date: '2026-01-01', ExtId: 'div-1', Qty: '10', Total: '2,50' }]);
+    mocked.find.mockResolvedValue([]);
+    mocked.findOne.mockResolvedValue(null);
+    const { default: service } = await import('../portfolio-csv-column-mapping.service');
+
+    const result = await service.confirmColumnMapping({ ...input, columnMapping: { ...input.columnMapping, transactionType: 'Action' } });
+
+    expect(result).toMatchObject({ invalidRows: 0, readyRows: 1 });
+    expect(mocked.persist).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ normalizedJson: expect.objectContaining({ quantity: 10, transactionType: 'DIVIDEND', unitPrice: 0.25 }) })]));
+  });
+
   function withResolver(status = 'partial') {
     return vi.fn().mockResolvedValue({ ambiguousGroups: 0, matchedGroups: 0, providerErrorGroups: 0, status, totalGroups: 1, unmatchedGroups: 0 });
   }

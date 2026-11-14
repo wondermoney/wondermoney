@@ -406,8 +406,12 @@ class PortfolioCsvColumnMappingService {
   private normalizeTransactionType(transactionTypeRaw: string | undefined, transformations: PortfolioColumnMappingTransformations, totalAmount: string | undefined, quantity: number, fixedTransactionType?: 'BUY' | 'SELL', derivedTransactionType?: 'quantitySign' | 'totalAmountSign') {
     if (fixedTransactionType) return fixedTransactionType;
     const normalized = transactionTypeRaw?.trim().toUpperCase();
-    if (normalized === 'BUY' || normalized === 'B' || normalized === 'PURCHASE') return 'BUY';
-    if (normalized === 'SELL' || normalized === 'S' || normalized === 'SALE') return 'SELL';
+    if (normalized === 'BUY' || normalized === 'B' || normalized === 'PURCHASE' || normalized === 'MARKET BUY' || normalized === 'LIMIT BUY') return 'BUY';
+    if (normalized === 'SELL' || normalized === 'S' || normalized === 'SALE' || normalized === 'MARKET SELL' || normalized === 'LIMIT SELL') return 'SELL';
+    if (normalized === 'DIVIDEND' || normalized === 'DIV' || normalized === 'CASH DIVIDEND' || normalized === 'DIVIDEND (ORDINARY)' || normalized === 'DIVIDEND (RETURN OF CAPITAL)') return 'DIVIDEND';
+    // A mapped income/cash action must never become a buy or sale merely
+    // because its amount is positive or negative.
+    if (normalized) return undefined;
     if (derivedTransactionType === 'quantitySign' || transformations.quantitySignIndicatesDirection) return quantity > 0 ? 'BUY' : 'SELL';
     if (derivedTransactionType === 'totalAmountSign' || transformations.negativeAmountMeansBuy) return totalAmount !== undefined && parseMappedNumber(totalAmount, transformations) < 0 ? 'BUY' : 'SELL';
     return undefined;
@@ -549,7 +553,7 @@ function buildLocalHeuristicSuggestion(headers: string[]): PortfolioColumnMappin
     else if (!mapping.isin && /(?:^|\b)isin(?:\b|$)/.test(normalized)) mapping.isin = header;
     else if (!mapping.ticker && /(?:^|\b)(?:ticker|symbol)(?:\b|$)/.test(normalized)) mapping.ticker = header;
     else if (!mapping.assetName && /(?:^|\b)(?:asset|name|product|security)(?:\b|$)/.test(normalized)) mapping.assetName = header;
-    else if (!mapping.transactionType && /(?:^|\b)(?:type|side)(?:\b|$)/.test(normalized)) mapping.transactionType = header;
+    else if (!mapping.transactionType && /(?:^|\b)(?:type|side|action)(?:\b|$)/.test(normalized)) mapping.transactionType = header;
     else if (!mapping.externalTransactionId && /(?:^|\b)(?:external id|transaction id|id)(?:\b|$)/.test(normalized)) mapping.externalTransactionId = header;
     else if (!mapping.brokerExchange && /(?:^|\b)(?:exchange|market|venue)(?:\b|$)/.test(normalized)) mapping.brokerExchange = header;
     else if (!mapping.feeAmount && /(?:^|\b)(?:fee|commission)(?:\b|$)/.test(normalized)) mapping.feeAmount = header;

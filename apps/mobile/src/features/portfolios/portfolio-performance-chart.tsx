@@ -29,6 +29,29 @@ export type PortfolioPerformanceChartProps = Readonly<{
 /** The latest flows listed under the chart; the activity list has the rest. */
 const LISTED_FLOWS = 5
 
+export function PortfolioBenchmarkChart({ state, palette }: Pick<PortfolioPerformanceChartProps, 'state' | 'palette'>) {
+  const { t, i18n } = useTranslation()
+  const comparison = state.status === 'loaded' ? state.data.benchmark : undefined
+  const last = comparison?.points.filter((point) => point.portfolio !== null && point.benchmark !== null).at(-1)
+  const percent = (value: number) => new Intl.NumberFormat(i18n.resolvedLanguage ?? i18n.language, { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 1 }).format(value / 100)
+  return (
+    <Section title={t('portfolioDetail.benchmark.title')} variant="open">
+      {comparison?.status === 'ready' && last ? (
+        <>
+          <View accessible accessibilityLabel={t('portfolioDetail.benchmark.summary', { symbol: comparison.symbol, portfolio: percent(last.portfolio!), benchmark: percent(last.benchmark!) })} style={styles.chart}>
+            <CartesianChart data={[...comparison.points]} xKey="x" yKeys={['portfolio', 'benchmark']}>
+              {({ points }) => <><Line points={points.portfolio} color={palette.chart1} strokeWidth={2} curveType="linear" /><Line points={points.benchmark} color={palette.chart2} strokeWidth={2} curveType="linear" /></>}
+            </CartesianChart>
+          </View>
+          <Text style={[styles.helper, { color: palette.foreground }]}>{t('portfolioDetail.benchmark.summary', { symbol: comparison.symbol, portfolio: percent(last.portfolio!), benchmark: percent(last.benchmark!) })}</Text>
+        </>
+      ) : (
+        <Text accessibilityRole={state.status === 'error' ? 'alert' : undefined} style={[styles.helper, { color: palette.mutedForeground }]}>{t(state.status === 'loading' ? 'portfolioDetail.performance.loading' : state.status === 'error' ? 'portfolioDetail.performance.error' : 'portfolioDetail.benchmark.unavailable')}</Text>
+      )}
+    </Section>
+  )
+}
+
 /** 'YYYY-MM-DD' → "1 Jul 2026" in the reader's locale, read as a calendar day (UTC). */
 export function formatDay(date: string, locale: string): string {
   try {

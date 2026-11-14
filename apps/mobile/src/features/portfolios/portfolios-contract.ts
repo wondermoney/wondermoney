@@ -100,7 +100,6 @@ const portfolioMetadataSchema = z.object({
   currencyKey: z.object({ code: currencyCodeSchema }),
   description: z.string().nullable().optional(),
   excluded: z.boolean().optional(),
-  favored: z.boolean().optional(),
   name: z.string(),
   portfolioKey: z.number().int().positive(),
   targetAllocation: z.record(z.string(), finite).nullable().optional(),
@@ -240,7 +239,6 @@ export const portfolioSettingsWriteSchema = z.object({
   description: z.string().max(500).nullable().optional(),
   benchmarkSymbol: z.string().trim().max(20).nullable().optional(),
   excluded: z.boolean().optional(),
-  favored: z.boolean().optional(),
   targetAllocation: portfolioTargetAllocationWriteSchema.optional(),
 }).strict().refine((value) => (
   value.accountLink !== undefined
@@ -248,7 +246,6 @@ export const portfolioSettingsWriteSchema = z.object({
   || value.description !== undefined
   || value.benchmarkSymbol !== undefined
   || value.excluded !== undefined
-  || value.favored !== undefined
   || value.targetAllocation !== undefined
 ), 'At least one changed field is required.')
 export const portfolioSettingsResponseSchema = z.object({ portfolio: portfolioMetadataSchema })
@@ -543,9 +540,7 @@ export const createEditPortfolioTransactionEndpoint = (portfolioId: number, tran
 // Manual transaction creation. Web's PortfolioTransactionAddModal also collects a
 // broker, an optional fee, and an optional original currency/amount; mobile scopes those out the
 // same way the edit form already does (see the comment above), since unlike an edit, a create
-// still needs an asset, a type, and a settlement currency to exist at all. Web explicitly excludes
-// DIVIDEND from the selectable type list (dividends are recorded by the system, not added by
-// hand) — mobile matches that by filtering PortfolioTransactionTypeDto[] in the UI layer.
+// still needs an asset, a type, and a settlement currency to exist at all.
 export const portfolioTransactionCreateWriteSchema = z.object({
   assetSymbol: z.string().trim().min(1).max(20),
   financialTransactionTypeId: positiveSafeId,
@@ -606,10 +601,9 @@ export const portfolioTransactionTypesEndpoint = readEndpoint({
   method: 'GET', path: '/v1/portfolio/transaction-types', schema: portfolioTransactionTypesResponseSchema,
 })
 
-// Web excludes DIVIDEND from PortfolioTransactionAddModal's selectable type list — dividends are
-// system-recorded income events, not something a user hand-enters. Mobile matches that exclusion.
+// The same types as web; a dividend records quantity × dividend per share.
 export function isManuallyCreatableTransactionType(name: string): boolean {
-  return name.trim().toUpperCase() !== 'DIVIDEND'
+  return name.trim().length > 0
 }
 
 export const PORTFOLIO_PERFORMANCE_PERIODS = ['1M', '3M', '6M', 'YTD', '1Y', 'ALL'] as const

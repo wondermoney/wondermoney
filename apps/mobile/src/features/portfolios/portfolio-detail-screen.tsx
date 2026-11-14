@@ -18,7 +18,7 @@ import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
 import type { PortfolioDividendIncomeViewModel } from './portfolio-activity-view-model'
-import { PortfolioPerformanceChart, type PortfolioPerformanceChartProps } from './portfolio-performance-chart'
+import { PortfolioBenchmarkChart, PortfolioPerformanceChart, type PortfolioPerformanceChartProps } from './portfolio-performance-chart'
 import { PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import {
   DividendIncomeBody,
@@ -122,6 +122,7 @@ export function PortfolioDetailScreen({ state, performance, dividendIncome = { s
                 <HoldingsList holdings={data.holdings} locale={locale} onOpen={(holding) => onOpenHolding(holding.id)} />
               </Section>
               <PortfolioPerformanceChart {...performance} currency={data.currency} palette={palette} />
+              <PortfolioBenchmarkChart state={performance.state} palette={palette} />
               {allocation ? <PortfolioAllocationSection locale={locale} state={allocation} title={t('portfolioSections.allocation')} /> : null}
               {topMovers ? <PortfolioTopMoversSection currency={data.currency} locale={locale} state={topMovers} /> : null}
               <PortfolioQuickStatsSection bestPerformer={data.bestPerformer} biggestPosition={data.biggestPosition} holdingsCount={data.holdingsCount} locale={locale} worstPerformer={data.worstPerformer} />

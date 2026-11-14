@@ -3322,6 +3322,11 @@
     "add": "Añadir"
   },
   "portfolioDetail": {
+    "benchmark": {
+      "title": "Comparativa con benchmark",
+      "summary": "Cartera {portfolio} · {symbol} {benchmark}",
+      "unavailable": "La comparación necesita el historial de la cartera y los precios del índice de referencia."
+    },
     "back": "Volver a Cartera",
     "loading": "Cargando los detalles de la cartera",
     "stale": "No se pudo actualizar. Se muestran los detalles de la cartera cargados anteriormente",
@@ -3457,8 +3462,6 @@
     "benchmarkCleared": "Eliminar el índice de referencia actual",
     "excluded": "Excluir del panel agregado",
     "excludedHelper": "Deja esta cartera fuera de los totales, posiciones y gráficos de todas las carteras juntas. Su propia página y tu patrimonio neto la siguen incluyendo.",
-    "favored": "Destacar en el panel",
-    "favoredHelper": "Da a esta cartera prioridad de visualización en el panel",
     "allocation": {
       "heading": "Asignación objetivo",
       "helper": "Define porcentajes objetivo para cada clase de activo. El total no tiene que sumar 100%.",
@@ -4661,6 +4664,7 @@
     "asset": "Activo",
     "changeAsset": "Cambiar",
     "quantity": "Cantidad",
+    "dividendPerShare": "Dividendo por unidad",
     "unitPrice": "Precio unitario",
     "transactionDate": "Fecha de la transacción",
     "currency": "Moneda de liquidación",

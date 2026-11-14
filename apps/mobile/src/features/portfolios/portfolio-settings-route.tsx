@@ -88,8 +88,8 @@ export function PortfolioSettingsRoute() {
 
   return (
     <PortfolioSettingsScreen
-      key={`${portfolio.name}:${portfolio.description ?? ''}:${portfolio.benchmarkSymbol ?? ''}:${portfolio.excluded ?? false}:${portfolio.favored ?? false}:${JSON.stringify(portfolio.targetAllocation ?? null)}:${JSON.stringify(portfolio.accountLink ?? null)}:${mutation.unknownOutcome ? 'unknown' : 'authoritative'}`}
-      model={{ id: portfolio.portfolioKey, name: portfolio.name, description: portfolio.description ?? null, currency: portfolio.currencyKey.code, benchmarkSymbol: portfolio.benchmarkSymbol ?? null, excluded: portfolio.excluded ?? false, favored: portfolio.favored ?? false, targetAllocation: portfolio.targetAllocation ?? null, accountLink: portfolio.accountLink ?? null }}
+      key={`${portfolio.name}:${portfolio.description ?? ''}:${portfolio.benchmarkSymbol ?? ''}:${portfolio.excluded ?? false}:${JSON.stringify(portfolio.targetAllocation ?? null)}:${JSON.stringify(portfolio.accountLink ?? null)}:${mutation.unknownOutcome ? 'unknown' : 'authoritative'}`}
+      model={{ id: portfolio.portfolioKey, name: portfolio.name, description: portfolio.description ?? null, currency: portfolio.currencyKey.code, benchmarkSymbol: portfolio.benchmarkSymbol ?? null, excluded: portfolio.excluded ?? false, targetAllocation: portfolio.targetAllocation ?? null, accountLink: portfolio.accountLink ?? null }}
       accounts={accounts.data?.accounts ?? []}
       pending={mutation.isPending}
       failure={failure}

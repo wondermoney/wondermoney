@@ -2,6 +2,7 @@ import {
   type ActivationEventProperties,
   sanitizeActivationProperties,
 } from "./activation";
+import { getAnalyticsConsent } from "./consent";
 import { ACTIVATION_EVENTS } from "./events";
 
 export const SIGNUP_FUNNEL_EVENTS = {
@@ -27,11 +28,7 @@ export type SignupFunnelEventName =
   (typeof SIGNUP_FUNNEL_EVENTS)[keyof typeof SIGNUP_FUNNEL_EVENTS];
 
 export type SignupFailureCategory =
-  | "app_callback"
-  | "auth_provider"
-  | "missing_user"
-  | "recaptcha"
-  | "unknown";
+  "app_callback" | "auth_provider" | "missing_user" | "recaptcha" | "unknown";
 
 interface SignupFunnelCaptureClient {
   capture: (eventName: string, properties?: Record<string, unknown>) => void;
@@ -53,12 +50,14 @@ export function captureSignupFunnelEvent(
 
     window.dataLayer = window.dataLayer ?? [];
     window.dataLayer.push({ ...safeProperties, event: eventName });
-  } catch { // no-excuse-ok: catch -- analytics must never block authentication
+  } catch {
+    // no-excuse-ok: catch -- analytics must never block authentication
   }
 }
 
 function isSignupFunnelAnalyticsEnabled() {
   if (typeof window === "undefined") return false;
+  if (getAnalyticsConsent() !== "granted") return false;
   return (
     process.env.NODE_ENV === "production" ||
     process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === "1"
