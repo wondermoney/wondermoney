@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Introduz o código de 6 dígitos da tua aplicação de autenticação.",
         "invalidCode": "Esse código não estava correto. Tenta novamente.",
-        "unavailable": "Não foi possível verificar esse código. Verifica a tua ligação e tenta novamente."
-      }
+        "unavailable": "Não foi possível verificar esse código. Verifica a tua ligação e tenta novamente.",
+        "backupCodeValidation": "Introduz um código de recuperação.",
+        "invalidBackupCode": "Esse código de recuperação não é válido ou já foi usado.",
+        "challengeExpired": "Já não é possível concluir este início de sessão. Termina a sessão e inicia sessão novamente.",
+        "rateLimited": "Demasiadas tentativas falhadas. Aguarda alguns minutos e tenta novamente."
+      },
+      "useBackupCode": "Usar um código de recuperação",
+      "useAuthenticator": "Usar a aplicação de autenticação",
+      "backupCodeLabel": "Introduz um dos teus códigos de recuperação",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Cada código de recuperação só funciona uma vez. Depois de iniciares sessão com ele, já não pode ser usado."
     },
     "signOutFailed": {
       "title": "Não foi possível terminar a sessão",
@@ -3944,7 +3953,11 @@
         "validation": "Introduz o código de 6 dígitos da tua aplicação de autenticação.",
         "invalidCode": "Esse código não estava correto. Tenta novamente.",
         "unavailable": "Não foi possível concluir essa ação. Verifica a tua ligação e tenta novamente."
-      }
+      },
+      "backupCodesTitle": "Guarda os teus códigos de recuperação",
+      "backupCodesHelper": "Guarda estes códigos num local seguro. Cada um pode ser usado uma vez se perderes o acesso à tua aplicação de autenticação.",
+      "copyBackupCodes": "Copiar códigos",
+      "backupCodesCopied": "Códigos de recuperação copiados para a área de transferência."
     },
     "deleteHeading": "Eliminar conta",
     "deleteExplainer": "Elimina permanentemente a tua conta WonderMoney e todos os dados associados dos nossos sistemas.",

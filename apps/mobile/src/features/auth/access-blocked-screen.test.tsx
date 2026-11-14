@@ -23,7 +23,7 @@ async function renderState(status: 'mfa-required' | 'sign-out-failed') {
         onOpenPrivacy={onOpenPrivacy}
         onOpenTerms={onOpenTerms}
         onOpenSupport={onOpenSupport}
-        mfaChallenge={{ submitting: false, failure: null, onSubmit: onSubmitMfaCode }}
+        mfaChallenge={{ submitting: false, failure: null, onSubmit: onSubmitMfaCode, onSubmitBackupCode: jest.fn() }}
       />
     </I18nextProvider>,
   )

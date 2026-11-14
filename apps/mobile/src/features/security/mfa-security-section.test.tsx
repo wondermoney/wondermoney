@@ -1,10 +1,13 @@
 import { fireEvent, render } from '@testing-library/react-native'
+import * as Clipboard from 'expo-clipboard'
 import { I18nextProvider } from 'react-i18next'
 
 import { initMobileI18n } from '@/lib/i18n'
 import { themeTokens } from '@/theme/tokens'
 
 import { MfaSecuritySection } from './mfa-security-section'
+
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn().mockResolvedValue(undefined) }))
 
 const palette = themeTokens.colors.light
 
@@ -64,7 +67,7 @@ describe('MfaSecuritySection', () => {
     const onConfirm = jest.fn()
     const { view } = await renderSection({
       status: 'enrolling',
-      enrollment: { secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/WonderMoney?secret=JBSWY3DPEHPK3PXP' },
+      enrollment: { secret: 'JBSWY3DPEHPK3PXP', uri: 'otpauth://totp/WonderMoney?secret=JBSWY3DPEHPK3PXP', backupCodes: [] },
       onConfirm,
     })
     expect(view.getByText('JBSWY3DPEHPK3PXP')).toBeOnTheScreen()
@@ -82,7 +85,7 @@ describe('MfaSecuritySection', () => {
     const onCancelEnrollment = jest.fn()
     const { view } = await renderSection({
       status: 'enrolling',
-      enrollment: { secret: 'secret', uri: 'uri' },
+      enrollment: { secret: 'secret', uri: 'uri', backupCodes: [] },
       onCancelEnrollment,
     })
     await fireEvent.press(view.getByRole('button', { name: 'Cancel setup' }))
@@ -92,7 +95,7 @@ describe('MfaSecuritySection', () => {
   it('surfaces an invalid code without leaving enrollment', async () => {
     const { view } = await renderSection({
       status: 'enrolling',
-      enrollment: { secret: 'secret', uri: 'uri' },
+      enrollment: { secret: 'secret', uri: 'uri', backupCodes: [] },
       confirmFailure: 'invalid-code',
     })
     expect(view.getByRole('alert')).toHaveTextContent(/that code was not correct/i)
@@ -114,5 +117,34 @@ describe('MfaSecuritySection', () => {
   it('surfaces a failure to turn off', async () => {
     const { view } = await renderSection({ status: 'on', unenrollFailed: true })
     expect(view.getByRole('alert')).toHaveTextContent(/could not complete that action/i)
+  })
+
+  it('shows the backup codes during setup, with a way to copy them', async () => {
+    const { view } = await renderSection({
+      status: 'enrolling',
+      enrollment: { secret: 'secret', uri: 'uri', backupCodes: ['abcde-12345', 'fghij-67890'] },
+    })
+    expect(view.getByText('Save your backup codes')).toBeOnTheScreen()
+    expect(view.getByText('abcde-12345')).toBeOnTheScreen()
+    expect(view.getByText('fghij-67890')).toBeOnTheScreen()
+
+    await fireEvent.press(view.getByRole('button', { name: 'Copy codes' }))
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith('abcde-12345\nfghij-67890')
+    expect(view.getByText('Backup codes copied to clipboard.')).toBeOnTheScreen()
+  })
+
+  it('reports a failed copy of the backup codes', async () => {
+    jest.mocked(Clipboard.setStringAsync).mockRejectedValueOnce(new Error('denied'))
+    const { view } = await renderSection({
+      status: 'enrolling',
+      enrollment: { secret: 'secret', uri: 'uri', backupCodes: ['abcde-12345'] },
+    })
+    await fireEvent.press(view.getByRole('button', { name: 'Copy codes' }))
+    expect(view.getByRole('alert')).toHaveTextContent(/could not complete that action/i)
+  })
+
+  it('never renders backup codes once two-factor authentication is on', async () => {
+    const { view } = await renderSection({ status: 'on', enrollment: null })
+    expect(view.queryByText('Save your backup codes')).not.toBeOnTheScreen()
   })
 })

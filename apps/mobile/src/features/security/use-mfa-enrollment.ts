@@ -8,9 +8,10 @@ import { mfaFactorsKey } from './query-keys'
 
 /**
  * TOTP enrollment as two guarded steps: `start` creates a new (unverified) factor and
- * returns its secret for manual entry into an authenticator app; `confirm` challenges
- * and verifies that same factor with the code the user typed. Neither the secret nor
- * the code is ever logged. On a verified confirmation the epoch-scoped factor-status
+ * returns its secret for manual entry into an authenticator app, with the one-time backup
+ * codes; `confirm` challenges and verifies that same factor with the code the user typed.
+ * None of the secret, the backup codes or the code is ever logged, and they live only in
+ * this mutation's in-memory state, which the screen resets when setup ends. On a verified confirmation the epoch-scoped factor-status
  * query is invalidated so Security reflects the new state.
  */
 export function useMfaEnrollment() {

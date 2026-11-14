@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Enter the 6-digit code from your authenticator app.",
         "invalidCode": "That code was not correct. Try again.",
-        "unavailable": "Could not verify that code. Check your connection and try again."
-      }
+        "unavailable": "Could not verify that code. Check your connection and try again.",
+        "backupCodeValidation": "Enter a backup code.",
+        "invalidBackupCode": "That backup code isn't valid or has already been used.",
+        "challengeExpired": "This sign-in can't be completed any more. Sign out and sign in again.",
+        "rateLimited": "Too many failed attempts. Wait a few minutes and try again."
+      },
+      "useBackupCode": "Use a backup code",
+      "useAuthenticator": "Use your authenticator app instead",
+      "backupCodeLabel": "Enter one of your backup codes",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Each backup code works once. After you sign in with it, it can't be used again."
     },
     "signOutFailed": {
       "title": "Could not sign out",
@@ -3944,7 +3953,11 @@
         "validation": "Enter the 6-digit code from your authenticator app.",
         "invalidCode": "That code was not correct. Try again.",
         "unavailable": "Could not complete that action. Check your connection and try again."
-      }
+      },
+      "backupCodesTitle": "Save your backup codes",
+      "backupCodesHelper": "Store these codes somewhere safe. Each one can be used once if you lose access to your authenticator app.",
+      "copyBackupCodes": "Copy codes",
+      "backupCodesCopied": "Backup codes copied to clipboard."
     },
     "deleteHeading": "Delete account",
     "deleteExplainer": "Permanently deletes your WonderMoney account and all associated data from our systems.",

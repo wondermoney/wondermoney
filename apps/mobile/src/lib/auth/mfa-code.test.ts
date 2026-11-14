@@ -1,4 +1,4 @@
-import { isValidTotpCode, normalizeTotpCode } from './mfa-code'
+import { isValidTotpCode, normalizeBackupCode, normalizeTotpCode } from './mfa-code'
 
 describe('normalizeTotpCode', () => {
   it('strips whitespace around and inside the code', () => {
@@ -18,5 +18,21 @@ describe('isValidTotpCode', () => {
     ['empty', ''],
   ])('rejects %s', (_label, value) => {
     expect(isValidTotpCode(value)).toBe(false)
+  })
+})
+
+describe('normalizeBackupCode', () => {
+  it('keeps the case and drops pasted whitespace', () => {
+    expect(normalizeBackupCode('  AbCdE-12345 \n')).toBe('AbCdE-12345')
+    expect(normalizeBackupCode('AbCdE 12345')).toBe('AbCdE-12345')
+  })
+
+  it('puts back the hyphen of a code typed without it', () => {
+    expect(normalizeBackupCode('abcde12345')).toBe('abcde-12345')
+  })
+
+  it('sends a code of another shape as typed', () => {
+    expect(normalizeBackupCode('abc-12345')).toBe('abc-12345')
+    expect(normalizeBackupCode('abcdef123456')).toBe('abcdef123456')
   })
 })

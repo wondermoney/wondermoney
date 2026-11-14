@@ -121,13 +121,15 @@ export function SecurityRoute() {
       } : null}
       mfa={{
         status: mfaStatus,
-        enrollment: pendingEnrollment ? { secret: pendingEnrollment.totp.secret, uri: pendingEnrollment.totp.uri } : null,
+        enrollment: pendingEnrollment
+          ? { secret: pendingEnrollment.totp.secret, uri: pendingEnrollment.totp.uri, backupCodes: pendingEnrollment.backupCodes }
+          : null,
         enrollBusy: enrollment.start.isPending,
         enrollFailed: enrollment.start.data?.status === 'unavailable',
         confirmBusy: enrollment.confirm.isPending,
         confirmFailure: enrollment.confirm.data?.status === 'invalid-code'
           ? 'invalid-code'
-          : enrollment.confirm.data?.status === 'unavailable'
+          : enrollment.confirm.data && enrollment.confirm.data.status !== 'verified'
             ? 'unavailable'
             : null,
         unenrollBusy: unenroll.isPending,
@@ -136,8 +138,8 @@ export function SecurityRoute() {
         onTurnOn: () => enrollment.start.mutate(),
         onConfirm: async (code) => {
           const result = await enrollment.confirm.mutateAsync(code)
-          // The pending factor is now verified server-side; drop the local secret so the
-          // section falls back to the freshly-invalidated (now enabled) factor status.
+          // The pending factor is now verified server-side; drop the local secret and backup
+          // codes so the section falls back to the freshly-invalidated (now enabled) factor status.
           if (result.status === 'verified') enrollment.start.reset()
         },
         onCancelEnrollment: () => {

@@ -5,12 +5,14 @@ import { useMfaChallenge } from './use-mfa-challenge'
 const mockMfaListFactors = jest.fn()
 const mockMfaChallenge = jest.fn()
 const mockMfaVerify = jest.fn()
+const mockMfaVerifyBackupCode = jest.fn()
 const mockCompleteMfaVerification = jest.fn()
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({
     mfaListFactors: mockMfaListFactors,
     mfaChallenge: mockMfaChallenge,
     mfaVerify: mockMfaVerify,
+    mfaVerifyBackupCode: mockMfaVerifyBackupCode,
     completeMfaVerification: mockCompleteMfaVerification,
   }),
 }))
@@ -20,6 +22,7 @@ describe('useMfaChallenge', () => {
     mockMfaListFactors.mockReset()
     mockMfaChallenge.mockReset()
     mockMfaVerify.mockReset()
+    mockMfaVerifyBackupCode.mockReset()
     mockCompleteMfaVerification.mockReset()
   })
 
@@ -94,4 +97,30 @@ describe('useMfaChallenge', () => {
       await first
     })
   })
+
+  it('signs in with a backup code without challenging the authenticator factor', async () => {
+    mockMfaVerifyBackupCode.mockResolvedValue({ status: 'verified' })
+    const hook = await renderHook(() => useMfaChallenge())
+
+    await act(async () => { await hook.result.current.submitBackupCode('abcde-12345') })
+
+    expect(mockMfaVerifyBackupCode).toHaveBeenCalledWith('abcde-12345')
+    expect(mockMfaListFactors).not.toHaveBeenCalled()
+    expect(mockMfaVerify).not.toHaveBeenCalled()
+    expect(mockCompleteMfaVerification).toHaveBeenCalledTimes(1)
+    expect(hook.result.current.failure).toBeNull()
+  })
+
+  it.each(['invalid-code', 'challenge-expired', 'rate-limited', 'unavailable'] as const)(
+    'surfaces a %s backup code without completing the sign-in',
+    async (status) => {
+      mockMfaVerifyBackupCode.mockResolvedValue({ status })
+      const hook = await renderHook(() => useMfaChallenge())
+
+      await act(async () => { await hook.result.current.submitBackupCode('abcde-12345') })
+
+      expect(hook.result.current.failure).toBe(status)
+      expect(mockCompleteMfaVerification).not.toHaveBeenCalled()
+    },
+  )
 })
