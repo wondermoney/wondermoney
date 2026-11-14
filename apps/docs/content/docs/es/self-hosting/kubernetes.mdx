@@ -87,7 +87,7 @@ El chart se niega a usar dos nombres de host sin el dominio de cookie, porque el
 
 ## Configurar
 
-El mapa `config` acepta los ajustes de [Configurar tu instancia](/es/docs/self-hosting/configure), con los mismos nombres y en las mismas secciones que `.env`. Las credenciales van en `secrets`, que el chart guarda en un Secret. Todo lo demás va en `extraEnv`.
+El mapa `config` acepta los ajustes de [Configurar tu instancia](/es/docs/self-hosting/configure), con los mismos nombres y en las mismas secciones que `.env`. Las credenciales van en `secrets`, que el chart guarda en un Secret. Todo lo demás va en `extraEnv`, que llega a la API y al worker, o en `webExtraEnv` para la aplicación web.
 
 ```yaml
 config:

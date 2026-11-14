@@ -37,7 +37,7 @@ Revoca un token cuando un script ya no lo necesite, cuando se pierda un portáti
 
 ## Límites de peticiones
 
-El tráfico de tokens tiene su propio presupuesto, contado por token. Una petición por encima del límite recibe `429 Too Many Requests` con una cabecera `Retry-After`. El presupuesto es independiente de tu sesión en el navegador, así que un script ocupado no ralentiza la aplicación para ti.
+El tráfico de tokens tiene su propio presupuesto, contado por token: 1200 peticiones cada 15 minutos. Una petición por encima del límite recibe `429 Too Many Requests` con una cabecera `Retry-After`. El presupuesto es independiente de tu sesión en el navegador, así que un script ocupado no ralentiza la aplicación para ti.
 
 ## Páginas relacionadas
 

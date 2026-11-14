@@ -37,7 +37,7 @@ Revoke a token when a script no longer needs it, when a laptop or device is lost
 
 ## Rate limits
 
-Token traffic has its own budget, counted per token. A request over the limit gets `429 Too Many Requests` with a `Retry-After` header. The budget is separate from your browser session, so a busy script does not slow down the app for you.
+Token traffic has its own budget, counted per token: 1,200 requests every 15 minutes. A request over the limit gets `429 Too Many Requests` with a `Retry-After` header. The budget is separate from your browser session, so a busy script does not slow down the app for you.
 
 ## Related pages
 

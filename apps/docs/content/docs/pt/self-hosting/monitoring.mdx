@@ -46,7 +46,7 @@ Logo depois de arrancares os contentores, `worker` pode falhar durante alguns se
 O [Uptime Kuma](https://github.com/louislam/uptime-kuma) é um monitor que alojas tu próprio e que te pode avisar por email, Telegram, ntfy e muitos outros canais. Adiciona um monitor:
 
 - **Monitor type**: HTTP(s) - Keyword
-- **URL**: `https://money.example.com/v1/health/ready` (o teu `APP_URL` seguido de `/v1/health/ready`)
+- **URL**: `https://money.example.com/v1/health/ready` (o teu `API_URL` seguido de `/v1/health/ready`; numa instalação com um só nome de anfitrião, é o endereço da aplicação web)
 - **Keyword**: `"status":"ok"`
 - **Heartbeat interval**: 60 segundos
 

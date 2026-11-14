@@ -10,7 +10,7 @@ docker compose pull
 docker compose up -d
 ```
 
-The API applies any database changes when it starts. To stay on a specific release instead of the latest, set `WM_VERSION` in `.env`, for example `WM_VERSION=1.4`.
+The API applies any database changes when it starts. To stay on a specific release instead of the latest, set `WM_VERSION` in `.env`, for example `WM_VERSION=1.4`. The images come from `ghcr.io/wondermoney`; to pull them from somewhere else, such as a mirror or a registry holding your own builds, set `WM_IMAGE_REGISTRY` to it. The image names stay `wondermoney-api`, `wondermoney-worker` and `wondermoney-web`.
 
 An install made with the install script is already pinned: the script sets `WM_VERSION` to the release it installed, so `docker compose pull` stays on that release. To move it to the latest release, run `./install.sh --dir .` in the install folder (the script leaves a copy of itself there, and changes only the `WM_VERSION` line of `.env`), or set `WM_VERSION` yourself.
 

@@ -58,7 +58,7 @@ Cada fila se convierte en una **compra de apertura**: una compra normal de esa c
 
 Si la cartera ya tiene compras o ventas de un activo del archivo, una compra de apertura encima contaría la posición dos veces. Esas filas aparecen con un aviso y se **omiten por defecto**. Activa una fila para importarla igualmente, por ejemplo cuando las operaciones existentes son de una posición que vendiste antes de volver a comprar. Las filas de activos sin operaciones se importan con normalidad.
 
-Importar dos veces el mismo archivo de posiciones se detecta como duplicado.
+Importar dos veces el mismo archivo de posiciones en la misma cartera, con la misma elección de bróker, se detecta como duplicado siempre que cada fila caiga en la misma fecha. Una fila sin fecha de adquisición usa la fecha de referencia, así que con otra fecha de referencia no es un duplicado; en ese caso aparece con el aviso anterior y se omite por defecto.
 
 ## Importar bienes manuales
 

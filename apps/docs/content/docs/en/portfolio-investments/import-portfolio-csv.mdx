@@ -58,7 +58,7 @@ Each row becomes one **opening buy**: a normal buy of that quantity at the avera
 
 If the portfolio already has buys or sales of an asset in the file, an opening buy on top of them would count the holding twice. Those rows are listed with a warning and **skipped by default**. Switch a row on to import it anyway, for example when the existing trades are of a holding you sold before buying again. Rows for assets without trades import as usual.
 
-Importing the same positions file twice is caught as a duplicate.
+Importing the same positions file into the same portfolio twice, with the same broker choice, is caught as a duplicate as long as each row lands on the same date. A row without an acquisition date takes the as-of date, so under a different as-of date it is not a duplicate; it is then listed with the warning above and skipped by default.
 
 ## Import manual assets
 

@@ -31,7 +31,7 @@ El ejemplo solicita cuentas; consulta [Cuentas en la referencia](/es/docs/api/re
 
 ## Límites de solicitudes
 
-Cuando una solicitud supera el límite, la API devuelve `429`. Espera el periodo indicado en la cabecera `Retry-After` antes de volver a intentarlo. Evita los ciclos de reintentos inmediatos y limita el número de intentos.
+Cada token puede hacer 1200 solicitudes cada 15 minutos. Cuando una solicitud supera el límite, la API devuelve `429`. Espera el periodo indicado en la cabecera `Retry-After` antes de volver a intentarlo. Evita los ciclos de reintentos inmediatos y limita el número de intentos.
 
 ## Errores
 

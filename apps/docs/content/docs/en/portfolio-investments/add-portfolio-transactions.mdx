@@ -23,7 +23,7 @@ Choose **Add transaction** on the Portfolios page or on a portfolio's page. The 
 - Withdrawal
 - Offer
 
-Holdings, cost basis and realized gains are worked out from buys and sells. A deposit, a withdrawal or an offer is kept in the portfolio's transaction list and does not change your holdings.
+Holdings, cost basis and realized gains are worked out from buys and sells. A deposit, a withdrawal or an offer is kept in the portfolio's transaction list and nowhere else: it does not change your holdings, the portfolio's value or history, or the cash flows the returns are measured from. A portfolio keeps no cash balance. The **Deposit** and **Withdrawal** markers on the web performance chart mark days of net buying and net selling, not these transactions.
 
 Dividend is not in the list: a dividend cannot be added by hand in the web or mobile app. A fee is not a type of its own either: it is recorded on the buy or sale it belongs to.
 
@@ -51,7 +51,9 @@ Portuguese savings certificates (Certificados de Aforro) have no ticker. On the 
 2. Enter the **Subscription date** and the **Principal amount**.
 3. For séries C to F, tick **Tax-exempt (65+)** if the exemption from withholding applies to you. It is self-reported: WonderMoney does not check your age or eligibility.
 
-For séries C to F, WonderMoney estimates the current value from the rates IGCP publishes. Every three months from the subscription date, interest is credited at the série's base rate plus the loyalty premium for the years held, less the 28% withholding unless you ticked the exemption, and is added to the balance. Séries A and B have no published formula, so their value is what your transactions say.
+For séries C to F, WonderMoney estimates the current value with its own model of the product. Every three months from the subscription date, it credits interest at the base rate it holds for the série in that quarter plus a loyalty premium for the years held, deducts a 28% withholding unless you ticked the exemption, and adds the result to the balance. Before the premium is added, the app limits the base rate to 3.5% for séries C, D and E and to 2.5% for série F. It stops crediting interest 10 years after the subscription date for séries C to E, and 15 years after it for série F.
+
+These rates, limits and terms are what the app applies. They are not a statement of the official terms in force, so check them against IGCP's own information. Séries A and B have no published formula, so their value is what your transactions say.
 
 The holding's details show **Accrual details**: the current rate, the years held, the premium tier, the next capitalization and the current value of each subscription. The figures are an estimate, not a guarantee of the redemption value.
 

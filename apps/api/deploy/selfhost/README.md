@@ -80,12 +80,13 @@ Everything lives in `.env`; it is commented section by section. After editing it
 |---|---|
 | Email | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `EMAIL_FROM` (or `RESEND_API_KEY`) |
 | CSV imports and receipt copies | an S3-compatible bucket, or the bundled store: `COMPOSE_PROFILES=storage` plus the values in `.env`'s file storage section |
-| Receipt scanning, smart categorisation, CSV column mapping, the assistant | `AI_BASE_URL`, `AI_MODEL` (any OpenAI-compatible endpoint, including Ollama), or `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `AI_MODEL` |
+| Receipt scanning, smart categorisation, CSV column mapping, the assistant | `AI_BASE_URL`, `AI_MODEL` (any OpenAI-compatible endpoint, including Ollama), or `AI_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `AI_MODEL`, or Azure OpenAI with the `AZURE_OPENAI_*` settings (see `.env`) |
 | Ticker search and live prices | `EODHD_API_KEY`, or the free Stooq and CoinGecko providers for prices through `MARKET_DATA_PROVIDERS` |
 | Crypto wallets valued from public addresses | `CRYPTO_BTC_EXPLORER_URL` (a mempool or Esplora API), `CRYPTO_ETH_EXPLORER_URL` (a Blockscout instance), and crypto prices through `MARKET_DATA_PROVIDERS` |
 | A contact form and a support address in the app | `SUPPORT_EMAIL` (and optionally reCAPTCHA keys) |
 | The in-app "Share Feedback" form, emailed to you | `SUPPORT_EMAIL` plus email (SMTP or Resend) |
 | "Continue with Google" | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Sign in with Apple in the iOS app | `APPLE_NATIVE_AUDIENCE`: the app's bundle ID (`money.wonder.app` for the published app). The web app has no Apple button |
 | "Sign in with <name>" through your own identity provider (OIDC) | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` (see the single sign-on guide) |
 | Bank sync | nothing on the server: each user adds their own Enable Banking key in Settings. Or your own Enable Banking application for your household: `ENABLE_BANKING_APP_ID` and `ENABLE_BANKING_PRIVATE_KEY_FILE` (see `.env`) |
 | Bank sync with US and Canadian banks (SimpleFIN, off by default) | `BANK_PROVIDERS=enable_banking,simplefin` (see the SimpleFIN guide) |
@@ -209,7 +210,8 @@ docker compose up -d
 `./install.sh --dir .` does the same for the latest release and pins `WM_VERSION` to it; the
 installer leaves a copy of itself in the directory. The API applies any new database migrations
 when it starts. To stay on a release, set `WM_VERSION` (e.g. `WM_VERSION=1.4`) instead of
-`latest`.
+`latest`. To pull the images from a mirror or a registry holding your own builds, set
+`WM_IMAGE_REGISTRY` (`ghcr.io/wondermoney` when empty).
 
 ## Monitor
 

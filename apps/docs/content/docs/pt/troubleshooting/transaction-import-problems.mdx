@@ -28,7 +28,7 @@ Um ficheiro ilegível é rejeitado com uma mensagem de erro em vez de ser import
 
 ## Transações semelhantes e duplicados
 
-O WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas (por exemplo, duas compras do mesmo montante no mesmo dia) deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja substituído silenciosamente.
+O WonderMoney reconhece uma linha do ficheiro como já importada pelo identificador ou pela referência do próprio banco, quando o ficheiro os tem (um `FITID` de OFX, uma referência de CAMT.053), e, se não, por uma impressão digital construída a partir de detalhes como a data e o montante. As linhas do mesmo ficheiro que partilham esses detalhes contam em separado, por isso duas compras do mesmo montante no mesmo dia são ambas importadas. Uma linha importada antes aparece na revisão como **Já na conta** e é ignorada, a não ser que a incluas; a transação que está na conta fica como está.
 
 Uma linha do ficheiro com o mesmo montante de uma transação que já está na conta, até 3 dias de diferença, aparece na revisão como possível duplicado, ao lado da transação com que se parece. É ignorada, a não ser que a incluas; vê [Possíveis duplicados](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados).
 

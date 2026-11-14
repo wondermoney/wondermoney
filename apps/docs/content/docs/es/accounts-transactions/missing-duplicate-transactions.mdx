@@ -7,15 +7,15 @@ WonderMoney evita los duplicados como parte de su flujo normal de transacciones,
 
 ## Cómo se tratan los duplicados
 
-Cada transacción lleva una huella que la identifica. Cuando los datos entrantes coinciden con una huella existente, el duplicado se descarta en lugar de crear una segunda fila. En la rara ocasión en que la coincidencia no es segura, la transacción se conserva y se marca con una pista para que tú decidas.
+Una transacción que envía tu banco lleva la referencia del propio banco, y una que ya está guardada no se añade una segunda vez. Una transacción sin referencia bancaria, como una que añades a mano o importas de un archivo, se identifica por una huella de su fecha y su importe. Cuando añades una transacción a mano en la web y coincide con una que ya está en la cuenta, se añade igualmente, y un mensaje indica que parece un duplicado para que tú decidas.
 
-Cada decisión queda registrada en el registro de auditoría de la transacción, incluidos los duplicados omitidos y los cambios de estado. La tolerancia de la huella es deliberadamente estrecha: dos transacciones legítimas que se parecen — por ejemplo, dos compras idénticas el mismo día — no se tratan como duplicadas. Una referencia bancaria distinta las diferencia y, cuando el banco envía compras idénticas sin referencia, cada una que el banco lista se sigue guardando como una transacción propia.
+Los duplicados omitidos en una sincronización bancaria y los cambios de estado quedan registrados en el registro de auditoría de la transacción; en la web, elige **Editar** en una transacción para verlo en **Actividad**. Dos transacciones legítimas de tu banco que se parecen, por ejemplo dos compras idénticas el mismo día, no se tratan como duplicadas. Una referencia bancaria distinta las diferencia y, cuando el banco envía compras idénticas sin referencia, cada una que el banco lista se sigue guardando como una transacción propia.
 
 Una importación de archivo añade una comprobación más: una fila con el mismo importe que una transacción que ya está en la cuenta, con hasta 3 días de diferencia, aparece como [posible duplicado](/es/docs/accounts-transactions/import-transactions-csv#posibles-duplicados) y se omite a menos que la incluyas.
 
 ## Versiones pendiente y confirmada
 
-Un pago con tarjeta pendiente se empareja automáticamente con su versión confirmada cuando el banco lo confirma, así que los dos no deberían permanecer separados. Si el banco nunca confirma un pago pendiente, este caduca después del plazo configurado y aparece como caducado en lugar de quedarse como registro pendiente.
+Un pago con tarjeta pendiente se empareja automáticamente con su versión confirmada cuando el banco lo confirma, así que los dos no deberían permanecer separados. Si el banco deja de listar un pago pendiente sin confirmarlo, este se marca como caducado cuando tiene más de 7 días y sale de la lista, en lugar de quedarse como registro pendiente.
 
 ## Antes de empezar
 
@@ -43,7 +43,7 @@ Después de corregir el problema, vuelve a comprobar la cuenta tras la próxima 
 ## Problemas comunes
 
 - Se añadió una entrada manual antes de que llegara la importación bancaria, y una pista sugiere que puede ser un duplicado.
-- Una transacción pendiente aparece como caducada porque el banco nunca la confirmó.
+- Una transacción pendiente salió de la lista porque el banco nunca la confirmó y caducó.
 - El banco omitió una transacción hasta la siguiente actualización.
 - El filtro de fechas incorrecto hizo que la transacción pareciera en falta.
 

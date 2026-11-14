@@ -41,7 +41,7 @@ La confianza de la categorización indica el grado de seguridad de una asignaci�
 
 Una huella de la transacción es un valor que identifica una transacción para detectar duplicados.
 
-**En WonderMoney:** Una huella de la transacción se construye a partir de los detalles de la transacción, como la fecha y el importe. Se usa para evitar importar la misma transacción dos veces. La tolerancia está calibrada para que las transacciones similares pero legítimas no se traten como duplicados.
+**En WonderMoney:** Una huella de la transacción se construye a partir de la fecha y el importe de la transacción. Identifica una transacción que no tiene referencia del banco, como una que introdujiste o importaste desde un archivo, para que la misma transacción no se añada dos veces. Una transacción sincronizada desde un banco se identifica por la referencia del propio banco, así que dos compras idénticas el mismo día siguen separadas.
 
 **Relacionado:** [Transacción](/es/docs/glossary#transacción), [Pendiente fantasma](/es/docs/glossary#pendiente-fantasma), [Registro de auditoría](/es/docs/glossary#registro-de-auditoría)
 
@@ -49,7 +49,7 @@ Una huella de la transacción es un valor que identifica una transacción para d
 
 Un pendiente fantasma es una transacción pendiente que nunca llega a convertirse en una confirmada.
 
-**En WonderMoney:** Un pendiente fantasma es una transacción pendiente guardada que ya no aparece en el listado de pendientes del banco. WonderMoney la caduca tras un periodo de gracia en lugar de dejarla en su sitio, para que no se convierta en un duplicado cuando llegue la transacción confirmada real.
+**En WonderMoney:** Un pendiente fantasma es una transacción pendiente guardada que ya no aparece en el listado de pendientes del banco. Cuando tiene más de 7 días, la siguiente sincronización lo marca como caducado en lugar de dejarlo en su sitio, para que no se quede como transacción pendiente. El cambio queda en el registro de auditoría.
 
 **Relacionado:** [Transacción](/es/docs/glossary#transacción), [Huella de la transacción](/es/docs/glossary#huella-de-la-transacción)
 
@@ -57,7 +57,7 @@ Un pendiente fantasma es una transacción pendiente que nunca llega a convertirs
 
 Un registro de auditoría es un historial de los cambios realizados en los datos.
 
-**En WonderMoney:** Un registro de auditoría registra eventos en una transacción, como la creación, las ediciones, la categorización y las decisiones sobre duplicados. La entrada original se conserva para que el historial siga siendo trazable.
+**En WonderMoney:** Un registro de auditoría registra eventos en una transacción, como la creación, las ediciones, la categorización y las decisiones sobre duplicados. Las entradas solo se añaden, nunca se cambian ni se eliminan, para que el historial siga siendo trazable.
 
 **Relacionado:** [Transacción](/es/docs/glossary#transacción), [Huella de la transacción](/es/docs/glossary#huella-de-la-transacción)
 
@@ -119,7 +119,7 @@ El disponible para asignar es el dinero que todavía puedes destinar a un objeti
 
 La amortización de deuda es el objetivo de reducir lo que debes.
 
-**En WonderMoney:** Un objetivo de amortización de deuda agrupa una o más deudas y planifica su reembolso, usando estrategias como el orden de avalancha o de bola de nieve. Asignar dinero al objetivo hace un seguimiento del progreso respecto al plan.
+**En WonderMoney:** Un objetivo de amortización de deuda sigue una sola deuda. A partir de su saldo, su tipo de interés y su pago mensual, muestra la fecha de liquidación y el total de intereses. Con dos o más objetivos de amortización de deuda, la página de objetivos compara pagarlos en orden de avalancha o de bola de nieve.
 
 **Relacionado:** [Disponible para asignar](/es/docs/glossary#disponible-para-asignar), [Presupuesto](/es/docs/glossary#presupuesto)
 

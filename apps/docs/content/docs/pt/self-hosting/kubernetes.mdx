@@ -87,7 +87,7 @@ O chart recusa dois nomes de anfitrião sem o domínio de cookie, porque o iníc
 
 ## Configurar
 
-O mapa `config` aceita as definições de [Configurar a tua instância](/pt/docs/self-hosting/configure), com os mesmos nomes e nas mesmas secções que o `.env`. As credenciais vão antes em `secrets`, que o chart guarda num Secret. Tudo o resto vai em `extraEnv`.
+O mapa `config` aceita as definições de [Configurar a tua instância](/pt/docs/self-hosting/configure), com os mesmos nomes e nas mesmas secções que o `.env`. As credenciais vão antes em `secrets`, que o chart guarda num Secret. Tudo o resto vai em `extraEnv`, que chega à API e ao worker, ou em `webExtraEnv` para a aplicação web.
 
 ```yaml
 config:

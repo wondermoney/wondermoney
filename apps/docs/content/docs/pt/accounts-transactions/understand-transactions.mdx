@@ -11,13 +11,13 @@ Uma transação percorre um ciclo definido:
 
 - **Pendente.** O banco comunicou o pagamento, mas ainda não o confirmou. Os pagamentos por cartão costumam começar aqui.
 - **Confirmado.** O banco confirmou a transação. Um pagamento pendente é associado automaticamente à versão confirmada, pelo que os dois não ficam muito tempo separados.
-- **Expirado.** Uma transação pendente que o banco nunca confirma dentro do intervalo definido fica marcada como expirada e é removida da lista ativa. Isto evita que registos pendentes antigos fiquem na lista.
+- **Expirado.** Uma transação pendente que o banco deixa de listar sem a confirmar fica marcada como expirada quando tiver mais de 7 dias e é removida da lista. Isto evita que registos pendentes antigos fiquem na lista.
 
 O saldo disponível é o saldo atual líquido da atividade pendente, pelo que o dinheiro ainda pendente está refletido no que vês.
 
 ## Registo de auditoria
 
-Cada alteração a uma transação — incluindo o tratamento de duplicados e as mudanças de estado — fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo.
+Cada alteração a uma transação, incluindo o tratamento de duplicados e as mudanças de estado, fica registada no registo de auditoria. Se precisares de perceber porque é que uma transação está num determinado estado, o histórico de auditoria tem o registo: na web, escolhe **Editar** numa transação para o veres em **Atividade**. A aplicação móvel não o mostra.
 
 ## Anexos
 

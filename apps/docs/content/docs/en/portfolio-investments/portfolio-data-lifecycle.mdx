@@ -31,9 +31,11 @@ While the history is not complete, the portfolio page on the web shows a notice 
 |---|---|---|
 | **Building performance history** | Historical prices are still being fetched for some assets. Holdings and allocation are already **Ready**; performance shows **Building** and the benchmark **Waiting** | Nothing. It finishes by itself |
 | **Portfolio history is partially available** | The prices are in, and the history does not yet cover the whole period. Performance and the benchmark show **Partial** | Nothing. Charts and metrics may cover a shorter period for now |
-| **Historical prices unavailable** | Prices for some assets have been missing for more than three days, usually because the market-data provider has no older prices for them | Check that each asset was matched to the right ticker. Holdings stay up to date either way |
+| **Historical prices unavailable** | Some assets still lack historical prices more than three days after their latest buy was recorded, usually because the market-data provider has no older prices for them. All four lines read **Unavailable**, although holdings and allocation are still shown and current | Check that each asset was matched to the right ticker. Holdings stay up to date either way |
 
-When there is no notice, the history is complete.
+When there is no notice, the history is complete, or the portfolio has no buys yet.
+
+The mobile app does not show this notice. While the history has fewer than two daily values, its performance chart shows **Not enough history yet to chart performance** instead of the chart, or **No performance history is available yet** when there is none. The advanced metrics carry a note when the performance history or the risk metrics need more history.
 
 ## What to expect
 

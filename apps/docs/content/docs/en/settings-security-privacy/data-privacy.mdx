@@ -17,9 +17,11 @@ WonderMoney uses read-only bank access for connected accounts. It cannot move mo
 
 ## How consent works
 
-Consent is a property of the user account. At signup you accept the terms and choose whether to allow analytics and attribution. You can review or change both choices at any time from settings.
+Creating an account means accepting the Terms of Service and the Privacy Policy. Sign-up does not ask about analytics. The AI assistant has its own consent, stored with your account: see [AI assistant consent](/en/docs/settings-security-privacy/ai-assistant-consent).
 
-Analytics and attribution are gated on consent. If you have not consented to analytics, those calls are not made and your activity is not collected for analytics purposes.
+Analytics and advertising measurement are asked about on the wonder.money website, not in the app. On your first visit, the **Privacy choices** banner offers **Use necessary only**, **Customize** and **Allow all**; **Analytics** and **Advertising** stay off unless you allow them. The choice is saved in that browser, not in your account, so each browser asks once. To change it, select the **Privacy choices** button in the corner of any page of the website.
+
+The web and mobile apps have no analytics switch for an account. The web app loads analytics only on a server whose operator has configured it, and a self-hosted server has none by default (see [Analytics](/en/docs/self-hosting/configure#analytics)). The mobile app sends usage events only while it is connected to the server it was built for.
 
 ## AI features
 
@@ -37,7 +39,7 @@ While the switch is on, the server refuses the assistant, receipt scanning, PDF 
 
 - Which household your account data belongs to
 - Per-account privacy settings and whether they match the access you want
-- Whether analytics and attribution are enabled for your account
+- Your **Privacy choices** on the wonder.money website, in each browser you use
 - Whether connected services are still active
 - Whether connected bank access is still needed
 
@@ -45,7 +47,7 @@ While the switch is on, the server refuses the assistant, receipt scanning, PDF 
 
 **Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
 
-- `data/`: one JSON file per kind of data: accounts (with their sharing: shared with the household, or private and who can view or edit them), transactions, categories and category settings, merchants, tags, transaction splits, refunds linked to the expenses they offset, shared expense groups with their members, expenses and settlements, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, the public addresses and holdings of crypto wallets, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `data/`: one JSON file per kind of data: the household's members (the other members by first name and role only), accounts (with their sharing: shared with the household, or private and who can view or edit them), transactions, categories and category settings, merchants, tags, transaction splits, refunds linked to the expenses they offset, shared expense groups with their members, expenses and settlements, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, the public addresses and holdings of crypto wallets, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
 - `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
 - `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
 

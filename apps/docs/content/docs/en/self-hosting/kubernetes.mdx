@@ -87,7 +87,7 @@ The chart refuses two hostnames without the cookie domain, because sign-in would
 
 ## Configure
 
-The `config` map takes the settings of [Configure your instance](/en/docs/self-hosting/configure), by the same names and in the same sections as `.env`. Credentials go in `secrets` instead, which the chart stores in a Secret. Anything else goes in `extraEnv`.
+The `config` map takes the settings of [Configure your instance](/en/docs/self-hosting/configure), by the same names and in the same sections as `.env`. Credentials go in `secrets` instead, which the chart stores in a Secret. Anything else goes in `extraEnv`, which reaches the API and the worker, or in `webExtraEnv` for the web app.
 
 ```yaml
 config:

@@ -59,9 +59,9 @@ Acrescenta as variáveis ao ficheiro `.env` ao lado do `docker-compose.yml` e co
 
 | Definição | O que faz |
 |---|---|
-| `OIDC_ISSUER` | O URL do emissor do fornecedor. Tem de ser HTTPS |
+| `OIDC_ISSUER` | O URL do emissor do fornecedor. Tem de ser HTTPS; `http` simples só é aceite em `localhost` ou `127.0.0.1` |
 | `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | O cliente que registaste |
-| `OIDC_DISPLAY_NAME` | O nome no botão: **Iniciar sessão com &lt;nome&gt;**. Por omissão, `SSO` |
+| `OIDC_DISPLAY_NAME` | O nome no botão: **Iniciar sessão com &lt;nome&gt;**. Por omissão, `SSO`; no máximo 60 carateres |
 | `OIDC_SCOPES` | Âmbitos separados por espaços; tem de incluir `openid`. Por omissão, `openid email profile`. Acrescenta o âmbito de que o teu fornecedor precisa para os grupos, se tiver um |
 | `OIDC_GROUPS_CLAIM` | A claim do token de ID que lista os grupos da pessoa. Por omissão, `groups` |
 | `OIDC_ALLOWED_GROUPS` | Grupos separados por vírgulas que podem iniciar sessão |

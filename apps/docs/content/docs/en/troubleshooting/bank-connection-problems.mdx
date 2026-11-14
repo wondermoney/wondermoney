@@ -55,9 +55,9 @@ Most connection problems trace back to how the Enable Banking application was se
 
 ## Sync errors and history
 
-When a sync fails, the connection shows **Error** in **Settings → Connections**. Select **Sync history** on the connection, on the web or in the mobile app, to see the last 20 times WonderMoney tried to sync it and how each one ended. Most failures clear on the next automatic sync; a connection that keeps failing usually needs **Reconnect**.
+A failed sync is recorded in the connection's history. Select **Sync history** on the connection, on the web or in the mobile app, to see the last 20 times WonderMoney tried to sync it and how each one ended. **Error** in **Settings → Connections** means the connection itself could not be completed, not that a sync failed. WonderMoney syncs each connection automatically about once a day, and a failed sync may be retried once, half an hour later. A connection that keeps failing usually needs **Reconnect**.
 
-Provider outages, such as an Enable Banking outage, are handled in the bank list rather than surfacing as server errors, so your existing data stays unchanged. You can start the connection again once the provider is available.
+During an outage at the provider, such as Enable Banking, the bank list cannot be loaded: the mobile app says so and offers **Retry**, and on the web the list stays empty. Your existing data stays unchanged. You can start the connection again once the provider is available.
 
 For the full connection workflow, see [Manage bank connections](/en/docs/accounts-transactions/manage-bank-connections).
 

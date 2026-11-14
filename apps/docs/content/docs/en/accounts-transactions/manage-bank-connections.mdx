@@ -22,13 +22,15 @@ SimpleFIN connections are listed separately, as **Connected**, **First sync runn
 
 You only see status for your own connections, and status is scoped to your account rather than to the bank or provider as a whole.
 
-## When a sync fails
+## When a connection or a sync fails
 
-If a sync fails, the recovery view explains what happened and offers the relevant next step, such as retrying the connection, adding the account manually, or importing a statement. The recovery flow shows the name of the affected bank, so it is clear which connection needs attention.
+If you start a connection from **Accounts** on the web and come back from the bank without one, for example because you cancelled the approval, the page shows **Bank connection could not be completed**. No bank data is added, and the notice offers **Retry bank connection**, **Add account manually** and **Import CSV or bank statement**. The notice does not name the bank.
+
+A sync that fails on an existing connection is recorded in that connection's history. The mobile app, and the SimpleFIN list on the web, also show the reason under the connection, and when a bank has not updated for more than 2 days, the home page says so and names the bank.
 
 **Sync history** on a connection lists the last 20 times WonderMoney tried to sync it, with the result of each attempt.
 
-If the list of banks is temporarily unavailable — for example during an outage at the provider — the bank picker shows a clear error instead of failing, and you can retry.
+If the list of banks cannot be loaded, for example during an outage at the provider, the mobile app shows **Could not load banks** with **Retry**. On the web, the list stays empty: close the dialog and try again later.
 
 ## Before you start
 
@@ -57,8 +59,8 @@ After updating a connection, confirm that new transactions appear and that balan
 
 - The bank changed its login or security flow.
 - One account synced while another did not.
-- A removed connection still appears until the next refresh.
-- The bank connection is valid, but the account was hidden or excluded.
+- On the web, a removed connection still appears until the list is loaded again.
+- The bank connection is valid, but the account is [private](/en/docs/household/account-privacy), so other household members do not see it.
 
 ## Related links
 

@@ -31,7 +31,7 @@ O exemplo pede as contas; consulta [Contas na referência](/pt/docs/api/referenc
 
 ## Limites de pedidos
 
-Quando um pedido excede o limite, a API devolve `429`. Espera o período indicado no cabeçalho `Retry-After` antes de tentares novamente. Evita ciclos de repetição imediata; limita as tentativas.
+Cada token pode fazer 1200 pedidos a cada 15 minutos. Quando um pedido excede o limite, a API devolve `429`. Espera o período indicado no cabeçalho `Retry-After` antes de tentares novamente. Evita ciclos de repetição imediata; limita as tentativas.
 
 ## Erros
 

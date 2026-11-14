@@ -58,7 +58,7 @@ Cada linha torna-se uma **compra de abertura**: uma compra normal dessa quantida
 
 Se o portefólio já tiver compras ou vendas de um ativo do ficheiro, uma compra de abertura por cima contaria a posição duas vezes. Essas linhas aparecem com um aviso e são **ignoradas por omissão**. Liga uma linha para a importar mesmo assim, por exemplo quando as transações existentes são de uma posição que vendeste antes de voltares a comprar. As linhas de ativos sem transações importam-se normalmente.
 
-Importar o mesmo ficheiro de posições duas vezes é detetado como duplicado.
+Importar duas vezes o mesmo ficheiro de posições para o mesmo portefólio, com a mesma escolha de corretora, é detetado como duplicado desde que cada linha fique na mesma data. Uma linha sem data de aquisição usa a data de referência, por isso com outra data de referência não é um duplicado; nesse caso aparece com o aviso acima e é ignorada por omissão.
 
 ## Importar bens manuais
 

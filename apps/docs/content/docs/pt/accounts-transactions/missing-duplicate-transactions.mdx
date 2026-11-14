@@ -7,15 +7,15 @@ O WonderMoney evita duplicados como parte do processo normal de transações, pe
 
 ## Como os duplicados são tratados
 
-Cada transação tem uma impressão digital que a identifica. Quando os dados recebidos coincidem com uma impressão digital existente, o duplicado é descartado em vez de criar uma segunda linha. Na rara ocasião em que a correspondência não é certa, a transação é mantida e marcada com um aviso para que possas decidir.
+Uma transação enviada pelo teu banco traz a referência do próprio banco, e uma que já esteja guardada não é adicionada uma segunda vez. Uma transação sem referência bancária, como uma que adicionas à mão ou importas de um ficheiro, é identificada por uma impressão digital da sua data e do seu valor. Quando adicionas uma transação à mão na web e ela coincide com uma que já está na conta, é adicionada na mesma, e uma mensagem diz que parece um duplicado, para que possas decidir.
 
-Todas as decisões ficam registadas no registo de auditoria das transações, incluindo duplicados descartados e mudanças de estado. A tolerância da impressão digital é deliberadamente estreita: duas transações legítimas que parecem semelhantes — por exemplo duas compras idênticas no mesmo dia — não são tratadas como duplicados. Uma referência bancária distinta distingue-as e, quando o banco envia compras idênticas sem referência, cada uma que o banco lista continua a ser guardada como uma transação própria.
+Os duplicados ignorados numa sincronização bancária e as mudanças de estado ficam registados no registo de auditoria da transação; na web, escolhe **Editar** numa transação para o veres em **Atividade**. Duas transações legítimas do teu banco que parecem semelhantes, por exemplo duas compras idênticas no mesmo dia, não são tratadas como duplicados. Uma referência bancária distinta distingue-as e, quando o banco envia compras idênticas sem referência, cada uma que o banco lista continua a ser guardada como uma transação própria.
 
 Uma importação de ficheiro acrescenta mais uma verificação: uma linha com o mesmo valor de uma transação que já está na conta, com até 3 dias de diferença, aparece como [possível duplicado](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados) e é ignorada, a não ser que a incluas.
 
 ## Versões pendente e confirmada
 
-Um pagamento por cartão pendente é associado automaticamente à versão confirmada quando o banco o confirma, pelo que os dois não devem ficar separados. Se o banco nunca confirmar um pagamento pendente, este expira após o intervalo definido e aparece como expirado, em vez de ficar como um registo pendente.
+Um pagamento por cartão pendente é associado automaticamente à versão confirmada quando o banco o confirma, pelo que os dois não devem ficar separados. Se o banco deixar de listar um pagamento pendente sem o confirmar, este é marcado como expirado quando tiver mais de 7 dias e sai da lista, em vez de ficar como um registo pendente.
 
 ## Antes de começar
 
@@ -43,7 +43,7 @@ Depois de corrigir, volta a verificar a conta após a próxima sincronização. 
 ## Problemas comuns
 
 - Uma entrada manual foi criada antes de chegar a importação bancária e um aviso sugere que pode ser um duplicado.
-- Uma transação pendente aparece como expirada porque o banco nunca a confirmou.
+- Uma transação pendente saiu da lista porque o banco nunca a confirmou e ela expirou.
 - O banco omitiu uma transação até à próxima atualização.
 - O filtro de datas errado fez a transação parecer em falta.
 

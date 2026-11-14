@@ -15,7 +15,7 @@ Escolhe **Adicionar transação** na página Portefólios ou na página de um po
 - Levantamento
 - Oferta
 
-As posições, o preço de custo e os ganhos realizados são calculados a partir das compras e das vendas. Um depósito, um levantamento ou uma oferta fica na lista de transações do portefólio e não altera as tuas posições.
+As posições, o preço de custo e os ganhos realizados são calculados a partir das compras e das vendas. Um depósito, um levantamento ou uma oferta fica na lista de transações do portefólio e em mais lado nenhum: não altera as tuas posições, o valor ou o histórico do portefólio, nem os fluxos de caixa a partir dos quais os retornos são medidos. Um portefólio não guarda saldo em dinheiro. Os marcadores **Depósito** e **Levantamento** no gráfico de desempenho da web assinalam dias de compras líquidas e de vendas líquidas, não estas transações.
 
 Dividendos não está na lista: não podes adicionar um dividendo à mão na aplicação web nem na app móvel. Uma comissão também não é um tipo próprio: fica registada na compra ou na venda a que pertence.
 
@@ -43,7 +43,9 @@ Os Certificados de Aforro não têm ticker. Na web, em **Tipo de ativo**, na jan
 2. Introduz a **Data de subscrição** e o **Montante subscrito**.
 3. Nas séries C a F, marca **Isento de IRS (65+)** se a isenção de retenção se aplicar a ti. É uma declaração tua: o WonderMoney não verifica a tua idade nem a elegibilidade.
 
-Nas séries C a F, o WonderMoney estima o valor atual a partir das taxas publicadas pelo IGCP. De três em três meses a contar da data de subscrição, os juros são creditados à taxa base da série mais o prémio de permanência dos anos decorridos, menos a retenção de 28%, a não ser que tenhas marcado a isenção, e somados ao saldo. As séries A e B não têm fórmula publicada, por isso o valor é o que as tuas transações indicam.
+Nas séries C a F, o WonderMoney estima o valor atual com o seu próprio modelo do produto. De três em três meses a contar da data de subscrição, credita juros à taxa base que tem registada para a série nesse trimestre mais um prémio de permanência pelos anos decorridos, deduz uma retenção de 28%, a não ser que tenhas marcado a isenção, e soma o resultado ao saldo. Antes de somar o prémio, a aplicação limita a taxa base a 3,5% nas séries C, D e E e a 2,5% na série F. Deixa de creditar juros 10 anos depois da data de subscrição nas séries C a E, e 15 anos depois na série F.
+
+Estas taxas, limites e prazos são os que a aplicação aplica. Não são uma declaração das condições oficiais em vigor, por isso confirma-os na informação do próprio IGCP. As séries A e B não têm fórmula publicada, por isso o valor é o que as tuas transações indicam.
 
 Os detalhes da posição mostram **Detalhes de capitalização**: a taxa atual, os anos decorridos, o escalão do prémio, a próxima capitalização e o valor atual de cada subscrição. Os valores são uma estimativa, não uma garantia do valor de resgate.
 
