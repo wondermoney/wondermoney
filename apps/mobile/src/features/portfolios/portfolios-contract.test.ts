@@ -91,8 +91,7 @@ describe('portfolio endpoint contracts', () => {
     expect(portfolioSettingsWriteSchema.parse({ name: '  Renamed ', description: null })).toEqual({ name: 'Renamed', description: null })
     expect(portfolioSettingsWriteSchema.parse({ benchmarkSymbol: '  SPY  ' })).toEqual({ benchmarkSymbol: 'SPY' })
     expect(portfolioSettingsWriteSchema.parse({ excluded: true })).toEqual({ excluded: true })
-    expect(portfolioSettingsWriteSchema.parse({ favored: true })).toEqual({ favored: true })
-    expect(portfolioSettingsResponseSchema.parse({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })).toEqual({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, favored: true, targetAllocation: { STOCK: 80 } } })
+    expect(portfolioSettingsResponseSchema.parse({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, targetAllocation: { STOCK: 80 } } })).toEqual({ portfolio: { portfolioKey: 7, name: 'Renamed', description: null, currencyKey: { code: 'EUR' }, benchmarkSymbol: 'SPY', excluded: false, targetAllocation: { STOCK: 80 } } })
     for (const body of [{}, { currencyId: 151 }, { targetAllocation: {} }, { benchmarkSymbol: 'x'.repeat(21) }]) expect(portfolioSettingsWriteSchema.safeParse(body).success).toBe(false)
   })
 
@@ -380,11 +379,11 @@ describe('portfolio endpoint contracts', () => {
     expect(createPortfolioTransactionResponseSchema.parse({ transaction: { transactionKey: 99, extra: 'ignored' } })).toEqual({ transactionId: 99 })
   })
 
-  it('excludes DIVIDEND (case-insensitively) from the manually-creatable transaction types', () => {
+  it('allows manually recording dividends alongside trades', () => {
     expect(isManuallyCreatableTransactionType('BUY')).toBe(true)
     expect(isManuallyCreatableTransactionType('SELL')).toBe(true)
-    expect(isManuallyCreatableTransactionType('DIVIDEND')).toBe(false)
-    expect(isManuallyCreatableTransactionType('dividend')).toBe(false)
+    expect(isManuallyCreatableTransactionType('DIVIDEND')).toBe(true)
+    expect(isManuallyCreatableTransactionType('dividend')).toBe(true)
   })
 
   describe('freezePortfolioTransactionCreate', () => {

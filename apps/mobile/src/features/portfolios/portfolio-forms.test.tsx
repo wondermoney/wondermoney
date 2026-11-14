@@ -8,7 +8,7 @@ import { PortfolioSettingsScreen } from './portfolio-settings-screen'
 
 const currencies = [{ currencyKey: 151, code: 'EUR', description: 'Euro' }, { currencyKey: 152, code: 'USD', description: 'US Dollar' }]
 const commonCreate = { currencies, pending: false, unknownPayload: null, failure: null, detailState: 'idle' as const, confirmedPortfolioId: null, refreshingList: false, listRefreshFailed: false, onBack: jest.fn(), onRefreshList: jest.fn(), onRetryDetail: jest.fn() }
-const settingsModel = { id: 7, name: 'Future', description: 'Long horizon', currency: 'EUR', benchmarkSymbol: null, excluded: false, favored: false, targetAllocation: null, accountLink: null }
+const settingsModel = { id: 7, name: 'Future', description: 'Long horizon', currency: 'EUR', benchmarkSymbol: null, excluded: false, targetAllocation: null, accountLink: null }
 const linkAccounts = [
   { accountKey: 22, accountName: 'Checking', accountType: 'CHECKING', source: 'open_banking' },
   { accountKey: 21, accountName: 'Brokerage cash', accountType: 'INVESTMENT', source: 'open_banking' },
@@ -52,16 +52,14 @@ describe('portfolio forms', () => {
     expect(view.getByDisplayValue('Future')).toBeOnTheScreen()
     expect(save).not.toHaveBeenCalled()
   })
-  it('reviews and saves a benchmark change alongside a dashboard-visibility toggle', async () => {
+  it('reviews and saves a benchmark change', async () => {
     const save = jest.fn().mockResolvedValue(undefined); const view = await provider(<PortfolioSettingsScreen {...commonSettings} onSave={save} />)
     await fireEvent.changeText(view.getByLabelText('Benchmark ticker'), '  SPY  ')
-    await fireEvent(view.getByRole('switch', { name: 'Highlight on dashboard' }), 'valueChange', true)
     await fireEvent.press(view.getByRole('button', { name: 'Review changes' }))
     expect(view.getByLabelText('Benchmark ticker: SPY')).toBeOnTheScreen()
-    expect(view.getByLabelText('Highlight on dashboard: On')).toBeOnTheScreen()
     expect(view.queryByLabelText('Portfolio name: Future')).not.toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Confirm changes' }))
-    await waitFor(() => expect(save).toHaveBeenCalledWith({ benchmarkSymbol: 'SPY', favored: true }))
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ benchmarkSymbol: 'SPY' }))
   })
   it('clearing the benchmark field submits an explicit null, not an omitted field', async () => {
     const save = jest.fn().mockResolvedValue(undefined)

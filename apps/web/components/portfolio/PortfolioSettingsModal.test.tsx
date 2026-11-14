@@ -55,11 +55,7 @@ function renderModal(shown: Portfolio = portfolio) {
 
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <PortfolioSettingsModal
-        closeModal={vi.fn()}
-        isOpen
-        portfolio={shown}
-      />
+      <PortfolioSettingsModal closeModal={vi.fn()} isOpen portfolio={shown} />
     </NextIntlClientProvider>,
   );
 }
@@ -72,9 +68,7 @@ test("saves a changed cost basis method", async () => {
   await user.click(screen.getByLabelText(/Average cost/));
   await user.click(screen.getByRole("button", { name: "Save" }));
 
-  await waitFor(() =>
-    assert.equal(mutateAsync.mock.calls.length, 1),
-  );
+  await waitFor(() => assert.equal(mutateAsync.mock.calls.length, 1));
   assert.deepEqual(mutateAsync.mock.calls[0]?.[0], {
     costBasisMethod: "AVERAGE",
     description: null,
@@ -83,15 +77,31 @@ test("saves a changed cost basis method", async () => {
   });
 });
 
+test("saves a trimmed benchmark and allows clearing it to the default", async () => {
+  const user = userEvent.setup();
+  renderModal({ ...portfolio, benchmarkSymbol: "SPY" });
+  const benchmark = screen.getByLabelText("Benchmark ticker");
+  await user.clear(benchmark);
+  await user.type(benchmark, "  QQQ  ");
+  await user.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() =>
+    assert.equal(mutateAsync.mock.calls[0]?.[0]?.benchmarkSymbol, "QQQ"),
+  );
+
+  await user.clear(benchmark);
+  await user.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() =>
+    assert.equal(mutateAsync.mock.calls[1]?.[0]?.benchmarkSymbol, null),
+  );
+});
+
 test("does not send the method when it did not change", async () => {
   const user = userEvent.setup();
   renderModal();
 
   await user.click(screen.getByRole("button", { name: "Save" }));
 
-  await waitFor(() =>
-    assert.equal(mutateAsync.mock.calls.length, 1),
-  );
+  await waitFor(() => assert.equal(mutateAsync.mock.calls.length, 1));
   assert.equal(
     Object.hasOwn(mutateAsync.mock.calls[0]?.[0] ?? {}, "costBasisMethod"),
     false,

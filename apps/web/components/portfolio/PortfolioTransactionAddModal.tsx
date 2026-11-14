@@ -25,10 +25,7 @@ import { getApiErrorMessage, isDemoReadOnlyError } from "@/lib/api/errors";
 import useCreatePortfolioTransaction from "@/lib/api/portfolio/useCreatePortfolioTransaction";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
-import {
-  buildCurrencyOptions,
-  CURRENCY_TRIGGER_CLASS,
-} from "@/lib/utils/currency-field";
+import { buildCurrencyOptions } from "@/lib/utils/currency-field";
 import {
   formatLocaleNumberInput,
   zLocaleNumber,
@@ -36,7 +33,6 @@ import {
 } from "@/lib/utils/number";
 
 import { Button } from "../ui/button";
-import { ComboBoxForm } from "../ui/combobox";
 import { Input } from "../ui/input";
 import { MoneyInput } from "../ui/MoneyInput";
 import {
@@ -75,9 +71,12 @@ const createFormSchema = (t: (key: string) => string, locale: string) =>
     quantity: zLocaleNumber(locale, t("invalid-amount")),
     unitPrice: zLocaleNumber(locale, t("invalid-amount")),
     settlementCurrencyId: z.string(),
-    feeAmount: zOptionalLocaleNumber(locale, t("invalid-amount")),
+    feeAmount: zOptionalLocaleNumber(locale, t("invalid-amount")).optional(),
     feeCurrencyId: z.string().optional(),
-    originalUnitPrice: zOptionalLocaleNumber(locale, t("invalid-amount")),
+    originalUnitPrice: zOptionalLocaleNumber(
+      locale,
+      t("invalid-amount"),
+    ).optional(),
     originalCurrencyId: z.string().optional(),
     notes: z.string().optional(),
     hasFees: z.boolean().default(false),
@@ -201,6 +200,16 @@ const PortfolioTransactionAddModal: React.FC<
   const [enableOriginalCurrency, setEnableOriginalCurrency] = useState(false);
 
   const assetKind = useWatch({ control, name: "assetKind" });
+  const transactionTypeId = useWatch({
+    control,
+    name: "financialTransactionTypeId",
+  });
+  const isDividend =
+    configsData?.financialTransactionTypes.some(
+      (type) =>
+        type.financialTransactionTypeKey.toString() === transactionTypeId &&
+        type.name === "DIVIDEND",
+    ) ?? false;
   const [settlementCurrencyId, feeCurrencyId, originalCurrencyId] = useWatch({
     control,
     name: ["settlementCurrencyId", "feeCurrencyId", "originalCurrencyId"],
@@ -238,10 +247,7 @@ const PortfolioTransactionAddModal: React.FC<
 
   const handleImportTransactions = onImportTransactions;
 
-  const selectableTransactionTypes =
-    configsData?.financialTransactionTypes.filter(
-      (transactionType) => transactionType.name !== "DIVIDEND",
-    );
+  const selectableTransactionTypes = configsData?.financialTransactionTypes;
   const createTransactionMutation = useCreatePortfolioTransaction();
 
   const onSubmit: SubmitHandler<FormProps> = async (data) => {
@@ -607,7 +613,13 @@ const PortfolioTransactionAddModal: React.FC<
                 name="unitPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>{t("unit-price")}</FormLabel>
+                    <FormLabel required>
+                      {t(
+                        isDividend
+                          ? "portfolio-dividend-per-share"
+                          : "unit-price",
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <MoneyInput
                         type="tel"
@@ -615,23 +627,14 @@ const PortfolioTransactionAddModal: React.FC<
                         min="0"
                         {...field}
                         value={formatLocaleNumberInput(field.value, locale)}
-                        currencySlot={
-                          <ComboBoxForm
-                            triggerClassName={CURRENCY_TRIGGER_CLASS}
-                            field={{
-                              value:
-                                settlementCurrencyId ?? "",
-                            }}
-                            onSelect={(opt) => {
-                              methods.setValue(
-                                "settlementCurrencyId",
-                                opt?.value || "",
-                              );
-                            }}
-                            placeholder={t("currency")}
-                            options={buildCurrencyOptions(configsData?.currencies)}
-                          />
-                        }
+                        currencyPicker={{
+                          value: settlementCurrencyId ?? "",
+                          onChange: (value) =>
+                            methods.setValue("settlementCurrencyId", value),
+                          label: t("currency"),
+                          options:
+                            buildCurrencyOptions(configsData?.currencies) ?? [],
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -674,22 +677,14 @@ const PortfolioTransactionAddModal: React.FC<
                         min="0"
                         {...field}
                         value={formatLocaleNumberInput(field.value, locale)}
-                        currencySlot={
-                          <ComboBoxForm
-                            triggerClassName={CURRENCY_TRIGGER_CLASS}
-                            field={{
-                              value: feeCurrencyId ?? "",
-                            }}
-                            onSelect={(opt) => {
-                              methods.setValue(
-                                "feeCurrencyId",
-                                opt?.value || "",
-                              );
-                            }}
-                            placeholder={t("currency")}
-                            options={buildCurrencyOptions(configsData?.currencies)}
-                          />
-                        }
+                        currencyPicker={{
+                          value: feeCurrencyId ?? "",
+                          onChange: (value) =>
+                            methods.setValue("feeCurrencyId", value),
+                          label: t("currency"),
+                          options:
+                            buildCurrencyOptions(configsData?.currencies) ?? [],
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -734,22 +729,14 @@ const PortfolioTransactionAddModal: React.FC<
                         min="0"
                         {...field}
                         value={formatLocaleNumberInput(field.value, locale)}
-                        currencySlot={
-                          <ComboBoxForm
-                            triggerClassName={CURRENCY_TRIGGER_CLASS}
-                            field={{
-                              value: originalCurrencyId ?? "",
-                            }}
-                            onSelect={(opt) => {
-                              methods.setValue(
-                                "originalCurrencyId",
-                                opt?.value || "",
-                              );
-                            }}
-                            placeholder={t("currency")}
-                            options={buildCurrencyOptions(configsData?.currencies)}
-                          />
-                        }
+                        currencyPicker={{
+                          value: originalCurrencyId ?? "",
+                          onChange: (value) =>
+                            methods.setValue("originalCurrencyId", value),
+                          label: t("currency"),
+                          options:
+                            buildCurrencyOptions(configsData?.currencies) ?? [],
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

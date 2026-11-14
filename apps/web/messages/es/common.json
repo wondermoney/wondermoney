@@ -1001,6 +1001,7 @@
   "value": "Valor",
   "weight": "Peso",
   "average-price": "Precio medio",
+  "portfolio-dividend-per-share": "Dividendo por unidad",
   "unit-price": "Precio unitario",
   "buy": "Comprar",
   "sell": "Vender",
@@ -2108,6 +2109,8 @@
   "target-low": "Bajo",
   "consensus-target": "Precio objetivo consensuado",
   "target-consensus": "Consenso",
+  "portfolio-benchmark-symbol": "Ticker del índice de referencia",
+  "portfolio-benchmark-symbol-hint": "Se usa para comparar esta cartera. Déjalo en blanco para usar SPY. Las carteras combinadas usan SPY.",
   "portfolio-settings": "Ajustes de la cartera",
   "cost-basis-method": "Método de coste",
   "cost-basis-fifo": "FIFO (lotes más antiguos primero)",
@@ -2537,6 +2540,15 @@
     "calendarStatusDue": "Vence hoy",
     "calendarStatusOverdue": "Vencido",
     "calendarStatusProjected": "Previsto"
+  },
+  "analytics-opt-in": {
+    "title": "Analítica opcional",
+    "description": "Permite el análisis de uso para ayudar a mejorar WonderMoney. La grabación de sesiones está desactivada y tu correo no se envía a PostHog.",
+    "change-later": "Puedes cambiar esta elección en Ajustes → Privacidad.",
+    "decline": "Rechazar analítica",
+    "allow": "Permitir analítica",
+    "enabled": "La analítica está activada en este navegador.",
+    "disabled": "La analítica está desactivada en este navegador."
   },
   "analytics-consent": {
     "title": "Tus opciones de privacidad",

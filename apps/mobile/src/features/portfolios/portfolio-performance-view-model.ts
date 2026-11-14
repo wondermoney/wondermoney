@@ -16,6 +16,11 @@ export type PortfolioPerformanceFlow = Readonly<{
 }>
 
 export type PortfolioPerformanceViewModel = Readonly<{
+  benchmark?: Readonly<{
+    symbol: string
+    status: string
+    points: readonly { x: number; portfolio: number | null; benchmark: number | null }[]
+  }>
   points: readonly PortfolioPerformanceChartPoint[]
   /** The time-weighted return over the history, % since the first day; null when it was not measured. */
   totalReturnPercent: number | null
@@ -56,7 +61,14 @@ export function mapPortfolioPerformance(response: PortfolioPerformanceResponseDt
     if (flow) flows.push(flow)
     return { x: index, value: point.value, flow: flow ? point.value : null }
   })
+  const returnsByDate = new Map(measured.map((point) => [point.date, point.value]))
+  const benchmarkByDate = new Map((response.normalizedBenchmarkDataPoints ?? []).map((point) => [point.date, point.value]))
   return {
+    benchmark: {
+      symbol: response.benchmarkSymbol ?? 'SPY',
+      status: response.readiness?.benchmark?.status ?? response.benchmarkStatus ?? 'waiting_for_portfolio_history',
+      points: raw.map((point, x) => ({ x, portfolio: returnsByDate.get(point.date) ?? null, benchmark: benchmarkByDate.get(point.date) ?? null })),
+    },
     points,
     totalReturnPercent: lastReturn?.value ?? null,
     returnEndDate: lastReturn?.date ?? null,

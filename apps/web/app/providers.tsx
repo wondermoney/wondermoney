@@ -10,11 +10,13 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { Toaster } from "sonner";
 
+import { AnalyticsConsent } from "@/components/analytics/AnalyticsConsent";
 import { AnalyticsInit } from "@/components/analytics/AnalyticsInit";
 import { SignupCompletionTracker } from "@/components/analytics/SignupCompletionTracker";
 import { HouseholdReadOnlyNotifier } from "@/components/household/HouseholdReadOnlyNotifier";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getToastOptions } from "@/components/ui/sonner-options";
+import { useAnalyticsConsent } from "@/lib/analytics/consent";
 import { AuthUserProvider } from "@/lib/auth/user-context";
 import { getQueryClient } from "@/lib/query/query-client";
 import { isAnalyticsEnabled } from "@/lib/utils/analytics-enabled";
@@ -27,13 +29,16 @@ export function Providers(props: { children: React.ReactNode }) {
   //       suspend because React will throw away the client on the initial
   //       render if it suspends and there is no boundary
   const queryClient = getQueryClient();
+  const consent = useAnalyticsConsent();
 
   return (
     <QueryClientProvider client={queryClient}>
       <PostHogProvider client={posthog}>
         <AuthUserProvider>
           <AnalyticsInit />
-          <SignupCompletionTracker analyticsEnabled={isAnalyticsEnabled()} />
+          <SignupCompletionTracker
+            analyticsEnabled={isAnalyticsEnabled() && consent === "granted"}
+          />
           <HouseholdReadOnlyNotifier />
           <ThemeProvider
             // The class feeds Tailwind's `dark:` variant; the data attribute
@@ -55,6 +60,7 @@ export function Providers(props: { children: React.ReactNode }) {
                   {props.children}
                 </div>
               </div>
+              <AnalyticsConsent />
             </ProgressProvider>
             <Toaster {...getToastOptions()} />
           </ThemeProvider>

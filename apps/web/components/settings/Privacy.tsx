@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { AnalyticsConsent } from "@/components/analytics/AnalyticsConsent";
 import { useInstanceName } from "@/components/instance/InstanceNameProvider";
 import { useRouter } from "@/i18n/navigation";
 import { useDataRestoreOverview } from "@/lib/api/user/useDataRestore";
@@ -25,6 +26,7 @@ export default function Privacy() {
 
   return (
     <div className="divide-border divide-y">
+      <AnalyticsConsent settings />
       <AiFeatures />
 
       <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">

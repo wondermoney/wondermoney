@@ -5,6 +5,7 @@ import { usePostHog } from "posthog-js/react";
 import { Suspense, useEffect } from "react";
 
 import { usePathname } from "@/i18n/navigation";
+import { useAnalyticsConsent } from "@/lib/analytics/consent";
 import { getSanitizedPageviewUrl } from "@/lib/analytics/pageview-url";
 import { isAnalyticsEnabled } from "@/lib/utils/analytics-enabled";
 
@@ -12,14 +13,16 @@ function AnalyticsPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const posthog = usePostHog();
+  const consent = useAnalyticsConsent();
 
   useEffect(() => {
-    if (!isAnalyticsEnabled() || !pathname || !posthog) return;
+    if (consent !== "granted" || !isAnalyticsEnabled() || !pathname || !posthog)
+      return;
 
     const url = getSanitizedPageviewUrl(window.origin, pathname, searchParams);
 
     posthog.capture("$pageview", { $current_url: url });
-  }, [pathname, posthog, searchParams]);
+  }, [consent, pathname, posthog, searchParams]);
 
   return null;
 }

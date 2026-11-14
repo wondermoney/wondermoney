@@ -37,7 +37,7 @@ import {
 } from './portfolios-contract'
 import type { PortfolioSettingsFailure } from './use-portfolio-settings'
 
-export type PortfolioSettingsModel = Readonly<{ id: number; name: string; description: string | null; currency: string; benchmarkSymbol: string | null; excluded: boolean; favored: boolean; targetAllocation: Readonly<Record<string, number>> | null; accountLink: PortfolioAccountLink | null }>
+export type PortfolioSettingsModel = Readonly<{ id: number; name: string; description: string | null; currency: string; benchmarkSymbol: string | null; excluded: boolean; targetAllocation: Readonly<Record<string, number>> | null; accountLink: PortfolioAccountLink | null }>
 
 /** The words for a failed save; a refused link names the member who holds it and nothing else. */
 export function portfolioSettingsFailureMessage(t: TFunction, failure: PortfolioSettingsFailure, linkHolder: string | null): string {
@@ -91,7 +91,6 @@ export function PortfolioSettingsScreen({
   const [description, setDescription] = useState(unknownPayload && 'description' in unknownPayload ? unknownPayload.description ?? '' : model.description ?? '')
   const [benchmarkSymbol, setBenchmarkSymbol] = useState(unknownPayload && 'benchmarkSymbol' in unknownPayload ? unknownPayload.benchmarkSymbol ?? '' : model.benchmarkSymbol ?? '')
   const [excluded, setExcluded] = useState(unknownPayload?.excluded ?? model.excluded)
-  const [favored, setFavored] = useState(unknownPayload?.favored ?? model.favored)
   const [allocationInputs, setAllocationInputs] = useState<Record<PortfolioTargetAssetClass, string>>(() => (
     allocationInputsFrom(unknownPayload && 'targetAllocation' in unknownPayload ? unknownPayload.targetAllocation : model.targetAllocation, locale)
   ))
@@ -138,7 +137,6 @@ export function PortfolioSettingsScreen({
     ...(nextDescription !== model.description ? { description: nextDescription } : {}),
     ...(nextBenchmarkSymbol !== model.benchmarkSymbol ? { benchmarkSymbol: nextBenchmarkSymbol } : {}),
     ...(excluded !== model.excluded ? { excluded } : {}),
-    ...(favored !== model.favored ? { favored } : {}),
     ...(!portfolioTargetAllocationsEqual(nextAllocation, model.targetAllocation) ? { targetAllocation: nextAllocation } : {}),
     // Sent only when changed: a link this member cannot see is never touched.
     ...(linkChanged(model.accountLink, link) ? { accountLink: linkInputFromDraft(link) } : {}),
@@ -162,7 +160,6 @@ export function PortfolioSettingsScreen({
     setDescription(model.description ?? '')
     setBenchmarkSymbol(model.benchmarkSymbol ?? '')
     setExcluded(model.excluded)
-    setFavored(model.favored)
     setAllocationInputs(allocationInputsFrom(model.targetAllocation, locale))
     setLink(draftFromLink(model.accountLink))
     setReviewed(null)
@@ -239,7 +236,6 @@ export function PortfolioSettingsScreen({
                 <FormTextRow key="description" editable={!pending} hint={t('portfolioSettings.blankDescription')} label={t('portfolioSettings.description')} maxLength={500} multiline onChangeText={setDescription} value={description} />
                 <FormTextRow key="benchmark" autoCapitalize="characters" autoCorrect={false} editable={!pending} hint={t('portfolioSettings.blankBenchmark')} label={t('portfolioSettings.benchmarkSymbol')} maxLength={20} onChangeText={setBenchmarkSymbol} placeholder={t('portfolioTickerSearch.placeholder')} value={benchmarkSymbol} />
                 <FormSwitchRow key="excluded" disabled={pending} hint={t('portfolioSettings.excludedHelper')} label={t('portfolioSettings.excluded')} onValueChange={setExcluded} value={excluded} />
-                <FormSwitchRow key="favored" disabled={pending} hint={t('portfolioSettings.favoredHelper')} label={t('portfolioSettings.favored')} onValueChange={setFavored} value={favored} />
               </FormGroup>
 
               <PortfolioAccountLinkFields accounts={accounts} disabled={pending} linkedAccountName={model.accountLink?.accountName} onChange={setLink} testID="portfolio-settings-account-link" value={link} />
@@ -290,7 +286,6 @@ function ReviewChanges({ payload, accounts, linkedAccountName }: { payload: Read
       {payload.description !== undefined ? <PortfolioReviewRow key="description" label={t('portfolioSettings.description')} value={payload.description === null ? t('portfolioSettings.descriptionCleared') : payload.description} /> : null}
       {payload.benchmarkSymbol !== undefined ? <PortfolioReviewRow key="benchmark" label={t('portfolioSettings.benchmarkSymbol')} value={payload.benchmarkSymbol === null ? t('portfolioSettings.benchmarkCleared') : payload.benchmarkSymbol} /> : null}
       {payload.excluded !== undefined ? <PortfolioReviewRow key="excluded" label={t('portfolioSettings.excluded')} value={t(payload.excluded ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
-      {payload.favored !== undefined ? <PortfolioReviewRow key="favored" label={t('portfolioSettings.favored')} value={t(payload.favored ? 'portfolioSettings.on' : 'portfolioSettings.off')} /> : null}
       {payload.accountLink !== undefined ? <PortfolioReviewRow key="account-link" label={t('portfolioAccountLink.accountLabel')} value={linkSummary(t, payload.accountLink, accounts, linkedAccountName)} /> : null}
       {payload.targetAllocation !== undefined ? (
         payload.targetAllocation === null

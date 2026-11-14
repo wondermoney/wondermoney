@@ -43,8 +43,9 @@ export const portfolioAnalyticsKey = (epochId: number, resource: 'allocation' | 
 export const portfolioDividendIncomeKey = (epochId: number, portfolioId: number) => (
   ['portfolio-analytics', epochId, portfolioId, 'dividend-income'] as const
 )
+export const portfolioPerformancePrefix = (epochId: number, portfolioId: number | 'aggregate') => ['portfolio-performance', epochId, portfolioId] as const
 export const portfolioPerformanceKey = (epochId: number, portfolioId: number | 'aggregate', period: string, member?: string) => (
-  ['portfolio-performance', epochId, portfolioId, period, ...memberTail(member)] as const
+  [...portfolioPerformancePrefix(epochId, portfolioId), period, ...memberTail(member)] as const
 )
 
 const PORTFOLIO_CONTENT_QUERY_TAGS = new Set([

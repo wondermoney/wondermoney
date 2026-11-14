@@ -222,6 +222,21 @@ describe('portfolio import finalize service', () => {
     expect(createPortfolioTransaction).toHaveBeenCalledWith(appuser, expect.objectContaining({ financialTransactionTypeId: 1, settlementCurrencyId: 151 }), em);
   });
 
+  it.each([{ transactionType: 'DIVIDEND' }, { transactionTypeId: 3 }])('imports a dividend without treating it as a trade: %j', async (type) => {
+    mockFindOneForImport({
+      createdTransactions: { 'dividend-1': { internalTransactionId: 'dividend-1', transactionDate: new Date('2026-01-01'), transactionKey: 901 } },
+      transactionTypes: { 3: { financialTransactionTypeKey: 3, name: 'DIVIDEND' }, DIVIDEND: { financialTransactionTypeKey: 3, name: 'DIVIDEND' } },
+    });
+    const row = { financialAssetKey: { symbol: 'ABC' }, internalTransactionId: 'dividend-1', normalizedJson: { date: '2026-01-01', quantity: 10, settlementCurrencyCode: 'EUR', unitPrice: 0.25, ...type }, portfolioImportRowKey: 1, status: PortfolioImportRowStatus.READY };
+    em.find.mockResolvedValueOnce([row]);
+    createPortfolioTransaction.mockResolvedValueOnce(undefined);
+
+    const result = await service.finalizeImportSession({ importSessionId: 456 });
+
+    expect(result).toMatchObject({ failedRows: 0, importedRows: 1, status: PortfolioImportSessionStatus.SUCCEEDED });
+    expect(row.status).toBe(PortfolioImportRowStatus.IMPORTED);
+  });
+
   it('defaults fee currency to settlement currency when fee is present', async () => {
     mockFindOneForImport();
     em.find.mockResolvedValueOnce([

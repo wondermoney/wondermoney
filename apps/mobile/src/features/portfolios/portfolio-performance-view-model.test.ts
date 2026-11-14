@@ -10,6 +10,13 @@ const base: PortfolioPerformanceResponseDto = {
 }
 
 describe('mapPortfolioPerformance', () => {
+  it('matches benchmark and portfolio returns by date, leaving missing observations empty', () => {
+    const result = mapPortfolioPerformance({ ...base, benchmarkSymbol: 'QQQ', benchmarkStatus: 'ready', normalizedBenchmarkDataPoints: [{ date: '2026-07-01', value: 0 }, { date: '2026-08-01', value: 12 }] })
+    expect(result.benchmark).toEqual({
+      symbol: 'QQQ', status: 'ready',
+      points: [{ x: 0, portfolio: 0, benchmark: 0 }, { x: 1, portfolio: 5, benchmark: null }, { x: 2, portfolio: 10, benchmark: 12 }],
+    })
+  })
   it('converts raw data points to index-positioned chart points', () => {
     expect(mapPortfolioPerformance(base).points).toEqual([{ x: 0, value: 1000, flow: null }, { x: 1, value: 1050, flow: null }, { x: 2, value: 1100, flow: null }])
   })

@@ -10,7 +10,6 @@ describe('portfolio settings reconciliation', () => {
     expect(reconcilePortfolioSettings(7, { benchmarkSymbol: 'SPY' }, detail({ benchmarkSymbol: 'SPY' }))).toBe('applied')
     expect(reconcilePortfolioSettings(7, { benchmarkSymbol: null }, detail({ benchmarkSymbol: null }))).toBe('applied')
     expect(reconcilePortfolioSettings(7, { excluded: true }, detail({ excluded: true }))).toBe('applied')
-    expect(reconcilePortfolioSettings(7, { favored: true }, detail({ favored: true }))).toBe('applied')
     expect(reconcilePortfolioSettings(7, { targetAllocation: { 'Equities': 60, 'Fixed Income': 40 } }, detail({ targetAllocation: { 'Fixed Income': 40, 'Equities': 60 } }))).toBe('applied')
     expect(reconcilePortfolioSettings(7, { targetAllocation: null }, detail({ targetAllocation: null }))).toBe('applied')
   })

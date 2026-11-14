@@ -17,11 +17,11 @@ WonderMoney uses read-only bank access for connected accounts. It cannot move mo
 
 ## How consent works
 
-Creating an account means accepting the Terms of Service and the Privacy Policy. Sign-up does not ask about analytics. The AI assistant has its own consent, stored with your account: see [AI assistant consent](/en/docs/settings-security-privacy/ai-assistant-consent).
+Creating an account means accepting the Terms of Service and the Privacy Policy. When browser analytics is configured, the web app asks for explicit opt-in before loading it. You can decline or change your choice in **Settings → Privacy**. The choice is stored in this browser. PostHog session recording and email identification are disabled. The AI assistant has its own consent, stored with your account: see [AI assistant consent](/en/docs/settings-security-privacy/ai-assistant-consent).
 
-Analytics and advertising measurement are asked about on the wonder.money website, not in the app. On your first visit, the **Privacy choices** banner offers **Use necessary only**, **Customize** and **Allow all**; **Analytics** and **Advertising** stay off unless you allow them. The choice is saved in that browser, not in your account, so each browser asks once. To change it, select the **Privacy choices** button in the corner of any page of the website.
+The wonder.money website separately asks about analytics and advertising measurement. On your first visit, the **Privacy choices** banner offers **Use necessary only**, **Customize** and **Allow all**; **Analytics** and **Advertising** stay off unless you allow them. The choice is saved in that browser, not in your account, so each browser asks once. To change it, select the **Privacy choices** button in the corner of any page of the website.
 
-The web and mobile apps have no analytics switch for an account. The web app loads analytics only on a server whose operator has configured it, and a self-hosted server has none by default (see [Analytics](/en/docs/self-hosting/configure#analytics)). The mobile app sends usage events only while it is connected to the server it was built for.
+The web app loads browser analytics only when the operator configures it and you opt in. You can withdraw that choice in **Settings → Privacy**. A self-hosted server has no browser analytics by default (see [Analytics](/en/docs/self-hosting/configure#analytics)). This choice does not change the separately configured API/worker analytics outbox or mobile telemetry; the mobile app sends usage events only while connected to the server it was built for.
 
 ## AI features
 

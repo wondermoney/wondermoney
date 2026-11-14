@@ -125,9 +125,14 @@ describe('PortfolioTransactionCreateScreen', () => {
     expect(view.getByLabelText('Asset')).toHaveDisplayValue('')
   })
 
-  it('never offers DIVIDEND as a selectable type', async () => {
-    const { view } = await renderScreen()
-    expect(view.queryByRole('tab', { name: /dividend/i })).toBeNull()
+  it('records a dividend with its share count and per-share payment', async () => {
+    const onCreate = jest.fn().mockResolvedValue(undefined)
+    const { view } = await renderScreen({ onCreate, transactionTypes: [...transactionTypes, { financialTransactionTypeKey: 3, name: 'DIVIDEND' }] })
+    await fillRequiredFields(view)
+    await choose(view, 'Transaction type', 'Dividend')
+    await fireEvent.changeText(view.getByLabelText('Dividend per share'), '0.25')
+    await fireEvent.press(view.getByRole('button', { name: 'Add transaction' }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ financialTransactionTypeId: 3, quantity: '10', unitPrice: '0.25' })))
   })
 
   it('keeps Add transaction disabled until the required fields are filled, flagging only wrong input', async () => {

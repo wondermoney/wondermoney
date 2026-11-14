@@ -2,18 +2,9 @@ import assert from "node:assert/strict";
 
 import { afterEach, beforeEach, describe, it } from "vitest";
 
-import {
-  captureSignupFunnelEvent,
-  SIGNUP_FUNNEL_EVENTS,
-} from "./signup";
+import { captureSignupFunnelEvent, SIGNUP_FUNNEL_EVENTS } from "./signup";
 
-const consentValue = JSON.stringify({
-  version: 1,
-  necessary: true,
-  analytics: true,
-  ads: false,
-  lifecycleEmail: false,
-});
+const consentValue = "granted";
 
 let originalAnalyticsFlag: string | undefined;
 let originalWindow: PropertyDescriptor | undefined;
@@ -39,6 +30,43 @@ afterEach(() => {
 });
 
 describe("signup analytics isolation", () => {
+  it("sends neither an event nor a tag-manager event without opt-in", () => {
+    const dataLayer: unknown[] = [];
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { dataLayer, localStorage: { getItem: () => null } },
+    });
+    const events: string[] = [];
+    captureSignupFunnelEvent(
+      {
+        capture: (event) => {
+          events.push(event);
+        },
+      },
+      SIGNUP_FUNNEL_EVENTS.submitClicked,
+    );
+    assert.deepEqual(events, []);
+    assert.deepEqual(dataLayer, []);
+  });
+
+  it("sends an opted-in signup event", () => {
+    const dataLayer: unknown[] = [];
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { dataLayer, localStorage: { getItem: () => consentValue } },
+    });
+    const events: string[] = [];
+    captureSignupFunnelEvent(
+      {
+        capture: (event) => {
+          events.push(event);
+        },
+      },
+      SIGNUP_FUNNEL_EVENTS.submitClicked,
+    );
+    assert.deepEqual(events, [SIGNUP_FUNNEL_EVENTS.submitClicked]);
+    assert.equal(dataLayer.length, 1);
+  });
   it("does not block auth when the analytics client throws", () => {
     // Given
     Object.defineProperty(globalThis, "window", {
@@ -76,11 +104,10 @@ describe("signup analytics isolation", () => {
 
     // When / Then
     assert.doesNotThrow(() =>
-      captureSignupFunnelEvent(
-        null,
-        SIGNUP_FUNNEL_EVENTS.submitClicked,
-        { locale: "en", method: "email" },
-      ),
+      captureSignupFunnelEvent(null, SIGNUP_FUNNEL_EVENTS.submitClicked, {
+        locale: "en",
+        method: "email",
+      }),
     );
   });
 });
