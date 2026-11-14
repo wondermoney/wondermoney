@@ -3,7 +3,7 @@ title: Autenticação de dois fatores
 description: Adiciona um segundo passo ao início de sessão com uma aplicação de autenticação.
 ---
 
-A autenticação de dois fatores acrescenta outra verificação quando inicias sessão.
+A autenticação de dois fatores acrescenta outra verificação quando inicias sessão: depois da palavra-passe, introduzes o código de 6 dígitos de uma aplicação de autenticação, ou um dos teus códigos de recuperação.
 
 É especialmente útil quando queres proteção extra para além da palavra-passe.
 
@@ -13,20 +13,32 @@ Na web:
 
 1. Abre **Definições**, escolhe **Segurança** e procura **Autenticação de dois fatores**.
 2. Seleciona **Ativar 2FA** e introduz a palavra-passe da tua conta.
-3. Digitaliza o código QR com uma aplicação de autenticação. Guarda num local seguro os códigos de recuperação mostrados por baixo; **Copiar códigos** copia-os. Cada um pode ser usado uma vez se perderes o acesso à aplicação de autenticação.
-4. Seleciona **Continuar**, introduz o código de 6 dígitos que a aplicação mostra e seleciona **Submeter**.
+3. Digitaliza o código QR com uma aplicação de autenticação.
+4. Guarda os códigos de recuperação mostrados por baixo do código QR. Seleciona **Copiar códigos** para os copiar e guarda-os num local a que consigas chegar sem o telemóvel. Só são mostrados desta vez.
+5. Seleciona **Continuar**, introduz o código de 6 dígitos que a aplicação mostra e seleciona **Submeter**.
 
-Na aplicação móvel, abre **Mais > Definições > Segurança** e seleciona **Ativar a autenticação de dois fatores**. Adiciona a chave de configuração à tua aplicação de autenticação, introduz o código de 6 dígitos que ela mostra e seleciona **Confirmar código**.
+Na aplicação móvel, abre **Mais > Definições > Segurança** e seleciona **Ativar a autenticação de dois fatores**. Adiciona a chave de configuração à tua aplicação de autenticação, introduz o código de 6 dígitos que ela mostra e seleciona **Confirmar código**. A partir de uma próxima versão da aplicação, a aplicação móvel também mostra os códigos de recuperação por baixo da chave de configuração, com **Copiar códigos**.
 
 ## Desativar
 
 Na web, seleciona **Desativar 2FA** na mesma secção e introduz a palavra-passe da tua conta. Na aplicação móvel, seleciona **Desativar a autenticação de dois fatores**.
+
+## Iniciar sessão com um código de recuperação
+
+Se não tiveres a aplicação de autenticação, seleciona **Usar um código de recuperação** no passo de verificação do início de sessão e introduz um dos códigos que guardaste. Cada código só funciona uma vez. Vê [Autenticação de dois fatores](/pt/docs/start-here/multi-factor-authentication) para mais detalhes.
+
+## Se perderes a aplicação de autenticação
+
+1. Inicia sessão com um dos teus códigos de recuperação.
+2. Abre **Definições → Segurança** e desativa a autenticação de dois fatores.
+3. Volta a ativá-la com o novo dispositivo. Recebes um novo conjunto de códigos de recuperação; os antigos deixam de funcionar.
 
 ## Problemas comuns
 
 - O código expirou.
 - A aplicação de autenticação está a usar a conta errada.
 - A hora do dispositivo está dessincronizada.
+- Um código de recuperação já foi usado, ou foi escrito com as maiúsculas e minúsculas erradas.
 
 ## O que tentar
 
@@ -34,12 +46,11 @@ Na web, seleciona **Desativar 2FA** na mesma secção e introduz a palavra-passe
 - Verifica a hora no dispositivo que gera os códigos.
 - Confirma que estás a usar a entrada de conta correta na aplicação de autenticação.
 
-Se ainda não conseguires iniciar sessão, usa as opções de recuperação se tiverem sido guardadas quando a funcionalidade foi ativada.
-
-
+Se ainda não conseguires iniciar sessão, usa um dos códigos de recuperação que guardaste quando ativaste a funcionalidade.
 
 ## Páginas relacionadas
 
+- [Autenticação de dois fatores no início de sessão](/pt/docs/start-here/multi-factor-authentication)
 - [Chaves de acesso](/pt/docs/settings-security-privacy/passkeys)
 - [Bloqueio da aplicação](/pt/docs/settings-security-privacy/app-lock)
 - [Mudar palavra-passe](/pt/docs/settings-security-privacy/change-password)

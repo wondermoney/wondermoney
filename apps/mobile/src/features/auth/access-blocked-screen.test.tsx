@@ -23,7 +23,7 @@ async function renderState(status: 'mfa-required' | 'sign-out-failed') {
         onOpenPrivacy={onOpenPrivacy}
         onOpenTerms={onOpenTerms}
         onOpenSupport={onOpenSupport}
-        mfaChallenge={{ submitting: false, failure: null, onSubmit: onSubmitMfaCode }}
+        mfaChallenge={{ submitting: false, failure: null, onSubmit: onSubmitMfaCode, onSubmitBackupCode: jest.fn() }}
       />
     </I18nextProvider>,
   )
@@ -90,7 +90,7 @@ describe('AccessBlockedScreen', () => {
 
   it('offers an inline TOTP challenge to resolve mfa-required', async () => {
     const { view, onSubmitMfaCode } = await renderState('mfa-required')
-    expect(view.getByText('Enter the 6-digit code from your authenticator app to continue')).toBeOnTheScreen()
+    expect(view.getByText(/^Confirm it's you with a code from your authenticator app or one of your backup codes$/)).toBeOnTheScreen()
     await fireEvent.changeText(view.getByLabelText('6-digit code'), '123456')
     await fireEvent.press(view.getByRole('button', { name: 'Verify' }))
     expect(onSubmitMfaCode).toHaveBeenCalledWith('123456')

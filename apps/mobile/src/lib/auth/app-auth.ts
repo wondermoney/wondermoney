@@ -84,9 +84,18 @@ export type MfaChallengeOutcome =
   | { status: 'challenged'; challengeId: string }
   | { status: 'unavailable' }
 
+/**
+ * `invalid-code` covers a mistyped code and a backup code that was already used (better-auth
+ * removes a used backup code, so both answer `INVALID_BACKUP_CODE`). `challenge-expired` is a
+ * pending sign-in that can no longer be completed (too many wrong codes, or its two-factor cookie
+ * expired): the only way on is to sign in again. `rate-limited` is a temporarily locked account
+ * or the API's limiter: waiting is the only fix.
+ */
 export type MfaVerifyOutcome =
   | { status: 'verified' }
   | { status: 'invalid-code' }
+  | { status: 'challenge-expired' }
+  | { status: 'rate-limited' }
   | { status: 'unavailable' }
 
 export type MfaUnenrollOutcome =
@@ -201,6 +210,11 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
     mfaChallenge: (factorId: string) => Promise<MfaChallengeOutcome>
     /** The code parameter is never logged by this adapter. */
     mfaVerify: (factorId: string, challengeId: string, code: string) => Promise<MfaVerifyOutcome>
+    /**
+     * Completes a pending two-factor sign-in with one of the backup codes shown at enrolment
+     * (`twoFactor.verifyBackupCode`). Each code works once. The code is never logged.
+     */
+    mfaVerifyBackupCode: (code: string) => Promise<MfaVerifyOutcome>
     mfaUnenroll: (factorId: string) => Promise<MfaUnenrollOutcome>
     mfaListFactors: () => Promise<MfaListFactorsOutcome>
     /**

@@ -216,7 +216,7 @@
   "access": {
     "mfa": {
       "title": "Se necesita una verificación adicional",
-      "message": "Introduce el código de 6 dígitos de tu aplicación de autenticación para continuar",
+      "message": "Confirma que eres tú con un código de tu aplicación de autenticación o uno de tus códigos de respaldo",
       "codeLabel": "Código de 6 dígitos",
       "codePlaceholder": "123456",
       "verify": "Verificar",
@@ -224,8 +224,17 @@
       "errors": {
         "validation": "Introduce el código de 6 dígitos de tu aplicación de autenticación.",
         "invalidCode": "Ese código no era correcto. Inténtalo de nuevo.",
-        "unavailable": "No se pudo verificar ese código. Comprueba tu conexión e inténtalo de nuevo."
-      }
+        "unavailable": "No se pudo verificar ese código. Comprueba tu conexión e inténtalo de nuevo.",
+        "backupCodeValidation": "Introduce un código de respaldo.",
+        "invalidBackupCode": "Ese código de respaldo no es válido o ya se ha usado.",
+        "challengeExpired": "Ya no se puede completar este inicio de sesión. Cierra sesión y vuelve a iniciarla.",
+        "rateLimited": "Demasiados intentos fallidos. Espera unos minutos y vuelve a intentarlo."
+      },
+      "useBackupCode": "Usar un código de respaldo",
+      "useAuthenticator": "Usar tu aplicación de autenticación",
+      "backupCodeLabel": "Introduce uno de tus códigos de respaldo",
+      "backupCodePlaceholder": "xxxxx-xxxxx",
+      "backupCodeHelper": "Cada código de respaldo funciona una sola vez. Después de iniciar sesión con él, ya no se puede volver a usar."
     },
     "signOutFailed": {
       "title": "No se pudo cerrar la sesión",
@@ -3944,7 +3953,11 @@
         "validation": "Introduce el código de 6 dígitos de tu aplicación de autenticación.",
         "invalidCode": "Ese código no era correcto. Inténtalo de nuevo.",
         "unavailable": "No se pudo completar esa acción. Comprueba tu conexión e inténtalo de nuevo."
-      }
+      },
+      "backupCodesTitle": "Guarda tus códigos de respaldo",
+      "backupCodesHelper": "Guarda estos códigos en un lugar seguro. Cada uno se puede usar una vez si pierdes el acceso a tu aplicación de autenticación.",
+      "copyBackupCodes": "Copiar códigos",
+      "backupCodesCopied": "Códigos de respaldo copiados al portapapeles."
     },
     "deleteHeading": "Eliminar cuenta",
     "deleteExplainer": "Elimina permanentemente tu cuenta de WonderMoney y todos los datos asociados de nuestros sistemas.",

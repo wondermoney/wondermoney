@@ -3,7 +3,7 @@ title: Autenticación de dos factores
 description: Configura y usa la autenticación de dos factores para iniciar sesión.
 ---
 
-La autenticación de dos factores añade una segunda comprobación al iniciar sesión. Cuando está activada, confirmas tu identidad con un código de seis dígitos de una app de autenticación antes de que se abra la sesión.
+La autenticación de dos factores añade una segunda comprobación al iniciar sesión. Cuando está activada, iniciar sesión con tu contraseña también pide el código de 6 dígitos de tu aplicación de autenticación, o uno de tus códigos de respaldo si no tienes la aplicación a mano.
 
 ## Antes de empezar
 
@@ -14,30 +14,42 @@ Mantén el acceso al teléfono y a la aplicación de autenticación vinculados a
 1. Abre **Configuración → Seguridad** y busca **Autenticación de dos factores**.
 2. Selecciona **Activar 2FA** e introduce la contraseña de tu cuenta.
 3. Escanea el código QR con tu app de autenticación.
-4. En **Guarda tus códigos de respaldo**, selecciona **Copiar códigos** y guárdalos en un lugar seguro.
-5. Introduce el código de seis dígitos que muestra tu app de autenticación para terminar.
+4. En **Guarda tus códigos de respaldo**, selecciona **Copiar códigos** y guárdalos en un lugar al que puedas acceder sin el teléfono, como un gestor de contraseñas. Solo se muestran esta vez.
+5. Introduce el código de 6 dígitos que muestra tu app de autenticación para terminar.
 
-Para desactivarla, selecciona **Desactivar 2FA** en la misma sección e introduce la contraseña de tu cuenta.
+Para desactivarla, selecciona **Desactivar 2FA** en la misma sección e introduce la contraseña de tu cuenta. Para la aplicación móvil, consulta [Autenticación de dos factores](/es/docs/settings-security-privacy/two-factor-authentication).
 
 ## Pasos
 
 1. Inicia sesión con tu correo electrónico y tu contraseña.
-2. Introduce el código de seis dígitos de tu app de autenticación.
-3. Confirma que la sesión se abre con normalidad.
+2. Introduce el código de 6 dígitos de tu aplicación de autenticación.
+3. Si no tienes la aplicación, selecciona **Usar un código de respaldo** e introduce uno de los códigos de respaldo que guardaste. **Usar tu app de autenticación** te devuelve al código de 6 dígitos.
+4. Confirma que la sesión se abre con normalidad.
 
 Iniciar sesión con una llave de acceso no pide el código; consulta [Llaves de acceso](/es/docs/settings-security-privacy/passkeys).
 
+## Códigos de respaldo
+
+- Cada código de respaldo funciona una sola vez. Después de iniciar sesión con él, ya no se puede volver a usar.
+- Introduce el código tal como se mostró, con las mismas mayúsculas y minúsculas. Puedes omitir el guion.
+- Desactivar y volver a activar la autenticación de dos factores te da un nuevo conjunto de códigos, y los anteriores dejan de funcionar.
+- La aplicación móvil también ofrece **Usar un código de respaldo** en su pantalla de verificación. Los códigos de respaldo en la aplicación móvil llegan en una próxima versión de la aplicación.
+
 ## Revisa tu configuración
 
-Prueba el flujo de inicio de sesión una vez después de la configuración para saber que el segundo factor funciona antes de necesitarlo. La página de inicio de sesión pide solo el código de la app de autenticación, así que mantén la app disponible. Antes de cambiar o restablecer el teléfono, pasa la app de autenticación al nuevo dispositivo, o desactiva y vuelve a activar la autenticación de dos factores mientras sigues con la sesión iniciada.
+Prueba el flujo de inicio de sesión una vez después de la configuración para saber que el segundo factor funciona antes de necesitarlo. Guarda tus códigos de respaldo en un lugar seguro distinto del dispositivo que usas a diario. Antes de cambiar o restablecer el teléfono, pasa la app de autenticación al nuevo dispositivo, o desactiva y vuelve a activar la autenticación de dos factores mientras sigues con la sesión iniciada.
 
 ## Problemas comunes
 
 - El código caducó antes de introducirlo.
-- La aplicación de autenticación está en un dispositivo reemplazado o restablecido.
+- La aplicación de autenticación está en un dispositivo reemplazado o restablecido: inicia sesión con un código de respaldo y vuelve a configurar la autenticación de dos factores en el dispositivo nuevo.
 - El reloj del dispositivo que genera los códigos está desincronizado.
+- **Ese código de respaldo no es válido o ya se ha usado**: el código se escribió mal o ya se usó en un inicio de sesión anterior. Prueba con otro.
+- **Demasiados códigos incorrectos**: tras cinco códigos incorrectos, el inicio de sesión se detiene. Vuelve al inicio de sesión y entra de nuevo.
+- **Demasiados intentos fallidos**: tras varios códigos incorrectos, el segundo paso queda bloqueado durante unos 15 minutos. Espera y vuelve a intentarlo.
 - El navegador pide un nuevo desafío después de cerrar la sesión.
 
+Sin la aplicación de autenticación ni un código de respaldo sin usar, no se puede completar el segundo paso.
 
 ## Enlaces relacionados
 

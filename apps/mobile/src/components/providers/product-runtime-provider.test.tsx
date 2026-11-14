@@ -53,6 +53,7 @@ const createAuth = () => ({
   mfaEnrollTotp: jest.fn(),
   mfaChallenge: jest.fn(),
   mfaVerify: jest.fn(),
+  mfaVerifyBackupCode: jest.fn(),
   mfaUnenroll: jest.fn(),
   mfaListFactors: jest.fn(),
   changePassword: jest.fn(),
@@ -859,6 +860,7 @@ describe('ProductRuntimeProvider MFA', () => {
     auth.mfaEnrollTotp.mockResolvedValue({ status: 'enrolled', factorId: 'f1', totp: { qrCode: 'x', secret: 's', uri: 'u' } })
     auth.mfaChallenge.mockResolvedValue({ status: 'challenged', challengeId: 'c1' })
     auth.mfaVerify.mockResolvedValue({ status: 'verified' })
+    auth.mfaVerifyBackupCode.mockResolvedValue({ status: 'verified' })
     auth.mfaUnenroll.mockResolvedValue({ status: 'unenrolled' })
     auth.mfaListFactors.mockResolvedValue({ status: 'available', totpFactors: [] })
     const harness = await createHarness(session('a'), { auth })
@@ -868,6 +870,8 @@ describe('ProductRuntimeProvider MFA', () => {
     expect(auth.mfaChallenge).toHaveBeenCalledWith('f1')
     await expect(harness.current().mfaVerify('f1', 'c1', '123456')).resolves.toEqual({ status: 'verified' })
     expect(auth.mfaVerify).toHaveBeenCalledWith('f1', 'c1', '123456')
+    await expect(harness.current().mfaVerifyBackupCode('abcde-12345')).resolves.toEqual({ status: 'verified' })
+    expect(auth.mfaVerifyBackupCode).toHaveBeenCalledWith('abcde-12345')
     await expect(harness.current().mfaUnenroll('f1')).resolves.toEqual({ status: 'unenrolled' })
     expect(auth.mfaUnenroll).toHaveBeenCalledWith('f1')
     await expect(harness.current().mfaListFactors()).resolves.toEqual({ status: 'available', totpFactors: [] })

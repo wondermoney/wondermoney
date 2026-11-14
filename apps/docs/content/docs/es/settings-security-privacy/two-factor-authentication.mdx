@@ -3,7 +3,7 @@ title: Autenticación de dos factores
 description: Añade un segundo paso al inicio de sesión con una aplicación de autenticación.
 ---
 
-La autenticación de dos factores añade otra verificación cuando inicias sesión.
+La autenticación de dos factores añade otra verificación cuando inicias sesión: después de tu contraseña, introduces el código de 6 dígitos de una aplicación de autenticación, o uno de tus códigos de respaldo.
 
 Es especialmente útil cuando quieres una protección extra además de tu contraseña.
 
@@ -13,20 +13,32 @@ En la web:
 
 1. Abre **Configuración**, elige **Seguridad** y busca **Autenticación de dos factores**.
 2. Selecciona **Activar 2FA** e introduce la contraseña de tu cuenta.
-3. Escanea el código QR con una aplicación de autenticación. Guarda en un lugar seguro los códigos de respaldo que aparecen debajo; **Copiar códigos** los copia. Cada uno se puede usar una vez si pierdes el acceso a tu aplicación de autenticación.
-4. Selecciona **Continuar**, introduce el código de 6 dígitos que muestra la aplicación y selecciona **Enviar**.
+3. Escanea el código QR con una aplicación de autenticación.
+4. Guarda los códigos de respaldo que aparecen bajo el código QR. Selecciona **Copiar códigos** para copiarlos y guárdalos en un lugar al que puedas acceder sin el teléfono. Solo se muestran esta vez.
+5. Selecciona **Continuar**, introduce el código de 6 dígitos que muestra la aplicación y selecciona **Enviar**.
 
-En la aplicación móvil, abre **Más > Configuración > Seguridad** y selecciona **Activar la autenticación de dos factores**. Añade la clave de configuración a tu aplicación de autenticación, introduce el código de 6 dígitos que muestra y selecciona **Confirmar código**.
+En la aplicación móvil, abre **Más > Configuración > Seguridad** y selecciona **Activar la autenticación de dos factores**. Añade la clave de configuración a tu aplicación de autenticación, introduce el código de 6 dígitos que muestra y selecciona **Confirmar código**. A partir de una próxima versión de la aplicación, la aplicación móvil también muestra los códigos de respaldo bajo la clave de configuración, con **Copiar códigos**.
 
 ## Desactivarla
 
 En la web, selecciona **Desactivar 2FA** en la misma sección e introduce la contraseña de tu cuenta. En la aplicación móvil, selecciona **Desactivar la autenticación de dos factores**.
+
+## Iniciar sesión con un código de respaldo
+
+Si no tienes tu aplicación de autenticación, selecciona **Usar un código de respaldo** en el paso de verificación del inicio de sesión e introduce uno de los códigos que guardaste. Cada código funciona una sola vez. Consulta [Autenticación de dos factores](/es/docs/start-here/multi-factor-authentication) para más detalles.
+
+## Si pierdes tu aplicación de autenticación
+
+1. Inicia sesión con uno de tus códigos de respaldo.
+2. Abre **Configuración → Seguridad** y desactiva la autenticación de dos factores.
+3. Vuelve a activarla con el dispositivo nuevo. Recibes un nuevo conjunto de códigos de respaldo; los anteriores dejan de funcionar.
 
 ## Problemas habituales
 
 - El código ha caducado.
 - La aplicación de autenticación está usando la cuenta equivocada.
 - La hora del dispositivo no está sincronizada.
+- Un código de respaldo ya se usó, o se escribió con las mayúsculas y minúsculas equivocadas.
 
 ## Qué probar
 
@@ -34,12 +46,11 @@ En la web, selecciona **Desactivar 2FA** en la misma sección e introduce la con
 - Comprueba la hora en el dispositivo que genera los códigos.
 - Asegúrate de que usas la entrada de cuenta correcta en la aplicación de autenticación.
 
-Si todavía no puedes iniciar sesión, usa las opciones de recuperación si se guardaron cuando se activó la función.
-
-
+Si todavía no puedes iniciar sesión, usa uno de los códigos de respaldo que guardaste cuando activaste la función.
 
 ## Páginas relacionadas
 
+- [Autenticación de dos factores al iniciar sesión](/es/docs/start-here/multi-factor-authentication)
 - [Llaves de acceso](/es/docs/settings-security-privacy/passkeys)
 - [Bloqueo de la aplicación](/es/docs/settings-security-privacy/app-lock)
 - [Cambiar contraseña](/es/docs/settings-security-privacy/change-password)
