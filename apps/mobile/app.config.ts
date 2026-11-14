@@ -2,19 +2,33 @@ import { parseEnv } from '@expo/env'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ExpoConfig } from 'expo/config'
-import { type ConfigPlugin, withGradleProperties } from 'expo/config-plugins'
+import { type ConfigPlugin, withGradleProperties, withProjectBuildGradle } from 'expo/config-plugins'
 
 // JSON, not the sibling .ts module: Expo's config loader transpiles app.config.ts alone
 // and cannot resolve a TypeScript import. See src/lib/auth/google-oauth-clients.ts.
 import googleOAuthClients from './src/lib/auth/google-oauth-clients.json'
 
-// EAS's free Android builder (4 vCPUs, 16 GB) ran out of memory compiling every native
-// module's C++ for four ABIs in parallel, and the Gradle daemon was killed mid-build.
-// Phones only need the two ARM ABIs (x86/x86_64 are emulators and some Chromebooks), and
-// two workers keep the parallel CMake jobs within the machine's memory.
+// EAS's free Android builder (4 vCPUs, 16 GB) runs out of memory on a release build, the
+// kernel kills the Gradle daemon, and the build ends "Gradle build daemon disappeared
+// unexpectedly". Three things share the memory:
+// - The Gradle daemon. EAS fixes its heap at 4 GB through GRADLE_OPTS, which outranks
+//   gradle.properties.
+// - The Kotlin daemon. Without its own setting it inherits that 4 GB heap, and it keeps the
+//   memory after the Kotlin compiles finish. It gets its own 2 GB cap here.
+// - C++ compilers. Each native module's CMake build runs Ninja, which starts nproc + 2
+//   (six) compilers at once whatever Gradle's worker count is. So two Gradle workers meant
+//   up to twelve clang processes on four CPUs, each holding up to about a gigabyte for
+//   React Native's headers. A Ninja job pool caps each build at two compiles: two workers
+//   then run four compilers, one per CPU, which is no slower.
+// `bundleRelease` (production AAB) runs the native builds last, after every Kotlin compile,
+// so they hit full JVMs. `assembleRelease` (preview APK) runs them first, which is why only
+// production builds failed. Phones only need the two ARM ABIs (x86/x86_64 are emulators and
+// some Chromebooks).
+const NATIVE_COMPILE_JOBS_PER_BUILD = 2
 const RELEASE_GRADLE_PROPERTIES: Record<string, string> = {
   reactNativeArchitectures: 'armeabi-v7a,arm64-v8a',
   'org.gradle.workers.max': '2',
+  'kotlin.daemon.jvmargs': '-Xmx2g -XX:MaxMetaspaceSize=1g',
 }
 
 const withReleaseGradleProperties: ConfigPlugin = (expoConfig) =>
@@ -25,6 +39,44 @@ const withReleaseGradleProperties: ConfigPlugin = (expoConfig) =>
       )
       gradleConfig.modResults.push({ type: 'property', key, value })
     }
+    return gradleConfig
+  })
+
+// Adds the Ninja job pools to every Android module's CMake arguments. finalizeDsl runs after
+// each module's own build script, so the arguments are added to the module's own, not
+// replaced. This is how the React Native Gradle plugin adds its defaults. The block must come
+// before the root-project plugins: com.facebook.react.rootproject evaluates the subprojects
+// as it is applied, and finalizeDsl can't be registered once a module has been evaluated.
+const NATIVE_JOB_POOL_MARKER = '// wondermoney: native compile job pool (app.config.ts)'
+const NATIVE_JOB_POOL_GRADLE = `${NATIVE_JOB_POOL_MARKER}
+subprojects { subproject ->
+  ['com.android.application', 'com.android.library'].each { pluginId ->
+    subproject.pluginManager.withPlugin(pluginId) {
+      subproject.extensions.getByName('androidComponents').finalizeDsl { android ->
+        android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
+          '-DCMAKE_JOB_POOLS=compile=${NATIVE_COMPILE_JOBS_PER_BUILD};link=1',
+          '-DCMAKE_JOB_POOL_COMPILE=compile',
+          '-DCMAKE_JOB_POOL_LINK=link',
+        ])
+      }
+    }
+  }
+}
+`
+
+const withNativeJobPool: ConfigPlugin = (expoConfig) =>
+  withProjectBuildGradle(expoConfig, (gradleConfig) => {
+    if (gradleConfig.modResults.language !== 'groovy') {
+      throw new Error('withNativeJobPool expects a Groovy android/build.gradle')
+    }
+    const { contents } = gradleConfig.modResults
+    if (contents.includes(NATIVE_JOB_POOL_MARKER)) return gradleConfig
+    const firstPluginApply = contents.search(/^apply plugin:/m)
+    if (firstPluginApply === -1) {
+      throw new Error('withNativeJobPool found no `apply plugin:` line in android/build.gradle')
+    }
+    gradleConfig.modResults.contents =
+      contents.slice(0, firstPluginApply) + NATIVE_JOB_POOL_GRADLE + '\n' + contents.slice(firstPluginApply)
     return gradleConfig
   })
 
@@ -175,4 +227,4 @@ const config: ExpoConfig = {
   },
 }
 
-export default withReleaseGradleProperties(config)
+export default withNativeJobPool(withReleaseGradleProperties(config))
