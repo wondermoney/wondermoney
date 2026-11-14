@@ -11,6 +11,8 @@ export type PortfolioRowViewModel = Readonly<{
   brokerName?: string | null
   currency: string
   description: string | null
+  /** Switched to "Exclude from aggregate dashboard": listed so it can be opened, outside the totals. */
+  excluded?: boolean
   gainPercent: number
   id: number
   name: string
@@ -92,15 +94,17 @@ export function mapPortfolioOverview(
 ): PortfolioOverviewViewModel {
   const metadata = new Map(list.portfolios.map((portfolio) => [portfolio.portfolioKey, portfolio]))
   const shown = new Set(dashboard.portfolios.map((portfolio) => portfolio.portfolioKey))
+  // Excluded from the aggregate dashboard: in the list and the rows, but in none of the figures.
+  const excluded = dashboard.portfolios.filter((portfolio) => portfolio.excluded).length
   return {
     assetCount: dashboard.summary.assetCount,
     currency: dashboard.summary.currency,
     feesLeftOut: Boolean(dashboard.summary.feeConversionIncompleteAssetKeys?.length),
     periodReturn: dashboard.summary.periodReturn,
-    // The list is the household's portfolios. Count from it, so the figure matches the rows and
-    // the total even when the server's summary counts only the caller's own portfolios; filtered,
-    // the summary counts the member's.
-    portfolioCount: filtered ? dashboard.summary.portfolioCount : Math.max(list.portfolios.length, dashboard.summary.portfolioCount),
+    // The list is the household's portfolios. Count from it, less the excluded ones, so the figure
+    // matches the total even when the server's summary counts only the caller's own portfolios;
+    // filtered, the summary counts the member's.
+    portfolioCount: filtered ? dashboard.summary.portfolioCount : Math.max(list.portfolios.length - excluded, dashboard.summary.portfolioCount),
     householdHasPortfolios: Math.max(list.portfolios.length, dashboard.summary.portfolioCount) > 0,
     transactionTargets: [
       ...dashboard.portfolios.map((portfolio) => ({ id: portfolio.portfolioKey, name: portfolio.name })),
@@ -110,6 +114,7 @@ export function mapPortfolioOverview(
       brokerName: metadata.get(portfolio.portfolioKey)?.broker?.displayName ?? null,
       currency: portfolio.currency,
       description: metadata.get(portfolio.portfolioKey)?.description ?? null,
+      ...(portfolio.excluded ? { excluded: true } : {}),
       gainPercent: portfolio.gainPercent,
       id: portfolio.portfolioKey,
       name: portfolio.name,

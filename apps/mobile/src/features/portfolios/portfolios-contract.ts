@@ -78,6 +78,8 @@ const dashboardSummarySchema = z.object({
 
 const portfolioBreakdownSchema = z.object({
   currency: currencyCodeSchema,
+  // Switched to "Exclude from aggregate dashboard": listed, outside the totals, weight 0. Absent on older APIs.
+  excluded: z.boolean().optional(),
   gainPercent: finite,
   name: z.string(),
   portfolioKey: z.number().int().positive(),

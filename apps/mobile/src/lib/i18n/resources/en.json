@@ -3458,7 +3458,7 @@
     "blankBenchmark": "Leave blank to remove the benchmark comparison",
     "benchmarkCleared": "Remove the current benchmark",
     "excluded": "Exclude from aggregate dashboard",
-    "excludedHelper": "Hides this portfolio from combined totals and performance across all portfolios",
+    "excludedHelper": "Leaves this portfolio out of the totals, holdings and charts of all portfolios together. Its own page and your net worth still include it.",
     "favored": "Highlight on dashboard",
     "favoredHelper": "Gives this portfolio priority placement on the dashboard",
     "allocation": {
@@ -5097,6 +5097,7 @@
     "worstPerformer": "Worst Performer",
     "dataUnavailable": "Data unavailable",
     "weight": "Weight",
+    "excludedFromTotals": "Excluded from totals",
     "gain": "Gain",
     "performanceInsufficient": "We need at least two snapshots to show a trend.",
     "performanceWaiting": "Performance appears once snapshots are created.",

@@ -3458,7 +3458,7 @@
     "blankBenchmark": "Deixa em branco para remover a comparação com o benchmark",
     "benchmarkCleared": "Remover o benchmark atual",
     "excluded": "Excluir do painel agregado",
-    "excludedHelper": "Oculta este portefólio dos totais combinados e do desempenho de todos os portefólios",
+    "excludedHelper": "Deixa este portefólio fora dos totais, posições e gráficos de todos os portefólios juntos. A página dele e o teu património líquido continuam a incluí-lo.",
     "favored": "Destacar no painel",
     "favoredHelper": "Dá a este portefólio destaque prioritário no painel",
     "allocation": {
@@ -5097,6 +5097,7 @@
     "worstPerformer": "Pior Performance",
     "dataUnavailable": "Dados indisponíveis",
     "weight": "Peso",
+    "excludedFromTotals": "Fora dos totais",
     "gain": "Ganho",
     "performanceInsufficient": "Precisamos de pelo menos dois snapshots para mostrar uma tendência.",
     "performanceWaiting": "O desempenho aparece assim que existirem snapshots.",
