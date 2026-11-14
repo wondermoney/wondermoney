@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { EyeOff, Ban, Server, KeyRound, LogOut, Fingerprint } from "lucide-react";
+import { EyeOff, Ban, Server, KeyRound, LogOut, FingerprintPattern } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CTABanner from "@/components/shared/CTABanner";
 import SecurityDashboardPreview from "@/components/homepage/previews/SecurityDashboardPreview";
@@ -16,7 +16,7 @@ const principles = [
 	{ icon: Server, titleKey: "principle3Title", bodyKey: "principle3Body" },
 	{ icon: KeyRound, titleKey: "principle4Title", bodyKey: "principle4Body" },
 	{ icon: LogOut, titleKey: "principle5Title", bodyKey: "principle5Body" },
-	{ icon: Fingerprint, titleKey: "principle6Title", bodyKey: "principle6Body" },
+	{ icon: FingerprintPattern, titleKey: "principle6Title", bodyKey: "principle6Body" },
 ] as const;
 
 function PrincipleCard({
