@@ -2716,18 +2716,14 @@
     "legacyRecurrence": "This category has no saved recurrence. Select one explicitly before saving.",
     "scope": "Apply change to",
     "scopeMonth": "Selected month only",
-    "scopeForward_one": "Selected month through December ({{count}} month)",
-    "scopeForward_other": "Selected month through December ({{count}} months)",
-    "scopeNote": "The selected route month is the starting point. Earlier months and future years are never changed.",
+    "scopeNote": "Choosing following months also updates later years. Earlier months stay unchanged.",
     "suggestionLabel": "Suggested from your spending: {{amount}}",
     "suggestionApply": "Apply",
     "suggestionNotEnoughData": "Not enough history yet for a suggestion.",
     "save": "Save category budget",
     "saving": "Saving category budget…",
-    "confirmTitle": "Apply through December?",
-    "confirmMessage_one": "Apply this amount and recurrence from {{start}} through {{end}} ({{count}} month)? Earlier months, future years, account balances, and spending transactions will not change.",
-    "confirmMessage_other": "Apply this amount and recurrence from {{start}} through {{end}} ({{count}} months)? Earlier months, future years, account balances, and spending transactions will not change.",
-    "confirmAction": "Apply through December",
+    "confirmTitle": "Apply to following months?",
+    "confirmAction": "Apply to following months",
     "failures": {
       "demo": "Demo mode is read-only. No category change was saved.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2738,7 +2734,9 @@
       "invalid-response": "The server did not confirm the category change safely. Your values were retained.",
       "invalid": "Enter a positive amount and explicitly select a recurrence.",
       "general": "The category change could not be saved. Your values were retained."
-    }
+    },
+    "scopeForward": "Selected month and all following months",
+    "confirmMessage": "Apply this amount and recurrence from {{start}} onward, including later years? Earlier months, account balances, and spending transactions will not change."
   },
   "budgetCreate": {
     "title": "Create budget",
@@ -3891,7 +3889,7 @@
     },
     "appLock": {
       "heading": "App lock",
-      "helper": "Require Face ID, Touch ID, or your device passcode to open WonderMoney.",
+      "helper": "Set up face or fingerprint recognition to turn on app lock. Your device passcode can be used as a fallback when unlocking.",
       "loading": "Checking app lock status…",
       "onLabel": "App lock is on",
       "offLabel": "App lock is off",
@@ -3901,8 +3899,8 @@
       "turningOff": "Turning off…",
       "confirmPrompt": "Confirm to turn on app lock",
       "errors": {
-        "no-hardware": "No biometric or passcode is set up on this device.",
-        "not-enrolled": "Set up Face ID, Touch ID, or a passcode in your device settings first.",
+        "no-hardware": "This device does not support face or fingerprint recognition.",
+        "not-enrolled": "Enroll a face or fingerprint in your device settings before turning on app lock.",
         "auth-failed": "Could not confirm. Try again."
       }
     },
@@ -5104,7 +5102,8 @@
     "loading": "Loading",
     "sectionError": "Could not load this section. Pull down to try again.",
     "more": "More for this portfolio",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "All-time yield and volatility; fixed 4.5% reference rate for every currency."
   },
   "privacy": {
     "hiddenAmount": "Hidden amount",

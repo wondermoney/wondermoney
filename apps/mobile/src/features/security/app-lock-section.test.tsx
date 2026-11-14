@@ -21,7 +21,7 @@ async function renderSection(overrides: Partial<React.ComponentProps<typeof AppL
     ...overrides,
   }
   const view = await render(<I18nextProvider i18n={i18n}><AppLockSection {...props} /></I18nextProvider>)
-  return { view, props }
+  return { view, props, i18n }
 }
 
 describe('AppLockSection', () => {
@@ -51,12 +51,8 @@ describe('AppLockSection', () => {
     expect(view.getByRole('button', { name: 'Turning on…' })).toBeDisabled()
   })
 
-  it.each([
-    ['no-hardware', /no biometric or passcode/i],
-    ['not-enrolled', /set up face id/i],
-    ['auth-failed', /could not confirm/i],
-  ] as const)('surfaces the %s failure', async (failure, matcher) => {
-    const { view } = await renderSection({ failure })
-    expect(view.getByRole('alert')).toHaveTextContent(matcher)
+  it.each(['no-hardware', 'not-enrolled', 'auth-failed'] as const)('surfaces the %s failure', async (failure) => {
+    const { view, i18n } = await renderSection({ failure })
+    expect(view.getByRole('alert')).toHaveTextContent(i18n.t(`security.appLock.errors.${failure}`))
   })
 })

@@ -19,7 +19,6 @@ import {
   getRequisitionKey,
   Requisition,
 } from "@/lib/api/user/useRequisitions";
-import GoCardlessBlackLogo from "@/public/gocardless-black.svg";
 
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
@@ -60,15 +59,9 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
     institutionName: string | null;
   } | null>(null);
   const [selectedRequisitionData, setSelectedRequisitionData] = useState<{
-    id: number | null;
-    daysLeft: number | null;
-  }>({
-    id: null,
-    daysLeft: null,
-  });
-  const accountNames = data.flatMap((r) =>
-    r.accounts.map((a) => a.accountName),
-  );
+    id: number;
+    accountNames: string[];
+  } | null>(null);
 
   const openUnsyncAccountModal = useCallback(
     (requisitionKey: number) => {
@@ -80,7 +73,7 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
       }
       setSelectedRequisitionData({
         id: requisitionKey,
-        daysLeft: 123, // FIXME: calculate days left
+        accountNames: requisition.accounts.map((account) => account.accountName),
       });
       setIsUnsyncAccountModalOpen(true);
     },
@@ -190,14 +183,7 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
             <Text variant="smallText">{requisition.institution.name}</Text>
           );
         }
-        return (
-          <Image
-            src={GoCardlessBlackLogo.src}
-            alt="gocardless"
-            width={120}
-            height={18}
-          />
-        );
+        return <Text variant="smallText">{requisition.provider}</Text>;
       },
     }),
     columnHelper.accessor("accounts", {
@@ -319,11 +305,18 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
                 {t("reconnect")}
               </Button>
             ) : null}
-            <RefreshCwOff
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-11"
+              aria-label={t("unsync-account")}
               onClick={() =>
                 openUnsyncAccountModal(getRequisitionKey(requisition))
               }
-            />
+            >
+              <RefreshCwOff className="size-4" aria-hidden="true" />
+            </Button>
           </div>
         );
       },
@@ -333,15 +326,11 @@ const ConnectionsTable: React.FC<ConnectionsTableProps> = ({ data }) => {
   return (
     <>
       <Table columns={columns} data={data} />
-      {selectedRequisitionData &&
-      selectedRequisitionData.id &&
-      selectedRequisitionData.daysLeft ? (
+      {selectedRequisitionData ? (
         <BankConnectionUnsyncModal
           isOpen={isUnsyncAccountModalOpen}
           closeModal={() => setIsUnsyncAccountModalOpen(false)}
-          requisitionData={
-            { ...selectedRequisitionData, accountNames } as any
-          }
+          requisitionData={selectedRequisitionData}
         />
       ) : null}
       <SyncHistoryDrawer

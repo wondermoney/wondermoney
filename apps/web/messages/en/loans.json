@@ -8,7 +8,6 @@
       "add": "Add loan",
       "edit": "Edit loan",
       "delete": "Delete loan",
-      "recordPayment": "Record payment",
       "linkRepayment": "Link repayment",
       "unlinkRepayment": "Unlink repayment",
       "save": "Save changes"
@@ -33,7 +32,6 @@
       "amortizationMethodHint": "French keeps the payment level; constant principal pays the same principal each month, so the payment falls.",
       "startDate": "Start date",
       "dueDate": "Due date",
-      "linkedAccount": "Linked account",
       "linkedTransaction": "Linked repayment",
       "namePlaceholder": "e.g. Home mortgage",
       "interestRatePlaceholder": "0.00",

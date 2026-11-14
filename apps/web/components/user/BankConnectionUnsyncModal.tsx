@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ interface BankConnectionUnsyncModalProps {
   closeModal: () => void;
   requisitionData: {
     id: string | number;
-    daysLeft: number;
     accountNames: string[];
   };
 }
@@ -25,9 +24,10 @@ const BankConnectionUnsyncModal: React.FC<BankConnectionUnsyncModalProps> = ({
   requisitionData,
 }) => {
   const t = useTranslations();
+  const locale = useLocale();
   const posthog = usePostHog();
   const deleteRequisitionMutation = useDeleteRequisition();
-  const formatter = new Intl.ListFormat("en", {
+  const formatter = new Intl.ListFormat(locale, {
     style: "long",
     type: "conjunction",
   });

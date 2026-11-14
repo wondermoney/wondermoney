@@ -2716,18 +2716,14 @@
     "legacyRecurrence": "Esta categoria não tem uma recorrência guardada. Seleciona uma explicitamente antes de guardares.",
     "scope": "Aplicar alteração a",
     "scopeMonth": "Apenas ao mês selecionado",
-    "scopeForward_one": "Do mês selecionado até dezembro ({{count}} mês)",
-    "scopeForward_other": "Do mês selecionado até dezembro ({{count}} meses)",
-    "scopeNote": "O mês da rota selecionada é o ponto de partida. Os meses anteriores e os anos futuros nunca são alterados.",
+    "scopeNote": "A opção de meses seguintes também altera os anos seguintes. Os meses anteriores mantêm-se.",
     "suggestionLabel": "Sugerido a partir dos teus gastos: {{amount}}",
     "suggestionApply": "Aplicar",
     "suggestionNotEnoughData": "Ainda não há histórico suficiente para uma sugestão.",
     "save": "Guardar orçamento da categoria",
     "saving": "A guardar orçamento da categoria…",
-    "confirmTitle": "Aplicar até dezembro?",
-    "confirmMessage_one": "Aplicar este montante e recorrência de {{start}} até {{end}} ({{count}} mês)? Os meses anteriores, anos futuros, saldos das contas e transações de despesa não serão alterados.",
-    "confirmMessage_other": "Aplicar este montante e recorrência de {{start}} até {{end}} ({{count}} meses)? Os meses anteriores, anos futuros, saldos das contas e transações de despesa não serão alterados.",
-    "confirmAction": "Aplicar até dezembro",
+    "confirmTitle": "Aplicar aos meses seguintes?",
+    "confirmAction": "Aplicar aos meses seguintes",
     "failures": {
       "demo": "O modo de demonstração é só de leitura. Não foi guardada nenhuma alteração à categoria.",
       "read-only": "$t(common.householdReadOnly)",
@@ -2738,7 +2734,9 @@
       "invalid-response": "O servidor não confirmou a alteração da categoria de forma segura. Os valores foram mantidos.",
       "invalid": "Introduz um montante positivo e seleciona explicitamente uma recorrência.",
       "general": "Não foi possível guardar a alteração da categoria. Os valores foram mantidos."
-    }
+    },
+    "scopeForward": "Mês selecionado e todos os meses seguintes",
+    "confirmMessage": "Aplicar este montante e recorrência a partir de {{start}}, incluindo anos seguintes? Os meses anteriores, saldos das contas e transações de despesa não serão alterados."
   },
   "budgetCreate": {
     "title": "Criar orçamento",
@@ -3891,7 +3889,7 @@
     },
     "appLock": {
       "heading": "Bloqueio da aplicação",
-      "helper": "Exige Face ID, Touch ID ou o código do dispositivo para abrir o WonderMoney.",
+      "helper": "Configura o reconhecimento facial ou de impressão digital para ativar o bloqueio da aplicação. Ao desbloquear, podes usar o código do dispositivo como alternativa.",
       "loading": "A verificar o estado do bloqueio da aplicação…",
       "onLabel": "O bloqueio da aplicação está ativado",
       "offLabel": "O bloqueio da aplicação está desativado",
@@ -3901,8 +3899,8 @@
       "turningOff": "A desativar…",
       "confirmPrompt": "Confirma para ativar o bloqueio da aplicação",
       "errors": {
-        "no-hardware": "Não existe biometria ou código configurado neste dispositivo.",
-        "not-enrolled": "Configura primeiro o Face ID, Touch ID ou um código nas definições do dispositivo.",
+        "no-hardware": "Este dispositivo não suporta reconhecimento facial ou de impressão digital.",
+        "not-enrolled": "Regista o teu rosto ou uma impressão digital nas definições do dispositivo antes de ativares o bloqueio da aplicação.",
         "auth-failed": "Não foi possível confirmar. Tenta novamente."
       }
     },
@@ -5104,7 +5102,8 @@
     "loading": "A carregar",
     "sectionError": "Não foi possível carregar esta secção. Puxa para baixo para tentar novamente.",
     "more": "Mais sobre este portefólio",
-    "allocationShare": "{{label}}, {{percent}}"
+    "allocationShare": "{{label}}, {{percent}}",
+    "sharpeBasis": "Rendimento e volatilidade de todo o histórico; taxa de referência fixa de 4,5% para todas as moedas."
   },
   "privacy": {
     "hiddenAmount": "Montante oculto",
