@@ -3,6 +3,7 @@ import { createFetchTransport } from '@/lib/api/fetch-transport'
 import type { AppAuthAdapter, AuthSession } from '@/lib/auth/app-auth'
 import { createAppAuthAdapter, type BetterAuthClientPort } from '@/lib/auth/app-auth-adapter'
 import { createApiAuthClient } from '@/lib/auth/auth-client'
+import { nativePasskeyAuthenticator } from '@/lib/auth/native-passkeys'
 import {
   createPasswordRecoveryAdapter,
   type PasswordRecoveryAdapter,
@@ -68,7 +69,7 @@ export function createLiveAppDependencies(
     const client = createApiAuthClient({ baseUrl: apiBaseUrl, scheme: AUTH_SCHEME })
     // The better-auth client exposes a superset of both ports; the casts only
     // narrow it to the members each consumer is allowed to touch.
-    const auth = createAppAuthAdapter(client as unknown as BetterAuthClientPort)
+    const auth = createAppAuthAdapter(client as unknown as BetterAuthClientPort, nativePasskeyAuthenticator)
     const passwordRecovery = createPasswordRecoveryAdapter(client as unknown as PasswordRecoveryClientPort)
     const transport = createFetchTransport({ baseUrl: apiBaseUrl, fetchImpl })
     return {

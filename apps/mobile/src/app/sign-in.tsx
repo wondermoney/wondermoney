@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { DemoSignIn } from '@/features/auth/demo-sign-in'
+import { PasskeySignIn } from '@/features/auth/passkey-sign-in'
 import { ScanPairingQr } from '@/features/auth/scan-pairing-qr'
 import { ServerSwitcher } from '@/features/auth/server-switcher'
 import { SignInScreen } from '@/features/auth/sign-in-screen'
@@ -102,6 +103,7 @@ export default function SignInRoute() {
         footer={(
           <>
             <SsoSignIn primary={!passwordSignIn} />
+            <PasskeySignIn />
             <SocialSignIn />
             <DemoSignIn />
             <Button

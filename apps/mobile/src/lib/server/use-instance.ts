@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
+import { nativePasskeyAuthenticator } from '@/lib/auth/native-passkeys'
+import { appPasskeyDomains, isPasskeyAvailable } from '@/lib/auth/passkey-availability'
 
 import { fetchInstance, type InstanceDescription } from './server-connection'
 
@@ -42,6 +44,22 @@ export function useConfirmedFeature(select: (features: Features) => boolean | un
 export function useOidcProvider(): { name: string } | null {
   const { data } = useInstance()
   return data?.features.oidc ?? null
+}
+
+/**
+ * Whether to offer passkeys: the server has them, its passkey hostname (`passkeyRpId`) is one of
+ * this build's associated domains, and the device can use them (lib/auth/passkey-availability).
+ * False while the description loads, on an older server and on any self-hosted server the build
+ * wasn't made for.
+ */
+export function usePasskeyAvailable(): boolean {
+  const { data } = useInstance()
+  return isPasskeyAvailable({
+    serverPasskey: data?.features.passkey,
+    rpId: data?.features.passkeyRpId,
+    appDomains: appPasskeyDomains(),
+    deviceSupported: nativePasskeyAuthenticator.isSupported(),
+  })
 }
 
 /**

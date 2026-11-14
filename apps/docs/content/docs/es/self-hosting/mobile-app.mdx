@@ -42,6 +42,21 @@ Por defecto, Expo acepta una petición de push para un token sin comprobar quié
 
 Para no depender de ello, compila la aplicación desde el código con tu propio proyecto de Expo y tus propias credenciales de push de Apple y Firebase (`apps/mobile/README.md`, "EAS configuration"). Tu servidor envía entonces a tu versión; define `EXPO_ACCESS_TOKEN` si activas la seguridad reforzada en tu cuenta de Expo.
 
+## Llaves de acceso
+
+Una llave de acceso pertenece al dominio de tu aplicación web (el host de `APP_URL`), y un teléfono solo la ofrece a una aplicación cuando ese dominio respalda la aplicación y la aplicación se compiló para pedirla. La aplicación de WonderMoney publicada se compila solo para wonder.money. En tu servidor, oculta **Iniciar sesión con una llave de acceso** y **Añadir una llave de acceso**, y la gente inicia sesión con su contraseña, Google, Apple o el inicio de sesión único. Las llaves de acceso siguen funcionando en tu aplicación web, y la aplicación sigue mostrándolas y puede eliminarlas.
+
+Para usar llaves de acceso en la aplicación con tu propio servidor, compila la aplicación desde el código (`apps/mobile/README.md`, "Passkeys") y define:
+
+| Dónde | Variable | Valor |
+| --- | --- | --- |
+| Compilación de la aplicación | `WONDERMONEY_PASSKEY_DOMAINS` | El dominio de tu aplicación web, por ejemplo `money.example.com`. En iOS, el App ID necesita la capacidad Associated Domains. |
+| Aplicación web | `IOS_APP_TEAM_ID`, `IOS_APP_BUNDLE_ID` | El ID de tu equipo de Apple Developer y el bundle ID de la aplicación. La aplicación web los sirve como `/.well-known/apple-app-site-association`. |
+| Aplicación web | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | El nombre del paquete de la aplicación y las huellas SHA-256 de sus certificados de firma, separadas por comas (`AB:CD:…`, como las muestran `keytool` o la Play Console). La aplicación web los sirve como `/.well-known/assetlinks.json`. |
+| API | `ANDROID_APP_CERT_SHA256` | Las mismas huellas. Android indica que una llave de acceso de una aplicación viene de `android:apk-key-hash:` y el hash del certificado, no de tu dirección web, así que la API solo acepta ese origen para estos certificados. |
+
+Con Docker Compose, todas van en `.env`. Mientras no estén definidas, las dos direcciones `/.well-known` responden 404 y nada cambia. Mantén `APP_URL` en el puerto HTTPS predeterminado: iOS indica que las llaves de acceso de la aplicación vienen de `https://` y el dominio, sin puerto.
+
 ## Requisitos
 
 - El teléfono tiene que poder llegar a la API. En la práctica, eso significa HTTPS en un dominio público; consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains).

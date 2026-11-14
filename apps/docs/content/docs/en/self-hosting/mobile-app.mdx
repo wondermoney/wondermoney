@@ -42,6 +42,21 @@ By default, Expo accepts a push request for a token without checking who sends i
 
 To be independent of it, build the app from source with your own Expo project and your own Apple and Firebase push credentials (`apps/mobile/README.md`, "EAS configuration"). Your server then sends to your own build; set `EXPO_ACCESS_TOKEN` if you turn on enhanced security in your Expo account.
 
+## Passkeys
+
+A passkey belongs to your web app's hostname (the host of `APP_URL`), and a phone offers it to an app only when that hostname vouches for the app and the app was built to ask for it. The published WonderMoney app is built for wonder.money alone. On your server it hides **Sign in with a passkey** and **Add a passkey**, and people sign in with a password, Google, Apple or single sign-on instead. Passkeys keep working on your web app, and the app still lists them and can delete them.
+
+To use passkeys in the app with your own server, build the app from source (`apps/mobile/README.md`, "Passkeys") and set:
+
+| Where | Variable | Value |
+| --- | --- | --- |
+| App build | `WONDERMONEY_PASSKEY_DOMAINS` | Your web app's hostname, for example `money.example.com`. On iOS the App ID needs the Associated Domains capability. |
+| Web app | `IOS_APP_TEAM_ID`, `IOS_APP_BUNDLE_ID` | Your Apple Developer team ID and the app's bundle ID. The web app serves them as `/.well-known/apple-app-site-association`. |
+| Web app | `ANDROID_APP_PACKAGE`, `ANDROID_APP_CERT_SHA256` | The app's package name and the SHA-256 fingerprints of its signing certificates, comma-separated (`AB:CD:…`, as `keytool` or the Play Console print them). The web app serves them as `/.well-known/assetlinks.json`. |
+| API | `ANDROID_APP_CERT_SHA256` | The same fingerprints. Android reports a passkey from an app as coming from `android:apk-key-hash:` and the certificate's hash, not from your web address, so the API accepts that origin only for these certificates. |
+
+With the Docker Compose setup, all of them go in `.env`. Until they are set, both `/.well-known` addresses answer 404 and nothing changes. Keep `APP_URL` on the default HTTPS port: iOS reports the app's passkeys as coming from `https://` and the hostname, without a port.
+
 ## Requirements
 
 - The phone must be able to reach the API. In practice that means HTTPS on a public hostname; see [HTTPS and domains](/en/docs/self-hosting/https-and-domains).

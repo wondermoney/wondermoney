@@ -204,6 +204,13 @@
         "unavailable": "La demo no está disponible ahora. Inténtalo más tarde.",
         "unreachable": "No se ha podido contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo."
       }
+    },
+    "passkey": {
+      "signIn": "Iniciar sesión con una llave de acceso",
+      "signingIn": "Iniciando sesión…",
+      "errors": {
+        "unavailable": "No se ha podido iniciar sesión con esa llave de acceso. Inténtalo de nuevo o usa tu contraseña."
+      }
     }
   },
   "access": {
@@ -3953,6 +3960,33 @@
       "access": "Tu sesión no pudo autorizar esta acción. Tu cuenta no ha cambiado.",
       "mfa": "Se requiere autenticación multifactor antes de eliminar tu cuenta.",
       "cancelled": "La eliminación de la cuenta se canceló. Tu cuenta no ha cambiado."
+    },
+    "passkeys": {
+      "heading": "Llaves de acceso",
+      "helper": "Inicia sesión con tu huella, tu cara o el PIN del dispositivo en lugar de tu contraseña. Un inicio de sesión con llave de acceso no pide el código del autenticador.",
+      "loading": "Cargando llaves de acceso…",
+      "loadFailed": "No se han podido cargar tus llaves de acceso. Inténtalo más tarde.",
+      "retry": "Reintentar",
+      "empty": "Todavía no has añadido ninguna llave de acceso.",
+      "defaultName": "Llave de acceso",
+      "addedOn": "Añadida el {{date}}",
+      "lastUsed": "Último uso: {{date}}",
+      "neverUsed": "Nunca usada",
+      "add": "Añadir una llave de acceso",
+      "adding": "Añadiendo…",
+      "added": "Llave de acceso añadida.",
+      "unsupported": "Este dispositivo no puede usar llaves de acceso aquí. Puedes añadir una en la aplicación web.",
+      "delete": "Eliminar",
+      "deleteNamed": "Eliminar {{name}}",
+      "deleteTitle": "¿Eliminar esta llave de acceso?",
+      "deleteDescription": "Ya no podrás iniciar sesión con {{name}}. Tu contraseña y tus otras llaves de acceso siguen funcionando. Elimínala también de tu gestor de contraseñas.",
+      "deleteConfirm": "Eliminar llave de acceso",
+      "deleted": "Llave de acceso eliminada.",
+      "errors": {
+        "add": "No se ha podido añadir la llave de acceso. Inténtalo de nuevo.",
+        "sessionNotFresh": "Cierra sesión y vuelve a iniciarla antes de añadir una llave de acceso.",
+        "delete": "No se ha podido eliminar la llave de acceso. Inténtalo de nuevo."
+      }
     }
   },
   "notifications": {

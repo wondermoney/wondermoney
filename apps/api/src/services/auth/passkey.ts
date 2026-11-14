@@ -15,6 +15,11 @@ import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/a
  * one-hostname setup), so no new variable is needed. Moving the web app to another hostname
  * orphans every registered passkey: the browser will not offer them there.
  *
+ * The mobile app uses the same relying party. Its passkeys work only when the web app on that
+ * hostname vouches for the app (`/.well-known/apple-app-site-association` and
+ * `/.well-known/assetlinks.json`, served by the web app) and the app build lists the hostname
+ * among its associated domains, so in practice only for the server the app was built for.
+ *
  * Why a passkey sign-in is a full session for a two-factor account. A passkey is
  * phishing-resistant by construction (the browser signs only for the relying party's origin),
  * and with `userVerification: 'required'` every assertion proves both possession of the device
@@ -35,6 +40,43 @@ export interface PasskeyRelyingParty {
 export function passkeyRelyingParty(appUrl: string): PasskeyRelyingParty {
   const url = new URL(appUrl);
   return { origin: url.origin, rpID: url.hostname };
+}
+
+const COLON_FINGERPRINT = /^[\dA-F]{2}(?::[\dA-F]{2}){31}$/i;
+const BARE_FINGERPRINT = /^[\dA-F]{64}$/i;
+
+/**
+ * The SHA-256 fingerprints of the Android app's signing certificates
+ * (`ANDROID_APP_CERT_SHA256`, comma-separated), as `keytool` and the Play Console print them
+ * (`AB:CD:…`, 32 bytes) or as bare hex. Anything else is left out, so a typo turns Android
+ * passkeys off rather than accepting some other app.
+ */
+export function androidCertFingerprints(value: string | undefined): string[] {
+  const hex = (value ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => COLON_FINGERPRINT.test(entry) || BARE_FINGERPRINT.test(entry))
+    .map((entry) => entry.replaceAll(':', '').toUpperCase());
+  return [...new Set(hex)];
+}
+
+/**
+ * The origin an Android app's passkey assertion reports. Android's Credential Manager does not
+ * report the website's origin for a native app: it reports `android:apk-key-hash:` and the
+ * unpadded base64url of the app's signing-certificate SHA-256, after checking the relying
+ * party's `/.well-known/assetlinks.json` lists that certificate.
+ */
+export function androidApkKeyHashOrigin(fingerprintHex: string): string {
+  return `android:apk-key-hash:${Buffer.from(fingerprintHex, 'hex').toString('base64url')}`;
+}
+
+/**
+ * Every origin a passkey ceremony may come from: the web app's, and one per Android signing
+ * certificate the operator listed. The iOS app needs nothing here: Apple's AuthenticationServices
+ * reports `https://<rpID>`, which is the web app's origin when `APP_URL` has no port.
+ */
+export function passkeyOrigins(appUrl: string, androidFingerprints: readonly string[] = []): string[] {
+  return [passkeyRelyingParty(appUrl).origin, ...androidFingerprints.map(androidApkKeyHashOrigin)];
 }
 
 const OWNED_PASSKEY_PATHS = new Set(['/passkey/delete-passkey', '/passkey/update-passkey']);
@@ -78,9 +120,18 @@ const passkeyAccountRules = (): BetterAuthPlugin => ({
   },
 });
 
-/** The plugins that give better-auth passkeys for this instance's web app. */
-export function passkeyPlugins({ appName, appUrl }: { appName: string; appUrl: string }): BetterAuthPlugin[] {
-  const { origin, rpID } = passkeyRelyingParty(appUrl);
+/**
+ * The plugins that give better-auth passkeys for this instance's web app, and for the mobile
+ * app when `androidCertFingerprints` names its Android signing certificates (see
+ * `passkeyOrigins`).
+ */
+export function passkeyPlugins({ androidCertFingerprints: fingerprints = [], appName, appUrl }: {
+  androidCertFingerprints?: readonly string[];
+  appName: string;
+  appUrl: string;
+}): BetterAuthPlugin[] {
+  const { rpID } = passkeyRelyingParty(appUrl);
+  const origin = passkeyOrigins(appUrl, fingerprints);
   return [
     passkey({
       authentication: {

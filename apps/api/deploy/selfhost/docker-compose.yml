@@ -115,6 +115,11 @@ services:
       # Analytics: off unless set (see .env).
       NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID:-}
       NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY:-}
+      # The mobile app's passkey files under /.well-known (see .env). Empty: 404.
+      IOS_APP_TEAM_ID: ${IOS_APP_TEAM_ID:-}
+      IOS_APP_BUNDLE_ID: ${IOS_APP_BUNDLE_ID:-}
+      ANDROID_APP_PACKAGE: ${ANDROID_APP_PACKAGE:-}
+      ANDROID_APP_CERT_SHA256: ${ANDROID_APP_CERT_SHA256:-}
     depends_on:
       api:
         condition: service_healthy

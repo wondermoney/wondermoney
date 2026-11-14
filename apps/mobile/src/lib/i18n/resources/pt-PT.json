@@ -204,6 +204,13 @@
         "unavailable": "A demonstração não está disponível de momento. Tenta mais tarde.",
         "unreachable": "Não foi possível contactar o servidor. Verifica a ligação e tenta novamente."
       }
+    },
+    "passkey": {
+      "signIn": "Iniciar sessão com uma chave de acesso",
+      "signingIn": "A iniciar sessão…",
+      "errors": {
+        "unavailable": "Não foi possível iniciar sessão com essa chave de acesso. Tenta novamente ou usa a palavra-passe."
+      }
     }
   },
   "access": {
@@ -3953,6 +3960,33 @@
       "access": "A tua sessão não pôde autorizar esta ação. A tua conta permanece inalterada.",
       "mfa": "É necessária autenticação multifator antes de eliminares a tua conta.",
       "cancelled": "A eliminação da conta foi cancelada. A tua conta permanece inalterada."
+    },
+    "passkeys": {
+      "heading": "Chaves de acesso",
+      "helper": "Inicia sessão com a impressão digital, o rosto ou o PIN do dispositivo em vez da palavra-passe. Um início de sessão com chave de acesso não pede o código do autenticador.",
+      "loading": "A carregar chaves de acesso…",
+      "loadFailed": "Não foi possível carregar as tuas chaves de acesso. Tenta mais tarde.",
+      "retry": "Tentar novamente",
+      "empty": "Ainda não adicionaste nenhuma chave de acesso.",
+      "defaultName": "Chave de acesso",
+      "addedOn": "Adicionada a {{date}}",
+      "lastUsed": "Usada pela última vez a {{date}}",
+      "neverUsed": "Nunca usada",
+      "add": "Adicionar uma chave de acesso",
+      "adding": "A adicionar…",
+      "added": "Chave de acesso adicionada.",
+      "unsupported": "Este dispositivo não pode usar chaves de acesso aqui. Podes adicionar uma na aplicação web.",
+      "delete": "Eliminar",
+      "deleteNamed": "Eliminar {{name}}",
+      "deleteTitle": "Eliminar esta chave de acesso?",
+      "deleteDescription": "Deixas de poder iniciar sessão com {{name}}. A tua palavra-passe e as outras chaves de acesso continuam a funcionar. Remove-a também do teu gestor de palavras-passe.",
+      "deleteConfirm": "Eliminar chave de acesso",
+      "deleted": "Chave de acesso eliminada.",
+      "errors": {
+        "add": "Não foi possível adicionar a chave de acesso. Tenta novamente.",
+        "sessionNotFresh": "Termina sessão e volta a iniciar sessão antes de adicionares uma chave de acesso.",
+        "delete": "Não foi possível eliminar a chave de acesso. Tenta novamente."
+      }
     }
   },
   "notifications": {

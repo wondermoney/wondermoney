@@ -7,7 +7,7 @@ A passkey lets you sign in without typing your email or password. Your device ke
 
 Passkeys are an extra way to sign in. Your password, Google sign-in and Apple sign-in keep working, and you keep your password. You can't create an account with only a passkey.
 
-Passkeys work on the web app. The mobile app doesn't support them yet.
+Passkeys work on the web app, and in the mobile app on the server it was built for (see [Passkeys in the mobile app](#passkeys-in-the-mobile-app)).
 
 ## Add a passkey
 
@@ -40,6 +40,16 @@ A new passkey takes the name of the password manager that stores it when the bro
 Select **Delete** to remove a passkey. It stops working in WonderMoney straight away, but it stays in your password manager or on your device until you remove it there too.
 
 Personal API tokens can't list, add or remove passkeys.
+
+## Passkeys in the mobile app
+
+Passkeys in the published app on wonder.money arrive in an upcoming app release. Until then, sign in to the app with your password, Google or Apple.
+
+On the sign-in screen of the iOS and Android app, tap **Sign in with a passkey** and unlock the passkey with your fingerprint, face or device PIN. A passkey you added on the web works in the app when your phone has it, for example through iCloud Keychain or Google Password Manager, and one added in the app works on the web.
+
+In the app, **Settings → Security → Passkeys** lists your passkeys. Tap **Add a passkey** to create one on the phone, or **Delete** to remove one. Renaming is on the web app.
+
+The app offers passkeys only on the server it was built for: the published app, on wonder.money. Connected to a self-hosted server, the app hides **Sign in with a passkey** and **Add a passkey**, and you sign in with your password, Google, Apple or single sign-on. [Use the mobile app with your server](/en/docs/self-hosting/mobile-app) explains why.
 
 ## Related pages
 

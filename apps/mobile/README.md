@@ -63,6 +63,7 @@ from environment variables, with no defaults, so a fork sets its own:
 | `WONDERMONEY_EXPO_OWNER` | `app.config.ts` (`owner`) | Expo account or organisation that owns the project |
 | `WONDERMONEY_EAS_PROJECT_ID` | `app.config.ts` (`extra.eas.projectId`) | EAS project ID (`eas init` prints it) |
 | `WONDERMONEY_GOOGLE_SERVICES_FILE` | `app.config.ts` (`android.googleServicesFile`) | Path to the Firebase project's `google-services.json`, for Android push (optional) |
+| `WONDERMONEY_PASSKEY_DOMAINS` | `app.config.ts` (`ios.associatedDomains`, `extra.passkeyDomains`) | Hostnames whose passkeys the app may use, comma-separated (optional; see "Passkeys") |
 
 Set them once as EAS environment variables (`eas env:create`, for `production`, `preview` and
 `development`), so EAS Build workers resolve the same config. Locally, put them in
@@ -89,6 +90,29 @@ API and worker). The docs' self-hosting "Mobile app" page explains this for oper
 "App Store Connect: Manage your API Key", and set it up for submissions), so `eas.json` holds
 no key path, key ID, issuer ID, app ID or team ID. An interactive `eas submit` finds the app by
 its bundle identifier (`money.wonder.app`).
+
+### Passkeys
+
+"Sign in with a passkey" and the Security screen's passkeys use `react-native-passkeys` (an Expo
+module: Apple's AuthenticationServices on iOS, Credential Manager on Android). A passkey belongs
+to the web app's hostname (the server reports it as `features.passkeyRpId` in `/v1/instance`), and
+the phone hands one to the app only when three things agree:
+
+1. **The build lists the hostname**: `WONDERMONEY_PASSKEY_DOMAINS=money.example.com`. On iOS this
+   adds the `webcredentials:money.example.com` entitlement, which needs the Associated Domains
+   capability on the App ID in the Apple Developer account (EAS syncs capabilities on build).
+   The app hides passkeys on a server whose hostname isn't in the list.
+2. **The web app on that hostname vouches for the app**: it serves
+   `/.well-known/apple-app-site-association` from `IOS_APP_TEAM_ID` and `IOS_APP_BUNDLE_ID`, and
+   `/.well-known/assetlinks.json` from `ANDROID_APP_PACKAGE` and `ANDROID_APP_CERT_SHA256` (the
+   SHA-256 fingerprints of the signing certificates: the upload key's and, with Play App Signing,
+   Google's app signing key from the Play Console).
+3. **The API accepts Android's origin**: `ANDROID_APP_CERT_SHA256` on the API too. Android reports a
+   native app's assertion as `android:apk-key-hash:<certificate hash>`, not as the web origin.
+
+Nothing account-specific is in the repository; until these are set, the app shows no passkey
+option and the sign-in screen offers the other methods. The docs' self-hosting "Mobile app" page
+has the operator's side.
 
 ## Important
 
