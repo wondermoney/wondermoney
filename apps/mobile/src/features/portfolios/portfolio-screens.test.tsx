@@ -185,6 +185,12 @@ describe('portfolio screens', () => {
     expect(error.getAllByText('Holdings').length).toBeGreaterThan(0)
   })
 
+  it('shows a member with no portfolios empty figures, not the first-portfolio prompt', async () => {
+    const view = await provider(<PortfoliosScreen state={{ status: 'loaded', data: { ...overview, householdHasPortfolios: true, portfolioCount: 0, portfolios: [], totalValue: 0 } }} onRefresh={jest.fn()} onLogout={jest.fn()} onSelectPortfolio={jest.fn()} />)
+    expect(view.queryByText('No portfolios available')).not.toBeOnTheScreen()
+    expect(view.getByTestId('portfolio-period')).toBeOnTheScreen()
+  })
+
   it('keeps empty states informational and suppresses all chrome during access transition', async () => {
     const empty = await provider(<PortfoliosScreen state={{ status: 'loaded', data: { ...overview, portfolioCount: 0, portfolios: [] } }} onRefresh={jest.fn()} onLogout={jest.fn()} onSelectPortfolio={jest.fn()} />)
     expect(empty.getByText('No portfolios available')).toBeOnTheScreen()

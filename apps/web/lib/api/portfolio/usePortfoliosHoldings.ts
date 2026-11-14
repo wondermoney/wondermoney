@@ -2,6 +2,10 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
 import api from "../api";
+import {
+  portfolioMembersKey,
+  portfolioMembersParams,
+} from "./portfolioMembers";
 
 export interface PortfolioHolding {
   currentPrice: number | null;
@@ -52,11 +56,14 @@ export interface GetPortfoliosHoldingsResponse {
   holdings: PortfolioHolding[];
 }
 
-async function getPortfoliosHoldings(
+/** Every household portfolio's holdings, or the member filter's (`portfolioMembers.ts`). */
+export async function getPortfoliosHoldings(
   apiClient: AxiosInstance = api,
+  memberKeys?: readonly string[],
 ): Promise<GetPortfoliosHoldingsResponse> {
   const { data } = await apiClient.get<GetPortfoliosHoldingsResponse>(
     `/v1/portfolio/holdings`,
+    { params: portfolioMembersParams(memberKeys) },
   );
   return data;
 }
@@ -68,10 +75,11 @@ export default function usePortfoliosHoldings<
     UseQueryOptions<GetPortfoliosHoldingsResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  memberKeys?: readonly string[],
 ) {
   return useQuery({
-    queryKey: ["portfolios-holdings"],
-    queryFn: () => getPortfoliosHoldings(),
+    queryKey: ["portfolios-holdings", ...portfolioMembersKey(memberKeys)],
+    queryFn: () => getPortfoliosHoldings(api, memberKeys),
     ...options,
   });
 }

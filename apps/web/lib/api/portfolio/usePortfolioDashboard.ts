@@ -4,6 +4,10 @@ import type { AxiosInstance } from "axios";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 import api from "../api";
+import {
+  portfolioMembersKey,
+  portfolioMembersParams,
+} from "./portfolioMembers";
 
 // The API adds opt-in summary fields only when asked, so strict older clients keep parsing.
 const DASHBOARD_INCLUDE = "feeConversion,periodReturns";
@@ -74,15 +78,23 @@ export interface IndividualDashboardResponse {
 }
 
 /**
- * Fetches aggregate dashboard data for all portfolios
+ * Fetches aggregate dashboard data for all portfolios, or with `memberKeys`
+ * for the portfolios those members own (`portfolioMembers.ts`).
  */
 export async function getAggregateDashboard(
   period: Period = "YTD",
   apiClient: AxiosInstance = api,
+  memberKeys?: readonly string[],
 ): Promise<AggregateDashboardResponse> {
   const { data } = await apiClient.get<AggregateDashboardResponse>(
     `/v1/portfolio/dashboard`,
-    { params: { period, include: DASHBOARD_INCLUDE } },
+    {
+      params: {
+        period,
+        include: DASHBOARD_INCLUDE,
+        ...portfolioMembersParams(memberKeys),
+      },
+    },
   );
   return data;
 }
@@ -108,10 +120,16 @@ export function useAggregateDashboard<R = AggregateDashboardResponse>(
     UseQueryOptions<AggregateDashboardResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  memberKeys?: readonly string[],
 ) {
   return useQuery({
-    queryKey: ["portfolio-dashboard", "aggregate", period],
-    queryFn: () => getAggregateDashboard(period),
+    queryKey: [
+      "portfolio-dashboard",
+      "aggregate",
+      period,
+      ...portfolioMembersKey(memberKeys),
+    ],
+    queryFn: () => getAggregateDashboard(period, api, memberKeys),
     ...options,
   });
 }

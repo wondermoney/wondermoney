@@ -73,6 +73,7 @@ import {
   getAggregateAllocationRequestSchema,
   getAggregateDashboardRequestSchema,
   getAggregatePerformanceRequestSchema,
+  getAggregatePortfolioReadRequestSchema,
   getAggregateTopMoversRequestSchema,
   getAssetPriceHistoryRequestSchema,
   getAssetPriceOverrideRequestSchema,
@@ -839,6 +840,7 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'GET /v1/portfolio/holdings': {
     tag: 'Portfolio',
     summary: 'List holdings across portfolios',
+    request: getAggregatePortfolioReadRequestSchema,
     response: listResponse('HoldingList', 'holdings', holdingSchema),
   },
   'GET /v1/portfolio/brokers': {
@@ -860,11 +862,13 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'GET /v1/portfolio/calendar': {
     tag: 'Portfolio',
     summary: 'Get the portfolio dividend and earnings calendar',
+    request: getAggregatePortfolioReadRequestSchema,
     response: portfolioCalendarSchema,
   },
   'GET /v1/portfolio/dividend-income': {
     tag: 'Portfolio',
     summary: 'Get aggregate dividend income',
+    request: getAggregatePortfolioReadRequestSchema,
     response: dividendIncomeSchema,
   },
   'GET /v1/portfolio/realized-gains': {

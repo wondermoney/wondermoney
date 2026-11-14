@@ -20,6 +20,12 @@ interface PortfolioTopMoversProps {
   portfolioId: number | null;
   period: Period;
   currency?: string;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 interface MoverItemProps {
@@ -79,6 +85,7 @@ const PortfolioTopMovers: React.FC<PortfolioTopMoversProps> = ({
   portfolioId,
   period,
   currency = "USD",
+  memberKeys,
 }) => {
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
@@ -87,6 +94,8 @@ const PortfolioTopMovers: React.FC<PortfolioTopMoversProps> = ({
     portfolioId,
     period,
     5,
+    undefined,
+    memberKeys,
   );
 
   const hasGainers = topMoversData?.gainers && topMoversData.gainers.length > 0;

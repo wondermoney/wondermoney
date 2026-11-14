@@ -13,6 +13,11 @@ import { FinancialAssetLogo } from "../FinancialAssetLogo";
 
 interface PortfolioCalendarProps {
   holdings?: PortfolioHolding[];
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the dividends of the holdings those members own. Absent for everyone.
+   */
+  memberKeys?: string[];
 }
 
 const calendarEmptyStateClass =
@@ -40,11 +45,14 @@ const REVENUE_ESTIMATE_FORMAT = {
   maximumFractionDigits: 1,
 } as const;
 
-const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({ holdings }) => {
+const PortfolioCalendar: React.FC<PortfolioCalendarProps> = ({
+  holdings,
+  memberKeys,
+}) => {
   const t = useTranslations();
   const locale = useLocale();
   const formatRevenue = useFormatCurrency();
-  const { data, isLoading } = usePortfolioCalendar();
+  const { data, isLoading } = usePortfolioCalendar(undefined, memberKeys);
   const earnings = data?.earnings;
   const dividends = data?.dividends;
 

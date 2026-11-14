@@ -32,6 +32,12 @@ const dateFormatOptions = {
 interface PortfolioRealizedGainsProps {
   /** One portfolio, or `null` for every portfolio of the household. */
   portfolioId: number | null;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 /**
@@ -42,13 +48,14 @@ interface PortfolioRealizedGainsProps {
  */
 export default function PortfolioRealizedGains({
   portfolioId,
+  memberKeys,
 }: PortfolioRealizedGainsProps) {
   const t = useTranslations();
   const locale = useLocale();
   const formatQuantity = useFormatQuantity();
   const [year, setYear] = useState<number | null>(null);
-  const lifetime = useRealizedGains(portfolioId, null);
-  const query = useRealizedGains(portfolioId, year);
+  const lifetime = useRealizedGains(portfolioId, null, undefined, memberKeys);
+  const query = useRealizedGains(portfolioId, year, undefined, memberKeys);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, dateFormatOptions),
     [locale],

@@ -18210,6 +18210,26 @@
         "x-required-scopes": [
           "read"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -18348,6 +18368,26 @@
         "x-required-scopes": [
           "read"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -18427,6 +18467,24 @@
             "required": false,
             "description": "Opt-in summary fields, comma-separated: `feeConversion`, `periodReturns`.",
             "name": "include",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {
@@ -18515,6 +18573,26 @@
         ],
         "x-required-scopes": [
           "read"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          }
         ],
         "responses": {
           "200": {
@@ -18970,6 +19048,26 @@
         "x-required-scopes": [
           "read"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -19050,6 +19148,24 @@
             },
             "required": false,
             "name": "fromDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           }
         ],
@@ -19233,6 +19349,24 @@
             "schema": {
               "anyOf": [
                 {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
                   "type": "number"
                 },
                 {
@@ -19331,6 +19465,24 @@
             },
             "required": false,
             "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "required": false,
+            "name": "memberKeys",
             "in": "query"
           },
           {

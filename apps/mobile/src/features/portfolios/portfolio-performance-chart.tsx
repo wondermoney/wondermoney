@@ -4,8 +4,6 @@ import { CartesianChart, Line, Scatter } from 'victory-native'
 
 import { Section } from '@/components/ui/section'
 import { SegmentedControl } from '@/components/ui/segmented-control'
-import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
-import { MemberFilterButton } from '@/features/household/member-filter-control'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
@@ -26,11 +24,6 @@ export type PortfolioPerformanceChartProps = Readonly<{
   palette: Palette
   /** The currency the history is valued in (the viewer's), for the deposit and withdrawal amounts. */
   currency?: string | null
-  /**
-   * Whose portfolios the household chart covers: everyone, one member or Shared, beside the
-   * section's heading. Omitted (one portfolio, or a household of one), not shown.
-   */
-  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }>
 
 /** The latest flows listed under the chart; the activity list has the rest. */
@@ -51,7 +44,7 @@ export function formatDay(date: string, locale: string): string {
  * which those flows don't move. The latest flows are listed with their amounts, since the chart
  * has no point to select.
  */
-export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palette, currency = null, memberFilter }: PortfolioPerformanceChartProps) {
+export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palette, currency = null }: PortfolioPerformanceChartProps) {
   const { t, i18n } = useTranslation()
   const formatMoney = useFormatMoney()
   const locale = i18n.resolvedLanguage ?? i18n.language ?? 'en'
@@ -64,13 +57,7 @@ export function PortfolioPerformanceChart({ state, period, onSelectPeriod, palet
   const returnLagging = state.status === 'loaded' && state.data.returnEndDate !== null && state.data.endDate !== null && state.data.returnEndDate < state.data.endDate
   return (
     // Web's ruled "Performance" section: the chart on the canvas, no card around it.
-    <Section
-      action={memberFilter ? <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} /> : undefined}
-      style={styles.card}
-      testID="portfolio-performance"
-      title={t('portfolioDetail.performance.heading')}
-      variant="open"
-    >
+    <Section style={styles.card} testID="portfolio-performance" title={t('portfolioDetail.performance.heading')} variant="open">
       {onSelectPeriod ? <SegmentedControl
         accessibilityLabel={t('portfolioDetail.performance.title')}
         onChange={onSelectPeriod}

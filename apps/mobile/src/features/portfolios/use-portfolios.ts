@@ -12,7 +12,12 @@ import {
 } from './query-state'
 import { aggregatePortfolioDashboardKey, portfoliosKey } from './query-keys'
 
-export function usePortfolios(period: PortfolioPerformancePeriod = 'YTD') {
+/**
+ * The household's portfolio list and the aggregate dashboard. `member` (the Portfolios tab's
+ * member filter) narrows the dashboard to the portfolios that member owns; the list stays the
+ * household's, so the tab can tell a member with no portfolios from a household with none.
+ */
+export function usePortfolios(period: PortfolioPerformancePeriod = 'YTD', member?: string) {
   const { runtime, blockAccess } = useProductRuntime()
   if (!runtime) throw new Error('usePortfolios requires an authenticated runtime')
 
@@ -22,9 +27,9 @@ export function usePortfolios(period: PortfolioPerformancePeriod = 'YTD') {
     ...conservativePortfolioQueryOptions,
   })
   const dashboard = useQuery({
-    queryKey: aggregatePortfolioDashboardKey(runtime.epochId, period),
-    queryFn: () => runtime.apiClient.read(createAggregatePortfolioDashboardEndpoint(period)),
-    // Switching period keeps the previous figures on screen until the new ones land.
+    queryKey: aggregatePortfolioDashboardKey(runtime.epochId, period, member),
+    queryFn: () => runtime.apiClient.read(createAggregatePortfolioDashboardEndpoint(period, member)),
+    // Switching period or member keeps the previous figures on screen until the new ones land.
     placeholderData: keepPreviousData,
     ...conservativePortfolioQueryOptions,
   })

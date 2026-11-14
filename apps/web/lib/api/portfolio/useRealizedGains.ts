@@ -3,6 +3,10 @@ import type { AxiosInstance } from "axios";
 
 import api from "../api";
 import type { AmountsCompleteness } from "../completeness";
+import {
+  portfolioMembersKey,
+  portfolioMembersParams,
+} from "./portfolioMembers";
 
 /** Totals of a set of sales, in the report's currency. */
 export interface RealizedGainsTotals {
@@ -75,10 +79,12 @@ export interface RealizedGainsResponse {
   year: number | null;
 }
 
-async function getRealizedGains(
+/** `memberKeys` (the aggregate only): the portfolios those members own (`portfolioMembers.ts`). */
+export async function getRealizedGains(
   portfolioId: number | null,
   year: number | null,
   apiClient: AxiosInstance = api,
+  memberKeys?: readonly string[],
 ): Promise<RealizedGainsResponse> {
   const { data } = await apiClient.get<RealizedGainsResponse>(
     "/v1/portfolio/realized-gains",
@@ -86,13 +92,17 @@ async function getRealizedGains(
       params: {
         ...(portfolioId ? { portfolioId } : {}),
         ...(year ? { year } : {}),
+        ...portfolioMembersParams(memberKeys, portfolioId),
       },
     },
   );
   return data;
 }
 
-/** Realized gains for one portfolio (or all, with `null`) and one UTC year (or all). */
+/**
+ * Realized gains for one portfolio (or all, with `null`, narrowed to the
+ * member filter's with `memberKeys`) and one UTC year (or all).
+ */
 export default function useRealizedGains<R = RealizedGainsResponse>(
   portfolioId: number | null,
   year: number | null = null,
@@ -100,10 +110,16 @@ export default function useRealizedGains<R = RealizedGainsResponse>(
     UseQueryOptions<RealizedGainsResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  memberKeys?: readonly string[],
 ) {
   return useQuery({
-    queryKey: ["realized-gains", portfolioId, year],
-    queryFn: () => getRealizedGains(portfolioId, year),
+    queryKey: [
+      "realized-gains",
+      portfolioId,
+      year,
+      ...portfolioMembersKey(memberKeys, portfolioId),
+    ],
+    queryFn: () => getRealizedGains(portfolioId, year, api, memberKeys),
     ...options,
   });
 }

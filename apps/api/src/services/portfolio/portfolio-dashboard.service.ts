@@ -6,7 +6,7 @@ import { anyOf, sqlQuery } from '@app/database/sql';
 import type { Appuser } from '@entity/Appuser';
 import { Portfolio } from '@entity/Portfolio';
 import { FEED_RATES_ONLY, loadRateTable } from '@service/currency/exchange-rate';
-import { type MemberFilter, portfoliosOfMembers } from '@service/household/member-attribution';
+import type { MemberFilter } from '@service/household/member-attribution';
 import { roundDisplay, sumMoney } from '@utils/money';
 
 import assetPriceService from './asset-price.service';
@@ -15,6 +15,7 @@ import { calculateCostBasis, getPeriodStartDate } from './portfolio-dashboard.ut
 import { historyInViewerCurrency, historyRatePairs } from './portfolio-history-currency';
 import portfolioHoldingsService from './portfolio-holdings.service';
 import { filterValidHoldings } from './portfolio-holdings.utils';
+import { memberPortfolioKeys } from './portfolio-member-scope';
 import {
   calculateTimeWeightedReturn,
   combinePeriodMeasures,
@@ -308,23 +309,25 @@ export class PortfolioDashboardService {
   }
 
   /**
-   * Get aggregate dashboard data for all portfolios
+   * The summary and breakdown of every household portfolio together. `members` keeps the
+   * portfolios those members own, a former member's as Shared (`memberPortfolioKeys`), so every
+   * figure (value, gains, return, counts) is theirs alone.
    */
-  async getAggregateDashboard(appuser: Appuser, period: Period = 'YTD', tenantKey?: number, options: DashboardOptions = {}): Promise<AggregateDashboardResponse> {
-    // Get all portfolios
+  async getAggregateDashboard(appuser: Appuser, period: Period = 'YTD', tenantKey?: number, options: DashboardOptions = {}, members?: MemberFilter): Promise<AggregateDashboardResponse> {
+    const selected = await memberPortfolioKeys(DI.em, tenantKey, members);
     const portfolios = await DI.em.find(
       Portfolio,
-      { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) },
+      { deletedAt: undefined, ...portfolioScope(appuser, tenantKey), ...(selected ? { portfolioKey: { $in: selected } } : {}) },
       { populate: ['currencyKey'] },
     );
 
-    // Get all holdings across portfolios
-    const holdings = await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey);
+    // Get all holdings across those portfolios
+    const holdings = await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, selected);
     const hasInvalidHoldings = holdings.some((holding) => holding.isInvalid);
 
     // Calculate totals
     const validHoldings = filterValidHoldings(holdings);
-    const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, undefined, tenantKey);
+    const { feeConversionIncompleteAssetKeys, totalCostBasisOfSold, totalRealizedGains } = await portfolioHoldingsService.getRealizedGains(appuser.appuserKey, selected, tenantKey);
     const costBasis = calculateCostBasis(validHoldings);
     const unrealizedGains = validHoldings.reduce((sum, h) => sum + (h.unrealizedGains || 0), 0);
     const totalGainLoss = unrealizedGains + totalRealizedGains;
@@ -588,9 +591,8 @@ export class PortfolioDashboardService {
 
   /** The aggregate chart's portfolios: the household's (the user's without a tenant), narrowed by the member filter. */
   private async aggregatePortfolioKeys(appuser: Appuser, tenantKey: number | undefined, members: MemberFilter | undefined): Promise<number[]> {
-    const portfolios = await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) });
-    const kept = tenantKey == null ? portfolios : await portfoliosOfMembers(DI.em, tenantKey, portfolios, members);
-    return kept.map((portfolio) => portfolio.portfolioKey);
+    return (await memberPortfolioKeys(DI.em, tenantKey, members))
+      ?? (await DI.em.find(Portfolio, { deletedAt: undefined, ...portfolioScope(appuser, tenantKey) })).map((portfolio) => portfolio.portfolioKey);
   }
 
   /**
@@ -629,12 +631,13 @@ export class PortfolioDashboardService {
   }
 
   /**
-   * Get allocation breakdown
+   * The allocation of one portfolio, or with `portfolioId` null of every household portfolio
+   * together; `members` (the aggregate only) keeps the portfolios those members own.
    */
-  async getAllocation(appuser: Appuser, portfolioId: null | number, tenantKey?: number): Promise<AllocationResponse> {
+  async getAllocation(appuser: Appuser, portfolioId: null | number, tenantKey?: number, members?: MemberFilter): Promise<AllocationResponse> {
     const holdings = portfolioId
       ? await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, tenantKey)
-      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey);
+      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await memberPortfolioKeys(DI.em, tenantKey, members));
     const validHoldings = filterValidHoldings(holdings);
     const pricedHoldings = validHoldings.filter((h): h is typeof h & { currentValue: number } => h.currentValue != null);
 
@@ -758,7 +761,9 @@ export class PortfolioDashboardService {
   }
 
   /**
-   * Get top movers (gainers and losers)
+   * The period's top gainers and losers of one portfolio, or with `portfolioId` null of every
+   * household portfolio together; `members` (the aggregate only) keeps the portfolios those
+   * members own.
    */
   async getTopMovers(
     appuser: Appuser,
@@ -766,10 +771,11 @@ export class PortfolioDashboardService {
     period: Period = 'YTD',
     limit = 5,
     tenantKey?: number,
+    members?: MemberFilter,
   ): Promise<TopMoversResponse> {
     const holdings = portfolioId
       ? await portfolioHoldingsService.getPortfolioHoldings(appuser, portfolioId, tenantKey)
-      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey);
+      : await portfolioHoldingsService.getPortfoliosHoldings(appuser, tenantKey, await memberPortfolioKeys(DI.em, tenantKey, members));
 
     const eligibleHoldings = filterValidHoldings(holdings).filter((h) => h.currentValue != null);
     if (eligibleHoldings.length < MIN_TOP_MOVERS_HOLDINGS) {
