@@ -2,11 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogPanel, Disclosure } from "@headlessui/react";
 import {
   BookOpen,
+  ChartPie,
   ChevronDown,
   FileText,
   Landmark,
   Menu,
-  PieChart,
   Shield,
   Tag,
   Wrench,
@@ -82,7 +82,7 @@ export default function Header({ locale }: Props) {
       nameKey: "header.nav.portfolio.name",
       descKey: "header.nav.portfolio.description",
       routeId: "featurePortfolio",
-      icon: PieChart,
+      icon: ChartPie,
     },
     {
       nameKey: "header.nav.reports.name",
