@@ -15,13 +15,16 @@ Esto mantiene el saldo restante alineado con los pagos registrados.
   height={900}
 />
 
-## Qué registrar
+## Vincular un reembolso
 
-- Importe del reembolso
-- Fecha
-- Notas, si las necesitas
+Un reembolso es una de tus transacciones vinculada al préstamo; no hay un reembolso aparte que introducir. Su fecha es la fecha de la transacción.
 
-Registra el reembolso en la fecha en que se efectuó realmente si quieres que el historial del saldo siga siendo preciso.
+1. En la página del préstamo, elige **Vincular pago**.
+2. Elige la transacción. La lista muestra tus transacciones de salida, cada una con una confianza que refleja hasta qué punto su importe, su fecha y su comercio coinciden con el préstamo.
+3. Revisa la asignación: el pago total dividido en capital, intereses y comisiones.
+4. Elige **Guardar asignación**.
+
+Solo la parte de capital reduce el saldo del préstamo. En la tabla **Pagos** puedes más adelante editar la asignación de un reembolso o eliminar su vínculo.
 
 ## Qué te indica la vista
 
@@ -35,11 +38,11 @@ Registra el reembolso en la fecha en que se efectuó realmente si quieres que el
 - Introducir un reembolso en el préstamo equivocado.
 - Suponer que un reembolso cambia el saldo de un objetivo. Los préstamos y los objetivos son independientes.
 
-Si un pago fue reembolsado o revertido, anótalo antes de añadir una nueva entrada de reembolso.
+Si un pago fue devuelto o revertido, elimina su vínculo para que deje de reducir el saldo.
 
 ## Corregir el saldo
 
-Cuando el extracto de tu prestamista muestre otro saldo, registra su cifra. En la página del préstamo, elige **Ajustar saldo**, deja **Corregir saldo** e introduce el saldo y la fecha del extracto. Se permite cero, para un préstamo que el prestamista da por pagado.
+Cuando el extracto de tu prestamista muestre otro saldo, registra su cifra. En la página del préstamo, elige **Añadir ajuste de saldo**, deja **Corregir saldo** e introduce el saldo y la fecha del extracto. Se permite cero, para un préstamo que el prestamista da por pagado.
 
 - Una corrección sustituye el saldo registrado desde su fecha; no es un pago adicional. Los reembolsos anteriores a esa fecha ya están en la cifra del prestamista, y los posteriores reducen el saldo corregido.
 - Una corrección con fecha futura no cambia el saldo de hoy. Entra en vigor en su fecha.
@@ -53,6 +56,10 @@ Para un préstamo de tipo variable, elige el tipo de interés **Variable** al a�
 
 - Los intereses de cada mes usan la tasa vigente al empezar ese mes. Cuando una nueva tasa está vigente en una fecha de pago, la cuota se recalcula para que el préstamo termine en la misma fecha de vencimiento.
 - WonderMoney no obtiene índices como el Euríbor ni predice cambios. Añade cada cambio cuando tu prestamista lo anuncie.
+
+## En la aplicación móvil
+
+La aplicación móvil vincula reembolsos y muestra el saldo, los reembolsos y la proyección de liquidación. Los ajustes de saldo, el historial de tasas y el calendario de amortización están en la web.
 
 ## Páginas relacionadas
 

@@ -7,8 +7,8 @@ El centro de preferencias de correo controla qué correos envía WonderMoney a t
 
 <DocsImage
   src="/images/docs/es/settings-security-privacy/email-preferences-notifications.png"
-  alt="Email notification preferences listing the unsubscribe-from-all-marketing switch and each email category with its on/off switch."
-  caption="The email preference center lists every email category with its own switch plus a master unsubscribe control."
+  alt="Preferencias de notificaciones por correo, con el interruptor para cancelar todo el marketing y cada categoría de correo con su interruptor."
+  caption="El centro de preferencias de correo muestra cada categoría de correo con su propio interruptor, además de un control general para cancelarlo todo."
   width={1216}
   height={1042}
 />
@@ -17,36 +17,41 @@ El centro de preferencias de correo controla qué correos envía WonderMoney a t
 
 Cada categoría de correo agrupa un conjunto de mensajes relacionados. Puedes activar o desactivar cada categoría de forma independiente.
 
-- **Recuperación bancaria** incluye los mensajes sobre restaurar o volver a conectar una conexión bancaria.
-- **Financiera** incluye las alertas de presupuesto y la información semanal.
-- **Recuperación de la cuenta** incluye los mensajes que te ayudan a recuperar el acceso a tu cuenta.
-- **Alertas de conexión bancaria** te avisan cuando una conexión bancaria te necesita. Recibes un correo unos 7 días antes y otro en el último día antes de que termine el acceso a un banco, uno cuando el banco termina el acceso antes de tiempo y uno cuando un banco lleva más de 2 días sin sincronizar por un motivo que te necesita, como un consentimiento o una clave de Enable Banking rechazados. Los problemas temporales, como que el banco no esté disponible un rato o limite las solicitudes, no envían correo. Cada alerta se envía una vez por conexión y solo al miembro del hogar que conectó el banco. Está activada por defecto. Los correos se envían en el idioma de tu cuenta.
+- **Alertas de presupuesto** envían un correo agregado cuando una categoría del presupuesto alcanza el 80% o el 100% del importe planificado. Se envía, como máximo, un correo de presupuesto al día.
+- **Resumen semanal** envía los lunes un resumen de la semana completa anterior.
+- **Correos de recuperación de cuenta** son alertas cuando una conexión bancaria necesita reconectarse, con los pasos para solucionarlo. No incluyen alertas de seguridad sobre tu inicio de sesión, que siempre se envían.
+- **Alertas de conexiones bancarias** te avisan cuando una conexión bancaria te necesita. Recibes un correo unos 7 días antes y otro en el último día antes de que termine el acceso a un banco, uno cuando el banco termina el acceso antes de tiempo y uno cuando un banco lleva más de 2 días sin sincronizar por un motivo que te necesita, como un consentimiento o una clave de Enable Banking rechazados. Los problemas temporales, como que el banco no esté disponible un rato o limite las solicitudes, no envían correo. Cada alerta se envía una vez por conexión y solo al miembro del hogar que conectó el banco.
+- **Recordatorios de pago de la tarjeta** envían un correo unos días antes del vencimiento de un extracto de tarjeta de crédito cerrado, si aún tiene saldo pendiente. Se envía, como máximo, un correo por extracto.
 
-Algunas categorías están activadas por defecto. Los correos de alertas de presupuesto y de información semanal están activados en producción, así que se envían a menos que desactives la categoría financiera o la deshabilites en el centro de preferencias.
+Todas las categorías están activadas por defecto, así que sus correos se envían a menos que las desactives. Los correos se envían en el idioma de tu cuenta. Cada categoría muestra si está en **Envío activo**, **En pausa** o **Envío desactivado**; una categoría queda en pausa mientras tengas cancelada la suscripción a todos los correos de marketing, o mientras no se pueda entregar correo en tu dirección.
 
-Las mismas alertas aparecen como un aviso en la pantalla de inicio, en la web y en la app móvil, con un enlace para volver a conectar el banco. Cerrar el aviso oculta esa alerta hasta la siguiente.
+Las alertas de conexiones bancarias aparecen también como un aviso en la pantalla de inicio, en la web y en la app móvil, con un enlace para volver a conectar el banco. Cerrar el aviso oculta esa alerta hasta la siguiente.
 
 ## Interruptor principal
 
-El interruptor principal desactiva de una vez todas las categorías de correo de marketing e informativas. No detiene el correo transaccional de seguridad crítica.
+El interruptor principal, **Cancelar la suscripción a todos los correos de marketing**, desactiva de una vez todas las categorías anteriores. Tu elección en cada categoría se conserva y vuelve a aplicarse cuando desactivas el interruptor principal. No detiene el correo transaccional de seguridad crítica.
 
 ## Consentimiento de marketing y transaccional
 
 El consentimiento para el correo funciona en dos partes:
 
 - **El correo de marketing e informativo** es opcional. Puedes desactivarlo por categoría o con el interruptor principal.
-- **El correo transaccional** es necesario para que el servicio funcione. Los mensajes de seguridad crítica, como la recuperación de contraseña y las notificaciones de inicio de sesión, no se pueden cancelar.
+- **El correo transaccional** es necesario para que el servicio funcione. Mensajes como el correo para restablecer la contraseña, el correo que confirma tu dirección y una invitación a un hogar no se pueden cancelar.
 
 El consentimiento transaccional se gestiona por separado de las categorías de correo. Incluso con el interruptor principal desactivado, WonderMoney sigue enviando los mensajes necesarios para mantener tu cuenta segura y prestar el servicio.
 
 ## Dónde encontrarlo
 
-1. Abre la configuración.
-2. Ve a la sección de preferencias de correo.
-3. Ajusta las categorías que quieres recibir.
-4. Guarda los cambios.
+1. Abre **Configuración** y elige **Notificaciones**. En la aplicación móvil, abre **Más > Configuración** y elige **Notificaciones**.
+2. Activa o desactiva cada categoría. El cambio se guarda en cuanto lo haces.
 
 Si no ves el centro de preferencias de correo, comprueba que has iniciado sesión en la cuenta correcta y que la página de configuración está completamente cargada.
+
+## Notificaciones push en la aplicación móvil
+
+La aplicación móvil también puede mostrar las alertas de presupuesto, los recordatorios de pago de la tarjeta y las alertas de conexiones bancarias como notificaciones push, en un servidor que tenga activadas las notificaciones push. En **Más > Configuración > Notificaciones**, en la sección **Notificaciones push**, cada una está desactivada hasta que la activas, y el teléfono pide permiso la primera vez. **Enviar notificación de prueba** comprueba que el teléfono las recibe.
+
+Las notificaciones push nunca muestran importes ni comercios: abre la aplicación para ver las cifras. Se configuran por teléfono y son independientes de las categorías de correo anteriores. Si gestionas tu propio servidor, consulta [Notificaciones push](/es/docs/self-hosting/mobile-app#notificaciones-push).
 
 ## Páginas relacionadas
 

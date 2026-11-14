@@ -23,7 +23,7 @@ Analytics and attribution are gated on consent. If you have not consented to ana
 
 ## AI features
 
-Every AI feature is optional, and you can turn all of them off for your account, whatever this server has configured. Turn on **Settings > Privacy > Hide AI features** (in the mobile app, **Settings > Appearance & Language > AI features**) to:
+Every AI feature is optional, and you can turn all of them off for your account, whatever this server has configured. Turn on **Settings > Privacy > Hide AI features** (in the mobile app, **More > Settings > Appearance**, under **AI features**) to:
 
 - hide the assistant launcher and its panel;
 - hide receipt scanning and PDF statement import;
@@ -45,7 +45,7 @@ While the switch is on, the server refuses the assistant, receipt scanning, PDF 
 
 **Settings > Privacy > Export all data** (or **Settings > Security** in the mobile app) downloads everything in your household that you can see, as a zip file named `wondermoney-export-YYYY-MM-DD.zip`:
 
-- `data/`: one JSON file per kind of data: accounts (with their sharing: shared with the household, or private and who can view or edit them), transactions, categories and category settings, merchants, tags, transaction splits, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
+- `data/`: one JSON file per kind of data: accounts (with their sharing: shared with the household, or private and who can view or edit them), transactions, categories and category settings, merchants, tags, transaction splits, refunds linked to the expenses they offset, shared expense groups with their members, expenses and settlements, rules, recurring payments, budgets, goals, loans, manually valued assets and their valuations, the public addresses and holdings of crypto wallets, portfolios and their transactions, credit card statement settings, installment plans and their schedules, the household's own exchange rates and manual prices, your transaction templates, your watchlist and your preferences. Rows refer to each other by ids that only have meaning inside the export.
 - `csv/`: transactions, accounts, portfolio transactions and current holdings, for spreadsheets. Amounts use a dot as the decimal separator and dates are written as `YYYY-MM-DD`.
 - `manifest.json`: the format version, when the export was made, and the number of rows and a SHA-256 checksum for every file.
 

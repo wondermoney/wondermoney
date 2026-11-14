@@ -29,7 +29,7 @@ A data de vencimento é o primeiro dia de vencimento após o fecho. Fechar a 5 e
 
 ## Mover uma transação para outro extrato
 
-Quando o extrato do banco não concorda com a sua própria lista de transações, podes mover uma transação. Abre a transação e define a data do extrato: passa a contar no extrato que contém essa data em vez daquele em que a data própria cai. Limpar a data repõe o comportamento normal.
+Quando o extrato do banco não concorda com a sua própria lista de transações, uma transação pode ser movida: recebe uma data de extrato e passa a contar no extrato que contém essa data em vez daquele em que a data própria cai. Limpar a data repõe o comportamento normal. As aplicações web e móvel ainda não têm um controlo para isto; define-se através da [API](/pt/docs/api), com o campo `statementDateOverride` ao atualizar uma transação.
 
 ## Contas sincronizadas
 

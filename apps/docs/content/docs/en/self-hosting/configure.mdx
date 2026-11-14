@@ -23,6 +23,8 @@ EMAIL_FROM=money@example.com
 
 Or set `RESEND_API_KEY` to use Resend instead. To test without a real provider, use the bundled Mailpit: add `mail` to `COMPOSE_PROFILES`, set `SMTP_HOST=mailpit` and `SMTP_PORT=1025`, run `docker compose up -d`, and read the mail at http://localhost:8025.
 
+`SMTP_PORT` defaults to `587`. The connection uses implicit TLS on port 465 and, on any other port, STARTTLS when the server offers it; set `SMTP_SECURE` to `true` or `false` to choose yourself.
+
 With no provider configured, the API writes each message to its log, and the worker sends no background reminders (card payment reminders, API token expiry). Card payment reminders go out a few days before a statement is due: set `CREDIT_CARD_DUE_REMINDER_DAYS` on the worker to change the lead time (3 by default, a whole number of days).
 
 ## File storage
@@ -38,7 +40,7 @@ S3_PUBLIC_ENDPOINT=http://localhost:9000
 S3_BUCKET=wondermoney
 ```
 
-The two keys become the store's credentials, and it won't start without them. `S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage; behind a proxy, give it its own HTTPS hostname that forwards to port 9000. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3. Transaction attachments use the same storage: without it, the attachments section is hidden and its endpoints answer 503.
+The two keys become the store's credentials, and it won't start without them. `S3_PUBLIC_ENDPOINT` is the address browsers use to reach the storage; behind a proxy, give it its own HTTPS hostname that forwards to port 9000. Any S3-compatible service works too, such as Cloudflare R2, Backblaze B2 or AWS S3: set `S3_REGION` when the service needs one (`us-east-1` is used when it is empty and `S3_ENDPOINT` is set). With `S3_ENDPOINT`, requests use path-style addresses; set `S3_FORCE_PATH_STYLE=false` for a service that only accepts virtual-hosted ones. Transaction attachments use the same storage: without it, the attachments section is hidden and its endpoints answer 503.
 
 ## AI features
 
@@ -49,7 +51,7 @@ AI_BASE_URL=http://host.docker.internal:11434/v1
 AI_MODEL=llama3.1
 ```
 
-Set `AI_API_KEY` when the endpoint needs one. To use a different model for one feature, set `AI_MODEL_<FEATURE>`; for example, receipt scanning needs a model that reads images, set with `AI_MODEL_OCR`.
+Set `AI_API_KEY` when the endpoint needs one. To use a different model for one feature, set `AI_MODEL_<FEATURE>`; for example, receipt scanning needs a model that reads images, set with `AI_MODEL_OCR`. The features are `ASSISTANT`, `CSV_MAPPING`, `ENRICHMENT` (transaction categorisation), `MONTHLY_STORY`, `OCR` and `STATEMENT_IMPORT`.
 
 To use Anthropic with your own API key, choose it explicitly:
 
@@ -214,7 +216,7 @@ If the web app moves to another hostname, existing passkeys stop working and you
 | `SUPPORT_EMAIL` | The inbox for the contact form, account alerts and in-app feedback, and the support address the app shows; leave empty to turn them off and hide the support links. The "Share Feedback" form also needs email configured; without it the form is hidden |
 | `SPONSOR_URL` | A page where your users can chip in towards running the instance (Open Collective, GitHub Sponsors, ...). The web app's FAQ links to it when set |
 | `NEXT_PUBLIC_TERMS_URL`, `NEXT_PUBLIC_PRIVACY_URL` | Your legal pages, linked from the sign-up page when both are set |
-| `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en` or `pt`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |
+| `PRIVACY_POLICY_URL` | Your privacy policy, linked from email footers. `{lang}` is replaced with the recipient's language (`en`, `pt` or `es`), for example `https://example.com/{lang}/privacy`. Defaults to the app's privacy settings |
 | `MCP_ENABLED` | The read-only MCP server at `POST /v1/mcp`, which lets an AI client ask about a user's own finances with a personal API token carrying `mcp:read` (see [Connect an AI client](/en/docs/settings-security-privacy/connect-ai-client)). On by default; set it to `false` to answer `404` and report `features.mcp: false` in `GET /v1/instance` |
 | `DEMO_SIGN_IN_ENABLED` | `true` turns on a public read-only demo: a **Try the demo** button that signs anyone in to one shared demo account. Off by default; see [Public demo](#public-demo) |
 | `TRANSFER_MATCH_FX_TOLERANCE` | How far apart the two halves of a transfer between accounts in different currencies may be once the amount that left is converted at that day's exchange rate, as a fraction of the amount that arrived: `0.02` (the default) is 2 percent. Raise it if your bank's exchange margin and fees are larger; at most `0.25`. Set it on the API and the worker |
@@ -256,7 +258,7 @@ Your instance loads no analytics or tag manager and records no usage events unle
 |---|---|
 | `NEXT_PUBLIC_GTM_ID` | Your Google Tag Manager container (`GTM-XXXXXXX`), loaded on every page of the web app |
 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog in the web app: page views, usage events and session recordings, linked to each user's email address |
-| `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` | Sign-up, login and bank sync events sent to PostHog by the API and the worker. Set both on the API and the worker; while the mode is off, no events are recorded |
+| `ANALYTICS_OUTBOX_MODE=live` with `POSTHOG_API_KEY` | Sign-up, login and bank sync events sent to PostHog by the API and the worker. Set both on the API and the worker; while the mode is off, no events are recorded. `POSTHOG_HOST` on the worker sets the PostHog address, `https://eu.i.posthog.com` by default |
 
 If you turn any of these on, tell your users in your privacy policy (`NEXT_PUBLIC_PRIVACY_URL`), and ask for consent where the law requires it.
 

@@ -7,16 +7,25 @@ Usa el flujo de conexión bancaria cuando quieras que WonderMoney importe saldos
 
 Durante la incorporación, puedes conectar un banco directamente desde el paso de cuentas, así que no necesitas visitar este flujo por separado. Esta página describe el flujo independiente, que funciona de la misma manera.
 
+Las conexiones con bancos europeos pasan por Enable Banking y son de solo lectura. Te conectas con una clave de Enable Banking propia, que añades una vez en **Configuración → Proveedor bancario**; [Conectar tu primera cuenta bancaria](/es/docs/start-here/connect-first-bank-account) lo explica paso a paso. Un servidor autoalojado puede compartir una clave con tu hogar, y entonces puedes saltarte ese paso.
+
 ## Antes de empezar
 
-Confirma que el banco es compatible y que estás listo para aprobar la conexión en el propio flujo de autenticación del banco.
+Confirma que el banco es compatible y que estás listo para aprobar la conexión en el propio flujo de autenticación del banco. Mientras no haya una clave de Enable Banking disponible, la opción **Vinculada** muestra **Añade primero tu clave de Enable Banking**, con un enlace a los ajustes del proveedor bancario.
 
 ## Pasos
 
-1. Inicia una nueva conexión bancaria.
-2. Selecciona el banco e inicia sesión en el proveedor.
-3. Elige las cuentas que quieres importar.
-4. Completa la aprobación y espera a la primera sincronización.
+1. Abre **Cuentas**, selecciona **Añadir cuenta** y elige **Vinculada**.
+2. Elige el **País** de tu banco y después el banco en la lista.
+3. Lee lo que ocurre a continuación y selecciona **Continuar al banco**. Sales de WonderMoney e inicias sesión en tu banco.
+4. Aprueba el acceso de solo lectura. Si el banco te pregunta qué cuentas compartir, elígelas allí: WonderMoney añade todas las cuentas que el banco comparta.
+5. Vuelves a WonderMoney automáticamente. Tus cuentas y transacciones recientes se importan en segundo plano y aparecen en **Cuentas** al poco tiempo.
+
+En la aplicación móvil, abre **Más → Conexiones bancarias**, selecciona **Conectar un banco**, elige el banco y completa el consentimiento en el navegador. La clave de Enable Banking se añade en la web.
+
+## Bancos de Estados Unidos y Canadá
+
+En una instancia autoalojada que active SimpleFIN, **Conectar con SimpleFIN** aparece en el diálogo **Añadir cuenta** y en **Configuración → Conexiones** en la web, y en **Conexiones bancarias** en la aplicación móvil. Pega un token de configuración de SimpleFIN Bridge y selecciona **Conectar**; tus cuentas aparecen tras la primera sincronización. Consulta [SimpleFIN para bancos de EE. UU. y Canadá](/es/docs/self-hosting/simplefin).
 
 ## Revisión
 

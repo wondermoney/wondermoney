@@ -23,7 +23,7 @@ Los análisis y la atribución dependen del consentimiento. Si no has dado tu co
 
 ## Funciones de IA
 
-Todas las funciones de IA son opcionales y puedes desactivarlas todas en tu cuenta, independientemente de lo que este servidor tenga configurado. Activa **Ajustes > Privacidad > Ocultar funciones de IA** (en la aplicación móvil, **Ajustes > Apariencia e idioma > Funciones de IA**) para:
+Todas las funciones de IA son opcionales y puedes desactivarlas todas en tu cuenta, independientemente de lo que este servidor tenga configurado. Activa **Configuración > Privacidad > Ocultar funciones de IA** (en la aplicación móvil, **Más > Configuración > Apariencia**, en la sección **Funciones de IA**) para:
 
 - ocultar el lanzador del asistente y su panel;
 - ocultar la lectura de recibos y la importación de extractos en PDF;
@@ -43,9 +43,9 @@ Mientras el ajuste esté activo, el servidor rechaza el asistente, la lectura de
 
 ## Exportar tus datos
 
-**Configuración > Privacidad > Exportar todos los datos** (o **Ajustes > Seguridad** en la aplicación móvil) descarga todo lo que ves en tu hogar, en un archivo zip llamado `wondermoney-export-AAAA-MM-DD.zip`:
+**Configuración > Privacidad > Exportar todos los datos** (o **Configuración > Seguridad** en la aplicación móvil) descarga todo lo que ves en tu hogar, en un archivo zip llamado `wondermoney-export-AAAA-MM-DD.zip`:
 
-- `data/`: un archivo JSON por tipo de datos: cuentas (con cómo se comparten: con el hogar, o privadas y quién puede verlas o editarlas), transacciones, categorías y su configuración, comercios, etiquetas, divisiones de transacciones, reglas, pagos recurrentes, presupuestos, objetivos, préstamos, activos valorados manualmente y sus valoraciones, carteras y sus transacciones, la configuración de extracto de las tarjetas de crédito, las compras a plazos y sus calendarios, los tipos de cambio y precios manuales del hogar, tus plantillas de transacción, tu lista de seguimiento y tus preferencias. Las filas se refieren entre sí mediante identificadores que solo tienen sentido dentro de la exportación.
+- `data/`: un archivo JSON por tipo de datos: cuentas (con cómo se comparten: con el hogar, o privadas y quién puede verlas o editarlas), transacciones, categorías y su configuración, comercios, etiquetas, divisiones de transacciones, reembolsos vinculados a los gastos que compensan, grupos de gastos compartidos con sus miembros, gastos y liquidaciones, reglas, pagos recurrentes, presupuestos, objetivos, préstamos, activos valorados manualmente y sus valoraciones, las direcciones públicas y los saldos de las monederos de criptomonedas, carteras y sus transacciones, la configuración de extracto de las tarjetas de crédito, las compras a plazos y sus calendarios, los tipos de cambio y precios manuales del hogar, tus plantillas de transacción, tu lista de seguimiento y tus preferencias. Las filas se refieren entre sí mediante identificadores que solo tienen sentido dentro de la exportación.
 - `csv/`: transacciones, cuentas, transacciones de cartera y posiciones actuales, para hojas de cálculo. Los importes usan el punto como separador decimal y las fechas tienen el formato `AAAA-MM-DD`.
 - `manifest.json`: la versión del formato, cuándo se hizo la exportación y el número de filas y una suma de comprobación SHA-256 de cada archivo.
 

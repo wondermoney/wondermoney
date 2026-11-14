@@ -5,9 +5,9 @@ description: Register your own free Enable Banking application, then link a real
 
 WonderMoney doesn't run its own paid, shared bank-connection service — that model got too expensive to keep offering for free. Instead, bank connections use Enable Banking under a bring-your-own-key (BYOK) model: you register your own free Enable Banking application, and WonderMoney's servers use your own application's credentials — never a WonderMoney-wide one — to link and read your bank data. This keeps bank connections free, both for you and for WonderMoney.
 
-The setup below is one-time. During onboarding you may be prompted to connect a bank as part of the account step; if you haven't set up your own Enable Banking key yet, do that first using the steps here, then come back to connect the bank itself. Once your key is saved, it stays saved — every bank you add afterwards, including from Settings later, uses the same key.
+The setup below is one-time. During first-run setup, the account step shows the bank list only once a key is available. If you haven't saved a key yet, add an account manually or skip that step, finish the setup, then follow the steps here and connect the bank from **Accounts**. Once your key is saved, it stays saved — every bank you add afterwards, including from Settings later, uses the same key.
 
-On a self-hosted server, the person who runs it may have set up one Enable Banking application for your household. If the bank list opens straight away when you add a linked account, you don't need a key of your own and can skip the setup below; if you add one anyway, new bank links use yours. See [Configure your instance](/en/docs/self-hosting/configure#bank-sync).
+On a self-hosted server, the person who runs it may have set up one Enable Banking application for your household. If the bank list opens straight away when you add a linked account, you don't need a key of your own and can skip the setup below; if you add one anyway, new bank links use yours. See [Configure your instance](/en/docs/self-hosting/configure#bank-sync). A self-hosted server can also offer SimpleFIN, for banks in the United States and Canada; it needs no Enable Banking key. See [SimpleFIN](/en/docs/self-hosting/simplefin).
 
 ## Before you start
 
@@ -29,7 +29,7 @@ You'll need a few free minutes, the email address you want to use for Enable Ban
 </Callout>
 
 <Callout type="info" title="The redirect URL is WonderMoney's, not yours">
-  `https://api.wonder.money/v1/banking/enable-banking/callback` is WonderMoney's own backend address. You're registering an application that talks to WonderMoney's servers, so this value is fixed — enter it exactly as shown, not your own domain.
+  `https://api.wonder.money/v1/banking/enable-banking/callback` is WonderMoney's own backend address. You're registering an application that talks to WonderMoney's servers, so this value is fixed — enter it exactly as shown, not your own domain. The one exception is a self-hosted server: there, replace `https://api.wonder.money` with your server's API address.
 </Callout>
 
 <Callout type="warn" title="Privacy URL and Terms URL are required for Production — even though the form doesn't say so">
@@ -63,9 +63,9 @@ After you submit, the application's page shows **"Restricted Production, not yet
 
 1. On the application's page, copy the **Application ID** — a UUID shown near the top.
 2. Find the `.pem` file Enable Banking downloaded earlier.
-3. In WonderMoney, open **Settings → Bank Provider**.
+3. In the WonderMoney web app, open **Settings → Bank Provider** and select **Add your key**. The mobile app links banks with a saved key, but the key itself is added on the web.
 4. Paste the Application ID into **Application ID**, and paste the full contents of the `.pem` file into **Private key**.
-5. Save. WonderMoney tests the credential against Enable Banking before storing it, so a mistyped ID or an incomplete key is rejected immediately rather than failing later.
+5. Select **Test & Save**. WonderMoney tests the credential against Enable Banking before storing it, so a mistyped ID or an incomplete key is rejected immediately rather than failing later.
 
 ## What WonderMoney does with your key
 

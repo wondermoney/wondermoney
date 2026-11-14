@@ -3,18 +3,29 @@ title: Multi-factor authentication
 description: Set up and use multi-factor authentication for sign-in.
 ---
 
-Multi-factor authentication adds a second check at sign-in. When it is enabled, you confirm your identity with a code or another approved method before the session opens.
+Multi-factor authentication adds a second check at sign-in. When it is enabled, you confirm your identity with a six-digit code from an authenticator app before the session opens.
 
 ## Before you start
 
-Keep access to the phone, authenticator app, or backup method tied to the account. If you are changing devices, make sure the old method still works until the new one is ready.
+Keep access to the phone and authenticator app tied to the account. If you are changing devices, make sure the old method still works until the new one is ready.
+
+## Turn it on
+
+1. Open **Settings → Security** and find **Multi-factor authentication**.
+2. Select **Enable 2FA** and enter your account password.
+3. Scan the QR code with your authenticator app.
+4. Under **Save your backup codes**, select **Copy codes** and store them somewhere safe.
+5. Enter the six-digit code your authenticator app shows to finish.
+
+To turn it off, select **Disable 2FA** in the same section and enter your account password.
 
 ## Steps
 
 1. Sign in with your email and password.
-2. Enter the verification code or approve the prompt.
-3. Save any backup codes if they are provided.
-4. Confirm that the session opens normally.
+2. Enter the six-digit code from your authenticator app.
+3. Confirm that the session opens normally.
+
+Signing in with a passkey does not ask for the code; see [Passkeys](/en/docs/settings-security-privacy/passkeys).
 
 <DocsImage
   src="/images/docs/start-here/multi-factor-authentication-otp.png"
@@ -26,18 +37,19 @@ Keep access to the phone, authenticator app, or backup method tied to the accoun
 
 ## Review your setup
 
-Test the sign-in flow once after setup so you know the second factor works before you need it. If you rely on backup codes, store them in a safe place separate from the device you use every day.
+Test the sign-in flow once after setup so you know the second factor works before you need it. The sign-in page asks for the authenticator code only, so keep the authenticator app available. Before you replace or reset your phone, move the authenticator to the new device, or turn two-factor authentication off and on again while you are still signed in.
 
 ## Common issues
 
 - The code expired before it was entered.
 - The authenticator app is on a replaced or reset device.
-- Backup codes were used up or stored in the wrong place.
+- The clock on the device that generates the codes is out of sync.
 - The browser is asking for a new challenge after sign-out.
 
 
 ## Related links
 
 - [Sign in and recover a password](/en/docs/start-here/sign-in-password-recovery)
+- [Two-factor authentication settings](/en/docs/settings-security-privacy/two-factor-authentication)
 - [Create an account](/en/docs/start-here/create-account)
 - [Understand the dashboard](/en/docs/start-here/understand-dashboard)

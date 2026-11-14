@@ -15,10 +15,17 @@ This view is informational only. WonderMoney does not tell you what to buy, sell
   height={900}
 />
 
+## Where to find it
+
+- **Performance** is on the Portfolios page, for all your portfolios together, and on each portfolio's page.
+- **Benchmark Comparison** is on the Portfolios page on the web. It compares all your portfolios together with `SPY`, an exchange-traded fund that follows the S&P 500.
+- Both follow the period you pick: 1 Month, 3 Months, 6 Months, Year to Date, 1 Year or All Time. The page opens on Year to Date.
+- In a household with more than one member, the Portfolios page has a member filter, and both charts follow it. See [Filter by member](/en/docs/household/filter-by-member).
+
 ## What this view shows
 
-- **Return (time-weighted)**: the portfolio's cumulative time-weighted return since the first day of the period. Money you put in or take out does not move it, so a deposit is not shown as a gain or a withdrawal as a loss.
-- The value view: what the portfolio was worth each day, deposits and withdrawals included. Days with a deposit or a withdrawal are marked on it.
+- **Return (time-weighted)**, in Benchmark Comparison: the portfolio's cumulative time-weighted return since the first day of the period. Money you put in or take out does not move it, so a deposit is not shown as a gain or a withdrawal as a loss.
+- The Performance chart: what the portfolio was worth each day, deposits and withdrawals included. Days with a deposit or a withdrawal are marked on it.
 - Benchmark return over the same period: the benchmark's price change since the same first day. A benchmark has no deposits or withdrawals, so the two lines are on the same basis.
 - Relative performance between the two.
 - In the summary, the period's time-weighted and money-weighted return (see [Time-weighted and money-weighted return](/en/docs/portfolio-investments/portfolio-metrics-explained#time-weighted-and-money-weighted-return)).
@@ -31,12 +38,31 @@ This view is informational only. WonderMoney does not tell you what to buy, sell
 - Use the same currency context when possible.
 - Compare the benchmark with the time-weighted return. Like a benchmark's price, it is not moved by deposits or withdrawals. The money-weighted return also reflects when you added or took out money, so it can differ from both.
 
+## Top Movers
+
+**Top Movers** lists the holdings whose price rose or fell the most over a period: up to five **Gainers** and up to five **Losers**. It is on the Portfolios page, where it covers all your portfolios together and follows the period and the member filter, and on each portfolio's page, where it always covers Year to Date. It is on the web and in the mobile app.
+
+Each row shows two figures:
+
+- The percentage is the change in the security's price: `(current price - price at the start of the period) / price at the start of the period`. The starting price is the last price on or before the first day of the period, and a [manual price](/en/docs/portfolio-investments/holdings-allocation#set-a-manual-price) counts.
+- The amount under it is what that change is worth on the quantity you hold today, in your currency: `current value - current value / (1 + change)`.
+
+What it does not account for:
+
+- It measures the security, not your trades. A holding bought halfway through the period is still measured from the first day of the period, and the amount assumes you held today's quantity throughout.
+- Dividends and fees are not included.
+- When there is no price on or before the first day of the period, the row shows the holding's unrealized gain over its cost basis instead. This is common with All Time, which looks back ten years.
+- A holding whose price did not change is in neither list.
+
+The lists need at least two priced holdings. Until then, the section says that top movers appear once there is more than one priced holding.
+
 ## Common mistakes
 
+- Reading a Top Movers percentage as your own return on that holding. It is the price change over the period, whenever you bought.
 - Comparing short periods as if they were meaningful long-term results.
 - Treating benchmark lag as proof that one asset is better.
 - Using a benchmark with a very different risk profile from the portfolio.
-- Reading a jump in the value view as a gain. A deposit raises the value, not the return; check the percentage view for how the investments did.
+- Reading a jump in the Performance chart as a gain. A deposit raises the value, not the return; check the time-weighted return for how the investments did.
 
 
 ## Related pages

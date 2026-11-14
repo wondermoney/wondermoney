@@ -3,38 +3,32 @@ title: Problemas na importação de transações
 description: Corrige erros ao importar transações por ficheiro.
 ---
 
+Um ficheiro ilegível é rejeitado com uma mensagem de erro em vez de ser importado em silêncio, para que possas corrigir o ficheiro e tentar de novo.
+
 ## Sintomas
 
-Usa esta página quando as transações importadas estão em falta, duplicadas ou com valores errados.
-
-Sinais comuns:
-
-- O ficheiro não importa
-- Só algumas linhas aparecem
-- Há transações duplicadas
-- As datas ou montantes ficam trocados
+- Um ficheiro de importação é rejeitado.
+- A importação termina mas as transações não aparecem.
+- Algumas linhas são ignoradas.
+- As datas, os montantes ou as descrições ficam errados depois da importação.
 
 ## O que verificar
 
-Confirma:
-
-- Se o ficheiro é compatível
-- Se o período importado é o correto
-- Se há colunas vazias ou inválidas
-- Se o formato de data corresponde ao esperado
+- Se o formato do ficheiro corresponde à ferramenta de importação.
+- Se os cabeçalhos das colunas e os separadores estão corretos.
+- Se o ficheiro inclui linhas duplicadas ou em branco.
+- Se a conta e o intervalo de datas correspondem aos dados que queres.
 
 ## O que tentar
 
-Tenta:
-
-1. Importa um ficheiro mais pequeno.
-2. Revê separadores e cabeçalhos.
-3. Remove linhas problemáticas.
-4. Confirma se a transação já existia antes da importação.
+1. Exporta de novo o ficheiro a partir do sistema de origem, se for possível.
+2. Remove linhas duplicadas e linhas vazias.
+3. Verifica o mapeamento das colunas antes de confirmares a importação.
+4. Experimenta um ficheiro mais pequeno para isolar o problema.
 
 ## Transações semelhantes e duplicados
 
-O WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas — por exemplo, duas compras do mesmo montante no mesmo dia — deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja alterado silenciosamente.
+O WonderMoney identifica duplicados através de uma impressão digital da transação, construída a partir de detalhes como a data e o montante. A tolerância desta impressão digital foi reforçada, por isso duas transações semelhantes mas legítimas (por exemplo, duas compras do mesmo montante no mesmo dia) deixam de ser ignoradas como duplicados. Quando é detetado um duplicado real, a entrada original é mantida e a decisão fica registada no registo de auditoria, para que nada seja substituído silenciosamente.
 
 Uma linha do ficheiro com o mesmo montante de uma transação que já está na conta, até 3 dias de diferença, aparece na revisão como possível duplicado, ao lado da transação com que se parece. É ignorada, a não ser que a incluas; vê [Possíveis duplicados](/pt/docs/accounts-transactions/import-transactions-csv#possíveis-duplicados).
 
@@ -42,12 +36,10 @@ Para saber mais sobre como as transações são associadas e guardadas, vê [Com
 
 ## Quando contactar o suporte
 
-Contacta o suporte se o problema persistir depois de validares o ficheiro ou se precisares de ajuda com duplicados em massa.
+Contacta o suporte se o ficheiro seguir o formato exigido mas as importações continuarem a falhar, ou se a importação criar transações incorretas que não consegues corrigir manualmente.
 
 
 ## Páginas relacionadas
 
-- [Resolução de problemas](/pt/docs/troubleshooting/)
-- [Importar transações CSV ou OFX](/pt/docs/accounts-transactions/import-transactions-csv)
-- [Transações em falta ou duplicadas](/pt/docs/accounts-transactions/missing-duplicate-transactions)
+- [Problemas de ligação bancária](/pt/docs/troubleshooting/bank-connection-problems)
 - [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

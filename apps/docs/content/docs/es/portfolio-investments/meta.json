@@ -9,6 +9,7 @@
     "import-portfolio-csv",
     "holdings-allocation",
     "performance-benchmarks",
+    "portfolio-data-lifecycle",
     "manual-assets",
     "crypto-wallets",
     "troubleshoot-portfolio-imports"

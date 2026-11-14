@@ -1,0 +1,77 @@
+---
+title: Despesa vs normal
+description: Vê para onde foi o dinheiro de um mês e que categorias ficaram acima ou abaixo do nível habitual.
+---
+
+O relatório **Despesa vs normal** mostra o que gastaste num mês, categoria a categoria, e compara cada categoria com o seu próprio normal: a média dos mesmos dias nos três meses anteriores.
+
+É a imagem completa por trás da estatística [Gastos face ao habitual](/pt/docs/budgets/insights#gastos-face-ao-habitual) da página inicial. Ambos usam o mesmo cálculo, por isso os valores de uma categoria aqui coincidem com os do cartão dessa estatística para o mesmo mês. A estatística mostra no máximo três categorias com um desvio de 25% ou mais; o relatório mostra todas as categorias em que gastaste.
+
+O relatório está na página **Relatórios** da web. A aplicação móvel não tem este relatório; mostra a estatística da página inicial.
+
+## Escolher o mês
+
+O seletor **Mês** começa no mês atual. No mês atual, o relatório conta os gastos até agora. Um mês passado é contado por inteiro.
+
+## Ler o gráfico
+
+O gráfico tem um bloco por cada categoria de topo com gastos no mês. O tamanho do bloco é o valor gasto. A cor é a variação face ao normal:
+
+- **Verde:** 15% ou mais abaixo do normal.
+- **Neutro:** a menos de 15% do normal, acima ou abaixo.
+- **Âmbar:** mais de 15% e até 50% acima do normal.
+- **Vermelho:** mais de 50% acima do normal.
+- **Neutro com contorno tracejado:** não há nada com que comparar (vê [Quando não há comparação](#quando-não-há-comparação)).
+
+Um bloco com espaço suficiente mostra a categoria e a variação em percentagem, ou um traço quando não há comparação. Aponta para um bloco para veres o **Gasto**, o **Normal** e a **Variação vs normal** por baixo do gráfico. Seleciona um bloco para abrires as transações que o compõem.
+
+## Ler a tabela
+
+A tabela lista as mesmas categorias de topo, da que tem mais gastos para a que tem menos, cada uma seguida das suas subcategorias.
+
+- **Gasto** é o que gastaste no mês até agora. Seleciona o valor para abrires as transações que o compõem.
+- **Normal** é a média dos três meses para os mesmos dias.
+- **Variação vs normal** é a distância entre **Gasto** e **Normal**, em percentagem. Fica a vermelho a partir de mais de 15% acima do normal e a verde a partir de 15% abaixo.
+
+Uma subcategoria é comparada com o seu próprio normal, não com o da categoria principal. Uma categoria sem gastos no mês não aparece, mesmo que costume ter.
+
+## Como se calcula o normal
+
+- O relatório usa os três meses de calendário anteriores ao mês escolhido.
+- Em cada um deles conta só os dias a que o mês escolhido já chegou. No dia 12, os primeiros 12 dias do mês atual são comparados com os dias 1 a 12 de cada mês anterior.
+- O normal é a média desses três valores. Um mês sem gastos na categoria conta como zero.
+
+## Quando não há comparação
+
+O relatório mostra sempre o que gastaste. **Normal**, **Variação vs normal** ou ambos mostram um traço quando a comparação diria pouco:
+
+- **O mês tem menos de 7 dias.** Nenhuma categoria é comparada antes do dia 7.
+- **Não há três meses de histórico.** Se algum dos três meses anteriores não tiver transações nas tuas contas, nenhuma categoria é comparada.
+- **A categoria é nova.** Sem gastos na categoria nos três meses anteriores, não existe normal.
+- **O normal é inferior a 20 na tua moeda.** O valor **Normal** aparece, mas sem percentagem: abaixo disso, alguns euros fazem-na oscilar muito.
+
+## O que conta
+
+- O relatório lê as contas de que és titular, incluindo as conjuntas. Num agregado, as contas de outro membro não contam, nem as que esse membro partilha contigo. As contas encerradas ficam de fora.
+- As transações pendentes contam como dinheiro já comprometido. Uma transação pendente que expirou sem ser liquidada não conta.
+- As transferências entre contas nunca contam.
+- As categorias que não são gasto (investimentos e poupança) ficam de fora, tal como as transações sem categoria.
+- Um reembolso reduz o total da categoria em que entra, e uma categoria nunca desce abaixo de zero. Uma despesa com um reembolso associado conta pelo valor líquido.
+- Uma transação dividida conta cada linha na sua categoria.
+- Um pagamento associado a um crédito conta só os juros e as comissões.
+- Os valores estão na tua moeda base. Uma transação sem valor convertido fica de fora, e uma nota por baixo do relatório indica-o.
+
+## Filtros
+
+Na página **Relatórios**, os filtros **Contas** e **Categorias** e o [filtro por membro](/pt/docs/household/filter-by-member) restringem este relatório. O filtro por membro mantém os gastos atribuídos a esse membro, ou a **Partilhado**, dentro das tuas contas.
+
+**Período**, **Comerciantes**, **Etiquetas**, **Moeda**, **Incluir transações pendentes** e **Incluir transferências** não o alteram. O relatório segue a definição da estatística para que os dois coincidam sempre.
+
+Este relatório não tem exportação para CSV.
+
+## Páginas relacionadas
+
+- [Estatísticas](/pt/docs/budgets/insights)
+- [Comparar dois meses](/pt/docs/budgets/compare-months)
+- [Acompanhar gastos mensais](/pt/docs/budgets/track-monthly-spending)
+- [Filtrar por membro](/pt/docs/household/filter-by-member)

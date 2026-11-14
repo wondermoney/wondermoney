@@ -3,45 +3,39 @@ title: Problemas de ligação bancária
 description: Resolve falhas ao ligar uma conta bancária ou ao configurar a tua chave da Enable Banking.
 ---
 
+Antes de o processo no banco começar, o WonderMoney explica o que acontece a seguir, incluindo o acesso apenas de leitura e para onde vão as tuas credenciais.
+
 ## Sintomas
 
-Esta página ajuda quando a ligação bancária falha, expira ou não mostra dados recentes.
-
-Sinais comuns:
-
-- A ligação não conclui
-- Surge uma mensagem de erro no banco
-- Os saldos não atualizam
-- As transações deixam de sincronizar
-- A chave da Enable Banking não guarda, ou o WonderMoney assinala-a como inválida
+- O banco não chega a ficar ligado.
+- A ligação falha depois de aprovares o acesso no banco.
+- As contas não aparecem depois do passo de ligação.
+- As ligações existentes deixam de atualizar.
+- A chave da Enable Banking não guarda, ou o WonderMoney assinala-a como inválida.
 
 ## O que verificar
 
-Antes de repetires a ligação, confirma:
-
-- Se tens uma chave da Enable Banking válida guardada em Definições → Fornecedor bancário — sem ela, nenhuma ligação bancária arranca
-- Se o banco está com manutenção
-- Se a autenticação expirou. Quando nenhuma conta responde, o WonderMoney pergunta ao banco se o teu consentimento ainda está ativo. Se o banco o terminou mais cedo, a ligação aparece como terminada pelo banco e deixa de atualizar até a voltares a ligar. Vê Duração do consentimento e voltar a ligar, mais abaixo
-- Se o banco está a limitar as atualizações. Os bancos podem permitir só algumas atualizações automáticas por dia. Quando um banco pede ao WonderMoney para abrandar, a próxima atualização automática espera até à hora indicada pelo banco, ou cerca de um dia se não indicar nenhuma
-- Se a conta correta está a ser ligada
-- Se permitiste o acesso necessário
+- Se tens uma chave da Enable Banking válida guardada em Definições → Fornecedor bancário. Sem ela, nenhuma ligação bancária arranca, a não ser que o teu servidor forneça uma chave partilhada ou que ligues através do SimpleFIN.
+- Se o banco suporta atualmente o método de ligação que estás a usar.
+- Se concluíste todos os passos de aprovação no banco.
+- Se a conta está ligada à conta correta.
+- Se a ligação expirou ou foi revogada. Quando nenhuma conta responde, o WonderMoney pergunta ao banco se o teu consentimento ainda está ativo. Se o banco o terminou mais cedo, a ligação aparece como terminada pelo banco e deixa de atualizar até a voltares a ligar. Vê Duração do consentimento e voltar a ligar, mais abaixo.
+- Se o banco está a limitar as atualizações. Os bancos podem permitir só algumas atualizações automáticas por dia. Quando um banco pede ao WonderMoney para abrandar, a próxima atualização automática espera até à hora indicada pelo banco, ou cerca de um dia se não indicar nenhuma.
 
 ## O que tentar
 
-Tenta estes passos:
-
-1. Reinicia o processo de ligação.
-2. Volta a autenticar no banco.
-3. Remove a ligação e cria-a novamente.
-4. Verifica se o problema acontece também noutro navegador.
+1. Inicia de novo a ligação a partir da página de ligação bancária.
+2. Inicia sessão no banco com cuidado e confirma todos os ecrãs de permissões.
+3. Espera alguns minutos e atualiza a lista de contas.
+4. Remove a ligação e volta a ligar se o processo estiver bloqueado.
 
 ## Duração do consentimento e voltar a ligar
 
 Os bancos dão ao WonderMoney acesso apenas de leitura durante um tempo limitado. Ao abrigo da PSD2, um consentimento dura no máximo 180 dias, e cada banco define o seu próprio limite, muitas vezes 90 ou 180 dias. A lista de ligações nas Definições mostra quando termina cada consentimento.
 
-- **Expira em breve.** Nos últimos 14 dias antes de um consentimento terminar, a ligação mostra quantos dias faltam e oferece **Voltar a ligar**, na web e na app móvel.
-- **Consentimento expirado.** O consentimento chegou ao fim. Os dados deixam de atualizar até voltares a ligar.
-- **Terminada pelo banco.** O banco terminou o consentimento antes do prazo, por exemplo depois de alterares a palavra-passe do homebanking ou retirares o acesso na app do banco. Os dados deixam de atualizar até voltares a ligar.
+- **Expira em breve.** Nos últimos 14 dias antes de um consentimento terminar, a ligação mostra quantos dias faltam e oferece **Voltar a ligar**, na web e na aplicação móvel.
+- **Expirada.** O consentimento chegou à data de fim. Os dados deixam de atualizar até voltares a ligar.
+- **Terminada pelo banco.** O banco terminou o consentimento antes da data de fim, por exemplo depois de alterares a palavra-passe do homebanking ou retirares o acesso na aplicação do banco. Os dados deixam de atualizar até voltares a ligar.
 
 O WonderMoney também te envia um email cerca de 7 dias antes e outro no último dia antes de um consentimento terminar, e quando o banco o termina mais cedo. Vê [Preferências de email](/pt/docs/settings-security-privacy/email-preferences) para desligar estes alertas.
 
@@ -51,38 +45,30 @@ Voltar a ligar inicia um novo consentimento com o mesmo banco. Quando termina, o
 
 A maior parte dos problemas de ligação vem de como a aplicação foi configurada na Enable Banking, não do banco em si. Antes de tentares ligar de novo, verifica isto:
 
-- **A aplicação foi criada com Sandbox em vez de Production.** O Sandbox só liga a dados bancários fictícios, por isso nunca vai conseguir ligar uma conta real. Confirma na página da aplicação no Painel de Controlo da Enable Banking — se mostrar um ambiente Sandbox, regista uma aplicação nova com **Production** selecionado. Vê [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account) para a configuração completa.
-- **O formulário da aplicação não submetia.** Numa aplicação Production, a Enable Banking exige um Privacy URL e um Terms URL, mas não os marca como obrigatórios nem mostra qualquer erro quando faltam — o formulário simplesmente não faz nada ao clicar em submeter. Se uma aplicação não guarda, confirma se os dois campos estão preenchidos.
-- **Foi clicado em "Request activation" em vez de "Activate by linking accounts".** O Painel de Controlo da Enable Banking mostra os dois botões depois de a aplicação ser registada. "Request activation" inicia um processo de verificação empresarial (KYB) que não é necessário para uso pessoal e não ativa sozinho uma aplicação pessoal. Usa antes "Activate by linking accounts", que ativa a aplicação ao guiar-te para ligares uma das tuas próprias contas bancárias.
+- **A aplicação foi criada com Sandbox em vez de Production.** O Sandbox só liga a dados bancários fictícios, por isso nunca vai conseguir ligar uma conta real. Confirma na página da aplicação no Painel de Controlo da Enable Banking: se mostrar um ambiente Sandbox, regista uma aplicação nova com **Production** selecionado. Vê [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account) para a configuração completa.
+- **O formulário da aplicação não submetia.** Numa aplicação Production, a Enable Banking exige um Privacy URL e um Terms URL, mas não os marca como obrigatórios nem mostra qualquer erro quando faltam: o formulário simplesmente não faz nada quando clicas em submeter. Se uma aplicação não guarda, confirma se os dois campos estão preenchidos.
+- **Foi clicado "Request activation" em vez de "Activate by linking accounts".** O Painel de Controlo da Enable Banking mostra os dois botões depois de a aplicação ser registada. "Request activation" inicia um processo de verificação empresarial (KYB) que não é necessário para uso pessoal e não ativa sozinho uma aplicação pessoal. Usa antes "Activate by linking accounts", que ativa a aplicação ao guiar-te para ligares uma das tuas próprias contas bancárias.
 
 <Callout type="error" title="Perdeste a chave privada descarregada">
-  A Enable Banking mostra a chave privada uma única vez, no momento em que é gerada, e não a consegue voltar a mostrar — nem mesmo através do próprio suporte. Se o ficheiro `.pem` não foi guardado em segurança e já não é possível encontrá-lo, não há forma de o recuperar. A única solução é registar uma aplicação completamente nova no Painel de Controlo e gerar uma chave nova.
+  A Enable Banking mostra a chave privada uma única vez, no momento em que é gerada, e não a consegue voltar a mostrar, nem mesmo através do próprio suporte. Se não fizeste uma cópia de segurança do ficheiro `.pem` e já não o consegues encontrar, não há forma de o recuperar. A única solução é registar uma aplicação completamente nova no Painel de Controlo e gerar uma chave nova.
 </Callout>
 
-## Incidentes de ligação
+## Erros e histórico de sincronização
 
-Uma ligação bancária pode terminar num estado de incidente em vez de um sucesso ou de uma falha limpos. Os estados mais comuns incluem:
+Quando uma sincronização falha, a ligação mostra **Erro** em **Definições → Ligações**. Seleciona **Histórico de sincronizações** na ligação, na web ou na aplicação móvel, para veres as últimas 20 vezes em que o WonderMoney a tentou sincronizar e como terminou cada uma. A maior parte das falhas resolve-se na sincronização automática seguinte; uma ligação que continua a falhar costuma precisar de **Voltar a ligar**.
 
-- `bank-disconnected` — o banco cancelou ou terminou a ligação, que precisa de ser restabelecida.
-- `payment-failed` — um passo relacionado com pagamentos da ligação não foi concluído.
-
-Os incidentes são recuperáveis. Falhas do fornecedor, como uma falha da Enable Banking, são tratadas na lista de bancos em vez de aparecerem como erros de servidor, por isso os teus dados existentes não são alterados. Quando um incidente é recuperável, iniciar novamente a ligação reabre o fluxo de ligação com o nome real do banco, e podes concluir os passos de aprovação assim que o fornecedor estiver disponível.
+Falhas do fornecedor, como uma falha da Enable Banking, são tratadas na lista de bancos em vez de aparecerem como erros de servidor, por isso os teus dados existentes não são alterados. Podes iniciar novamente a ligação assim que o fornecedor estiver disponível.
 
 Para o fluxo completo de ligações, vê [Gerir ligações bancárias](/pt/docs/accounts-transactions/manage-bank-connections).
 
 ## Quando contactar o suporte
 
-Contacta o suporte se:
-
-- O erro se repetir após várias tentativas
-- A conta correta não aparecer
-- Houver dados em falta após ligação bem-sucedida
+Contacta o suporte se o banco aparecer como suportado mas a ligação continuar a falhar depois de uma nova tentativa, ou se a conta ligar mas nenhum dado sincronizar depois de uma espera razoável.
 
 
 ## Páginas relacionadas
 
 - [Ligar a primeira conta bancária](/pt/docs/start-here/connect-first-bank-account)
-- [Resolução de problemas](/pt/docs/troubleshooting/)
 - [Problemas de início de sessão](/pt/docs/troubleshooting/sign-in-problems)
-- [Problemas de importação de transações](/pt/docs/troubleshooting/transaction-import-problems)
+- [Problemas na configuração do orçamento](/pt/docs/troubleshooting/budget-setup-problems)
 - [Contactar o suporte](/pt/docs/troubleshooting/contact-support)

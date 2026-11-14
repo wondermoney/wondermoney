@@ -9,16 +9,23 @@ Esta vista es solo informativa. WonderMoney no te dice qué comprar, vender o ma
 
 <DocsImage
   src="/images/docs/es/portfolio-investments/performance-benchmarks-performance.png"
-  alt="Performance chart on the portfolio detail page showing portfolio value over time, with allocation and benchmark comparison sections."
-  caption="The performance section charts portfolio value over time so you can compare it with a benchmark."
+  alt="Gráfico de rendimiento en la página de detalle de la cartera, con el valor de la cartera a lo largo del tiempo y las secciones de asignación y de comparativa con el benchmark."
+  caption="La sección de rendimiento muestra el valor de la cartera a lo largo del tiempo para que puedas compararlo con un índice de referencia."
   width={1440}
   height={900}
 />
 
+## Dónde encontrarlo
+
+- **Rendimiento** está en la página Carteras, para todas tus carteras juntas, y en la página de cada cartera.
+- **Comparativa con benchmark** está en la página Carteras, en la web. Compara todas tus carteras juntas con `SPY`, un fondo cotizado que sigue el S&P 500.
+- Ambos siguen el periodo que elijas: 1 mes, 3 meses, 6 meses, Año en curso, 1 año o Todo el periodo. La página se abre en Año en curso.
+- En un hogar con más de un miembro, la página Carteras tiene un filtro por miembro, y los dos gráficos lo siguen. Consulta [Filtrar por miembro](/es/docs/household/filter-by-member).
+
 ## Qué muestra esta vista
 
-- **Rentabilidad (ponderada por tiempo)**: la rentabilidad ponderada por tiempo acumulada de la cartera desde el primer día del periodo. El dinero que aportas o retiras no la mueve, así que una aportación no aparece como ganancia ni una retirada como pérdida.
-- La vista de valor: lo que valía la cartera cada día, con aportaciones y retiradas incluidas. Los días con una aportación o una retirada aparecen marcados.
+- **Rentabilidad (ponderada por tiempo)**, en Comparativa con benchmark: la rentabilidad ponderada por tiempo acumulada de la cartera desde el primer día del periodo. El dinero que aportas o retiras no la mueve, así que una aportación no aparece como ganancia ni una retirada como pérdida.
+- El gráfico Rendimiento: lo que valía la cartera cada día, con aportaciones y retiradas incluidas. Los días con una aportación o una retirada aparecen marcados.
 - La rentabilidad del índice de referencia en el mismo periodo: la variación de su precio desde el mismo primer día. Un índice de referencia no tiene aportaciones ni retiradas, así que las dos líneas tienen la misma base.
 - La rentabilidad relativa entre ambos.
 - En el resumen, la rentabilidad ponderada por tiempo y por dinero del periodo (consulta [Rentabilidad ponderada por tiempo y por dinero](/es/docs/portfolio-investments/portfolio-metrics-explained#rentabilidad-ponderada-por-tiempo-y-por-dinero)).
@@ -31,12 +38,31 @@ Esta vista es solo informativa. WonderMoney no te dice qué comprar, vender o ma
 - Usa el mismo contexto de moneda cuando sea posible.
 - Compara el índice de referencia con la rentabilidad ponderada por tiempo. Como el precio de un índice, no se mueve con aportaciones ni retiradas. La rentabilidad ponderada por dinero refleja también cuándo aportaste o retiraste dinero, así que puede diferir de ambos.
 
+## Mayores movimientos
+
+**Mayores movimientos** lista las posiciones cuyo precio más subió o bajó en un periodo: hasta cinco **Subidas** y hasta cinco **Bajadas**. Está en la página Carteras, donde abarca todas tus carteras juntas y sigue el periodo y el filtro por miembro, y en la página de cada cartera, donde siempre abarca Año en curso. Está en la web y en la app móvil.
+
+Cada fila muestra dos cifras:
+
+- El porcentaje es la variación del precio del valor: `(precio actual - precio al inicio del periodo) / precio al inicio del periodo`. El precio inicial es el último precio del primer día del periodo o anterior, y un [precio manual](/es/docs/portfolio-investments/holdings-allocation#fijar-un-precio-manual) cuenta.
+- El importe de debajo es lo que vale esa variación sobre la cantidad que tienes hoy, en tu moneda: `valor actual - valor actual / (1 + variación)`.
+
+Qué no tiene en cuenta:
+
+- Mide el valor, no tus operaciones. Una posición comprada a mitad del periodo se mide igualmente desde el primer día del periodo, y el importe supone que tuviste la cantidad de hoy durante todo el periodo.
+- Los dividendos y las comisiones no están incluidos.
+- Cuando no hay precio del primer día del periodo o anterior, la fila muestra en su lugar la ganancia no realizada de la posición sobre su coste base. Es habitual con Todo el periodo, que retrocede diez años.
+- Una posición cuyo precio no cambió no está en ninguna de las listas.
+
+Las listas necesitan al menos dos posiciones con precio. Hasta entonces, la sección indica que los mayores movimientos aparecen cuando haya más de una posición con precio.
+
 ## Errores comunes
 
+- Leer un porcentaje de Mayores movimientos como tu rentabilidad en esa posición. Es la variación del precio en el periodo, sea cual sea la fecha en que compraste.
 - Comparar periodos cortos como si fueran resultados a largo plazo significativos.
 - Tratar el retraso del índice de referencia como una prueba de que un activo es mejor.
 - Usar un índice de referencia con un perfil de riesgo muy distinto al de la cartera.
-- Leer un salto en la vista de valor como una ganancia. Una aportación sube el valor, no la rentabilidad; mira la vista en porcentaje para saber cómo les fue a las inversiones.
+- Leer un salto en el gráfico Rendimiento como una ganancia. Una aportación sube el valor, no la rentabilidad; mira la rentabilidad ponderada por tiempo para saber cómo les fue a las inversiones.
 
 ## Páginas relacionadas
 

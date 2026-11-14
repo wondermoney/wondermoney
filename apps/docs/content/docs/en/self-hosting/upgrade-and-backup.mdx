@@ -12,6 +12,8 @@ docker compose up -d
 
 The API applies any database changes when it starts. To stay on a specific release instead of the latest, set `WM_VERSION` in `.env`, for example `WM_VERSION=1.4`.
 
+An install made with the install script is already pinned: the script sets `WM_VERSION` to the release it installed, so `docker compose pull` stays on that release. To move it to the latest release, run `./install.sh --dir .` in the install folder (the script leaves a copy of itself there, and changes only the `WM_VERSION` line of `.env`), or set `WM_VERSION` yourself.
+
 To check which version an instance runs, open the account menu in the web app (or **More** in the mobile app): it shows the web app's version and the server's, with the commit each was built from. `GET /v1/instance` also reports `version` and `commit`.
 
 ## Back up

@@ -1,20 +1,20 @@
 ---
-title: Métricas da carteira explicadas
-description: Compreende o valor da carteira, preço de custo, retorno, alocação, benchmarks, dividendos e efeitos cambiais na aplicação WonderMoney.
+title: Métricas do portefólio explicadas
+description: Compreende o valor do portefólio, preço de custo, retorno, alocação, benchmarks, dividendos e efeitos cambiais na aplicação WonderMoney.
 ---
 
-WonderMoney mostra os dados da carteira para perceber o que mudou. Esta página e os respetivos dados são apenas informativos. WonderMoney não diz o que comprar, vender ou manter.
+O WonderMoney mostra os dados do portefólio para perceber o que mudou. Esta página e os respetivos dados são apenas informativos. O WonderMoney não diz o que comprar, vender ou manter.
 
-## Valor da carteira
+## Valor do portefólio
 
 ### O que significa
-O valor total da carteira com base no valor de mercado atual das posições.
+O valor total do portefólio com base no valor de mercado atual das posições.
 
 ### Onde aparece
-Nos resumos da carteira, vistas de desempenho e cabeçalhos de detalhe da carteira.
+Nos resumos do portefólio, vistas de desempenho e cabeçalhos de detalhe do portefólio.
 
 ### Como ler
-Compara-o com o teu preço de custo e com a mesma carteira ao longo do tempo.
+Compara-o com o teu preço de custo e com o mesmo portefólio ao longo do tempo.
 
 ### O que o pode alterar
 Movimentos de preços, novas operações, dividendos, comissões e efeitos cambiais.
@@ -25,10 +25,10 @@ Não é o mesmo que o dinheiro investido nem o que pagaste originalmente.
 ## Dinheiro investido e preço de custo
 
 ### O que significa
-Dinheiro investido é o montante que aplicaste na carteira. Preço de custo é o valor registado para as posições atuais, incluindo os custos registados.
+Dinheiro investido é o montante que aplicaste no portefólio. Preço de custo é o valor registado para as posições atuais, incluindo os custos registados.
 
 ### Onde aparece
-Totais da carteira, detalhes da posição e vistas de ganhos/perdas.
+Totais do portefólio, detalhes da posição e vistas de ganhos/perdas.
 
 ### Como ler
 Usa-o como base para retorno e ganho ou perda não realizado.
@@ -45,10 +45,10 @@ Preço de custo não é o mesmo que valor atual.
 O método de custo decide que custo de compra é consumido por uma venda. FIFO (primeiro a entrar, primeiro a sair) vende primeiro os lotes mais antigos. O custo médio consome a média corrente de tudo o que ainda deténs, e uma venda não altera essa média.
 
 ### Onde aparece
-Nas definições da carteira, onde escolhes o método, e na secção de lotes dos detalhes de uma posição, que lista cada lote de compra com a data, quantidade, quantidade restante, custo unitário e comissões.
+Nas definições do portefólio, onde escolhes o método, e na secção de lotes dos detalhes de uma posição, que lista cada lote de compra com a data, quantidade, quantidade restante, custo unitário e comissões.
 
 ### Como ler
-Escolhe o método que as tuas regras fiscais usam. Portugal e Espanha usam FIFO; o Brasil e outras jurisdições usam o custo médio. Alterar o método recalcula os ganhos realizados da carteira e reconstrói o histórico diário com o novo custo.
+Escolhe o método que as tuas regras fiscais usam. Portugal e Espanha usam FIFO; o Brasil e outras jurisdições usam o custo médio. Alterar o método recalcula os ganhos realizados do portefólio e reconstrói o histórico diário com o novo custo.
 
 ### Exemplo
 Compra 10 unidades a 100 e 10 unidades a 200 e vende 10.
@@ -57,7 +57,7 @@ Compra 10 unidades a 100 e 10 unidades a 200 e vende 10.
 - O custo médio consome metade dos 3 000 totais: custo realizado de 1 500 e as 10 unidades restantes mantêm um custo médio de 150.
 
 ### O que o pode alterar
-Alterar o método nas definições da carteira, novas compras e vendas, splits, comissões e correções de transações.
+Alterar o método nas definições do portefólio, novas compras e vendas, splits, comissões e correções de transações.
 
 ### Má interpretação comum
 O método altera o custo e os ganhos realizados, não o valor de mercado do que deténs. Uma venda nunca altera o custo médio por unidade no método do custo médio.
@@ -65,10 +65,10 @@ O método altera o custo e os ganhos realizados, não o valor de mercado do que 
 ## Valor de mercado
 
 ### O que significa
-O valor atual de uma posição ou carteira com base no preço mais recente.
+O valor atual de uma posição ou portefólio com base no preço mais recente.
 
 ### Onde aparece
-Nos cartões da carteira, tabelas de posições e vistas de alocação.
+Nos cartões do portefólio, tabelas de posições e vistas de alocação.
 
 ### Como ler
 O valor de mercado mostra quanto a posição vale agora, não quanto custou.
@@ -99,16 +99,16 @@ Só se torna real quando vendes. Até lá, é não realizado.
 ## Ganho ou perda realizado
 
 ### O que significa
-O lucro ou prejuízo fixado quando vendes ou fechas uma posição. Em cada venda é o valor da venda depois da comissão, menos o custo que o método da carteira abateu (incluindo as comissões de compra das unidades vendidas).
+O lucro ou prejuízo fixado quando vendes ou fechas uma posição. Em cada venda é o valor da venda depois da comissão, menos o custo que o método do portefólio abateu (incluindo as comissões de compra das unidades vendidas).
 
 ### Onde aparece
-- No resumo da carteira, como total da carteira ou de todas as carteiras.
+- No resumo do portefólio, como total do portefólio ou de todos os portefólios.
 - Na coluna **Realizado** da tabela de posições: tudo o que essa posição já realizou.
 - Na secção **Ganhos realizados**, que lista cada venda com a data, a quantidade, o valor da venda, o custo de aquisição, o ganho realizado e a data da compra mais antiga de que vendeu (detido desde). Filtra-a por ano e descarrega a lista apresentada como ficheiro CSV.
 - Em **Posições fechadas**: ativos que vendeste na totalidade, com o resultado de toda a sua vida, para continuarem visíveis depois de saírem das posições.
 
 ### Como ler
-Usa-o para ver o que já foi concretizado por operações concluídas. As vendas de um ano somam o total desse ano, e todos os anos juntos somam os ganhos realizados da carteira. Um ano é um ano civil em UTC, pela data da venda.
+Usa-o para ver o que já foi concretizado por operações concluídas. As vendas de um ano somam o total desse ano, e todos os anos juntos somam os ganhos realizados do portefólio. Um ano é um ano civil em UTC, pela data da venda.
 
 ### Exemplo
 Compra 10 unidades a 100 com uma comissão de 10 e vende 4 a 150 com uma comissão de 2. Em FIFO a venda abate 4 × 100 mais 4 dos 10 de comissão de compra, um custo de 404. O valor da venda é 600 menos a comissão de 2, ou seja 598, por isso a venda realizou 194.
@@ -120,7 +120,7 @@ Vendas, vendas parciais, comissões, desdobramentos de ações, correções de t
 Os valores aparecem na tua moeda. Uma venda registada noutra moeda é convertida à taxa de câmbio do dia da venda. Uma venda sem taxa para esse dia aparece na sua própria moeda e fica fora dos totais, com uma nota a indicá-lo.
 
 ### Má interpretação comum
-Ganho ou perda realizado é diferente de ganho ou perda não realizado. O WonderMoney mostra o que cada venda rendeu segundo o método de custo da carteira; não aplica regras fiscais de cada país, como as regras de wash sale, e não é uma declaração fiscal.
+Ganho ou perda realizado é diferente de ganho ou perda não realizado. O WonderMoney mostra o que cada venda rendeu segundo o método de custo do portefólio; não aplica regras fiscais de cada país, como as regras de wash sale, e não é uma declaração fiscal.
 
 ## Percentagem de retorno
 
@@ -137,7 +137,7 @@ Compara retornos entre intervalos apenas quando o método usado é o mesmo.
 Movimentos de preço, dividendos, comissões e efeitos cambiais.
 
 ### Má interpretação comum
-A percentagem de retorno não é o mesmo que o valor da carteira.
+A percentagem de retorno não é o mesmo que o valor do portefólio.
 
 ## Retorno ponderado pelo tempo e pelo dinheiro
 
@@ -148,7 +148,7 @@ Dois retornos para o período escolhido respondem a duas perguntas diferentes.
 - **Retorno ponderado pelo dinheiro** diz como correu o teu dinheiro. É a taxa a que o valor no início do período, cada compra, venda e dividendo nele, e o valor no fim se equilibram: o mesmo cálculo que a função `XIRR` (`XTIR` em português) de uma folha de cálculo. O dinheiro investido durante mais tempo pesa mais.
 
 ### Onde aparece
-No resumo da carteira, para uma carteira ou para todas em conjunto, em cada período que podes escolher; no relatório de desempenho da carteira e na sua exportação CSV; e, para o retorno ponderado pelo tempo, na vista em percentagem do gráfico de desempenho, dia a dia.
+No resumo do portefólio, para um portefólio ou para todos em conjunto, em cada período que podes escolher; no relatório de desempenho do portefólio e na sua exportação CSV; e, para o retorno ponderado pelo tempo, no gráfico Comparação com Benchmark, dia a dia.
 
 ### Como ler
 - Quando os dois são próximos, o momento dos teus depósitos e levantamentos fez pouca diferença.
@@ -157,13 +157,13 @@ No resumo da carteira, para uma carteira ou para todas em conjunto, em cada per�
 - Sem depósitos nem levantamentos no período, o retorno ponderado pelo tempo é a variação do valor sobre o valor inicial.
 
 ### Exemplo
-Tens 10 000 no início do ano. Os preços ficam estáveis até juntares mais 10 000 em junho; depois sobem 10% e a carteira acaba o ano com 22 000.
+Tens 10 000 no início do ano. Os preços ficam estáveis até juntares mais 10 000 em junho; depois sobem 10% e o portefólio acaba o ano com 22 000.
 
 - Retorno ponderado pelo tempo: +10%. Os investimentos subiram 10%; o depósito não é um ganho.
 - Retorno ponderado pelo dinheiro: mais de +10%, porque o dobro do dinheiro estava investido durante a subida.
 
 ### Dias em falta
-Os dois retornos são medidos a partir do histórico diário da carteira. Um dia sem valor registado (por exemplo enquanto o histórico é reconstruído, ou quando nenhuma taxa de câmbio o converte para a tua moeda) nunca é lido como zero: o último valor é mantido nesse dia, e o resumo indica quantos dias faltaram. Os dias em que a carteira não tinha nada, antes da primeira compra ou depois de vender tudo, não contam como em falta.
+Os dois retornos são medidos a partir do histórico diário do portefólio. Um dia sem valor registado (por exemplo enquanto o histórico é reconstruído, ou quando nenhuma taxa de câmbio o converte para a tua moeda) nunca é lido como zero: o último valor é mantido nesse dia, e o resumo indica quantos dias faltaram. Os dias em que o portefólio não tinha nada, antes da primeira compra ou depois de vender tudo, não contam como em falta.
 
 ### O que o pode alterar
 Movimentos de preço, dividendos, comissões, efeitos cambiais e o período escolhido. Uma compra ou venda altera o retorno ponderado pelo dinheiro; só altera o retorno ponderado pelo tempo através do que o dinheiro faz depois.
@@ -171,13 +171,131 @@ Movimentos de preço, dividendos, comissões, efeitos cambiais e o período esco
 ### Má interpretação comum
 Nenhum dos dois é o ganho sobre o preço de custo. Compara um benchmark com o retorno ponderado pelo tempo, porque um benchmark também não tem depósitos nem levantamentos.
 
+## Métricas avançadas
+
+### O que significa
+Cinco valores que descrevem o retorno e o risco dos teus portefólios em conjunto: **Rendimento anual**, **Volatilidade**, **Índice de Sharpe**, **Drawdown Máximo** e **Nível de risco**. Cada um tem a sua secção abaixo.
+
+### Onde aparece
+Na secção **Métricas avançadas** da página Portefólios, na web e na app móvel. Abrange todos os teus portefólios em conjunto, ou os portefólios dos membros escolhidos no filtro por membro. A página de um portefólio não a tem.
+
+### Que histórico lê
+- O **Rendimento anual** lê todas as compras, vendas e dividendos registados, seja qual for o período escolhido.
+- Na web, a **Volatilidade**, o **Drawdown Máximo** e o **Nível de risco** leem o histórico diário do portefólio a partir do primeiro dia do período escolhido. Na app móvel leem o histórico todo, e o seletor de período não os altera.
+- O **Índice de Sharpe** combina o rendimento anual com a volatilidade, por isso na web compara um rendimento de todo o histórico com a volatilidade do período escolhido.
+
+### Quando falta um valor
+Um valor que não pode ser calculado mostra um motivo curto em vez de um número. Nunca aparece como zero.
+
+- **Precisa de um ano de histórico**: o rendimento anual, e o índice de Sharpe que depende dele, precisam de pelo menos 365 dias entre a tua primeira transação registada e hoje (ou a tua última transação, quando já não tens nenhuma posição).
+- **Precisa de 3 meses de histórico de preços** e **Precisa de 3 meses de histórico para calcular o risco**: a volatilidade e o nível de risco precisam de pelo menos 90 valores diários. Na web, um período mais curto do que isso, como 1 mês, mostra esta mensagem por mais antigo que seja o portefólio.
+- **Precisa de uma janela de drawdown maior**: o drawdown máximo precisa de pelo menos 30 valores diários.
+- Com menos de 30 valores diários no histórico lido, a secção acrescenta a nota **O histórico de desempenho precisa de cerca de um mês de snapshots diários.**
+
+Os valores também ficam de fora, com as mesmas mensagens, quando não podem ser medidos na tua moeda: uma transação sem taxa de câmbio para a sua data deixa de fora os valores que a leem, e um dia do histórico que não pode ser convertido deixa de fora a volatilidade, o nível de risco e o drawdown máximo. Uma posição com mais unidades vendidas do que compradas deixa os cinco de fora até as transações serem corrigidas.
+
+### Má interpretação comum
+Estes valores descrevem o passado. Não são uma previsão nem uma classificação, e o WonderMoney não os usa para recomendar nada.
+
+## Rendimento anual
+
+### O que significa
+A taxa anual que o teu dinheiro rendeu em todos os teus portefólios desde a tua primeira transação. É um retorno ponderado pelo dinheiro: o mesmo cálculo `XIRR` descrito em [Retorno ponderado pelo tempo e pelo dinheiro](#retorno-ponderado-pelo-tempo-e-pelo-dinheiro), feito sobre o histórico todo e não sobre o período escolhido.
+
+### Como é calculado
+Cada compra (com a sua comissão) conta como dinheiro que entrou, cada venda (líquida da sua comissão) e cada dividendo como dinheiro recebido, e o que tens hoje como um último valor recebido hoje. O rendimento anual é a taxa `r` que os equilibra:
+
+```text
+soma de valor / (1 + r)^(dias desde a primeira transação / 365) = 0
+```
+
+Os valores são convertidos para a tua moeda à taxa de câmbio da data de cada transação.
+
+### Como ler
+Um valor positivo significa que o teu dinheiro cresceu a essa taxa por ano; um negativo significa que diminuiu. O dinheiro investido durante mais tempo pesa mais.
+
+### O que o pode alterar
+Movimentos de preço, novas compras e vendas, dividendos, comissões e taxas de câmbio. O período escolhido não o altera.
+
+### Má interpretação comum
+Não é uma taxa de dividendo, e não é o retorno do período escolhido. Não é mostrado para um histórico com menos de um ano, porque esticar uns meses até um ano exageraria o valor.
+
+## Volatilidade e nível de risco
+
+### O que significa
+A volatilidade diz quanto o valor dos teus portefólios variou de um dia para o outro, em percentagem anual. O **Nível de risco** é uma etiqueta lida a partir dela.
+
+### Como é calculada
+1. Para cada par de dias consecutivos do histórico, o retorno diário é `(valor de hoje - dinheiro que entrou hoje + dinheiro que saiu hoje) / valor de ontem - 1`. As compras e as vendas são retiradas, por isso um depósito não é lido como ganho nem uma venda como perda.
+2. A volatilidade é o desvio padrão desses retornos diários, multiplicado por `sqrt(365)` para a tornar anual. O histórico tem um valor por dia de calendário, com fins de semana e feriados incluídos, e é por isso que o fator é 365 e não os 252 dias de negociação muitas vezes usados noutros sítios.
+3. O nível de risco segue a volatilidade:
+
+| Volatilidade | Nível de risco |
+|---|---|
+| Abaixo de 15% | **Baixo** |
+| De 15% a menos de 25% | **Médio** |
+| 25% ou mais | **Alto** |
+
+### Como ler
+Um valor mais alto significa variações diárias maiores, para cima ou para baixo. Compara-o apenas com uma volatilidade medida da mesma forma: um valor calculado só com dias de negociação não é diretamente comparável.
+
+### O que a pode alterar
+Movimentos de preço, taxas de câmbio, a composição das posições e, na web, o período escolhido.
+
+### O que não tem em conta
+- Os dias com um valor em falta de um dos lados são ignorados, por isso uma falha no histórico retira esses dias da medida.
+- Os dividendos que recebeste não fazem parte dos valores diários.
+- O nível de risco lê apenas a volatilidade. Não olha para a concentração, para o tipo de ativos que tens nem para a tua situação.
+
+### Má interpretação comum
+**Baixo** não significa seguro, e **Alto** não significa que vem aí uma perda. A etiqueta diz apenas quanto o valor variou no histórico medido.
+
+## Índice de Sharpe
+
+### O que significa
+O retorno obtido acima de uma taxa sem risco por cada unidade de volatilidade.
+
+### Como é calculado
+`(rendimento anual - 4,5) / volatilidade`, com os três em percentagem anual. A taxa sem risco está fixada em 4,5% por ano, uma taxa aproximada das obrigações do Tesouro dos EUA. É a mesma para todas as moedas e não acompanha as taxas de mercado.
+
+### Como ler
+Um índice mais alto significa mais retorno para as variações suportadas. Um índice negativo significa que o rendimento anual ficou abaixo de 4,5%.
+
+### O que o pode alterar
+Tudo o que altere o rendimento anual ou a volatilidade.
+
+### O que não tem em conta
+- Precisa de um ano de transações e de 90 valores diários, e não é mostrado quando a volatilidade é zero.
+- A taxa fixa pode estar longe da taxa disponível na tua moeda, o que desloca o índice para cima ou para baixo.
+- Na web, o rendimento abrange o teu histórico todo e a volatilidade o período escolhido, por isso as duas metades podem abranger intervalos de tempo diferentes.
+
+### Má interpretação comum
+Um índice de Sharpe só é comparável com outro que use a mesma taxa sem risco e a mesma forma de anualizar.
+
+## Drawdown máximo
+
+### O que significa
+A maior queda entre um máximo e um mínimo posterior no histórico medido, em percentagem.
+
+### Como é calculado
+Um índice começa em 100 e move-se em cada dia pelo mesmo retorno diário usado na [volatilidade](#volatilidade-e-nível-de-risco), por isso os depósitos e os levantamentos não o alteram. O drawdown de um dia é `(índice mais alto até então - índice nesse dia) / índice mais alto até então`, e o drawdown máximo é o maior deles.
+
+### Como ler
+Um drawdown máximo de 20% significa que, no pior momento, os investimentos estavam 20% abaixo do seu máximo anterior. Não diz quanto tempo durou a queda nem se já foi recuperada. Um valor de 0% significa que o índice nunca fechou abaixo de um máximo anterior.
+
+### O que o pode alterar
+Movimentos de preço, taxas de câmbio e, na web, o período escolhido: um período mais curto pode deixar de fora uma queda mais antiga e mais profunda.
+
+### Má interpretação comum
+Não é a perda sobre o teu preço de custo, e não é o máximo que o portefólio pode cair. Indica apenas a pior queda que aconteceu no histórico medido, a partir de valores diários, por isso as variações dentro de um dia não são vistas.
+
 ## Dividendos e rendimento
 
 ### O que significa
 Rendimento em dinheiro pago pelos investimentos, normalmente sob a forma de dividendos ou distribuições semelhantes.
 
 ### Onde aparece
-Listas de transações, resumos de rendimento e vistas de desempenho.
+Listas de transações, resumos de rendimento e vistas de desempenho. A secção **Rendimento de Dividendos** soma as transações de dividendos dos teus portefólios, e o **Calendário** lista as próximas datas de dividendos; ambos são descritos abaixo.
 
 ### Como ler
 Considera-o parte do retorno total quando queres a imagem completa.
@@ -185,19 +303,33 @@ Considera-o parte do retorno total quando queres a imagem completa.
 ### O que o pode alterar
 Novos dividendos, reinvestimentos, retenções na fonte e correções.
 
+### Rendimento de Dividendos
+A secção **Rendimento de Dividendos** está na página Portefólios, para todos os teus portefólios em conjunto, e na página de cada portefólio, na web e na app móvel. Só aparece quando os portefólios têm pelo menos uma transação de dividendo. Neste momento, a aplicação web e a app móvel não permitem adicionar um dividendo, e uma importação de CSV traz apenas compras e vendas (vê [Adicionar transações de portefólio](/pt/docs/portfolio-investments/add-portfolio-transactions#tipos-suportados)), por isso a maioria dos portefólios não mostra esta secção.
+
+- **Total de Dividendos** é a soma de todas as transações de dividendos dos portefólios, desde a primeira. Não segue o período escolhido.
+- **Dividendos por Ativo** divide esse total por título, do maior para o menor.
+- Os valores estão na tua moeda. Um dividendo registado noutra moeda é convertido à taxa de câmbio da sua data. Um dividendo sem taxa para essa data fica de fora dos totais, e uma nota indica quantos ficaram de fora.
+
+A secção conta apenas transações de dividendos, pelos valores registados. Não vai buscar os dividendos que um título pagou, e não estima rendimento futuro.
+
+### Dividendos futuros no Calendário
+A secção **Calendário** está na página Portefólios, na web. Em **Dividendos Futuros**, lista o ticker e a data ex-dividendo dos dividendos anunciados para os títulos que tens, nos próximos 120 dias, do mais próximo para o mais distante, até dez entradas. Segue o filtro por membro.
+
+As datas vêm do fornecedor de dados de mercado do servidor. Um dividendo que ainda não foi anunciado não aparece, não é mostrado nenhum valor, e nada é acrescentado às tuas transações quando a data chega. **Resultados Futuros** não tem dados neste momento e mostra **Sem eventos futuros**.
+
 ### Má interpretação comum
 Rendimento não é o mesmo que lucro por variação de preço.
 
 ## Alocação e peso da posição
 
 ### O que significa
-A alocação mostra como a carteira está distribuída pelos ativos. O peso da posição mostra quanto uma posição contribui para o total.
+A alocação mostra como o portefólio está distribuído pelos ativos. O peso da posição mostra quanto uma posição contribui para o total.
 
 ### Onde aparece
-Gráficos de alocação, tabelas de posições e resumos da carteira.
+Gráficos de alocação, tabelas de posições e resumos do portefólio.
 
 ### Como ler
-Procura concentração, equilíbrio e se uma única posição domina a carteira.
+Procura concentração, equilíbrio e se uma única posição domina o portefólio.
 
 ### O que o pode alterar
 Novas operações, mudanças de preço, dividendos e movimentos de caixa.
@@ -208,16 +340,16 @@ A alocação descreve a estrutura, não uma recomendação.
 ## Comparação com benchmark
 
 ### O que significa
-Um benchmark é uma referência usada para comparar o desempenho da carteira.
+Um benchmark é uma referência usada para comparar o desempenho do portefólio.
 
 ### Onde aparece
 Nas vistas de benchmark de desempenho e nos gráficos de retorno.
 
 ### Como ler
-Compara a carteira e o benchmark no mesmo intervalo de tempo e no mesmo contexto cambial.
+Compara o portefólio e o benchmark no mesmo intervalo de tempo e no mesmo contexto cambial.
 
 ### O que o pode alterar
-Retornos da carteira, movimentos do benchmark e o intervalo de tempo selecionado.
+Retornos do portefólio, movimentos do benchmark e o intervalo de tempo selecionado.
 
 ### Má interpretação comum
 Um benchmark é uma linha de comparação, não uma sugestão para copiar.
@@ -275,7 +407,7 @@ Intervalos de tempo diferentes podem produzir valores de retorno muito diferente
 
 ## Termos relacionados
 
-- [Carteira](/pt/docs/glossary#carteira)
+- [Portefólio](/pt/docs/glossary#portefólio)
 - [Posição](/pt/docs/glossary#posição)
 - [Alocação](/pt/docs/glossary#alocação)
 - [Valor de mercado](/pt/docs/glossary#valor-de-mercado)
@@ -286,6 +418,6 @@ Intervalos de tempo diferentes podem produzir valores de retorno muito diferente
 
 ## Páginas relacionadas
 
-- [Investimentos de carteira](/pt/docs/portfolio-investments)
+- [Investimentos de portefólio](/pt/docs/portfolio-investments)
 - [Posições e alocação](/pt/docs/portfolio-investments/holdings-allocation)
 - [Desempenho e benchmarks](/pt/docs/portfolio-investments/performance-benchmarks)

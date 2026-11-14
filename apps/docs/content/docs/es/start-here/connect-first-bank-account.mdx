@@ -5,9 +5,9 @@ description: Registra tu propia aplicación gratuita de Enable Banking y luego v
 
 WonderMoney ya no ofrece un servicio de conexión bancaria propio y compartido para todos los usuarios — mantener ese modelo de forma gratuita se volvió inviable. En su lugar, las conexiones bancarias funcionan con Enable Banking bajo un modelo "trae tu propia clave" (BYOK): registras tu propia aplicación gratuita en Enable Banking, y los servidores de WonderMoney usan las credenciales de tu propia aplicación —nunca una compartida por todos— para vincular y leer tus datos bancarios. Así las conexiones bancarias se mantienen gratuitas, tanto para ti como para WonderMoney.
 
-La configuración de abajo es de una sola vez. Durante el onboarding puede que se te pida conectar un banco en el paso de la cuenta; si todavía no has configurado tu clave de Enable Banking, hazlo primero siguiendo estos pasos y luego vuelve a conectar el banco. Una vez guardada la clave, queda guardada: cada banco que añadas después, incluso desde Ajustes más adelante, usa la misma clave.
+La configuración de abajo es de una sola vez. Durante la incorporación, el paso de la cuenta solo muestra la lista de bancos cuando ya hay una clave. Si todavía no has guardado la tuya, añade una cuenta manualmente o salta ese paso, termina la configuración y después sigue estos pasos y conecta el banco desde **Cuentas**. Una vez guardada la clave, queda guardada: cada banco que añadas después, incluso desde Configuración más adelante, usa la misma clave.
 
-En un servidor propio, quien lo administra puede haber configurado una aplicación de Enable Banking para tu hogar. Si la lista de bancos se abre directamente al añadir una cuenta vinculada, no necesitas una clave propia y puedes saltarte la configuración de abajo; si aun así añades una, las nuevas conexiones bancarias usan la tuya. Consulta [Configurar tu instancia](/es/docs/self-hosting/configure#sincronización-bancaria).
+En un servidor propio, quien lo administra puede haber configurado una aplicación de Enable Banking para tu hogar. Si la lista de bancos se abre directamente al añadir una cuenta vinculada, no necesitas una clave propia y puedes saltarte la configuración de abajo; si aun así añades una, las nuevas conexiones bancarias usan la tuya. Consulta [Configurar tu instancia](/es/docs/self-hosting/configure#sincronización-bancaria). Un servidor propio también puede ofrecer SimpleFIN, para bancos de Estados Unidos y Canadá; no necesita clave de Enable Banking. Consulta [SimpleFIN](/es/docs/self-hosting/simplefin).
 
 ## Antes de empezar
 
@@ -29,7 +29,7 @@ Necesitarás unos minutos, el correo que quieras usar para Enable Banking y acce
 </Callout>
 
 <Callout type="info" title="La URL de redirección es de WonderMoney, no tuya">
-  `https://api.wonder.money/v1/banking/enable-banking/callback` es la dirección del propio backend de WonderMoney. Estás registrando una aplicación que habla con los servidores de WonderMoney, así que este valor es fijo — introdúcelo tal cual, no uses tu propio dominio.
+  `https://api.wonder.money/v1/banking/enable-banking/callback` es la dirección del propio backend de WonderMoney. Estás registrando una aplicación que habla con los servidores de WonderMoney, así que este valor es fijo — introdúcelo tal cual, no uses tu propio dominio. La única excepción es un servidor propio: ahí, sustituye `https://api.wonder.money` por la dirección de la API de tu servidor.
 </Callout>
 
 <Callout type="warn" title="Privacy URL y Terms URL son obligatorias en Production, aunque el formulario no lo diga">
@@ -63,9 +63,9 @@ Después de enviar el formulario, la página de la aplicación muestra **"Restri
 
 1. En la página de la aplicación, copia el **Application ID** — un UUID que aparece cerca de la parte superior.
 2. Localiza el archivo `.pem` que descargaste antes.
-3. En WonderMoney, abre **Configuración → Proveedor bancario**.
-4. Pega el Application ID en **Application ID**, y el contenido completo del archivo `.pem` en **Private key**.
-5. Guarda. WonderMoney comprueba la credencial contra Enable Banking antes de guardarla, así que un identificador mal copiado o una clave incompleta se rechazan de inmediato en lugar de fallar más adelante.
+3. En la aplicación web de WonderMoney, abre **Configuración → Proveedor bancario** y selecciona **Añadir clave**. La app móvil vincula bancos con una clave ya guardada, pero la clave se añade en la web.
+4. Pega el Application ID en **ID de la aplicación**, y el contenido completo del archivo `.pem` en **Clave privada**.
+5. Selecciona **Probar y guardar**. WonderMoney comprueba la credencial contra Enable Banking antes de guardarla, así que un identificador mal copiado o una clave incompleta se rechazan de inmediato en lugar de fallar más adelante.
 
 ## Qué hace WonderMoney con tu clave
 

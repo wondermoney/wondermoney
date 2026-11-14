@@ -7,18 +7,26 @@ Las conexiones bancarias pueden caducar, necesitar una nueva aprobación o dejar
 
 ## Estado de la conexión
 
-Cada conexión muestra uno de estos pocos estados:
+En la web, **Configuración → Conexiones** muestra cada banco con sus cuentas, cuándo caduca su consentimiento y un estado:
 
-- **Conectada** — la conexión está activa y sus cuentas se han actualizado.
-- **En proceso** — la conexión se está configurando o aún no ha terminado su primera actualización.
-- **Caducada** — la conexión ya no es válida y necesita una nueva aprobación.
+- **Vinculada** — la conexión está activa.
+- **Creado** o **Autorizada** — la conexión se inició, pero la aprobación en el banco aún no ha terminado.
+- **Caduca en N días** — el consentimiento termina en un plazo de 14 días. **Volver a conectar** aparece en la fila.
+- **Caducada** — el consentimiento ha terminado y la conexión necesita una nueva aprobación.
+- **Finalizada por tu banco** — el banco retiró el acceso antes de la fecha de fin del consentimiento.
 - **Error** — la conexión no se pudo completar.
+
+La aplicación móvil muestra las mismas conexiones en **Más → Conexiones bancarias**, con los estados **Conectado**, **Procesando**, **Caduca pronto**, **Consentimiento expirado**, **Finalizada por el banco** o **Error**, la fecha en que caduca el consentimiento y la fecha hasta la que están al día los datos.
+
+Las conexiones de SimpleFIN aparecen aparte, como **Conectada**, **Primera sincronización en curso**, **Acceso revocado**, **Caducada** o **Error**.
 
 Solo ves el estado de tus propias conexiones, y el estado se limita a tu cuenta y no al banco o al proveedor en su conjunto.
 
 ## Cuando falla una sincronización
 
 Si una sincronización falla, la vista de recuperación explica qué ocurrió y ofrece el siguiente paso relevante, como reintentar la conexión, añadir la cuenta manualmente o importar un extracto. El flujo de recuperación muestra el nombre del banco afectado, para que quede claro qué conexión necesita atención.
+
+**Historial de sincronizaciones**, en cada conexión, muestra las últimas 20 veces que WonderMoney intentó sincronizarla y el resultado de cada intento.
 
 Si la lista de bancos no está disponible temporalmente — por ejemplo, durante una interrupción en el proveedor — el selector de bancos muestra un error claro en lugar de fallar, y puedes reintentar.
 
@@ -28,15 +36,15 @@ Comprueba si el problema se limita a una cuenta o afecta a toda la conexión ban
 
 ## Pasos
 
-1. Abre la lista de bancos conectados.
-2. Revisa el estado de sincronización y la hora de la última actualización.
-3. Vuelve a conectar o a autorizar cualquier conexión que haya caducado.
-4. Elimina una conexión solo si ya no quieres recibir nuevas importaciones de ella. Desvincular es seguro de reintentar: si el primer intento no se completa, repetirlo termina el trabajo.
+1. Abre **Configuración → Conexiones** en la web, o **Más → Conexiones bancarias** en la aplicación móvil.
+2. Revisa el estado de cada conexión y cuándo caduca su consentimiento. Abre **Historial de sincronizaciones** para ver cómo fueron las sincronizaciones recientes.
+3. Selecciona **Volver a conectar** en una conexión cuyo consentimiento está a punto de terminar, ha caducado o fue finalizado por el banco, y apruébala de nuevo en el banco. Una cuenta que el banco indique con el mismo IBAN conserva su historial. Una conexión de SimpleFIN con el acceso revocado necesita en su lugar un nuevo token de configuración.
+4. Elimina una conexión solo si ya no quieres recibir nuevas importaciones de ella. En la web, selecciona el icono de desincronizar en la columna **Acciones** y confirma con **Desincronizar**; en la aplicación móvil, o en una conexión de SimpleFIN, selecciona **Desconectar**. Los datos ya importados se conservan. Desvincular es seguro de reintentar: si el primer intento no se completa, repetirlo termina el trabajo.
 
 <DocsImage
   src="/images/docs/es/accounts-transactions/manage-bank-connections-overview.png"
-  alt="Settings Connections tab showing the bank connections list with an empty state."
-  caption="Bank connections live under Settings — Connections, with sync status per connection."
+  alt="Pestaña Conexiones de Configuración con la lista de conexiones bancarias vacía."
+  caption="Las conexiones bancarias están en Configuración — Conexiones, con el estado de sincronización de cada una."
   width={1440}
   height={900}
 />

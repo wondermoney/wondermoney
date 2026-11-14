@@ -7,16 +7,21 @@ Use the bank connection flow when you want WonderMoney to import balances and tr
 
 During onboarding, you can connect a bank directly from the account step, so you do not need to visit this flow separately. This page describes the standalone flow, which works the same way.
 
+Connections to European banks go through Enable Banking and are read-only. You connect with an Enable Banking key of your own, which you add once in **Settings → Bank Provider**; [Connect your first bank account](/en/docs/start-here/connect-first-bank-account) walks through it. A self-hosted server may share one key with your household, and then you can skip that step.
+
 ## Before you start
 
-Confirm that the bank is supported and that you are ready to approve the connection in the bank's own authentication flow.
+Confirm that the bank is supported and that you are ready to approve the connection in the bank's own authentication flow. Until an Enable Banking key is available, the **Linked** option shows **Add your Enable Banking key first**, with a link to the Bank Provider settings.
 
 ## Steps
 
-1. Start a new bank connection.
-2. Select the bank and sign in at the provider.
-3. Choose the accounts you want to import.
-4. Finish approval and wait for the first sync.
+1. Open **Accounts**, select **Add account** and choose **Linked**.
+2. Choose your bank's **Country**, then pick the bank from the list.
+3. Read what happens next and select **Continue to bank**. You leave WonderMoney and sign in at your bank.
+4. Approve read-only access. If your bank asks which accounts to share, choose them there: WonderMoney adds every account the bank shares.
+5. You return to WonderMoney automatically. Your accounts and recent transactions are imported in the background and appear in **Accounts** shortly.
+
+In the mobile app, open **More → Bank connections**, select **Connect a bank**, pick the bank and finish the consent in your browser. The Enable Banking key itself is added on the web.
 
 <DocsImage
   src="/images/docs/accounts-transactions/connect-bank-account-bank-picker.png"
@@ -25,6 +30,10 @@ Confirm that the bank is supported and that you are ready to approve the connect
   width={1440}
   height={1131}
 />
+
+## Banks in the United States and Canada
+
+On a self-hosted instance that turns SimpleFIN on, **Connect with SimpleFIN** appears in the **Add account** dialog and in **Settings → Connections** on the web, and under **Bank connections** in the mobile app. Paste a setup token from SimpleFIN Bridge and select **Connect**; your accounts appear after the first sync. See [SimpleFIN for US and Canadian banks](/en/docs/self-hosting/simplefin).
 
 ## Review
 
