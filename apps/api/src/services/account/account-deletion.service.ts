@@ -11,7 +11,7 @@ import { PushNotificationClaim } from '@entity/PushNotificationClaim';
 import { SentEmail } from '@entity/SentEmail';
 import logger from '@utils/logger';
 
-import { tearDownHouseholdOnOwnerDeletion } from '../household/household-membership.service';
+import { revokeBankConnectionsOf, tearDownHouseholdOnOwnerDeletion } from '../household/household-membership.service';
 
 interface Account {
   appuserKey: number;
@@ -64,7 +64,8 @@ export async function deleteWonderMoneyAccount(appuser: Account, deps: Deps = {}
   const originalEmailAddress = appuser.emailAddress;
 
   await DI.em.transactional(async (txEm: EntityManager) => {
-    await txEm.getConnection().execute('select "appuser_key" from "appuser" where "appuser_key" = ? for update', [appuser.appuserKey], 'get');
+    // On the transaction's own connection: anywhere else the row lock ends before the deletion starts.
+    await txEm.getConnection().execute('select "appuser_key" from "appuser" where "appuser_key" = ? for update', [appuser.appuserKey], 'get', txEm.getTransactionContext());
     const tenantMemberships = await txEm.find(AppuserTenant, { appuserKey: appuser });
     const foundRequisitions = await txEm.find(NordigenRequisition, { appuserKey: appuser });
     const foundAssistantConsents = await txEm.find(AssistantConsent, { appuserKey: appuser });
@@ -86,6 +87,10 @@ export async function deleteWonderMoneyAccount(appuser: Account, deps: Deps = {}
     sentEmails.push(...foundSentEmails);
 
     await tearDownHouseholdOnOwnerDeletion(txEm, appuser.appuserKey, now);
+    // The person's own bank connections, every provider, in every household they belonged to,
+    // as leaving a household does: the scheduled refresh stops and SimpleFIN access is destroyed.
+    const tenants = new Map(tenantMemberships.map((membership) => [membership.tenantKey.tenantKey, membership.tenantKey]));
+    for (const tenant of tenants.values()) await revokeBankConnectionsOf(txEm, tenant, appuser.appuserKey, now);
     appuser.deletedAt = now;
     appuser.emailAddress = `deleted+${appuser.appuserKey}@deleted.invalid`;
     appuser.externalUserId = `deleted:${appuser.appuserKey}`;
