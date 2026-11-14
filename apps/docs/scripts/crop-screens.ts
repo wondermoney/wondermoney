@@ -10,8 +10,9 @@
  * Usage:
  *   yarn tsx scripts/crop-screens.ts [--section <section-slug>]
  *
- * Defaults to the `start-here` section. Future sections add their entries to
- * the CROPS map below, keyed by `<section>/<page-slug>-<step>.png`.
+ * Defaults to every section. New screenshots add their entries to the CROPS map
+ * below, keyed by `<section>/<page-slug>-<step>.png`. `--locale pt|es` reads
+ * `dogfood-output/docs-screens/<locale>/` and writes `public/images/docs/<locale>/`.
  *
  * Crop bounds are in raw PNG pixel coordinates (2x scale). The cropped file
  * keeps the same scale; divide by 2 for the display size used in MDX.
@@ -27,107 +28,113 @@ interface CropBounds {
   height: number;
 }
 
+/** The whole 1440x900 viewport at 2x. */
+const VIEWPORT: CropBounds = { x: 0, y: 0, width: 2880, height: 1800 };
+/** Settings tabs without the sidebar: the main column starts at 248 CSS px. */
+const SETTINGS_MAIN: CropBounds = { x: 496, y: 0, width: 2384, height: 1800 };
+/**
+ * Keep the whole capture. Used for element screenshots (a dialog, a settings section, a
+ * household card), which the capture already cut to the element, and for full-page docs
+ * captures. Their size differs by locale, so the bounds only cap it; the crop is clamped
+ * to the image.
+ */
+const WHOLE: CropBounds = { x: 0, y: 0, width: 2880, height: 6000 };
+
 /**
  * Crop bounds per screenshot, keyed by `<section>/<page-slug>-<step>.png`.
  */
 const CROPS: Record<string, CropBounds> = {
-  // glossary-landing
-  'glossary-landing/index-overview.png': { x: 0, y: 0, width: 2850, height: 2742 },
-
   // start-here
-  'start-here/index-overview.png': { x: 0, y: 0, width: 2850, height: 2742 },
-  'start-here/create-account-signup-form.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'start-here/sign-in-password-recovery-login.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'start-here/sign-in-password-recovery-forgot-password.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'start-here/multi-factor-authentication-otp.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'start-here/connect-first-bank-account-bank-picker.png': { x: 0, y: 0, width: 2880, height: 2262 },
-  'start-here/understand-dashboard-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'start-here/index-overview.png': WHOLE,
+  'start-here/create-account-signup-form.png': VIEWPORT,
+  'start-here/sign-in-password-recovery-login.png': VIEWPORT,
+  'start-here/sign-in-password-recovery-forgot-password.png': VIEWPORT,
+  'start-here/multi-factor-authentication-otp.png': VIEWPORT,
+  'start-here/understand-dashboard-overview.png': VIEWPORT,
 
   // accounts-transactions
-  'accounts-transactions/index-accounts-overview.png': { x: 0, y: 0, width: 2880, height: 2262 },
-  'accounts-transactions/connect-bank-account-bank-picker.png': { x: 0, y: 0, width: 2880, height: 2262 },
-  'accounts-transactions/manual-offline-account-add-form.png': { x: 0, y: 0, width: 2880, height: 2262 },
-  'accounts-transactions/manage-bank-connections-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'accounts-transactions/understand-transactions-list.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'accounts-transactions/import-transactions-csv-import-modal.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'accounts-transactions/categorize-transactions-category-picker.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'accounts-transactions/recurring-payments-detected.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'accounts-transactions/missing-duplicate-transactions-review.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'accounts-transactions/index-accounts-overview.png': VIEWPORT,
+  'accounts-transactions/connect-bank-account-bank-picker.png': VIEWPORT,
+  'accounts-transactions/manual-offline-account-add-form.png': VIEWPORT,
+  'accounts-transactions/manage-bank-connections-overview.png': VIEWPORT,
+  'accounts-transactions/understand-transactions-list.png': VIEWPORT,
+  'accounts-transactions/import-transactions-csv-import-modal.png': VIEWPORT,
+  'accounts-transactions/categorize-transactions-category-picker.png': VIEWPORT,
+  'accounts-transactions/recurring-payments-detected.png': VIEWPORT,
+  'accounts-transactions/missing-duplicate-transactions-review.png': VIEWPORT,
 
   // budgets
-  'budgets/index-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/create-first-budget-household.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/create-first-budget-income.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/household-size-dependents-dependents.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/choose-budget-categories-categories.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/track-monthly-spending-month-detail.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'budgets/adjust-delete-budget-overflow-menu.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'budgets/index-overview.png': VIEWPORT,
+  'budgets/create-first-budget-household.png': VIEWPORT,
+  'budgets/create-first-budget-income.png': VIEWPORT,
+  'budgets/household-size-dependents-dependents.png': VIEWPORT,
+  'budgets/choose-budget-categories-categories.png': VIEWPORT,
+  'budgets/track-monthly-spending-month-detail.png': VIEWPORT,
+  'budgets/adjust-delete-budget-overflow-menu.png': VIEWPORT,
 
   // portfolio-investments
-  'portfolio-investments/index-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/portfolio-metrics-explained-metrics.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/create-portfolio-dialog.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/add-portfolio-transactions-modal.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/import-portfolio-csv-import-modal.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/holdings-allocation-holdings.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/performance-benchmarks-performance.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/troubleshoot-portfolio-imports-error.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'portfolio-investments/portfolio-data-lifecycle-transactions.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'portfolio-investments/index-overview.png': VIEWPORT,
+  'portfolio-investments/portfolio-metrics-explained-metrics.png': VIEWPORT,
+  'portfolio-investments/create-portfolio-dialog.png': VIEWPORT,
+  'portfolio-investments/add-portfolio-transactions-modal.png': VIEWPORT,
+  'portfolio-investments/import-portfolio-csv-import-modal.png': VIEWPORT,
+  'portfolio-investments/holdings-allocation-holdings.png': VIEWPORT,
+  'portfolio-investments/performance-benchmarks-performance.png': VIEWPORT,
+  'portfolio-investments/troubleshoot-portfolio-imports-error.png': VIEWPORT,
+  'portfolio-investments/portfolio-data-lifecycle-transactions.png': VIEWPORT,
 
-  // financial-markets
-  'financial-markets/index-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'financial-markets/search-stocks-etfs-ticker-quote.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'financial-markets/watchlist-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'financial-markets/screener-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-
+  // financial-markets (needs a market data provider: see capture-screens.ts)
+  'financial-markets/index-overview.png': VIEWPORT,
+  'financial-markets/search-stocks-etfs-ticker-quote.png': VIEWPORT,
+  'financial-markets/watchlist-overview.png': VIEWPORT,
 
   // household
-  'household/index-overview.png': { x: 0, y: 0, width: 2880, height: 950 },
-  'household/create-a-household-members.png': { x: 1354, y: 330, width: 1366, height: 195 },
-  'household/invite-a-member-invite-form.png': { x: 1354, y: 596, width: 1366, height: 352 },
-  'household/invite-a-member-pending.png': { x: 1354, y: 596, width: 1366, height: 170 },
-  'household/account-privacy-privacy-toggle.png': { x: 2112, y: 40, width: 768, height: 760 },
-  'household/join-a-household-invalid.png': { x: 1640, y: 860, width: 1010, height: 262 },
-  'household/shared-context-shared-accounts.png': { x: 512, y: 980, width: 896, height: 330 },
-  'household/leave-or-remove-leave-dialog.png': { x: 674, y: 724, width: 1532, height: 352 },
-  'household/leave-or-remove-remove-dialog.png': { x: 674, y: 724, width: 1532, height: 352 },
+  'household/index-overview.png': VIEWPORT,
+  'household/create-a-household-members.png': WHOLE,
+  'household/invite-a-member-invite-form.png': WHOLE,
+  'household/invite-a-member-pending.png': WHOLE,
+  'household/join-a-household-invalid.png': WHOLE,
+  'household/shared-context-shared-accounts.png': WHOLE,
+  'household/leave-or-remove-leave-dialog.png': WHOLE,
+  'household/leave-or-remove-remove-dialog.png': WHOLE,
 
   // settings-security-privacy
-  'settings-security-privacy/index-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'settings-security-privacy/profile-preferences-profile.png': { x: 448, y: 64, width: 2432, height: 836 },
-  'settings-security-privacy/email-preferences-notifications.png': { x: 448, y: 64, width: 2432, height: 2084 },
-  'settings-security-privacy/appearance-appearance.png': { x: 448, y: 64, width: 2432, height: 560 },
-  'settings-security-privacy/manage-categories-categories.png': { x: 448, y: 160, width: 2432, height: 1800 },
-  'settings-security-privacy/assistant-settings-assistant.png': { x: 448, y: 0, width: 2432, height: 1800 },
-  'settings-security-privacy/ai-assistant-consent-consent.png': { x: 1900, y: 0, width: 980, height: 1800 },
-  'settings-security-privacy/change-password-change-password.png': { x: 448, y: 160, width: 2432, height: 918 },
-  'settings-security-privacy/two-factor-authentication-mfa.png': { x: 448, y: 1078, width: 2432, height: 490 },
-  'settings-security-privacy/delete-account-delete-account.png': { x: 448, y: 1568, width: 2432, height: 608 },
-  'settings-security-privacy/delete-account-confirm-dialog.png': { x: 600, y: 640, width: 1680, height: 520 },
-  'settings-security-privacy/data-privacy-connections.png': { x: 448, y: 64, width: 2432, height: 1736 },
+  'settings-security-privacy/index-overview.png': VIEWPORT,
+  'settings-security-privacy/profile-preferences-profile.png': WHOLE,
+  'settings-security-privacy/email-preferences-notifications.png': WHOLE,
+  'settings-security-privacy/appearance-appearance.png': WHOLE,
+  'settings-security-privacy/manage-categories-categories.png': SETTINGS_MAIN,
+  'settings-security-privacy/assistant-settings-assistant.png': SETTINGS_MAIN,
+  // The assistant panel slides in over the right third of the viewport.
+  'settings-security-privacy/ai-assistant-consent-consent.png': { x: 1920, y: 0, width: 960, height: 1800 },
+  'settings-security-privacy/change-password-change-password.png': WHOLE,
+  'settings-security-privacy/two-factor-authentication-mfa.png': WHOLE,
+  'settings-security-privacy/delete-account-delete-account.png': WHOLE,
+  'settings-security-privacy/delete-account-confirm-dialog.png': WHOLE,
+  'settings-security-privacy/data-privacy-connections.png': SETTINGS_MAIN,
 
   // troubleshooting
-  'troubleshooting/index-overview.png': { x: 0, y: 0, width: 2850, height: 3790 },
-  'troubleshooting/sign-in-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'troubleshooting/transaction-import-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 2262 },
-  'troubleshooting/budget-setup-problems-incomplete.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'troubleshooting/portfolio-import-problems-error-state.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'troubleshooting/index-overview.png': WHOLE,
+  'troubleshooting/sign-in-problems-error-state.png': VIEWPORT,
+  'troubleshooting/transaction-import-problems-error-state.png': VIEWPORT,
+  'troubleshooting/budget-setup-problems-incomplete.png': VIEWPORT,
+  'troubleshooting/portfolio-import-problems-error-state.png': VIEWPORT,
 
   // goals-loans
-  'goals-loans/index-overview.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/create-fund-goal-dialog.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/create-fund-goal-debt-paydown.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/link-accounts-goals-link-account.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/link-accounts-goals-linked.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/loans-overview-empty.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/loans-overview-list.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/add-loan-credit-facility-drawer.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/track-repayments-detail.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/track-repayments-link-repayment.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/archived-and-restore-archive-dialog.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/archived-and-restore-archived-list.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/archived-and-restore-empty.png': { x: 0, y: 0, width: 2880, height: 1800 },
-  'goals-loans/goal-priority-edit-form.png': { x: 0, y: 0, width: 2880, height: 1800 },
+  'goals-loans/index-overview.png': VIEWPORT,
+  'goals-loans/create-fund-goal-dialog.png': VIEWPORT,
+  'goals-loans/create-fund-goal-debt-paydown.png': VIEWPORT,
+  'goals-loans/link-accounts-goals-link-account.png': VIEWPORT,
+  'goals-loans/link-accounts-goals-linked.png': VIEWPORT,
+  'goals-loans/loans-overview-empty.png': VIEWPORT,
+  'goals-loans/loans-overview-list.png': VIEWPORT,
+  'goals-loans/add-loan-credit-facility-drawer.png': VIEWPORT,
+  'goals-loans/track-repayments-detail.png': VIEWPORT,
+  'goals-loans/track-repayments-link-repayment.png': VIEWPORT,
+  'goals-loans/archived-and-restore-archive-dialog.png': VIEWPORT,
+  'goals-loans/archived-and-restore-archived-list.png': VIEWPORT,
+  'goals-loans/archived-and-restore-empty.png': VIEWPORT,
+  'goals-loans/goal-priority-edit-form.png': VIEWPORT,
 };
 
 const RAW_ROOT = (locale: string) => path.resolve(__dirname, `../../dogfood-output/docs-screens${locale === 'en' ? '' : `/${locale}`}`);
@@ -207,10 +214,11 @@ async function main(): Promise<void> {
           .png({ compressionLevel: 9 })
           .toFile(outputPath);
       })
-      .then(async () => {
+      .then(async (info) => {
+        if (!info) return;
         const outputSize = (await stat(outputPath)).size;
         const savedKb = Math.max(0, Math.round((sourceSize - outputSize) / 1024));
-        console.log(`  cropped ${key} → ${bounds.width}x${bounds.height} (saved ${savedKb} KB)`);
+        console.log(`  cropped ${key} → ${info.width}x${info.height} (saved ${savedKb} KB)`);
         cropped += 1;
       })
       .catch((err) => {
