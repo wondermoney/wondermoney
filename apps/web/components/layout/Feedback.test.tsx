@@ -9,24 +9,43 @@ import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { afterEach, beforeAll, beforeEach, test, vi } from "vitest";
 
-import { instanceFeatures, queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics/consent";
+import {
+  instanceFeatures,
+  queryClientWithInstance,
+} from "@/lib/api/instance/instance-fixture";
 import type { InstanceDescription } from "@/lib/api/instance/useInstance";
 
 import enMessages from "../../messages/en/common.json";
 import Feedback from "./Feedback";
 
-const mocked = vi.hoisted(() => ({ analytics: false, capture: vi.fn(), post: vi.fn() }));
+const mocked = vi.hoisted(() => ({
+  analytics: false,
+  capture: vi.fn(),
+  post: vi.fn(),
+}));
 
 vi.mock("@/i18n/navigation", () => ({ usePathname: () => "/budgets" }));
 vi.mock("@/components/ui/Link", () => ({
-  Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: ReactNode;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
 }));
-vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: mocked.capture }) }));
-vi.mock("@/lib/utils/analytics-enabled", () => ({ isAnalyticsEnabled: () => mocked.analytics }));
+vi.mock("posthog-js/react", () => ({
+  usePostHog: () => ({ capture: mocked.capture }),
+}));
+vi.mock("@/lib/utils/analytics-enabled", () => ({
+  isAnalyticsEnabled: () => mocked.analytics,
+}));
 vi.mock("@/lib/api/api", () => ({ default: { post: mocked.post } }));
 
 beforeAll(() => {
@@ -38,6 +57,7 @@ beforeAll(() => {
   })) as unknown as typeof window.matchMedia;
 });
 beforeEach(() => {
+  window.localStorage.clear();
   mocked.analytics = false;
   mocked.capture.mockReset();
   mocked.post.mockReset().mockResolvedValue({ data: undefined });
@@ -54,14 +74,22 @@ function renderFeedback(client: QueryClient) {
   );
 }
 
-const shareButton = () => screen.queryByRole("button", { name: enMessages["share-feedback"] });
+const shareButton = () =>
+  screen.queryByRole("button", { name: enMessages["share-feedback"] });
 
 async function sendFeedback() {
   const user = userEvent.setup();
   await user.click(shareButton()!);
-  await user.click(await screen.findByRole("button", { name: enMessages["feedback-bug"] }));
-  await user.type(screen.getByPlaceholderText(enMessages["feedback-placeholder"]), "The chart is wrong");
-  await user.click(screen.getByRole("button", { name: enMessages["feedback-submit"] }));
+  await user.click(
+    await screen.findByRole("button", { name: enMessages["feedback-bug"] }),
+  );
+  await user.type(
+    screen.getByPlaceholderText(enMessages["feedback-placeholder"]),
+    "The chart is wrong",
+  );
+  await user.click(
+    screen.getByRole("button", { name: enMessages["feedback-submit"] }),
+  );
 }
 
 test("offers feedback on an instance that can email it", () => {
@@ -70,21 +98,30 @@ test("offers feedback on an instance that can email it", () => {
 });
 
 test("hides the feedback form on an instance that cannot deliver it, keeping the support address", () => {
-  renderFeedback(queryClientWithInstance(instanceFeatures({ feedback: false }), { supportEmail: "help@example.com" }));
+  renderFeedback(
+    queryClientWithInstance(instanceFeatures({ feedback: false }), {
+      supportEmail: "help@example.com",
+    }),
+  );
   assert.equal(shareButton(), null);
   assert.ok(document.querySelector('a[href="mailto:help@example.com"]'));
 });
 
 test("renders nothing on an instance with neither feedback nor a support address", () => {
   const { container } = renderFeedback(
-    queryClientWithInstance(instanceFeatures({ contactForm: false, feedback: false }), { supportEmail: null }),
+    queryClientWithInstance(
+      instanceFeatures({ contactForm: false, feedback: false }),
+      { supportEmail: null },
+    ),
   );
   assert.equal(container.innerHTML, "");
 });
 
 test("treats an API that predates the feedback flag as having no feedback", () => {
   const { feedback: _feedback, ...olderFeatures } = instanceFeatures();
-  renderFeedback(queryClientWithInstance(olderFeatures as InstanceDescription["features"]));
+  renderFeedback(
+    queryClientWithInstance(olderFeatures as InstanceDescription["features"]),
+  );
   assert.equal(shareButton(), null);
 });
 
@@ -109,14 +146,21 @@ test("says the feedback was not sent when the API fails, and keeps the message",
   assert.equal(alert.textContent, enMessages["feedback-send-error"]);
   assert.equal(screen.queryByText(enMessages["feedback-thank-you"]), null);
   assert.equal(
-    (screen.getByPlaceholderText(enMessages["feedback-placeholder"]) as HTMLTextAreaElement).value,
+    (
+      screen.getByPlaceholderText(
+        enMessages["feedback-placeholder"],
+      ) as HTMLTextAreaElement
+    ).value,
     "The chart is wrong",
   );
 });
 
-test("sends feedback to analytics where they are configured, as the hosted app does", async () => {
+test("sends feedback to configured analytics after explicit opt-in", async () => {
   mocked.analytics = true;
-  renderFeedback(queryClientWithInstance(instanceFeatures({ feedback: false })));
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
+  renderFeedback(
+    queryClientWithInstance(instanceFeatures({ feedback: false })),
+  );
   await sendFeedback();
 
   await waitFor(() => assert.equal(mocked.capture.mock.calls.length, 1));
@@ -125,4 +169,29 @@ test("sends feedback to analytics where they are configured, as the hosted app d
     { message: "The chart is wrong", page: "/budgets", type: "bug" },
   ]);
   assert.equal(mocked.post.mock.calls.length, 0);
+});
+
+test.each([null, "denied"])(
+  "delivers feedback through the API when analytics consent is %s",
+  async (consent) => {
+    mocked.analytics = true;
+    if (consent) window.localStorage.setItem(ANALYTICS_CONSENT_KEY, consent);
+    renderFeedback(
+      queryClientWithInstance(instanceFeatures({ feedback: true })),
+    );
+    await sendFeedback();
+
+    await screen.findByText(enMessages["feedback-thank-you"]);
+    assert.equal(mocked.post.mock.calls.length, 1);
+    assert.equal(mocked.capture.mock.calls.length, 0);
+  },
+);
+
+test("hides analytics-only feedback when the user has declined analytics", () => {
+  mocked.analytics = true;
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "denied");
+  renderFeedback(
+    queryClientWithInstance(instanceFeatures({ feedback: false })),
+  );
+  assert.equal(shareButton() === null, true);
 });
