@@ -12,12 +12,14 @@ import { Section } from '@/components/ui/section'
 import { SelectTrigger } from '@/components/ui/select-trigger'
 import { OptionSheet } from '@/components/ui/sheet'
 import { Text } from '@/components/ui/text'
+import type { HouseholdMembersModel, MemberFilter } from '@/features/household/member-attribution'
+import { MemberFilterButton } from '@/features/household/member-filter-control'
 import { formatPercentagePoints } from '@/lib/formatters/financial'
 import { useFormatMoney } from '@/lib/formatters/money-display'
 import { themeTokens } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
 
-import { PortfolioPerformanceChart, type PortfolioPerformanceChartProps, type PortfolioPerformanceState } from './portfolio-performance-chart'
+import { PortfolioPerformanceChart, type PortfolioPerformanceState } from './portfolio-performance-chart'
 import { Metric, PortfolioFailure, PortfolioLoading } from './portfolio-screen-parts'
 import {
   DividendIncomeBody,
@@ -74,8 +76,12 @@ export type PortfoliosScreenProps = {
   onRefresh: () => void | Promise<void>
   onLogout: () => void | Promise<void>
   onSelectPortfolio: (id: number) => void
-  /** The Performance chart's member filter; the tab's other figures stay the household's. */
-  performanceMemberFilter?: PortfolioPerformanceChartProps['memberFilter']
+  /**
+   * The tab's member filter, beside the period in the one control row: every figure and section
+   * keeps the portfolios the chosen member owns, a former member's under Shared. Omitted in a
+   * household of one.
+   */
+  memberFilter?: Readonly<{ model: HouseholdMembersModel; value: MemberFilter; onChange: (value: MemberFilter) => void }>
 }
 
 const previewHoldings = [
@@ -94,7 +100,7 @@ const previewHoldings = [
  * there is any) and All Holdings — each an open section.
  * Web's Benchmark Comparison and Calendar are not built here.
  */
-export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD', onSelectPeriod = () => undefined, onCreatePortfolio = () => undefined, onAddTransaction = () => undefined, onOpenHolding = () => undefined, onRefresh, onLogout, onSelectPortfolio, performanceMemberFilter }: PortfoliosScreenProps) {
+export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD', onSelectPeriod = () => undefined, onCreatePortfolio = () => undefined, onAddTransaction = () => undefined, onOpenHolding = () => undefined, onRefresh, onLogout, onSelectPortfolio, memberFilter }: PortfoliosScreenProps) {
   const formatMoney = useFormatMoney()
   const { t, i18n } = useTranslation()
   const palette = usePalette()
@@ -110,7 +116,8 @@ export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD
   const { data } = state
   const refresh = <RefreshControl refreshing={Boolean(state.refreshing)} onRefresh={() => void onRefresh()} tintColor={palette.primary} />
 
-  if (data.portfolioCount === 0) {
+  // The first-portfolio prompt is for a household with none; a member with none sees empty figures.
+  if (!(data.householdHasPortfolios ?? data.portfolioCount > 0)) {
     const money = (value: number) => formatMoney(value, { locale, currency: data.currency })
     const percent = (value: number) => formatPercentagePoints(value, locale, { maximumFractionDigits: 1 })
     return (
@@ -152,10 +159,12 @@ export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD
   // The one "+" lists both add actions. With several portfolios, "Add transaction" heads a
   // run of portfolio names, so the choice takes one sheet (a second sheet would open over
   // the first while it is still closing).
+  // Every household portfolio takes a transaction, whoever the member filter names.
+  const targets = data.transactionTargets ?? data.portfolios
   const addGroups = [
-    data.portfolios.length === 1
-      ? { options: [{ value: `transaction:${data.portfolios[0]!.id}`, label: t('portfolios.addTransaction') }] }
-      : { label: t('portfolios.addTransaction'), options: data.portfolios.map((portfolio) => ({ value: `transaction:${portfolio.id}`, label: portfolio.name })) },
+    targets.length === 1
+      ? { options: [{ value: `transaction:${targets[0]!.id}`, label: t('portfolios.addTransaction') }] }
+      : { label: t('portfolios.addTransaction'), options: targets.map((portfolio) => ({ value: `transaction:${portfolio.id}`, label: portfolio.name })) },
     { options: [{ value: 'create', label: t('portfolios.create') }] },
   ]
   const chooseAdd = (value: string) => {
@@ -181,15 +190,16 @@ export function PortfoliosScreen({ state, sections = idleSections, period = 'YTD
               locale={locale}
               showRealized={false}
             />
-            {/* The one control row, under the figures: the period the returns and the chart cover. */}
+            {/* The one control row, under the figures: whose portfolios and the period every section covers. */}
             <View style={styles.controlRow}>
+              {memberFilter ? <MemberFilterButton model={memberFilter.model} onChange={memberFilter.onChange} value={memberFilter.value} /> : null}
               <SelectTrigger accessibilityLabel={t('portfolios.period')} onPress={() => setPicker('period')} size="sm" testID="portfolio-period" value={t(`portfolios.periods.${period}`)} />
             </View>
           </View>
 
           {/* The portfolios themselves come first, straight under the figures. */}
           <PortfolioBreakdownSection locale={locale} onSelect={onSelectPortfolio} portfolios={data.portfolios} />
-          <PortfolioPerformanceChart currency={data.currency} memberFilter={performanceMemberFilter} palette={palette} period={period} state={sections.performance} />
+          <PortfolioPerformanceChart currency={data.currency} palette={palette} period={period} state={sections.performance} />
           <PortfolioAllocationSection locale={locale} state={sections.allocation} title={t('portfolioSections.allocation')} />
           <PortfolioMetricsSection locale={locale} state={sections.metrics} />
           <PortfolioTopMoversSection currency={data.currency} locale={locale} state={sections.topMovers} />
@@ -227,7 +237,7 @@ const styles = StyleSheet.create({
   page: { width: '100%', maxWidth: 800, alignSelf: 'center', gap: themeTokens.spacing[10] },
   // Title, the figures and the one control row sit tight; the sections keep 40pt between them.
   lead: { gap: themeTokens.spacing[6] },
-  controlRow: { flexDirection: 'row', alignItems: 'center', gap: themeTokens.spacing[2] },
+  controlRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: themeTokens.spacing[2] },
   banner: { borderWidth: 1, borderRadius: themeTokens.radius.md, padding: themeTokens.spacing[4] },
   centered: { paddingVertical: themeTokens.spacing[8], textAlign: 'center' },
   empty: { gap: themeTokens.spacing[4] },

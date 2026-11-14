@@ -335,7 +335,7 @@ describe('portfolio metrics calculations', () => {
 
       await portfolioMetricsService.getPortfoliosMetrics(VIEWER, undefined, 77);
 
-      expect(portfolioHoldingsServiceMock.getInvestmentCashFlows).toHaveBeenCalledWith(VIEWER, 77);
+      expect(portfolioHoldingsServiceMock.getInvestmentCashFlows).toHaveBeenCalledWith(VIEWER, 77, undefined);
     });
 
     it('returns null annual yield when the first buy is too recent even if fromDate is earlier', async () => {

@@ -10,12 +10,12 @@ import type { PortfolioPerformanceState } from './portfolio-performance-chart'
 import { mapPortfolioPerformance } from './portfolio-performance-view-model'
 import { type PortfolioOverviewSections, PortfoliosScreen, type PortfoliosViewState } from './portfolios-screen'
 import {
-  aggregatePortfolioHoldingsEndpoint,
+  createAggregateDividendIncomeEndpoint,
+  createAggregatePortfolioHoldingsEndpoint,
+  createPortfolioAllocationAggregateEndpoint,
+  createPortfolioMetricsEndpoint,
   createPortfolioPerformanceEndpoint,
   createPortfolioTopMoversEndpoint,
-  portfolioAllocationEndpoint,
-  portfolioDividendIncomeEndpoint,
-  portfolioMetricsEndpoint,
   type PortfolioPerformancePeriod,
 } from './portfolios-contract'
 import { mapHoldings, mapPortfolioOverview } from './portfolios-view-model'
@@ -29,30 +29,31 @@ function mapState<T, U>(state: PortfolioResourceState<T>, map: (data: T) => U): 
 
 export function PortfoliosRoute() {
   const [period, setPeriod] = useState<PortfolioPerformancePeriod>('YTD')
-  const query = usePortfolios(period)
-  const { signOut } = useProductRuntime()
-  const router = useRouter()
-  const hasPortfolios = (query.data?.portfolios.portfolios.length ?? 0) > 0
-  // The chart's member filter (households of more than one): it keeps the chosen member's
-  // portfolios. The summary and the other sections stay the household's.
+  // One member filter for the whole tab (households of more than one), held like the budgets
+  // list's: the summary, the portfolios and every section keep the portfolios the chosen member
+  // owns, a former member's under Shared. The portfolio list stays the household's.
   const members = useHouseholdMembers()
   const [memberChoice, setMemberChoice] = useState<MemberFilter>(null)
   const memberFilter = effectiveMemberFilter(memberChoice, members)
   const member = memberKeysParam(memberFilter)
+  const query = usePortfolios(period, member)
+  const { signOut } = useProductRuntime()
+  const router = useRouter()
+  const hasPortfolios = (query.data?.portfolios.portfolios.length ?? 0) > 0
 
   // The sections web loads alongside the summary. Each loads, fails and retries on its own.
-  const metrics = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'metrics'), () => portfolioMetricsEndpoint, hasPortfolios)
+  const metrics = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'metrics', member), () => createPortfolioMetricsEndpoint(member), hasPortfolios)
   const performance = usePortfolioResource((epoch) => portfolioPerformanceKey(epoch, 'aggregate', period, member), () => createPortfolioPerformanceEndpoint(null, period, member), hasPortfolios, true)
-  const allocation = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'allocation'), () => portfolioAllocationEndpoint, hasPortfolios)
-  const topMovers = usePortfolioResource((epoch) => portfolioTopMoversKey(epoch, 'aggregate', period), () => createPortfolioTopMoversEndpoint(null, period), hasPortfolios, true)
-  const dividends = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'dividends'), () => portfolioDividendIncomeEndpoint, hasPortfolios)
-  const holdings = usePortfolioResource(aggregatePortfolioHoldingsKey, () => aggregatePortfolioHoldingsEndpoint, hasPortfolios)
+  const allocation = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'allocation', member), () => createPortfolioAllocationAggregateEndpoint(member), hasPortfolios)
+  const topMovers = usePortfolioResource((epoch) => portfolioTopMoversKey(epoch, 'aggregate', period, member), () => createPortfolioTopMoversEndpoint(null, period, member), hasPortfolios, true)
+  const dividends = usePortfolioResource((epoch) => portfolioAnalyticsKey(epoch, 'dividends', member), () => createAggregateDividendIncomeEndpoint(member), hasPortfolios)
+  const holdings = usePortfolioResource((epoch) => aggregatePortfolioHoldingsKey(epoch, member), () => createAggregatePortfolioHoldingsEndpoint(member), hasPortfolios)
 
   let state: PortfoliosViewState
   if (query.isAccessTransition) state = { status: 'access-transition' }
   else if (query.isInitialLoading) state = { status: 'loading' }
   else if (query.data) {
-    const data = mapPortfolioOverview(query.data.portfolios, query.data.dashboard)
+    const data = mapPortfolioOverview(query.data.portfolios, query.data.dashboard, member !== undefined)
     state = query.isRefreshFailure ? { status: 'refresh-error', data, refreshing: query.isRefreshing } : { status: 'loaded', data, refreshing: query.isRefreshing }
   } else if (query.isInvalidResponse) state = { status: 'invalid-response' }
   else state = { status: 'error' }
@@ -85,7 +86,7 @@ export function PortfoliosRoute() {
       onOpenHolding={(holding) => { if (holding.portfolioId) router.push(`/portfolio/${holding.portfolioId}/holding/${holding.id}` as Href) }}
       onRefresh={refresh}
       onLogout={signOut}
-      performanceMemberFilter={members.multiMember ? { model: members, value: memberFilter, onChange: setMemberChoice } : undefined}
+      memberFilter={members.multiMember ? { model: members, value: memberFilter, onChange: setMemberChoice } : undefined}
       onSelectPortfolio={(portfolioId) => router.push({ pathname: '/portfolio/[portfolioId]', params: { portfolioId: String(portfolioId) } } as unknown as Href)}
     />
   )

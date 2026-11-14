@@ -1,6 +1,7 @@
 /**
  * Every surface the member filter applies to sends it the way its endpoint reads it: `memberKeys`
- * on lists, reports, cash flow, category spending, budgets and the portfolio chart, `member` on net worth. Without a filter, nothing is
+ * on lists, reports, cash flow, category spending, budgets and every read of the portfolios
+ * overview, `member` on net worth. Without a filter, nothing is
  * sent, so an unfiltered request is the same as before the filter existed.
  */
 import assert from "node:assert/strict";
@@ -21,7 +22,15 @@ import {
 import { getTransactionsCategorySpending } from "@/lib/api/account/useTransactionsCategorySpending";
 import { getBudgetsFull } from "@/lib/api/budget/useBudgetsFull";
 import { getNetWorth } from "@/lib/api/net-worth/useNetWorth";
+import { getDividendIncome } from "@/lib/api/portfolio/useDividendIncome";
+import { getPortfolioAllocation } from "@/lib/api/portfolio/usePortfolioAllocation";
+import { getPortfolioCalendar } from "@/lib/api/portfolio/usePortfolioCalendar";
+import { getAggregateDashboard } from "@/lib/api/portfolio/usePortfolioDashboard";
+import { getPortfolioMetrics } from "@/lib/api/portfolio/usePortfolioMetrics";
 import { getPortfolioPerformance } from "@/lib/api/portfolio/usePortfolioPerformance";
+import { getPortfoliosHoldings } from "@/lib/api/portfolio/usePortfoliosHoldings";
+import { getPortfolioTopMovers } from "@/lib/api/portfolio/usePortfolioTopMovers";
+import { getRealizedGains } from "@/lib/api/portfolio/useRealizedGains";
 import { getCashflow } from "@/lib/api/reports/cashflow";
 
 /** A client that records the params of every GET and answers with `data`. */
@@ -103,6 +112,59 @@ test("the portfolio chart sends memberKeys on the household's chart only, and on
       ["/v1/portfolio/7/performance", { period: "YTD" }],
     ],
   );
+});
+
+test("every read of the portfolios overview sends memberKeys only when filtered", async () => {
+  const { client, sent } = recordingClient({ dividends: [], earnings: [] });
+  const members = ["4", "shared"];
+  const reads = [
+    (keys?: string[]) => getAggregateDashboard("YTD", client, keys),
+    (keys?: string[]) => getPortfolioMetrics(undefined, client, keys),
+    (keys?: string[]) => getPortfolioAllocation(null, client, keys),
+    (keys?: string[]) => getPortfolioTopMovers(null, "YTD", 5, client, keys),
+    (keys?: string[]) => getPortfoliosHoldings(client, keys),
+    (keys?: string[]) => getPortfolioCalendar(client, keys),
+    (keys?: string[]) => getDividendIncome(null, client, keys),
+    (keys?: string[]) => getRealizedGains(null, null, client, keys),
+  ];
+  for (const read of reads) {
+    await read(members);
+    await read();
+  }
+
+  const filtered = sent.filter((_, index) => index % 2 === 0);
+  const unfiltered = sent.filter((_, index) => index % 2 === 1);
+  for (const request of filtered) {
+    assert.equal(request.params?.memberKeys, "4,shared", request.url);
+  }
+  for (const request of unfiltered) {
+    assert.equal("memberKeys" in (request.params ?? {}), false, request.url);
+  }
+  assert.deepEqual(
+    filtered.map((request) => request.url),
+    [
+      "/v1/portfolio/dashboard",
+      "/v1/portfolio/metrics",
+      "/v1/portfolio/allocation",
+      "/v1/portfolio/top-movers",
+      "/v1/portfolio/holdings",
+      "/v1/portfolio/calendar",
+      "/v1/portfolio/dividend-income",
+      "/v1/portfolio/realized-gains",
+    ],
+  );
+});
+
+test("one portfolio's reads send no member filter: it has one owner", async () => {
+  const { client, sent } = recordingClient({});
+  await getPortfolioAllocation(7, client, ["4"]);
+  await getPortfolioTopMovers(7, "YTD", 5, client, ["4"]);
+  await getDividendIncome(7, client, ["4"]);
+  await getRealizedGains(7, null, client, ["4"]);
+
+  for (const request of sent) {
+    assert.equal("memberKeys" in (request.params ?? {}), false, request.url);
+  }
 });
 
 test("budgets send memberKeys only when filtered", async () => {

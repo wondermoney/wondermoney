@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -7,7 +8,7 @@ import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 
 import TimeframeSelect from "@/components/dashboard/TimeframeSelect";
-import PortfolioAggregatePerformance from "@/components/portfolio/PortfolioAggregatePerformance";
+import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import PortfolioAllocationChart from "@/components/portfolio/PortfolioAllocationChart";
 import PortfolioBenchmarkChart from "@/components/portfolio/PortfolioBenchmarkChart";
 import PortfolioBreakdown from "@/components/portfolio/PortfolioBreakdown";
@@ -19,6 +20,7 @@ import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendInc
 import PortfolioEmptyState from "@/components/portfolio/PortfolioEmptyState";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
 import PortfolioMetrics from "@/components/portfolio/PortfolioMetrics";
+import PortfolioPerformanceChart from "@/components/portfolio/PortfolioPerformanceChart";
 import PortfolioRealizedGains from "@/components/portfolio/PortfolioRealizedGains";
 import PortfolioTopMovers from "@/components/portfolio/PortfolioTopMovers";
 import PortfolioTransactionAddModal from "@/components/portfolio/PortfolioTransactionAddModal";
@@ -37,6 +39,7 @@ import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import usePortfoliosHoldings from "@/lib/api/portfolio/usePortfoliosHoldings";
 import { useUser } from "@/lib/auth/user-context";
 import { getDocsLink } from "@/lib/docs-links";
+import { useMemberFilter } from "@/lib/household/useMemberFilter";
 import {
   cancelFirstRunHandoff,
   completeFirstRunHandoff,
@@ -63,6 +66,11 @@ const Portfolio = () => {
   ];
 
   const [period, setPeriod] = useState<Period>("YTD");
+  // One member filter (`?member=`, `lib/household/member-attribution.ts`) for
+  // the whole overview: every section keeps the portfolios that member owns,
+  // and a former member's under Shared. Absent (everyone, or a household of
+  // one), every read is the household's as before.
+  const { memberKeys } = useMemberFilter();
 
   const fromDate = useMemo(() => {
     return getPortfolioFromDate(period);
@@ -77,11 +85,21 @@ const Portfolio = () => {
     data: dashboardData,
     isError: isDashboardError,
     isLoading: isLoadingDashboard,
-  } = useAggregateDashboard(period);
+  } = useAggregateDashboard(
+    period,
+    // Changing the period or the member keeps the page (and its controls) on
+    // screen with the last figures until the new ones arrive.
+    { placeholderData: keepPreviousData },
+    memberKeys,
+  );
   const { data: holdingsData, isLoading: isLoadingHoldings } =
-    usePortfoliosHoldings();
-  const { data: metricsData } = usePortfolioMetrics(fromDate);
-  const { data: dividendData } = useDividendIncome(null);
+    usePortfoliosHoldings(undefined, memberKeys);
+  const { data: metricsData } = usePortfolioMetrics(
+    fromDate,
+    undefined,
+    memberKeys,
+  );
+  const { data: dividendData } = useDividendIncome(null, undefined, memberKeys);
 
   const [isCreatePortfolioModalOpen, setIsCreatePortfolioModalOpen] = useState(
     !!searchParams.get("create"),
@@ -171,6 +189,7 @@ const Portfolio = () => {
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
+          <MemberFilterControl className="w-40 sm:w-44" />
           <TimeframeSelect
             timeframes={TIMEFRAME_OPTIONS}
             timeframe={period}
@@ -238,11 +257,20 @@ const Portfolio = () => {
         </div>
       )}
 
-      {/* Performance: follows the member filter, its control in the section's head. */}
-      <PortfolioAggregatePerformance
-        period={period}
-        currency={dashboardData?.summary?.currency}
-      />
+      {/* Performance */}
+      <section className="border-foreground min-w-0 border-t-2 pt-4">
+        <div className="mb-4">
+          <h2 className="text-foreground text-lg font-semibold tracking-tight">
+            {t("performance")}
+          </h2>
+        </div>
+        <PortfolioPerformanceChart
+          portfolioId={null}
+          period={period}
+          currency={dashboardData?.summary?.currency}
+          memberKeys={memberKeys}
+        />
+      </section>
 
       {/* Allocation + Benchmark */}
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
@@ -256,6 +284,7 @@ const Portfolio = () => {
             portfolioId={null}
             currency={dashboardData?.summary?.currency ?? "USD"}
             showSectorToggle
+            memberKeys={memberKeys}
           />
         </section>
 
@@ -265,7 +294,11 @@ const Portfolio = () => {
               {t("benchmark-comparison")}
             </h2>
           </div>
-          <PortfolioBenchmarkChart portfolioId={null} period={period} />
+          <PortfolioBenchmarkChart
+            portfolioId={null}
+            period={period}
+            memberKeys={memberKeys}
+          />
         </section>
       </div>
 
@@ -293,6 +326,7 @@ const Portfolio = () => {
             portfolioId={null}
             period={period}
             currency={dashboardData?.summary?.currency}
+            memberKeys={memberKeys}
           />
         </section>
 
@@ -302,7 +336,10 @@ const Portfolio = () => {
               {t("portfolio-calendar")}
             </h2>
           </div>
-          <PortfolioCalendar holdings={holdingsData?.holdings} />
+          <PortfolioCalendar
+            holdings={holdingsData?.holdings}
+            memberKeys={memberKeys}
+          />
         </section>
       </div>
 
@@ -319,6 +356,7 @@ const Portfolio = () => {
             <PortfolioDividendIncome
               portfolioId={null}
               currency={dashboardData?.summary?.currency}
+              memberKeys={memberKeys}
             />
           </section>
         )}
@@ -344,8 +382,8 @@ const Portfolio = () => {
       </section>
 
       {/* Each renders nothing until a portfolio has a sale. */}
-      <PortfolioRealizedGains portfolioId={null} />
-      <PortfolioClosedPositions portfolioId={null} />
+      <PortfolioRealizedGains portfolioId={null} memberKeys={memberKeys} />
+      <PortfolioClosedPositions portfolioId={null} memberKeys={memberKeys} />
     </div>
   );
 };

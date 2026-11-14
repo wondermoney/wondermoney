@@ -20,6 +20,12 @@ const dateFormatOptions = {
 interface PortfolioClosedPositionsProps {
   /** One portfolio, or `null` for every portfolio of the household. */
   portfolioId: number | null;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 /**
@@ -30,11 +36,12 @@ interface PortfolioClosedPositionsProps {
  */
 export default function PortfolioClosedPositions({
   portfolioId,
+  memberKeys,
 }: PortfolioClosedPositionsProps) {
   const t = useTranslations();
   const locale = useLocale();
   const formatQuantity = useFormatQuantity();
-  const { data } = useRealizedGains(portfolioId, null);
+  const { data } = useRealizedGains(portfolioId, null, undefined, memberKeys);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, dateFormatOptions),
     [locale],

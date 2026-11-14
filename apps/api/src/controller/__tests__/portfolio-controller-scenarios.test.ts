@@ -264,7 +264,7 @@ describe('portfolio controller scenarios', () => {
   it('stubs earnings to [] (Fundamentals-tier, not covered) and returns EODHD-backed dividends filtered to the forward window', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'));
-    vi.mocked(zParse).mockResolvedValueOnce({});
+    vi.mocked(zParse).mockResolvedValueOnce({ query: {} });
     mocked.getPortfoliosHoldings.mockResolvedValueOnce([
       { financialAssetSymbol: 'AAPL', isInvalid: false },
       { financialAssetSymbol: 'AMD', isInvalid: false },
@@ -302,7 +302,7 @@ describe('portfolio controller scenarios', () => {
   it('tolerates a single symbol\'s dividend lookup failing without blanking out the rest', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-15T12:00:00.000Z'));
-    vi.mocked(zParse).mockResolvedValueOnce({});
+    vi.mocked(zParse).mockResolvedValueOnce({ query: {} });
     mocked.getPortfoliosHoldings.mockResolvedValueOnce([
       { financialAssetSymbol: 'AAPL', isInvalid: false },
       { financialAssetSymbol: 'AMD', isInvalid: false },

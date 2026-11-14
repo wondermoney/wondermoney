@@ -63,26 +63,49 @@ export type PortfolioOverviewViewModel = Readonly<SummaryFigures & {
   /** A trade fee could not be converted and was left out of the gains. */
   feesLeftOut?: boolean
   periodReturn: number | null
+  /** The portfolios the figures cover: the household's, or the member filter's. */
   portfolioCount: number
   portfolios: readonly PortfolioRowViewModel[]
+  /**
+   * Whether the household has any portfolio, whoever the member filter names: a member with none
+   * sees empty figures, not the first-portfolio prompt. Absent, `portfolioCount` tells.
+   */
+  householdHasPortfolios?: boolean
+  /**
+   * The portfolios "Add transaction" offers: every one of the household's, the filtered ones
+   * first. Absent, `portfolios`.
+   */
+  transactionTargets?: readonly Readonly<{ id: number; name: string }>[]
   totalGainLoss: number
   totalGainLossPercent: number
   totalValue: number
 }>
 
+/**
+ * The tab's figures from the household's portfolio list and the aggregate dashboard. `filtered`:
+ * the dashboard was asked for the member filter's portfolios only, so it alone counts them.
+ */
 export function mapPortfolioOverview(
   list: PortfoliosResponseDto,
   dashboard: AggregateDashboardResponseDto,
+  filtered = false,
 ): PortfolioOverviewViewModel {
   const metadata = new Map(list.portfolios.map((portfolio) => [portfolio.portfolioKey, portfolio]))
+  const shown = new Set(dashboard.portfolios.map((portfolio) => portfolio.portfolioKey))
   return {
     assetCount: dashboard.summary.assetCount,
     currency: dashboard.summary.currency,
     feesLeftOut: Boolean(dashboard.summary.feeConversionIncompleteAssetKeys?.length),
     periodReturn: dashboard.summary.periodReturn,
     // The list is the household's portfolios. Count from it, so the figure matches the rows and
-    // the total even when the server's summary counts only the caller's own portfolios.
-    portfolioCount: Math.max(list.portfolios.length, dashboard.summary.portfolioCount),
+    // the total even when the server's summary counts only the caller's own portfolios; filtered,
+    // the summary counts the member's.
+    portfolioCount: filtered ? dashboard.summary.portfolioCount : Math.max(list.portfolios.length, dashboard.summary.portfolioCount),
+    householdHasPortfolios: Math.max(list.portfolios.length, dashboard.summary.portfolioCount) > 0,
+    transactionTargets: [
+      ...dashboard.portfolios.map((portfolio) => ({ id: portfolio.portfolioKey, name: portfolio.name })),
+      ...list.portfolios.filter((portfolio) => !shown.has(portfolio.portfolioKey)).map((portfolio) => ({ id: portfolio.portfolioKey, name: portfolio.name })),
+    ],
     portfolios: dashboard.portfolios.map((portfolio) => ({
       brokerName: metadata.get(portfolio.portfolioKey)?.broker?.displayName ?? null,
       currency: portfolio.currency,

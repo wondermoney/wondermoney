@@ -1,5 +1,5 @@
 import type { Big } from 'big.js';
-import { type Kysely, sql } from 'kysely';
+import { type Expression, type Kysely, sql, type SqlBool } from 'kysely';
 
 import { DI } from '@app/app';
 import { FINANCIAL_TRANSACTION_TYPES } from '@app/constants/financial-transaction-types';
@@ -154,6 +154,18 @@ export interface HoldingLots {
 type FeeConversion = { amount: number } | { reason: string };
 
 /**
+ * The portfolios a read covers: one portfolio, or a set of them (the member filter's, see
+ * `memberPortfolioKeys`). An empty set covers none. Absent, a read covers every portfolio in its
+ * scope (the household's with a tenant, else the user's own).
+ */
+export type PortfolioSelection = number | readonly number[];
+
+/** SQL: the row's portfolio is one of the selection. */
+function inPortfolios(column: string, selection: PortfolioSelection): Expression<SqlBool> {
+  return typeof selection === 'number' ? sql<SqlBool>`${sql.ref(column)} = ${selection}` : anyOf(column, selection);
+}
+
+/**
  * Service for calculating portfolio holdings from purchase lots.
  *
  * A portfolio's `costBasisMethod` decides how a sale relieves cost. FIFO (First In, First Out)
@@ -161,7 +173,7 @@ type FeeConversion = { amount: number } | { reason: string };
  * running average of the open position, as in Brazil. Both run through `replayHoldingTimeline`.
  */
 class PortfolioHoldingsService {
-  private async getPortfolioTransactionRows(appuserKey: number, portfolioId?: number, tenantKey?: number): Promise<{
+  private async getPortfolioTransactionRows(appuserKey: number, portfolios?: PortfolioSelection, tenantKey?: number): Promise<{
     splitRows: Record<string, unknown>[];
     transactionRows: Record<string, unknown>[];
   }> {
@@ -221,7 +233,7 @@ class PortfolioHoldingsService {
           : eb.and([eb('ft.tenant_key', '=', tenantKey), eb('p.tenant_key', '=', tenantKey)]))
       .where('ft.deleted_at', 'is', null)
       .where('ft.financial_transaction_type_key', 'in', [FINANCIAL_TRANSACTION_TYPES.BUY, FINANCIAL_TRANSACTION_TYPES.SELL])
-      .$if(portfolioId != null, (query) => query.where('ft.portfolio_key', '=', portfolioId))
+      .$if(portfolios != null, (query) => query.where(inPortfolios('ft.portfolio_key', portfolios ?? [])))
       .execute();
 
     // An asset with no resolved FinancialAssetType (unreachable through normal app
@@ -548,10 +560,12 @@ class PortfolioHoldingsService {
   }
 
   /**
-   * Get holdings across all portfolios for a user
+   * Holdings across portfolios, one per asset: the household's (the user's own without a
+   * tenant), or only `portfolios` (the member filter's). Selecting the portfolios before the
+   * replay, not filtering its result, matters because an asset held in several merges into one.
    */
-  async getPortfoliosHoldings(appuser: Appuser, tenantKey?: number): Promise<PortfolioHolding[]> {
-    const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, undefined, tenantKey);
+  async getPortfoliosHoldings(appuser: Appuser, tenantKey?: number, portfolios?: readonly number[]): Promise<PortfolioHolding[]> {
+    const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuser.appuserKey, portfolios, tenantKey);
     const currency = appuser.currencyKey.code || 'EUR';
     const costBasisMethod = this.costBasisMethodFromRows(transactionRows);
     const replay = this.replayRows(transactionRows, splitRows, costBasisMethod);
@@ -657,9 +671,9 @@ class PortfolioHoldingsService {
    * proceeds less its fee. A dividend counts at the stored amount dividend income reads it at
    * ({@link dividendSourceAmount}), so the two agree for every member. Each flow carries its
    * currency (`currencyCode`) for the reader to convert into the viewer's. With `tenantKey`, the
-   * household's flows, otherwise the viewer's own; with `portfolioKey`, only that portfolio's.
+   * household's flows, otherwise the viewer's own; with `portfolioKey`, only those portfolios'.
    */
-  async getInvestmentCashFlows(viewer: Appuser, tenantKey?: number, portfolioKey?: number): Promise<InvestmentCashFlow[]> {
+  async getInvestmentCashFlows(viewer: Appuser, tenantKey?: number, portfolioKey?: PortfolioSelection): Promise<InvestmentCashFlow[]> {
     const appuserKey = viewer.appuserKey;
     const { transactionRows } = await this.getPortfolioTransactionRows(appuserKey, portfolioKey, tenantKey);
     const dividend = dividendSourceAmount(viewer.currencyKey.currencyKey);
@@ -678,7 +692,7 @@ class PortfolioHoldingsService {
           ? eb('ft.appuser_key', '=', appuserKey)
           : eb.and([eb('ft.tenant_key', '=', tenantKey), eb('p.tenant_key', '=', tenantKey)]))
       .where('ft.deleted_at', 'is', null)
-      .$if(portfolioKey != null, (query) => query.where('ft.portfolio_key', '=', portfolioKey))
+      .$if(portfolioKey != null, (query) => query.where(inPortfolios('ft.portfolio_key', portfolioKey ?? [])))
       .execute()) as Record<string, unknown>[];
 
     // Each flow carries the currency its amount is in, as gains count it: the recording member's
@@ -716,9 +730,9 @@ class PortfolioHoldingsService {
    * currency, otherwise converted into it at the rate of the dividend's UTC day. One with no rate is
    * left out of both totals and counted in `completeness`, never added at face value. With
    * `tenantKey`, the household's dividends; otherwise the viewer's own (worker path). With
-   * `portfolioId`, that portfolio's only.
+   * `portfolioId`, only those portfolios'.
    */
-  async getDividendIncome(viewer: Appuser, portfolioId?: number, tenantKey?: number): Promise<DividendIncome> {
+  async getDividendIncome(viewer: Appuser, portfolioId?: PortfolioSelection, tenantKey?: number): Promise<DividendIncome> {
     if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
     const viewerCurrency = viewer.currencyKey.code;
     // Summed per asset, currency and UTC day (rates are daily), so each day's sum is converted once.
@@ -744,7 +758,7 @@ class PortfolioHoldingsService {
       .where((eb) => (tenantKey == null ? eb('ft.appuser_key', '=', viewer.appuserKey) : eb('ft.tenant_key', '=', tenantKey)))
       .where('ft.deleted_at', 'is', null)
       .where(sql<boolean>`${amount} IS NOT NULL`)
-      .$if(Boolean(portfolioId), (query) => query.where('ft.portfolio_key', '=', portfolioId))
+      .$if(portfolioId != null, (query) => query.where(inPortfolios('ft.portfolio_key', portfolioId ?? [])))
       .groupBy(['fa.financial_asset_key', 'fa.symbol', currencyCode, day])
       .orderBy('fa.financial_asset_key')
       .execute()) as { amount: string; currency_code: null | string; day: string; financial_asset_key: number; symbol: string; transactions: string }[];
@@ -790,7 +804,7 @@ class PortfolioHoldingsService {
    */
   async getRealizedGains(
     appuserKey: number,
-    portfolioId?: number,
+    portfolioId?: PortfolioSelection,
     tenantKey?: number,
   ): Promise<RealizedGains> {
     const { splitRows, transactionRows } = await this.getPortfolioTransactionRows(appuserKey, portfolioId, tenantKey);
@@ -830,7 +844,7 @@ class PortfolioHoldingsService {
    */
   async getRealizedGainsReport(
     viewer: Appuser,
-    options: { portfolioId?: number; tenantKey?: number; year?: number } = {},
+    options: { portfolioId?: PortfolioSelection; tenantKey?: number; year?: number } = {},
   ): Promise<RealizedGainsReport> {
     if (!viewer.currencyKey.code) await DI.em.populate(viewer, ['currencyKey']);
     const viewerCurrency = viewer.currencyKey.code;

@@ -18,6 +18,12 @@ import { PortfolioHistoryCurrencyNotice } from "./PortfolioHistoryCurrencyNotice
 interface PortfolioBenchmarkChartProps {
   portfolioId: number | null;
   period: Period;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 const MAX_X_AXIS_TICKS = 5;
@@ -104,6 +110,7 @@ function getReturnColor(value: number) {
 const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
   portfolioId,
   period,
+  memberKeys,
 }) => {
   const t = useTranslations();
   const locale = useLocale();
@@ -115,9 +122,12 @@ const PortfolioBenchmarkChart: React.FC<PortfolioBenchmarkChartProps> = ({
     [locale],
   );
 
+  // The same read as the Performance chart's, so the two share one request.
   const { data: performanceData, isLoading } = usePortfolioPerformance(
     portfolioId,
     period,
+    undefined,
+    memberKeys,
   );
   const readiness = performanceData?.readiness?.benchmark;
   const status: PortfolioBenchmarkReadinessStatus =

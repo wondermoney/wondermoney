@@ -3,6 +3,10 @@ import type { AxiosInstance } from "axios";
 import { z } from "zod";
 
 import api from "../api";
+import {
+  portfolioMembersKey,
+  portfolioMembersParams,
+} from "./portfolioMembers";
 
 /**
  * Forward-looking earnings window. Empty for now — EODHD's Fundamentals plan
@@ -98,10 +102,16 @@ function parseCalendarResponse(raw: unknown): PortfolioCalendarResponse {
   };
 }
 
-async function getPortfolioCalendar(
+/** The household's holdings' calendar, or the member filter's (`portfolioMembers.ts`). */
+export async function getPortfolioCalendar(
   apiClient: AxiosInstance = api,
+  memberKeys?: readonly string[],
 ): Promise<PortfolioCalendarResponse> {
-  const { data } = await apiClient.get("/v1/portfolio/calendar");
+  const params = portfolioMembersParams(memberKeys);
+  const { data } = await apiClient.get(
+    "/v1/portfolio/calendar",
+    params.memberKeys ? { params } : undefined,
+  );
   return parseCalendarResponse(data);
 }
 
@@ -110,10 +120,11 @@ export default function usePortfolioCalendar<R = PortfolioCalendarResponse>(
     UseQueryOptions<PortfolioCalendarResponse, Error, R>,
     "queryKey" | "queryFn"
   >,
+  memberKeys?: readonly string[],
 ) {
   return useQuery({
-    queryKey: ["portfolio-calendar"],
-    queryFn: () => getPortfolioCalendar(),
+    queryKey: ["portfolio-calendar", ...portfolioMembersKey(memberKeys)],
+    queryFn: () => getPortfolioCalendar(api, memberKeys),
     ...options,
   });
 }

@@ -12,14 +12,25 @@ import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 interface PortfolioDividendIncomeProps {
   portfolioId: number | null;
   currency?: string;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 const PortfolioDividendIncome: React.FC<PortfolioDividendIncomeProps> = ({
   portfolioId,
   currency = "USD",
+  memberKeys,
 }) => {
   const t = useTranslations();
-  const { data, isLoading } = useDividendIncome(portfolioId);
+  const { data, isLoading } = useDividendIncome(
+    portfolioId,
+    undefined,
+    memberKeys,
+  );
   const formatCurrency = useFormatCurrency();
   // The totals are in the viewer's currency, which the API names.
   const totalsCurrency = data?.completeness?.currencyCode ?? currency;

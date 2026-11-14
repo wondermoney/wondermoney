@@ -392,15 +392,26 @@ export const createPortfolioWriteEndpoint = writeEndpoint({
 // The API sends opt-in dashboard fields only when asked. Older builds shipped strict schemas
 // that rejected unknown fields, so this keeps them parsing the summary.
 const DASHBOARD_INCLUDE = 'include=feeConversion,periodReturns'
-export const createAggregatePortfolioDashboardEndpoint = (period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
-  method: 'GET' as const, path: `/v1/portfolio/dashboard?period=${period}&${DASHBOARD_INCLUDE}`, schema: aggregateDashboardResponseSchema,
+/**
+ * A household read's path with the Portfolios tab's member filter: `member` (a member's key or
+ * `shared`) keeps the portfolios that member owns, a former member's under Shared. Without one the
+ * path is unchanged, so an unfiltered read is the same as before the filter existed.
+ */
+const withMember = (path: string, member?: string) => (member === undefined ? path : `${path}${path.includes('?') ? '&' : '?'}${new URLSearchParams({ memberKeys: member }).toString()}`)
+
+export const createAggregatePortfolioDashboardEndpoint = (period: PortfolioPerformancePeriod = 'YTD', member?: string) => readEndpoint({
+  method: 'GET' as const, path: withMember(`/v1/portfolio/dashboard?period=${period}&${DASHBOARD_INCLUDE}`, member), schema: aggregateDashboardResponseSchema,
 })
 export const aggregatePortfolioDashboardEndpoint = createAggregatePortfolioDashboardEndpoint('YTD')
-export const portfolioAllocationEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/allocation', schema: portfolioAllocationResponseSchema })
+export const createPortfolioAllocationAggregateEndpoint = (member?: string) => readEndpoint({ method: 'GET' as const, path: withMember('/v1/portfolio/allocation', member), schema: portfolioAllocationResponseSchema })
+export const portfolioAllocationEndpoint = createPortfolioAllocationAggregateEndpoint()
 // Every holding across the household's portfolios (web's "All Holdings").
-export const aggregatePortfolioHoldingsEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/holdings', schema: portfolioHoldingsResponseSchema })
-export const portfolioDividendIncomeEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/dividend-income', schema: portfolioDividendIncomeResponseSchema })
-export const portfolioMetricsEndpoint = readEndpoint({ method: 'GET', path: '/v1/portfolio/metrics', schema: portfolioMetricsResponseSchema })
+export const createAggregatePortfolioHoldingsEndpoint = (member?: string) => readEndpoint({ method: 'GET' as const, path: withMember('/v1/portfolio/holdings', member), schema: portfolioHoldingsResponseSchema })
+export const aggregatePortfolioHoldingsEndpoint = createAggregatePortfolioHoldingsEndpoint()
+export const createAggregateDividendIncomeEndpoint = (member?: string) => readEndpoint({ method: 'GET' as const, path: withMember('/v1/portfolio/dividend-income', member), schema: portfolioDividendIncomeResponseSchema })
+export const portfolioDividendIncomeEndpoint = createAggregateDividendIncomeEndpoint()
+export const createPortfolioMetricsEndpoint = (member?: string) => readEndpoint({ method: 'GET' as const, path: withMember('/v1/portfolio/metrics', member), schema: portfolioMetricsResponseSchema })
+export const portfolioMetricsEndpoint = createPortfolioMetricsEndpoint()
 
 export const isValidPortfolioId = (id: number): boolean => Number.isSafeInteger(id) && id > 0
 
@@ -666,9 +677,14 @@ export const portfolioTopMoversResponseSchema = z.object({
 })
 export type PortfolioTopMoversDto = z.infer<typeof portfolioTopMoversResponseSchema>
 
-/** Web's Top Movers (five gainers, five losers). `null` is the household aggregate. */
-export const createPortfolioTopMoversEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD') => readEndpoint({
+/**
+ * Web's Top Movers (five gainers, five losers). `null` is the household aggregate, which takes
+ * the member filter (`member`); one portfolio has one owner, so it takes none.
+ */
+export const createPortfolioTopMoversEndpoint = (portfolioId: number | null, period: PortfolioPerformancePeriod = 'YTD', member?: string) => readEndpoint({
   method: 'GET' as const,
-  path: `${portfolioId === null ? '/v1/portfolio/top-movers' : portfolioPath(portfolioId, '/top-movers')}?period=${period}&limit=5`,
+  path: portfolioId === null
+    ? withMember(`/v1/portfolio/top-movers?period=${period}&limit=5`, member)
+    : `${portfolioPath(portfolioId, '/top-movers')}?period=${period}&limit=5`,
   schema: portfolioTopMoversResponseSchema,
 })

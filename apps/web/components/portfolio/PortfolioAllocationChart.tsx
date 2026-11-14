@@ -17,6 +17,12 @@ interface PortfolioAllocationChartProps {
   portfolioId: number | null;
   currency: SupportedCurrencyCodes;
   showSectorToggle?: boolean;
+  /**
+   * The overview's member filter (`lib/household/member-attribution.ts`):
+   * the portfolios those members own. Absent for everyone, and for one
+   * portfolio.
+   */
+  memberKeys?: string[];
 }
 
 // The project's validated categorical ramp, in order. This replaced eight raw
@@ -44,6 +50,7 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
   portfolioId,
   currency,
   showSectorToggle = false,
+  memberKeys,
 }) => {
   const t = useTranslations();
   const formatPercentage = useFormatPercentage();
@@ -51,8 +58,11 @@ const PortfolioAllocationChart: React.FC<PortfolioAllocationChartProps> = ({
   const formatCurrency = useFormatCurrency();
   const [viewMode, setViewMode] = useState<"type" | "sector" | "asset">("type");
 
-  const { data: allocationData, isLoading } =
-    usePortfolioAllocation(portfolioId);
+  const { data: allocationData, isLoading } = usePortfolioAllocation(
+    portfolioId,
+    undefined,
+    memberKeys,
+  );
 
   const chartData = useMemo(() => {
     if (!allocationData) {
