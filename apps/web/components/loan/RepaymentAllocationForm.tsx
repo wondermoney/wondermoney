@@ -90,7 +90,7 @@ export default function RepaymentAllocationForm({
   }, [candidate, existingRepayment, form]);
   const submit = async (values: z.output<Schema>) => {
     const payload = {
-      transactionKey: candidate.transactionKey,
+      transactionKey: candidate.transaction.transactionKey,
       totalPaymentAmount: values.total,
       principalAmount: values.principal,
       interestAmount: values.interest,

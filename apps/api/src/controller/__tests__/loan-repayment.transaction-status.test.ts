@@ -37,13 +37,23 @@ describe('loan repayments and transaction status', () => {
     return { household, keys, loan };
   }
 
-  it('does not offer an expired payment as a repayment candidate', async () => {
+  it('offers eligible payments with their account and currency, excluding expired ones', async () => {
     const { household, keys, loan } = await seedLoanAndPayments();
 
     const { body } = await call(listLoanRepaymentCandidates, household, { params: { loanId: String(loan.loanKey) } });
 
     const offered = (body?.['candidates'] as { transaction: { transactionKey: number } }[]).map((candidate) => candidate.transaction.transactionKey);
     expect(offered.sort()).toEqual([keys.BOOKED, keys.PENDING, keys.none].sort());
+    expect(body?.['candidates']).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        confidence: 'MEDIUM',
+        transaction: expect.objectContaining({
+          accountName: household.account.accountName,
+          currencyCode: household.currency.code,
+          transactionKey: keys.BOOKED,
+        }),
+      }),
+    ]));
   });
 
   it('refuses to link an expired payment as a repayment', async () => {

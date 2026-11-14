@@ -138,6 +138,7 @@
         "linked": "Vinculado",
         "candidateConfidence": "Confianza: {value}",
         "confidenceValue": "{value}%",
+        "confidence": { "HIGH": "Alta", "MEDIUM": "Media", "LOW": "Baja" },
         "confidenceUnavailable": "no disponible",
         "reasonsUnavailable": "No se proporcionaron razones",
         "high": "alta",
