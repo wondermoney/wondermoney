@@ -14,7 +14,7 @@ import EtfTracker from "@/components/landing/EtfTracker";
 import PortfolioTracker from "@/components/landing/PortfolioTracker";
 import NetWorthTracker from "@/components/landing/NetWorthTracker";
 import YnabAlternative from "@/components/landing/YnabAlternative";
-import FireCalculator from "@/components/landing/FireCalculator";
+import FireCalculatorPage from "@/components/landing/FireCalculatorPage.astro";
 import HowToCalculateNetWorth from "@/components/landing/HowToCalculateNetWorth";
 import PersonalFinanceApp from "@/components/landing/PersonalFinanceApp";
 import OpenBankingApp from "@/components/landing/OpenBankingApp";
@@ -227,7 +227,7 @@ const structuredData = softwareSchemas[routeId]
     {routeId === "pagePortfolioTracker" && <PortfolioTracker locale={locale} client:idle />}
     {routeId === "pageNetWorthTracker" && <NetWorthTracker locale={locale} client:idle />}
     {routeId === "pageYnabAlternative" && <YnabAlternative locale={locale} client:idle />}
-    {routeId === "pageFireCalculator" && <FireCalculator locale={locale} client:idle />}
+    {routeId === "pageFireCalculator" && <FireCalculatorPage locale={locale} />}
     {routeId === "pageHowToCalculateNetWorth" && (
       <HowToCalculateNetWorth locale={locale} client:idle />
     )}
