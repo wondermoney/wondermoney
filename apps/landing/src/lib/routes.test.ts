@@ -424,3 +424,48 @@ describe("standalone page routes", () => {
 		)
 	})
 })
+
+describe("emergency fund tool route", () => {
+	const expectedPaths: Record<Lang, string> = {
+		pt: "/pt/tools/fundo-de-emergencia",
+		en: "/en/tools/emergency-fund-calculator",
+		es: "/es/tools/fondo-de-emergencia",
+		fr: "/fr/tools/epargne-de-precaution",
+		de: "/de/tools/notgroschen-rechner",
+		it: "/it/tools/fondo-di-emergenza",
+	}
+
+	it.each(SUPPORTED_LANGS)("has a localized tool path in %s that resolves back", (lang) => {
+		expect(toLocalizedPath("toolEmergencyFund", lang)).toBe(expectedPaths[lang])
+		expect(
+			resolveToolRouteId(lang, getLocalizedSlug("toolEmergencyFund", lang)),
+		).toBe("toolEmergencyFund")
+	})
+
+	it("maps the slug when switching language", () => {
+		expect(toLocalizedPathname("/pt/tools/fundo-de-emergencia", "de")).toBe(
+			"/de/tools/notgroschen-rechner",
+		)
+		expect(toLocalizedPathname("/fr/tools/epargne-de-precaution", "en")).toBe(
+			"/en/tools/emergency-fund-calculator",
+		)
+	})
+
+	it("resolves the identifiers learn and glossary content can link it by", () => {
+		for (const value of ["toolEmergencyFund", "emergency-fund-calculator", "emergencyFund", "fundo-de-emergencia"]) {
+			expect(resolveToolRouteIdFromLegacy(value, "en")).toBe("toolEmergencyFund")
+		}
+		expect(resolveToolRouteIdFromLegacy("notgroschen-rechner", "de")).toBe(
+			"toolEmergencyFund",
+		)
+	})
+
+	it.each(SUPPORTED_LANGS)("is listed on the %s tools hub", (lang) => {
+		const hubSource = readFileSync(
+			fileURLToPath(new URL(`../pages/${lang}/tools/index.astro`, import.meta.url)),
+			"utf8",
+		)
+
+		expect(hubSource).toContain('routeId: "toolEmergencyFund"')
+	})
+})

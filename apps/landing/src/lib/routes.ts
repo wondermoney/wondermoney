@@ -232,6 +232,14 @@ const ROUTE_SLUGS = {
 		de: "schuldendienstquote-rechner",
 		it: "rapporto-rata-reddito",
 	},
+	toolEmergencyFund: {
+		pt: "fundo-de-emergencia",
+		en: "emergency-fund-calculator",
+		es: "fondo-de-emergencia",
+		fr: "epargne-de-precaution",
+		de: "notgroschen-rechner",
+		it: "fondo-di-emergenza",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -335,6 +343,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolSavingsRate",
 	"toolInvestmentReturn",
 	"toolDebtToIncome",
+	"toolEmergencyFund",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -546,6 +555,11 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	debttoincomecalculator: "toolDebtToIncome",
 	"debt-to-income-calculator": "toolDebtToIncome",
 	"taxa-de-esforco": "toolDebtToIncome",
+	toolemergencyfund: "toolEmergencyFund",
+	emergencyfundcalculator: "toolEmergencyFund",
+	"emergency-fund-calculator": "toolEmergencyFund",
+	"emergency-fund": "toolEmergencyFund",
+	"fundo-de-emergencia": "toolEmergencyFund",
 }
 
 function normalizeRouteLookupKey(value: string): string {
