@@ -270,7 +270,7 @@ describe("computeMortgage", () => {
     });
   });
 
-  it("rejects a negative or implausibly high rate and treats an empty rate as 0%", () => {
+  it("rejects a negative, implausibly high or empty rate", () => {
     expect(computeMortgage({ ...base, annualRate: -1 })).toEqual({
       ok: false,
       errors: { annualRate: "negative" },
@@ -279,7 +279,11 @@ describe("computeMortgage", () => {
       ok: false,
       errors: { annualRate: "tooLarge" },
     });
-    expect(calculate({ annualRate: Number.NaN }).totalInterest).toBe(0);
+    expect(computeMortgage({ ...base, annualRate: Number.NaN })).toEqual({
+      ok: false,
+      errors: { annualRate: "required" },
+    });
+    expect(calculate({ annualRate: 0 }).totalInterest).toBe(0);
   });
 
   it("rejects negative or implausibly high fees and treats empty fees as none", () => {

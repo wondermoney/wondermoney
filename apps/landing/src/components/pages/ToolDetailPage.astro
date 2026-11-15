@@ -20,6 +20,7 @@ import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
 import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
+import { getToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
 import type { ToolRouteId } from "@/lib/pageStaticPaths";
 
@@ -31,29 +32,7 @@ interface Props {
 const { locale, routeId } = Astro.props;
 const t = getTranslations(locale);
 
-const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
-  toolCompoundInterest: ["toolNetWorth", "toolSavingsRate", "toolInvestmentReturn"],
-  toolNetWorth: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
-  toolSavingsRate: ["toolCompoundInterest", "toolNetWorth", "toolInvestmentReturn"],
-  toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
-  toolDebtToIncome: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
-  toolEmergencyFund: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
-  toolMortgage: ["toolDebtToIncome", "toolSavingsRate", "toolNetWorth"],
-  toolHouseholdBudget: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
-  toolSavingsGoal: ["toolCompoundInterest", "toolSavingsRate", "toolEmergencyFund"],
-};
-
-const toolKeyByRouteId: Record<ToolRouteId, string> = {
-  toolCompoundInterest: "compoundInterest",
-  toolNetWorth: "netWorth",
-  toolSavingsRate: "savingsRate",
-  toolInvestmentReturn: "investmentReturn",
-  toolDebtToIncome: "debtToIncome",
-  toolEmergencyFund: "emergencyFund",
-  toolMortgage: "mortgage",
-  toolHouseholdBudget: "householdBudget",
-  toolSavingsGoal: "savingsGoal",
-};
+const { key, related } = getToolCatalogEntry(routeId);
 
 // Tools whose closing call to action names their own next step in the app.
 const nextStepCtaByRouteId: Partial<
@@ -88,18 +67,17 @@ const nextStepCtaByRouteId: Partial<
   },
 };
 
-const relatedItems = relatedByRouteId[routeId].map((relatedRouteId) => {
-  const key = toolKeyByRouteId[relatedRouteId];
+const relatedItems = related.map((relatedRouteId) => {
+  const relatedKey = getToolCatalogEntry(relatedRouteId).key;
 
   return {
-    title: t(`tools.${key}.title`),
-    description: t(`tools.${key}.description`),
+    title: t(`tools.${relatedKey}.title`),
+    description: t(`tools.${relatedKey}.description`),
     href: toLocalizedPath(relatedRouteId, locale),
     type: "calculator" as const,
   };
 });
 
-const key = toolKeyByRouteId[routeId];
 const alternateLinks = buildAlternateLinks(routeId);
 const pageTitle = t(`tools.${key}.pageTitle`);
 const pageDescription = t(`tools.${key}.pageDescription`);

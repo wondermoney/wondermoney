@@ -52,9 +52,11 @@ function NetWorthCalculatorContent() {
   const [otherDebt, setOtherDebt] = useState(0);
 
   const { totalAssets, totalLiabilities, netWorth, chartData } = useMemo(() => {
-    const assets =
-      cashSavings + investments + realEstate + vehicles + otherAssets;
-    const liabilities = mortgage + studentLoans + creditCardDebt + otherDebt;
+    // Every line is an optional amount: an empty one counts as 0.
+    const sum = (...values: number[]) =>
+      values.reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0);
+    const assets = sum(cashSavings, investments, realEstate, vehicles, otherAssets);
+    const liabilities = sum(mortgage, studentLoans, creditCardDebt, otherDebt);
     const net = assets - liabilities;
 
     const data = [

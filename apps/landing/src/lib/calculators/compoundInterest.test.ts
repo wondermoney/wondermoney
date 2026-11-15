@@ -24,7 +24,9 @@ const base: CompoundInterestParams = {
 /** The nominal and real totals of a result that has them. */
 function totals(params: CompoundInterestParams) {
   const result = computeCompoundInterest(params);
-  if (result.status === "tooLarge") throw new Error("expected figures, got tooLarge");
+  if (result.status === "tooLarge" || result.status === "incomplete") {
+    throw new Error(`expected figures, got ${result.status}`);
+  }
   return result;
 }
 
@@ -176,6 +178,18 @@ describe("computeCompoundInterest", () => {
     expect(result.schedule).toHaveLength(1);
   });
 
+  it.each(["annualRate", "years"] as const)("reports incomplete, with no figures, while %s is empty", (field) => {
+    const result = computeCompoundInterest({ ...base, [field]: Number.NaN });
+    expect(result.status).toBe("incomplete");
+    expect(result.nominal).toBeNull();
+    expect(result.real).toBeNull();
+    expect(result.schedule).toEqual([]);
+  });
+
+  it("counts an empty inflation rate as 0", () => {
+    expect(totals({ ...base, inflationRate: Number.NaN })).toEqual(totals({ ...base, inflationRate: 0 }));
+  });
+
   it("reports nothing invested when both amounts are zero or empty", () => {
     for (const empty of [0, Number.NaN]) {
       const result = totals({ ...base, principal: empty, monthlyContribution: empty });
@@ -306,6 +320,14 @@ describe("defaultComparisonContribution", () => {
 });
 
 describe("compareContributions", () => {
+  it("leaves the comparison incomplete, with no difference, while its contribution is empty", () => {
+    const { current, comparison, difference } = compareContributions(base, Number.NaN);
+    expect(current.status).toBe("ok");
+    expect(comparison.status).toBe("incomplete");
+    expect(comparison.nominal).toBeNull();
+    expect(difference).toBeNull();
+  });
+
   it("compares the same plan at a second monthly contribution", () => {
     const comparison = compareContributions(base, 300);
 

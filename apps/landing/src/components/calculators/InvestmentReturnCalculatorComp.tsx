@@ -32,6 +32,10 @@ function InvestmentReturnCalculatorContent() {
   const [currentValue, setCurrentValue] = useState(15000);
   const [years, setYears] = useState(5);
 
+  // Every field is needed: while one is empty the results show a dash.
+  const complete = [initialInvestment, currentValue, years].every(Number.isFinite);
+  const shown = (format: () => string) => (complete ? format() : "\u2014");
+
   const { totalReturn, totalReturnPct, annualizedReturn } = useMemo(() => {
     const returnAmount = currentValue - initialInvestment;
     const returnPct =
@@ -94,15 +98,15 @@ function InvestmentReturnCalculatorContent() {
           items={[
             {
               label: t("tools.investmentReturn.totalReturn"),
-              value: eurFormatter.format(totalReturn),
+              value: shown(() => eurFormatter.format(totalReturn)),
             },
             {
               label: t("tools.investmentReturn.totalReturnPct"),
-              value: formatPercent(locale, totalReturnPct),
+              value: shown(() => formatPercent(locale, totalReturnPct)),
             },
             {
               label: t("tools.investmentReturn.annualizedReturn"),
-              value: formatPercent(locale, annualizedReturn, { decimals: 2 }),
+              value: shown(() => formatPercent(locale, annualizedReturn, { decimals: 2 })),
               highlight: true,
             },
           ]}

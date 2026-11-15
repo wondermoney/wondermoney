@@ -88,8 +88,13 @@ function FireCalculatorContent() {
       ? ` ${t(k("clampedNote"), { value: rate(locale, used[field]) })}`
       : "";
 
+  // An empty rate gives no figures: the calculation would read it as 0% or the default.
+  const missingRate = !Number.isFinite(inputs.realReturn) || !Number.isFinite(inputs.withdrawalRate);
+  const emptyMessage =
+    result.status === "noSpending" ? t(k("noSpending")) : missingRate ? t(k("missingRate")) : null;
+
   const progressForBar = result.progress === null ? 0 : Math.min(100, result.progress);
-  const showChart = result.path.length > 1;
+  const showChart = emptyMessage === null && result.path.length > 1;
 
   return (
     <div className="space-y-8">
@@ -163,9 +168,9 @@ function FireCalculatorContent() {
         {/* Results */}
         <div className="sticky top-20 space-y-6 break-words rounded-card border border-border bg-background p-6 shadow-sm lg:top-24">
           <div aria-live="polite" className="space-y-6">
-            {result.status === "noSpending" ? (
+            {emptyMessage !== null ? (
               <p className="rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
-                {t(k("noSpending"))}
+                {emptyMessage}
               </p>
             ) : (
               <>

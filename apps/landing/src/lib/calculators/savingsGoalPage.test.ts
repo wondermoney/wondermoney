@@ -10,6 +10,7 @@ import {
 	toLocalizedPathname,
 	type Lang,
 } from "../routes"
+import { buildToolsHub } from "../toolsCatalog"
 
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
@@ -77,9 +78,12 @@ describe("savings goal tool page", () => {
 	})
 
 	it.each(SUPPORTED_LANGS)("is listed on the %s tools hub", (lang) => {
-		expect(readSource(`../../pages/${lang}/tools/index.astro`)).toContain(
-			'{ key: "savingsGoal", routeId: "toolSavingsGoal", available: true }',
-		)
+		const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+
+		expect(hubTools.find((tool) => tool.routeId === "toolSavingsGoal")).toMatchObject({
+			key: "savingsGoal",
+			href: expectedPaths[lang],
+		})
 	})
 
 	it("closes with its own next step into the app", () => {
