@@ -1458,6 +1458,7 @@
         "even": "Both paths end level",
         "breakEven": "Buying pulls ahead at the end of year {{year}}.",
         "noBreakEven": "Buying does not pull ahead by the end of year {{years}}.",
+        "aheadThenBehind": "Buying is ahead from year {{from}} but falls behind again by year {{back}}.",
         "firstMonth": "Both paths start with {{upfront}}. In the first month owning costs {{owning}}, of which {{mortgage}} is the mortgage payment, and renting costs {{rent}}."
       },
       "chartLabel": "Line chart of net worth if you buy and if you rent, from the purchase to the end of year {{years}}. The table below lists the same figures.",
@@ -1493,7 +1494,7 @@
         "read": {
           "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
           "difference": "The difference: how far ahead one path is at the end of the period you chose.",
-          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind, because the purchase costs are spent on day one and selling would cost more on top.",
+          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
           "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
         },
         "exampleHeading": "Worked example",
@@ -1510,7 +1511,7 @@
           "start": "Both paths start with the same cash: the down payment plus the purchase costs. The owner spends it on the home; the renter invests all of it.",
           "loan": "The mortgage is the one the mortgage calculator works out: a fixed rate, with each month's payment set from the balance still owed. Payments stop once the loan is repaid.",
           "monthly": "Each month the owner pays the mortgage and a twelfth of the year's ownership costs, and the renter pays the rent. Whichever path costs less that month invests the difference.",
-          "growth": "The home's value changes once a year by the growth rate, and the ownership costs follow the value. The rent rises once a year by the rent increase.",
+          "growth": "The home's value changes once a year by the growth rate. Ownership costs are a percentage of the value at the start of each year, so they change with it. The rent rises once a year by the rent increase.",
           "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
           "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
         },

@@ -1458,6 +1458,7 @@
         "even": "Beide Wege enden gleichauf",
         "breakEven": "Kaufen zieht am Ende von Jahr {{year}} vorbei.",
         "noBreakEven": "Kaufen zieht bis zum Ende von Jahr {{years}} nicht vorbei.",
+        "aheadThenBehind": "Kaufen liegt ab Jahr {{from}} vorne, fällt aber bis Ende von Jahr {{back}} wieder zurück.",
         "firstMonth": "Beide Wege starten mit {{upfront}}. Im ersten Monat kostet das Eigentum {{owning}}, davon {{mortgage}} Kreditrate, und das Mieten {{rent}}."
       },
       "chartLabel": "Liniendiagramm des Vermögens beim Kauf und beim Mieten, vom Kauf bis zum Ende von Jahr {{years}}. Die Tabelle darunter enthält dieselben Zahlen.",
@@ -1493,7 +1494,7 @@
         "read": {
           "netWorth": "Das Vermögen beider Wege: beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits ließe, plus alles Angelegte; beim Mieten die Anlagen.",
           "difference": "Die Differenz: wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt.",
-          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, weil die Kaufnebenkosten am ersten Tag anfallen und ein Verkauf noch mehr kosten würde.",
+          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und ein sofortiger Verkauf würde zusätzlich die Verkaufskosten kosten. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters.",
           "chart": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
         },
         "exampleHeading": "Rechenbeispiel",
@@ -1510,7 +1511,7 @@
           "start": "Beide Wege starten mit demselben Geld: Eigenkapital plus Kaufnebenkosten. Der Käufer steckt es in die Immobilie, der Mieter legt alles an.",
           "loan": "Die Hypothek ist die, die der Hypothekenrechner ermittelt: fester Zins, und jede Monatsrate wird aus der Restschuld berechnet. Die Raten enden, sobald der Kredit getilgt ist.",
           "monthly": "Jeden Monat zahlt der Käufer die Kreditrate und ein Zwölftel der jährlichen Eigentümerkosten, der Mieter die Miete. Der Weg, der in diesem Monat weniger kostet, legt die Differenz an.",
-          "growth": "Der Immobilienwert ändert sich einmal im Jahr um die Wertsteigerung, und die laufenden Kosten folgen dem Wert. Die Miete steigt einmal im Jahr um die angegebene Erhöhung.",
+          "growth": "Der Immobilienwert ändert sich einmal im Jahr um die Wertsteigerung. Die laufenden Eigentümerkosten sind ein Prozentsatz des Werts zu Beginn jedes Jahres und ändern sich deshalb mit ihm. Die Miete steigt einmal im Jahr um die angegebene Erhöhung.",
           "returns": "Die Anlagen wachsen jeden Monat mit dem Monatszins, der über zwölf Monate die Jahresrendite ergibt.",
           "netWorth": "Am Ende jedes Jahres ist das Vermögen des Käufers der Immobilienwert abzüglich Verkaufskosten und Restschuld, plus seine Anlagen. Das des Mieters sind seine Anlagen. Das Jahr des Gleichstands ist das erste, das mit dem Käufer vorne endet."
         },

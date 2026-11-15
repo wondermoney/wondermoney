@@ -1458,6 +1458,7 @@
         "even": "Os dois caminhos acabam empatados",
         "breakEven": "Comprar passa à frente no fim do ano {{year}}.",
         "noBreakEven": "Comprar não passa à frente até ao fim do ano {{years}}.",
+        "aheadThenBehind": "Comprar fica à frente a partir do ano {{from}}, mas volta a ficar atrás até ao fim do ano {{back}}.",
         "firstMonth": "Os dois caminhos começam com {{upfront}}. No primeiro mês, ter casa custa {{owning}}, dos quais {{mortgage}} são a prestação do crédito, e arrendar custa {{rent}}."
       },
       "chartLabel": "Gráfico de linhas do património se comprares e se arrendares, da compra até ao fim do ano {{years}}. A tabela abaixo tem os mesmos valores.",
@@ -1493,7 +1494,7 @@
         "read": {
           "netWorth": "O património de cada caminho: para quem compra, o que ficaria depois de vender a casa, pagar os custos de venda e liquidar o crédito, mais o que tiver investido; para quem arrenda, os investimentos.",
           "difference": "A diferença: quanto um caminho está à frente do outro no fim do período que escolheste.",
-          "breakEven": "O ano de equilíbrio: o primeiro ano que acaba com comprar à frente. Comprar começa atrás, porque os custos de compra são pagos no primeiro dia e vender ainda custaria mais.",
+          "breakEven": "O ano de equilíbrio: o primeiro ano que acaba com comprar à frente. Comprar começa atrás sempre que há custos de compra ou de venda: os custos de compra são pagos no primeiro dia e vender logo a seguir ainda custaria os custos de venda. Comprar também pode passar à frente e voltar a ficar atrás, por exemplo quando o valor da casa cresce mais devagar do que os investimentos de quem arrenda.",
           "chart": "O gráfico e a tabela mostram os dois caminhos em cada ano, para veres se a distância está a diminuir ou a aumentar."
         },
         "exampleHeading": "Exemplo prático",
@@ -1510,7 +1511,7 @@
           "start": "Os dois caminhos começam com o mesmo dinheiro: a entrada mais os custos de compra. Quem compra gasta-o na casa; quem arrenda investe-o todo.",
           "loan": "O crédito é o que o simulador de crédito habitação calcula: taxa fixa, com a prestação de cada mês calculada a partir do capital ainda em dívida. As prestações param quando o crédito fica pago.",
           "monthly": "Em cada mês, quem compra paga a prestação e um duodécimo dos custos anuais de ter casa, e quem arrenda paga a renda. O caminho que custar menos nesse mês investe a diferença.",
-          "growth": "O valor da casa muda uma vez por ano pela taxa de valorização, e os custos de ter casa acompanham o valor. A renda sobe uma vez por ano pelo aumento indicado.",
+          "growth": "O valor da casa muda uma vez por ano pela taxa de valorização. Os custos de ter casa são uma percentagem do valor no início de cada ano, por isso acompanham-no. A renda sobe uma vez por ano pelo aumento indicado.",
           "returns": "Os investimentos crescem todos os meses à taxa mensal que, composta ao longo de um ano, dá o rendimento anual.",
           "netWorth": "No fim de cada ano, o património de quem compra é o valor da casa menos os custos de venda e o crédito em dívida, mais os investimentos. O de quem arrenda são os investimentos. O ano de equilíbrio é o primeiro que acaba com quem compra à frente."
         },

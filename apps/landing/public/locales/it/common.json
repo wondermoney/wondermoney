@@ -1458,6 +1458,7 @@
         "even": "Le due strade finiscono in parità",
         "breakEven": "Comprare passa in vantaggio alla fine dell'anno {{year}}.",
         "noBreakEven": "Comprare non passa in vantaggio entro la fine dell'anno {{years}}.",
+        "aheadThenBehind": "Comprare è in vantaggio dall'anno {{from}}, ma torna in svantaggio entro la fine dell'anno {{back}}.",
         "firstMonth": "Le due strade partono con {{upfront}}. Il primo mese la proprietà costa {{owning}}, di cui {{mortgage}} di rata del mutuo, e l'affitto {{rent}}."
       },
       "chartLabel": "Grafico a linee del patrimonio se compri e se affitti, dall'acquisto alla fine dell'anno {{years}}. La tabella qui sotto riporta le stesse cifre.",
@@ -1493,7 +1494,7 @@
         "read": {
           "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
           "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
-          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio, perché i costi di acquisto si pagano il primo giorno e vendere costerebbe ancora di più.",
+          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendere il giorno stesso costerebbe in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta.",
           "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
         },
         "exampleHeading": "Esempio pratico",
@@ -1510,7 +1511,7 @@
           "start": "Le due strade partono con lo stesso denaro: l'anticipo più i costi di acquisto. Chi compra lo spende nella casa; chi affitta lo investe tutto.",
           "loan": "Il mutuo è quello calcolato dal calcolatore del mutuo: tasso fisso, con la rata di ogni mese ricavata dal debito residuo. Le rate finiscono quando il mutuo è estinto.",
           "monthly": "Ogni mese chi compra paga la rata e un dodicesimo dei costi di proprietà dell'anno, e chi affitta paga l'affitto. La strada che quel mese costa meno investe la differenza.",
-          "growth": "Il valore della casa cambia una volta all'anno secondo la rivalutazione, e i costi di proprietà seguono il valore. L'affitto sale una volta all'anno secondo l'aumento indicato.",
+          "growth": "Il valore della casa cambia una volta all'anno secondo la rivalutazione. I costi di proprietà sono una percentuale del valore all'inizio di ogni anno, quindi cambiano con esso. L'affitto sale una volta all'anno secondo l'aumento indicato.",
           "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
           "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta sono i suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
         },

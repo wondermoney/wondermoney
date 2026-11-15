@@ -195,6 +195,7 @@ describe("computeBuyVsRent", () => {
 	})
 
 	it("handles a 100% down payment with no loan", () => {
+		// Without a loan the mortgage fields are ignored, even when empty.
 		const result = compute({ mortgageTermYears: Number.NaN, mortgageRate: Number.NaN, horizonYears: 5 })
 
 		expect(result.loanAmount).toBe(0)
@@ -233,25 +234,63 @@ describe("computeBuyVsRent", () => {
 		}
 	})
 
-	it("reads empty optional fields as zero", () => {
+	it("reads an empty down payment, rent or cost percentage as zero", () => {
 		const empty = compute({
 			downPayment: Number.NaN,
-			mortgageRate: Number.NaN,
 			purchaseCostsPct: Number.NaN,
 			ownershipCostsPct: Number.NaN,
-			appreciationPct: Number.NaN,
 			monthlyRent: Number.NaN,
-			rentIncreasePct: Number.NaN,
-			investmentReturnPct: Number.NaN,
 			sellingCostsPct: Number.NaN,
 		})
-		const zero = compute({
-			downPayment: 0,
-			mortgageRate: 0,
-			monthlyRent: 0,
-		})
+		const zero = compute({ downPayment: 0, monthlyRent: 0 })
 
 		expect(empty).toEqual(zero)
+	})
+
+	it("reports the year buying falls behind again after pulling ahead", () => {
+		const result = compute(
+			{
+				downPayment: 30_000,
+				mortgageRate: 1,
+				mortgageTermYears: 15,
+				ownershipCostsPct: 0.5,
+				appreciationPct: 0,
+				monthlyRent: 1_000,
+				rentIncreasePct: 1,
+				horizonYears: 20,
+			},
+			BUY_VS_RENT_EXAMPLE,
+		)
+
+		expect(result.breakEvenYear).toBe(11)
+		expect(result.fallsBehindYear).toBe(15)
+		expect(result.years[14].difference).toBeGreaterThan(0)
+		expect(result.years[15].difference).toBeLessThanOrEqual(0)
+		expect(result.difference).toBeLessThanOrEqual(0)
+	})
+
+	it("has no falls-behind year while buying stays ahead or never gets ahead", () => {
+		expect(compute({}, BUY_VS_RENT_EXAMPLE).fallsBehindYear).toBeNull()
+		expect(compute({ appreciationPct: -5 }, BUY_VS_RENT_EXAMPLE).fallsBehindYear).toBeNull()
+	})
+
+	it("matches the year-by-year differences for break-even and falling behind", () => {
+		for (const appreciationPct of [-2, 0, 1, 2, 4]) {
+			for (const monthlyRent of [600, 1_000, 1_400]) {
+				for (const mortgageTermYears of [10, 15, 30]) {
+					const result = compute(
+						{ appreciationPct, monthlyRent, mortgageTermYears, horizonYears: 30 },
+						BUY_VS_RENT_EXAMPLE,
+					)
+					const ahead = result.years.find((year) => year.year > 0 && year.difference > 0)
+					const behind = ahead
+						? result.years.find((year) => year.year > ahead.year && year.difference <= 0)
+						: undefined
+					expect(result.breakEvenYear).toBe(ahead?.year ?? null)
+					expect(result.fallsBehindYear).toBe(behind?.year ?? null)
+				}
+			}
+		}
 	})
 })
 
@@ -271,6 +310,20 @@ describe("computeBuyVsRent validation", () => {
 		expect(errorsOf({ downPayment: BUY_VS_RENT_EXAMPLE.homePrice + 1 }).downPayment).toBe("aboveHomePrice")
 		expect(errorsOf({ downPayment: BUY_VS_RENT_EXAMPLE.homePrice - 50 }).downPayment).toBe("loanTooSmall")
 		expect(errorsOf({ downPayment: BUY_VS_RENT_EXAMPLE.homePrice }).downPayment).toBeUndefined()
+	})
+
+	it("asks for an empty rate instead of reading it as 0%", () => {
+		for (const field of ["mortgageRate", "appreciationPct", "rentIncreasePct", "investmentReturnPct"] as const) {
+			expect(errorsOf({ [field]: Number.NaN })[field]).toBe("required")
+		}
+	})
+
+	it("checks the minimum loan in cents, as the loan is built", () => {
+		// In floating-point euros 128.01 − 28.01 is 99.99999999999999; in cents it is exactly 10000.
+		expect(128.01 - 28.01).toBeLessThan(100)
+		expect(errorsOf({ homePrice: 128.01, downPayment: 28.01 }).downPayment).toBeUndefined()
+		expect(compute({ homePrice: 128.01, downPayment: 28.01 }, BUY_VS_RENT_EXAMPLE).loanAmount).toBe(100)
+		expect(errorsOf({ homePrice: 128.01, downPayment: 28.02 }).downPayment).toBe("loanTooSmall")
 	})
 
 	it("checks the mortgage only when there is one", () => {

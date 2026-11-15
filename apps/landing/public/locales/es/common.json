@@ -1458,6 +1458,7 @@
         "even": "Los dos caminos acaban igualados",
         "breakEven": "Comprar se pone por delante al final del año {{year}}.",
         "noBreakEven": "Comprar no se pone por delante antes del final del año {{years}}.",
+        "aheadThenBehind": "Comprar va por delante desde el año {{from}}, pero vuelve a quedarse atrás al final del año {{back}}.",
         "firstMonth": "Los dos caminos empiezan con {{upfront}}. El primer mes, ser propietario cuesta {{owning}}, de los que {{mortgage}} son la cuota de la hipoteca, y alquilar cuesta {{rent}}."
       },
       "chartLabel": "Gráfico de líneas del patrimonio si compras y si alquilas, desde la compra hasta el final del año {{years}}. La tabla de abajo recoge las mismas cifras.",
@@ -1493,7 +1494,7 @@
         "read": {
           "netWorth": "El patrimonio de cada camino: si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones.",
           "difference": "La diferencia: cuánto va por delante un camino al final del periodo que has elegido.",
-          "breakEven": "El año de equilibrio: el primer año que termina con comprar por delante. Comprar empieza por detrás, porque los gastos de compra se pagan el primer día y vender costaría todavía más.",
+          "breakEven": "El año de equilibrio: el primer año que termina con comprar por delante. Comprar empieza por detrás siempre que haya gastos de compra o de venta: los gastos de compra se pagan el primer día y vender enseguida costaría además los gastos de venta. Comprar también puede ponerse por delante y volver a quedarse atrás, por ejemplo cuando el valor de la vivienda crece más despacio que las inversiones de quien alquila.",
           "chart": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
         },
         "exampleHeading": "Ejemplo práctico",
@@ -1510,7 +1511,7 @@
           "start": "Los dos caminos empiezan con el mismo dinero: la entrada más los gastos de compra. Quien compra lo gasta en la vivienda; quien alquila lo invierte entero.",
           "loan": "La hipoteca es la que calcula la calculadora de hipoteca: tipo fijo, con la cuota de cada mes calculada a partir del capital pendiente. Las cuotas terminan cuando la hipoteca queda pagada.",
           "monthly": "Cada mes, quien compra paga la cuota y una doceava parte de los gastos de propiedad del año, y quien alquila paga el alquiler. El camino que cueste menos ese mes invierte la diferencia.",
-          "growth": "El valor de la vivienda cambia una vez al año según la revalorización, y los gastos de propiedad siguen al valor. El alquiler sube una vez al año según la subida indicada.",
+          "growth": "El valor de la vivienda cambia una vez al año según la revalorización. Los gastos de propiedad son un porcentaje del valor al principio de cada año, así que cambian con él. El alquiler sube una vez al año según la subida indicada.",
           "returns": "Las inversiones crecen cada mes al tipo mensual que, compuesto durante un año, da la rentabilidad anual.",
           "netWorth": "Al final de cada año, el patrimonio de quien compra es el valor de la vivienda menos los gastos de venta y la hipoteca pendiente, más sus inversiones. El de quien alquila son sus inversiones. El año de equilibrio es el primero que termina con quien compra por delante."
         },

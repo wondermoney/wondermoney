@@ -4,6 +4,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Lang } from "@/lib/i18nLocale";
+import BuyVsRentCalculatorComp from "./BuyVsRentCalculatorComp";
 import CompoundInterestCalculatorComp from "./CompoundInterestCalculatorComp";
 import DebtToIncomeCalculatorComp from "./DebtToIncomeCalculatorComp";
 import EarlyRepaymentCalculatorComp from "./EarlyRepaymentCalculatorComp";
@@ -18,6 +19,7 @@ import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
 import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
 
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
+  ["buy versus rent", BuyVsRentCalculatorComp],
   ["compound interest", CompoundInterestCalculatorComp],
   ["debt-to-income", DebtToIncomeCalculatorComp],
   ["early repayment", EarlyRepaymentCalculatorComp],
@@ -179,6 +181,39 @@ describe.each(["Expected real return a year", "Safe withdrawal rate"])(
       expect(
         screen.getByText("Enter a real return and a withdrawal rate to see your FIRE number."),
       ).toBeTruthy();
+    });
+  },
+);
+
+describe.each([
+  "Mortgage interest rate",
+  "Home value growth a year",
+  "Rent increase a year",
+  "Investment return a year",
+])("buy versus rent calculator with %j cleared", (label) => {
+  it("asks for a value instead of reading the cleared rate as 0%", async () => {
+    const user = userEvent.setup();
+    render(<BuyVsRentCalculatorComp locale="en" />);
+    const field = screen.getByRole("spinbutton", { name: label });
+    await user.clear(field);
+    expect(field.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByText("Enter a value.")).toBeTruthy();
+    expect(
+      screen.getByText("The comparison appears once every field has a valid value."),
+    ).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+});
+
+describe.each(["Down payment", "Monthly rent", "Purchase costs", "Ownership costs a year", "Selling costs at the end"])(
+  "buy versus rent calculator with %j cleared",
+  (label) => {
+    it("counts the empty amount as 0", async () => {
+      const user = userEvent.setup();
+      render(<BuyVsRentCalculatorComp locale="en" />);
+      await user.clear(screen.getByRole("spinbutton", { name: label }));
+      expect(screen.queryByText("Enter a value.")).toBeNull();
+      expect(figures().length).toBeGreaterThan(0);
     });
   },
 );

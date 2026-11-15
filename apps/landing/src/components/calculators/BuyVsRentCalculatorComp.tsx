@@ -130,6 +130,19 @@ function BuyVsRentCalculatorContent() {
     [result],
   );
 
+  // The break-even line must never contradict the headline: buying can pull ahead and then fall
+  // behind again before the end.
+  let breakEvenText = t(k("results.noBreakEven"), { years: horizon });
+  if (result && result.breakEvenYear !== null) {
+    breakEvenText =
+      result.difference <= 0 && result.fallsBehindYear !== null
+        ? t(k("results.aheadThenBehind"), {
+            from: result.breakEvenYear,
+            back: result.fallsBehindYear,
+          })
+        : t(k("results.breakEven"), { year: result.breakEvenYear });
+  }
+
   let verdictLabel = t(k("results.even"));
   if (result && result.difference > 0) verdictLabel = t(k("results.buyAhead"));
   if (result && result.difference < 0) verdictLabel = t(k("results.rentAhead"));
@@ -188,9 +201,7 @@ function BuyVsRentCalculatorContent() {
                 ]}
               />
               <p className="text-sm font-medium text-foreground">
-                {result.breakEvenYear === null
-                  ? t(k("results.noBreakEven"), { years: horizon })
-                  : t(k("results.breakEven"), { year: result.breakEvenYear })}
+                {breakEvenText}
               </p>
               <p className="text-xs text-muted-foreground">
                 {t(k("results.firstMonth"), {

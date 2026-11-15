@@ -58,8 +58,10 @@ export const BUY_VS_RENT_EXAMPLE = {
 export const BUY_VS_RENT_EXAMPLE_ALTERNATIVE_RENT = 1_000
 
 /**
- * Amounts in euros, rates in percent (3.5 means 3.5%). An empty field (NaN) reads as zero,
- * except the home price, the horizon and, when there is a loan, its term.
+ * Amounts in euros, rates in percent (3.5 means 3.5%). An empty field (NaN) follows the landing
+ * calculators' rule: an empty optional amount (the down payment, the rent and the three cost
+ * percentages) reads as zero; an empty home price, rate or period is `required`. The mortgage
+ * rate and term are only checked when there is a loan.
  */
 export type BuyVsRentInput = {
 	homePrice: number
@@ -132,6 +134,12 @@ export type BuyVsRentResult = {
 	difference: number
 	/** The first year that ends with buying ahead, or null if it never is within the horizon. */
 	breakEvenYear: number | null
+	/**
+	 * The first year after the break-even year that ends with buying no longer ahead, or null.
+	 * Buying can pull ahead and fall back, for instance when the home's value grows more slowly
+	 * than the renter's investments.
+	 */
+	fallsBehindYear: number | null
 }
 
 export type BuyVsRentCalculation =
@@ -139,12 +147,15 @@ export type BuyVsRentCalculation =
 	| { ok: false; errors: Partial<Record<BuyVsRentField, BuyVsRentInputError>> }
 
 const orZero = (value: number) => (Number.isNaN(value) ? 0 : value)
+const toCents = (euros: number) => Math.round(euros * 100)
+const fromCents = (cents: number) => cents / 100
 
 function checkRange(
 	value: number,
 	min: number,
 	max: number,
 ): BuyVsRentInputError | undefined {
+	if (Number.isNaN(value)) return "required"
 	if (value < min) return min === 0 ? "negative" : "tooSmall"
 	if (value > max) return "tooLarge"
 	return undefined
@@ -161,20 +172,22 @@ function validate(input: BuyVsRentInput): Partial<Record<BuyVsRentField, BuyVsRe
 	if (Number.isNaN(homePrice) || homePrice <= 0) errors.homePrice = "required"
 	else if (homePrice > L.maxHomePrice) errors.homePrice = "tooLarge"
 
+	// The loan is checked in cents, exactly as computeBuyVsRent builds it.
 	const downPayment = orZero(input.downPayment)
+	let loanCents = 0
 	if (downPayment < 0) errors.downPayment = "negative"
 	else if (!errors.homePrice) {
-		const loan = homePrice - downPayment
-		if (loan < 0) errors.downPayment = "aboveHomePrice"
-		else if (loan > 0 && loan < L.minLoanAmount) errors.downPayment = "loanTooSmall"
+		loanCents = toCents(homePrice) - toCents(downPayment)
+		if (loanCents < 0) errors.downPayment = "aboveHomePrice"
+		else if (loanCents > 0 && loanCents < L.minLoanAmount * 100) errors.downPayment = "loanTooSmall"
 	}
 
-	const hasLoan = !errors.homePrice && !errors.downPayment && homePrice - downPayment > 0
+	const hasLoan = !errors.homePrice && !errors.downPayment && loanCents > 0
 	if (hasLoan) {
 		const term = input.mortgageTermYears
 		if (Number.isNaN(term) || Math.round(term * 12) < 1) errors.mortgageTermYears = "required"
 		else if (term > L.maxTermYears) errors.mortgageTermYears = "tooLarge"
-		set("mortgageRate", checkRange(orZero(input.mortgageRate), 0, L.maxMortgageRate))
+		set("mortgageRate", checkRange(input.mortgageRate, 0, L.maxMortgageRate))
 	}
 
 	set("purchaseCostsPct", checkRange(orZero(input.purchaseCostsPct), 0, L.maxPurchaseCostsPct))
@@ -182,7 +195,7 @@ function validate(input: BuyVsRentInput): Partial<Record<BuyVsRentField, BuyVsRe
 	set("sellingCostsPct", checkRange(orZero(input.sellingCostsPct), 0, L.maxSellingCostsPct))
 	set("monthlyRent", checkRange(orZero(input.monthlyRent), 0, L.maxMonthlyRent))
 	for (const field of ["appreciationPct", "rentIncreasePct", "investmentReturnPct"] as const) {
-		set(field, checkRange(orZero(input[field]), L.minGrowthPct, L.maxGrowthPct))
+		set(field, checkRange(input[field], L.minGrowthPct, L.maxGrowthPct))
 	}
 
 	const horizon = input.horizonYears
@@ -192,9 +205,6 @@ function validate(input: BuyVsRentInput): Partial<Record<BuyVsRentField, BuyVsRe
 
 	return errors
 }
-
-const toCents = (euros: number) => Math.round(euros * 100)
-const fromCents = (cents: number) => cents / 100
 
 export function computeBuyVsRent(input: BuyVsRentInput): BuyVsRentCalculation {
 	const errors = validate(input)
@@ -207,12 +217,12 @@ export function computeBuyVsRent(input: BuyVsRentInput): BuyVsRentCalculation {
 	const upfrontCents = downPaymentCents + purchaseCostsCents
 
 	const ownership = orZero(input.ownershipCostsPct) / 100
-	const appreciation = orZero(input.appreciationPct) / 100
-	const rentIncrease = orZero(input.rentIncreasePct) / 100
+	const appreciation = input.appreciationPct / 100
+	const rentIncrease = input.rentIncreasePct / 100
 	const selling = orZero(input.sellingCostsPct) / 100
 	const rentCents = toCents(orZero(input.monthlyRent))
 	// The monthly rate that compounds to the annual return over twelve months.
-	const monthlyReturn = Math.expm1(Math.log1p(orZero(input.investmentReturnPct) / 100) / 12)
+	const monthlyReturn = Math.expm1(Math.log1p(input.investmentReturnPct / 100) / 12)
 	const horizon = Math.round(input.horizonYears)
 
 	// Principal and interest each month, and the balance owed at the end of each loan year.
@@ -222,7 +232,7 @@ export function computeBuyVsRent(input: BuyVsRentInput): BuyVsRentCalculation {
 		const mortgage = computeMortgage({
 			loanAmount: fromCents(loanCents),
 			termYears: input.mortgageTermYears,
-			annualRate: orZero(input.mortgageRate),
+			annualRate: input.mortgageRate,
 			monthlyFees: 0,
 		})
 		if (!mortgage.ok) throw new Error("Buy versus rent passed the mortgage an invalid loan")
@@ -293,6 +303,9 @@ export function computeBuyVsRent(input: BuyVsRentInput): BuyVsRentCalculation {
 
 	const last = years[years.length - 1]
 	const ahead = years.find((entry) => entry.year > 0 && entry.difference > 0)
+	const behindAgain = ahead
+		? years.find((entry) => entry.year > ahead.year && entry.difference <= 0)
+		: undefined
 
 	return {
 		ok: true,
@@ -308,6 +321,7 @@ export function computeBuyVsRent(input: BuyVsRentInput): BuyVsRentCalculation {
 			renterNetWorth: last.renterNetWorth,
 			difference: last.difference,
 			breakEvenYear: ahead?.year ?? null,
+			fallsBehindYear: behindAgain?.year ?? null,
 		},
 	}
 }
