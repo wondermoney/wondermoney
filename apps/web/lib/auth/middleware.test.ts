@@ -72,6 +72,23 @@ test("a signed-in visit to login with an unsafe next goes home", async () => {
   assert.equal(location.search, "");
 });
 
+test("a signed-in visit to the demo link goes into the app without starting the demo", async () => {
+  // The marketing site's "Try the demo" links to /auth/login?demo=1. A visitor who is
+  // already signed in (to the demo or their own account) keeps that session.
+  const location = await redirectFor(
+    "http://localhost:3000/en/auth/login?demo=1",
+    { loggedIn: true },
+  );
+
+  assert.ok(location);
+  assert.equal(location.origin, "http://localhost:3000");
+  assert.equal(`${location.pathname}${location.search}`, "/en");
+});
+
+test("a logged-out visit to the demo link reaches the sign-in page with the flag", async () => {
+  assert.equal(await redirectFor("http://localhost:3000/en/auth/login?demo=1"), null);
+});
+
 test("a logged-out visit to an unprefixed page keeps it as a localised next", async () => {
   const location = await redirectFor("http://localhost:3000/accounts/42?tab=x");
 

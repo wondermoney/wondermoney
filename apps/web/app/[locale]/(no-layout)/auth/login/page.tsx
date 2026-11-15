@@ -13,6 +13,9 @@ export default function LoginPage() {
   const instanceName = useInstanceName();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
+  // The marketing site's "Try the demo" link: start the demo session on arrival. A visitor
+  // who is already signed in never gets here; the middleware sends them into the app.
+  const autoStartDemo = searchParams.get("demo") === "1";
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-6 py-12">
@@ -35,7 +38,7 @@ export default function LoginPage() {
             })}
           </p>
         </div>
-        <LoginForm nextParam={nextParam} />
+        <LoginForm autoStartDemo={autoStartDemo} nextParam={nextParam} />
       </div>
     </div>
   );
