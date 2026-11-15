@@ -10,12 +10,24 @@ import { ReferenceDataSeeder } from '@app/database/seeders/ReferenceDataSeeder';
 import { Account } from '@entity/Account';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
+import { AppuserTransactionCategory } from '@entity/AppuserTransactionCategory';
 import { Budget } from '@entity/Budget';
+import { BudgetTemplateIncome } from '@entity/BudgetTemplateIncome';
+import { Category } from '@entity/Category';
 import { FinancialTransaction } from '@entity/FinancialTransaction';
+import { Goal } from '@entity/Goal';
+import { GoalAccountLink } from '@entity/GoalAccountLink';
 import { Loan } from '@entity/Loan';
+import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
+import { ManualAsset } from '@entity/ManualAsset';
+import { ManualAssetValuation } from '@entity/ManualAssetValuation';
 import { Portfolio } from '@entity/Portfolio';
+import { RecurringOccurrence } from '@entity/RecurringOccurrence';
+import { RecurringSeries } from '@entity/RecurringSeries';
 import { Tenant, TenantType } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
+import { TransactionType } from '@entity/TransactionType';
+import { Watchlist } from '@entity/Watchlist';
 import { type DemoAuthUserPort, DemoSeedRefusedError, seedDemoHousehold } from '@service/demo-data/demo-household-seed.service';
 
 /*
@@ -33,13 +45,23 @@ async function demoCounts(em: EntityManager) {
   return {
     accounts: await em.count(Account, { tenantKey: tenant }),
     appusers: appusers.length,
+    assets: await em.count(ManualAsset, { tenantKey: tenant }),
     budgets: await em.count(Budget, { tenantKey: tenant }),
+    categories: await em.count(AppuserTransactionCategory, { transactionKey: { tenantKey: tenant } }),
+    goalLinks: await em.count(GoalAccountLink, { tenantKey: tenant }),
+    goals: await em.count(Goal, { tenantKey: tenant }),
+    income: await em.count(BudgetTemplateIncome, { budgetKey: { tenantKey: tenant } }),
     links: await em.count(AppuserTenant, { tenantKey: tenant }),
     loans: await em.count(Loan, { tenantKey: tenant }),
+    occurrences: await em.count(RecurringOccurrence, { recurringSeriesKey: { tenantKey: tenant } }),
     portfolios: await em.count(Portfolio, { tenantKey: tenant }),
     portfolioTransactions: await em.count(FinancialTransaction, { portfolioKey: { tenantKey: tenant } }),
+    recurring: await em.count(RecurringSeries, { tenantKey: tenant }),
+    repayments: await em.count(LoanRepaymentLink, { tenantKey: tenant }),
     tenants: tenants.length,
     transactions: await em.count(Transaction, { tenantKey: tenant }),
+    valuations: await em.count(ManualAssetValuation, { tenantKey: tenant }),
+    watchlist: await em.count(Watchlist, { tenantKey: tenant }),
   };
 }
 
@@ -78,6 +100,10 @@ describe('seeding the demo account and household', () => {
     expect(afterFirst.portfolios).toBeGreaterThan(0);
     expect(afterFirst.transactions).toBeGreaterThan(0);
     expect(afterFirst.portfolioTransactions).toBeGreaterThan(0);
+    // The demo's feature pages have useful, linked examples.
+    for (const feature of ['categories', 'income', 'goals', 'goalLinks', 'assets', 'valuations', 'recurring', 'occurrences', 'repayments', 'watchlist'] as const) {
+      expect(afterFirst[feature]).toBeGreaterThan(0);
+    }
     const check = db.em();
     const demo = await check.findOneOrFail(Appuser, { appuserKey: first.appuserKey });
     expect(demo).toMatchObject({ accountType: AppuserAccountType.DEMO, emailAddress: demoPersona.email, externalUserId: auth.users.get(demoPersona.email) });
@@ -87,17 +113,52 @@ describe('seeding the demo account and household', () => {
     expect(await check.count(Account, { tenantKey: regular.tenant })).toBe(1);
     expect(await check.count(AppuserTenant, { tenantKey: regular.tenant })).toBe(1);
 
+    const goalLink = await check.findOneOrFail(GoalAccountLink, { tenantKey: { tenantKey: first.tenantKey } }, { populate: ['accountKey'] });
+    expect(goalLink.accountKey.balance).toBeGreaterThan(0);
+    const accounts = await check.find(Account, { tenantKey: { tenantKey: first.tenantKey } });
+    expect(accounts.every((account) => account.refreshedAt && account.refreshedAt <= AS_OF)).toBe(true);
+
+    // Older demos had a withdrawal on the savings account. Repair it in place so
+    // the globally unique transaction identity cannot collide with a new row.
+    const legacyTransfer = await check.findOneOrFail(Transaction, {
+      externalTransactionId: 'DEMO-BANK-TXN-SAVINGS-TRANSFER-00', tenantKey: { tenantKey: first.tenantKey },
+    }, { populate: ['accountKey'] });
+    const transferKey = legacyTransfer.transactionKey;
+    expect(legacyTransfer.accountKey?.accountName).toBe('Emergency Fund');
+    legacyTransfer.settlementAmount = -500;
+    legacyTransfer.transactionTypeKey = await check.findOneOrFail(TransactionType, { name: 'TRANSFER_OUT' });
+    const legacyCategory = await check.findOneOrFail(AppuserTransactionCategory, {
+      appuserKey: demo, transactionKey: { externalTransactionId: 'DEMO-BANK-TXN-SALARY-00' },
+    });
+    const categoryKey = legacyCategory.appuserTransactionCategoryKey;
+    const salaryCategoryKey = legacyCategory.categoryKey.categoryKey;
+    legacyCategory.categoryKey = await check.findOneOrFail(Category, { isSystemCategory: true, name: 'GIFTS' });
+    await check.flush();
+
     // Idempotent: the same account, household and rows.
     const second = await seedDemoHousehold({ asOfDate: AS_OF, auth: auth.port, em: db.em() });
     expect(second).toMatchObject({ appuserKey: first.appuserKey, authUserCreated: false, tenantKey: first.tenantKey });
     expect(first.authUserCreated).toBe(true);
     expect(await demoCounts(db.em())).toEqual(afterFirst);
+    const repaired = await db.em().findOneOrFail(Transaction, { transactionKey: transferKey }, { populate: ['transactionTypeKey'] });
+    expect(repaired.settlementAmount).toBe(500);
+    expect(repaired.transactionTypeKey?.name).toBe('TRANSFER_IN');
+    const repairedCategory = await db.em().findOneOrFail(AppuserTransactionCategory, { appuserTransactionCategoryKey: categoryKey });
+    expect(repairedCategory.categoryKey.categoryKey).toBe(salaryCategoryKey);
 
     // A later day moves the demo transactions forward to it.
     const later = new Date('2026-11-20T00:00:00.000Z');
     await seedDemoHousehold({ asOfDate: later, auth: auth.port, em: db.em() });
     const newest = await db.em().findOneOrFail(Transaction, { tenantKey: { tenantKey: first.tenantKey } }, { orderBy: { transactionDate: 'desc' } });
     expect(newest.transactionDate?.getTime()).toBe(later.getTime());
+
+    const moved = db.em();
+    const recurring = await moved.find(RecurringSeries, { tenantKey: { tenantKey: first.tenantKey } });
+    expect(recurring.every((series) => series.nextExpectedAt && series.nextExpectedAt > later)).toBe(true);
+    const repayment = await moved.findOneOrFail(LoanRepaymentLink, { tenantKey: { tenantKey: first.tenantKey } }, { populate: ['transactionKey'] });
+    expect(repayment.paymentDate).toEqual(repayment.transactionKey.transactionDate);
+    expect(repayment.totalPaymentAmount).toBe(repayment.principalAmount + repayment.interestAmount + repayment.feeAmount);
+    expect(await demoCounts(db.em())).toEqual(afterFirst);
 
     // Somebody else in the demo household: refused.
     const em = db.em();

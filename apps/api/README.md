@@ -43,6 +43,12 @@ account. `pnpm demo:seed:dev` creates the demo account and household on a databa
 the reference data but not the development seed; `pnpm demo:seed` does the same from the built
 `dist` for a demo server (see "Public demo" in the self-hosting configuration docs).
 
+Both seed paths include categorized spending, budget income, an emergency-fund goal linked to
+savings, home and car valuations, recurring bills linked to payments, mortgage repayment splits,
+and a market watchlist alongside the accounts and portfolios. The daily demo refresh maintains
+these examples and their transaction dates. Rerun `demo:seed` after deploying seed changes to
+rebaseline the demo's account balances as well; it leaves other households alone.
+
 ## `.env` decides which database you touch
 
 Every `migrate:*` and `seed:*` script connects to whatever `DB_HOST` / `DB_PORT` /
