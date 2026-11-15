@@ -256,6 +256,14 @@ const ROUTE_SLUGS = {
 		de: "haushaltsbudget-rechner",
 		it: "budget-familiare",
 	},
+	toolSavingsGoal: {
+		pt: "simulador-poupanca",
+		en: "savings-goal-calculator",
+		es: "simulador-ahorro",
+		fr: "simulateur-epargne",
+		de: "sparziel-rechner",
+		it: "simulatore-risparmio",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -362,6 +370,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolEmergencyFund",
 	"toolMortgage",
 	"toolHouseholdBudget",
+	"toolSavingsGoal",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -586,6 +595,11 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	householdbudgetcalculator: "toolHouseholdBudget",
 	"household-budget-calculator": "toolHouseholdBudget",
 	"orcamento-familiar": "toolHouseholdBudget",
+	toolsavingsgoal: "toolSavingsGoal",
+	savingsgoalcalculator: "toolSavingsGoal",
+	"savings-goal-calculator": "toolSavingsGoal",
+	"savings-goal": "toolSavingsGoal",
+	"simulador-poupanca": "toolSavingsGoal",
 }
 
 function normalizeRouteLookupKey(value: string): string {

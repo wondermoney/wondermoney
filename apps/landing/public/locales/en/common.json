@@ -955,6 +955,128 @@
         "headline": "Track this loan alongside your budget",
         "description": "Add the mortgage to WonderMoney with its rate and term, link the monthly repayment and see the balance fall next to your budget and net worth."
       }
+    },
+    "savingsGoal": {
+      "title": "Savings Goal Calculator",
+      "description": "Work out how much to save each month for a goal, how long the goal will take, or what your savings add up to.",
+      "pageTitle": "Savings Goal Calculator: How Much to Save a Month — WonderMoney",
+      "pageDescription": "Free savings goal calculator. See how much to save each month to reach a target, how long your goal will take or what your savings grow to, with the growth and a year-by-year schedule. No sign-up.",
+      "subtitle": "Choose what to work out: the monthly contribution a goal needs, the time it takes at the pace you can save, or what your savings add up to. Nothing to sign up for.",
+      "solveForLabel": "What do you want to work out?",
+      "solveFor": {
+        "contribution": "Monthly contribution",
+        "time": "Time to the goal",
+        "finalAmount": "Final amount"
+      },
+      "goalAmount": "Savings goal",
+      "goalAmountHelp": "The amount you want to have saved.",
+      "startingSavings": "Already saved",
+      "startingSavingsHelp": "Optional. What you have already put aside for this goal.",
+      "monthlyContribution": "Monthly contribution",
+      "monthlyContributionHelp": "What you add at the end of each month.",
+      "period": "Saving period",
+      "periodYears": "Years",
+      "periodMonths": "Months",
+      "periodHelp": "Up to 100 years.",
+      "annualReturn": "Expected annual return",
+      "annualReturnHelp": "2% to start with. Use 0% for money that earns nothing.",
+      "answer": {
+        "contribution": "Monthly contribution needed",
+        "time": "Time to reach the goal",
+        "finalAmount": "Final amount"
+      },
+      "totalContributions": "Total contributions",
+      "totalGrowth": "Growth",
+      "finalBalance": "Final balance",
+      "alreadyThere": "You're already there",
+      "never": "Not at this pace",
+      "overHundredYears": "More than 100 years",
+      "durationYears": "{{count}} years",
+      "durationYearsOne": "1 year",
+      "durationMonths": "{{count}} months",
+      "durationMonthsOne": "1 month",
+      "durationJoin": "{{years}} and {{months}}",
+      "status": {
+        "contribution": "Put aside {{contribution}} at the end of each month for {{period}} and you reach {{goal}}.",
+        "time": "At {{contribution}} a month you reach {{goal}} in {{period}}.",
+        "finalAmount": "After {{period}} you would have {{final}}.",
+        "reached": "The {{savings}} you already have covers the goal, so you don't need to add anything.",
+        "reachedTime": "The {{savings}} you already have covers the goal: you're there today.",
+        "growthAlone": "At {{rate}} a year, your {{savings}} grows past the goal within {{period}} with nothing added each month.",
+        "never": "With no monthly contribution and no growth, your savings stay at {{savings}} and never reach the goal. Add a monthly contribution to see when you get there.",
+        "beyondHorizon": "At {{contribution}} a month it would take more than 100 years to reach {{goal}}. Try a larger contribution or a smaller goal.",
+        "tooLarge": "The balance would pass {{max}}, more than this calculator shows. Try a shorter period or a lower return."
+      },
+      "assumptionsTitle": "What this assumes",
+      "assumptionsReturn": "A constant annual return, compounded monthly, with each contribution added at the end of the month.",
+      "assumptionsCosts": "No taxes, fees or inflation.",
+      "errors": {
+        "summary": "Your result appears once every field has a valid value.",
+        "goalAmount": {
+          "required": "Enter the amount you want to reach.",
+          "negative": "The goal can't be negative.",
+          "tooLarge": "Enter a goal up to {{max}}."
+        },
+        "startingSavings": {
+          "negative": "Savings can't be negative. Enter 0 if you are starting from nothing.",
+          "tooLarge": "Enter savings up to {{max}}."
+        },
+        "monthlyContribution": {
+          "negative": "The contribution can't be negative. Enter 0 to add nothing.",
+          "tooLarge": "Enter a contribution up to {{max}}."
+        },
+        "period": {
+          "required": "Enter a period of at least 1 month.",
+          "negative": "The period can't be negative.",
+          "tooLarge": "Enter a period of up to {{max}} years."
+        },
+        "annualReturn": {
+          "negative": "This calculator doesn't model negative returns. Enter 0% or more.",
+          "tooLarge": "Enter a return up to {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Year by year",
+        "description": "What you have paid in and what growth has added by the end of each year. The balance includes what you had already saved.",
+        "chartLabel": "Chart of your balance over time, split into what you had already saved, your contributions and growth. The table below has the same figures.",
+        "yearAxis": "Years",
+        "tooltipLabel": "After {{months}} months",
+        "startingSavings": "Already saved",
+        "contributions": "Contributions",
+        "growth": "Growth",
+        "balance": "Balance",
+        "period": "Period",
+        "yearLabel": "Year {{year}}",
+        "monthLabel": "Month {{month}}"
+      },
+      "guide": {
+        "whatTitle": "Three ways to plan a savings goal",
+        "whatBody1": "Pick what you want to work out. Know the goal and the date? See how much to put aside each month. Know what you can save? See how long the goal will take. No figure in mind yet? See what you could build up over a period you choose.",
+        "whatBody2": "Every answer shows how much comes out of your own pocket and how much comes from growth, with a year-by-year schedule, so you can see which part of the goal is your own money.",
+        "relatedSavingsRate": "measures what share of your income you save each month; this tool starts from a goal and works out the plan to reach it.",
+        "relatedCompoundInterest": "shows how an investment grows over time, with no goal to reach.",
+        "exampleTitle": "Worked example",
+        "exampleIntro": "Say you want {{goal}} in {{years}} years ({{months}} months). You have already saved {{savings}} and expect a return of {{rate}} a year.",
+        "exampleStep1": "Monthly rate: (1 + {{rate}})^(1/12) − 1, about {{monthlyRate}} a month.",
+        "exampleStep2": "Left alone, your {{savings}} grows to {{savingsAlone}} over {{months}} months, so your contributions and their growth have to cover the remaining {{gap}}.",
+        "exampleStep3": "The smallest monthly contribution that gets there is {{contribution}}. Over {{months}} months you pay in {{contributions}} and growth adds {{growth}}, for {{final}} at the end.",
+        "exampleOutro": "Turn it around: put aside a round {{rounded}} a month instead and you reach the goal after {{timeMonths}} months, and by the end of the {{years}} years you have {{finalAmount}}.",
+        "methodTitle": "How the calculator works",
+        "methodIntro": "Your balance grows once a month and your contribution is added at the end of each month. After n months it comes to:",
+        "methodLegend": "S is what you have already saved, C the monthly contribution, r the monthly rate and n the number of months. With a 0% return there is nothing to divide by r, and the balance is simply S + C × n.",
+        "methodRate": "The monthly rate r is the one that compounds to your annual return over twelve months: (1 + annual return)^(1/12) − 1. Dividing the annual return by 12 would overstate it slightly.",
+        "methodOrder": "Each month's growth is rounded to the cent before the contribution is added, so the year-by-year schedule adds up to the totals exactly.",
+        "methodContribution": "The contribution needed comes from solving the formula for C. It is rounded up to the cent and checked month by month, so it really does reach the goal.",
+        "methodTime": "The time needed is the first whole month in which the balance reaches the goal, searched up to {{maxYears}} years.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionReturn": "The return is the same every year. Real returns vary, and investments can lose value.",
+        "assumptionCosts": "No taxes, fees or other charges are taken from the growth.",
+        "assumptionInflation": "No inflation: the goal is in euros of the day you reach it, which buy less than the same amount does today.",
+        "assumptionLimits": "Amounts up to {{maxAmount}}, returns from 0% to {{maxReturn}} a year and periods of up to {{maxYears}} years."
+      },
+      "nextStepHeadline": "Turn the required contribution into a recurring goal",
+      "nextStepDescription": "Create the goal in WonderMoney with its amount, date and monthly contribution, and follow your progress against your real account balances.",
+      "nextStepCta": "Create a goal"
     }
   },
   "learn": {

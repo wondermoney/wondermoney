@@ -955,6 +955,128 @@
         "headline": "Suivez ce prêt à côté de votre budget",
         "description": "Ajoutez le prêt immobilier à WonderMoney avec son taux et sa durée, reliez la mensualité et voyez la dette baisser à côté de votre budget et de votre patrimoine."
       }
+    },
+    "savingsGoal": {
+      "title": "Simulateur d'épargne",
+      "description": "Calculez combien épargner par mois pour un objectif, en combien de temps vous l'atteindrez ou combien vous aurez mis de côté.",
+      "pageTitle": "Simulateur d'épargne : combien épargner par mois — WonderMoney",
+      "pageDescription": "Simulateur d'épargne gratuit. Découvrez combien épargner chaque mois pour atteindre un objectif, en combien de temps vous y arriverez ou ce que deviendra votre épargne, avec les intérêts et un plan année par année. Sans inscription.",
+      "subtitle": "Choisissez ce que vous voulez calculer : le versement mensuel qu'exige un objectif, le temps qu'il faut au rythme où vous pouvez épargner ou la somme que vous aurez constituée. Sans inscription.",
+      "solveForLabel": "Que voulez-vous calculer ?",
+      "solveFor": {
+        "contribution": "Versement mensuel",
+        "time": "Durée jusqu'à l'objectif",
+        "finalAmount": "Montant final"
+      },
+      "goalAmount": "Objectif d'épargne",
+      "goalAmountHelp": "La somme que vous voulez avoir de côté.",
+      "startingSavings": "Déjà épargné",
+      "startingSavingsHelp": "Facultatif. Ce que vous avez déjà mis de côté pour cet objectif.",
+      "monthlyContribution": "Versement mensuel",
+      "monthlyContributionHelp": "Ce que vous ajoutez à la fin de chaque mois.",
+      "period": "Durée d'épargne",
+      "periodYears": "Années",
+      "periodMonths": "Mois",
+      "periodHelp": "Jusqu'à 100 ans.",
+      "annualReturn": "Rendement annuel attendu",
+      "annualReturnHelp": "2 % pour commencer. Indiquez 0 % pour une somme qui ne rapporte rien.",
+      "answer": {
+        "contribution": "Versement mensuel nécessaire",
+        "time": "Durée jusqu'à l'objectif",
+        "finalAmount": "Montant final"
+      },
+      "totalContributions": "Total versé",
+      "totalGrowth": "Intérêts cumulés",
+      "finalBalance": "Solde final",
+      "alreadyThere": "Vous y êtes déjà",
+      "never": "Pas à ce rythme",
+      "overHundredYears": "Plus de 100 ans",
+      "durationYears": "{{count}} ans",
+      "durationYearsOne": "1 an",
+      "durationMonths": "{{count}} mois",
+      "durationMonthsOne": "1 mois",
+      "durationJoin": "{{years}} et {{months}}",
+      "status": {
+        "contribution": "En mettant de côté {{contribution}} à la fin de chaque mois pendant {{period}}, vous atteignez {{goal}}.",
+        "time": "Avec {{contribution}} par mois, vous atteignez {{goal}} en {{period}}.",
+        "finalAmount": "Au bout de {{period}}, vous auriez {{final}}.",
+        "reached": "Les {{savings}} que vous avez déjà couvrent l'objectif : inutile de verser quoi que ce soit.",
+        "reachedTime": "Les {{savings}} que vous avez déjà couvrent l'objectif : vous y êtes.",
+        "growthAlone": "Avec un rendement de {{rate}} par an, vos {{savings}} dépassent l'objectif en {{period}} sans aucun versement mensuel.",
+        "never": "Sans versement mensuel ni rendement, votre épargne reste à {{savings}} et n'atteint jamais l'objectif. Ajoutez un versement mensuel pour voir quand vous y arriverez.",
+        "beyondHorizon": "Avec {{contribution}} par mois, il vous faudrait plus de 100 ans pour atteindre {{goal}}. Essayez un versement plus élevé ou un objectif plus modeste.",
+        "tooLarge": "Le solde dépasserait {{max}}, au-delà de ce que ce simulateur affiche. Essayez une durée plus courte ou un rendement plus faible."
+      },
+      "assumptionsTitle": "Ce que ce calcul suppose",
+      "assumptionsReturn": "Un rendement annuel constant, capitalisé chaque mois, chaque versement étant ajouté en fin de mois.",
+      "assumptionsCosts": "Ni impôts, ni frais, ni inflation.",
+      "errors": {
+        "summary": "Le résultat s'affiche dès que tous les champs ont une valeur valide.",
+        "goalAmount": {
+          "required": "Indiquez la somme que vous voulez atteindre.",
+          "negative": "L'objectif ne peut pas être négatif.",
+          "tooLarge": "Indiquez un objectif d'au plus {{max}}."
+        },
+        "startingSavings": {
+          "negative": "L'épargne ne peut pas être négative. Indiquez 0 si vous partez de zéro.",
+          "tooLarge": "Indiquez une épargne d'au plus {{max}}."
+        },
+        "monthlyContribution": {
+          "negative": "Le versement ne peut pas être négatif. Indiquez 0 pour ne rien verser.",
+          "tooLarge": "Indiquez un versement d'au plus {{max}}."
+        },
+        "period": {
+          "required": "Indiquez une durée d'au moins 1 mois.",
+          "negative": "La durée ne peut pas être négative.",
+          "tooLarge": "Indiquez une durée d'au plus {{max}} ans."
+        },
+        "annualReturn": {
+          "negative": "Ce simulateur ne gère pas les rendements négatifs. Indiquez 0 % ou plus.",
+          "tooLarge": "Indiquez un rendement d'au plus {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Année par année",
+        "description": "Ce que vous avez versé et ce que les intérêts ont ajouté à la fin de chaque année. Le solde comprend ce que vous aviez déjà épargné.",
+        "chartLabel": "Graphique du solde dans le temps, réparti entre ce que vous aviez déjà épargné, vos versements et les intérêts. Le tableau ci-dessous reprend les mêmes chiffres.",
+        "yearAxis": "Années",
+        "tooltipLabel": "Après {{months}} mois",
+        "startingSavings": "Déjà épargné",
+        "contributions": "Versements",
+        "growth": "Intérêts",
+        "balance": "Solde",
+        "period": "Période",
+        "yearLabel": "Année {{year}}",
+        "monthLabel": "Mois {{month}}"
+      },
+      "guide": {
+        "whatTitle": "Trois façons de planifier un objectif d'épargne",
+        "whatBody1": "Choisissez ce que vous voulez calculer. Vous connaissez l'objectif et la date ? Voyez combien mettre de côté chaque mois. Vous savez combien vous pouvez épargner ? Voyez combien de temps il vous faudra. Pas encore de montant en tête ? Voyez ce que vous pouvez constituer sur la durée de votre choix.",
+        "whatBody2": "Chaque réponse indique ce qui sort de votre poche et ce qu'apportent les intérêts, avec un plan année par année, pour voir quelle part de l'objectif vient de votre propre argent.",
+        "relatedSavingsRate": "mesure la part de vos revenus que vous épargnez chaque mois ; ce simulateur part d'un objectif et calcule le plan pour l'atteindre.",
+        "relatedCompoundInterest": "montre comment un placement grandit dans le temps, sans objectif à atteindre.",
+        "exampleTitle": "Exemple chiffré",
+        "exampleIntro": "Imaginons que vous vouliez réunir {{goal}} en {{years}} ans ({{months}} mois). Vous avez déjà {{savings}} de côté et comptez sur un rendement de {{rate}} par an.",
+        "exampleStep1": "Taux mensuel : (1 + {{rate}})^(1/12) − 1, soit environ {{monthlyRate}} par mois.",
+        "exampleStep2": "Seuls, vos {{savings}} deviennent {{savingsAlone}} en {{months}} mois : les versements et leurs intérêts doivent donc couvrir les {{gap}} restants.",
+        "exampleStep3": "Le plus petit versement mensuel qui y parvient est de {{contribution}}. En {{months}} mois, vous versez {{contributions}} et les intérêts ajoutent {{growth}}, soit {{final}} à la fin.",
+        "exampleOutro": "À l'inverse : si vous mettez de côté un montant rond de {{rounded}} par mois, vous atteignez l'objectif au bout de {{timeMonths}} mois, et au terme des {{years}} ans vous avez {{finalAmount}}.",
+        "methodTitle": "Comment fonctionne le simulateur",
+        "methodIntro": "Le solde rapporte une fois par mois et le versement arrive à la fin de chaque mois. Au bout de n mois, le solde vaut :",
+        "methodLegend": "S est ce que vous avez déjà épargné, C le versement mensuel, r le taux mensuel et n le nombre de mois. Avec un rendement de 0 %, il n'y a rien à diviser par r et le solde vaut simplement S + C × n.",
+        "methodRate": "Le taux mensuel r est celui qui, capitalisé sur douze mois, donne le rendement annuel : (1 + rendement annuel)^(1/12) − 1. Diviser le rendement annuel par 12 donnerait un chiffre un peu trop élevé.",
+        "methodOrder": "Les intérêts de chaque mois sont arrondis au centime avant l'ajout du versement, si bien que le plan année par année correspond exactement aux totaux.",
+        "methodContribution": "Le versement nécessaire s'obtient en résolvant la formule pour C. Il est arrondi au centime supérieur et vérifié mois par mois, pour atteindre réellement l'objectif.",
+        "methodTime": "La durée nécessaire est le premier mois complet où le solde atteint l'objectif, recherché jusqu'à {{maxYears}} ans.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionReturn": "Le rendement est le même chaque année. En réalité il varie, et un placement peut perdre de la valeur.",
+        "assumptionCosts": "Aucun impôt, frais ou autre coût n'est déduit des intérêts.",
+        "assumptionInflation": "Pas d'inflation : l'objectif est exprimé en euros du jour où vous l'atteignez, qui achètent moins que la même somme aujourd'hui.",
+        "assumptionLimits": "Montants jusqu'à {{maxAmount}}, rendements de 0 % à {{maxReturn}} par an et durées jusqu'à {{maxYears}} ans."
+      },
+      "nextStepHeadline": "Transformez le versement nécessaire en objectif récurrent",
+      "nextStepDescription": "Créez l'objectif dans WonderMoney avec le montant, la date et le versement mensuel, et suivez vos progrès avec les soldes réels de vos comptes.",
+      "nextStepCta": "Créer un objectif"
     }
   },
   "learn": {

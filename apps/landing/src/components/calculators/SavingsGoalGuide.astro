@@ -1,0 +1,133 @@
+---
+// Prerendered explanation, worked example and method for the savings goal calculator. The
+// figures come from the same function the calculator runs, starting from its first state.
+import {
+  SAVINGS_GOAL_EXAMPLE,
+  SAVINGS_GOAL_LIMITS,
+  computeSavingsGoal,
+  type SavingsGoalInput,
+  type SavingsGoalResult,
+} from "@/lib/calculators/savingsGoal";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.savingsGoal.guide.${key}`;
+
+function calculate(overrides: Partial<SavingsGoalInput>): SavingsGoalResult {
+  const calculation = computeSavingsGoal({ ...SAVINGS_GOAL_EXAMPLE, ...overrides });
+  if (!calculation.ok) throw new Error("The savings goal worked example has invalid inputs");
+  return calculation.result;
+}
+
+const example = calculate({});
+const savingsAlone = calculate({ solveFor: "finalAmount", monthlyContribution: 0 });
+const time = calculate({ solveFor: "time" });
+const final = calculate({ solveFor: "finalAmount" });
+
+const money = (value: number) =>
+  formatMoney(locale, value, { decimals: Number.isInteger(value) ? 0 : 2 });
+const periodMonths = SAVINGS_GOAL_EXAMPLE.years * 12 + SAVINGS_GOAL_EXAMPLE.months;
+
+const values = {
+  goal: money(SAVINGS_GOAL_EXAMPLE.goalAmount),
+  savings: money(SAVINGS_GOAL_EXAMPLE.startingSavings),
+  years: formatNumber(locale, SAVINGS_GOAL_EXAMPLE.years),
+  months: formatNumber(locale, periodMonths),
+  rate: formatPercent(locale, SAVINGS_GOAL_EXAMPLE.annualReturn, { decimals: 0 }),
+  monthlyRate: formatPercent(locale, example.monthlyRate, { decimals: 4 }),
+  savingsAlone: money(savingsAlone.finalBalance),
+  gap: money(SAVINGS_GOAL_EXAMPLE.goalAmount - savingsAlone.finalBalance),
+  contribution: money(example.monthlyContribution),
+  contributions: money(example.totalContributions),
+  growth: money(example.totalGrowth),
+  final: money(example.finalBalance),
+  rounded: money(SAVINGS_GOAL_EXAMPLE.monthlyContribution),
+  timeMonths: formatNumber(locale, time.months ?? 0),
+  finalAmount: money(final.finalBalance),
+  maxAmount: money(SAVINGS_GOAL_LIMITS.maxAmount),
+  maxReturn: formatPercent(locale, SAVINGS_GOAL_LIMITS.maxAnnualReturn, { decimals: 0 }),
+  maxYears: formatNumber(locale, SAVINGS_GOAL_LIMITS.maxMonths / 12),
+};
+
+const exampleSteps = ["exampleStep1", "exampleStep2", "exampleStep3"].map((key) =>
+  t(k(key), values),
+);
+const methodItems = ["methodRate", "methodOrder", "methodContribution", "methodTime"].map((key) =>
+  t(k(key), values),
+);
+const assumptions = [
+  "assumptionReturn",
+  "assumptionCosts",
+  "assumptionInflation",
+  "assumptionLimits",
+].map((key) => t(k(key), values));
+
+const related = [
+  { routeId: "toolSavingsRate", key: "relatedSavingsRate", title: t("tools.savingsRate.title") },
+  {
+    routeId: "toolCompoundInterest",
+    key: "relatedCompoundInterest",
+    title: t("tools.compoundInterest.title"),
+  },
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="savings-goal-what">
+    <h2 id="savings-goal-what" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("whatTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("whatBody1"))}</p>
+    <p class="mt-4">{t(k("whatBody2"))}</p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {
+        related.map((item) => (
+          <li>
+            <a
+              href={toLocalizedPath(item.routeId, locale)}
+              class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
+            >
+              {item.title}
+            </a>{": "}{t(k(item.key))}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="savings-goal-example">
+    <h2 id="savings-goal-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("exampleIntro"), values)}</p>
+    <ol class="mt-4 list-decimal space-y-2 pl-6">
+      {exampleSteps.map((step) => <li>{step}</li>)}
+    </ol>
+    <p class="mt-4">{t(k("exampleOutro"), values)}</p>
+  </section>
+
+  <section aria-labelledby="savings-goal-method">
+    <h2 id="savings-goal-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("methodIntro"))}</p>
+    <p class="mt-4 rounded-lg bg-paper-2 px-4 py-3 font-mono text-foreground">
+      FV = S × (1 + r)<sup>n</sup> + C × ((1 + r)<sup>n</sup> − 1) ÷ r
+    </p>
+    <p class="mt-4">{t(k("methodLegend"))}</p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methodItems.map((item) => <li>{item}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {assumptions.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+</div>
