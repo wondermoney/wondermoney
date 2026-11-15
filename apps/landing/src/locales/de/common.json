@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Funktionen",
-    "resources": "Ressourcen",
     "about": "Über uns",
     "tools": "Tools",
+    "toolsMenu": {
+      "seeAll": "Alle Tools ansehen"
+    },
     "learn": "Lernen",
     "glossary": "Glossar",
     "login": "Anmelden",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Datenschutz",
         "description": "Bankverbindungen nutzen Nur-Lese-Open-Banking über Enable Banking. WonderMoney kann keine Überweisungen veranlassen."
-      },
-      "tools": {
-        "name": "Tools",
-        "description": "Kostenlose Finanzrechner: Zinseszins, Nettovermögen und mehr"
       },
       "learn": {
         "name": "Lernen",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "FIRE-Rechner",
+      "shortName": "Finanzielle Unabhängigkeit (FIRE)",
       "description": "Berechnen Sie, wie viel Sie investiert haben müssen, um davon zu leben, und wie lange es bis dahin dauert.",
       "annualSpending": "Jährliche Ausgaben im Ruhestand",
       "annualSpendingHelp": "Was Sie pro Jahr ausgeben wollen, wenn Sie nicht mehr arbeiten, in heutigen Euro",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Zinseszinsrechner",
+      "shortName": "Zinseszins",
       "description": "Sehen Sie, wie ein Startbetrag und monatliche Sparraten wachsen, vor und nach Inflation.",
       "initialInvestment": "Anfangsinvestition",
       "monthlyContribution": "Monatliche Sparrate",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Nettovermögensrechner",
+      "shortName": "Nettovermögen",
       "description": "Berechnen Sie Ihr Nettovermögen, indem Sie alle Vermögenswerte addieren und Verbindlichkeiten abziehen.",
       "assets": "Vermögenswerte",
       "liabilities": "Verbindlichkeiten",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Sparquotenrechner",
+      "shortName": "Sparquote",
       "description": "Finden Sie heraus, wie viel Prozent Ihres Einkommens Sie monatlich sparen — und wie Sie es verbessern können.",
       "monthlyIncome": "Monatliches Einkommen (netto)",
       "monthlyExpenses": "Monatliche Ausgaben",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Anlagerenditerechner",
+      "shortName": "Anlagerendite",
       "description": "Sehen Sie die annualisierte Rendite einer beliebigen Anlage anhand von Anfangswert, Endwert und Anlagezeitraum.",
       "initialInvestment": "Anfangsinvestition",
       "currentValue": "Aktueller Wert",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Notgroschen-Rechner",
+      "shortName": "Notgroschen",
       "description": "Berechnen Sie die Höhe Ihres Notgroschens aus Ihren notwendigen Ausgaben und sehen Sie, in welchem Monat Sie ihn erreichen.",
       "pageTitle": "Notgroschen-Rechner: Wie viel Rücklage brauchen Sie? — WonderMoney",
       "pageDescription": "Kostenloser Notgroschen-Rechner. Sehen Sie, wie viel Geld Sie für Unvorhergesehenes zurücklegen sollten, wie viel noch fehlt und in welchem Monat Sie es schaffen. Ohne Anmeldung.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Schuldendienstquote-Rechner",
+      "shortName": "Schuldendienstquote",
       "description": "Addieren Sie Ihre monatlichen Kreditraten und sehen Sie, welcher Anteil Ihres Nettoeinkommens in Schulden fließt.",
       "pageTitle": "Schuldendienstquote-Rechner — WonderMoney",
       "pageDescription": "Kostenloser Rechner für die Schuldendienstquote. Geben Sie Nettoeinkommen und Kreditraten ein, sehen Sie die Quote mit dem Rechenweg und testen Sie, wie ein neuer oder abbezahlter Kredit sie verändert.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Haushaltsbudget-Rechner",
+      "shortName": "Haushaltsbudget",
       "description": "Tragen Sie Ihre monatlichen Einnahmen und Ausgaben nach Kategorie ein und sehen Sie, was übrig bleibt, Ihre Sparquote und wohin jeder Euro fließt.",
       "pageTitle": "Haushaltsbudget-Rechner — WonderMoney",
       "pageDescription": "Kostenloser Haushaltsbudget-Rechner. Geben Sie monatliche Einnahmen und Ausgaben nach Kategorie ein und sehen Sie Überschuss oder Defizit, Sparquote, den Anteil jeder Kategorie und ein Flussdiagramm. Ohne Anmeldung.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Hypothekenrechner",
+      "shortName": "Hypothek",
       "description": "Berechnen Sie die Monatsrate eines Darlehens mit festem Zins, die Zinskosten und wie die Restschuld Jahr für Jahr sinkt.",
       "pageTitle": "Hypothekenrechner mit Tilgungsplan — WonderMoney",
       "pageDescription": "Kostenloser Hypothekenrechner für Darlehen mit festem Zins. Geben Sie Betrag, Laufzeit, Zinssatz und monatliche Versicherung ein und sehen Sie Rate, Zinskosten, Gesamtbetrag und einen Tilgungsplan Jahr für Jahr. Ohne Anmeldung.",
@@ -1145,6 +1152,7 @@
     },
     "savingsGoal": {
       "title": "Sparzielrechner",
+      "shortName": "Sparziel",
       "description": "Berechnen Sie, wie viel Sie monatlich für ein Ziel sparen müssen, wie lange es dauert oder was am Ende zusammenkommt.",
       "pageTitle": "Sparzielrechner: Wie viel monatlich sparen? — WonderMoney",
       "pageDescription": "Kostenloser Sparzielrechner. Sehen Sie, wie viel Sie monatlich sparen müssen, um ein Ziel zu erreichen, wie lange es dauert oder was aus Ihrem Ersparten wird, mit Zinserträgen und einem Plan Jahr für Jahr. Ohne Anmeldung.",
