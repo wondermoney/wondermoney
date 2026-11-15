@@ -543,6 +543,7 @@
       "noIncome": "Geben Sie Ihr monatliches Nettoeinkommen ein, um die Quote zu sehen.",
       "noDebts": "Keine Raten eingegeben: Kein Teil Ihres Einkommens fließt in Kredite.",
       "exceedsIncome": "Ihre Raten übersteigen Ihr Einkommen um {{amount}} pro Monat. Prüfen Sie die Zahlen; wenn sie stimmen, sprechen Sie mit Ihrer Bank oder einer kostenlosen Schuldnerberatung über Ihre Möglichkeiten.",
+      "outOfRange": "Diese Zahlen sind zu groß für die Berechnung. Prüfen Sie die eingegebenen Beträge.",
       "limitsNote": "Die Bereiche sind eine Faustregel. Banken und Aufsichtsbehörden legen eigene Grenzen fest, und diese unterscheiden sich von Land zu Land.",
       "scenarioHeading": "Eine Änderung durchspielen",
       "scenarioIntro": "Ändern Sie eine Rate oder fügen Sie einen neuen Kredit hinzu und vergleichen Sie die neue Quote mit der heutigen.",

@@ -543,6 +543,7 @@
       "noIncome": "Saisissez vos revenus nets mensuels pour voir le taux.",
       "noDebts": "Aucune mensualité saisie : aucune part de vos revenus ne part en crédit.",
       "exceedsIncome": "Vos mensualités dépassent vos revenus de {{amount}} par mois. Vérifiez les chiffres ; s'ils sont justes, parlez-en à votre banque ou à un service gratuit d'aide aux personnes endettées.",
+      "outOfRange": "Ces chiffres sont trop élevés pour être calculés. Vérifiez les montants saisis.",
       "limitsNote": "Les seuils sont un repère général. Les banques et les régulateurs fixent leurs propres limites, qui varient selon les pays.",
       "scenarioHeading": "Testez un changement",
       "scenarioIntro": "Modifiez une mensualité ou ajoutez un nouveau crédit, et comparez le nouveau taux avec le taux actuel.",

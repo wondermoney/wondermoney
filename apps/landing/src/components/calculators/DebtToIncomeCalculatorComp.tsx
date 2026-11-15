@@ -51,8 +51,9 @@ const INPUT_CLASS = cn(
   "transition-colors",
 );
 
-function toNumber(value: string): number {
-  return value === "" ? 0 : Number(value);
+/** Amounts are never negative: a minus sign or an unreadable entry stores (and shows) 0. */
+function toAmount(value: number): number {
+  return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
 export default function DebtToIncomeCalculator({ locale }: { locale: Lang }) {
@@ -126,25 +127,39 @@ function DebtToIncomeCalculatorContent() {
     setRows((previous) => previous.map((row) => (row.id === id ? { ...row, ...patch } : row)));
   };
 
+  // The scenario always points at a row that exists, and its amount starts from
+  // that row's payment, so removing the selected row never leaves a stale amount
+  // applied to another one.
+  const pointScenarioAt = (row: PaymentRow | undefined) => {
+    setChangeRowId(row?.id ?? "");
+    setChangeAmount(row?.amount ?? 0);
+  };
+
   const removeRow = (id: string) => {
     markUsed();
-    setRows((previous) => previous.filter((row) => row.id !== id));
+    const remaining = rows.filter((row) => row.id !== id);
+    setRows(remaining);
+    if (selectedChangeRow?.id === id) pointScenarioAt(remaining[0]);
   };
 
   const addRow = () => {
     markUsed();
     const number = nextRowNumber.current++;
-    setRows((previous) => [
-      ...previous,
-      { id: `added-${number}`, label: t(k("newRowLabel")), amount: 0 },
-    ]);
+    const added: PaymentRow = { id: `added-${number}`, label: t(k("newRowLabel")), amount: 0 };
+    setRows([...rows, added]);
+    if (!selectedChangeRow) pointScenarioAt(added);
   };
 
   const selectChangeRow = (id: string) => {
     markUsed();
-    setChangeRowId(id);
-    setChangeAmount(rows.find((row) => row.id === id)?.amount ?? 0);
+    pointScenarioAt(rows.find((row) => row.id === id));
   };
+
+  const formatAmount = (value: number) =>
+    Number.isFinite(value) ? moneyFormatter.format(value) : "\u2014";
+
+  const scenarioOutOfRange =
+    comparison.current.status === "outOfRange" || comparison.scenario.status === "outOfRange";
 
   const ratioForBar = current.ratio === null ? 0 : Math.max(0, Math.min(100, current.ratio));
 
@@ -159,7 +174,7 @@ function DebtToIncomeCalculatorContent() {
             value={monthlyIncome}
             onChange={(value) => {
               markUsed();
-              setMonthlyIncome(value);
+              setMonthlyIncome(toAmount(value));
             }}
             min={0}
             step={50}
@@ -201,7 +216,7 @@ function DebtToIncomeCalculatorContent() {
                         min={0}
                         step={10}
                         value={row.amount}
-                        onChange={(e) => updateRow(row.id, { amount: toNumber(e.target.value) })}
+                        onChange={(e) => updateRow(row.id, { amount: toAmount(Number(e.target.value)) })}
                         aria-label={t(k("rowAmountLabel"), { name })}
                         className={cn(INPUT_CLASS, "pl-8 font-mono")}
                       />
@@ -289,7 +304,7 @@ function DebtToIncomeCalculatorContent() {
                 value={changeAmount}
                 onChange={(value) => {
                   markUsed();
-                  setChangeAmount(value);
+                  setChangeAmount(toAmount(value));
                 }}
                 min={0}
                 step={10}
@@ -303,7 +318,7 @@ function DebtToIncomeCalculatorContent() {
               value={addAmount}
               onChange={(value) => {
                 markUsed();
-                setAddAmount(value);
+                setAddAmount(toAmount(value));
               }}
               min={0}
               step={10}
@@ -326,7 +341,9 @@ function DebtToIncomeCalculatorContent() {
             />
           </dl>
           <p className="text-sm text-muted-foreground" aria-live="polite">
-            {comparison.pointsChange === null
+            {scenarioOutOfRange
+              ? t(k("outOfRange"))
+              : comparison.pointsChange === null
               ? t(k("noIncome"))
               : t(k("scenarioDelta"), {
                   points: new Intl.NumberFormat(toIntlLocale(locale), {
@@ -345,7 +362,7 @@ function DebtToIncomeCalculatorContent() {
           items={[
             {
               label: t(k("totalPayments")),
-              value: moneyFormatter.format(current.totalPayments),
+              value: formatAmount(current.totalPayments),
             },
             {
               label: t(k("ratio")),
@@ -356,9 +373,9 @@ function DebtToIncomeCalculatorContent() {
         />
 
         <div aria-live="polite" className="space-y-4">
-          {current.status === "noIncome" ? (
+          {current.status !== "ok" ? (
             <p className="rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
-              {t(k("noIncome"))}
+              {t(k(current.status))}
             </p>
           ) : (
             <>

@@ -70,6 +70,22 @@ describe("computeDebtToIncome", () => {
     expect(result.band).toBe("high");
   });
 
+  it("reports figures too large for a finite total instead of an infinite ratio", () => {
+    const result = computeDebtToIncome({ monthlyIncome: 2000, payments: [1e308, 1e308] });
+
+    expect(result.status).toBe("outOfRange");
+    expect(result.ratio).toBeNull();
+    expect(result.band).toBeNull();
+    expect(result.remainingIncome).toBeNull();
+  });
+
+  it("reports a ratio too large to be finite as out of range", () => {
+    const result = computeDebtToIncome({ monthlyIncome: 1e-300, payments: [1e10] });
+
+    expect(result.status).toBe("outOfRange");
+    expect(result.ratio).toBeNull();
+  });
+
   it("works out the page's worked example", () => {
     const { monthlyIncome, rows } = DEBT_TO_INCOME_WORKED_EXAMPLE;
     const result = computeDebtToIncome({
@@ -136,6 +152,14 @@ describe("compareDebtScenario", () => {
     expect(comparison.scenario.ratio).toBe(28.2);
     expect(comparison.scenario.band).toBe("healthy");
     expect(comparison.pointsChange).toBe(-7.5);
+  });
+
+  it("moves the worked example from the caution band to the healthy band, as the page says", () => {
+    const { monthlyIncome, rows, scenario } = DEBT_TO_INCOME_WORKED_EXAMPLE;
+    const comparison = compareDebtScenario(monthlyIncome, rows, scenario);
+
+    expect(comparison.current.band).toBe("caution");
+    expect(comparison.scenario.band).toBe("healthy");
   });
 
   it("raises the ratio when a new loan payment is added", () => {

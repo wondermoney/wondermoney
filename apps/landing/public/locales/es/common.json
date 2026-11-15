@@ -543,6 +543,7 @@
       "noIncome": "Introduce tus ingresos netos mensuales para ver el ratio.",
       "noDebts": "No has indicado cuotas: ninguna parte de tus ingresos se va en créditos.",
       "exceedsIncome": "Tus cuotas superan tus ingresos en {{amount}} al mes. Revisa las cifras; si son correctas, habla con tu banco o con un servicio gratuito de asesoramiento sobre deudas para ver tus opciones.",
+      "outOfRange": "Estas cifras son demasiado grandes para calcularlas. Revisa los importes que has introducido.",
       "limitsNote": "Los tramos son una referencia general. Los bancos y los reguladores fijan sus propios límites, y varían según el país.",
       "scenarioHeading": "Prueba un cambio",
       "scenarioIntro": "Cambia una cuota o añade un préstamo nuevo y compara el nuevo ratio con el actual.",

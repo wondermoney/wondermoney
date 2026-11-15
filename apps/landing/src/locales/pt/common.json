@@ -543,6 +543,7 @@
       "noIncome": "Indica o rendimento líquido mensal para veres a taxa de esforço.",
       "noDebts": "Sem prestações indicadas: nenhuma parte do rendimento vai para crédito.",
       "exceedsIncome": "As prestações ultrapassam o rendimento em {{amount}} por mês. Confirma os valores; se estiverem certos, fala com o teu banco ou com um serviço gratuito de apoio a pessoas endividadas sobre as opções.",
+      "outOfRange": "Estes valores são demasiado grandes para calcular. Confirma os montantes que introduziste.",
       "limitsNote": "Os escalões são uma referência geral. Os bancos e os reguladores definem os seus próprios limites, que variam de país para país.",
       "scenarioHeading": "Experimenta uma alteração",
       "scenarioIntro": "Muda uma prestação, ou acrescenta um crédito novo, e compara a nova taxa com a atual.",

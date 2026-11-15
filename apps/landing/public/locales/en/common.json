@@ -543,6 +543,7 @@
       "noIncome": "Enter your net monthly income to see the ratio.",
       "noDebts": "No debt payments entered, so none of your income goes to credit.",
       "exceedsIncome": "Your payments are {{amount}} a month more than your income. Check the figures; if they are right, speak to your lender or a free debt advice service about your options.",
+      "outOfRange": "These figures are too large to work out. Check the amounts you entered.",
       "limitsNote": "The bands are a rule of thumb. Lenders and regulators set their own limits, and they vary by country.",
       "scenarioHeading": "Try a change",
       "scenarioIntro": "Change one payment, or add a new loan, and compare the new ratio with today's.",

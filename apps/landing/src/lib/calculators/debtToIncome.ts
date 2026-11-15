@@ -29,8 +29,12 @@ export type DebtToIncomeResult =
       exceedsIncome: boolean;
     }
   | {
-      /** Income is zero, empty or negative: a ratio cannot be worked out. */
-      status: "noIncome";
+      /**
+       * noIncome: income is zero, empty or negative, so there is nothing to divide by.
+       * outOfRange: the figures are too large for a finite total or ratio.
+       */
+      status: "noIncome" | "outOfRange";
+      /** Can be Infinity when the status is outOfRange. */
       totalPayments: number;
       ratio: null;
       band: null;
@@ -100,8 +104,21 @@ export function computeDebtToIncome(params: DebtToIncomeParams): DebtToIncomeRes
     };
   }
 
+  const rawRatio = (totalPayments / monthlyIncome) * 100;
+
+  if (!Number.isFinite(totalPayments) || !Number.isFinite(rawRatio)) {
+    return {
+      status: "outOfRange",
+      totalPayments,
+      ratio: null,
+      band: null,
+      remainingIncome: null,
+      exceedsIncome: false,
+    };
+  }
+
   // The band follows the rounded figure so the verdict matches the number shown.
-  const ratio = roundToOneDecimal((totalPayments / monthlyIncome) * 100);
+  const ratio = roundToOneDecimal(rawRatio);
 
   return {
     status: "ok",

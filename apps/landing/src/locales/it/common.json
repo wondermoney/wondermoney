@@ -543,6 +543,7 @@
       "noIncome": "Inserisci il reddito netto mensile per vedere il rapporto.",
       "noDebts": "Nessuna rata inserita: nessuna parte del reddito va ai finanziamenti.",
       "exceedsIncome": "Le rate superano il reddito di {{amount}} al mese. Controlla i numeri; se sono giusti, parla con la tua banca o con un servizio gratuito di consulenza sul debito per valutare le opzioni.",
+      "outOfRange": "Questi numeri sono troppo grandi per il calcolo. Controlla gli importi che hai inserito.",
       "limitsNote": "Le fasce sono un riferimento generale. Banche e autorità di vigilanza fissano i propri limiti, che cambiano da paese a paese.",
       "scenarioHeading": "Prova un cambiamento",
       "scenarioIntro": "Modifica una rata o aggiungi un nuovo finanziamento e confronta il nuovo rapporto con quello attuale.",
