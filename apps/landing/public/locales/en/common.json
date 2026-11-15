@@ -1273,6 +1273,163 @@
       "nextStepDescription": "Create the goal in WonderMoney with its amount, date and monthly contribution, and follow your progress against your real account balances.",
       "nextStepCta": "Create a goal"
     },
+    "borrowingCapacity": {
+      "title": "Borrowing Capacity Calculator",
+      "description": "See the highest home price your income and savings allow, which of the two holds you back, and what would raise it.",
+      "pageTitle": "How Much Can I Borrow? Borrowing Capacity Calculator — WonderMoney",
+      "pageDescription": "Free borrowing capacity calculator. Enter your net income, existing loan payments and savings to see the largest mortgage and home price within reach, and which limit holds you back. No sign-up.",
+      "subtitle": "Two things cap the home you can buy: the monthly payment your income can carry and the cash you need up front. See each limit on its own, then the price both allow. Nothing to sign up for.",
+      "budgetHeading": "Your monthly budget",
+      "monthlyIncome": "Net monthly household income",
+      "monthlyIncomeHelp": "Take-home pay of everyone who will share the loan, after tax and social contributions.",
+      "existingPayments": "Existing credit payments",
+      "existingPaymentsHelp": "What you already pay each month on car loans, personal loans, credit cards and other credit. Leave it at 0 if you have none.",
+      "maxDebtShare": "Maximum share of income for all credit",
+      "maxDebtShareHelp": "Between {{min}} and {{max}} of net income, for your existing payments and the new loan together.",
+      "maxDebtShareBand": "The debt-to-income calculator reads {{share}} as: {{band}}.",
+      "loanHeading": "The new loan",
+      "annualRate": "Interest rate",
+      "annualRateHelp": "Fixed nominal annual rate. Leave a margin above today's offers: lenders often test a higher one.",
+      "termYears": "Loan term",
+      "years": "years",
+      "yearsCount": "{{count}} years",
+      "yearsOne": "1 year",
+      "savingsHeading": "Your savings",
+      "savings": "Savings for the purchase",
+      "savingsHelp": "Only what you can put into the home. Keep your emergency fund out of this figure.",
+      "purchaseCostsRate": "One-off purchase costs",
+      "purchaseCostsRateHelp": "Taxes, notary, registration and bank fees, as a share of the price. {{rate}} to start with; check the figure where you buy.",
+      "maxLoanToValue": "Maximum loan-to-value",
+      "maxLoanToValueHelp": "The largest share of the price a lender will lend; the rest is your down payment. {{rate}} to start with.",
+      "result": {
+        "price": "Highest home price",
+        "loan": "Loan",
+        "downPayment": "Down payment",
+        "purchaseCosts": "Purchase costs",
+        "monthlyPayment": "Monthly payment at {{rate}} over {{years}}",
+        "totalInterest": "Interest over the term",
+        "totalPaid": "Total repaid",
+        "debtToIncome": "Debt-to-income ratio with this loan: {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Debt-to-income ratio with your current payments: {{ratio}} ({{band}}).",
+        "scheduleLink": "Open the mortgage calculator for the year-by-year schedule"
+      },
+      "binding": {
+        "monthly": "Your monthly budget sets the limit. Your savings would stretch further.",
+        "cash": "Your savings set the limit. Your income could carry a larger loan.",
+        "both": "Both limits meet at this price."
+      },
+      "lift": {
+        "income": "About {{amount}} more net income a month would take you to {{price}}, where your savings become the limit.",
+        "incomeStep": "Each extra {{step}} of net income a month adds about {{amount}} to the price.",
+        "savings": "About {{amount}} more in savings would take you to {{price}}, where your monthly budget becomes the limit.",
+        "both": "To go higher, you would need more income and more savings."
+      },
+      "status": {
+        "noRoom": "Your existing payments already take the {{share}} of income you allowed for credit, so there is no room for a new loan payment. The price shown is what your savings alone would buy.",
+        "savingsOnly": "The loan your savings allow would be under {{min}}, so the price shown is what your savings alone would buy.",
+        "noSavings": "Your savings don't cover the {{deposit}} down payment and {{costs}} purchase costs, so there is no price to show yet.",
+        "nothing": "With no room for a new loan payment and no savings, there is no price to show. Lower your existing payments, or allow a larger share of income, to see one.",
+        "outOfRange": "These figures need a loan above {{max}}, more than this calculator works out. Check the amounts you entered."
+      },
+      "lenderNote": "This is an estimate, not a loan offer. Lenders apply their own rules: many test the payment at a higher rate than the one you would pay, count income their own way, and follow limits on loan size and repayments that differ by country.",
+      "limits": {
+        "title": "The two limits, side by side",
+        "intro": "Each limit gives its own highest price. The lower of the two is the result above.",
+        "setsLimit": "Sets the limit",
+        "monthlyTitle": "1. Monthly budget",
+        "allowed": "{{share}} of net income for credit",
+        "existing": "Existing credit payments",
+        "room": "Room for the new payment",
+        "maxLoan": "Largest loan at {{rate}} over {{years}}",
+        "monthlyPrice": "Highest price, with your savings",
+        "noRoom": "Your existing payments leave no room for a new loan.",
+        "cashTitle": "2. Upfront cash",
+        "savings": "Savings for the purchase",
+        "deposit": "Down payment (the lender lends {{ltv}})",
+        "costs": "Purchase costs",
+        "cashShare": "Needed from savings, as a share of the price",
+        "cashPrice": "Highest price your savings cover",
+        "noCeiling": "No limit",
+        "noCeilingNote": "With a 100% loan and no purchase costs, nothing has to come from savings, so only the monthly budget limits the price."
+      },
+      "errors": {
+        "summary": "Your result appears once every field has a valid value.",
+        "monthlyIncome": {
+          "required": "Enter your net monthly income.",
+          "tooLarge": "Enter an income up to {{max}} a month."
+        },
+        "existingPayments": {
+          "negative": "Payments can't be negative. Enter 0 if you have none.",
+          "tooLarge": "Enter payments up to {{max}} a month."
+        },
+        "maxDebtShare": {
+          "required": "Enter a share between {{min}} and {{max}}.",
+          "tooSmall": "Enter at least {{min}}.",
+          "tooLarge": "Enter at most {{max}}."
+        },
+        "annualRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The rate can't be negative. Enter 0% or more.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the loan term in years.",
+          "tooLarge": "Enter a term of up to {{max}} years."
+        },
+        "savings": {
+          "negative": "Savings can't be negative. Enter 0 if you have none.",
+          "tooLarge": "Enter savings up to {{max}}."
+        },
+        "purchaseCostsRate": {
+          "negative": "Costs can't be negative. Enter 0% to leave them out.",
+          "tooLarge": "Enter costs up to {{max}} of the price."
+        },
+        "maxLoanToValue": {
+          "required": "Enter a loan-to-value between {{min}} and {{max}}.",
+          "tooSmall": "Enter at least {{min}}.",
+          "tooLarge": "Enter at most {{max}}."
+        }
+      },
+      "nextStepHeadline": "Plan your deposit and monthly housing costs",
+      "nextStepDescription": "Set the down payment as a savings goal in WonderMoney and plan the future loan payment in your monthly budget, next to what you really spend.",
+      "nextStepCta": "Start planning",
+      "guide": {
+        "whatTitle": "Two limits decide how much you can borrow",
+        "whatBody1": "The first is monthly. Lenders want all your credit payments together to stay under a share of your net income. Take that share, subtract what you already pay on other credit, and what is left is the most the new loan's payment can be. At a given rate and term, that payment repays a loan of a set size: the most your income supports.",
+        "whatBody2": "The second is cash. Lenders rarely finance the whole price. The part they don't lend is your down payment, and buying also has one-off costs such as taxes, notary and registration fees. Both come out of savings, so your savings put their own ceiling on the price.",
+        "whatBody3": "The price within reach is the lower of the two. The calculator shows which one holds you back and how much more income or savings would lift it.",
+        "relatedMortgage": "works out the monthly payment, interest and year-by-year schedule of a loan you already have in mind.",
+        "relatedDebtToIncome": "shows what share of your income your current payments take, with the same bands this tool uses.",
+        "exampleTitle": "Worked example",
+        "exampleIntro": "A couple brings home {{income}} a month and pays {{existing}} a month on a car loan. They have {{savings}} saved for a home, expect a fixed rate of {{rate}} over {{years}} years and plan for purchase costs of {{costsRate}} of the price. Their lender lends up to {{ltv}} of the price, and they allow {{share}} of their income for credit.",
+        "exampleStep1": "Monthly room: {{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
+        "exampleStep2": "Largest loan: a payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
+        "exampleStep3": "Cash: each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
+        "exampleStep4": "The lower of the two is {{monthlyPrice}}, so the monthly budget sets the limit.",
+        "exampleResult": "At {{price}} they would borrow {{loan}}, pay {{downPayment}} down and {{purchaseCosts}} in costs, using all of their {{savings}}. The mortgage calculator puts the payment at {{payment}} a month.",
+        "exampleLift": "About {{extraIncome}} more net income a month would take them to {{liftPrice}}, where the savings limit takes over.",
+        "exampleSavings": "With only {{lowSavings}} saved, the picture flips: the savings cover a price of {{lowSavingsPrice}}, with a loan of {{lowSavingsLoan}}, well within what their income could carry. Saving more, not earning more, is what would raise their limit. The calculator above starts from the first couple, so you can swap in your own figures.",
+        "methodTitle": "Method",
+        "methodIntro": "The calculation works out each limit on its own, then takes the lower price.",
+        "methodLegend": "I is net monthly income, d the share of it allowed for credit, E the existing payments and M the room for the new payment. r is the annual rate divided by 12, n the number of monthly payments and L the largest loan. S is the savings, c the purchase costs and v the loan-to-value, both as a share of the price. P₁ is the price the monthly budget allows and P₂ the one the savings allow.",
+        "methodShare": "The starting share of {{share}} sits in the caution band of the debt-to-income calculator ({{caution}}% to {{high}}%). It is a rule of thumb, not a legal limit.",
+        "methodCosts": "At the highest price every euro of savings goes into the purchase: the costs first, the rest as the down payment. The loan covers what is left, and never more than the loan-to-value allows.",
+        "methodRounding": "Amounts are worked in cents. The loan is rounded down to the cent, so its payment, worked out by the mortgage calculator, never goes over the room, and the price is exactly the loan plus the down payment. The extra income or savings is rounded up to the euro.",
+        "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionFixedRate": "A fixed rate for the whole term, with equal monthly payments of principal and interest.",
+        "assumptionSavings": "All of the savings you enter go into the purchase. Keep your emergency fund out of the figure.",
+        "assumptionPayment": "The payment leaves out insurance, account fees and the running costs of the home, such as property tax, upkeep and utilities.",
+        "assumptionCurrency": "Purchase costs are a flat share of the price. In practice taxes are often tiered and some fees are fixed amounts.",
+        "lendersTitle": "What lenders check that this tool doesn't",
+        "lendersIntro": "A lender's answer can be lower than this estimate, sometimes by a lot. Rules differ by lender and by country, and this calculator builds none of them in.",
+        "lenderStress": "Stress-tested rates: many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
+        "lenderIncome": "Income definitions: some count only part of bonuses, self-employed or rental income, or average it over several years.",
+        "lenderCountry": "Country limits: regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
+        "lenderProfile": "Your profile: your age at the end of the term, job security, credit history and the home itself all count.",
+        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you."
+      }
+    },
     "termDeposit": {
       "title": "Term Deposit Calculator",
       "description": "Work out what a fixed-term deposit earns before and after tax, with interest paid at maturity or along the way.",

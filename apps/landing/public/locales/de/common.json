@@ -1273,6 +1273,163 @@
       "nextStepDescription": "Legen Sie das Ziel in WonderMoney mit Betrag, Termin und monatlicher Sparrate an und verfolgen Sie Ihren Fortschritt mit den echten Salden Ihrer Konten.",
       "nextStepCta": "Ziel anlegen"
     },
+    "borrowingCapacity": {
+      "title": "Wie viel Kredit bekomme ich?",
+      "description": "Sehen Sie, welchen Kaufpreis Ihr Einkommen und Ihr Erspartes höchstens erlauben, welche der beiden Grenzen Sie bremst und was sie anheben würde.",
+      "pageTitle": "Wie viel Kredit bekomme ich? Rechner für den Kreditrahmen — WonderMoney",
+      "pageDescription": "Kostenloser Rechner für Ihren Kreditrahmen. Geben Sie Nettoeinkommen, laufende Kreditraten und Erspartes ein und sehen Sie das größte Darlehen und den höchsten Kaufpreis in Reichweite, und welche Grenze Sie bremst. Ohne Anmeldung.",
+      "subtitle": "Zwei Dinge begrenzen die Immobilie, die Sie kaufen können: die Rate, die Ihr Einkommen tragen kann, und das Geld, das Sie vorab brauchen. Sehen Sie jede Grenze für sich und dann den Preis, den beide erlauben. Keine Anmeldung nötig.",
+      "budgetHeading": "Ihr Monatsbudget",
+      "monthlyIncome": "Monatliches Nettoeinkommen des Haushalts",
+      "monthlyIncomeHelp": "Was alle, die sich das Darlehen teilen, nach Steuern und Sozialabgaben erhalten.",
+      "existingPayments": "Laufende Kreditraten",
+      "existingPaymentsHelp": "Was Sie schon jeden Monat für Autokredit, Ratenkredit, Kreditkarten und andere Kredite zahlen. Lassen Sie 0 stehen, wenn Sie keine haben.",
+      "maxDebtShare": "Höchstanteil des Einkommens für alle Kredite",
+      "maxDebtShareHelp": "Zwischen {{min}} und {{max}} des Nettoeinkommens, für laufende Raten und das neue Darlehen zusammen.",
+      "maxDebtShareBand": "Der Schuldendienstquote-Rechner stuft {{share}} so ein: {{band}}.",
+      "loanHeading": "Das neue Darlehen",
+      "annualRate": "Zinssatz",
+      "annualRateHelp": "Fester Nominalzins pro Jahr. Planen Sie einen Puffer über heutigen Angeboten ein: Banken rechnen oft mit einem höheren.",
+      "termYears": "Laufzeit",
+      "years": "Jahre",
+      "yearsCount": "{{count}} Jahre",
+      "yearsOne": "1 Jahr",
+      "savingsHeading": "Ihr Erspartes",
+      "savings": "Erspartes für den Kauf",
+      "savingsHelp": "Nur was Sie in die Immobilie stecken können. Lassen Sie Ihren Notgroschen aus diesem Betrag heraus.",
+      "purchaseCostsRate": "Einmalige Kaufnebenkosten",
+      "purchaseCostsRateHelp": "Steuern, Notar, Grundbuch und Bankgebühren, als Anteil am Kaufpreis. {{rate}} zum Start; prüfen Sie den Wert für Ihren Kaufort.",
+      "maxLoanToValue": "Höchster Beleihungsauslauf (LTV)",
+      "maxLoanToValueHelp": "Der größte Anteil am Kaufpreis, den die Bank finanziert; der Rest ist Ihr Eigenkapital. {{rate}} zum Start.",
+      "result": {
+        "price": "Höchster Kaufpreis",
+        "loan": "Darlehen",
+        "downPayment": "Eigenkapital",
+        "purchaseCosts": "Kaufnebenkosten",
+        "monthlyPayment": "Monatsrate bei {{rate}} über {{years}}",
+        "totalInterest": "Zinsen über die Laufzeit",
+        "totalPaid": "Insgesamt zurückgezahlt",
+        "debtToIncome": "Schuldendienstquote mit diesem Darlehen: {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Schuldendienstquote mit Ihren laufenden Raten: {{ratio}} ({{band}}).",
+        "scheduleLink": "Den Hypothekenrechner für den Tilgungsplan Jahr für Jahr öffnen"
+      },
+      "binding": {
+        "monthly": "Ihr Monatsbudget setzt die Grenze. Ihr Erspartes würde weiter reichen.",
+        "cash": "Ihr Erspartes setzt die Grenze. Ihr Einkommen könnte ein größeres Darlehen tragen.",
+        "both": "Beide Grenzen treffen sich bei diesem Preis."
+      },
+      "lift": {
+        "income": "Mit etwa {{amount}} mehr Nettoeinkommen im Monat kämen Sie auf {{price}}; dort wird Ihr Erspartes zur Grenze.",
+        "incomeStep": "Je {{step}} mehr Nettoeinkommen im Monat steigt der Preis um etwa {{amount}}.",
+        "savings": "Mit etwa {{amount}} mehr Erspartem kämen Sie auf {{price}}; dort wird Ihr Monatsbudget zur Grenze.",
+        "both": "Für einen höheren Preis bräuchten Sie mehr Einkommen und mehr Erspartes."
+      },
+      "status": {
+        "noRoom": "Ihre laufenden Raten nehmen schon die {{share}} des Einkommens ein, die Sie für Kredite vorgesehen haben, es bleibt also kein Spielraum für eine neue Rate. Der angezeigte Preis ist das, was Ihr Erspartes allein kaufen würde.",
+        "savingsOnly": "Das Darlehen, das Ihr Erspartes erlaubt, läge unter {{min}}. Der angezeigte Preis ist daher das, was Ihr Erspartes allein kaufen würde.",
+        "noSavings": "Ihr Erspartes deckt weder das Eigenkapital von {{deposit}} noch die Kaufnebenkosten von {{costs}}, daher gibt es noch keinen Preis.",
+        "nothing": "Ohne Spielraum für eine neue Rate und ohne Erspartes gibt es keinen Preis. Senken Sie Ihre laufenden Raten oder erlauben Sie einen größeren Anteil des Einkommens, um einen zu sehen.",
+        "outOfRange": "Diese Werte bräuchten ein Darlehen über {{max}}, mehr als dieser Rechner berechnet. Prüfen Sie die eingegebenen Beträge."
+      },
+      "lenderNote": "Dies ist eine Schätzung, kein Kreditangebot. Banken wenden eigene Regeln an: Viele prüfen die Rate mit einem höheren Zins als dem, den Sie zahlen würden, rechnen Einkommen auf ihre Weise und folgen Obergrenzen für Darlehen und Raten, die je nach Land verschieden sind.",
+      "limits": {
+        "title": "Die zwei Grenzen nebeneinander",
+        "intro": "Jede Grenze ergibt einen eigenen Höchstpreis. Der niedrigere der beiden ist das Ergebnis oben.",
+        "setsLimit": "Setzt die Grenze",
+        "monthlyTitle": "1. Monatsbudget",
+        "allowed": "{{share}} des Nettoeinkommens für Kredite",
+        "existing": "Laufende Kreditraten",
+        "room": "Spielraum für die neue Rate",
+        "maxLoan": "Größtes Darlehen bei {{rate}} über {{years}}",
+        "monthlyPrice": "Höchster Preis, mit Ihrem Ersparten",
+        "noRoom": "Ihre laufenden Raten lassen keinen Spielraum für ein neues Darlehen.",
+        "cashTitle": "2. Geld vorab",
+        "savings": "Erspartes für den Kauf",
+        "deposit": "Eigenkapital (die Bank finanziert {{ltv}})",
+        "costs": "Kaufnebenkosten",
+        "cashShare": "Aus dem Ersparten, als Anteil am Kaufpreis",
+        "cashPrice": "Höchster Preis, den Ihr Erspartes deckt",
+        "noCeiling": "Keine Grenze",
+        "noCeilingNote": "Bei 100 % Finanzierung und ohne Kaufnebenkosten muss nichts aus dem Ersparten kommen, also begrenzt nur das Monatsbudget den Preis."
+      },
+      "errors": {
+        "summary": "Das Ergebnis erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "monthlyIncome": {
+          "required": "Geben Sie Ihr monatliches Nettoeinkommen ein.",
+          "tooLarge": "Geben Sie ein Einkommen bis {{max}} im Monat ein."
+        },
+        "existingPayments": {
+          "negative": "Raten können nicht negativ sein. Geben Sie 0 ein, wenn Sie keine haben.",
+          "tooLarge": "Geben Sie Raten bis {{max}} im Monat ein."
+        },
+        "maxDebtShare": {
+          "required": "Geben Sie einen Anteil zwischen {{min}} und {{max}} ein.",
+          "tooSmall": "Geben Sie mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie höchstens {{max}} ein."
+        },
+        "annualRate": {
+          "required": "Geben Sie den Zinssatz ein.",
+          "negative": "Der Zins kann nicht negativ sein. Geben Sie 0 % oder mehr ein.",
+          "tooLarge": "Geben Sie einen Zins bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Laufzeit in Jahren ein.",
+          "tooLarge": "Geben Sie eine Laufzeit bis {{max}} Jahre ein."
+        },
+        "savings": {
+          "negative": "Erspartes kann nicht negativ sein. Geben Sie 0 ein, wenn Sie nichts haben.",
+          "tooLarge": "Geben Sie Erspartes bis {{max}} ein."
+        },
+        "purchaseCostsRate": {
+          "negative": "Kosten können nicht negativ sein. Geben Sie 0 % ein, um sie wegzulassen.",
+          "tooLarge": "Geben Sie Kosten bis {{max}} des Kaufpreises ein."
+        },
+        "maxLoanToValue": {
+          "required": "Geben Sie einen Beleihungsauslauf zwischen {{min}} und {{max}} ein.",
+          "tooSmall": "Geben Sie mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie höchstens {{max}} ein."
+        }
+      },
+      "nextStepHeadline": "Planen Sie Eigenkapital und monatliche Wohnkosten",
+      "nextStepDescription": "Legen Sie das Eigenkapital in WonderMoney als Sparziel an und planen Sie die künftige Rate in Ihrem Monatsbudget ein, neben Ihren tatsächlichen Ausgaben.",
+      "nextStepCta": "Mit der Planung beginnen",
+      "guide": {
+        "whatTitle": "Zwei Grenzen bestimmen, wie viel Sie leihen können",
+        "whatBody1": "Die erste ist monatlich. Banken möchten, dass alle Ihre Kreditraten zusammen unter einem Anteil Ihres Nettoeinkommens bleiben. Nehmen Sie diesen Anteil, ziehen Sie ab, was Sie schon für andere Kredite zahlen, und der Rest ist die höchste mögliche Rate für das neue Darlehen. Bei gegebenem Zins und gegebener Laufzeit tilgt diese Rate ein Darlehen bestimmter Höhe: das Maximum, das Ihr Einkommen trägt.",
+        "whatBody2": "Die zweite ist das Geld vorab. Banken finanzieren selten den ganzen Kaufpreis. Den Teil, den sie nicht leihen, bringen Sie als Eigenkapital ein, und der Kauf hat zudem einmalige Nebenkosten wie Steuern, Notar und Grundbuch. Beides kommt aus dem Ersparten, das dem Preis damit eine eigene Obergrenze setzt.",
+        "whatBody3": "Der erreichbare Preis ist der niedrigere der beiden. Der Rechner zeigt, welche Grenze Sie bremst und wie viel mehr Einkommen oder Erspartes sie anheben würde.",
+        "relatedMortgage": "berechnet Rate, Zinsen und Tilgungsplan Jahr für Jahr für ein Darlehen, das Sie schon im Blick haben.",
+        "relatedDebtToIncome": "zeigt, welchen Anteil Ihres Einkommens Ihre laufenden Raten einnehmen, mit denselben Stufen wie dieses Werkzeug.",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleIntro": "Ein Paar verdient zusammen {{income}} netto im Monat und zahlt {{existing}} im Monat für einen Autokredit. Es hat {{savings}} für eine Immobilie gespart, rechnet mit einem festen Zins von {{rate}} über {{years}} Jahre und plant Kaufnebenkosten von {{costsRate}} des Preises ein. Die Bank finanziert bis zu {{ltv}} des Preises, und das Paar erlaubt {{share}} seines Einkommens für Kredite.",
+        "exampleStep1": "Monatlicher Spielraum: {{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
+        "exampleStep2": "Größtes Darlehen: Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Mit dem ganzen Ersparten dazu und den Nebenkosten aus der Summe bezahlt erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
+        "exampleStep3": "Geld vorab: Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
+        "exampleStep4": "Der niedrigere der beiden ist {{monthlyPrice}}, also setzt das Monatsbudget die Grenze.",
+        "exampleResult": "Bei {{price}} würde das Paar {{loan}} leihen, {{downPayment}} Eigenkapital einbringen und {{purchaseCosts}} Nebenkosten zahlen, mit seinem ganzen Ersparten von {{savings}}. Der Hypothekenrechner kommt auf eine Rate von {{payment}} im Monat.",
+        "exampleLift": "Mit etwa {{extraIncome}} mehr Nettoeinkommen im Monat käme es auf {{liftPrice}}; dort übernimmt die Grenze des Ersparten.",
+        "exampleSavings": "Mit nur {{lowSavings}} Erspartem kehrt sich das Bild um: Das Ersparte deckt einen Preis von {{lowSavingsPrice}} mit einem Darlehen von {{lowSavingsLoan}}, weit unter dem, was das Einkommen tragen könnte. Mehr sparen, nicht mehr verdienen, würde die Grenze anheben. Der Rechner oben beginnt mit dem ersten Paar, damit Sie Ihre eigenen Zahlen eintragen können.",
+        "methodTitle": "Methode",
+        "methodIntro": "Die Rechnung bestimmt jede Grenze für sich und nimmt dann den niedrigeren Preis.",
+        "methodLegend": "I ist das monatliche Nettoeinkommen, d der für Kredite erlaubte Anteil davon, E die laufenden Raten und M der Spielraum für die neue Rate. r ist der Jahreszins geteilt durch 12, n die Zahl der Monatsraten und L das größte Darlehen. S ist das Ersparte, c die Kaufnebenkosten und v der Beleihungsauslauf, beide als Anteil am Preis. P₁ ist der Preis, den das Monatsbudget erlaubt, P₂ der, den das Ersparte erlaubt.",
+        "methodShare": "Der Startwert von {{share}} liegt in der Vorsicht-Stufe des Schuldendienstquote-Rechners ({{caution}} % bis {{high}} %). Das ist eine Faustregel, keine gesetzliche Grenze.",
+        "methodCosts": "Beim höchsten Preis fließt jeder Euro des Ersparten in den Kauf: zuerst die Nebenkosten, der Rest als Eigenkapital. Das Darlehen deckt, was fehlt, und nie mehr, als der Beleihungsauslauf erlaubt.",
+        "methodRounding": "Beträge werden in Cent gerechnet. Das Darlehen wird auf den Cent abgerundet, damit seine Rate, berechnet vom Hypothekenrechner, nie über dem Spielraum liegt, und der Preis ist genau Darlehen plus Eigenkapital. Das zusätzliche Einkommen oder Ersparte wird auf den Euro aufgerundet.",
+        "methodPrivacy": "Die Rechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionFixedRate": "Ein fester Zins über die ganze Laufzeit, mit gleichen Monatsraten aus Zins und Tilgung.",
+        "assumptionSavings": "Das ganze eingegebene Ersparte fließt in den Kauf. Lassen Sie Ihren Notgroschen aus dem Betrag heraus.",
+        "assumptionPayment": "Die Rate enthält keine Versicherungen, Kontogebühren oder laufenden Kosten der Immobilie wie Grundsteuer, Instandhaltung und Nebenkosten.",
+        "assumptionCurrency": "Die Kaufnebenkosten sind ein fester Anteil am Preis. In der Praxis sind Steuern oft gestaffelt und manche Gebühren feste Beträge.",
+        "lendersTitle": "Was Banken prüfen und dieses Werkzeug nicht",
+        "lendersIntro": "Die Antwort einer Bank kann unter dieser Schätzung liegen, manchmal deutlich. Die Regeln unterscheiden sich je nach Bank und Land, und dieser Rechner enthält keine davon.",
+        "lenderStress": "Stresszins: Viele Banken prüfen, ob Sie auch bei einem um einige Punkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
+        "lenderIncome": "Was als Einkommen zählt: Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
+        "lenderCountry": "Grenzen je Land: In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
+        "lenderProfile": "Ihr Profil: Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
+        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten."
+      }
+    },
     "termDeposit": {
       "title": "Festgeld-Rechner",
       "description": "Berechnen Sie, was eine Festgeldanlage vor und nach Steuern bringt, mit Zinsen am Laufzeitende oder während der Laufzeit.",
