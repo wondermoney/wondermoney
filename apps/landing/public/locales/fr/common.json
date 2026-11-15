@@ -753,8 +753,8 @@
         "shortfall": "Manque"
       },
       "table": {
-        "caption": "Poids de chaque catégorie dans les revenus",
-        "category": "Catégorie",
+        "caption": "Le budget en chiffres",
+        "category": "Poste",
         "monthly": "Par mois",
         "share": "% des revenus",
         "note": "Les pourcentages portent sur le total des revenus : avec un excédent, les catégories font moins de 100 % ; avec un déficit, plus."

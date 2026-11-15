@@ -124,7 +124,8 @@ describe("household budget tool page", () => {
 	it("addresses the pt reader as tu", () => {
 		const pt = JSON.stringify(readLocale("src/locales", "pt").tools.householdBudget)
 
-		expect(pt).not.toMatch(/\bvocê\b|\bseu\b|\bsua\b/iu)
+		// \b is ASCII-only, so it never matches next to "ê": use letter lookarounds.
+		expect(pt).not.toMatch(/(?<!\p{L})(?:você|seu|sua|seus|suas)(?!\p{L})/iu)
 	})
 
 	it("reports use without amounts and stores nothing in the browser", () => {

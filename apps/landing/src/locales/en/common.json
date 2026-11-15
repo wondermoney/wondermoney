@@ -753,8 +753,8 @@
         "shortfall": "Shortfall"
       },
       "table": {
-        "caption": "Share of income by category",
-        "category": "Category",
+        "caption": "The budget in figures",
+        "category": "Item",
         "monthly": "Per month",
         "share": "Share of income",
         "note": "Shares are of total income: with a surplus the categories add up to less than 100%, with a deficit to more."

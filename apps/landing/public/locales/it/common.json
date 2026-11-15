@@ -753,8 +753,8 @@
         "shortfall": "Ammanco"
       },
       "table": {
-        "caption": "Peso di ogni categoria sul reddito",
-        "category": "Categoria",
+        "caption": "Il budget in cifre",
+        "category": "Voce",
         "monthly": "Al mese",
         "share": "% del reddito",
         "note": "Le percentuali sono sul totale delle entrate: con un avanzo le categorie sommano meno del 100%, con un disavanzo di più."

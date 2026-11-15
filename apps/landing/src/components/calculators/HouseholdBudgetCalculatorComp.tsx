@@ -14,7 +14,7 @@ import {
 } from "@/lib/calculators/householdBudget";
 import type { SankeyNode } from "@/lib/calculators/budgetSankey";
 import type { Lang } from "@/lib/i18nLocale";
-import { formatPercent, toIntlLocale } from "@/lib/numberFormat";
+import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { cn } from "@/lib/utils";
 
@@ -45,17 +45,9 @@ function HouseholdBudgetCalculatorContent() {
   const { t, locale } = useTranslations();
   const k = (key: string) => `tools.householdBudget.${key}`;
 
-  const moneyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat(toIntlLocale(locale), {
-        style: "currency",
-        currency: "EUR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [locale],
-  );
-  const money = (value: number) => moneyFormatter.format(value);
+  // Whole euros without decimals, anything else with both cent digits.
+  const money = (value: number) =>
+    formatMoney(locale, value, { decimals: Number.isInteger(value) ? 0 : 2 });
   const percent = (value: number | null) => (value === null ? "—" : formatPercent(locale, value));
 
   const [incomes, setIncomes] = useState<IncomeEntry[]>(() =>
@@ -260,7 +252,13 @@ function HouseholdBudgetCalculatorContent() {
         </div>
       </CalculatorLayout>
 
-      <BreakdownTable result={result} money={money} percent={percent} categoryName={categoryName} />
+      <BreakdownTable
+        result={result}
+        incomes={incomes.map((row) => ({ id: row.id, name: incomeName(row), amount: toBudgetAmount(row.amount) }))}
+        money={money}
+        percent={percent}
+        categoryName={categoryName}
+      />
     </div>
   );
 }
@@ -401,11 +399,13 @@ function StatusNote({ result, money }: { result: HouseholdBudgetResult; money: (
 
 function BreakdownTable({
   result,
+  incomes,
   money,
   percent,
   categoryName,
 }: {
   result: HouseholdBudgetResult;
+  incomes: ReadonlyArray<{ id: string; name: string; amount: number }>;
   money: (value: number) => string;
   percent: (value: number | null) => string;
   categoryName: (category: BudgetCategory) => string;
@@ -414,6 +414,10 @@ function BreakdownTable({
   const k = (key: string) => `tools.householdBudget.${key}`;
   const balanceLabel =
     result.balance > 0 ? t(k("surplus")) : result.balance < 0 ? t(k("deficit")) : t(k("balance"));
+  // A deficit reads as a positive amount and share under its "Deficit" label,
+  // as in the summary above.
+  const balanceShare = result.savingsRate === null ? null : Math.abs(result.savingsRate);
+  const hasIncome = result.totalIncome > 0;
 
   return (
     <div className="overflow-x-auto rounded-card border border-border bg-background p-4 shadow-sm sm:p-6">
@@ -435,45 +439,96 @@ function BreakdownTable({
           </tr>
         </thead>
         <tbody>
-          {result.categories.map((entry) => (
-            <tr key={entry.category} className="border-b border-border-2">
-              <th scope="row" className="py-2 pr-4 text-left font-normal text-foreground">
-                {categoryName(entry.category)}
-              </th>
-              <td className="py-2 pr-4 text-right font-mono text-foreground">{money(entry.total)}</td>
-              <td className="py-2 text-right font-mono text-foreground">{percent(entry.shareOfIncome)}</td>
-            </tr>
+          <SectionRow label={t(k("incomeHeading"))} />
+          {incomes.map((row) => (
+            <TableRow key={row.id} label={row.name} amount={money(row.amount)} share="" />
           ))}
+          <TableRow
+            label={t(k("totalIncome"))}
+            amount={money(result.totalIncome)}
+            share={hasIncome ? percent(100) : percent(null)}
+            strong
+          />
+          {result.balance < 0 && (
+            <TableRow
+              label={t(k("sankey.shortfall"))}
+              amount={money(-result.balance)}
+              share=""
+              tone="negative"
+            />
+          )}
         </tbody>
-        <tfoot>
-          <tr className="border-b border-border-2">
-            <th scope="row" className="py-2 pr-4 text-left font-semibold text-foreground">
-              {t(k("totalExpenses"))}
-            </th>
-            <td className="py-2 pr-4 text-right font-mono font-semibold text-foreground">
-              {money(result.totalExpenses)}
-            </td>
-            <td className="py-2 text-right font-mono font-semibold text-foreground">{percent(result.expensesShareOfIncome)}</td>
-          </tr>
-          <tr>
-            <th scope="row" className="py-2 pr-4 text-left font-semibold text-foreground">
-              {balanceLabel}
-            </th>
-            <td
-              className={cn(
-                "py-2 pr-4 text-right font-mono font-semibold",
-                result.balance > 0 && "text-success-text",
-                result.balance < 0 && "text-destructive-text",
-                result.balance === 0 && "text-foreground",
-              )}
-            >
-              {money(result.balance)}
-            </td>
-            <td className="py-2 text-right font-mono font-semibold text-foreground">{percent(result.savingsRate)}</td>
-          </tr>
-        </tfoot>
+        <tbody>
+          <SectionRow label={t(k("expensesHeading"))} />
+          {result.categories.map((entry) => (
+            <TableRow
+              key={entry.category}
+              label={categoryName(entry.category)}
+              amount={money(entry.total)}
+              share={percent(entry.shareOfIncome)}
+            />
+          ))}
+          <TableRow
+            label={t(k("totalExpenses"))}
+            amount={money(result.totalExpenses)}
+            share={percent(result.expensesShareOfIncome)}
+            strong
+          />
+          <TableRow
+            label={balanceLabel}
+            amount={money(Math.abs(result.balance))}
+            share={percent(balanceShare)}
+            strong
+            tone={result.balance > 0 ? "positive" : result.balance < 0 ? "negative" : undefined}
+          />
+        </tbody>
       </table>
       <p className="mt-3 text-xs text-muted-foreground">{t(k("table.note"))}</p>
     </div>
+  );
+}
+
+function SectionRow({ label }: { label: string }) {
+  return (
+    <tr className="border-b border-border">
+      <th scope="colgroup" colSpan={3} className="pb-2 pt-5 text-left font-semibold text-foreground">
+        {label}
+      </th>
+    </tr>
+  );
+}
+
+function TableRow({
+  label,
+  amount,
+  share,
+  strong = false,
+  tone,
+}: {
+  label: string;
+  amount: string;
+  share: string;
+  strong?: boolean;
+  tone?: "positive" | "negative";
+}) {
+  return (
+    <tr className="border-b border-border-2">
+      <th
+        scope="row"
+        className={cn("py-2 pr-4 text-left text-foreground", strong ? "font-semibold" : "font-normal")}
+      >
+        {label}
+      </th>
+      <td
+        className={cn(
+          "py-2 pr-4 text-right font-mono",
+          strong && "font-semibold",
+          tone === "positive" ? "text-success-text" : tone === "negative" ? "text-destructive-text" : "text-foreground",
+        )}
+      >
+        {amount}
+      </td>
+      <td className={cn("py-2 text-right font-mono text-foreground", strong && "font-semibold")}>{share}</td>
+    </tr>
   );
 }

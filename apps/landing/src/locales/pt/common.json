@@ -753,8 +753,8 @@
         "shortfall": "Em falta"
       },
       "table": {
-        "caption": "Peso de cada categoria no rendimento",
-        "category": "Categoria",
+        "caption": "O orçamento em números",
+        "category": "Rubrica",
         "monthly": "Por mês",
         "share": "% do rendimento",
         "note": "As percentagens são sobre o rendimento total: com excedente, as categorias somam menos de 100%; com défice, somam mais."

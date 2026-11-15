@@ -161,6 +161,83 @@ describe("computeHouseholdBudget", () => {
     expect(categoryTotal(result, "housing")?.shareOfIncome).toBe(200);
   });
 
+  it("rounds category shares and the surplus together so they add up to 100%", () => {
+    // Each part is a third of income: rounded on its own, each would be 33.3%.
+    const result = computeHouseholdBudget({
+      incomes: [{ id: "salary", amount: 300 }],
+      expenses: [
+        { id: "rent", category: "housing", amount: 100 },
+        { id: "groceries", category: "food", amount: 100 },
+      ],
+    });
+
+    expect(categoryTotal(result, "housing")?.shareOfIncome).toBe(33.4);
+    expect(categoryTotal(result, "food")?.shareOfIncome).toBe(33.3);
+    expect(result.savingsRate).toBe(33.3);
+    expect(result.expensesShareOfIncome).toBe(66.7);
+  });
+
+  it("makes category shares add up to the expenses share when there is a deficit", () => {
+    const result = computeHouseholdBudget({
+      incomes: [{ id: "salary", amount: 300 }],
+      expenses: [
+        { id: "rent", category: "housing", amount: 200 },
+        { id: "groceries", category: "food", amount: 200 },
+      ],
+    });
+
+    expect(categoryTotal(result, "housing")?.shareOfIncome).toBe(66.7);
+    expect(categoryTotal(result, "food")?.shareOfIncome).toBe(66.6);
+    expect(result.expensesShareOfIncome).toBe(133.3);
+    expect(result.savingsRate).toBe(-33.3);
+  });
+
+  it("keeps the shown shares consistent for any budget", () => {
+    let seed = 7;
+    const next = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const tenths = (value: number | null) => Math.round((value ?? 0) * 10);
+
+    for (let run = 0; run < 500; run++) {
+      const expenses = BUDGET_CATEGORIES.map((category, index) => ({
+        id: String(index),
+        category,
+        amount: Math.round(next() * 100000) / 100,
+      }));
+      const income = Math.round(next() * 600000) / 100 + 0.01;
+      const result = computeHouseholdBudget({ incomes: [{ id: "salary", amount: income }], expenses });
+      const categoryTenths = result.categories.reduce((sum, entry) => sum + tenths(entry.shareOfIncome), 0);
+
+      expect(categoryTenths).toBe(tenths(result.expensesShareOfIncome));
+      expect(categoryTenths + tenths(result.savingsRate)).toBe(1000);
+      // Largest remainder keeps every shown share within a tenth of its exact value.
+      const exact = (result.totalExpenses / result.totalIncome) * 1000;
+      expect(Math.abs(tenths(result.expensesShareOfIncome) - exact)).toBeLessThan(1);
+      for (const entry of result.categories) {
+        expect(Math.abs(tenths(entry.shareOfIncome) - (entry.total / result.totalIncome) * 1000)).toBeLessThan(1);
+      }
+    }
+  });
+
+  it("rounds each row to the cent so category totals and the overall total agree", () => {
+    const result = computeHouseholdBudget({
+      incomes: [{ id: "salary", amount: 1000.004 }],
+      expenses: [
+        { id: "a", category: "housing", amount: 0.005 },
+        { id: "b", category: "food", amount: 0.005 },
+        { id: "c", category: "other", amount: 0.005 },
+      ],
+    });
+
+    expect(categoryTotal(result, "housing")?.total).toBe(0.01);
+    expect(categoryTotal(result, "food")?.total).toBe(0.01);
+    expect(categoryTotal(result, "other")?.total).toBe(0.01);
+    expect(result.totalExpenses).toBe(0.03);
+    expect(result.totalIncome).toBe(1000);
+  });
+
   it("works out the page's worked example", () => {
     const result = computeHouseholdBudget(HOUSEHOLD_BUDGET_WORKED_EXAMPLE);
 

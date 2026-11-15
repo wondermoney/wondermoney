@@ -753,8 +753,8 @@
         "shortfall": "Fehlbetrag"
       },
       "table": {
-        "caption": "Anteil jeder Kategorie am Einkommen",
-        "category": "Kategorie",
+        "caption": "Das Budget in Zahlen",
+        "category": "Posten",
         "monthly": "Pro Monat",
         "share": "Anteil am Einkommen",
         "note": "Die Anteile beziehen sich auf die gesamten Einnahmen: Bei einem Überschuss ergeben die Kategorien weniger als 100 %, bei einem Defizit mehr."

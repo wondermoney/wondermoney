@@ -753,8 +753,8 @@
         "shortfall": "Faltante"
       },
       "table": {
-        "caption": "Peso de cada categoría en los ingresos",
-        "category": "Categoría",
+        "caption": "El presupuesto en cifras",
+        "category": "Partida",
         "monthly": "Al mes",
         "share": "% de los ingresos",
         "note": "Los porcentajes son sobre los ingresos totales: con superávit, las categorías suman menos del 100 %; con déficit, suman más."
