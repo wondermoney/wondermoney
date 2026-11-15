@@ -5,6 +5,7 @@ import { QueryOrder } from '@mikro-orm/core';
 import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { demoBudget } from '@app/database/seeders/demo/demo-budget';
+import { upsertDemoFeatures } from '@app/database/seeders/demo/demo-features';
 import { demoPersona } from '@app/database/seeders/demo/demo-fixtures';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
@@ -136,6 +137,8 @@ export class DemoDataRefreshService {
         appuser,
         tenant,
       );
+      await tx.flush();
+      await upsertDemoFeatures(tx, appuser, tenant, plan.asOfDate);
       await tx.flush();
     });
 

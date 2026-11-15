@@ -37,7 +37,7 @@ export async function upsertDemoHouseholdCore(em: EntityManager, appuser: Appuse
   ]);
 
   const demoRequisition = await em.findOne(NordigenRequisition, { appuserKey: appuser });
-  const sharedRefreshedAt = new Date('2040-01-01T00:00:00.000Z');
+  const sharedRefreshedAt = new Date();
   await Promise.all([
     upsertByCriteria<Account>(
       em,

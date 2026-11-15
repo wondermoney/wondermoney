@@ -19,7 +19,7 @@ export const demoAccounts = {
     accountId: '24603cf1-426f-47f0-af1e-b3b56629aaab-DEMO-SAVINGS',
     accountName: 'Emergency Fund',
     accountNumber: 'DEMO-PT-SAVINGS-001',
-    balance: 0,
+    balance: 3500,
     currency: 'EUR',
     holderName: 'Sofia Martins',
   },
