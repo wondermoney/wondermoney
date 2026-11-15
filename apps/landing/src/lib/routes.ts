@@ -248,6 +248,14 @@ const ROUTE_SLUGS = {
 		de: "hypotheken-rechner",
 		it: "mutuo-casa",
 	},
+	toolHouseholdBudget: {
+		pt: "orcamento-familiar",
+		en: "household-budget-calculator",
+		es: "presupuesto-familiar",
+		fr: "budget-familial",
+		de: "haushaltsbudget-rechner",
+		it: "budget-familiare",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -353,6 +361,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolDebtToIncome",
 	"toolEmergencyFund",
 	"toolMortgage",
+	"toolHouseholdBudget",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -573,6 +582,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	mortgagecalculator: "toolMortgage",
 	"mortgage-calculator": "toolMortgage",
 	"credito-habitacao": "toolMortgage",
+	toolhouseholdbudget: "toolHouseholdBudget",
+	householdbudgetcalculator: "toolHouseholdBudget",
+	"household-budget-calculator": "toolHouseholdBudget",
+	"orcamento-familiar": "toolHouseholdBudget",
 }
 
 function normalizeRouteLookupKey(value: string): string {
@@ -617,4 +630,45 @@ export function resolveToolRouteIdFromLegacy(
 	}
 
 	return undefined
+}
+
+// Calculators with their own page outside /tools, which learn and glossary
+// content can name as a related calculator too.
+const CALCULATOR_PAGE_ROUTE_IDS = [
+	"pageFireCalculator",
+] as const satisfies ReadonlyArray<RouteId>
+
+const LEGACY_CALCULATOR_PAGE_ROUTE_ID_BY_KEY: Record<string, RouteId> = {
+	fire: "pageFireCalculator",
+	"fire-calculator": "pageFireCalculator",
+	"page-fire-calculator": "pageFireCalculator",
+}
+
+/**
+ * Resolves a related calculator named in learn or glossary content: a tool
+ * (resolveToolRouteIdFromLegacy) or a calculator page such as FIRE, by key or
+ * by its slug in any language.
+ */
+export function resolveCalculatorRouteIdFromLegacy(
+	value: string | null | undefined,
+	lang: Lang,
+): RouteId | undefined {
+	const toolRouteId = resolveToolRouteIdFromLegacy(value, lang)
+
+	if (toolRouteId || !value) {
+		return toolRouteId
+	}
+
+	const normalized = normalizeRouteLookupKey(value)
+	const directMatch = LEGACY_CALCULATOR_PAGE_ROUTE_ID_BY_KEY[normalized]
+
+	if (directMatch) {
+		return directMatch
+	}
+
+	return CALCULATOR_PAGE_ROUTE_IDS.find((routeId) =>
+		SUPPORTED_LANGS.some(
+			(slugLang) => normalizeRouteLookupKey(getLocalizedSlug(routeId, slugLang)) === normalized,
+		),
+	)
 }

@@ -58,7 +58,6 @@ const trialNoteConsumers = [
   "src/components/landing/FeaturePortfolio.tsx",
   "src/components/landing/FeaturePrivacy.tsx",
   "src/components/landing/FeatureReports.tsx",
-  "src/components/landing/FireCalculator.tsx",
   "src/components/landing/HowToCalculateNetWorth.tsx",
   "src/components/landing/NetWorthTracker.tsx",
   "src/components/landing/OpenBankingApp.tsx",
@@ -120,7 +119,7 @@ for (const locale of locales) {
   }
 }
 
-assert.equal(trialNoteConsumers.length, 20);
+assert.equal(trialNoteConsumers.length, 19);
 for (const file of trialNoteConsumers) {
   assert.match(read(file), /t\(["']lp\.shared\.trialNote["']\)/, `${file} must consume lp.shared.trialNote`);
 }

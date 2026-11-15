@@ -66,7 +66,6 @@ const trialNoteConsumers = [
 	"src/components/landing/FeaturePortfolio.tsx",
 	"src/components/landing/FeaturePrivacy.tsx",
 	"src/components/landing/FeatureReports.tsx",
-	"src/components/landing/FireCalculator.tsx",
 	"src/components/landing/HowToCalculateNetWorth.tsx",
 	"src/components/landing/NetWorthTracker.tsx",
 	"src/components/landing/OpenBankingApp.tsx",
@@ -159,7 +158,7 @@ describe("public acquisition offer", () => {
 	})
 
 	it("keeps all trial-note consumers on the shared, sign-ups-paused copy", () => {
-		expect(trialNoteConsumers).toHaveLength(20)
+		expect(trialNoteConsumers).toHaveLength(19)
 		for (const file of trialNoteConsumers) {
 			expect(read(file)).toMatch(/t\(["']lp\.shared\.trialNote["']\)/)
 		}

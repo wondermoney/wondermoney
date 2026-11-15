@@ -9,7 +9,7 @@ import ReferenceList from "@/components/learning/ReferenceList.astro";
 import { PortableText } from "astro-portabletext";
 import type { PortableTextProps } from "astro-portabletext/types";
 import {
-  resolveToolRouteIdFromLegacy,
+  resolveCalculatorRouteIdFromLegacy,
   toLocalizedPath,
   toToolsHubPath,
   type Lang,
@@ -103,7 +103,7 @@ if (term.relatedTerms) {
 }
 
 if (term.relatedCalculator) {
-  const routeId = resolveToolRouteIdFromLegacy(term.relatedCalculator, locale);
+  const routeId = resolveCalculatorRouteIdFromLegacy(term.relatedCalculator, locale);
 
   relatedItems.push({
     title: term.relatedCalculator,
