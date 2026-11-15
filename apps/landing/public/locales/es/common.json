@@ -664,9 +664,10 @@
       "year": "Año",
       "chartLabel": "Gráfico del capital amortizado y de los intereses pagados, acumulados año a año a lo largo del plazo.",
       "errors": {
-        "summary": "Corrige el campo señalado para ver tu cuota.",
+        "summary": "La cuota aparece cuando todos los campos tienen un valor válido.",
         "loanAmount": {
           "required": "Introduce el importe que quieres pedir.",
+          "tooSmall": "Introduce un importe de al menos {{min}}.",
           "tooLarge": "Introduce un importe de hasta {{max}}."
         },
         "termYears": {
@@ -726,7 +727,7 @@
         "method": {
           "title": "Cómo se calcula la cuota",
           "intro": "La mayoría de las hipotecas a tipo fijo se devuelven con cuotas constantes: el mismo importe cada mes, calculado para que la deuda llegue a cero con la última. La cuota sale de la fórmula de la anualidad:",
-          "legend": "Aquí P es el importe prestado, r es el tipo anual dividido entre 12 y n es el número de cuotas mensuales. Con un interés del 0 % no hay nada que descontar, y la cuota es simplemente P dividido entre n.",
+          "legend": "Aquí M es la cuota mensual, P es el importe prestado, r es el tipo anual dividido entre 12 y n es el número de cuotas mensuales. Con un interés del 0 % no hay nada que descontar, y la cuota es simplemente P dividido entre n.",
           "schedule": "Cada mes, los intereses se calculan sobre el capital pendiente y el resto de la cuota amortiza capital. A medida que baja la deuda, la parte de intereses se reduce y la de capital crece; por eso la deuda baja despacio al principio y más deprisa al final. Los seguros y comisiones se suman a la cuota y nunca reducen la deuda.",
           "assumptionsTitle": "Supuestos",
           "assumptions": {
@@ -734,10 +735,10 @@
             "monthly": "Pagas una vez al mes, empezando un mes después del inicio del préstamo, sin amortizaciones anticipadas ni periodos de carencia.",
             "nominalRate": "El tipo que introduces es un tipo nominal anual. La TAE que indica el banco incluye comisiones y gastos, por lo que es más alta que el tipo usado aquí.",
             "flatFees": "Los seguros y comisiones tienen el mismo importe todos los meses.",
-            "rounding": "Los importes están en euros. Cada cuota se redondea al céntimo y la última absorbe el redondeo, para que la deuda termine exactamente en cero.",
+            "rounding": "Los importes están en euros. La cuota de cada mes se calcula a partir del capital pendiente y de los meses que quedan, y se redondea al céntimo; por eso una cuota puede diferir de las demás en un céntimo, y la última liquida la deuda exactamente. En un préstamo muy largo a un tipo alto, las primeras cuotas pueden amortizar menos de un céntimo.",
             "lenderFigures": "Las cifras de tu banco pueden variar ligeramente por cómo cuenta los días, redondea los importes o fija la fecha de pago. La información precontractual que te entregue es la referencia."
           },
-          "limits": "La calculadora acepta préstamos de hasta {{maxAmount}}, plazos de hasta {{maxYears}} años y tipos de hasta {{maxRate}}."
+          "limits": "La calculadora acepta préstamos de {{minAmount}} a {{maxAmount}}, plazos de hasta {{maxYears}} años y tipos de hasta {{maxRate}}."
         }
       },
       "cta": {

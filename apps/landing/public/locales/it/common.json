@@ -664,9 +664,10 @@
       "year": "Anno",
       "chartLabel": "Grafico del capitale rimborsato e degli interessi pagati, sommati anno per anno per tutta la durata.",
       "errors": {
-        "summary": "Correggi il campo evidenziato per vedere la rata.",
+        "summary": "La rata compare quando tutti i campi hanno un valore valido.",
         "loanAmount": {
           "required": "Inserisci l'importo che vuoi chiedere.",
+          "tooSmall": "Inserisci un importo di almeno {{min}}.",
           "tooLarge": "Inserisci un importo fino a {{max}}."
         },
         "termYears": {
@@ -726,7 +727,7 @@
         "method": {
           "title": "Come si calcola la rata",
           "intro": "La maggior parte dei mutui a tasso fisso si rimborsa con rate costanti: lo stesso importo ogni mese, fissato in modo che il debito arrivi a zero con l'ultima rata. La rata deriva dalla formula della rendita:",
-          "legend": "Qui P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
+          "legend": "Qui M è la rata mensile, P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
           "schedule": "Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa capitale. Man mano che il debito scende, la quota interessi si riduce e la quota capitale cresce: per questo il debito scende piano all'inizio e più in fretta verso la fine. Assicurazioni e spese si sommano alla rata e non riducono mai il debito.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -734,10 +735,10 @@
             "monthly": "Paghi una volta al mese, a partire da un mese dopo l'erogazione, senza estinzioni anticipate né sospensioni delle rate.",
             "nominalRate": "Il tasso che inserisci è un tasso annuo nominale. Il TAEG indicato dalla banca include spese e oneri, quindi è più alto del tasso usato qui.",
             "flatFees": "Assicurazioni e spese hanno lo stesso importo ogni mese.",
-            "rounding": "Gli importi sono in euro. Ogni rata è arrotondata al centesimo e l'ultima assorbe l'arrotondamento, così il debito finisce esattamente a zero.",
+            "rounding": "Gli importi sono in euro. La rata di ogni mese si calcola dal debito residuo e dai mesi che restano, arrotondata al centesimo: per questo una rata può differire dalle altre di un centesimo, e l'ultima estingue il debito esattamente. In un mutuo molto lungo a un tasso alto, le prime rate possono rimborsare meno di un centesimo di capitale.",
             "lenderFigures": "Le cifre della tua banca possono differire leggermente per come conta i giorni, arrotonda gli importi o fissa la data di pagamento. Il riferimento sono le informazioni precontrattuali che ti consegna."
           },
-          "limits": "Il calcolatore accetta mutui fino a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
+          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
         }
       },
       "cta": {

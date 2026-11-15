@@ -46,6 +46,7 @@ const values = {
   fees: money(MORTGAGE_EXAMPLE.exampleMonthlyFees),
   monthlyWithFees: money(withFees.monthlyTotal, 2),
   totalPaidWithFees: money(withFees.totalPaid),
+  minAmount: money(MORTGAGE_LIMITS.minLoanAmount),
   maxAmount: money(MORTGAGE_LIMITS.maxLoanAmount),
   maxYears: formatNumber(locale, MORTGAGE_LIMITS.maxTermYears),
   maxRate: formatPercent(locale, MORTGAGE_LIMITS.maxAnnualRate, { decimals: 0 }),

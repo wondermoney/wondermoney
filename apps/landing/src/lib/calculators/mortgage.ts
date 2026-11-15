@@ -1,11 +1,21 @@
 /**
  * Fixed-rate loan with level monthly payments (French amortization), the shape of most
  * mortgages. Amounts are worked in whole cents so every row of the schedule adds up to the
- * totals exactly; the regular payment is rounded to the cent and the last payment absorbs the
- * rounding difference, as a lender's schedule does.
+ * totals exactly.
+ *
+ * Each month's payment is the level payment for the balance still owed over the months left,
+ * rounded to the cent. Rounding one payment and holding it for the whole term would let the
+ * rounding error compound at the loan rate: on a long, expensive loan the payment can round
+ * down to the interest alone and leave the whole balance to the last month. Recomputing keeps
+ * every payment within a cent of the next, and the last one clears the balance exactly.
  */
 
 export const MORTGAGE_LIMITS = {
+  /**
+   * Euros. Small enough to block no real loan, large enough that even at 0% over the longest
+   * term every payment is several cents rather than rounding to nothing.
+   */
+  minLoanAmount: 100,
   /** Euros. Beyond this the figures stop meaning anything for a household. */
   maxLoanAmount: 100_000_000,
   maxTermYears: 50,
@@ -38,7 +48,7 @@ export type MortgageInput = {
 
 export type MortgageField = keyof MortgageInput;
 
-export type MortgageInputError = "required" | "tooLarge" | "negative";
+export type MortgageInputError = "required" | "tooSmall" | "tooLarge" | "negative";
 
 export type MortgageMonth = {
   /** 1-based month of the loan. */
@@ -65,7 +75,10 @@ export type MortgageYear = {
 };
 
 export type MortgageResult = {
-  /** The regular monthly payment of principal and interest. */
+  /**
+   * The regular monthly payment of principal and interest: the first one. Later payments stay
+   * within a cent of it.
+   */
   monthlyPayment: number;
   /** The regular monthly payment plus insurance and fees. */
   monthlyTotal: number;
@@ -87,6 +100,7 @@ function validate(input: MortgageInput): Partial<Record<MortgageField, MortgageI
   const { loanAmount, termYears, annualRate, monthlyFees } = input;
 
   if (Number.isNaN(loanAmount) || loanAmount <= 0) errors.loanAmount = "required";
+  else if (loanAmount < MORTGAGE_LIMITS.minLoanAmount) errors.loanAmount = "tooSmall";
   else if (loanAmount > MORTGAGE_LIMITS.maxLoanAmount) errors.loanAmount = "tooLarge";
 
   if (Number.isNaN(termYears) || Math.round(termYears * 12) < 1) errors.termYears = "required";
@@ -101,11 +115,12 @@ function validate(input: MortgageInput): Partial<Record<MortgageField, MortgageI
   return errors;
 }
 
-function levelPaymentCents(principalCents: number, monthlyRate: number, months: number): number {
-  if (monthlyRate === 0) return Math.round(principalCents / months);
-  // P * r / (1 - (1 + r)^-n), with expm1/log1p so a tiny rate keeps its precision.
+/** The level payment, unrounded, that clears `balanceCents` over `months` payments. */
+function levelPaymentCents(balanceCents: number, monthlyRate: number, months: number): number {
+  if (monthlyRate === 0) return balanceCents / months;
+  // B * r / (1 - (1 + r)^-n), with expm1/log1p so a tiny rate keeps its precision.
   const discount = -Math.expm1(-months * Math.log1p(monthlyRate));
-  return Math.round((principalCents * monthlyRate) / discount);
+  return (balanceCents * monthlyRate) / discount;
 }
 
 const fromCents = (cents: number) => cents / 100;
@@ -121,7 +136,6 @@ export function computeMortgage(input: MortgageInput): MortgageCalculation {
   const monthlyRate = annualRate / 100 / 12;
   const principalCents = Math.round(input.loanAmount * 100);
   const feesCents = Math.round(monthlyFees * 100);
-  const paymentCents = levelPaymentCents(principalCents, monthlyRate, months);
 
   const years: MortgageYear[] = [];
   let balanceCents = principalCents;
@@ -129,10 +143,15 @@ export function computeMortgage(input: MortgageInput): MortgageCalculation {
 
   for (let month = 1; month <= months; month++) {
     const interestCents = Math.round(balanceCents * monthlyRate);
-    const isLast = month === months;
-    const principalPaidCents = isLast
-      ? balanceCents
-      : Math.min(Math.max(paymentCents - interestCents, 0), balanceCents);
+    const monthsLeft = months - month + 1;
+    const paymentCents = Math.round(levelPaymentCents(balanceCents, monthlyRate, monthsLeft));
+    // On a long loan at a high rate the principal part of the first payments can be under half a
+    // cent, so it rounds to nothing; recomputing next month from the same balance lets it grow
+    // as it would unrounded, and the payment stays level.
+    const principalPaidCents =
+      monthsLeft === 1
+        ? balanceCents
+        : Math.min(Math.max(paymentCents - interestCents, 0), balanceCents);
     balanceCents -= principalPaidCents;
     totalInterestCents += interestCents;
 
@@ -171,12 +190,13 @@ export function computeMortgage(input: MortgageInput): MortgageCalculation {
   }
 
   const totalFeesCents = feesCents * months;
+  const firstPaymentCents = Math.round(years[0].months[0].payment * 100);
 
   return {
     ok: true,
     result: {
-      monthlyPayment: fromCents(paymentCents),
-      monthlyTotal: fromCents(paymentCents + feesCents),
+      monthlyPayment: fromCents(firstPaymentCents),
+      monthlyTotal: fromCents(firstPaymentCents + feesCents),
       numberOfPayments: months,
       totalPrincipal: fromCents(principalCents),
       totalInterest: fromCents(totalInterestCents),

@@ -664,9 +664,10 @@
       "year": "Jahr",
       "chartLabel": "Diagramm der Tilgung und der gezahlten Zinsen, Jahr für Jahr über die Laufzeit aufsummiert.",
       "errors": {
-        "summary": "Korrigieren Sie das markierte Feld, um Ihre Rate zu sehen.",
+        "summary": "Die Rate erscheint, sobald alle Felder einen gültigen Wert haben.",
         "loanAmount": {
           "required": "Geben Sie den Betrag ein, den Sie leihen möchten.",
+          "tooSmall": "Geben Sie einen Betrag von mindestens {{min}} ein.",
           "tooLarge": "Geben Sie einen Betrag bis {{max}} ein."
         },
         "termYears": {
@@ -726,7 +727,7 @@
         "method": {
           "title": "So wird die Rate berechnet",
           "intro": "Die meisten Darlehen mit festem Zins werden in gleichbleibenden Raten zurückgezahlt: jeden Monat derselbe Betrag, so bemessen, dass die Schuld mit der letzten Rate auf null fällt. Die Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "Dabei ist P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
+          "legend": "Dabei ist M die Monatsrate, P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
           "schedule": "Jeden Monat werden Zinsen auf die verbleibende Schuld berechnet, der Rest der Rate tilgt das Darlehen. Je weiter die Schuld sinkt, desto kleiner wird der Zinsanteil und desto größer der Tilgungsanteil. Deshalb sinkt die Schuld anfangs langsam und gegen Ende schneller. Versicherung und Gebühren kommen zur Rate hinzu und verringern die Schuld nie.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -734,10 +735,10 @@
             "monthly": "Sie zahlen einmal im Monat, erstmals einen Monat nach Auszahlung, ohne Sondertilgungen oder Zahlungspausen.",
             "nominalRate": "Der eingegebene Zinssatz ist ein nominaler Jahreszins. Der Effektivzins, den die Bank angibt, enthält Gebühren und liegt daher höher als der hier verwendete Satz.",
             "flatFees": "Versicherung und Gebühren sind jeden Monat gleich hoch.",
-            "rounding": "Beträge sind in Euro. Jede Rate wird auf den Cent gerundet, und die letzte Rate gleicht die Rundung aus, damit die Schuld genau bei null endet.",
+            "rounding": "Beträge sind in Euro. Jede Monatsrate wird aus der Restschuld und den verbleibenden Monaten berechnet und auf den Cent gerundet. Eine Rate kann deshalb um einen Cent von den anderen abweichen, und die letzte tilgt die Schuld genau. Bei einem sehr langen Darlehen mit hohem Zins können die ersten Raten weniger als einen Cent tilgen.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt, rundet oder den Zahlungstermin legt. Maßgeblich sind die vorvertraglichen Informationen, die Sie von ihr erhalten."
           },
-          "limits": "Der Rechner akzeptiert Darlehen bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
+          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
         }
       },
       "cta": {

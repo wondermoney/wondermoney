@@ -664,9 +664,10 @@
       "year": "Ano",
       "chartLabel": "Gráfico do capital amortizado e dos juros pagos, acumulados ano a ano ao longo do prazo.",
       "errors": {
-        "summary": "Corrige o campo assinalado para veres a prestação.",
+        "summary": "A prestação aparece quando todos os campos tiverem um valor válido.",
         "loanAmount": {
           "required": "Indica o montante que queres pedir.",
+          "tooSmall": "Indica um montante de pelo menos {{min}}.",
           "tooLarge": "Indica um montante até {{max}}."
         },
         "termYears": {
@@ -726,7 +727,7 @@
         "method": {
           "title": "Como é calculada a prestação",
           "intro": "A maioria dos créditos habitação a taxa fixa é paga em prestações constantes: o mesmo valor todos os meses, definido para que a dívida chegue a zero com a última. A prestação resulta da fórmula das rendas:",
-          "legend": "Aqui, P é o montante pedido, r é a taxa anual a dividir por 12 e n é o número de prestações mensais. Com juro de 0% não há nada a descontar, e a prestação é simplesmente P a dividir por n.",
+          "legend": "Aqui, M é a prestação mensal, P é o montante pedido, r é a taxa anual a dividir por 12 e n é o número de prestações mensais. Com juro de 0% não há nada a descontar, e a prestação é simplesmente P a dividir por n.",
           "schedule": "Em cada mês, os juros incidem sobre o capital ainda em dívida e o resto da prestação amortiza capital. À medida que a dívida desce, a parte de juros encolhe e a parte de capital cresce, por isso a dívida desce devagar no início e mais depressa no fim. Os seguros e comissões somam-se à prestação e nunca reduzem a dívida.",
           "assumptionsTitle": "Pressupostos",
           "assumptions": {
@@ -734,10 +735,10 @@
             "monthly": "Pagas uma vez por mês, a começar um mês depois do início do empréstimo, sem amortizações antecipadas nem períodos de carência.",
             "nominalRate": "A taxa que indicas é uma taxa anual nominal. A TAEG que o banco apresenta inclui comissões e encargos, por isso é mais alta do que a taxa usada aqui.",
             "flatFees": "Os seguros e comissões têm o mesmo valor todos os meses.",
-            "rounding": "Os valores estão em euros. Cada prestação é arredondada ao cêntimo e a última absorve o arredondamento, para que a dívida termine exatamente em zero.",
+            "rounding": "Os valores estão em euros. A prestação de cada mês é calculada a partir do capital em dívida e dos meses que faltam, e arredondada ao cêntimo; por isso, uma prestação pode diferir das outras num cêntimo, e a última liquida a dívida exatamente. Num empréstimo muito longo com taxa alta, as primeiras prestações podem amortizar menos de um cêntimo.",
             "lenderFigures": "Os valores do teu banco podem diferir ligeiramente, pela forma como contam os dias, arredondam valores ou fixam a data de pagamento. A informação pré-contratual que te entregam é a referência a usar."
           },
-          "limits": "O simulador aceita empréstimos até {{maxAmount}}, prazos até {{maxYears}} anos e taxas até {{maxRate}}."
+          "limits": "O simulador aceita empréstimos de {{minAmount}} a {{maxAmount}}, prazos até {{maxYears}} anos e taxas até {{maxRate}}."
         }
       },
       "cta": {

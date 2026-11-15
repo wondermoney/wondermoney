@@ -49,8 +49,8 @@ function MortgageCalculatorContent() {
     [loanAmount, termYears, annualRate, monthlyFees],
   );
 
-  // Like the other tools: one `tool_used` per page view, on the visitor's first edit, without
-  // amounts. pushGtmEvent drops it unless analytics consent was given.
+  // The shared landing tool event: one `tool_used` per page view, on the visitor's first edit,
+  // without amounts. pushGtmEvent drops it unless analytics consent was given.
   const usageSent = useRef(false);
   const edit = (setter: (value: number) => void) => (value: number) => {
     if (!usageSent.current) {
@@ -71,7 +71,12 @@ function MortgageCalculatorContent() {
   const errorFor = (field: MortgageField): string | undefined => {
     if (calculation.ok) return undefined;
     const error: MortgageInputError | undefined = calculation.errors[field];
-    return error ? t(`tools.mortgage.errors.${field}.${error}`, { max: limits[field] }) : undefined;
+    return error
+      ? t(`tools.mortgage.errors.${field}.${error}`, {
+          max: limits[field],
+          min: money(MORTGAGE_LIMITS.minLoanAmount),
+        })
+      : undefined;
   };
 
   const result = calculation.ok ? calculation.result : null;
@@ -98,7 +103,7 @@ function MortgageCalculatorContent() {
             label={t("tools.mortgage.loanAmount")}
             value={loanAmount}
             onChange={edit(setLoanAmount)}
-            min={0}
+            min={MORTGAGE_LIMITS.minLoanAmount}
             max={MORTGAGE_LIMITS.maxLoanAmount}
             step={1000}
             prefix={"€"}
@@ -150,19 +155,19 @@ function MortgageCalculatorContent() {
                 items={[
                   {
                     label: t("tools.mortgage.totalInterest"),
-                    value: money(result.totalInterest),
+                    value: money(result.totalInterest, 2),
                   },
                   ...(hasFees
                     ? [
                         {
                           label: t("tools.mortgage.totalFees"),
-                          value: money(result.totalFees),
+                          value: money(result.totalFees, 2),
                         },
                       ]
                     : []),
                   {
                     label: t("tools.mortgage.totalPaid"),
-                    value: money(result.totalPaid),
+                    value: money(result.totalPaid, 2),
                   },
                   ...(hasFees
                     ? [
@@ -281,7 +286,7 @@ function AmortizationSchedule({
       </p>
 
       <div className="mt-6 overflow-x-auto rounded-card border border-border">
-        <table className="w-full min-w-[36rem] text-sm">
+        <table className="w-full min-w-[42rem] text-sm">
           <thead className="bg-paper-2 text-muted-foreground">
             <tr>
               <th scope="col" className="px-3 py-2 text-left font-medium">
@@ -332,11 +337,11 @@ function AmortizationSchedule({
                       <span className="sr-only">{t("tools.mortgage.schedule.showMonths")}</span>
                     </button>
                   </th>
-                  <td className={cell}>{money(year.payment)}</td>
-                  <td className={cell}>{money(year.principal)}</td>
-                  <td className={cell}>{money(year.interest)}</td>
-                  {showFees && <td className={cell}>{money(year.fees)}</td>}
-                  <td className={cell}>{money(year.balance)}</td>
+                  <td className={cell}>{money(year.payment, 2)}</td>
+                  <td className={cell}>{money(year.principal, 2)}</td>
+                  <td className={cell}>{money(year.interest, 2)}</td>
+                  {showFees && <td className={cell}>{money(year.fees, 2)}</td>}
+                  <td className={cell}>{money(year.balance, 2)}</td>
                 </tr>
               </tbody>
               {isOpen && (
