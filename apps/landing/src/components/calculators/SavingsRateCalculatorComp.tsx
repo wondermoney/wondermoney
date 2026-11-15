@@ -8,6 +8,11 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatPercent, toIntlLocale } from "@/lib/numberFormat";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 
+/** An empty optional field (NaN) counts as none. */
+function orNone(value: number): number {
+  return Number.isFinite(value) ? value : 0;
+}
+
 function getSavingsRateColor(rate: number): string {
   if (rate >= 50) return "bg-success";
   if (rate >= 20) return "bg-success";
@@ -51,15 +56,20 @@ function SavingsRateCalculatorContent() {
   const [includeDuodecimos, setIncludeDuodecimos] = useState(false);
   const [duodecimosAnnualAmount, setDuodecimosAnnualAmount] = useState(0);
 
+  // Income and expenses are needed; empty deductions or duodécimos count as none.
+  const complete = Number.isFinite(monthlyIncome) && Number.isFinite(monthlyExpenses);
+
   const { monthlySavings, savingsRate, annualSavings } = useMemo(() => {
+    if (!complete) return { monthlySavings: 0, savingsRate: 0, annualSavings: 0 };
     return computeSavingsRate({
       monthlyIncome,
       monthlyExpenses,
-      monthlyDeductions,
+      monthlyDeductions: orNone(monthlyDeductions),
       includeDuodecimos,
-      duodecimosAnnualAmount,
+      duodecimosAnnualAmount: orNone(duodecimosAnnualAmount),
     });
   }, [
+    complete,
     monthlyIncome,
     monthlyExpenses,
     monthlyDeductions,
@@ -144,15 +154,15 @@ function SavingsRateCalculatorContent() {
           items={[
             {
               label: t("tools.savingsRate.monthlySavings"),
-              value: eurFormatter.format(monthlySavings),
+              value: complete ? eurFormatter.format(monthlySavings) : "\u2014",
             },
             {
               label: t("tools.savingsRate.annualSavings"),
-              value: eurFormatter.format(annualSavings),
+              value: complete ? eurFormatter.format(annualSavings) : "\u2014",
             },
             {
               label: t("tools.savingsRate.savingsRate"),
-              value: formatPercent(locale, savingsRate),
+              value: complete ? formatPercent(locale, savingsRate) : "\u2014",
               highlight: true,
             },
           ]}
@@ -183,9 +193,11 @@ function SavingsRateCalculatorContent() {
             <span>50%</span>
             <span>100%</span>
           </div>
-          <p className="text-sm font-medium text-foreground">
-            {getSavingsRateLabel(savingsRate, t)}
-          </p>
+          {complete && (
+            <p className="text-sm font-medium text-foreground">
+              {getSavingsRateLabel(savingsRate, t)}
+            </p>
+          )}
         </div>
       </div>
     </CalculatorLayout>

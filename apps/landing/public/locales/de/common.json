@@ -447,6 +447,7 @@
       "unreachableWithContribution": "Mit diesen Zahlen pendeln sich Ihre Anlagen unter Ihrer FIRE-Zahl ein und erreichen sie nie. Erhöhen Sie die monatliche Sparrate oder die erwartete Rendite, um ein Datum zu sehen.",
       "beyondHorizon": "Mit diesen Zahlen nicht innerhalb von {{years}} Jahren. Die Grafik zeigt die ersten {{years}} Jahre; eine höhere Sparrate oder geringere Ausgaben bringen das Ziel näher.",
       "noSpending": "Geben Sie Ihre jährlichen Ausgaben ein, um Ihre FIRE-Zahl zu sehen.",
+      "missingRate": "Geben Sie eine reale Rendite und eine Entnahmerate ein, um Ihre FIRE-Zahl zu sehen.",
       "sensitivity": "Geben Sie {{cut}} weniger aus, also {{spending}} pro Jahr, sinkt das Ziel auf {{target}} und Sie erreichen es in {{time}}.",
       "sensitivityReached": "Geben Sie {{cut}} weniger aus, also {{spending}} pro Jahr, sinkt das Ziel auf {{target}}, und das decken Ihre Anlagen schon.",
       "chartTitle": "Voraussichtliches Vermögen",
@@ -504,6 +505,7 @@
       "summary": "Nach {{years}} wachsen Ihre Einzahlungen von {{contributed}} auf {{final}}. In heutiger Kaufkraft sind das {{real}}.",
       "statusNothingInvested": "Geben Sie einen Startbetrag oder eine monatliche Sparrate ein, um das Wachstum zu sehen.",
       "statusNoPeriod": "Bei einer Laufzeit von 0 Jahren bleibt keine Zeit zum Wachsen: Der Endwert ist Ihr Startbetrag.",
+      "statusIncomplete": "Geben Sie eine erwartete Jahresrendite und einen Anlagezeitraum ein, um das Wachstum zu sehen.",
       "statusTooLarge": "Das Ergebnis übersteigt {{max}} und damit, was dieser Rechner anzeigt. Senken Sie die Beträge, die Rendite oder die Laufzeit.",
       "inflationWarning": "Die Inflation liegt auf oder über der erwarteten Rendite, daher hält dieses Geld seine Kaufkraft kaum oder verliert sie. Wachstum nach Inflation: {{growth}}.",
       "adjusted": "Einige Werte lagen außerhalb der zulässigen Bereiche und wurden angepasst: Beträge von 0 bis {{maxAmount}}, Rendite und Inflation von 0 % bis {{maxRate}} % und 0 bis {{maxYears}} Jahre.",
@@ -523,6 +525,7 @@
       "comparisonSame": "Beide Sparraten sind gleich. Ändern Sie den Betrag, um zu vergleichen.",
       "comparisonNoPeriod": "Wählen Sie eine Laufzeit von mindestens einem Jahr, um Sparraten zu vergleichen.",
       "comparisonUnavailable": "Eines der Ergebnisse ist zu groß für einen Vergleich. Senken Sie die Beträge, die Rendite oder die Laufzeit.",
+      "comparisonIncomplete": "Geben Sie eine Rendite, einen Zeitraum und eine Vergleichsrate ein, um den Unterschied zu sehen.",
       "nextStepHeadline": "Machen Sie aus dieser Hochrechnung ein verfolgtes Ziel",
       "nextStepDescription": "Speichern Sie den Endwert als Ziel in WonderMoney und verfolgen Sie Ihren Fortschritt anhand Ihrer echten Kontostände.",
       "nextStepCta": "Ziel anlegen",
@@ -885,6 +888,7 @@
           "tooLarge": "Geben Sie eine Laufzeit von höchstens {{max}} Jahren ein."
         },
         "annualRate": {
+          "required": "Geben Sie den Zinssatz ein.",
           "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
           "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
         },
@@ -1037,6 +1041,7 @@
           "tooLarge": "Geben Sie 0 bis {{max}} Monate ein; volle Jahre gehören unter Jahre."
         },
         "annualReturn": {
+          "required": "Geben Sie eine erwartete jährliche Rendite ein, 0 % oder mehr.",
           "negative": "Negative Renditen bildet dieser Rechner nicht ab. Geben Sie 0 % oder mehr ein.",
           "tooLarge": "Geben Sie eine Rendite von höchstens {{max}} ein."
         }

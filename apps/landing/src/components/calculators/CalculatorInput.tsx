@@ -1,8 +1,11 @@
 import { cn } from "@/lib/utils";
+import NumericInput from "./NumericInput";
 
 interface Props {
   label: string;
+  /** NaN shows an empty field. */
   value: number;
+  /** Called with NaN while the field is empty or holds a partial entry such as "-". */
   onChange: (value: number) => void;
   min?: number;
   max?: number;
@@ -43,11 +46,10 @@ export default function CalculatorInput({
             {prefix}
           </span>
         )}
-        <input
+        <NumericInput
           id={id}
-          type="number"
           value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={onChange}
           min={min}
           max={max}
           step={step}

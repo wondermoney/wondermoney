@@ -50,7 +50,7 @@ export type SavingsGoalInput = {
   /** The saving period is years × 12 + months. Not used when solving for the time. */
   years: number;
   months: number;
-  /** Expected annual return in percent (2 means 2%). Empty (NaN) reads as 0%. */
+  /** Expected annual return in percent (2 means 2%). Empty (NaN) is `required`. */
   annualReturn: number;
 };
 
@@ -169,7 +169,8 @@ function validate(
     else if (!errors.periodMonths && periodMonths(input) < 1) set("period", "required");
     else if (periodMonths(input) > SAVINGS_GOAL_LIMITS.maxMonths) set("period", "tooLarge");
   }
-  if (input.annualReturn < 0) set("annualReturn", "negative");
+  if (isBlank(input.annualReturn)) set("annualReturn", "required");
+  else if (input.annualReturn < 0) set("annualReturn", "negative");
   else if (input.annualReturn > SAVINGS_GOAL_LIMITS.maxAnnualReturn) set("annualReturn", "tooLarge");
 
   return errors;

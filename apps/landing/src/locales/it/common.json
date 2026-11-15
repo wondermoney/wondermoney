@@ -447,6 +447,7 @@
       "unreachableWithContribution": "Con queste cifre i tuoi investimenti si stabilizzano sotto il tuo numero FIRE e non lo raggiungono mai. Alza il versamento mensile o il rendimento atteso per vedere una data.",
       "beyondHorizon": "Con queste cifre non ci arrivi entro {{years}} anni. Il grafico mostra i primi {{years}} anni; un versamento più alto o una spesa più bassa avvicinano la data.",
       "noSpending": "Inserisci la tua spesa annua per vedere il tuo numero FIRE.",
+      "missingRate": "Inserisci un rendimento reale e un tasso di prelievo per vedere il tuo numero FIRE.",
       "sensitivity": "Spendendo il {{cut}} in meno, {{spending}} all'anno, l'obiettivo scende a {{target}} e ci arrivi in {{time}}.",
       "sensitivityReached": "Spendendo il {{cut}} in meno, {{spending}} all'anno, l'obiettivo scende a {{target}}, che i tuoi investimenti coprono già.",
       "chartTitle": "Investimenti previsti",
@@ -504,6 +505,7 @@
       "summary": "Dopo {{years}}, i {{contributed}} che versi arrivano a {{final}}. In euro di oggi valgono {{real}}.",
       "statusNothingInvested": "Inserisci un capitale iniziale o un versamento mensile per vederlo crescere.",
       "statusNoPeriod": "Con una durata di 0 anni non c'è tempo per crescere: il valore finale è l'importo di partenza.",
+      "statusIncomplete": "Inserisci un rendimento annuo atteso e un periodo di investimento per vederlo crescere.",
       "statusTooLarge": "Il risultato supera {{max}}, oltre quanto mostra questo calcolatore. Abbassa gli importi, il rendimento o la durata.",
       "inflationWarning": "L'inflazione è pari o superiore al rendimento atteso, quindi questo denaro mantiene a malapena o perde potere d'acquisto. Crescita al netto dell'inflazione: {{growth}}.",
       "adjusted": "Alcuni valori erano fuori dai limiti accettati e sono stati corretti: importi da 0 a {{maxAmount}}, rendimento e inflazione dallo 0% al {{maxRate}}% e da 0 a {{maxYears}} anni.",
@@ -523,6 +525,7 @@
       "comparisonSame": "I due versamenti sono uguali. Cambia l'importo per confrontare.",
       "comparisonNoPeriod": "Imposta una durata di almeno un anno per confrontare i versamenti.",
       "comparisonUnavailable": "Uno dei risultati è troppo grande per il confronto. Abbassa gli importi, il rendimento o la durata.",
+      "comparisonIncomplete": "Inserisci un rendimento, una durata e un versamento da confrontare per vedere la differenza.",
       "nextStepHeadline": "Trasforma questa proiezione in un obiettivo da seguire",
       "nextStepDescription": "Salva il valore finale come obiettivo in WonderMoney e segui i tuoi progressi con i saldi reali dei tuoi conti.",
       "nextStepCta": "Crea il tuo obiettivo",
@@ -885,6 +888,7 @@
           "tooLarge": "Inserisci una durata fino a {{max}} anni."
         },
         "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
           "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
           "tooLarge": "Inserisci un tasso fino a {{max}}."
         },
@@ -1037,6 +1041,7 @@
           "tooLarge": "Inserisci da 0 a {{max}} mesi; gli anni interi vanno in Anni."
         },
         "annualReturn": {
+          "required": "Inserisci un rendimento annuo atteso, dello 0% o più.",
           "negative": "Questo simulatore non considera rendimenti negativi. Inserisci 0% o più.",
           "tooLarge": "Inserisci un rendimento fino a {{max}}."
         }

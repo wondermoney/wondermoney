@@ -447,6 +447,7 @@
       "unreachableWithContribution": "At these figures your investments level off below your FIRE number and never reach it. Raise your monthly contribution or the expected return to see a date.",
       "beyondHorizon": "Not within {{years}} years at these figures. The chart shows the first {{years}} years; a higher contribution or lower spending brings the date closer.",
       "noSpending": "Enter your annual spending to see your FIRE number.",
+      "missingRate": "Enter a real return and a withdrawal rate to see your FIRE number.",
       "sensitivity": "Spending {{cut}} less, {{spending}} a year, lowers the target to {{target}} and gets you there in {{time}}.",
       "sensitivityReached": "Spending {{cut}} less, {{spending}} a year, lowers the target to {{target}}, which your investments already cover.",
       "chartTitle": "Projected investments",
@@ -504,6 +505,7 @@
       "summary": "After {{years}}, the {{contributed}} you pay in grows to {{final}}. In today's money that is worth {{real}}.",
       "statusNothingInvested": "Enter an initial amount or a monthly contribution to see it grow.",
       "statusNoPeriod": "With a period of 0 years there is no time to grow: the final value is the amount you start with.",
+      "statusIncomplete": "Enter an expected annual return and an investment period to see it grow.",
       "statusTooLarge": "The result passes {{max}}, more than this calculator shows. Lower the amounts, the return or the period.",
       "inflationWarning": "Inflation is at or above the expected return, so this money barely keeps or loses its purchasing power. Growth after inflation: {{growth}}.",
       "adjusted": "Some values were outside the accepted range and were adjusted: amounts from 0 to {{maxAmount}}, return and inflation from 0% to {{maxRate}}%, and 0 to {{maxYears}} years.",
@@ -523,6 +525,7 @@
       "comparisonSame": "Both contributions are the same. Change the amount to compare.",
       "comparisonNoPeriod": "Set a period of at least one year to compare contributions.",
       "comparisonUnavailable": "One of the results is too large to compare. Lower the amounts, the return or the period.",
+      "comparisonIncomplete": "Enter a return, a period and a contribution to compare to see the difference.",
       "nextStepHeadline": "Turn this projection into a tracked goal",
       "nextStepDescription": "Save the final value as a goal in WonderMoney and follow your progress against your real account balances.",
       "nextStepCta": "Create your goal",
@@ -885,6 +888,7 @@
           "tooLarge": "Enter a term of up to {{max}} years."
         },
         "annualRate": {
+          "required": "Enter the interest rate.",
           "negative": "The interest rate can't be below 0%.",
           "tooLarge": "Enter a rate up to {{max}}."
         },
@@ -1037,6 +1041,7 @@
           "tooLarge": "Enter 0 to {{max}} months; put whole years under Years."
         },
         "annualReturn": {
+          "required": "Enter an expected annual return, 0% or more.",
           "negative": "This calculator doesn't model negative returns. Enter 0% or more.",
           "tooLarge": "Enter a return up to {{max}}."
         }

@@ -3,6 +3,7 @@ import { Plus, X } from "lucide-react";
 import { useTranslations } from "@/lib/reactTranslations";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
+import NumericInput from "./NumericInput";
 import CalculatorResult from "./CalculatorResult";
 import {
   DEBT_TO_INCOME_CAUTION_FROM,
@@ -51,9 +52,13 @@ const INPUT_CLASS = cn(
   "transition-colors",
 );
 
-/** Amounts are never negative: a minus sign or an unreadable entry stores (and shows) 0. */
+/**
+ * Amounts are never negative: a negative entry stores (and shows) 0. An empty field stays
+ * empty (NaN), and the calculation reads it as 0.
+ */
 function toAmount(value: number): number {
-  return Number.isFinite(value) && value > 0 ? value : 0;
+  if (Number.isNaN(value)) return value;
+  return value > 0 ? value : 0;
 }
 
 export default function DebtToIncomeCalculator({ locale }: { locale: Lang }) {
@@ -210,13 +215,11 @@ function DebtToIncomeCalculatorContent() {
                       <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                         {"€"}
                       </span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
+                      <NumericInput
                         min={0}
                         step={10}
                         value={row.amount}
-                        onChange={(e) => updateRow(row.id, { amount: toAmount(Number(e.target.value)) })}
+                        onChange={(value) => updateRow(row.id, { amount: toAmount(value) })}
                         aria-label={t(k("rowAmountLabel"), { name })}
                         className={cn(INPUT_CLASS, "pl-8 font-mono")}
                       />

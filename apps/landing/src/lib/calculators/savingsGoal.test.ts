@@ -225,16 +225,19 @@ describe("solving for the final amount", () => {
     expect(result.totalGrowth).toBe(0);
   });
 
-  it("reads empty optional fields as zero", () => {
+  it("reads empty optional amounts as zero", () => {
     const result = solve({
       ...final,
       startingSavings: Number.NaN,
       monthlyContribution: Number.NaN,
-      annualReturn: Number.NaN,
+      annualReturn: 0,
     });
 
     expect(result.finalBalance).toBe(0);
-    expect(result.annualReturn).toBe(0);
+  });
+
+  it("asks for an empty annual return instead of reading it as 0%", () => {
+    expect(errorsFor({ ...final, annualReturn: Number.NaN })).toEqual({ annualReturn: "required" });
   });
 
   it("reports a balance too large to show instead of a wrong figure", () => {
