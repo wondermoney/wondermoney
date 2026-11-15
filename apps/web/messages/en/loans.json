@@ -138,6 +138,7 @@
         "linked": "Linked",
         "candidateConfidence": "Confidence: {value}",
         "confidenceValue": "{value}%",
+        "confidence": { "HIGH": "High", "MEDIUM": "Medium", "LOW": "Low" },
         "confidenceUnavailable": "unavailable",
         "reasonsUnavailable": "No reasons provided",
         "high": "high",

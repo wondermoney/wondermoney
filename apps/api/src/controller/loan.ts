@@ -419,7 +419,7 @@ export async function listLoanRepaymentCandidates(req: Request, res: Response) {
     ...(query.accountKey ? { accountKey: query.accountKey } : {}),
     ...(query.amount ? { settlementAmount: -Math.abs(query.amount) } : {}),
     ...(query.endDate || query.startDate ? { transactionDate: { ...(query.startDate ? { $gte: query.startDate } : {}), ...(query.endDate ? { $lte: query.endDate } : {}) } } : {}),
-  } as FilterQuery<Transaction>), { orderBy: { transactionDate: QueryOrder.DESC }, populate: ['transactionMerchantKey'] });
+  } as FilterQuery<Transaction>), { orderBy: { transactionDate: QueryOrder.DESC }, populate: ['transactionMerchantKey', 'accountKey.currencyKey'] });
 
   const outstandingPrincipal = await currentOutstandingPrincipal(loan, new Date());
   const ratePeriods = await loadRatePeriods(loan);
@@ -444,7 +444,11 @@ export async function listLoanRepaymentCandidates(req: Request, res: Response) {
         outstandingPrincipal,
         reasons: score.reasons,
         suggestedAllocation: buildSuggestedAllocation(amount, loan, outstandingPrincipal, ratePeriods, transaction.transactionDate ?? new Date()),
-        transaction: summarizeTransaction(transaction),
+        transaction: {
+          ...summarizeTransaction(transaction),
+          accountName: transaction.accountKey?.accountName ?? null,
+          currencyCode: transaction.accountKey?.currencyKey.code ?? null,
+        },
       };
     }),
   });

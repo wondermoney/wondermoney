@@ -42,6 +42,7 @@ describe('loan contracts', () => {
     const allocation = { principalAmount: 645, interestAmount: 300, feeAmount: 5, totalPaymentAmount: 950 }
     expect(loanRepaymentAllocationSchema.parse(allocation)).toEqual(allocation)
     expect(loanRepaymentCandidatesResponseSchema.parse({ candidates: [repaymentCandidateFixture] }).candidates[0].transaction).toEqual(repaymentCandidateFixture.transaction)
+    expect(loanRepaymentCandidatesResponseSchema.parse({ candidates: [{ ...repaymentCandidateFixture, transaction: { ...repaymentCandidateFixture.transaction, accountName: 'Current account' } }] }).candidates[0].transaction.accountName).toBe('Current account')
     expect(loanRepaymentCandidatesResponseSchema.safeParse({ candidates: [{ ...repaymentCandidateFixture, suggestedAllocation: { ...repaymentCandidateFixture.suggestedAllocation, principalAmount: 0, interestAmount: 950, feeAmount: 0, needsReview: true, negativeAmortization: true } }] }).success).toBe(true)
     const response = { repayment: { ...repaymentFixture, loanKey: 7, linkedByAppuserKey: 2, tenantKey: 3, transactionKey: 82 } }
     expect(loanRepaymentMutationResponseSchema.parse(response)).toEqual(response)

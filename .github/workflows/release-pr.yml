@@ -1,7 +1,8 @@
 name: Release PR
 
 # Keeps one open pull request from develop into main, titled "Release: develop → main", whose
-# body lists what merging it would release. Merging it (merge commit only: a ruleset on main
+# body lists what merging it would release. The section the prepare-deploy skill writes between
+# the "prepare-deploy" markers is kept as it is. Merging it (merge commit only: a ruleset on main
 # blocks squash and rebase) is the release: the push to main runs the production deploys.
 #
 # The pull request is opened with GITHUB_TOKEN, and events made with that token start no
@@ -79,22 +80,33 @@ jobs:
             fi
           done < <(git log --first-parent --reverse --format='%H%x09%s' "$range" | head -n 300)
 
+          number=$(gh pr list -R "$repo" --base main --head develop --state open --json number --jq '.[0].number // empty')
+
+          # The prepare-deploy skill (.claude/skills/prepare-deploy) writes the changelog, blast
+          # radius and deploy instructions between these two markers. Carry that section over
+          # unchanged; it names the commit it was prepared for, so a stale one is visible.
+          prepared=""
+          if [ -n "$number" ]; then
+            prepared=$(gh pr view "$number" -R "$repo" --json body --jq .body | tr -d '\r' |
+              awk '/<!-- prepare-deploy:start -->/{keep=1} keep{print} /<!-- prepare-deploy:end -->/{keep=0}')
+          fi
+
           body_file="$RUNNER_TEMP/release-body.md"
           {
             echo "Releases ${count} commit(s) from \`develop\` to \`main\` ([compare](${compare}))."
             echo
             echo "**Merge with a merge commit; merging deploys production.** Squash and rebase merges are blocked on \`main\`."
             echo
+            [ -n "$prepared" ] && printf '%s\n\n' "$prepared"
             [ -n "$features" ] && printf '### Features\n\n%s\n' "$features"
             [ -n "$fixes" ] && printf '### Fixes\n\n%s\n' "$fixes"
             [ -n "$other" ] && printf '### Other changes\n\n%s\n' "$other"
             [ -n "$direct" ] && printf '### Commits pushed to develop\n\n%s\n' "$direct"
             echo "---"
             echo
-            echo "The required check comes from CI's push run on develop's head commit, which this pull request's head is. If it is missing, run CI on develop (Actions > CI > Run workflow, branch \`develop\`). This body is regenerated on every push to develop by \`.github/workflows/release-pr.yml\`."
+            echo "The required check comes from CI's push run on develop's head commit, which this pull request's head is. If it is missing, run CI on develop (Actions > CI > Run workflow, branch \`develop\`). This body is regenerated on every push to develop by \`.github/workflows/release-pr.yml\`, except the section between the \`prepare-deploy\` markers."
           } > "$body_file"
 
-          number=$(gh pr list -R "$repo" --base main --head develop --state open --json number --jq '.[0].number // empty')
           if [ -n "$number" ]; then
             gh pr edit "$number" -R "$repo" --title "$TITLE" --body-file "$body_file"
             echo "Updated $GITHUB_SERVER_URL/$repo/pull/$number"
