@@ -1041,6 +1041,7 @@
           "tooLarge": "Introduz entre 0 e {{max}} meses; os anos completos vão em Anos."
         },
         "annualReturn": {
+          "required": "Introduz um rendimento anual esperado, de 0% ou mais.",
           "negative": "Este simulador não considera rendimentos negativos. Introduz 0% ou mais.",
           "tooLarge": "Introduz um rendimento até {{max}}."
         }

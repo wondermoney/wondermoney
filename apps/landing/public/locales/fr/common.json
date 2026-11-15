@@ -1041,6 +1041,7 @@
           "tooLarge": "Indiquez de 0 à {{max}} mois ; les années entières vont dans Années."
         },
         "annualReturn": {
+          "required": "Indiquez un rendement annuel attendu, de 0 % ou plus.",
           "negative": "Ce simulateur ne gère pas les rendements négatifs. Indiquez 0 % ou plus.",
           "tooLarge": "Indiquez un rendement d'au plus {{max}}."
         }

@@ -1041,6 +1041,7 @@
           "tooLarge": "Enter 0 to {{max}} months; put whole years under Years."
         },
         "annualReturn": {
+          "required": "Enter an expected annual return, 0% or more.",
           "negative": "This calculator doesn't model negative returns. Enter 0% or more.",
           "tooLarge": "Enter a return up to {{max}}."
         }

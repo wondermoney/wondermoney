@@ -1041,6 +1041,7 @@
           "tooLarge": "Introduce de 0 a {{max}} meses; los años completos van en Años."
         },
         "annualReturn": {
+          "required": "Introduce una rentabilidad anual esperada, del 0 % o más.",
           "negative": "Este simulador no contempla rentabilidades negativas. Introduce 0 % o más.",
           "tooLarge": "Introduce una rentabilidad de hasta {{max}}."
         }

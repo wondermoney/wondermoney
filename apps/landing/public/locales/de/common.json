@@ -1041,6 +1041,7 @@
           "tooLarge": "Geben Sie 0 bis {{max}} Monate ein; volle Jahre gehören unter Jahre."
         },
         "annualReturn": {
+          "required": "Geben Sie eine erwartete jährliche Rendite ein, 0 % oder mehr.",
           "negative": "Negative Renditen bildet dieser Rechner nicht ab. Geben Sie 0 % oder mehr ein.",
           "tooLarge": "Geben Sie eine Rendite von höchstens {{max}} ein."
         }

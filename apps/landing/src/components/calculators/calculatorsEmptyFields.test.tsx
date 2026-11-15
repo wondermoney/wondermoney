@@ -12,6 +12,7 @@ import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
 import InvestmentReturnCalculatorComp from "./InvestmentReturnCalculatorComp";
 import MortgageCalculatorComp from "./MortgageCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
+import SavingsGoalCalculatorComp from "./SavingsGoalCalculatorComp";
 import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
 
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
@@ -23,6 +24,7 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["investment return", InvestmentReturnCalculatorComp],
   ["mortgage", MortgageCalculatorComp],
   ["net worth", NetWorthCalculatorComp],
+  ["savings goal", SavingsGoalCalculatorComp],
   ["savings rate", SavingsRateCalculatorComp],
 ];
 
@@ -176,6 +178,15 @@ describe.each(["Expected real return a year", "Safe withdrawal rate"])(
     });
   },
 );
+
+describe("savings goal calculator with the annual return cleared", () => {
+  it("asks for the return instead of reading it as 0%", async () => {
+    const user = userEvent.setup();
+    render(<SavingsGoalCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Expected annual return" }));
+    expect(screen.getByText("Enter an expected annual return, 0% or more.")).toBeTruthy();
+  });
+});
 
 describe("net worth calculator with every field cleared", () => {
   it("counts every empty line as 0", async () => {
