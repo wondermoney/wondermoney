@@ -130,8 +130,8 @@ function CompoundInterestCalculatorContent() {
           suffix="%"
           helpText={t(k("inflationHelp"))}
         />
-        {/* On leaving the field, show the whole years the result uses. */}
-        <div onBlur={() => setYears(result.inputs.years)}>
+        {/* On leaving the field, show the whole years the result uses; an empty one stays empty. */}
+        <div onBlur={() => Number.isFinite(years) && setYears(result.inputs.years)}>
           <CalculatorInput
             id="years"
             label={t(k("investmentPeriod"))}
@@ -273,6 +273,8 @@ function statusMessage(
   switch (result.status) {
     case "tooLarge":
       return t(k("statusTooLarge"), { max: money(MAX_RESULT) });
+    case "incomplete":
+      return t(k("statusIncomplete"));
     case "nothingInvested":
       return t(k("statusNothingInvested"));
     case "noPeriod":
@@ -417,7 +419,10 @@ function ComparisonCard({
   const signed = (value: number) => formatMoney(locale, value, { sign: value === 0 ? "auto" : "always" });
 
   const rows: Array<{ label: string; pick: (r: CompoundInterestResult) => number | null; strong?: boolean }> = [
-    { label: t(k("monthlyContribution")), pick: (r) => r.inputs.monthlyContribution },
+    {
+      label: t(k("monthlyContribution")),
+      pick: (r) => (r.status === "incomplete" ? null : r.inputs.monthlyContribution),
+    },
     { label: t(k("totalContributions")), pick: (r) => r.nominal?.contributed ?? null },
     { label: t(k("totalInterest")), pick: (r) => r.nominal?.growth ?? null },
     { label: t(k("finalBalance")), pick: (r) => r.nominal?.finalValue ?? null, strong: true },
@@ -521,10 +526,13 @@ function ComparisonCard({
 }
 
 function comparisonMessage(
-  { current, difference }: ContributionComparison,
+  { current, comparison, difference }: ContributionComparison,
   money: (value: number) => string,
   t: Translate,
 ): string {
+  if (current.status === "incomplete" || comparison.status === "incomplete") {
+    return t(k("comparisonIncomplete"));
+  }
   if (!difference) return t(k("comparisonUnavailable"));
   if (current.inputs.years === 0) return t(k("comparisonNoPeriod"));
   const values = {

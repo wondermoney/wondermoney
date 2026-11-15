@@ -51,8 +51,8 @@ function NetWorthCalculatorContent() {
   const [creditCardDebt, setCreditCardDebt] = useState(1000);
   const [otherDebt, setOtherDebt] = useState(0);
 
-  const { entered, totalAssets, totalLiabilities, netWorth, chartData } = useMemo(() => {
-    // An empty field counts as nothing; with every field empty there is no result yet.
+  const { totalAssets, totalLiabilities, netWorth, chartData } = useMemo(() => {
+    // Every line is an optional amount: an empty one counts as 0.
     const sum = (...values: number[]) =>
       values.reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0);
     const assets = sum(cashSavings, investments, realEstate, vehicles, otherAssets);
@@ -71,17 +71,6 @@ function NetWorthCalculatorContent() {
     ];
 
     return {
-      entered: [
-        cashSavings,
-        investments,
-        realEstate,
-        vehicles,
-        otherAssets,
-        mortgage,
-        studentLoans,
-        creditCardDebt,
-        otherDebt,
-      ].some(Number.isFinite),
       totalAssets: assets,
       totalLiabilities: liabilities,
       netWorth: net,
@@ -99,7 +88,6 @@ function NetWorthCalculatorContent() {
     otherDebt,
     t,
   ]);
-  const money = (value: number) => (entered ? eurFormatter.format(value) : "\u2014");
 
   return (
     <CalculatorLayout>
@@ -216,15 +204,15 @@ function NetWorthCalculatorContent() {
           items={[
             {
               label: t("tools.netWorth.totalAssets"),
-              value: money(totalAssets),
+              value: eurFormatter.format(totalAssets),
             },
             {
               label: t("tools.netWorth.totalLiabilities"),
-              value: money(totalLiabilities),
+              value: eurFormatter.format(totalLiabilities),
             },
             {
               label: t("tools.netWorth.netWorth"),
-              value: money(netWorth),
+              value: eurFormatter.format(netWorth),
               highlight: true,
             },
           ]}
@@ -234,7 +222,7 @@ function NetWorthCalculatorContent() {
         <div className="h-72 w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart
-              data={entered ? chartData : []}
+              data={chartData}
               margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
             >
               <CartesianGrid

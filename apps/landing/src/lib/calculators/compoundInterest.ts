@@ -73,7 +73,9 @@ export type CompoundInterestStatus =
   /** No initial amount and no monthly contribution. */
   | "nothingInvested"
   /** The balance passes MAX_RESULT, so no figures are shown. */
-  | "tooLarge";
+  | "tooLarge"
+  /** The annual return or the period is empty (NaN), so there is nothing to project yet. */
+  | "incomplete";
 
 type ResultBase = {
   /** The inputs actually used, after clamping to their ranges. */
@@ -90,13 +92,14 @@ type ResultBase = {
 export type CompoundInterestResult = ResultBase &
   (
     | {
-        status: Exclude<CompoundInterestStatus, "tooLarge">;
+        status: Exclude<CompoundInterestStatus, "tooLarge" | "incomplete">;
         nominal: CompoundInterestTotals;
         /** The same totals in today's money. */
         real: CompoundInterestTotals;
         schedule: CompoundInterestYear[];
       }
     | { status: "tooLarge"; nominal: null; real: null; schedule: [] }
+    | { status: "incomplete"; nominal: null; real: null; schedule: [] }
   );
 
 export type ContributionComparison = {
@@ -113,7 +116,8 @@ export type ContributionComparison = {
 type Clamped = { value: number; adjusted: boolean };
 
 function clamp(value: number, max: number): Clamped {
-  // An empty field reads as 0, which is in range; NaN is treated the same way.
+  // An empty amount or inflation (NaN) reads as 0, which is in range. An empty return or
+  // period is caught before this and reported as `incomplete`.
   if (Number.isNaN(value)) return { value: 0, adjusted: false };
   if (value < 0) return { value: 0, adjusted: true };
   if (value > max) return { value: max, adjusted: true };
@@ -157,6 +161,10 @@ export function computeCompoundInterest(params: CompoundInterestParams): Compoun
     inflationAtOrAboveReturn:
       inflationRate.value > 0 && inflationRate.value >= effectiveAnnualRate(annualRate.value),
   };
+
+  if (Number.isNaN(params.annualRate) || Number.isNaN(params.years)) {
+    return { ...base, status: "incomplete", nominal: null, real: null, schedule: [] };
+  }
 
   const monthlyRate = annualRate.value / 100 / 12;
   const monthlyInflation = (1 + inflationRate.value / 100) ** (1 / 12);
@@ -228,16 +236,22 @@ const subtract = (a: CompoundInterestTotals, b: CompoundInterestTotals): Compoun
   finalValue: a.finalValue - b.finalValue,
 });
 
-/** The same plan at the current and at a second monthly contribution. */
+/**
+ * The same plan at the current and at a second monthly contribution. An empty comparison
+ * contribution (NaN) leaves the comparison `incomplete` rather than comparing against 0.
+ */
 export function compareContributions(
   params: CompoundInterestParams,
   comparisonContribution: number,
 ): ContributionComparison {
   const current = computeCompoundInterest(params);
-  const comparison = computeCompoundInterest({
+  const projected = computeCompoundInterest({
     ...params,
     monthlyContribution: comparisonContribution,
   });
+  const comparison: CompoundInterestResult = Number.isNaN(comparisonContribution)
+    ? { ...projected, status: "incomplete", nominal: null, real: null, schedule: [] }
+    : projected;
 
   const difference =
     current.nominal && comparison.nominal && current.real && comparison.real

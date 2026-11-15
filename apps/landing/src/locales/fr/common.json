@@ -447,6 +447,7 @@
       "unreachableWithContribution": "Avec ces chiffres, vos placements plafonnent sous votre chiffre FIRE et ne l'atteignent jamais. Augmentez le versement mensuel ou le rendement attendu pour obtenir une date.",
       "beyondHorizon": "Avec ces chiffres, vous n'y arrivez pas en {{years}} ans. Le graphique montre les {{years}} premières années ; un versement plus élevé ou des dépenses plus faibles rapprochent la date.",
       "noSpending": "Saisissez vos dépenses annuelles pour voir votre chiffre FIRE.",
+      "missingRate": "Saisissez un rendement réel et un taux de retrait pour voir votre chiffre FIRE.",
       "sensitivity": "En dépensant {{cut}} de moins, soit {{spending}} par an, l'objectif descend à {{target}} et vous l'atteignez en {{time}}.",
       "sensitivityReached": "En dépensant {{cut}} de moins, soit {{spending}} par an, l'objectif descend à {{target}}, que vos placements couvrent déjà.",
       "chartTitle": "Placements projetés",
@@ -504,6 +505,7 @@
       "summary": "Au bout de {{years}}, les {{contributed}} que vous versez atteignent {{final}}. En euros d'aujourd'hui, cela vaut {{real}}.",
       "statusNothingInvested": "Saisissez un capital de départ ou un versement mensuel pour voir sa croissance.",
       "statusNoPeriod": "Avec une durée de 0 an, rien n'a le temps de croître : la valeur finale est le montant de départ.",
+      "statusIncomplete": "Saisissez un rendement annuel attendu et une durée d'investissement pour voir sa croissance.",
       "statusTooLarge": "Le résultat dépasse {{max}}, au-delà de ce qu'affiche cette calculatrice. Réduisez les montants, le rendement ou la durée.",
       "inflationWarning": "L'inflation est égale ou supérieure au rendement attendu : cet argent conserve à peine ou perd son pouvoir d'achat. Croissance après inflation : {{growth}}.",
       "adjusted": "Certaines valeurs étaient hors des limites acceptées et ont été ajustées : montants de 0 à {{maxAmount}}, rendement et inflation de 0 % à {{maxRate}} %, et de 0 à {{maxYears}} ans.",
@@ -523,6 +525,7 @@
       "comparisonSame": "Les deux versements sont identiques. Modifiez le montant pour comparer.",
       "comparisonNoPeriod": "Indiquez une durée d'au moins un an pour comparer les versements.",
       "comparisonUnavailable": "L'un des résultats est trop élevé pour être comparé. Réduisez les montants, le rendement ou la durée.",
+      "comparisonIncomplete": "Saisissez un rendement, une durée et un versement à comparer pour voir la différence.",
       "nextStepHeadline": "Transformez cette projection en objectif suivi",
       "nextStepDescription": "Enregistrez la valeur finale comme objectif dans WonderMoney et suivez votre progression à partir des soldes réels de vos comptes.",
       "nextStepCta": "Créer votre objectif",
@@ -885,6 +888,7 @@
           "tooLarge": "Saisissez une durée de {{max}} ans au maximum."
         },
         "annualRate": {
+          "required": "Saisissez le taux d'intérêt.",
           "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
           "tooLarge": "Saisissez un taux jusqu'à {{max}}."
         },

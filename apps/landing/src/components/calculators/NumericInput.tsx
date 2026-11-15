@@ -3,6 +3,7 @@ import {
   formatNumericInput,
   isNumericDraft,
   parseNumericInput,
+  sanitizeNumericInput,
   separatorOf,
   stepNumericValue,
 } from "@/lib/calculators/numericInput";
@@ -26,7 +27,17 @@ type Props = Omit<
  *
  * It is a text input rather than type="number", so a comma works as the decimal separator and
  * no browser rewrites a partial entry; the arrow keys still step by `step` within min and max.
+ * With a whole-number `step` the field reads "1,500" and "1.500" as 1500; with a fractional
+ * one (a rate) they stay decimals (`parseNumericInput`).
  */
+/** Whether `after` is `before` with one stretch of characters removed (Backspace, Delete, cut). */
+function isDeletion(before: string, after: string): boolean {
+  if (after.length >= before.length) return false;
+  let start = 0;
+  while (start < after.length && after[start] === before[start]) start += 1;
+  return before.endsWith(after.slice(start));
+}
+
 export default function NumericInput({
   value,
   onChange,
@@ -37,6 +48,7 @@ export default function NumericInput({
   onKeyDown,
   ...rest
 }: Props) {
+  const parseOptions = { grouping: Number.isInteger(step) };
   const [text, setText] = useState(() => formatNumericInput(value));
   // The number `text` stands for. When `value` moves away from it, the parent changed the
   // value itself and the field shows the new one.
@@ -56,6 +68,8 @@ export default function NumericInput({
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    // Leave browser and system shortcuts (Cmd+Up, Alt+Down) alone.
+    if (event.metaKey || event.altKey || event.ctrlKey) return;
     event.preventDefault();
     const next = stepNumericValue(shown, event.key === "ArrowUp" ? 1 : -1, { min, max, step });
     show(formatNumericInput(next, separatorOf(text)), next);
@@ -75,9 +89,13 @@ export default function NumericInput({
       aria-valuemax={max}
       value={text}
       onChange={(event) => {
-        const nextText = event.target.value;
-        if (!isNumericDraft(nextText)) return;
-        show(nextText, parseNumericInput(nextText));
+        const typed = event.target.value;
+        // A deletion always goes through. Otherwise currency signs and letters are dropped
+        // (a pasted "1 500,00 €"), and what is left must still be a number being typed.
+        const deletion = isDeletion(text, typed);
+        const nextText = deletion ? typed : sanitizeNumericInput(typed);
+        if (!deletion && !isNumericDraft(nextText)) return;
+        show(nextText, parseNumericInput(nextText, parseOptions));
       }}
       onKeyDown={handleKeyDown}
       onBlur={(event) => {

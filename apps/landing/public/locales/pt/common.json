@@ -447,6 +447,7 @@
       "unreachableWithContribution": "Com estes valores, os teus investimentos estabilizam abaixo do teu número FIRE e nunca lá chegam. Aumenta a contribuição mensal ou o retorno esperado para veres uma data.",
       "beyondHorizon": "Com estes valores, não chegas lá em {{years}} anos. O gráfico mostra os primeiros {{years}} anos; uma contribuição maior ou uma despesa menor aproximam a data.",
       "noSpending": "Introduz a tua despesa anual para veres o teu número FIRE.",
+      "missingRate": "Indica um retorno real e uma taxa de levantamento para veres o teu número FIRE.",
       "sensitivity": "Se gastares menos {{cut}}, {{spending}} por ano, o objetivo desce para {{target}} e chegas lá em {{time}}.",
       "sensitivityReached": "Se gastares menos {{cut}}, {{spending}} por ano, o objetivo desce para {{target}}, que os teus investimentos já cobrem.",
       "chartTitle": "Investimentos projetados",
@@ -504,6 +505,7 @@
       "summary": "Ao fim de {{years}}, os {{contributed}} que investes chegam a {{final}}. Em dinheiro de hoje, isso vale {{real}}.",
       "statusNothingInvested": "Indica um montante inicial ou uma contribuição mensal para veres o crescimento.",
       "statusNoPeriod": "Com um período de 0 anos não há tempo para crescer: o valor final é o montante com que começas.",
+      "statusIncomplete": "Indica um retorno anual esperado e um período de investimento para veres o crescimento.",
       "statusTooLarge": "O resultado ultrapassa {{max}}, mais do que esta calculadora mostra. Baixa os montantes, o retorno ou o período.",
       "inflationWarning": "A inflação está igual ou acima do retorno esperado, por isso este dinheiro mal mantém ou perde poder de compra. Crescimento depois da inflação: {{growth}}.",
       "adjusted": "Alguns valores estavam fora dos limites aceites e foram ajustados: montantes de 0 a {{maxAmount}}, retorno e inflação de 0% a {{maxRate}}% e de 0 a {{maxYears}} anos.",
@@ -523,6 +525,7 @@
       "comparisonSame": "As duas contribuições são iguais. Altera o valor para comparar.",
       "comparisonNoPeriod": "Define um período de pelo menos um ano para comparar contribuições.",
       "comparisonUnavailable": "Um dos resultados é demasiado grande para comparar. Baixa os montantes, o retorno ou o período.",
+      "comparisonIncomplete": "Indica um retorno, um período e uma contribuição a comparar para veres a diferença.",
       "nextStepHeadline": "Transforma esta projeção num objetivo acompanhado",
       "nextStepDescription": "Guarda o valor final como objetivo no WonderMoney e acompanha o teu progresso com os saldos reais das tuas contas.",
       "nextStepCta": "Criar objetivo",
@@ -885,6 +888,7 @@
           "tooLarge": "Indica um prazo até {{max}} anos."
         },
         "annualRate": {
+          "required": "Indica a taxa de juro.",
           "negative": "A taxa de juro não pode ser inferior a 0%.",
           "tooLarge": "Indica uma taxa até {{max}}."
         },

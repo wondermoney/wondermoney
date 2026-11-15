@@ -186,6 +186,65 @@ describe("CalculatorInput", () => {
     expect(input.hasAttribute("aria-valuenow")).toBe(false);
   });
 
+  it.each(["1,500", "1.500"])("reads %s in an amount field as 1500", async (typed) => {
+    const { input, received, user } = setup({ initial: 0, step: 500 });
+    await user.clear(input);
+    await user.type(input, typed);
+    expect(input.value).toBe(typed);
+    expect(received.at(-1)).toBe(1500);
+    await user.tab();
+    expect(input.value).toBe("1500");
+  });
+
+  it("reads 3,125 in a rate field as 3.125", async () => {
+    const { input, received, user } = setup({ initial: 7, step: 0.5 });
+    await user.clear(input);
+    await user.type(input, "3,125");
+    expect(input.value).toBe("3,125");
+    expect(received.at(-1)).toBe(3.125);
+  });
+
+  it.each([
+    ["1,000.50", "1000.5"],
+    ["1.000,50", "1000,5"],
+  ])("types %s key by key as 1000.5", async (typed, tidied) => {
+    const { input, received, user } = setup({ initial: 0, step: 500 });
+    await user.clear(input);
+    await user.type(input, typed);
+    expect(input.value).toBe(typed);
+    expect(received.at(-1)).toBe(1000.5);
+    await user.tab();
+    expect(input.value).toBe(tidied);
+  });
+
+  it.each([
+    ["€1500", 1500],
+    ["1 500,00 €", 1500],
+    ["1.000,50", 1000.5],
+  ])("takes the pasted %j", async (pasted, expected) => {
+    const { input, received, user } = setup({ initial: 0, step: 50 });
+    await user.clear(input);
+    await user.paste(pasted);
+    expect(received.at(-1)).toBe(expected);
+  });
+
+  it("lets every character of a very large or very small value be deleted", async () => {
+    const { input, received, user } = setup({ initial: 1e21 });
+    expect(input.value).toBe("1000000000000000000000");
+    await user.click(input);
+    await user.keyboard("{End}{Backspace}");
+    expect(input.value).toBe("100000000000000000000");
+    expect(received.at(-1)).toBe(1e20);
+  });
+
+  it("leaves the arrow keys to the browser while a modifier is held", async () => {
+    const { input, received, user } = setup({ initial: 5 });
+    await user.click(input);
+    await user.keyboard("{Meta>}{ArrowUp}{/Meta}{Alt>}{ArrowDown}{/Alt}{Control>}{ArrowUp}{/Control}");
+    expect(input.value).toBe("5");
+    expect(received).toEqual([]);
+  });
+
   it("offers the full keyboard where negative numbers are allowed", () => {
     const { input } = setup({ initial: 4, min: -10 });
     expect(input.getAttribute("inputmode")).toBe("text");

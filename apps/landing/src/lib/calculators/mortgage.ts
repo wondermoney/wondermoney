@@ -40,7 +40,7 @@ export type MortgageInput = {
   loanAmount: number;
   /** Term in years; fractions are rounded to the nearest month. */
   termYears: number;
-  /** Nominal annual interest rate in percent (3.5 means 3.5%). Empty (NaN) reads as 0%. */
+  /** Nominal annual interest rate in percent (3.5 means 3.5%). Empty (NaN) is `required`. */
   annualRate: number;
   /** Flat monthly insurance and fees, in euros. Empty (NaN) reads as none. */
   monthlyFees: number;
@@ -106,7 +106,8 @@ function validate(input: MortgageInput): Partial<Record<MortgageField, MortgageI
   if (Number.isNaN(termYears) || Math.round(termYears * 12) < 1) errors.termYears = "required";
   else if (termYears > MORTGAGE_LIMITS.maxTermYears) errors.termYears = "tooLarge";
 
-  if (annualRate < 0) errors.annualRate = "negative";
+  if (Number.isNaN(annualRate)) errors.annualRate = "required";
+  else if (annualRate < 0) errors.annualRate = "negative";
   else if (annualRate > MORTGAGE_LIMITS.maxAnnualRate) errors.annualRate = "tooLarge";
 
   if (monthlyFees < 0) errors.monthlyFees = "negative";
@@ -129,7 +130,7 @@ export function computeMortgage(input: MortgageInput): MortgageCalculation {
   const errors = validate(input);
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
-  const annualRate = Number.isNaN(input.annualRate) ? 0 : input.annualRate;
+  const { annualRate } = input;
   const monthlyFees = Number.isNaN(input.monthlyFees) ? 0 : input.monthlyFees;
 
   const months = Math.round(input.termYears * 12);
