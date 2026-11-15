@@ -9,9 +9,13 @@
  *   end. A term that is not a whole number of periods ends with a shorter last period, paid pro
  *   rata at maturity; a term shorter than one period is a single payment at maturity.
  * - Reinvested interest is added to the deposit after tax, so it compounds at the payment
- *   frequency. Paid-out interest leaves the deposit and earns nothing more here.
+ *   frequency. Paid-out interest leaves the deposit, so later interest is on the amount deposited.
  * - Tax is withheld from each interest payment and rounded to the cent. All amounts are worked
- *   in whole cents, so the payment rows add up to the totals exactly.
+ *   in whole cents with exact integer arithmetic (half a cent rounds up), so the payment rows
+ *   add up to the totals exactly.
+ * - The net annual yield is the internal rate of return of the saver's net cash flows: the
+ *   deposit at month 0, each net payment paid out at its month, and the deposit (with any
+ *   reinvested interest) back at maturity.
  */
 
 export const INTEREST_PAYOUTS = ["maturity", "monthly", "quarterly", "annually"] as const;
@@ -54,16 +58,16 @@ export const TERM_DEPOSIT_EXAMPLE = {
 } as const;
 
 export type TermDepositInput = {
-  /** Amount deposited, in euros. */
+  /** Amount deposited, in euros. NaN asks for a value. */
   amount: number;
-  /** Gross nominal annual rate in percent (3 means 3%). */
+  /** Gross nominal annual rate in percent (3 means 3%). NaN asks for a value. */
   annualRate: number;
-  /** Whole months, 1 to 120. */
+  /** Whole months, 1 to 120. NaN asks for a value. */
   termMonths: number;
   payout: InterestPayout;
   /** Periodic payouts only: add each net payment to the deposit instead of paying it out. */
   reinvest: boolean;
-  /** Percent withheld from each interest payment. Empty (NaN) reads as none. */
+  /** Percent withheld from each interest payment. NaN counts as 0%: the field is optional. */
   taxRate: number;
 };
 
@@ -96,11 +100,15 @@ export type TermDepositResult = {
   grossInterest: number;
   tax: number;
   netInterest: number;
-  /** What the saver has at maturity: the deposit plus all net interest, paid out or not. */
+  /**
+   * The deposit plus all net interest. With interest paid out it is the total the saver
+   * receives over the term, not a balance held at maturity.
+   */
   finalBalance: number;
   /**
-   * The net return annualized with compounding, in percent: (final ÷ principal)^(12 ÷ months) − 1.
-   * Interest paid out is not assumed to earn anything after it leaves the deposit.
+   * The internal rate of return of the net cash flows, as an annual rate in percent. With a
+   * single inflow at maturity (paid at maturity, or reinvested) it is
+   * (final ÷ principal)^(12 ÷ months) − 1.
    */
   effectiveAnnualNetYield: number;
   payments: TermDepositPayment[];
@@ -147,31 +155,82 @@ export function paymentPeriods(termMonths: number, payout: InterestPayout): numb
 
 const fromCents = (cents: number) => cents / 100;
 
+/**
+ * Rates are scaled to integers with this many units per percent (a millionth of a percent)
+ * before multiplying, so the products are exact and half a cent rounds up, not to float noise.
+ */
+const PERCENT_SCALE = 1_000_000;
+
+const toScaledPercent = (percent: number) => BigInt(Math.round(percent * PERCENT_SCALE));
+
+/** numerator ÷ denominator for non-negative integers, rounded half up. */
+function divideHalfUp(numerator: bigint, denominator: bigint): bigint {
+  return (numerator * 2n + denominator) / (denominator * 2n);
+}
+
+/** Interest in cents on `balanceCents` for `months` at `scaledRate`, rounded half up. */
+function interestCents(balanceCents: number, scaledRate: bigint, months: number): number {
+  const denominator = 12n * 100n * BigInt(PERCENT_SCALE);
+  return Number(divideHalfUp(BigInt(balanceCents) * scaledRate * BigInt(months), denominator));
+}
+
+/** `scaledTax` percent of `grossCents`, rounded half up. */
+function taxCents(grossCents: number, scaledTax: bigint): number {
+  return Number(divideHalfUp(BigInt(grossCents) * scaledTax, 100n * BigInt(PERCENT_SCALE)));
+}
+
+type CashFlow = { month: number; cents: number };
+
+/**
+ * The annual rate y, in percent, at which −principal at month 0 plus each flow discounted by
+ * (1 + y)^(month ÷ 12) sums to zero. Every flow is non-negative and they add up to at least the
+ * principal, so the rate is at least 0 and the sum falls as y rises: bisection finds it.
+ */
+function internalRateOfReturn(principalCents: number, flows: ReadonlyArray<CashFlow>): number {
+  const presentValue = (rate: number) =>
+    flows.reduce((sum, flow) => sum + flow.cents * Math.pow(1 + rate, -flow.month / 12), 0) -
+    principalCents;
+
+  let low = 0;
+  let high = 1;
+  while (presentValue(high) > 0) high *= 2;
+  for (let i = 0; i < 200 && high - low > 1e-15; i++) {
+    const mid = (low + high) / 2;
+    if (presentValue(mid) > 0) low = mid;
+    else high = mid;
+  }
+  return ((low + high) / 2) * 100;
+}
+
 export function computeTermDeposit(input: TermDepositInput): TermDepositCalculation {
   const errors = validate(input);
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
-  const rate = input.annualRate / 100;
-  const taxShare = Number.isNaN(input.taxRate) ? 0 : input.taxRate / 100;
+  const scaledRate = toScaledPercent(input.annualRate);
+  const scaledTax = toScaledPercent(Number.isNaN(input.taxRate) ? 0 : input.taxRate);
   const reinvested = input.payout !== "maturity" && input.reinvest;
   const principalCents = Math.round(input.amount * 100);
 
   let balanceCents = principalCents;
   let paidOutCents = 0;
   let grossCents = 0;
-  let taxCents = 0;
+  let totalTaxCents = 0;
   let month = 0;
+  const cashFlows: CashFlow[] = [];
 
   const payments = paymentPeriods(input.termMonths, input.payout).map((months, index) => {
     month += months;
-    const paymentGrossCents = Math.round((balanceCents * rate * months) / 12);
-    const paymentTaxCents = Math.round(paymentGrossCents * taxShare);
+    const paymentGrossCents = interestCents(balanceCents, scaledRate, months);
+    const paymentTaxCents = taxCents(paymentGrossCents, scaledTax);
     const paymentNetCents = paymentGrossCents - paymentTaxCents;
 
     grossCents += paymentGrossCents;
-    taxCents += paymentTaxCents;
+    totalTaxCents += paymentTaxCents;
     if (reinvested) balanceCents += paymentNetCents;
-    else paidOutCents += paymentNetCents;
+    else {
+      paidOutCents += paymentNetCents;
+      if (month < input.termMonths) cashFlows.push({ month, cents: paymentNetCents });
+    }
 
     return {
       number: index + 1,
@@ -185,10 +244,22 @@ export function computeTermDeposit(input: TermDepositInput): TermDepositCalculat
     };
   });
 
-  const netCents = grossCents - taxCents;
-  const growth = netCents / principalCents;
-  const effectiveAnnualNetYield =
-    netCents === 0 ? 0 : Math.expm1((Math.log1p(growth) * 12) / input.termMonths) * 100;
+  const netCents = grossCents - totalTaxCents;
+  // What comes back at maturity: the deposit, with reinvested interest or the last payment.
+  const atMaturityCents = principalCents + netCents - cashFlows.reduce((sum, f) => sum + f.cents, 0);
+
+  let effectiveAnnualNetYield: number;
+  if (netCents === 0) effectiveAnnualNetYield = 0;
+  else if (cashFlows.length === 0) {
+    // One inflow at maturity: the closed form, exact.
+    const growth = netCents / principalCents;
+    effectiveAnnualNetYield = Math.expm1((Math.log1p(growth) * 12) / input.termMonths) * 100;
+  } else {
+    effectiveAnnualNetYield = internalRateOfReturn(principalCents, [
+      ...cashFlows,
+      { month: input.termMonths, cents: atMaturityCents },
+    ]);
+  }
 
   return {
     ok: true,
@@ -198,7 +269,7 @@ export function computeTermDeposit(input: TermDepositInput): TermDepositCalculat
       payout: input.payout,
       reinvested,
       grossInterest: fromCents(grossCents),
-      tax: fromCents(taxCents),
+      tax: fromCents(totalTaxCents),
       netInterest: fromCents(netCents),
       finalBalance: fromCents(principalCents + netCents),
       effectiveAnnualNetYield,

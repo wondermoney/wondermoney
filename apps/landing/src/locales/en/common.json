@@ -1147,12 +1147,13 @@
       "netInterest": "Net interest",
       "netYield": "Net annual yield",
       "finalBalance": "Balance at maturity",
+      "totalReceived": "Total received",
       "paymentsOne": "1 interest payment",
       "paymentsMany": "{{count}} interest payments",
       "resultNote": {
         "maturity": "Interest for {{term}} is paid in one go when the deposit matures.",
         "reinvested": "Over {{term}}, {{payments}} are added to the deposit after tax, so later ones earn on a bigger balance.",
-        "paidOut": "Over {{term}}, you receive {{payments}} after tax and {{principal}} comes back at maturity. The balance counts both."
+        "paidOut": "Over {{term}}, you receive {{payments}} after tax and {{principal}} comes back at maturity. The total counts both."
       },
       "errors": {
         "summary": "The result appears once every field has a valid value.",
@@ -1198,22 +1199,22 @@
           "gross": "Gross interest: everything the deposit earns before tax.",
           "tax": "Tax withheld: the part of each interest payment kept back for tax at the rate you enter.",
           "net": "Net interest: what reaches you, gross interest minus tax.",
-          "final": "Balance at maturity: the amount deposited plus all the net interest, counting interest already paid out to you.",
+          "final": "Balance at maturity, or total received when interest is paid out: the amount deposited plus all the net interest.",
           "yield": "Net annual yield: the net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
         },
         "exampleHeading": "Worked example",
         "exampleSetup": "Say you deposit {{amount}} for {{months}} months at a gross rate of {{rate}} a year, with the interest paid at maturity. The interest is simple: the amount times the rate times the share of a year the money stays.",
         "exampleCompounded": "If the same deposit pays interest every quarter and adds it to the balance, it makes {{compoundedPayments}} payments and each one earns on a slightly larger amount. Gross interest comes to {{compoundedGross}}, {{compoundedExtra}} more, for a balance of {{compoundedFinal}} and a yield of {{compoundedYield}} a year, against {{yield}} when everything is paid at the end.",
-        "exampleTax": "Now suppose {{taxRate}} is withheld from the interest paid at maturity. That rate is only an illustration, not any country's: the calculator starts at 0% so you can enter your own. The bank keeps {{tax}}, you receive {{net}} and you end with {{taxedFinal}}, a net yield of {{taxedYield}} a year.",
+        "exampleTax": "Now suppose {{taxRate}} is withheld from the interest paid at maturity, a rate chosen only as an illustration, not taken from any country's rules: the calculator starts at 0% so you can enter your own. The bank keeps {{tax}}, you receive {{net}} and you end with {{taxedFinal}}, a net yield of {{taxedYield}} a year.",
         "methodHeading": "Method and assumptions",
         "methodIntro": "Interest is counted in whole months, without a day count. The rate you enter is a nominal annual rate: each period earns the rate times its months divided by 12.",
-        "methodFormula": "Interest for a period = balance × annual rate × months in the period ÷ 12. Net interest = interest − tax. Net annual yield = (balance at maturity ÷ amount deposited)^(12 ÷ term in months) − 1.",
+        "methodFormula": "Interest for a period = balance × annual rate × months in the period ÷ 12. Net interest = interest − tax. Net annual yield = the yearly rate that turns the amount deposited into the net payments and the amount returned, each counted when it arrives. With all the interest at maturity, that is (balance at maturity ÷ amount deposited)^(12 ÷ term in months) − 1.",
         "method": {
           "maturity": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
           "periodic": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
-          "reinvest": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out earns nothing more in this calculation.",
+          "reinvest": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out leaves the deposit, so later interest is worked out on the amount deposited.",
           "tax": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
-          "yield": "The net annual yield compounds the net return over a year. A deposit shorter than a year is assumed to be renewed on the same terms, and one longer than a year shows its average yearly growth.",
+          "yield": "The net annual yield is the internal rate of return of the deposit: the yearly rate at which the amount you put in grows into everything you get back, counting each net payment in the month it is paid. Interest paid along the way therefore counts for more than the same interest at maturity. A deposit shorter than a year is assumed to be renewed on the same terms.",
           "excluded": "Not included: early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
           "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere."
         },

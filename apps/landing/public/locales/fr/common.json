@@ -1147,12 +1147,13 @@
       "netInterest": "Intérêts nets",
       "netYield": "Rendement net annuel",
       "finalBalance": "Solde à l'échéance",
+      "totalReceived": "Total perçu",
       "paymentsOne": "1 versement d'intérêts",
       "paymentsMany": "{{count}} versements d'intérêts",
       "resultNote": {
         "maturity": "Les intérêts de {{term}} sont versés en une fois à l'échéance du dépôt.",
         "reinvested": "Sur {{term}}, le dépôt reçoit {{payments}} après impôt : les suivants rapportent donc sur un solde plus élevé.",
-        "paidOut": "Sur {{term}}, vous recevez {{payments}} après impôt et récupérez {{principal}} à l'échéance. Le solde compte les deux."
+        "paidOut": "Sur {{term}}, vous recevez {{payments}} après impôt et récupérez {{principal}} à l'échéance. Le total compte les deux."
       },
       "errors": {
         "summary": "Le résultat s'affiche dès que chaque champ a une valeur valide.",
@@ -1198,22 +1199,22 @@
           "gross": "Intérêts bruts : tout ce que rapporte le dépôt avant impôt.",
           "tax": "Impôt prélevé : la part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
           "net": "Intérêts nets : ce qui vous revient, les intérêts bruts moins l'impôt.",
-          "final": "Solde à l'échéance : le montant déposé plus tous les intérêts nets, y compris ceux déjà versés sur votre compte.",
+          "final": "Solde à l'échéance, ou total perçu lorsque les intérêts sont versés sur votre compte : le montant déposé plus tous les intérêts nets.",
           "yield": "Rendement net annuel : le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
         },
         "exampleHeading": "Exemple chiffré",
         "exampleSetup": "Supposons que vous déposiez {{amount}} pendant {{months}} mois à un taux brut de {{rate}} par an, avec des intérêts versés à l'échéance. Les intérêts sont simples : le montant multiplié par le taux et par la part de l'année pendant laquelle l'argent reste placé.",
         "exampleCompounded": "Si le même dépôt verse ses intérêts chaque trimestre et les ajoute au solde, il effectue {{compoundedPayments}} versements, chacun calculé sur un montant un peu plus élevé. Les intérêts bruts atteignent {{compoundedGross}}, soit {{compoundedExtra}} de plus, pour un solde de {{compoundedFinal}} et un rendement de {{compoundedYield}} par an, contre {{yield}} lorsque tout est versé à la fin.",
-        "exampleTax": "Supposons maintenant que {{taxRate}} soient prélevés sur les intérêts versés à l'échéance. Ce taux n'est qu'une illustration et ne correspond à aucun pays : le calculateur démarre à 0 % pour que vous saisissiez le vôtre. La banque prélève {{tax}}, vous recevez {{net}} et terminez avec {{taxedFinal}}, soit un rendement net de {{taxedYield}} par an.",
+        "exampleTax": "Supposons maintenant que {{taxRate}} soient prélevés sur les intérêts versés à l'échéance, un taux choisi uniquement à titre d'illustration et non tiré des règles d'un pays : le calculateur démarre à 0 % pour que vous saisissiez le vôtre. La banque prélève {{tax}}, vous recevez {{net}} et terminez avec {{taxedFinal}}, soit un rendement net de {{taxedYield}} par an.",
         "methodHeading": "Méthode et hypothèses",
         "methodIntro": "Les intérêts se comptent en mois entiers, sans décompte des jours. Le taux saisi est un taux nominal annuel : chaque période rapporte le taux multiplié par son nombre de mois, divisé par 12.",
-        "methodFormula": "Intérêts d'une période = solde × taux annuel × mois de la période ÷ 12. Intérêts nets = intérêts − impôt. Rendement net annuel = (solde à l'échéance ÷ montant déposé)^(12 ÷ durée en mois) − 1.",
+        "methodFormula": "Intérêts d'une période = solde × taux annuel × mois de la période ÷ 12. Intérêts nets = intérêts − impôt. Rendement net annuel = le taux annuel qui transforme le montant déposé en versements nets et en montant restitué, chacun compté à sa date. Avec tous les intérêts à l'échéance, il vaut (solde à l'échéance ÷ montant déposé)^(12 ÷ durée en mois) − 1.",
         "method": {
           "maturity": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
           "periodic": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
-          "reinvest": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte ne rapportent plus rien dans ce calcul.",
+          "reinvest": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte quittent le dépôt, et les suivants sont calculés sur le montant déposé.",
           "tax": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
-          "yield": "Le rendement net annuel capitalise le gain net sur un an. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions, et un dépôt de plus d'un an affiche sa croissance annuelle moyenne.",
+          "yield": "Le rendement net annuel est le taux de rendement interne du dépôt : le taux annuel auquel la somme placée devient tout ce que vous récupérez, chaque versement net étant compté le mois où il est payé. Des intérêts versés en cours de route valent donc davantage que les mêmes intérêts à l'échéance. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions.",
           "excluded": "Non compris : pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
           "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés."
         },

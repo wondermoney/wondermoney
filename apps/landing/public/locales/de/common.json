@@ -1147,12 +1147,13 @@
       "netInterest": "Nettozinsen",
       "netYield": "Nettorendite pro Jahr",
       "finalBalance": "Guthaben am Laufzeitende",
+      "totalReceived": "Insgesamt erhalten",
       "paymentsOne": "1 Zinszahlung",
       "paymentsMany": "{{count}} Zinszahlungen",
       "resultNote": {
         "maturity": "Die Zinsen für {{term}} werden auf einmal gezahlt, wenn die Anlage fällig wird.",
         "reinvested": "Über {{term}} schreibt die Bank der Anlage {{payments}} nach Steuern gut, sodass die späteren auf ein höheres Guthaben anfallen.",
-        "paidOut": "Über {{term}} erhalten Sie {{payments}} nach Steuern, und am Laufzeitende kommen {{principal}} zurück. Das Guthaben zählt beides."
+        "paidOut": "Über {{term}} erhalten Sie {{payments}} nach Steuern, und am Laufzeitende kommen {{principal}} zurück. Die Summe zählt beides."
       },
       "errors": {
         "summary": "Das Ergebnis erscheint, sobald jedes Feld einen gültigen Wert hat.",
@@ -1198,22 +1199,22 @@
           "gross": "Bruttozinsen: alles, was die Anlage vor Steuern bringt.",
           "tax": "Einbehaltene Steuer: der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
           "net": "Nettozinsen: was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
-          "final": "Guthaben am Laufzeitende: der Anlagebetrag plus alle Nettozinsen, auch die bereits ausgezahlten.",
+          "final": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten: der Anlagebetrag plus alle Nettozinsen.",
           "yield": "Nettorendite pro Jahr: der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
         },
         "exampleHeading": "Rechenbeispiel",
         "exampleSetup": "Angenommen, Sie legen {{amount}} für {{months}} Monate zu einem Bruttozins von {{rate}} pro Jahr an, mit Zinszahlung am Laufzeitende. Der Zins ist ein einfacher Zins: Betrag mal Zinssatz mal Anteil des Jahres, den das Geld angelegt bleibt.",
         "exampleCompounded": "Zahlt dieselbe Anlage die Zinsen vierteljährlich und schreibt sie dem Guthaben gut, gibt es {{compoundedPayments}} Zahlungen, und jede fällt auf einen etwas höheren Betrag an. Die Bruttozinsen steigen auf {{compoundedGross}}, also {{compoundedExtra}} mehr, für ein Guthaben von {{compoundedFinal}} und eine Rendite von {{compoundedYield}} pro Jahr, gegenüber {{yield}}, wenn alles am Ende gezahlt wird.",
-        "exampleTax": "Nehmen wir nun an, dass von den Zinsen am Laufzeitende {{taxRate}} einbehalten werden. Dieser Satz dient nur der Veranschaulichung und ist der keines Landes: Der Rechner beginnt bei 0 %, damit Sie Ihren eigenen eingeben. Die Bank behält {{tax}} ein, Sie erhalten {{net}} und haben am Ende {{taxedFinal}}, eine Nettorendite von {{taxedYield}} pro Jahr.",
+        "exampleTax": "Nehmen wir nun an, dass von den Zinsen am Laufzeitende {{taxRate}} einbehalten werden, ein Satz, der nur zur Veranschaulichung gewählt und keinen Regeln eines Landes entnommen ist: Der Rechner beginnt bei 0 %, damit Sie Ihren eigenen eingeben. Die Bank behält {{tax}} ein, Sie erhalten {{net}} und haben am Ende {{taxedFinal}}, eine Nettorendite von {{taxedYield}} pro Jahr.",
         "methodHeading": "Methode und Annahmen",
         "methodIntro": "Zinsen werden in ganzen Monaten gerechnet, ohne Tageszählung. Der eingegebene Zinssatz ist ein nominaler Jahreszins: Jede Periode bringt den Zinssatz mal ihre Monate geteilt durch 12.",
-        "methodFormula": "Zinsen einer Periode = Guthaben × Jahreszins × Monate der Periode ÷ 12. Nettozinsen = Zinsen − Steuer. Nettorendite pro Jahr = (Guthaben am Laufzeitende ÷ Anlagebetrag)^(12 ÷ Laufzeit in Monaten) − 1.",
+        "methodFormula": "Zinsen einer Periode = Guthaben × Jahreszins × Monate der Periode ÷ 12. Nettozinsen = Zinsen − Steuer. Nettorendite pro Jahr = der Jahreszins, mit dem der Anlagebetrag zu den Nettozahlungen und dem zurückgezahlten Betrag wird, jeweils zu ihrem Zeitpunkt gezählt. Kommen alle Zinsen am Laufzeitende, ist das (Guthaben am Laufzeitende ÷ Anlagebetrag)^(12 ÷ Laufzeit in Monaten) − 1.",
         "method": {
           "maturity": "Bei Zahlung am Laufzeitende ist der Zins einfach: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
           "periodic": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
-          "reinvest": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen bringen in dieser Rechnung nichts mehr.",
+          "reinvest": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
           "tax": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
-          "yield": "Die Nettorendite pro Jahr verzinst den Nettoertrag über ein Jahr. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird; eine Anlage über einem Jahr zeigt ihr durchschnittliches jährliches Wachstum.",
+          "yield": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der Jahreszins, zu dem Ihr Anlagebetrag zu allem wird, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
           "excluded": "Nicht enthalten: Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
           "privacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen."
         },

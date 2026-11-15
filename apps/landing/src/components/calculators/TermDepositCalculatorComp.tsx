@@ -170,7 +170,13 @@ function TermDepositCalculatorContent() {
                     label: t(k("netYield")),
                     value: formatPercent(locale, result.effectiveAnnualNetYield, { decimals: 2 }),
                   },
-                  { label: t(k("finalBalance")), value: money(result.finalBalance), highlight: true },
+                  {
+                    // Paid-out interest is not held in the deposit: the figure is what the saver
+                    // receives over the term.
+                    label: periodic && !result.reinvested ? t(k("totalReceived")) : t(k("finalBalance")),
+                    value: money(result.finalBalance),
+                    highlight: true,
+                  },
                 ]}
               />
               <p className="text-xs leading-5 text-muted-foreground">

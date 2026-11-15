@@ -103,7 +103,8 @@ describe("computeTermDeposit with periodic payments", () => {
     expect(result.payments[11].paidOutToDate).toBe(300);
     expect(result.grossInterest).toBe(300);
     expect(result.finalBalance).toBe(10_300);
-    expect(result.effectiveAnnualNetYield).toBeCloseTo(3, 10);
+    // Each month's 25 arrives when paid: the internal rate of return is 1.0025^12 − 1.
+    expect(result.effectiveAnnualNetYield).toBeCloseTo(3.0416, 4);
   });
 
   it("compounds at the payment frequency when interest is reinvested", () => {
@@ -163,6 +164,44 @@ describe("computeTermDeposit with periodic payments", () => {
   });
 });
 
+describe("computeTermDeposit net annual yield", () => {
+  it("counts paid-out interest when it arrives", () => {
+    const result = calculate({ termMonths: 120, payout: "annually", reinvest: false });
+
+    // 300 at the end of every year and 10,000 back after ten: exactly 3% a year.
+    expect(result.effectiveAnnualNetYield).toBeCloseTo(3, 6);
+    // Paid at maturity, the same deposit yields less: 1.3^(1/10) − 1.
+    expect(calculate({ termMonths: 120 }).effectiveAnnualNetYield).toBeCloseTo(2.6584, 4);
+  });
+
+  it("is net of tax for paid-out interest too", () => {
+    const result = calculate({ termMonths: 36, payout: "annually", taxRate: 20 });
+
+    // 240 net a year on 10,000: 2.4%.
+    expect(result.effectiveAnnualNetYield).toBeCloseTo(2.4, 6);
+  });
+
+  it("matches the closed form when everything arrives at maturity", () => {
+    for (const overrides of [
+      { payout: "maturity" as const },
+      { payout: "monthly" as const, reinvest: true },
+      { payout: "annually" as const, termMonths: 6 },
+    ]) {
+      const result = calculate(overrides);
+      const expected = (Math.pow(result.finalBalance / result.principal, 12 / result.termMonths) - 1) * 100;
+      expect(result.effectiveAnnualNetYield).toBeCloseTo(expected, 10);
+    }
+  });
+
+  it("finds the rate at the highest rate and monthly payments", () => {
+    const result = calculate({ annualRate: 50, termMonths: 120, payout: "monthly" });
+
+    // 50% ÷ 12 a month, paid when earned: (1 + 0.5 ÷ 12)^12 − 1, give or take the payments'
+    // rounding to the cent (416.67 instead of 416.666…).
+    expect(result.effectiveAnnualNetYield).toBeCloseTo((Math.pow(1 + 0.5 / 12, 12) - 1) * 100, 2);
+  });
+});
+
 describe("computeTermDeposit tax", () => {
   it("withholds tax from each payment, rounded to the cent", () => {
     const result = calculate({ amount: 1_000, annualRate: 1, termMonths: 12, payout: "monthly", taxRate: 25 });
@@ -212,6 +251,17 @@ describe("computeTermDeposit edge cases", () => {
     expect(result.finalBalance).toBe(10_000);
     expect(result.effectiveAnnualNetYield).toBe(0);
     expect(result.payments).toHaveLength(8);
+  });
+
+  it("rounds half a cent up instead of trusting floating point", () => {
+    // 12.50 interest; 57% of it is 7.125, which floats as 7.1249… and would round down.
+    const taxed = calculate({ amount: 1_000, annualRate: 2.5, termMonths: 6, taxRate: 57 });
+    expect(taxed.grossInterest).toBe(12.5);
+    expect(taxed.tax).toBe(7.13);
+    expect(taxed.netInterest).toBe(5.37);
+
+    // 10 × 1.45% = 0.145, which floats as 0.14499…
+    expect(calculate({ amount: 10, annualRate: 1.45, termMonths: 12 }).grossInterest).toBe(0.15);
   });
 
   it("works in cents on fractional amounts", () => {

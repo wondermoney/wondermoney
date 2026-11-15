@@ -21,6 +21,7 @@ type ToolCopy = Record<string, unknown> & {
 	ctaHeadline: string
 	payouts: Record<string, string>
 	taxRateHelp: string
+	totalReceived: string
 }
 
 function readLocale(base: "src/locales" | "public/locales", lang: string) {
@@ -136,6 +137,13 @@ describe("term deposit tool page", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			expect(readLocale("src/locales", lang).tools.termDeposit.taxRateHelp).not.toMatch(/[1-9]\d*\s?%/)
 		}
+	})
+
+	it("labels the paid-out total as received, not as a balance", () => {
+		const source = readSource("../../components/calculators/TermDepositCalculatorComp.tsx")
+
+		expect(source).toContain('periodic && !result.reinvested ? t(k("totalReceived")) : t(k("finalBalance"))')
+		expect(readLocale("src/locales", "en").tools.termDeposit.totalReceived).toBe("Total received")
 	})
 
 	it("addresses the pt reader as tu", () => {
