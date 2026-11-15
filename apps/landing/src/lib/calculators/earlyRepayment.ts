@@ -55,7 +55,7 @@ export type EarlyRepaymentInput = {
   termYears: number;
   /** Months left on top of the years, 0 to 11. Empty (NaN) reads as 0. */
   termMonths: number;
-  /** Fixed nominal annual rate in percent. Empty (NaN) reads as 0%. */
+  /** Fixed nominal annual rate in percent. Empty (NaN) is `required`: 0% is a value to enter. */
   annualRate: number;
   /** One lump sum repaid now, in euros. Empty (NaN) reads as nothing. */
   repayment: number;
@@ -160,7 +160,8 @@ function validate(
     } else if (months < 1) errors.termYears = "required";
   }
 
-  if (annualRate < 0) errors.annualRate = "negative";
+  if (Number.isNaN(annualRate)) errors.annualRate = "required";
+  else if (annualRate < 0) errors.annualRate = "negative";
   else if (annualRate > EARLY_REPAYMENT_LIMITS.maxAnnualRate) errors.annualRate = "tooLarge";
 
   if (repayment < 0) errors.repayment = "negative";
@@ -216,7 +217,7 @@ export function computeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymen
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const months = remainingMonths(input);
-  const monthlyRate = monthlyRateFromAnnual(orZero(input.annualRate));
+  const monthlyRate = monthlyRateFromAnnual(input.annualRate);
   const balanceCents = Math.round(input.balance * 100);
   const repaymentCents = Math.round(orZero(input.repayment) * 100);
   const appliedCents = Math.min(repaymentCents, balanceCents);

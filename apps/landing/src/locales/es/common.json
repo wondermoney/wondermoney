@@ -1070,6 +1070,7 @@
           "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
         },
         "annualRate": {
+          "required": "Introduce el tipo de interés.",
           "negative": "El tipo de interés no puede ser inferior al 0%.",
           "tooLarge": "Introduce un tipo de hasta {{max}}."
         },

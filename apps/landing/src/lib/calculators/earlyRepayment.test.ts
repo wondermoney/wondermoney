@@ -259,11 +259,17 @@ describe("computeEarlyRepayment", () => {
     expectConsistent(result, input);
   });
 
-  it("treats an empty rate as 0% and an empty fee as none", () => {
-    const result = calculate({ annualRate: Number.NaN, feePercent: Number.NaN });
+  it("asks for an empty rate instead of reading it as 0%", () => {
+    expect(computeEarlyRepayment({ ...base, annualRate: Number.NaN })).toEqual({
+      ok: false,
+      errors: { annualRate: "required" },
+    });
+    expect(calculate({ annualRate: 0 }).original.totalInterest).toBe(0);
+  });
 
-    expect(result.original.totalInterest).toBe(0);
-    expect(result.fee).toBe(0);
+  it("counts an empty repayment or fee as 0", () => {
+    expect(calculate({ feePercent: Number.NaN }).fee).toBe(0);
+    expect(calculate({ repayment: Number.NaN }).status).toBe("none");
   });
 
   it("handles one month left", () => {

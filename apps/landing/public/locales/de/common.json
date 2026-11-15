@@ -1070,6 +1070,7 @@
           "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
         },
         "annualRate": {
+          "required": "Geben Sie den Zinssatz ein.",
           "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
           "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
         },

@@ -1070,6 +1070,7 @@
           "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
         },
         "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
           "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
           "tooLarge": "Inserisci un tasso fino a {{max}}."
         },

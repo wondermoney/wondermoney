@@ -1070,6 +1070,7 @@
           "tooLarge": "Indica de 0 a 11 meses; os anos completos vão no campo dos anos."
         },
         "annualRate": {
+          "required": "Indica a taxa de juro.",
           "negative": "A taxa de juro não pode ser inferior a 0%.",
           "tooLarge": "Indica uma taxa até {{max}}."
         },

@@ -1070,6 +1070,7 @@
           "tooLarge": "Indiquez de 0 à 11 mois ; les années entières vont dans le champ des années."
         },
         "annualRate": {
+          "required": "Saisissez le taux d'intérêt.",
           "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
           "tooLarge": "Indiquez un taux jusqu'à {{max}}."
         },

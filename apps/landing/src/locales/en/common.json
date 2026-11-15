@@ -1070,6 +1070,7 @@
           "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
         },
         "annualRate": {
+          "required": "Enter the interest rate.",
           "negative": "The interest rate can't be below 0%.",
           "tooLarge": "Enter a rate up to {{max}}."
         },
