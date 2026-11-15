@@ -635,8 +635,8 @@
         "methodRounding": "Die Quote wird auf eine Nachkommastelle gerundet, und der Bereich richtet sich nach dem gerundeten Wert. Raten über dem Einkommen ergeben eine Quote über 100 %.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
         "nextHeading": "Planen Sie einen neuen Kredit?",
-        "nextBody": "Eine Baufinanzierung oder ein anderer Kredit bringt eine weitere Rate. Tragen Sie sie im Szenario-Bereich ein, um die neue Quote zu sehen, und planen Sie den Rest mit den anderen kostenlosen Rechnern.",
-        "nextLink": "Alle Rechner ansehen"
+        "nextBody": "Eine Baufinanzierung oder ein anderer Kredit bringt eine weitere Rate. Berechnen Sie, was eine neue Hypothek im Monat kosten würde, und tragen Sie diese Rate im Szenario-Bereich ein, um die neue Quote zu sehen.",
+        "nextLink": "Hypothekenrechner öffnen"
       }
     },
     "mortgage": {

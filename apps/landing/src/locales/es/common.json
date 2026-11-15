@@ -635,8 +635,8 @@
         "methodRounding": "El ratio se redondea a un decimal, y el tramo sigue la cifra redondeada. Si las cuotas superan los ingresos, el ratio pasa del 100 %.",
         "methodPrivacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan.",
         "nextHeading": "¿Piensas pedir un préstamo nuevo?",
-        "nextBody": "Una hipoteca u otro préstamo añade una cuota. Introdúcela en el panel de escenario para ver el nuevo ratio y usa las demás calculadoras gratuitas para planificar el resto.",
-        "nextLink": "Ver todas las calculadoras"
+        "nextBody": "Una hipoteca u otro préstamo añade una cuota. Calcula cuánto costaría al mes una nueva hipoteca e introduce esa cuota en el panel de escenario para ver el nuevo ratio.",
+        "nextLink": "Abrir la calculadora de hipoteca"
       }
     },
     "mortgage": {

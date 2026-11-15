@@ -635,8 +635,8 @@
         "methodRounding": "Le taux est arrondi à une décimale, et la zone suit le chiffre arrondi. Des mensualités supérieures aux revenus donnent un taux de plus de 100 %.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
         "nextHeading": "Un nouveau crédit en vue ?",
-        "nextBody": "Un crédit immobilier ou un autre prêt ajoute une mensualité. Saisissez-la dans le panneau de scénario pour voir le nouveau taux, et utilisez les autres calculateurs gratuits pour planifier le reste.",
-        "nextLink": "Voir tous les calculateurs"
+        "nextBody": "Un crédit immobilier ou un autre prêt ajoute une mensualité. Calculez ce que coûterait chaque mois un nouveau prêt immobilier, puis saisissez cette mensualité dans le panneau de scénario pour voir le nouveau taux.",
+        "nextLink": "Ouvrir le simulateur de prêt immobilier"
       }
     },
     "mortgage": {

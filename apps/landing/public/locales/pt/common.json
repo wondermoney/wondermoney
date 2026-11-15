@@ -635,8 +635,8 @@
         "methodRounding": "A taxa é arredondada a uma casa decimal, e o escalão segue o valor arredondado. Prestações acima do rendimento dão uma taxa superior a 100%.",
         "methodPrivacy": "O cálculo é feito no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados.",
         "nextHeading": "A pensar num crédito novo?",
-        "nextBody": "Um crédito à habitação ou outro empréstimo acrescenta uma prestação. Indica-a no painel de cenário para veres a nova taxa, e usa as outras calculadoras gratuitas para planear o resto.",
-        "nextLink": "Ver todas as calculadoras"
+        "nextBody": "Um crédito à habitação ou outro empréstimo acrescenta uma prestação. Calcula quanto custaria por mês um novo crédito habitação e indica essa prestação no painel de cenário para veres a nova taxa.",
+        "nextLink": "Abrir o simulador de crédito habitação"
       }
     },
     "mortgage": {

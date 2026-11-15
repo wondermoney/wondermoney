@@ -242,6 +242,16 @@ describe("route localization", () => {
 		)
 	})
 
+	it("sends the debt-to-income guide's new-loan link to the mortgage calculator", () => {
+		const guideSource = readFileSync(
+			fileURLToPath(
+				new URL("../components/calculators/DebtToIncomeGuide.astro", import.meta.url),
+			),
+			"utf8",
+		)
+		expect(guideSource).toContain('toLocalizedPath("toolMortgage", locale)')
+	})
+
 	it("lists the mortgage calculator on the tools hub in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const hubSource = readFileSync(

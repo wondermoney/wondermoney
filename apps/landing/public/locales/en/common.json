@@ -635,8 +635,8 @@
         "methodRounding": "The ratio is rounded to one decimal place, and the band follows the rounded figure. Payments above income give a ratio over 100%.",
         "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
         "nextHeading": "Planning a new loan?",
-        "nextBody": "A mortgage or another loan adds a payment. Enter it in the scenario panel to see the new ratio, and use the other free calculators to plan the rest.",
-        "nextLink": "See all calculators"
+        "nextBody": "A mortgage or another loan adds a payment. Work out what a new mortgage would cost each month, then enter that payment in the scenario panel to see the new ratio.",
+        "nextLink": "Open the mortgage calculator"
       }
     },
     "mortgage": {

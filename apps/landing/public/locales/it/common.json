@@ -635,8 +635,8 @@
         "methodRounding": "Il rapporto è arrotondato a un decimale, e la fascia segue il valore arrotondato. Rate superiori al reddito danno un rapporto oltre il 100%.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati.",
         "nextHeading": "Pensi a un nuovo finanziamento?",
-        "nextBody": "Un mutuo o un altro prestito aggiunge una rata. Inseriscila nel pannello dello scenario per vedere il nuovo rapporto e usa gli altri calcolatori gratuiti per pianificare il resto.",
-        "nextLink": "Vedi tutti i calcolatori"
+        "nextBody": "Un mutuo o un altro prestito aggiunge una rata. Calcola quanto costerebbe al mese un nuovo mutuo e inserisci quella rata nel pannello dello scenario per vedere il nuovo rapporto.",
+        "nextLink": "Apri il calcolatore del mutuo"
       }
     },
     "mortgage": {
