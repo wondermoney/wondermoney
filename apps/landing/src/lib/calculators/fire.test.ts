@@ -12,9 +12,10 @@ import {
   normalizeFireInputs,
   splitMonths,
   toMonthIndex,
+  withSpendingCut,
   type FireInputs,
 } from "./fire";
-import { formatFireDuration } from "./fireFormat";
+import { formatFireDuration, formatFireProgress, formatFireRate } from "./fireFormat";
 
 const base: FireInputs = {
   annualSpending: 30000,
@@ -226,5 +227,42 @@ describe("formatFireDuration", () => {
     expect(formatFireDuration("de", 13)).toBe("1 Jahr und 1 Monat");
     expect(formatFireDuration("fr", 24)).toBe("2 ans");
     expect(formatFireDuration("it", 5)).toBe("5 mesi");
+  });
+});
+
+describe("withSpendingCut", () => {
+  it("cuts the spending the calculation used, not what was typed", () => {
+    expect(withSpendingCut(FIRE_WORKED_EXAMPLE).annualSpending).toBe(21600);
+    // Typed above the cap: the cut applies to the capped amount.
+    expect(withSpendingCut({ ...base, annualSpending: 1e15 }).annualSpending).toBe(FIRE_MAX_AMOUNT * 0.9);
+    // Out-of-range rates come back normalized too.
+    expect(withSpendingCut({ ...base, withdrawalRate: 9 }).withdrawalRate).toBe(FIRE_WITHDRAWAL_RATE_MAX);
+  });
+});
+
+describe("formatFireRate", () => {
+  it("shows up to two decimals, so the rate shown is the rate used", () => {
+    expect(formatFireRate("en", 4)).toBe("4%");
+    expect(formatFireRate("en", 2.5)).toBe("2.5%");
+    expect(formatFireRate("en", 3.25)).toBe("3.25%");
+    expect(formatFireRate("pt", 3.25)).toBe("3,25%");
+  });
+});
+
+describe("formatFireProgress", () => {
+  it("shows one decimal", () => {
+    expect(formatFireProgress("en", 10)).toBe("10.0%");
+    expect(formatFireProgress("en", calculateFire(FIRE_WORKED_EXAMPLE).progress ?? 0)).toBe("10.0%");
+    expect(formatFireProgress("en", 120)).toBe("120.0%");
+  });
+
+  it("never shows 100% before the target is reached", () => {
+    // 599 800 of 600 000 is 99.97%, which rounding would show as 100.0%.
+    const result = calculateFire({ ...FIRE_WORKED_EXAMPLE, currentAssets: 599800 });
+
+    expect(result.status).toBe("projected");
+    expect(formatFireProgress("en", result.progress ?? 0)).toBe("99.9%");
+    expect(formatFireProgress("en", 99.99999)).toBe("99.9%");
+    expect(formatFireProgress("en", 100)).toBe("100.0%");
   });
 });

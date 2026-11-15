@@ -6,8 +6,9 @@ import {
   FIRE_SPENDING_CUT,
   FIRE_WORKED_EXAMPLE,
   calculateFire,
+  withSpendingCut,
 } from "@/lib/calculators/fire";
-import { formatFireDuration } from "@/lib/calculators/fireFormat";
+import { formatFireDuration, formatFireProgress, formatFireRate } from "@/lib/calculators/fireFormat";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/i18nLocale";
 import { getTranslations } from "@/lib/translations";
@@ -22,10 +23,7 @@ const k = (key: string) => `tools.fire.guide.${key}`;
 
 const example = FIRE_WORKED_EXAMPLE;
 const result = calculateFire(example);
-const cut = calculateFire({
-  ...example,
-  annualSpending: example.annualSpending * (1 - FIRE_SPENDING_CUT / 100),
-});
+const cut = calculateFire(withSpendingCut(example));
 
 // The worked example is fixed, so a change to the calculation that stops it
 // projecting a date has to fail the build rather than print an empty sentence.
@@ -34,8 +32,8 @@ if (result.monthsToTarget === null || cut.monthsToTarget === null || result.prog
 }
 
 const money = (value: number) => formatMoney(locale, value);
-const rate = (value: number) =>
-  formatPercent(locale, value, { decimals: Number.isInteger(value) ? 0 : 1 });
+// The same formatters as the calculator, so the example reads exactly like its result.
+const rate = (value: number) => formatFireRate(locale, value);
 
 const values = {
   spending: money(example.annualSpending),
@@ -44,7 +42,7 @@ const values = {
   return: rate(example.realReturn),
   rate: rate(example.withdrawalRate),
   target: money(result.fireNumber),
-  progress: rate(Math.round(result.progress * 10) / 10),
+  progress: formatFireProgress(locale, result.progress),
   time: formatFireDuration(locale, result.monthsToTarget),
   cut: formatPercent(locale, FIRE_SPENDING_CUT, { decimals: 0 }),
   cutSpending: money(cut.inputs.annualSpending),

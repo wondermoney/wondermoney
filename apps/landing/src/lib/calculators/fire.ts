@@ -97,6 +97,12 @@ export function normalizeFireInputs(inputs: FireInputs): FireInputs {
   };
 }
 
+/** The same inputs, normalized, with annual spending cut by FIRE_SPENDING_CUT percent. */
+export function withSpendingCut(inputs: FireInputs): FireInputs {
+  const normalized = normalizeFireInputs(inputs);
+  return { ...normalized, annualSpending: normalized.annualSpending * (1 - FIRE_SPENDING_CUT / 100) };
+}
+
 /** The monthly rate that compounds to the annual return over twelve months. */
 function monthlyRateFor(annualPercent: number): number {
   return Math.pow(1 + annualPercent / 100, 1 / 12) - 1;

@@ -25,20 +25,20 @@ import {
   calculateFire,
   fireTargetYear,
   toMonthIndex,
+  withSpendingCut,
   type FireInputs,
 } from "@/lib/calculators/fire";
-import { formatFireDuration } from "@/lib/calculators/fireFormat";
+import {
+  formatFireDuration,
+  formatFireProgress,
+  formatFireRate as rate,
+} from "@/lib/calculators/fireFormat";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 
 const noSubscription = () => () => {};
-
-/** Whole percentages without decimals, others with one: 4%, 2.5%. */
-function rate(lang: Lang, value: number): string {
-  return formatPercent(lang, value, { decimals: Number.isInteger(value) ? 0 : 1 });
-}
 
 export default function FireCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -75,11 +75,13 @@ function FireCalculatorContent() {
   };
 
   const result = useMemo(() => calculateFire(inputs), [inputs]);
-  const cutResult = useMemo(
-    () => calculateFire({ ...inputs, annualSpending: inputs.annualSpending * (1 - FIRE_SPENDING_CUT / 100) }),
-    [inputs],
-  );
+  const cutResult = useMemo(() => calculateFire(withSpendingCut(inputs)), [inputs]);
   const used = result.inputs;
+  // The 10% line shows wherever the cut gives an answer: a date, or "already covered".
+  const showCut =
+    result.status !== "reached" &&
+    result.status !== "noSpending" &&
+    (cutResult.status === "reached" || (cutResult.status === "projected" && cutResult.monthsToTarget !== null));
 
   const clampedNote = (field: "realReturn" | "withdrawalRate") =>
     Number.isFinite(inputs[field]) && inputs[field] !== used[field]
@@ -183,7 +185,7 @@ function FireCalculatorContent() {
                   <div className="flex items-baseline justify-between gap-4">
                     <p className="text-sm text-muted-foreground">{t(k("progress"))}</p>
                     <p className="font-mono text-xl font-semibold text-foreground">
-                      {formatPercent(locale, result.progress ?? 0)}
+                      {formatFireProgress(locale, result.progress ?? 0)}
                     </p>
                   </div>
                   <div className="h-3 w-full overflow-hidden rounded-full bg-paper-3" aria-hidden="true">
@@ -224,7 +226,7 @@ function FireCalculatorContent() {
                 )}
                 {result.status === "unreachable" && (
                   <p className="rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
-                    {t(k("unreachable"))}
+                    {t(k(used.monthlyContribution > 0 ? "unreachableWithContribution" : "unreachable"))}
                   </p>
                 )}
                 {result.status === "beyondHorizon" && (
@@ -233,18 +235,16 @@ function FireCalculatorContent() {
                   </p>
                 )}
 
-                {result.status === "projected" &&
-                  cutResult.status === "projected" &&
-                  cutResult.monthsToTarget !== null && (
-                    <p className="text-sm text-foreground">
-                      {t(k("sensitivity"), {
-                        cut: formatPercent(locale, FIRE_SPENDING_CUT, { decimals: 0 }),
-                        spending: money(cutResult.inputs.annualSpending),
-                        target: money(cutResult.fireNumber),
-                        time: formatFireDuration(locale, cutResult.monthsToTarget),
-                      })}
-                    </p>
-                  )}
+                {showCut && (
+                  <p className="text-sm text-foreground">
+                    {t(k(cutResult.status === "reached" ? "sensitivityReached" : "sensitivity"), {
+                      cut: formatPercent(locale, FIRE_SPENDING_CUT, { decimals: 0 }),
+                      spending: money(cutResult.inputs.annualSpending),
+                      target: money(cutResult.fireNumber),
+                      time: formatFireDuration(locale, cutResult.monthsToTarget ?? 0),
+                    })}
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -295,6 +295,7 @@ function FireCalculatorContent() {
                 />
                 <ReferenceLine
                   y={result.fireNumber}
+                  ifOverflow="extendDomain"
                   stroke="oklch(var(--foreground))"
                   strokeDasharray="6 4"
                   label={{
