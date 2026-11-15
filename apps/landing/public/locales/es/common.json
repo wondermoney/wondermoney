@@ -419,8 +419,29 @@
       "pageTitle": "Herramientas y calculadoras financieras — WonderMoney",
       "pageDescription": "Calculadoras interactivas gratuitas para planificar tu futuro financiero. Interés compuesto, patrimonio neto, tasa de ahorro y más.",
       "badge": "Calculadora",
-      "comingSoon": "Próximamente",
-      "openCalculator": "Abrir calculadora"
+      "openCalculator": "Abrir calculadora",
+      "tasks": {
+        "title": "¿Qué quieres calcular?",
+        "description": "Elige una tarea para ir directamente a sus calculadoras."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Presupuesto y ahorro",
+          "intro": "Mira adónde va tu dinero, cuánto conservas y cuánto apartar."
+        },
+        "borrowAndBuyHome": {
+          "title": "Préstamos y compra de vivienda",
+          "intro": "Comprueba cuánto costará un préstamo y si las cuotas encajan con tus ingresos."
+        },
+        "investAndGrow": {
+          "title": "Invertir y crecer",
+          "intro": "Calcula cuánto pueden crecer tus ahorros e inversiones y cuándo podrían cubrir tus gastos."
+        },
+        "trackWealth": {
+          "title": "Controla tu patrimonio",
+          "intro": "Suma lo que tienes y lo que debes para saber dónde estás hoy."
+        }
+      }
     },
     "fire": {
       "title": "Calculadora FIRE",

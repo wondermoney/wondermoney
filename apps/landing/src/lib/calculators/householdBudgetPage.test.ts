@@ -9,6 +9,7 @@ import {
 	toLocalizedPath,
 	toLocalizedPathname,
 } from "../routes"
+import { buildToolsHub } from "../toolsCatalog"
 import { BUDGET_CATEGORIES, HOUSEHOLD_BUDGET_WORKED_EXAMPLE } from "./householdBudget"
 
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
@@ -85,9 +86,8 @@ describe("household budget tool page", () => {
 
 	it("is listed on the tools hub in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
-			expect(readSource(`../../pages/${lang}/tools/index.astro`)).toContain(
-				'routeId: "toolHouseholdBudget"',
-			)
+			const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+			expect(hubTools.map((tool) => tool.href)).toContain(toLocalizedPath("toolHouseholdBudget", lang))
 		}
 	})
 

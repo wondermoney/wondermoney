@@ -10,6 +10,7 @@ import {
 	toLocalizedPath,
 	toLocalizedPathname,
 } from "../routes"
+import { buildToolsHub } from "../toolsCatalog"
 
 // pageStaticPaths imports the Sanity client for the content routes; top-level paths never call it.
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
@@ -30,17 +31,6 @@ function keyPaths(value: unknown, prefix = ""): string[] {
 	return Object.entries(value).flatMap(([key, child]) =>
 		keyPaths(child, prefix ? `${prefix}.${key}` : key),
 	)
-}
-
-// The hub's `calculators` list, read as data so the test does not depend on how it is formatted.
-function hubCalculators(lang: string): Array<{ key: string; routeId: string; available: boolean }> {
-	const source = readFileSync(join(landingRoot, "src/pages", lang, "tools/index.astro"), "utf8")
-	const list = source.match(/const calculators = \[([\s\S]*?)\] as const/)?.[1] ?? ""
-	return [...list.matchAll(/\{([^}]*)\}/g)].map(([, body]) => ({
-		key: body.match(/key:\s*"([^"]+)"/)?.[1] ?? "",
-		routeId: body.match(/routeId:\s*"([^"]+)"/)?.[1] ?? "",
-		available: /available:\s*true/.test(body),
-	}))
 }
 
 function filesUnder(directory: string): string[] {
@@ -73,12 +63,12 @@ describe("FIRE calculator page", () => {
 		}
 	})
 
-	it("is an available card on the tools hub in every locale, with its title and link", () => {
+	it("is listed on the tools hub in every locale, with its title and link", () => {
 		for (const lang of SUPPORTED_LANGS) {
-			const entries = hubCalculators(lang)
-			const fire = entries.find((entry) => entry.routeId === "pageFireCalculator")
+			const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+			const fire = hubTools.find((tool) => tool.routeId === "pageFireCalculator")
 
-			expect(fire).toEqual({ key: "fire", routeId: "pageFireCalculator", available: true })
+			expect(fire).toMatchObject({ key: "fire", href: toLocalizedPath("pageFireCalculator", lang) })
 			// What the hub renders for the card: its title and description, and a link to the page.
 			const copy = readLocale("src/locales", lang).tools.fire
 			expect(copy.title).toEqual(expect.any(String))
