@@ -2,6 +2,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@app/database/di', () => ({ DI: { em: {} } }));
+// The persisted demo examples are covered by demo-household-seed.service.test.ts.
+vi.mock('@app/database/seeders/demo/demo-features', () => ({ upsertDemoFeatures: vi.fn() }));
 vi.mock('@service/portfolio/portfolio-snapshot.service', () => ({
   default: { backfillSnapshotsForPortfolio: vi.fn() },
 }));
@@ -243,7 +245,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 25;
+      if (entity === Transaction) return 26;
       return 0;
     });
 
@@ -1391,7 +1393,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 25;
+      if (entity === Transaction) return 26;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot) return 8;
       return 0;
@@ -1444,7 +1446,7 @@ describe('demo data refresh service', () => {
     );
     em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? 1 : 0));
     const service = createService(em, resolveIdentity, true, { buildPlan });
-    await expect(service.refresh()).rejects.toThrow(/Expected at least 25 demo bank transactions/);
+    await expect(service.refresh()).rejects.toThrow(/Expected at least 26 demo bank transactions/);
   });
 
   it('ignores unrelated fresh non-generated transactions in bank invariants', async () => {
@@ -1582,7 +1584,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 25;
+      if (entity === Transaction) return 26;
       if (entity === FinancialTransaction) return 0;
       if (entity === PortfolioSnapshot) return 0;
       return 0;
@@ -1644,7 +1646,7 @@ describe('demo data refresh service', () => {
                   : null,
     );
     em.count.mockImplementation(async (entity: unknown) =>
-      entity === Transaction ? 25 : entity === FinancialTransaction ? 1 : entity === PortfolioSnapshot ? 30 : 0,
+      entity === Transaction ? 26 : entity === FinancialTransaction ? 1 : entity === PortfolioSnapshot ? 30 : 0,
     );
     const service = createService(em, resolveIdentity, true, { buildPlan });
     await expect(service.refresh()).rejects.toThrow(/Missing verified demo budget category/);
@@ -1705,7 +1707,7 @@ describe('demo data refresh service', () => {
       if (entity === Transaction) return { transactionDate: asOfDate };
       return null;
     });
-    em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? 25 : 0));
+    em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? 26 : 0));
 
     const service = createService(em, resolveIdentity, true, { buildPlan });
 
@@ -1779,7 +1781,7 @@ describe('demo data refresh service', () => {
                     : null,
     );
     em.count.mockImplementation(async (entity: unknown, where?: any) => {
-      if (entity === Transaction && where?.transactionDate?.$gte) return 25;
+      if (entity === Transaction && where?.transactionDate?.$gte) return 26;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot && where?.snapshotDate?.$gte) return 24;
       return 0;
@@ -1870,7 +1872,7 @@ describe('demo data refresh service', () => {
                       : null,
     );
     em.count.mockImplementation(async (entity: unknown, where?: any) => {
-      if (entity === Transaction && where?.transactionDate?.$gte) return 25;
+      if (entity === Transaction && where?.transactionDate?.$gte) return 26;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot && where?.snapshotDate?.$gte) return 19;
       return 0;

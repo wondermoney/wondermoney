@@ -6,6 +6,10 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTransactionCategory } from '@entity/AppuserTransactionCategory';
 import { Category } from '@entity/Category';
 import { Currency } from '@entity/Currency';
+import { Goal } from '@entity/Goal';
+import { ManualAsset } from '@entity/ManualAsset';
+import { RecurringSeries } from '@entity/RecurringSeries';
+import { Watchlist } from '@entity/Watchlist';
 
 import { DatabaseSeeder } from '../DatabaseSeeder';
 import { demoPersona } from '../demo/demo-fixtures';
@@ -34,6 +38,10 @@ async function seededDemoData(db: ReturnType<typeof useTestDatabase>) {
     demoCategories: await em.count(Category, { appuserKey: demoUser }),
     eurCurrencies: await em.count(Currency, { code: 'EUR' }),
     transactionCategories: await em.count(AppuserTransactionCategory, {}),
+    goals: await em.count(Goal, { appuserKey: demoUser }),
+    assets: await em.count(ManualAsset, { ownerAppuserKey: demoUser }),
+    recurring: await em.count(RecurringSeries, { appuserKey: demoUser }),
+    watchlist: await em.count(Watchlist, { appuserKey: demoUser }),
   };
 }
 
@@ -56,6 +64,9 @@ describe('seeding the development data set', () => {
     expect(seeded.demoAccounts.map((account) => account.currencyKey?.code).sort()).toEqual(['EUR', 'EUR', 'USD']);
     expect(seeded.demoCategories).toBeGreaterThan(0);
     expect(seeded.transactionCategories).toBeGreaterThan(0);
+    for (const feature of ['goals', 'assets', 'recurring', 'watchlist'] as const) {
+      expect(seeded[feature]).toBeGreaterThan(0);
+    }
   }, 60_000);
 
   it('seeds the reference data too when the database has none', async () => {

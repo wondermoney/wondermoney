@@ -10,6 +10,7 @@ import { BudgetSeeder } from './BudgetSeeder';
 import { BudgetTemplateCategorySeeder } from './BudgetTemplateCategorySeeder';
 import { BudgetTemplateIncomeSeeder } from './BudgetTemplateIncomeSeeder';
 import { DemoCategorySeeder } from './DemoCategorySeeder';
+import { DemoFeatureSeeder } from './DemoFeatureSeeder';
 import { FinancialAssetPriceSeeder } from './FinancialAssetPriceSeeder';
 import { FinancialTransactionSeeder } from './FinancialTransactionSeeder';
 import { LoanSeeder } from './LoanSeeder';
@@ -54,6 +55,7 @@ export class DatabaseSeeder extends Seeder {
       BudgetSeeder,
       BudgetTemplateIncomeSeeder,
       BudgetTemplateCategorySeeder,
+      DemoFeatureSeeder,
     ], ctx);
   }
 }
