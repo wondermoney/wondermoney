@@ -12,7 +12,7 @@ import {
   type PortableTextBlock,
 } from "@/lib/learningContent";
 import {
-  resolveToolRouteIdFromLegacy,
+  resolveCalculatorRouteIdFromLegacy,
   toLocalizedPath,
   toToolsHubPath,
   type Lang,
@@ -45,7 +45,7 @@ const relatedItems: {
 
 if (guide.relatedCalculators) {
   for (const calc of guide.relatedCalculators) {
-    const routeId = resolveToolRouteIdFromLegacy(calc, locale);
+    const routeId = resolveCalculatorRouteIdFromLegacy(calc, locale);
 
     relatedItems.push({
       title: calc,
