@@ -994,6 +994,7 @@
       "termYears": "Years",
       "termMonths": "Months",
       "termHelp": "Years plus months, for example 22 years and 4 months.",
+      "termRounded": "Worked out over {{term}}: the time left is rounded to whole months.",
       "interestRate": "Interest rate",
       "rateHelp": "Fixed nominal annual rate. Variable and mixed rates are not covered.",
       "repayment": "Lump sum you repay now",
@@ -1044,7 +1045,8 @@
         "none": "Enter a lump sum to see what it saves. With nothing repaid, the loan stays as it is.",
         "cleared": "This repayment clears the loan: no more payments and no more interest.",
         "unused": "Only {{needed}} is needed to clear the loan, so the other {{unused}} is left out of the figures.",
-        "feeExceeds": "The fee is more than the interest this repayment saves, so you lose money overall. Check whether your contract allows a repayment without a fee."
+        "feeExceeds": "The fee is more than the interest this repayment saves, so you lose money overall. Check whether your contract allows a repayment without a fee.",
+        "nearlyCleared": "This repayment all but clears the loan: the {{remainder}} left is paid off with your next payment of {{payment}}, and after that there is no more interest."
       },
       "resultNote": "The rate stays fixed for the rest of the loan. Payments are monthly, and the next one is due a month from now.",
       "chart": {

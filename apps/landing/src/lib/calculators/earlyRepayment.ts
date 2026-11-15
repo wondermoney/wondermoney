@@ -10,6 +10,10 @@
  * calculator runs), worked in whole cents so every figure adds up exactly. Because the shorter
  * schedule pays the original amounts on a smaller balance, its balance stays below the
  * original's every month: it never runs longer and never costs more interest.
+ *
+ * A balance left below the calculator's minimum loan is treated as cleared: it is paid with the
+ * next payment, plus that month's interest, rather than spread into payments that round to
+ * nothing.
  */
 
 import {
@@ -73,8 +77,11 @@ export type LoanOutlook = {
   totalInterest: number;
   /** Principal plus interest still to pay. */
   totalPaid: number;
-  /** Balance owed now (index 0) and at the end of each year after, ending at 0. */
-  yearEndBalances: number[];
+  /**
+   * Balance owed now (years 0), at the end of each whole year, and 0 at the payoff time in
+   * fractional years (months / 12), so a chart ends where the loan does.
+   */
+  balancePoints: Array<{ years: number; balance: number }>;
 };
 
 export type EarlyRepaymentScenario = LoanOutlook & {
@@ -89,7 +96,10 @@ export type EarlyRepaymentScenario = LoanOutlook & {
 };
 
 export type EarlyRepaymentResult = {
-  /** "none": nothing repaid; "partial": a balance is left; "cleared": the loan is paid off. */
+  /**
+   * "none": nothing repaid; "partial": a balance is left; "cleared": the loan is paid off, or
+   * all but a remainder below the minimum balance, paid with the next payment.
+   */
   status: "none" | "partial" | "cleared";
   /** The part of the repayment that goes to the loan: at most the balance. */
   repaymentApplied: number;
@@ -98,6 +108,11 @@ export type EarlyRepaymentResult = {
   fee: number;
   /** Balance owed straight after the repayment. */
   balanceAfter: number;
+  /**
+   * When the repayment leaves less than the minimum balance, the single next payment that
+   * clears it (the remainder plus a month's interest). 0 otherwise.
+   */
+  finalPayment: number;
   original: LoanOutlook;
   lowerPayment: EarlyRepaymentScenario;
   shorterTerm: EarlyRepaymentScenario;
@@ -110,8 +125,18 @@ export type EarlyRepaymentCalculation =
 const orZero = (value: number) => (Number.isNaN(value) ? 0 : value);
 const fromCents = (cents: number) => cents / 100;
 
+/**
+ * The whole months left on the loan, and whether the years and months entered had to be rounded
+ * to get them (2.51 years, or 2.6 months).
+ */
+export function remainingTerm(termYears: number, termMonths: number): { months: number; rounded: boolean } {
+  const exact = orZero(termYears) * 12 + orZero(termMonths);
+  const months = Math.round(exact);
+  return { months, rounded: Number.isFinite(exact) && Math.abs(exact - months) > 1e-9 };
+}
+
 function remainingMonths(input: EarlyRepaymentInput): number {
-  return Math.round(orZero(input.termYears) * 12 + orZero(input.termMonths));
+  return remainingTerm(input.termYears, input.termMonths).months;
 }
 
 function validate(
@@ -149,12 +174,14 @@ function validate(
 
 function outlook(openingCents: number, rows: readonly AmortizationMonth[]): LoanOutlook {
   const interestCents = totalInterestCents(rows);
-  const yearEndBalances = [fromCents(openingCents)];
+  const balancePoints = [{ years: 0, balance: fromCents(openingCents) }];
   for (let index = 11; index < rows.length; index += 12) {
-    yearEndBalances.push(fromCents(rows[index].balanceCents));
+    balancePoints.push({ years: (index + 1) / 12, balance: fromCents(rows[index].balanceCents) });
   }
   // A last, partial year ends when the loan does.
-  if (rows.length % 12 !== 0) yearEndBalances.push(fromCents(rows[rows.length - 1].balanceCents));
+  if (rows.length % 12 !== 0) {
+    balancePoints.push({ years: rows.length / 12, balance: fromCents(rows[rows.length - 1].balanceCents) });
+  }
 
   return {
     monthlyPayment: fromCents(rows[0]?.paymentCents ?? 0),
@@ -162,7 +189,7 @@ function outlook(openingCents: number, rows: readonly AmortizationMonth[]): Loan
     months: rows.length,
     totalInterest: fromCents(interestCents),
     totalPaid: fromCents(openingCents + interestCents),
-    yearEndBalances,
+    balancePoints,
   };
 }
 
@@ -199,24 +226,34 @@ export function computeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymen
   const originalRows = amortizeLevelPayment(balanceCents, monthlyRate, months);
   const original = outlook(balanceCents, originalRows);
 
-  const lowerPaymentRows = afterCents > 0 ? amortizeLevelPayment(afterCents, monthlyRate, months) : [];
-  const shorterTermRows =
-    afterCents > 0
-      ? amortizeWithPayments(
-          afterCents,
-          monthlyRate,
-          originalRows.map((row) => row.paymentCents),
-        )
-      : [];
+  // Below the minimum loan, spreading the remainder over the months left would give payments
+  // that round to nothing; it is paid off with the next payment instead, in both outcomes.
+  const effectivelyCleared =
+    appliedCents > 0 && afterCents < EARLY_REPAYMENT_LIMITS.minBalance * 100;
+  const clearingRows = effectivelyCleared && afterCents > 0
+    ? amortizeLevelPayment(afterCents, monthlyRate, 1)
+    : [];
+
+  const lowerPaymentRows = effectivelyCleared
+    ? clearingRows
+    : amortizeLevelPayment(afterCents, monthlyRate, months);
+  const shorterTermRows = effectivelyCleared
+    ? clearingRows
+    : amortizeWithPayments(
+        afterCents,
+        monthlyRate,
+        originalRows.map((row) => row.paymentCents),
+      );
 
   return {
     ok: true,
     result: {
-      status: appliedCents === 0 ? "none" : afterCents === 0 ? "cleared" : "partial",
+      status: appliedCents === 0 ? "none" : effectivelyCleared ? "cleared" : "partial",
       repaymentApplied: fromCents(appliedCents),
       repaymentUnused: fromCents(repaymentCents - appliedCents),
       fee: fromCents(feeCents),
       balanceAfter: fromCents(afterCents),
+      finalPayment: fromCents(clearingRows[0]?.paymentCents ?? 0),
       original,
       lowerPayment: compare(original, outlook(afterCents, lowerPaymentRows), feeCents),
       shorterTerm: compare(original, outlook(afterCents, shorterTermRows), feeCents),

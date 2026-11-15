@@ -994,6 +994,7 @@
       "termYears": "Años",
       "termMonths": "Meses",
       "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
       "interestRate": "Tipo de interés",
       "rateHelp": "Tipo nominal anual fijo (TIN). Los tipos variables y mixtos no están incluidos.",
       "repayment": "Cantidad que amortizas ahora",
@@ -1044,7 +1045,8 @@
         "none": "Introduce una cantidad para ver cuánto ahorras. Sin amortización, el préstamo sigue igual.",
         "cleared": "Esta cantidad cancela el préstamo: no quedan más cuotas ni más intereses.",
         "unused": "Bastan {{needed}} para cancelar el préstamo, así que los {{unused}} restantes quedan fuera de las cuentas.",
-        "feeExceeds": "La comisión supera los intereses que ahorra esta amortización, así que pierdes dinero en total. Comprueba si tu contrato permite amortizar sin comisión."
+        "feeExceeds": "La comisión supera los intereses que ahorra esta amortización, así que pierdes dinero en total. Comprueba si tu contrato permite amortizar sin comisión.",
+        "nearlyCleared": "Esta amortización casi cancela el préstamo: los {{remainder}} que quedan se pagan con tu próxima cuota, de {{payment}}, y a partir de ahí no hay más intereses."
       },
       "resultNote": "El tipo se mantiene fijo hasta el final del préstamo. Las cuotas son mensuales y la próxima vence dentro de un mes.",
       "chart": {

@@ -994,6 +994,7 @@
       "termYears": "Années",
       "termMonths": "Mois",
       "termHelp": "Des années plus des mois, par exemple 22 ans et 4 mois.",
+      "termRounded": "Calculé sur {{term}} : la durée restante est arrondie au mois entier.",
       "interestRate": "Taux d'intérêt",
       "rateHelp": "Taux nominal annuel fixe. Les taux variables et mixtes ne sont pas pris en compte.",
       "repayment": "Somme remboursée maintenant",
@@ -1044,7 +1045,8 @@
         "none": "Indiquez une somme pour voir ce qu'elle fait économiser. Sans remboursement, le prêt reste tel quel.",
         "cleared": "Cette somme solde le prêt : plus aucune mensualité ni aucun intérêt.",
         "unused": "Il suffit de {{needed}} pour solder le prêt : les {{unused}} restants ne sont pas comptés.",
-        "feeExceeds": "Les indemnités dépassent les intérêts économisés par ce remboursement : vous y perdez au total. Vérifiez si votre contrat permet un remboursement sans indemnités."
+        "feeExceeds": "Les indemnités dépassent les intérêts économisés par ce remboursement : vous y perdez au total. Vérifiez si votre contrat permet un remboursement sans indemnités.",
+        "nearlyCleared": "Ce remboursement solde presque le prêt : les {{remainder}} restants sont réglés avec votre prochaine mensualité, de {{payment}}, et il n'y a plus d'intérêts ensuite."
       },
       "resultNote": "Le taux reste fixe jusqu'à la fin du prêt. Les mensualités sont mensuelles et la prochaine tombe dans un mois.",
       "chart": {

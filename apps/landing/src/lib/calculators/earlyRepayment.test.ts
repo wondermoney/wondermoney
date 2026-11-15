@@ -4,6 +4,7 @@ import {
   EARLY_REPAYMENT_EXAMPLE,
   EARLY_REPAYMENT_LIMITS,
   computeEarlyRepayment,
+  remainingTerm,
   type EarlyRepaymentInput,
   type EarlyRepaymentResult,
 } from "./earlyRepayment";
@@ -171,6 +172,7 @@ describe("computeEarlyRepayment", () => {
       expect(result.repaymentApplied).toBe(150_000);
       expect(result.repaymentUnused).toBe(repayment - 150_000);
       expect(result.balanceAfter).toBe(0);
+      expect(result.finalPayment).toBe(0);
       // The fee is on what is repaid, not on money left over.
       expect(result.fee).toBe(1500);
       for (const scenario of [result.lowerPayment, result.shorterTerm]) {
@@ -181,6 +183,66 @@ describe("computeEarlyRepayment", () => {
         expect(scenario.monthsSaved).toBe(300);
       }
       expectConsistent(result, input);
+    }
+  });
+
+  it("treats a balance left below the minimum as cleared with one final payment", () => {
+    const input = { ...base, repayment: 149_999.5, feePercent: 1 };
+    const result = calculate(input);
+
+    expect(result.status).toBe("cleared");
+    expect(result.balanceAfter).toBe(0.5);
+    // 0.50 * 3.5% / 12 rounds to no interest, so the next payment is the remainder alone.
+    expect(result.finalPayment).toBe(0.5);
+    for (const scenario of [result.lowerPayment, result.shorterTerm]) {
+      expect(scenario.months).toBe(1);
+      expect(scenario.monthlyPayment).toBe(0.5);
+      expect(scenario.lastPayment).toBe(0.5);
+      expect(scenario.monthsSaved).toBe(299);
+    }
+    expectConsistent(result, input);
+  });
+
+  it("adds a month's interest to the final payment of a small remainder", () => {
+    const input = { ...base, repayment: 149_950 };
+    const result = calculate(input);
+
+    expect(result.status).toBe("cleared");
+    // 50 * 3.5% / 12 = 0.1458..., so 0.15 of interest.
+    expect(result.finalPayment).toBe(50.15);
+    expect(result.shorterTerm.totalInterest).toBe(0.15);
+    expectConsistent(result, input);
+  });
+
+  it("keeps a schedule once the balance left reaches the minimum", () => {
+    const input = { ...base, repayment: 150_000 - EARLY_REPAYMENT_LIMITS.minBalance };
+    const result = calculate(input);
+
+    expect(result.status).toBe("partial");
+    expect(result.finalPayment).toBe(0);
+    expect(result.lowerPayment.months).toBe(300);
+    expect(result.lowerPayment.monthlyPayment).toBeGreaterThan(0);
+    expectConsistent(result, input);
+  });
+
+  it("never shows a zero payment in a schedule it keeps", () => {
+    for (const months of [1, 300, EARLY_REPAYMENT_LIMITS.maxTermYears * 12]) {
+      for (const remainder of [0.01, 0.5, 99.99, 100, 100.01, 250]) {
+        const input: EarlyRepaymentInput = {
+          ...base,
+          termYears: Math.floor(months / 12),
+          termMonths: months % 12,
+          annualRate: 0,
+          repayment: 150_000 - remainder,
+        };
+        const result = calculate(input);
+        const label = JSON.stringify(input);
+        for (const scenario of [result.lowerPayment, result.shorterTerm]) {
+          expect(scenario.monthlyPayment, label).toBeGreaterThan(0);
+          expect(scenario.lastPayment, label).toBeGreaterThan(0);
+        }
+        expect(result.status, label).toBe(remainder < 100 ? "cleared" : "partial");
+      }
     }
   });
 
@@ -218,6 +280,14 @@ describe("computeEarlyRepayment", () => {
     expectConsistent(result, input);
   });
 
+  it("says when the term it uses is rounded to whole months", () => {
+    expect(remainingTerm(2, 6)).toEqual({ months: 30, rounded: false });
+    expect(remainingTerm(2.5, 0)).toEqual({ months: 30, rounded: false });
+    expect(remainingTerm(2.51, 0)).toEqual({ months: 30, rounded: true });
+    expect(remainingTerm(1, 2.6)).toEqual({ months: 15, rounded: true });
+    expect(remainingTerm(Number.NaN, 4)).toEqual({ months: 4, rounded: false });
+  });
+
   it("adds years and months into one remaining term", () => {
     expect(calculate({ termYears: 2, termMonths: 6 }).original.months).toBe(30);
     expect(calculate({ termYears: Number.NaN, termMonths: 7 }).original.months).toBe(7);
@@ -249,9 +319,11 @@ describe("computeEarlyRepayment", () => {
             const result = calculate(input);
 
             expect(result.original.months, label).toBe(months);
-            expect(result.lowerPayment.monthlyPayment, label).toBeLessThanOrEqual(
-              result.original.monthlyPayment,
-            );
+            if (result.status !== "cleared") {
+              expect(result.lowerPayment.monthlyPayment, label).toBeLessThanOrEqual(
+                result.original.monthlyPayment,
+              );
+            }
             expect(result.shorterTerm.months, label).toBeLessThanOrEqual(months);
             expectConsistent(result, input, label);
           }
@@ -300,15 +372,27 @@ describe("computeEarlyRepayment", () => {
     expectConsistent(result, input);
   });
 
-  it("gives year-end balances for each outcome, ending at zero", () => {
+  it("gives the balance at each year end, and zero at the exact payoff time", () => {
     const result = calculate({ termYears: 2, termMonths: 6 });
 
-    expect(result.original.yearEndBalances[0]).toBe(150_000);
-    expect(result.original.yearEndBalances).toHaveLength(4);
-    expect(result.original.yearEndBalances.at(-1)).toBe(0);
-    expect(result.lowerPayment.yearEndBalances[0]).toBe(130_000);
-    expect(result.shorterTerm.yearEndBalances.at(-1)).toBe(0);
-    expect(calculate({ repayment: 150_000 }).shorterTerm.yearEndBalances).toEqual([0]);
+    expect(result.original.balancePoints.map((point) => point.years)).toEqual([0, 1, 2, 2.5]);
+    expect(result.original.balancePoints[0].balance).toBe(150_000);
+    expect(result.original.balancePoints.at(-1)?.balance).toBe(0);
+    expect(result.lowerPayment.balancePoints[0].balance).toBe(130_000);
+    expect(calculate({ repayment: 150_000 }).shorterTerm.balancePoints).toEqual([
+      { years: 0, balance: 0 },
+    ]);
+  });
+
+  it("ends the shorter term's balance line where the table says the loan ends", () => {
+    const { shorterTerm } = calculate();
+    const last = shorterTerm.balancePoints.at(-1);
+
+    expect(shorterTerm.months).toBe(242);
+    expect(last?.years).toBeCloseTo(242 / 12, 10);
+    expect(last?.balance).toBe(0);
+    // Whole years before it: 0 to 20.
+    expect(shorterTerm.balancePoints).toHaveLength(22);
   });
 
   it("works out the worked example the page prints", () => {

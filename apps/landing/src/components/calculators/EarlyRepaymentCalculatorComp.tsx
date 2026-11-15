@@ -16,6 +16,7 @@ import {
   EARLY_REPAYMENT_EXAMPLE,
   EARLY_REPAYMENT_LIMITS,
   computeEarlyRepayment,
+  remainingTerm,
   type EarlyRepaymentField,
   type EarlyRepaymentResult,
   type EarlyRepaymentScenario,
@@ -101,6 +102,7 @@ function EarlyRepaymentCalculatorContent() {
   };
 
   const result = calculation.ok ? calculation.result : null;
+  const term = remainingTerm(termYears, termMonths);
 
   return (
     <>
@@ -143,6 +145,11 @@ function EarlyRepaymentCalculatorContent() {
               />
             </div>
             <p className="text-xs text-muted-foreground">{t(k("termHelp"))}</p>
+            {term.rounded && term.months > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t(k("termRounded"), { term: formatDuration(locale, term.months) })}
+              </p>
+            )}
           </fieldset>
           <CalculatorInput
             id="earlyRepaymentRate"
@@ -272,11 +279,19 @@ function Results({
     return (
       <>
         <p className="rounded-lg bg-success/10 px-4 py-3 text-sm text-foreground">
-          {t(k("status.cleared"))}
+          {result.finalPayment > 0
+            ? t(k("status.nearlyCleared"), {
+                remainder: money(result.balanceAfter),
+                payment: money(result.finalPayment),
+              })
+            : t(k("status.cleared"))}
         </p>
         {result.repaymentUnused > 0 && <UnusedNote result={result} money={money} />}
         <CalculatorResult
           items={[
+            ...(result.finalPayment > 0
+              ? [{ label: t(k("table.lastPayment")), value: money(result.finalPayment) }]
+              : []),
             { label: t(k("table.interestSaved")), value: money(result.shorterTerm.interestSaved) },
             { label: t(k("table.fee")), value: money(result.fee) },
             {
@@ -357,7 +372,7 @@ function Comparison({
         payoffMonth={payoffMonth}
       />
       <p className="text-xs text-muted-foreground">{t(k("resultNote"))}</p>
-      <BalanceChart result={result} scenarios={scenarios} money={money} />
+      <BalanceChart result={result} scenarios={scenarios} money={money} duration={duration} />
     </section>
   );
 }
@@ -526,10 +541,12 @@ function BalanceChart({
   result,
   scenarios,
   money,
+  duration,
 }: {
   result: EarlyRepaymentResult;
   scenarios: readonly Scenario[];
   money: Money;
+  duration: (months: number) => string;
 }) {
   const { t, locale } = useTranslations();
   const series = [
@@ -540,14 +557,23 @@ function BalanceChart({
       dash: undefined,
     })),
   ];
-  const data = result.original.yearEndBalances.map((_, year) => {
-    const point: Record<string, number | undefined> = { year };
-    for (const { key } of series) {
-      const loan = key === "original" ? result.original : result[key];
-      point[key] = loan.yearEndBalances[year];
+  // Each outcome has a point per year end and one at its payoff time (months / 12), so the x axis
+  // is numeric and a line ends exactly where the table says the loan does. Points are merged by
+  // time; a series without a point at some time is bridged by connectNulls.
+  const byYears = new Map<number, Record<string, number>>();
+  for (const { key } of series) {
+    const loan = key === "original" ? result.original : result[key];
+    for (const { years, balance } of loan.balancePoints) {
+      const point = byYears.get(years) ?? { years };
+      point[key] = balance;
+      byYears.set(years, point);
     }
-    return point;
-  });
+  }
+  const data = [...byYears.values()].sort((a, b) => a.years - b.years);
+  // Whole-year ticks at a step that keeps them readable on long loans.
+  const lastYear = Math.ceil(result.original.months / 12);
+  const step = lastYear > 20 ? 5 : lastYear > 8 ? 2 : 1;
+  const ticks = Array.from({ length: Math.floor(lastYear / step) + 1 }, (_, index) => index * step);
 
   return (
     <div className="h-64 w-full min-w-0" role="img" aria-label={t(k("chart.label"))}>
@@ -555,7 +581,10 @@ function BalanceChart({
         <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
           <XAxis
-            dataKey="year"
+            dataKey="years"
+            type="number"
+            domain={[0, "dataMax"]}
+            ticks={ticks}
             label={{ value: t(k("chart.year")), position: "insideBottomRight", offset: -5 }}
             tick={{ fontSize: 12 }}
           />
@@ -567,6 +596,7 @@ function BalanceChart({
           <Tooltip
             // @ts-expect-error Recharts tooltip types are very broken
             formatter={(value: number, name: string) => [money(value, 0), name]}
+            labelFormatter={(years) => (typeof years === "number" ? duration(Math.round(years * 12)) : years)}
           />
           <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           {series.map(({ key, color, dash }) => (
@@ -579,7 +609,7 @@ function BalanceChart({
               strokeWidth={2}
               strokeDasharray={dash}
               dot={false}
-              connectNulls={false}
+              connectNulls
             />
           ))}
         </LineChart>

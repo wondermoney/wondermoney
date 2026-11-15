@@ -994,6 +994,7 @@
       "termYears": "Jahre",
       "termMonths": "Monate",
       "termHelp": "Jahre plus Monate, zum Beispiel 22 Jahre und 4 Monate.",
+      "termRounded": "Berechnet für {{term}}: Die Restlaufzeit wird auf ganze Monate gerundet.",
       "interestRate": "Zinssatz",
       "rateHelp": "Fester Sollzins pro Jahr. Variable Zinsen und Mischformen sind nicht abgedeckt.",
       "repayment": "Sondertilgung jetzt",
@@ -1044,7 +1045,8 @@
         "none": "Geben Sie einen Betrag ein, um zu sehen, was er spart. Ohne Sondertilgung bleibt das Darlehen, wie es ist.",
         "cleared": "Dieser Betrag tilgt das Darlehen vollständig: keine weiteren Raten und keine Zinsen mehr.",
         "unused": "Zur vollständigen Tilgung genügen {{needed}}, die übrigen {{unused}} bleiben in der Rechnung außen vor.",
-        "feeExceeds": "Die Gebühr ist höher als die Zinsen, die diese Sondertilgung spart: Unterm Strich verlieren Sie Geld. Prüfen Sie, ob Ihr Vertrag eine gebührenfreie Sondertilgung erlaubt."
+        "feeExceeds": "Die Gebühr ist höher als die Zinsen, die diese Sondertilgung spart: Unterm Strich verlieren Sie Geld. Prüfen Sie, ob Ihr Vertrag eine gebührenfreie Sondertilgung erlaubt.",
+        "nearlyCleared": "Diese Sondertilgung tilgt das Darlehen fast vollständig: Die restlichen {{remainder}} begleichen Sie mit der nächsten Rate von {{payment}}, danach fallen keine Zinsen mehr an."
       },
       "resultNote": "Der Zinssatz bleibt bis zum Ende des Darlehens fest. Die Raten sind monatlich, die nächste ist in einem Monat fällig.",
       "chart": {

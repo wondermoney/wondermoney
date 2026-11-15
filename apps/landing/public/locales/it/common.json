@@ -994,6 +994,7 @@
       "termYears": "Anni",
       "termMonths": "Mesi",
       "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+      "termRounded": "Calcolato su {{term}}: la durata residua è arrotondata a mesi interi.",
       "interestRate": "Tasso di interesse",
       "rateHelp": "Tasso annuo nominale fisso (TAN). I tassi variabili e misti non sono inclusi.",
       "repayment": "Somma che rimborsi ora",
@@ -1044,7 +1045,8 @@
         "none": "Inserisci una somma per vedere quanto risparmi. Senza rimborso, il prestito resta com'è.",
         "cleared": "Questa somma estingue il prestito: niente più rate e niente più interessi.",
         "unused": "Per estinguere il prestito bastano {{needed}}, quindi i restanti {{unused}} restano fuori dai conti.",
-        "feeExceeds": "La penale supera gli interessi che questo rimborso fa risparmiare, quindi nel complesso ci perdi. Verifica se il tuo contratto consente un rimborso senza penale."
+        "feeExceeds": "La penale supera gli interessi che questo rimborso fa risparmiare, quindi nel complesso ci perdi. Verifica se il tuo contratto consente un rimborso senza penale.",
+        "nearlyCleared": "Questo rimborso estingue quasi del tutto il prestito: i {{remainder}} che restano si pagano con la prossima rata, di {{payment}}, e da lì non ci sono più interessi."
       },
       "resultNote": "Il tasso resta fisso fino alla fine del prestito. Le rate sono mensili e la prossima scade tra un mese.",
       "chart": {

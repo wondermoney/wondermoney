@@ -994,6 +994,7 @@
       "termYears": "Anos",
       "termMonths": "Meses",
       "termHelp": "Anos e meses, por exemplo 22 anos e 4 meses.",
+      "termRounded": "Calculado para {{term}}: o prazo é arredondado a meses completos.",
       "interestRate": "Taxa de juro",
       "rateHelp": "Taxa anual nominal fixa (TAN). Taxas variáveis e mistas ficam fora deste simulador.",
       "repayment": "Valor a amortizar agora",
@@ -1044,7 +1045,8 @@
         "none": "Indica um valor a amortizar para veres quanto poupas. Sem amortização, o crédito fica como está.",
         "cleared": "Este valor liquida o crédito: não há mais prestações nem mais juros.",
         "unused": "Bastam {{needed}} para liquidar o crédito, por isso os restantes {{unused}} ficam fora das contas.",
-        "feeExceeds": "A comissão é maior do que os juros que esta amortização poupa, por isso perdes dinheiro no total. Confirma se o teu contrato permite amortizar sem comissão."
+        "feeExceeds": "A comissão é maior do que os juros que esta amortização poupa, por isso perdes dinheiro no total. Confirma se o teu contrato permite amortizar sem comissão.",
+        "nearlyCleared": "Esta amortização quase liquida o crédito: os {{remainder}} que faltam ficam pagos na próxima prestação, de {{payment}}, e a partir daí não há mais juros."
       },
       "resultNote": "A taxa mantém-se fixa até ao fim do crédito. As prestações são mensais e a próxima vence daqui a um mês.",
       "chart": {
