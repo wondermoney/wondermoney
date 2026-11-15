@@ -5,6 +5,8 @@ import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInt
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
+import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
+import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -25,6 +27,7 @@ const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
   toolNetWorth: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
   toolSavingsRate: ["toolCompoundInterest", "toolNetWorth", "toolInvestmentReturn"],
   toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
+  toolDebtToIncome: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
 };
 
 const toolKeyByRouteId: Record<ToolRouteId, string> = {
@@ -32,6 +35,15 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
   toolNetWorth: "netWorth",
   toolSavingsRate: "savingsRate",
   toolInvestmentReturn: "investmentReturn",
+  toolDebtToIncome: "debtToIncome",
+};
+
+// Tools whose closing call to action names their own next step in the app.
+const nextStepCtaByRouteId: Partial<Record<ToolRouteId, { headline: string; description: string }>> = {
+  toolDebtToIncome: {
+    headline: t("tools.debtToIncome.ctaHeadline"),
+    description: t("tools.debtToIncome.ctaDescription"),
+  },
 };
 
 const relatedItems = relatedByRouteId[routeId].map((relatedRouteId) => {
@@ -93,7 +105,10 @@ const schema = {
     {routeId === "toolInvestmentReturn" && (
       <InvestmentReturnCalculatorComp locale={locale} client:load />
     )}
+    {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
   </div>
+
+  {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />
@@ -101,6 +116,6 @@ const schema = {
 
   <RelatedContent locale={locale} client:idle items={relatedItems} />
   <div class="mt-8">
-    <CTABanner locale={locale} client:idle />
+    <CTABanner locale={locale} client:idle {...nextStepCtaByRouteId[routeId]} />
   </div>
 </ContentLayout>

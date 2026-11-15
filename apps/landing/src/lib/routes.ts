@@ -224,6 +224,14 @@ const ROUTE_SLUGS = {
 		de: "anlagerendite-rechner",
 		it: "rendimento-investimento",
 	},
+	toolDebtToIncome: {
+		pt: "taxa-de-esforco",
+		en: "debt-to-income-calculator",
+		es: "ratio-endeudamiento",
+		fr: "taux-endettement",
+		de: "schuldendienstquote-rechner",
+		it: "rapporto-rata-reddito",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -326,6 +334,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolNetWorth",
 	"toolSavingsRate",
 	"toolInvestmentReturn",
+	"toolDebtToIncome",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -533,6 +542,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	investmentreturncalculator: "toolInvestmentReturn",
 	"investment-return-calculator": "toolInvestmentReturn",
 	"retorno-investimento": "toolInvestmentReturn",
+	tooldebttoincome: "toolDebtToIncome",
+	debttoincomecalculator: "toolDebtToIncome",
+	"debt-to-income-calculator": "toolDebtToIncome",
+	"taxa-de-esforco": "toolDebtToIncome",
 }
 
 function normalizeRouteLookupKey(value: string): string {
