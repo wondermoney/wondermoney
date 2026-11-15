@@ -1389,6 +1389,151 @@
         "nextSavingsGoal": "Sie sparen den Betrag für das Festgeld erst an oder planen, was nach der Fälligkeit kommt? Der Sparzielrechner ermittelt die monatliche Sparrate oder die nötige Zeit.",
         "nextSavingsGoalLink": "Sparzielrechner öffnen"
       }
+    },
+    "buyVsRent": {
+      "title": "Rechner: Kaufen oder mieten",
+      "description": "Vergleichen Sie das Nettovermögen beim Kauf einer Immobilie mit Hypothek mit dem beim Mieten und Anlegen der Differenz, Jahr für Jahr.",
+      "pageTitle": "Kaufen oder mieten: Rechner mit Vermögen Jahr für Jahr — WonderMoney",
+      "pageDescription": "Kostenloser Rechner für die Frage kaufen oder mieten. Geben Sie Preis, Eigenkapital, Kredit, Miete und Wachstumsannahmen ein und sehen Sie, welcher Weg Ihnen mehr lässt und ab welchem Jahr der Kauf vorne liegt. Ohne Anmeldung.",
+      "subtitle": "Geben Sie die Immobilie, die Hypothek und die Miete ein, die Sie stattdessen zahlen würden. Der Rechner verfolgt beide Wege mit demselben Startkapital und zeigt Jahr für Jahr, welcher Ihnen mehr lässt. Ohne Anmeldung.",
+      "groups": {
+        "home": "Die Immobilie",
+        "mortgage": "Die Hypothek",
+        "renting": "Stattdessen mieten",
+        "comparison": "Der Vergleich"
+      },
+      "years": "Jahre",
+      "fields": {
+        "homePrice": {
+          "label": "Kaufpreis"
+        },
+        "downPayment": {
+          "label": "Eigenkapital",
+          "help": "Das Geld, das Sie zu Beginn einbringen. Geben Sie den vollen Preis ein, um ohne Kredit zu kaufen."
+        },
+        "purchaseCostsPct": {
+          "label": "Kaufnebenkosten",
+          "help": "Einmalige Steuern und Gebühren in Prozent des Preises. Sie unterscheiden sich stark nach Land und Region, prüfen Sie also, was dort gilt, wo Sie kaufen."
+        },
+        "ownershipCostsPct": {
+          "label": "Laufende Eigentümerkosten pro Jahr",
+          "help": "Instandhaltung, Versicherungen und Grundsteuer in Prozent des Immobilienwerts."
+        },
+        "appreciationPct": {
+          "label": "Wertsteigerung pro Jahr",
+          "help": "Wie stark sich der Wert der Immobilie jedes Jahr ändert. Ein negativer Wert bedeutet fallende Preise."
+        },
+        "sellingCostsPct": {
+          "label": "Verkaufskosten am Ende",
+          "help": "Makler- und andere Kosten bei einem Verkauf am Ende, in Prozent des Immobilienwerts."
+        },
+        "mortgageRate": {
+          "label": "Sollzins der Hypothek",
+          "help": "Fester nominaler Jahreszins. Spielt keine Rolle, wenn Sie nichts leihen."
+        },
+        "mortgageTermYears": {
+          "label": "Laufzeit der Hypothek"
+        },
+        "monthlyRent": {
+          "label": "Monatliche Miete"
+        },
+        "rentIncreasePct": {
+          "label": "Mieterhöhung pro Jahr",
+          "help": "Die Miete steigt einmal im Jahr um diesen Prozentsatz."
+        },
+        "investmentReturnPct": {
+          "label": "Anlagerendite pro Jahr",
+          "help": "Was Geld, das nicht ins Wohnen fließt, nach Kosten einbringt. Sie gilt für den Weg, bei dem Geld übrig bleibt."
+        },
+        "horizonYears": {
+          "label": "Verglichene Jahre",
+          "help": "Von 1 bis 40 Jahren."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Vermögen beim Kauf, Ende von Jahr {{years}}",
+        "renterNetWorth": "Vermögen beim Mieten, Ende von Jahr {{years}}",
+        "buyAhead": "Kaufen liegt vorne um",
+        "rentAhead": "Mieten liegt vorne um",
+        "even": "Beide Wege enden gleichauf",
+        "breakEven": "Kaufen zieht am Ende von Jahr {{year}} vorbei.",
+        "noBreakEven": "Kaufen zieht bis zum Ende von Jahr {{years}} nicht vorbei.",
+        "firstMonth": "Beide Wege starten mit {{upfront}}. Im ersten Monat kostet das Eigentum {{owning}}, davon {{mortgage}} Kreditrate, und das Mieten {{rent}}."
+      },
+      "chartLabel": "Liniendiagramm des Vermögens beim Kauf und beim Mieten, vom Kauf bis zum Ende von Jahr {{years}}. Die Tabelle darunter enthält dieselben Zahlen.",
+      "chartBuy": "Kaufen",
+      "chartRent": "Mieten",
+      "year": "Jahr",
+      "table": {
+        "title": "Jahr für Jahr",
+        "description": "Das Vermögen beider Wege am Ende jedes Jahres. Beim Kauf ist es das, was nach einem Verkauf, den Verkaufskosten und der Tilgung des Kredits bliebe, plus die Anlagen.",
+        "year": "Jahr",
+        "start": "Kauf",
+        "yearLabel": "Jahr {{year}}",
+        "homeValue": "Immobilienwert",
+        "loanBalance": "Restschuld",
+        "ownerNetWorth": "Vermögen beim Kauf",
+        "renterNetWorth": "Vermögen beim Mieten",
+        "difference": "Kaufen minus Mieten"
+      },
+      "errors": {
+        "summary": "Der Vergleich erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "required": "Geben Sie einen Wert ein.",
+        "tooSmall": "Geben Sie mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie höchstens {{max}} ein.",
+        "negative": "Dieser Wert kann nicht negativ sein. Geben Sie 0 ein, wenn es keinen gibt.",
+        "aboveHomePrice": "Das Eigenkapital kann nicht höher sein als der Kaufpreis.",
+        "loanTooSmall": "Leihen Sie mindestens {{minLoan}} oder geben Sie den vollen Preis ein, um ohne Kredit zu kaufen."
+      },
+      "ctaHeadline": "Verfolgen Sie die Entscheidung in Ihrem Vermögensplan",
+      "ctaDescription": "Erfassen Sie Immobilie, Hypothek und Anlagen in WonderMoney und verfolgen Sie Ihr Nettovermögen über die Jahre, egal welchen Weg Sie wählen.",
+      "guide": {
+        "whatHeading": "Was der Vergleich zeigt",
+        "whatBody": "Kaufen ersetzt die Miete durch Kreditraten, bindet aber auch Geld im Eigenkapital und in den Kaufnebenkosten und bringt laufende Eigentümerkosten mit sich. Mieten lässt dieses Geld frei für eine Anlage. Der Rechner verfolgt beide Wege mit demselben Startkapital und vergleicht, was Ihnen jeweils bleibt.",
+        "read": {
+          "netWorth": "Das Vermögen beider Wege: beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits ließe, plus alles Angelegte; beim Mieten die Anlagen.",
+          "difference": "Die Differenz: wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt.",
+          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, weil die Kaufnebenkosten am ersten Tag anfallen und ein Verkauf noch mehr kosten würde.",
+          "chart": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+        },
+        "exampleHeading": "Rechenbeispiel",
+        "example": {
+          "setup": "Eine Immobilie kostet {{price}}. Sie bringen {{downPayment}} Eigenkapital ein ({{downPaymentShare}}) und leihen {{loan}} zu {{rate}} über {{term}} Jahre. Kaufnebenkosten von {{purchaseCostsPct}} kommen mit {{purchaseCosts}} hinzu, der Kauf bindet also {{upfront}}. Dieselbe Immobilie lässt sich für {{rent}} im Monat mieten. Der Rest sind die Startannahmen des Rechners: Miete plus {{rentIncrease}} pro Jahr, Immobilienwert plus {{appreciation}} pro Jahr, laufende Eigentümerkosten von {{ownershipCostsPct}} des Werts pro Jahr, {{investmentReturn}} Rendite auf Anlagen und {{sellingCostsPct}} Verkaufskosten, über {{horizon}} Jahre.",
+          "start": "Am ersten Tag legt der Mieter die {{upfront}} an. Der Anteil des Käufers ist das Eigenkapital von {{downPayment}} abzüglich {{startSellingCosts}} Verkaufskosten, also {{startOwner}}: Der Kauf startet mit {{startGap}} Rückstand.",
+          "monthly": "Im ersten Monat kostet das Eigentum {{owningMonthly}}: {{mortgagePayment}} Kreditrate und {{ownershipMonthly}} laufende Kosten. Die Miete beträgt {{rentMonthly}}, also legt der Mieter die Differenz von {{monthlyGap}} an. In diesem Beispiel kostet das Eigentum in jedem Monat der {{horizon}} Jahre mehr als die Miete, sodass beim Käufer nie Geld zum Anlegen übrig bleibt.",
+          "result": "Nach {{horizon}} Jahren ist die Immobilie {{homeValue}} wert. Der Verkauf kostet {{sellingCosts}} und tilgt die {{loanBalance}} Restschuld, sodass dem Käufer {{ownerNetWorth}} bleiben. Die Anlagen des Mieters sind auf {{renterNetWorth}} gewachsen: Der Kauf liegt am Ende {{difference}} vorne.",
+          "breakEven": "Der Kauf zieht erstmals am Ende von Jahr {{breakEvenYear}} vorbei. Die Antwort hängt an den Annahmen: Bei einer Miete von {{altRent}} im Monat liegt das Mieten nach {{horizon}} Jahren noch {{altDifference}} vorne."
+        },
+        "methodHeading": "So wird der Vergleich berechnet",
+        "methodIntro": "Der Rechner arbeitet Monat für Monat und centgenau ab dem Kauftag.",
+        "method": {
+          "start": "Beide Wege starten mit demselben Geld: Eigenkapital plus Kaufnebenkosten. Der Käufer steckt es in die Immobilie, der Mieter legt alles an.",
+          "loan": "Die Hypothek ist die, die der Hypothekenrechner ermittelt: fester Zins, und jede Monatsrate wird aus der Restschuld berechnet. Die Raten enden, sobald der Kredit getilgt ist.",
+          "monthly": "Jeden Monat zahlt der Käufer die Kreditrate und ein Zwölftel der jährlichen Eigentümerkosten, der Mieter die Miete. Der Weg, der in diesem Monat weniger kostet, legt die Differenz an.",
+          "growth": "Der Immobilienwert ändert sich einmal im Jahr um die Wertsteigerung, und die laufenden Kosten folgen dem Wert. Die Miete steigt einmal im Jahr um die angegebene Erhöhung.",
+          "returns": "Die Anlagen wachsen jeden Monat mit dem Monatszins, der über zwölf Monate die Jahresrendite ergibt.",
+          "netWorth": "Am Ende jedes Jahres ist das Vermögen des Käufers der Immobilienwert abzüglich Verkaufskosten und Restschuld, plus seine Anlagen. Das des Mieters sind seine Anlagen. Das Jahr des Gleichstands ist das erste, das mit dem Käufer vorne endet."
+        },
+        "formulaOwner": "Kaufen = Immobilienwert − Verkaufskosten − Restschuld + Anlagen",
+        "formulaRenter": "Mieten = Anlagen",
+        "formulaReturn": "Monatsrendite",
+        "formulaLegend": "Dabei ist R die jährliche Anlagerendite: {{investmentReturn}} pro Jahr ergeben etwa {{monthlyReturn}} im Monat.",
+        "leftOutHeading": "Was nicht berücksichtigt wird",
+        "leftOut": {
+          "gainsTax": "Steuern auf Anlageerträge oder auf den Gewinn aus dem Verkauf der Immobilie.",
+          "deposit": "Eine Mietkaution und was sie einbringen könnte.",
+          "taxRelief": "Steuerliche Absetzbarkeit von Kreditzinsen und andere Steuervorteile für Eigentümer.",
+          "countryRules": "Die Kaufsteuern und Gebühren des jeweiligen Landes: Geben Sie Ihre eigene Schätzung als Kaufnebenkosten ein.",
+          "rateChanges": "Zinsänderungen bei variablem Zins oder nach der Zinsbindung, Sondertilgungen und an den Kredit gebundene Versicherungen.",
+          "budget": "Ob die Raten bezahlbar sind: Beide Wege setzen voraus, dass jeden Monat die höhere der beiden Kosten aus dem Einkommen bezahlt wird."
+        },
+        "limits": "Der Rechner akzeptiert Kaufpreise bis {{maxPrice}}, Mieten bis {{maxRent}} im Monat, Wachstums- und Renditeraten von {{minGrowth}} bis {{maxGrowth}} pro Jahr und bis zu {{maxHorizon}} Jahre.",
+        "relatedHeading": "Verwandte Rechner",
+        "relatedMortgage": "Den Kredit allein, mit seinem Tilgungsplan Jahr für Jahr, zeigt der",
+        "relatedMortgageLink": "Hypothekenrechner",
+        "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
+        "relatedNetWorthLink": "Nettovermögensrechner"
+      }
     }
   },
   "learn": {

@@ -1389,6 +1389,151 @@
         "nextSavingsGoal": "¿Estás reuniendo el importe que vas a depositar o planeando qué hacer cuando venza? El simulador de ahorro calcula cuánto apartar cada mes o cuánto tiempo lleva.",
         "nextSavingsGoalLink": "Abrir el simulador de ahorro"
       }
+    },
+    "buyVsRent": {
+      "title": "Calculadora comprar o alquilar vivienda",
+      "description": "Compara el patrimonio neto de comprar una vivienda con hipoteca con el de alquilar e invertir la diferencia, año a año.",
+      "pageTitle": "¿Comprar o alquilar vivienda? Calculadora año a año — WonderMoney",
+      "pageDescription": "Calculadora gratuita para decidir entre comprar o alquilar. Introduce el precio, la entrada, la hipoteca, el alquiler y las tasas de crecimiento y verás qué camino te deja con más y en qué año comprar se pone por delante. Sin registro.",
+      "subtitle": "Introduce la vivienda, la hipoteca y el alquiler que pagarías en su lugar. La calculadora sigue los dos caminos con el mismo dinero inicial y muestra cuál te deja con más, año a año. Sin registro.",
+      "groups": {
+        "home": "La vivienda",
+        "mortgage": "La hipoteca",
+        "renting": "Alquilar en su lugar",
+        "comparison": "La comparación"
+      },
+      "years": "años",
+      "fields": {
+        "homePrice": {
+          "label": "Precio de la vivienda"
+        },
+        "downPayment": {
+          "label": "Entrada",
+          "help": "El dinero que aportas al principio. Introduce el precio total para comprar sin hipoteca."
+        },
+        "purchaseCostsPct": {
+          "label": "Gastos de compra",
+          "help": "Impuestos y gastos que se pagan una vez, como porcentaje del precio. Varían mucho según el país y la región, así que comprueba los que se aplican donde compras."
+        },
+        "ownershipCostsPct": {
+          "label": "Gastos de propiedad al año",
+          "help": "Mantenimiento, seguros e impuesto sobre el inmueble, como porcentaje del valor de la vivienda."
+        },
+        "appreciationPct": {
+          "label": "Revalorización de la vivienda al año",
+          "help": "Cuánto cambia el valor de la vivienda cada año. Una cifra negativa significa precios a la baja."
+        },
+        "sellingCostsPct": {
+          "label": "Gastos de venta al final",
+          "help": "Comisión de la inmobiliaria y otros gastos si vendieras al final, como porcentaje del valor de la vivienda."
+        },
+        "mortgageRate": {
+          "label": "Tipo de interés de la hipoteca",
+          "help": "Tipo nominal anual fijo. No cuenta si no pides préstamo."
+        },
+        "mortgageTermYears": {
+          "label": "Plazo de la hipoteca"
+        },
+        "monthlyRent": {
+          "label": "Alquiler mensual"
+        },
+        "rentIncreasePct": {
+          "label": "Subida del alquiler al año",
+          "help": "El alquiler sube una vez al año en este porcentaje."
+        },
+        "investmentReturnPct": {
+          "label": "Rentabilidad de la inversión al año",
+          "help": "Lo que rinde el dinero que no se destina a la vivienda, después de comisiones. Se aplica al camino al que le sobre dinero."
+        },
+        "horizonYears": {
+          "label": "Años a comparar",
+          "help": "De 1 a 40 años."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Patrimonio si compras, final del año {{years}}",
+        "renterNetWorth": "Patrimonio si alquilas, final del año {{years}}",
+        "buyAhead": "Comprar sale por delante en",
+        "rentAhead": "Alquilar sale por delante en",
+        "even": "Los dos caminos acaban igualados",
+        "breakEven": "Comprar se pone por delante al final del año {{year}}.",
+        "noBreakEven": "Comprar no se pone por delante antes del final del año {{years}}.",
+        "firstMonth": "Los dos caminos empiezan con {{upfront}}. El primer mes, ser propietario cuesta {{owning}}, de los que {{mortgage}} son la cuota de la hipoteca, y alquilar cuesta {{rent}}."
+      },
+      "chartLabel": "Gráfico de líneas del patrimonio si compras y si alquilas, desde la compra hasta el final del año {{years}}. La tabla de abajo recoge las mismas cifras.",
+      "chartBuy": "Comprar",
+      "chartRent": "Alquilar",
+      "year": "Año",
+      "table": {
+        "title": "Año a año",
+        "description": "El patrimonio de cada camino al final de cada año. Si compras, es lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más las inversiones.",
+        "year": "Año",
+        "start": "Compra",
+        "yearLabel": "Año {{year}}",
+        "homeValue": "Valor de la vivienda",
+        "loanBalance": "Hipoteca pendiente",
+        "ownerNetWorth": "Patrimonio comprando",
+        "renterNetWorth": "Patrimonio alquilando",
+        "difference": "Comprar menos alquilar"
+      },
+      "errors": {
+        "summary": "La comparación aparece cuando todos los campos tienen un valor válido.",
+        "required": "Introduce un valor.",
+        "tooSmall": "Introduce al menos {{min}}.",
+        "tooLarge": "Introduce hasta {{max}}.",
+        "negative": "Este valor no puede ser negativo. Introduce 0 si no tienes.",
+        "aboveHomePrice": "La entrada no puede ser mayor que el precio de la vivienda.",
+        "loanTooSmall": "Pide al menos {{minLoan}}, o introduce el precio total para comprar sin hipoteca."
+      },
+      "ctaHeadline": "Sigue la decisión en tu plan de patrimonio",
+      "ctaDescription": "Añade la vivienda, la hipoteca y tus inversiones a WonderMoney y sigue tu patrimonio a lo largo de los años, elijas el camino que elijas.",
+      "guide": {
+        "whatHeading": "Qué muestra la comparación",
+        "whatBody": "Comprar cambia el alquiler por la cuota de la hipoteca, pero también inmoviliza dinero en la entrada y los gastos de compra y añade los gastos de ser propietario. Alquilar deja ese dinero libre para invertir. La calculadora sigue los dos caminos con el mismo dinero inicial y compara con cuánto te deja cada uno.",
+        "read": {
+          "netWorth": "El patrimonio de cada camino: si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones.",
+          "difference": "La diferencia: cuánto va por delante un camino al final del periodo que has elegido.",
+          "breakEven": "El año de equilibrio: el primer año que termina con comprar por delante. Comprar empieza por detrás, porque los gastos de compra se pagan el primer día y vender costaría todavía más.",
+          "chart": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
+        },
+        "exampleHeading": "Ejemplo práctico",
+        "example": {
+          "setup": "Una vivienda cuesta {{price}}. Aportas {{downPayment}} de entrada ({{downPaymentShare}}) y pides {{loan}} al {{rate}} a {{term}} años. Unos gastos de compra del {{purchaseCostsPct}} suman {{purchaseCosts}}, así que comprar exige {{upfront}} en efectivo. La misma vivienda se alquila por {{rent}} al mes. El resto son los supuestos iniciales de la calculadora: alquiler que sube un {{rentIncrease}} al año, valor de la vivienda que sube un {{appreciation}} al año, gastos de propiedad del {{ownershipCostsPct}} del valor al año, una rentabilidad del {{investmentReturn}} y gastos de venta del {{sellingCostsPct}}, durante {{horizon}} años.",
+          "start": "El primer día, quien alquila invierte los {{upfront}}. La parte de quien compra es la entrada de {{downPayment}} menos {{startSellingCosts}} de gastos de venta, es decir {{startOwner}}, así que comprar empieza {{startGap}} por detrás.",
+          "monthly": "El primer mes, ser propietario cuesta {{owningMonthly}}: {{mortgagePayment}} de cuota y {{ownershipMonthly}} de gastos de propiedad. El alquiler es de {{rentMonthly}}, así que quien alquila invierte la diferencia de {{monthlyGap}}. En este ejemplo, ser propietario cuesta más que alquilar todos los meses de los {{horizon}} años, así que a quien compra nunca le sobra dinero para invertir.",
+          "result": "Al cabo de {{horizon}} años, la vivienda vale {{homeValue}}. Venderla cuesta {{sellingCosts}} y cancela los {{loanBalance}} pendientes, lo que deja a quien compró {{ownerNetWorth}}. Las inversiones de quien alquila han crecido hasta {{renterNetWorth}}, así que comprar acaba {{difference}} por delante.",
+          "breakEven": "Comprar se pone por delante por primera vez al final del año {{breakEvenYear}}. La respuesta depende de los supuestos: con un alquiler de {{altRent}} al mes, alquilar sigue {{altDifference}} por delante al cabo de {{horizon}} años."
+        },
+        "methodHeading": "Cómo se calcula la comparación",
+        "methodIntro": "La calculadora trabaja mes a mes, en céntimos, desde el día de la compra.",
+        "method": {
+          "start": "Los dos caminos empiezan con el mismo dinero: la entrada más los gastos de compra. Quien compra lo gasta en la vivienda; quien alquila lo invierte entero.",
+          "loan": "La hipoteca es la que calcula la calculadora de hipoteca: tipo fijo, con la cuota de cada mes calculada a partir del capital pendiente. Las cuotas terminan cuando la hipoteca queda pagada.",
+          "monthly": "Cada mes, quien compra paga la cuota y una doceava parte de los gastos de propiedad del año, y quien alquila paga el alquiler. El camino que cueste menos ese mes invierte la diferencia.",
+          "growth": "El valor de la vivienda cambia una vez al año según la revalorización, y los gastos de propiedad siguen al valor. El alquiler sube una vez al año según la subida indicada.",
+          "returns": "Las inversiones crecen cada mes al tipo mensual que, compuesto durante un año, da la rentabilidad anual.",
+          "netWorth": "Al final de cada año, el patrimonio de quien compra es el valor de la vivienda menos los gastos de venta y la hipoteca pendiente, más sus inversiones. El de quien alquila son sus inversiones. El año de equilibrio es el primero que termina con quien compra por delante."
+        },
+        "formulaOwner": "Comprar = valor de la vivienda − gastos de venta − hipoteca pendiente + inversiones",
+        "formulaRenter": "Alquilar = inversiones",
+        "formulaReturn": "Rentabilidad mensual",
+        "formulaLegend": "Aquí R es la rentabilidad anual de la inversión: un {{investmentReturn}} al año equivale a un {{monthlyReturn}} al mes, aproximadamente.",
+        "leftOutHeading": "Lo que no incluye",
+        "leftOut": {
+          "gainsTax": "Impuestos sobre las ganancias de las inversiones o sobre la plusvalía de la venta de la vivienda.",
+          "deposit": "La fianza del alquiler y lo que podría rendir.",
+          "taxRelief": "Deducciones fiscales por los intereses de la hipoteca y otras ventajas fiscales para propietarios.",
+          "countryRules": "Los impuestos y gastos de compra de cada país: introduce tu propia estimación en los gastos de compra.",
+          "rateChanges": "Cambios de tipo en una hipoteca variable o mixta, amortizaciones anticipadas y seguros vinculados al préstamo.",
+          "budget": "Si puedes pagar las cuotas: los dos caminos suponen que el mayor de los dos costes se paga con los ingresos cada mes."
+        },
+        "limits": "La calculadora acepta viviendas de hasta {{maxPrice}}, alquileres de hasta {{maxRent}} al mes, tasas de crecimiento y rentabilidad entre {{minGrowth}} y {{maxGrowth}} al año y hasta {{maxHorizon}} años.",
+        "relatedHeading": "Calculadoras relacionadas",
+        "relatedMortgage": "Para ver el préstamo por sí solo, con su cuadro de amortización año a año, usa la",
+        "relatedMortgageLink": "calculadora de hipoteca",
+        "relatedNetWorth": "Para sumar la vivienda, la hipoteca y tus ahorros tal como están hoy, usa la",
+        "relatedNetWorthLink": "calculadora de patrimonio neto"
+      }
     }
   },
   "learn": {

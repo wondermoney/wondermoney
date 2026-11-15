@@ -1389,6 +1389,151 @@
         "nextSavingsGoal": "Stai mettendo da parte la somma da depositare o pensi a cosa fare alla scadenza? Il simulatore di risparmio calcola quanto accantonare ogni mese o quanto tempo serve.",
         "nextSavingsGoalLink": "Apri il simulatore di risparmio"
       }
+    },
+    "buyVsRent": {
+      "title": "Calcolatore comprare o affittare casa",
+      "description": "Confronta il patrimonio netto di chi compra casa con un mutuo con quello di chi affitta e investe la differenza, anno per anno.",
+      "pageTitle": "Comprare o affittare casa: calcolatore anno per anno — WonderMoney",
+      "pageDescription": "Calcolatore gratuito per scegliere tra comprare o affittare. Inserisci prezzo, anticipo, mutuo, affitto e ipotesi di crescita per vedere quale strada ti lascia di più e in che anno comprare passa in vantaggio. Senza registrazione.",
+      "subtitle": "Inserisci la casa, il mutuo e l'affitto che pagheresti in alternativa. Il calcolatore segue le due strade con lo stesso capitale iniziale e mostra quale ti lascia di più, anno per anno. Senza registrazione.",
+      "groups": {
+        "home": "La casa",
+        "mortgage": "Il mutuo",
+        "renting": "Affittare in alternativa",
+        "comparison": "Il confronto"
+      },
+      "years": "anni",
+      "fields": {
+        "homePrice": {
+          "label": "Prezzo della casa"
+        },
+        "downPayment": {
+          "label": "Anticipo",
+          "help": "I soldi che versi all'inizio. Inserisci il prezzo intero per comprare senza mutuo."
+        },
+        "purchaseCostsPct": {
+          "label": "Costi di acquisto",
+          "help": "Imposte e spese pagate una volta, in percentuale del prezzo. Cambiano molto da paese a paese e tra regioni, quindi verifica quelle che valgono dove compri."
+        },
+        "ownershipCostsPct": {
+          "label": "Costi di proprietà all'anno",
+          "help": "Manutenzione, assicurazioni e imposte sull'immobile, in percentuale del valore della casa."
+        },
+        "appreciationPct": {
+          "label": "Rivalutazione della casa all'anno",
+          "help": "Quanto cambia ogni anno il valore della casa. Una cifra negativa indica prezzi in calo."
+        },
+        "sellingCostsPct": {
+          "label": "Costi di vendita alla fine",
+          "help": "Agenzia e altre spese se vendessi alla fine, in percentuale del valore della casa."
+        },
+        "mortgageRate": {
+          "label": "Tasso del mutuo",
+          "help": "Tasso nominale annuo fisso. Non conta se non chiedi un prestito."
+        },
+        "mortgageTermYears": {
+          "label": "Durata del mutuo"
+        },
+        "monthlyRent": {
+          "label": "Affitto mensile"
+        },
+        "rentIncreasePct": {
+          "label": "Aumento dell'affitto all'anno",
+          "help": "L'affitto sale una volta all'anno di questa percentuale."
+        },
+        "investmentReturnPct": {
+          "label": "Rendimento degli investimenti all'anno",
+          "help": "Quanto rende il denaro che non va nella casa, al netto dei costi. Vale per la strada che ha soldi in avanzo."
+        },
+        "horizonYears": {
+          "label": "Anni da confrontare",
+          "help": "Da 1 a 40 anni."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Patrimonio se compri, fine dell'anno {{years}}",
+        "renterNetWorth": "Patrimonio se affitti, fine dell'anno {{years}}",
+        "buyAhead": "Comprare è in vantaggio di",
+        "rentAhead": "Affittare è in vantaggio di",
+        "even": "Le due strade finiscono in parità",
+        "breakEven": "Comprare passa in vantaggio alla fine dell'anno {{year}}.",
+        "noBreakEven": "Comprare non passa in vantaggio entro la fine dell'anno {{years}}.",
+        "firstMonth": "Le due strade partono con {{upfront}}. Il primo mese la proprietà costa {{owning}}, di cui {{mortgage}} di rata del mutuo, e l'affitto {{rent}}."
+      },
+      "chartLabel": "Grafico a linee del patrimonio se compri e se affitti, dall'acquisto alla fine dell'anno {{years}}. La tabella qui sotto riporta le stesse cifre.",
+      "chartBuy": "Comprare",
+      "chartRent": "Affittare",
+      "year": "Anno",
+      "table": {
+        "title": "Anno per anno",
+        "description": "Il patrimonio di ciascuna strada alla fine di ogni anno. Per chi compra, è ciò che resterebbe dopo aver venduto la casa, pagato i costi di vendita ed estinto il mutuo, più gli investimenti.",
+        "year": "Anno",
+        "start": "Acquisto",
+        "yearLabel": "Anno {{year}}",
+        "homeValue": "Valore della casa",
+        "loanBalance": "Debito residuo",
+        "ownerNetWorth": "Patrimonio comprando",
+        "renterNetWorth": "Patrimonio affittando",
+        "difference": "Comprare meno affittare"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando tutti i campi hanno un valore valido.",
+        "required": "Inserisci un valore.",
+        "tooSmall": "Inserisci almeno {{min}}.",
+        "tooLarge": "Inserisci al massimo {{max}}.",
+        "negative": "Questo valore non può essere negativo. Inserisci 0 se non c'è.",
+        "aboveHomePrice": "L'anticipo non può superare il prezzo della casa.",
+        "loanTooSmall": "Chiedi almeno {{minLoan}}, oppure inserisci il prezzo intero per comprare senza mutuo."
+      },
+      "ctaHeadline": "Segui la decisione nel tuo piano patrimoniale",
+      "ctaDescription": "Aggiungi la casa, il mutuo e i tuoi investimenti a WonderMoney e segui il tuo patrimonio netto negli anni, qualunque strada tu scelga.",
+      "guide": {
+        "whatHeading": "Cosa mostra il confronto",
+        "whatBody": "Comprare sostituisce l'affitto con la rata del mutuo, ma blocca anche denaro nell'anticipo e nei costi di acquisto e aggiunge i costi della proprietà. Affittare lascia quel denaro libero di essere investito. Il calcolatore segue le due strade con lo stesso capitale iniziale e confronta quanto ti lascia ciascuna.",
+        "read": {
+          "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
+          "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
+          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio, perché i costi di acquisto si pagano il primo giorno e vendere costerebbe ancora di più.",
+          "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+        },
+        "exampleHeading": "Esempio pratico",
+        "example": {
+          "setup": "Una casa costa {{price}}. Versi {{downPayment}} di anticipo ({{downPaymentShare}}) e chiedi {{loan}} al {{rate}} per {{term}} anni. Costi di acquisto del {{purchaseCostsPct}} aggiungono {{purchaseCosts}}, quindi comprare richiede {{upfront}} di liquidità. La stessa casa si affitta a {{rent}} al mese. Il resto sono le ipotesi iniziali del calcolatore: affitto in aumento del {{rentIncrease}} all'anno, valore della casa in aumento del {{appreciation}} all'anno, costi di proprietà del {{ownershipCostsPct}} del valore all'anno, rendimento del {{investmentReturn}} sugli investimenti e costi di vendita del {{sellingCostsPct}}, per {{horizon}} anni.",
+          "start": "Il primo giorno chi affitta investe i {{upfront}}. La quota di chi compra è l'anticipo di {{downPayment}} meno {{startSellingCosts}} di costi di vendita, cioè {{startOwner}}: comprare parte con {{startGap}} di svantaggio.",
+          "monthly": "Il primo mese la proprietà costa {{owningMonthly}}: {{mortgagePayment}} di rata e {{ownershipMonthly}} di costi di proprietà. L'affitto è di {{rentMonthly}}, quindi chi affitta investe la differenza di {{monthlyGap}}. In questo esempio la proprietà costa più dell'affitto in ogni mese dei {{horizon}} anni, quindi a chi compra non avanza mai denaro da investire.",
+          "result": "Dopo {{horizon}} anni la casa vale {{homeValue}}. Venderla costa {{sellingCosts}} ed estingue i {{loanBalance}} di debito residuo, il che lascia a chi ha comprato {{ownerNetWorth}}. Gli investimenti di chi affitta sono cresciuti fino a {{renterNetWorth}}, quindi comprare finisce in vantaggio di {{difference}}.",
+          "breakEven": "Comprare passa in vantaggio per la prima volta alla fine dell'anno {{breakEvenYear}}. La risposta dipende dalle ipotesi: con un affitto di {{altRent}} al mese, affittare è ancora in vantaggio di {{altDifference}} dopo {{horizon}} anni."
+        },
+        "methodHeading": "Come viene calcolato il confronto",
+        "methodIntro": "Il calcolatore lavora mese per mese, al centesimo, dal giorno dell'acquisto.",
+        "method": {
+          "start": "Le due strade partono con lo stesso denaro: l'anticipo più i costi di acquisto. Chi compra lo spende nella casa; chi affitta lo investe tutto.",
+          "loan": "Il mutuo è quello calcolato dal calcolatore del mutuo: tasso fisso, con la rata di ogni mese ricavata dal debito residuo. Le rate finiscono quando il mutuo è estinto.",
+          "monthly": "Ogni mese chi compra paga la rata e un dodicesimo dei costi di proprietà dell'anno, e chi affitta paga l'affitto. La strada che quel mese costa meno investe la differenza.",
+          "growth": "Il valore della casa cambia una volta all'anno secondo la rivalutazione, e i costi di proprietà seguono il valore. L'affitto sale una volta all'anno secondo l'aumento indicato.",
+          "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
+          "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta sono i suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
+        },
+        "formulaOwner": "Comprare = valore della casa − costi di vendita − debito residuo + investimenti",
+        "formulaRenter": "Affittare = investimenti",
+        "formulaReturn": "Rendimento mensile",
+        "formulaLegend": "Qui R è il rendimento annuo degli investimenti: il {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
+        "leftOutHeading": "Cosa resta fuori",
+        "leftOut": {
+          "gainsTax": "Le imposte sui guadagni degli investimenti o sulla plusvalenza della vendita della casa.",
+          "deposit": "Il deposito cauzionale dell'affitto e quanto potrebbe rendere.",
+          "taxRelief": "Le detrazioni sugli interessi del mutuo e le altre agevolazioni fiscali per i proprietari.",
+          "countryRules": "Le imposte e le spese di acquisto di ciascun paese: inserisci la tua stima nei costi di acquisto.",
+          "rateChanges": "Le variazioni di tasso di un mutuo variabile o misto, le estinzioni anticipate e le assicurazioni legate al mutuo.",
+          "budget": "Se puoi permetterti le rate: entrambe le strade presuppongono che il maggiore dei due costi venga pagato ogni mese con il reddito."
+        },
+        "limits": "Il calcolatore accetta case fino a {{maxPrice}}, affitti fino a {{maxRent}} al mese, tassi di crescita e di rendimento da {{minGrowth}} a {{maxGrowth}} all'anno e fino a {{maxHorizon}} anni.",
+        "relatedHeading": "Calcolatori correlati",
+        "relatedMortgage": "Per vedere il mutuo da solo, con il piano di ammortamento anno per anno, usa il",
+        "relatedMortgageLink": "calcolatore del mutuo",
+        "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
+        "relatedNetWorthLink": "calcolatore del patrimonio netto"
+      }
     }
   },
   "learn": {

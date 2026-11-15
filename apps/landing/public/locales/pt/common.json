@@ -1389,6 +1389,151 @@
         "nextSavingsGoal": "Estás a juntar o montante que vais depositar ou a planear o que fazer quando o depósito vencer? O simulador de poupança calcula quanto pôr de lado por mês ou quanto tempo demora.",
         "nextSavingsGoalLink": "Abrir o simulador de poupança"
       }
+    },
+    "buyVsRent": {
+      "title": "Calculadora comprar ou arrendar casa",
+      "description": "Compara o património líquido de comprar casa com crédito habitação com o de arrendar e investir a diferença, ano a ano.",
+      "pageTitle": "Comprar ou arrendar casa: calculadora ano a ano — WonderMoney",
+      "pageDescription": "Calculadora gratuita para decidir entre comprar ou arrendar casa. Indica o preço, a entrada, o crédito, a renda e as taxas de crescimento e vê que caminho te deixa com mais e em que ano comprar passa à frente. Sem registo.",
+      "subtitle": "Indica a casa, o crédito habitação e a renda que pagarias em alternativa. A calculadora segue os dois caminhos com o mesmo dinheiro inicial e mostra qual te deixa com mais, ano a ano. Sem registo.",
+      "groups": {
+        "home": "A casa",
+        "mortgage": "O crédito habitação",
+        "renting": "Arrendar em alternativa",
+        "comparison": "A comparação"
+      },
+      "years": "anos",
+      "fields": {
+        "homePrice": {
+          "label": "Preço da casa"
+        },
+        "downPayment": {
+          "label": "Entrada",
+          "help": "O dinheiro que pões à cabeça. Indica o preço total para comprar sem crédito."
+        },
+        "purchaseCostsPct": {
+          "label": "Custos de compra",
+          "help": "Impostos e taxas pagos uma vez, em percentagem do preço. Variam muito de país para país e entre regiões, por isso confirma os que se aplicam onde compras."
+        },
+        "ownershipCostsPct": {
+          "label": "Custos de ter casa por ano",
+          "help": "Manutenção, seguros e imposto sobre o imóvel, em percentagem do valor da casa."
+        },
+        "appreciationPct": {
+          "label": "Valorização da casa por ano",
+          "help": "Quanto muda o valor da casa por ano. Um valor negativo significa preços a descer."
+        },
+        "sellingCostsPct": {
+          "label": "Custos de venda no fim",
+          "help": "Comissão da imobiliária e outras despesas se vendesses no fim, em percentagem do valor da casa."
+        },
+        "mortgageRate": {
+          "label": "Taxa de juro do crédito",
+          "help": "Taxa nominal anual fixa. Não conta quando não pedes empréstimo."
+        },
+        "mortgageTermYears": {
+          "label": "Prazo do crédito"
+        },
+        "monthlyRent": {
+          "label": "Renda mensal"
+        },
+        "rentIncreasePct": {
+          "label": "Aumento da renda por ano",
+          "help": "A renda sobe uma vez por ano nesta percentagem."
+        },
+        "investmentReturnPct": {
+          "label": "Rendimento dos investimentos por ano",
+          "help": "Quanto rende o dinheiro que não vai para a casa, depois de comissões. Aplica-se ao caminho que tiver dinheiro de sobra."
+        },
+        "horizonYears": {
+          "label": "Anos a comparar",
+          "help": "De 1 a 40 anos."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Património se comprares, fim do ano {{years}}",
+        "renterNetWorth": "Património se arrendares, fim do ano {{years}}",
+        "buyAhead": "Comprar fica à frente por",
+        "rentAhead": "Arrendar fica à frente por",
+        "even": "Os dois caminhos acabam empatados",
+        "breakEven": "Comprar passa à frente no fim do ano {{year}}.",
+        "noBreakEven": "Comprar não passa à frente até ao fim do ano {{years}}.",
+        "firstMonth": "Os dois caminhos começam com {{upfront}}. No primeiro mês, ter casa custa {{owning}}, dos quais {{mortgage}} são a prestação do crédito, e arrendar custa {{rent}}."
+      },
+      "chartLabel": "Gráfico de linhas do património se comprares e se arrendares, da compra até ao fim do ano {{years}}. A tabela abaixo tem os mesmos valores.",
+      "chartBuy": "Comprar",
+      "chartRent": "Arrendar",
+      "year": "Ano",
+      "table": {
+        "title": "Ano a ano",
+        "description": "O património de cada caminho no fim de cada ano. Para quem compra, é o que ficaria depois de vender a casa, pagar os custos de venda e liquidar o crédito, mais os investimentos.",
+        "year": "Ano",
+        "start": "Compra",
+        "yearLabel": "Ano {{year}}",
+        "homeValue": "Valor da casa",
+        "loanBalance": "Crédito em dívida",
+        "ownerNetWorth": "Património a comprar",
+        "renterNetWorth": "Património a arrendar",
+        "difference": "Comprar menos arrendar"
+      },
+      "errors": {
+        "summary": "A comparação aparece quando todos os campos tiverem um valor válido.",
+        "required": "Indica um valor.",
+        "tooSmall": "Indica pelo menos {{min}}.",
+        "tooLarge": "Indica até {{max}}.",
+        "negative": "Este valor não pode ser negativo. Indica 0 se não tiveres nenhum.",
+        "aboveHomePrice": "A entrada não pode ser maior do que o preço da casa.",
+        "loanTooSmall": "Pede pelo menos {{minLoan}}, ou indica o preço total para comprar sem crédito."
+      },
+      "ctaHeadline": "Acompanha a decisão no teu plano de património",
+      "ctaDescription": "Junta a casa, o crédito habitação e os teus investimentos no WonderMoney e acompanha o teu património ao longo dos anos, seja qual for o caminho que escolheres.",
+      "guide": {
+        "whatHeading": "O que mostra a comparação",
+        "whatBody": "Comprar troca a renda pela prestação do crédito, mas também prende dinheiro na entrada e nos custos de compra e acrescenta os custos de ter casa. Arrendar deixa esse dinheiro livre para investir. A calculadora segue os dois caminhos com o mesmo dinheiro inicial e compara com quanto cada um te deixa.",
+        "read": {
+          "netWorth": "O património de cada caminho: para quem compra, o que ficaria depois de vender a casa, pagar os custos de venda e liquidar o crédito, mais o que tiver investido; para quem arrenda, os investimentos.",
+          "difference": "A diferença: quanto um caminho está à frente do outro no fim do período que escolheste.",
+          "breakEven": "O ano de equilíbrio: o primeiro ano que acaba com comprar à frente. Comprar começa atrás, porque os custos de compra são pagos no primeiro dia e vender ainda custaria mais.",
+          "chart": "O gráfico e a tabela mostram os dois caminhos em cada ano, para veres se a distância está a diminuir ou a aumentar."
+        },
+        "exampleHeading": "Exemplo prático",
+        "example": {
+          "setup": "Uma casa custa {{price}}. Dás {{downPayment}} de entrada ({{downPaymentShare}}) e pedes {{loan}} a {{rate}} por {{term}} anos. Custos de compra de {{purchaseCostsPct}} somam {{purchaseCosts}}, por isso comprar exige {{upfront}} em dinheiro. A mesma casa arrenda-se por {{rent}} por mês. O resto são os pressupostos iniciais da calculadora: renda a subir {{rentIncrease}} por ano, valor da casa a subir {{appreciation}} por ano, custos de ter casa de {{ownershipCostsPct}} do valor por ano, rendimento de {{investmentReturn}} nos investimentos e custos de venda de {{sellingCostsPct}}, durante {{horizon}} anos.",
+          "start": "No primeiro dia, quem arrenda investe os {{upfront}}. A parte de quem compra é a entrada de {{downPayment}} menos {{startSellingCosts}} de custos de venda, ou seja {{startOwner}}, por isso comprar começa {{startGap}} atrás.",
+          "monthly": "No primeiro mês, ter casa custa {{owningMonthly}}: {{mortgagePayment}} de prestação e {{ownershipMonthly}} de custos de ter casa. A renda é de {{rentMonthly}}, por isso quem arrenda investe a diferença de {{monthlyGap}}. Neste exemplo, ter casa custa mais do que arrendar em todos os meses dos {{horizon}} anos, por isso quem compra nunca tem dinheiro de sobra para investir.",
+          "result": "Ao fim de {{horizon}} anos, a casa vale {{homeValue}}. Vendê-la custa {{sellingCosts}} e liquida os {{loanBalance}} ainda em dívida, o que deixa a quem comprou {{ownerNetWorth}}. Os investimentos de quem arrenda cresceram até {{renterNetWorth}}, por isso comprar acaba {{difference}} à frente.",
+          "breakEven": "Comprar passa à frente pela primeira vez no fim do ano {{breakEvenYear}}. A resposta depende dos pressupostos: com uma renda de {{altRent}} por mês, arrendar ainda está {{altDifference}} à frente ao fim de {{horizon}} anos."
+        },
+        "methodHeading": "Como é feita a comparação",
+        "methodIntro": "A calculadora trabalha mês a mês, em cêntimos, a partir do dia da compra.",
+        "method": {
+          "start": "Os dois caminhos começam com o mesmo dinheiro: a entrada mais os custos de compra. Quem compra gasta-o na casa; quem arrenda investe-o todo.",
+          "loan": "O crédito é o que o simulador de crédito habitação calcula: taxa fixa, com a prestação de cada mês calculada a partir do capital ainda em dívida. As prestações param quando o crédito fica pago.",
+          "monthly": "Em cada mês, quem compra paga a prestação e um duodécimo dos custos anuais de ter casa, e quem arrenda paga a renda. O caminho que custar menos nesse mês investe a diferença.",
+          "growth": "O valor da casa muda uma vez por ano pela taxa de valorização, e os custos de ter casa acompanham o valor. A renda sobe uma vez por ano pelo aumento indicado.",
+          "returns": "Os investimentos crescem todos os meses à taxa mensal que, composta ao longo de um ano, dá o rendimento anual.",
+          "netWorth": "No fim de cada ano, o património de quem compra é o valor da casa menos os custos de venda e o crédito em dívida, mais os investimentos. O de quem arrenda são os investimentos. O ano de equilíbrio é o primeiro que acaba com quem compra à frente."
+        },
+        "formulaOwner": "Comprar = valor da casa − custos de venda − crédito em dívida + investimentos",
+        "formulaRenter": "Arrendar = investimentos",
+        "formulaReturn": "Rendimento mensal",
+        "formulaLegend": "Aqui, R é o rendimento anual dos investimentos: {{investmentReturn}} por ano dá cerca de {{monthlyReturn}} por mês.",
+        "leftOutHeading": "O que fica de fora",
+        "leftOut": {
+          "gainsTax": "Impostos sobre os ganhos dos investimentos ou sobre a mais-valia da venda da casa.",
+          "deposit": "A caução do arrendamento e o que ela poderia render.",
+          "taxRelief": "Deduções fiscais dos juros do crédito e outros benefícios fiscais para proprietários.",
+          "countryRules": "Os impostos e taxas de compra de cada país: indica a tua estimativa nos custos de compra.",
+          "rateChanges": "Alterações de taxa num crédito com taxa variável ou mista, amortizações antecipadas e seguros associados ao crédito.",
+          "budget": "Se consegues pagar as prestações: os dois caminhos assumem que o mais caro dos dois custos é pago com o rendimento todos os meses."
+        },
+        "limits": "A calculadora aceita casas até {{maxPrice}}, rendas até {{maxRent}} por mês, taxas de crescimento e de rendimento entre {{minGrowth}} e {{maxGrowth}} por ano e até {{maxHorizon}} anos.",
+        "relatedHeading": "Calculadoras relacionadas",
+        "relatedMortgage": "Para ver o empréstimo sozinho, com o plano de pagamentos ano a ano, usa o",
+        "relatedMortgageLink": "simulador de crédito habitação",
+        "relatedNetWorth": "Para somar a casa, o crédito e as tuas poupanças tal como estão hoje, usa a",
+        "relatedNetWorthLink": "calculadora de património líquido"
+      }
     }
   },
   "learn": {

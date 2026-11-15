@@ -1389,6 +1389,151 @@
         "nextSavingsGoal": "Vous mettez de côté la somme à déposer, ou vous préparez la suite après l'échéance ? Le simulateur d'épargne calcule l'effort mensuel ou le temps nécessaire.",
         "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne"
       }
+    },
+    "buyVsRent": {
+      "title": "Calculatrice acheter ou louer",
+      "description": "Comparez le patrimoine net d'un achat immobilier à crédit avec celui d'une location où vous placez la différence, année après année.",
+      "pageTitle": "Acheter ou louer : calculatrice année par année — WonderMoney",
+      "pageDescription": "Calculatrice gratuite pour choisir entre acheter ou louer. Saisissez le prix, l'apport, le prêt, le loyer et les hypothèses de croissance pour voir quelle option vous laisse le plus et l'année où l'achat passe devant. Sans inscription.",
+      "subtitle": "Saisissez le logement, le prêt immobilier et le loyer que vous paieriez à la place. La calculatrice suit les deux options avec la même somme de départ et montre laquelle vous laisse le plus, année après année. Sans inscription.",
+      "groups": {
+        "home": "Le logement",
+        "mortgage": "Le prêt immobilier",
+        "renting": "Louer à la place",
+        "comparison": "La comparaison"
+      },
+      "years": "ans",
+      "fields": {
+        "homePrice": {
+          "label": "Prix du logement"
+        },
+        "downPayment": {
+          "label": "Apport",
+          "help": "La somme que vous versez au départ. Saisissez le prix total pour acheter sans crédit."
+        },
+        "purchaseCostsPct": {
+          "label": "Frais d'achat",
+          "help": "Taxes et frais payés une seule fois, en pourcentage du prix. Ils varient beaucoup selon le pays et la région : vérifiez ceux qui s'appliquent là où vous achetez."
+        },
+        "ownershipCostsPct": {
+          "label": "Frais de propriété par an",
+          "help": "Entretien, assurances et taxe foncière, en pourcentage de la valeur du logement."
+        },
+        "appreciationPct": {
+          "label": "Hausse de la valeur par an",
+          "help": "De combien la valeur du logement change chaque année. Un chiffre négatif signifie des prix en baisse."
+        },
+        "sellingCostsPct": {
+          "label": "Frais de vente à la fin",
+          "help": "Frais d'agence et autres si vous vendiez à la fin, en pourcentage de la valeur du logement."
+        },
+        "mortgageRate": {
+          "label": "Taux du prêt",
+          "help": "Taux nominal annuel fixe. Ignoré si vous n'empruntez rien."
+        },
+        "mortgageTermYears": {
+          "label": "Durée du prêt"
+        },
+        "monthlyRent": {
+          "label": "Loyer mensuel"
+        },
+        "rentIncreasePct": {
+          "label": "Hausse du loyer par an",
+          "help": "Le loyer augmente une fois par an de ce pourcentage."
+        },
+        "investmentReturnPct": {
+          "label": "Rendement des placements par an",
+          "help": "Ce que rapporte l'argent qui ne va pas au logement, après frais. Il s'applique à l'option qui dispose d'un surplus."
+        },
+        "horizonYears": {
+          "label": "Années à comparer",
+          "help": "De 1 à 40 ans."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Patrimoine si vous achetez, fin de l'année {{years}}",
+        "renterNetWorth": "Patrimoine si vous louez, fin de l'année {{years}}",
+        "buyAhead": "L'achat l'emporte de",
+        "rentAhead": "La location l'emporte de",
+        "even": "Les deux options finissent à égalité",
+        "breakEven": "L'achat passe devant à la fin de l'année {{year}}.",
+        "noBreakEven": "L'achat ne passe pas devant avant la fin de l'année {{years}}.",
+        "firstMonth": "Les deux options partent de {{upfront}}. Le premier mois, être propriétaire coûte {{owning}}, dont {{mortgage}} de mensualité, et louer coûte {{rent}}."
+      },
+      "chartLabel": "Graphique en courbes du patrimoine si vous achetez et si vous louez, de l'achat à la fin de l'année {{years}}. Le tableau ci-dessous reprend les mêmes chiffres.",
+      "chartBuy": "Acheter",
+      "chartRent": "Louer",
+      "year": "Année",
+      "table": {
+        "title": "Année par année",
+        "description": "Le patrimoine de chaque option à la fin de chaque année. Pour l'achat, c'est ce qui resterait après la vente, les frais de vente et le remboursement du prêt, plus les placements.",
+        "year": "Année",
+        "start": "Achat",
+        "yearLabel": "Année {{year}}",
+        "homeValue": "Valeur du logement",
+        "loanBalance": "Capital restant dû",
+        "ownerNetWorth": "Patrimoine en achetant",
+        "renterNetWorth": "Patrimoine en louant",
+        "difference": "Achat moins location"
+      },
+      "errors": {
+        "summary": "La comparaison s'affiche dès que tous les champs ont une valeur valide.",
+        "required": "Saisissez une valeur.",
+        "tooSmall": "Saisissez au moins {{min}}.",
+        "tooLarge": "Saisissez au plus {{max}}.",
+        "negative": "Cette valeur ne peut pas être négative. Saisissez 0 s'il n'y en a pas.",
+        "aboveHomePrice": "L'apport ne peut pas dépasser le prix du logement.",
+        "loanTooSmall": "Empruntez au moins {{minLoan}}, ou saisissez le prix total pour acheter sans crédit."
+      },
+      "ctaHeadline": "Suivez cette décision dans votre plan de patrimoine",
+      "ctaDescription": "Ajoutez le logement, le prêt et vos placements à WonderMoney et suivez votre patrimoine au fil des années, quelle que soit l'option choisie.",
+      "guide": {
+        "whatHeading": "Ce que montre la comparaison",
+        "whatBody": "Acheter remplace le loyer par des mensualités, mais immobilise aussi de l'argent dans l'apport et les frais d'achat et ajoute les frais de propriété. Louer laisse cet argent libre d'être placé. La calculatrice suit les deux options avec la même somme de départ et compare ce que chacune vous laisse.",
+        "read": {
+          "netWorth": "Le patrimoine de chaque option : pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements.",
+          "difference": "L'écart : de combien une option devance l'autre à la fin de la période choisie.",
+          "breakEven": "L'année d'équilibre : la première année qui se termine avec l'achat devant. L'achat part derrière, car les frais d'achat sont payés le premier jour et vendre coûterait encore davantage.",
+          "chart": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+        },
+        "exampleHeading": "Exemple chiffré",
+        "example": {
+          "setup": "Un logement coûte {{price}}. Vous apportez {{downPayment}} ({{downPaymentShare}}) et empruntez {{loan}} à {{rate}} sur {{term}} ans. Des frais d'achat de {{purchaseCostsPct}} ajoutent {{purchaseCosts}} : l'achat mobilise donc {{upfront}}. Le même logement se loue {{rent}} par mois. Le reste correspond aux hypothèses de départ de la calculatrice : loyer en hausse de {{rentIncrease}} par an, valeur du logement en hausse de {{appreciation}} par an, frais de propriété de {{ownershipCostsPct}} de la valeur par an, rendement de {{investmentReturn}} sur les placements et frais de vente de {{sellingCostsPct}}, sur {{horizon}} ans.",
+          "start": "Le premier jour, le locataire place les {{upfront}}. La part du propriétaire est l'apport de {{downPayment}} moins {{startSellingCosts}} de frais de vente, soit {{startOwner}} : l'achat part donc avec {{startGap}} de retard.",
+          "monthly": "Le premier mois, être propriétaire coûte {{owningMonthly}} : {{mortgagePayment}} de mensualité et {{ownershipMonthly}} de frais de propriété. Le loyer est de {{rentMonthly}}, donc le locataire place la différence de {{monthlyGap}}. Dans cet exemple, être propriétaire coûte plus cher que louer chaque mois des {{horizon}} ans : le propriétaire n'a jamais de surplus à placer.",
+          "result": "Au bout de {{horizon}} ans, le logement vaut {{homeValue}}. Le vendre coûte {{sellingCosts}} et rembourse les {{loanBalance}} restant dus, ce qui laisse {{ownerNetWorth}} au propriétaire. Les placements du locataire atteignent {{renterNetWorth}} : l'achat finit avec {{difference}} d'avance.",
+          "breakEven": "L'achat passe devant pour la première fois à la fin de l'année {{breakEvenYear}}. La réponse dépend des hypothèses : avec un loyer de {{altRent}} par mois, la location garde {{altDifference}} d'avance au bout de {{horizon}} ans."
+        },
+        "methodHeading": "Comment la comparaison est calculée",
+        "methodIntro": "La calculatrice avance mois par mois, au centime près, à partir du jour de l'achat.",
+        "method": {
+          "start": "Les deux options partent de la même somme : l'apport plus les frais d'achat. Le propriétaire la dépense dans le logement ; le locataire la place entièrement.",
+          "loan": "Le prêt est celui que calcule le simulateur de prêt immobilier : taux fixe, avec une mensualité calculée chaque mois à partir du capital restant dû. Les mensualités s'arrêtent une fois le prêt remboursé.",
+          "monthly": "Chaque mois, le propriétaire paie la mensualité et un douzième des frais de propriété de l'année, et le locataire paie le loyer. L'option la moins chère ce mois-là place la différence.",
+          "growth": "La valeur du logement change une fois par an selon la hausse indiquée, et les frais de propriété suivent la valeur. Le loyer augmente une fois par an selon la hausse indiquée.",
+          "returns": "Les placements progressent chaque mois au taux mensuel qui, composé sur douze mois, donne le rendement annuel.",
+          "netWorth": "À la fin de chaque année, le patrimoine du propriétaire est la valeur du logement moins les frais de vente et le capital restant dû, plus ses placements. Celui du locataire correspond à ses placements. L'année d'équilibre est la première qui se termine avec le propriétaire devant."
+        },
+        "formulaOwner": "Acheter = valeur du logement − frais de vente − capital restant dû + placements",
+        "formulaRenter": "Louer = placements",
+        "formulaReturn": "Rendement mensuel",
+        "formulaLegend": "Ici, R est le rendement annuel des placements : {{investmentReturn}} par an donnent environ {{monthlyReturn}} par mois.",
+        "leftOutHeading": "Ce qui n'est pas pris en compte",
+        "leftOut": {
+          "gainsTax": "L'impôt sur les gains des placements ou sur la plus-value de la vente du logement.",
+          "deposit": "Le dépôt de garantie de la location et ce qu'il pourrait rapporter.",
+          "taxRelief": "Les avantages fiscaux liés aux intérêts d'emprunt et aux propriétaires.",
+          "countryRules": "Les taxes et frais d'achat propres à chaque pays : saisissez votre propre estimation dans les frais d'achat.",
+          "rateChanges": "Les variations de taux d'un prêt variable ou mixte, les remboursements anticipés et l'assurance emprunteur.",
+          "budget": "La capacité à payer les mensualités : les deux options supposent que le plus élevé des deux coûts est payé chaque mois sur les revenus."
+        },
+        "limits": "La calculatrice accepte des logements jusqu'à {{maxPrice}}, des loyers jusqu'à {{maxRent}} par mois, des taux de croissance et de rendement de {{minGrowth}} à {{maxGrowth}} par an et jusqu'à {{maxHorizon}} ans.",
+        "relatedHeading": "Calculatrices associées",
+        "relatedMortgage": "Pour voir le prêt seul, avec son tableau d'amortissement année par année, utilisez le",
+        "relatedMortgageLink": "simulateur de prêt immobilier",
+        "relatedNetWorth": "Pour additionner le logement, le prêt et votre épargne tels qu'ils sont aujourd'hui, utilisez la",
+        "relatedNetWorthLink": "calculatrice de patrimoine net"
+      }
     }
   },
   "learn": {
