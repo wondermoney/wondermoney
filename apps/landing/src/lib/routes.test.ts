@@ -221,6 +221,47 @@ describe("route localization", () => {
 		)
 	})
 
+	it("gives the mortgage calculator a localized tool path in every locale", () => {
+		const expected: Record<Lang, string> = {
+			pt: "/pt/tools/credito-habitacao",
+			en: "/en/tools/mortgage-calculator",
+			es: "/es/tools/hipoteca",
+			fr: "/fr/tools/pret-immobilier",
+			de: "/de/tools/hypotheken-rechner",
+			it: "/it/tools/mutuo-casa",
+		}
+
+		for (const lang of SUPPORTED_LANGS) {
+			expect(toLocalizedPath("toolMortgage", lang)).toBe(expected[lang])
+			expect(
+				resolveToolRouteId(lang, getLocalizedSlug("toolMortgage", lang)),
+			).toBe("toolMortgage")
+		}
+		expect(toLocalizedPathname("/pt/tools/credito-habitacao", "de")).toBe(
+			"/de/tools/hypotheken-rechner",
+		)
+	})
+
+	it("sends the debt-to-income guide's new-loan link to the mortgage calculator", () => {
+		const guideSource = readFileSync(
+			fileURLToPath(
+				new URL("../components/calculators/DebtToIncomeGuide.astro", import.meta.url),
+			),
+			"utf8",
+		)
+		expect(guideSource).toContain('toLocalizedPath("toolMortgage", locale)')
+	})
+
+	it("lists the mortgage calculator on the tools hub in every locale", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const hubSource = readFileSync(
+				fileURLToPath(new URL(`../pages/${lang}/tools/index.astro`, import.meta.url)),
+				"utf8",
+			)
+			expect(hubSource).toContain('routeId: "toolMortgage"')
+		}
+	})
+
 	it("resolves legacy calculator identifiers to tool route ids", () => {
 		expect(resolveToolRouteIdFromLegacy("toolCompoundInterest", "pt")).toBe(
 			"toolCompoundInterest",
@@ -237,8 +278,16 @@ describe("route localization", () => {
 		expect(resolveToolRouteIdFromLegacy("investment_return_calculator", "en")).toBe(
 			"toolInvestmentReturn",
 		)
-		expect(resolveToolRouteIdFromLegacy("toolMortgage", "en")).toBeUndefined()
-		expect(resolveToolRouteIdFromLegacy("mortgage-calculator", "en")).toBeUndefined()
+		expect(resolveToolRouteIdFromLegacy("toolMortgage", "en")).toBe("toolMortgage")
+		expect(resolveToolRouteIdFromLegacy("mortgage-calculator", "pt")).toBe(
+			"toolMortgage",
+		)
+		expect(resolveToolRouteIdFromLegacy("credito-habitacao", "en")).toBe(
+			"toolMortgage",
+		)
+		expect(resolveToolRouteIdFromLegacy("hypotheken-rechner", "de")).toBe(
+			"toolMortgage",
+		)
 		expect(
 			resolveToolRouteIdFromLegacy("how-to-calculate-net-worth", "en"),
 		).toBeUndefined()
@@ -252,15 +301,13 @@ describe("route localization", () => {
 	})
 
 	it("does not expose removed routes", () => {
-		expect(() => toLocalizedPath("toolMortgage" as never, "pt")).toThrow()
 		expect(() =>
 			toLocalizedPath("howToCalculateNetWorth" as never, "pt"),
 		).toThrow()
-		expect(() => resolveToolRouteId("en", "mortgage-calculator")).toThrow()
 		expect(() => resolveToolRouteId("en", "how-to-calculate-net-worth")).toThrow()
 	})
 
-	it("does not surface removed mortgage/how-to links in tools hub mappings", () => {
+	it("does not surface removed how-to links in tools hub mappings", () => {
 		const toolsHubPath = fileURLToPath(
 			new URL("../pages/en/tools/index.astro", import.meta.url),
 		)
@@ -271,12 +318,8 @@ describe("route localization", () => {
 		const toolsHubSource = readFileSync(toolsHubPath, "utf8")
 		const toolPageSource = readFileSync(toolPagePath, "utf8")
 
-		expect(toolsHubSource).not.toContain("toolMortgage")
-		expect(toolsHubSource).not.toContain("mortgage-calculator")
 		expect(toolsHubSource).not.toContain("how-to-calculate-net-worth")
 
-		expect(toolPageSource).not.toContain("toolMortgage")
-		expect(toolPageSource).not.toContain("mortgage-calculator")
 		expect(toolPageSource).not.toContain("how-to-calculate-net-worth")
 	})
 

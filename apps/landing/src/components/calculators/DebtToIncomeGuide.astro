@@ -8,7 +8,7 @@ import {
   compareDebtScenario,
 } from "@/lib/calculators/debtToIncome";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
-import { toToolsHubPath, type Lang } from "@/lib/routes";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
 interface Props {
@@ -50,8 +50,8 @@ const bands = [
 
 const methodItems = ["methodCounts", "methodExcludes", "methodIncome", "methodRounding", "methodPrivacy"];
 
-// Link to the tools hub; switch to the mortgage tool's route once it exists.
-const nextHref = toToolsHubPath(locale);
+// A new mortgage is the usual new payment; the mortgage tool works it out.
+const nextHref = toLocalizedPath("toolMortgage", locale);
 ---
 
 <div class="mx-auto mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">

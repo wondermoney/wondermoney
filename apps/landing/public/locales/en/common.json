@@ -635,29 +635,116 @@
         "methodRounding": "The ratio is rounded to one decimal place, and the band follows the rounded figure. Payments above income give a ratio over 100%.",
         "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
         "nextHeading": "Planning a new loan?",
-        "nextBody": "A mortgage or another loan adds a payment. Enter it in the scenario panel to see the new ratio, and use the other free calculators to plan the rest.",
-        "nextLink": "See all calculators"
+        "nextBody": "A mortgage or another loan adds a payment. Work out what a new mortgage would cost each month, then enter that payment in the scenario panel to see the new ratio.",
+        "nextLink": "Open the mortgage calculator"
       }
     },
     "mortgage": {
       "title": "Mortgage Calculator",
-      "description": "Calculate your monthly mortgage payment, total interest, and see how costs break down over time.",
-      "propertyPrice": "Property price",
-      "downPayment": "Down payment",
-      "interestRate": "Interest rate",
+      "description": "Work out the monthly payment on a fixed-rate home loan, the interest it costs and how the balance falls each year.",
+      "pageTitle": "Mortgage Calculator with Amortization Schedule — WonderMoney",
+      "pageDescription": "Free fixed-rate mortgage calculator. Enter the amount, term, rate and monthly insurance to see your payment, total interest, total paid and a year-by-year schedule. No sign-up.",
+      "subtitle": "Enter what you would borrow, the term and the fixed rate to see your monthly payment, what the loan costs in interest and how each payment splits between interest and principal. Nothing to sign up for.",
+      "loanAmount": "Loan amount",
+      "loanAmountHelp": "What you borrow after your deposit, not the price of the home.",
       "loanTerm": "Loan term",
       "years": "years",
-      "rateHelp": "Annual fixed interest rate",
+      "interestRate": "Interest rate",
+      "rateHelp": "Fixed nominal annual rate, not the APR.",
+      "monthlyFees": "Insurance and fees per month",
+      "monthlyFeesHelp": "Optional. Insurance premiums and account fees you pay with each instalment.",
       "monthlyPayment": "Monthly payment",
-      "totalInterest": "Total interest paid",
-      "totalCost": "Total cost",
-      "loanAmount": "Loan amount",
-      "principal": "Principal",
-      "interest": "Interest",
+      "monthlyTotal": "Monthly payment with insurance and fees",
+      "totalInterest": "Total interest",
+      "totalFees": "Total insurance and fees",
+      "totalPaid": "Total paid",
+      "resultNote": "Over {{payments}} monthly payments, with the rate fixed for the whole term.",
+      "principal": "Principal repaid",
+      "interest": "Interest paid",
       "year": "Year",
-      "pageTitle": "Mortgage Calculator — WonderMoney",
-      "pageDescription": "Free mortgage calculator. Calculate your monthly mortgage payment, total interest, and total cost. See how principal and interest break down over the life of your loan.",
-      "subtitle": "Calculate your monthly mortgage payment and see how much you will pay in interest over the life of your loan. Adjust the property price, down payment, rate, and term to compare scenarios."
+      "chartLabel": "Chart of principal repaid and interest paid, added up year by year over the term.",
+      "errors": {
+        "summary": "Your payment appears once every field has a valid value.",
+        "loanAmount": {
+          "required": "Enter the amount you want to borrow.",
+          "tooSmall": "Enter an amount of at least {{min}}.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the term in years, for example 25.",
+          "tooLarge": "Enter a term of up to {{max}} years."
+        },
+        "annualRate": {
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "monthlyFees": {
+          "negative": "Monthly fees can't be negative. Enter 0 if you have none.",
+          "tooLarge": "Enter monthly fees up to {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Amortization schedule",
+        "description": "One row per year of the loan. Open a year to see each monthly payment, how much of it is interest and what you still owe after it.",
+        "period": "Period",
+        "payments": "Payments",
+        "principal": "Principal",
+        "interest": "Interest",
+        "fees": "Insurance and fees",
+        "balance": "Balance owed",
+        "yearLabel": "Year {{year}}",
+        "monthLabel": "Month {{month}}",
+        "showMonths": "monthly breakdown"
+      },
+      "guide": {
+        "coverage": {
+          "title": "What the result includes and leaves out",
+          "intro": "The figures cover the loan itself: what you borrow, the interest on it and any flat monthly cost you add. Buying a home comes with other costs that this calculator does not model, so budget for them separately.",
+          "includedTitle": "Included",
+          "included": {
+            "borrowed": "The amount you borrow, repaid in equal monthly payments",
+            "interest": "Interest at the fixed rate you enter, charged on the balance still owed",
+            "fees": "A flat monthly amount for insurance and fees, if you enter one"
+          },
+          "excludedTitle": "Not included",
+          "excluded": {
+            "taxes": "Taxes on the purchase, such as transfer or property taxes, and stamp duty",
+            "upfront": "Upfront costs: arrangement or processing fees, valuation, notary, legal and registration fees",
+            "deposit": "Your deposit and any other money you pay at signing",
+            "insuranceChanges": "Insurance premiums that change over time",
+            "rateChanges": "Rate changes on a variable or mixed-rate loan",
+            "earlyRepayment": "Early repayments and the fees for them"
+          }
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you borrow {{amount}} over {{years}} years at a fixed {{rate}} a year. The monthly rate is {{rate}} divided by 12, about {{monthlyRate}}, and you make {{payments}} payments.",
+          "firstMonth": "The level payment that clears the loan is {{payment}} a month. In the first month, interest on the full balance comes to {{firstInterest}}, so only {{firstPrincipal}} of that payment reduces what you owe.",
+          "total": "Over the whole term you pay {{totalInterest}} in interest, {{totalPaid}} in all.",
+          "halfway": "Halfway through, after {{halfway}} years, you still owe {{halfwayBalance}}: more than half the amount borrowed, because the early payments are mostly interest.",
+          "fees": "Add {{fees}} a month for insurance and the monthly cost rises to {{monthlyWithFees}}; over the term you pay {{totalPaidWithFees}} in total."
+        },
+        "method": {
+          "title": "How the payment is calculated",
+          "intro": "Most fixed-rate mortgages are repaid in level payments: the same amount every month, set so the balance reaches zero with the last one. The payment comes from the annuity formula:",
+          "legend": "Here M is the monthly payment, P is the amount borrowed, r is the annual rate divided by 12, and n is the number of monthly payments. At 0% interest there is nothing to discount, so the payment is simply P divided by n.",
+          "schedule": "Each month, interest is charged on the balance still owed and the rest of the payment repays principal. As the balance falls, the interest part shrinks and the principal part grows, which is why the balance falls slowly at first and faster towards the end. Insurance and fees are added on top of the payment and never reduce the balance.",
+          "assumptionsTitle": "Assumptions",
+          "assumptions": {
+            "fixedRate": "The rate stays the same for the whole term.",
+            "monthly": "You pay once a month, starting one month after the loan begins, with no early repayments or payment breaks.",
+            "nominalRate": "The rate you enter is a nominal annual rate. The APR a lender quotes includes fees and charges, so it is higher than the rate used here.",
+            "flatFees": "Insurance and fees are the same amount every month.",
+            "rounding": "Amounts are in euros. Each month's payment is worked out from the balance still owed and the months left, then rounded to the cent, so a payment can differ from the others by a cent and the last one clears the balance exactly. On a very long loan at a high rate, the first payments may repay less than a cent of the loan.",
+            "lenderFigures": "Your lender's figures can differ slightly, because of how they count days, round amounts or set the payment date. The pre-contract information they give you is the figure to rely on."
+          },
+          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}."
+        }
+      },
+      "cta": {
+        "headline": "Track this loan alongside your budget",
+        "description": "Add the mortgage to WonderMoney with its rate and term, link the monthly repayment and see the balance fall next to your budget and net worth."
+      }
     }
   },
   "learn": {

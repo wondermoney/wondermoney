@@ -635,29 +635,116 @@
         "methodRounding": "A taxa é arredondada a uma casa decimal, e o escalão segue o valor arredondado. Prestações acima do rendimento dão uma taxa superior a 100%.",
         "methodPrivacy": "O cálculo é feito no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados.",
         "nextHeading": "A pensar num crédito novo?",
-        "nextBody": "Um crédito à habitação ou outro empréstimo acrescenta uma prestação. Indica-a no painel de cenário para veres a nova taxa, e usa as outras calculadoras gratuitas para planear o resto.",
-        "nextLink": "Ver todas as calculadoras"
+        "nextBody": "Um crédito à habitação ou outro empréstimo acrescenta uma prestação. Calcula quanto custaria por mês um novo crédito habitação e indica essa prestação no painel de cenário para veres a nova taxa.",
+        "nextLink": "Abrir o simulador de crédito habitação"
       }
     },
     "mortgage": {
-      "title": "Calculadora de hipoteca",
-      "description": "Calcula a prestação mensal da hipoteca, o total de juros e vê como os custos se distribuem ao longo do tempo.",
-      "propertyPrice": "Preço do imóvel",
-      "downPayment": "Entrada",
-      "interestRate": "Taxa de juro",
-      "loanTerm": "Prazo do empréstimo",
-      "years": "anos",
-      "rateHelp": "Taxa de juro fixa anual",
-      "monthlyPayment": "Prestação mensal",
-      "totalInterest": "Total de juros pagos",
-      "totalCost": "Custo total",
+      "title": "Simulador de crédito habitação",
+      "description": "Calcula a prestação mensal de um crédito habitação a taxa fixa, os juros que vais pagar e como a dívida desce ano a ano.",
+      "pageTitle": "Simulador de crédito habitação: prestação e juros — WonderMoney",
+      "pageDescription": "Simulador gratuito de crédito habitação a taxa fixa. Indica o montante, o prazo, a taxa e o seguro mensal para veres a prestação, os juros, o total pago e o plano de pagamentos ano a ano. Sem registo.",
+      "subtitle": "Indica quanto pedes emprestado, o prazo e a taxa fixa para veres a prestação mensal, quanto pagas em juros e como cada prestação se divide entre juros e capital. Não precisas de criar conta.",
       "loanAmount": "Montante do empréstimo",
-      "principal": "Capital",
-      "interest": "Juros",
+      "loanAmountHelp": "O valor que pedes ao banco, já sem a entrada, e não o preço da casa.",
+      "loanTerm": "Prazo",
+      "years": "anos",
+      "interestRate": "Taxa de juro",
+      "rateHelp": "Taxa anual nominal fixa (TAN), não a TAEG.",
+      "monthlyFees": "Seguros e comissões por mês",
+      "monthlyFeesHelp": "Opcional. Prémios de seguro e comissões que pagas com cada prestação.",
+      "monthlyPayment": "Prestação mensal",
+      "monthlyTotal": "Prestação mensal com seguros e comissões",
+      "totalInterest": "Total de juros",
+      "totalFees": "Total de seguros e comissões",
+      "totalPaid": "Total pago",
+      "resultNote": "Em {{payments}} prestações mensais, com a taxa fixa durante todo o prazo.",
+      "principal": "Capital amortizado",
+      "interest": "Juros pagos",
       "year": "Ano",
-      "pageTitle": "Calculadora de hipoteca — WonderMoney",
-      "pageDescription": "Calculadora de hipoteca gratuita. Calcula a tua prestação mensal, o total de juros e o custo total. Vê como o capital e os juros se distribuem ao longo da vida do empréstimo.",
-      "subtitle": "Calcula a tua prestação mensal de hipoteca e vê quanto pagarás em juros ao longo da vida do empréstimo. Ajusta o preço do imóvel, a entrada, a taxa e o prazo para comparar cenários."
+      "chartLabel": "Gráfico do capital amortizado e dos juros pagos, acumulados ano a ano ao longo do prazo.",
+      "errors": {
+        "summary": "A prestação aparece quando todos os campos tiverem um valor válido.",
+        "loanAmount": {
+          "required": "Indica o montante que queres pedir.",
+          "tooSmall": "Indica um montante de pelo menos {{min}}.",
+          "tooLarge": "Indica um montante até {{max}}."
+        },
+        "termYears": {
+          "required": "Indica o prazo em anos, por exemplo 30.",
+          "tooLarge": "Indica um prazo até {{max}} anos."
+        },
+        "annualRate": {
+          "negative": "A taxa de juro não pode ser inferior a 0%.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "monthlyFees": {
+          "negative": "As comissões não podem ser negativas. Indica 0 se não tiveres nenhuma.",
+          "tooLarge": "Indica um valor mensal até {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Plano de pagamentos",
+        "description": "Uma linha por cada ano do empréstimo. Abre um ano para veres cada prestação mensal, quanto dela é juro e quanto ainda deves depois de a pagares.",
+        "period": "Período",
+        "payments": "Prestações",
+        "principal": "Capital",
+        "interest": "Juros",
+        "fees": "Seguros e comissões",
+        "balance": "Capital em dívida",
+        "yearLabel": "Ano {{year}}",
+        "monthLabel": "Mês {{month}}",
+        "showMonths": "detalhe mensal"
+      },
+      "guide": {
+        "coverage": {
+          "title": "O que o resultado inclui e o que fica de fora",
+          "intro": "Os valores dizem respeito ao empréstimo em si: o que pedes, os juros sobre esse valor e um custo mensal fixo que acrescentes. Comprar casa tem outros custos que este simulador não calcula, por isso conta com eles à parte.",
+          "includedTitle": "Incluído",
+          "included": {
+            "borrowed": "O montante que pedes, pago em prestações mensais iguais",
+            "interest": "Os juros à taxa fixa que indicas, calculados sobre o capital em dívida",
+            "fees": "Um valor mensal fixo para seguros e comissões, se o indicares"
+          },
+          "excludedTitle": "Não incluído",
+          "excluded": {
+            "taxes": "Impostos sobre a compra, como impostos de transmissão ou sobre o imóvel, e imposto do selo",
+            "upfront": "Custos iniciais: comissões de abertura ou de processo, avaliação, notário e registos",
+            "deposit": "A entrada e outros valores que pagas na assinatura",
+            "insuranceChanges": "Prémios de seguro que mudam ao longo do tempo",
+            "rateChanges": "Alterações de taxa num crédito com taxa variável ou mista",
+            "earlyRepayment": "Amortizações antecipadas e as respetivas comissões"
+          }
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Imagina que pedes {{amount}} a {{years}} anos, a uma taxa fixa de {{rate}} ao ano. A taxa mensal é {{rate}} a dividir por 12, cerca de {{monthlyRate}}, e pagas {{payments}} prestações.",
+          "firstMonth": "A prestação constante que liquida o empréstimo é de {{payment}} por mês. No primeiro mês, os juros sobre todo o capital somam {{firstInterest}}, por isso só {{firstPrincipal}} dessa prestação reduzem o que deves.",
+          "total": "Ao longo de todo o prazo pagas {{totalInterest}} de juros, {{totalPaid}} no total.",
+          "halfway": "A meio, ao fim de {{halfway}} anos, ainda deves {{halfwayBalance}}: mais de metade do valor pedido, porque as primeiras prestações são sobretudo juros.",
+          "fees": "Junta {{fees}} por mês de seguros e o custo mensal sobe para {{monthlyWithFees}}; ao longo do prazo pagas {{totalPaidWithFees}} no total."
+        },
+        "method": {
+          "title": "Como é calculada a prestação",
+          "intro": "A maioria dos créditos habitação a taxa fixa é paga em prestações constantes: o mesmo valor todos os meses, definido para que a dívida chegue a zero com a última. A prestação resulta da fórmula das rendas:",
+          "legend": "Aqui, M é a prestação mensal, P é o montante pedido, r é a taxa anual a dividir por 12 e n é o número de prestações mensais. Com juro de 0% não há nada a descontar, e a prestação é simplesmente P a dividir por n.",
+          "schedule": "Em cada mês, os juros incidem sobre o capital ainda em dívida e o resto da prestação amortiza capital. À medida que a dívida desce, a parte de juros encolhe e a parte de capital cresce, por isso a dívida desce devagar no início e mais depressa no fim. Os seguros e comissões somam-se à prestação e nunca reduzem a dívida.",
+          "assumptionsTitle": "Pressupostos",
+          "assumptions": {
+            "fixedRate": "A taxa mantém-se igual durante todo o prazo.",
+            "monthly": "Pagas uma vez por mês, a começar um mês depois do início do empréstimo, sem amortizações antecipadas nem períodos de carência.",
+            "nominalRate": "A taxa que indicas é uma taxa anual nominal. A TAEG que o banco apresenta inclui comissões e encargos, por isso é mais alta do que a taxa usada aqui.",
+            "flatFees": "Os seguros e comissões têm o mesmo valor todos os meses.",
+            "rounding": "Os valores estão em euros. A prestação de cada mês é calculada a partir do capital em dívida e dos meses que faltam, e arredondada ao cêntimo; por isso, uma prestação pode diferir das outras num cêntimo, e a última liquida a dívida exatamente. Num empréstimo muito longo com taxa alta, as primeiras prestações podem amortizar menos de um cêntimo.",
+            "lenderFigures": "Os valores do teu banco podem diferir ligeiramente, pela forma como contam os dias, arredondam valores ou fixam a data de pagamento. A informação pré-contratual que te entregam é a referência a usar."
+          },
+          "limits": "O simulador aceita empréstimos de {{minAmount}} a {{maxAmount}}, prazos até {{maxYears}} anos e taxas até {{maxRate}}."
+        }
+      },
+      "cta": {
+        "headline": "Acompanha este crédito ao lado do teu orçamento",
+        "description": "Adiciona o crédito habitação ao WonderMoney com a taxa e o prazo, associa a prestação mensal e vê a dívida a descer ao lado do teu orçamento e do teu património."
+      }
     }
   },
   "learn": {
