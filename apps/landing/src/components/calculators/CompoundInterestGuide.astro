@@ -1,0 +1,122 @@
+---
+// Prerendered explanation, worked example, method and assumptions for the
+// compound interest calculator. The example is the calculator's starting state,
+// computed by the same function, so the prose and the tool never disagree.
+import {
+  EXAMPLE_INPUTS,
+  MAX_AMOUNT,
+  MAX_RATE,
+  MAX_YEARS,
+  compareContributions,
+  defaultComparisonContribution,
+  effectiveAnnualRate,
+} from "@/lib/calculators/compoundInterest";
+import type { Lang } from "@/lib/i18nLocale";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.compoundInterest.guide.${key}`;
+const money = (value: number) => formatMoney(locale, value);
+const percent = (value: number, decimals = 0) => formatPercent(locale, value, { decimals });
+
+const comparisonContribution = defaultComparisonContribution(EXAMPLE_INPUTS.monthlyContribution);
+const { current, comparison, difference } = compareContributions(
+  EXAMPLE_INPUTS,
+  comparisonContribution,
+);
+if (!current.nominal || !current.real || !comparison.nominal || !comparison.real || !difference) {
+  throw new Error("The compound interest worked example must produce figures");
+}
+
+const values = {
+  principal: money(EXAMPLE_INPUTS.principal),
+  monthly: money(EXAMPLE_INPUTS.monthlyContribution),
+  months: formatNumber(locale, EXAMPLE_INPUTS.years * 12),
+  rate: percent(EXAMPLE_INPUTS.annualRate),
+  effectiveRate: percent(effectiveAnnualRate(EXAMPLE_INPUTS.annualRate), 2),
+  inflation: percent(EXAMPLE_INPUTS.inflationRate),
+  years: formatNumber(locale, EXAMPLE_INPUTS.years),
+  contributed: money(current.nominal.contributed),
+  growth: money(current.nominal.growth),
+  final: money(current.nominal.finalValue),
+  realContributed: money(current.real.contributed),
+  realGrowth: money(current.real.growth),
+  realFinal: money(current.real.finalValue),
+  comparisonMonthly: money(comparison.inputs.monthlyContribution),
+  extraContributed: money(difference.nominal.contributed),
+  extraFinal: money(difference.nominal.finalValue),
+  extraReal: money(difference.real.finalValue),
+  comparisonFinal: money(comparison.nominal.finalValue),
+  maxAmount: money(MAX_AMOUNT),
+  maxRate: MAX_RATE,
+  maxYears: MAX_YEARS,
+};
+
+const exampleSteps = ["exampleStep1", "exampleStep2", "exampleStep3"].map((key) =>
+  t(k(key), values),
+);
+const methodItems = ["methodMonthly", "methodInflation", "methodRounding", "methodRanges", "methodPrivacy"].map(
+  (key) => t(k(key), values),
+);
+const assumptions = ["assumption1", "assumption2", "assumption3", "assumption4"].map((key) =>
+  t(k(key)),
+);
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("whatHeading"))}</h2>
+    <p class="mt-4">{t(k("whatBody1"))}</p>
+    <p class="mt-4">{t(k("whatBody2"))}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("realHeading"))}</h2>
+    <p class="mt-4">{t(k("realBody1"))}</p>
+    <p class="mt-4">{t(k("realBody2"))}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("exampleHeading"))}</h2>
+    <p class="mt-4">{t(k("exampleIntro"), values)}</p>
+    <ol class="mt-4 list-decimal space-y-2 pl-6">
+      {exampleSteps.map((step) => <li>{step}</li>)}
+    </ol>
+    <p class="mt-4">{t(k("exampleComparison"), values)}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("methodHeading"))}</h2>
+    <p class="mt-4 rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
+      {t(k("methodFormula"))}
+    </p>
+    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
+      {t(k("methodRealFormula"))}
+    </p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methodItems.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("assumptionsHeading"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {assumptions.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="mt-4">{t(k("assumptionsNote"))}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("rateHeading"))}</h2>
+    <p class="mt-4">{t(k("rateBody1"))}</p>
+    <p class="mt-4">{t(k("rateBody2"))}</p>
+  </section>
+</div>

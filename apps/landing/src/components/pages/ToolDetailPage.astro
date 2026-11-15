@@ -2,6 +2,7 @@
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
 import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInterestCalculatorComp";
+import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuide.astro";
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
@@ -54,6 +55,11 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
 const nextStepCtaByRouteId: Partial<
   Record<ToolRouteId, { headline: string; description: string; ctaText?: string }>
 > = {
+  toolCompoundInterest: {
+    headline: t("tools.compoundInterest.nextStepHeadline"),
+    description: t("tools.compoundInterest.nextStepDescription"),
+    ctaText: t("tools.compoundInterest.nextStepCta"),
+  },
   toolDebtToIncome: {
     headline: t("tools.debtToIncome.ctaHeadline"),
     description: t("tools.debtToIncome.ctaDescription"),
@@ -138,6 +144,7 @@ const schema = {
     {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
   </div>
 
+  {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
   {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
   {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
   {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
