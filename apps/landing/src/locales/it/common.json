@@ -955,6 +955,135 @@
         "headline": "Segui questo mutuo accanto al tuo budget",
         "description": "Aggiungi il mutuo a WonderMoney con tasso e durata, collega la rata mensile e guarda il debito scendere accanto al tuo budget e al tuo patrimonio."
       }
+    },
+    "savingsGoal": {
+      "title": "Simulatore di risparmio",
+      "description": "Calcola quanto risparmiare al mese per un obiettivo, quanto tempo ti serve o quanto metterai da parte.",
+      "pageTitle": "Simulatore di risparmio: quanto risparmiare al mese — WonderMoney",
+      "pageDescription": "Simulatore di risparmio gratuito. Scopri quanto risparmiare ogni mese per raggiungere un obiettivo, quanto tempo ti serve o a quanto arriveranno i tuoi risparmi, con il rendimento e un piano anno per anno. Senza registrazione.",
+      "subtitle": "Scegli cosa calcolare: il versamento mensile che serve per un obiettivo, il tempo necessario al ritmo con cui riesci a risparmiare o quanto metterai da parte. Senza registrazione.",
+      "solveForLabel": "Cosa vuoi calcolare?",
+      "solveFor": {
+        "contribution": "Versamento mensile",
+        "time": "Tempo per l'obiettivo",
+        "finalAmount": "Importo finale"
+      },
+      "goalAmount": "Obiettivo di risparmio",
+      "goalAmountHelp": "La somma che vuoi aver messo da parte.",
+      "startingSavings": "Già risparmiato",
+      "startingSavingsHelp": "Facoltativo. Quello che hai già messo da parte per questo obiettivo.",
+      "monthlyContribution": "Versamento mensile",
+      "monthlyContributionHelp": "Quello che aggiungi alla fine di ogni mese.",
+      "period": "Durata del risparmio",
+      "periodYears": "Anni",
+      "periodMonths": "Mesi",
+      "periodHelp": "Fino a {{maxYears}} anni.",
+      "annualReturn": "Rendimento annuo atteso",
+      "annualReturnHelp": "Si parte dal {{rate}}. Usa 0% per denaro che non rende nulla.",
+      "answer": {
+        "contribution": "Versamento mensile necessario",
+        "time": "Tempo per l'obiettivo",
+        "finalAmount": "Importo finale"
+      },
+      "totalContributions": "Totale versato",
+      "totalGrowth": "Rendimento accumulato",
+      "finalBalance": "Saldo finale",
+      "alreadyThere": "Ci sei già",
+      "never": "Non a questo ritmo",
+      "overMaxYears": "Più di {{maxYears}} anni",
+      "durationYears": "{{count}} anni",
+      "durationYearsOne": "1 anno",
+      "durationMonths": "{{count}} mesi",
+      "durationMonthsOne": "1 mese",
+      "durationJoin": "{{years}} e {{months}}",
+      "status": {
+        "contribution": "Mettendo da parte {{contribution}} alla fine di ogni mese per {{period}}, arrivi a {{goal}}.",
+        "time": "Con {{contribution}} al mese arrivi a {{goal}} in {{period}}.",
+        "finalAmount": "Dopo {{period}} avresti {{final}}.",
+        "reached": "I {{savings}} che hai già coprono l'obiettivo, quindi non devi versare nulla.",
+        "reachedTime": "I {{savings}} che hai già coprono l'obiettivo: ci sei già.",
+        "growthAlone": "Con un rendimento del {{rate}} annuo, i tuoi {{savings}} superano l'obiettivo in {{period}} senza alcun versamento mensile.",
+        "growthAloneTime": "Senza versare nulla ogni mese, i tuoi {{savings}} arrivano a {{goal}} in {{period}} con un rendimento del {{rate}} annuo.",
+        "never": "Senza versamenti mensili e senza rendimento, i tuoi risparmi restano a {{savings}} e non raggiungono mai l'obiettivo. Aggiungi un versamento mensile per vedere quando ci arrivi.",
+        "beyondHorizon": "Con {{contribution}} al mese ti servirebbero più di {{maxYears}} anni per arrivare a {{goal}}. Prova con un versamento più alto o un obiettivo più piccolo.",
+        "tooLarge": "Il saldo supererebbe {{max}}, oltre quanto mostra questo simulatore. Prova con una durata più breve o un rendimento più basso.",
+        "tooLargeTotals": "In questo periodo il saldo supererebbe {{max}}, oltre quanto mostra questo simulatore, quindi i totali e il piano anno per anno non sono mostrati."
+      },
+      "assumptionsTitle": "Cosa presuppone questo calcolo",
+      "assumptionsReturn": "Un rendimento annuo costante, capitalizzato ogni mese, con ogni versamento aggiunto a fine mese.",
+      "assumptionsCosts": "Niente tasse, commissioni o inflazione.",
+      "errors": {
+        "summary": "Il risultato compare quando ogni campo ha un valore valido.",
+        "goalAmount": {
+          "required": "Inserisci la somma che vuoi raggiungere.",
+          "negative": "L'obiettivo non può essere negativo.",
+          "tooLarge": "Inserisci un obiettivo fino a {{max}}."
+        },
+        "startingSavings": {
+          "negative": "I risparmi non possono essere negativi. Inserisci 0 se parti da zero.",
+          "tooLarge": "Inserisci risparmi fino a {{max}}."
+        },
+        "monthlyContribution": {
+          "negative": "Il versamento non può essere negativo. Inserisci 0 per non versare nulla.",
+          "tooLarge": "Inserisci un versamento fino a {{max}}."
+        },
+        "period": {
+          "required": "Inserisci una durata di almeno 1 mese.",
+          "negative": "La durata non può essere negativa.",
+          "tooLarge": "Inserisci una durata fino a {{max}} anni."
+        },
+        "periodMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a {{max}} mesi; gli anni interi vanno in Anni."
+        },
+        "annualReturn": {
+          "negative": "Questo simulatore non considera rendimenti negativi. Inserisci 0% o più.",
+          "tooLarge": "Inserisci un rendimento fino a {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Anno per anno",
+        "description": "Quanto hai versato e quanto ha aggiunto il rendimento alla fine di ogni anno. Il saldo include quello che avevi già risparmiato.",
+        "chartLabel": "Grafico del saldo nel tempo, diviso tra quanto avevi già risparmiato, i tuoi versamenti e il rendimento. La tabella qui sotto riporta le stesse cifre.",
+        "yearAxis": "Anni",
+        "tooltipLabel": "Dopo {{duration}}",
+        "tooltipStart": "All'inizio",
+        "startingSavings": "Già risparmiato",
+        "contributions": "Versamenti",
+        "growth": "Rendimento",
+        "balance": "Saldo",
+        "period": "Periodo",
+        "yearLabel": "Anno {{year}}",
+        "monthLabel": "Mese {{month}}"
+      },
+      "guide": {
+        "whatTitle": "Tre modi per pianificare un obiettivo di risparmio",
+        "whatBody1": "Scegli cosa calcolare. Conosci l'obiettivo e la data? Scopri quanto mettere da parte ogni mese. Sai quanto riesci a risparmiare? Scopri quanto tempo ti serve. Non hai ancora una cifra in mente? Scopri quanto puoi mettere da parte nel periodo che scegli.",
+        "whatBody2": "Ogni risposta mostra quanto esce dalla tua tasca e quanto arriva dal rendimento, con un piano anno per anno, così vedi quale parte dell'obiettivo è denaro tuo.",
+        "relatedSavingsRate": "misura quale parte del tuo reddito risparmi ogni mese; questo simulatore parte da un obiettivo e calcola il piano per raggiungerlo.",
+        "relatedCompoundInterest": "mostra come cresce un investimento nel tempo, senza un obiettivo da raggiungere.",
+        "exampleTitle": "Un esempio pratico",
+        "exampleIntro": "Supponi di voler mettere insieme {{goal}} in {{years}} anni ({{months}} mesi). Hai già {{savings}} da parte e conti su un rendimento del {{rate}} annuo.",
+        "exampleStep1": "Tasso mensile: (1 + {{rate}})^(1/12) − 1, circa {{monthlyRate}} al mese.",
+        "exampleStep2": "Da soli, i tuoi {{savings}} crescono fino a {{savingsAlone}} in {{months}} mesi, quindi i versamenti e il loro rendimento devono coprire i {{gap}} che mancano.",
+        "exampleStep3": "Il versamento mensile più piccolo che ci arriva è {{contribution}}. In {{months}} mesi versi {{contributions}} e il rendimento aggiunge {{growth}}, per un totale di {{final}} alla fine.",
+        "exampleOutro": "Al contrario: se metti da parte una cifra tonda di {{rounded}} al mese, raggiungi l'obiettivo dopo {{timeMonths}} mesi, e alla fine dei {{years}} anni hai {{finalAmount}}.",
+        "methodTitle": "Come funziona il simulatore",
+        "methodIntro": "Il saldo rende una volta al mese e il versamento arriva alla fine di ogni mese. Dopo n mesi il saldo è:",
+        "methodLegend": "S è quanto hai già risparmiato, C il versamento mensile, r il tasso mensile e n il numero di mesi. Con un rendimento dello 0% non c'è nulla da dividere per r, e il saldo è semplicemente S + C × n.",
+        "methodRate": "Il tasso mensile r è quello che, capitalizzato per dodici mesi, dà il rendimento annuo: (1 + rendimento annuo)^(1/12) − 1. Dividere il rendimento annuo per 12 darebbe una cifra un po' più alta del vero.",
+        "methodOrder": "Il rendimento di ogni mese viene arrotondato al centesimo prima di aggiungere il versamento, così il piano anno per anno torna esattamente con i totali.",
+        "methodContribution": "Il versamento necessario si ottiene risolvendo la formula rispetto a C. Viene arrotondato per eccesso al centesimo e verificato mese per mese, perché arrivi davvero all'obiettivo.",
+        "methodTime": "Il tempo necessario è il primo mese intero in cui il saldo raggiunge l'obiettivo, cercato fino a {{maxYears}} anni.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionReturn": "Il rendimento è lo stesso ogni anno. Nella realtà varia, e gli investimenti possono perdere valore.",
+        "assumptionCosts": "Dal rendimento non si sottraggono tasse, commissioni o altri costi.",
+        "assumptionInflation": "Niente inflazione: l'obiettivo è espresso in euro del giorno in cui lo raggiungi, che comprano meno della stessa somma oggi.",
+        "assumptionLimits": "Importi fino a {{maxAmount}}, rendimenti dallo 0% al {{maxReturn}} annuo e durate fino a {{maxYears}} anni."
+      },
+      "nextStepHeadline": "Trasforma il versamento necessario in un obiettivo ricorrente",
+      "nextStepDescription": "Crea l'obiettivo in WonderMoney con l'importo, la data e il versamento mensile, e segui i tuoi progressi con i saldi reali dei tuoi conti.",
+      "nextStepCta": "Crea obiettivo"
     }
   },
   "learn": {

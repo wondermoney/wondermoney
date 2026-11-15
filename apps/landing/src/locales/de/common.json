@@ -955,6 +955,135 @@
         "headline": "Behalten Sie dieses Darlehen neben Ihrem Budget im Blick",
         "description": "Erfassen Sie die Hypothek in WonderMoney mit Zinssatz und Laufzeit, verknüpfen Sie die Monatsrate und sehen Sie, wie die Schuld neben Ihrem Budget und Ihrem Vermögen sinkt."
       }
+    },
+    "savingsGoal": {
+      "title": "Sparzielrechner",
+      "description": "Berechnen Sie, wie viel Sie monatlich für ein Ziel sparen müssen, wie lange es dauert oder was am Ende zusammenkommt.",
+      "pageTitle": "Sparzielrechner: Wie viel monatlich sparen? — WonderMoney",
+      "pageDescription": "Kostenloser Sparzielrechner. Sehen Sie, wie viel Sie monatlich sparen müssen, um ein Ziel zu erreichen, wie lange es dauert oder was aus Ihrem Ersparten wird, mit Zinserträgen und einem Plan Jahr für Jahr. Ohne Anmeldung.",
+      "subtitle": "Wählen Sie, was Sie berechnen möchten: die monatliche Sparrate, die ein Ziel braucht, die Zeit bis zum Ziel bei Ihrem Spartempo oder den Betrag, der am Ende zusammenkommt. Keine Anmeldung nötig.",
+      "solveForLabel": "Was möchten Sie berechnen?",
+      "solveFor": {
+        "contribution": "Monatliche Sparrate",
+        "time": "Zeit bis zum Ziel",
+        "finalAmount": "Endbetrag"
+      },
+      "goalAmount": "Sparziel",
+      "goalAmountHelp": "Der Betrag, den Sie gespart haben möchten.",
+      "startingSavings": "Bereits gespart",
+      "startingSavingsHelp": "Optional. Was Sie schon für dieses Ziel zurückgelegt haben.",
+      "monthlyContribution": "Monatliche Sparrate",
+      "monthlyContributionHelp": "Was Sie am Ende jedes Monats einzahlen.",
+      "period": "Spardauer",
+      "periodYears": "Jahre",
+      "periodMonths": "Monate",
+      "periodHelp": "Bis zu {{maxYears}} Jahre.",
+      "annualReturn": "Erwartete jährliche Rendite",
+      "annualReturnHelp": "Zum Start {{rate}}. Geben Sie 0 % für Geld ein, das nichts abwirft.",
+      "answer": {
+        "contribution": "Nötige monatliche Sparrate",
+        "time": "Zeit bis zum Ziel",
+        "finalAmount": "Endbetrag"
+      },
+      "totalContributions": "Summe der Einzahlungen",
+      "totalGrowth": "Zinserträge",
+      "finalBalance": "Endsaldo",
+      "alreadyThere": "Schon erreicht",
+      "never": "Nicht in diesem Tempo",
+      "overMaxYears": "Mehr als {{maxYears}} Jahre",
+      "durationYears": "{{count}} Jahre",
+      "durationYearsOne": "1 Jahr",
+      "durationMonths": "{{count}} Monate",
+      "durationMonthsOne": "1 Monat",
+      "durationJoin": "{{years}} und {{months}}",
+      "status": {
+        "contribution": "Legen Sie {{period}} lang am Ende jedes Monats {{contribution}} zurück, erreichen Sie {{goal}}.",
+        "time": "Mit {{contribution}} im Monat brauchen Sie {{period}} bis zu {{goal}}.",
+        "finalAmount": "Sparen Sie {{period}} lang, haben Sie am Ende {{final}}.",
+        "reached": "Ihre {{savings}} decken das Ziel bereits, Sie müssen also nichts mehr einzahlen.",
+        "reachedTime": "Ihre {{savings}} decken das Ziel bereits: Sie sind schon am Ziel.",
+        "growthAlone": "Bei {{rate}} Rendite im Jahr wachsen Ihre {{savings}} in der gewählten Spardauer ({{period}}) ganz ohne monatliche Einzahlung über das Ziel hinaus.",
+        "growthAloneTime": "Ganz ohne monatliche Einzahlung wachsen Ihre {{savings}} bei {{rate}} Rendite im Jahr auf {{goal}}. Dauer: {{period}}.",
+        "never": "Ohne monatliche Einzahlung und ohne Rendite bleibt Ihr Erspartes bei {{savings}} und erreicht das Ziel nie. Geben Sie eine monatliche Sparrate ein, um zu sehen, wann Sie es schaffen.",
+        "beyondHorizon": "Mit {{contribution}} im Monat bräuchten Sie mehr als {{maxYears}} Jahre bis zu {{goal}}. Versuchen Sie es mit einer höheren Sparrate oder einem kleineren Ziel.",
+        "tooLarge": "Der Saldo würde {{max}} übersteigen, mehr als dieser Rechner anzeigt. Versuchen Sie es mit einer kürzeren Spardauer oder einer niedrigeren Rendite.",
+        "tooLargeTotals": "Über diese Spardauer würde der Saldo {{max}} übersteigen, mehr als dieser Rechner anzeigt. Summen und Plan Jahr für Jahr werden daher nicht gezeigt."
+      },
+      "assumptionsTitle": "Davon geht die Rechnung aus",
+      "assumptionsReturn": "Eine gleichbleibende jährliche Rendite, monatlich verzinst, und jede Einzahlung am Monatsende.",
+      "assumptionsCosts": "Keine Steuern, Gebühren oder Inflation.",
+      "errors": {
+        "summary": "Ihr Ergebnis erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "goalAmount": {
+          "required": "Geben Sie den Betrag ein, den Sie erreichen möchten.",
+          "negative": "Das Sparziel kann nicht negativ sein.",
+          "tooLarge": "Geben Sie ein Sparziel von höchstens {{max}} ein."
+        },
+        "startingSavings": {
+          "negative": "Das Ersparte kann nicht negativ sein. Geben Sie 0 ein, wenn Sie bei null anfangen.",
+          "tooLarge": "Geben Sie höchstens {{max}} als Erspartes ein."
+        },
+        "monthlyContribution": {
+          "negative": "Die Sparrate kann nicht negativ sein. Geben Sie 0 ein, wenn Sie nichts einzahlen.",
+          "tooLarge": "Geben Sie eine Sparrate von höchstens {{max}} ein."
+        },
+        "period": {
+          "required": "Geben Sie eine Spardauer von mindestens 1 Monat ein.",
+          "negative": "Die Spardauer kann nicht negativ sein.",
+          "tooLarge": "Geben Sie eine Spardauer von höchstens {{max}} Jahren ein."
+        },
+        "periodMonths": {
+          "negative": "Die Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis {{max}} Monate ein; volle Jahre gehören unter Jahre."
+        },
+        "annualReturn": {
+          "negative": "Negative Renditen bildet dieser Rechner nicht ab. Geben Sie 0 % oder mehr ein.",
+          "tooLarge": "Geben Sie eine Rendite von höchstens {{max}} ein."
+        }
+      },
+      "schedule": {
+        "title": "Jahr für Jahr",
+        "description": "Was Sie eingezahlt haben und was die Zinsen bis zum Ende jedes Jahres beigetragen haben. Der Saldo enthält, was Sie schon gespart hatten.",
+        "chartLabel": "Diagramm Ihres Saldos im Zeitverlauf, aufgeteilt in bereits Gespartes, Ihre Einzahlungen und Zinserträge. Die Tabelle darunter zeigt dieselben Zahlen.",
+        "yearAxis": "Jahre",
+        "tooltipLabel": "Spardauer: {{duration}}",
+        "tooltipStart": "Start",
+        "startingSavings": "Bereits gespart",
+        "contributions": "Einzahlungen",
+        "growth": "Zinserträge",
+        "balance": "Saldo",
+        "period": "Zeitraum",
+        "yearLabel": "Jahr {{year}}",
+        "monthLabel": "Monat {{month}}"
+      },
+      "guide": {
+        "whatTitle": "Drei Wege, ein Sparziel zu planen",
+        "whatBody1": "Wählen Sie, was Sie berechnen möchten. Sie kennen Ziel und Termin? Sehen Sie, wie viel Sie jeden Monat zurücklegen müssen. Sie wissen, wie viel Sie sparen können? Sehen Sie, wie lange es bis zum Ziel dauert. Noch keinen Betrag im Kopf? Sehen Sie, was in einem Zeitraum Ihrer Wahl zusammenkommt.",
+        "whatBody2": "Jede Antwort zeigt, wie viel aus Ihrer eigenen Tasche kommt und wie viel aus Zinsen, mit einem Plan Jahr für Jahr. So sehen Sie, welcher Teil des Ziels Ihr eigenes Geld ist.",
+        "relatedSavingsRate": "misst, welchen Anteil Ihres Einkommens Sie jeden Monat sparen; dieser Rechner geht von einem Ziel aus und berechnet den Plan dorthin.",
+        "relatedCompoundInterest": "zeigt, wie eine Geldanlage mit der Zeit wächst, ohne ein Ziel, das erreicht werden soll.",
+        "exampleTitle": "Ein Rechenbeispiel",
+        "exampleIntro": "Angenommen, Sie möchten in {{years}} Jahren ({{months}} Monaten) {{goal}} zusammenhaben. Sie haben schon {{savings}} gespart und rechnen mit {{rate}} Rendite im Jahr.",
+        "exampleStep1": "Monatszins: (1 + {{rate}})^(1/12) − 1, etwa {{monthlyRate}} im Monat.",
+        "exampleStep2": "Für sich allein wachsen Ihre {{savings}} in {{months}} Monaten auf {{savingsAlone}}. Die Einzahlungen und ihre Zinsen müssen also die restlichen {{gap}} abdecken.",
+        "exampleStep3": "Die kleinste monatliche Sparrate, die dafür reicht, ist {{contribution}}. In {{months}} Monaten zahlen Sie {{contributions}} ein und die Zinsen bringen {{growth}}, zusammen {{final}} am Ende.",
+        "exampleOutro": "Andersherum: Legen Sie stattdessen glatte {{rounded}} im Monat zurück, erreichen Sie das Ziel nach {{timeMonths}} Monaten und haben nach den {{years}} Jahren {{finalAmount}}.",
+        "methodTitle": "So rechnet der Rechner",
+        "methodIntro": "Der Saldo wird einmal im Monat verzinst, die Einzahlung kommt am Ende jedes Monats dazu. Nach n Monaten beträgt er:",
+        "methodLegend": "S ist Ihr bereits Erspartes, C die monatliche Sparrate, r der Monatszins und n die Zahl der Monate. Bei 0 % Rendite gibt es nichts durch r zu teilen, und der Saldo ist einfach S + C × n.",
+        "methodRate": "Der Monatszins r ist der Zins, der über zwölf Monate verzinst die Jahresrendite ergibt: (1 + Jahresrendite)^(1/12) − 1. Die Jahresrendite einfach durch 12 zu teilen, ergäbe einen etwas zu hohen Wert.",
+        "methodOrder": "Die Zinsen jedes Monats werden auf den Cent gerundet, bevor die Einzahlung dazukommt. So passt der Plan Jahr für Jahr genau zu den Summen.",
+        "methodContribution": "Die nötige Sparrate ergibt sich, wenn man die Formel nach C auflöst. Sie wird auf den Cent aufgerundet und Monat für Monat geprüft, damit sie das Ziel wirklich erreicht.",
+        "methodTime": "Die nötige Zeit ist der erste volle Monat, in dem der Saldo das Ziel erreicht; gesucht wird bis zu {{maxYears}} Jahre.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionReturn": "Die Rendite ist jedes Jahr gleich. In Wirklichkeit schwankt sie, und Geldanlagen können an Wert verlieren.",
+        "assumptionCosts": "Von den Zinserträgen werden keine Steuern, Gebühren oder sonstigen Kosten abgezogen.",
+        "assumptionInflation": "Keine Inflation: Das Ziel ist in Euro des Tages angegeben, an dem Sie es erreichen, und dafür bekommen Sie weniger als für denselben Betrag heute.",
+        "assumptionLimits": "Beträge bis {{maxAmount}}, Renditen von 0 % bis {{maxReturn}} im Jahr und eine Spardauer bis {{maxYears}} Jahre."
+      },
+      "nextStepHeadline": "Machen Sie aus der nötigen Sparrate ein wiederkehrendes Ziel",
+      "nextStepDescription": "Legen Sie das Ziel in WonderMoney mit Betrag, Termin und monatlicher Sparrate an und verfolgen Sie Ihren Fortschritt mit den echten Salden Ihrer Konten.",
+      "nextStepCta": "Ziel anlegen"
     }
   },
   "learn": {

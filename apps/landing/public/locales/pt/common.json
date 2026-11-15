@@ -955,6 +955,135 @@
         "headline": "Acompanha este crédito ao lado do teu orçamento",
         "description": "Adiciona o crédito habitação ao WonderMoney com a taxa e o prazo, associa a prestação mensal e vê a dívida a descer ao lado do teu orçamento e do teu património."
       }
+    },
+    "savingsGoal": {
+      "title": "Simulador de poupança",
+      "description": "Calcula quanto poupar por mês para um objetivo, quanto tempo demoras a lá chegar ou quanto vais juntar.",
+      "pageTitle": "Simulador de poupança: quanto poupar por mês — WonderMoney",
+      "pageDescription": "Simulador de poupança gratuito. Vê quanto tens de poupar por mês para chegar a um objetivo, em quanto tempo lá chegas ou quanto vais juntar, com o rendimento e um plano ano a ano. Sem registo.",
+      "subtitle": "Escolhe o que queres calcular: a contribuição mensal de que um objetivo precisa, o tempo que demora ao ritmo a que consegues poupar ou quanto vais juntar. Sem registo.",
+      "solveForLabel": "O que queres calcular?",
+      "solveFor": {
+        "contribution": "Contribuição mensal",
+        "time": "Tempo até ao objetivo",
+        "finalAmount": "Valor final"
+      },
+      "goalAmount": "Objetivo de poupança",
+      "goalAmountHelp": "O valor que queres ter poupado.",
+      "startingSavings": "Já poupado",
+      "startingSavingsHelp": "Opcional. O que já tens de parte para este objetivo.",
+      "monthlyContribution": "Contribuição mensal",
+      "monthlyContributionHelp": "O que pões de parte no fim de cada mês.",
+      "period": "Período de poupança",
+      "periodYears": "Anos",
+      "periodMonths": "Meses",
+      "periodHelp": "Até {{maxYears}} anos.",
+      "annualReturn": "Rendimento anual esperado",
+      "annualReturnHelp": "Começa em {{rate}}. Usa 0% para dinheiro que não rende nada.",
+      "answer": {
+        "contribution": "Contribuição mensal necessária",
+        "time": "Tempo até ao objetivo",
+        "finalAmount": "Valor final"
+      },
+      "totalContributions": "Total de contribuições",
+      "totalGrowth": "Rendimento acumulado",
+      "finalBalance": "Saldo final",
+      "alreadyThere": "Já lá estás",
+      "never": "Não a este ritmo",
+      "overMaxYears": "Mais de {{maxYears}} anos",
+      "durationYears": "{{count}} anos",
+      "durationYearsOne": "1 ano",
+      "durationMonths": "{{count}} meses",
+      "durationMonthsOne": "1 mês",
+      "durationJoin": "{{years}} e {{months}}",
+      "status": {
+        "contribution": "Ao pores de parte {{contribution}} no fim de cada mês durante {{period}}, chegas aos {{goal}}.",
+        "time": "Com {{contribution}} por mês, chegas aos {{goal}} em {{period}}.",
+        "finalAmount": "Ao fim de {{period}}, terias {{final}}.",
+        "reached": "Os {{savings}} que já tens cobrem o objetivo, por isso não precisas de juntar nada.",
+        "reachedTime": "Os {{savings}} que já tens cobrem o objetivo: já lá estás.",
+        "growthAlone": "Com um rendimento de {{rate}} por ano, os teus {{savings}} ultrapassam o objetivo em {{period}} sem juntares nada por mês.",
+        "growthAloneTime": "Sem juntares nada por mês, os teus {{savings}} chegam aos {{goal}} em {{period}}, com um rendimento de {{rate}} por ano.",
+        "never": "Sem contribuição mensal e sem rendimento, a tua poupança fica em {{savings}} e nunca chega ao objetivo. Junta uma contribuição mensal para veres quando lá chegas.",
+        "beyondHorizon": "Com {{contribution}} por mês, demorarias mais de {{maxYears}} anos a chegar aos {{goal}}. Experimenta uma contribuição maior ou um objetivo mais pequeno.",
+        "tooLarge": "O saldo passaria de {{max}}, mais do que este simulador mostra. Experimenta um período mais curto ou um rendimento mais baixo.",
+        "tooLargeTotals": "Neste período o saldo passaria de {{max}}, mais do que este simulador mostra, por isso os totais e o plano ano a ano ficam de fora."
+      },
+      "assumptionsTitle": "O que este cálculo assume",
+      "assumptionsReturn": "Um rendimento anual constante, capitalizado todos os meses, com cada contribuição somada no fim do mês.",
+      "assumptionsCosts": "Sem impostos, comissões nem inflação.",
+      "errors": {
+        "summary": "O resultado aparece quando todos os campos tiverem um valor válido.",
+        "goalAmount": {
+          "required": "Introduz o valor que queres atingir.",
+          "negative": "O objetivo não pode ser negativo.",
+          "tooLarge": "Introduz um objetivo até {{max}}."
+        },
+        "startingSavings": {
+          "negative": "A poupança não pode ser negativa. Introduz 0 se começas do zero.",
+          "tooLarge": "Introduz uma poupança até {{max}}."
+        },
+        "monthlyContribution": {
+          "negative": "A contribuição não pode ser negativa. Introduz 0 para não juntar nada.",
+          "tooLarge": "Introduz uma contribuição até {{max}}."
+        },
+        "period": {
+          "required": "Introduz um período de pelo menos 1 mês.",
+          "negative": "O período não pode ser negativo.",
+          "tooLarge": "Introduz um período até {{max}} anos."
+        },
+        "periodMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Introduz entre 0 e {{max}} meses; os anos completos vão em Anos."
+        },
+        "annualReturn": {
+          "negative": "Este simulador não considera rendimentos negativos. Introduz 0% ou mais.",
+          "tooLarge": "Introduz um rendimento até {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Ano a ano",
+        "description": "O que já puseste de parte e o que o rendimento somou até ao fim de cada ano. O saldo inclui o que já tinhas poupado.",
+        "chartLabel": "Gráfico do saldo ao longo do tempo, dividido entre o que já tinhas poupado, as tuas contribuições e o rendimento. A tabela abaixo tem os mesmos valores.",
+        "yearAxis": "Anos",
+        "tooltipLabel": "Ao fim de {{duration}}",
+        "tooltipStart": "No início",
+        "startingSavings": "Já poupado",
+        "contributions": "Contribuições",
+        "growth": "Rendimento",
+        "balance": "Saldo",
+        "period": "Período",
+        "yearLabel": "Ano {{year}}",
+        "monthLabel": "Mês {{month}}"
+      },
+      "guide": {
+        "whatTitle": "Três formas de planear um objetivo de poupança",
+        "whatBody1": "Escolhe o que queres calcular. Sabes o objetivo e a data? Vê quanto tens de pôr de parte por mês. Sabes quanto consegues poupar? Vê quanto tempo demoras a lá chegar. Ainda não tens um valor em mente? Vê quanto podes juntar no período que escolheres.",
+        "whatBody2": "Cada resposta mostra quanto sai do teu bolso e quanto vem do rendimento, com um plano ano a ano, para veres que parte do objetivo é dinheiro teu.",
+        "relatedSavingsRate": "mede que parte do que ganhas consegues poupar todos os meses; este simulador parte de um objetivo e calcula o plano para lá chegar.",
+        "relatedCompoundInterest": "mostra como um investimento cresce ao longo do tempo, sem um objetivo a atingir.",
+        "exampleTitle": "Um exemplo prático",
+        "exampleIntro": "Imagina que queres juntar {{goal}} em {{years}} anos ({{months}} meses). Já tens {{savings}} de parte e contas com um rendimento de {{rate}} por ano.",
+        "exampleStep1": "Taxa mensal: (1 + {{rate}})^(1/12) − 1, cerca de {{monthlyRate}} por mês.",
+        "exampleStep2": "Sozinhos, os teus {{savings}} crescem para {{savingsAlone}} em {{months}} meses, por isso as contribuições e o rendimento delas têm de cobrir os {{gap}} que faltam.",
+        "exampleStep3": "A contribuição mensal mais pequena que lá chega é {{contribution}}. Em {{months}} meses pões de parte {{contributions}} e o rendimento soma {{growth}}, para um total de {{final}} no fim.",
+        "exampleOutro": "Ao contrário: se puseres de parte {{rounded}} por mês, um valor redondo, chegas ao objetivo ao fim de {{timeMonths}} meses, e no fim dos {{years}} anos tens {{finalAmount}}.",
+        "methodTitle": "Como funciona o simulador",
+        "methodIntro": "O saldo rende uma vez por mês e a contribuição entra no fim de cada mês. Ao fim de n meses, o saldo é:",
+        "methodLegend": "S é o que já tens poupado, C a contribuição mensal, r a taxa mensal e n o número de meses. Com um rendimento de 0% não há nada a dividir por r, e o saldo é simplesmente S + C × n.",
+        "methodRate": "A taxa mensal r é a que, capitalizada durante doze meses, dá o rendimento anual: (1 + rendimento anual)^(1/12) − 1. Dividir o rendimento anual por 12 dava um valor um pouco acima do real.",
+        "methodOrder": "O rendimento de cada mês é arredondado ao cêntimo antes de a contribuição entrar, por isso o plano ano a ano bate certo com os totais.",
+        "methodContribution": "A contribuição necessária obtém-se resolvendo a fórmula em ordem a C. É arredondada para cima ao cêntimo e confirmada mês a mês, para chegar mesmo ao objetivo.",
+        "methodTime": "O tempo necessário é o primeiro mês completo em que o saldo chega ao objetivo, procurado até {{maxYears}} anos.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionReturn": "O rendimento é igual todos os anos. Na realidade varia, e os investimentos podem perder valor.",
+        "assumptionCosts": "Não se descontam impostos, comissões nem outros custos ao rendimento.",
+        "assumptionInflation": "Sem inflação: o objetivo está em euros do dia em que lá chegas, que compram menos do que o mesmo valor hoje.",
+        "assumptionLimits": "Valores até {{maxAmount}}, rendimentos de 0% a {{maxReturn}} por ano e períodos até {{maxYears}} anos."
+      },
+      "nextStepHeadline": "Transforma a contribuição necessária num objetivo recorrente",
+      "nextStepDescription": "Cria o objetivo no WonderMoney com o valor, a data e a contribuição mensal, e acompanha o progresso com os saldos reais das tuas contas.",
+      "nextStepCta": "Criar objetivo"
     }
   },
   "learn": {

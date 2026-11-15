@@ -14,6 +14,8 @@ import MortgageCalculatorComp from "@/components/calculators/MortgageCalculatorC
 import MortgageCalculatorGuide from "@/components/calculators/MortgageCalculatorGuide.astro";
 import HouseholdBudgetCalculatorComp from "@/components/calculators/HouseholdBudgetCalculatorComp";
 import HouseholdBudgetGuide from "@/components/calculators/HouseholdBudgetGuide.astro";
+import SavingsGoalCalculatorComp from "@/components/calculators/SavingsGoalCalculatorComp";
+import SavingsGoalGuide from "@/components/calculators/SavingsGoalGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -38,6 +40,7 @@ const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
   toolEmergencyFund: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
   toolMortgage: ["toolDebtToIncome", "toolSavingsRate", "toolNetWorth"],
   toolHouseholdBudget: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+  toolSavingsGoal: ["toolCompoundInterest", "toolSavingsRate", "toolEmergencyFund"],
 };
 
 const toolKeyByRouteId: Record<ToolRouteId, string> = {
@@ -49,6 +52,7 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
   toolEmergencyFund: "emergencyFund",
   toolMortgage: "mortgage",
   toolHouseholdBudget: "householdBudget",
+  toolSavingsGoal: "savingsGoal",
 };
 
 // Tools whose closing call to action names their own next step in the app.
@@ -76,6 +80,11 @@ const nextStepCtaByRouteId: Partial<
   toolHouseholdBudget: {
     headline: t("tools.householdBudget.ctaHeadline"),
     description: t("tools.householdBudget.ctaDescription"),
+  },
+  toolSavingsGoal: {
+    headline: t("tools.savingsGoal.nextStepHeadline"),
+    description: t("tools.savingsGoal.nextStepDescription"),
+    ctaText: t("tools.savingsGoal.nextStepCta"),
   },
 };
 
@@ -142,6 +151,7 @@ const schema = {
     {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
     {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
     {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
+    {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -149,6 +159,7 @@ const schema = {
   {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
   {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
   {routeId === "toolHouseholdBudget" && <HouseholdBudgetGuide locale={locale} />}
+  {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />
