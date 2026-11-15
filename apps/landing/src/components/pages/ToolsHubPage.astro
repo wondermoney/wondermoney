@@ -1,6 +1,7 @@
 ---
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import { buttonVariants } from "@/components/ui/button";
 import { buildAlternateLinksForPath, toToolsHubPath, type Lang } from "@/lib/routes";
 import { buildToolsHub, buildToolsHubItemList, toolAnalyticsName } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
@@ -48,7 +49,7 @@ const itemListSchema = buildToolsHubItemList(locale, t);
                 href={`#${group.anchor}`}
                 data-tools-hub-link="task"
                 data-group={group.id}
-                class="inline-flex h-10 items-center rounded-md border border-input bg-secondary px-4 text-sm font-medium text-secondary-foreground transition-colors hover:bg-paper-3"
+                class={buttonVariants({ variant: "secondary" })}
               >
                 {t(`tools.hub.groups.${group.id}.title`)}
               </a>

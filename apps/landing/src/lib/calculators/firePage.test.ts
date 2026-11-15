@@ -63,7 +63,7 @@ describe("FIRE calculator page", () => {
 		}
 	})
 
-	it("is an available card on the tools hub in every locale, with its title and link", () => {
+	it("is listed on the tools hub in every locale, with its title and link", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
 			const fire = hubTools.find((tool) => tool.routeId === "pageFireCalculator")

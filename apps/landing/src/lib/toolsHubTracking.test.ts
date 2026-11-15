@@ -13,10 +13,16 @@ afterEach(() => {
 	pushGtmEvent.mockReset()
 })
 
+type Listener = (event: { target: unknown; button?: number }) => void
+
+function dispatch(type: "click" | "auxclick", target: unknown, button = type === "click" ? 0 : 1) {
+	const listeners: Partial<Record<string, Listener>> = {}
+	trackToolsHubClicks({ addEventListener: (eventType, handler) => (listeners[eventType] = handler) })
+	listeners[type]?.({ target, button })
+}
+
 function clickOn(target: unknown) {
-	let listener: ((event: { target: unknown }) => void) | undefined
-	trackToolsHubClicks({ addEventListener: (_type, handler) => (listener = handler) })
-	listener?.({ target })
+	dispatch("click", target)
 }
 
 // A clicked element inside a link that carries the given data attributes.
@@ -47,6 +53,24 @@ describe("tools hub click tracking", () => {
 			tool_group: "investAndGrow",
 			page_type: "tools",
 		})
+	})
+
+	it("counts a middle-click that opens a tool in a new tab", () => {
+		dispatch("auxclick", insideLink({ toolsHubLink: "tool", tool: "fire", group: "investAndGrow", position: "9" }))
+
+		expect(pushGtmEvent).toHaveBeenCalledWith({
+			event: "tool_hub_click",
+			tool: "fire",
+			tool_group: "investAndGrow",
+			position: 9,
+			page_type: "tools",
+		})
+	})
+
+	it("ignores other auxiliary buttons, such as a right-click", () => {
+		dispatch("auxclick", insideLink({ toolsHubLink: "tool", tool: "fire", group: "investAndGrow", position: "9" }), 2)
+
+		expect(pushGtmEvent).not.toHaveBeenCalled()
 	})
 
 	it("ignores clicks outside the hub's links", () => {

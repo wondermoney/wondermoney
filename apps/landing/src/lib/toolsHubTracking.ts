@@ -37,14 +37,25 @@ export function toolsHubClickEvent(link: { dataset: LinkData }) {
 	return undefined
 }
 
-/** Counts clicks on the hub's marked links, through the consent-gated GTM and PostHog push. */
+type ClickEvent = { target: unknown; button?: number }
+
+/**
+ * Counts clicks on the hub's marked links, through the consent-gated GTM and PostHog push: a
+ * primary click, and a middle-click (`auxclick` with button 1), which opens the link in a new tab
+ * without firing `click`.
+ */
 export function trackToolsHubClicks(root: {
-	addEventListener: (type: "click", listener: (event: { target: unknown }) => void) => void
+	addEventListener: (type: "click" | "auxclick", listener: (event: ClickEvent) => void) => void
 }): void {
-	root.addEventListener("click", (event) => {
+	const count = (event: ClickEvent) => {
 		const link = (event.target as ClickTarget)?.closest?.(`[${TOOLS_HUB_LINK_ATTRIBUTE}]`)
 		const payload = link ? toolsHubClickEvent(link) : undefined
 
 		if (payload) pushGtmEvent(payload)
+	}
+
+	root.addEventListener("click", count)
+	root.addEventListener("auxclick", (event) => {
+		if (event.button === 1) count(event)
 	})
 }
