@@ -18,8 +18,11 @@ import { formatMoney, formatNumber, toIntlLocale } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { cn } from "@/lib/utils";
 
-/** Quiet time after the last edit before a calculation counts as completed. */
-const COMPLETION_DELAY_MS = 1500;
+/**
+ * Quiet time after an edit before `tool_used` fires, so the outcome it reports
+ * is not read halfway through typing a number.
+ */
+const USAGE_SETTLE_MS = 1500;
 
 export default function EmergencyFundCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -55,14 +58,14 @@ function EmergencyFundCalculatorContent() {
     [monthlyExpenses, monthsOfCover, currentSavings, monthlyContribution],
   );
 
-  // A completion is the visitor's own calculation, so the starting example
-  // does not count until they change an input.
+  // Use means the visitor's own calculation, so the starting example does not
+  // count until they change an input.
   const edited = useRef(false);
   const edit = (setter: (value: number) => void) => (value: number) => {
     edited.current = true;
     setter(value);
   };
-  useCompletionTracking(result, edited);
+  useUsageTracking(result, edited);
 
   const money = (value: number) =>
     formatMoney(locale, value, { decimals: Number.isInteger(value) ? 0 : 2 });
@@ -210,11 +213,11 @@ function EmergencyFundCalculatorContent() {
 type Translate = ReturnType<typeof useTranslations>["t"];
 
 /**
- * One `tool_complete` event per page view, once the visitor has changed an
- * input and left it for a moment. It carries the outcome and the months of
- * cover, never the amounts.
+ * One `tool_used` event per page view, the event every landing tool sends
+ * (`tool`, `page_type`), fired after the first edit once the input settles. It
+ * also carries the outcome and the months of cover, never the amounts.
  */
-function useCompletionTracking(result: EmergencyFundResult, edited: RefObject<boolean>) {
+function useUsageTracking(result: EmergencyFundResult, edited: RefObject<boolean>) {
   const tracked = useRef(false);
 
   useEffect(() => {
@@ -222,13 +225,13 @@ function useCompletionTracking(result: EmergencyFundResult, edited: RefObject<bo
     const timer = window.setTimeout(() => {
       tracked.current = true;
       pushGtmEvent({
-        event: "tool_complete",
+        event: "tool_used",
         tool: "emergency_fund",
         status: result.status,
         months_of_cover: result.monthsOfCover,
         page_type: getPageType(),
       });
-    }, COMPLETION_DELAY_MS);
+    }, USAGE_SETTLE_MS);
     return () => window.clearTimeout(timer);
   }, [result, edited]);
 }
