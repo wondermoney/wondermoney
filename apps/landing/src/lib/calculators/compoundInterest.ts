@@ -80,7 +80,10 @@ type ResultBase = {
   inputs: CompoundInterestParams;
   /** True when an input was negative or above its range and was adjusted. */
   adjusted: boolean;
-  /** True when there is inflation and it is at or above the return entered. */
+  /**
+   * True when there is inflation and it is at or above what the return earns
+   * over a year once compounded monthly (7% earns 7.23%), so both rates are annual.
+   */
   inflationAtOrAboveReturn: boolean;
 };
 
@@ -151,7 +154,8 @@ export function computeCompoundInterest(params: CompoundInterestParams): Compoun
       years: years.value,
     },
     adjusted: [principal, contribution, annualRate, inflationRate, years].some((c) => c.adjusted),
-    inflationAtOrAboveReturn: inflationRate.value > 0 && inflationRate.value >= annualRate.value,
+    inflationAtOrAboveReturn:
+      inflationRate.value > 0 && inflationRate.value >= effectiveAnnualRate(annualRate.value),
   };
 
   const monthlyRate = annualRate.value / 100 / 12;
@@ -159,7 +163,8 @@ export function computeCompoundInterest(params: CompoundInterestParams): Compoun
   const contributionCents = Math.round(contribution.value * 100);
   const maxCents = MAX_RESULT * 100;
 
-  let balanceCents = Math.round(principal.value * 100);
+  const principalCents = Math.round(principal.value * 100);
+  let balanceCents = principalCents;
   let contributedCents = balanceCents;
   // Each euro paid in, restated in today's money at the month it is paid.
   let realContributedCents = balanceCents;
@@ -189,8 +194,9 @@ export function computeCompoundInterest(params: CompoundInterestParams): Compoun
   }
 
   const realFinalCents = balanceCents / monthlyInflation ** (years.value * 12);
+  // Judged in cents: amounts that round to nothing invest nothing.
   const status =
-    principal.value === 0 && contribution.value === 0
+    principalCents === 0 && contributionCents === 0
       ? "nothingInvested"
       : years.value === 0
         ? "noPeriod"
@@ -205,11 +211,15 @@ export function computeCompoundInterest(params: CompoundInterestParams): Compoun
   };
 }
 
-/** The comparison's starting amount: 50% above the current contribution, in whole euros. */
+/**
+ * The comparison's starting amount: 50% above the current contribution,
+ * rounded up to whole euros so it never starts below it, or COMPARISON_FALLBACK
+ * when there is no contribution to the cent.
+ */
 export function defaultComparisonContribution(monthlyContribution: number): number {
   const current = clamp(monthlyContribution, MAX_AMOUNT).value;
-  if (current === 0) return COMPARISON_FALLBACK;
-  return Math.min(MAX_AMOUNT, Math.round(current * (1 + COMPARISON_UPLIFT)));
+  if (Math.round(current * 100) === 0) return COMPARISON_FALLBACK;
+  return Math.min(MAX_AMOUNT, Math.max(current, Math.ceil(current * (1 + COMPARISON_UPLIFT))));
 }
 
 const subtract = (a: CompoundInterestTotals, b: CompoundInterestTotals): CompoundInterestTotals => ({

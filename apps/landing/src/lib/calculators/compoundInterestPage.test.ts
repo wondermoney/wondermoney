@@ -94,6 +94,16 @@ describe("compound interest tool page", () => {
 		expect(new Set(copies.map((copy) => copy.pageDescription)).size).toBe(SUPPORTED_LANGS.length)
 	})
 
+	it("keeps French high punctuation on a non-breaking space", () => {
+		const fr = keyPaths(readLocale("src/locales", "fr").tools.compoundInterest)
+		const copy = readLocale("src/locales", "fr").tools.compoundInterest
+		const texts = fr.map((key) =>
+			String(key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown>)[part], copy)),
+		)
+
+		expect(texts.filter((text) => / [:;?!]/u.test(text))).toEqual([])
+	})
+
 	it("addresses the pt reader as tu", () => {
 		const pt = JSON.stringify(readLocale("src/locales", "pt").tools.compoundInterest)
 

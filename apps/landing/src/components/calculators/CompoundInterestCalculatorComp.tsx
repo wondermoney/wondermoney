@@ -13,6 +13,7 @@ import {
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import {
+  COMPARISON_FALLBACK,
   EXAMPLE_INPUTS,
   MAX_AMOUNT,
   MAX_RATE,
@@ -454,7 +455,7 @@ function ComparisonCard({
           max={MAX_AMOUNT}
           step={50}
           prefix={"€"}
-          helpText={t(k("comparisonHelp"))}
+          helpText={t(k("comparisonHelp"), { fallback: money(COMPARISON_FALLBACK) })}
         />
 
         <div className="space-y-3">

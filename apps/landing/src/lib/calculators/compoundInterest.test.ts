@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  COMPARISON_FALLBACK,
   EXAMPLE_INPUTS,
   MAX_AMOUNT,
   MAX_RATE,
@@ -93,6 +94,14 @@ describe("computeCompoundInterest", () => {
     }
   });
 
+  it("works the page's example: growth ends up larger than everything paid in", () => {
+    const result = totals(EXAMPLE_INPUTS);
+
+    expect(result.status).toBe("ok");
+    expect(result.nominal).toEqual({ contributed: 58000, growth: 86573, finalValue: 144573 });
+    expect(result.nominal.growth).toBeGreaterThan(result.nominal.contributed);
+  });
+
   it("shows the final value in today's money by discounting at the inflation rate", () => {
     const result = totals(EXAMPLE_INPUTS);
     const yearsOfInflation = (1 + EXAMPLE_INPUTS.inflationRate / 100) ** EXAMPLE_INPUTS.years;
@@ -144,12 +153,16 @@ describe("computeCompoundInterest", () => {
     expect(result.real).toEqual({ contributed: 1000, growth: -20, finalValue: 980 });
   });
 
-  it("flags inflation at or above the return, but not when both are zero", () => {
+  it("flags inflation at or above the return the money actually earns over a year", () => {
     const flag = (annualRate: number, inflationRate: number) =>
       computeCompoundInterest({ ...base, annualRate, inflationRate }).inflationAtOrAboveReturn;
 
-    expect(flag(2, 2)).toBe(true);
+    // 2% compounded monthly earns 2.018% over a year, so 2% inflation is below it…
+    expect(flag(2, 2)).toBe(false);
+    // …and 2.02% inflation is above it.
+    expect(flag(2, 2.02)).toBe(true);
     expect(flag(2, 3)).toBe(true);
+    expect(flag(0, 2)).toBe(true);
     expect(flag(2.5, 2)).toBe(false);
     expect(flag(0, 0)).toBe(false);
   });
@@ -170,6 +183,20 @@ describe("computeCompoundInterest", () => {
       expect(result.nominal).toEqual({ contributed: 0, growth: 0, finalValue: 0 });
       expect(result.adjusted).toBe(false);
     }
+  });
+
+  it("returns no period, not nothing invested, for 0 years with only a monthly contribution", () => {
+    const result = totals({ ...base, principal: 0, years: 0 });
+
+    expect(result.status).toBe("noPeriod");
+    expect(result.nominal).toEqual({ contributed: 0, growth: 0, finalValue: 0 });
+  });
+
+  it("counts amounts that round to zero cents as nothing invested", () => {
+    const result = totals({ ...base, principal: 0.004, monthlyContribution: 0.004 });
+
+    expect(result.status).toBe("nothingInvested");
+    expect(result.nominal).toEqual({ contributed: 0, growth: 0, finalValue: 0 });
   });
 
   it("treats negative inputs as zero and says so", () => {
@@ -254,14 +281,23 @@ describe("effectiveAnnualRate", () => {
 });
 
 describe("defaultComparisonContribution", () => {
-  it("is 50% more than the current contribution, in whole euros", () => {
+  it("is 50% more than the current contribution, rounded up to whole euros", () => {
     expect(defaultComparisonContribution(200)).toBe(300);
     expect(defaultComparisonContribution(125)).toBe(188);
+    expect(defaultComparisonContribution(101)).toBe(152);
   });
 
-  it("offers a starting amount when there is no current contribution", () => {
-    expect(defaultComparisonContribution(0)).toBe(100);
-    expect(defaultComparisonContribution(-50)).toBe(100);
+  it("never starts below the current contribution", () => {
+    for (const current of [0.01, 0.2, 0.5, 1, 1.3, 7.77]) {
+      expect(defaultComparisonContribution(current)).toBeGreaterThan(current);
+    }
+    expect(defaultComparisonContribution(0.2)).toBe(1);
+  });
+
+  it("starts at the fallback amount when there is no current contribution", () => {
+    expect(defaultComparisonContribution(0)).toBe(COMPARISON_FALLBACK);
+    expect(defaultComparisonContribution(-50)).toBe(COMPARISON_FALLBACK);
+    expect(defaultComparisonContribution(0.004)).toBe(COMPARISON_FALLBACK);
   });
 
   it("stays within the input range", () => {
