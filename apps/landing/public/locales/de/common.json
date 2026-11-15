@@ -641,23 +641,109 @@
     },
     "mortgage": {
       "title": "Hypothekenrechner",
-      "description": "Berechnen Sie Ihre monatliche Hypothekenrate, die Gesamtzinsen und sehen Sie, wie sich die Kosten im Zeitverlauf entwickeln.",
-      "propertyPrice": "Kaufpreis der Immobilie",
-      "downPayment": "Eigenkapital",
-      "interestRate": "Zinssatz",
-      "loanTerm": "Kreditlaufzeit",
-      "years": "Jahre",
-      "rateHelp": "Jährlicher Festzinssatz",
-      "monthlyPayment": "Monatliche Rate",
-      "totalInterest": "Gesamte Zinsen",
-      "totalCost": "Gesamtkosten",
+      "description": "Berechnen Sie die Monatsrate eines Darlehens mit festem Zins, die Zinskosten und wie die Restschuld Jahr für Jahr sinkt.",
+      "pageTitle": "Hypothekenrechner mit Tilgungsplan — WonderMoney",
+      "pageDescription": "Kostenloser Hypothekenrechner für Darlehen mit festem Zins. Geben Sie Betrag, Laufzeit, Zinssatz und monatliche Versicherung ein und sehen Sie Rate, Zinskosten, Gesamtbetrag und einen Tilgungsplan Jahr für Jahr. Ohne Anmeldung.",
+      "subtitle": "Geben Sie Darlehensbetrag, Laufzeit und festen Zinssatz ein, um Ihre Monatsrate zu sehen, was das Darlehen an Zinsen kostet und wie sich jede Rate auf Zinsen und Tilgung aufteilt. Keine Anmeldung nötig.",
       "loanAmount": "Darlehensbetrag",
-      "principal": "Tilgung",
-      "interest": "Zinsen",
+      "loanAmountHelp": "Der Betrag, den Sie leihen, nach Abzug des Eigenkapitals, nicht der Kaufpreis.",
+      "loanTerm": "Laufzeit",
+      "years": "Jahre",
+      "interestRate": "Zinssatz",
+      "rateHelp": "Fester Sollzins pro Jahr, nicht der Effektivzins.",
+      "monthlyFees": "Versicherung und Gebühren pro Monat",
+      "monthlyFeesHelp": "Optional. Versicherungsbeiträge und Kontogebühren, die Sie mit jeder Rate zahlen.",
+      "monthlyPayment": "Monatsrate",
+      "monthlyTotal": "Monatsrate mit Versicherung und Gebühren",
+      "totalInterest": "Zinsen gesamt",
+      "totalFees": "Versicherung und Gebühren gesamt",
+      "totalPaid": "Gesamtbetrag",
+      "resultNote": "Bei {{payments}} Monatsraten und einem Zinssatz, der über die gesamte Laufzeit fest bleibt.",
+      "principal": "Getilgt",
+      "interest": "Gezahlte Zinsen",
       "year": "Jahr",
-      "pageTitle": "Hypothekenrechner — WonderMoney",
-      "pageDescription": "Kostenloser Hypothekenrechner. Berechnen Sie Ihre monatliche Rate, Gesamtzinsen und Gesamtkosten. Sehen Sie, wie Tilgung und Zinsen über die Laufzeit aufgeteilt sind.",
-      "subtitle": "Berechnen Sie Ihre monatliche Hypothekenrate und ermitteln Sie, wie viel Sie über die gesamte Kreditlaufzeit an Zinsen zahlen. Passen Sie Kaufpreis, Eigenkapital, Zinssatz und Laufzeit an, um verschiedene Szenarien zu vergleichen."
+      "chartLabel": "Diagramm der Tilgung und der gezahlten Zinsen, Jahr für Jahr über die Laufzeit aufsummiert.",
+      "errors": {
+        "summary": "Korrigieren Sie das markierte Feld, um Ihre Rate zu sehen.",
+        "loanAmount": {
+          "required": "Geben Sie den Betrag ein, den Sie leihen möchten.",
+          "tooLarge": "Geben Sie einen Betrag bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Laufzeit in Jahren ein, zum Beispiel 25.",
+          "tooLarge": "Geben Sie eine Laufzeit von höchstens {{max}} Jahren ein."
+        },
+        "annualRate": {
+          "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "monthlyFees": {
+          "negative": "Gebühren können nicht negativ sein. Geben Sie 0 ein, wenn keine anfallen.",
+          "tooLarge": "Geben Sie einen Monatsbetrag bis {{max}} ein."
+        }
+      },
+      "schedule": {
+        "title": "Tilgungsplan",
+        "description": "Eine Zeile pro Jahr der Laufzeit. Öffnen Sie ein Jahr, um jede Monatsrate zu sehen, wie viel davon Zinsen sind und was danach noch offen ist.",
+        "period": "Zeitraum",
+        "payments": "Raten",
+        "principal": "Tilgung",
+        "interest": "Zinsen",
+        "fees": "Versicherung und Gebühren",
+        "balance": "Restschuld",
+        "yearLabel": "Jahr {{year}}",
+        "monthLabel": "Monat {{month}}",
+        "showMonths": "Monatsübersicht"
+      },
+      "guide": {
+        "coverage": {
+          "title": "Was das Ergebnis enthält und was nicht",
+          "intro": "Die Zahlen betreffen das Darlehen selbst: den geliehenen Betrag, die Zinsen darauf und feste monatliche Kosten, die Sie hinzufügen. Ein Immobilienkauf bringt weitere Kosten mit sich, die dieser Rechner nicht abbildet. Planen Sie sie getrennt ein.",
+          "includedTitle": "Enthalten",
+          "included": {
+            "borrowed": "Der geliehene Betrag, zurückgezahlt in gleichen Monatsraten",
+            "interest": "Zinsen zum eingegebenen festen Zinssatz, berechnet auf die Restschuld",
+            "fees": "Ein fester Monatsbetrag für Versicherung und Gebühren, falls Sie einen eingeben"
+          },
+          "excludedTitle": "Nicht enthalten",
+          "excluded": {
+            "taxes": "Steuern auf den Kauf, etwa Grunderwerb- oder Grundsteuer, und Stempelgebühren",
+            "upfront": "Einmalige Kosten: Bearbeitungsgebühren, Wertgutachten, Notar- und Grundbuchkosten",
+            "deposit": "Ihr Eigenkapital und andere Zahlungen bei Vertragsabschluss",
+            "insuranceChanges": "Versicherungsbeiträge, die sich mit der Zeit ändern",
+            "rateChanges": "Zinsänderungen bei variablem oder gemischtem Zins",
+            "earlyRepayment": "Sondertilgungen und Vorfälligkeitsentschädigungen"
+          }
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Angenommen, Sie leihen {{amount}} über {{years}} Jahre zu einem festen Zinssatz von {{rate}} pro Jahr. Der Monatszins ist {{rate}} geteilt durch 12, also etwa {{monthlyRate}}, und Sie zahlen {{payments}} Raten.",
+          "firstMonth": "Die gleichbleibende Rate, mit der das Darlehen genau abbezahlt wird, beträgt {{payment}} im Monat. Im ersten Monat fallen auf die volle Schuld {{firstInterest}} Zinsen an, sodass nur {{firstPrincipal}} dieser Rate Ihre Schuld verringern.",
+          "total": "Über die gesamte Laufzeit zahlen Sie {{totalInterest}} Zinsen, insgesamt {{totalPaid}}.",
+          "halfway": "Zur Halbzeit, nach {{halfway}} Jahren, schulden Sie noch {{halfwayBalance}}: mehr als die Hälfte des Darlehens, weil die ersten Raten überwiegend aus Zinsen bestehen.",
+          "fees": "Kommen {{fees}} im Monat für eine Versicherung hinzu, steigen die monatlichen Kosten auf {{monthlyWithFees}}; über die Laufzeit zahlen Sie dann insgesamt {{totalPaidWithFees}}."
+        },
+        "method": {
+          "title": "So wird die Rate berechnet",
+          "intro": "Die meisten Darlehen mit festem Zins werden in gleichbleibenden Raten zurückgezahlt: jeden Monat derselbe Betrag, so bemessen, dass die Schuld mit der letzten Rate auf null fällt. Die Rate ergibt sich aus der Annuitätenformel:",
+          "legend": "Dabei ist P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
+          "schedule": "Jeden Monat werden Zinsen auf die verbleibende Schuld berechnet, der Rest der Rate tilgt das Darlehen. Je weiter die Schuld sinkt, desto kleiner wird der Zinsanteil und desto größer der Tilgungsanteil. Deshalb sinkt die Schuld anfangs langsam und gegen Ende schneller. Versicherung und Gebühren kommen zur Rate hinzu und verringern die Schuld nie.",
+          "assumptionsTitle": "Annahmen",
+          "assumptions": {
+            "fixedRate": "Der Zinssatz bleibt über die gesamte Laufzeit gleich.",
+            "monthly": "Sie zahlen einmal im Monat, erstmals einen Monat nach Auszahlung, ohne Sondertilgungen oder Zahlungspausen.",
+            "nominalRate": "Der eingegebene Zinssatz ist ein nominaler Jahreszins. Der Effektivzins, den die Bank angibt, enthält Gebühren und liegt daher höher als der hier verwendete Satz.",
+            "flatFees": "Versicherung und Gebühren sind jeden Monat gleich hoch.",
+            "rounding": "Beträge sind in Euro. Jede Rate wird auf den Cent gerundet, und die letzte Rate gleicht die Rundung aus, damit die Schuld genau bei null endet.",
+            "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt, rundet oder den Zahlungstermin legt. Maßgeblich sind die vorvertraglichen Informationen, die Sie von ihr erhalten."
+          },
+          "limits": "Der Rechner akzeptiert Darlehen bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
+        }
+      },
+      "cta": {
+        "headline": "Behalten Sie dieses Darlehen neben Ihrem Budget im Blick",
+        "description": "Erfassen Sie die Hypothek in WonderMoney mit Zinssatz und Laufzeit, verknüpfen Sie die Monatsrate und sehen Sie, wie die Schuld neben Ihrem Budget und Ihrem Vermögen sinkt."
+      }
     }
   },
   "learn": {

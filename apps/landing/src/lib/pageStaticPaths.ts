@@ -152,6 +152,7 @@ const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Partial<Record<ToolRouteId, string>> = {
   toolNetWorth: "net-worth-calculator",
   toolSavingsRate: "savings-rate-calculator",
   toolInvestmentReturn: "investment-return-calculator",
+  toolMortgage: "mortgage-calculator",
 };
 
 function withLegacyAlias<TParam extends string>(

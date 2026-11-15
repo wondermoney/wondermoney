@@ -1,0 +1,120 @@
+---
+// Prerendered explanation for the mortgage calculator: what the result covers, a worked
+// example computed from the same function the calculator runs, and the method.
+import {
+  MORTGAGE_EXAMPLE,
+  MORTGAGE_LIMITS,
+  computeMortgage,
+  type MortgageResult,
+} from "@/lib/calculators/mortgage";
+import type { Lang } from "@/lib/i18nLocale";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+
+function calculate(monthlyFees: number): MortgageResult {
+  const calculation = computeMortgage({ ...MORTGAGE_EXAMPLE, monthlyFees });
+  if (!calculation.ok) throw new Error("The mortgage worked example has invalid inputs");
+  return calculation.result;
+}
+
+const example = calculate(0);
+const withFees = calculate(MORTGAGE_EXAMPLE.exampleMonthlyFees);
+const halfway = Math.floor(MORTGAGE_EXAMPLE.termYears / 2);
+const [firstMonth] = example.years[0].months;
+
+const money = (value: number, decimals = 0) => formatMoney(locale, value, { decimals });
+const values = {
+  amount: money(MORTGAGE_EXAMPLE.loanAmount),
+  years: formatNumber(locale, MORTGAGE_EXAMPLE.termYears),
+  rate: formatPercent(locale, MORTGAGE_EXAMPLE.annualRate, { decimals: 1 }),
+  monthlyRate: formatPercent(locale, MORTGAGE_EXAMPLE.annualRate / 12, { decimals: 4 }),
+  payments: formatNumber(locale, example.numberOfPayments),
+  payment: money(example.monthlyPayment, 2),
+  firstInterest: money(firstMonth.interest, 2),
+  firstPrincipal: money(firstMonth.principal, 2),
+  totalInterest: money(example.totalInterest),
+  totalPaid: money(example.totalPaid),
+  halfway: formatNumber(locale, halfway),
+  halfwayBalance: money(example.years[halfway - 1].balance),
+  fees: money(MORTGAGE_EXAMPLE.exampleMonthlyFees),
+  monthlyWithFees: money(withFees.monthlyTotal, 2),
+  totalPaidWithFees: money(withFees.totalPaid),
+  maxAmount: money(MORTGAGE_LIMITS.maxLoanAmount),
+  maxYears: formatNumber(locale, MORTGAGE_LIMITS.maxTermYears),
+  maxRate: formatPercent(locale, MORTGAGE_LIMITS.maxAnnualRate, { decimals: 0 }),
+};
+
+const list = (key: string) =>
+  Object.values(t<Record<string, string>>(key, { returnObjects: true }));
+const included = list("tools.mortgage.guide.coverage.included");
+const excluded = list("tools.mortgage.guide.coverage.excluded");
+const assumptions = list("tools.mortgage.guide.method.assumptions");
+---
+
+<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+  <section aria-labelledby="mortgage-coverage">
+    <h2 id="mortgage-coverage" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.mortgage.guide.coverage.title")}
+    </h2>
+    <p class="mt-3 leading-7">{t("tools.mortgage.guide.coverage.intro")}</p>
+    <div class="mt-6 grid gap-8 sm:grid-cols-2">
+      <div>
+        <h3 class="font-semibold text-foreground">
+          {t("tools.mortgage.guide.coverage.includedTitle")}
+        </h3>
+        <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+          {included.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold text-foreground">
+          {t("tools.mortgage.guide.coverage.excludedTitle")}
+        </h3>
+        <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+          {excluded.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="mortgage-example">
+    <h2 id="mortgage-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.mortgage.guide.example.title")}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t("tools.mortgage.guide.example.setup", values)}</p>
+      <p>{t("tools.mortgage.guide.example.firstMonth", values)}</p>
+      <p>{t("tools.mortgage.guide.example.total", values)}</p>
+      <p>{t("tools.mortgage.guide.example.halfway", values)}</p>
+      <p>{t("tools.mortgage.guide.example.fees", values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="mortgage-method">
+    <h2 id="mortgage-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.mortgage.guide.method.title")}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t("tools.mortgage.guide.method.intro")}</p>
+      <p class="rounded-lg bg-paper-2 px-4 py-3 font-mono text-foreground">
+        M = P × r ÷ (1 − (1 + r)<sup>−n</sup>)
+      </p>
+      <p>{t("tools.mortgage.guide.method.legend")}</p>
+      <p>{t("tools.mortgage.guide.method.schedule")}</p>
+    </div>
+    <h3 class="mt-8 font-semibold text-foreground">
+      {t("tools.mortgage.guide.method.assumptionsTitle")}
+    </h3>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {assumptions.map((item) => <li>{item}</li>)}
+      <li>{t("tools.mortgage.guide.method.limits", values)}</li>
+    </ul>
+  </section>
+</div>

@@ -9,6 +9,8 @@ import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCal
 import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
 import EmergencyFundCalculatorComp from "@/components/calculators/EmergencyFundCalculatorComp";
 import EmergencyFundMethod from "@/components/calculators/EmergencyFundMethod.astro";
+import MortgageCalculatorComp from "@/components/calculators/MortgageCalculatorComp";
+import MortgageCalculatorGuide from "@/components/calculators/MortgageCalculatorGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -31,6 +33,7 @@ const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
   toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
   toolDebtToIncome: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
   toolEmergencyFund: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+  toolMortgage: ["toolDebtToIncome", "toolSavingsRate", "toolNetWorth"],
 };
 
 const toolKeyByRouteId: Record<ToolRouteId, string> = {
@@ -40,6 +43,7 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
   toolInvestmentReturn: "investmentReturn",
   toolDebtToIncome: "debtToIncome",
   toolEmergencyFund: "emergencyFund",
+  toolMortgage: "mortgage",
 };
 
 // Tools whose closing call to action names their own next step in the app.
@@ -54,6 +58,10 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.emergencyFund.nextStepHeadline"),
     description: t("tools.emergencyFund.nextStepDescription"),
     ctaText: t("tools.emergencyFund.nextStepCta"),
+  },
+  toolMortgage: {
+    headline: t("tools.mortgage.cta.headline"),
+    description: t("tools.mortgage.cta.description"),
   },
 };
 
@@ -118,10 +126,12 @@ const schema = {
     )}
     {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
     {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
+    {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
   {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
+  {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

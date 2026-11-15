@@ -640,24 +640,110 @@
       }
     },
     "mortgage": {
-      "title": "Calculatrice de prêt immobilier",
-      "description": "Calculez votre mensualité de prêt immobilier, le total des intérêts et visualisez la répartition des coûts dans le temps.",
-      "propertyPrice": "Prix du bien",
-      "downPayment": "Apport personnel",
-      "interestRate": "Taux d'intérêt",
+      "title": "Simulateur de prêt immobilier",
+      "description": "Calculez la mensualité d'un prêt immobilier à taux fixe, les intérêts qu'il vous coûtera et l'évolution du capital restant dû année après année.",
+      "pageTitle": "Simulateur de prêt immobilier et tableau d'amortissement — WonderMoney",
+      "pageDescription": "Simulateur gratuit de prêt immobilier à taux fixe. Saisissez le montant, la durée, le taux et l'assurance mensuelle pour voir votre mensualité, les intérêts, le total payé et le tableau d'amortissement année par année. Sans inscription.",
+      "subtitle": "Saisissez la somme que vous emprunteriez, la durée et le taux fixe pour voir votre mensualité, ce que le prêt coûte en intérêts et la répartition de chaque mensualité entre intérêts et capital. Aucune inscription nécessaire.",
+      "loanAmount": "Montant emprunté",
+      "loanAmountHelp": "La somme empruntée, apport déduit, et non le prix du logement.",
       "loanTerm": "Durée du prêt",
       "years": "ans",
-      "rateHelp": "Taux d'intérêt fixe annuel",
+      "interestRate": "Taux d'intérêt",
+      "rateHelp": "Taux nominal annuel fixe, pas le TAEG.",
+      "monthlyFees": "Assurance et frais par mois",
+      "monthlyFeesHelp": "Facultatif. Primes d'assurance et frais de compte payés avec chaque mensualité.",
       "monthlyPayment": "Mensualité",
-      "totalInterest": "Total des intérêts payés",
-      "totalCost": "Coût total",
-      "loanAmount": "Montant emprunté",
-      "principal": "Capital",
-      "interest": "Intérêts",
+      "monthlyTotal": "Mensualité avec assurance et frais",
+      "totalInterest": "Total des intérêts",
+      "totalFees": "Total assurance et frais",
+      "totalPaid": "Total payé",
+      "resultNote": "Sur {{payments}} mensualités, avec un taux fixe pendant toute la durée.",
+      "principal": "Capital remboursé",
+      "interest": "Intérêts payés",
       "year": "Année",
-      "pageTitle": "Calculatrice de prêt immobilier — WonderMoney",
-      "pageDescription": "Calculatrice de prêt immobilier gratuite. Calculez votre mensualité, le total des intérêts et le coût total. Voyez comment se répartissent capital et intérêts sur la durée du prêt.",
-      "subtitle": "Calculez votre mensualité de prêt immobilier et le montant total que vous paierez en intérêts sur la durée du prêt. Ajustez le prix du bien, l'apport, le taux et la durée pour comparer différents scénarios."
+      "chartLabel": "Graphique du capital remboursé et des intérêts payés, cumulés année après année sur toute la durée.",
+      "errors": {
+        "summary": "Corrigez le champ signalé pour voir votre mensualité.",
+        "loanAmount": {
+          "required": "Saisissez la somme que vous souhaitez emprunter.",
+          "tooLarge": "Saisissez un montant jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Saisissez la durée en années, par exemple 25.",
+          "tooLarge": "Saisissez une durée de {{max}} ans au maximum."
+        },
+        "annualRate": {
+          "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Saisissez un taux jusqu'à {{max}}."
+        },
+        "monthlyFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Saisissez 0 si vous n'en avez pas.",
+          "tooLarge": "Saisissez un montant mensuel jusqu'à {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Tableau d'amortissement",
+        "description": "Une ligne par année de prêt. Ouvrez une année pour voir chaque mensualité, la part d'intérêts et ce qu'il vous reste à rembourser ensuite.",
+        "period": "Période",
+        "payments": "Mensualités",
+        "principal": "Capital",
+        "interest": "Intérêts",
+        "fees": "Assurance et frais",
+        "balance": "Capital restant dû",
+        "yearLabel": "Année {{year}}",
+        "monthLabel": "Mois {{month}}",
+        "showMonths": "détail mensuel"
+      },
+      "guide": {
+        "coverage": {
+          "title": "Ce que le résultat comprend et ce qu'il laisse de côté",
+          "intro": "Les chiffres portent sur le prêt lui-même : la somme empruntée, les intérêts sur cette somme et un coût mensuel fixe que vous ajoutez. L'achat d'un logement entraîne d'autres frais que ce simulateur ne calcule pas : prévoyez-les à part.",
+          "includedTitle": "Inclus",
+          "included": {
+            "borrowed": "La somme empruntée, remboursée en mensualités égales",
+            "interest": "Les intérêts au taux fixe saisi, calculés sur le capital restant dû",
+            "fees": "Un montant mensuel fixe pour l'assurance et les frais, si vous en saisissez un"
+          },
+          "excludedTitle": "Non inclus",
+          "excluded": {
+            "taxes": "Les taxes sur l'achat, comme les droits de mutation ou les impôts fonciers, et les droits de timbre",
+            "upfront": "Les frais initiaux : frais de dossier, d'expertise, de notaire, d'enregistrement et de garantie",
+            "deposit": "Votre apport et toute autre somme versée à la signature",
+            "insuranceChanges": "Les primes d'assurance qui évoluent dans le temps",
+            "rateChanges": "Les variations de taux d'un prêt à taux variable ou mixte",
+            "earlyRepayment": "Les remboursements anticipés et leurs indemnités"
+          }
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Supposons que vous empruntiez {{amount}} sur {{years}} ans à un taux fixe de {{rate}} par an. Le taux mensuel est {{rate}} divisé par 12, soit environ {{monthlyRate}}, et vous payez {{payments}} mensualités.",
+          "firstMonth": "La mensualité constante qui solde le prêt est de {{payment}}. Le premier mois, les intérêts sur la totalité du capital s'élèvent à {{firstInterest}} : seuls {{firstPrincipal}} de cette mensualité réduisent votre dette.",
+          "total": "Sur toute la durée, vous payez {{totalInterest}} d'intérêts, soit {{totalPaid}} au total.",
+          "halfway": "À mi-parcours, après {{halfway}} ans, vous devez encore {{halfwayBalance}} : plus de la moitié de la somme empruntée, car les premières mensualités sont surtout des intérêts.",
+          "fees": "Ajoutez {{fees}} par mois d'assurance et le coût mensuel passe à {{monthlyWithFees}} ; sur toute la durée, vous payez {{totalPaidWithFees}} au total."
+        },
+        "method": {
+          "title": "Comment la mensualité est calculée",
+          "intro": "La plupart des prêts immobiliers à taux fixe se remboursent par mensualités constantes : le même montant chaque mois, fixé pour que la dette tombe à zéro avec la dernière. La mensualité découle de la formule de l'annuité :",
+          "legend": "P est la somme empruntée, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement P divisé par n.",
+          "schedule": "Chaque mois, les intérêts sont calculés sur le capital restant dû et le reste de la mensualité rembourse du capital. À mesure que la dette baisse, la part d'intérêts diminue et la part de capital augmente : la dette baisse donc lentement au début et plus vite à la fin. L'assurance et les frais s'ajoutent à la mensualité et ne réduisent jamais la dette.",
+          "assumptionsTitle": "Hypothèses",
+          "assumptions": {
+            "fixedRate": "Le taux reste le même pendant toute la durée.",
+            "monthly": "Vous payez une fois par mois, à partir d'un mois après le début du prêt, sans remboursement anticipé ni différé.",
+            "nominalRate": "Le taux saisi est un taux nominal annuel. Le TAEG indiqué par la banque inclut les frais et l'assurance : il est donc plus élevé que le taux utilisé ici.",
+            "flatFees": "L'assurance et les frais ont le même montant chaque mois.",
+            "rounding": "Les montants sont en euros. Chaque mensualité est arrondie au centime et la dernière absorbe l'arrondi, pour que la dette finisse exactement à zéro.",
+            "lenderFigures": "Les chiffres de votre banque peuvent différer légèrement selon sa façon de compter les jours, d'arrondir ou de fixer la date de paiement. Les informations précontractuelles qu'elle vous remet font référence."
+          },
+          "limits": "Le simulateur accepte des prêts jusqu'à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}."
+        }
+      },
+      "cta": {
+        "headline": "Suivez ce prêt à côté de votre budget",
+        "description": "Ajoutez le prêt immobilier à WonderMoney avec son taux et sa durée, reliez la mensualité et voyez la dette baisser à côté de votre budget et de votre patrimoine."
+      }
     }
   },
   "learn": {

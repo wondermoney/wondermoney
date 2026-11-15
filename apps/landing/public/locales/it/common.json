@@ -641,23 +641,109 @@
     },
     "mortgage": {
       "title": "Calcolatore del mutuo",
-      "description": "Calcola la tua rata mensile del mutuo, gli interessi totali e vedi come si distribuiscono i costi nel tempo.",
-      "propertyPrice": "Prezzo dell'immobile",
-      "downPayment": "Acconto",
-      "interestRate": "Tasso di interesse",
-      "loanTerm": "Durata del mutuo",
-      "years": "anni",
-      "rateHelp": "Tasso di interesse fisso annuo",
-      "monthlyPayment": "Rata mensile",
-      "totalInterest": "Interessi totali pagati",
-      "totalCost": "Costo totale",
+      "description": "Calcola la rata mensile di un mutuo a tasso fisso, gli interessi che pagherai e come scende il debito anno dopo anno.",
+      "pageTitle": "Calcolo rata mutuo con piano di ammortamento — WonderMoney",
+      "pageDescription": "Calcolatore gratuito del mutuo a tasso fisso. Inserisci importo, durata, tasso e assicurazione mensile per vedere la rata, gli interessi, il totale pagato e il piano di ammortamento anno per anno. Senza registrazione.",
+      "subtitle": "Inserisci quanto chiederesti in prestito, la durata e il tasso fisso per vedere la rata mensile, quanto paghi di interessi e come ogni rata si divide tra interessi e capitale. Non serve registrarsi.",
       "loanAmount": "Importo del mutuo",
-      "principal": "Capitale",
-      "interest": "Interessi",
+      "loanAmountHelp": "Quanto chiedi in prestito, al netto dell'anticipo, non il prezzo della casa.",
+      "loanTerm": "Durata",
+      "years": "anni",
+      "interestRate": "Tasso di interesse",
+      "rateHelp": "Tasso annuo nominale fisso (TAN), non il TAEG.",
+      "monthlyFees": "Assicurazioni e spese al mese",
+      "monthlyFeesHelp": "Facoltativo. Premi assicurativi e spese di conto che paghi con ogni rata.",
+      "monthlyPayment": "Rata mensile",
+      "monthlyTotal": "Rata mensile con assicurazioni e spese",
+      "totalInterest": "Interessi totali",
+      "totalFees": "Totale assicurazioni e spese",
+      "totalPaid": "Totale pagato",
+      "resultNote": "Su {{payments}} rate mensili, con il tasso fisso per tutta la durata.",
+      "principal": "Capitale rimborsato",
+      "interest": "Interessi pagati",
       "year": "Anno",
-      "pageTitle": "Calcolatore del mutuo — WonderMoney",
-      "pageDescription": "Calcolatore gratuito del mutuo. Calcola la tua rata mensile, gli interessi totali e il costo complessivo. Scopri come si distribuiscono capitale e interessi per tutta la durata del mutuo.",
-      "subtitle": "Calcola la tua rata mensile del mutuo e scopri quanto pagherai di interessi per tutta la durata del prestito. Modifica il prezzo dell'immobile, l'acconto, il tasso e la durata per confrontare gli scenari."
+      "chartLabel": "Grafico del capitale rimborsato e degli interessi pagati, sommati anno per anno per tutta la durata.",
+      "errors": {
+        "summary": "Correggi il campo evidenziato per vedere la rata.",
+        "loanAmount": {
+          "required": "Inserisci l'importo che vuoi chiedere.",
+          "tooLarge": "Inserisci un importo fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata in anni, per esempio 25.",
+          "tooLarge": "Inserisci una durata fino a {{max}} anni."
+        },
+        "annualRate": {
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "monthlyFees": {
+          "negative": "Le spese non possono essere negative. Inserisci 0 se non ne hai.",
+          "tooLarge": "Inserisci un importo mensile fino a {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Piano di ammortamento",
+        "description": "Una riga per ogni anno del mutuo. Apri un anno per vedere ogni rata mensile, quanta parte è interesse e quanto devi ancora dopo averla pagata.",
+        "period": "Periodo",
+        "payments": "Rate",
+        "principal": "Capitale",
+        "interest": "Interessi",
+        "fees": "Assicurazioni e spese",
+        "balance": "Debito residuo",
+        "yearLabel": "Anno {{year}}",
+        "monthLabel": "Mese {{month}}",
+        "showMonths": "dettaglio mensile"
+      },
+      "guide": {
+        "coverage": {
+          "title": "Cosa include il risultato e cosa resta fuori",
+          "intro": "Le cifre riguardano il mutuo in sé: quanto chiedi, gli interessi su quell'importo e un costo mensile fisso che aggiungi. Comprare casa comporta altri costi che questo calcolatore non considera, quindi mettili in conto a parte.",
+          "includedTitle": "Incluso",
+          "included": {
+            "borrowed": "L'importo che chiedi, rimborsato in rate mensili uguali",
+            "interest": "Gli interessi al tasso fisso che inserisci, calcolati sul debito residuo",
+            "fees": "Un importo mensile fisso per assicurazioni e spese, se lo inserisci"
+          },
+          "excludedTitle": "Non incluso",
+          "excluded": {
+            "taxes": "Le imposte sull'acquisto, come quelle di registro o sulla proprietà, e le imposte di bollo",
+            "upfront": "I costi iniziali: spese di istruttoria, perizia, notaio, iscrizione ipotecaria e registrazione",
+            "deposit": "L'anticipo e ogni altra somma pagata alla firma",
+            "insuranceChanges": "Premi assicurativi che cambiano nel tempo",
+            "rateChanges": "Variazioni del tasso in un mutuo variabile o misto",
+            "earlyRepayment": "Estinzioni anticipate e relative penali"
+          }
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Immagina di chiedere {{amount}} per {{years}} anni a un tasso fisso annuo del {{rate}}. Il tasso mensile è {{rate}} diviso 12, circa {{monthlyRate}}, e paghi {{payments}} rate.",
+          "firstMonth": "La rata costante che estingue il mutuo è di {{payment}} al mese. Nel primo mese gli interessi sull'intero debito ammontano a {{firstInterest}}, quindi solo {{firstPrincipal}} di quella rata riducono ciò che devi.",
+          "total": "Su tutta la durata paghi {{totalInterest}} di interessi, {{totalPaid}} in totale.",
+          "halfway": "A metà strada, dopo {{halfway}} anni, devi ancora {{halfwayBalance}}: più della metà dell'importo chiesto, perché le prime rate sono soprattutto interessi.",
+          "fees": "Aggiungi {{fees}} al mese di assicurazione e il costo mensile sale a {{monthlyWithFees}}; su tutta la durata paghi {{totalPaidWithFees}} in totale."
+        },
+        "method": {
+          "title": "Come si calcola la rata",
+          "intro": "La maggior parte dei mutui a tasso fisso si rimborsa con rate costanti: lo stesso importo ogni mese, fissato in modo che il debito arrivi a zero con l'ultima rata. La rata deriva dalla formula della rendita:",
+          "legend": "Qui P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
+          "schedule": "Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa capitale. Man mano che il debito scende, la quota interessi si riduce e la quota capitale cresce: per questo il debito scende piano all'inizio e più in fretta verso la fine. Assicurazioni e spese si sommano alla rata e non riducono mai il debito.",
+          "assumptionsTitle": "Ipotesi",
+          "assumptions": {
+            "fixedRate": "Il tasso resta uguale per tutta la durata.",
+            "monthly": "Paghi una volta al mese, a partire da un mese dopo l'erogazione, senza estinzioni anticipate né sospensioni delle rate.",
+            "nominalRate": "Il tasso che inserisci è un tasso annuo nominale. Il TAEG indicato dalla banca include spese e oneri, quindi è più alto del tasso usato qui.",
+            "flatFees": "Assicurazioni e spese hanno lo stesso importo ogni mese.",
+            "rounding": "Gli importi sono in euro. Ogni rata è arrotondata al centesimo e l'ultima assorbe l'arrotondamento, così il debito finisce esattamente a zero.",
+            "lenderFigures": "Le cifre della tua banca possono differire leggermente per come conta i giorni, arrotonda gli importi o fissa la data di pagamento. Il riferimento sono le informazioni precontrattuali che ti consegna."
+          },
+          "limits": "Il calcolatore accetta mutui fino a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
+        }
+      },
+      "cta": {
+        "headline": "Segui questo mutuo accanto al tuo budget",
+        "description": "Aggiungi il mutuo a WonderMoney con tasso e durata, collega la rata mensile e guarda il debito scendere accanto al tuo budget e al tuo patrimonio."
+      }
     }
   },
   "learn": {
