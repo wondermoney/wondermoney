@@ -982,6 +982,164 @@
         "description": "Erfassen Sie die Hypothek in WonderMoney mit Zinssatz und Laufzeit, verknüpfen Sie die Monatsrate und sehen Sie, wie die Schuld neben Ihrem Budget und Ihrem Vermögen sinkt."
       }
     },
+    "earlyRepayment": {
+      "title": "Sondertilgungsrechner",
+      "description": "Sehen Sie, was eine Sondertilgung bei einem Darlehen mit festem Zins spart, ob Sie die Rate senken oder die Laufzeit verkürzen.",
+      "pageTitle": "Sondertilgungsrechner für Baufinanzierung und Kredite — WonderMoney",
+      "pageDescription": "Kostenloser Sondertilgungsrechner für Darlehen mit festem Zinssatz. Vergleichen Sie eine niedrigere Monatsrate mit einer kürzeren Laufzeit: gesparte Zinsen, Gebühr und Nettoersparnis. Keine Anmeldung.",
+      "subtitle": "Geben Sie Restschuld, Restlaufzeit, festen Zinssatz und den Betrag ein, den Sie jetzt sondertilgen könnten. Sie sehen beide Wege nebeneinander, eine niedrigere Rate bei gleicher Laufzeit oder die gleiche Rate bei früherem Ende, mit den gesparten Zinsen und einer etwaigen Gebühr. Keine Anmeldung nötig.",
+      "balance": "Restschuld",
+      "balanceHelp": "Was Sie heute noch schulden, laut Ihrem letzten Darlehenskontoauszug.",
+      "termLabel": "Restlaufzeit",
+      "termYears": "Jahre",
+      "termMonths": "Monate",
+      "termHelp": "Jahre plus Monate, zum Beispiel 22 Jahre und 4 Monate.",
+      "interestRate": "Zinssatz",
+      "rateHelp": "Fester Sollzins pro Jahr. Variable Zinsen und Mischformen sind nicht abgedeckt.",
+      "repayment": "Sondertilgung jetzt",
+      "repaymentHelp": "Eine einmalige Zahlung zusätzlich zu Ihren regulären Raten.",
+      "fee": "Gebühr für die vorzeitige Rückzahlung",
+      "feeHelp": "Ein Prozentsatz des zurückgezahlten Betrags. Gebühren und ihre gesetzlichen Obergrenzen unterscheiden sich je nach Land und Darlehensart, prüfen Sie also Ihren Vertrag. Sieht er keine vor, lassen Sie 0 %.",
+      "showLabel": "Angezeigtes Ergebnis",
+      "show": {
+        "both": "Beide vergleichen",
+        "lowerPayment": "Niedrigere Rate",
+        "shorterTerm": "Kürzere Laufzeit"
+      },
+      "lowerPayment": {
+        "title": "Laufzeit behalten, Rate senken",
+        "headline": "Neue Monatsrate",
+        "change": "{{amount}} weniger pro Monat"
+      },
+      "shorterTerm": {
+        "title": "Rate behalten, Laufzeit verkürzen",
+        "headline": "Früher abbezahlt um",
+        "change": "Endet in {{term}}, im {{date}}",
+        "changeNoDate": "Endet in {{term}}"
+      },
+      "netSaving": "Nettoersparnis nach Gebühr",
+      "netCost": "Nettokosten nach Gebühr",
+      "summary": {
+        "repaid": "Jetzt getilgt",
+        "fee": "Gebühr",
+        "balanceAfter": "Restschuld nach der Sondertilgung"
+      },
+      "table": {
+        "title": "Das Darlehen wie bisher und nach der Sondertilgung",
+        "caption": "Das Darlehen wie bisher, verglichen mit jedem Weg, die Sondertilgung zu nutzen",
+        "figure": "Kennzahl",
+        "original": "Darlehen wie bisher",
+        "lowerPayment": "Niedrigere Rate",
+        "shorterTerm": "Kürzere Laufzeit",
+        "monthlyPayment": "Monatsrate",
+        "lastPayment": "Letzte Rate",
+        "timeLeft": "Restlaufzeit",
+        "payoffMonth": "Abbezahlt im",
+        "totalInterest": "Noch zu zahlende Zinsen",
+        "interestSaved": "Gesparte Zinsen",
+        "fee": "Gebühr für die Sondertilgung",
+        "netSaving": "Nettoersparnis"
+      },
+      "status": {
+        "none": "Geben Sie einen Betrag ein, um zu sehen, was er spart. Ohne Sondertilgung bleibt das Darlehen, wie es ist.",
+        "cleared": "Dieser Betrag tilgt das Darlehen vollständig: keine weiteren Raten und keine Zinsen mehr.",
+        "unused": "Zur vollständigen Tilgung genügen {{needed}}, die übrigen {{unused}} bleiben in der Rechnung außen vor.",
+        "feeExceeds": "Die Gebühr ist höher als die Zinsen, die diese Sondertilgung spart: Unterm Strich verlieren Sie Geld. Prüfen Sie, ob Ihr Vertrag eine gebührenfreie Sondertilgung erlaubt."
+      },
+      "resultNote": "Der Zinssatz bleibt bis zum Ende des Darlehens fest. Die Raten sind monatlich, die nächste ist in einem Monat fällig.",
+      "chart": {
+        "label": "Diagramm der Restschuld am Ende jedes Jahres: das Darlehen wie bisher, mit niedrigerer Rate und mit kürzerer Laufzeit.",
+        "year": "Jahr"
+      },
+      "errors": {
+        "summary": "Der Vergleich erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Geben Sie die Restschuld ein.",
+          "tooSmall": "Geben Sie eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre können nicht negativ sein.",
+          "tooLarge": "Geben Sie insgesamt höchstens {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
+        },
+        "annualRate": {
+          "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "repayment": {
+          "negative": "Die Sondertilgung kann nicht negativ sein. Geben Sie 0 ein, um das Darlehen wie bisher zu sehen.",
+          "tooLarge": "Geben Sie eine Sondertilgung bis {{max}} ein."
+        },
+        "feePercent": {
+          "negative": "Die Gebühr kann nicht negativ sein. Geben Sie 0 ein, wenn keine anfällt.",
+          "tooLarge": "Geben Sie eine Gebühr bis {{max}} ein."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Zwei Wege, eine Sondertilgung zu nutzen",
+          "intro": "Wenn Sie einen Teil eines Darlehens vorzeitig zurückzahlen, sinkt die Restschuld, und die Bank rechnet das auf eine von zwei Arten an. Meist können Sie wählen:",
+          "lowerPaymentTitle": "Laufzeit behalten und Rate senken.",
+          "lowerPayment": "Die Zahl der verbleibenden Monate bleibt gleich, und jede Rate sinkt. So haben Sie jeden Monat mehr Spielraum.",
+          "shorterTermTitle": "Rate behalten und Laufzeit verkürzen.",
+          "shorterTerm": "Sie zahlen weiter denselben Betrag, und das Darlehen endet früher. Das spart mehr Zinsen, weil die Restschuld schneller sinkt.",
+          "outro": "In beiden Fällen zahlen Sie weniger Zinsen, weil sie ab jetzt auf eine kleinere Restschuld berechnet werden."
+        },
+        "before": {
+          "title": "Vor der Sondertilgung",
+          "items": {
+            "fee": "Prüfen Sie die Gebühr. Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen.",
+            "rate": "Variable Zinsen und Mischformen sind nicht abgedeckt: Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt.",
+            "reserves": "Behalten Sie eine Reserve. Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt.",
+            "otherDebts": "Tilgen Sie zuerst die teuerste Schuld. Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung.",
+            "lender": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet. Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+          }
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Angenommen, Sie schulden noch {{balance}} bei {{term}} Restlaufzeit und einem festen Zinssatz von {{rate}}. Sie zahlen {{payment}} im Monat, und wenn sich nichts ändert, kostet der Rest des Darlehens {{interest}} an Zinsen. Sie tilgen jetzt {{repayment}}, es bleiben also {{balanceAfter}}.",
+          "lowerPayment": "Behalten Sie die Laufzeit, sinkt die Rate auf {{newPayment}}, {{paymentDrop}} weniger pro Monat. Über die verbleibenden {{term}} zahlen Sie {{lowerSaved}} weniger Zinsen.",
+          "shorterTerm": "Zahlen Sie weiter {{payment}}, endet das Darlehen {{timeSaved}} früher, in {{newTerm}}, mit einer letzten Rate von {{lastPayment}}. Das spart {{shorterSaved}} an Zinsen, mehr als eine niedrigere Rate, weil die Restschuld von Anfang an schneller sinkt.",
+          "fee": "Verlangt Ihre Bank eine Gebühr von {{feeRate}}, kostet die Sondertilgung {{fee}}. Die Nettoersparnis beträgt dann {{lowerNet}} mit niedrigerer Rate und {{shorterNet}} mit kürzerer Laufzeit."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Der Rechner ermittelt zuerst das Darlehen wie bisher, mit demselben Festzins-Rechenkern wie der Hypothekenrechner. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
+          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der verbleibenden Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n.",
+          "lowerPayment": "Laufzeit behalten: Die Restschuld nach der Sondertilgung geht mit demselben n zurück in die Formel, das ergibt die neue, niedrigere Rate.",
+          "shorterTerm": "Rate behalten: Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
+          "fee": "Die Gebühr ist der eingegebene Prozentsatz, angewendet auf den getilgten Betrag. Die gesparten Zinsen sind die restlichen Zinsen des Darlehens wie bisher abzüglich der Zinsen im jeweiligen Szenario, und die Nettoersparnis ist dieser Betrag abzüglich der Gebühr. Ein Betrag über der Restschuld tilgt das Darlehen vollständig, und nur die Restschuld zählt für die Gebühr.",
+          "assumptionsTitle": "Annahmen",
+          "assumptions": {
+            "fixedRate": "Der Zinssatz bleibt bis zum Ende des Darlehens fest. Variable Zinsen und Mischformen sind nicht abgedeckt.",
+            "timing": "Sie tilgen heute, direkt nach einer regulären Rate, und die nächste Rate ist in einem Monat fällig.",
+            "oneOff": "Es gibt eine einzige Sondertilgung, ohne weitere Extrazahlungen oder Tilgungsaussetzungen.",
+            "costs": "Nur die Gebühr für die vorzeitige Rückzahlung wird berücksichtigt. Versicherungen, Kontoführungsgebühren und etwaige Steuern auf die Gebühr bleiben außen vor.",
+            "rounding": "Beträge sind in Euro. Zinsen und Rate werden jeden Monat auf den Cent gerundet, daher gehen alle Summen auf der Seite exakt auf.",
+            "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt und rundet. Lassen Sie sich vor der Sondertilgung ihre eigene Berechnung geben."
+          },
+          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags."
+        },
+        "related": {
+          "title": "Weitere Rechner",
+          "mortgageLink": "Hypothekenrechner",
+          "mortgageBody": "Der vollständige Tilgungsplan eines Festzinsdarlehens Jahr für Jahr, oder die Rate eines neuen Darlehens.",
+          "debtToIncomeLink": "Schuldendienstquote-Rechner",
+          "debtToIncomeBody": "Der Anteil Ihres Einkommens, der in Kreditraten fließt, vor und nach einer niedrigeren Rate.",
+          "emergencyFundLink": "Notgroschen-Rechner",
+          "emergencyFundBody": "Wie viel Geld Sie zurücklegen sollten, bevor Sie Ersparnisse in das Darlehen stecken."
+        }
+      },
+      "cta": {
+        "headline": "Verfolgen Sie Ihre Restschuld im Lauf der Zeit",
+        "description": "Tragen Sie das Darlehen mit Restschuld, Zinssatz und Laufzeit in WonderMoney ein, verknüpfen Sie die Monatsrate und sehen Sie, wie Ihre Restschuld sinkt, neben Ihrem Budget und Ihrem Vermögen."
+      }
+    },
     "savingsGoal": {
       "title": "Sparzielrechner",
       "description": "Berechnen Sie, wie viel Sie monatlich für ein Ziel sparen müssen, wie lange es dauert oder was am Ende zusammenkommt.",
