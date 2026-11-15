@@ -185,18 +185,20 @@ export interface LoanRepayment {
 }
 
 export interface LoanRepaymentCandidate {
-  transactionKey: number;
   amount: number;
   candidateScore: number;
-  confidence: number;
-  currencyCode: string;
-  description?: string | null;
-  accountName?: string | null;
-  bookingDate?: string | null;
+  confidence: "HIGH" | "MEDIUM" | "LOW" | number | null;
   outstandingPrincipal: number;
   reasons: string[];
-  merchantName?: string | null;
-  valueDate?: string | null;
+  transaction: {
+    transactionKey: number;
+    description?: string | null;
+    merchantName?: string | null;
+    transactionDate?: string | null;
+    settlementAmount?: number | null;
+    accountName?: string | null;
+    currencyCode?: string | null;
+  };
 }
 
 export interface LoanRepaymentCandidatesFilters {
