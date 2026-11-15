@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "@/lib/reactTranslations";
 import {
@@ -49,21 +49,16 @@ function MortgageCalculatorContent() {
     [loanAmount, termYears, annualRate, monthlyFees],
   );
 
-  // A completion is the first valid result after the visitor changed an input.
-  const edited = useRef(false);
-  const completionSent = useRef(false);
+  // Like the other tools: one `tool_used` per page view, on the visitor's first edit, without
+  // amounts. pushGtmEvent drops it unless analytics consent was given.
+  const usageSent = useRef(false);
   const edit = (setter: (value: number) => void) => (value: number) => {
-    edited.current = true;
+    if (!usageSent.current) {
+      usageSent.current = true;
+      pushGtmEvent({ event: "tool_used", tool: "mortgage", page_type: getPageType() });
+    }
     setter(value);
   };
-  useEffect(() => {
-    if (!edited.current || completionSent.current || !calculation.ok) return;
-    const timer = window.setTimeout(() => {
-      completionSent.current = true;
-      pushGtmEvent({ event: "tool_completed", tool_id: "mortgage", page_type: getPageType() });
-    }, 1000);
-    return () => window.clearTimeout(timer);
-  }, [calculation]);
 
   const money = (value: number, decimals = 0) => formatMoney(locale, value, { decimals });
 
