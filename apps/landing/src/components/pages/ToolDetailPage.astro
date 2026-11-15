@@ -7,6 +7,8 @@ import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalcu
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
 import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
 import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
+import EmergencyFundCalculatorComp from "@/components/calculators/EmergencyFundCalculatorComp";
+import EmergencyFundMethod from "@/components/calculators/EmergencyFundMethod.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -28,6 +30,7 @@ const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
   toolSavingsRate: ["toolCompoundInterest", "toolNetWorth", "toolInvestmentReturn"],
   toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
   toolDebtToIncome: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+  toolEmergencyFund: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
 };
 
 const toolKeyByRouteId: Record<ToolRouteId, string> = {
@@ -36,13 +39,21 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
   toolSavingsRate: "savingsRate",
   toolInvestmentReturn: "investmentReturn",
   toolDebtToIncome: "debtToIncome",
+  toolEmergencyFund: "emergencyFund",
 };
 
 // Tools whose closing call to action names their own next step in the app.
-const nextStepCtaByRouteId: Partial<Record<ToolRouteId, { headline: string; description: string }>> = {
+const nextStepCtaByRouteId: Partial<
+  Record<ToolRouteId, { headline: string; description: string; ctaText?: string }>
+> = {
   toolDebtToIncome: {
     headline: t("tools.debtToIncome.ctaHeadline"),
     description: t("tools.debtToIncome.ctaDescription"),
+  },
+  toolEmergencyFund: {
+    headline: t("tools.emergencyFund.nextStepHeadline"),
+    description: t("tools.emergencyFund.nextStepDescription"),
+    ctaText: t("tools.emergencyFund.nextStepCta"),
   },
 };
 
@@ -106,9 +117,11 @@ const schema = {
       <InvestmentReturnCalculatorComp locale={locale} client:load />
     )}
     {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
+    {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
+  {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

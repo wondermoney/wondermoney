@@ -1,0 +1,75 @@
+---
+import {
+  EXAMPLE_INPUTS,
+  GUIDANCE_RANGE_MONTHS,
+  computeEmergencyFund,
+} from "@/lib/calculators/emergencyFund";
+import type { Lang } from "@/lib/i18nLocale";
+import { formatMoney } from "@/lib/numberFormat";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const money = (value: number) => formatMoney(locale, value);
+
+// The worked example is the calculator's starting state, computed by the same
+// function, so the prose and the tool never disagree.
+const example = computeEmergencyFund(EXAMPLE_INPUTS);
+const lowCover = computeEmergencyFund({
+  ...EXAMPLE_INPUTS,
+  monthsOfCover: GUIDANCE_RANGE_MONTHS[0],
+});
+
+const values = {
+  expenses: money(EXAMPLE_INPUTS.monthlyExpenses),
+  savings: money(EXAMPLE_INPUTS.currentSavings),
+  contribution: money(EXAMPLE_INPUTS.monthlyContribution),
+  months: example.monthsOfCover,
+  target: money(example.target),
+  shortfall: money(example.shortfall),
+  monthsToTarget: example.monthsToTarget,
+  lowTarget: money(lowCover.target),
+  lowMonths: lowCover.monthsToTarget,
+};
+
+const exampleSteps = ["exampleStep1", "exampleStep2", "exampleStep3"].map((key) =>
+  t(`tools.emergencyFund.${key}`, values),
+);
+const methodSteps = ["method1", "method2", "method3", "method4"].map((key) =>
+  t(`tools.emergencyFund.${key}`),
+);
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.emergencyFund.whatTitle")}
+    </h2>
+    <p class="mt-4">{t("tools.emergencyFund.whatBody1")}</p>
+    <p class="mt-4">{t("tools.emergencyFund.whatBody2")}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.emergencyFund.exampleTitle")}
+    </h2>
+    <p class="mt-4">{t("tools.emergencyFund.exampleIntro", values)}</p>
+    <ol class="mt-4 list-decimal space-y-2 pl-6">
+      {exampleSteps.map((step) => <li>{step}</li>)}
+    </ol>
+    <p class="mt-4">{t("tools.emergencyFund.exampleOutro", values)}</p>
+  </section>
+
+  <section>
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
+      {t("tools.emergencyFund.methodTitle")}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methodSteps.map((step) => <li>{step}</li>)}
+    </ul>
+  </section>
+</div>
