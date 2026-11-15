@@ -105,7 +105,8 @@ function EmergencyFundCalculatorContent() {
           prefix={"€"}
           helpText={t("tools.emergencyFund.monthlyExpensesHelp")}
         />
-        <div className="space-y-2">
+        {/* On leaving the field, show the 1–24 whole months the result uses. */}
+        <div className="space-y-2" onBlur={() => setMonthsOfCover(result.monthsOfCover)}>
           <CalculatorInput
             id="emergencyMonthsOfCover"
             label={t("tools.emergencyFund.monthsOfCover")}
@@ -213,7 +214,7 @@ function EmergencyFundCalculatorContent() {
 type Translate = ReturnType<typeof useTranslations>["t"];
 
 /**
- * One `tool_used` event per page view, the event every landing tool sends
+ * One `tool_used` event per page view, the shared landing tool event
  * (`tool`, `page_type`), fired after the first edit once the input settles. It
  * also carries the outcome and the months of cover, never the amounts.
  */

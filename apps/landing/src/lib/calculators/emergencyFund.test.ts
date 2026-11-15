@@ -38,9 +38,11 @@ describe("computeEmergencyFund", () => {
   });
 
   it("does not add a month when the contribution divides the shortfall exactly in cents", () => {
+    // In floating point 0.1 × 3 is 0.30000000000000004, and that ÷ 0.1 rounds
+    // up to 4 months. In cents it is 30 ÷ 10 = 3.
     const result = computeEmergencyFund({
-      monthlyExpenses: 0.3,
-      monthsOfCover: 1,
+      monthlyExpenses: 0.1,
+      monthsOfCover: 3,
       currentSavings: 0,
       monthlyContribution: 0.1,
     });
@@ -173,11 +175,20 @@ describe("targetMonthFrom", () => {
   });
 
   it("uses the visitor's local month, not the UTC one", () => {
-    // 23:30 on 31 December local time is still December, wherever UTC is.
-    const lateOnNewYearsEve = new Date(2026, 11, 31, 23, 30);
+    // West of UTC, 23:30 on 31 December local time is already January in
+    // UTC, so reading the UTC month would give the wrong year.
+    const originalTz = process.env.TZ;
+    process.env.TZ = "America/Los_Angeles";
+    try {
+      const lateOnNewYearsEve = new Date(2026, 11, 31, 23, 30);
+      expect(lateOnNewYearsEve.getUTCMonth()).toBe(0);
 
-    expect(targetMonthFrom(lateOnNewYearsEve, 0).toISOString()).toBe(
-      "2026-12-01T00:00:00.000Z",
-    );
+      expect(targetMonthFrom(lateOnNewYearsEve, 0).toISOString()).toBe(
+        "2026-12-01T00:00:00.000Z",
+      );
+    } finally {
+      if (originalTz === undefined) delete process.env.TZ;
+      else process.env.TZ = originalTz;
+    }
   });
 });
