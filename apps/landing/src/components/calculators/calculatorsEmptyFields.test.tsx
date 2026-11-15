@@ -8,6 +8,7 @@ import CompoundInterestCalculatorComp from "./CompoundInterestCalculatorComp";
 import DebtToIncomeCalculatorComp from "./DebtToIncomeCalculatorComp";
 import EmergencyFundCalculatorComp from "./EmergencyFundCalculatorComp";
 import FireCalculatorComp from "./FireCalculatorComp";
+import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
 import InvestmentReturnCalculatorComp from "./InvestmentReturnCalculatorComp";
 import MortgageCalculatorComp from "./MortgageCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
@@ -18,6 +19,7 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["debt-to-income", DebtToIncomeCalculatorComp],
   ["emergency fund", EmergencyFundCalculatorComp],
   ["FIRE", FireCalculatorComp],
+  ["household budget", HouseholdBudgetCalculatorComp],
   ["investment return", InvestmentReturnCalculatorComp],
   ["mortgage", MortgageCalculatorComp],
   ["net worth", NetWorthCalculatorComp],

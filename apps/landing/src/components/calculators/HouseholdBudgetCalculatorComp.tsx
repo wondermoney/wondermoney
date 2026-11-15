@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import CalculatorLayout from "./CalculatorLayout";
+import NumericInput from "./NumericInput";
 import BudgetSankey from "./BudgetSankey";
 import {
   BUDGET_CATEGORIES,
@@ -294,14 +295,13 @@ function AmountRow({
         <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
           {"€"}
         </span>
-        <input
-          type="number"
-          inputMode="decimal"
+        <NumericInput
           min={0}
           max={BUDGET_MAX_AMOUNT}
           step={10}
           value={amount}
-          onChange={(e) => onAmount(toBudgetAmount(Number(e.target.value)))}
+          // An empty field stays empty (NaN); the budget counts it as 0.
+          onChange={(value) => onAmount(Number.isNaN(value) ? value : toBudgetAmount(value))}
           aria-label={t(k("rowAmountLabel"), { name })}
           className={cn(INPUT_CLASS, "pl-8 font-mono")}
         />
