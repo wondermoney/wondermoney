@@ -13,6 +13,8 @@ import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
 import {
+  DEFAULT_ANNUAL_RETURN,
+  MAX_PERIOD_MONTHS_FIELD,
   SAVINGS_GOAL_EXAMPLE,
   SAVINGS_GOAL_LIMITS,
   SOLVE_FOR_OPTIONS,
@@ -38,6 +40,7 @@ export default function SavingsGoalCalculatorComp({ locale }: { locale: Lang }) 
 
 type Translate = ReturnType<typeof useTranslations>["t"];
 type Money = (value: number, decimals?: number) => string;
+type Format = (value: number) => string;
 
 const k = (key: string) => `tools.savingsGoal.${key}`;
 
@@ -45,6 +48,8 @@ const k = (key: string) => `tools.savingsGoal.${key}`;
 // keep them in stacking order instead.
 const SERIES_ORDER = ["savings", "contributions", "growth"];
 const bySeries = (item: { dataKey?: unknown }) => SERIES_ORDER.indexOf(String(item.dataKey));
+
+const MAX_YEARS = SAVINGS_GOAL_LIMITS.maxMonths / 12;
 
 function SavingsGoalCalculatorContent() {
   const { t, locale } = useTranslations();
@@ -91,14 +96,19 @@ function SavingsGoalCalculatorContent() {
     };
 
   const money: Money = (value, decimals = 0) => formatMoney(locale, value, { decimals });
-  const cents = (value: number) => money(value, Number.isInteger(value) ? 0 : 2);
-  const duration = (count: number) => durationLabel(count, locale, t);
+  // Figures in the result and the schedule always show cents, so they line up and add up;
+  // prose drops ",00" from whole amounts.
+  const exact: Format = (value) => money(value, 2);
+  const cents: Format = (value) => money(value, Number.isInteger(value) ? 0 : 2);
+  const duration: Format = (count) => durationLabel(count, locale, t);
+  const maxYears = formatNumber(locale, MAX_YEARS);
 
   const limits: Record<SavingsGoalField, string> = {
     goalAmount: money(SAVINGS_GOAL_LIMITS.maxAmount),
     startingSavings: money(SAVINGS_GOAL_LIMITS.maxAmount),
     monthlyContribution: money(SAVINGS_GOAL_LIMITS.maxAmount),
-    period: formatNumber(locale, SAVINGS_GOAL_LIMITS.maxMonths / 12),
+    period: maxYears,
+    periodMonths: formatNumber(locale, MAX_PERIOD_MONTHS_FIELD),
     annualReturn: formatPercent(locale, SAVINGS_GOAL_LIMITS.maxAnnualReturn, { decimals: 0 }),
   };
   const errorFor = (field: SavingsGoalField): string | undefined => {
@@ -199,7 +209,7 @@ function SavingsGoalCalculatorContent() {
                   value={years}
                   onChange={edit(setYears)}
                   min={0}
-                  max={SAVINGS_GOAL_LIMITS.maxMonths / 12}
+                  max={MAX_YEARS}
                   step={1}
                   error={errorFor("period")}
                 />
@@ -209,11 +219,12 @@ function SavingsGoalCalculatorContent() {
                   value={months}
                   onChange={edit(setMonths)}
                   min={0}
-                  max={11}
+                  max={MAX_PERIOD_MONTHS_FIELD}
                   step={1}
+                  error={errorFor("periodMonths")}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">{t(k("periodHelp"))}</p>
+              <p className="text-xs text-muted-foreground">{t(k("periodHelp"), { maxYears })}</p>
             </fieldset>
           )}
           <CalculatorInput
@@ -225,7 +236,9 @@ function SavingsGoalCalculatorContent() {
             max={SAVINGS_GOAL_LIMITS.maxAnnualReturn}
             step={0.5}
             suffix="%"
-            helpText={t(k("annualReturnHelp"))}
+            helpText={t(k("annualReturnHelp"), {
+              rate: formatPercent(locale, DEFAULT_ANNUAL_RETURN, { decimals: 0 }),
+            })}
             error={errorFor("annualReturn")}
           />
         </div>
@@ -233,7 +246,14 @@ function SavingsGoalCalculatorContent() {
         {/* Results */}
         <div className="space-y-6 rounded-card border border-border bg-background p-6 shadow-sm lg:sticky lg:top-24">
           {result ? (
-            <ResultPanel result={result} money={money} cents={cents} duration={duration} />
+            <ResultPanel
+              result={result}
+              money={money}
+              exact={exact}
+              cents={cents}
+              duration={duration}
+              maxYears={maxYears}
+            />
           ) : (
             <p className="text-sm text-muted-foreground" aria-live="polite">
               {t(k("errors.summary"))}
@@ -249,7 +269,7 @@ function SavingsGoalCalculatorContent() {
       </CalculatorLayout>
 
       {result && result.years.length > 0 && (
-        <Schedule result={result} cents={cents} />
+        <Schedule result={result} exact={exact} duration={duration} />
       )}
     </>
   );
@@ -258,29 +278,45 @@ function SavingsGoalCalculatorContent() {
 function ResultPanel({
   result,
   money,
+  exact,
   cents,
   duration,
+  maxYears,
 }: {
   result: SavingsGoalResult;
   money: Money;
-  cents: (value: number) => string;
-  duration: (months: number) => string;
+  exact: Format;
+  cents: Format;
+  duration: Format;
+  maxYears: string;
 }) {
   const { t, locale } = useTranslations();
 
-  const answer = answerFor(result, { t, cents, duration });
+  const answer = answerFor(result, { t, exact, duration, maxYears });
   const showTotals =
-    result.status === "solved" || result.status === "growthAlone" || result.status === "reached";
-  const contributions = { label: t(k("totalContributions")), value: cents(result.totalContributions) };
-  const growth = { label: t(k("totalGrowth")), value: cents(result.totalGrowth) };
-  const items = !showTotals
-    ? []
-    : result.solveFor === "finalAmount"
-      ? [{ label: t(k("startingSavings")), value: cents(result.startingSavings) }, contributions, growth]
-      : [contributions, growth, { label: t(k("finalBalance")), value: cents(result.finalBalance) }];
-  const message = statusMessageFor(result, { t, money, cents, duration, locale });
+    !result.balanceTooLarge &&
+    (result.status === "solved" || result.status === "growthAlone" || result.status === "reached");
+  // Already saved + contributions + growth = final balance, so the rows add up on screen.
+  const items = showTotals
+    ? [
+        { label: t(k("startingSavings")), value: exact(result.startingSavings) },
+        { label: t(k("totalContributions")), value: exact(result.totalContributions) },
+        { label: t(k("totalGrowth")), value: exact(result.totalGrowth) },
+        ...(result.solveFor === "finalAmount"
+          ? []
+          : [{ label: t(k("finalBalance")), value: exact(result.finalBalance) }]),
+      ]
+    : [];
+  const message = statusMessageFor(result, { t, money, cents, duration, locale, maxYears });
+  // Solving for the contribution, a too-large balance hides only the totals: the answer stands.
+  const totalsNote =
+    result.balanceTooLarge && result.solveFor !== "finalAmount"
+      ? t(k("status.tooLargeTotals"), { max: money(SAVINGS_GOAL_LIMITS.maxBalance) })
+      : null;
   const isWarning =
-    result.status === "never" || result.status === "beyondHorizon" || result.status === "tooLarge";
+    result.status === "never" ||
+    result.status === "beyondHorizon" ||
+    (result.balanceTooLarge && result.solveFor === "finalAmount");
 
   return (
     <div className="space-y-4">
@@ -298,16 +334,19 @@ function ResultPanel({
       >
         {message}
       </p>
+      {totalsNote && <p className="text-sm leading-6 text-muted-foreground">{totalsNote}</p>}
     </div>
   );
 }
 
 function Schedule({
   result,
-  cents,
+  exact,
+  duration,
 }: {
   result: SavingsGoalResult;
-  cents: (value: number) => string;
+  exact: Format;
+  duration: Format;
 }) {
   const { t, locale } = useTranslations();
 
@@ -364,13 +403,14 @@ function Schedule({
             />
             <Tooltip
               itemSorter={bySeries}
-              labelFormatter={(value) =>
-                t(k("schedule.tooltipLabel"), {
-                  months: formatNumber(locale, Math.round(Number(value) * 12)),
-                })
-              }
+              labelFormatter={(value) => {
+                const months = Math.round(Number(value) * 12);
+                return months === 0
+                  ? t(k("schedule.tooltipStart"))
+                  : t(k("schedule.tooltipLabel"), { duration: duration(months) });
+              }}
               // @ts-expect-error Recharts tooltip types are very broken
-              formatter={(value: number, name: string) => [cents(value), name]}
+              formatter={(value: number, name: string) => [exact(value), name]}
             />
             <Legend
               itemSorter={bySeries}
@@ -429,9 +469,9 @@ function Schedule({
                 <th scope="row" className="px-3 py-2 text-left font-medium text-foreground">
                   {rowLabel(row)}
                 </th>
-                <td className={cell}>{cents(row.contributions)}</td>
-                <td className={cell}>{cents(row.growth)}</td>
-                <td className={cell}>{cents(row.balance)}</td>
+                <td className={cell}>{exact(row.contributions)}</td>
+                <td className={cell}>{exact(row.growth)}</td>
+                <td className={cell}>{exact(row.balance)}</td>
               </tr>
             ))}
           </tbody>
@@ -460,20 +500,20 @@ function answerFor(
   result: SavingsGoalResult,
   {
     t,
-    cents,
+    exact,
     duration,
-  }: { t: Translate; cents: (value: number) => string; duration: (months: number) => string },
+    maxYears,
+  }: { t: Translate; exact: Format; duration: Format; maxYears: string },
 ): string {
-  if (result.status === "tooLarge") return "—";
   switch (result.solveFor) {
     case "contribution":
-      return cents(result.monthlyContribution);
+      return exact(result.monthlyContribution);
     case "finalAmount":
-      return cents(result.finalBalance);
+      return result.balanceTooLarge ? "—" : exact(result.finalBalance);
     case "time":
       if (result.status === "reached") return t(k("alreadyThere"));
       if (result.status === "never") return t(k("never"));
-      if (result.status === "beyondHorizon") return t(k("overHundredYears"));
+      if (result.status === "beyondHorizon") return t(k("overMaxYears"), { maxYears });
       return duration(result.months ?? 0);
   }
 }
@@ -486,12 +526,14 @@ function statusMessageFor(
     cents,
     duration,
     locale,
+    maxYears,
   }: {
     t: Translate;
     money: Money;
-    cents: (value: number) => string;
-    duration: (months: number) => string;
+    cents: Format;
+    duration: Format;
     locale: Lang;
+    maxYears: string;
   },
 ): string {
   const values = {
@@ -504,15 +546,17 @@ function statusMessageFor(
       decimals: Number.isInteger(result.annualReturn) ? 0 : 2,
     }),
     max: money(SAVINGS_GOAL_LIMITS.maxBalance),
+    maxYears,
   };
 
+  if (result.balanceTooLarge && result.solveFor === "finalAmount") {
+    return t(k("status.tooLarge"), values);
+  }
   switch (result.status) {
-    case "tooLarge":
-      return t(k("status.tooLarge"), values);
     case "reached":
       return t(k(result.solveFor === "time" ? "status.reachedTime" : "status.reached"), values);
     case "growthAlone":
-      return t(k("status.growthAlone"), values);
+      return t(k(result.solveFor === "time" ? "status.growthAloneTime" : "status.growthAlone"), values);
     case "never":
       return t(k("status.never"), values);
     case "beyondHorizon":

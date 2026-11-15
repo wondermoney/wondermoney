@@ -977,9 +977,9 @@
       "period": "Spardauer",
       "periodYears": "Jahre",
       "periodMonths": "Monate",
-      "periodHelp": "Bis zu 100 Jahre.",
+      "periodHelp": "Bis zu {{maxYears}} Jahre.",
       "annualReturn": "Erwartete jährliche Rendite",
-      "annualReturnHelp": "Zum Start 2 %. Geben Sie 0 % für Geld ein, das nichts abwirft.",
+      "annualReturnHelp": "Zum Start {{rate}}. Geben Sie 0 % für Geld ein, das nichts abwirft.",
       "answer": {
         "contribution": "Nötige monatliche Sparrate",
         "time": "Zeit bis zum Ziel",
@@ -990,7 +990,7 @@
       "finalBalance": "Endsaldo",
       "alreadyThere": "Schon erreicht",
       "never": "Nicht in diesem Tempo",
-      "overHundredYears": "Mehr als 100 Jahre",
+      "overMaxYears": "Mehr als {{maxYears}} Jahre",
       "durationYears": "{{count}} Jahre",
       "durationYearsOne": "1 Jahr",
       "durationMonths": "{{count}} Monate",
@@ -1003,9 +1003,11 @@
         "reached": "Ihre {{savings}} decken das Ziel bereits, Sie müssen also nichts mehr einzahlen.",
         "reachedTime": "Ihre {{savings}} decken das Ziel bereits: Sie sind schon am Ziel.",
         "growthAlone": "Bei {{rate}} Rendite im Jahr wachsen Ihre {{savings}} in der gewählten Spardauer ({{period}}) ganz ohne monatliche Einzahlung über das Ziel hinaus.",
+        "growthAloneTime": "Ganz ohne monatliche Einzahlung wachsen Ihre {{savings}} bei {{rate}} Rendite im Jahr auf {{goal}}. Dauer: {{period}}.",
         "never": "Ohne monatliche Einzahlung und ohne Rendite bleibt Ihr Erspartes bei {{savings}} und erreicht das Ziel nie. Geben Sie eine monatliche Sparrate ein, um zu sehen, wann Sie es schaffen.",
-        "beyondHorizon": "Mit {{contribution}} im Monat bräuchten Sie mehr als 100 Jahre bis zu {{goal}}. Versuchen Sie es mit einer höheren Sparrate oder einem kleineren Ziel.",
-        "tooLarge": "Der Saldo würde {{max}} übersteigen, mehr als dieser Rechner anzeigt. Versuchen Sie es mit einer kürzeren Spardauer oder einer niedrigeren Rendite."
+        "beyondHorizon": "Mit {{contribution}} im Monat bräuchten Sie mehr als {{maxYears}} Jahre bis zu {{goal}}. Versuchen Sie es mit einer höheren Sparrate oder einem kleineren Ziel.",
+        "tooLarge": "Der Saldo würde {{max}} übersteigen, mehr als dieser Rechner anzeigt. Versuchen Sie es mit einer kürzeren Spardauer oder einer niedrigeren Rendite.",
+        "tooLargeTotals": "Über diese Spardauer würde der Saldo {{max}} übersteigen, mehr als dieser Rechner anzeigt. Summen und Plan Jahr für Jahr werden daher nicht gezeigt."
       },
       "assumptionsTitle": "Davon geht die Rechnung aus",
       "assumptionsReturn": "Eine gleichbleibende jährliche Rendite, monatlich verzinst, und jede Einzahlung am Monatsende.",
@@ -1030,6 +1032,10 @@
           "negative": "Die Spardauer kann nicht negativ sein.",
           "tooLarge": "Geben Sie eine Spardauer von höchstens {{max}} Jahren ein."
         },
+        "periodMonths": {
+          "negative": "Die Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis {{max}} Monate ein; volle Jahre gehören unter Jahre."
+        },
         "annualReturn": {
           "negative": "Negative Renditen bildet dieser Rechner nicht ab. Geben Sie 0 % oder mehr ein.",
           "tooLarge": "Geben Sie eine Rendite von höchstens {{max}} ein."
@@ -1040,7 +1046,8 @@
         "description": "Was Sie eingezahlt haben und was die Zinsen bis zum Ende jedes Jahres beigetragen haben. Der Saldo enthält, was Sie schon gespart hatten.",
         "chartLabel": "Diagramm Ihres Saldos im Zeitverlauf, aufgeteilt in bereits Gespartes, Ihre Einzahlungen und Zinserträge. Die Tabelle darunter zeigt dieselben Zahlen.",
         "yearAxis": "Jahre",
-        "tooltipLabel": "Nach {{months}} Monaten",
+        "tooltipLabel": "Spardauer: {{duration}}",
+        "tooltipStart": "Start",
         "startingSavings": "Bereits gespart",
         "contributions": "Einzahlungen",
         "growth": "Zinserträge",

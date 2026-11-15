@@ -977,9 +977,9 @@
       "period": "Durata del risparmio",
       "periodYears": "Anni",
       "periodMonths": "Mesi",
-      "periodHelp": "Fino a 100 anni.",
+      "periodHelp": "Fino a {{maxYears}} anni.",
       "annualReturn": "Rendimento annuo atteso",
-      "annualReturnHelp": "Si parte dal 2%. Usa 0% per denaro che non rende nulla.",
+      "annualReturnHelp": "Si parte dal {{rate}}. Usa 0% per denaro che non rende nulla.",
       "answer": {
         "contribution": "Versamento mensile necessario",
         "time": "Tempo per l'obiettivo",
@@ -990,7 +990,7 @@
       "finalBalance": "Saldo finale",
       "alreadyThere": "Ci sei già",
       "never": "Non a questo ritmo",
-      "overHundredYears": "Più di 100 anni",
+      "overMaxYears": "Più di {{maxYears}} anni",
       "durationYears": "{{count}} anni",
       "durationYearsOne": "1 anno",
       "durationMonths": "{{count}} mesi",
@@ -1003,9 +1003,11 @@
         "reached": "I {{savings}} che hai già coprono l'obiettivo, quindi non devi versare nulla.",
         "reachedTime": "I {{savings}} che hai già coprono l'obiettivo: ci sei già.",
         "growthAlone": "Con un rendimento del {{rate}} annuo, i tuoi {{savings}} superano l'obiettivo in {{period}} senza alcun versamento mensile.",
+        "growthAloneTime": "Senza versare nulla ogni mese, i tuoi {{savings}} arrivano a {{goal}} in {{period}} con un rendimento del {{rate}} annuo.",
         "never": "Senza versamenti mensili e senza rendimento, i tuoi risparmi restano a {{savings}} e non raggiungono mai l'obiettivo. Aggiungi un versamento mensile per vedere quando ci arrivi.",
-        "beyondHorizon": "Con {{contribution}} al mese ti servirebbero più di 100 anni per arrivare a {{goal}}. Prova con un versamento più alto o un obiettivo più piccolo.",
-        "tooLarge": "Il saldo supererebbe {{max}}, oltre quanto mostra questo simulatore. Prova con una durata più breve o un rendimento più basso."
+        "beyondHorizon": "Con {{contribution}} al mese ti servirebbero più di {{maxYears}} anni per arrivare a {{goal}}. Prova con un versamento più alto o un obiettivo più piccolo.",
+        "tooLarge": "Il saldo supererebbe {{max}}, oltre quanto mostra questo simulatore. Prova con una durata più breve o un rendimento più basso.",
+        "tooLargeTotals": "In questo periodo il saldo supererebbe {{max}}, oltre quanto mostra questo simulatore, quindi i totali e il piano anno per anno non sono mostrati."
       },
       "assumptionsTitle": "Cosa presuppone questo calcolo",
       "assumptionsReturn": "Un rendimento annuo costante, capitalizzato ogni mese, con ogni versamento aggiunto a fine mese.",
@@ -1030,6 +1032,10 @@
           "negative": "La durata non può essere negativa.",
           "tooLarge": "Inserisci una durata fino a {{max}} anni."
         },
+        "periodMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a {{max}} mesi; gli anni interi vanno in Anni."
+        },
         "annualReturn": {
           "negative": "Questo simulatore non considera rendimenti negativi. Inserisci 0% o più.",
           "tooLarge": "Inserisci un rendimento fino a {{max}}."
@@ -1040,7 +1046,8 @@
         "description": "Quanto hai versato e quanto ha aggiunto il rendimento alla fine di ogni anno. Il saldo include quello che avevi già risparmiato.",
         "chartLabel": "Grafico del saldo nel tempo, diviso tra quanto avevi già risparmiato, i tuoi versamenti e il rendimento. La tabella qui sotto riporta le stesse cifre.",
         "yearAxis": "Anni",
-        "tooltipLabel": "Dopo {{months}} mesi",
+        "tooltipLabel": "Dopo {{duration}}",
+        "tooltipStart": "All'inizio",
         "startingSavings": "Già risparmiato",
         "contributions": "Versamenti",
         "growth": "Rendimento",

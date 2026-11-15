@@ -977,9 +977,9 @@
       "period": "Saving period",
       "periodYears": "Years",
       "periodMonths": "Months",
-      "periodHelp": "Up to 100 years.",
+      "periodHelp": "Up to {{maxYears}} years.",
       "annualReturn": "Expected annual return",
-      "annualReturnHelp": "2% to start with. Use 0% for money that earns nothing.",
+      "annualReturnHelp": "{{rate}} to start with. Use 0% for money that earns nothing.",
       "answer": {
         "contribution": "Monthly contribution needed",
         "time": "Time to reach the goal",
@@ -990,7 +990,7 @@
       "finalBalance": "Final balance",
       "alreadyThere": "You're already there",
       "never": "Not at this pace",
-      "overHundredYears": "More than 100 years",
+      "overMaxYears": "More than {{maxYears}} years",
       "durationYears": "{{count}} years",
       "durationYearsOne": "1 year",
       "durationMonths": "{{count}} months",
@@ -1003,9 +1003,11 @@
         "reached": "The {{savings}} you already have covers the goal, so you don't need to add anything.",
         "reachedTime": "The {{savings}} you already have covers the goal: you're there today.",
         "growthAlone": "At {{rate}} a year, your {{savings}} grows past the goal within {{period}} with nothing added each month.",
+        "growthAloneTime": "With nothing added each month, your {{savings}} grows to {{goal}} in {{period}} at {{rate}} a year.",
         "never": "With no monthly contribution and no growth, your savings stay at {{savings}} and never reach the goal. Add a monthly contribution to see when you get there.",
-        "beyondHorizon": "At {{contribution}} a month it would take more than 100 years to reach {{goal}}. Try a larger contribution or a smaller goal.",
-        "tooLarge": "The balance would pass {{max}}, more than this calculator shows. Try a shorter period or a lower return."
+        "beyondHorizon": "At {{contribution}} a month it would take more than {{maxYears}} years to reach {{goal}}. Try a larger contribution or a smaller goal.",
+        "tooLarge": "The balance would pass {{max}}, more than this calculator shows. Try a shorter period or a lower return.",
+        "tooLargeTotals": "Over this period the balance would pass {{max}}, more than this calculator shows, so the totals and the schedule are left out."
       },
       "assumptionsTitle": "What this assumes",
       "assumptionsReturn": "A constant annual return, compounded monthly, with each contribution added at the end of the month.",
@@ -1030,6 +1032,10 @@
           "negative": "The period can't be negative.",
           "tooLarge": "Enter a period of up to {{max}} years."
         },
+        "periodMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to {{max}} months; put whole years under Years."
+        },
         "annualReturn": {
           "negative": "This calculator doesn't model negative returns. Enter 0% or more.",
           "tooLarge": "Enter a return up to {{max}}."
@@ -1040,7 +1046,8 @@
         "description": "What you have paid in and what growth has added by the end of each year. The balance includes what you had already saved.",
         "chartLabel": "Chart of your balance over time, split into what you had already saved, your contributions and growth. The table below has the same figures.",
         "yearAxis": "Years",
-        "tooltipLabel": "After {{months}} months",
+        "tooltipLabel": "After {{duration}}",
+        "tooltipStart": "At the start",
         "startingSavings": "Already saved",
         "contributions": "Contributions",
         "growth": "Growth",

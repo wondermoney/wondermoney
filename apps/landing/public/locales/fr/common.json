@@ -977,9 +977,9 @@
       "period": "Durée d'épargne",
       "periodYears": "Années",
       "periodMonths": "Mois",
-      "periodHelp": "Jusqu'à 100 ans.",
+      "periodHelp": "Jusqu'à {{maxYears}} ans.",
       "annualReturn": "Rendement annuel attendu",
-      "annualReturnHelp": "2 % pour commencer. Indiquez 0 % pour une somme qui ne rapporte rien.",
+      "annualReturnHelp": "{{rate}} pour commencer. Indiquez 0 % pour une somme qui ne rapporte rien.",
       "answer": {
         "contribution": "Versement mensuel nécessaire",
         "time": "Durée jusqu'à l'objectif",
@@ -990,7 +990,7 @@
       "finalBalance": "Solde final",
       "alreadyThere": "Vous y êtes déjà",
       "never": "Pas à ce rythme",
-      "overHundredYears": "Plus de 100 ans",
+      "overMaxYears": "Plus de {{maxYears}} ans",
       "durationYears": "{{count}} ans",
       "durationYearsOne": "1 an",
       "durationMonths": "{{count}} mois",
@@ -1003,9 +1003,11 @@
         "reached": "Les {{savings}} que vous avez déjà couvrent l'objectif : inutile de verser quoi que ce soit.",
         "reachedTime": "Les {{savings}} que vous avez déjà couvrent l'objectif : vous y êtes.",
         "growthAlone": "Avec un rendement de {{rate}} par an, vos {{savings}} dépassent l'objectif en {{period}} sans aucun versement mensuel.",
+        "growthAloneTime": "Sans aucun versement mensuel, vos {{savings}} atteignent {{goal}} en {{period}} avec un rendement de {{rate}} par an.",
         "never": "Sans versement mensuel ni rendement, votre épargne reste à {{savings}} et n'atteint jamais l'objectif. Ajoutez un versement mensuel pour voir quand vous y arriverez.",
-        "beyondHorizon": "Avec {{contribution}} par mois, il vous faudrait plus de 100 ans pour atteindre {{goal}}. Essayez un versement plus élevé ou un objectif plus modeste.",
-        "tooLarge": "Le solde dépasserait {{max}}, au-delà de ce que ce simulateur affiche. Essayez une durée plus courte ou un rendement plus faible."
+        "beyondHorizon": "Avec {{contribution}} par mois, il vous faudrait plus de {{maxYears}} ans pour atteindre {{goal}}. Essayez un versement plus élevé ou un objectif plus modeste.",
+        "tooLarge": "Le solde dépasserait {{max}}, au-delà de ce que ce simulateur affiche. Essayez une durée plus courte ou un rendement plus faible.",
+        "tooLargeTotals": "Sur cette durée, le solde dépasserait {{max}}, au-delà de ce que ce simulateur affiche : les totaux et le plan année par année ne sont donc pas affichés."
       },
       "assumptionsTitle": "Ce que ce calcul suppose",
       "assumptionsReturn": "Un rendement annuel constant, capitalisé chaque mois, chaque versement étant ajouté en fin de mois.",
@@ -1030,6 +1032,10 @@
           "negative": "La durée ne peut pas être négative.",
           "tooLarge": "Indiquez une durée d'au plus {{max}} ans."
         },
+        "periodMonths": {
+          "negative": "Le nombre de mois ne peut pas être négatif.",
+          "tooLarge": "Indiquez de 0 à {{max}} mois ; les années entières vont dans Années."
+        },
         "annualReturn": {
           "negative": "Ce simulateur ne gère pas les rendements négatifs. Indiquez 0 % ou plus.",
           "tooLarge": "Indiquez un rendement d'au plus {{max}}."
@@ -1040,7 +1046,8 @@
         "description": "Ce que vous avez versé et ce que les intérêts ont ajouté à la fin de chaque année. Le solde comprend ce que vous aviez déjà épargné.",
         "chartLabel": "Graphique du solde dans le temps, réparti entre ce que vous aviez déjà épargné, vos versements et les intérêts. Le tableau ci-dessous reprend les mêmes chiffres.",
         "yearAxis": "Années",
-        "tooltipLabel": "Après {{months}} mois",
+        "tooltipLabel": "Après {{duration}}",
+        "tooltipStart": "Au départ",
         "startingSavings": "Déjà épargné",
         "contributions": "Versements",
         "growth": "Intérêts",

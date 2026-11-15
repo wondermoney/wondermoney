@@ -110,6 +110,21 @@ describe("solving for the monthly contribution", () => {
     expect(result.finalBalance).toBeGreaterThanOrEqual(10_000);
   });
 
+  it("keeps the 0-a-month answer when the balance over the period is too large to show", () => {
+    const longAndHigh = { years: 100, annualReturn: SAVINGS_GOAL_LIMITS.maxAnnualReturn };
+
+    const reached = solve({ ...longAndHigh, goalAmount: 1_000, startingSavings: 2_000 });
+    expect(reached.status).toBe("reached");
+    expect(reached.monthlyContribution).toBe(0);
+    expect(reached.balanceTooLarge).toBe(true);
+    expect(reached.years).toEqual([]);
+
+    const growthAlone = solve({ ...longAndHigh, goalAmount: 1_000, startingSavings: 500 });
+    expect(growthAlone.status).toBe("growthAlone");
+    expect(growthAlone.monthlyContribution).toBe(0);
+    expect(growthAlone.balanceTooLarge).toBe(true);
+  });
+
   it("asks for a goal and a period", () => {
     expect(errorsFor({ goalAmount: 0 })).toEqual({ goalAmount: "required" });
     expect(errorsFor({ goalAmount: Number.NaN })).toEqual({ goalAmount: "required" });
@@ -133,7 +148,7 @@ describe("solving for the time", () => {
     expect(result.finalBalance).toBeGreaterThanOrEqual(10_000);
     expect(result.totalContributions).toBe(8_750);
     // One month earlier the goal is not yet reached.
-    expect(finalBalanceWith({ monthlyContribution: 250, years: 0, months: 34 })).toBeLessThan(10_000);
+    expect(finalBalanceWith({ monthlyContribution: 250, years: 2, months: 10 })).toBeLessThan(10_000);
   });
 
   it("gives whole months at 0% return, without dividing by zero", () => {
@@ -159,7 +174,7 @@ describe("solving for the time", () => {
   it("can reach the goal on growth alone", () => {
     const result = solve({ ...time, monthlyContribution: 0, startingSavings: 5_000, annualReturn: 4 });
 
-    expect(result.status).toBe("solved");
+    expect(result.status).toBe("growthAlone");
     // 1.04^17 = 1.948 and 1.04^18 = 2.026: the goal is reached during the 18th year.
     expect(result.months).toBeGreaterThan(17 * 12);
     expect(result.months).toBeLessThanOrEqual(18 * 12);
@@ -188,6 +203,7 @@ describe("solving for the final amount", () => {
     const result = solve(final);
 
     expect(result.status).toBe("solved");
+    expect(result.balanceTooLarge).toBe(false);
     expect(result.finalBalance).toBe(10_326.29);
     expect(result.totalContributions).toBe(9_000);
     expect(result.totalGrowth).toBe(326.29);
@@ -230,7 +246,8 @@ describe("solving for the final amount", () => {
       annualReturn: SAVINGS_GOAL_LIMITS.maxAnnualReturn,
     });
 
-    expect(result.status).toBe("tooLarge");
+    expect(result.balanceTooLarge).toBe(true);
+    expect(result.finalBalance).toBe(0);
     expect(result.years).toEqual([]);
   });
 });
@@ -278,7 +295,7 @@ describe("input checks", () => {
       monthlyContribution: "negative",
     });
     expect(errorsFor({ years: -1 })).toEqual({ period: "negative" });
-    expect(errorsFor({ months: -1 })).toEqual({ period: "negative" });
+    expect(errorsFor({ months: -1 })).toEqual({ periodMonths: "negative" });
     expect(errorsFor({ annualReturn: -0.5 })).toEqual({ annualReturn: "negative" });
   });
 
@@ -291,6 +308,9 @@ describe("input checks", () => {
     expect(errorsFor({ solveFor: "finalAmount", monthlyContribution: tooMuch })).toEqual({
       monthlyContribution: "tooLarge",
     });
+    expect(errorsFor({ years: 99, months: 12 })).toEqual({ periodMonths: "tooLarge" });
+    expect(errorsFor({ years: 0, months: 12 })).toEqual({ periodMonths: "tooLarge" });
+    expect(solve({ years: 0, months: 11 }).months).toBe(11);
     expect(errorsFor({ years: 100, months: 1 })).toEqual({ period: "tooLarge" });
     expect(solve({ years: 100, months: 0 }).months).toBe(1200);
     expect(errorsFor({ annualReturn: 30.01 })).toEqual({ annualReturn: "tooLarge" });

@@ -134,6 +134,20 @@ describe("savings goal tool page", () => {
 		for (const lang of SUPPORTED_LANGS) expect(placeholders(lang)).toEqual(reference)
 	})
 
+	it("takes the default return and the 100-year cap from the calculation, not the copy", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const copy = readLocale("src/locales", lang).tools.savingsGoal as Record<string, unknown> & {
+				status: Record<string, string>
+			}
+			expect(copy.annualReturnHelp).toContain("{{rate}}")
+			expect(copy.annualReturnHelp).not.toMatch(/\b2\b/)
+			for (const text of [copy.periodHelp, copy.overMaxYears, copy.status.beyondHorizon]) {
+				expect(text).toContain("{{maxYears}}")
+				expect(text).not.toMatch(/\b100\b/)
+			}
+		}
+	})
+
 	it("has a unique title and meta description per locale", () => {
 		const copies = SUPPORTED_LANGS.map((lang) => readLocale("src/locales", lang).tools.savingsGoal)
 

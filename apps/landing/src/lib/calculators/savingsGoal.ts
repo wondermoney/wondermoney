@@ -58,7 +58,10 @@ export type SavingsGoalField =
   | "goalAmount"
   | "startingSavings"
   | "monthlyContribution"
+  /** The saving period as a whole: years × 12 + months. */
   | "period"
+  /** The months box on its own: 0 to 11, whole years go in the years box. */
+  | "periodMonths"
   | "annualReturn";
 
 export type SavingsGoalInputError = "required" | "negative" | "tooLarge";
@@ -68,14 +71,15 @@ export type SavingsGoalStatus =
   | "solved"
   /** The starting savings already cover the goal. */
   | "reached"
-  /** Solving for the contribution: growth alone reaches the goal within the period. */
+  /**
+   * Growth alone reaches the goal: solving for the contribution, within the period (the answer
+   * is 0 a month); solving for the time, with no contribution entered.
+   */
   | "growthAlone"
   /** Solving for the time: nothing is added and nothing grows, so the goal is never reached. */
   | "never"
   /** Solving for the time: the goal is not reached within 100 years. */
-  | "beyondHorizon"
-  /** The balance would pass SAVINGS_GOAL_LIMITS.maxBalance. */
-  | "tooLarge";
+  | "beyondHorizon";
 
 export type SavingsGoalYear = {
   /** 1-based year of the plan. */
@@ -108,6 +112,13 @@ export type SavingsGoalResult = {
   totalGrowth: number;
   /** One row per year; empty when there is nothing to show. */
   years: SavingsGoalYear[];
+  /**
+   * The balance over the period would pass SAVINGS_GOAL_LIMITS.maxBalance (a very long period
+   * at a high return). The answer still stands where it does not depend on that balance (a
+   * contribution of 0), but the final balance, totals and schedule are left out: they are 0
+   * and empty.
+   */
+  balanceTooLarge: boolean;
 };
 
 export type SavingsGoalCalculation =
@@ -115,6 +126,9 @@ export type SavingsGoalCalculation =
   | { ok: false; errors: Partial<Record<SavingsGoalField, SavingsGoalInputError>> };
 
 const MAX_BALANCE_CENTS = SAVINGS_GOAL_LIMITS.maxBalance * 100;
+
+/** The months box takes 0 to 11; whole years go in the years box. */
+export const MAX_PERIOD_MONTHS_FIELD = 11;
 
 function isBlank(value: number): boolean {
   return Number.isNaN(value);
@@ -149,8 +163,10 @@ function validate(
     set("monthlyContribution", amountError(input.monthlyContribution, { required: false }));
   }
   if (input.solveFor !== "time") {
-    if (input.years < 0 || input.months < 0) set("period", "negative");
-    else if (periodMonths(input) < 1) set("period", "required");
+    if (input.months < 0) set("periodMonths", "negative");
+    else if (input.months > MAX_PERIOD_MONTHS_FIELD) set("periodMonths", "tooLarge");
+    if (input.years < 0) set("period", "negative");
+    else if (!errors.periodMonths && periodMonths(input) < 1) set("period", "required");
     else if (periodMonths(input) > SAVINGS_GOAL_LIMITS.maxMonths) set("period", "tooLarge");
   }
   if (input.annualReturn < 0) set("annualReturn", "negative");
@@ -306,13 +322,14 @@ export function computeSavingsGoal(input: SavingsGoalInput): SavingsGoalCalculat
         ok: true,
         result: {
           ...base,
-          status: "tooLarge",
+          status,
           monthlyContribution: contributionCents / 100,
           months,
           finalBalance: 0,
           totalContributions: 0,
           totalGrowth: 0,
           years: [],
+          balanceTooLarge: true,
         },
       };
     }
@@ -327,6 +344,7 @@ export function computeSavingsGoal(input: SavingsGoalInput): SavingsGoalCalculat
         totalContributions: (simulation?.contributionCents ?? 0) / 100,
         totalGrowth: (simulation?.growthCents ?? 0) / 100,
         years: simulation ? toYears(simulation) : [],
+        balanceTooLarge: false,
       },
     };
   };
@@ -365,5 +383,10 @@ export function computeSavingsGoal(input: SavingsGoalInput): SavingsGoalCalculat
     goalCents,
   );
   if (simulation.balanceCents < goalCents) return finish("beyondHorizon", contributionCents, null, null);
-  return finish("solved", contributionCents, simulation, simulation.months);
+  return finish(
+    contributionCents === 0 ? "growthAlone" : "solved",
+    contributionCents,
+    simulation,
+    simulation.months,
+  );
 }

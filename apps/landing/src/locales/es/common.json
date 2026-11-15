@@ -977,9 +977,9 @@
       "period": "Plazo de ahorro",
       "periodYears": "Años",
       "periodMonths": "Meses",
-      "periodHelp": "Hasta 100 años.",
+      "periodHelp": "Hasta {{maxYears}} años.",
       "annualReturn": "Rentabilidad anual esperada",
-      "annualReturnHelp": "Empieza en el 2 %. Usa 0 % para dinero que no rinde nada.",
+      "annualReturnHelp": "Empieza en el {{rate}}. Usa 0 % para dinero que no rinde nada.",
       "answer": {
         "contribution": "Aportación mensual necesaria",
         "time": "Tiempo hasta el objetivo",
@@ -990,7 +990,7 @@
       "finalBalance": "Saldo final",
       "alreadyThere": "Ya lo tienes",
       "never": "No a este ritmo",
-      "overHundredYears": "Más de 100 años",
+      "overMaxYears": "Más de {{maxYears}} años",
       "durationYears": "{{count}} años",
       "durationYearsOne": "1 año",
       "durationMonths": "{{count}} meses",
@@ -1003,9 +1003,11 @@
         "reached": "Los {{savings}} que ya tienes cubren el objetivo, así que no necesitas aportar nada.",
         "reachedTime": "Los {{savings}} que ya tienes cubren el objetivo: ya lo has alcanzado.",
         "growthAlone": "Con una rentabilidad del {{rate}} anual, tus {{savings}} superan el objetivo en {{period}} sin aportar nada al mes.",
+        "growthAloneTime": "Sin aportar nada al mes, tus {{savings}} llegan a {{goal}} en {{period}} con una rentabilidad del {{rate}} anual.",
         "never": "Sin aportación mensual y sin rentabilidad, tus ahorros se quedan en {{savings}} y nunca llegan al objetivo. Añade una aportación mensual para ver cuándo lo alcanzas.",
-        "beyondHorizon": "Con {{contribution}} al mes, tardarías más de 100 años en llegar a {{goal}}. Prueba con una aportación mayor o un objetivo menor.",
-        "tooLarge": "El saldo superaría {{max}}, más de lo que muestra este simulador. Prueba con un plazo más corto o una rentabilidad más baja."
+        "beyondHorizon": "Con {{contribution}} al mes, tardarías más de {{maxYears}} años en llegar a {{goal}}. Prueba con una aportación mayor o un objetivo menor.",
+        "tooLarge": "El saldo superaría {{max}}, más de lo que muestra este simulador. Prueba con un plazo más corto o una rentabilidad más baja.",
+        "tooLargeTotals": "En este plazo el saldo superaría {{max}}, más de lo que muestra este simulador, así que los totales y el plan año a año quedan fuera."
       },
       "assumptionsTitle": "Qué supone este cálculo",
       "assumptionsReturn": "Una rentabilidad anual constante, capitalizada cada mes, con cada aportación sumada al final del mes.",
@@ -1030,6 +1032,10 @@
           "negative": "El plazo no puede ser negativo.",
           "tooLarge": "Introduce un plazo de hasta {{max}} años."
         },
+        "periodMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a {{max}} meses; los años completos van en Años."
+        },
         "annualReturn": {
           "negative": "Este simulador no contempla rentabilidades negativas. Introduce 0 % o más.",
           "tooLarge": "Introduce una rentabilidad de hasta {{max}}."
@@ -1040,7 +1046,8 @@
         "description": "Lo que has aportado y lo que ha sumado el rendimiento al final de cada año. El saldo incluye lo que ya tenías ahorrado.",
         "chartLabel": "Gráfico del saldo a lo largo del tiempo, dividido entre lo que ya tenías ahorrado, tus aportaciones y el rendimiento. La tabla de abajo tiene las mismas cifras.",
         "yearAxis": "Años",
-        "tooltipLabel": "Tras {{months}} meses",
+        "tooltipLabel": "Tras {{duration}}",
+        "tooltipStart": "Al principio",
         "startingSavings": "Ya ahorrado",
         "contributions": "Aportaciones",
         "growth": "Rendimiento",
