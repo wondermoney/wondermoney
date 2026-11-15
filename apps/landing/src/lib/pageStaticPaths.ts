@@ -145,11 +145,14 @@ const LEGACY_FEATURE_SLUG_BY_ROUTE_ID: Record<FeatureRouteId, string> = {
   featureReports: "reports",
 };
 
-const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Record<ToolRouteId, string> = {
+// Only tools that once lived at an English slug have one; new tools start at
+// their localized slug and need no redirect page.
+const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Partial<Record<ToolRouteId, string>> = {
   toolCompoundInterest: "compound-interest-calculator",
   toolNetWorth: "net-worth-calculator",
   toolSavingsRate: "savings-rate-calculator",
   toolInvestmentReturn: "investment-return-calculator",
+  toolMortgage: "mortgage-calculator",
 };
 
 function withLegacyAlias<TParam extends string>(

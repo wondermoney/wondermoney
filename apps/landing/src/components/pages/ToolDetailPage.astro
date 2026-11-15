@@ -5,6 +5,12 @@ import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInt
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
+import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
+import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
+import EmergencyFundCalculatorComp from "@/components/calculators/EmergencyFundCalculatorComp";
+import EmergencyFundMethod from "@/components/calculators/EmergencyFundMethod.astro";
+import MortgageCalculatorComp from "@/components/calculators/MortgageCalculatorComp";
+import MortgageCalculatorGuide from "@/components/calculators/MortgageCalculatorGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -25,6 +31,9 @@ const relatedByRouteId: Record<ToolRouteId, ToolRouteId[]> = {
   toolNetWorth: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
   toolSavingsRate: ["toolCompoundInterest", "toolNetWorth", "toolInvestmentReturn"],
   toolInvestmentReturn: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
+  toolDebtToIncome: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+  toolEmergencyFund: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+  toolMortgage: ["toolDebtToIncome", "toolSavingsRate", "toolNetWorth"],
 };
 
 const toolKeyByRouteId: Record<ToolRouteId, string> = {
@@ -32,6 +41,28 @@ const toolKeyByRouteId: Record<ToolRouteId, string> = {
   toolNetWorth: "netWorth",
   toolSavingsRate: "savingsRate",
   toolInvestmentReturn: "investmentReturn",
+  toolDebtToIncome: "debtToIncome",
+  toolEmergencyFund: "emergencyFund",
+  toolMortgage: "mortgage",
+};
+
+// Tools whose closing call to action names their own next step in the app.
+const nextStepCtaByRouteId: Partial<
+  Record<ToolRouteId, { headline: string; description: string; ctaText?: string }>
+> = {
+  toolDebtToIncome: {
+    headline: t("tools.debtToIncome.ctaHeadline"),
+    description: t("tools.debtToIncome.ctaDescription"),
+  },
+  toolEmergencyFund: {
+    headline: t("tools.emergencyFund.nextStepHeadline"),
+    description: t("tools.emergencyFund.nextStepDescription"),
+    ctaText: t("tools.emergencyFund.nextStepCta"),
+  },
+  toolMortgage: {
+    headline: t("tools.mortgage.cta.headline"),
+    description: t("tools.mortgage.cta.description"),
+  },
 };
 
 const relatedItems = relatedByRouteId[routeId].map((relatedRouteId) => {
@@ -93,7 +124,14 @@ const schema = {
     {routeId === "toolInvestmentReturn" && (
       <InvestmentReturnCalculatorComp locale={locale} client:load />
     )}
+    {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
+    {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
+    {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
   </div>
+
+  {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
+  {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
+  {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />
@@ -101,6 +139,6 @@ const schema = {
 
   <RelatedContent locale={locale} client:idle items={relatedItems} />
   <div class="mt-8">
-    <CTABanner locale={locale} client:idle />
+    <CTABanner locale={locale} client:idle {...nextStepCtaByRouteId[routeId]} />
   </div>
 </ContentLayout>

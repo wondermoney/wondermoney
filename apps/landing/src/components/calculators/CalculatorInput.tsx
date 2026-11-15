@@ -10,6 +10,8 @@ interface Props {
   suffix?: string;
   prefix?: string;
   helpText?: string;
+  /** A validation message; marks the field invalid and is announced with it. */
+  error?: string;
   id: string;
 }
 
@@ -23,8 +25,13 @@ export default function CalculatorInput({
   suffix,
   prefix,
   helpText,
+  error,
   id,
 }: Props) {
+  const helpId = helpText ? `${id}-help` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [errorId, helpId].filter(Boolean).join(" ") || undefined;
+
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">
@@ -44,12 +51,15 @@ export default function CalculatorInput({
           min={min}
           max={max}
           step={step}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
           className={cn(
             "w-full rounded-lg border border-input px-3 py-2.5 font-mono text-sm",
             "focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring",
             "transition-colors",
             prefix && "pl-8",
-            suffix && "pr-12"
+            suffix && "pr-12",
+            error && "border-destructive-text"
           )}
         />
         {suffix && (
@@ -58,8 +68,13 @@ export default function CalculatorInput({
           </span>
         )}
       </div>
+      {error && (
+        <p id={errorId} className="text-xs text-destructive-text">
+          {error}
+        </p>
+      )}
       {helpText && (
-        <p className="text-xs text-muted-foreground">{helpText}</p>
+        <p id={helpId} className="text-xs text-muted-foreground">{helpText}</p>
       )}
     </div>
   );

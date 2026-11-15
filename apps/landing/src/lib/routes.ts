@@ -224,6 +224,30 @@ const ROUTE_SLUGS = {
 		de: "anlagerendite-rechner",
 		it: "rendimento-investimento",
 	},
+	toolDebtToIncome: {
+		pt: "taxa-de-esforco",
+		en: "debt-to-income-calculator",
+		es: "ratio-endeudamiento",
+		fr: "taux-endettement",
+		de: "schuldendienstquote-rechner",
+		it: "rapporto-rata-reddito",
+	},
+	toolEmergencyFund: {
+		pt: "fundo-de-emergencia",
+		en: "emergency-fund-calculator",
+		es: "fondo-de-emergencia",
+		fr: "epargne-de-precaution",
+		de: "notgroschen-rechner",
+		it: "fondo-di-emergenza",
+	},
+	toolMortgage: {
+		pt: "credito-habitacao",
+		en: "mortgage-calculator",
+		es: "hipoteca",
+		fr: "pret-immobilier",
+		de: "hypotheken-rechner",
+		it: "mutuo-casa",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -326,6 +350,9 @@ export const TOOL_ROUTE_IDS = [
 	"toolNetWorth",
 	"toolSavingsRate",
 	"toolInvestmentReturn",
+	"toolDebtToIncome",
+	"toolEmergencyFund",
+	"toolMortgage",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -533,6 +560,19 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	investmentreturncalculator: "toolInvestmentReturn",
 	"investment-return-calculator": "toolInvestmentReturn",
 	"retorno-investimento": "toolInvestmentReturn",
+	tooldebttoincome: "toolDebtToIncome",
+	debttoincomecalculator: "toolDebtToIncome",
+	"debt-to-income-calculator": "toolDebtToIncome",
+	"taxa-de-esforco": "toolDebtToIncome",
+	toolemergencyfund: "toolEmergencyFund",
+	emergencyfundcalculator: "toolEmergencyFund",
+	"emergency-fund-calculator": "toolEmergencyFund",
+	"emergency-fund": "toolEmergencyFund",
+	"fundo-de-emergencia": "toolEmergencyFund",
+	toolmortgage: "toolMortgage",
+	mortgagecalculator: "toolMortgage",
+	"mortgage-calculator": "toolMortgage",
+	"credito-habitacao": "toolMortgage",
 }
 
 function normalizeRouteLookupKey(value: string): string {
