@@ -1110,6 +1110,122 @@
       "nextStepHeadline": "Turn the required contribution into a recurring goal",
       "nextStepDescription": "Create the goal in WonderMoney with its amount, date and monthly contribution, and follow your progress against your real account balances.",
       "nextStepCta": "Create a goal"
+    },
+    "termDeposit": {
+      "title": "Term Deposit Calculator",
+      "description": "Work out what a fixed-term deposit earns before and after tax, with interest paid at maturity or along the way.",
+      "pageTitle": "Term Deposit Interest Calculator, Gross and Net — WonderMoney",
+      "pageDescription": "Free term deposit calculator. Enter the amount, gross rate, term and tax withheld to see gross and net interest, the balance at maturity, the net annual yield and every interest payment. No sign-up.",
+      "subtitle": "Enter the amount, the rate the bank quotes and the term to see what the deposit earns before and after tax and what you have when it matures. Nothing to sign up for.",
+      "ctaHeadline": "Track the maturity date and cash balance",
+      "ctaDescription": "Add the deposit to WonderMoney as an account so its balance counts in your net worth, and set a goal dated for the day it matures.",
+      "amount": "Amount deposited",
+      "annualRate": "Gross annual interest rate",
+      "annualRateHelp": "The nominal yearly rate before tax, as the bank quotes it. An AER already counts compounding, so with monthly or quarterly interest it sits slightly above the nominal rate.",
+      "term": "Term",
+      "termHelp": "In whole months, from 1 to {{max}}.",
+      "monthsSuffix": "months",
+      "monthsOne": "1 month",
+      "monthsMany": "{{count}} months",
+      "payout": "Interest is paid",
+      "payouts": {
+        "maturity": "At maturity",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "annually": "Yearly"
+      },
+      "reinvest": "Each interest payment is",
+      "reinvestOptions": {
+        "payOut": "Paid out to me",
+        "reinvest": "Added to the deposit"
+      },
+      "reinvestHelp": "Added to the deposit, interest earns interest from the next period on. Paid out, it leaves the deposit.",
+      "taxRate": "Tax withheld on interest",
+      "taxRateHelp": "Many countries withhold tax on deposit interest, at rates that differ by country and sometimes by person. Enter the rate that applies to you, or leave 0% to see gross figures.",
+      "grossInterest": "Gross interest",
+      "tax": "Tax withheld",
+      "netInterest": "Net interest",
+      "netYield": "Net annual yield",
+      "finalBalance": "Balance at maturity",
+      "paymentsOne": "1 interest payment",
+      "paymentsMany": "{{count}} interest payments",
+      "resultNote": {
+        "maturity": "Interest for {{term}} is paid in one go when the deposit matures.",
+        "reinvested": "Over {{term}}, {{payments}} are added to the deposit after tax, so later ones earn on a bigger balance.",
+        "paidOut": "Over {{term}}, you receive {{payments}} after tax and {{principal}} comes back at maturity. The balance counts both."
+      },
+      "errors": {
+        "summary": "The result appears once every field has a valid value.",
+        "amount": {
+          "required": "Enter the amount you deposit.",
+          "negative": "The amount can't be negative.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        },
+        "annualRate": {
+          "required": "Enter the rate, or 0 for none.",
+          "negative": "The rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "termMonths": {
+          "required": "Enter a term of at least 1 month.",
+          "tooLarge": "Enter a term of up to {{max}} months.",
+          "notWhole": "Enter the term in whole months."
+        },
+        "taxRate": {
+          "negative": "The tax rate can't be below 0%.",
+          "tooLarge": "The tax rate can't be above {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Interest payments",
+        "descriptionReinvested": "One row per payment: the interest for the period, the tax withheld from it and the deposit once the net interest is added.",
+        "descriptionPaidOut": "One row per payment: the interest for the period, the tax withheld from it and the net interest paid to you so far.",
+        "payment": "Paid at the end of",
+        "gross": "Gross interest",
+        "tax": "Tax",
+        "net": "Net interest",
+        "balance": "Deposit balance",
+        "paidOutToDate": "Paid to you so far",
+        "monthLabel": "Month {{month}}",
+        "showAll": "Show all {{count}} payments",
+        "showFewer": "Show fewer payments"
+      },
+      "guide": {
+        "whatHeading": "What a term deposit earns",
+        "whatBody": "A term deposit locks an amount away with a bank for a set number of months at a fixed rate. What you earn depends on three things besides the rate: how long the money stays, whether the interest comes at the end or along the way, and how much tax is withheld from it. This calculator works through all three with the rate you enter, so you can compare offers on the same basis.",
+        "readHeading": "How to read the result",
+        "read": {
+          "gross": "Gross interest: everything the deposit earns before tax.",
+          "tax": "Tax withheld: the part of each interest payment kept back for tax at the rate you enter.",
+          "net": "Net interest: what reaches you, gross interest minus tax.",
+          "final": "Balance at maturity: the amount deposited plus all the net interest, counting interest already paid out to you.",
+          "yield": "Net annual yield: the net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
+        },
+        "exampleHeading": "Worked example",
+        "exampleSetup": "Say you deposit {{amount}} for {{months}} months at a gross rate of {{rate}} a year, with the interest paid at maturity. The interest is simple: the amount times the rate times the share of a year the money stays.",
+        "exampleCompounded": "If the same deposit pays interest every quarter and adds it to the balance, it makes {{compoundedPayments}} payments and each one earns on a slightly larger amount. Gross interest comes to {{compoundedGross}}, {{compoundedExtra}} more, for a balance of {{compoundedFinal}} and a yield of {{compoundedYield}} a year, against {{yield}} when everything is paid at the end.",
+        "exampleTax": "Now suppose {{taxRate}} is withheld from the interest paid at maturity. That rate is only an illustration, not any country's: the calculator starts at 0% so you can enter your own. The bank keeps {{tax}}, you receive {{net}} and you end with {{taxedFinal}}, a net yield of {{taxedYield}} a year.",
+        "methodHeading": "Method and assumptions",
+        "methodIntro": "Interest is counted in whole months, without a day count. The rate you enter is a nominal annual rate: each period earns the rate times its months divided by 12.",
+        "methodFormula": "Interest for a period = balance × annual rate × months in the period ÷ 12. Net interest = interest − tax. Net annual yield = (balance at maturity ÷ amount deposited)^(12 ÷ term in months) − 1.",
+        "method": {
+          "maturity": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
+          "periodic": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
+          "reinvest": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out earns nothing more in this calculation.",
+          "tax": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
+          "yield": "The net annual yield compounds the net return over a year. A deposit shorter than a year is assumed to be renewed on the same terms, and one longer than a year shows its average yearly growth.",
+          "excluded": "Not included: early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
+          "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere."
+        },
+        "methodLimits": "Terms run from 1 to {{maxMonths}} months.",
+        "nextHeading": "Related calculators",
+        "nextCompound": "To see how money grows over years with regular contributions, try the compound interest calculator.",
+        "nextCompoundLink": "Open the compound interest calculator",
+        "nextEmergency": "A term deposit can hold savings you won't need soon, while your emergency fund stays within reach.",
+        "nextEmergencyLink": "Work out your emergency fund",
+        "nextSavingsGoal": "Saving up for the amount you will deposit, or planning what to do when it matures? The savings goal calculator works out the monthly amount or the time it takes.",
+        "nextSavingsGoalLink": "Open the savings goal calculator"
+      }
     }
   },
   "learn": {

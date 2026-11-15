@@ -1110,6 +1110,122 @@
       "nextStepHeadline": "Transformez le versement nécessaire en objectif récurrent",
       "nextStepDescription": "Créez l'objectif dans WonderMoney avec le montant, la date et le versement mensuel, et suivez vos progrès avec les soldes réels de vos comptes.",
       "nextStepCta": "Créer un objectif"
+    },
+    "termDeposit": {
+      "title": "Calculateur de dépôt à terme",
+      "description": "Calculez ce que rapporte un dépôt à terme avant et après impôt, avec des intérêts versés à l'échéance ou en cours de route.",
+      "pageTitle": "Calculateur d'intérêts de dépôt à terme, bruts et nets — WonderMoney",
+      "pageDescription": "Calculateur de dépôt à terme gratuit. Saisissez le montant, le taux brut, la durée et l'impôt prélevé pour voir les intérêts bruts et nets, le solde à l'échéance, le rendement net annuel et chaque versement d'intérêts. Sans inscription.",
+      "subtitle": "Saisissez le montant, le taux annoncé par la banque et la durée pour voir ce que le dépôt rapporte avant et après impôt et ce dont vous disposez à l'échéance. Aucune inscription nécessaire.",
+      "ctaHeadline": "Suivez la date d'échéance et le solde",
+      "ctaDescription": "Ajoutez le dépôt à WonderMoney comme compte pour que son solde compte dans votre patrimoine net, et créez un objectif daté du jour de son échéance.",
+      "amount": "Montant déposé",
+      "annualRate": "Taux nominal annuel brut",
+      "annualRateHelp": "Le taux annuel avant impôt annoncé par la banque. Un taux actuariel intègre déjà la capitalisation : avec des intérêts mensuels ou trimestriels, il dépasse un peu le taux nominal.",
+      "term": "Durée",
+      "termHelp": "En mois entiers, de 1 à {{max}}.",
+      "monthsSuffix": "mois",
+      "monthsOne": "1 mois",
+      "monthsMany": "{{count}} mois",
+      "payout": "Les intérêts sont versés",
+      "payouts": {
+        "maturity": "À l'échéance",
+        "monthly": "Chaque mois",
+        "quarterly": "Chaque trimestre",
+        "annually": "Chaque année"
+      },
+      "reinvest": "Chaque versement d'intérêts est",
+      "reinvestOptions": {
+        "payOut": "Versé sur mon compte",
+        "reinvest": "Ajouté au dépôt"
+      },
+      "reinvestHelp": "Ajoutés au dépôt, les intérêts produisent à leur tour des intérêts dès la période suivante. Versés sur votre compte, ils quittent le dépôt.",
+      "taxRate": "Impôt prélevé sur les intérêts",
+      "taxRateHelp": "De nombreux pays prélèvent un impôt sur les intérêts des dépôts, à un taux qui varie selon le pays et parfois selon la personne. Saisissez le taux qui vous concerne, ou laissez 0 % pour voir les montants bruts.",
+      "grossInterest": "Intérêts bruts",
+      "tax": "Impôt prélevé",
+      "netInterest": "Intérêts nets",
+      "netYield": "Rendement net annuel",
+      "finalBalance": "Solde à l'échéance",
+      "paymentsOne": "1 versement d'intérêts",
+      "paymentsMany": "{{count}} versements d'intérêts",
+      "resultNote": {
+        "maturity": "Les intérêts de {{term}} sont versés en une fois à l'échéance du dépôt.",
+        "reinvested": "Sur {{term}}, le dépôt reçoit {{payments}} après impôt : les suivants rapportent donc sur un solde plus élevé.",
+        "paidOut": "Sur {{term}}, vous recevez {{payments}} après impôt et récupérez {{principal}} à l'échéance. Le solde compte les deux."
+      },
+      "errors": {
+        "summary": "Le résultat s'affiche dès que chaque champ a une valeur valide.",
+        "amount": {
+          "required": "Saisissez le montant que vous déposez.",
+          "negative": "Le montant ne peut pas être négatif.",
+          "tooLarge": "Saisissez un montant d'au plus {{max}}."
+        },
+        "annualRate": {
+          "required": "Saisissez le taux, ou 0 s'il n'y en a pas.",
+          "negative": "Le taux ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Saisissez un taux d'au plus {{max}}."
+        },
+        "termMonths": {
+          "required": "Saisissez une durée d'au moins 1 mois.",
+          "tooLarge": "Saisissez une durée d'au plus {{max}} mois.",
+          "notWhole": "Saisissez la durée en mois entiers."
+        },
+        "taxRate": {
+          "negative": "Le taux d'impôt ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Le taux d'impôt ne peut pas dépasser {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Versements d'intérêts",
+        "descriptionReinvested": "Une ligne par versement : les intérêts de la période, l'impôt prélevé et le dépôt une fois les intérêts nets ajoutés.",
+        "descriptionPaidOut": "Une ligne par versement : les intérêts de la période, l'impôt prélevé et les intérêts nets reçus jusque-là.",
+        "payment": "Versé à la fin du",
+        "gross": "Intérêts bruts",
+        "tax": "Impôt",
+        "net": "Intérêts nets",
+        "balance": "Solde du dépôt",
+        "paidOutToDate": "Reçu jusqu'ici",
+        "monthLabel": "Mois {{month}}",
+        "showAll": "Afficher les {{count}} versements",
+        "showFewer": "Afficher moins de versements"
+      },
+      "guide": {
+        "whatHeading": "Ce que rapporte un dépôt à terme",
+        "whatBody": "Un dépôt à terme immobilise une somme à la banque pendant un nombre de mois fixé, à un taux fixe. Au-delà du taux, ce que vous gagnez dépend de trois choses : la durée pendant laquelle l'argent reste placé, le moment où les intérêts sont versés, à la fin ou en cours de route, et la part prélevée par l'impôt. Ce calculateur tient compte des trois avec le taux que vous saisissez, pour comparer les offres sur la même base.",
+        "readHeading": "Lire le résultat",
+        "read": {
+          "gross": "Intérêts bruts : tout ce que rapporte le dépôt avant impôt.",
+          "tax": "Impôt prélevé : la part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
+          "net": "Intérêts nets : ce qui vous revient, les intérêts bruts moins l'impôt.",
+          "final": "Solde à l'échéance : le montant déposé plus tous les intérêts nets, y compris ceux déjà versés sur votre compte.",
+          "yield": "Rendement net annuel : le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
+        },
+        "exampleHeading": "Exemple chiffré",
+        "exampleSetup": "Supposons que vous déposiez {{amount}} pendant {{months}} mois à un taux brut de {{rate}} par an, avec des intérêts versés à l'échéance. Les intérêts sont simples : le montant multiplié par le taux et par la part de l'année pendant laquelle l'argent reste placé.",
+        "exampleCompounded": "Si le même dépôt verse ses intérêts chaque trimestre et les ajoute au solde, il effectue {{compoundedPayments}} versements, chacun calculé sur un montant un peu plus élevé. Les intérêts bruts atteignent {{compoundedGross}}, soit {{compoundedExtra}} de plus, pour un solde de {{compoundedFinal}} et un rendement de {{compoundedYield}} par an, contre {{yield}} lorsque tout est versé à la fin.",
+        "exampleTax": "Supposons maintenant que {{taxRate}} soient prélevés sur les intérêts versés à l'échéance. Ce taux n'est qu'une illustration et ne correspond à aucun pays : le calculateur démarre à 0 % pour que vous saisissiez le vôtre. La banque prélève {{tax}}, vous recevez {{net}} et terminez avec {{taxedFinal}}, soit un rendement net de {{taxedYield}} par an.",
+        "methodHeading": "Méthode et hypothèses",
+        "methodIntro": "Les intérêts se comptent en mois entiers, sans décompte des jours. Le taux saisi est un taux nominal annuel : chaque période rapporte le taux multiplié par son nombre de mois, divisé par 12.",
+        "methodFormula": "Intérêts d'une période = solde × taux annuel × mois de la période ÷ 12. Intérêts nets = intérêts − impôt. Rendement net annuel = (solde à l'échéance ÷ montant déposé)^(12 ÷ durée en mois) − 1.",
+        "method": {
+          "maturity": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
+          "periodic": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
+          "reinvest": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte ne rapportent plus rien dans ce calcul.",
+          "tax": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
+          "yield": "Le rendement net annuel capitalise le gain net sur un an. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions, et un dépôt de plus d'un an affiche sa croissance annuelle moyenne.",
+          "excluded": "Non compris : pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
+          "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés."
+        },
+        "methodLimits": "Les durées vont de 1 à {{maxMonths}} mois.",
+        "nextHeading": "Calculateurs associés",
+        "nextCompound": "Pour voir comment l'argent fructifie sur des années avec des versements réguliers, essayez le calculateur d'intérêts composés.",
+        "nextCompoundLink": "Ouvrir le calculateur d'intérêts composés",
+        "nextEmergency": "Un dépôt à terme peut accueillir l'épargne dont vous n'aurez pas besoin de sitôt, tandis que votre épargne de précaution reste disponible.",
+        "nextEmergencyLink": "Calculer votre épargne de précaution",
+        "nextSavingsGoal": "Vous mettez de côté la somme à déposer, ou vous préparez la suite après l'échéance ? Le simulateur d'épargne calcule l'effort mensuel ou le temps nécessaire.",
+        "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne"
+      }
     }
   },
   "learn": {
