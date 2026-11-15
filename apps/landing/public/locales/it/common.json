@@ -419,8 +419,29 @@
       "pageTitle": "Strumenti e calcolatori finanziari — WonderMoney",
       "pageDescription": "Calcolatori interattivi gratuiti per pianificare il tuo futuro finanziario. Interesse composto, patrimonio netto, tasso di risparmio e molto altro.",
       "badge": "Calcolatore",
-      "comingSoon": "Presto disponibile",
-      "openCalculator": "Apri calcolatore"
+      "openCalculator": "Apri calcolatore",
+      "tasks": {
+        "title": "Cosa vuoi calcolare?",
+        "description": "Scegli un obiettivo per andare direttamente ai calcolatori giusti."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Budget e risparmio",
+          "intro": "Scopri dove vanno i tuoi soldi, quanto ne trattieni e quanto mettere da parte."
+        },
+        "borrowAndBuyHome": {
+          "title": "Prestiti e acquisto casa",
+          "intro": "Verifica quanto costerà un prestito e se le rate sono sostenibili per il tuo reddito."
+        },
+        "investAndGrow": {
+          "title": "Investire e crescere",
+          "intro": "Stima quanto possono crescere i tuoi risparmi e investimenti e quando potrebbero coprire le tue spese."
+        },
+        "trackWealth": {
+          "title": "Monitora il tuo patrimonio",
+          "intro": "Somma ciò che possiedi e ciò che devi per sapere a che punto sei oggi."
+        }
+      }
     },
     "fire": {
       "title": "Calcolatore FIRE",

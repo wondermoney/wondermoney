@@ -419,8 +419,29 @@
       "pageTitle": "Ferramentas e calculadoras financeiras — WonderMoney",
       "pageDescription": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Juros compostos, património líquido, taxa de poupança e mais.",
       "badge": "Calculadora",
-      "comingSoon": "Em breve",
-      "openCalculator": "Abrir calculadora"
+      "openCalculator": "Abrir calculadora",
+      "tasks": {
+        "title": "O que queres calcular?",
+        "description": "Escolhe uma tarefa para ires diretamente às calculadoras certas."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Orçamento e poupança",
+          "intro": "Vê para onde vai o teu dinheiro, quanto consegues guardar e quanto deves pôr de parte."
+        },
+        "borrowAndBuyHome": {
+          "title": "Crédito e compra de casa",
+          "intro": "Confirma quanto vai custar um empréstimo e se as prestações cabem no teu rendimento."
+        },
+        "investAndGrow": {
+          "title": "Investir e fazer crescer",
+          "intro": "Estima quanto as tuas poupanças e investimentos podem crescer e quando podem cobrir as tuas despesas."
+        },
+        "trackWealth": {
+          "title": "Acompanhar o património",
+          "intro": "Soma o que tens e o que deves para saberes onde estás hoje."
+        }
+      }
     },
     "fire": {
       "title": "Calculadora FIRE",

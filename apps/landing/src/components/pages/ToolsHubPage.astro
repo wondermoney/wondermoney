@@ -1,0 +1,109 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import { buildAlternateLinksForPath, toToolsHubPath, type Lang } from "@/lib/routes";
+import { buildToolsHub, buildToolsHubItemList, toolAnalyticsName } from "@/lib/toolsCatalog";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const toolsHubHref = toToolsHubPath(locale);
+const alternateLinks = buildAlternateLinksForPath((lang) => toToolsHubPath(lang));
+const groups = buildToolsHub(locale);
+const itemListSchema = buildToolsHubItemList(locale, t);
+---
+
+<ContentLayout
+  title={t("tools.hub.pageTitle")}
+  description={t("tools.hub.pageDescription")}
+  alternateLinks={alternateLinks}
+  breadcrumbs={[{ label: t("header.tools"), href: toolsHubHref }]}
+  locale={locale}
+  structuredData={itemListSchema}
+>
+  <div data-tools-hub>
+    <section>
+      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {t("tools.hub.title")}
+      </h1>
+      <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
+        {t("tools.hub.description")}
+      </p>
+    </section>
+
+    <nav class="mt-8" aria-labelledby="tools-hub-tasks">
+      <h2 id="tools-hub-tasks" class="text-xl font-semibold text-foreground">
+        {t("tools.hub.tasks.title")}
+      </h2>
+      <p class="mt-1 text-sm text-muted-foreground">{t("tools.hub.tasks.description")}</p>
+      <ul class="mt-4 flex flex-wrap gap-3">
+        {
+          groups.map((group) => (
+            <li>
+              <a
+                href={`#${group.anchor}`}
+                data-tools-hub-link="task"
+                data-group={group.id}
+                class="inline-flex h-10 items-center rounded-md border border-input bg-secondary px-4 text-sm font-medium text-secondary-foreground transition-colors hover:bg-paper-3"
+              >
+                {t(`tools.hub.groups.${group.id}.title`)}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mt-12 space-y-12">
+      {
+        groups.map((group) => (
+          <section id={group.anchor} class="scroll-mt-28" aria-labelledby={`${group.anchor}-title`}>
+            <h2
+              id={`${group.anchor}-title`}
+              class="border-b border-border pb-2 text-2xl font-bold text-foreground"
+            >
+              {t(`tools.hub.groups.${group.id}.title`)}
+            </h2>
+            <p class="mt-3 max-w-3xl text-muted-foreground">
+              {t(`tools.hub.groups.${group.id}.intro`)}
+            </p>
+            <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {group.tools.map((tool) => (
+                <a
+                  href={tool.href}
+                  data-tools-hub-link="tool"
+                  data-tool={toolAnalyticsName(tool.key)}
+                  data-group={group.id}
+                  data-position={tool.position}
+                  class="group relative rounded-card border border-border p-6 transition-colors hover:border-primary/40 hover:bg-accent"
+                >
+                  <h3 class="text-lg font-semibold text-foreground group-hover:text-primary">
+                    <span class="mb-1 block text-sm tracking-normal">{t("tools.hub.badge")}</span>{" "}
+                    {t(`tools.${tool.key}.title`)}
+                  </h3>
+                  <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                    {t(`tools.${tool.key}.description`)}
+                  </p>
+                  <span class="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 decoration-primary/40 group-hover:opacity-80">
+                    {t("tools.hub.openCalculator")}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</ContentLayout>
+
+<script>
+  import { trackToolsHubClicks } from "@/lib/toolsHubTracking";
+
+  const hub = document.querySelector<HTMLElement>("[data-tools-hub]");
+  if (hub) trackToolsHubClicks(hub);
+</script>

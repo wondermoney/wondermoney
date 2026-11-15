@@ -419,8 +419,29 @@
       "pageTitle": "Finanztools & Rechner — WonderMoney",
       "pageDescription": "Kostenlose interaktive Rechner zur Planung Ihrer finanziellen Zukunft. Zinseszins, Nettovermögen, Sparquote und mehr.",
       "badge": "Rechner",
-      "comingSoon": "Demnächst verfügbar",
-      "openCalculator": "Rechner öffnen"
+      "openCalculator": "Rechner öffnen",
+      "tasks": {
+        "title": "Was möchten Sie berechnen?",
+        "description": "Wählen Sie ein Thema, um direkt zu den passenden Rechnern zu springen."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Budget und Sparen",
+          "intro": "Sehen Sie, wohin Ihr Geld fließt, wie viel davon übrig bleibt und wie viel Sie zurücklegen sollten."
+        },
+        "borrowAndBuyHome": {
+          "title": "Kredit und Immobilienkauf",
+          "intro": "Prüfen Sie, was ein Kredit kostet und ob die Raten zu Ihrem Einkommen passen."
+        },
+        "investAndGrow": {
+          "title": "Investieren und Vermögen aufbauen",
+          "intro": "Schätzen Sie, wie Ihre Ersparnisse und Anlagen wachsen könnten und wann sie Ihre Ausgaben decken."
+        },
+        "trackWealth": {
+          "title": "Vermögen im Blick",
+          "intro": "Rechnen Sie zusammen, was Sie besitzen und was Sie schulden, um zu sehen, wo Sie heute stehen."
+        }
+      }
     },
     "fire": {
       "title": "FIRE-Rechner",

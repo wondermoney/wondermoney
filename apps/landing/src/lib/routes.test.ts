@@ -16,6 +16,7 @@ import {
 	toLocalizedPath,
 	toToolsHubPath,
 } from "./routes"
+import { buildToolsHub } from "./toolsCatalog"
 
 describe("route localization", () => {
 	const requiredLpMetaKeys = [
@@ -254,11 +255,8 @@ describe("route localization", () => {
 
 	it("lists the mortgage calculator on the tools hub in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
-			const hubSource = readFileSync(
-				fileURLToPath(new URL(`../pages/${lang}/tools/index.astro`, import.meta.url)),
-				"utf8",
-			)
-			expect(hubSource).toContain('routeId: "toolMortgage"')
+			const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+			expect(hubTools.map((tool) => tool.href)).toContain(toLocalizedPath("toolMortgage", lang))
 		}
 	})
 
@@ -309,7 +307,7 @@ describe("route localization", () => {
 
 	it("does not surface removed how-to links in tools hub mappings", () => {
 		const toolsHubPath = fileURLToPath(
-			new URL("../pages/en/tools/index.astro", import.meta.url),
+			new URL("../components/pages/ToolsHubPage.astro", import.meta.url),
 		)
 		const toolPagePath = fileURLToPath(
 			new URL("../pages/en/tools/[tool].astro", import.meta.url),
@@ -319,6 +317,9 @@ describe("route localization", () => {
 		const toolPageSource = readFileSync(toolPagePath, "utf8")
 
 		expect(toolsHubSource).not.toContain("how-to-calculate-net-worth")
+		expect(
+			buildToolsHub("en").flatMap((group) => group.tools.map((tool) => tool.href)),
+		).not.toContainEqual(expect.stringContaining("how-to-calculate-net-worth"))
 
 		expect(toolPageSource).not.toContain("how-to-calculate-net-worth")
 	})
@@ -504,11 +505,8 @@ describe("emergency fund tool route", () => {
 	})
 
 	it.each(SUPPORTED_LANGS)("is listed on the %s tools hub", (lang) => {
-		const hubSource = readFileSync(
-			fileURLToPath(new URL(`../pages/${lang}/tools/index.astro`, import.meta.url)),
-			"utf8",
-		)
+		const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
 
-		expect(hubSource).toContain('routeId: "toolEmergencyFund"')
+		expect(hubTools.map((tool) => tool.href)).toContain(toLocalizedPath("toolEmergencyFund", lang))
 	})
 })

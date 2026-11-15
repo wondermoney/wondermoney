@@ -9,6 +9,7 @@ import {
 	toLocalizedPath,
 	toLocalizedPathname,
 } from "../routes"
+import { buildToolsHub } from "../toolsCatalog"
 
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
@@ -72,11 +73,8 @@ describe("debt-to-income tool page", () => {
 
 	it("is listed on the tools hub in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
-			const hub = readFileSync(
-				fileURLToPath(new URL(`../../pages/${lang}/tools/index.astro`, import.meta.url)),
-				"utf8",
-			)
-			expect(hub).toContain('routeId: "toolDebtToIncome"')
+			const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+			expect(hubTools.map((tool) => tool.href)).toContain(toLocalizedPath("toolDebtToIncome", lang))
 		}
 	})
 

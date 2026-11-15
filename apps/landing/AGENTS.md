@@ -29,6 +29,7 @@ public/                # Static assets
 | Route parity | `src/pages/`, "Localized routes" below | Thin locale wrappers |
 | Localized URLs | `src/lib/routes.ts` | Typed localized slug map |
 | Static content expansion | `src/lib/pageStaticPaths.ts` | Guides, glossary, tools, monthly pages |
+| Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
 | Visual rules | `DESIGN.md` | Tokens shared with `apps/web/DESIGN.md` |

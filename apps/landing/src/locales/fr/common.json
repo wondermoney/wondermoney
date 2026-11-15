@@ -419,8 +419,29 @@
       "pageTitle": "Outils et calculatrices financiers — WonderMoney",
       "pageDescription": "Calculatrices interactives gratuites pour planifier votre avenir financier. Intérêts composés, patrimoine net, taux d'épargne, et bien plus.",
       "badge": "Calculatrice",
-      "comingSoon": "Bientôt disponible",
-      "openCalculator": "Ouvrir la calculatrice"
+      "openCalculator": "Ouvrir la calculatrice",
+      "tasks": {
+        "title": "Que voulez-vous calculer ?",
+        "description": "Choisissez un objectif pour aller directement aux calculatrices correspondantes."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Budget et épargne",
+          "intro": "Voyez où va votre argent, combien vous en gardez et combien mettre de côté."
+        },
+        "borrowAndBuyHome": {
+          "title": "Emprunter et acheter un logement",
+          "intro": "Vérifiez ce que coûtera un prêt et si les mensualités sont compatibles avec vos revenus."
+        },
+        "investAndGrow": {
+          "title": "Investir et faire fructifier",
+          "intro": "Estimez la croissance de votre épargne et de vos placements, et le moment où ils pourraient couvrir vos dépenses."
+        },
+        "trackWealth": {
+          "title": "Suivre votre patrimoine",
+          "intro": "Additionnez ce que vous possédez et ce que vous devez pour savoir où vous en êtes aujourd'hui."
+        }
+      }
     },
     "fire": {
       "title": "Calculatrice FIRE",

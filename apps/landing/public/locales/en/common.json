@@ -419,8 +419,29 @@
       "pageTitle": "Financial Tools & Calculators — WonderMoney",
       "pageDescription": "Free interactive calculators to help you plan your financial future. Compound interest, net worth, savings rate, and more.",
       "badge": "Calculator",
-      "comingSoon": "Coming soon",
-      "openCalculator": "Open calculator"
+      "openCalculator": "Open calculator",
+      "tasks": {
+        "title": "What do you want to work out?",
+        "description": "Pick a task to jump straight to its calculators."
+      },
+      "groups": {
+        "budgetAndSave": {
+          "title": "Budget and save",
+          "intro": "See where your money goes, how much of it you keep and how much to set aside."
+        },
+        "borrowAndBuyHome": {
+          "title": "Borrow and buy a home",
+          "intro": "Check what a loan will cost and whether the repayments fit your income."
+        },
+        "investAndGrow": {
+          "title": "Invest and grow",
+          "intro": "Estimate how your savings and investments could grow, and when they could cover your spending."
+        },
+        "trackWealth": {
+          "title": "Track your wealth",
+          "intro": "Add up what you own and what you owe to see where you stand today."
+        }
+      }
     },
     "fire": {
       "title": "FIRE Calculator",
