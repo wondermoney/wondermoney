@@ -74,6 +74,12 @@ export const TOOLS_CATALOG = [
 		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
 	},
 	{
+		key: "borrowingCapacity",
+		routeId: "toolBorrowingCapacity",
+		group: "borrowAndBuyHome",
+		related: ["toolMortgage", "toolDebtToIncome", "toolSavingsGoal"],
+	},
+	{
 		key: "earlyRepayment",
 		routeId: "toolEarlyRepayment",
 		group: "borrowAndBuyHome",

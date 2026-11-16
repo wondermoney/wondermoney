@@ -4,6 +4,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Lang } from "@/lib/i18nLocale";
+import BorrowingCapacityCalculatorComp from "./BorrowingCapacityCalculatorComp";
 import BuyVsRentCalculatorComp from "./BuyVsRentCalculatorComp";
 import CompoundInterestCalculatorComp from "./CompoundInterestCalculatorComp";
 import DebtToIncomeCalculatorComp from "./DebtToIncomeCalculatorComp";
@@ -20,6 +21,7 @@ import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
 
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["buy versus rent", BuyVsRentCalculatorComp],
+  ["borrowing capacity", BorrowingCapacityCalculatorComp],
   ["compound interest", CompoundInterestCalculatorComp],
   ["debt-to-income", DebtToIncomeCalculatorComp],
   ["early repayment", EarlyRepaymentCalculatorComp],
@@ -225,6 +227,26 @@ describe("savings goal calculator with the annual return cleared", () => {
     await user.clear(screen.getByRole("spinbutton", { name: "Expected annual return" }));
     expect(screen.getByText("Enter an expected annual return, 0% or more.")).toBeTruthy();
   });
+});
+
+describe("borrowing capacity calculator", () => {
+  it("asks for the interest rate instead of computing at 0%", async () => {
+    const user = userEvent.setup();
+    render(<BorrowingCapacityCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Interest rate" }));
+    expect(screen.getByText("Enter the interest rate.")).toBeTruthy();
+    expect(screen.queryByText("Highest home price")).toBeNull();
+  });
+
+  it.each(["Existing credit payments", "Savings for the purchase", "One-off purchase costs"])(
+    "counts an empty %s as 0",
+    async (label) => {
+      const user = userEvent.setup();
+      render(<BorrowingCapacityCalculatorComp locale="en" />);
+      await user.clear(screen.getByRole("spinbutton", { name: label }));
+      expect(screen.getByText("Highest home price")).toBeTruthy();
+    },
+  );
 });
 
 describe("net worth calculator with every field cleared", () => {

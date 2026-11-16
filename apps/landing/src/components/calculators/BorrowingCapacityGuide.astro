@@ -1,0 +1,169 @@
+---
+// Prerendered explanation, worked example and method for the borrowing capacity calculator.
+// The figures come from the same function the calculator runs, starting from its first state.
+import {
+  BORROWING_CAPACITY_EXAMPLE,
+  computeBorrowingCapacity,
+  type BorrowingCapacityInput,
+} from "@/lib/calculators/borrowingCapacity";
+import {
+  DEBT_TO_INCOME_CAUTION_FROM,
+  DEBT_TO_INCOME_HIGH_ABOVE,
+} from "@/lib/calculators/debtToIncome";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.borrowingCapacity.guide.${key}`;
+
+function calculate(overrides: Partial<BorrowingCapacityInput> = {}) {
+  const calculation = computeBorrowingCapacity({ ...BORROWING_CAPACITY_EXAMPLE, ...overrides });
+  if (!calculation.ok || calculation.result.status !== "ok") {
+    throw new Error("The borrowing capacity worked example has invalid inputs");
+  }
+  return calculation.result;
+}
+
+const example = calculate();
+const lowSavings = BORROWING_CAPACITY_EXAMPLE.savings / 2;
+const savingsBound = calculate({ savings: lowSavings });
+if (example.binding !== "monthly" || example.lift?.kind !== "income" || !example.mortgage) {
+  throw new Error("The worked example should be limited by the monthly budget");
+}
+if (savingsBound.binding !== "cash") {
+  throw new Error("The second worked example should be limited by the savings");
+}
+
+const exact = (value: number) => formatMoney(locale, value, { decimals: 2 });
+const euros = (value: number) => formatMoney(locale, value, { decimals: 0 });
+const pct = (value: number) =>
+  formatPercent(locale, value, { decimals: Number.isInteger(value) ? 0 : 1 });
+
+const values = {
+  income: euros(BORROWING_CAPACITY_EXAMPLE.monthlyIncome),
+  existing: euros(BORROWING_CAPACITY_EXAMPLE.existingPayments),
+  share: pct(BORROWING_CAPACITY_EXAMPLE.maxDebtShare),
+  allowed: exact(example.monthly.allowedPayments),
+  room: exact(example.monthly.maxNewPayment),
+  rate: pct(BORROWING_CAPACITY_EXAMPLE.annualRate),
+  years: formatNumber(locale, BORROWING_CAPACITY_EXAMPLE.termYears),
+  maxLoan: exact(example.monthly.maxLoan),
+  savings: euros(BORROWING_CAPACITY_EXAMPLE.savings),
+  costsRate: pct(BORROWING_CAPACITY_EXAMPLE.purchaseCostsRate),
+  ltv: pct(BORROWING_CAPACITY_EXAMPLE.maxLoanToValue),
+  deposit: pct(example.cash.depositShare),
+  cashShare: pct(example.cash.cashShare),
+  cashPrice: exact(example.cash.priceCeiling ?? 0),
+  monthlyPrice: exact(example.monthly.priceCeiling),
+  price: exact(example.price),
+  loan: exact(example.loan),
+  downPayment: exact(example.downPayment),
+  purchaseCosts: exact(example.purchaseCosts),
+  payment: exact(example.mortgage.monthlyPayment),
+  extraIncome: euros(example.lift.extraMonthlyIncome),
+  liftPrice: euros(example.lift.price),
+  lowSavings: euros(lowSavings),
+  lowSavingsPrice: exact(savingsBound.price),
+  lowSavingsLoan: exact(savingsBound.loan),
+  caution: DEBT_TO_INCOME_CAUTION_FROM,
+  high: DEBT_TO_INCOME_HIGH_ABOVE,
+};
+
+const exampleSteps = ["exampleStep1", "exampleStep2", "exampleStep3", "exampleStep4"].map((key) =>
+  t(k(key), values),
+);
+const methodItems = ["methodShare", "methodCosts", "methodRounding", "methodPrivacy"].map((key) =>
+  t(k(key), values),
+);
+const assumptions = [
+  "assumptionFixedRate",
+  "assumptionSavings",
+  "assumptionPayment",
+  "assumptionCostsShare",
+].map((key) => t(k(key), values));
+const lenderRules = ["lenderStress", "lenderIncome", "lenderCountry", "lenderProfile"].map((key) =>
+  t(k(key)),
+);
+
+const related = [
+  { routeId: "toolMortgage", key: "relatedMortgage", title: t("tools.mortgage.title") },
+  { routeId: "toolDebtToIncome", key: "relatedDebtToIncome", title: t("tools.debtToIncome.title") },
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="borrowing-capacity-what">
+    <h2 id="borrowing-capacity-what" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("whatTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("whatBody1"))}</p>
+    <p class="mt-4">{t(k("whatBody2"))}</p>
+    <p class="mt-4">{t(k("whatBody3"))}</p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {
+        related.map((item) => (
+          <li>
+            <a
+              href={toLocalizedPath(item.routeId, locale)}
+              class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
+            >
+              {item.title}
+            </a>{": "}{t(k(item.key))}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="borrowing-capacity-example">
+    <h2 id="borrowing-capacity-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("exampleIntro"), values)}</p>
+    <ol class="mt-4 list-decimal space-y-2 pl-6">
+      {exampleSteps.map((step) => <li>{step}</li>)}
+    </ol>
+    <p class="mt-4">{t(k("exampleResult"), values)}</p>
+    <p class="mt-4">{t(k("exampleLift"), values)}</p>
+    <p class="mt-4">{t(k("exampleSavings"), values)}</p>
+  </section>
+
+  <section aria-labelledby="borrowing-capacity-method">
+    <h2 id="borrowing-capacity-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("methodIntro"))}</p>
+    <div class="mt-4 space-y-1 rounded-lg bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
+      <p>M = I × d − E</p>
+      <p>L = M × (1 − (1 + r)<sup>−n</sup>) ÷ r</p>
+      <p>P₁ = (L + S) ÷ (1 + c)</p>
+      <p>P₂ = S ÷ (1 − v + c)</p>
+      <p>P = min(P₁, P₂)</p>
+    </div>
+    <p class="mt-4">{t(k("methodLegend"))}</p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methodItems.map((item) => <li>{item}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {assumptions.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="borrowing-capacity-lenders">
+    <h2 id="borrowing-capacity-lenders" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("lendersTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("lendersIntro"))}</p>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {lenderRules.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="mt-4">{t(k("lendersOutro"))}</p>
+  </section>
+</div>
