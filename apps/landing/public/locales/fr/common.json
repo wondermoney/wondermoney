@@ -1922,6 +1922,150 @@
         "relatedNetWorth": "Pour additionner le logement, le prêt et votre épargne tels qu'ils sont aujourd'hui, utilisez la",
         "relatedNetWorthLink": "calculatrice de patrimoine net"
       }
+    },
+    "rateRevision": {
+      "title": "Simulateur de révision de taux variable",
+      "shortName": "Révision du taux",
+      "description": "Voyez comment la mensualité d'un prêt à taux variable change quand son indice bouge, sur un an et jusqu'à la fin du prêt.",
+      "pageTitle": "Simulateur de Prêt à Taux Variable : votre Mensualité après une Révision — WonderMoney",
+      "pageDescription": "Simulateur gratuit pour prêts immobiliers et crédits à taux variable. Saisissez le capital restant dû, la durée, l'indice et la marge pour voir la nouvelle mensualité après révision, le coût sur un an et jusqu'au terme, et un tableau de −2 à +4 points. Sans inscription.",
+      "subtitle": "Indiquez le capital restant dû, la durée restante, l'indice que suit votre prêt et la marge de la banque, puis l'indice attendu à la prochaine révision. Voyez la nouvelle mensualité, ce que l'écart représente sur un an et jusqu'à la fin du prêt, et la mensualité pour un indice de 2 points plus bas à 4 points plus haut. Sans inscription.",
+      "loanHeading": "Votre prêt aujourd'hui",
+      "balance": "Capital restant dû",
+      "balanceHelp": "Ce que vous devez aujourd'hui, d'après votre dernier relevé de prêt.",
+      "termLabel": "Durée restante",
+      "termYears": "Années",
+      "termMonths": "Mois",
+      "termHelp": "Années plus mois, par exemple 22 ans et 4 mois.",
+      "termRounded": "Calculé sur {{term}} : la durée restante est arrondie au mois entier.",
+      "indexRate": "Indice actuel",
+      "indexRateHelp": "Le taux de référence que suit votre prêt, comme l'Euribor ou un taux de banque centrale, à la valeur utilisée par votre mensualité actuelle. Il peut être négatif.",
+      "spread": "Marge",
+      "spreadHelp": "La marge fixe que la banque ajoute à l'indice, telle que prévue dans votre contrat.",
+      "currentRate": "Vous payez {{rate}} aujourd'hui : l'indice plus la marge.",
+      "floored": "L'indice plus la marge est inférieur à 0 %, donc le taux est pris à 0 %. Votre contrat peut prévoir son propre plancher.",
+      "revisionHeading": "À la prochaine révision",
+      "newIndexRate": "Nouvel indice",
+      "newIndexRateHelp": "La valeur attendue à la prochaine date de révision, ou choisissez une variation ci-dessous.",
+      "stressLabel": "Essayez une variation de l'indice",
+      "stress": {
+        "one": "{{change}} point",
+        "other": "{{change}} points"
+      },
+      "newRate": "Le taux passe à {{rate}}.",
+      "incomeHeading": "Votre budget",
+      "monthlyIncome": "Revenu net mensuel (facultatif)",
+      "monthlyIncomeHelp": "Après impôts. Indiquez-le pour voir la part de vos revenus prise par la mensualité, ou laissez vide.",
+      "result": {
+        "newPayment": "Nouvelle mensualité",
+        "up": "{{amount}} de plus par mois ({{percent}})",
+        "down": "{{amount}} de moins par mois ({{percent}})",
+        "same": "La mensualité ne change pas.",
+        "currentPayment": "Mensualité aujourd'hui, à {{rate}}",
+        "revisedPayment": "Mensualité après révision, à {{rate}}",
+        "monthlyChange": "Écart par mois",
+        "nextYear": "Sur les 12 prochaines mensualités",
+        "paymentsLeft": "Sur les {{count}} mensualités restantes",
+        "paymentLeft": "Sur la dernière mensualité",
+        "totalInterest": "Écart d'intérêts jusqu'à la fin du prêt",
+        "incomeShare": "La nouvelle mensualité prendrait {{revised}} de votre revenu net, contre {{current}} aujourd'hui. Niveau du taux d'endettement : {{band}}.",
+        "exceedsIncome": "La nouvelle mensualité dépasse le revenu que vous avez saisi.",
+        "bandNote": "Niveaux du calculateur de taux d'endettement : sous {{caution}} % sain, de {{caution}} % à {{high}} % vigilance, au-dessus de {{high}} % élevé. C'est un repère général, pas la limite d'une banque."
+      },
+      "assumptionNote": "Le nouveau taux s'applique de la prochaine mensualité jusqu'à la fin du prêt. Les dates de révision, les plafonds et les planchers dépendent de votre contrat et ne sont pas pris en compte.",
+      "table": {
+        "title": "Votre mensualité si l'indice bouge",
+        "intro": "Le même prêt avec un indice de 2 points plus bas à 4 points plus haut qu'aujourd'hui et la même marge, chaque taux appliqué de la prochaine mensualité jusqu'à la fin du prêt.",
+        "caption": "Mensualité pour chaque variation de l'indice",
+        "change": "Variation de l'indice",
+        "index": "Indice",
+        "rate": "Taux payé",
+        "payment": "Mensualité",
+        "monthlyChange": "Écart par mois",
+        "interestChange": "Écart d'intérêts jusqu'au terme",
+        "today": "Aujourd'hui",
+        "selected": "Votre scénario"
+      },
+      "errors": {
+        "summary": "La nouvelle mensualité s'affiche dès que tous les champs ont une valeur valide.",
+        "balance": {
+          "required": "Indiquez le capital restant dû.",
+          "tooSmall": "Indiquez un capital d'au moins {{min}}.",
+          "tooLarge": "Indiquez un capital jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Indiquez la durée restante, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indiquez jusqu'à {{max}} ans au total."
+        },
+        "termMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indiquez de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "indexRate": {
+          "required": "Indiquez l'indice. Il peut être à 0 % ou négatif.",
+          "tooSmall": "Indiquez un indice d'au moins {{min}}.",
+          "tooLarge": "Indiquez un indice jusqu'à {{max}}."
+        },
+        "spread": {
+          "required": "Indiquez la marge, ou 0 % s'il n'y en a pas.",
+          "negative": "La marge ne peut pas être négative.",
+          "tooLarge": "Indiquez une marge jusqu'à {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Indiquez le nouvel indice, ou choisissez une variation ci-dessous.",
+          "tooSmall": "Indiquez un indice d'au moins {{min}}.",
+          "tooLarge": "Indiquez un indice jusqu'à {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Le revenu ne peut pas être négatif. Laissez vide pour ne pas l'utiliser.",
+          "tooLarge": "Indiquez un revenu jusqu'à {{max}}."
+        }
+      },
+      "nextStepHeadline": "Prévoyez une mensualité plus élevée dans votre budget",
+      "nextStepDescription": "Ajoutez le prêt dans WonderMoney, prévoyez la mensualité plus élevée dans votre budget mensuel et voyez ce qu'il reste pour vos autres dépenses et votre épargne.",
+      "nextStepCta": "Planifier mon budget",
+      "guide": {
+        "whatTitle": "Comment une révision de taux change votre mensualité",
+        "whatBody1": "Sur un prêt à taux variable, le taux payé a deux composantes : un indice de référence et une marge. L'indice est un taux de marché ou de banque centrale, comme l'Euribor dans une grande partie de la zone euro ; d'autres pays utilisent d'autres indices. La marge est celle de la banque et elle est fixée dans le contrat.",
+        "whatBody2": "À chaque date de révision, souvent tous les 3, 6 ou 12 mois, la banque reprend la dernière valeur de l'indice, y ajoute la marge et calcule une nouvelle mensualité sur le capital restant dû et la durée restante. La marge ne change pas : une hausse de 1 point de l'indice est une hausse de 1 point de votre taux.",
+        "whatBody3": "Ce simulateur montre la mensualité avant et après la variation que vous choisissez, pour voir à l'avance ce qu'une hausse ou une baisse signifierait pour votre budget mensuel.",
+        "relatedMortgage": "le tableau complet, année par année, d'un prêt à un seul taux.",
+        "relatedDebtToIncome": "la part de vos revenus qui part dans toutes vos mensualités de crédit.",
+        "relatedEarlyRepayment": "ce que fait gagner un remboursement anticipé et de combien il baisse la mensualité.",
+        "exampleTitle": "Exemple chiffré",
+        "exampleSetup": "Supposons qu'il vous reste {{balance}} à rembourser sur {{term}}. Votre prêt suit un indice à {{index}} plus une marge de {{spread}}, vous payez donc {{rate}} : {{payment}} par mois, et {{interest}} d'intérêts jusqu'à la fin du prêt.",
+        "exampleRise": "À la prochaine révision, l'indice monte à {{newIndex}} et votre taux passe à {{newRate}}. La mensualité monte à {{newPayment}} : {{monthlyChange}} de plus par mois ({{percent}}), {{yearlyChange}} de plus sur les 12 prochaines mensualités et {{interestChange}} d'intérêts en plus jusqu'au terme, si le taux en reste là.",
+        "exampleStress": "Une hausse de {{stressStep}} points à la place, jusqu'à un taux de {{stressRate}}, porterait la mensualité à {{stressPayment}}, soit {{stressChange}} de plus qu'aujourd'hui.",
+        "exampleIncome": "Avec un revenu net de {{income}} par mois, la mensualité en prend {{currentShare}} aujourd'hui, {{newShare}} après la première hausse et {{stressShare}} après la plus forte, un niveau que les seuils du taux d'endettement classent en « {{stressBand}} ».",
+        "methodTitle": "Comment c'est calculé",
+        "methodIntro": "Chaque mensualité est la mensualité constante qui rembourse le capital restant dû sur les mois restants, avec le même moteur à taux fixe que le simulateur de prêt immobilier :",
+        "methodLegend": "i est l'indice et s la marge, tous deux en taux annuels. r est le taux mensuel, M la mensualité, P le capital restant dû et n le nombre de mensualités restantes. Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement P divisé par n.",
+        "methodItems": {
+          "change": "L'écart par mois est la première mensualité au nouveau taux moins la première mensualité au taux actuel, toutes deux sur le capital d'aujourd'hui et sur le même nombre de mois.",
+          "year": "L'écart sur 12 mensualités additionne les 12 premières mensualités de chaque tableau. Chaque mensualité est arrondie au centime, il peut donc différer d'un centime de 12 fois l'écart mensuel.",
+          "interest": "L'écart d'intérêts est le total des intérêts du nouveau tableau moins celui du tableau actuel, tous deux jusqu'à la fin du prêt.",
+          "income": "La part des revenus est la mensualité divisée par le revenu net que vous saisissez, lue avec les seuils du calculateur de taux d'endettement : sous {{caution}} % sain, de {{caution}} % à {{high}} % vigilance et au-dessus de {{high}} % élevé. C'est un repère général, pas la limite d'une banque.",
+          "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés."
+        },
+        "assumptionsTitle": "Hypothèses",
+        "assumptions": {
+          "fromNextMonth": "Le nouveau taux s'applique de la prochaine mensualité jusqu'à la fin du prêt. En pratique, il est de nouveau révisé à chaque date de révision : chaque résultat est un scénario, pas une prévision.",
+          "sameTerm": "Le capital restant dû et la durée restante ne changent pas ; c'est la mensualité qui change. Certaines banques peuvent garder la mensualité et modifier la durée.",
+          "statement": "La mensualité actuelle est calculée à partir de l'indice et de la marge saisis. Votre relevé peut différer de quelques centimes, et l'assurance et les frais de tenue de compte ne sont pas comptés.",
+          "noFeed": "C'est vous qui saisissez l'indice : le simulateur n'a pas de données d'indices. Reprenez la valeur actuelle de votre contrat, de votre banque ou de l'organisme qui publie l'indice."
+        },
+        "limits": "Le simulateur accepte un capital de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans de durée restante, un indice de {{minIndex}} à {{maxIndex}} et une marge jusqu'à {{maxSpread}}.",
+        "contractTitle": "Ce que décide votre contrat",
+        "contractIntro": "Une révision réelle dépend de votre contrat et des règles du pays où vous vivez. Rien de cela n'est intégré au simulateur :",
+        "contractItems": {
+          "resetDates": "Les dates de révision : à quel rythme le taux est révisé, la valeur de l'indice de quel jour compte et quand la nouvelle mensualité commence.",
+          "capsFloors": "Les plafonds et planchers : certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %.",
+          "index": "L'indice : l'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication.",
+          "mixed": "Les prêts à taux mixte : une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+        },
+        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
+      }
     }
   },
   "learn": {

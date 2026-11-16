@@ -1922,6 +1922,150 @@
         "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
         "relatedNetWorthLink": "Nettovermögensrechner"
       }
+    },
+    "rateRevision": {
+      "title": "Zinsanpassungsrechner für variable Kredite",
+      "shortName": "Zinsanpassung",
+      "description": "Sehen Sie, wie sich die Monatsrate eines Kredits mit variablem Zins ändert, wenn sich sein Referenzzins bewegt, über ein Jahr und bis zum Ende der Laufzeit.",
+      "pageTitle": "Rechner für variable Kredite: Ihre Rate nach einer Zinsanpassung — WonderMoney",
+      "pageDescription": "Kostenloser Rechner für Baufinanzierungen und Kredite mit variablem Zins. Geben Sie Restschuld, Restlaufzeit, Referenzzins und Aufschlag ein und sehen Sie die neue Rate nach der Zinsanpassung, die Kosten über ein Jahr und bis zum Ende sowie eine Tabelle von −2 bis +4 Punkten. Keine Anmeldung nötig.",
+      "subtitle": "Geben Sie Ihre Restschuld, die Restlaufzeit, den Referenzzins Ihres Kredits und den Aufschlag der Bank ein, dann den Referenzzins, den Sie bei der nächsten Anpassung erwarten. Sie sehen die neue Monatsrate, was der Unterschied über ein Jahr und bis zum Ende der Laufzeit ausmacht, und die Rate bei einem Referenzzins von 2 Punkten niedriger bis 4 Punkten höher. Keine Anmeldung nötig.",
+      "loanHeading": "Ihr Kredit heute",
+      "balance": "Restschuld",
+      "balanceHelp": "Was Sie heute noch schulden, laut Ihrem letzten Kreditauszug.",
+      "termLabel": "Restlaufzeit",
+      "termYears": "Jahre",
+      "termMonths": "Monate",
+      "termHelp": "Jahre plus Monate, zum Beispiel 22 Jahre und 4 Monate.",
+      "termRounded": "Berechnet für {{term}}: Die Restlaufzeit wird auf ganze Monate gerundet.",
+      "indexRate": "Referenzzins heute",
+      "indexRateHelp": "Der Zinssatz, an den Ihr Kredit gebunden ist, etwa der Euribor oder ein Leitzins, mit dem Wert, den Ihre aktuelle Rate verwendet. Er kann negativ sein.",
+      "spread": "Aufschlag",
+      "spreadHelp": "Die feste Marge, die die Bank auf den Referenzzins aufschlägt, wie in Ihrem Vertrag festgelegt.",
+      "currentRate": "Sie zahlen heute {{rate}}: Referenzzins plus Aufschlag.",
+      "floored": "Referenzzins plus Aufschlag liegen unter 0 %, daher wird der Zins mit 0 % angesetzt. Ihr Vertrag kann eine eigene Untergrenze vorsehen.",
+      "revisionHeading": "Bei der nächsten Anpassung",
+      "newIndexRate": "Neuer Referenzzins",
+      "newIndexRateHelp": "Der Wert, den Sie zum nächsten Anpassungstermin erwarten, oder wählen Sie unten eine Änderung.",
+      "stressLabel": "Probieren Sie eine Änderung des Referenzzinses",
+      "stress": {
+        "one": "{{change}} Punkt",
+        "other": "{{change}} Punkte"
+      },
+      "newRate": "Ihr Zins wäre dann {{rate}}.",
+      "incomeHeading": "Ihr Budget",
+      "monthlyIncome": "Monatliches Nettoeinkommen (optional)",
+      "monthlyIncomeHelp": "Nach Steuern. Geben Sie es ein, um den Anteil der Rate am Einkommen zu sehen, oder lassen Sie das Feld leer.",
+      "result": {
+        "newPayment": "Neue Monatsrate",
+        "up": "{{amount}} mehr im Monat ({{percent}})",
+        "down": "{{amount}} weniger im Monat ({{percent}})",
+        "same": "Die Rate bleibt gleich.",
+        "currentPayment": "Rate heute, bei {{rate}}",
+        "revisedPayment": "Rate nach der Anpassung, bei {{rate}}",
+        "monthlyChange": "Unterschied im Monat",
+        "nextYear": "Über die nächsten 12 Raten",
+        "paymentsLeft": "Über die {{count}} restlichen Raten",
+        "paymentLeft": "Bei der letzten Rate",
+        "totalInterest": "Unterschied bei den Zinsen bis zum Ende der Laufzeit",
+        "incomeShare": "Die neue Rate würde {{revised}} Ihres Nettoeinkommens beanspruchen, gegenüber {{current}} heute. Stufe der Schuldendienstquote: {{band}}.",
+        "exceedsIncome": "Die neue Rate ist höher als das Einkommen, das Sie eingegeben haben.",
+        "bandNote": "Stufen aus dem Schuldendienstquote-Rechner: unter {{caution}} % gesund, {{caution}} % bis {{high}} % Vorsicht, über {{high}} % hoch. Das ist eine Faustregel, keine Grenze einer Bank."
+      },
+      "assumptionNote": "Der neue Zins gilt ab der nächsten Rate bis zum Ende der Laufzeit. Anpassungstermine, Zinsobergrenzen und -untergrenzen hängen von Ihrem Vertrag ab und sind nicht enthalten.",
+      "table": {
+        "title": "Ihre Rate, wenn sich der Referenzzins bewegt",
+        "intro": "Derselbe Kredit mit einem Referenzzins von 2 Punkten unter bis 4 Punkten über dem heutigen und gleichem Aufschlag, jeder Zins ab der nächsten Rate bis zum Ende der Laufzeit.",
+        "caption": "Monatsrate für jede Änderung des Referenzzinses",
+        "change": "Änderung des Referenzzinses",
+        "index": "Referenzzins",
+        "rate": "Ihr Zins",
+        "payment": "Monatsrate",
+        "monthlyChange": "Unterschied im Monat",
+        "interestChange": "Unterschied bei den Zinsen bis zum Ende",
+        "today": "Heute",
+        "selected": "Ihr Szenario"
+      },
+      "errors": {
+        "summary": "Die neue Rate erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Geben Sie Ihre Restschuld ein.",
+          "tooSmall": "Geben Sie eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre können nicht negativ sein.",
+          "tooLarge": "Geben Sie insgesamt bis zu {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
+        },
+        "indexRate": {
+          "required": "Geben Sie den Referenzzins ein. Er kann 0 % oder negativ sein.",
+          "tooSmall": "Geben Sie einen Referenzzins von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie einen Referenzzins bis {{max}} ein."
+        },
+        "spread": {
+          "required": "Geben Sie den Aufschlag ein, oder 0 %, wenn es keinen gibt.",
+          "negative": "Der Aufschlag kann nicht negativ sein.",
+          "tooLarge": "Geben Sie einen Aufschlag bis {{max}} ein."
+        },
+        "newIndexRate": {
+          "required": "Geben Sie den neuen Referenzzins ein, oder wählen Sie unten eine Änderung.",
+          "tooSmall": "Geben Sie einen Referenzzins von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie einen Referenzzins bis {{max}} ein."
+        },
+        "monthlyIncome": {
+          "negative": "Das Einkommen kann nicht negativ sein. Lassen Sie das Feld leer, um es wegzulassen.",
+          "tooLarge": "Geben Sie ein Einkommen bis {{max}} ein."
+        }
+      },
+      "nextStepHeadline": "Planen Sie eine höhere Rate in Ihr Budget ein",
+      "nextStepDescription": "Legen Sie den Kredit in WonderMoney an, planen Sie die höhere Rate in Ihrem Monatsbudget ein und sehen Sie, was für Ihre übrigen Ausgaben und zum Sparen bleibt.",
+      "nextStepCta": "Budget planen",
+      "guide": {
+        "whatTitle": "Wie eine Zinsanpassung Ihre Rate verändert",
+        "whatBody1": "Bei einem Kredit mit variablem Zins besteht Ihr Zins aus zwei Teilen: einem Referenzzins und einem Aufschlag. Der Referenzzins ist ein Markt- oder Leitzins, etwa der Euribor in weiten Teilen des Euroraums; andere Länder nutzen andere Referenzzinsen. Der Aufschlag ist die Marge der Bank und im Vertrag festgelegt.",
+        "whatBody2": "Zu jedem Anpassungstermin, oft alle 3, 6 oder 12 Monate, nimmt die Bank den aktuellen Wert des Referenzzinses, schlägt die Marge auf und berechnet eine neue Rate auf die Restschuld und die Restlaufzeit. Der Aufschlag bleibt gleich: Steigt der Referenzzins um 1 Punkt, steigt Ihr Zins um 1 Punkt.",
+        "whatBody3": "Dieser Rechner zeigt die Rate vor und nach einer Änderung, die Sie wählen. So sehen Sie rechtzeitig, was ein Anstieg oder ein Rückgang für Ihr Monatsbudget bedeuten würde.",
+        "relatedMortgage": "der vollständige Tilgungsplan Jahr für Jahr für einen Kredit zu einem festen Zins.",
+        "relatedDebtToIncome": "der Anteil Ihres Einkommens, der in alle Ihre Kreditraten fließt.",
+        "relatedEarlyRepayment": "was eine Sondertilgung spart und wie stark sie die Rate senkt.",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleSetup": "Angenommen, Sie schulden noch {{balance}} bei einer Restlaufzeit von {{term}}. Ihr Kredit folgt einem Referenzzins von {{index}} plus einem Aufschlag von {{spread}}, Sie zahlen also {{rate}}: {{payment}} im Monat und {{interest}} Zinsen bis zum Ende der Laufzeit.",
+        "exampleRise": "Bei der nächsten Anpassung steigt der Referenzzins auf {{newIndex}}, Ihr Zins also auf {{newRate}}. Die Rate steigt auf {{newPayment}}: {{monthlyChange}} mehr im Monat ({{percent}}), {{yearlyChange}} mehr über die nächsten 12 Raten und {{interestChange}} mehr Zinsen bis zum Ende der Laufzeit, wenn der Zins dort bleibt.",
+        "exampleStress": "Ein Anstieg um {{stressStep}} Punkte, auf einen Zins von {{stressRate}}, würde die Rate stattdessen auf {{stressPayment}} bringen, {{stressChange}} mehr als heute.",
+        "exampleIncome": "Bei einem Nettoeinkommen von {{income}} im Monat beansprucht die Rate heute {{currentShare}} davon, nach dem ersten Anstieg {{newShare}} und nach dem größeren {{stressShare}}, was die Stufen der Schuldendienstquote als „{{stressBand}}“ einordnen.",
+        "methodTitle": "So wird gerechnet",
+        "methodIntro": "Jede Rate ist die gleichbleibende Rate, die die Restschuld in den verbleibenden Monaten tilgt, mit derselben Festzins-Rechnung wie im Hypothekenrechner:",
+        "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
+        "methodItems": {
+          "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
+          "year": "Der Unterschied über 12 Raten summiert die ersten 12 Raten jedes Plans. Jede Rate wird auf den Cent gerundet, daher kann er um einen Cent vom Zwölffachen des Monatsunterschieds abweichen.",
+          "interest": "Der Unterschied bei den Zinsen ist die Zinssumme des neuen Plans minus die des heutigen, beide bis zum Ende der Laufzeit.",
+          "income": "Der Anteil am Einkommen ist die Rate geteilt durch das Nettoeinkommen, das Sie eingeben, gelesen mit den Stufen des Schuldendienstquote-Rechners: unter {{caution}} % gesund, {{caution}} % bis {{high}} % Vorsicht und über {{high}} % hoch. Das ist eine Faustregel, keine Grenze einer Bank.",
+          "privacy": "Die Rechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert."
+        },
+        "assumptionsTitle": "Annahmen",
+        "assumptions": {
+          "fromNextMonth": "Der neue Zins gilt ab der nächsten Rate bis zum Ende der Laufzeit. In der Praxis wird er zu jedem Anpassungstermin erneut angepasst, jedes Ergebnis ist also ein Szenario, keine Prognose.",
+          "sameTerm": "Restschuld und Restlaufzeit bleiben gleich, es ändert sich die Rate. Manche Banken können stattdessen die Rate halten und die Laufzeit ändern.",
+          "statement": "Die heutige Rate wird aus dem Referenzzins und dem Aufschlag berechnet, die Sie eingeben. Ihr Auszug kann um einige Cent abweichen, und Versicherungen und Kontogebühren sind nicht enthalten.",
+          "noFeed": "Den Referenzzins geben Sie selbst ein: Der Rechner hat keine eigenen Zinsdaten. Nehmen Sie den aktuellen Wert aus Ihrem Vertrag, von Ihrer Bank oder von der Stelle, die den Referenzzins veröffentlicht."
+        },
+        "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, einen Referenzzins von {{minIndex}} bis {{maxIndex}} und einen Aufschlag bis {{maxSpread}}.",
+        "contractTitle": "Was Ihr Vertrag festlegt",
+        "contractIntro": "Wie eine echte Zinsanpassung abläuft, hängt von Ihrem Vertrag und den Regeln in Ihrem Land ab. Nichts davon ist im Rechner enthalten:",
+        "contractItems": {
+          "resetDates": "Anpassungstermine: wie oft der Zins angepasst wird, der Wert welchen Tages zählt und ab wann die neue Rate gilt.",
+          "capsFloors": "Ober- und Untergrenzen: Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt.",
+          "index": "Der Referenzzins: der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender.",
+          "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+        },
+        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
+      }
     }
   },
   "learn": {

@@ -1922,6 +1922,150 @@
         "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
         "relatedNetWorthLink": "net worth calculator"
       }
+    },
+    "rateRevision": {
+      "title": "Variable-Rate Payment Calculator",
+      "shortName": "Rate change",
+      "description": "See how the monthly payment on a variable-rate loan changes when its index moves, over a year and to the end of the loan.",
+      "pageTitle": "Variable-Rate Mortgage Calculator: Your Payment After a Rate Change — WonderMoney",
+      "pageDescription": "Free calculator for variable-rate mortgages and loans. Enter the balance, time left, index and spread to see the new payment after a rate revision, the yearly and total cost, and a table from −2 to +4 points. No sign-up.",
+      "subtitle": "Enter what you still owe, the time left, the index your loan follows and your lender's spread, then the index you expect after the next revision. See the new monthly payment, what the change adds up to over a year and to the end of the loan, and the payment for the index moving from 2 points lower to 4 points higher. Nothing to sign up for.",
+      "loanHeading": "Your loan today",
+      "balance": "Balance still owed",
+      "balanceHelp": "What you owe today, from your latest loan statement.",
+      "termLabel": "Time left on the loan",
+      "termYears": "Years",
+      "termMonths": "Months",
+      "termHelp": "Years plus months, for example 22 years and 4 months.",
+      "termRounded": "Worked out over {{term}}: the time left is rounded to whole months.",
+      "indexRate": "Index rate today",
+      "indexRateHelp": "The reference rate your loan follows, such as Euribor or a central bank rate, at the value your current payment uses. It can be negative.",
+      "spread": "Spread",
+      "spreadHelp": "The fixed margin your lender adds to the index, as set in your contract.",
+      "currentRate": "You pay {{rate}} today: the index plus the spread.",
+      "floored": "The index plus the spread is below 0%, so the rate is taken as 0%. Your contract may set its own floor.",
+      "revisionHeading": "At the next revision",
+      "newIndexRate": "New index rate",
+      "newIndexRateHelp": "The value you expect at the next reset date, or pick a change below.",
+      "stressLabel": "Try a change in the index",
+      "stress": {
+        "one": "{{change}} point",
+        "other": "{{change}} points"
+      },
+      "newRate": "The rate becomes {{rate}}.",
+      "incomeHeading": "Your budget",
+      "monthlyIncome": "Net monthly income (optional)",
+      "monthlyIncomeHelp": "After tax. Add it to see the payment as a share of your income, or leave it empty.",
+      "result": {
+        "newPayment": "New monthly payment",
+        "up": "{{amount}} more a month ({{percent}})",
+        "down": "{{amount}} less a month ({{percent}})",
+        "same": "The payment stays the same.",
+        "currentPayment": "Payment today, at {{rate}}",
+        "revisedPayment": "Payment after the revision, at {{rate}}",
+        "monthlyChange": "Change a month",
+        "nextYear": "Over the next 12 payments",
+        "paymentsLeft": "Over the {{count}} payments left",
+        "paymentLeft": "On the last payment",
+        "totalInterest": "Change in interest to the end of the loan",
+        "incomeShare": "The new payment would take {{revised}} of your net income, against {{current}} today. Debt-to-income band: {{band}}.",
+        "exceedsIncome": "The new payment is more than the income you entered.",
+        "bandNote": "Bands from the debt-to-income calculator: under {{caution}}% healthy, {{caution}}% to {{high}}% caution, above {{high}}% high. They are a rule of thumb, not a lender's limit."
+      },
+      "assumptionNote": "The new rate applies from your next payment to the end of the loan. Reset dates, caps and floors depend on your contract and are not included.",
+      "table": {
+        "title": "Your payment if the index moves",
+        "intro": "The same loan with the index from 2 points lower to 4 points higher than today and the spread unchanged, each rate applied from the next payment to the end of the loan.",
+        "caption": "Monthly payment for each change in the index",
+        "change": "Change in the index",
+        "index": "Index",
+        "rate": "Rate you pay",
+        "payment": "Monthly payment",
+        "monthlyChange": "Change a month",
+        "interestChange": "Change in interest to the end",
+        "today": "Today",
+        "selected": "Your scenario"
+      },
+      "errors": {
+        "summary": "The new payment appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "indexRate": {
+          "required": "Enter the index rate. It can be 0% or negative.",
+          "tooSmall": "Enter an index of at least {{min}}.",
+          "tooLarge": "Enter an index up to {{max}}."
+        },
+        "spread": {
+          "required": "Enter the spread, or 0% if there is none.",
+          "negative": "The spread can't be negative.",
+          "tooLarge": "Enter a spread up to {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Enter the new index rate, or pick a change below.",
+          "tooSmall": "Enter an index of at least {{min}}.",
+          "tooLarge": "Enter an index up to {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Income can't be negative. Leave it empty to skip it.",
+          "tooLarge": "Enter an income up to {{max}}."
+        }
+      },
+      "nextStepHeadline": "Plan for a higher payment in your budget",
+      "nextStepDescription": "Add the loan to WonderMoney, give the higher payment its place in your monthly budget and see what it leaves for the rest of your spending and saving.",
+      "nextStepCta": "Plan your budget",
+      "guide": {
+        "whatTitle": "How a rate revision changes your payment",
+        "whatBody1": "On a variable-rate loan the rate you pay has two parts: a reference index and a spread. The index is a market or central bank rate, such as Euribor in much of the euro area, and other countries use their own. The spread is the lender's margin and is fixed in your contract.",
+        "whatBody2": "At each reset date, often every 3, 6 or 12 months, the lender takes the latest value of the index, adds the spread and works out a new payment on the balance and the time left. The spread stays the same, so a 1-point rise in the index is a 1-point rise in your rate.",
+        "whatBody3": "This calculator shows the payment before and after a change you choose, so you can see ahead of time what a rise or a fall would mean for your monthly budget.",
+        "relatedMortgage": "the full year-by-year schedule of a loan at one rate.",
+        "relatedDebtToIncome": "the share of your income that goes on all your credit payments.",
+        "relatedEarlyRepayment": "what a lump-sum repayment saves, and how much it lowers the payment.",
+        "exampleTitle": "Worked example",
+        "exampleSetup": "Say you still owe {{balance}} with {{term}} left. Your loan follows an index at {{index}} plus a spread of {{spread}}, so you pay {{rate}}: {{payment}} a month, and {{interest}} in interest to the end of the loan.",
+        "exampleRise": "At the next revision the index rises to {{newIndex}}, so your rate becomes {{newRate}}. The payment goes up to {{newPayment}}: {{monthlyChange}} more a month ({{percent}}), {{yearlyChange}} more over the next 12 payments and {{interestChange}} more interest by the end of the loan, if the rate stays there.",
+        "exampleStress": "A rise of {{stressStep}} points instead, to a rate of {{stressRate}}, would take the payment to {{stressPayment}}, {{stressChange}} more than today.",
+        "exampleIncome": "On a net income of {{income}} a month, the payment takes {{currentShare}} of it today, {{newShare}} after the first rise and {{stressShare}} after the larger one, which the debt-to-income bands rate as “{{stressBand}}”.",
+        "methodTitle": "How it is calculated",
+        "methodIntro": "Each payment is the level payment that clears the balance over the months left, from the same fixed-rate engine as the mortgage calculator:",
+        "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
+        "methodItems": {
+          "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
+          "year": "The change over 12 payments adds up the first 12 payments of each schedule. Each month's payment is rounded to the cent, so it can differ by a cent from 12 times the monthly change.",
+          "interest": "The change in interest is the interest of the new schedule minus today's, both to the end of the loan.",
+          "income": "The share of income is the payment divided by the net income you enter, read against the debt-to-income calculator's bands: under {{caution}}% healthy, {{caution}}% to {{high}}% caution and above {{high}}% high. They are a rule of thumb, not a lender's limit.",
+          "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved."
+        },
+        "assumptionsTitle": "Assumptions",
+        "assumptions": {
+          "fromNextMonth": "The new rate applies from your next payment to the end of the loan. In practice it is revised again at every reset date, so each result is one scenario, not a forecast.",
+          "sameTerm": "The balance and the time left stay as they are, and the payment is what changes. Some lenders can keep the payment and change the term instead.",
+          "statement": "Today's payment is worked out from the index and spread you enter. Your statement can differ by a few cents, and insurance and account fees are left out.",
+          "noFeed": "You enter the index yourself: the calculator has no index data of its own. Take the current value from your contract, your lender or the body that publishes the index."
+        },
+        "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, an index from {{minIndex}} to {{maxIndex}} and a spread up to {{maxSpread}}.",
+        "contractTitle": "What your contract decides",
+        "contractIntro": "How a real revision works depends on your contract and on the rules where you live. None of this is built into the calculator:",
+        "contractItems": {
+          "resetDates": "Reset dates: how often the rate is revised, which day's index value counts and when the new payment starts.",
+          "capsFloors": "Caps and floors: some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%.",
+          "index": "The index: Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule.",
+          "mixed": "Mixed-rate loans: a fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+        },
+        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
+      }
     }
   },
   "learn": {

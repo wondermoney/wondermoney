@@ -1922,6 +1922,150 @@
         "relatedNetWorth": "Para sumar la vivienda, la hipoteca y tus ahorros tal como están hoy, usa la",
         "relatedNetWorthLink": "calculadora de patrimonio neto"
       }
+    },
+    "rateRevision": {
+      "title": "Simulador de revisión del tipo de interés",
+      "shortName": "Revisión del tipo",
+      "description": "Mira cómo cambia la cuota de un préstamo a tipo variable cuando se mueve su índice, en un año y hasta el final del préstamo.",
+      "pageTitle": "Simulador de Hipoteca Variable: tu Cuota tras la Revisión del Tipo — WonderMoney",
+      "pageDescription": "Simulador gratuito para hipotecas y préstamos a tipo variable. Introduce el capital pendiente, el plazo, el índice y el diferencial y ve la nueva cuota tras la revisión, el coste en un año y hasta el final, y una tabla de −2 a +4 puntos. Sin registro.",
+      "subtitle": "Introduce lo que aún debes, el plazo que queda, el índice que sigue tu préstamo y el diferencial, y después el índice que esperas en la próxima revisión. Ve la nueva cuota mensual, cuánto suma la diferencia en un año y hasta el final del préstamo, y la cuota con el índice desde 2 puntos menos hasta 4 puntos más. Sin registro.",
+      "loanHeading": "Tu préstamo hoy",
+      "balance": "Capital pendiente",
+      "balanceHelp": "Lo que debes hoy, según el último extracto del préstamo.",
+      "termLabel": "Plazo que queda",
+      "termYears": "Años",
+      "termMonths": "Meses",
+      "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
+      "indexRate": "Índice actual",
+      "indexRateHelp": "El tipo de referencia que sigue tu préstamo, como el Euríbor o un tipo de un banco central, con el valor que usa tu cuota actual. Puede ser negativo.",
+      "spread": "Diferencial",
+      "spreadHelp": "El margen fijo que el banco suma al índice, tal como figura en tu contrato.",
+      "currentRate": "Hoy pagas un {{rate}}: el índice más el diferencial.",
+      "floored": "El índice más el diferencial queda por debajo del 0%, así que el tipo se toma como 0%. Tu contrato puede fijar su propio suelo.",
+      "revisionHeading": "En la próxima revisión",
+      "newIndexRate": "Nuevo índice",
+      "newIndexRateHelp": "El valor que esperas en la próxima fecha de revisión, o elige una variación abajo.",
+      "stressLabel": "Prueba una variación del índice",
+      "stress": {
+        "one": "{{change}} punto",
+        "other": "{{change}} puntos"
+      },
+      "newRate": "El tipo pasa a ser del {{rate}}.",
+      "incomeHeading": "Tu presupuesto",
+      "monthlyIncome": "Ingresos netos mensuales (opcional)",
+      "monthlyIncomeHelp": "Después de impuestos. Añádelos para ver qué parte de tus ingresos se lleva la cuota, o déjalo vacío.",
+      "result": {
+        "newPayment": "Nueva cuota mensual",
+        "up": "{{amount}} más al mes ({{percent}})",
+        "down": "{{amount}} menos al mes ({{percent}})",
+        "same": "La cuota no cambia.",
+        "currentPayment": "Cuota hoy, al {{rate}}",
+        "revisedPayment": "Cuota tras la revisión, al {{rate}}",
+        "monthlyChange": "Diferencia al mes",
+        "nextYear": "En las próximas 12 cuotas",
+        "paymentsLeft": "En las {{count}} cuotas que quedan",
+        "paymentLeft": "En la última cuota",
+        "totalInterest": "Diferencia de intereses hasta el final del préstamo",
+        "incomeShare": "La nueva cuota se llevaría el {{revised}} de tus ingresos netos, frente al {{current}} de hoy. Nivel del ratio de endeudamiento: {{band}}.",
+        "exceedsIncome": "La nueva cuota es mayor que los ingresos que has introducido.",
+        "bandNote": "Niveles de la calculadora de ratio de endeudamiento: por debajo del {{caution}}% saludable, del {{caution}}% al {{high}}% precaución, por encima del {{high}}% elevado. Son una referencia general, no el límite de un banco."
+      },
+      "assumptionNote": "El nuevo tipo se aplica desde la próxima cuota hasta el final del préstamo. Las fechas de revisión, los techos y los suelos dependen de tu contrato y no se incluyen.",
+      "table": {
+        "title": "Tu cuota si el índice se mueve",
+        "intro": "El mismo préstamo con el índice entre 2 puntos menos y 4 puntos más que hoy y el mismo diferencial, cada tipo aplicado desde la próxima cuota hasta el final del préstamo.",
+        "caption": "Cuota mensual para cada variación del índice",
+        "change": "Variación del índice",
+        "index": "Índice",
+        "rate": "Tipo que pagas",
+        "payment": "Cuota mensual",
+        "monthlyChange": "Diferencia al mes",
+        "interestChange": "Diferencia de intereses hasta el final",
+        "today": "Hoy",
+        "selected": "Tu escenario"
+      },
+      "errors": {
+        "summary": "La nueva cuota aparece cuando todos los campos tienen un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo que queda, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce hasta {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "indexRate": {
+          "required": "Introduce el índice. Puede ser 0% o negativo.",
+          "tooSmall": "Introduce un índice de al menos {{min}}.",
+          "tooLarge": "Introduce un índice de hasta {{max}}."
+        },
+        "spread": {
+          "required": "Introduce el diferencial, o 0% si no hay.",
+          "negative": "El diferencial no puede ser negativo.",
+          "tooLarge": "Introduce un diferencial de hasta {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Introduce el nuevo índice, o elige una variación abajo.",
+          "tooSmall": "Introduce un índice de al menos {{min}}.",
+          "tooLarge": "Introduce un índice de hasta {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Los ingresos no pueden ser negativos. Déjalo vacío para no usarlos.",
+          "tooLarge": "Introduce unos ingresos de hasta {{max}}."
+        }
+      },
+      "nextStepHeadline": "Prepara tu presupuesto para una cuota más alta",
+      "nextStepDescription": "Añade el préstamo a WonderMoney, reserva la cuota más alta en tu presupuesto mensual y mira cuánto te queda para el resto de gastos y para ahorrar.",
+      "nextStepCta": "Planificar el presupuesto",
+      "guide": {
+        "whatTitle": "Cómo cambia tu cuota con la revisión del tipo",
+        "whatBody1": "En un préstamo a tipo variable, el tipo que pagas tiene dos partes: un índice de referencia y un diferencial. El índice es un tipo de mercado o de un banco central, como el Euríbor en gran parte de la zona euro; otros países usan otros índices. El diferencial es el margen del banco y está fijado en el contrato.",
+        "whatBody2": "En cada fecha de revisión, a menudo cada 3, 6 o 12 meses, el banco toma el último valor del índice, le suma el diferencial y calcula una nueva cuota sobre el capital pendiente y el plazo que queda. El diferencial no cambia, así que una subida de 1 punto del índice es una subida de 1 punto de tu tipo.",
+        "whatBody3": "Este simulador muestra la cuota antes y después de la variación que elijas, para que veas con tiempo qué supondría una subida o una bajada para tu presupuesto mensual.",
+        "relatedMortgage": "el cuadro completo, año a año, de un préstamo a un solo tipo.",
+        "relatedDebtToIncome": "la parte de tus ingresos que se va en todas tus cuotas de crédito.",
+        "relatedEarlyRepayment": "cuánto ahorra una amortización anticipada y cuánto baja la cuota.",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleSetup": "Imagina que aún debes {{balance}} y te quedan {{term}}. Tu préstamo sigue un índice del {{index}} más un diferencial del {{spread}}, así que pagas un {{rate}}: {{payment}} al mes y {{interest}} de intereses hasta el final del préstamo.",
+        "exampleRise": "En la próxima revisión el índice sube al {{newIndex}} y tu tipo pasa al {{newRate}}. La cuota sube a {{newPayment}}: {{monthlyChange}} más al mes ({{percent}}), {{yearlyChange}} más en las próximas 12 cuotas y {{interestChange}} más de intereses hasta el final del préstamo, si el tipo se queda ahí.",
+        "exampleStress": "Si en cambio el índice subiera {{stressStep}} puntos, hasta un tipo del {{stressRate}}, la cuota pasaría a {{stressPayment}}, {{stressChange}} más que hoy.",
+        "exampleIncome": "Con unos ingresos netos de {{income}} al mes, la cuota se lleva hoy el {{currentShare}}, el {{newShare}} tras la primera subida y el {{stressShare}} tras la mayor, un valor que los niveles del ratio de endeudamiento califican como «{{stressBand}}».",
+        "methodTitle": "Cómo se calcula",
+        "methodIntro": "Cada cuota es la cuota constante que devuelve el capital pendiente en los meses que quedan, con el mismo motor de tipo fijo que la calculadora de hipoteca:",
+        "methodLegend": "i es el índice y s el diferencial, ambos como tipos anuales. r es el tipo mensual, M la cuota mensual, P el capital pendiente y n el número de cuotas que quedan. Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente P dividido entre n.",
+        "methodItems": {
+          "change": "La diferencia al mes es la primera cuota al nuevo tipo menos la primera cuota al tipo actual, ambas sobre el capital de hoy y en el mismo número de meses.",
+          "year": "La diferencia en 12 cuotas suma las 12 primeras cuotas de cada cuadro. Cada cuota se redondea al céntimo, así que puede diferir en un céntimo de 12 veces la diferencia mensual.",
+          "interest": "La diferencia de intereses es el total de intereses del nuevo cuadro menos el del actual, ambos hasta el final del préstamo.",
+          "income": "La parte de los ingresos es la cuota dividida entre los ingresos netos que introduces, leída con los niveles de la calculadora de ratio de endeudamiento: por debajo del {{caution}}% saludable, del {{caution}}% al {{high}}% precaución y por encima del {{high}}% elevado. Son una referencia general, no el límite de un banco.",
+          "privacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan."
+        },
+        "assumptionsTitle": "Supuestos",
+        "assumptions": {
+          "fromNextMonth": "El nuevo tipo se aplica desde la próxima cuota hasta el final del préstamo. En la práctica se vuelve a revisar en cada fecha de revisión, así que cada resultado es un escenario, no una previsión.",
+          "sameTerm": "El capital pendiente y el plazo que queda no cambian; lo que cambia es la cuota. Algunos bancos pueden mantener la cuota y cambiar el plazo.",
+          "statement": "La cuota de hoy se calcula a partir del índice y el diferencial que introduces. Tu extracto puede diferir en unos céntimos, y los seguros y las comisiones de cuenta quedan fuera.",
+          "noFeed": "El índice lo introduces tú: el simulador no tiene datos propios de índices. Toma el valor actual de tu contrato, de tu banco o del organismo que publica el índice."
+        },
+        "limits": "El simulador acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años de plazo, un índice del {{minIndex}} al {{maxIndex}} y un diferencial de hasta el {{maxSpread}}.",
+        "contractTitle": "Lo que decide tu contrato",
+        "contractIntro": "Cómo funciona una revisión real depende de tu contrato y de las normas del país donde vives. Nada de esto está incluido en el simulador:",
+        "contractItems": {
+          "resetDates": "Fechas de revisión: cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota.",
+          "capsFloors": "Techos y suelos: algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%.",
+          "index": "El índice: el Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación.",
+          "mixed": "Préstamos a tipo mixto: primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+        },
+        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
+      }
     }
   },
   "learn": {
