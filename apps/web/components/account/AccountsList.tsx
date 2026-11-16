@@ -311,7 +311,7 @@ export default function AccountsList({
                     <AccountSyncBadge
                       syncStatus={account.syncStatus}
                       refreshedAt={account.refreshedAt}
-                      className="shrink-0 whitespace-nowrap"
+                      className="min-w-0"
                     />
                   </>
                 )}
