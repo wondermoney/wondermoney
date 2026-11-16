@@ -79,6 +79,12 @@ export const TOOLS_CATALOG = [
 		group: "borrowAndBuyHome",
 		related: ["toolMortgage", "toolDebtToIncome", "toolEmergencyFund"],
 	},
+	{
+		key: "buyVsRent",
+		routeId: "toolBuyVsRent",
+		group: "borrowAndBuyHome",
+		related: ["toolMortgage", "toolNetWorth", "toolCompoundInterest"],
+	},
 	// Invest and grow
 	{
 		key: "compoundInterest",

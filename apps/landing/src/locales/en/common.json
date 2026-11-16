@@ -1389,6 +1389,152 @@
         "nextSavingsGoal": "Saving up for the amount you will deposit, or planning what to do when it matures? The savings goal calculator works out the monthly amount or the time it takes.",
         "nextSavingsGoalLink": "Open the savings goal calculator"
       }
+    },
+    "buyVsRent": {
+      "title": "Buy vs Rent Calculator",
+      "description": "Compare the net worth of buying a home with a mortgage against renting and investing the difference, year by year.",
+      "pageTitle": "Rent vs Buy Calculator: Compare Net Worth Year by Year — WonderMoney",
+      "pageDescription": "Free rent vs buy calculator. Enter the price, down payment, mortgage, rent and growth assumptions to see which path leaves you with more, and the year buying pulls ahead. No sign-up.",
+      "subtitle": "Enter the home, the mortgage and the rent you would pay instead. The calculator follows both paths from the same starting cash and shows which one leaves you with more, year by year. Nothing to sign up for.",
+      "groups": {
+        "home": "The home",
+        "mortgage": "The mortgage",
+        "renting": "Renting instead",
+        "comparison": "The comparison"
+      },
+      "years": "years",
+      "fields": {
+        "homePrice": {
+          "label": "Home price"
+        },
+        "downPayment": {
+          "label": "Down payment",
+          "help": "The cash you put in at the start. Enter the full price to buy without a mortgage."
+        },
+        "purchaseCostsPct": {
+          "label": "Purchase costs",
+          "help": "One-off taxes and fees, as a percentage of the price. They vary a lot by country and region, so check what applies where you buy."
+        },
+        "ownershipCostsPct": {
+          "label": "Ownership costs a year",
+          "help": "Maintenance, insurance and property tax, as a percentage of the home's value."
+        },
+        "appreciationPct": {
+          "label": "Home value growth a year",
+          "help": "How much the home's value changes each year. A negative figure means falling prices."
+        },
+        "sellingCostsPct": {
+          "label": "Selling costs at the end",
+          "help": "Agent and other fees if you sold at the end, as a percentage of the home's value."
+        },
+        "mortgageRate": {
+          "label": "Mortgage interest rate",
+          "help": "Fixed nominal annual rate. Ignored when you borrow nothing."
+        },
+        "mortgageTermYears": {
+          "label": "Mortgage term"
+        },
+        "monthlyRent": {
+          "label": "Monthly rent"
+        },
+        "rentIncreasePct": {
+          "label": "Rent increase a year",
+          "help": "The rent rises once a year by this percentage."
+        },
+        "investmentReturnPct": {
+          "label": "Investment return a year",
+          "help": "What money not spent on housing earns, after fees. It applies to whichever path has money left over."
+        },
+        "horizonYears": {
+          "label": "Years to compare",
+          "help": "From 1 to 40 years."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Net worth if you buy, end of year {{years}}",
+        "renterNetWorth": "Net worth if you rent, end of year {{years}}",
+        "buyAhead": "Buying comes out ahead by",
+        "rentAhead": "Renting comes out ahead by",
+        "even": "Both paths end level",
+        "breakEven": "Buying pulls ahead at the end of year {{year}}.",
+        "noBreakEven": "Buying does not pull ahead by the end of year {{years}}.",
+        "aheadThenBehind": "Buying is ahead from year {{from}} but falls behind again by year {{back}}.",
+        "firstMonth": "Both paths start with {{upfront}}. In the first month owning costs {{owning}}, of which {{mortgage}} is the mortgage payment, and renting costs {{rent}}."
+      },
+      "chartLabel": "Line chart of net worth if you buy and if you rent, from the purchase to the end of year {{years}}. The table below lists the same figures.",
+      "chartBuy": "Buying",
+      "chartRent": "Renting",
+      "year": "Year",
+      "table": {
+        "title": "Year by year",
+        "description": "Net worth on each path at the end of every year. For buying, it is what selling would leave after selling costs and repaying the loan, plus any investments.",
+        "year": "Year",
+        "start": "Purchase",
+        "yearLabel": "Year {{year}}",
+        "homeValue": "Home value",
+        "loanBalance": "Loan owed",
+        "ownerNetWorth": "Net worth buying",
+        "renterNetWorth": "Net worth renting",
+        "difference": "Buying minus renting"
+      },
+      "errors": {
+        "summary": "The comparison appears once every field has a valid value.",
+        "required": "Enter a value.",
+        "tooSmall": "Enter at least {{min}}.",
+        "tooLarge": "Enter up to {{max}}.",
+        "negative": "This can't be negative. Enter 0 for none.",
+        "aboveHomePrice": "The down payment can't be more than the home price.",
+        "loanTooSmall": "Borrow at least {{minLoan}}, or enter the full price to buy without a mortgage."
+      },
+      "ctaHeadline": "Follow the decision in your net-worth plan",
+      "ctaDescription": "Add your home, your mortgage and your investments to WonderMoney and follow your net worth over the years, whichever path you take.",
+      "guide": {
+        "whatHeading": "What the comparison shows",
+        "whatBody": "Buying swaps rent for mortgage payments, but it also ties up cash in the down payment and purchase costs and adds the costs of owning. Renting leaves that cash free to invest. The calculator follows both paths from the same starting cash and compares what each one leaves you with.",
+        "read": {
+          "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
+          "difference": "The difference: how far ahead one path is at the end of the period you chose.",
+          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
+          "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+        },
+        "exampleHeading": "Worked example",
+        "example": {
+          "setup": "A home costs {{price}}. You put down {{downPayment}} ({{downPaymentShare}}) and borrow {{loan}} at {{rate}} over {{term}} years. Purchase costs of {{purchaseCostsPct}} add {{purchaseCosts}}, so buying takes {{upfront}} of cash. The same home rents for {{rent}} a month. The rest are the calculator's starting assumptions: rent up {{rentIncrease}} a year, the home's value up {{appreciation}} a year, ownership costs of {{ownershipCostsPct}} of the value a year, a {{investmentReturn}} return on investments and {{sellingCostsPct}} selling costs, over {{horizon}} years.",
+          "start": "On day one the renter invests the {{upfront}}. The owner's stake is the {{downPayment}} down payment less {{startSellingCosts}} of selling costs, {{startOwner}}, so buying starts {{startGap}} behind.",
+          "monthly": "In the first month owning costs {{owningMonthly}}: {{mortgagePayment}} of mortgage payment and {{ownershipMonthly}} of ownership costs. The rent is {{rentMonthly}}, so the renter invests the {{monthlyGap}} difference. In this example owning costs more than renting in every month of the {{horizon}} years, so the owner never has money left over to invest.",
+          "result": "After {{horizon}} years the home is worth {{homeValue}}. Selling it costs {{sellingCosts}} and repays the {{loanBalance}} still owed, which leaves the owner {{ownerNetWorth}}. The renter's investments have grown to {{renterNetWorth}}, so buying ends {{difference}} ahead.",
+          "breakEven": "Buying first pulls ahead at the end of year {{breakEvenYear}}. The answer depends on the assumptions: at a rent of {{altRent}} a month instead, renting is still {{altDifference}} ahead after {{horizon}} years."
+        },
+        "methodHeading": "How the comparison is calculated",
+        "methodIntro": "The calculator works month by month, in cents, from the day of purchase.",
+        "method": {
+          "start": "Both paths start with the same cash: the down payment plus the purchase costs. The owner spends it on the home; the renter invests all of it.",
+          "loan": "The mortgage is the one the mortgage calculator works out: a fixed rate, with each month's payment set from the balance still owed. Payments stop once the loan is repaid.",
+          "monthly": "Each month the owner pays the mortgage and a twelfth of the year's ownership costs, and the renter pays the rent. Whichever path costs less that month invests the difference.",
+          "growth": "The home's value changes once a year by the growth rate. Ownership costs are a percentage of the value at the start of each year, so they change with it. The rent rises once a year by the rent increase.",
+          "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
+          "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
+        },
+        "formulaOwner": "Buying = home value − selling costs − loan owed + investments",
+        "formulaRenter": "Renting = investments",
+        "formulaReturn": "Monthly return",
+        "formulaLegend": "Here R is the annual investment return, so {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
+        "leftOutHeading": "What it leaves out",
+        "leftOut": {
+          "gainsTax": "Tax on investment gains or on the profit from selling the home.",
+          "deposit": "A rent deposit, and anything it could earn.",
+          "taxRelief": "Mortgage interest tax relief and other tax breaks for homeowners.",
+          "countryRules": "Each country's purchase taxes and fees: enter your own estimate as the purchase costs.",
+          "rateChanges": "Rate changes on a variable or mixed-rate mortgage, early repayments and insurance tied to the loan.",
+          "budget": "Whether the payments are affordable: both paths assume the higher of the two costs is paid from income every month."
+        },
+        "limits": "The calculator accepts home prices up to {{maxPrice}}, rent up to {{maxRent}} a month, growth and return rates from {{minGrowth}} to {{maxGrowth}} a year, and up to {{maxHorizon}} years.",
+        "relatedHeading": "Related calculators",
+        "relatedMortgage": "To see the loan on its own, with its schedule year by year, use the",
+        "relatedMortgageLink": "mortgage calculator",
+        "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
+        "relatedNetWorthLink": "net worth calculator"
+      }
     }
   },
   "learn": {
