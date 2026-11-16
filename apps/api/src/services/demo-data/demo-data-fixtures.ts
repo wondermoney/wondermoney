@@ -14,6 +14,9 @@ export interface DemoBankTransactionFixture {
   externalTransactionId: string;
   merchant: string;
   offsetDays: number;
+  /** A complete calendar month before the capture month; absent means rolling days. */
+  dayOfMonth?: number;
+  monthOffset?: number;
   type: DemoBankTransactionType;
 }
 
@@ -206,18 +209,16 @@ export const demoBankTransactionFixtures: DemoBankTransactionFixture[] = [
         merchant: 'Mb Way Tiago',
       },
     ] satisfies { amount: number; description: string; descriptionDirty: string; key: string; merchant: string }[]
-  ).map(
-    ({ amount, description, descriptionDirty, key, merchant }, index): DemoBankTransactionFixture => ({
-      accountName: demoAccounts.current.accountName,
-      amount,
-      description,
-      descriptionDirty,
-      externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}${key}`,
-      merchant,
-      offsetDays: index + 2,
-      type: amount > 0 ? 'DEPOSIT' : 'PAYMENT',
-    }),
-  ),
+  ).map(({ amount, description, descriptionDirty, key, merchant }, index): DemoBankTransactionFixture => ({
+    accountName: demoAccounts.current.accountName,
+    amount,
+    description,
+    descriptionDirty,
+    externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}${key}`,
+    merchant,
+    offsetDays: index + 2,
+    type: amount > 0 ? 'DEPOSIT' : 'PAYMENT',
+  })),
   {
     accountName: demoAccounts.savings.accountName,
     amount: 500,
@@ -250,11 +251,73 @@ export const demoBankTransactionFixtures: DemoBankTransactionFixture[] = [
   },
 ];
 
+demoBankTransactionFixtures.push({
+  accountName: demoAccounts.current.accountName,
+  amount: 10,
+  description: 'Dinner reimbursement from Alex',
+  descriptionDirty: 'DINNER REIMBURSEMENT ALEX',
+  externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}GROUP-SETTLEMENT`,
+  merchant: 'Alex',
+  offsetDays: 1,
+  type: 'DEPOSIT',
+});
+
+// Complete previous months make comparisons meaningful, including February and month boundaries.
+const monthlyExamples = demoBankTransactionFixtures.filter(
+  (row) =>
+    row.accountName === demoAccounts.current.accountName &&
+    !row.type.startsWith('TRANSFER_') &&
+    !row.externalTransactionId.endsWith('GROUP-SETTLEMENT'),
+);
+for (let monthOffset = 1; monthOffset <= 4; monthOffset += 1) {
+  for (const row of monthlyExamples) {
+    demoBankTransactionFixtures.push({
+      ...row,
+      dayOfMonth: Math.min(28, row.offsetDays + 1),
+      externalTransactionId: `${row.externalTransactionId}-MONTH-${monthOffset}`,
+      monthOffset,
+    });
+  }
+}
+for (let monthOffset = 0; monthOffset <= 2; monthOffset += 1) {
+  demoBankTransactionFixtures.push({
+    accountName: demoAccounts.card.accountName,
+    amount: -200,
+    dayOfMonth: 1,
+    description: 'Laptop installment',
+    descriptionDirty: 'LAPTOP INSTALLMENT',
+    externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}CARD-LAPTOP-${monthOffset}`,
+    merchant: 'Worten',
+    monthOffset,
+    offsetDays: 0,
+    type: 'PAYMENT',
+  });
+  if (monthOffset > 0) {
+    for (const [accountName, amount, type] of [
+      [demoAccounts.card.accountName, 200, 'TRANSFER_IN'],
+      [demoAccounts.current.accountName, -200, 'TRANSFER_OUT'],
+    ] as const) {
+      demoBankTransactionFixtures.push({
+        accountName,
+        amount,
+        dayOfMonth: 20,
+        description: 'Credit card payment',
+        descriptionDirty: 'CARD PAYMENT',
+        externalTransactionId: `${DEMO_BANK_TRANSACTION_ID_PREFIX}CARD-PAYMENT-${monthOffset}-${type}`,
+        merchant: 'Family credit card',
+        monthOffset,
+        offsetDays: 0,
+        type,
+      });
+    }
+  }
+}
+
 export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[] = [
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}LONG-TERM-DEPOSIT-00`,
     feeAmount: 0,
-    offsetDays: 28,
+    offsetDays: 360,
     portfolioName: 'Long-term investments',
     quantity: 1,
     settlementAmount: 750,
@@ -264,7 +327,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}LONG-TERM-AAPL-BUY-00`,
     feeAmount: 1.2,
-    offsetDays: 24,
+    offsetDays: 300,
     portfolioName: 'Long-term investments',
     quantity: 2,
     settlementAmount: 240,
@@ -274,7 +337,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}LONG-TERM-NVDA-BUY-00`,
     feeAmount: 2.1,
-    offsetDays: 18,
+    offsetDays: 270,
     portfolioName: 'Long-term investments',
     quantity: 3,
     settlementAmount: 420,
@@ -284,7 +347,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}SHORT-TERM-DEPOSIT-00`,
     feeAmount: 0,
-    offsetDays: 15,
+    offsetDays: 210,
     portfolioName: 'Short-term opportunities',
     quantity: 1,
     settlementAmount: 500,
@@ -294,7 +357,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}SHORT-TERM-CRM-BUY-00`,
     feeAmount: 1.4,
-    offsetDays: 12,
+    offsetDays: 180,
     portfolioName: 'Short-term opportunities',
     quantity: 2,
     settlementAmount: 220,
@@ -304,7 +367,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}US-GROWTH-DEPOSIT-00`,
     feeAmount: 0,
-    offsetDays: 10,
+    offsetDays: 150,
     portfolioName: 'US growth portfolio',
     quantity: 1,
     settlementAmount: 650,
@@ -314,7 +377,7 @@ export const demoPortfolioTransactionFixtures: DemoPortfolioTransactionFixture[]
   {
     externalTransactionId: `${DEMO_PORTFOLIO_TRANSACTION_ID_PREFIX}US-GROWTH-GOOGL-BUY-00`,
     feeAmount: 2.3,
-    offsetDays: 7,
+    offsetDays: 120,
     portfolioName: 'US growth portfolio',
     quantity: 4,
     settlementAmount: 360,

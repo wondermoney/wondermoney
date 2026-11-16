@@ -206,7 +206,7 @@ const PortfolioDashboardSummary: React.FC<PortfolioDashboardSummaryProps> = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <Stats stats={stats} columns={4} />
+      <Stats stats={stats} columns={4} mobilePrimaryCount={2} />
       {missingSnapshotCount > 0 ? (
         <MissingSnapshotsNote count={missingSnapshotCount} />
       ) : null}

@@ -6,7 +6,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
-import { instanceFeatures, queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
+import {
+  instanceFeatures,
+  queryClientWithInstance,
+} from "@/lib/api/instance/instance-fixture";
 
 import enCommon from "../../../../messages/en/common.json";
 import enNavigation from "../../../../messages/en/navigation.json";
@@ -17,7 +20,9 @@ const { searchParams, state } = vi.hoisted(() => ({
   state: { aiHidden: false },
 }));
 
-vi.mock("next/navigation", () => ({ useSearchParams: () => searchParams.current }));
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => searchParams.current,
+}));
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/settings",
   useRouter: () => ({ push: () => {} }),
@@ -25,8 +30,12 @@ vi.mock("@/i18n/navigation", () => ({
 // Tab bodies are beside the point here; each one is a lazily loaded settings
 // panel with its own data hooks.
 vi.mock("next/dynamic", () => ({ default: () => () => <p>tab body</p> }));
-vi.mock("@/components/settings/Profile", () => ({ default: () => <p>profile body</p> }));
-vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({ default: () => state.aiHidden }));
+vi.mock("@/components/settings/Profile", () => ({
+  default: () => <p>profile body</p>,
+}));
+vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({
+  default: () => state.aiHidden,
+}));
 
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
@@ -46,7 +55,10 @@ function renderSettings(features = instanceFeatures(), tab?: string) {
   searchParams.current = new URLSearchParams(tab ? { tab } : {});
   render(
     <QueryClientProvider client={queryClientWithInstance(features)}>
-      <NextIntlClientProvider locale="en" messages={{ ...enCommon, ...enNavigation }}>
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ ...enCommon, ...enNavigation }}
+      >
         <SettingsPage />
       </NextIntlClientProvider>
     </QueryClientProvider>,
@@ -54,40 +66,54 @@ function renderSettings(features = instanceFeatures(), tab?: string) {
 }
 
 const withoutAssistant = () =>
-  instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: false });
+  instanceFeatures({
+    ai: { ...instanceFeatures().ai, assistant: false },
+    mcp: false,
+  });
 
 test("a server with an assistant model shows the Assistant settings tab", () => {
-  renderSettings();
+  renderSettings(instanceFeatures(), "assistant");
 
-  screen.getByRole("tab", { name: nav.assistant });
+  screen.getByRole("region", { name: nav.assistant });
 });
 
 test("a server with MCP but no assistant model keeps the tab for pending changes", () => {
   state.aiHidden = false;
-  renderSettings(instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: true }), "assistant");
+  renderSettings(
+    instanceFeatures({
+      ai: { ...instanceFeatures().ai, assistant: false },
+      mcp: true,
+    }),
+    "assistant",
+  );
 
-  const selected = screen.getByRole("tab", { selected: true });
+  const selected = screen.getByRole("combobox");
   assert.equal(selected.textContent, nav.assistant);
 });
 
 test("on such a server, a person who hid AI has no Assistant tab", () => {
   state.aiHidden = true;
-  renderSettings(instanceFeatures({ ai: { ...instanceFeatures().ai, assistant: false }, mcp: true }));
+  renderSettings(
+    instanceFeatures({
+      ai: { ...instanceFeatures().ai, assistant: false },
+      mcp: true,
+    }),
+  );
 
-  assert.equal(screen.queryByRole("tab", { name: nav.assistant }), null);
+  assert.equal(screen.queryByRole("region", { name: nav.assistant }), null);
 });
 
 test("a server with neither an assistant model nor MCP has no Assistant settings tab", () => {
-  renderSettings(withoutAssistant());
+  renderSettings(withoutAssistant(), "appearance");
 
-  assert.equal(screen.queryByRole("tab", { name: nav.assistant }), null);
-  screen.getByRole("tab", { name: nav.appearance });
+  assert.equal(screen.queryByRole("region", { name: nav.assistant }), null);
+  screen.getByRole("region", { name: nav.appearance });
 });
 
 test("a link to the Assistant tab on such a server opens Profile instead", () => {
   renderSettings(withoutAssistant(), "assistant");
 
-  const selected = screen.getByRole("tab", { selected: true });
+  const selected = screen.getByRole("combobox");
   assert.equal(selected.textContent, nav.profile);
   screen.getByText("profile body");
 });

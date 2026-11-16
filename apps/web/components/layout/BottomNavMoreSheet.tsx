@@ -11,6 +11,7 @@ import {
   Landmark,
   Lightbulb,
   LogOut,
+  MessageSquareMore,
   ReceiptText,
   SettingsIcon,
   Target,
@@ -18,10 +19,12 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { openAssistant } from "@/components/assistant/assistant-store";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import { useIsDemoProfile } from "@/lib/api/user/useProfile";
+import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useUser } from "@/lib/auth/user-context";
 import { useSignOut } from "@/lib/auth/useSignOut";
 import { instanceConfig } from "@/lib/instance";
@@ -47,6 +50,8 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
     useIsDemoProfile({ fetch: false }) ||
     (instanceConfig.demoEmail !== null &&
       user?.email === instanceConfig.demoEmail);
+  const assistantAvailable = useFeature((features) => features.ai.assistant);
+  const aiHidden = useAiHidden();
   const marketDataAvailable = useFeature((features) => features.marketData);
 
   const userInitials = user?.email?.split("@")[0].slice(0, 2).toUpperCase();
@@ -109,6 +114,26 @@ export default function BottomNavMoreSheet({ open, onOpenChange }: Props) {
         </ul>
 
         <Separator />
+
+        {assistantAvailable && !aiHidden ? (
+          <>
+            <Separator />
+            <button
+              type="button"
+              className={itemClass}
+              onClick={() => {
+                close();
+                openAssistant();
+              }}
+            >
+              <MessageSquareMore
+                className="size-5 shrink-0"
+                aria-hidden="true"
+              />
+              {t("assistant.launcher")}
+            </button>
+          </>
+        ) : null}
 
         {/* Primary secondary items */}
         <ul className="py-2">

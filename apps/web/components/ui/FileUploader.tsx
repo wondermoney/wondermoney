@@ -128,9 +128,10 @@ export function FileUploader(props: FileUploaderProps) {
         { threshold: 1024 ** 3, unit: "gigabyte" as const },
       ];
 
-      const selectedUnit = [...units]
-        .reverse()
-        .find((candidate) => bytes >= candidate.threshold) ?? units[0];
+      const selectedUnit =
+        [...units]
+          .reverse()
+          .find((candidate) => bytes >= candidate.threshold) ?? units[0];
       const value = bytes / selectedUnit.threshold;
 
       return new Intl.NumberFormat(locale, {
@@ -194,7 +195,9 @@ export function FileUploader(props: FileUploaderProps) {
             setFiles([]);
             return t("file-uploader-uploaded", { count: updatedFiles.length });
           },
-          error: t("file-uploader-upload-failed", { count: updatedFiles.length }),
+          error: t("file-uploader-upload-failed", {
+            count: updatedFiles.length,
+          }),
         });
       }
     },
@@ -279,7 +282,12 @@ export function FileUploader(props: FileUploaderProps) {
                 </div>
                 <div className="flex flex-col gap-px">
                   <p className="font-medium">
-                    {t("file-uploader-dropzone-title")}
+                    <span className="sm:hidden">
+                      {t("file-uploader-choose-file")}
+                    </span>
+                    <span className="hidden sm:inline">
+                      {t("file-uploader-dropzone-title")}
+                    </span>
                   </p>
                   <p className="text-muted-foreground text-sm">
                     {dropzoneDescription}

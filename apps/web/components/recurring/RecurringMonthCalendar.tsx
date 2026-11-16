@@ -129,7 +129,9 @@ export function RecurringMonthCalendar({
   const grouped = groupOccurrencesByDay(calendarItems(items, installments));
   const selectedItems = grouped.get(selectedDay) ?? [];
   const formatDay = (day: string, options: Intl.DateTimeFormatOptions) =>
-    new Intl.DateTimeFormat(locale, options).format(new Date(`${day}T00:00:00`));
+    new Intl.DateTimeFormat(locale, options).format(
+      new Date(`${day}T00:00:00`),
+    );
   const selectedLabel = formatDay(selectedDay, {
     day: "numeric",
     month: "long",
@@ -189,11 +191,16 @@ export function RecurringMonthCalendar({
             const inMonth = day.slice(0, 7) === month;
             const isSelected = day === selectedDay;
             const isToday = day === today;
-            const hasOverdue = dayItems.some((item) => item.status === "overdue");
+            const hasOverdue = dayItems.some(
+              (item) => item.status === "overdue",
+            );
             const hasDue = dayItems.some((item) => item.status === "due");
-            const totalLabel = total.amount !== null && isCurrencyCode(total.currency)
-              ? formatMoney(total.amount, total.currency, { maximumFractionDigits: 2 })
-              : labels.paymentCount(total.count);
+            const totalLabel =
+              total.amount !== null && isCurrencyCode(total.currency)
+                ? formatMoney(total.amount, total.currency, {
+                    maximumFractionDigits: 2,
+                  })
+                : labels.paymentCount(total.count);
 
             return (
               <button
@@ -202,7 +209,7 @@ export function RecurringMonthCalendar({
                 aria-current={isToday ? "date" : undefined}
                 aria-pressed={isSelected}
                 className={cn(
-                  "relative flex min-h-16 flex-col items-start gap-1 border-r border-b p-1.5 text-left transition-colors",
+                  "relative flex min-h-16 min-w-0 flex-col items-start gap-1 border-r border-b p-1.5 text-left transition-colors",
                   "hover:bg-muted/60 focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-hidden",
                   inMonth ? "text-foreground" : "text-muted-foreground/60",
                   isSelected && "bg-primary/10",
@@ -233,6 +240,15 @@ export function RecurringMonthCalendar({
                   ) : null}
                 </span>
                 {dayItems.length > 0 ? (
+                  <span
+                    className="hidden w-full truncate text-xs lg:block"
+                    title={dayItems.map((item) => item.name).join(", ")}
+                  >
+                    {dayItems[0].name}
+                    {dayItems.length > 1 ? ` +${dayItems.length - 1}` : ""}
+                  </span>
+                ) : null}
+                {dayItems.length > 0 ? (
                   <span className="text-muted-foreground w-full truncate font-mono text-xs tabular-nums">
                     {totalLabel}
                   </span>
@@ -245,9 +261,13 @@ export function RecurringMonthCalendar({
         <div className="px-4 py-4">
           <h3 className="text-sm font-medium">{selectedLabel}</h3>
           {isLoading ? (
-            <p className="text-muted-foreground mt-2 text-sm">{labels.loading}</p>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {labels.loading}
+            </p>
           ) : selectedItems.length === 0 ? (
-            <p className="text-muted-foreground mt-2 text-sm">{labels.emptyDay}</p>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {labels.emptyDay}
+            </p>
           ) : (
             <ul className="mt-2">
               {selectedItems.map((item) => (
@@ -259,7 +279,9 @@ export function RecurringMonthCalendar({
                     <span className="truncate text-sm">{item.name}</span>
                     {item.installment ? (
                       <span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-                        <span aria-hidden={labels.installment ? true : undefined}>
+                        <span
+                          aria-hidden={labels.installment ? true : undefined}
+                        >
                           {item.installment.number}/{item.installment.count}
                         </span>
                         {labels.installment ? (
@@ -277,7 +299,8 @@ export function RecurringMonthCalendar({
                     </Badge>
                   </div>
                   <span className="font-mono text-sm tabular-nums">
-                    {item.expectedAmount !== null && isCurrencyCode(item.currency)
+                    {item.expectedAmount !== null &&
+                    isCurrencyCode(item.currency)
                       ? formatMoney(item.expectedAmount, item.currency, {
                           minimumFractionDigits: 2,
                         })

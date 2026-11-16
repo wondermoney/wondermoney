@@ -10,6 +10,7 @@ import Text from "@/components/ui/Typography/Text";
 import useBudgetSuggestions, {
   type BudgetSuggestionMonths,
 } from "@/lib/api/budget/useBudgetSuggestions";
+import { getCategoryDisplayName } from "@/lib/utils/categories";
 import type { SupportedCurrencyCodes } from "@/lib/utils/currencySymbol";
 
 /** The parts of a budget table row a suggestion needs: its key, amount and children. */
@@ -24,7 +25,9 @@ type Props = {
   currency: SupportedCurrencyCodes;
   month: number;
   months?: BudgetSuggestionMonths;
-  onApply: (updates: { amount: number; categoryKey: number }[]) => Promise<void> | void;
+  onApply: (
+    updates: { amount: number; categoryKey: number }[],
+  ) => Promise<void> | void;
   rows: SuggestionRow[];
   year: number;
 };
@@ -105,7 +108,9 @@ export function BudgetSuggestionsCard({
                     key={suggestion.categoryKey}
                     className="bg-muted/40 flex flex-col gap-2 rounded-md px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <span className="font-medium">{suggestion.categoryName}</span>
+                    <span className="font-medium">
+                      {getCategoryDisplayName(t, suggestion.categoryName)}
+                    </span>
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="text-muted-foreground">
                         {t("budget-suggestions-current")}:{" "}

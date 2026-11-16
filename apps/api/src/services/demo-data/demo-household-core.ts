@@ -6,6 +6,7 @@ import { demoLoans } from '@app/database/seeders/demo/demo-loans';
 import { demoPortfolios } from '@app/database/seeders/demo/demo-portfolio';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
+import { AccountType } from '@entity/AccountType';
 import type { Appuser } from '@entity/Appuser';
 import { Budget } from '@entity/Budget';
 import { Currency } from '@entity/Currency';
@@ -13,12 +14,7 @@ import { Loan } from '@entity/Loan';
 import { NordigenRequisition } from '@entity/NordigenRequisition';
 import { Portfolio } from '@entity/Portfolio';
 import type { Tenant } from '@entity/Tenant';
-import {
-  LoanPaymentFrequency,
-  LoanRateType,
-  LoanStatus,
-  LoanType,
-} from '@service/loan/loan-types';
+import { LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@service/loan/loan-types';
 
 /**
  * The demo household's core objects, upserted from the seeder fixtures in `seeders/demo/`: its three
@@ -97,6 +93,23 @@ export async function upsertDemoHouseholdCore(em: EntityManager, appuser: Appuse
       },
     ),
   ]);
+  await upsertByCriteria<Account>(
+    em,
+    Account,
+    { accountId: demoAccounts.card.accountId, accountOwnerAppuserKey: appuser },
+    {
+      accountId: demoAccounts.card.accountId,
+      accountName: demoAccounts.card.accountName,
+      accountNumber: demoAccounts.card.accountNumber,
+      accountOwnerAppuserKey: appuser,
+      accountTypeKey: await em.findOneOrFail(AccountType, { description: 'CREDIT_CARD' }),
+      appuserCurrencyBalance: demoAccounts.card.balance,
+      balance: demoAccounts.card.balance,
+      currencyKey: eurCurrency,
+      holderName: demoAccounts.card.holderName,
+      tenantKey: tenant,
+    },
+  );
   await upsertByCriteria<Budget>(
     em,
     Budget,
@@ -180,7 +193,6 @@ export async function upsertDemoHouseholdCore(em: EntityManager, appuser: Appuse
       },
     ),
   ]);
-
 }
 
 async function upsertByCriteria<T extends object>(

@@ -20,8 +20,13 @@ vi.mock('../../utils/better-auth-user', () => ({
   createUser: ({ email }: { email: string }) => Promise.resolve({ id: `auth-${email}` }),
 }));
 // The full exchange-rate history and 45k-symbol catalog take minutes to insert and nothing in the
-// demo data set reads them: keep only the stocks the demo portfolios hold.
-vi.mock('../exchange_rate_eur_ecb_20200101_20221215.json', () => ({ default: [] }));
+// demo data set needs: keep the EUR/USD pair and stocks the demo portfolios hold.
+vi.mock('../exchange_rate_eur_ecb_20200101_20221215.json', () => ({
+  default: [
+    { f: 'EUR', t: 'USD', r: 1.0621, d: '2022-12-15' },
+    { f: 'USD', t: 'EUR', r: 0.9415, d: '2022-12-15' },
+  ],
+}));
 vi.mock('../stock_list_clean.json', async (importOriginal) => {
   const { default: stocks } = await importOriginal<{ default: { symbol: string }[] }>();
   const { demoPortfolioHoldings } = await import('../demo/demo-portfolio');
@@ -61,7 +66,7 @@ describe('seeding the development data set', () => {
     const seeded = await seededDemoData(db);
     expect(seeded.currencies).toBe(currenciesBefore);
     expect(seeded.eurCurrencies).toBe(1);
-    expect(seeded.demoAccounts.map((account) => account.currencyKey?.code).sort()).toEqual(['EUR', 'EUR', 'USD']);
+    expect(seeded.demoAccounts.map((account) => account.currencyKey?.code).sort()).toEqual(['EUR', 'EUR', 'EUR', 'USD']);
     expect(seeded.demoCategories).toBeGreaterThan(0);
     expect(seeded.transactionCategories).toBeGreaterThan(0);
     for (const feature of ['goals', 'assets', 'recurring', 'watchlist'] as const) {
@@ -74,7 +79,7 @@ describe('seeding the development data set', () => {
 
     const seeded = await seededDemoData(db);
     expect(seeded.eurCurrencies).toBe(1);
-    expect(seeded.demoAccounts).toHaveLength(3);
+    expect(seeded.demoAccounts).toHaveLength(4);
     expect(seeded.demoCategories).toBeGreaterThan(0);
     expect(seeded.transactionCategories).toBeGreaterThan(0);
   }, 60_000);

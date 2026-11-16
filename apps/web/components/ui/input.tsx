@@ -50,7 +50,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {startAdornment && (
               <div
                 className={cn(
-                  "text-muted-foreground pl-4 font-normal",
+                  "text-muted-foreground shrink-0 pl-4 font-normal",
                   startAdornmentClassName,
                 )}
               >
@@ -64,7 +64,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 // so text lines up with every other input in the form.
                 startAdornment ? "pl-2" : "pl-4",
                 endAdornment ? "pr-2" : "pr-4",
-                "placeholder:text-muted-foreground flex size-full rounded-md border-none bg-transparent py-2 text-sm shadow-none outline-hidden file:bg-transparent file:text-sm file:font-medium focus:ring-0 focus:ring-offset-0 focus-visible:border-none focus-visible:shadow-none focus-visible:outline-hidden",
+                "placeholder:text-muted-foreground flex size-full min-w-0 flex-1 rounded-md border-none bg-transparent py-2 text-sm shadow-none outline-hidden file:bg-transparent file:text-sm file:font-medium focus:ring-0 focus:ring-offset-0 focus-visible:border-none focus-visible:shadow-none focus-visible:outline-hidden",
                 className,
               )}
               ref={ref}

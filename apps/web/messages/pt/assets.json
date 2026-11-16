@@ -59,7 +59,8 @@
       "privateDescription": "Só tu vês este bem. Fica fora do património dos outros membros do agregado.",
       "notes": "Notas",
       "notesPlaceholder": "O que valha a pena lembrar sobre este bem",
-      "datePlaceholder": "Escolhe uma data"
+      "datePlaceholder": "Escolhe uma data",
+      "projectionDetails": "Detalhes da projeção (opcional)"
     },
     "validation": {
       "required": "Este campo é obrigatório",

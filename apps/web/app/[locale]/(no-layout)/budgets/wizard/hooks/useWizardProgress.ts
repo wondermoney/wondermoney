@@ -14,7 +14,10 @@ export function useWizardProgress() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const currentStep = steps.findIndex((step) => pathname.includes(step));
+  const currentStep = Math.max(
+    0,
+    steps.findIndex((step) => pathname.includes(step)),
+  );
   const stepProgress = ((currentStep + 1) / steps.length) * 100;
   const isLastStep = currentStep === steps.length - 1;
 
@@ -28,6 +31,8 @@ export function useWizardProgress() {
 
   return {
     currentStep,
+    stepName: steps[currentStep],
+    totalSteps: steps.length,
     stepProgress,
     isLastStep,
     handleGoBack,

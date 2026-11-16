@@ -12,6 +12,7 @@ import {
   type IssuedSession,
 } from '@service/auth/better-auth';
 import { demoSessionDeadline, isDemoAccountEmail } from '@service/auth/demo-session';
+import { isDemoCompanionProfile } from '@service/demo-data/demo-companion';
 import { resolveDemoRefreshIdentity } from '@service/demo-data/demo-data-refresh-identity';
 
 /**
@@ -23,7 +24,7 @@ import { resolveDemoRefreshIdentity } from '@service/demo-data/demo-data-refresh
  * - the instance enabled it (`DEMO_SIGN_IN_ENABLED`);
  * - there is exactly one active demo `Appuser` (account type `demo`, the canonical demo address)
  *   and exactly one active demo household it owns;
- * - the demo user belongs to that household only, and nobody else belongs to it;
+ * - the demo user belongs to that household only, with only the non-login seeded companion allowed beside it;
  * - the better-auth user behind it exists and carries the canonical demo address too, so a demo row
  *   whose `externalUserId` was pointed at somebody else's login signs in no one;
  * - that user has no TOTP: the demo must never be a way around a second factor.
@@ -92,9 +93,22 @@ export async function signInToDemo(
 
   const [appuserMemberships, householdMembers] = await Promise.all([
     em.count(AppuserTenant, { appuserKey: appuser, deletedAt: null, recordActive: true }),
-    em.count(AppuserTenant, { deletedAt: null, recordActive: true, tenantKey: tenant }),
+    em.find(AppuserTenant, { deletedAt: null, recordActive: true, tenantKey: tenant }, { populate: ['appuserKey'] }),
   ]);
-  if (appuserMemberships !== 1 || householdMembers !== 1) return unavailable('demo-household-shared');
+  const companions = householdMembers.filter((member) => member.appuserKey.appuserKey !== appuser.appuserKey);
+  if (
+    appuserMemberships !== 1 ||
+    companions.length > 1 ||
+    companions.some((member) => !isDemoCompanionProfile(member.appuserKey))
+  )
+    return unavailable('demo-household-shared');
+  for (const companion of companions) {
+    if (await sessions.findUser(companion.appuserKey.externalUserId)) return unavailable('demo-household-shared');
+    if (
+      (await em.count(AppuserTenant, { appuserKey: companion.appuserKey, deletedAt: null, recordActive: true })) !== 1
+    )
+      return unavailable('demo-household-shared');
+  }
 
   const authUser = await sessions.findUser(appuser.externalUserId);
   if (!authUser) return unavailable('missing-auth-user');

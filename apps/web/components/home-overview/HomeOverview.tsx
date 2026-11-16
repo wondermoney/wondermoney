@@ -151,9 +151,8 @@ export function HomeOverview() {
           </Button>
         </div>
         <NetWorthHero member={member} />
+        {hydrated ? <HomeActivation /> : null}
       </div>
-
-      {hydrated ? <HomeActivation /> : null}
 
       {layout
         .filter((entry) => entry.id !== "net-worth" && !entry.hidden)

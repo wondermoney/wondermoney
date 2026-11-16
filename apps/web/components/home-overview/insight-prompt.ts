@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import type { Insight } from "@/lib/api/insights/useInsights";
 import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
+import { getCategoryDisplayName } from "@/lib/utils/categories";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
@@ -17,6 +18,8 @@ import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
  */
 export function useInsightPrompt(insight: Insight): string {
   const t = useTranslations("homeOverview.insights.ask.prompt");
+  const tRoot = useTranslations();
+  const categoryLabel = (name: string) => getCategoryDisplayName(tRoot, name);
   const formatPercent = useFormatPercentage();
   const formatCurrency = useFormatCurrency();
   const { hidden } = usePrivacyMode();
@@ -28,15 +31,15 @@ export function useInsightPrompt(insight: Insight): string {
     );
 
     return t(`spending.${facts.direction}`, {
-      category: facts.categoryName,
+      category: categoryLabel(facts.categoryName),
       percent,
     });
   }
 
   const facts = insight.facts;
   const category = facts.parentCategoryName
-    ? `${facts.parentCategoryName} / ${facts.categoryName}`
-    : facts.categoryName;
+    ? `${categoryLabel(facts.parentCategoryName)} / ${categoryLabel(facts.categoryName)}`
+    : categoryLabel(facts.categoryName);
 
   if (hidden) {
     return t("budgetHidden", { category });

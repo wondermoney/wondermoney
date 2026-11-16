@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserRound,UsersRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -85,6 +86,8 @@ export default function VisibilityPage() {
                       <ul className="divide-border divide-y rounded-md border">
                         {BUDGET_VISIBILITIES.map((option) => {
                           const checked = field.value === option;
+                          const Icon =
+                            option === "household" ? UsersRound : UserRound;
                           return (
                             <li key={option}>
                               <label
@@ -101,6 +104,10 @@ export default function VisibilityPage() {
                                   onChange={() => field.onChange(option)}
                                   onBlur={field.onBlur}
                                   className="accent-primary mt-1 size-4 shrink-0"
+                                />
+                                <Icon
+                                  aria-hidden="true"
+                                  className="text-muted-foreground mt-0.5 size-5 shrink-0"
                                 />
                                 <span className="flex min-w-0 flex-col gap-1">
                                   <span className="text-foreground font-medium">

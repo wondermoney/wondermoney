@@ -200,11 +200,11 @@ export default function PortfolioTransactionsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:items-start">
         <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
           {t("transactions")}
         </h1>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2">
           <PortfolioTransactionImportModal
             isOpen={isImportTransactionModalOpen}
             setOpen={(open) => {
@@ -216,9 +216,16 @@ export default function PortfolioTransactionsClient({
             }}
             defaultPortfolioId={portfoliosData?.portfolios[0].portfolioKey.toString()}
             trigger={
-              <Button variant="outline" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                aria-label={t("import-transactions")}
+                title={t("import-transactions")}
+                className="size-11 p-0 sm:h-10 sm:w-auto sm:px-4"
+              >
                 <Download className="size-4" />
-                {t("import-transactions")}
+                <span className="hidden sm:inline">
+                  {t("import-transactions")}
+                </span>
               </Button>
             }
           />
@@ -232,9 +239,13 @@ export default function PortfolioTransactionsClient({
               }
             }}
             trigger={
-              <Button className="w-full sm:w-auto">
+              <Button
+                aria-label={t("add-transaction")}
+                className="min-h-11 gap-1 px-3 sm:gap-2 sm:px-4"
+              >
                 <Plus className="size-4" />
-                {t("add-transaction")}
+                <span className="sm:hidden">{t("add")}</span>
+                <span className="hidden sm:inline">{t("add-transaction")}</span>
               </Button>
             }
           />

@@ -163,7 +163,8 @@
         "noData": {
           "title": "No spending in either month",
           "description": "Try two other months, or check that accounts are connected."
-        }
+        },
+        "percentagePoints": "{value} pp"
       },
       "spendingVsNormal": {
         "title": "Spending vs normal",

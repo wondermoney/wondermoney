@@ -26,7 +26,16 @@ export function buildDemoRefreshPlan({ asOfDate }: { asOfDate: Date }): DemoRefr
     asOfDate: normalizedAsOfDate,
     bankTransactions: demoBankTransactionFixtures.map((fixture) => ({
       ...fixture,
-      transactionDate: subUtcDays(normalizedAsOfDate, fixture.offsetDays),
+      transactionDate:
+        fixture.monthOffset === undefined
+          ? subUtcDays(normalizedAsOfDate, fixture.offsetDays)
+          : new Date(
+              Date.UTC(
+                normalizedAsOfDate.getUTCFullYear(),
+                normalizedAsOfDate.getUTCMonth() - fixture.monthOffset,
+                fixture.dayOfMonth ?? 1,
+              ),
+            ),
     })),
     portfolioTransactions: demoPortfolioTransactionFixtures.map((fixture) => ({
       ...fixture,

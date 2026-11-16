@@ -478,7 +478,7 @@ export default function AccountsClient({
   const accountsFreshness = getAggregateFreshness(accountsData?.accounts);
 
   return (
-    <div className="flex flex-col gap-10 lg:gap-12">
+    <div className="flex flex-col gap-6 sm:gap-10 lg:gap-12">
       {/* Header row */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
@@ -501,7 +501,7 @@ export default function AccountsClient({
             timeframe={timeframe}
             setTimeframe={(value) => setTimeframe(value as AccountsTimeframe)}
           />
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex gap-2 sm:items-center">
             {hasEditableAccounts ? (
               <AccountTransactionAddModal
                 isOpen={isAddManualTransactionModalOpen}
@@ -543,7 +543,7 @@ export default function AccountsClient({
       {recoveryBanner}
 
       {/* Lead: the total balance, then the period's flows as a ruled stat row. */}
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-2 sm:gap-8">
         <div>
           <p className="text-foreground text-base font-medium">
             {t("total-balance")}
@@ -557,7 +557,7 @@ export default function AccountsClient({
             <Amount
               value={totalBalance}
               currency={userCurrency}
-              className="font-mono text-5xl leading-tight font-medium tracking-tight lg:text-6xl"
+              className="font-mono text-3xl leading-tight font-medium tracking-tight sm:text-5xl lg:text-6xl"
             />
             {totalBalance !== null && netChange !== null && netChange !== 0 && (
               <div className="flex shrink-0 items-center gap-1">
@@ -623,14 +623,20 @@ export default function AccountsClient({
       </div>
 
       {/* Spending by category: follows the member filter, its control in the section's head. */}
-      <AccountsCategorySpending
-        fromDate={fromDate}
-        toDate={toDate}
-        userCurrency={userCurrency}
-      />
+      <div className="max-sm:order-1">
+        <AccountsCategorySpending
+          fromDate={fromDate}
+          toDate={toDate}
+          userCurrency={userCurrency}
+        />
+      </div>
 
       {/* Balance chart */}
-      <Section id="balance-growth-heading" title={t("balance-growth")}>
+      <Section
+        className="max-sm:order-1"
+        id="balance-growth-heading"
+        title={t("balance-growth")}
+      >
         <div>
           {isLoadingTransactionsData && !isTransactionsPlaceholderData ? (
             <div className="flex h-75 items-center justify-center">

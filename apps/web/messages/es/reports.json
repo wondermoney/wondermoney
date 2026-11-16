@@ -163,7 +163,8 @@
         "noData": {
           "title": "Sin gastos en ninguno de los meses",
           "description": "Prueba con otros dos meses o comprueba que las cuentas estén conectadas."
-        }
+        },
+        "percentagePoints": "{value} pp"
       },
       "spendingVsNormal": {
         "title": "Gasto vs normal",

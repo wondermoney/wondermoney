@@ -59,7 +59,8 @@
       "privateDescription": "Only you see this asset. It stays out of the other household members' net worth.",
       "notes": "Notes",
       "notesPlaceholder": "Anything worth remembering about this asset",
-      "datePlaceholder": "Pick a date"
+      "datePlaceholder": "Pick a date",
+      "projectionDetails": "Projection details (optional)"
     },
     "validation": {
       "required": "This field is required",

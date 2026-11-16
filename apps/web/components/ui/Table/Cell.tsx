@@ -27,15 +27,35 @@ const cellVariants = cva(
 interface TableCellProps
   extends
     React.TdHTMLAttributes<HTMLTableCellElement>,
-    VariantProps<typeof cellVariants> {}
+    VariantProps<typeof cellVariants> {
+  mobileLabel?: React.ReactNode;
+  mobilePriority?: boolean;
+}
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ variant, className, ...props }, ref) => (
+  (
+    { variant, className, mobileLabel, mobilePriority, children, ...props },
+    ref,
+  ) => (
     <td
       ref={ref}
-      className={cn(cellVariants({ variant }), className)}
+      className={cn(
+        cellVariants({ variant }),
+        mobilePriority && "max-sm:order-first max-sm:col-span-2",
+        className,
+      )}
       {...props}
-    />
+    >
+      {mobileLabel ? (
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground mb-1 block font-sans text-xs font-normal sm:hidden"
+        >
+          {mobileLabel}
+        </span>
+      ) : null}
+      {children}
+    </td>
   ),
 );
 TableCell.displayName = "TableCell";

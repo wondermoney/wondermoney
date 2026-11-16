@@ -22,7 +22,10 @@ import {
   type NetWorthChange,
   netWorthChanges,
 } from "@/lib/home/month-overview";
-import { type MemberFilter, memberKeysFor } from "@/lib/household/member-attribution";
+import {
+  type MemberFilter,
+  memberKeysFor,
+} from "@/lib/household/member-attribution";
 import {
   monthlyNetWorthPoints,
   netWorthAxisLabels,
@@ -232,6 +235,7 @@ export function NetWorthHero({
           series={[{ key: "netWorth", type: "area" }]}
           config={chartConfig}
           className={CHART_CLASS}
+          yAxisWidth="auto"
           yFormatter={(value) => formatMoney(value, 0)}
           tooltipValueFormatter={(value) => (
             <span className="font-mono whitespace-nowrap tabular-nums">
@@ -244,7 +248,7 @@ export function NetWorthHero({
   }
 
   return wrap(
-    <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+    <div className="grid items-end gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
       <div className="flex min-w-0 flex-col gap-6">
         <div className="flex flex-col gap-2">
           <p className="flex items-center gap-2">

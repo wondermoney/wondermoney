@@ -3,7 +3,7 @@
 import NumberFlow, { Format } from "@number-flow/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
@@ -29,9 +29,15 @@ interface StatsProps {
    * quarter of the content column is too narrow for a currency figure.
    */
   columns?: 3 | 4;
+  mobilePrimaryCount?: number;
 }
 
-export default function Stats({ stats, columns = 3 }: StatsProps) {
+export default function Stats({
+  stats,
+  columns = 3,
+  mobilePrimaryCount,
+}: StatsProps) {
+  const [expanded, setExpanded] = useState(false);
   const t = useTranslations();
   // The reader's locale, not the runtime's: `12,5 %` for pt, `12.5%` for en.
   const locale = useLocale();
@@ -49,11 +55,11 @@ export default function Stats({ stats, columns = 3 }: StatsProps) {
     <div>
       <dl
         className={cn(
-          "grid grid-cols-1 gap-x-8 gap-y-6",
+          "grid grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-8 sm:gap-y-6",
           columns === 4 ? "sm:grid-cols-2 xl:grid-cols-4" : "sm:grid-cols-3",
         )}
       >
-        {stats.map((item) => {
+        {stats.map((item, index) => {
           let colorClass = "text-muted-foreground";
           let Icon = null;
 
@@ -87,7 +93,13 @@ export default function Stats({ stats, columns = 3 }: StatsProps) {
             <div
               key={item.name}
               // Direction A: a figure under a hairline, not a box.
-              className="border-border overflow-hidden border-t pt-3"
+              className={cn(
+                "border-border min-w-0 overflow-hidden border-t pt-3",
+                mobilePrimaryCount !== undefined &&
+                  index >= mobilePrimaryCount &&
+                  !expanded &&
+                  "hidden sm:block",
+              )}
             >
               <dt className="text-muted-foreground flex justify-between truncate text-sm">
                 {item.name}
@@ -101,7 +113,7 @@ export default function Stats({ stats, columns = 3 }: StatsProps) {
                 </div>
               </dt>
               <dd className="mt-2 space-y-1">
-                <div className="text-foreground font-mono text-2xl font-medium tracking-tight whitespace-nowrap">
+                <div className="text-foreground font-mono text-xl font-medium tracking-tight whitespace-nowrap sm:text-2xl">
                   {item.value != null ? (
                     <NumberFlow
                       locales={numberLocale}
@@ -136,6 +148,16 @@ export default function Stats({ stats, columns = 3 }: StatsProps) {
           );
         })}
       </dl>
+      {mobilePrimaryCount !== undefined && stats.length > mobilePrimaryCount ? (
+        <button
+          type="button"
+          className="text-muted-foreground focus-visible:ring-ring mt-2 min-h-11 rounded-md text-sm underline underline-offset-4 focus-visible:ring-2 sm:hidden"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {t(expanded ? "summary-less-details" : "summary-more-details")}
+        </button>
+      ) : null}
     </div>
   );
 }

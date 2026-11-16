@@ -242,3 +242,21 @@ test("needs-category bucket orders low-confidence (ambiguous) before none/other"
     [2, 1, 3],
   );
 });
+
+test("confirmed transfer legs do not ask for income or expense categories", () => {
+  const payment = transaction({ transactionKey: 1 });
+  const outgoing = transaction({
+    transactionKey: 2,
+    transactionTypeKey: { name: "TRANSFER_OUT" },
+  });
+  const incoming = transaction({
+    transactionKey: 3,
+    transactionTypeKey: { name: "TRANSFER_IN" },
+  });
+  const buckets = getTransactionReviewBuckets([payment, outgoing, incoming]);
+  assert.deepEqual(
+    buckets.needsCategory.map((row) => row.transactionKey),
+    [1],
+  );
+  assert.equal(buckets.totalUnreviewed, 1);
+});

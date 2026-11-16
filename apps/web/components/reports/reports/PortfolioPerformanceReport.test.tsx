@@ -134,7 +134,7 @@ test("a return that cannot be measured is an em dash, not zero", () => {
   const cells = cellsOf("Long-term");
   for (const header of [copy.timeWeighted, copy.moneyWeighted]) {
     const cell = cells[columnIndex(header)];
-    assert.equal(cell.textContent?.trim(), "—");
+    assert.ok(within(cell).getByText("—"));
     assert.ok(cell.querySelector("[aria-label]"));
   }
 });
@@ -157,6 +157,6 @@ test("the household total does not invent a combined rate", () => {
   renderReport();
 
   const total = cellsOf(copy.total);
-  assert.equal(total[columnIndex(copy.timeWeighted)].textContent?.trim(), "—");
-  assert.equal(total[columnIndex(copy.moneyWeighted)].textContent?.trim(), "—");
+  assert.ok(within(total[columnIndex(copy.timeWeighted)]).getByText("—"));
+  assert.ok(within(total[columnIndex(copy.moneyWeighted)]).getByText("—"));
 });
