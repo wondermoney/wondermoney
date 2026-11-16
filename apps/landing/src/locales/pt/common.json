@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Funcionalidades",
-    "resources": "Recursos",
     "about": "Sobre",
     "tools": "Ferramentas",
+    "toolsMenu": {
+      "seeAll": "Ver todas as ferramentas"
+    },
     "learn": "Aprender",
     "glossary": "Glossário",
     "login": "Entrar",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Privacidade",
         "description": "Acesso só de leitura. Os teus dados nunca são vendidos."
-      },
-      "tools": {
-        "name": "Ferramentas",
-        "description": "Calculadoras financeiras gratuitas: juro composto, valor líquido e mais"
       },
       "learn": {
         "name": "Aprender",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "Calculadora FIRE",
+      "shortName": "Independência financeira (FIRE)",
       "description": "Descobre quanto precisas de ter investido para viveres dos rendimentos e quanto tempo demoras a lá chegar.",
       "annualSpending": "Despesa anual na reforma",
       "annualSpendingHelp": "Quanto esperas gastar por ano quando deixares de trabalhar, em euros de hoje",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Calculadora de juros compostos",
+      "shortName": "Juros compostos",
       "description": "Vê quanto podem crescer um montante inicial e contribuições mensais, antes e depois da inflação.",
       "initialInvestment": "Investimento inicial",
       "monthlyContribution": "Contribuição mensal",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Calculadora de património líquido",
+      "shortName": "Património líquido",
       "description": "Calcula o teu património líquido total somando todos os ativos e subtraindo os passivos.",
       "assets": "Ativos",
       "liabilities": "Passivos",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Calculadora de taxa de poupança",
+      "shortName": "Taxa de poupança",
       "description": "Descobre que percentagem do teu rendimento estás a poupar cada mês e como melhorá-la.",
       "monthlyIncome": "Rendimento mensal (após impostos)",
       "monthlyExpenses": "Despesas mensais",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Calculadora de retorno de investimento",
+      "shortName": "Retorno de investimento",
       "description": "Calcula o retorno anualizado de qualquer investimento dado um valor inicial, valor final e período de tempo.",
       "initialInvestment": "Investimento inicial",
       "currentValue": "Valor atual",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Calculadora de fundo de emergência",
+      "shortName": "Fundo de emergência",
       "description": "Calcula o objetivo do teu fundo de emergência a partir das despesas essenciais e vê em que mês lá chegas.",
       "pageTitle": "Calculadora de fundo de emergência: quanto poupar — WonderMoney",
       "pageDescription": "Calculadora de fundo de emergência gratuita. Vê quanto dinheiro deves ter de parte para imprevistos, quanto te falta poupar e em que mês lá chegas. Sem registo.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Calculadora de taxa de esforço",
+      "shortName": "Taxa de esforço",
       "description": "Soma as prestações mensais dos teus créditos e vê que parte do rendimento líquido vai para dívidas.",
       "pageTitle": "Calculadora de taxa de esforço — WonderMoney",
       "pageDescription": "Calculadora de taxa de esforço gratuita. Indica o rendimento líquido mensal e as prestações dos créditos, vê a taxa com as contas feitas e testa o efeito de um crédito novo ou já pago.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Calculadora de orçamento familiar",
+      "shortName": "Orçamento familiar",
       "description": "Lista os rendimentos e as despesas do mês por categoria e vê o que sobra, a taxa de poupança e para onde vai cada euro.",
       "pageTitle": "Calculadora de orçamento familiar — WonderMoney",
       "pageDescription": "Calculadora de orçamento familiar gratuita. Introduz os rendimentos e as despesas mensais por categoria e vê o excedente ou o défice, a taxa de poupança, o peso de cada categoria e um diagrama de fluxos. Sem registo.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Simulador de crédito habitação",
+      "shortName": "Crédito habitação",
       "description": "Calcula a prestação mensal de um crédito habitação a taxa fixa, os juros que vais pagar e como a dívida desce ano a ano.",
       "pageTitle": "Simulador de crédito habitação: prestação e juros — WonderMoney",
       "pageDescription": "Simulador gratuito de crédito habitação a taxa fixa. Indica o montante, o prazo, a taxa e o seguro mensal para veres a prestação, os juros, o total pago e o plano de pagamentos ano a ano. Sem registo.",
@@ -984,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Simulador de amortização de crédito",
+      "shortName": "Amortização antecipada",
       "description": "Vê quanto poupas com uma amortização antecipada num crédito a taxa fixa, quer baixes a prestação quer reduzas o prazo.",
       "pageTitle": "Simulador de Amortização Antecipada de Crédito — WonderMoney",
       "pageDescription": "Simulador gratuito de amortização antecipada para crédito habitação e outros créditos a taxa fixa. Compara uma prestação mais baixa com um prazo mais curto: juros poupados, comissão e poupança líquida. Sem registo.",
@@ -1145,6 +1153,7 @@
     },
     "savingsGoal": {
       "title": "Simulador de poupança",
+      "shortName": "Objetivo de poupança",
       "description": "Calcula quanto poupar por mês para um objetivo, quanto tempo demoras a lá chegar ou quanto vais juntar.",
       "pageTitle": "Simulador de poupança: quanto poupar por mês — WonderMoney",
       "pageDescription": "Simulador de poupança gratuito. Vê quanto tens de poupar por mês para chegar a um objetivo, em quanto tempo lá chegas ou quanto vais juntar, com o rendimento e um plano ano a ano. Sem registo.",
@@ -1275,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Quanto posso pedir emprestado?",
+      "shortName": "Quanto posso pedir emprestado",
       "description": "Vê o preço máximo de casa que o teu rendimento e as tuas poupanças permitem, qual dos dois te trava e o que o faria subir.",
       "pageTitle": "Quanto posso pedir emprestado? Simulador de capacidade de crédito — WonderMoney",
       "pageDescription": "Simulador grátis de capacidade de crédito. Indica o rendimento líquido, as prestações que já pagas e as poupanças, e vê o maior crédito e o preço de casa ao teu alcance, e qual dos limites te trava. Sem registo.",
@@ -1433,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculadora de depósitos a prazo",
+      "shortName": "Depósitos a prazo",
       "description": "Calcula quanto rende um depósito a prazo antes e depois de impostos, com juros pagos no vencimento ou ao longo do prazo.",
       "pageTitle": "Calculadora de juros de depósitos a prazo, brutos e líquidos — WonderMoney",
       "pageDescription": "Calculadora gratuita de depósitos a prazo. Indica o montante, a TANB, o prazo e o imposto retido para veres os juros brutos e líquidos, o saldo no vencimento, a rentabilidade líquida anual e cada pagamento de juros. Sem registo.",
@@ -1550,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculadora comprar ou arrendar casa",
+      "shortName": "Comprar ou arrendar",
       "description": "Compara o património líquido de comprar casa com crédito habitação com o de arrendar e investir a diferença, ano a ano.",
       "pageTitle": "Comprar ou arrendar casa: calculadora ano a ano — WonderMoney",
       "pageDescription": "Calculadora gratuita para decidir entre comprar ou arrendar casa. Indica o preço, a entrada, o crédito, a renda e as taxas de crescimento e vê que caminho te deixa com mais e em que ano comprar passa à frente. Sem registo.",

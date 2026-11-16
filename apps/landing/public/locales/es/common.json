@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Funciones",
-    "resources": "Recursos",
     "about": "Sobre nosotros",
     "tools": "Herramientas",
+    "toolsMenu": {
+      "seeAll": "Ver todas las herramientas"
+    },
     "learn": "Aprender",
     "glossary": "Glosario",
     "login": "Iniciar sesión",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Privacidad",
         "description": "Acceso bancario de solo lectura. Tus datos nunca se venden."
-      },
-      "tools": {
-        "name": "Herramientas",
-        "description": "Calculadoras financieras gratuitas: interés compuesto, patrimonio neto y más"
       },
       "learn": {
         "name": "Aprender",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "Calculadora FIRE",
+      "shortName": "Independencia financiera (FIRE)",
       "description": "Calcula cuánto necesitas tener invertido para vivir de ello y cuánto tardas en llegar.",
       "annualSpending": "Gasto anual en la jubilación",
       "annualSpendingHelp": "Lo que esperas gastar al año cuando dejes de trabajar, en euros de hoy",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Calculadora de interés compuesto",
+      "shortName": "Interés compuesto",
       "description": "Mira cuánto pueden crecer un importe inicial y aportaciones mensuales, antes y después de la inflación.",
       "initialInvestment": "Inversión inicial",
       "monthlyContribution": "Aportación mensual",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Calculadora de patrimonio neto",
+      "shortName": "Patrimonio neto",
       "description": "Calcula tu patrimonio neto total sumando todos tus activos y restando tus pasivos.",
       "assets": "Activos",
       "liabilities": "Pasivos",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Calculadora de tasa de ahorro",
+      "shortName": "Tasa de ahorro",
       "description": "Descubre qué porcentaje de tus ingresos estás ahorrando cada mes y cómo mejorarlo.",
       "monthlyIncome": "Ingresos mensuales (después de impuestos)",
       "monthlyExpenses": "Gastos mensuales",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Calculadora de rentabilidad de inversión",
+      "shortName": "Rentabilidad de inversión",
       "description": "Ve la rentabilidad anualizada de cualquier inversión dado un valor inicial, valor final y período de tiempo.",
       "initialInvestment": "Inversión inicial",
       "currentValue": "Valor actual",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Calculadora de fondo de emergencia",
+      "shortName": "Fondo de emergencia",
       "description": "Calcula el objetivo de tu fondo de emergencia a partir de tus gastos esenciales y descubre en qué mes lo alcanzarás.",
       "pageTitle": "Calculadora de fondo de emergencia: cuánto ahorrar — WonderMoney",
       "pageDescription": "Calculadora de fondo de emergencia gratuita. Descubre cuánto dinero guardar para imprevistos, cuánto te falta por ahorrar y en qué mes lo consigues. Sin registro.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Calculadora de ratio de endeudamiento",
+      "shortName": "Ratio de endeudamiento",
       "description": "Suma las cuotas mensuales de tus préstamos y descubre qué parte de tus ingresos netos se va en deudas.",
       "pageTitle": "Calculadora de ratio de endeudamiento — WonderMoney",
       "pageDescription": "Calculadora gratuita de ratio de endeudamiento. Introduce tus ingresos netos y las cuotas de tus préstamos, mira el porcentaje con el cálculo detallado y prueba cómo cambia con un préstamo nuevo o ya pagado.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Calculadora de presupuesto familiar",
+      "shortName": "Presupuesto familiar",
       "description": "Anota tus ingresos y gastos del mes por categoría y descubre lo que te sobra, tu tasa de ahorro y adónde va cada euro.",
       "pageTitle": "Calculadora de presupuesto familiar — WonderMoney",
       "pageDescription": "Calculadora de presupuesto familiar gratuita. Introduce tus ingresos y gastos mensuales por categoría y ve el superávit o el déficit, la tasa de ahorro, el peso de cada categoría y un diagrama de flujos. Sin registro.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Calculadora de hipoteca",
+      "shortName": "Hipoteca",
       "description": "Calcula la cuota mensual de una hipoteca a tipo fijo, los intereses que pagarás y cómo baja la deuda año a año.",
       "pageTitle": "Calculadora de hipoteca con cuadro de amortización — WonderMoney",
       "pageDescription": "Calculadora de hipoteca a tipo fijo gratuita. Introduce el importe, el plazo, el tipo y el seguro mensual para ver la cuota, los intereses, el total pagado y el cuadro de amortización año a año. Sin registro.",
@@ -984,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Calculadora de amortización anticipada",
+      "shortName": "Amortización anticipada",
       "description": "Mira cuánto ahorras con una amortización anticipada en un préstamo a tipo fijo, tanto si bajas la cuota como si acortas el plazo.",
       "pageTitle": "Calculadora de Amortización Anticipada de Hipoteca y Préstamos — WonderMoney",
       "pageDescription": "Calculadora gratuita de amortización anticipada para hipotecas y préstamos a tipo fijo. Compara una cuota más baja con un plazo más corto: intereses ahorrados, comisión y ahorro neto. Sin registro.",
@@ -1145,6 +1153,7 @@
     },
     "savingsGoal": {
       "title": "Simulador de ahorro",
+      "shortName": "Objetivo de ahorro",
       "description": "Calcula cuánto ahorrar al mes para un objetivo, cuánto tardarás en alcanzarlo o cuánto llegarás a juntar.",
       "pageTitle": "Simulador de ahorro: cuánto ahorrar al mes — WonderMoney",
       "pageDescription": "Simulador de ahorro gratuito. Descubre cuánto necesitas ahorrar al mes para alcanzar un objetivo, cuánto tardarás en llegar o cuánto juntarás, con el rendimiento y un plan año a año. Sin registro.",
@@ -1275,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "¿Cuánto puedo pedir prestado?",
+      "shortName": "Cuánto puedo pedir prestado",
       "description": "Mira el precio de vivienda más alto que permiten tus ingresos y tus ahorros, cuál de los dos te frena y qué lo haría subir.",
       "pageTitle": "¿Cuánto puedo pedir prestado? Calculadora de capacidad de endeudamiento — WonderMoney",
       "pageDescription": "Calculadora gratuita de capacidad de endeudamiento. Indica tus ingresos netos, las cuotas que ya pagas y tus ahorros, y descubre la hipoteca y el precio de vivienda a tu alcance, y qué límite te frena. Sin registro.",
@@ -1433,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculadora de depósitos a plazo",
+      "shortName": "Depósitos a plazo",
       "description": "Calcula cuánto rinde un depósito a plazo fijo antes y después de impuestos, con intereses al vencimiento o a lo largo del plazo.",
       "pageTitle": "Calculadora de intereses de depósitos a plazo, brutos y netos — WonderMoney",
       "pageDescription": "Calculadora gratuita de depósitos a plazo. Introduce el importe, el TIN bruto, el plazo y la retención para ver los intereses brutos y netos, el saldo al vencimiento, la rentabilidad neta anual y cada pago de intereses. Sin registro.",
@@ -1550,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculadora comprar o alquilar vivienda",
+      "shortName": "Comprar o alquilar",
       "description": "Compara el patrimonio neto de comprar una vivienda con hipoteca con el de alquilar e invertir la diferencia, año a año.",
       "pageTitle": "¿Comprar o alquilar vivienda? Calculadora año a año — WonderMoney",
       "pageDescription": "Calculadora gratuita para decidir entre comprar o alquilar. Introduce el precio, la entrada, la hipoteca, el alquiler y las tasas de crecimiento y verás qué camino te deja con más y en qué año comprar se pone por delante. Sin registro.",

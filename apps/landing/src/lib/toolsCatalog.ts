@@ -19,7 +19,10 @@ export type ToolGroupId = (typeof TOOL_GROUPS)[number]["id"]
 export type CatalogRouteId = ToolRouteId | "pageFireCalculator"
 
 export interface ToolCatalogEntry {
-	/** Copy key: the card reads `tools.<key>.title` and `tools.<key>.description`. */
+	/**
+	 * Copy key: the hub card reads `tools.<key>.title` and `tools.<key>.description`, and the
+	 * header's Tools menu `tools.<key>.shortName`.
+	 */
 	readonly key: string
 	readonly routeId: CatalogRouteId
 	readonly group: ToolGroupId
@@ -31,8 +34,9 @@ export interface ToolCatalogEntry {
  * Every calculator on the landing site, the one list the tools hub, its ItemList and the related
  * tools of each /tools page read. Entries are written group by group in display order.
  *
- * Adding a tool: add its route to `TOOL_ROUTE_IDS` and one entry here, in its group.
- * `toolsCatalog.test.ts` fails until both are done.
+ * Adding a tool: add its route to `TOOL_ROUTE_IDS`, one entry here, in its group, and its
+ * `title`, `shortName` and `description` under `tools.<key>` in every locale. The hub, the header's
+ * Tools menu and the mobile drawer pick it up. `toolsCatalog.test.ts` fails until all are done.
  */
 export const TOOLS_CATALOG = [
 	// Budget and save
@@ -156,14 +160,18 @@ export interface ToolsHubGroup {
 	readonly tools: readonly ToolsHubTool[]
 }
 
-/** The hub's groups for one locale, each with its tools and their localized links. */
-export function buildToolsHub(lang: Lang): ToolsHubGroup[] {
+/**
+ * The hub's groups for one locale, each with its tools and their localized links. The header's
+ * Tools menu reads the same groups, so a new catalog entry reaches both. `catalog` is the full
+ * catalog unless a test passes another.
+ */
+export function buildToolsHub(lang: Lang, catalog: readonly ToolCatalogEntry[] = CATALOG): ToolsHubGroup[] {
 	let position = 0
 
 	return TOOL_GROUPS.map((group) => ({
 		id: group.id,
 		anchor: group.anchor,
-		tools: CATALOG.filter((tool) => tool.group === group.id).map((tool) => ({
+		tools: catalog.filter((tool) => tool.group === group.id).map((tool) => ({
 			...tool,
 			href: toLocalizedPath(tool.routeId, lang),
 			position: ++position,

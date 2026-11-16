@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Fonctionnalités",
-    "resources": "Ressources",
     "about": "À propos",
     "tools": "Outils",
+    "toolsMenu": {
+      "seeAll": "Voir tous les outils"
+    },
     "learn": "Apprendre",
     "glossary": "Glossaire",
     "login": "Connexion",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Confidentialité",
         "description": "Les connexions bancaires utilisent l’Open Banking en lecture seule via Enable Banking. WonderMoney ne peut pas initier de virements."
-      },
-      "tools": {
-        "name": "Outils",
-        "description": "Calculatrices financières gratuites : intérêts composés, patrimoine net, et plus encore"
       },
       "learn": {
         "name": "Apprendre",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "Calculatrice FIRE",
+      "shortName": "Indépendance financière (FIRE)",
       "description": "Calculez le capital à investir pour vivre de ses revenus et le temps qu'il vous faut pour l'atteindre.",
       "annualSpending": "Dépenses annuelles à la retraite",
       "annualSpendingHelp": "Ce que vous pensez dépenser par an une fois que vous ne travaillerez plus, en euros d'aujourd'hui",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Calculatrice d'intérêts composés",
+      "shortName": "Intérêts composés",
       "description": "Voyez jusqu'où peuvent croître un capital de départ et des versements mensuels, avant et après inflation.",
       "initialInvestment": "Investissement initial",
       "monthlyContribution": "Versement mensuel",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Calculatrice de patrimoine net",
+      "shortName": "Patrimoine net",
       "description": "Calculez votre patrimoine net total en additionnant tous vos actifs et en soustrayant vos passifs.",
       "assets": "Actifs",
       "liabilities": "Passifs",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Calculatrice de taux d'épargne",
+      "shortName": "Taux d'épargne",
       "description": "Découvrez quel pourcentage de vos revenus vous épargnez chaque mois et comment l'améliorer.",
       "monthlyIncome": "Revenus mensuels (après impôts)",
       "monthlyExpenses": "Dépenses mensuelles",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Calculatrice de rendement d'investissement",
+      "shortName": "Rendement d'investissement",
       "description": "Calculez le rendement annualisé de n'importe quel investissement à partir d'une valeur initiale, d'une valeur finale et d'une durée.",
       "initialInvestment": "Investissement initial",
       "currentValue": "Valeur actuelle",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Calculateur d'épargne de précaution",
+      "shortName": "Épargne de précaution",
       "description": "Calculez le montant de votre épargne de précaution à partir de vos dépenses essentielles et voyez le mois où vous l'atteindrez.",
       "pageTitle": "Calculateur d'épargne de précaution : combien mettre de côté — WonderMoney",
       "pageDescription": "Calculateur d'épargne de précaution gratuit. Voyez combien garder pour les imprévus, combien il vous reste à épargner et le mois où vous y arrivez. Sans inscription.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Calculateur de taux d'endettement",
+      "shortName": "Taux d'endettement",
       "description": "Additionnez vos mensualités de crédit et voyez quelle part de vos revenus nets part en remboursements.",
       "pageTitle": "Calculateur de taux d'endettement — WonderMoney",
       "pageDescription": "Calculateur de taux d'endettement gratuit. Saisissez vos revenus nets et vos mensualités, voyez le taux avec le calcul détaillé et testez l'effet d'un nouveau crédit ou d'un crédit soldé.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Calculateur de budget familial",
+      "shortName": "Budget familial",
       "description": "Notez vos revenus et vos dépenses du mois par catégorie, et voyez ce qui reste, votre taux d'épargne et où va chaque euro.",
       "pageTitle": "Calculateur de budget familial — WonderMoney",
       "pageDescription": "Calculateur de budget familial gratuit. Saisissez vos revenus et dépenses mensuels par catégorie pour voir l'excédent ou le déficit, le taux d'épargne, le poids de chaque catégorie et un diagramme des flux. Sans inscription.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Simulateur de prêt immobilier",
+      "shortName": "Prêt immobilier",
       "description": "Calculez la mensualité d'un prêt immobilier à taux fixe, les intérêts qu'il vous coûtera et l'évolution du capital restant dû année après année.",
       "pageTitle": "Simulateur de prêt immobilier et tableau d'amortissement — WonderMoney",
       "pageDescription": "Simulateur gratuit de prêt immobilier à taux fixe. Saisissez le montant, la durée, le taux et l'assurance mensuelle pour voir votre mensualité, les intérêts, le total payé et le tableau d'amortissement année par année. Sans inscription.",
@@ -984,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Simulateur de remboursement anticipé",
+      "shortName": "Remboursement anticipé",
       "description": "Voyez ce que rapporte un remboursement anticipé partiel sur un prêt à taux fixe, en baissant la mensualité ou en raccourcissant la durée.",
       "pageTitle": "Simulateur de Remboursement Anticipé de Prêt Immobilier — WonderMoney",
       "pageDescription": "Simulateur gratuit de remboursement anticipé pour prêts immobiliers et crédits à taux fixe. Comparez une mensualité plus basse et une durée plus courte : intérêts économisés, indemnités et économie nette. Sans inscription.",
@@ -1145,6 +1153,7 @@
     },
     "savingsGoal": {
       "title": "Simulateur d'épargne",
+      "shortName": "Objectif d'épargne",
       "description": "Calculez combien épargner par mois pour un objectif, en combien de temps vous l'atteindrez ou combien vous aurez mis de côté.",
       "pageTitle": "Simulateur d'épargne : combien épargner par mois — WonderMoney",
       "pageDescription": "Simulateur d'épargne gratuit. Découvrez combien épargner chaque mois pour atteindre un objectif, en combien de temps vous y arriverez ou ce que deviendra votre épargne, avec les intérêts et un plan année par année. Sans inscription.",
@@ -1275,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Combien puis-je emprunter ?",
+      "shortName": "Capacité d'emprunt",
       "description": "Voyez le prix de logement le plus élevé que vos revenus et votre épargne permettent, lequel des deux vous freine et ce qui le ferait monter.",
       "pageTitle": "Combien puis-je emprunter ? Calculateur de capacité d'emprunt — WonderMoney",
       "pageDescription": "Calculateur gratuit de capacité d'emprunt. Saisissez vos revenus nets, vos mensualités actuelles et votre épargne pour voir le prêt et le prix de logement à votre portée, et la limite qui vous freine. Sans inscription.",
@@ -1433,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculateur de dépôt à terme",
+      "shortName": "Dépôt à terme",
       "description": "Calculez ce que rapporte un dépôt à terme avant et après impôt, avec des intérêts versés à l'échéance ou en cours de route.",
       "pageTitle": "Calculateur d'intérêts de dépôt à terme, bruts et nets — WonderMoney",
       "pageDescription": "Calculateur de dépôt à terme gratuit. Saisissez le montant, le taux brut, la durée et l'impôt prélevé pour voir les intérêts bruts et nets, le solde à l'échéance, le rendement net annuel et chaque versement d'intérêts. Sans inscription.",
@@ -1550,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculatrice acheter ou louer",
+      "shortName": "Acheter ou louer",
       "description": "Comparez le patrimoine net d'un achat immobilier à crédit avec celui d'une location où vous placez la différence, année après année.",
       "pageTitle": "Acheter ou louer : calculatrice année par année — WonderMoney",
       "pageDescription": "Calculatrice gratuite pour choisir entre acheter ou louer. Saisissez le prix, l'apport, le prêt, le loyer et les hypothèses de croissance pour voir quelle option vous laisse le plus et l'année où l'achat passe devant. Sans inscription.",

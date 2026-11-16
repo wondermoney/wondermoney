@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Funzionalità",
-    "resources": "Risorse",
     "about": "Chi siamo",
     "tools": "Strumenti",
+    "toolsMenu": {
+      "seeAll": "Vedi tutti gli strumenti"
+    },
     "learn": "Impara",
     "glossary": "Glossario",
     "login": "Accedi",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Privacy",
         "description": "Accesso bancario solo in lettura. I tuoi dati non vengono mai venduti."
-      },
-      "tools": {
-        "name": "Strumenti",
-        "description": "Calcolatori finanziari gratuiti: interesse composto, patrimonio netto e altro"
       },
       "learn": {
         "name": "Impara",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "Calcolatore FIRE",
+      "shortName": "Indipendenza finanziaria (FIRE)",
       "description": "Calcola quanto ti serve avere investito per viverne e quanto tempo ti serve per arrivarci.",
       "annualSpending": "Spesa annua in pensione",
       "annualSpendingHelp": "Quanto pensi di spendere all'anno quando smetterai di lavorare, in euro di oggi",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Calcolatore dell'interesse composto",
+      "shortName": "Interesse composto",
       "description": "Scopri quanto possono crescere un capitale iniziale e versamenti mensili, prima e dopo l'inflazione.",
       "initialInvestment": "Investimento iniziale",
       "monthlyContribution": "Versamento mensile",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Calcolatore del patrimonio netto",
+      "shortName": "Patrimonio netto",
       "description": "Calcola il tuo patrimonio netto totale sommando tutte le tue attività e sottraendo le passività.",
       "assets": "Attività",
       "liabilities": "Passività",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Calcolatore del tasso di risparmio",
+      "shortName": "Tasso di risparmio",
       "description": "Scopri quale percentuale del tuo reddito stai risparmiando ogni mese e come migliorarla.",
       "monthlyIncome": "Reddito mensile (al netto delle tasse)",
       "monthlyExpenses": "Spese mensili",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Calcolatore del rendimento degli investimenti",
+      "shortName": "Rendimento degli investimenti",
       "description": "Calcola il rendimento annualizzato di qualsiasi investimento dato un valore iniziale, un valore finale e un periodo di tempo.",
       "initialInvestment": "Investimento iniziale",
       "currentValue": "Valore attuale",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Calcolatore del fondo di emergenza",
+      "shortName": "Fondo di emergenza",
       "description": "Calcola l'obiettivo del tuo fondo di emergenza a partire dalle spese essenziali e scopri in che mese lo raggiungerai.",
       "pageTitle": "Calcolatore del fondo di emergenza: quanto risparmiare — WonderMoney",
       "pageDescription": "Calcolatore del fondo di emergenza gratuito. Scopri quanto tenere da parte per gli imprevisti, quanto ti manca da risparmiare e in che mese ci arrivi. Senza registrazione.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Calcolatore del rapporto rata/reddito",
+      "shortName": "Rapporto rata/reddito",
       "description": "Somma le rate mensili dei tuoi finanziamenti e scopri quale parte del reddito netto va ai debiti.",
       "pageTitle": "Calcolatore del rapporto rata/reddito — WonderMoney",
       "pageDescription": "Calcolatore gratuito del rapporto rata/reddito. Inserisci reddito netto e rate, vedi la percentuale con il calcolo spiegato e prova come cambia con un nuovo prestito o uno già estinto.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Calcolatore del budget familiare",
+      "shortName": "Budget familiare",
       "description": "Inserisci le entrate e le spese del mese per categoria e scopri quanto avanza, il tuo tasso di risparmio e dove va ogni euro.",
       "pageTitle": "Calcolatore del budget familiare — WonderMoney",
       "pageDescription": "Calcolatore del budget familiare gratuito. Inserisci entrate e spese mensili per categoria e vedi l'avanzo o il disavanzo, il tasso di risparmio, il peso di ogni categoria e un diagramma dei flussi. Senza registrazione.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Calcolatore del mutuo",
+      "shortName": "Mutuo",
       "description": "Calcola la rata mensile di un mutuo a tasso fisso, gli interessi che pagherai e come scende il debito anno dopo anno.",
       "pageTitle": "Calcolo rata mutuo con piano di ammortamento — WonderMoney",
       "pageDescription": "Calcolatore gratuito del mutuo a tasso fisso. Inserisci importo, durata, tasso e assicurazione mensile per vedere la rata, gli interessi, il totale pagato e il piano di ammortamento anno per anno. Senza registrazione.",
@@ -984,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Calcolatore di estinzione anticipata",
+      "shortName": "Estinzione anticipata",
       "description": "Scopri quanto risparmi con un rimborso anticipato parziale su un prestito a tasso fisso, che tu riduca la rata o la durata.",
       "pageTitle": "Calcolatore di Estinzione Anticipata del Mutuo e dei Prestiti — WonderMoney",
       "pageDescription": "Calcolatore gratuito di estinzione anticipata parziale per mutui e prestiti a tasso fisso. Confronta una rata più bassa con una durata più breve: interessi risparmiati, penale e risparmio netto. Senza registrazione.",
@@ -1145,6 +1153,7 @@
     },
     "savingsGoal": {
       "title": "Simulatore di risparmio",
+      "shortName": "Obiettivo di risparmio",
       "description": "Calcola quanto risparmiare al mese per un obiettivo, quanto tempo ti serve o quanto metterai da parte.",
       "pageTitle": "Simulatore di risparmio: quanto risparmiare al mese — WonderMoney",
       "pageDescription": "Simulatore di risparmio gratuito. Scopri quanto risparmiare ogni mese per raggiungere un obiettivo, quanto tempo ti serve o a quanto arriveranno i tuoi risparmi, con il rendimento e un piano anno per anno. Senza registrazione.",
@@ -1275,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Quanto mutuo posso chiedere?",
+      "shortName": "Quanto mutuo posso chiedere",
       "description": "Scopri il prezzo di casa più alto che reddito e risparmi ti permettono, quale dei due ti frena e cosa lo farebbe salire.",
       "pageTitle": "Quanto mutuo posso chiedere? Calcolatore della capacità di credito — WonderMoney",
       "pageDescription": "Calcolatore gratuito della capacità di credito. Inserisci reddito netto, rate che già paghi e risparmi, e scopri il mutuo e il prezzo di casa alla tua portata, e quale limite ti frena. Senza registrazione.",
@@ -1433,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calcolatore conto deposito",
+      "shortName": "Conto deposito",
       "description": "Calcola quanto rende un conto deposito vincolato prima e dopo le imposte, con interessi pagati alla scadenza o durante il vincolo.",
       "pageTitle": "Calcolatore interessi conto deposito vincolato, lordi e netti — WonderMoney",
       "pageDescription": "Calcolatore gratuito per conti deposito vincolati. Inserisci importo, tasso lordo, durata e ritenuta per vedere interessi lordi e netti, saldo alla scadenza, rendimento netto annuo e ogni pagamento di interessi. Senza registrazione.",
@@ -1550,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calcolatore comprare o affittare casa",
+      "shortName": "Comprare o affittare",
       "description": "Confronta il patrimonio netto di chi compra casa con un mutuo con quello di chi affitta e investe la differenza, anno per anno.",
       "pageTitle": "Comprare o affittare casa: calcolatore anno per anno — WonderMoney",
       "pageDescription": "Calcolatore gratuito per scegliere tra comprare o affittare. Inserisci prezzo, anticipo, mutuo, affitto e ipotesi di crescita per vedere quale strada ti lascia di più e in che anno comprare passa in vantaggio. Senza registrazione.",

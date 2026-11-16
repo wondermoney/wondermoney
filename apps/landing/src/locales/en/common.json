@@ -358,9 +358,11 @@
   },
   "header": {
     "features": "Features",
-    "resources": "Resources",
     "about": "About",
     "tools": "Tools",
+    "toolsMenu": {
+      "seeAll": "See all tools"
+    },
     "learn": "Learn",
     "glossary": "Glossary",
     "login": "Login",
@@ -391,10 +393,6 @@
       "privacy": {
         "name": "Privacy",
         "description": "Bank connections use read-only Open Banking through Enable Banking. WonderMoney cannot initiate transfers."
-      },
-      "tools": {
-        "name": "Tools",
-        "description": "Free financial calculators: compound interest, net worth, and more"
       },
       "learn": {
         "name": "Learn",
@@ -446,6 +444,7 @@
     },
     "fire": {
       "title": "FIRE Calculator",
+      "shortName": "Financial independence (FIRE)",
       "description": "Work out how much you need invested to live off it, and how long your savings take to get there.",
       "annualSpending": "Annual spending in retirement",
       "annualSpendingHelp": "What you expect to spend a year once you stop working, in today's money",
@@ -496,6 +495,7 @@
     },
     "compoundInterest": {
       "title": "Compound Interest Calculator",
+      "shortName": "Compound interest",
       "description": "See how an initial amount and monthly contributions grow, before and after inflation.",
       "initialInvestment": "Initial investment",
       "monthlyContribution": "Monthly contribution",
@@ -585,6 +585,7 @@
     },
     "netWorth": {
       "title": "Net Worth Calculator",
+      "shortName": "Net worth",
       "description": "Calculate your total net worth by adding up all your assets and subtracting liabilities.",
       "assets": "Assets",
       "liabilities": "Liabilities",
@@ -608,6 +609,7 @@
     },
     "savingsRate": {
       "title": "Savings Rate Calculator",
+      "shortName": "Savings rate",
       "description": "Find out what percentage of your income you are saving each month and how to improve it.",
       "monthlyIncome": "Monthly income (after tax)",
       "monthlyExpenses": "Monthly expenses",
@@ -632,6 +634,7 @@
     },
     "investmentReturn": {
       "title": "Investment Return Calculator",
+      "shortName": "Investment return",
       "description": "See the annualized return of any investment given a start value, end value, and time period.",
       "initialInvestment": "Initial investment",
       "currentValue": "Current value",
@@ -647,6 +650,7 @@
     },
     "emergencyFund": {
       "title": "Emergency Fund Calculator",
+      "shortName": "Emergency fund",
       "description": "Find your emergency fund target from your essential expenses and see the month you will reach it.",
       "pageTitle": "Emergency Fund Calculator: How Much to Save — WonderMoney",
       "pageDescription": "Free emergency fund calculator. See how much cash to keep for the unexpected, how much you still need to save and the month you get there. No sign-up.",
@@ -703,6 +707,7 @@
     },
     "debtToIncome": {
       "title": "Debt-to-income ratio calculator",
+      "shortName": "Debt-to-income ratio",
       "description": "Add up your monthly loan payments and see what share of your take-home pay goes to debt.",
       "pageTitle": "Debt-to-income ratio calculator — WonderMoney",
       "pageDescription": "Free debt-to-income calculator. Enter your net monthly income and loan payments, see your ratio with the arithmetic, and test how a new or paid-off loan changes it.",
@@ -779,6 +784,7 @@
     },
     "householdBudget": {
       "title": "Household budget calculator",
+      "shortName": "Household budget",
       "description": "List your monthly income and spending by category, and see your surplus, savings rate and where each euro goes.",
       "pageTitle": "Household budget calculator — WonderMoney",
       "pageDescription": "Free household budget calculator. Enter monthly income and expenses by category to see your surplus or deficit, savings rate, each category's share of income and a money flow diagram. No signup.",
@@ -876,6 +882,7 @@
     },
     "mortgage": {
       "title": "Mortgage Calculator",
+      "shortName": "Mortgage",
       "description": "Work out the monthly payment on a fixed-rate home loan, the interest it costs and how the balance falls each year.",
       "pageTitle": "Mortgage Calculator with Amortization Schedule — WonderMoney",
       "pageDescription": "Free fixed-rate mortgage calculator. Enter the amount, term, rate and monthly insurance to see your payment, total interest, total paid and a year-by-year schedule. No sign-up.",
@@ -984,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Early Repayment Calculator",
+      "shortName": "Early repayment",
       "description": "See what a lump-sum repayment saves on a fixed-rate loan, whether you lower the payment or shorten the term.",
       "pageTitle": "Early Repayment Calculator for Mortgages and Loans — WonderMoney",
       "pageDescription": "Free early repayment calculator for fixed-rate mortgages and loans. Compare a lower monthly payment with a shorter term: interest saved, the fee and your net saving. No sign-up.",
@@ -1145,6 +1153,7 @@
     },
     "savingsGoal": {
       "title": "Savings Goal Calculator",
+      "shortName": "Savings goal",
       "description": "Work out how much to save each month for a goal, how long the goal will take, or what your savings add up to.",
       "pageTitle": "Savings Goal Calculator: How Much to Save a Month — WonderMoney",
       "pageDescription": "Free savings goal calculator. See how much to save each month to reach a target, how long your goal will take or what your savings grow to, with the growth and a year-by-year schedule. No sign-up.",
@@ -1275,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Borrowing Capacity Calculator",
+      "shortName": "Borrowing capacity",
       "description": "See the highest home price your income and savings allow, which of the two holds you back, and what would raise it.",
       "pageTitle": "How Much Can I Borrow? Borrowing Capacity Calculator — WonderMoney",
       "pageDescription": "Free borrowing capacity calculator. Enter your net income, existing loan payments and savings to see the largest mortgage and home price within reach, and which limit holds you back. No sign-up.",
@@ -1433,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Term Deposit Calculator",
+      "shortName": "Term deposit",
       "description": "Work out what a fixed-term deposit earns before and after tax, with interest paid at maturity or along the way.",
       "pageTitle": "Term Deposit Interest Calculator, Gross and Net — WonderMoney",
       "pageDescription": "Free term deposit calculator. Enter the amount, gross rate, term and tax withheld to see gross and net interest, the balance at maturity, the net annual yield and every interest payment. No sign-up.",
@@ -1550,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Buy vs Rent Calculator",
+      "shortName": "Buy or rent",
       "description": "Compare the net worth of buying a home with a mortgage against renting and investing the difference, year by year.",
       "pageTitle": "Rent vs Buy Calculator: Compare Net Worth Year by Year — WonderMoney",
       "pageDescription": "Free rent vs buy calculator. Enter the price, down payment, mortgage, rent and growth assumptions to see which path leaves you with more, and the year buying pulls ahead. No sign-up.",
