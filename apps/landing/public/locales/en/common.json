@@ -2,6 +2,7 @@
   "global": {
     "mainCta": "Start free",
     "mainCtaMicrocopy": "Free and open source. Use it here or host your own.",
+    "demoCta": "Try the demo",
     "secondaryCta": "See how it works",
     "financialDisclaimer": "This calculator is for illustrative purposes only and does not constitute financial, investment, or tax advice. Figures shown are estimates — consult a qualified financial advisor before making financial decisions.",
     "ctaBanner": {

@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { DEMO_URL, useCtaUrl } from "@/hooks/useCtaUrl";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 export default function BottomCTA({ locale }: { locale: Lang }) {
@@ -31,21 +31,37 @@ function BottomCTAContent() {
             {t("bottomCta.subheadline")}
           </p>
         </div>
-        <div className="flex min-w-0 flex-col items-start gap-3 lg:col-span-4 lg:col-start-9 lg:items-end">
-          <Button asChild size="lg" className="px-6">
-            <a
-              href={ctaUrl}
-              onClick={() =>
-                pushGtmEvent({
-                  event: "cta_click",
-                  cta_position: "bottom_cta",
-                  page_type: getPageType(),
-                })
-              }
-            >
-              {t("global.mainCta")}
-            </a>
-          </Button>
+        <div className="flex min-w-0 flex-col items-start gap-3 lg:col-span-5 lg:col-start-8 lg:items-end">
+          <div className="flex flex-wrap gap-3 lg:justify-end">
+            <Button asChild size="lg" className="px-6">
+              <a
+                href={ctaUrl}
+                onClick={() =>
+                  pushGtmEvent({
+                    event: "cta_click",
+                    cta_position: "bottom_cta",
+                    page_type: getPageType(),
+                  })
+                }
+              >
+                {t("global.mainCta")}
+              </a>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="px-6">
+              <a
+                href={DEMO_URL}
+                onClick={() =>
+                  pushGtmEvent({
+                    event: "demo_cta_click",
+                    cta_position: "bottom_cta",
+                    page_type: getPageType(),
+                  })
+                }
+              >
+                {t("global.demoCta")}
+              </a>
+            </Button>
+          </div>
           <p className="text-sm text-muted-foreground">
             {t("bottomCta.microcopy")}
           </p>

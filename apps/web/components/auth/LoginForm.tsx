@@ -55,10 +55,15 @@ type SignInEmailResult = {
 };
 
 interface LoginFormProps {
+  /** Start the demo on arrival (`?demo=1`), when the server offers one. */
+  autoStartDemo?: boolean;
   nextParam?: string | null;
 }
 
-export default function LoginForm({ nextParam }: LoginFormProps = {}) {
+export default function LoginForm({
+  autoStartDemo = false,
+  nextParam,
+}: LoginFormProps = {}) {
   const t = useTranslations();
   // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
@@ -77,6 +82,8 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
   );
   // The shared read-only demo account, only on a server that has said it offers one.
   const demoSignIn = useConfirmedFeature((features) => features.demo === true);
+  // The server has answered and has no demo: a `?demo=1` visitor is told so, not left waiting.
+  const demoOff = useConfirmedFeature((features) => features.demo !== true);
   const [isNavigating, setIsNavigating] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -360,12 +367,20 @@ export default function LoginForm({ nextParam }: LoginFormProps = {}) {
         </div>
       )}
 
-      {demoSignIn && (
+      {demoSignIn ? (
         <DemoSignInButton
+          autoStart={autoStartDemo}
           disabled={isLoading}
           locale={locale}
           nextParam={nextParam}
         />
+      ) : (
+        autoStartDemo &&
+        demoOff && (
+          <p role="alert" className="text-destructive-text mt-10 text-sm">
+            {t("demo.sign-in-unavailable")}
+          </p>
+        )
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { completeAuthAndRedirect } from "@/lib/auth/complete-auth";
 import {
@@ -20,6 +20,11 @@ const FAILURE_MESSAGE = {
 } as const satisfies Record<DemoSignInFailure, string>;
 
 interface DemoSignInButtonProps {
+  /**
+   * Start the demo as soon as the button appears, as if pressed: the sign-in page's
+   * `?demo=1`, which the marketing site's "Try the demo" links to.
+   */
+  readonly autoStart?: boolean;
   /** Another sign-in on the page is running. */
   readonly disabled?: boolean;
   readonly locale: string;
@@ -33,6 +38,7 @@ interface DemoSignInButtonProps {
  * sign-in page renders it only when the server reports `features.demo`.
  */
 export function DemoSignInButton({
+  autoStart = false,
   disabled,
   locale,
   nextParam = null,
@@ -63,6 +69,17 @@ export function DemoSignInButton({
       setPending(false);
     }
   };
+
+  // At most once per page: a re-render, or strict mode's second effect pass, must not
+  // open a second demo session (each one also spends the demo's rate limit). A failure
+  // leaves the button, so the visitor retries by pressing it.
+  const autoStarted = useRef(false);
+  const startOnArrival = useEffectEvent(() => void signIn());
+  useEffect(() => {
+    if (!autoStart || autoStarted.current) return;
+    autoStarted.current = true;
+    startOnArrival();
+  }, [autoStart]);
 
   return (
     <div className="border-border mt-10 border-t pt-6">

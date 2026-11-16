@@ -4,7 +4,7 @@ import HeroMosaic from "./previews/HeroMosaic";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { DEMO_URL, useCtaUrl } from "@/hooks/useCtaUrl";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 export default function Hero({ locale }: { locale: Lang }) {
@@ -33,20 +33,36 @@ function HeroContent() {
             {t("homepage.hero.newSubheadline")}
           </p>
           <div className="mt-9 flex flex-col items-start gap-3">
-            <Button asChild size="lg" className="px-6">
-              <a
-                href={ctaUrl}
-                onClick={() =>
-                  pushGtmEvent({
-                    event: "cta_click",
-                    cta_position: "homepage_hero",
-                    page_type: getPageType(),
-                  })
-                }
-              >
-                {t("homepage.hero.newCta")}
-              </a>
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild size="lg" className="px-6">
+                <a
+                  href={ctaUrl}
+                  onClick={() =>
+                    pushGtmEvent({
+                      event: "cta_click",
+                      cta_position: "homepage_hero",
+                      page_type: getPageType(),
+                    })
+                  }
+                >
+                  {t("homepage.hero.newCta")}
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="secondary" className="px-6">
+                <a
+                  href={DEMO_URL}
+                  onClick={() =>
+                    pushGtmEvent({
+                      event: "demo_cta_click",
+                      cta_position: "homepage_hero",
+                      page_type: getPageType(),
+                    })
+                  }
+                >
+                  {t("global.demoCta")}
+                </a>
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               {t("global.mainCtaMicrocopy")}
             </p>

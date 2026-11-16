@@ -2,6 +2,7 @@
   "global": {
     "mainCta": "Empieza gratis",
     "mainCtaMicrocopy": "Gratis y de código abierto. Úsalo aquí o en tu propio servidor.",
+    "demoCta": "Prueba la demo",
     "secondaryCta": "Ver cómo funciona",
     "financialDisclaimer": "Esta calculadora tiene fines meramente ilustrativos y no constituye asesoramiento financiero, de inversión o fiscal. Las cifras mostradas son estimaciones — consulta a un asesor financiero cualificado antes de tomar decisiones financieras.",
     "ctaBanner": {
