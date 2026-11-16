@@ -2,15 +2,12 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import { Link } from "@/components/ui/Link";
 import type { AmountsCompleteness } from "@/lib/api/completeness";
-import { exchangeRateSettingsHref } from "@/lib/fx/fx-status";
 import { cn } from "@/lib/utils";
 
 /**
  * Says that a total leaves rows out because their currency has no exchange
- * rate yet, so a partial total never reads as a whole one, and links to
- * where a rate can be added when it knows which currency lacks one. Renders
+ * rate yet, so a partial total never reads as a whole one, with the automatic-update context. Renders
  * nothing when the total is complete or the API sent no completeness.
  */
 export function UnconvertedAmountsNotice({
@@ -45,12 +42,7 @@ export function UnconvertedAmountsNotice({
       {currencies.length > 0 ? (
         <>
           {" "}
-          <Link
-            href={exchangeRateSettingsHref({ from: currencies[0] })}
-            className="text-foreground underline underline-offset-4"
-          >
-            {tFx("add-rate")}
-          </Link>
+          <span>{tFx("automatic-rates")}</span>
         </>
       ) : null}
     </p>

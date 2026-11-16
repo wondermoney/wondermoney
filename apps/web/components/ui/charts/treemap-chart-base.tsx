@@ -15,6 +15,8 @@ export interface TreemapTileDatum {
   ariaLabel: string;
   /** A second line inside the tile, e.g. the change from normal. */
   detail?: string;
+  /** Optional decorative category mark, alongside the visible name. */
+  icon?: React.ReactNode;
   /** A dashed outline marks a tile with no baseline, without relying on colour. */
   dashed?: boolean;
   fill: string;
@@ -69,7 +71,12 @@ export function TreemapChartBase<T extends TreemapTileDatum>({
         tile.detail !== undefined &&
         width >= MIN_LABEL_WIDTH &&
         height >= MIN_DETAIL_HEIGHT;
-      const maxCharacters = Math.max(1, Math.floor((width - 16) / CHAR_WIDTH));
+      const showIcon = Boolean(tile.icon) && showName && width >= 100;
+      const labelInset = showIcon ? 30 : 8;
+      const maxCharacters = Math.max(
+        1,
+        Math.floor((width - labelInset - 8) / CHAR_WIDTH),
+      );
 
       return (
         <g
@@ -121,10 +128,22 @@ export function TreemapChartBase<T extends TreemapTileDatum>({
               y={y + 1}
             />
           ) : null}
+          {showIcon ? (
+            <g
+              aria-hidden="true"
+              className={tile.textClassName}
+              transform={`translate(${x + 8}, ${y + 5})`}
+            >
+              {tile.icon}
+            </g>
+          ) : null}
           {showName ? (
             <text
-              className={cn("fill-current text-xs font-medium", tile.textClassName)}
-              x={x + 8}
+              className={cn(
+                "fill-current text-xs font-medium",
+                tile.textClassName,
+              )}
+              x={x + labelInset}
               y={y + 17}
             >
               {truncate(tile.name, maxCharacters)}
@@ -132,7 +151,10 @@ export function TreemapChartBase<T extends TreemapTileDatum>({
           ) : null}
           {showDetail ? (
             <text
-              className={cn("fill-current font-mono text-xs", tile.textClassName)}
+              className={cn(
+                "fill-current font-mono text-xs",
+                tile.textClassName,
+              )}
               x={x + 8}
               y={y + 33}
             >

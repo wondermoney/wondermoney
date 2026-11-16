@@ -2889,7 +2889,8 @@
     "incomplete-label": "No se pudieron convertir todos los importes",
     "total-leaves-out": "Este total deja fuera {count, plural, one {# cuenta, préstamo o cartera} other {# cuentas, préstamos o carteras}} que no se pudieron valorar en {currency}.",
     "missing-rates": "Aún no hay tipo de cambio para {currencies}.",
-    "add-rate": "Añadir un tipo de cambio"
+    "add-rate": "Añadir un tipo de cambio",
+    "automatic-rates": "Los tipos de cambio se actualizan automáticamente los días laborables. Algunas monedas o fechas pueden no estar cubiertas."
   },
   "bank-sync": {
     "errors": {

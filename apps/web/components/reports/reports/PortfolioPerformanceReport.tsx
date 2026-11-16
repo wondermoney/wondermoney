@@ -83,8 +83,8 @@ function ChangeCell({
     );
   }
   return (
-    <div className="flex flex-col items-end gap-0.5">
-      <span className="font-mono whitespace-nowrap tabular-nums">
+    <div className="flex flex-col items-start gap-0.5 sm:items-end">
+      <span className="font-mono text-xl font-semibold whitespace-nowrap tabular-nums sm:text-sm sm:font-normal">
         {change > 0 ? "+" : ""}
         <ReportAmount value={change} currencyKey={currencyKey} />
       </span>
@@ -121,7 +121,7 @@ function ReturnCell({
   }
   const Icon = value === 0 ? Minus : value > 0 ? ChevronUp : ChevronDown;
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className="flex flex-col items-start gap-0.5 sm:items-end">
       <span
         className={cn(
           "inline-flex items-center gap-1 font-mono whitespace-nowrap tabular-nums",
@@ -234,7 +234,10 @@ export function PortfolioPerformanceReport() {
       data-testid="portfolio-performance-report"
     >
       <div className="overflow-x-auto">
-        <SimpleTable mobileCards>
+        <SimpleTable
+          mobileCards
+          className="max-sm:[&_tbody_td:first-child]:text-base max-sm:[&_tbody_td:first-child]:font-semibold max-sm:[&_tbody_tr]:gap-y-4 max-sm:[&_tbody_tr]:border-b max-sm:[&_tbody_tr]:py-5"
+        >
           <TableHeader>
             <TableRow>
               <TableHead>{t("portfolio")}</TableHead>
@@ -285,7 +288,7 @@ export function PortfolioPerformanceReport() {
                   />
                 </TableCell>
                 <TableCell
-                  className="text-right"
+                  className="text-right max-sm:col-span-1"
                   mobileLabel={t("change")}
                   mobilePriority
                 >
@@ -307,8 +310,9 @@ export function PortfolioPerformanceReport() {
                   />
                 </TableCell>
                 <TableCell
-                  className="text-right font-mono"
+                  className="text-right font-mono max-sm:col-span-1 max-sm:text-xl max-sm:font-semibold"
                   mobileLabel={t("endValue")}
+                  mobilePriority
                 >
                   <OptionalAmount
                     value={row.endValue}
@@ -361,7 +365,7 @@ export function PortfolioPerformanceReport() {
                   />
                 </TableCell>
                 <TableCell
-                  className="text-right"
+                  className="text-right max-sm:col-span-1"
                   mobileLabel={t("change")}
                   mobilePriority
                 >
@@ -383,8 +387,9 @@ export function PortfolioPerformanceReport() {
                   />
                 </TableCell>
                 <TableCell
-                  className="text-right font-mono"
+                  className="text-right font-mono max-sm:col-span-1 max-sm:text-xl max-sm:font-semibold"
                   mobileLabel={t("endValue")}
+                  mobilePriority
                 >
                   <OptionalAmount
                     value={totals.endValue}

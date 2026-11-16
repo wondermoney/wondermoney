@@ -5,7 +5,12 @@ import { useReducedMotion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
-import { formatMonthLabel, monthKeyDateRange, monthKeyOf, MonthPicker } from "@/components/reports/filters/MonthPicker";
+import {
+  formatMonthLabel,
+  monthKeyDateRange,
+  monthKeyOf,
+  MonthPicker,
+} from "@/components/reports/filters/MonthPicker";
 import { useReportFilters } from "@/components/reports/filters/useReportFilters";
 import {
   ReportAmount,
@@ -15,8 +20,12 @@ import {
   ReportLoadingSkeleton,
 } from "@/components/reports/primitives";
 import { useReportsCurrency } from "@/components/reports/ReportsCurrencyContext";
+import CategoryIcon, { categoryIconStyle } from "@/components/ui/CategoryIcon";
 import type { ChartConfig } from "@/components/ui/chart";
-import { TreemapChartBase, type TreemapTileDatum } from "@/components/ui/charts";
+import {
+  TreemapChartBase,
+  type TreemapTileDatum,
+} from "@/components/ui/charts";
 import { Link } from "@/components/ui/Link";
 import {
   SimpleTable,
@@ -43,10 +52,7 @@ import {
   spendingVsNormalTone,
 } from "@/lib/reports/spending-vs-normal";
 import { cn } from "@/lib/utils";
-import {
-  getAllCategories,
-  getCategoryTranslationKey,
-} from "@/lib/utils/categories";
+import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { useFormatCurrencyForScreenReader } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
@@ -87,10 +93,9 @@ export function SpendingVsNormalReport() {
   const categoryByKey = useMemo(
     () =>
       new Map(
-        getAllCategories(categoriesData?.categories ?? []).map((category) => [
-          category.key.toString(),
-          category,
-        ]),
+        (categoriesData?.categories ?? [])
+          .flatMap((category) => [category, ...(category.childCategory ?? [])])
+          .map((category) => [category.categoryKey.toString(), category]),
       ),
     [categoriesData],
   );
@@ -191,6 +196,14 @@ export function SpendingVsNormalReport() {
           )}. ${t("change")} ${changeLabel(row)}`,
           categoryKey: row.categoryKey,
           dashed: tone === "none",
+          icon: (
+            <CategoryIcon
+              icon={categoryByKey.get(row.categoryKey)?.icon ?? "folder"}
+              width="16px"
+              height="16px"
+              className="text-current"
+            />
+          ),
           detail: changeText(row) ?? "—",
           fill: spendingVsNormalFill(tone),
           name,
@@ -199,6 +212,7 @@ export function SpendingVsNormalReport() {
         };
       }),
     [
+      categoryByKey,
       changeLabel,
       changeText,
       currencyKey,
@@ -322,7 +336,23 @@ export function SpendingVsNormalReport() {
                           })}
                         </span>
                       ) : null}
-                      {name}
+                      <span className="inline-flex items-center gap-2">
+                        <span aria-hidden="true">
+                          <CategoryIcon
+                            icon={
+                              categoryByKey.get(row.categoryKey)?.icon ??
+                              "folder"
+                            }
+                            width="16px"
+                            height="16px"
+                            className="shrink-0"
+                            style={categoryIconStyle(
+                              categoryByKey.get(row.categoryKey)?.bgColor,
+                            )}
+                          />
+                        </span>
+                        {name}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {href ? (

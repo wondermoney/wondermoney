@@ -2889,7 +2889,8 @@
     "incomplete-label": "Not every amount could be converted",
     "total-leaves-out": "This total leaves out {count, plural, one {# account, loan or portfolio} other {# accounts, loans or portfolios}} that could not be valued in {currency}.",
     "missing-rates": "No exchange rate yet for {currencies}.",
-    "add-rate": "Add an exchange rate"
+    "add-rate": "Add an exchange rate",
+    "automatic-rates": "Exchange rates update automatically on working days. Some currencies or dates may not be covered."
   },
   "bank-sync": {
     "errors": {

@@ -2889,7 +2889,8 @@
     "incomplete-label": "Nem todos os valores puderam ser convertidos",
     "total-leaves-out": "Este total deixa de fora {count, plural, one {# conta, empréstimo ou portefólio} other {# contas, empréstimos ou portefólios}} que não foi possível avaliar em {currency}.",
     "missing-rates": "Ainda não há taxa de câmbio para {currencies}.",
-    "add-rate": "Adiciona uma taxa de câmbio"
+    "add-rate": "Adiciona uma taxa de câmbio",
+    "automatic-rates": "As taxas de câmbio são atualizadas automaticamente nos dias úteis. Algumas moedas ou datas podem não estar abrangidas."
   },
   "bank-sync": {
     "errors": {

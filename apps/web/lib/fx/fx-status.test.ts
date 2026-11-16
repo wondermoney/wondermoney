@@ -2,12 +2,7 @@ import assert from "node:assert/strict";
 
 import { test } from "vitest";
 
-import {
-  accountFxView,
-  exchangeRateSettingsHref,
-  formatRateDate,
-  transactionFxView,
-} from "./fx-status";
+import { accountFxView, formatRateDate, transactionFxView } from "./fx-status";
 
 const row = (fields: {
   fxStatus?: "exact" | "missing" | "provisional" | null;
@@ -76,14 +71,6 @@ test("an account balance converts from the account's currency to its owner's", (
       accountOwnerAppuserKey: { currencyKey: { code: "EUR" } },
     }),
     { status: "exact" },
-  );
-});
-
-test("the exchange rate link opens the Currencies settings, prefilled", () => {
-  assert.equal(exchangeRateSettingsHref(), "/settings?tab=currencies");
-  assert.equal(
-    exchangeRateSettingsHref({ from: "JPY", date: "2026-10-01" }),
-    "/settings?tab=currencies&from=JPY&date=2026-10-01",
   );
 });
 
