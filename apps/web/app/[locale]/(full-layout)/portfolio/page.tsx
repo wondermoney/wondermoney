@@ -184,18 +184,18 @@ const Portfolio = () => {
               {t("help-hint-portfolios")}
             </HelpHint>
           </div>
-          <p className="text-muted-foreground mt-0.5 text-sm">
+          <p className="text-muted-foreground mt-0.5 hidden text-sm sm:block">
             {t("portfolios-overview-description")}
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <MemberFilterControl className="w-40 sm:w-44" />
           <TimeframeSelect
             timeframes={TIMEFRAME_OPTIONS}
             timeframe={period}
             setTimeframe={(value) => setPeriod(value as Period)}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <PortfolioTransactionAddModal
               isOpen={isAddTransactionModalOpen}
               setOpen={setIsAddTransactionModalOpen}
@@ -204,13 +204,22 @@ const Portfolio = () => {
                 setIsImportTransactionModalOpen,
               )}
               trigger={
-                <Button>
+                <Button className="flex-1 sm:flex-none">
                   <Plus className="size-4" />
                   {t("add-transaction")}
                 </Button>
               }
             />
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => openPortfolioCreateModal()}
+            >
+              <Plus className="size-4" />
+              {t("create-portfolio")}
+            </Button>
             <PortfolioCreateDialog
+              showTrigger={false}
               isOpen={isCreatePortfolioModalOpen}
               setOpen={(open) => {
                 if (!open) {

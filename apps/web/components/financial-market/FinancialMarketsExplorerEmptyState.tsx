@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
+import { ExplorerCompanyCards } from "./ExplorerCompanyCards";
+
 interface FinancialMarketsExplorerEmptyStateProps {
   children?: ReactNode;
 }
@@ -29,6 +31,7 @@ export default function FinancialMarketsExplorerEmptyState({
         </p>
         {children ? <div className="pt-2">{children}</div> : null}
       </div>
+      <ExplorerCompanyCards />
     </section>
   );
 }

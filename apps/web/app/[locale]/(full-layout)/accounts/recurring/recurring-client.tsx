@@ -1,6 +1,5 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -18,7 +17,6 @@ import { RecurringReviewQueue } from "@/components/recurring/RecurringReviewQueu
 import type { RecurringStatusBadgeLabels } from "@/components/recurring/RecurringStatusBadge";
 import { RecurringSummaryCards } from "@/components/recurring/RecurringSummaryCards";
 import { RecurringUpcomingTimeline } from "@/components/recurring/RecurringUpcomingTimeline";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heading, Text } from "@/components/ui/Typography";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
@@ -27,7 +25,6 @@ import type { GetRecurringItemsResponse } from "@/lib/api/recurring/useRecurring
 import useRecurringItems from "@/lib/api/recurring/useRecurringItems";
 import {
   useConfirmRecurring,
-  useDetectRecurring,
   useDismissRecurring,
   useUpdateRecurring,
 } from "@/lib/api/recurring/useRecurringMutations";
@@ -39,7 +36,10 @@ import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { normalizeFinancialLocale } from "@/lib/utils/formatCurrency";
 import { calendarDays, monthKey } from "@/lib/utils/recurring-calendar";
 import { localCalendarDay } from "@/lib/utils/transaction-date";
-import { useFormatCurrency, useFormatCurrencyForScreenReader } from "@/lib/utils/useFormatCurrency";
+import {
+  useFormatCurrency,
+  useFormatCurrencyForScreenReader,
+} from "@/lib/utils/useFormatCurrency";
 
 const isCurrencyCode = (value: unknown): value is string =>
   typeof value === "string" && /^[A-Z]{3}$/.test(value);
@@ -149,7 +149,6 @@ export default function RecurringClient({
   );
 
   const confirmRecurringMutation = useConfirmRecurring();
-  const detectRecurringMutation = useDetectRecurring();
   const dismissRecurringMutation = useDismissRecurring();
   const updateRecurringMutation = useUpdateRecurring();
 
@@ -315,16 +314,6 @@ export default function RecurringClient({
     ],
   );
 
-  const handleScan = useCallback(async () => {
-    try {
-      await detectRecurringMutation.mutateAsync();
-      toast.success(t("detectSuccess"), { position: "bottom-center" });
-    } catch (error) {
-      if (!(error instanceof Error)) throw error;
-      toast.error(t("detectError"), { position: "bottom-center" });
-    }
-  }, [detectRecurringMutation, t]);
-
   const scrollToReview = useCallback(() => {
     const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
       .matches
@@ -382,27 +371,6 @@ export default function RecurringClient({
               </p>
             ) : null}
           </div>
-          {!noAccounts && recurringItems.length > 0 ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11 shrink-0"
-              onClick={handleScan}
-              disabled={detectRecurringMutation.isPending}
-            >
-              <RefreshCw
-                className={
-                  detectRecurringMutation.isPending
-                    ? "size-4 animate-spin motion-reduce:animate-none"
-                    : "size-4"
-                }
-                aria-hidden="true"
-              />
-              {detectRecurringMutation.isPending
-                ? t("detecting")
-                : t("scanAgain")}
-            </Button>
-          ) : null}
         </div>
       </header>
 
@@ -415,8 +383,6 @@ export default function RecurringClient({
         <RecurringDetectionEmptyState
           currencyCode={accounts[0]?.currencyKey.code ?? "EUR"}
           hasScanned={Boolean(recurringSummary?.lastDetectedAt)}
-          isScanning={detectRecurringMutation.isPending}
-          onScan={handleScan}
           referenceTime={currentTime}
         />
       ) : (

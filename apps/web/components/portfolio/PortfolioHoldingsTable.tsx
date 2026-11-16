@@ -312,7 +312,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
     );
 
     return (
-      <div>
+      <div className="px-3 sm:px-4">
         {readinessNote ? (
           <div className="border-border border-b px-5 py-3">
             <p className="text-muted-foreground text-xs leading-5">

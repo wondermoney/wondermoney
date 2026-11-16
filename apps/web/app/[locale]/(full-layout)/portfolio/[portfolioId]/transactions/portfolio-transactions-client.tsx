@@ -1,6 +1,7 @@
 "use client";
 
 import { endOfDay, startOfDay, subDays } from "date-fns";
+import { Download, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import PortfolioTransactionAddModal from "@/components/portfolio/PortfolioTransa
 import PortfolioTransactionImportModal from "@/components/portfolio/PortfolioTransactionImportModal";
 import PortfolioTransactionsEmptyState from "@/components/portfolio/PortfolioTransactionsEmptyState";
 import PortfolioTransactionsTable from "@/components/portfolio/PortfolioTransactionsTable";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import type { GetPortfolioTransactionsResponse } from "@/lib/api/portfolio/usePortfolioTransactions";
 import usePortfolioTransactions from "@/lib/api/portfolio/usePortfolioTransactions";
@@ -140,7 +142,7 @@ export default function PortfolioTransactionsClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-center justify-between gap-2 sm:items-start">
         <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
           {t("transactions")}
         </h1>
@@ -154,6 +156,16 @@ export default function PortfolioTransactionsClient({
                 openAddManualTransactionModal();
               }
             }}
+            trigger={
+              <Button
+                aria-label={t("add-transaction")}
+                className="min-h-11 gap-1 px-3 sm:gap-2 sm:px-4"
+              >
+                <Plus className="size-4" />
+                <span className="sm:hidden">{t("add")}</span>
+                <span className="hidden sm:inline">{t("add-transaction")}</span>
+              </Button>
+            }
             defaultPortfolioId={portfolioId}
             onImportTransactions={createPortfolioImportHandoff(
               setIsAddManualTransactionOpen,
@@ -161,6 +173,19 @@ export default function PortfolioTransactionsClient({
             )}
           />
           <PortfolioTransactionImportModal
+            trigger={
+              <Button
+                variant="outline"
+                aria-label={t("import-transactions")}
+                title={t("import-transactions")}
+                className="size-11 p-0 sm:h-10 sm:w-auto sm:px-4"
+              >
+                <Download className="size-4" />
+                <span className="hidden sm:inline">
+                  {t("import-transactions")}
+                </span>
+              </Button>
+            }
             defaultPortfolioId={portfolioId}
             isOpen={isImportTransactionModalOpen}
             setOpen={(open) => {
@@ -173,8 +198,8 @@ export default function PortfolioTransactionsClient({
           />
         </div>
       </div>
-      <section className="border-border bg-card rounded-lg border">
-        <div className="border-border border-b px-5 py-3">
+      <section className="min-w-0 space-y-3">
+        <div className="border-border hidden border-b px-3 py-3 sm:block">
           <h2 className="text-foreground text-sm font-medium">
             {t("all-transactions")}
           </h2>

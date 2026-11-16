@@ -2471,7 +2471,7 @@
     "detectError": "No se pudieron buscar pagos recurrentes.",
     "lastChecked": "Última comprobación {time}",
     "emptyTitle": "Todavía no se han detectado pagos recurrentes",
-    "emptyDescription": "Busca ahora en tus transacciones recientes. Las próximas sincronizaciones comprobarán automáticamente.",
+    "emptyDescription": "Los pagos recurrentes se detectan automáticamente al añadir, importar o sincronizar transacciones. Los nuevos resultados aparecerán aquí.",
     "emptyScannedDescription": "Revisamos tus transacciones recientes y no encontramos pagos recurrentes. Los nuevos resultados aparecerán aquí automáticamente.",
     "upcoming": "Próximos",
     "allRecurringPayments": "Todos los pagos recurrentes",
@@ -3235,5 +3235,7 @@
     "saveNote": "Tu presupuesto se guarda al continuar desde Ingresos. Los pasos anteriores solo se conservan mientras esta página siga abierta."
   },
   "summary-more-details": "Más detalles",
-  "summary-less-details": "Menos detalles"
+  "summary-less-details": "Menos detalles",
+  "activation-setup-hint": "Completar configuración",
+  "financial-markets-example-companies": "Empresas para explorar"
 }

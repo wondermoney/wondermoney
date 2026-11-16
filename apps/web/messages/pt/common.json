@@ -2471,7 +2471,7 @@
     "detectError": "Não foi possível procurar pagamentos recorrentes.",
     "lastChecked": "Última verificação {time}",
     "emptyTitle": "Ainda não foram detetados pagamentos recorrentes",
-    "emptyDescription": "Procura agora nas transações recentes. As próximas sincronizações verificarão automaticamente.",
+    "emptyDescription": "Os pagamentos recorrentes são detetados automaticamente quando adicionas, importas ou sincronizas transações. Os novos resultados aparecem aqui.",
     "emptyScannedDescription": "Verificámos as tuas transações recentes e não encontrámos pagamentos recorrentes. Novos resultados vão aparecer aqui automaticamente.",
     "upcoming": "Próximos",
     "allRecurringPayments": "Todos os pagamentos recorrentes",
@@ -3235,5 +3235,7 @@
     "saveNote": "O teu orçamento é guardado quando continuas após os rendimentos. Os passos anteriores ficam disponíveis apenas enquanto esta página estiver aberta."
   },
   "summary-more-details": "Mais detalhes",
-  "summary-less-details": "Menos detalhes"
+  "summary-less-details": "Menos detalhes",
+  "activation-setup-hint": "Concluir configuração",
+  "financial-markets-example-companies": "Empresas para explorar"
 }

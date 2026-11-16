@@ -25,6 +25,14 @@ import { ApplyRulesDialog } from "@/components/rules/ApplyRulesDialog";
 import { RuleEditorDialog } from "@/components/rules/RuleEditorDialog";
 import { TagPicker } from "@/components/tags/TagPicker";
 import { Amount } from "@/components/ui/Amount";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { amountToUnits, toSplitRequest } from "@/lib/account/transaction-split";
 import {
   buildTransferEdit,
@@ -50,6 +58,7 @@ import {
   zLocaleNumber,
 } from "@/lib/utils/number";
 import { invalidateSpendingTotals } from "@/lib/utils/queryInvalidation";
+import { useMediaQuery } from "@/lib/utils/useMediaQuery";
 
 import { Button } from "../ui/button";
 import {
@@ -102,6 +111,13 @@ export function AccountTransactionEditSheet({
   onOpenChange,
 }: Props) {
   const t = useTranslations();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const EditSheet = isDesktop ? Sheet : Drawer;
+  const EditContent = isDesktop ? SheetContent : DrawerContent;
+  const EditHeader = isDesktop ? SheetHeader : DrawerHeader;
+  const EditTitle = isDesktop ? SheetTitle : DrawerTitle;
+  const EditDescription = isDesktop ? SheetDescription : DrawerDescription;
+  const EditFooter = isDesktop ? SheetFooter : DrawerFooter;
   const notifyIfRateLimited = useRateLimitToast();
   const posthog = usePostHog();
 
@@ -297,18 +313,22 @@ export function AccountTransactionEditSheet({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>{t("edit-transaction")}</SheetTitle>
-          <SheetDescription>
-            {t("edit-transaction-description")}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+    <EditSheet open={isOpen} onOpenChange={onOpenChange}>
+      <EditContent
+        className={
+          isDesktop
+            ? "flex w-full flex-col sm:max-w-lg"
+            : "flex max-h-[92dvh] flex-col"
+        }
+      >
+        <EditHeader className="shrink-0 text-left">
+          <EditTitle>{t("edit-transaction")}</EditTitle>
+          <EditDescription>{t("edit-transaction-description")}</EditDescription>
+        </EditHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 md:px-0">
           <Form {...form}>
             <form
-              className="my-8 w-full space-y-6"
+              className="my-4 w-full space-y-5 md:my-8 md:space-y-6"
               onSubmit={handleSubmit(onSubmit)}
               id="edit-account-transaction-form"
             >
@@ -519,7 +539,7 @@ export function AccountTransactionEditSheet({
             <TransactionActivity transactionId={transaction.transactionKey} />
           </div>
         </div>
-        <SheetFooter className="border-border shrink-0 gap-2 border-t pt-4">
+        <EditFooter className="border-border shrink-0 flex-row gap-2 border-t pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-0 [&>button]:flex-1 md:[&>button]:flex-none">
           <Button
             type="button"
             variant="secondary"
@@ -536,8 +556,8 @@ export function AccountTransactionEditSheet({
           >
             {t("save")}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </EditFooter>
+      </EditContent>
+    </EditSheet>
   );
 }

@@ -2471,7 +2471,7 @@
     "detectError": "Could not scan recurring payments.",
     "lastChecked": "Last checked {time}",
     "emptyTitle": "No recurring payments detected yet",
-    "emptyDescription": "Scan your recent transactions now. Future account syncs will check automatically.",
+    "emptyDescription": "Recurring payments are detected automatically when transactions are added, imported or synced. New matches will appear here.",
     "emptyScannedDescription": "We checked your recent transactions and didn't find any recurring payments. New matches will appear here automatically.",
     "upcoming": "Upcoming",
     "allRecurringPayments": "All recurring payments",
@@ -3235,5 +3235,7 @@
     "saveNote": "Your budget is saved when you continue from Income. Earlier steps are kept only while this page stays open."
   },
   "summary-more-details": "More details",
-  "summary-less-details": "Fewer details"
+  "summary-less-details": "Fewer details",
+  "activation-setup-hint": "Finish setup",
+  "financial-markets-example-companies": "Companies to explore"
 }
