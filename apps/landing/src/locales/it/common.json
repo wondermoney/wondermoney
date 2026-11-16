@@ -2066,6 +2066,111 @@
         },
         "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
       }
+    },
+    "personalLoan": {
+      "title": "Calcolo prestito personale",
+      "shortName": "Prestito personale",
+      "description": "Calcola la rata, il costo totale e una stima del TAEG di un prestito personale, commissioni comprese, con il piano mese per mese.",
+      "pageTitle": "Calcolo prestito personale: rata, costo totale e TAEG — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di prestito personale. Inserisci importo, durata, tasso di interesse e commissioni e vedi la rata mensile, il costo totale del credito, una stima del TAEG e il piano di ammortamento mese per mese. Senza registrazione.",
+      "subtitle": "Due prestiti allo stesso tasso di interesse possono costare cifre molto diverse quando si aggiungono le commissioni. Inserisci l'offerta che hai, commissioni comprese, e guarda quanto costa al mese e in totale. Senza registrazione.",
+      "amount": "Importo del prestito",
+      "amountHelp": "Quanto ti presta il finanziatore, prima di togliere qualsiasi commissione.",
+      "termMonths": "Durata",
+      "termMonthsHelp": "Numero di rate mensili, da {{min}} a {{max}}.",
+      "months": "mesi",
+      "annualRate": "Tasso di interesse",
+      "annualRateHelp": "Il tasso annuo nominale fisso dell'offerta (TAN), non il TAEG: il TAEG è quello che calcola questo strumento.",
+      "upfrontFees": "Commissioni iniziali",
+      "upfrontFeesHelp": "Spese pagate una sola volta all'inizio del prestito, come le spese di istruttoria, e le eventuali imposte sul prestito. Lascia 0 se non ce ne sono.",
+      "monthlyFees": "Commissioni e assicurazione mensili",
+      "monthlyFeesHelp": "Addebitate con ogni rata, come le spese di incasso rata o il premio di un'assicurazione richiesta dal prestito. Lascia 0 se non ce ne sono.",
+      "result": {
+        "monthlyPayment": "Rata mensile",
+        "monthlyPaymentSplit": "{{loan}} per il prestito più {{fees}} di commissioni.",
+        "paymentsNote": "{{count}} rate mensili. Le successive restano entro un centesimo dalla prima; l'ultima, di {{last}}, estingue il debito residuo.",
+        "apr": "TAEG stimato, commissioni comprese",
+        "aprOver": "oltre {{max}}",
+        "aprNote": "Una stima del tasso annuo effettivo globale (TAEG), calcolata dai soldi che ricevi e da ogni rata che paghi. Il TAEG indicato da un finanziatore segue le regole del suo paese e può includere costi che questo strumento non conosce.",
+        "totalInterest": "Interessi totali",
+        "totalFees": "Commissioni totali",
+        "totalCostOfCredit": "Costo totale del credito",
+        "totalRepaid": "Totale che paghi, commissioni comprese",
+        "amountReceived": "Ricevi {{amount}} dopo aver tolto le commissioni iniziali."
+      },
+      "estimateNote": "Questa è una stima, non un'offerta di prestito né un preventivo. Il tasso, le commissioni e l'approvazione dipendono dal finanziatore e dalla tua situazione: confronta le cifre dell'offerta scritta di ogni finanziatore prima di firmare.",
+      "schedule": {
+        "title": "Piano mensile",
+        "description": "Come ogni rata si divide tra interessi, capitale e commissioni, e quanto devi ancora dopo averla pagata.",
+        "upfrontNote": "Le commissioni iniziali di {{fees}} si pagano all'inizio e non sono nella tabella.",
+        "show": "Mostra il piano mensile",
+        "hide": "Nascondi il piano mensile",
+        "month": "Mese",
+        "payment": "Rata",
+        "principal": "Capitale",
+        "interest": "Interessi",
+        "fees": "Commissioni",
+        "balance": "Debito residuo",
+        "total": "Totale"
+      },
+      "errors": {
+        "summary": "Il risultato compare quando ogni campo ha un valore valido.",
+        "amount": {
+          "required": "Inserisci l'importo che vuoi chiedere.",
+          "tooSmall": "Inserisci almeno {{min}}.",
+          "tooLarge": "Inserisci un importo fino a {{max}}."
+        },
+        "termMonths": {
+          "required": "Inserisci la durata in mesi.",
+          "tooSmall": "Inserisci una durata di almeno {{min}} mesi.",
+          "tooLarge": "Inserisci una durata fino a {{max}} mesi."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso non può essere negativo. Inserisci 0 per un prestito senza interessi.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Le commissioni non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci commissioni iniziali fino a {{max}}, metà dell'importo."
+        },
+        "monthlyFees": {
+          "negative": "Le commissioni non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci commissioni mensili fino a {{max}}."
+        }
+      },
+      "nextStepHeadline": "Segui questo prestito accanto al tuo budget",
+      "nextStepDescription": "Aggiungi il prestito a WonderMoney con tasso e durata, prevedi la rata nel tuo budget mensile e guarda il debito scendere accanto a quello che spendi davvero.",
+      "nextStepCta": "Inizia a seguirlo",
+      "guide": {
+        "whatTitle": "Quanto costa davvero un prestito personale",
+        "whatBody1": "Un prestito personale si rimborsa con rate mensili uguali per un numero fisso di mesi. Ogni rata copre gli interessi su quanto devi ancora e restituisce una parte del capitale, quindi le prime rate sono soprattutto interessi e le ultime soprattutto capitale.",
+        "whatBody2": "Il tasso di interesse è solo una parte del prezzo. I finanziatori aggiungono spesso una commissione all'inizio e un costo mensile, come le spese di incasso o un'assicurazione. Queste commissioni si sommano agli interessi e, su un prestito piccolo o breve, possono costare più degli interessi stessi.",
+        "whatBody3": "Prima di chiederlo, verifica che la rata ci stia: accanto alle rate che già paghi e dentro il budget con cui già vivi.",
+        "relatedDebtToIncome": "mostra quale parte del tuo reddito occuperebbero le tue rate, compresa questa.",
+        "relatedHouseholdBudget": "mostra dove vanno i tuoi soldi ogni mese, così vedi cosa dovrebbe sostituire la nuova rata.",
+        "aprTitle": "Tasso di interesse e TAEG non sono la stessa cosa",
+        "aprBody1": "Il tasso di interesse di un'offerta (il TAN) è un tasso annuo nominale: fissa gli interessi di ogni mese, un dodicesimo del tasso sul debito residuo. Lascia fuori le commissioni e, poiché gli interessi si pagano ogni mese, resta sotto il costo annuo anche in un prestito senza commissioni.",
+        "aprBody2": "Il TAEG riunisce tutto in un solo numero. È il tasso annuo al quale i soldi che ricevi davvero (l'importo meno le commissioni iniziali) eguagliano tutte le rate che paghi, commissioni comprese. Due offerte con lo stesso importo e la stessa durata si confrontano con il TAEG: quella più bassa costa meno.",
+        "aprBody3": "Ogni finanziatore calcola il TAEG secondo le regole del suo paese, che possono includere costi che questo strumento non chiede e contare i mesi in modo diverso. Il TAEG che vedi qui è una stima per confrontare offerte, non la cifra di un contratto.",
+        "exampleTitle": "Esempio pratico",
+        "exampleIntro": "Supponiamo che tu chieda {{amount}} in {{months}} mesi a un tasso nominale del {{rate}}, senza commissioni.",
+        "exampleNoFees": "La rata mensile è di {{payment}}. Nel corso della durata paghi {{interest}} di interessi e {{totalRepaid}} in totale. Anche senza commissioni il TAEG è del {{apr}}, un po' sopra il {{rate}}, perché gli interessi si pagano ogni mese.",
+        "exampleFees": "Ora aggiungi {{upfront}} di commissioni iniziali e {{monthlyFee}} al mese di commissioni. Ricevi {{received}} e ogni rata sale a {{paymentWithFees}}. Le commissioni aggiungono {{fees}}, quindi il costo del credito sale a {{cost}} e paghi {{totalRepaidFees}} in totale.",
+        "exampleApr": "Il tasso di interesse resta del {{rate}}, ma il TAEG sale al {{aprFees}}. È questo il numero da confrontare con un'altra offerta: un prestito con un tasso più alto e senza commissioni può costare meno.",
+        "exampleOutro": "Lo strumento qui sopra parte da questo prestito, senza le commissioni, così puoi inserire la tua offerta.",
+        "methodTitle": "Come fa i conti lo strumento",
+        "methodIntro": "La rata è la rata costante che rimborsa l'importo nella durata al tasso mensile, e il TAEG è il tasso che pareggia quello che ricevi e quello che paghi:",
+        "methodLegend": "M è la rata di capitale e interessi, P l'importo del prestito, r il tasso annuo nominale diviso per 12 e n il numero di mesi. Le commissioni mensili f si sommano a ogni rata.",
+        "methodApr": "Il TAEG è il tasso A che risolve la seconda riga: quello che ricevi all'inizio, l'importo P meno le commissioni iniziali F, è pari alla rata di ogni mese Mₖ più le commissioni f, scontata per (1 + A) elevato a k ÷ 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
+        "methodRounding": "Ogni cifra è calcolata in centesimi interi. Ogni rata viene ricalcolata dal debito residuo, così le rate restano entro un centesimo l'una dall'altra, l'ultima estingue il debito esattamente e il piano torna con i totali.",
+        "methodPrivacy": "Il calcolo avviene nel tuo browser. Niente di quello che inserisci viene inviato o salvato.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionFixedRate": "Il tasso è fisso per tutta la durata e ogni rata è pagata puntualmente.",
+        "assumptionFees": "Le commissioni iniziali si pagano, o si tolgono dall'importo, all'inizio del prestito; le commissioni mensili sono uguali ogni mese.",
+        "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
+        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
+      }
     }
   },
   "learn": {

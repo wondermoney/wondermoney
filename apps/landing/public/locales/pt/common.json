@@ -2066,6 +2066,111 @@
         },
         "contractOutro": "Os valores que contam são os do teu banco. Usa este simulador para te preparares antes de uma revisão e depois compara-o com os valores do banco."
       }
+    },
+    "personalLoan": {
+      "title": "Simulador de crédito pessoal",
+      "shortName": "Crédito pessoal",
+      "description": "Calcula a prestação, o custo total e uma estimativa da TAEG de um crédito pessoal, com comissões, e vê o plano mês a mês.",
+      "pageTitle": "Simulador de crédito pessoal: prestação, custo total e TAEG — WonderMoney",
+      "pageDescription": "Simulador grátis de crédito pessoal. Indica o montante, o prazo, a taxa de juro e as comissões e vê a prestação mensal, o custo total do crédito, uma estimativa da TAEG e o plano mês a mês. Sem registo.",
+      "subtitle": "Dois créditos com a mesma taxa de juro podem custar valores muito diferentes quando se somam as comissões. Indica a proposta que tens, com as comissões, e vê quanto custa por mês e no total. Sem registo.",
+      "amount": "Montante do crédito",
+      "amountHelp": "O valor que o banco te empresta, antes de descontar qualquer comissão.",
+      "termMonths": "Prazo",
+      "termMonthsHelp": "Número de prestações mensais, de {{min}} a {{max}}.",
+      "months": "meses",
+      "annualRate": "Taxa de juro",
+      "annualRateHelp": "A taxa anual nominal fixa da proposta (TAN), não a TAEG: a TAEG é o que este simulador calcula.",
+      "upfrontFees": "Comissões iniciais",
+      "upfrontFeesHelp": "Encargos pagos uma só vez, no início do crédito, como a comissão de abertura ou de processamento e os impostos sobre o crédito. Deixa 0 se não houver.",
+      "monthlyFees": "Comissões e seguros mensais",
+      "monthlyFeesHelp": "Cobrados com cada prestação, como uma comissão de processamento da prestação ou o prémio de um seguro que o crédito exija. Deixa 0 se não houver.",
+      "result": {
+        "monthlyPayment": "Prestação mensal",
+        "monthlyPaymentSplit": "{{loan}} do crédito mais {{fees}} de comissões.",
+        "paymentsNote": "{{count}} prestações mensais. As seguintes ficam a um cêntimo da primeira; a última, de {{last}}, liquida o capital em dívida.",
+        "apr": "TAEG estimada, com comissões",
+        "aprOver": "acima de {{max}}",
+        "aprNote": "Uma estimativa da taxa anual de encargos efetiva global (TAEG), calculada a partir do dinheiro que recebes e de cada prestação que pagas. A TAEG que um banco indica segue as regras do país onde opera e pode contar custos que este simulador não conhece.",
+        "totalInterest": "Total de juros",
+        "totalFees": "Total de comissões",
+        "totalCostOfCredit": "Custo total do crédito",
+        "totalRepaid": "Total que pagas, com comissões",
+        "amountReceived": "Recebes {{amount}} depois de descontadas as comissões iniciais."
+      },
+      "estimateNote": "Isto é uma estimativa, não uma proposta de crédito nem uma simulação de um banco. A taxa, as comissões e a aprovação dependem do banco e da tua situação: compara os valores da proposta escrita de cada banco antes de assinar.",
+      "schedule": {
+        "title": "Plano mensal",
+        "description": "Como cada prestação se divide entre juros, capital e comissões, e quanto ainda deves depois dela.",
+        "upfrontNote": "As comissões iniciais de {{fees}} pagam-se no início e não entram na tabela.",
+        "show": "Mostrar o plano mensal",
+        "hide": "Esconder o plano mensal",
+        "month": "Mês",
+        "payment": "Prestação",
+        "principal": "Capital",
+        "interest": "Juros",
+        "fees": "Comissões",
+        "balance": "Em dívida",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "O resultado aparece quando todos os campos tiverem um valor válido.",
+        "amount": {
+          "required": "Indica o montante que queres pedir.",
+          "tooSmall": "Indica pelo menos {{min}}.",
+          "tooLarge": "Indica um montante até {{max}}."
+        },
+        "termMonths": {
+          "required": "Indica o prazo em meses.",
+          "tooSmall": "Indica um prazo de pelo menos {{min}} meses.",
+          "tooLarge": "Indica um prazo até {{max}} meses."
+        },
+        "annualRate": {
+          "required": "Indica a taxa de juro.",
+          "negative": "A taxa não pode ser negativa. Indica 0 para um crédito sem juros.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "As comissões não podem ser negativas. Indica 0 se não houver.",
+          "tooLarge": "Indica comissões iniciais até {{max}}, metade do montante do crédito."
+        },
+        "monthlyFees": {
+          "negative": "As comissões não podem ser negativas. Indica 0 se não houver.",
+          "tooLarge": "Indica comissões mensais até {{max}}."
+        }
+      },
+      "nextStepHeadline": "Acompanha este crédito ao lado do teu orçamento",
+      "nextStepDescription": "Adiciona o crédito ao WonderMoney com a taxa e o prazo, reserva a prestação no teu orçamento mensal e vê o capital em dívida descer ao lado do que gastas de facto.",
+      "nextStepCta": "Começar a acompanhar",
+      "guide": {
+        "whatTitle": "Quanto custa de facto um crédito pessoal",
+        "whatBody1": "Um crédito pessoal paga-se em prestações mensais iguais durante um número fixo de meses. Cada prestação cobre os juros sobre o que ainda deves e devolve parte do capital, por isso as primeiras são sobretudo juros e as últimas sobretudo capital.",
+        "whatBody2": "A taxa de juro é só uma parte do preço. Os bancos juntam muitas vezes uma comissão no início e um encargo mensal, como uma comissão de processamento ou um seguro. Essas comissões somam-se aos juros e, num crédito pequeno ou curto, podem custar mais do que os próprios juros.",
+        "whatBody3": "Antes de pedir, confirma que a prestação cabe: junto das prestações que já pagas e dentro do orçamento com que já vives.",
+        "relatedDebtToIncome": "mostra que parte do rendimento as tuas prestações, incluindo esta, iriam ocupar.",
+        "relatedHouseholdBudget": "mostra para onde vai o teu dinheiro todos os meses, para veres o que a nova prestação teria de substituir.",
+        "aprTitle": "Taxa de juro e TAEG não são a mesma coisa",
+        "aprBody1": "A taxa de juro de uma proposta (a TAN) é uma taxa anual nominal: define os juros de cada mês, um doze avos dela sobre o capital em dívida. Deixa de fora as comissões e, como os juros se cobram todos os meses, fica abaixo do custo anual mesmo num crédito sem comissões.",
+        "aprBody2": "A TAEG junta tudo num só número. É a taxa anual à qual o dinheiro que recebes de facto (o montante menos as comissões iniciais) iguala todas as prestações que pagas, com comissões. Duas propostas com o mesmo montante e prazo comparam-se pela TAEG: a mais baixa custa menos.",
+        "aprBody3": "Cada banco calcula a TAEG segundo as regras do país onde opera, que podem incluir custos que este simulador não pergunta e contar os meses de outra forma. A TAEG que vês aqui é uma estimativa para comparar propostas, não o valor de um contrato.",
+        "exampleTitle": "Exemplo prático",
+        "exampleIntro": "Imagina que pedes {{amount}} a {{months}} meses, com uma taxa nominal de {{rate}} e sem comissões.",
+        "exampleNoFees": "A prestação mensal é de {{payment}}. Ao longo do prazo pagas {{interest}} de juros e {{totalRepaid}} no total. Mesmo sem comissões, a TAEG é de {{apr}}, um pouco acima de {{rate}}, porque os juros se cobram todos os meses.",
+        "exampleFees": "Agora junta {{upfront}} de comissões iniciais e {{monthlyFee}} por mês de comissões. Recebes {{received}} e cada prestação sobe para {{paymentWithFees}}. As comissões somam {{fees}}, por isso o custo do crédito passa para {{cost}} e pagas {{totalRepaidFees}} no total.",
+        "exampleApr": "A taxa de juro continua a ser {{rate}}, mas a TAEG sobe para {{aprFees}}. É esse o número a comparar com outra proposta: um crédito com uma taxa mais alta e sem comissões pode sair mais barato.",
+        "exampleOutro": "O simulador acima começa neste crédito, sem as comissões, para poderes pôr a tua proposta.",
+        "methodTitle": "Como o simulador faz as contas",
+        "methodIntro": "A prestação é a prestação constante que paga o montante ao longo do prazo, à taxa mensal, e a TAEG é a taxa que equilibra o que recebes com o que pagas:",
+        "methodLegend": "M é a prestação de capital e juros, P o montante do crédito, r a taxa anual nominal a dividir por 12 e n o número de meses. As comissões mensais f somam-se a cada prestação.",
+        "methodApr": "A TAEG é a taxa A que resolve a segunda linha: o que recebes no início, o montante P menos as comissões iniciais F, iguala a prestação de cada mês Mₖ mais as comissões f, descontada por (1 + A) elevado a k ÷ 12, contando cada mês como um doze avos do ano. O simulador encontra-a por bissecção.",
+        "methodRounding": "Todas as contas são feitas em cêntimos. Cada prestação é calculada de novo a partir do capital em dívida, por isso as prestações ficam a um cêntimo umas das outras, a última liquida o capital exatamente e o plano bate certo com os totais.",
+        "methodPrivacy": "As contas são feitas no teu navegador. Nada do que escreves é enviado nem guardado.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionFixedRate": "A taxa é fixa durante todo o prazo e todas as prestações são pagas a tempo.",
+        "assumptionFees": "As comissões iniciais pagam-se, ou descontam-se do montante, no início do crédito; as comissões mensais são iguais todos os meses.",
+        "assumptionOtherCosts": "Ficam de fora custos que o simulador não pergunta, como seguros opcionais, encargos por atraso ou uma comissão de reembolso antecipado.",
+        "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}."
+      }
     }
   },
   "learn": {

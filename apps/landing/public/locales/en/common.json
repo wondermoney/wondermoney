@@ -2066,6 +2066,111 @@
         },
         "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
       }
+    },
+    "personalLoan": {
+      "title": "Personal Loan Calculator",
+      "shortName": "Personal loan",
+      "description": "Work out the monthly payment, the total cost and an estimated APR of a personal loan, fees included, with the full monthly schedule.",
+      "pageTitle": "Personal Loan Calculator: Monthly Payment, Total Cost and APR — WonderMoney",
+      "pageDescription": "Free personal loan calculator. Enter the amount, term, interest rate and fees to see the monthly payment, the total cost of credit, an estimated APR and the month-by-month schedule. No sign-up.",
+      "subtitle": "Two loans at the same interest rate can cost very different amounts once the fees are added. Enter the offer you have, fees included, and see what it costs each month and in total. Nothing to sign up for.",
+      "amount": "Amount borrowed",
+      "amountHelp": "What the lender lends you, before any fees are taken off.",
+      "termMonths": "Term",
+      "termMonthsHelp": "Number of monthly payments, from {{min}} to {{max}}.",
+      "months": "months",
+      "annualRate": "Interest rate",
+      "annualRateHelp": "The fixed nominal annual rate in the offer, not the APR: the APR is what this calculator works out.",
+      "upfrontFees": "Upfront fees",
+      "upfrontFeesHelp": "One-off charges paid when the loan starts, such as an arrangement or processing fee, and any tax on the loan. Leave 0 if there are none.",
+      "monthlyFees": "Monthly fees and insurance",
+      "monthlyFeesHelp": "Charged with every payment, such as an account or collection fee, or the premium of an insurance the loan requires. Leave 0 if there are none.",
+      "result": {
+        "monthlyPayment": "Monthly payment",
+        "monthlyPaymentSplit": "{{loan}} for the loan plus {{fees}} in fees.",
+        "paymentsNote": "{{count}} monthly payments. Later payments stay within a cent of the first; the last one, {{last}}, clears the balance.",
+        "apr": "Estimated APR, fees included",
+        "aprOver": "over {{max}}",
+        "aprNote": "An estimate of the annual percentage rate (APR), worked out from the money you receive and every payment you make. The figure a lender quotes follows its country's rules and can count costs this calculator doesn't know about.",
+        "totalInterest": "Total interest",
+        "totalFees": "Total fees",
+        "totalCostOfCredit": "Total cost of credit",
+        "totalRepaid": "Total you pay, fees included",
+        "amountReceived": "You receive {{amount}} once the upfront fees are taken off."
+      },
+      "estimateNote": "This is an estimate, not a loan offer or a quote. The rate, the fees and whether you are approved depend on the lender and on your circumstances: compare the figures in each lender's written offer before you sign.",
+      "schedule": {
+        "title": "Monthly schedule",
+        "description": "How each payment splits between interest, principal and fees, and what you still owe after it.",
+        "upfrontNote": "The {{fees}} of upfront fees are paid at the start and aren't in the table.",
+        "show": "Show the monthly schedule",
+        "hide": "Hide the monthly schedule",
+        "month": "Month",
+        "payment": "Payment",
+        "principal": "Principal",
+        "interest": "Interest",
+        "fees": "Fees",
+        "balance": "Balance",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "Your result appears once every field has a valid value.",
+        "amount": {
+          "required": "Enter the amount you want to borrow.",
+          "tooSmall": "Enter at least {{min}}.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        },
+        "termMonths": {
+          "required": "Enter the term in months.",
+          "tooSmall": "Enter a term of at least {{min}} months.",
+          "tooLarge": "Enter a term of up to {{max}} months."
+        },
+        "annualRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The rate can't be negative. Enter 0 for an interest-free loan.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter upfront fees up to {{max}}, half the amount borrowed."
+        },
+        "monthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter monthly fees up to {{max}}."
+        }
+      },
+      "nextStepHeadline": "Track this loan alongside your budget",
+      "nextStepDescription": "Add the loan to WonderMoney with its rate and term, plan the monthly payment in your budget and see the balance fall next to what you really spend.",
+      "nextStepCta": "Start tracking",
+      "guide": {
+        "whatTitle": "What a personal loan really costs",
+        "whatBody1": "A personal loan is repaid in equal monthly payments over a fixed number of months. Each payment covers the interest on what you still owe and pays back part of the amount, so the first payments are mostly interest and the last ones mostly principal.",
+        "whatBody2": "The interest rate is only part of the price. Lenders often add a fee when the loan starts and a monthly charge, such as a collection fee or an insurance premium. Those fees come on top of the interest, and on a small or short loan they can cost more than the interest itself.",
+        "whatBody3": "Before you borrow, check that the payment fits: next to the credit payments you already make, and inside the budget you already live on.",
+        "relatedDebtToIncome": "shows what share of your income your credit payments, this one included, would take.",
+        "relatedHouseholdBudget": "shows where your money goes each month, so you can see what the new payment would have to replace.",
+        "aprTitle": "The interest rate and the APR are not the same",
+        "aprBody1": "The interest rate in an offer is a nominal annual rate: it sets each month's interest, a twelfth of it on the balance still owed. It leaves out the fees and, because interest is charged every month, it understates the yearly cost even of a loan with no fees.",
+        "aprBody2": "The annual percentage rate puts everything into one figure. It is the yearly rate at which the money you actually receive (the amount less the upfront fees) equals every payment you make, fees included. Two offers for the same amount and term can be compared by their APR: the lower one costs less.",
+        "aprBody3": "Each lender works out its APR under its own country's rules, which can include costs this calculator doesn't ask about and count months differently. The APR shown here is an estimate for comparing offers, not the figure in a contract.",
+        "exampleTitle": "Worked example",
+        "exampleIntro": "Say you borrow {{amount}} over {{months}} months at a nominal rate of {{rate}}, with no fees.",
+        "exampleNoFees": "The monthly payment is {{payment}}. Over the term you pay {{interest}} in interest and {{totalRepaid}} in all. Even with no fees, the APR is {{apr}}, a little above {{rate}}, because interest is charged every month.",
+        "exampleFees": "Now add {{upfront}} of upfront fees and {{monthlyFee}} a month in fees. You receive {{received}}, and each payment rises to {{paymentWithFees}}. The fees add {{fees}}, so the cost of credit grows to {{cost}} and you pay {{totalRepaidFees}} in all.",
+        "exampleApr": "The interest rate is still {{rate}}, but the APR rises to {{aprFees}}. That is the figure to compare with another offer: a loan at a higher rate with no fees can cost less.",
+        "exampleOutro": "The calculator above starts from this loan without the fees, so you can enter your own offer.",
+        "methodTitle": "How the calculator works it out",
+        "methodIntro": "The monthly payment is the level payment that repays the amount over the term at the monthly rate, and the APR is the rate that balances what you receive against what you pay:",
+        "methodLegend": "M is the payment of principal and interest, P the amount borrowed, r the nominal annual rate divided by 12 and n the number of months. The monthly fees f are added to each payment.",
+        "methodApr": "The APR is the rate A that solves the second line: what you receive at the start, the amount P less the upfront fees F, equals each month's payment Mₖ plus the fees f, discounted by (1 + A) to the power of k ÷ 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
+        "methodRounding": "Every figure is worked in whole cents. Each payment is worked out again from the balance still owed, so the payments stay within a cent of each other, the last one clears the balance exactly, and the schedule adds up to the totals.",
+        "methodPrivacy": "The calculation runs in your browser. Nothing you enter is sent or stored.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionFixedRate": "The rate is fixed for the whole term, and every payment is made on time.",
+        "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
+        "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
+        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
+      }
     }
   },
   "learn": {

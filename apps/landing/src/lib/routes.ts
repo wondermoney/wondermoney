@@ -312,6 +312,14 @@ const ROUTE_SLUGS = {
 		de: "zinsanpassung-rechner",
 		it: "simulatore-rata-mutuo-variabile",
 	},
+	toolPersonalLoan: {
+		pt: "simulador-credito-pessoal",
+		en: "personal-loan-calculator",
+		es: "simulador-prestamo-personal",
+		fr: "simulateur-pret-personnel",
+		de: "privatkredit-rechner",
+		it: "calcolo-prestito-personale",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -425,6 +433,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolBorrowingCapacity",
 	"toolMortgageTransfer",
 	"toolRateRevision",
+	"toolPersonalLoan",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -688,6 +697,12 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"rate-revision": "toolRateRevision",
 	"variable-rate-payment-calculator": "toolRateRevision",
 	"simulador-revisao-taxa-credito": "toolRateRevision",
+	toolpersonalloan: "toolPersonalLoan",
+	personalloancalculator: "toolPersonalLoan",
+	"personal-loan-calculator": "toolPersonalLoan",
+	"personal-loan": "toolPersonalLoan",
+	"simulador-credito-pessoal": "toolPersonalLoan",
+	"credito-pessoal": "toolPersonalLoan",
 }
 
 function normalizeRouteLookupKey(value: string): string {

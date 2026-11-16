@@ -69,7 +69,7 @@ describe("tools catalog", () => {
 		])
 		expect(groups).toEqual({
 			budgetAndSave: ["toolHouseholdBudget", "toolSavingsRate", "toolEmergencyFund", "toolSavingsGoal"],
-			borrowAndBuyHome: ["toolMortgage", "toolDebtToIncome", "toolBorrowingCapacity", "toolEarlyRepayment", "toolMortgageTransfer", "toolBuyVsRent", "toolRateRevision"],
+			borrowAndBuyHome: ["toolMortgage", "toolDebtToIncome", "toolBorrowingCapacity", "toolEarlyRepayment", "toolMortgageTransfer", "toolBuyVsRent", "toolRateRevision", "toolPersonalLoan"],
 			investAndGrow: ["toolCompoundInterest", "toolInvestmentReturn", "pageFireCalculator", "toolTermDeposit"],
 			trackWealth: ["toolNetWorth"],
 		})

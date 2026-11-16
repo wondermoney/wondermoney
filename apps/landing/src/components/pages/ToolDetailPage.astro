@@ -28,6 +28,8 @@ import BorrowingCapacityCalculatorComp from "@/components/calculators/BorrowingC
 import BorrowingCapacityGuide from "@/components/calculators/BorrowingCapacityGuide.astro";
 import RateRevisionCalculatorComp from "@/components/calculators/RateRevisionCalculatorComp";
 import RateRevisionGuide from "@/components/calculators/RateRevisionGuide.astro";
+import PersonalLoanCalculatorComp from "@/components/calculators/PersonalLoanCalculatorComp";
+import PersonalLoanGuide from "@/components/calculators/PersonalLoanGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -102,6 +104,11 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.rateRevision.nextStepHeadline"),
     description: t("tools.rateRevision.nextStepDescription"),
     ctaText: t("tools.rateRevision.nextStepCta"),
+  },
+  toolPersonalLoan: {
+    headline: t("tools.personalLoan.nextStepHeadline"),
+    description: t("tools.personalLoan.nextStepDescription"),
+    ctaText: t("tools.personalLoan.nextStepCta"),
   },
 };
 
@@ -178,6 +185,7 @@ const schema = {
       <BorrowingCapacityCalculatorComp locale={locale} client:load />
     )}
     {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
+    {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -192,6 +200,7 @@ const schema = {
   {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
   {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
   {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
+  {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />
