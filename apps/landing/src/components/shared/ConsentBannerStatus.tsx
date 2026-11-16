@@ -2,6 +2,7 @@ import type { Ref } from "react";
 
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LAYER } from "@/lib/layers";
 
 type CollapsedConsentButtonProps = {
   readonly buttonRef: Ref<HTMLButtonElement>;
@@ -17,7 +18,7 @@ export function CollapsedConsentButton({
   return (
     <Button
       ref={buttonRef}
-      className="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg md:right-6 md:bottom-6"
+      className={`fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] ${LAYER.consent} gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg md:right-6 md:bottom-6`}
       variant="outline"
       onClick={onOpen}
     >
@@ -44,7 +45,7 @@ export function SavedConsentStatus({
 }: SavedConsentStatusProps) {
   return (
     <aside
-      className="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-80"
+      className={`fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] ${LAYER.consent} w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-80`}
       aria-label={title}
     >
       <div className="flex items-center justify-between gap-4">

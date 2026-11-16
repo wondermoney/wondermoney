@@ -1,6 +1,8 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
 import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { LAYER } from "@/lib/layers";
+import { cn } from "@/lib/utils";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
@@ -18,7 +20,12 @@ function StickyMobileCtaContent() {
   const ctaUrl = useCtaUrl();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+    <div
+      className={cn(
+        "fixed inset-x-0 bottom-0 border-t border-border bg-background/95 px-4 py-3 backdrop-blur md:hidden",
+        LAYER.stickyCta,
+      )}
+    >
       <div className="mx-auto flex max-w-2xl items-center gap-3">
         <Button asChild size="lg" className="flex-1">
           <a

@@ -7,7 +7,9 @@ import { createConsentDecision, writeConsentDecision } from "@/lib/consent";
 import { SUPPORTED_LANGS, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
 import { TOOLS_CATALOG, buildToolsHub, type ToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
+import { ConsentBanner } from "./ConsentBanner";
 import Header from "./Header";
+import PivotAnnouncementBanner from "./PivotAnnouncementBanner";
 import { HOVER_CLOSE_DELAY_MS, HOVER_OPEN_DELAY_MS } from "./useNavMenus";
 
 // Entries a test adds to the catalog, as a new tool would be added to TOOLS_CATALOG.
@@ -453,6 +455,59 @@ describe("Header tools menu analytics", () => {
     await user.keyboard("{Enter}");
     await user.click(within(panel("tools")).getByRole("link", { name: en("header.toolsMenu.seeAll") }));
     expect(navClicks()).toEqual([]);
+  });
+});
+
+describe("Header drawer stacking", () => {
+  /**
+   * The z-index an element stacks at against the rest of the page: that of its outermost
+   * ancestor carrying a `z-*` class, the layer that starts its stacking context at the root.
+   */
+  function rootLayer(element: Element): number {
+    let level: number | undefined;
+    for (let node: Element | null = element; node; node = node.parentElement) {
+      const match = /(?:^|\s)z-(\d+)(?:\s|$)/.exec(node.getAttribute("class") ?? "");
+      if (match) level = Number(match[1]);
+    }
+    if (level === undefined) throw new Error("element has no z-index layer");
+    return level;
+  }
+
+  it("stacks the open drawer above the header and the banner, and below the consent card", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <PivotAnnouncementBanner locale="en" />
+        <Header locale="en" />
+        <ConsentBanner locale="en" />
+      </>,
+    );
+    const dismiss = await screen.findByRole("button", { name: en("global.pivotBanner.dismissLabel") });
+    const consent = screen.getByRole("complementary", { name: en("global.consent.title") });
+
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+    const close = screen.getByRole("button", { name: en("header.closeMenu") });
+    const firstRow = screen.getByRole("button", { name: en("header.features") });
+
+    const banner = rootLayer(dismiss);
+    const header = rootLayer(document.querySelector("header")!);
+    for (const control of [close, firstRow]) {
+      expect(rootLayer(control)).toBeGreaterThan(header);
+      expect(rootLayer(control)).toBeGreaterThan(banner);
+      expect(rootLayer(control)).toBeLessThan(rootLayer(consent));
+    }
+    expect(header).toBeGreaterThan(banner);
+  });
+
+  it("raises the drawer backdrop with its panel", async () => {
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+
+    const panel = screen.getByRole("button", { name: en("header.closeMenu") }).closest("[id^=headlessui-dialog-panel]")!;
+    const backdrop = panel.previousElementSibling!;
+    expect(rootLayer(backdrop)).toBe(rootLayer(panel));
+    expect(rootLayer(backdrop)).toBeGreaterThan(rootLayer(document.querySelector("header")!));
   });
 });
 
