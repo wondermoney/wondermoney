@@ -228,7 +228,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                 value={formatQuantity(info.getValue(), {
                   maximumFractionDigits: 6,
                 })}
-                className="min-w-[5rem] text-right font-mono"
+                className="block min-w-20 text-right font-mono"
               />
             ),
         }),

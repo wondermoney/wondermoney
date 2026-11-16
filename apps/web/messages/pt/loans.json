@@ -70,7 +70,8 @@
       "required": "Este campo é obrigatório.",
       "positiveAmount": "Introduz um valor positivo.",
       "validRate": "Introduz uma taxa de juro válida.",
-      "originalPrincipalTooLow": "O valor original do empréstimo deve ser, no mínimo, igual ao capital."
+      "originalPrincipalTooLow": "O valor original do empréstimo deve ser, no mínimo, igual ao capital.",
+      "currencyRequired": "Escolhe uma moeda."
     },
     "errors": {
       "loadFailed": "Não foi possível carregar os empréstimos.",
@@ -138,7 +139,11 @@
         "linked": "Associado",
         "candidateConfidence": "Confiança: {value}",
         "confidenceValue": "{value}%",
-        "confidence": { "HIGH": "Alta", "MEDIUM": "Média", "LOW": "Baixa" },
+        "confidence": {
+          "HIGH": "Alta",
+          "MEDIUM": "Média",
+          "LOW": "Baixa"
+        },
         "confidenceUnavailable": "indisponível",
         "reasonsUnavailable": "Sem razões apresentadas",
         "high": "alta",

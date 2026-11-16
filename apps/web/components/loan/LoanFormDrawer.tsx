@@ -130,7 +130,10 @@ function buildBaseSchema(
     ]),
     amortizationMethod: z.enum(["FRENCH", "CONSTANT_PRINCIPAL"]),
     providerName: z.string().optional(),
-    currencyKey: z.coerce.number<number | "">().int().positive(),
+    currencyKey: z.coerce
+      .number<number | "">()
+      .int()
+      .positive(t("validation.currencyRequired")),
     openingPrincipalBalance: amount().pipe(z.number().min(0)),
     openingBalanceDate: z.string().min(1, t("validation.required")),
     // Amount originally borrowed at origination — distinct from, and
@@ -435,9 +438,11 @@ export default function LoanFormDrawer({
                       onChange: (value) =>
                         form.setValue("currencyKey", Number(value), {
                           shouldDirty: true,
+                          shouldValidate: true,
                         }),
                       options: currencyOptions,
                       label: t("fields.currency"),
+                      error: form.formState.errors.currencyKey?.message,
                     }}
                   />
                 </FormControl>

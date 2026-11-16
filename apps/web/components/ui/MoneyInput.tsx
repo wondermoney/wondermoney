@@ -21,7 +21,8 @@ import {
 interface CurrencyPicker {
   value?: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; shortLabel?: string }[];
+  error?: string;
   /** Names the picker for assistive tech; the field label names the amount. */
   label: string;
 }
@@ -79,6 +80,7 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
     },
     ref,
   ) => {
+    const currencyErrorId = React.useId();
     const amountPlaceholder = useAmountPlaceholder();
     const locale = useLocale();
 
@@ -94,6 +96,9 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
       return true;
     }, [locale, onEvaluated, result]);
 
+    const selectedCurrency = currencyPicker?.options.find(
+      (option) => option.value === currencyPicker.value,
+    );
     const adornment = currencySlot ? (
       currencySlot
     ) : currencyPicker ? (
@@ -103,9 +108,13 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
       >
         <SelectTrigger
           aria-label={currencyPicker.label}
+          aria-invalid={currencyPicker.error ? true : undefined}
+          aria-describedby={currencyPicker.error ? currencyErrorId : undefined}
           className="hover:bg-accent h-8 w-20 min-w-20 shrink-0 gap-1 border-none bg-transparent px-2 font-mono"
         >
-          <SelectValue />
+          <SelectValue placeholder={currencyPicker.label}>
+            {selectedCurrency?.shortLabel ?? selectedCurrency?.label}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {currencyPicker.options.map((option) => (
@@ -153,12 +162,23 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
 
     // Without evaluation the field is exactly the bare input it always was, so
     // existing layouts (a narrow split line, a grid cell) do not move.
-    if (!onEvaluated) return input;
+    if (!onEvaluated && !currencyPicker?.error) return input;
 
     return (
       <div className="flex flex-col gap-1">
         {input}
-        <AmountExpressionHint locale={locale} value={String(value ?? "")} />
+        {currencyPicker?.error ? (
+          <p
+            id={currencyErrorId}
+            role="alert"
+            className="text-destructive-text text-sm"
+          >
+            {currencyPicker.error}
+          </p>
+        ) : null}
+        {onEvaluated ? (
+          <AmountExpressionHint locale={locale} value={String(value ?? "")} />
+        ) : null}
       </div>
     );
   },

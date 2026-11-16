@@ -70,7 +70,8 @@
       "required": "This field is required.",
       "positiveAmount": "Enter a positive amount.",
       "validRate": "Enter a valid interest rate.",
-      "originalPrincipalTooLow": "Original loan amount must be at least the principal."
+      "originalPrincipalTooLow": "Original loan amount must be at least the principal.",
+      "currencyRequired": "Choose a currency."
     },
     "errors": {
       "loadFailed": "Unable to load loans.",
@@ -138,7 +139,11 @@
         "linked": "Linked",
         "candidateConfidence": "Confidence: {value}",
         "confidenceValue": "{value}%",
-        "confidence": { "HIGH": "High", "MEDIUM": "Medium", "LOW": "Low" },
+        "confidence": {
+          "HIGH": "High",
+          "MEDIUM": "Medium",
+          "LOW": "Low"
+        },
         "confidenceUnavailable": "unavailable",
         "reasonsUnavailable": "No reasons provided",
         "high": "high",
