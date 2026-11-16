@@ -1151,6 +1151,223 @@
         "description": "Aggiungi il prestito a WonderMoney con debito residuo, tasso e durata, collega la rata mensile e guarda scendere quanto devi ancora, accanto al tuo budget e al tuo patrimonio."
       }
     },
+    "mortgageTransfer": {
+      "title": "Calcolatore di surroga del mutuo",
+      "shortName": "Surroga del mutuo",
+      "description": "Confronta il tuo mutuo con una nuova offerta: la rata, i costi del passaggio, quando si ripagano e il risparmio netto.",
+      "pageTitle": "Calcolatore di Surroga del Mutuo: Conviene Cambiare Banca? — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di surroga del mutuo. Confronta il tuo mutuo a tasso fisso con l'offerta di un'altra banca, aggiungi i costi del passaggio e scopri il risparmio mensile, il mese in cui li recuperi e il risparmio netto. Senza registrazione.",
+      "subtitle": "Inserisci il debito residuo, la durata residua e il tasso attuale, poi l'offerta che hai ricevuto e quanto costerebbe cambiare. Vedi le due rate con assicurazioni e spese, il costo totale di ogni mutuo, il mese in cui il passaggio si ripaga e quanto risparmi alla fine. Nessuna registrazione.",
+      "termYears": "Anni",
+      "termMonths": "Mesi",
+      "termRounded": "Calcolato su {{term}}: la durata è arrotondata a mesi interi.",
+      "current": {
+        "legend": "Il tuo mutuo attuale",
+        "balance": "Debito residuo",
+        "balanceHelp": "Quanto devi oggi, secondo l'ultimo estratto del mutuo. Il nuovo mutuo riprende questo importo.",
+        "termLabel": "Durata residua",
+        "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+        "rate": "Tasso di interesse attuale",
+        "rateHelp": "Tasso annuo nominale fisso (TAN). I tassi variabili e misti non sono inclusi.",
+        "fees": "Assicurazioni e spese al mese",
+        "feesHelp": "Assicurazioni vita e casa legate al mutuo, spese del conto e altri costi mensili. Lascia 0 se non ce ne sono."
+      },
+      "offer": {
+        "legend": "La nuova offerta",
+        "rate": "Nuovo tasso di interesse",
+        "rateHelp": "Il tasso annuo nominale fisso (TAN) che ti hanno proposto.",
+        "termLabel": "Durata del nuovo mutuo",
+        "termHelp": "Parte dalla durata residua del mutuo attuale. Una durata più lunga abbassa la rata, ma aggiunge interessi.",
+        "fees": "Assicurazioni e spese al mese",
+        "feesHelp": "Quello che la nuova banca chiede ogni mese: assicurazioni, spese del conto e altre spese."
+      },
+      "costs": {
+        "legend": "Costi una tantum del passaggio",
+        "help": "I costi variano a seconda del paese, della banca e del mutuo, quindi inserisci quelli della tua offerta e del tuo contratto. Lascia 0 per quelli che non pagherai.",
+        "exitFee": "Penale di uscita dal mutuo attuale",
+        "exitFeeHelp": "Una percentuale del debito residuo che la banca attuale applica per il rimborso anticipato. Controlla nel contratto la percentuale e l'eventuale limite di legge.",
+        "newLoanFees": "Spese del nuovo mutuo",
+        "newLoanFeesHelp": "Spese di istruttoria, di apertura o di mediazione del nuovo mutuo.",
+        "valuationFee": "Perizia dell'immobile",
+        "legalFees": "Notaio e registrazioni",
+        "legalFeesHelp": "Notaio, iscrizione e cancellazione dell'ipoteca, onorari e imposte sul nuovo mutuo."
+      },
+      "results": {
+        "currentMonthly": "Rata attuale",
+        "offerMonthly": "Rata con l'offerta",
+        "includesFees": "Prima rata di ogni mutuo, con assicurazioni e spese.",
+        "lessEachMonth": "{{amount}} in meno al mese",
+        "moreEachMonth": "{{amount}} in più al mese",
+        "sameEachMonth": "La stessa rata ogni mese",
+        "netSaving": "Risparmio netto con il passaggio",
+        "netCost": "Costo netto del passaggio",
+        "netSavingHelp": "Quanto resta da pagare sul mutuo attuale, meno il nuovo mutuo con i costi del passaggio.",
+        "breakEvenTitle": "Quando il passaggio si ripaga",
+        "breakEven": "Al mese {{month}}, dopo {{duration}}: a quel punto le rate più basse hanno coperto i costi del passaggio.",
+        "breakEvenNoCosts": "Senza costi di passaggio non c'è nulla da recuperare: ogni mese in cui l'offerta costa meno è un risparmio.",
+        "breakEvenNever": "Mai entro la durata: il risparmio non arriva a coprire i costi del passaggio.",
+        "breakEvenThenLoss": "Il risparmio copre i costi del passaggio al mese {{month}}, ma la durata più lunga alla fine costa di più.",
+        "longerTerm": "La nuova durata è {{extra}} più lunga della durata residua. Sulla durata residua, questa offerta costerebbe {{sameTerm}} al mese: parte del calo della rata viene dal pagare più a lungo, e questo aggiunge {{interest}} di interessi.",
+        "longerTermNoInterest": "La nuova durata è {{extra}} più lunga della durata residua. Allo 0% non aggiunge interessi, ma paghi le assicurazioni e le spese mensili più a lungo.",
+        "costsExceed": "Il passaggio costa più di quanto fa risparmiare. Chiedi alla nuova banca se può ridurre o farsi carico delle spese, oppure chiedi un tasso migliore alla banca attuale.",
+        "switchingCosts": "Costi del passaggio"
+      },
+      "table": {
+        "title": "Il tuo mutuo attuale e l'offerta a confronto",
+        "caption": "Quanto resta del mutuo attuale a confronto con la nuova offerta",
+        "figure": "Voce",
+        "current": "Mutuo attuale",
+        "offer": "Nuova offerta",
+        "monthlyPayment": "Rata mensile",
+        "monthlyFees": "Assicurazioni e spese al mese",
+        "monthlyTotal": "Totale al mese",
+        "term": "Tempo per estinguerlo",
+        "totalInterest": "Interessi",
+        "totalFees": "Assicurazioni e spese in totale",
+        "switchingCosts": "Costi del passaggio",
+        "totalCost": "Costo totale"
+      },
+      "resultNote": "I due tassi restano fissi fino alla fine di ogni mutuo. Le rate sono mensili, i costi del passaggio si pagano il giorno del passaggio e il nuovo mutuo riprende lo stesso debito residuo.",
+      "chart": {
+        "title": "Risparmio dal passaggio",
+        "description": "Quanto ha fatto risparmiare finora il passaggio, rata dopo rata, rispetto ai costi del passaggio. Quando la linea supera la linea tratteggiata dei costi, il passaggio si è ripagato.",
+        "label": "Grafico del risparmio dal passaggio alla fine di ogni anno, rispetto ai costi del passaggio. Gli stessi valori sono nella tabella qui sotto.",
+        "year": "Anno",
+        "saved": "Risparmiato finora",
+        "costs": "Costi del passaggio"
+      },
+      "yearTable": {
+        "caption": "Risparmio anno per anno",
+        "year": "Anno",
+        "yearLabel": "Anno {{year}}",
+        "saving": "Risparmiato nell'anno",
+        "cumulative": "Risparmiato finora",
+        "afterCosts": "Dopo i costi del passaggio"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il debito residuo.",
+          "tooSmall": "Inserisci un debito di almeno {{min}}.",
+          "tooLarge": "Inserisci un debito fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata residua, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "newTermYears": {
+          "required": "Inserisci la durata del nuovo mutuo, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "newTermMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "currentRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "newRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Le spese non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}} al mese."
+        },
+        "newMonthlyFees": {
+          "negative": "Le spese non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}} al mese."
+        },
+        "exitFeePercent": {
+          "negative": "La penale non può essere negativa. Inserisci 0 se non c'è.",
+          "tooLarge": "Inserisci una penale fino a {{max}} del debito."
+        },
+        "newLoanFees": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        },
+        "valuationFee": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        },
+        "legalFees": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Cosa confrontare prima di cambiare",
+          "intro": "Portare il mutuo in un'altra banca, o rinegoziare le condizioni con la tua, può abbassare quello che paghi. Un tasso più basso è solo una parte del conto, quindi confronta l'offerta per intero:",
+          "items": {
+            "rate": "Il tasso. Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi.",
+            "monthlyCosts": "Gli extra mensili. Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommale alla rata, altrimenti un tasso più conveniente può finire per costare di più.",
+            "term": "La durata. Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo.",
+            "oneOff": "I costi una tantum. Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+          },
+          "outro": "Il calcolatore mette tutto insieme: la rata con gli extra, quanto costa ancora ogni mutuo in totale e il mese in cui recuperi i costi del passaggio."
+        },
+        "costs": {
+          "title": "I costi del passaggio",
+          "intro": "Quanto costa cambiare dipende dal paese, dal contratto e dalle banche coinvolte. Le voci abituali sono:",
+          "items": {
+            "exitFee": "La penale di uscita o di estinzione anticipata, una percentuale del debito residuo che la banca attuale applica quando il mutuo viene chiuso prima della scadenza. In molti paesi la legge la limita o la esclude, e alcuni mutui non la prevedono.",
+            "newLoanFees": "Le spese del nuovo mutuo: istruttoria, apertura o mediazione.",
+            "valuation": "La perizia dell'immobile, che la nuova banca di solito richiede.",
+            "legal": "Notaio e registrazioni: cancellazione o trasferimento della vecchia ipoteca, iscrizione della nuova ed eventuali imposte sul nuovo mutuo."
+          },
+          "outro": "Alcune banche si fanno carico di parte di questi costi per acquisire il tuo mutuo. Inserisci solo quello che pagheresti tu e chiedi a ogni banca gli importi per iscritto."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Supponiamo che tu debba ancora {{balance}}, con {{term}} di durata residua a un tasso fisso del {{currentRate}}, e che paghi {{currentFees}} al mese di assicurazioni e spese. La tua rata è di {{currentMonthly}} al mese. Un'altra banca offre il {{newRate}} sulla stessa durata, con {{newFees}} al mese di assicurazione: {{offerMonthly}} al mese, {{monthlySaving}} in meno.",
+          "costs": "Cambiare costa {{costs}}: una penale di uscita del {{exitFeeRate}}, cioè {{exitFee}}, {{newLoanFees}} di spese del nuovo mutuo, {{valuationFee}} di perizia e {{legalFees}} di notaio e registrazioni. Con {{monthlySaving}} al mese, il passaggio si ripaga al mese {{breakEvenMonth}}, dopo {{breakEvenTime}}.",
+          "total": "Per il resto della durata, il mutuo attuale costa {{currentTotal}} tra rate, assicurazioni e spese. Il nuovo mutuo costa {{offerTotal}}, costi del passaggio compresi. Il risparmio netto è di {{netSaving}}.",
+          "longer": "Ora supponiamo che la nuova banca proponga di allungare il mutuo a {{longerTerm}}. La rata scende a {{longerMonthly}}, {{longerSaving}} in meno di oggi, e i costi si coprono prima. Ma la durata più lunga aggiunge {{extraInterest}} di interessi e, in totale, il passaggio costa {{longerNetCost}} in più che tenere il mutuo attuale. Una rata più bassa non vuol dire un mutuo più conveniente."
+        },
+        "method": {
+          "title": "Come viene calcolato",
+          "intro": "Il calcolatore ricostruisce i due mutui con lo stesso motore a tasso fisso del calcolatore del mutuo, sul debito che hai ancora. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula delle annualità:",
+          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n. Le assicurazioni e le spese di ogni mese si sommano sopra.",
+          "saving": "Il risparmio di un mese è quanto costerebbe quel mese il mutuo attuale meno quanto costa il nuovo. Un mutuo estinto non costa più nulla, quindi con una nuova durata più lunga i mesi dopo la fine del mutuo attuale contano come un costo. Il costo totale di ogni opzione sono le rate, le assicurazioni e le spese, più i costi del passaggio per il nuovo mutuo. Il risparmio netto è la differenza.",
+          "breakEven": "Il mese in cui il passaggio si ripaga è il primo in cui il risparmio accumulato arriva almeno ai costi del passaggio. Se non succede prima della fine dei due mutui, il passaggio non si ripaga.",
+          "longerTerm": "Quando la nuova durata è più lunga della durata residua, il calcolatore calcola anche l'offerta sulla durata residua, così vedi quanto del calo della rata viene dal tasso e quanto dal pagare più a lungo.",
+          "assumptionsTitle": "Ipotesi",
+          "assumptions": {
+            "fixedRate": "I due tassi restano fissi fino alla fine di ogni mutuo. I tassi variabili e misti, e i periodi fissi seguiti da un tasso variabile, non sono inclusi.",
+            "sameBalance": "Il nuovo mutuo riprende esattamente il debito residuo di oggi. Non chiedi altro denaro, e i costi del passaggio si pagano a parte invece di essere aggiunti al mutuo.",
+            "timing": "Il passaggio avviene oggi, appena dopo una rata normale, e la prima rata del nuovo mutuo scade tra un mese.",
+            "fees": "Le assicurazioni e le spese restano uguali ogni mese finché dura ciascun mutuo.",
+            "noDiscounting": "Un euro risparmiato tra dieci anni vale come un euro oggi: non ci sono inflazione né rendimenti sul denaro risparmiato.",
+            "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano. La rata indicata è la prima; le successive restano entro un centesimo da essa.",
+            "lenderFigures": "Ogni banca conta i giorni e arrotonda a modo suo, quindi i suoi importi possono differire di poco. Chiedi a ciascuna l'offerta ufficiale prima di decidere."
+          },
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino a {{maxExitFee}} del debito."
+        },
+        "related": {
+          "title": "Altri calcolatori",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Il piano completo, anno per anno, del nuovo mutuo o di quello che hai ora.",
+          "earlyRepaymentLink": "Calcolatore di estinzione anticipata",
+          "earlyRepaymentBody": "Quanto risparmieresti con un rimborso parziale sul mutuo attuale, invece di surrogarlo.",
+          "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
+          "debtToIncomeBody": "La parte del tuo reddito che va in rate, oggi e con la nuova rata."
+        }
+      },
+      "cta": {
+        "headline": "Confronta le tue offerte di mutuo in un solo posto",
+        "description": "Aggiungi il tuo mutuo a WonderMoney con tasso e durata, pianifica la rata di ogni offerta nel tuo budget e guarda come si inserisce accanto a quello che spendi davvero, prima e dopo il passaggio."
+      }
+    },
     "savingsGoal": {
       "title": "Simulatore di risparmio",
       "shortName": "Obiettivo di risparmio",

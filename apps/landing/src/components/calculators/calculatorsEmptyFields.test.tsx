@@ -14,6 +14,7 @@ import FireCalculatorComp from "./FireCalculatorComp";
 import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
 import InvestmentReturnCalculatorComp from "./InvestmentReturnCalculatorComp";
 import MortgageCalculatorComp from "./MortgageCalculatorComp";
+import MortgageTransferCalculatorComp from "./MortgageTransferCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
 import SavingsGoalCalculatorComp from "./SavingsGoalCalculatorComp";
 import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
@@ -30,6 +31,7 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["household budget", HouseholdBudgetCalculatorComp],
   ["investment return", InvestmentReturnCalculatorComp],
   ["mortgage", MortgageCalculatorComp],
+  ["mortgage transfer", MortgageTransferCalculatorComp],
   ["net worth", NetWorthCalculatorComp],
   ["savings goal", SavingsGoalCalculatorComp],
   ["savings rate", SavingsRateCalculatorComp],
@@ -347,5 +349,74 @@ describe("early repayment calculator", () => {
     await user.clear(screen.getByRole("spinbutton", { name: "Early repayment fee" }));
     expect(figures().length).toBeGreaterThan(0);
     expect(screen.queryByText(/Enter a fee/)).toBeNull();
+  });
+});
+
+describe("mortgage transfer calculator", () => {
+  const group = (name: string) => within(screen.getByRole("group", { name }));
+
+  it.each([
+    ["Balance still owed", "Enter the balance you still owe."],
+    ["Current interest rate", "Enter the interest rate."],
+    ["New interest rate", "Enter the interest rate."],
+  ] as const)("asks for a value when %j is empty", async (label, message) => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: label }));
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(screen.getByText("Your comparison appears once every field has a valid value.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("asks for the time left when both of its fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const timeLeft = group("Time left on the loan");
+    await user.clear(timeLeft.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(timeLeft.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the time left, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("asks for the new term when both of its fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const newTerm = group("New loan term");
+    await user.clear(newTerm.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(newTerm.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the new loan's term, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("starts the new term at the time left and follows it until the new term is set", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const timeLeftYears = group("Time left on the loan").getByRole("spinbutton", { name: "Years" });
+    const newYears = group("New loan term").getByRole("spinbutton", { name: "Years" }) as HTMLInputElement;
+    expect(newYears.value).toBe("25");
+    await user.clear(timeLeftYears);
+    await user.type(timeLeftYears, "20");
+    expect(newYears.value).toBe("20");
+    await user.clear(newYears);
+    await user.type(newYears, "30");
+    await user.clear(timeLeftYears);
+    await user.type(timeLeftYears, "18");
+    expect(newYears.value).toBe("30");
+    expect(screen.getByRole("note").textContent).toContain("12 years longer");
+  });
+
+  it.each([
+    ["Your current loan", "Insurance and fees a month"],
+    ["The new offer", "Insurance and fees a month"],
+    ["One-off switching costs", "Exit fee on the current loan"],
+    ["One-off switching costs", "New loan fees"],
+    ["One-off switching costs", "Valuation"],
+    ["One-off switching costs", "Legal and registration costs"],
+  ] as const)("in %j, counts an empty %j as 0", async (section, label) => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    await user.clear(group(section).getByRole("spinbutton", { name: label }));
+    expect(screen.queryByText(/^Enter /)).toBeNull();
+    expect(figures().length).toBeGreaterThan(0);
   });
 });

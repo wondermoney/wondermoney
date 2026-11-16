@@ -1151,6 +1151,223 @@
         "description": "Añade el préstamo a WonderMoney con su capital, tipo y plazo, vincula la cuota mensual y mira cómo baja lo que aún debes, junto a tu presupuesto y tu patrimonio."
       }
     },
+    "mortgageTransfer": {
+      "title": "Calculadora para cambiar la hipoteca de banco",
+      "shortName": "Cambiar de hipoteca",
+      "description": "Compara tu hipoteca con una nueva oferta: la cuota, los gastos del cambio, cuándo se recuperan y el ahorro neto.",
+      "pageTitle": "Calculadora para Cambiar la Hipoteca de Banco: ¿Compensa la Subrogación? — WonderMoney",
+      "pageDescription": "Calculadora gratuita para cambiar la hipoteca de banco. Compara tu préstamo a tipo fijo con la oferta de otra entidad, suma los gastos del cambio y mira el ahorro mensual, el mes en que los recuperas y el ahorro neto. Sin registro.",
+      "subtitle": "Introduce el capital que aún debes, el plazo que queda y tu tipo actual, luego la oferta que te han hecho y lo que costaría cambiar. Mira las dos cuotas con seguros y comisiones, el coste total de cada préstamo, el mes en que el cambio se paga solo y lo que ahorras al final. Sin necesidad de registrarte.",
+      "termYears": "Años",
+      "termMonths": "Meses",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
+      "current": {
+        "legend": "Tu hipoteca actual",
+        "balance": "Capital pendiente",
+        "balanceHelp": "Lo que debes hoy, según tu último extracto del préstamo. El nuevo préstamo asume este importe.",
+        "termLabel": "Plazo que queda",
+        "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+        "rate": "Tipo de interés actual",
+        "rateHelp": "Tipo nominal anual fijo (TIN). Los tipos variables y mixtos no están incluidos.",
+        "fees": "Seguros y comisiones al mes",
+        "feesHelp": "Seguros de vida y hogar vinculados al préstamo, comisiones de cuenta y otros gastos mensuales. Deja 0 si no hay."
+      },
+      "offer": {
+        "legend": "La nueva oferta",
+        "rate": "Nuevo tipo de interés",
+        "rateHelp": "El tipo nominal anual fijo (TIN) que te han ofrecido.",
+        "termLabel": "Plazo del nuevo préstamo",
+        "termHelp": "Empieza igual al plazo que queda en tu hipoteca actual. Un plazo más largo baja la cuota, pero suma intereses.",
+        "fees": "Seguros y comisiones al mes",
+        "feesHelp": "Lo que pide la nueva entidad cada mes: seguros, comisiones de cuenta y otros gastos."
+      },
+      "costs": {
+        "legend": "Gastos únicos del cambio",
+        "help": "Los gastos varían según el país, la entidad y el préstamo, así que introduce los de tu oferta y tu contrato. Deja 0 en los que no vayas a pagar.",
+        "exitFee": "Comisión de salida de la hipoteca actual",
+        "exitFeeHelp": "Un porcentaje del capital que cobra tu entidad actual por devolver el préstamo antes de tiempo. Comprueba en tu contrato el porcentaje y el límite legal, si lo hay.",
+        "newLoanFees": "Comisiones del nuevo préstamo",
+        "newLoanFeesHelp": "Comisiones de apertura, de estudio o de intermediación del nuevo préstamo.",
+        "valuationFee": "Tasación",
+        "legalFees": "Notaría, registro y gestoría",
+        "legalFeesHelp": "Notario, registro de la propiedad, gestoría, honorarios e impuestos sobre el nuevo préstamo."
+      },
+      "results": {
+        "currentMonthly": "Cuota actual",
+        "offerMonthly": "Cuota con la oferta",
+        "includesFees": "Primera cuota de cada préstamo, con seguros y comisiones.",
+        "lessEachMonth": "{{amount}} menos al mes",
+        "moreEachMonth": "{{amount}} más al mes",
+        "sameEachMonth": "La misma cuota cada mes",
+        "netSaving": "Ahorro neto con el cambio",
+        "netCost": "Coste neto del cambio",
+        "netSavingHelp": "Lo que queda por pagar de tu hipoteca actual, menos el nuevo préstamo con los gastos del cambio.",
+        "breakEvenTitle": "Cuándo se paga el cambio",
+        "breakEven": "En el mes {{month}}, al cabo de {{duration}}: para entonces las cuotas más bajas ya han cubierto los gastos del cambio.",
+        "breakEvenNoCosts": "Sin gastos de cambio no hay nada que recuperar: cada mes en que la oferta cuesta menos es ahorro.",
+        "breakEvenNever": "Nunca dentro del plazo: el ahorro no llega a cubrir los gastos del cambio.",
+        "breakEvenThenLoss": "El ahorro cubre los gastos del cambio en el mes {{month}}, pero el plazo más largo sale más caro al final.",
+        "longerTerm": "El nuevo plazo es {{extra}} más largo que el plazo que queda. En el plazo que queda, esta oferta costaría {{sameTerm}} al mes: parte de la bajada de la cuota viene de pagar durante más tiempo, lo que suma {{interest}} en intereses.",
+        "longerTermNoInterest": "El nuevo plazo es {{extra}} más largo que el plazo que queda. Al 0% no suma intereses, pero pagas los seguros y comisiones mensuales durante más tiempo.",
+        "costsExceed": "Cambiar cuesta más de lo que ahorra. Pregunta a la nueva entidad si puede rebajar o asumir los gastos, o pide a tu entidad actual un tipo mejor.",
+        "switchingCosts": "Gastos del cambio"
+      },
+      "table": {
+        "title": "Tu hipoteca actual y la oferta, una al lado de la otra",
+        "caption": "Lo que queda de tu hipoteca actual comparado con la nueva oferta",
+        "figure": "Concepto",
+        "current": "Hipoteca actual",
+        "offer": "Nueva oferta",
+        "monthlyPayment": "Cuota mensual",
+        "monthlyFees": "Seguros y comisiones al mes",
+        "monthlyTotal": "Total al mes",
+        "term": "Plazo hasta terminar",
+        "totalInterest": "Intereses",
+        "totalFees": "Seguros y comisiones en total",
+        "switchingCosts": "Gastos del cambio",
+        "totalCost": "Coste total"
+      },
+      "resultNote": "Los dos tipos se mantienen fijos hasta el final de cada préstamo. Las cuotas son mensuales, los gastos del cambio se pagan el día del cambio y el nuevo préstamo asume el mismo capital pendiente.",
+      "chart": {
+        "title": "Ahorro desde el cambio",
+        "description": "Lo que el cambio ha ahorrado hasta ahora, cuota a cuota, frente a los gastos del cambio. Cuando la línea supera la línea discontinua de los gastos, el cambio se ha pagado solo.",
+        "label": "Gráfico del ahorro desde el cambio al final de cada año, frente a los gastos del cambio. Las mismas cifras están en la tabla de abajo.",
+        "year": "Año",
+        "saved": "Ahorrado hasta ahora",
+        "costs": "Gastos del cambio"
+      },
+      "yearTable": {
+        "caption": "Ahorro año a año",
+        "year": "Año",
+        "yearLabel": "Año {{year}}",
+        "saving": "Ahorrado en el año",
+        "cumulative": "Ahorrado hasta ahora",
+        "afterCosts": "Después de los gastos del cambio"
+      },
+      "errors": {
+        "summary": "La comparación aparece cuando todos los campos tienen un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo que queda, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce como máximo {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "newTermYears": {
+          "required": "Introduce el plazo del nuevo préstamo, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce como máximo {{max}} años en total."
+        },
+        "newTermMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "currentRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo de interés no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "newRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo de interés no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}} al mes."
+        },
+        "newMonthlyFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}} al mes."
+        },
+        "exitFeePercent": {
+          "negative": "La comisión no puede ser negativa. Introduce 0 si no hay.",
+          "tooLarge": "Introduce una comisión de hasta {{max}} del capital."
+        },
+        "newLoanFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        },
+        "legalFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Qué comparar antes de cambiar",
+          "intro": "Llevar tu hipoteca a otra entidad, o renegociar las condiciones con la tuya, puede bajar lo que pagas. Un tipo más bajo es solo una parte de la cuenta, así que compara la oferta completa:",
+          "items": {
+            "rate": "El tipo. Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes.",
+            "monthlyCosts": "Los extras mensuales. Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro.",
+            "term": "El plazo. Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo.",
+            "oneOff": "Los gastos únicos. Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+          },
+          "outro": "La calculadora junta todo esto: la cuota con los extras, el total que cada préstamo aún cuesta y el mes en que recuperas los gastos del cambio."
+        },
+        "costs": {
+          "title": "Los gastos de cambiar",
+          "intro": "Lo que cuesta cambiar depende del país, del contrato y de las entidades. Las partidas habituales son:",
+          "items": {
+            "exitFee": "La comisión de salida o de amortización anticipada, un porcentaje del capital que cobra tu entidad actual cuando el préstamo se cancela antes de tiempo. En muchos países la ley la limita, y hay préstamos sin comisión.",
+            "newLoanFees": "Las comisiones del nuevo préstamo: apertura, estudio o intermediación.",
+            "valuation": "La tasación de la vivienda, que la nueva entidad suele pedir.",
+            "legal": "Notaría, registro y gestoría: cancelar la hipoteca anterior, inscribir la nueva y los impuestos que correspondan."
+          },
+          "outro": "Algunas entidades asumen parte de estos gastos para quedarse con tu hipoteca. Introduce solo lo que pagarías tú y pide a cada entidad las cifras por escrito."
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Imagina que aún debes {{balance}}, quedan {{term}} a un tipo fijo del {{currentRate}} y pagas {{currentFees}} al mes en seguros y comisiones. Tu cuota es de {{currentMonthly}} al mes. Otra entidad te ofrece un {{newRate}} en el mismo plazo, con {{newFees}} al mes de seguros: {{offerMonthly}} al mes, {{monthlySaving}} menos.",
+          "costs": "Cambiar cuesta {{costs}}: una comisión de salida del {{exitFeeRate}}, es decir {{exitFee}}, {{newLoanFees}} de comisiones del nuevo préstamo, {{valuationFee}} de tasación y {{legalFees}} de notaría, registro y gestoría. Con {{monthlySaving}} al mes, el cambio se paga solo en el mes {{breakEvenMonth}}, al cabo de {{breakEvenTime}}.",
+          "total": "En el resto del plazo, la hipoteca actual cuesta {{currentTotal}} en cuotas, seguros y comisiones. El nuevo préstamo cuesta {{offerTotal}}, con los gastos del cambio incluidos. El ahorro neto es de {{netSaving}}.",
+          "longer": "Ahora imagina que la nueva entidad te ofrece alargar el préstamo a {{longerTerm}}. La cuota baja a {{longerMonthly}}, {{longerSaving}} menos que hoy, y los gastos se cubren antes. Pero el plazo más largo suma {{extraInterest}} en intereses y, en total, el cambio cuesta {{longerNetCost}} más que quedarte con tu hipoteca actual. Una cuota más baja no es lo mismo que un préstamo más barato."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "La calculadora calcula los dos préstamos con el mismo motor de tipo fijo que la calculadora de hipoteca, sobre el capital que aún debes. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
+          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n. Los seguros y comisiones de cada mes se suman encima.",
+          "saving": "El ahorro de un mes es lo que costaría ese mes la hipoteca actual menos lo que cuesta la nueva. Un préstamo ya pagado no cuesta nada, así que, con un nuevo plazo más largo, los meses posteriores al final de tu hipoteca actual cuentan como coste. El coste total de cada opción son sus cuotas, seguros y comisiones, más los gastos del cambio en el nuevo préstamo. El ahorro neto es la diferencia.",
+          "breakEven": "El mes en que el cambio se paga solo es el primero en que el ahorro acumulado llega al menos a los gastos del cambio. Si eso no ocurre antes de que terminen los dos préstamos, el cambio no se paga solo.",
+          "longerTerm": "Cuando el nuevo plazo es más largo que el plazo que queda, la calculadora calcula también la oferta en el plazo que queda, para que veas cuánto de la bajada de la cuota viene del tipo y cuánto de pagar durante más tiempo.",
+          "assumptionsTitle": "Supuestos",
+          "assumptions": {
+            "fixedRate": "Los dos tipos se mantienen fijos hasta el final de cada préstamo. Los tipos variables y mixtos, y los periodos fijos que pasan a tipo variable, no están incluidos.",
+            "sameBalance": "El nuevo préstamo asume exactamente el capital que debes hoy. No pides dinero de más, y los gastos del cambio se pagan aparte en lugar de sumarse al préstamo.",
+            "timing": "El cambio se hace hoy, justo después de una cuota normal, y la primera cuota del nuevo préstamo vence dentro de un mes.",
+            "fees": "Los seguros y comisiones son los mismos cada mes mientras dura cada préstamo.",
+            "noDiscounting": "Un euro ahorrado dentro de diez años cuenta lo mismo que un euro hoy: no hay inflación ni rentabilidad sobre el dinero ahorrado.",
+            "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran. La cuota mostrada es la primera; las siguientes quedan a menos de un céntimo de ella.",
+            "lenderFigures": "Cada entidad cuenta los días y redondea a su manera, así que sus cifras pueden variar un poco. Pide a cada una su oferta vinculante antes de decidir."
+          },
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital."
+        },
+        "related": {
+          "title": "Otras calculadoras",
+          "mortgageLink": "Calculadora de hipoteca",
+          "mortgageBody": "El cuadro completo, año a año, del nuevo préstamo o del que tienes ahora.",
+          "earlyRepaymentLink": "Calculadora de amortización anticipada",
+          "earlyRepaymentBody": "Lo que ahorrarías con una amortización en tu hipoteca actual, en lugar de cambiarla.",
+          "debtToIncomeLink": "Calculadora de ratio de endeudamiento",
+          "debtToIncomeBody": "La parte de tus ingresos que se va en cuotas, hoy y con la nueva cuota."
+        }
+      },
+      "cta": {
+        "headline": "Compara tus ofertas de préstamo en un solo lugar",
+        "description": "Añade tu hipoteca a WonderMoney con su tipo y su plazo, planifica la cuota de cada oferta en tu presupuesto y mira cómo encaja junto a lo que gastas de verdad, antes y después del cambio."
+      }
+    },
     "savingsGoal": {
       "title": "Simulador de ahorro",
       "shortName": "Objetivo de ahorro",

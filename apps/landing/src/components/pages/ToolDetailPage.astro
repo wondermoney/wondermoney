@@ -20,6 +20,8 @@ import TermDepositCalculatorComp from "@/components/calculators/TermDepositCalcu
 import TermDepositGuide from "@/components/calculators/TermDepositGuide.astro";
 import EarlyRepaymentCalculatorComp from "@/components/calculators/EarlyRepaymentCalculatorComp";
 import EarlyRepaymentGuide from "@/components/calculators/EarlyRepaymentGuide.astro";
+import MortgageTransferCalculatorComp from "@/components/calculators/MortgageTransferCalculatorComp";
+import MortgageTransferGuide from "@/components/calculators/MortgageTransferGuide.astro";
 import BuyVsRentCalculatorComp from "@/components/calculators/BuyVsRentCalculatorComp";
 import BuyVsRentGuide from "@/components/calculators/BuyVsRentGuide.astro";
 import BorrowingCapacityCalculatorComp from "@/components/calculators/BorrowingCapacityCalculatorComp";
@@ -80,6 +82,10 @@ const nextStepCtaByRouteId: Partial<
   toolEarlyRepayment: {
     headline: t("tools.earlyRepayment.cta.headline"),
     description: t("tools.earlyRepayment.cta.description"),
+  },
+  toolMortgageTransfer: {
+    headline: t("tools.mortgageTransfer.cta.headline"),
+    description: t("tools.mortgageTransfer.cta.description"),
   },
   toolBuyVsRent: {
     headline: t("tools.buyVsRent.ctaHeadline"),
@@ -157,6 +163,9 @@ const schema = {
     {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
     {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
     {routeId === "toolEarlyRepayment" && <EarlyRepaymentCalculatorComp locale={locale} client:load />}
+    {routeId === "toolMortgageTransfer" && (
+      <MortgageTransferCalculatorComp locale={locale} client:load />
+    )}
     {routeId === "toolBuyVsRent" && <BuyVsRentCalculatorComp locale={locale} client:load />}
     {routeId === "toolBorrowingCapacity" && (
       <BorrowingCapacityCalculatorComp locale={locale} client:load />
@@ -171,6 +180,7 @@ const schema = {
   {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
   {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
   {routeId === "toolEarlyRepayment" && <EarlyRepaymentGuide locale={locale} />}
+  {routeId === "toolMortgageTransfer" && <MortgageTransferGuide locale={locale} />}
   {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
   {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
 

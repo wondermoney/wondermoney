@@ -1151,6 +1151,223 @@
         "description": "Add the loan to WonderMoney with its balance, rate and term, link the monthly repayment and watch what you still owe go down, next to your budget and net worth."
       }
     },
+    "mortgageTransfer": {
+      "title": "Mortgage Switch Calculator",
+      "shortName": "Mortgage switch",
+      "description": "Compare your mortgage with a new offer: the monthly payment, the switching costs, when they pay for themselves and the net saving.",
+      "pageTitle": "Mortgage Switch Calculator: Is Moving Your Loan Worth It? — WonderMoney",
+      "pageDescription": "Free mortgage switch calculator. Compare your fixed-rate loan with another lender's offer, add the switching costs and see the monthly saving, the break-even month and the net saving. No sign-up.",
+      "subtitle": "Enter what you still owe, the time left and your current rate, then the offer you have been made and what switching would cost. See both monthly payments with insurance and fees, the total cost of each loan, the month the switch pays for itself and what you save overall. Nothing to sign up for.",
+      "termYears": "Years",
+      "termMonths": "Months",
+      "termRounded": "Worked out over {{term}}: the term is rounded to whole months.",
+      "current": {
+        "legend": "Your current loan",
+        "balance": "Balance still owed",
+        "balanceHelp": "What you owe today, from your latest loan statement. The new loan takes over this amount.",
+        "termLabel": "Time left on the loan",
+        "termHelp": "Years plus months, for example 22 years and 4 months.",
+        "rate": "Current interest rate",
+        "rateHelp": "Fixed nominal annual rate. Variable and mixed rates are not covered.",
+        "fees": "Insurance and fees a month",
+        "feesHelp": "Life and home insurance tied to the loan, account charges and other monthly costs. Leave 0 if there are none."
+      },
+      "offer": {
+        "legend": "The new offer",
+        "rate": "New interest rate",
+        "rateHelp": "The fixed nominal annual rate you have been offered.",
+        "termLabel": "New loan term",
+        "termHelp": "Starts at the time left on your current loan. A longer term lowers the payment but adds interest.",
+        "fees": "Insurance and fees a month",
+        "feesHelp": "What the new lender asks for each month: its insurance, account charges and other fees."
+      },
+      "costs": {
+        "legend": "One-off switching costs",
+        "help": "Costs vary by country, lender and loan, so enter the ones in your offer and your contract. Leave 0 for any you will not pay.",
+        "exitFee": "Exit fee on the current loan",
+        "exitFeeHelp": "A percentage of the balance, charged by your current lender for repaying early. Check your contract for the rate and any legal cap.",
+        "newLoanFees": "New loan fees",
+        "newLoanFeesHelp": "Arrangement, processing or broker fees for the new loan.",
+        "valuationFee": "Valuation",
+        "legalFees": "Legal and registration costs",
+        "legalFeesHelp": "Notary, land registry, legal fees and any tax on the new loan."
+      },
+      "results": {
+        "currentMonthly": "Monthly payment now",
+        "offerMonthly": "Monthly payment with the offer",
+        "includesFees": "First payment of each loan, with its insurance and fees.",
+        "lessEachMonth": "{{amount}} less each month",
+        "moreEachMonth": "{{amount}} more each month",
+        "sameEachMonth": "The same payment each month",
+        "netSaving": "Net saving from switching",
+        "netCost": "Net cost of switching",
+        "netSavingHelp": "The rest of your current loan, minus the new loan with the switching costs.",
+        "breakEvenTitle": "When the switch pays for itself",
+        "breakEven": "In month {{month}}, after {{duration}}: by then the lower payments have covered the switching costs.",
+        "breakEvenNoCosts": "With no switching costs there is nothing to earn back: every month the offer costs less is a saving.",
+        "breakEvenNever": "Never within the term: the savings never cover the switching costs.",
+        "breakEvenThenLoss": "The savings cover the switching costs by month {{month}}, but the longer term costs more by the end.",
+        "longerTerm": "The new term is {{extra}} longer than the time left. Over the time left, this offer would cost {{sameTerm}} a month: part of the lower payment comes from paying for longer, which adds {{interest}} in interest.",
+        "longerTermNoInterest": "The new term is {{extra}} longer than the time left. At 0% it adds no interest, but you pay the monthly insurance and fees for longer.",
+        "costsExceed": "Switching costs more than it saves. Ask the new lender whether it can lower or cover the fees, or ask your current lender for a better rate.",
+        "switchingCosts": "Switching costs"
+      },
+      "table": {
+        "title": "Your current loan and the offer side by side",
+        "caption": "The rest of your current loan compared with the new offer",
+        "figure": "Figure",
+        "current": "Current loan",
+        "offer": "New offer",
+        "monthlyPayment": "Monthly payment",
+        "monthlyFees": "Insurance and fees a month",
+        "monthlyTotal": "Monthly total",
+        "term": "Time to pay off",
+        "totalInterest": "Interest",
+        "totalFees": "Insurance and fees in total",
+        "switchingCosts": "Switching costs",
+        "totalCost": "Total cost"
+      },
+      "resultNote": "Both rates stay fixed to the end of each loan. Payments are monthly, the switching costs are paid on the day of the switch, and the new loan takes over the same balance.",
+      "chart": {
+        "title": "Savings since the switch",
+        "description": "What the switch has saved so far, payment by payment, against the switching costs. Where the line rises above the dashed costs line, the switch has paid for itself.",
+        "label": "Chart of the savings since the switch at the end of each year, against the switching costs. The same figures are in the table below.",
+        "year": "Year",
+        "saved": "Saved so far",
+        "costs": "Switching costs"
+      },
+      "yearTable": {
+        "caption": "Savings year by year",
+        "year": "Year",
+        "yearLabel": "Year {{year}}",
+        "saving": "Saved in the year",
+        "cumulative": "Saved so far",
+        "afterCosts": "After switching costs"
+      },
+      "errors": {
+        "summary": "Your comparison appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "newTermYears": {
+          "required": "Enter the new loan's term, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "newTermMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "currentRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "newRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}} a month."
+        },
+        "newMonthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}} a month."
+        },
+        "exitFeePercent": {
+          "negative": "The fee can't be negative. Enter 0 if there is none.",
+          "tooLarge": "Enter a fee up to {{max}} of the balance."
+        },
+        "newLoanFees": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        },
+        "legalFees": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "What to compare before you switch",
+          "intro": "Moving your mortgage to another lender, or onto new terms with your own, can lower what you pay. A lower rate is only part of the picture, so compare the whole offer:",
+          "items": {
+            "rate": "The rate. A lower fixed rate cuts the interest charged on what you owe every month.",
+            "monthlyCosts": "The monthly extras. Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer.",
+            "term": "The term. A new loan over more years lowers the payment, but you pay interest for longer.",
+            "oneOff": "The one-off costs. Leaving one loan and taking out another has fees, and they come out of your savings."
+          },
+          "outro": "The calculator puts these together: the payment with its extras, the total each loan still costs and the month the switching costs are paid back."
+        },
+        "costs": {
+          "title": "The costs of switching",
+          "intro": "What a switch costs depends on your country, your contract and the lenders involved. The usual items are:",
+          "items": {
+            "exitFee": "An exit or early repayment fee, a percentage of the balance your current lender charges when the loan is repaid before the end. Many countries cap it by law, and some loans have none.",
+            "newLoanFees": "Fees for the new loan: arrangement, processing or broker fees.",
+            "valuation": "A valuation of the home, which the new lender usually asks for.",
+            "legal": "Legal and registration costs: notary, land registry, cancelling the old charge on the home and registering the new one, and any tax on the new loan."
+          },
+          "outro": "Some lenders pay part of these costs to win your loan. Enter only what you would pay yourself, and ask each lender for the figures in writing."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you still owe {{balance}} with {{term}} left at a fixed {{currentRate}}, and pay {{currentFees}} a month in insurance and fees. Your payment is {{currentMonthly}} a month. Another lender offers {{newRate}} over the same term, with {{newFees}} a month of insurance: {{offerMonthly}} a month, {{monthlySaving}} less.",
+          "costs": "Switching costs {{costs}}: a {{exitFeeRate}} exit fee of {{exitFee}}, {{newLoanFees}} of new loan fees, {{valuationFee}} for the valuation and {{legalFees}} of legal and registration costs. At {{monthlySaving}} a month, the switch pays for itself in month {{breakEvenMonth}}, after {{breakEvenTime}}.",
+          "total": "Over the rest of the term, the current loan costs {{currentTotal}} in payments, insurance and fees. The new loan costs {{offerTotal}}, switching costs included. The net saving is {{netSaving}}.",
+          "longer": "Now say the new lender offers to spread the loan over {{longerTerm}}. The payment falls to {{longerMonthly}}, {{longerSaving}} less than today, and the costs are covered sooner. But the longer term adds {{extraInterest}} in interest, and overall the switch costs {{longerNetCost}} more than keeping your current loan. A lower payment is not the same as a cheaper loan."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator works out both loans with the same fixed-rate engine as the mortgage calculator, on the balance you still owe. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
+          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments. At 0% there is no interest, so the payment is simply P divided by n. Each month's insurance and fees are added on top.",
+          "saving": "A month's saving is what the current loan would cost that month minus what the new one costs. Once a loan is paid off it costs nothing, so with a longer new term the months after your current loan would have ended count as a cost. The total cost of each option is its payments, insurance and fees, plus the switching costs for the new loan. The net saving is the difference.",
+          "breakEven": "The break-even month is the first month in which the savings so far are at least the switching costs. If that never happens before both loans end, the switch does not pay for itself.",
+          "longerTerm": "When the new term is longer than the time left, the calculator also works out the offer over the time left, so you can see how much of the lower payment comes from the rate and how much from paying for longer.",
+          "assumptionsTitle": "Assumptions",
+          "assumptions": {
+            "fixedRate": "Both rates stay fixed to the end of each loan. Variable and mixed rates, and fixed periods that end in a variable rate, are not covered.",
+            "sameBalance": "The new loan takes over exactly the balance you owe today. Nothing is borrowed on top, and the switching costs are paid in cash rather than added to the loan.",
+            "timing": "The switch happens today, straight after a regular payment, and the first payment on the new loan is due in a month.",
+            "fees": "Insurance and fees stay the same each month for as long as each loan runs.",
+            "noDiscounting": "A euro saved in ten years counts the same as a euro today: there is no inflation or return on the money you save.",
+            "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly. The payment shown is the first one; later ones stay within a cent of it.",
+            "lenderFigures": "Lenders count days and round in their own ways, so their figures can differ slightly. Ask each one for its official offer before you decide."
+          },
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance."
+        },
+        "related": {
+          "title": "Related calculators",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "The full year-by-year schedule of the new loan, or of the one you have now.",
+          "earlyRepaymentLink": "Early repayment calculator",
+          "earlyRepaymentBody": "What a lump sum would save on your current loan instead of switching it.",
+          "debtToIncomeLink": "Debt-to-income ratio calculator",
+          "debtToIncomeBody": "The share of your income that goes on debt payments, now and with the new payment."
+        }
+      },
+      "cta": {
+        "headline": "Compare your loan offers in one place",
+        "description": "Add your mortgage to WonderMoney with its rate and term, plan each offer's monthly payment in your budget and see how it fits next to what you really spend, before and after switching."
+      }
+    },
     "savingsGoal": {
       "title": "Savings Goal Calculator",
       "shortName": "Savings goal",

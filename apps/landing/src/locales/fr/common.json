@@ -1151,6 +1151,223 @@
         "description": "Ajoutez le prêt à WonderMoney avec son capital, son taux et sa durée, reliez la mensualité et voyez ce que vous devez encore diminuer, à côté de votre budget et de votre patrimoine."
       }
     },
+    "mortgageTransfer": {
+      "title": "Simulateur de rachat de crédit immobilier",
+      "shortName": "Rachat de crédit immobilier",
+      "description": "Comparez votre prêt immobilier avec une nouvelle offre : la mensualité, les frais du rachat, quand ils sont amortis et l'économie nette.",
+      "pageTitle": "Simulateur de Rachat de Crédit Immobilier : Changer de Banque Est-il Rentable ? — WonderMoney",
+      "pageDescription": "Simulateur gratuit de rachat de crédit immobilier. Comparez votre prêt à taux fixe avec l'offre d'une autre banque, ajoutez les frais du rachat et voyez l'économie mensuelle, le mois où ils sont amortis et l'économie nette. Sans inscription.",
+      "subtitle": "Indiquez le capital restant dû, la durée restante et votre taux actuel, puis l'offre que vous avez reçue et ce que coûterait le rachat. Voyez les deux mensualités avec assurances et frais, le coût total de chaque prêt, le mois où le rachat est amorti et ce que vous économisez au bout du compte. Aucune inscription.",
+      "termYears": "Années",
+      "termMonths": "Mois",
+      "termRounded": "Calculé sur {{term}} : la durée est arrondie au mois entier.",
+      "current": {
+        "legend": "Votre prêt actuel",
+        "balance": "Capital restant dû",
+        "balanceHelp": "Ce que vous devez aujourd'hui, d'après votre dernier relevé de prêt. Le nouveau prêt reprend ce montant.",
+        "termLabel": "Durée restante",
+        "termHelp": "Des années plus des mois, par exemple 22 ans et 4 mois.",
+        "rate": "Taux d'intérêt actuel",
+        "rateHelp": "Taux nominal annuel fixe. Les taux variables et mixtes ne sont pas pris en compte.",
+        "fees": "Assurances et frais par mois",
+        "feesHelp": "Assurance emprunteur, assurance habitation liée au prêt, frais de compte et autres coûts mensuels. Laissez 0 s'il n'y en a pas."
+      },
+      "offer": {
+        "legend": "La nouvelle offre",
+        "rate": "Nouveau taux d'intérêt",
+        "rateHelp": "Le taux nominal annuel fixe qui vous est proposé.",
+        "termLabel": "Durée du nouveau prêt",
+        "termHelp": "Démarre à la durée restante de votre prêt actuel. Une durée plus longue baisse la mensualité, mais ajoute des intérêts.",
+        "fees": "Assurances et frais par mois",
+        "feesHelp": "Ce que la nouvelle banque demande chaque mois : assurances, frais de compte et autres frais."
+      },
+      "costs": {
+        "legend": "Frais ponctuels du rachat",
+        "help": "Les frais varient selon le pays, la banque et le prêt : indiquez ceux de votre offre et de votre contrat. Laissez 0 pour ceux que vous ne paierez pas.",
+        "exitFee": "Indemnités de remboursement anticipé",
+        "exitFeeHelp": "Un pourcentage du capital, facturé par votre banque actuelle pour un remboursement avant terme. Vérifiez dans votre contrat le taux et le plafond légal éventuel.",
+        "newLoanFees": "Frais du nouveau prêt",
+        "newLoanFeesHelp": "Frais de dossier, de courtage ou de mise en place du nouveau prêt.",
+        "valuationFee": "Expertise du bien",
+        "legalFees": "Frais de notaire et de garantie",
+        "legalFeesHelp": "Notaire, inscription et mainlevée de la garantie, honoraires et taxes sur le nouveau prêt."
+      },
+      "results": {
+        "currentMonthly": "Mensualité actuelle",
+        "offerMonthly": "Mensualité avec l'offre",
+        "includesFees": "Première mensualité de chaque prêt, assurances et frais compris.",
+        "lessEachMonth": "{{amount}} de moins par mois",
+        "moreEachMonth": "{{amount}} de plus par mois",
+        "sameEachMonth": "La même mensualité chaque mois",
+        "netSaving": "Économie nette du rachat",
+        "netCost": "Coût net du rachat",
+        "netSavingHelp": "Ce qu'il reste à payer sur votre prêt actuel, moins le nouveau prêt avec les frais du rachat.",
+        "breakEvenTitle": "Quand le rachat est amorti",
+        "breakEven": "Au mois {{month}}, après {{duration}} : à ce moment-là, les mensualités plus basses ont couvert les frais du rachat.",
+        "breakEvenNoCosts": "Sans frais de rachat, il n'y a rien à récupérer : chaque mois où l'offre coûte moins est une économie.",
+        "breakEvenNever": "Jamais sur la durée : les économies ne couvrent pas les frais du rachat.",
+        "breakEvenThenLoss": "Les économies couvrent les frais du rachat au mois {{month}}, mais la durée plus longue coûte plus cher au final.",
+        "longerTerm": "La nouvelle durée dépasse de {{extra}} la durée restante. Sur la durée restante, cette offre coûterait {{sameTerm}} par mois : une partie de la baisse de la mensualité vient du fait de payer plus longtemps, ce qui ajoute {{interest}} d'intérêts.",
+        "longerTermNoInterest": "La nouvelle durée dépasse de {{extra}} la durée restante. À 0 %, elle n'ajoute pas d'intérêts, mais vous payez les assurances et frais mensuels plus longtemps.",
+        "costsExceed": "Le rachat coûte plus qu'il ne rapporte. Demandez à la nouvelle banque si elle peut réduire ou prendre en charge les frais, ou demandez un meilleur taux à votre banque actuelle.",
+        "switchingCosts": "Frais du rachat"
+      },
+      "table": {
+        "title": "Votre prêt actuel et l'offre côte à côte",
+        "caption": "Ce qu'il reste de votre prêt actuel, comparé avec la nouvelle offre",
+        "figure": "Montant",
+        "current": "Prêt actuel",
+        "offer": "Nouvelle offre",
+        "monthlyPayment": "Mensualité",
+        "monthlyFees": "Assurances et frais par mois",
+        "monthlyTotal": "Total par mois",
+        "term": "Durée jusqu'au solde",
+        "totalInterest": "Intérêts",
+        "totalFees": "Assurances et frais au total",
+        "switchingCosts": "Frais du rachat",
+        "totalCost": "Coût total"
+      },
+      "resultNote": "Les deux taux restent fixes jusqu'au terme de chaque prêt. Les mensualités sont mensuelles, les frais du rachat sont payés le jour du rachat et le nouveau prêt reprend le même capital restant dû.",
+      "chart": {
+        "title": "Économies depuis le rachat",
+        "description": "Ce que le rachat a déjà fait économiser, mensualité après mensualité, face aux frais du rachat. Quand la courbe passe au-dessus de la ligne pointillée des frais, le rachat est amorti.",
+        "label": "Graphique des économies depuis le rachat à la fin de chaque année, face aux frais du rachat. Les mêmes chiffres figurent dans le tableau ci-dessous.",
+        "year": "Année",
+        "saved": "Économisé à ce jour",
+        "costs": "Frais du rachat"
+      },
+      "yearTable": {
+        "caption": "Économies année par année",
+        "year": "Année",
+        "yearLabel": "Année {{year}}",
+        "saving": "Économisé dans l'année",
+        "cumulative": "Économisé à ce jour",
+        "afterCosts": "Après les frais du rachat"
+      },
+      "errors": {
+        "summary": "La comparaison s'affiche dès que tous les champs ont une valeur valide.",
+        "balance": {
+          "required": "Indiquez le capital restant dû.",
+          "tooSmall": "Indiquez un capital d'au moins {{min}}.",
+          "tooLarge": "Indiquez un capital jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Indiquez la durée restante, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indiquez au plus {{max}} ans au total."
+        },
+        "termMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indiquez de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "newTermYears": {
+          "required": "Indiquez la durée du nouveau prêt, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indiquez au plus {{max}} ans au total."
+        },
+        "newTermMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indiquez de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "currentRate": {
+          "required": "Saisissez le taux d'intérêt.",
+          "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Indiquez un taux jusqu'à {{max}}."
+        },
+        "newRate": {
+          "required": "Saisissez le taux d'intérêt.",
+          "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Indiquez un taux jusqu'à {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}} par mois."
+        },
+        "newMonthlyFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}} par mois."
+        },
+        "exitFeePercent": {
+          "negative": "Les indemnités ne peuvent pas être négatives. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}} du capital."
+        },
+        "newLoanFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Les frais ne peuvent pas être négatifs. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}}."
+        },
+        "legalFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez au plus {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Ce qu'il faut comparer avant de faire racheter son prêt",
+          "intro": "Faire racheter votre prêt immobilier par une autre banque, ou renégocier avec la vôtre, peut faire baisser ce que vous payez. Un taux plus bas n'est qu'une partie du calcul : comparez l'offre dans son ensemble.",
+          "items": {
+            "rate": "Le taux. Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez.",
+            "monthlyCosts": "Les frais mensuels. La banque demande souvent de souscrire son assurance emprunteur ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher.",
+            "term": "La durée. Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps.",
+            "oneOff": "Les frais ponctuels. Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+          },
+          "outro": "Le simulateur réunit tout cela : la mensualité avec ses frais, le total que chaque prêt coûte encore et le mois où les frais du rachat sont récupérés."
+        },
+        "costs": {
+          "title": "Les frais d'un rachat",
+          "intro": "Le coût d'un rachat dépend du pays, du contrat et des banques concernées. Les postes habituels sont :",
+          "items": {
+            "exitFee": "Les indemnités de remboursement anticipé, un pourcentage du capital que votre banque actuelle facture quand le prêt est soldé avant terme. Beaucoup de pays les plafonnent par la loi, et certains prêts n'en prévoient pas.",
+            "newLoanFees": "Les frais du nouveau prêt : frais de dossier, de courtage ou de mise en place.",
+            "valuation": "L'expertise du bien, que la nouvelle banque demande souvent.",
+            "legal": "Les frais de notaire et de garantie : mainlevée de l'ancienne hypothèque, inscription de la nouvelle garantie et taxes éventuelles."
+          },
+          "outro": "Certaines banques prennent en charge une partie de ces frais pour récupérer votre prêt. N'indiquez que ce que vous paieriez vous-même et demandez à chaque banque les montants par écrit."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Supposons qu'il vous reste {{balance}} à rembourser sur {{term}} à un taux fixe de {{currentRate}}, avec {{currentFees}} par mois d'assurances et de frais. Votre mensualité est de {{currentMonthly}}. Une autre banque propose {{newRate}} sur la même durée, avec {{newFees}} d'assurance par mois : {{offerMonthly}} par mois, soit {{monthlySaving}} de moins.",
+          "costs": "Le rachat coûte {{costs}} : des indemnités de {{exitFeeRate}}, soit {{exitFee}}, {{newLoanFees}} de frais pour le nouveau prêt, {{valuationFee}} d'expertise et {{legalFees}} de frais de notaire et de garantie. À {{monthlySaving}} par mois, le rachat est amorti au mois {{breakEvenMonth}}, après {{breakEvenTime}}.",
+          "total": "Sur le reste de la durée, le prêt actuel coûte {{currentTotal}} en mensualités, assurances et frais. Le nouveau prêt coûte {{offerTotal}}, frais du rachat compris. L'économie nette est de {{netSaving}}.",
+          "longer": "Supposons maintenant que la nouvelle banque propose d'étaler le prêt sur {{longerTerm}}. La mensualité tombe à {{longerMonthly}}, {{longerSaving}} de moins qu'aujourd'hui, et les frais sont couverts plus tôt. Mais la durée plus longue ajoute {{extraInterest}} d'intérêts et, au total, le rachat coûte {{longerNetCost}} de plus que de garder votre prêt actuel. Une mensualité plus basse ne fait pas un prêt moins cher."
+        },
+        "method": {
+          "title": "Comment c'est calculé",
+          "intro": "Le simulateur calcule les deux prêts avec le même moteur à taux fixe que le simulateur de prêt immobilier, sur le capital restant dû. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
+          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n. Les assurances et frais de chaque mois s'ajoutent par-dessus.",
+          "saving": "L'économie d'un mois est ce que coûterait ce mois-là le prêt actuel, moins ce que coûte le nouveau. Un prêt soldé ne coûte plus rien : avec une nouvelle durée plus longue, les mois qui suivent la fin de votre prêt actuel comptent donc comme un coût. Le coût total de chaque option correspond aux mensualités, assurances et frais, plus les frais du rachat pour le nouveau prêt. L'économie nette est la différence.",
+          "breakEven": "Le mois où le rachat est amorti est le premier mois où les économies cumulées atteignent au moins les frais du rachat. Si cela n'arrive pas avant la fin des deux prêts, le rachat n'est pas amorti.",
+          "longerTerm": "Quand la nouvelle durée dépasse la durée restante, le simulateur calcule aussi l'offre sur la durée restante, pour montrer quelle part de la baisse de mensualité vient du taux et quelle part vient d'un remboursement plus long.",
+          "assumptionsTitle": "Hypothèses",
+          "assumptions": {
+            "fixedRate": "Les deux taux restent fixes jusqu'au terme de chaque prêt. Les taux variables et mixtes, et les périodes fixes suivies d'un taux variable, ne sont pas pris en compte.",
+            "sameBalance": "Le nouveau prêt reprend exactement le capital restant dû aujourd'hui. Rien n'est emprunté en plus, et les frais du rachat sont payés comptant au lieu d'être ajoutés au prêt.",
+            "timing": "Le rachat a lieu aujourd'hui, juste après une mensualité normale, et la première mensualité du nouveau prêt tombe dans un mois.",
+            "fees": "Les assurances et frais restent identiques chaque mois tant que dure chaque prêt.",
+            "noDiscounting": "Un euro économisé dans dix ans compte autant qu'un euro aujourd'hui : ni inflation ni rendement sur l'argent économisé.",
+            "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page tombent juste. La mensualité affichée est la première ; les suivantes restent à moins d'un centime d'elle.",
+            "lenderFigures": "Chaque banque compte les jours et arrondit à sa façon, ses chiffres peuvent donc différer légèrement. Demandez à chacune son offre officielle avant de décider."
+          },
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital."
+        },
+        "related": {
+          "title": "Autres simulateurs",
+          "mortgageLink": "Simulateur de prêt immobilier",
+          "mortgageBody": "Le tableau complet, année par année, du nouveau prêt ou de celui que vous avez aujourd'hui.",
+          "earlyRepaymentLink": "Simulateur de remboursement anticipé",
+          "earlyRepaymentBody": "Ce que ferait économiser un remboursement partiel sur votre prêt actuel, plutôt qu'un rachat.",
+          "debtToIncomeLink": "Calculateur de taux d'endettement",
+          "debtToIncomeBody": "La part de vos revenus consacrée aux remboursements, aujourd'hui et avec la nouvelle mensualité."
+        }
+      },
+      "cta": {
+        "headline": "Comparez vos offres de prêt au même endroit",
+        "description": "Ajoutez votre prêt immobilier à WonderMoney avec son taux et sa durée, prévoyez la mensualité de chaque offre dans votre budget et voyez comment elle s'intègre à vos dépenses réelles, avant et après le rachat."
+      }
+    },
     "savingsGoal": {
       "title": "Simulateur d'épargne",
       "shortName": "Objectif d'épargne",

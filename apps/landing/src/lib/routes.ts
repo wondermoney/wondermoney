@@ -256,6 +256,14 @@ const ROUTE_SLUGS = {
 		de: "sondertilgung-rechner",
 		it: "estinzione-anticipata",
 	},
+	toolMortgageTransfer: {
+		pt: "simulador-transferencia-credito-habitacao",
+		en: "mortgage-switch-calculator",
+		es: "cambiar-hipoteca-de-banco",
+		fr: "rachat-credit-immobilier",
+		de: "umschuldung-rechner",
+		it: "surroga-mutuo",
+	},
 	toolHouseholdBudget: {
 		pt: "orcamento-familiar",
 		en: "household-budget-calculator",
@@ -407,6 +415,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolEarlyRepayment",
 	"toolBuyVsRent",
 	"toolBorrowingCapacity",
+	"toolMortgageTransfer",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -657,6 +666,12 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"borrowing-capacity": "toolBorrowingCapacity",
 	"how-much-can-i-borrow": "toolBorrowingCapacity",
 	"quanto-posso-pedir-emprestado": "toolBorrowingCapacity",
+	toolmortgagetransfer: "toolMortgageTransfer",
+	mortgagetransfercalculator: "toolMortgageTransfer",
+	"mortgage-transfer-calculator": "toolMortgageTransfer",
+	"mortgage-switch-calculator": "toolMortgageTransfer",
+	"mortgage-transfer": "toolMortgageTransfer",
+	"simulador-transferencia-credito-habitacao": "toolMortgageTransfer",
 }
 
 function normalizeRouteLookupKey(value: string): string {
