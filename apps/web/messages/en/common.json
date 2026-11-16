@@ -2629,6 +2629,7 @@
     "q6Body": "Reach out any time at {email}. We read everything."
   },
   "demo": {
+    "badge": "Demo",
     "sign-in": "Try the demo",
     "sign-in-hint": "Look around a sample household without creating an account.",
     "sign-in-unavailable": "The demo isn't available on this server.",

@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarRange } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -25,8 +26,15 @@ export default function TimeframeSelect({
 
   return (
     <Select value={timeframe} onValueChange={setTimeframe}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={t("timeframe")} />
+      <SelectTrigger
+        aria-label={`${t("timeframe")}: ${timeframes.find((option) => option.value === timeframe)?.label ?? timeframe}`}
+        title={timeframes.find((option) => option.value === timeframe)?.label}
+        className="w-[180px] max-sm:size-11 max-sm:w-11 max-sm:justify-center max-sm:border-transparent max-sm:p-0 max-sm:[&>svg:last-child]:hidden"
+      >
+        <CalendarRange className="size-4 sm:hidden" aria-hidden="true" />
+        <span className="max-sm:sr-only">
+          <SelectValue placeholder={t("timeframe")} />
+        </span>
       </SelectTrigger>
       <SelectContent>
         {timeframes.map((timeframe) => (

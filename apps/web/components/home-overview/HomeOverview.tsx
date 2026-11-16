@@ -135,22 +135,29 @@ export function HomeOverview() {
   };
 
   return (
-    <div className="flex flex-col gap-12 lg:gap-16">
+    <div className="flex flex-col gap-8 sm:gap-12 lg:gap-16">
       {hydrated ? <BankAlertsBanner /> : null}
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-end gap-2">
-          <MemberFilterControl className="w-40 sm:w-44" />
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setCustomizing(true)}
-          >
-            <SlidersHorizontal className="size-4" />
-            {t("action")}
-          </Button>
-        </div>
-        <NetWorthHero member={member} />
+        <NetWorthHero
+          member={member}
+          actions={
+            <>
+              <MemberFilterControl />
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label={t("action")}
+                title={t("action")}
+                className="max-sm:size-11 sm:w-auto sm:px-3"
+                onClick={() => setCustomizing(true)}
+              >
+                <SlidersHorizontal className="size-4" aria-hidden="true" />
+                <span className="hidden sm:inline">{t("action")}</span>
+              </Button>
+            </>
+          }
+        />
         {hydrated ? <HomeActivation /> : null}
       </div>
 

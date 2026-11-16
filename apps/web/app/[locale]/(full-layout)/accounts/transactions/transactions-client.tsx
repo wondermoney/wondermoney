@@ -20,6 +20,7 @@ import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { AccountsTransactionsOnboarding } from "@/components/onboarding/AccountsTransactionsOnboarding";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import {
   readOnlyAccountKeys,
   writableAccounts,
@@ -364,25 +365,27 @@ export default function AccountsTransactionsClient({
   return (
     <div className="flex flex-col gap-4 sm:gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 sm:flex sm:items-end sm:justify-between">
+        <div className="contents sm:flex sm:flex-col sm:gap-1">
           <div className="flex items-center gap-2">
             {/* § 9 rule 3: a declarative header — the title and nothing else.
                 No supporting sentence; the figures and the ledger follow. */}
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+            <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl">
               {t("transactions")}
             </h1>
-            <AccountsTransactionsOnboarding />
+            <span className="hidden sm:inline-flex">
+              <AccountsTransactionsOnboarding />
+            </span>
           </div>
           {/* § 9 rule 6: say how fresh this is. A missing charge otherwise looks
               exactly like a quiet spending day. */}
-          <AccountsFreshness accounts={accountsData?.accounts} />
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-          {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
-          <div className="col-span-2">
-            <MemberFilterControl />
+          <div className="col-span-2 row-start-2">
+            <AccountsFreshness accounts={accountsData?.accounts} />
           </div>
+        </div>
+        <div className="col-start-2 row-start-1 flex items-center gap-1 sm:gap-2">
+          {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
+          <MemberFilterControl />
           {editableAccounts.length > 0 ? (
             <>
               <AccountTransactionImportModal
@@ -396,10 +399,11 @@ export default function AccountsTransactionsClient({
                 }}
                 accounts={editableAccounts}
                 trigger={
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    <Download className="size-4" />
-                    {t("import-transactions")}
-                  </Button>
+                  <ToolbarAction
+                    variant="outline"
+                    label={t("import-transactions")}
+                    icon={<Download className="size-4" />}
+                  />
                 }
               />
               <AccountTransactionAddModal
@@ -413,10 +417,10 @@ export default function AccountsTransactionsClient({
                 }}
                 accounts={editableAccounts}
                 trigger={
-                  <Button className="w-full sm:w-auto">
-                    <Plus className="size-4" />
-                    {t("add-transaction")}
-                  </Button>
+                  <ToolbarAction
+                    label={t("add-transaction")}
+                    icon={<Plus className="size-4" />}
+                  />
                 }
               />
             </>

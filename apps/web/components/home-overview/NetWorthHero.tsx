@@ -38,21 +38,32 @@ const FIGURE_CLASS =
 const CHART_CLASS = "h-44 lg:h-56";
 
 /** The page's one h1, with how fresh the figures under it are. */
-function HeroHeader({ title }: { title: string }) {
+function HeroHeader({
+  title,
+  actions,
+}: {
+  title: string;
+  actions?: ReactNode;
+}) {
   const { data: accountsData } = useAccounts();
   // Freshness is relative to the reader's clock: render it once hydrated.
   const hydrated = useHydrated();
 
   return (
-    <header className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+    <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
       <h1
         id="net-worth-heading"
         className="text-foreground text-base font-medium"
       >
         {title}
       </h1>
+      {actions ? (
+        <div className="flex items-center gap-1">{actions}</div>
+      ) : null}
       {hydrated ? (
-        <AccountsFreshness accounts={accountsData?.accounts} />
+        <div className="col-span-2">
+          <AccountsFreshness accounts={accountsData?.accounts} />
+        </div>
       ) : null}
     </header>
   );
@@ -101,9 +112,11 @@ function Change({
  */
 export function NetWorthHero({
   member = null,
+  actions,
 }: {
   /** One member's net worth, or Shared's; null for the household's. */
   member?: MemberFilter;
+  actions?: ReactNode;
 } = {}) {
   const t = useTranslations("homeOverview.net-worth");
   const tSheet = useTranslations("homeOverview.sheet");
@@ -139,7 +152,7 @@ export function NetWorthHero({
       aria-busy={busy || undefined}
       className="flex flex-col gap-4"
     >
-      <HeroHeader title={t("title")} />
+      <HeroHeader title={t("title")} actions={actions} />
       {children}
     </section>
   );

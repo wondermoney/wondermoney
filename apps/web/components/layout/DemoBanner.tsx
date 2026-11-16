@@ -3,6 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useSignupMode } from "@/lib/api/instance/useInstance";
 import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { useSignOut } from "@/lib/auth/useSignOut";
@@ -17,7 +22,9 @@ const linkClass =
  * own, signing up here (only when this server's sign-up is open) or hosting
  * your own. Not dismissible: every write is refused for as long as it applies.
  */
-export default function DemoBanner() {
+export default function DemoBanner({
+  compact = false,
+}: { compact?: boolean } = {}) {
   const t = useTranslations("demo");
   const locale = useLocale();
   const isDemo = useIsDemoProfile();
@@ -34,39 +41,57 @@ export default function DemoBanner() {
     await signOut("/auth/signup");
   };
 
+  const actions = (
+    <div className="flex flex-wrap items-center gap-x-4">
+      {signupMode === "open" ? (
+        <button
+          type="button"
+          className={linkClass}
+          disabled={leaving}
+          aria-busy={leaving || undefined}
+          onClick={() => void signUp()}
+        >
+          {t("banner-sign-up")}
+        </button>
+      ) : null}
+      <a
+        href={`${instanceConfig.docsUrl}/${locale}/docs/self-hosting`}
+        target="_blank"
+        rel="noreferrer"
+        className={linkClass}
+      >
+        {t("banner-self-host")}
+      </a>
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <Popover>
+        <PopoverTrigger
+          aria-label={t("banner-label")}
+          className="focus-visible:ring-ring inline-flex h-11 shrink-0 items-center rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
+        >
+          <span className="border-border text-muted-foreground rounded-sm border px-1.5 py-0.5 text-xs font-medium">
+            {t("badge")}
+          </span>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="flex flex-col gap-2 text-sm">
+          <p>{t("banner-message")}</p>
+          {actions}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
   return (
     <section
       aria-label={t("banner-label")}
-      className="border-info-text/50 text-info-text border-b px-4 py-2 text-sm lg:px-10"
+      className="border-info-text/50 text-info-text hidden border-b px-10 py-2 text-sm lg:block"
     >
       <div className="mx-auto flex max-w-[85rem] flex-wrap items-center gap-x-4 gap-y-1">
-        <p className="leading-6">
-          <span className="lg:hidden">{t("banner-compact")}</span>
-          <span className="hidden lg:inline">{t("banner-message")}</span>
-        </p>
-        <div className="flex flex-wrap items-center gap-x-4">
-          {signupMode === "open" ? (
-            <button
-              type="button"
-              className={linkClass}
-              disabled={leaving}
-              aria-busy={leaving || undefined}
-              aria-label={t("banner-sign-up")}
-              onClick={() => void signUp()}
-            >
-              <span className="lg:hidden">{t("banner-sign-up-compact")}</span>
-              <span className="hidden lg:inline">{t("banner-sign-up")}</span>
-            </button>
-          ) : null}
-          <a
-            href={`${instanceConfig.docsUrl}/${locale}/docs/self-hosting`}
-            target="_blank"
-            rel="noreferrer"
-            className={`${linkClass} max-lg:hidden`}
-          >
-            {t("banner-self-host")}
-          </a>
-        </div>
+        <p className="leading-6">{t("banner-message")}</p>
+        {actions}
       </div>
     </section>
   );
