@@ -120,7 +120,12 @@ export type BorrowingCapacityLift =
   /** No cash limit to reach: each `step` euros of monthly income adds about `priceIncrease`. */
   | { kind: "incomeStep"; step: number; priceIncrease: number }
   /** About this much more savings (whole euros) reaches `price`, the monthly limit. */
-  | { kind: "savings"; extraSavings: number; price: number };
+  | { kind: "savings"; extraSavings: number; price: number }
+  /**
+   * No room for a loan and no cash limit to reach: about this much more net income a month
+   * (whole euros) leaves room for the smallest loan.
+   */
+  | { kind: "incomeToBorrow"; extraMonthlyIncome: number };
 
 export type BorrowingCapacityResult =
   | {
@@ -255,24 +260,35 @@ export function computeBorrowingCapacity(
     return mortgage.result;
   };
 
-  // 1. Monthly limit.
-  const allowedCents = floorCents((incomeCents * shareBp) / BP);
-  const maxNewPaymentCents = Math.max(0, allowedCents - existingCents);
-  let maxLoanCents = floorCents(maxNewPaymentCents * factor);
-  if (maxLoanCents < toCents(L.minLoanAmount)) maxLoanCents = 0;
-  // The mortgage calculator rounds each payment to the cent; make sure its payment for this
-  // loan fits the room, as the unrounded formula says it does.
-  if (maxLoanCents > 0 && maxLoanCents <= toCents(L.maxLoanAmount)) {
-    for (let guard = 0; guard < 10; guard++) {
-      if (toCents(paymentFor(maxLoanCents).monthlyPayment) <= maxNewPaymentCents) break;
-      maxLoanCents -= 1;
-    }
-  }
-  const incomeCeilingCents = floorCents(((maxLoanCents + savingsCents) * BP) / (BP + costsBp));
+  const minLoanCents = toCents(L.minLoanAmount);
+  const maxLoanAmountCents = toCents(L.maxLoanAmount);
 
+  // 1. Monthly limit, for any income so the lifts below can be checked against it.
+  const monthlyLimitFor = (forIncomeCents: number) => {
+    const allowedCents = floorCents((forIncomeCents * shareBp) / BP);
+    const maxNewPaymentCents = Math.max(0, allowedCents - existingCents);
+    let maxLoanCents = floorCents(maxNewPaymentCents * factor);
+    // The mortgage calculator rounds each payment to the cent; make sure its first payment for
+    // this loan fits the room, as the unrounded formula says it does.
+    if (maxLoanCents >= minLoanCents && maxLoanCents <= maxLoanAmountCents) {
+      for (let guard = 0; guard < 10; guard++) {
+        if (toCents(paymentFor(maxLoanCents).monthlyPayment) <= maxNewPaymentCents) break;
+        maxLoanCents -= 1;
+      }
+    }
+    // Room for less than the smallest loan is no room.
+    if (maxLoanCents < minLoanCents) maxLoanCents = 0;
+    return { allowedCents, maxNewPaymentCents, maxLoanCents };
+  };
+  const incomeCeilingFor = (loanCents: number, forSavingsCents: number) =>
+    floorCents(((loanCents + forSavingsCents) * BP) / (BP + costsBp));
   // 2. Upfront cash limit.
-  const cashCeilingCents =
-    cashBp === 0 ? Number.POSITIVE_INFINITY : floorCents((savingsCents * BP) / cashBp);
+  const cashCeilingFor = (forSavingsCents: number) =>
+    cashBp === 0 ? Number.POSITIVE_INFINITY : floorCents((forSavingsCents * BP) / cashBp);
+
+  const { allowedCents, maxNewPaymentCents, maxLoanCents } = monthlyLimitFor(incomeCents);
+  const incomeCeilingCents = incomeCeilingFor(maxLoanCents, savingsCents);
+  const cashCeilingCents = cashCeilingFor(savingsCents);
 
   const monthly: MonthlyLimit = {
     allowedPayments: fromCents(allowedCents),
@@ -309,14 +325,29 @@ export function computeBorrowingCapacity(
     return loanCents <= maxLoanCents && loanCents * BP <= priceCents * ltvBp;
   };
 
-  let priceCents = Math.min(incomeCeilingCents, cashCeilingCents);
+  // Then step back up while the next cent still fits, never past the lower ceiling, so the
+  // price is neither a few cents short nor above a limit the page shows.
+  const ceilingCents = Math.min(incomeCeilingCents, cashCeilingCents);
+  let priceCents = ceilingCents;
   for (let guard = 0; guard < 100 && priceCents > 0 && !fits(priceCents); guard++) priceCents -= 1;
+  for (let guard = 0; guard < 100 && priceCents < ceilingCents && fits(priceCents + 1); guard++) {
+    priceCents += 1;
+  }
 
   // A loan under the minimum isn't a loan: buy with savings alone instead.
-  if (loanFor(priceCents) > 0 && loanFor(priceCents) < toCents(L.minLoanAmount)) {
-    priceCents = floorCents((savingsCents * BP) / (BP + costsBp));
-    for (let guard = 0; guard < 100 && priceCents > 0 && loanFor(priceCents) > 0; guard++) {
+  if (loanFor(priceCents) > 0 && loanFor(priceCents) < minLoanCents) {
+    const withoutLoan = (cents: number) => loanFor(cents) === 0;
+    const cashOnlyCents = floorCents((savingsCents * BP) / (BP + costsBp));
+    priceCents = cashOnlyCents;
+    for (let guard = 0; guard < 100 && priceCents > 0 && !withoutLoan(priceCents); guard++) {
       priceCents -= 1;
+    }
+    for (
+      let guard = 0;
+      guard < 100 && priceCents < cashOnlyCents && withoutLoan(priceCents + 1);
+      guard++
+    ) {
+      priceCents += 1;
     }
   }
 
@@ -352,38 +383,77 @@ export function computeBorrowingCapacity(
     },
   };
 
+  /**
+   * What would take the binding limit up to the other one. Each answer is checked by working
+   * the limits out again with it; an answer outside the inputs the calculator takes, or past
+   * the largest loan it works out, is left out.
+   */
   function liftFor(limit: BorrowingCapacityLimit): BorrowingCapacityLift | null {
     if (limit === "both") return null;
+    const maxIncomeCents = toCents(L.maxMonthlyAmount);
+
+    /** The smallest whole-euro raise from `estimateCents` up for which `reached` holds. */
+    const smallestRaise = (estimateCents: number, reached: (raiseCents: number) => boolean) => {
+      let euros = Math.max(1, Math.ceil(estimateCents / 100));
+      for (let guard = 0; guard < 20 && euros > 1 && reached((euros - 1) * 100); guard++) euros -= 1;
+      for (let guard = 0; guard < 20 && !reached(euros * 100); guard++) euros += 1;
+      return reached(euros * 100) ? euros : null;
+    };
 
     if (limit === "cash") {
       // Savings at which the cash limit meets the monthly one: S × LTV = loan × cash share.
-      const neededSavingsCents = ceilCents((maxLoanCents * cashBp) / ltvBp);
+      if (maxLoanCents > maxLoanAmountCents) return null;
+      const estimate = ceilCents((maxLoanCents * cashBp) / ltvBp) - savingsCents;
+      const extraSavings = smallestRaise(
+        estimate,
+        (raise) =>
+          cashCeilingFor(savingsCents + raise) >= incomeCeilingFor(maxLoanCents, savingsCents + raise),
+      );
+      if (extraSavings === null || savingsCents + extraSavings * 100 > toCents(L.maxSavings)) {
+        return null;
+      }
       return {
         kind: "savings",
-        extraSavings: Math.max(1, Math.ceil((neededSavingsCents - savingsCents) / 100)),
-        price: fromCents(floorCents(((maxLoanCents + neededSavingsCents) * BP) / (BP + costsBp))),
+        extraSavings,
+        price: fromCents(incomeCeilingFor(maxLoanCents, savingsCents + extraSavings * 100)),
       };
     }
 
+    const loanWithRaise = (raiseCents: number) => monthlyLimitFor(incomeCents + raiseCents).maxLoanCents;
+    const withinIncome = (extra: number | null): extra is number =>
+      extra !== null && incomeCents + extra * 100 <= maxIncomeCents;
+
     if (!Number.isFinite(cashCeilingCents)) {
-      const extraPaymentCents = (BORROWING_CAPACITY_INCOME_STEP * 100 * shareBp) / BP;
+      if (maxLoanCents === 0) {
+        // Existing payments use up the room: the income at which the smallest loan first fits.
+        const neededPaymentCents = ceilCents(minLoanCents / factor);
+        const neededIncomeCents = ceilCents(((neededPaymentCents + existingCents) * BP) / shareBp);
+        const extra = smallestRaise(neededIncomeCents - incomeCents, (raise) => loanWithRaise(raise) > 0);
+        return withinIncome(extra) ? { kind: "incomeToBorrow", extraMonthlyIncome: extra } : null;
+      }
+      const step = BORROWING_CAPACITY_INCOME_STEP;
+      const steppedLoanCents = loanWithRaise(step * 100);
+      if (!withinIncome(step) || steppedLoanCents > maxLoanAmountCents) return null;
       return {
         kind: "incomeStep",
-        step: BORROWING_CAPACITY_INCOME_STEP,
-        priceIncrease: fromCents(floorCents((extraPaymentCents * factor * BP) / (BP + costsBp))),
+        step,
+        priceIncrease: fromCents(
+          incomeCeilingFor(steppedLoanCents, savingsCents) - incomeCeilingCents,
+        ),
       };
     }
 
     // Income at which the monthly limit reaches the cash one: the loan that price needs, the
     // payment that repays it, and the income whose allowed share covers that payment.
-    const neededLoanCents =
-      ceilCents((cashCeilingCents * (BP + costsBp)) / BP) - savingsCents;
+    const neededLoanCents = ceilCents((cashCeilingCents * (BP + costsBp)) / BP) - savingsCents;
+    if (neededLoanCents < minLoanCents || neededLoanCents > maxLoanAmountCents) return null;
     const neededPaymentCents = ceilCents(neededLoanCents / factor);
     const neededIncomeCents = ceilCents(((neededPaymentCents + existingCents) * BP) / shareBp);
-    return {
-      kind: "income",
-      extraMonthlyIncome: Math.max(1, Math.ceil((neededIncomeCents - incomeCents) / 100)),
-      price: fromCents(cashCeilingCents),
-    };
+    const extra = smallestRaise(
+      neededIncomeCents - incomeCents,
+      (raise) => incomeCeilingFor(loanWithRaise(raise), savingsCents) >= cashCeilingCents,
+    );
+    if (!withinIncome(extra)) return null;
+    return { kind: "income", extraMonthlyIncome: extra, price: fromCents(cashCeilingCents) };
   }
 }

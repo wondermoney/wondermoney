@@ -183,6 +183,22 @@ describe("borrowing capacity tool page", () => {
 		}
 	})
 
+	it("names the smallest loan where existing payments leave too little room", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const copy = copyFor(lang)
+			for (const path of ["status.noRoom", "limits.noRoom", "lift.incomeToBorrow"]) {
+				expect(textAt(copy, path)).toContain("{{min}}")
+			}
+		}
+	})
+
+	it("promises only that the first payment fits the room", () => {
+		expect(textAt(copyFor("en"), "guide.methodRounding")).toContain(
+			"its first payment, worked out by the mortgage calculator, fits your room; later ones can differ by a cent",
+		)
+		expect(textAt(copyFor("en"), "guide.methodRounding")).not.toMatch(/never goes over/)
+	})
+
 	it("says in every locale that lenders apply their own rules and that this is an estimate", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = copyFor(lang)

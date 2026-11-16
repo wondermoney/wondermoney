@@ -262,7 +262,10 @@ function ResultPanel({
       return t(k("status.noSavings"), { deposit: pct(cash.depositShare), costs: pct(cash.purchaseCostsRate) });
     }
     if (!monthly.hasRoom) {
-      return t(k("status.noRoom"), { share: pct(input.maxDebtShare) });
+      return t(k("status.noRoom"), {
+        share: pct(input.maxDebtShare),
+        min: euros(BORROWING_CAPACITY_LIMITS.minLoanAmount),
+      });
     }
     if (result.loan === 0) {
       return t(k("status.savingsOnly"), { min: euros(BORROWING_CAPACITY_LIMITS.minLoanAmount) });
@@ -271,7 +274,8 @@ function ResultPanel({
   })();
 
   const liftLine = (() => {
-    if (!lift) return result.price === 0 ? null : t(k("lift.both"));
+    // No lift: both limits meet, or the raise would go past what the calculator takes.
+    if (!lift) return result.binding === "both" && result.price > 0 ? t(k("lift.both")) : null;
     switch (lift.kind) {
       case "income":
         return t(k("lift.income"), { amount: euros(lift.extraMonthlyIncome), price: euros(lift.price) });
@@ -279,6 +283,11 @@ function ResultPanel({
         return t(k("lift.incomeStep"), { step: euros(lift.step), amount: euros(lift.priceIncrease) });
       case "savings":
         return t(k("lift.savings"), { amount: euros(lift.extraSavings), price: euros(lift.price) });
+      case "incomeToBorrow":
+        return t(k("lift.incomeToBorrow"), {
+          amount: euros(lift.extraMonthlyIncome),
+          min: euros(BORROWING_CAPACITY_LIMITS.minLoanAmount),
+        });
     }
   })();
 
@@ -389,7 +398,11 @@ function TwoLimits({
             {row(t(k("limits.monthlyPrice")), exact(monthly.priceCeiling), true)}
           </dl>
           {!monthly.hasRoom && (
-            <p className="mt-3 text-sm leading-6 text-warning-text">{t(k("limits.noRoom"))}</p>
+            <p className="mt-3 text-sm leading-6 text-warning-text">
+              {t(k("limits.noRoom"), {
+                min: formatMoney(locale, BORROWING_CAPACITY_LIMITS.minLoanAmount, { decimals: 0 }),
+              })}
+            </p>
           )}
         </div>
 

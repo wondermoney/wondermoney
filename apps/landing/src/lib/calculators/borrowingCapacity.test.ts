@@ -78,16 +78,14 @@ describe("computeBorrowingCapacity: the monthly limit", () => {
           monthlyFees: 0,
         });
         if (!mortgage.ok) throw new Error("the mortgage engine rejected the loan");
+        // The first payment fits the room.
         expect(mortgage.result.monthlyPayment).toBeLessThanOrEqual(monthly.maxNewPayment);
-        // One more euro of loan would no longer fit.
-        const bigger = computeMortgage({
-          loanAmount: monthly.maxLoan + 1,
-          termYears,
-          annualRate,
-          monthlyFees: 0,
-        });
-        if (!bigger.ok) throw new Error("the mortgage engine rejected the loan");
-        expect(bigger.result.monthlyPayment).toBeGreaterThanOrEqual(monthly.maxNewPayment);
+        // One more cent of loan no longer fits: its level payment is over the room.
+        const r = annualRate / 100 / 12;
+        const n = termYears * 12;
+        const biggerCents = Math.round(monthly.maxLoan * 100) + 1;
+        const levelPaymentCents = r === 0 ? biggerCents / n : (biggerCents * r) / (1 - (1 + r) ** -n);
+        expect(levelPaymentCents).toBeGreaterThan(Math.round(monthly.maxNewPayment * 100));
       }
     }
   });
@@ -245,6 +243,57 @@ describe("computeBorrowingCapacity: the combined result", () => {
     expect(Math.abs(lifted.price - result.price - result.lift.priceIncrease)).toBeLessThan(1);
   });
 
+  it("with no room and no savings ceiling, says how much more income lets the smallest loan fit", () => {
+    const noCeiling = { existingPayments: 1500, maxLoanToValue: 100, purchaseCostsRate: 0 };
+    const result = calculateOk(noCeiling);
+    if (result.lift?.kind !== "incomeToBorrow") {
+      throw new Error(`expected an income-to-borrow lift, got ${result.lift?.kind}`);
+    }
+
+    expect(result.binding).toBe("monthly");
+    expect(result.loan).toBe(0);
+    // Apply the stated raise: a loan fits and the price moves up.
+    const lifted = calculateOk({
+      ...noCeiling,
+      monthlyIncome: base.monthlyIncome + result.lift.extraMonthlyIncome,
+    });
+    expect(lifted.monthly.hasRoom).toBe(true);
+    expect(lifted.loan).toBeGreaterThanOrEqual(BORROWING_CAPACITY_LIMITS.minLoanAmount);
+    expect(lifted.price).toBeGreaterThan(result.price);
+    // A euro less is not enough.
+    const short = calculateOk({
+      ...noCeiling,
+      monthlyIncome: base.monthlyIncome + result.lift.extraMonthlyIncome - 1,
+    });
+    expect(short.monthly.hasRoom).toBe(false);
+  });
+
+  it("applies the each-extra-100 step: the price moves by the amount stated", () => {
+    const noCeiling = { maxLoanToValue: 100, purchaseCostsRate: 0 };
+    const result = calculateOk(noCeiling);
+    if (result.lift?.kind !== "incomeStep") throw new Error("expected an income step");
+
+    const lifted = calculateOk({ ...noCeiling, monthlyIncome: base.monthlyIncome + result.lift.step });
+    expect(cents(lifted.price) - cents(result.price)).toBe(cents(result.lift.priceIncrease));
+  });
+
+  it("leaves out a lift beyond the inputs or the largest loan the calculator takes", () => {
+    // Reaching the savings limit would need a loan above the mortgage calculator's maximum.
+    expect(calculateOk({ monthlyIncome: 50_000, savings: 100_000_000 }).lift).toBeNull();
+    // Reaching the monthly limit would mean a loan above the maximum too.
+    expect(calculateOk({ monthlyIncome: 1_000_000, maxDebtShare: 60, savings: 1_000_000 }).lift).toBeNull();
+    // An extra 100 a month would take the income past the largest the calculator takes.
+    const atMax = calculateOk({
+      monthlyIncome: BORROWING_CAPACITY_LIMITS.maxMonthlyAmount,
+      maxDebtShare: 10,
+      annualRate: 30,
+      maxLoanToValue: 100,
+      purchaseCostsRate: 0,
+    });
+    expect(atMax.binding).toBe("monthly");
+    expect(atMax.lift).toBeNull();
+  });
+
   it("with no room for a new loan, prices what savings alone can buy", () => {
     const result = calculateOk({ existingPayments: 1500 });
 
@@ -298,6 +347,34 @@ describe("computeBorrowingCapacity: the combined result", () => {
     // 10 ÷ 1.07
     expect(result.price).toBe(9.34);
     expectConsistent(result, 10);
+  });
+
+  it("reaches the lower ceiling, or stops only where one more cent breaks a limit", () => {
+    const cases: Array<Partial<BorrowingCapacityInput>> = [
+      {},
+      { savings: 20_000 },
+      { savings: 31_234.56, purchaseCostsRate: 8.35, maxLoanToValue: 85.5 },
+      { maxLoanToValue: 100, savings: 10_000 },
+      { monthlyIncome: 2345.67, existingPayments: 123.45, savings: 77_777.77 },
+      { existingPayments: 1500 },
+    ];
+    for (const overrides of cases) {
+      const input = { ...base, ...overrides };
+      const result = calculateOk(overrides);
+      const ceiling = Math.min(
+        cents(result.monthly.priceCeiling),
+        result.cash.priceCeiling === null ? Number.POSITIVE_INFINITY : cents(result.cash.priceCeiling),
+      );
+      const next = cents(result.price) + 1;
+      const costs = Math.round((next * Math.round(input.purchaseCostsRate * 100)) / 10_000);
+      const loan = Math.max(0, next + costs - cents(input.savings));
+      const breaksALimit =
+        next > ceiling ||
+        loan > cents(result.monthly.maxLoan) ||
+        loan * 10_000 > next * Math.round(input.maxLoanToValue * 100) ||
+        (loan > 0 && loan < cents(BORROWING_CAPACITY_LIMITS.minLoanAmount));
+      expect(breaksALimit).toBe(true);
+    }
   });
 
   it("keeps every figure consistent to the cent across awkward inputs", () => {
