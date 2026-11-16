@@ -982,6 +982,167 @@
         "description": "Aggiungi il mutuo a WonderMoney con tasso e durata, collega la rata mensile e guarda il debito scendere accanto al tuo budget e al tuo patrimonio."
       }
     },
+    "earlyRepayment": {
+      "title": "Calcolatore di estinzione anticipata",
+      "description": "Scopri quanto risparmi con un rimborso anticipato parziale su un prestito a tasso fisso, che tu riduca la rata o la durata.",
+      "pageTitle": "Calcolatore di Estinzione Anticipata del Mutuo e dei Prestiti — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di estinzione anticipata parziale per mutui e prestiti a tasso fisso. Confronta una rata più bassa con una durata più breve: interessi risparmiati, penale e risparmio netto. Senza registrazione.",
+      "subtitle": "Inserisci il debito residuo, la durata che resta, il tasso fisso e la somma che potresti rimborsare ora. Vedi affiancati i due modi di usarla, una rata più bassa con la stessa durata o la stessa rata con il prestito estinto prima, con gli interessi risparmiati e la penale. Non serve registrarsi.",
+      "balance": "Debito residuo",
+      "balanceHelp": "Quanto devi oggi, secondo l'ultimo estratto del prestito.",
+      "termLabel": "Durata residua",
+      "termYears": "Anni",
+      "termMonths": "Mesi",
+      "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+      "termRounded": "Calcolato su {{term}}: la durata residua è arrotondata a mesi interi.",
+      "interestRate": "Tasso di interesse",
+      "rateHelp": "Tasso annuo nominale fisso (TAN). I tassi variabili e misti non sono inclusi.",
+      "repayment": "Somma che rimborsi ora",
+      "repaymentHelp": "Un pagamento unico, in aggiunta alle rate normali.",
+      "fee": "Penale di estinzione anticipata",
+      "feeHelp": "Una percentuale della somma che rimborsi. Le penali e i loro limiti di legge variano a seconda del paese e del tipo di prestito, quindi controlla il tuo contratto. Se non ne prevede, lascia 0%.",
+      "showLabel": "Risultato da mostrare",
+      "show": {
+        "both": "Confronta entrambi",
+        "lowerPayment": "Rata più bassa",
+        "shorterTerm": "Durata più breve"
+      },
+      "lowerPayment": {
+        "title": "Mantenere la durata, ridurre la rata",
+        "headline": "Nuova rata mensile",
+        "change": "{{amount}} in meno al mese"
+      },
+      "shorterTerm": {
+        "title": "Mantenere la rata, ridurre la durata",
+        "headline": "Prestito estinto prima di",
+        "change": "Finisce tra {{term}}, a {{date}}",
+        "changeNoDate": "Finisce tra {{term}}"
+      },
+      "netSaving": "Risparmio netto dopo la penale",
+      "netCost": "Costo netto dopo la penale",
+      "summary": {
+        "repaid": "Rimborsato ora",
+        "fee": "Penale",
+        "balanceAfter": "Debito residuo dopo il rimborso"
+      },
+      "table": {
+        "title": "Il prestito così com'è e dopo il rimborso",
+        "caption": "Il prestito così com'è, confrontato con ciascun modo di usare il rimborso",
+        "figure": "Voce",
+        "original": "Prestito così com'è",
+        "lowerPayment": "Rata più bassa",
+        "shorterTerm": "Durata più breve",
+        "monthlyPayment": "Rata mensile",
+        "lastPayment": "Ultima rata",
+        "timeLeft": "Durata residua",
+        "payoffMonth": "Estinto a",
+        "totalInterest": "Interessi ancora da pagare",
+        "interestSaved": "Interessi risparmiati",
+        "fee": "Penale di estinzione",
+        "netSaving": "Risparmio netto"
+      },
+      "status": {
+        "none": "Inserisci una somma per vedere quanto risparmi. Senza rimborso, il prestito resta com'è.",
+        "cleared": "Questa somma estingue il prestito: niente più rate e niente più interessi.",
+        "unused": "Per estinguere il prestito bastano {{needed}}, quindi i restanti {{unused}} restano fuori dai conti.",
+        "feeExceeds": "La penale supera gli interessi che questo rimborso fa risparmiare, quindi nel complesso ci perdi. Verifica se il tuo contratto consente un rimborso senza penale.",
+        "nearlyCleared": "Questo rimborso estingue quasi del tutto il prestito: i {{remainder}} che restano si pagano con la prossima rata, di {{payment}}, e da lì non ci sono più interessi."
+      },
+      "resultNote": "Il tasso resta fisso fino alla fine del prestito. Le rate sono mensili e la prossima scade tra un mese.",
+      "chart": {
+        "label": "Grafico del debito residuo alla fine di ogni anno: il prestito così com'è, con una rata più bassa e con una durata più breve.",
+        "year": "Anno"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il debito residuo.",
+          "tooSmall": "Inserisci un debito di almeno {{min}}.",
+          "tooLarge": "Inserisci un debito fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata residua, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "repayment": {
+          "negative": "La somma da rimborsare non può essere negativa. Inserisci 0 per vedere il prestito così com'è.",
+          "tooLarge": "Inserisci una somma fino a {{max}}."
+        },
+        "feePercent": {
+          "negative": "La penale non può essere negativa. Inserisci 0 se non c'è.",
+          "tooLarge": "Inserisci una penale fino a {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Due modi di usare un rimborso anticipato",
+          "intro": "Quando rimborsi una parte del prestito prima del tempo, il debito residuo scende e la banca applica la riduzione in uno di due modi. Di solito puoi scegliere:",
+          "lowerPaymentTitle": "Mantenere la durata e ridurre la rata.",
+          "lowerPayment": "I mesi che restano non cambiano e ogni rata scende, così ogni mese hai più margine.",
+          "shorterTermTitle": "Mantenere la rata e ridurre la durata.",
+          "shorterTerm": "Continui a pagare la stessa cifra e il prestito finisce prima. Risparmi più interessi, perché il debito scende più in fretta.",
+          "outro": "In entrambi i casi paghi meno interessi, perché da ora in poi sono calcolati su un debito più piccolo."
+        },
+        "before": {
+          "title": "Prima di rimborsare",
+          "items": {
+            "fee": "Controlla la penale. La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto.",
+            "rate": "I tassi variabili e misti non sono coperti: i calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito.",
+            "reserves": "Tieni una riserva. Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso.",
+            "otherDebts": "Rimborsa prima il debito più caro. Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico.",
+            "lender": "Chiedi alla banca come applica il rimborso. Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+          }
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Immagina di dovere ancora {{balance}}, con {{term}} di durata residua e un tasso fisso del {{rate}}. Paghi {{payment}} al mese e, se nulla cambia, il resto del prestito costa {{interest}} di interessi. Rimborsi {{repayment}} ora e restano {{balanceAfter}} da pagare.",
+          "lowerPayment": "Se mantieni la durata, la rata scende a {{newPayment}}, {{paymentDrop}} in meno al mese. Nei {{term}} che restano paghi {{lowerSaved}} di interessi in meno.",
+          "shorterTerm": "Se continui a pagare {{payment}}, il prestito finisce {{timeSaved}} prima, tra {{newTerm}}, con un'ultima rata di {{lastPayment}}. Risparmi {{shorterSaved}} di interessi, più che riducendo la rata, perché il debito scende più in fretta fin dall'inizio.",
+          "fee": "Se la banca applica una penale del {{feeRate}}, il rimborso costa {{fee}}. Il risparmio netto è allora di {{lowerNet}} con la rata più bassa e di {{shorterNet}} con la durata più breve."
+        },
+        "method": {
+          "title": "Come viene calcolato",
+          "intro": "Il calcolatore ricostruisce prima il prestito così com'è, con lo stesso motore a tasso fisso del calcolatore del mutuo. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula delle annualità:",
+          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate che restano. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n.",
+          "lowerPayment": "Mantenere la durata: il debito che resta dopo il rimborso torna nella formula con lo stesso n, che dà la nuova rata, più bassa.",
+          "shorterTerm": "Mantenere la rata: continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
+          "fee": "La penale è la percentuale che inserisci, applicata alla somma rimborsata. Gli interessi risparmiati sono gli interessi residui del prestito così com'è meno quelli di ciascuno scenario, e il risparmio netto è questa cifra meno la penale. Una somma superiore al debito residuo estingue il prestito, e solo il debito residuo conta per la penale.",
+          "assumptionsTitle": "Ipotesi",
+          "assumptions": {
+            "fixedRate": "Il tasso resta fisso fino alla fine del prestito. I tassi variabili e misti non sono inclusi.",
+            "timing": "Rimborsi oggi, appena dopo una rata normale, e la prossima rata scade tra un mese.",
+            "oneOff": "C'è un solo rimborso, senza altri pagamenti extra né sospensioni delle rate.",
+            "costs": "Conta solo la penale di estinzione anticipata. Assicurazioni, spese di conto ed eventuali imposte sulla penale restano fuori.",
+            "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano esattamente.",
+            "lenderFigures": "I numeri della tua banca possono differire leggermente per come conta i giorni e arrotonda. Chiedile una simulazione prima di rimborsare."
+          },
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata."
+        },
+        "related": {
+          "title": "Altri calcolatori",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Il piano completo, anno per anno, di un prestito a tasso fisso, o la rata di uno nuovo.",
+          "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
+          "debtToIncomeBody": "La parte del tuo reddito che va in rate, prima e dopo una rata più bassa.",
+          "emergencyFundLink": "Calcolatore del fondo di emergenza",
+          "emergencyFundBody": "Quanto denaro tenere da parte prima di mettere i risparmi nel prestito."
+        }
+      },
+      "cta": {
+        "headline": "Segui il debito che ti resta nel tempo",
+        "description": "Aggiungi il prestito a WonderMoney con debito residuo, tasso e durata, collega la rata mensile e guarda scendere quanto devi ancora, accanto al tuo budget e al tuo patrimonio."
+      }
+    },
     "savingsGoal": {
       "title": "Simulatore di risparmio",
       "description": "Calcola quanto risparmiare al mese per un obiettivo, quanto tempo ti serve o quanto metterai da parte.",

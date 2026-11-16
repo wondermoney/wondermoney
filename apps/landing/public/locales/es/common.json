@@ -982,6 +982,167 @@
         "description": "Añade la hipoteca a WonderMoney con su tipo y su plazo, vincula la cuota mensual y mira cómo baja la deuda junto a tu presupuesto y tu patrimonio."
       }
     },
+    "earlyRepayment": {
+      "title": "Calculadora de amortización anticipada",
+      "description": "Mira cuánto ahorras con una amortización anticipada en un préstamo a tipo fijo, tanto si bajas la cuota como si acortas el plazo.",
+      "pageTitle": "Calculadora de Amortización Anticipada de Hipoteca y Préstamos — WonderMoney",
+      "pageDescription": "Calculadora gratuita de amortización anticipada para hipotecas y préstamos a tipo fijo. Compara una cuota más baja con un plazo más corto: intereses ahorrados, comisión y ahorro neto. Sin registro.",
+      "subtitle": "Introduce lo que aún debes, el tiempo que queda, el tipo fijo y la cantidad que podrías amortizar ahora. Ve las dos formas de usarla una al lado de la otra, una cuota más baja en el mismo plazo o la misma cuota con el préstamo pagado antes, con los intereses ahorrados y la comisión. Sin registro.",
+      "balance": "Capital pendiente",
+      "balanceHelp": "Lo que debes hoy, según el último extracto del préstamo.",
+      "termLabel": "Plazo que queda",
+      "termYears": "Años",
+      "termMonths": "Meses",
+      "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
+      "interestRate": "Tipo de interés",
+      "rateHelp": "Tipo nominal anual fijo (TIN). Los tipos variables y mixtos no están incluidos.",
+      "repayment": "Cantidad que amortizas ahora",
+      "repaymentHelp": "Un pago único, además de las cuotas habituales.",
+      "fee": "Comisión por amortización anticipada",
+      "feeHelp": "Un porcentaje de la cantidad que amortizas. Las comisiones y sus límites legales varían según el país y el tipo de préstamo, así que revisa tu contrato. Si no hay ninguna, deja 0%.",
+      "showLabel": "Resultado que mostrar",
+      "show": {
+        "both": "Comparar ambos",
+        "lowerPayment": "Cuota más baja",
+        "shorterTerm": "Plazo más corto"
+      },
+      "lowerPayment": {
+        "title": "Mantener el plazo y bajar la cuota",
+        "headline": "Nueva cuota mensual",
+        "change": "{{amount}} menos al mes"
+      },
+      "shorterTerm": {
+        "title": "Mantener la cuota y acortar el plazo",
+        "headline": "Préstamo pagado antes en",
+        "change": "Termina dentro de {{term}}, en {{date}}",
+        "changeNoDate": "Termina dentro de {{term}}"
+      },
+      "netSaving": "Ahorro neto tras la comisión",
+      "netCost": "Coste neto tras la comisión",
+      "summary": {
+        "repaid": "Amortizado ahora",
+        "fee": "Comisión",
+        "balanceAfter": "Capital pendiente tras amortizar"
+      },
+      "table": {
+        "title": "El préstamo tal como está y después de amortizar",
+        "caption": "El préstamo tal como está, comparado con cada forma de usar la amortización",
+        "figure": "Concepto",
+        "original": "Préstamo tal como está",
+        "lowerPayment": "Cuota más baja",
+        "shorterTerm": "Plazo más corto",
+        "monthlyPayment": "Cuota mensual",
+        "lastPayment": "Última cuota",
+        "timeLeft": "Plazo que queda",
+        "payoffMonth": "Pagado en",
+        "totalInterest": "Intereses por pagar",
+        "interestSaved": "Intereses ahorrados",
+        "fee": "Comisión por amortización",
+        "netSaving": "Ahorro neto"
+      },
+      "status": {
+        "none": "Introduce una cantidad para ver cuánto ahorras. Sin amortización, el préstamo sigue igual.",
+        "cleared": "Esta cantidad cancela el préstamo: no quedan más cuotas ni más intereses.",
+        "unused": "Bastan {{needed}} para cancelar el préstamo, así que los {{unused}} restantes quedan fuera de las cuentas.",
+        "feeExceeds": "La comisión supera los intereses que ahorra esta amortización, así que pierdes dinero en total. Comprueba si tu contrato permite amortizar sin comisión.",
+        "nearlyCleared": "Esta amortización casi cancela el préstamo: los {{remainder}} que quedan se pagan con tu próxima cuota, de {{payment}}, y a partir de ahí no hay más intereses."
+      },
+      "resultNote": "El tipo se mantiene fijo hasta el final del préstamo. Las cuotas son mensuales y la próxima vence dentro de un mes.",
+      "chart": {
+        "label": "Gráfico del capital pendiente al final de cada año: el préstamo tal como está, con la cuota más baja y con el plazo más corto.",
+        "year": "Año"
+      },
+      "errors": {
+        "summary": "La comparación aparece cuando todos los campos tienen un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo que queda, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce como máximo {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "annualRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo de interés no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "repayment": {
+          "negative": "La cantidad a amortizar no puede ser negativa. Introduce 0 para ver el préstamo tal como está.",
+          "tooLarge": "Introduce una cantidad de hasta {{max}}."
+        },
+        "feePercent": {
+          "negative": "La comisión no puede ser negativa. Introduce 0 si no hay ninguna.",
+          "tooLarge": "Introduce una comisión de hasta {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Dos formas de usar una amortización anticipada",
+          "intro": "Cuando pagas parte de un préstamo antes de tiempo, el capital pendiente baja y el banco aplica esa reducción de una de dos formas. Normalmente puedes elegir:",
+          "lowerPaymentTitle": "Mantener el plazo y bajar la cuota.",
+          "lowerPayment": "Los meses que quedan no cambian y cada cuota baja, lo que te deja más margen cada mes.",
+          "shorterTermTitle": "Mantener la cuota y acortar el plazo.",
+          "shorterTerm": "Sigues pagando lo mismo y el préstamo termina antes. Ahorras más intereses, porque la deuda baja más deprisa.",
+          "outro": "En los dos casos pagas menos intereses, porque a partir de ahora se calculan sobre un capital menor."
+        },
+        "before": {
+          "title": "Antes de amortizar",
+          "items": {
+            "fee": "Revisa la comisión. El banco puede cobrar un porcentaje de lo que amortizas, y las normas y los límites legales cambian según el país y el tipo de préstamo. Introdúcela en la calculadora para ver el ahorro neto.",
+            "rate": "Los tipos variables y mixtos quedan fuera de esta calculadora: las cuentas suponen que el tipo que introduces se mantiene fijo hasta el final del préstamo.",
+            "reserves": "Guarda un colchón. El dinero que entregas al banco es difícil de recuperar, así que asegúrate de que tu fondo de emergencia sigue ahí después de amortizar.",
+            "otherDebts": "Paga primero la deuda más cara. Si tienes una tarjeta de crédito o un préstamo personal con un tipo más alto, amortizarlo suele ahorrar más que amortizar una hipoteca más barata.",
+            "lender": "Pregunta al banco cómo aplica la amortización. Unos bajan la cuota por defecto, otros acortan el plazo y muchos te dejan elegir."
+          }
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Supón que aún debes {{balance}}, quedan {{term}} y el tipo fijo es del {{rate}}. Pagas {{payment}} al mes y, si nada cambia, el resto del préstamo cuesta {{interest}} en intereses. Amortizas {{repayment}} ahora y quedan {{balanceAfter}} por pagar.",
+          "lowerPayment": "Si mantienes el plazo, la cuota baja a {{newPayment}}, {{paymentDrop}} menos al mes. En los {{term}} que quedan pagas {{lowerSaved}} menos en intereses.",
+          "shorterTerm": "Si sigues pagando {{payment}}, el préstamo termina {{timeSaved}} antes, dentro de {{newTerm}}, con una última cuota de {{lastPayment}}. Ahorras {{shorterSaved}} en intereses, más que bajando la cuota, porque la deuda baja más deprisa desde el principio.",
+          "fee": "Si el banco cobra una comisión del {{feeRate}}, la amortización cuesta {{fee}}. El ahorro neto queda en {{lowerNet}} con la cuota más baja y en {{shorterNet}} con el plazo más corto."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "La calculadora primero calcula el préstamo tal como está, con el mismo motor de tipo fijo que la calculadora de hipoteca. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
+          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas que quedan. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n.",
+          "lowerPayment": "Mantener el plazo: el capital que queda tras la amortización vuelve a la fórmula con el mismo n, lo que da la nueva cuota, más baja.",
+          "shorterTerm": "Mantener la cuota: sigues pagando lo que el cuadro original prevé cada mes hasta que el capital menor se acaba. La última cuota solo cubre lo que falta, así que suele ser menor.",
+          "fee": "La comisión es el porcentaje que introduces, aplicado a la cantidad amortizada. Los intereses ahorrados son los intereses que quedan en el préstamo tal como está menos los de cada escenario, y el ahorro neto es eso menos la comisión. Una cantidad mayor que el capital pendiente cancela el préstamo, y solo el capital cuenta para la comisión.",
+          "assumptionsTitle": "Supuestos",
+          "assumptions": {
+            "fixedRate": "El tipo se mantiene fijo hasta el final del préstamo. Los tipos variables y mixtos no están incluidos.",
+            "timing": "Amortizas hoy, justo después de una cuota normal, y la próxima cuota vence dentro de un mes.",
+            "oneOff": "Hay una única amortización, sin otros pagos extra ni periodos de carencia.",
+            "costs": "Solo cuenta la comisión por amortización anticipada. Los seguros, las comisiones de mantenimiento y los impuestos sobre la comisión quedan fuera.",
+            "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran.",
+            "lenderFigures": "Las cifras de tu banco pueden variar un poco por cómo cuenta los días y redondea. Pídele su propia simulación antes de amortizar."
+          },
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años pendientes, tipos de hasta {{maxRate}} y comisiones de hasta el {{maxFee}} de lo amortizado."
+        },
+        "related": {
+          "title": "Otras calculadoras",
+          "mortgageLink": "Calculadora de hipoteca",
+          "mortgageBody": "El cuadro completo, año a año, de un préstamo a tipo fijo, o la cuota de uno nuevo.",
+          "debtToIncomeLink": "Calculadora de ratio de endeudamiento",
+          "debtToIncomeBody": "La parte de tus ingresos que se va en cuotas, antes y después de bajar la cuota.",
+          "emergencyFundLink": "Calculadora de fondo de emergencia",
+          "emergencyFundBody": "Cuánto dinero guardar antes de destinar ahorros al préstamo."
+        }
+      },
+      "cta": {
+        "headline": "Sigue la deuda que te queda a lo largo del tiempo",
+        "description": "Añade el préstamo a WonderMoney con su capital, tipo y plazo, vincula la cuota mensual y mira cómo baja lo que aún debes, junto a tu presupuesto y tu patrimonio."
+      }
+    },
     "savingsGoal": {
       "title": "Simulador de ahorro",
       "description": "Calcula cuánto ahorrar al mes para un objetivo, cuánto tardarás en alcanzarlo o cuánto llegarás a juntar.",

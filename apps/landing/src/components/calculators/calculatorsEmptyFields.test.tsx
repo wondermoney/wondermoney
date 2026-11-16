@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import type { Lang } from "@/lib/i18nLocale";
 import CompoundInterestCalculatorComp from "./CompoundInterestCalculatorComp";
 import DebtToIncomeCalculatorComp from "./DebtToIncomeCalculatorComp";
+import EarlyRepaymentCalculatorComp from "./EarlyRepaymentCalculatorComp";
 import EmergencyFundCalculatorComp from "./EmergencyFundCalculatorComp";
 import FireCalculatorComp from "./FireCalculatorComp";
 import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
@@ -19,6 +20,7 @@ import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["compound interest", CompoundInterestCalculatorComp],
   ["debt-to-income", DebtToIncomeCalculatorComp],
+  ["early repayment", EarlyRepaymentCalculatorComp],
   ["emergency fund", EmergencyFundCalculatorComp],
   ["FIRE", FireCalculatorComp],
   ["household budget", HouseholdBudgetCalculatorComp],
@@ -235,5 +237,58 @@ describe("term deposit calculator with the tax cleared", () => {
     await user.clear(screen.getByRole("spinbutton", { name: "Tax withheld on interest" }));
     expect(figures()).toEqual(before);
     expect(figures()).toContain("€0.00");
+  });
+});
+
+describe("early repayment calculator", () => {
+  it("asks for the rate instead of computing at 0%", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Interest rate" }));
+    expect(screen.getByText("Enter the interest rate.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("asks for the time left when both term fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(screen.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the time left, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("reads an empty months field as 0 when years are given", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Months" }));
+    expect(figures().length).toBeGreaterThan(0);
+  });
+
+  it("asks for the balance, since a loan needs one", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Balance still owed" }));
+    expect(screen.getByText("Enter the balance you still owe.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("counts an empty repayment as nothing repaid", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Lump sum you repay now" }));
+    expect(
+      screen.getByText(
+        "Enter a lump sum to see what it saves. With nothing repaid, the loan stays as it is.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("counts an empty fee as none", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Early repayment fee" }));
+    expect(figures().length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Enter a fee/)).toBeNull();
   });
 });

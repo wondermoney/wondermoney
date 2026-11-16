@@ -982,6 +982,167 @@
         "description": "Adiciona o crédito habitação ao WonderMoney com a taxa e o prazo, associa a prestação mensal e vê a dívida a descer ao lado do teu orçamento e do teu património."
       }
     },
+    "earlyRepayment": {
+      "title": "Simulador de amortização de crédito",
+      "description": "Vê quanto poupas com uma amortização antecipada num crédito a taxa fixa, quer baixes a prestação quer reduzas o prazo.",
+      "pageTitle": "Simulador de Amortização Antecipada de Crédito — WonderMoney",
+      "pageDescription": "Simulador gratuito de amortização antecipada para crédito habitação e outros créditos a taxa fixa. Compara uma prestação mais baixa com um prazo mais curto: juros poupados, comissão e poupança líquida. Sem registo.",
+      "subtitle": "Indica quanto ainda deves, o tempo que falta, a taxa fixa e o valor que podes amortizar agora. Vê lado a lado as duas formas de o usar, uma prestação mais baixa no mesmo prazo ou a mesma prestação com o crédito pago mais cedo, com os juros poupados e a comissão. Sem registo.",
+      "balance": "Capital em dívida",
+      "balanceHelp": "O que deves hoje, segundo o último extrato do crédito.",
+      "termLabel": "Prazo que falta",
+      "termYears": "Anos",
+      "termMonths": "Meses",
+      "termHelp": "Anos e meses, por exemplo 22 anos e 4 meses.",
+      "termRounded": "Calculado para {{term}}: o prazo é arredondado a meses completos.",
+      "interestRate": "Taxa de juro",
+      "rateHelp": "Taxa anual nominal fixa (TAN). Taxas variáveis e mistas ficam fora deste simulador.",
+      "repayment": "Valor a amortizar agora",
+      "repaymentHelp": "Um pagamento único, além das prestações normais.",
+      "fee": "Comissão de amortização antecipada",
+      "feeHelp": "Uma percentagem do valor que amortizas. As comissões e os limites legais variam consoante o país e o tipo de crédito, por isso confirma no teu contrato. Se não houver nenhuma, deixa 0%.",
+      "showLabel": "Resultado a mostrar",
+      "show": {
+        "both": "Comparar os dois",
+        "lowerPayment": "Prestação mais baixa",
+        "shorterTerm": "Prazo mais curto"
+      },
+      "lowerPayment": {
+        "title": "Manter o prazo e baixar a prestação",
+        "headline": "Nova prestação mensal",
+        "change": "Menos {{amount}} por mês"
+      },
+      "shorterTerm": {
+        "title": "Manter a prestação e reduzir o prazo",
+        "headline": "Crédito pago mais cedo em",
+        "change": "Termina daqui a {{term}}, em {{date}}",
+        "changeNoDate": "Termina daqui a {{term}}"
+      },
+      "netSaving": "Poupança líquida depois da comissão",
+      "netCost": "Custo líquido depois da comissão",
+      "summary": {
+        "repaid": "Amortizado agora",
+        "fee": "Comissão",
+        "balanceAfter": "Capital em dívida depois de amortizar"
+      },
+      "table": {
+        "title": "O crédito tal como está e depois da amortização",
+        "caption": "O crédito tal como está, comparado com cada forma de usar a amortização",
+        "figure": "Valor",
+        "original": "Crédito tal como está",
+        "lowerPayment": "Prestação mais baixa",
+        "shorterTerm": "Prazo mais curto",
+        "monthlyPayment": "Prestação mensal",
+        "lastPayment": "Última prestação",
+        "timeLeft": "Prazo que falta",
+        "payoffMonth": "Pago em",
+        "totalInterest": "Juros por pagar",
+        "interestSaved": "Juros poupados",
+        "fee": "Comissão de amortização",
+        "netSaving": "Poupança líquida"
+      },
+      "status": {
+        "none": "Indica um valor a amortizar para veres quanto poupas. Sem amortização, o crédito fica como está.",
+        "cleared": "Este valor liquida o crédito: não há mais prestações nem mais juros.",
+        "unused": "Bastam {{needed}} para liquidar o crédito, por isso os restantes {{unused}} ficam fora das contas.",
+        "feeExceeds": "A comissão é maior do que os juros que esta amortização poupa, por isso perdes dinheiro no total. Confirma se o teu contrato permite amortizar sem comissão.",
+        "nearlyCleared": "Esta amortização quase liquida o crédito: os {{remainder}} que faltam ficam pagos na próxima prestação, de {{payment}}, e a partir daí não há mais juros."
+      },
+      "resultNote": "A taxa mantém-se fixa até ao fim do crédito. As prestações são mensais e a próxima vence daqui a um mês.",
+      "chart": {
+        "label": "Gráfico do capital em dívida no fim de cada ano: o crédito tal como está, com a prestação mais baixa e com o prazo mais curto.",
+        "year": "Ano"
+      },
+      "errors": {
+        "summary": "A comparação aparece quando todos os campos tiverem um valor válido.",
+        "balance": {
+          "required": "Indica o capital que ainda deves.",
+          "tooSmall": "Indica um capital de pelo menos {{min}}.",
+          "tooLarge": "Indica um capital até {{max}}."
+        },
+        "termYears": {
+          "required": "Indica o prazo que falta, pelo menos um mês.",
+          "negative": "Os anos não podem ser negativos.",
+          "tooLarge": "Indica no máximo {{max}} anos no total."
+        },
+        "termMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Indica de 0 a 11 meses; os anos completos vão no campo dos anos."
+        },
+        "annualRate": {
+          "required": "Indica a taxa de juro.",
+          "negative": "A taxa de juro não pode ser inferior a 0%.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "repayment": {
+          "negative": "O valor a amortizar não pode ser negativo. Indica 0 para veres o crédito tal como está.",
+          "tooLarge": "Indica um valor até {{max}}."
+        },
+        "feePercent": {
+          "negative": "A comissão não pode ser negativa. Indica 0 se não houver nenhuma.",
+          "tooLarge": "Indica uma comissão até {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Duas formas de usar uma amortização antecipada",
+          "intro": "Quando pagas parte de um crédito antes do tempo, o capital em dívida desce e o banco aplica essa redução de uma de duas formas. Em geral, podes escolher:",
+          "lowerPaymentTitle": "Manter o prazo e baixar a prestação.",
+          "lowerPayment": "Os meses que faltam ficam iguais e cada prestação desce, o que te dá mais folga todos os meses.",
+          "shorterTermTitle": "Manter a prestação e reduzir o prazo.",
+          "shorterTerm": "Continuas a pagar o mesmo e o crédito acaba mais cedo. Poupas mais juros, porque a dívida desce mais depressa.",
+          "outro": "Nos dois casos pagas menos juros, porque a partir de agora são calculados sobre um capital mais pequeno."
+        },
+        "before": {
+          "title": "Antes de amortizar",
+          "items": {
+            "fee": "Confirma a comissão. O banco pode cobrar uma percentagem do valor que amortizas, e as regras e os limites legais mudam de país para país e com o tipo de crédito. Indica-a no simulador para veres a poupança líquida.",
+            "rate": "Taxas variáveis e mistas ficam fora deste simulador: as contas assumem que a taxa que indicas se mantém fixa até ao fim do crédito.",
+            "reserves": "Mantém uma reserva. O dinheiro entregue ao banco é difícil de recuperar, por isso garante que o teu fundo de emergência continua lá depois de amortizares.",
+            "otherDebts": "Paga primeiro a dívida mais cara. Se tens um cartão de crédito ou um crédito pessoal com uma taxa mais alta, amortizá-lo costuma poupar mais do que amortizar um crédito habitação mais barato.",
+            "lender": "Pergunta ao banco como aplica a amortização. Uns baixam a prestação por defeito, outros reduzem o prazo, e muitos deixam-te escolher."
+          }
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Imagina que ainda deves {{balance}}, faltam {{term}} e a taxa fixa é de {{rate}}. Pagas {{payment}} por mês e, se nada mudar, o resto do crédito custa {{interest}} em juros. Amortizas {{repayment}} agora e ficam {{balanceAfter}} por pagar.",
+          "lowerPayment": "Se mantiveres o prazo, a prestação desce para {{newPayment}}, menos {{paymentDrop}} por mês. Nos {{term}} que faltam, pagas menos {{lowerSaved}} em juros.",
+          "shorterTerm": "Se continuares a pagar {{payment}}, o crédito acaba {{timeSaved}} mais cedo, daqui a {{newTerm}}, com uma última prestação de {{lastPayment}}. Poupas {{shorterSaved}} em juros, mais do que baixando a prestação, porque a dívida desce mais depressa desde o início.",
+          "fee": "Se o banco cobrar uma comissão de {{feeRate}}, a amortização custa {{fee}}. A poupança líquida fica em {{lowerNet}} com a prestação mais baixa e em {{shorterNet}} com o prazo mais curto."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "O simulador calcula primeiro o crédito tal como está, com o mesmo motor de taxa fixa do simulador de crédito habitação. Em cada mês, os juros incidem sobre o capital em dívida e o resto da prestação amortiza o crédito. A prestação constante vem da fórmula das anuidades:",
+          "legend": "M é a prestação mensal, P o capital em dívida, r a taxa anual a dividir por 12 e n o número de prestações que faltam. A 0% não há juros, por isso a prestação é simplesmente P a dividir por n.",
+          "lowerPayment": "Manter o prazo: o capital que fica depois da amortização volta à fórmula com o mesmo n, o que dá a nova prestação, mais baixa.",
+          "shorterTerm": "Manter a prestação: continuas a pagar o que o plano original prevê para cada mês até o capital mais pequeno acabar. A última prestação só cobre o que falta, por isso costuma ser mais baixa.",
+          "fee": "A comissão é a percentagem que indicas, aplicada ao valor amortizado. Os juros poupados são os juros que faltam no crédito tal como está menos os juros de cada cenário, e a poupança líquida é esse valor menos a comissão. Um valor maior do que o capital em dívida liquida o crédito, e só o capital conta para a comissão.",
+          "assumptionsTitle": "Pressupostos",
+          "assumptions": {
+            "fixedRate": "A taxa mantém-se fixa até ao fim do crédito. Taxas variáveis e mistas não estão incluídas.",
+            "timing": "Amortizas hoje, logo a seguir a uma prestação normal, e a próxima prestação vence daqui a um mês.",
+            "oneOff": "Há uma única amortização, sem outros pagamentos extra nem períodos de carência.",
+            "costs": "Só conta a comissão de amortização antecipada. Seguros, comissões de manutenção e impostos sobre a comissão ficam de fora.",
+            "rounding": "Os valores estão em euros. Os juros e a prestação de cada mês são arredondados ao cêntimo, por isso todos os totais da página batem certo.",
+            "lenderFigures": "Os valores do teu banco podem diferir ligeiramente, pela forma como conta os dias e arredonda. Pede-lhe uma simulação antes de amortizares."
+          },
+          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, até {{maxYears}} anos por pagar, taxas até {{maxRate}} e comissões até {{maxFee}} do valor amortizado."
+        },
+        "related": {
+          "title": "Outros simuladores",
+          "mortgageLink": "Simulador de crédito habitação",
+          "mortgageBody": "O plano completo, ano a ano, de um crédito a taxa fixa, ou a prestação de um crédito novo.",
+          "debtToIncomeLink": "Calculadora de taxa de esforço",
+          "debtToIncomeBody": "A parte do teu rendimento que vai para prestações, antes e depois de baixares a prestação.",
+          "emergencyFundLink": "Calculadora de fundo de emergência",
+          "emergencyFundBody": "Quanto dinheiro deves manter de lado antes de pores poupanças no crédito."
+        }
+      },
+      "cta": {
+        "headline": "Acompanha a dívida que te falta pagar ao longo do tempo",
+        "description": "Adiciona o crédito ao WonderMoney com o capital, a taxa e o prazo, associa a prestação mensal e vê o que ainda deves a descer, ao lado do teu orçamento e do teu património."
+      }
+    },
     "savingsGoal": {
       "title": "Simulador de poupança",
       "description": "Calcula quanto poupar por mês para um objetivo, quanto tempo demoras a lá chegar ou quanto vais juntar.",

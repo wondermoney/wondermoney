@@ -982,6 +982,167 @@
         "description": "Ajoutez le prêt immobilier à WonderMoney avec son taux et sa durée, reliez la mensualité et voyez la dette baisser à côté de votre budget et de votre patrimoine."
       }
     },
+    "earlyRepayment": {
+      "title": "Simulateur de remboursement anticipé",
+      "description": "Voyez ce que rapporte un remboursement anticipé partiel sur un prêt à taux fixe, en baissant la mensualité ou en raccourcissant la durée.",
+      "pageTitle": "Simulateur de Remboursement Anticipé de Prêt Immobilier — WonderMoney",
+      "pageDescription": "Simulateur gratuit de remboursement anticipé pour prêts immobiliers et crédits à taux fixe. Comparez une mensualité plus basse et une durée plus courte : intérêts économisés, indemnités et économie nette. Sans inscription.",
+      "subtitle": "Indiquez le capital restant dû, la durée restante, le taux fixe et la somme que vous pourriez rembourser maintenant. Voyez côte à côte les deux façons de l'utiliser, une mensualité plus basse sur la même durée ou la même mensualité avec un prêt remboursé plus tôt, avec les intérêts économisés et les indemnités. Sans inscription.",
+      "balance": "Capital restant dû",
+      "balanceHelp": "Ce que vous devez aujourd'hui, d'après votre dernier relevé de prêt.",
+      "termLabel": "Durée restante",
+      "termYears": "Années",
+      "termMonths": "Mois",
+      "termHelp": "Des années plus des mois, par exemple 22 ans et 4 mois.",
+      "termRounded": "Calculé sur {{term}} : la durée restante est arrondie au mois entier.",
+      "interestRate": "Taux d'intérêt",
+      "rateHelp": "Taux nominal annuel fixe. Les taux variables et mixtes ne sont pas pris en compte.",
+      "repayment": "Somme remboursée maintenant",
+      "repaymentHelp": "Un versement unique, en plus de vos mensualités habituelles.",
+      "fee": "Indemnités de remboursement anticipé",
+      "feeHelp": "Un pourcentage de la somme remboursée. Les indemnités et leurs plafonds légaux varient selon le pays et le type de prêt : vérifiez votre contrat. S'il n'en prévoit pas, laissez 0 %.",
+      "showLabel": "Résultat à afficher",
+      "show": {
+        "both": "Comparer les deux",
+        "lowerPayment": "Mensualité plus basse",
+        "shorterTerm": "Durée plus courte"
+      },
+      "lowerPayment": {
+        "title": "Garder la durée, baisser la mensualité",
+        "headline": "Nouvelle mensualité",
+        "change": "{{amount}} de moins par mois"
+      },
+      "shorterTerm": {
+        "title": "Garder la mensualité, réduire la durée",
+        "headline": "Prêt remboursé plus tôt de",
+        "change": "Se termine dans {{term}}, en {{date}}",
+        "changeNoDate": "Se termine dans {{term}}"
+      },
+      "netSaving": "Économie nette après indemnités",
+      "netCost": "Coût net après indemnités",
+      "summary": {
+        "repaid": "Remboursé maintenant",
+        "fee": "Indemnités",
+        "balanceAfter": "Capital restant dû après le remboursement"
+      },
+      "table": {
+        "title": "Le prêt tel quel et après le remboursement",
+        "caption": "Le prêt tel quel, comparé à chaque façon d'utiliser le remboursement",
+        "figure": "Élément",
+        "original": "Prêt tel quel",
+        "lowerPayment": "Mensualité plus basse",
+        "shorterTerm": "Durée plus courte",
+        "monthlyPayment": "Mensualité",
+        "lastPayment": "Dernière mensualité",
+        "timeLeft": "Durée restante",
+        "payoffMonth": "Remboursé en",
+        "totalInterest": "Intérêts restant à payer",
+        "interestSaved": "Intérêts économisés",
+        "fee": "Indemnités de remboursement",
+        "netSaving": "Économie nette"
+      },
+      "status": {
+        "none": "Indiquez une somme pour voir ce qu'elle fait économiser. Sans remboursement, le prêt reste tel quel.",
+        "cleared": "Cette somme solde le prêt : plus aucune mensualité ni aucun intérêt.",
+        "unused": "Il suffit de {{needed}} pour solder le prêt : les {{unused}} restants ne sont pas comptés.",
+        "feeExceeds": "Les indemnités dépassent les intérêts économisés par ce remboursement : vous y perdez au total. Vérifiez si votre contrat permet un remboursement sans indemnités.",
+        "nearlyCleared": "Ce remboursement solde presque le prêt : les {{remainder}} restants sont réglés avec votre prochaine mensualité, de {{payment}}, et il n'y a plus d'intérêts ensuite."
+      },
+      "resultNote": "Le taux reste fixe jusqu'à la fin du prêt. Les mensualités sont mensuelles et la prochaine tombe dans un mois.",
+      "chart": {
+        "label": "Graphique du capital restant dû à la fin de chaque année : le prêt tel quel, avec une mensualité plus basse et avec une durée plus courte.",
+        "year": "Année"
+      },
+      "errors": {
+        "summary": "La comparaison s'affiche dès que tous les champs ont une valeur valide.",
+        "balance": {
+          "required": "Indiquez le capital restant dû.",
+          "tooSmall": "Indiquez un capital d'au moins {{min}}.",
+          "tooLarge": "Indiquez un capital jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Indiquez la durée restante, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indiquez au plus {{max}} ans au total."
+        },
+        "termMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indiquez de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "annualRate": {
+          "required": "Saisissez le taux d'intérêt.",
+          "negative": "Le taux d'intérêt ne peut pas être inférieur à 0 %.",
+          "tooLarge": "Indiquez un taux jusqu'à {{max}}."
+        },
+        "repayment": {
+          "negative": "La somme remboursée ne peut pas être négative. Indiquez 0 pour voir le prêt tel quel.",
+          "tooLarge": "Indiquez une somme jusqu'à {{max}}."
+        },
+        "feePercent": {
+          "negative": "Les indemnités ne peuvent pas être négatives. Indiquez 0 s'il n'y en a pas.",
+          "tooLarge": "Indiquez des indemnités jusqu'à {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Deux façons d'utiliser un remboursement anticipé",
+          "intro": "Quand vous remboursez une partie d'un prêt avant l'échéance, le capital restant dû baisse et la banque applique cette baisse de l'une de deux façons. En général, vous pouvez choisir :",
+          "lowerPaymentTitle": "Garder la durée et baisser la mensualité.",
+          "lowerPayment": "Le nombre de mois restants ne change pas et chaque mensualité baisse, ce qui vous laisse plus de marge chaque mois.",
+          "shorterTermTitle": "Garder la mensualité et réduire la durée.",
+          "shorterTerm": "Vous continuez à payer la même somme et le prêt se termine plus tôt. Vous économisez plus d'intérêts, car le capital baisse plus vite.",
+          "outro": "Dans les deux cas, vous payez moins d'intérêts, car ils sont désormais calculés sur un capital plus faible."
+        },
+        "before": {
+          "title": "Avant de rembourser",
+          "items": {
+            "fee": "Vérifiez les indemnités. La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette.",
+            "rate": "Les taux variables et mixtes ne sont pas couverts : les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt.",
+            "reserves": "Gardez une réserve. L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement.",
+            "otherDebts": "Remboursez d'abord la dette la plus chère. Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher.",
+            "lender": "Demandez à votre banque comment elle applique le remboursement. Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+          }
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Imaginons qu'il vous reste {{balance}} à rembourser sur {{term}}, à un taux fixe de {{rate}}. Vous payez {{payment}} par mois et, si rien ne change, le reste du prêt coûte {{interest}} d'intérêts. Vous remboursez {{repayment}} maintenant, il reste donc {{balanceAfter}} à payer.",
+          "lowerPayment": "Si vous gardez la durée, la mensualité passe à {{newPayment}}, soit {{paymentDrop}} de moins par mois. Sur les {{term}} restants, vous payez {{lowerSaved}} d'intérêts en moins.",
+          "shorterTerm": "Si vous continuez à payer {{payment}}, le prêt se termine {{timeSaved}} plus tôt, dans {{newTerm}}, avec une dernière mensualité de {{lastPayment}}. Vous économisez {{shorterSaved}} d'intérêts, plus qu'en baissant la mensualité, car le capital baisse plus vite dès le départ.",
+          "fee": "Si la banque facture des indemnités de {{feeRate}}, le remboursement coûte {{fee}}. L'économie nette est alors de {{lowerNet}} avec la mensualité plus basse et de {{shorterNet}} avec la durée plus courte."
+        },
+        "method": {
+          "title": "Comment c'est calculé",
+          "intro": "Le simulateur calcule d'abord le prêt tel quel, avec le même moteur à taux fixe que le simulateur de prêt immobilier. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
+          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités restantes. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n.",
+          "lowerPayment": "Garder la durée : le capital restant après le remboursement repasse dans la formule avec le même n, ce qui donne la nouvelle mensualité, plus basse.",
+          "shorterTerm": "Garder la mensualité : vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
+          "fee": "Les indemnités sont le pourcentage indiqué, appliqué à la somme remboursée. Les intérêts économisés sont les intérêts restants du prêt tel quel moins ceux de chaque scénario, et l'économie nette est ce montant moins les indemnités. Une somme supérieure au capital restant dû solde le prêt, et seul ce capital compte pour les indemnités.",
+          "assumptionsTitle": "Hypothèses",
+          "assumptions": {
+            "fixedRate": "Le taux reste fixe jusqu'à la fin du prêt. Les taux variables et mixtes ne sont pas pris en compte.",
+            "timing": "Vous remboursez aujourd'hui, juste après une mensualité normale, et la prochaine mensualité tombe dans un mois.",
+            "oneOff": "Il y a un seul remboursement, sans autre versement supplémentaire ni report d'échéances.",
+            "costs": "Seules les indemnités de remboursement anticipé sont comptées. L'assurance, les frais de compte et les taxes éventuelles sur les indemnités sont exclus.",
+            "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page concordent.",
+            "lenderFigures": "Les chiffres de votre banque peuvent légèrement différer selon sa façon de compter les jours et d'arrondir. Demandez-lui sa propre simulation avant de rembourser."
+          },
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée."
+        },
+        "related": {
+          "title": "Autres simulateurs",
+          "mortgageLink": "Simulateur de prêt immobilier",
+          "mortgageBody": "Le tableau complet, année par année, d'un prêt à taux fixe, ou la mensualité d'un nouveau prêt.",
+          "debtToIncomeLink": "Calculateur de taux d'endettement",
+          "debtToIncomeBody": "La part de vos revenus consacrée aux mensualités, avant et après une mensualité plus basse.",
+          "emergencyFundLink": "Calculateur d'épargne de précaution",
+          "emergencyFundBody": "Combien garder de côté avant de placer votre épargne dans le prêt."
+        }
+      },
+      "cta": {
+        "headline": "Suivez votre dette restante au fil du temps",
+        "description": "Ajoutez le prêt à WonderMoney avec son capital, son taux et sa durée, reliez la mensualité et voyez ce que vous devez encore diminuer, à côté de votre budget et de votre patrimoine."
+      }
+    },
     "savingsGoal": {
       "title": "Simulateur d'épargne",
       "description": "Calculez combien épargner par mois pour un objectif, en combien de temps vous l'atteindrez ou combien vous aurez mis de côté.",
