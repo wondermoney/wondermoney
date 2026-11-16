@@ -92,7 +92,7 @@ const soldFlat = manualAsset({
 });
 
 const mortgage: LoanDetail = {
-  currency: { code: "EUR", currencyKey: 1 },
+  currency: { code: "EUR", currencyKey: 151 },
   includeInNetWorth: true,
   loanKey: 5,
   name: "Home loan",
@@ -209,4 +209,13 @@ test("the asset a loan is secured against stays offered once it is archived", as
     "Family home",
     "Sold flat",
   ]);
+});
+
+test("editing a loan keeps its currency when the household uses another one", async () => {
+  state.update.mockResolvedValue({});
+  const user = userEvent.setup();
+  renderForm({ ...mortgage, currency: { code: "CHF", currencyKey: 1 } });
+  await user.click(screen.getByRole("button", { name: m.actions.save }));
+  await waitFor(() => assert.equal(state.update.mock.calls.length, 1));
+  assert.equal(state.update.mock.calls[0][0].payload.currencyKey, 1);
 });
