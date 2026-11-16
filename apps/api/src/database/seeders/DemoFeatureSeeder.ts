@@ -5,7 +5,8 @@ import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { Tenant, TenantType } from '@entity/Tenant';
 
 import { getSeedNow } from '../utils/seed';
-import { upsertDemoFeatures } from './demo/demo-features';
+import { DemoDataRefreshService } from '@service/demo-data/demo-data-refresh.service';
+import { upsertDemoHouseholdCore } from '@service/demo-data/demo-household-core';
 import { demoPersona } from './demo/demo-fixtures';
 
 export class DemoFeatureSeeder extends Seeder {
@@ -16,7 +17,8 @@ export class DemoFeatureSeeder extends Seeder {
       { populate: ['currencyKey'] },
     );
     const tenant = await em.findOneOrFail(Tenant, { ownerAppuserKey: appuser, tenantType: TenantType.DEMO });
-    await upsertDemoFeatures(em, appuser, tenant, getSeedNow());
+    await upsertDemoHouseholdCore(em, appuser, tenant);
     await em.flush();
+    await new DemoDataRefreshService({ em }).refresh({ asOfDate: getSeedNow() });
   }
 }
