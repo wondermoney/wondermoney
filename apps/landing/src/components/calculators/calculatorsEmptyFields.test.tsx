@@ -4,8 +4,10 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Lang } from "@/lib/i18nLocale";
+import BuyVsRentCalculatorComp from "./BuyVsRentCalculatorComp";
 import CompoundInterestCalculatorComp from "./CompoundInterestCalculatorComp";
 import DebtToIncomeCalculatorComp from "./DebtToIncomeCalculatorComp";
+import EarlyRepaymentCalculatorComp from "./EarlyRepaymentCalculatorComp";
 import EmergencyFundCalculatorComp from "./EmergencyFundCalculatorComp";
 import FireCalculatorComp from "./FireCalculatorComp";
 import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
@@ -17,8 +19,10 @@ import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
 import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
 
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
+  ["buy versus rent", BuyVsRentCalculatorComp],
   ["compound interest", CompoundInterestCalculatorComp],
   ["debt-to-income", DebtToIncomeCalculatorComp],
+  ["early repayment", EarlyRepaymentCalculatorComp],
   ["emergency fund", EmergencyFundCalculatorComp],
   ["FIRE", FireCalculatorComp],
   ["household budget", HouseholdBudgetCalculatorComp],
@@ -181,6 +185,39 @@ describe.each(["Expected real return a year", "Safe withdrawal rate"])(
   },
 );
 
+describe.each([
+  "Mortgage interest rate",
+  "Home value growth a year",
+  "Rent increase a year",
+  "Investment return a year",
+])("buy versus rent calculator with %j cleared", (label) => {
+  it("asks for a value instead of reading the cleared rate as 0%", async () => {
+    const user = userEvent.setup();
+    render(<BuyVsRentCalculatorComp locale="en" />);
+    const field = screen.getByRole("spinbutton", { name: label });
+    await user.clear(field);
+    expect(field.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByText("Enter a value.")).toBeTruthy();
+    expect(
+      screen.getByText("The comparison appears once every field has a valid value."),
+    ).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+});
+
+describe.each(["Down payment", "Monthly rent", "Purchase costs", "Ownership costs a year", "Selling costs at the end"])(
+  "buy versus rent calculator with %j cleared",
+  (label) => {
+    it("counts the empty amount as 0", async () => {
+      const user = userEvent.setup();
+      render(<BuyVsRentCalculatorComp locale="en" />);
+      await user.clear(screen.getByRole("spinbutton", { name: label }));
+      expect(screen.queryByText("Enter a value.")).toBeNull();
+      expect(figures().length).toBeGreaterThan(0);
+    });
+  },
+);
+
 describe("savings goal calculator with the annual return cleared", () => {
   it("asks for the return instead of reading it as 0%", async () => {
     const user = userEvent.setup();
@@ -235,5 +272,58 @@ describe("term deposit calculator with the tax cleared", () => {
     await user.clear(screen.getByRole("spinbutton", { name: "Tax withheld on interest" }));
     expect(figures()).toEqual(before);
     expect(figures()).toContain("€0.00");
+  });
+});
+
+describe("early repayment calculator", () => {
+  it("asks for the rate instead of computing at 0%", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Interest rate" }));
+    expect(screen.getByText("Enter the interest rate.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("asks for the time left when both term fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(screen.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the time left, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("reads an empty months field as 0 when years are given", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Months" }));
+    expect(figures().length).toBeGreaterThan(0);
+  });
+
+  it("asks for the balance, since a loan needs one", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Balance still owed" }));
+    expect(screen.getByText("Enter the balance you still owe.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("counts an empty repayment as nothing repaid", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Lump sum you repay now" }));
+    expect(
+      screen.getByText(
+        "Enter a lump sum to see what it saves. With nothing repaid, the loan stays as it is.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("counts an empty fee as none", async () => {
+    const user = userEvent.setup();
+    render(<EarlyRepaymentCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Early repayment fee" }));
+    expect(figures().length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Enter a fee/)).toBeNull();
   });
 });

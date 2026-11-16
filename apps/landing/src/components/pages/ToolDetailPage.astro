@@ -18,6 +18,10 @@ import SavingsGoalCalculatorComp from "@/components/calculators/SavingsGoalCalcu
 import SavingsGoalGuide from "@/components/calculators/SavingsGoalGuide.astro";
 import TermDepositCalculatorComp from "@/components/calculators/TermDepositCalculatorComp";
 import TermDepositGuide from "@/components/calculators/TermDepositGuide.astro";
+import EarlyRepaymentCalculatorComp from "@/components/calculators/EarlyRepaymentCalculatorComp";
+import EarlyRepaymentGuide from "@/components/calculators/EarlyRepaymentGuide.astro";
+import BuyVsRentCalculatorComp from "@/components/calculators/BuyVsRentCalculatorComp";
+import BuyVsRentGuide from "@/components/calculators/BuyVsRentGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -70,6 +74,14 @@ const nextStepCtaByRouteId: Partial<
   toolTermDeposit: {
     headline: t("tools.termDeposit.ctaHeadline"),
     description: t("tools.termDeposit.ctaDescription"),
+  },
+  toolEarlyRepayment: {
+    headline: t("tools.earlyRepayment.cta.headline"),
+    description: t("tools.earlyRepayment.cta.description"),
+  },
+  toolBuyVsRent: {
+    headline: t("tools.buyVsRent.ctaHeadline"),
+    description: t("tools.buyVsRent.ctaDescription"),
   },
 };
 
@@ -137,6 +149,8 @@ const schema = {
     {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
     {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
     {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
+    {routeId === "toolEarlyRepayment" && <EarlyRepaymentCalculatorComp locale={locale} client:load />}
+    {routeId === "toolBuyVsRent" && <BuyVsRentCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -146,6 +160,8 @@ const schema = {
   {routeId === "toolHouseholdBudget" && <HouseholdBudgetGuide locale={locale} />}
   {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
   {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
+  {routeId === "toolEarlyRepayment" && <EarlyRepaymentGuide locale={locale} />}
+  {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

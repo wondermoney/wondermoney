@@ -982,6 +982,167 @@
         "description": "Add the mortgage to WonderMoney with its rate and term, link the monthly repayment and see the balance fall next to your budget and net worth."
       }
     },
+    "earlyRepayment": {
+      "title": "Early Repayment Calculator",
+      "description": "See what a lump-sum repayment saves on a fixed-rate loan, whether you lower the payment or shorten the term.",
+      "pageTitle": "Early Repayment Calculator for Mortgages and Loans — WonderMoney",
+      "pageDescription": "Free early repayment calculator for fixed-rate mortgages and loans. Compare a lower monthly payment with a shorter term: interest saved, the fee and your net saving. No sign-up.",
+      "subtitle": "Enter what you still owe, the time left, the fixed rate and a lump sum you could repay now. See both ways to use it side by side, a lower monthly payment over the same term or the same payment with the loan paid off sooner, with the interest saved and any fee. Nothing to sign up for.",
+      "balance": "Balance still owed",
+      "balanceHelp": "What you owe today, from your latest loan statement.",
+      "termLabel": "Time left on the loan",
+      "termYears": "Years",
+      "termMonths": "Months",
+      "termHelp": "Years plus months, for example 22 years and 4 months.",
+      "termRounded": "Worked out over {{term}}: the time left is rounded to whole months.",
+      "interestRate": "Interest rate",
+      "rateHelp": "Fixed nominal annual rate. Variable and mixed rates are not covered.",
+      "repayment": "Lump sum you repay now",
+      "repaymentHelp": "A single payment on top of your regular instalments.",
+      "fee": "Early repayment fee",
+      "feeHelp": "A percentage of the amount you repay. Fees and their legal caps vary by country and loan type, so check your contract. If it has none, leave 0%.",
+      "showLabel": "Outcome to show",
+      "show": {
+        "both": "Compare both",
+        "lowerPayment": "Lower payment",
+        "shorterTerm": "Shorter term"
+      },
+      "lowerPayment": {
+        "title": "Keep the term, lower the payment",
+        "headline": "New monthly payment",
+        "change": "{{amount}} less each month"
+      },
+      "shorterTerm": {
+        "title": "Keep the payment, shorten the term",
+        "headline": "Paid off sooner by",
+        "change": "Ends in {{term}}, in {{date}}",
+        "changeNoDate": "Ends in {{term}}"
+      },
+      "netSaving": "Net saving after the fee",
+      "netCost": "Net cost after the fee",
+      "summary": {
+        "repaid": "Repaid now",
+        "fee": "Fee",
+        "balanceAfter": "Balance after the repayment"
+      },
+      "table": {
+        "title": "The loan as it is and after the repayment",
+        "caption": "The loan as it is, compared with each way to use the repayment",
+        "figure": "Figure",
+        "original": "Loan as it is",
+        "lowerPayment": "Lower payment",
+        "shorterTerm": "Shorter term",
+        "monthlyPayment": "Monthly payment",
+        "lastPayment": "Final payment",
+        "timeLeft": "Time left",
+        "payoffMonth": "Paid off in",
+        "totalInterest": "Interest still to pay",
+        "interestSaved": "Interest saved",
+        "fee": "Early repayment fee",
+        "netSaving": "Net saving"
+      },
+      "status": {
+        "none": "Enter a lump sum to see what it saves. With nothing repaid, the loan stays as it is.",
+        "cleared": "This repayment clears the loan: no more payments and no more interest.",
+        "unused": "Only {{needed}} is needed to clear the loan, so the other {{unused}} is left out of the figures.",
+        "feeExceeds": "The fee is more than the interest this repayment saves, so you lose money overall. Check whether your contract allows a repayment without a fee.",
+        "nearlyCleared": "This repayment all but clears the loan: the {{remainder}} left is paid off with your next payment of {{payment}}, and after that there is no more interest."
+      },
+      "resultNote": "The rate stays fixed for the rest of the loan. Payments are monthly, and the next one is due a month from now.",
+      "chart": {
+        "label": "Chart of the balance still owed at the end of each year: the loan as it is, with a lower payment and with a shorter term.",
+        "year": "Year"
+      },
+      "errors": {
+        "summary": "Your comparison appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "annualRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "repayment": {
+          "negative": "The repayment can't be negative. Enter 0 to see the loan as it is.",
+          "tooLarge": "Enter a repayment up to {{max}}."
+        },
+        "feePercent": {
+          "negative": "The fee can't be negative. Enter 0 if there is none.",
+          "tooLarge": "Enter a fee up to {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Two ways to use an early repayment",
+          "intro": "When you pay off part of a loan early, the balance falls and the lender applies the cut in one of two ways. You can usually choose:",
+          "lowerPaymentTitle": "Keep the term and lower the payment.",
+          "lowerPayment": "The months left stay the same and each payment falls, which leaves you more room every month.",
+          "shorterTermTitle": "Keep the payment and shorten the term.",
+          "shorterTerm": "You keep paying the same amount and the loan ends sooner. This saves more interest, because the balance falls faster.",
+          "outro": "Either way you pay less interest, because from now on it is charged on a smaller balance."
+        },
+        "before": {
+          "title": "Before you repay",
+          "items": {
+            "fee": "Check the fee. A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving.",
+            "rate": "Variable and mixed rates are out of scope: the figures assume the rate you enter stays fixed for the rest of the loan.",
+            "reserves": "Keep a cash cushion. Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment.",
+            "otherDebts": "Repay the most expensive debt first. If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage.",
+            "lender": "Ask your lender how it applies the repayment. Some lower the payment by default, others shorten the term, and many let you choose."
+          }
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you still owe {{balance}} with {{term}} left at a fixed {{rate}}. You pay {{payment}} a month and, if nothing changes, the rest of the loan costs {{interest}} in interest. You repay {{repayment}} now, which leaves {{balanceAfter}} to pay.",
+          "lowerPayment": "Keep the term and the payment falls to {{newPayment}}, {{paymentDrop}} less each month. Over the remaining {{term}} you pay {{lowerSaved}} less in interest.",
+          "shorterTerm": "Keep paying {{payment}} and the loan ends {{timeSaved}} sooner, in {{newTerm}}, with a final payment of {{lastPayment}}. That saves {{shorterSaved}} in interest, more than lowering the payment, because the balance falls faster from the start.",
+          "fee": "If your lender charges a {{feeRate}} fee, the repayment costs {{fee}}. The net saving is then {{lowerNet}} with the lower payment and {{shorterNet}} with the shorter term."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator first works out the loan as it stands, with the same fixed-rate engine as the mortgage calculator. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
+          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments left. At 0% there is no interest, so the payment is simply P divided by n.",
+          "lowerPayment": "Keep the term: the balance left after the repayment goes back into the formula with the same n, which gives the new, lower payment.",
+          "shorterTerm": "Keep the payment: you go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
+          "fee": "The fee is the percentage you enter, applied to the amount repaid. Interest saved is the interest left on the loan as it is minus the interest in each outcome, and the net saving is that minus the fee. A repayment larger than the balance clears the loan, and only the balance counts towards the fee.",
+          "assumptionsTitle": "Assumptions",
+          "assumptions": {
+            "fixedRate": "The rate stays fixed for the rest of the loan. Variable and mixed rates are not covered.",
+            "timing": "You repay the lump sum today, straight after a regular payment, and the next payment is due in a month.",
+            "oneOff": "There is one repayment, with no further extra payments or payment breaks.",
+            "costs": "Only the early repayment fee is counted. Insurance, account charges and any tax on the fee are left out.",
+            "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly.",
+            "lenderFigures": "Your lender's figures can differ slightly because of how it counts days and rounds. Ask for its own simulation before you repay."
+          },
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid."
+        },
+        "related": {
+          "title": "Related calculators",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "The full year-by-year schedule of a fixed-rate loan, or the payment on a new one.",
+          "debtToIncomeLink": "Debt-to-income ratio calculator",
+          "debtToIncomeBody": "The share of your income that goes on debt payments, before and after a lower payment.",
+          "emergencyFundLink": "Emergency fund calculator",
+          "emergencyFundBody": "How much cash to keep aside before you put savings into the loan."
+        }
+      },
+      "cta": {
+        "headline": "Track your remaining debt over time",
+        "description": "Add the loan to WonderMoney with its balance, rate and term, link the monthly repayment and watch what you still owe go down, next to your budget and net worth."
+      }
+    },
     "savingsGoal": {
       "title": "Savings Goal Calculator",
       "description": "Work out how much to save each month for a goal, how long the goal will take, or what your savings add up to.",
@@ -1227,6 +1388,152 @@
         "nextEmergencyLink": "Work out your emergency fund",
         "nextSavingsGoal": "Saving up for the amount you will deposit, or planning what to do when it matures? The savings goal calculator works out the monthly amount or the time it takes.",
         "nextSavingsGoalLink": "Open the savings goal calculator"
+      }
+    },
+    "buyVsRent": {
+      "title": "Buy vs Rent Calculator",
+      "description": "Compare the net worth of buying a home with a mortgage against renting and investing the difference, year by year.",
+      "pageTitle": "Rent vs Buy Calculator: Compare Net Worth Year by Year — WonderMoney",
+      "pageDescription": "Free rent vs buy calculator. Enter the price, down payment, mortgage, rent and growth assumptions to see which path leaves you with more, and the year buying pulls ahead. No sign-up.",
+      "subtitle": "Enter the home, the mortgage and the rent you would pay instead. The calculator follows both paths from the same starting cash and shows which one leaves you with more, year by year. Nothing to sign up for.",
+      "groups": {
+        "home": "The home",
+        "mortgage": "The mortgage",
+        "renting": "Renting instead",
+        "comparison": "The comparison"
+      },
+      "years": "years",
+      "fields": {
+        "homePrice": {
+          "label": "Home price"
+        },
+        "downPayment": {
+          "label": "Down payment",
+          "help": "The cash you put in at the start. Enter the full price to buy without a mortgage."
+        },
+        "purchaseCostsPct": {
+          "label": "Purchase costs",
+          "help": "One-off taxes and fees, as a percentage of the price. They vary a lot by country and region, so check what applies where you buy."
+        },
+        "ownershipCostsPct": {
+          "label": "Ownership costs a year",
+          "help": "Maintenance, insurance and property tax, as a percentage of the home's value."
+        },
+        "appreciationPct": {
+          "label": "Home value growth a year",
+          "help": "How much the home's value changes each year. A negative figure means falling prices."
+        },
+        "sellingCostsPct": {
+          "label": "Selling costs at the end",
+          "help": "Agent and other fees if you sold at the end, as a percentage of the home's value."
+        },
+        "mortgageRate": {
+          "label": "Mortgage interest rate",
+          "help": "Fixed nominal annual rate. Ignored when you borrow nothing."
+        },
+        "mortgageTermYears": {
+          "label": "Mortgage term"
+        },
+        "monthlyRent": {
+          "label": "Monthly rent"
+        },
+        "rentIncreasePct": {
+          "label": "Rent increase a year",
+          "help": "The rent rises once a year by this percentage."
+        },
+        "investmentReturnPct": {
+          "label": "Investment return a year",
+          "help": "What money not spent on housing earns, after fees. It applies to whichever path has money left over."
+        },
+        "horizonYears": {
+          "label": "Years to compare",
+          "help": "From 1 to 40 years."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Net worth if you buy, end of year {{years}}",
+        "renterNetWorth": "Net worth if you rent, end of year {{years}}",
+        "buyAhead": "Buying comes out ahead by",
+        "rentAhead": "Renting comes out ahead by",
+        "even": "Both paths end level",
+        "breakEven": "Buying pulls ahead at the end of year {{year}}.",
+        "noBreakEven": "Buying does not pull ahead by the end of year {{years}}.",
+        "aheadThenBehind": "Buying is ahead from year {{from}} but falls behind again by year {{back}}.",
+        "firstMonth": "Both paths start with {{upfront}}. In the first month owning costs {{owning}}, of which {{mortgage}} is the mortgage payment, and renting costs {{rent}}."
+      },
+      "chartLabel": "Line chart of net worth if you buy and if you rent, from the purchase to the end of year {{years}}. The table below lists the same figures.",
+      "chartBuy": "Buying",
+      "chartRent": "Renting",
+      "year": "Year",
+      "table": {
+        "title": "Year by year",
+        "description": "Net worth on each path at the end of every year. For buying, it is what selling would leave after selling costs and repaying the loan, plus any investments.",
+        "year": "Year",
+        "start": "Purchase",
+        "yearLabel": "Year {{year}}",
+        "homeValue": "Home value",
+        "loanBalance": "Loan owed",
+        "ownerNetWorth": "Net worth buying",
+        "renterNetWorth": "Net worth renting",
+        "difference": "Buying minus renting"
+      },
+      "errors": {
+        "summary": "The comparison appears once every field has a valid value.",
+        "required": "Enter a value.",
+        "tooSmall": "Enter at least {{min}}.",
+        "tooLarge": "Enter up to {{max}}.",
+        "negative": "This can't be negative. Enter 0 for none.",
+        "aboveHomePrice": "The down payment can't be more than the home price.",
+        "loanTooSmall": "Borrow at least {{minLoan}}, or enter the full price to buy without a mortgage."
+      },
+      "ctaHeadline": "Follow the decision in your net-worth plan",
+      "ctaDescription": "Add your home, your mortgage and your investments to WonderMoney and follow your net worth over the years, whichever path you take.",
+      "guide": {
+        "whatHeading": "What the comparison shows",
+        "whatBody": "Buying swaps rent for mortgage payments, but it also ties up cash in the down payment and purchase costs and adds the costs of owning. Renting leaves that cash free to invest. The calculator follows both paths from the same starting cash and compares what each one leaves you with.",
+        "read": {
+          "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
+          "difference": "The difference: how far ahead one path is at the end of the period you chose.",
+          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
+          "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+        },
+        "exampleHeading": "Worked example",
+        "example": {
+          "setup": "A home costs {{price}}. You put down {{downPayment}} ({{downPaymentShare}}) and borrow {{loan}} at {{rate}} over {{term}} years. Purchase costs of {{purchaseCostsPct}} add {{purchaseCosts}}, so buying takes {{upfront}} of cash. The same home rents for {{rent}} a month. The rest are the calculator's starting assumptions: rent up {{rentIncrease}} a year, the home's value up {{appreciation}} a year, ownership costs of {{ownershipCostsPct}} of the value a year, a {{investmentReturn}} return on investments and {{sellingCostsPct}} selling costs, over {{horizon}} years.",
+          "start": "On day one the renter invests the {{upfront}}. The owner's stake is the {{downPayment}} down payment less {{startSellingCosts}} of selling costs, {{startOwner}}, so buying starts {{startGap}} behind.",
+          "monthly": "In the first month owning costs {{owningMonthly}}: {{mortgagePayment}} of mortgage payment and {{ownershipMonthly}} of ownership costs. The rent is {{rentMonthly}}, so the renter invests the {{monthlyGap}} difference. In this example owning costs more than renting in every month of the {{horizon}} years, so the owner never has money left over to invest.",
+          "result": "After {{horizon}} years the home is worth {{homeValue}}. Selling it costs {{sellingCosts}} and repays the {{loanBalance}} still owed, which leaves the owner {{ownerNetWorth}}. The renter's investments have grown to {{renterNetWorth}}, so buying ends {{difference}} ahead.",
+          "breakEven": "Buying first pulls ahead at the end of year {{breakEvenYear}}. The answer depends on the assumptions: at a rent of {{altRent}} a month instead, renting is still {{altDifference}} ahead after {{horizon}} years."
+        },
+        "methodHeading": "How the comparison is calculated",
+        "methodIntro": "The calculator works month by month, in cents, from the day of purchase.",
+        "method": {
+          "start": "Both paths start with the same cash: the down payment plus the purchase costs. The owner spends it on the home; the renter invests all of it.",
+          "loan": "The mortgage is the one the mortgage calculator works out: a fixed rate, with each month's payment set from the balance still owed. Payments stop once the loan is repaid.",
+          "monthly": "Each month the owner pays the mortgage and a twelfth of the year's ownership costs, and the renter pays the rent. Whichever path costs less that month invests the difference.",
+          "growth": "The home's value changes once a year by the growth rate. Ownership costs are a percentage of the value at the start of each year, so they change with it. The rent rises once a year by the rent increase.",
+          "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
+          "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
+        },
+        "formulaOwner": "Buying = home value − selling costs − loan owed + investments",
+        "formulaRenter": "Renting = investments",
+        "formulaReturn": "Monthly return",
+        "formulaLegend": "Here R is the annual investment return, so {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
+        "leftOutHeading": "What it leaves out",
+        "leftOut": {
+          "gainsTax": "Tax on investment gains or on the profit from selling the home.",
+          "deposit": "A rent deposit, and anything it could earn.",
+          "taxRelief": "Mortgage interest tax relief and other tax breaks for homeowners.",
+          "countryRules": "Each country's purchase taxes and fees: enter your own estimate as the purchase costs.",
+          "rateChanges": "Rate changes on a variable or mixed-rate mortgage, early repayments and insurance tied to the loan.",
+          "budget": "Whether the payments are affordable: both paths assume the higher of the two costs is paid from income every month."
+        },
+        "limits": "The calculator accepts home prices up to {{maxPrice}}, rent up to {{maxRent}} a month, growth and return rates from {{minGrowth}} to {{maxGrowth}} a year, and up to {{maxHorizon}} years.",
+        "relatedHeading": "Related calculators",
+        "relatedMortgage": "To see the loan on its own, with its schedule year by year, use the",
+        "relatedMortgageLink": "mortgage calculator",
+        "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
+        "relatedNetWorthLink": "net worth calculator"
       }
     }
   },

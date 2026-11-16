@@ -248,6 +248,14 @@ const ROUTE_SLUGS = {
 		de: "hypotheken-rechner",
 		it: "mutuo-casa",
 	},
+	toolEarlyRepayment: {
+		pt: "simulador-amortizacao-credito",
+		en: "early-repayment-calculator",
+		es: "amortizacion-anticipada",
+		fr: "remboursement-anticipe",
+		de: "sondertilgung-rechner",
+		it: "estinzione-anticipata",
+	},
 	toolHouseholdBudget: {
 		pt: "orcamento-familiar",
 		en: "household-budget-calculator",
@@ -271,6 +279,14 @@ const ROUTE_SLUGS = {
 		fr: "calculateur-depot-a-terme",
 		de: "festgeld-rechner",
 		it: "calcolatore-conto-deposito",
+	},
+	toolBuyVsRent: {
+		pt: "comprar-ou-arrendar-casa",
+		en: "rent-vs-buy-calculator",
+		es: "comprar-o-alquilar-vivienda",
+		fr: "acheter-ou-louer",
+		de: "kaufen-oder-mieten-rechner",
+		it: "comprare-o-affittare-casa",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -380,6 +396,8 @@ export const TOOL_ROUTE_IDS = [
 	"toolHouseholdBudget",
 	"toolSavingsGoal",
 	"toolTermDeposit",
+	"toolEarlyRepayment",
+	"toolBuyVsRent",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -616,6 +634,14 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"calculadora-depositos-a-prazo": "toolTermDeposit",
 	"depositos-a-prazo": "toolTermDeposit",
 	"deposito-a-prazo": "toolTermDeposit",
+	toolearlyrepayment: "toolEarlyRepayment",
+	earlyrepaymentcalculator: "toolEarlyRepayment",
+	"early-repayment-calculator": "toolEarlyRepayment",
+	"simulador-amortizacao-credito": "toolEarlyRepayment",
+	toolbuyvsrent: "toolBuyVsRent",
+	"buy-vs-rent": "toolBuyVsRent",
+	"rent-vs-buy-calculator": "toolBuyVsRent",
+	"comprar-ou-arrendar-casa": "toolBuyVsRent",
 }
 
 function normalizeRouteLookupKey(value: string): string {

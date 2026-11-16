@@ -982,6 +982,167 @@
         "description": "Aggiungi il mutuo a WonderMoney con tasso e durata, collega la rata mensile e guarda il debito scendere accanto al tuo budget e al tuo patrimonio."
       }
     },
+    "earlyRepayment": {
+      "title": "Calcolatore di estinzione anticipata",
+      "description": "Scopri quanto risparmi con un rimborso anticipato parziale su un prestito a tasso fisso, che tu riduca la rata o la durata.",
+      "pageTitle": "Calcolatore di Estinzione Anticipata del Mutuo e dei Prestiti — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di estinzione anticipata parziale per mutui e prestiti a tasso fisso. Confronta una rata più bassa con una durata più breve: interessi risparmiati, penale e risparmio netto. Senza registrazione.",
+      "subtitle": "Inserisci il debito residuo, la durata che resta, il tasso fisso e la somma che potresti rimborsare ora. Vedi affiancati i due modi di usarla, una rata più bassa con la stessa durata o la stessa rata con il prestito estinto prima, con gli interessi risparmiati e la penale. Non serve registrarsi.",
+      "balance": "Debito residuo",
+      "balanceHelp": "Quanto devi oggi, secondo l'ultimo estratto del prestito.",
+      "termLabel": "Durata residua",
+      "termYears": "Anni",
+      "termMonths": "Mesi",
+      "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+      "termRounded": "Calcolato su {{term}}: la durata residua è arrotondata a mesi interi.",
+      "interestRate": "Tasso di interesse",
+      "rateHelp": "Tasso annuo nominale fisso (TAN). I tassi variabili e misti non sono inclusi.",
+      "repayment": "Somma che rimborsi ora",
+      "repaymentHelp": "Un pagamento unico, in aggiunta alle rate normali.",
+      "fee": "Penale di estinzione anticipata",
+      "feeHelp": "Una percentuale della somma che rimborsi. Le penali e i loro limiti di legge variano a seconda del paese e del tipo di prestito, quindi controlla il tuo contratto. Se non ne prevede, lascia 0%.",
+      "showLabel": "Risultato da mostrare",
+      "show": {
+        "both": "Confronta entrambi",
+        "lowerPayment": "Rata più bassa",
+        "shorterTerm": "Durata più breve"
+      },
+      "lowerPayment": {
+        "title": "Mantenere la durata, ridurre la rata",
+        "headline": "Nuova rata mensile",
+        "change": "{{amount}} in meno al mese"
+      },
+      "shorterTerm": {
+        "title": "Mantenere la rata, ridurre la durata",
+        "headline": "Prestito estinto prima di",
+        "change": "Finisce tra {{term}}, a {{date}}",
+        "changeNoDate": "Finisce tra {{term}}"
+      },
+      "netSaving": "Risparmio netto dopo la penale",
+      "netCost": "Costo netto dopo la penale",
+      "summary": {
+        "repaid": "Rimborsato ora",
+        "fee": "Penale",
+        "balanceAfter": "Debito residuo dopo il rimborso"
+      },
+      "table": {
+        "title": "Il prestito così com'è e dopo il rimborso",
+        "caption": "Il prestito così com'è, confrontato con ciascun modo di usare il rimborso",
+        "figure": "Voce",
+        "original": "Prestito così com'è",
+        "lowerPayment": "Rata più bassa",
+        "shorterTerm": "Durata più breve",
+        "monthlyPayment": "Rata mensile",
+        "lastPayment": "Ultima rata",
+        "timeLeft": "Durata residua",
+        "payoffMonth": "Estinto a",
+        "totalInterest": "Interessi ancora da pagare",
+        "interestSaved": "Interessi risparmiati",
+        "fee": "Penale di estinzione",
+        "netSaving": "Risparmio netto"
+      },
+      "status": {
+        "none": "Inserisci una somma per vedere quanto risparmi. Senza rimborso, il prestito resta com'è.",
+        "cleared": "Questa somma estingue il prestito: niente più rate e niente più interessi.",
+        "unused": "Per estinguere il prestito bastano {{needed}}, quindi i restanti {{unused}} restano fuori dai conti.",
+        "feeExceeds": "La penale supera gli interessi che questo rimborso fa risparmiare, quindi nel complesso ci perdi. Verifica se il tuo contratto consente un rimborso senza penale.",
+        "nearlyCleared": "Questo rimborso estingue quasi del tutto il prestito: i {{remainder}} che restano si pagano con la prossima rata, di {{payment}}, e da lì non ci sono più interessi."
+      },
+      "resultNote": "Il tasso resta fisso fino alla fine del prestito. Le rate sono mensili e la prossima scade tra un mese.",
+      "chart": {
+        "label": "Grafico del debito residuo alla fine di ogni anno: il prestito così com'è, con una rata più bassa e con una durata più breve.",
+        "year": "Anno"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il debito residuo.",
+          "tooSmall": "Inserisci un debito di almeno {{min}}.",
+          "tooLarge": "Inserisci un debito fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata residua, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "repayment": {
+          "negative": "La somma da rimborsare non può essere negativa. Inserisci 0 per vedere il prestito così com'è.",
+          "tooLarge": "Inserisci una somma fino a {{max}}."
+        },
+        "feePercent": {
+          "negative": "La penale non può essere negativa. Inserisci 0 se non c'è.",
+          "tooLarge": "Inserisci una penale fino a {{max}}."
+        }
+      },
+      "guide": {
+        "choice": {
+          "title": "Due modi di usare un rimborso anticipato",
+          "intro": "Quando rimborsi una parte del prestito prima del tempo, il debito residuo scende e la banca applica la riduzione in uno di due modi. Di solito puoi scegliere:",
+          "lowerPaymentTitle": "Mantenere la durata e ridurre la rata.",
+          "lowerPayment": "I mesi che restano non cambiano e ogni rata scende, così ogni mese hai più margine.",
+          "shorterTermTitle": "Mantenere la rata e ridurre la durata.",
+          "shorterTerm": "Continui a pagare la stessa cifra e il prestito finisce prima. Risparmi più interessi, perché il debito scende più in fretta.",
+          "outro": "In entrambi i casi paghi meno interessi, perché da ora in poi sono calcolati su un debito più piccolo."
+        },
+        "before": {
+          "title": "Prima di rimborsare",
+          "items": {
+            "fee": "Controlla la penale. La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto.",
+            "rate": "I tassi variabili e misti non sono coperti: i calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito.",
+            "reserves": "Tieni una riserva. Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso.",
+            "otherDebts": "Rimborsa prima il debito più caro. Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico.",
+            "lender": "Chiedi alla banca come applica il rimborso. Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+          }
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Immagina di dovere ancora {{balance}}, con {{term}} di durata residua e un tasso fisso del {{rate}}. Paghi {{payment}} al mese e, se nulla cambia, il resto del prestito costa {{interest}} di interessi. Rimborsi {{repayment}} ora e restano {{balanceAfter}} da pagare.",
+          "lowerPayment": "Se mantieni la durata, la rata scende a {{newPayment}}, {{paymentDrop}} in meno al mese. Nei {{term}} che restano paghi {{lowerSaved}} di interessi in meno.",
+          "shorterTerm": "Se continui a pagare {{payment}}, il prestito finisce {{timeSaved}} prima, tra {{newTerm}}, con un'ultima rata di {{lastPayment}}. Risparmi {{shorterSaved}} di interessi, più che riducendo la rata, perché il debito scende più in fretta fin dall'inizio.",
+          "fee": "Se la banca applica una penale del {{feeRate}}, il rimborso costa {{fee}}. Il risparmio netto è allora di {{lowerNet}} con la rata più bassa e di {{shorterNet}} con la durata più breve."
+        },
+        "method": {
+          "title": "Come viene calcolato",
+          "intro": "Il calcolatore ricostruisce prima il prestito così com'è, con lo stesso motore a tasso fisso del calcolatore del mutuo. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula delle annualità:",
+          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate che restano. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n.",
+          "lowerPayment": "Mantenere la durata: il debito che resta dopo il rimborso torna nella formula con lo stesso n, che dà la nuova rata, più bassa.",
+          "shorterTerm": "Mantenere la rata: continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
+          "fee": "La penale è la percentuale che inserisci, applicata alla somma rimborsata. Gli interessi risparmiati sono gli interessi residui del prestito così com'è meno quelli di ciascuno scenario, e il risparmio netto è questa cifra meno la penale. Una somma superiore al debito residuo estingue il prestito, e solo il debito residuo conta per la penale.",
+          "assumptionsTitle": "Ipotesi",
+          "assumptions": {
+            "fixedRate": "Il tasso resta fisso fino alla fine del prestito. I tassi variabili e misti non sono inclusi.",
+            "timing": "Rimborsi oggi, appena dopo una rata normale, e la prossima rata scade tra un mese.",
+            "oneOff": "C'è un solo rimborso, senza altri pagamenti extra né sospensioni delle rate.",
+            "costs": "Conta solo la penale di estinzione anticipata. Assicurazioni, spese di conto ed eventuali imposte sulla penale restano fuori.",
+            "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano esattamente.",
+            "lenderFigures": "I numeri della tua banca possono differire leggermente per come conta i giorni e arrotonda. Chiedile una simulazione prima di rimborsare."
+          },
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata."
+        },
+        "related": {
+          "title": "Altri calcolatori",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Il piano completo, anno per anno, di un prestito a tasso fisso, o la rata di uno nuovo.",
+          "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
+          "debtToIncomeBody": "La parte del tuo reddito che va in rate, prima e dopo una rata più bassa.",
+          "emergencyFundLink": "Calcolatore del fondo di emergenza",
+          "emergencyFundBody": "Quanto denaro tenere da parte prima di mettere i risparmi nel prestito."
+        }
+      },
+      "cta": {
+        "headline": "Segui il debito che ti resta nel tempo",
+        "description": "Aggiungi il prestito a WonderMoney con debito residuo, tasso e durata, collega la rata mensile e guarda scendere quanto devi ancora, accanto al tuo budget e al tuo patrimonio."
+      }
+    },
     "savingsGoal": {
       "title": "Simulatore di risparmio",
       "description": "Calcola quanto risparmiare al mese per un obiettivo, quanto tempo ti serve o quanto metterai da parte.",
@@ -1227,6 +1388,152 @@
         "nextEmergencyLink": "Calcola il tuo fondo di emergenza",
         "nextSavingsGoal": "Stai mettendo da parte la somma da depositare o pensi a cosa fare alla scadenza? Il simulatore di risparmio calcola quanto accantonare ogni mese o quanto tempo serve.",
         "nextSavingsGoalLink": "Apri il simulatore di risparmio"
+      }
+    },
+    "buyVsRent": {
+      "title": "Calcolatore comprare o affittare casa",
+      "description": "Confronta il patrimonio netto di chi compra casa con un mutuo con quello di chi affitta e investe la differenza, anno per anno.",
+      "pageTitle": "Comprare o affittare casa: calcolatore anno per anno — WonderMoney",
+      "pageDescription": "Calcolatore gratuito per scegliere tra comprare o affittare. Inserisci prezzo, anticipo, mutuo, affitto e ipotesi di crescita per vedere quale strada ti lascia di più e in che anno comprare passa in vantaggio. Senza registrazione.",
+      "subtitle": "Inserisci la casa, il mutuo e l'affitto che pagheresti in alternativa. Il calcolatore segue le due strade con lo stesso capitale iniziale e mostra quale ti lascia di più, anno per anno. Senza registrazione.",
+      "groups": {
+        "home": "La casa",
+        "mortgage": "Il mutuo",
+        "renting": "Affittare in alternativa",
+        "comparison": "Il confronto"
+      },
+      "years": "anni",
+      "fields": {
+        "homePrice": {
+          "label": "Prezzo della casa"
+        },
+        "downPayment": {
+          "label": "Anticipo",
+          "help": "I soldi che versi all'inizio. Inserisci il prezzo intero per comprare senza mutuo."
+        },
+        "purchaseCostsPct": {
+          "label": "Costi di acquisto",
+          "help": "Imposte e spese pagate una volta, in percentuale del prezzo. Cambiano molto da paese a paese e tra regioni, quindi verifica quelle che valgono dove compri."
+        },
+        "ownershipCostsPct": {
+          "label": "Costi di proprietà all'anno",
+          "help": "Manutenzione, assicurazioni e imposte sull'immobile, in percentuale del valore della casa."
+        },
+        "appreciationPct": {
+          "label": "Rivalutazione della casa all'anno",
+          "help": "Quanto cambia ogni anno il valore della casa. Una cifra negativa indica prezzi in calo."
+        },
+        "sellingCostsPct": {
+          "label": "Costi di vendita alla fine",
+          "help": "Agenzia e altre spese se vendessi alla fine, in percentuale del valore della casa."
+        },
+        "mortgageRate": {
+          "label": "Tasso del mutuo",
+          "help": "Tasso nominale annuo fisso. Non conta se non chiedi un prestito."
+        },
+        "mortgageTermYears": {
+          "label": "Durata del mutuo"
+        },
+        "monthlyRent": {
+          "label": "Affitto mensile"
+        },
+        "rentIncreasePct": {
+          "label": "Aumento dell'affitto all'anno",
+          "help": "L'affitto sale una volta all'anno di questa percentuale."
+        },
+        "investmentReturnPct": {
+          "label": "Rendimento degli investimenti all'anno",
+          "help": "Quanto rende il denaro che non va nella casa, al netto dei costi. Vale per la strada che ha soldi in avanzo."
+        },
+        "horizonYears": {
+          "label": "Anni da confrontare",
+          "help": "Da 1 a 40 anni."
+        }
+      },
+      "results": {
+        "ownerNetWorth": "Patrimonio se compri, fine dell'anno {{years}}",
+        "renterNetWorth": "Patrimonio se affitti, fine dell'anno {{years}}",
+        "buyAhead": "Comprare è in vantaggio di",
+        "rentAhead": "Affittare è in vantaggio di",
+        "even": "Le due strade finiscono in parità",
+        "breakEven": "Comprare passa in vantaggio alla fine dell'anno {{year}}.",
+        "noBreakEven": "Comprare non passa in vantaggio entro la fine dell'anno {{years}}.",
+        "aheadThenBehind": "Comprare è in vantaggio dall'anno {{from}}, ma torna in svantaggio entro la fine dell'anno {{back}}.",
+        "firstMonth": "Le due strade partono con {{upfront}}. Il primo mese la proprietà costa {{owning}}, di cui {{mortgage}} di rata del mutuo, e l'affitto {{rent}}."
+      },
+      "chartLabel": "Grafico a linee del patrimonio se compri e se affitti, dall'acquisto alla fine dell'anno {{years}}. La tabella qui sotto riporta le stesse cifre.",
+      "chartBuy": "Comprare",
+      "chartRent": "Affittare",
+      "year": "Anno",
+      "table": {
+        "title": "Anno per anno",
+        "description": "Il patrimonio di ciascuna strada alla fine di ogni anno. Per chi compra, è ciò che resterebbe dopo aver venduto la casa, pagato i costi di vendita ed estinto il mutuo, più gli investimenti.",
+        "year": "Anno",
+        "start": "Acquisto",
+        "yearLabel": "Anno {{year}}",
+        "homeValue": "Valore della casa",
+        "loanBalance": "Debito residuo",
+        "ownerNetWorth": "Patrimonio comprando",
+        "renterNetWorth": "Patrimonio affittando",
+        "difference": "Comprare meno affittare"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando tutti i campi hanno un valore valido.",
+        "required": "Inserisci un valore.",
+        "tooSmall": "Inserisci almeno {{min}}.",
+        "tooLarge": "Inserisci al massimo {{max}}.",
+        "negative": "Questo valore non può essere negativo. Inserisci 0 se non c'è.",
+        "aboveHomePrice": "L'anticipo non può superare il prezzo della casa.",
+        "loanTooSmall": "Chiedi almeno {{minLoan}}, oppure inserisci il prezzo intero per comprare senza mutuo."
+      },
+      "ctaHeadline": "Segui la decisione nel tuo piano patrimoniale",
+      "ctaDescription": "Aggiungi la casa, il mutuo e i tuoi investimenti a WonderMoney e segui il tuo patrimonio netto negli anni, qualunque strada tu scelga.",
+      "guide": {
+        "whatHeading": "Cosa mostra il confronto",
+        "whatBody": "Comprare sostituisce l'affitto con la rata del mutuo, ma blocca anche denaro nell'anticipo e nei costi di acquisto e aggiunge i costi della proprietà. Affittare lascia quel denaro libero di essere investito. Il calcolatore segue le due strade con lo stesso capitale iniziale e confronta quanto ti lascia ciascuna.",
+        "read": {
+          "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
+          "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
+          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendere il giorno stesso costerebbe in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta.",
+          "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+        },
+        "exampleHeading": "Esempio pratico",
+        "example": {
+          "setup": "Una casa costa {{price}}. Versi {{downPayment}} di anticipo ({{downPaymentShare}}) e chiedi {{loan}} al {{rate}} per {{term}} anni. Costi di acquisto del {{purchaseCostsPct}} aggiungono {{purchaseCosts}}, quindi comprare richiede {{upfront}} di liquidità. La stessa casa si affitta a {{rent}} al mese. Il resto sono le ipotesi iniziali del calcolatore: affitto in aumento del {{rentIncrease}} all'anno, valore della casa in aumento del {{appreciation}} all'anno, costi di proprietà del {{ownershipCostsPct}} del valore all'anno, rendimento del {{investmentReturn}} sugli investimenti e costi di vendita del {{sellingCostsPct}}, per {{horizon}} anni.",
+          "start": "Il primo giorno chi affitta investe i {{upfront}}. La quota di chi compra è l'anticipo di {{downPayment}} meno {{startSellingCosts}} di costi di vendita, cioè {{startOwner}}: comprare parte con {{startGap}} di svantaggio.",
+          "monthly": "Il primo mese la proprietà costa {{owningMonthly}}: {{mortgagePayment}} di rata e {{ownershipMonthly}} di costi di proprietà. L'affitto è di {{rentMonthly}}, quindi chi affitta investe la differenza di {{monthlyGap}}. In questo esempio la proprietà costa più dell'affitto in ogni mese dei {{horizon}} anni, quindi a chi compra non avanza mai denaro da investire.",
+          "result": "Dopo {{horizon}} anni la casa vale {{homeValue}}. Venderla costa {{sellingCosts}} ed estingue i {{loanBalance}} di debito residuo, il che lascia a chi ha comprato {{ownerNetWorth}}. Gli investimenti di chi affitta sono cresciuti fino a {{renterNetWorth}}, quindi comprare finisce in vantaggio di {{difference}}.",
+          "breakEven": "Comprare passa in vantaggio per la prima volta alla fine dell'anno {{breakEvenYear}}. La risposta dipende dalle ipotesi: con un affitto di {{altRent}} al mese, affittare è ancora in vantaggio di {{altDifference}} dopo {{horizon}} anni."
+        },
+        "methodHeading": "Come viene calcolato il confronto",
+        "methodIntro": "Il calcolatore lavora mese per mese, al centesimo, dal giorno dell'acquisto.",
+        "method": {
+          "start": "Le due strade partono con lo stesso denaro: l'anticipo più i costi di acquisto. Chi compra lo spende nella casa; chi affitta lo investe tutto.",
+          "loan": "Il mutuo è quello calcolato dal calcolatore del mutuo: tasso fisso, con la rata di ogni mese ricavata dal debito residuo. Le rate finiscono quando il mutuo è estinto.",
+          "monthly": "Ogni mese chi compra paga la rata e un dodicesimo dei costi di proprietà dell'anno, e chi affitta paga l'affitto. La strada che quel mese costa meno investe la differenza.",
+          "growth": "Il valore della casa cambia una volta all'anno secondo la rivalutazione. I costi di proprietà sono una percentuale del valore all'inizio di ogni anno, quindi cambiano con esso. L'affitto sale una volta all'anno secondo l'aumento indicato.",
+          "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
+          "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta sono i suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
+        },
+        "formulaOwner": "Comprare = valore della casa − costi di vendita − debito residuo + investimenti",
+        "formulaRenter": "Affittare = investimenti",
+        "formulaReturn": "Rendimento mensile",
+        "formulaLegend": "Qui R è il rendimento annuo degli investimenti: il {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
+        "leftOutHeading": "Cosa resta fuori",
+        "leftOut": {
+          "gainsTax": "Le imposte sui guadagni degli investimenti o sulla plusvalenza della vendita della casa.",
+          "deposit": "Il deposito cauzionale dell'affitto e quanto potrebbe rendere.",
+          "taxRelief": "Le detrazioni sugli interessi del mutuo e le altre agevolazioni fiscali per i proprietari.",
+          "countryRules": "Le imposte e le spese di acquisto di ciascun paese: inserisci la tua stima nei costi di acquisto.",
+          "rateChanges": "Le variazioni di tasso di un mutuo variabile o misto, le estinzioni anticipate e le assicurazioni legate al mutuo.",
+          "budget": "Se puoi permetterti le rate: entrambe le strade presuppongono che il maggiore dei due costi venga pagato ogni mese con il reddito."
+        },
+        "limits": "Il calcolatore accetta case fino a {{maxPrice}}, affitti fino a {{maxRent}} al mese, tassi di crescita e di rendimento da {{minGrowth}} a {{maxGrowth}} all'anno e fino a {{maxHorizon}} anni.",
+        "relatedHeading": "Calcolatori correlati",
+        "relatedMortgage": "Per vedere il mutuo da solo, con il piano di ammortamento anno per anno, usa il",
+        "relatedMortgageLink": "calcolatore del mutuo",
+        "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
+        "relatedNetWorthLink": "calcolatore del patrimonio netto"
       }
     }
   },
