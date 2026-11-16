@@ -40,7 +40,10 @@ export default function DemoBanner() {
       className="border-info-text/50 text-info-text border-b px-4 py-2 text-sm lg:px-10"
     >
       <div className="mx-auto flex max-w-[85rem] flex-wrap items-center gap-x-4 gap-y-1">
-        <p className="leading-6">{t("banner-message")}</p>
+        <p className="leading-6">
+          <span className="lg:hidden">{t("banner-compact")}</span>
+          <span className="hidden lg:inline">{t("banner-message")}</span>
+        </p>
         <div className="flex flex-wrap items-center gap-x-4">
           {signupMode === "open" ? (
             <button
@@ -48,16 +51,18 @@ export default function DemoBanner() {
               className={linkClass}
               disabled={leaving}
               aria-busy={leaving || undefined}
+              aria-label={t("banner-sign-up")}
               onClick={() => void signUp()}
             >
-              {t("banner-sign-up")}
+              <span className="lg:hidden">{t("banner-sign-up-compact")}</span>
+              <span className="hidden lg:inline">{t("banner-sign-up")}</span>
             </button>
           ) : null}
           <a
             href={`${instanceConfig.docsUrl}/${locale}/docs/self-hosting`}
             target="_blank"
             rel="noreferrer"
-            className={linkClass}
+            className={`${linkClass} max-lg:hidden`}
           >
             {t("banner-self-host")}
           </a>

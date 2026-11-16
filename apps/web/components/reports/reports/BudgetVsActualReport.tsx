@@ -178,7 +178,7 @@ export function BudgetVsActualReport() {
       data-testid="budget-vs-actual-report"
     >
       <div className="overflow-x-auto">
-        <SimpleTable>
+        <SimpleTable mobileCards>
           <TableHeader>
             <TableRow>
               <TableHead>{t("category")}</TableHead>
@@ -217,25 +217,38 @@ export function BudgetVsActualReport() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell
+                    className="text-right font-mono"
+                    mobileLabel={t("budgeted")}
+                  >
                     <ReportAmount
                       value={row.budgeted}
                       currencyKey={currencyKey}
                     />
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell
+                    className="text-right font-mono"
+                    mobileLabel={t("actual")}
+                  >
                     <ReportAmount
                       value={row.actual}
                       currencyKey={currencyKey}
                     />
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell
+                    className="text-right font-mono"
+                    mobileLabel={t("variance")}
+                    mobilePriority
+                  >
                     <ReportAmount
                       value={row.variance}
                       currencyKey={currencyKey}
                     />
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell
+                    className="text-right font-mono"
+                    mobileLabel={t("percentUsed")}
+                  >
                     {formatPercentage(row.percentUsed / 100, {
                       maximumFractionDigits: 0,
                     })}

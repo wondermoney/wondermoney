@@ -44,6 +44,7 @@ import useCreateLoan from "@/lib/api/loan/useCreateLoan";
 import useUpdateLoan from "@/lib/api/loan/useUpdateLoan";
 import type { ManualAsset } from "@/lib/api/manual-asset/types";
 import useManualAssets from "@/lib/api/manual-asset/useManualAssets";
+import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import {
   formatDateInputValue,
   parseDateInputValue,
@@ -129,7 +130,7 @@ function buildBaseSchema(
     ]),
     amortizationMethod: z.enum(["FRENCH", "CONSTANT_PRINCIPAL"]),
     providerName: z.string().optional(),
-    currencyKey: z.coerce.number<number>().int().positive(),
+    currencyKey: z.coerce.number<number | "">().int().positive(),
     openingPrincipalBalance: amount().pipe(z.number().min(0)),
     openingBalanceDate: z.string().min(1, t("validation.required")),
     // Amount originally borrowed at origination — distinct from, and
@@ -172,6 +173,10 @@ export default function LoanFormDrawer({
   const updateMutation = useUpdateLoan();
   const { data: currenciesData } = useCurrencies({ enabled: open });
   const currencies = currenciesData?.currencies ?? [];
+  const { data: netWorthData } = useNetWorth({ enabled: open });
+  const baseCurrencyKey = currencies.find(
+    (currency) => currency.code === netWorthData?.netWorth.currencyCode,
+  )?.currencyKey;
   const { data: assetsData } = useManualAssets({ enabled: open });
   const currentSecuredAsset = loan?.securedAsset ?? null;
   const assetOptions = securedAssetOptions(
@@ -185,7 +190,7 @@ export default function LoanFormDrawer({
       type: loan?.type ?? "PERSONAL_LOAN",
       amortizationMethod: loan?.amortizationMethod ?? "FRENCH",
       providerName: loan?.providerName ?? "",
-      currencyKey: loan?.currency.currencyKey ?? 1,
+      currencyKey: loan?.currency.currencyKey ?? "",
       openingPrincipalBalance: loan?.openingPrincipalBalance ?? 0,
       openingBalanceDate:
         (loan as LoanDetail | undefined)?.openingBalanceDate?.slice(0, 10) ??
@@ -238,6 +243,11 @@ export default function LoanFormDrawer({
   useEffect(() => {
     if (open) form.reset(defaultValues);
   }, [open, defaultValues, form]);
+  useEffect(() => {
+    if (open && !loan && baseCurrencyKey && !form.getValues("currencyKey")) {
+      form.setValue("currencyKey", baseCurrencyKey);
+    }
+  }, [open, loan, baseCurrencyKey, form]);
   const currencyKey = useWatch({ control: form.control, name: "currencyKey" });
   const currencyCode = currencies.find(
     (currency) => currency.currencyKey === Number(currencyKey),

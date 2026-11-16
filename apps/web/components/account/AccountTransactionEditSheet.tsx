@@ -298,225 +298,235 @@ export function AccountTransactionEditSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="flex w-full flex-col sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{t("edit-transaction")}</SheetTitle>
           <SheetDescription>
             {t("edit-transaction-description")}
           </SheetDescription>
         </SheetHeader>
-        <Form {...form}>
-          <form
-            className="my-8 w-full space-y-6"
-            onSubmit={handleSubmit(onSubmit)}
-            id="edit-account-transaction-form"
-          >
-            <FormField
-              control={form.control}
-              name="updatedAmount"
-              defaultValue={transaction.settlementAmount}
-              render={({ field }) => {
-                const settleExpression = () => {
-                  const result = amountExpressionResult(
-                    String(field.value ?? ""),
-                    locale,
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <Form {...form}>
+            <form
+              className="my-8 w-full space-y-6"
+              onSubmit={handleSubmit(onSubmit)}
+              id="edit-account-transaction-form"
+            >
+              <FormField
+                control={form.control}
+                name="updatedAmount"
+                defaultValue={transaction.settlementAmount}
+                render={({ field }) => {
+                  const settleExpression = () => {
+                    const result = amountExpressionResult(
+                      String(field.value ?? ""),
+                      locale,
+                    );
+                    if (result === null) return false;
+                    field.onChange(formatLocaleNumberInput(result, locale));
+                    return true;
+                  };
+                  return (
+                    <FormItem>
+                      <FormLabel>{t("amount")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="tel"
+                          inputMode="decimal"
+                          {...field}
+                          value={formatLocaleNumberInput(field.value, locale)}
+                          onBlur={() => {
+                            field.onBlur();
+                            settleExpression();
+                          }}
+                          onKeyDown={(event) => {
+                            // Enter settles the expression; a second Enter submits.
+                            if (event.key === "Enter" && settleExpression()) {
+                              event.preventDefault();
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <AmountExpressionHint
+                        locale={locale}
+                        value={String(field.value ?? "")}
+                      />
+                      <FormDescription>
+                        {t("original-settlement-amount")}:{" "}
+                        <Amount
+                          value={transaction.settlementAmount}
+                          currency={transaction.settlementCurrencyKey.code}
+                        />
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
                   );
-                  if (result === null) return false;
-                  field.onChange(formatLocaleNumberInput(result, locale));
-                  return true;
-                };
-                return (
+                }}
+              />
+              {/* Its category, or the lines of its split. */}
+              <TransactionSplitField
+                split={split}
+                transaction={transaction}
+                categories={categories}
+                amountChanged={amountFieldChanged}
+                disabled={isSubmitting}
+                onRemoved={() => onOpenChange(false)}
+              />
+              {/* Shared with an expense group: who paid and each person's share. Saves at once. */}
+              <TransactionExpenseGroupField
+                transaction={transaction}
+                categories={categories}
+                disabled={isSubmitting}
+                onChanged={() => onOpenChange(false)}
+              />
+              {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
+              <TransactionReimbursementField
+                transaction={transaction}
+                disabled={isSubmitting}
+              />
+              {/* Whose spending it counts as, in a household of more than one. Saves at once. */}
+              <TransactionSpentByField
+                transaction={transaction}
+                disabled={isSubmitting}
+              />
+              {/* The transaction's tags, with "create tag" inline. */}
+              <div className="space-y-2">
+                <Label htmlFor="edit-transaction-tags">
+                  {t("transactionTags.label")}
+                </Label>
+                <TagPicker
+                  id="edit-transaction-tags"
+                  value={tagKeys}
+                  onChange={setTagKeys}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <TransactionTransferFields
+                accountKey={transaction.accountKey.accountKey}
+                amount={rowAmount}
+                destination={transferDestination}
+                disabled={isSubmitting}
+                isTransfer={isTransfer}
+                onDestinationChange={setTransferDestination}
+                onTransferChange={(transfer) => {
+                  setIsTransfer(transfer);
+                  if (!transfer) setTransferDestination(null);
+                }}
+              />
+              {/* Receipts, invoices and warranties kept with the purchase. */}
+              <TransactionAttachments
+                disabled={isSubmitting}
+                transactionKey={transaction.transactionKey}
+              />
+              <div className="bg-muted space-y-3 rounded-md p-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    {t("goals.fund-transaction")}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {canFundWithGoal
+                      ? t("goals.fund-transaction-description")
+                      : t("goals.fund-transaction-disabled")}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!canFundWithGoal}
+                  onClick={() =>
+                    onFundGoal({
+                      currencyCode:
+                        transaction.appuserCurrencyKey?.code ??
+                        transaction.settlementCurrencyKey.code,
+                      maxAmount: maxFundAmount,
+                      transactionKey: transaction.transactionKey,
+                    })
+                  }
+                >
+                  {t("goals.fund-transaction-action")}
+                </Button>
+              </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("amount")}</FormLabel>
+                    <FormLabel>{t("description")}</FormLabel>
                     <FormControl>
-                      <Input
-                        type="tel"
-                        inputMode="decimal"
-                        {...field}
-                        value={formatLocaleNumberInput(field.value, locale)}
-                        onBlur={() => {
-                          field.onBlur();
-                          settleExpression();
-                        }}
-                        onKeyDown={(event) => {
-                          // Enter settles the expression; a second Enter submits.
-                          if (event.key === "Enter" && settleExpression()) {
-                            event.preventDefault();
-                          }
-                        }}
-                      />
+                      <Textarea placeholder={t("description")} {...field} />
                     </FormControl>
-                    <AmountExpressionHint
-                      locale={locale}
-                      value={String(field.value ?? "")}
-                    />
                     <FormDescription>
-                      {t("original-settlement-amount")}:{" "}
-                      <Amount
-                        value={transaction.settlementAmount}
-                        currency={transaction.settlementCurrencyKey.code}
-                      />
+                      {t("original-description")}:{" "}
+                      {transaction.descriptionDirty}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
-            {/* Its category, or the lines of its split. */}
-            <TransactionSplitField
-              split={split}
-              transaction={transaction}
-              categories={categories}
-              amountChanged={amountFieldChanged}
-              disabled={isSubmitting}
-              onRemoved={() => onOpenChange(false)}
-            />
-            {/* Shared with an expense group: who paid and each person's share. Saves at once. */}
-            <TransactionExpenseGroupField
-              transaction={transaction}
-              categories={categories}
-              disabled={isSubmitting}
-              onChanged={() => onOpenChange(false)}
-            />
-            {/* Money in paying back an expense, or what paid this expense back. Saves at once. */}
-            <TransactionReimbursementField
-              transaction={transaction}
-              disabled={isSubmitting}
-            />
-            {/* Whose spending it counts as, in a household of more than one. Saves at once. */}
-            <TransactionSpentByField
-              transaction={transaction}
-              disabled={isSubmitting}
-            />
-            {/* The transaction's tags, with "create tag" inline. */}
-            <div className="space-y-2">
-              <Label htmlFor="edit-transaction-tags">
-                {t("transactionTags.label")}
-              </Label>
-              <TagPicker
-                id="edit-transaction-tags"
-                value={tagKeys}
-                onChange={setTagKeys}
-                disabled={isSubmitting}
+                )}
               />
-            </div>
-            <TransactionTransferFields
-              accountKey={transaction.accountKey.accountKey}
-              amount={rowAmount}
-              destination={transferDestination}
-              disabled={isSubmitting}
-              isTransfer={isTransfer}
-              onDestinationChange={setTransferDestination}
-              onTransferChange={(transfer) => {
-                setIsTransfer(transfer);
-                if (!transfer) setTransferDestination(null);
+            </form>
+          </Form>
+          <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
+            <p className="text-muted-foreground text-sm">
+              {t("transactionTemplates.save-as-template-hint")}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setSavingAsTemplate(true)}
+            >
+              {t("transactionTemplates.save-as-template")}
+            </Button>
+          </div>
+          {savingAsTemplate ? (
+            <SaveTransactionAsTemplateDialog
+              transaction={transaction}
+              open
+              onOpenChange={setSavingAsTemplate}
+            />
+          ) : null}
+          <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
+            <p className="text-muted-foreground text-sm">
+              {t("rules.from-transaction-hint")}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setCreatingRule(true)}
+            >
+              {t("rules.from-transaction")}
+            </Button>
+          </div>
+          {creatingRule ? (
+            <RuleEditorDialog
+              open
+              initialForm={formFromTransaction(transaction)}
+              onOpenChange={setCreatingRule}
+              onSaved={(saved) => {
+                if (saved.active) setApplyingRule(saved);
               }}
             />
-            {/* Receipts, invoices and warranties kept with the purchase. */}
-            <TransactionAttachments
-              disabled={isSubmitting}
-              transactionKey={transaction.transactionKey}
+          ) : null}
+          {applyingRule ? (
+            <ApplyRulesDialog
+              key={applyingRule.ruleKey}
+              target={{ ruleKey: applyingRule.ruleKey }}
+              ruleName={applyingRule.name}
+              offer
+              onClose={closeApplyingRule}
             />
-            <div className="bg-muted space-y-3 rounded-md p-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">
-                  {t("goals.fund-transaction")}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  {canFundWithGoal
-                    ? t("goals.fund-transaction-description")
-                    : t("goals.fund-transaction-disabled")}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!canFundWithGoal}
-                onClick={() =>
-                  onFundGoal({
-                    currencyCode:
-                      transaction.appuserCurrencyKey?.code ??
-                      transaction.settlementCurrencyKey.code,
-                    maxAmount: maxFundAmount,
-                    transactionKey: transaction.transactionKey,
-                  })
-                }
-              >
-                {t("goals.fund-transaction-action")}
-              </Button>
-            </div>
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("description")}</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder={t("description")} {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    {t("original-description")}: {transaction.descriptionDirty}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-        <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
-          <p className="text-muted-foreground text-sm">
-            {t("transactionTemplates.save-as-template-hint")}
-          </p>
+          ) : null}
+          <div className="border-border border-t pt-4">
+            <TransactionActivity transactionId={transaction.transactionKey} />
+          </div>
+        </div>
+        <SheetFooter className="border-border shrink-0 gap-2 border-t pt-4">
           <Button
             type="button"
             variant="secondary"
-            onClick={() => setSavingAsTemplate(true)}
+            onClick={() => onOpenChange(false)}
           >
-            {t("transactionTemplates.save-as-template")}
+            {t("cancel")}
           </Button>
-        </div>
-        {savingAsTemplate ? (
-          <SaveTransactionAsTemplateDialog
-            transaction={transaction}
-            open
-            onOpenChange={setSavingAsTemplate}
-          />
-        ) : null}
-        <div className="bg-muted mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md p-4">
-          <p className="text-muted-foreground text-sm">
-            {t("rules.from-transaction-hint")}
-          </p>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setCreatingRule(true)}
-          >
-            {t("rules.from-transaction")}
-          </Button>
-        </div>
-        {creatingRule ? (
-          <RuleEditorDialog
-            open
-            initialForm={formFromTransaction(transaction)}
-            onOpenChange={setCreatingRule}
-            onSaved={(saved) => {
-              if (saved.active) setApplyingRule(saved);
-            }}
-          />
-        ) : null}
-        {applyingRule ? (
-          <ApplyRulesDialog
-            key={applyingRule.ruleKey}
-            target={{ ruleKey: applyingRule.ruleKey }}
-            ruleName={applyingRule.name}
-            offer
-            onClose={closeApplyingRule}
-          />
-        ) : null}
-        <div className="border-border border-t pt-4">
-          <TransactionActivity transactionId={transaction.transactionKey} />
-        </div>
-        <SheetFooter>
           <Button
             type="submit"
             loading={isSubmitting}

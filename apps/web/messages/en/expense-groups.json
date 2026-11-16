@@ -189,6 +189,13 @@
       "member-in-use": "This person has shared expenses or settlements in the group, so they cannot be removed.",
       "not-empty": "This group has shared expenses or settlements, so it cannot be deleted. Archive it instead.",
       "account-read-only": "You can view this transaction's account but not change it."
+    },
+    "chooseExpense": {
+      "action": "Add shared expense",
+      "title": "Choose a transaction",
+      "description": "Choose a posted expense, then decide who paid and how to split it.",
+      "empty": "No eligible expenses on this page. Try loading older transactions.",
+      "more": "Load older transactions"
     }
   }
 }

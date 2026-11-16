@@ -25,9 +25,15 @@ const state = vi.hoisted(() => ({
 vi.mock("@/lib/api/account/useCurrencies", () => ({
   default: () => ({
     data: {
-      currencies: [{ currencyKey: 1, code: "EUR", description: "Euro" }],
+      currencies: [
+        { currencyKey: 1, code: "CHF", description: "Swiss franc" },
+        { currencyKey: 151, code: "EUR", description: "Euro" },
+      ],
     },
   }),
+}));
+vi.mock("@/lib/api/net-worth/useNetWorth", () => ({
+  default: () => ({ data: { netWorth: { currencyCode: "EUR" } } }),
 }));
 vi.mock("@/lib/api/manual-asset/useManualAssets", () => ({
   default: () => ({ data: { assets: state.assets } }),
@@ -136,6 +142,7 @@ test("a new loan can be secured against an asset still held, and sends its key",
 
   await waitFor(() => assert.equal(state.create.mock.calls.length, 1));
   assert.equal(state.create.mock.calls[0][0].securedAssetKey, 7);
+  assert.equal(state.create.mock.calls[0][0].currencyKey, 151);
 });
 
 test("a new loan secured against nothing does not send the field", async () => {

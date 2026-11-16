@@ -52,7 +52,7 @@ export default function MetricsCards({
       />
       <StatCard
         icon={PiggyBank}
-        label={t("savings-rate")}
+        label={t("net-savings")}
         value={netSavings}
         currency={userCurrency}
         comparisonValue={netSavingsPast}

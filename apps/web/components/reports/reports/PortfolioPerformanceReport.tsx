@@ -234,7 +234,7 @@ export function PortfolioPerformanceReport() {
       data-testid="portfolio-performance-report"
     >
       <div className="overflow-x-auto">
-        <SimpleTable>
+        <SimpleTable mobileCards>
           <TableHeader>
             <TableRow>
               <TableHead>{t("portfolio")}</TableHead>
@@ -264,21 +264,31 @@ export function PortfolioPerformanceReport() {
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("startValue")}
+                >
                   <OptionalAmount
                     value={row.startValue}
                     currencyKey={currencyKey}
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("netContributions")}
+                >
                   <OptionalAmount
                     value={row.netContributions}
                     currencyKey={currencyKey}
                     unknownLabel={noRateLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("change")}
+                  mobilePriority
+                >
                   <ChangeCell
                     change={row.change}
                     changePercent={row.changePercent}
@@ -286,27 +296,39 @@ export function PortfolioPerformanceReport() {
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("dividends")}
+                >
                   <OptionalAmount
                     value={row.dividends}
                     currencyKey={currencyKey}
                     unknownLabel={noRateLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("endValue")}
+                >
                   <OptionalAmount
                     value={row.endValue}
                     currencyKey={currencyKey}
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("timeWeighted")}
+                >
                   <ReturnCell
                     value={row.timeWeightedReturn}
                     unknownLabel={returnUnavailableLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("moneyWeighted")}
+                >
                   <ReturnCell
                     value={row.moneyWeightedReturn}
                     annualized={row.moneyWeightedReturnAnnualized}
@@ -318,21 +340,31 @@ export function PortfolioPerformanceReport() {
             {rows.length > 1 && (
               <TableRow className="font-medium">
                 <TableCell>{t("total")}</TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("startValue")}
+                >
                   <OptionalAmount
                     value={totals.startValue}
                     currencyKey={currencyKey}
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("netContributions")}
+                >
                   <OptionalAmount
                     value={totals.netContributions}
                     currencyKey={currencyKey}
                     unknownLabel={noRateLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("change")}
+                  mobilePriority
+                >
                   <ChangeCell
                     change={totals.change}
                     changePercent={totals.changePercent}
@@ -340,14 +372,20 @@ export function PortfolioPerformanceReport() {
                     unknownLabel={unknownLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("dividends")}
+                >
                   <OptionalAmount
                     value={totals.dividends}
                     currencyKey={currencyKey}
                     unknownLabel={noRateLabel}
                   />
                 </TableCell>
-                <TableCell className="text-right font-mono">
+                <TableCell
+                  className="text-right font-mono"
+                  mobileLabel={t("endValue")}
+                >
                   <OptionalAmount
                     value={totals.endValue}
                     currencyKey={currencyKey}
@@ -356,10 +394,16 @@ export function PortfolioPerformanceReport() {
                 </TableCell>
                 {/* A household rate needs every portfolio's cash flows, not
                     their rates: averaging rows would state a figure nobody earned. */}
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("timeWeighted")}
+                >
                   <ReturnCell value={null} unknownLabel={t("notCombined")} />
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  mobileLabel={t("moneyWeighted")}
+                >
                   <ReturnCell value={null} unknownLabel={t("notCombined")} />
                 </TableCell>
               </TableRow>

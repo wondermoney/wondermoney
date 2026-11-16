@@ -752,3 +752,31 @@ export function TransactionExpenseGroupField({
     </section>
   );
 }
+
+/** The same sharing editor, entered from a group's own transaction picker. */
+export function ShareTransactionInGroup({
+  transaction,
+  group,
+  categories,
+  onCancel,
+  onSaved,
+}: {
+  transaction: Transaction;
+  group: ExpenseGroup;
+  categories: Category[];
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  return (
+    <GroupShareEditor
+      transaction={transaction}
+      groups={[group]}
+      start={startFor(group)}
+      editing={false}
+      categories={categories}
+      disabled={false}
+      onCancel={onCancel}
+      onSaved={onSaved}
+    />
+  );
+}

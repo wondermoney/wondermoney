@@ -17,7 +17,7 @@ export default async function ReviewTransactionsPage({
 
   const [accountsData, transactionsData, configsData] = await Promise.all([
     getAccounts(api),
-    getTransactions({ unreviewedOnly: true }, api),
+    getTransactions({ unreviewedOnly: true, excludeTransfers: true }, api),
     getConfigs(api),
   ]);
 

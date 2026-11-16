@@ -1,5 +1,7 @@
 import type { Transaction } from "@/lib/api/account/useTransactions";
 
+import { isTransferType } from "./transaction-transfer";
+
 export interface TransactionReviewBuckets {
   needsCategory: Transaction[];
   suggestedCategory: Transaction[];
@@ -26,7 +28,11 @@ function needsCategoryRank(transaction: Transaction): number {
 export function getTransactionReviewBuckets(
   transactions: Transaction[],
 ): TransactionReviewBuckets {
-  const unreviewed = transactions.filter((transaction) => !transaction.reviewed);
+  const unreviewed = transactions.filter(
+    (transaction) =>
+      !transaction.reviewed &&
+      !isTransferType(transaction.transactionTypeKey?.name),
+  );
 
   const needsCategory = unreviewed
     .filter((transaction) => !hasTransactionCategory(transaction))
@@ -40,7 +46,9 @@ export function getTransactionReviewBuckets(
 
   return {
     needsCategory,
-    suggestedCategory: unreviewed.filter((transaction) => hasTransactionCategory(transaction)),
+    suggestedCategory: unreviewed.filter((transaction) =>
+      hasTransactionCategory(transaction),
+    ),
     totalUnreviewed: unreviewed.length,
   };
 }
@@ -90,8 +98,7 @@ export function groupTransactionsByMerchant(
 
   return Array.from(groups.values()).sort(
     (left, right) =>
-      right.transactions.length -
-      left.transactions.length ||
+      right.transactions.length - left.transactions.length ||
       left.label.toLowerCase().localeCompare(right.label.toLowerCase()) ||
       left.settlementCurrencyCode.localeCompare(right.settlementCurrencyCode),
   );

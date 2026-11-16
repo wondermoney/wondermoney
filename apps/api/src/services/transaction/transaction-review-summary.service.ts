@@ -10,7 +10,7 @@ import { getTransactionTotal } from './transaction-total.service';
  * amounts add up to in the viewer's own currency.
  *
  * The rows are the review inbox's rows, not a second definition of them: the filters are the
- * list's default scope with `unreviewedOnly`, and the count and sum come from
+ * list's default scope with `unreviewedOnly` and `excludeTransfers`, and the count and sum come from
  * `getTransactionTotal`, the same query behind `GET /v1/account/transaction`'s `total`. So the
  * count is the list's `total` for `unreviewedOnly=true`, and the tenant and privacy rules
  * (`transaction-scope.ts`) are applied once, where the list applies them.
@@ -28,13 +28,16 @@ export interface TransactionReviewSummary {
   currency: string;
 }
 
-export async function getTransactionReviewSummary(input: { tenantKey: number; viewerAppuserKey: number }): Promise<TransactionReviewSummary> {
+export async function getTransactionReviewSummary(input: {
+  tenantKey: number;
+  viewerAppuserKey: number;
+}): Promise<TransactionReviewSummary> {
   const viewer = await DI.em.findOne(Appuser, { appuserKey: input.viewerAppuserKey }, { populate: ['currencyKey'] });
   if (!viewer) throw new NotFoundError('User not found');
 
   const currency = { code: viewer.currencyKey.code, currencyKey: viewer.currencyKey.currencyKey };
   const total = await getTransactionTotal(
-    { unreviewedOnly: true },
+    { excludeTransfers: true, unreviewedOnly: true },
     { currency, tenantKey: input.tenantKey, viewerAppuserKey: input.viewerAppuserKey },
   );
 

@@ -59,7 +59,8 @@
       "privateDescription": "Solo tú ves este bien. Queda fuera del patrimonio neto de los demás miembros del hogar.",
       "notes": "Notas",
       "notesPlaceholder": "Lo que merezca la pena recordar sobre este bien",
-      "datePlaceholder": "Elige una fecha"
+      "datePlaceholder": "Elige una fecha",
+      "projectionDetails": "Detalles de la proyección (opcional)"
     },
     "validation": {
       "required": "Este campo es obligatorio",

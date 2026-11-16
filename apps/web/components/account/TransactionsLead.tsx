@@ -41,6 +41,7 @@ export function TransactionsLead({
     toDate,
     limit: 1,
     unreviewedOnly: true,
+    excludeTransfers: true,
   });
   const currency =
     flows.data?.completeness?.currencyCode ??

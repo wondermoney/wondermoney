@@ -158,7 +158,7 @@ export default function Assistant() {
 
           <div className="space-y-6">
             <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
+              <div className="flex min-w-0 flex-col gap-1">
                 <Label htmlFor="assistant-enabled">
                   {t("assistant.settings.enabled")}
                 </Label>
@@ -194,7 +194,7 @@ export default function Assistant() {
             </div>
 
             <div className="border-border/60 flex items-start justify-between gap-4 border-t pt-6">
-              <div className="space-y-1">
+              <div className="flex min-w-0 flex-col gap-1">
                 <Label htmlFor="assistant-launcher-hidden">
                   {t("assistant.settings.hideLauncher")}
                 </Label>

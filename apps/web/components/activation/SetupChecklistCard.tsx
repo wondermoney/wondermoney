@@ -16,6 +16,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
+import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { cn } from "@/lib/utils";
 import { RETENTION_GROWTH_EVENTS } from "@/lib/utils/analytics";
 import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
@@ -44,6 +45,7 @@ export function SetupChecklistCard({
 }: SetupChecklistCardProps) {
   const t = useTranslations();
   const posthog = usePostHog();
+  const isDemo = useIsDemoProfile({ fetch: false });
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDismissed, dismiss } = useDismissibleActivation("setup-checklist");
   const visibleSteps = steps;
@@ -63,7 +65,7 @@ export function SetupChecklistCard({
   const allStepsComplete = visibleSteps.every((step) => completed[step.key]);
 
   useEffect(() => {
-    if (isDismissed || allStepsComplete) return;
+    if (isDemo || isDismissed || allStepsComplete) return;
 
     posthog?.capture(RETENTION_GROWTH_EVENTS.profileCompletenessViewed, {
       completedStepsCount,
@@ -81,11 +83,12 @@ export function SetupChecklistCard({
     hasPortfolio,
     hasReviewedTransactions,
     isDismissed,
+    isDemo,
     posthog,
     totalStepsCount,
   ]);
 
-  if (isDismissed || allStepsComplete) {
+  if (isDemo || isDismissed || allStepsComplete) {
     return null;
   }
 

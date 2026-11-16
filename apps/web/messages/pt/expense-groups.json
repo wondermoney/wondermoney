@@ -189,6 +189,13 @@
       "member-in-use": "Esta pessoa tem despesas partilhadas ou acertos no grupo, por isso não pode ser removida.",
       "not-empty": "Este grupo tem despesas partilhadas ou acertos, por isso não pode ser eliminado. Em vez disso, arquiva-o.",
       "account-read-only": "Podes ver a conta desta transação, mas não a podes alterar."
+    },
+    "chooseExpense": {
+      "action": "Adicionar despesa partilhada",
+      "title": "Escolher uma transação",
+      "description": "Escolhe uma despesa registada e indica quem pagou e como a dividir.",
+      "empty": "Não há despesas elegíveis nesta página. Experimenta carregar transações mais antigas.",
+      "more": "Carregar transações mais antigas"
     }
   }
 }

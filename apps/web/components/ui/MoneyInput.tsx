@@ -103,7 +103,7 @@ const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(
       >
         <SelectTrigger
           aria-label={currencyPicker.label}
-          className="hover:bg-accent h-8 w-auto gap-1 border-none bg-transparent px-2 font-mono"
+          className="hover:bg-accent h-8 w-20 min-w-20 shrink-0 gap-1 border-none bg-transparent px-2 font-mono"
         >
           <SelectValue />
         </SelectTrigger>

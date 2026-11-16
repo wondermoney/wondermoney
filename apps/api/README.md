@@ -44,8 +44,10 @@ the reference data but not the development seed; `pnpm demo:seed` does the same 
 `dist` for a demo server (see "Public demo" in the self-hosting configuration docs).
 
 Both seed paths include categorized spending, budget income, an emergency-fund goal linked to
-savings, home and car valuations, recurring bills linked to payments, mortgage repayment splits,
-and a market watchlist alongside the accounts and portfolios. The daily demo refresh maintains
+savings with funding activity, home and car valuations, recurring bills linked to payments, mortgage
+repayment splits, rules and tags, a shared dinner with a partial settlement, a non-login example
+household member, a credit card with matched installments, and a market watchlist. Income and
+spending cover four complete months; investment history covers a longer holding period. The daily demo refresh maintains
 these examples and their transaction dates. Rerun `demo:seed` after deploying seed changes to
 rebaseline the demo's account balances as well; it leaves other households alone.
 
@@ -54,7 +56,7 @@ rebaseline the demo's account balances as well; it leaves other households alone
 Every `migrate:*` and `seed:*` script connects to whatever `DB_HOST` / `DB_PORT` /
 `DB_DATABASE` resolve to, **regardless of the `dev` or `prd` in the script name**.
 
-1. **Keep `.env` local, with exactly one `DB_*` block.** dotenv keeps the *last*
+1. **Keep `.env` local, with exactly one `DB_*` block.** dotenv keeps the _last_
    assignment, so a second block pasted at the bottom silently wins.
 2. **`migrate:dev:fresh` / `migrate:prd:fresh` DROP the whole database.** They refuse to
    run unless `DB_HOST` is local (`scripts/assert-local-db.mjs`). To move a real

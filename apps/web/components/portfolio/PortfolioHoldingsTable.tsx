@@ -103,15 +103,6 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
     // https://github.com/TanStack/table/issues/4382#issuecomment-1801830220
     const columns: ColumnDef<PortfolioHolding, any>[] = useMemo(
       () => [
-        columnHelper.accessor("financialAssetType", {
-          header: t("type"),
-          cell: (info) => (
-            // Badge has no colour prop, so the old per-type `color` fell
-            // through to the DOM and every type rendered as a violet fill.
-            // Asset type is a category, not status or an action: neutral.
-            <Badge variant="outline">{t(info.getValue() as any)}</Badge>
-          ),
-        }),
         columnHelper.accessor("financialAssetSymbol", {
           header: t("ticker"),
           cell: (info) => (
@@ -150,16 +141,67 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             </div>
           ),
         }),
+        columnHelper.accessor("currentValue", {
+          header: () => (
+            <div className="min-w-[7.5rem] text-right">
+              {t("current-value")}
+            </div>
+          ),
+          cell: (info) =>
+            info.row.original.financialAssetType.toLowerCase() ===
+            "cash" ? null : (
+              <CellNumeric className="min-w-[7.5rem] text-right">
+                {info.getValue() != null
+                  ? formatCurrency(info.getValue(), info.row.original.currency)
+                  : t("portfolio-holdings-value-pending")}
+              </CellNumeric>
+            ),
+        }),
+        columnHelper.accessor("unrealizedGains", {
+          header: () => (
+            <div className="min-w-32 text-right whitespace-nowrap">
+              {t("gain-loss")}
+            </div>
+          ),
+          cell: (info) => {
+            const gains = info.getValue();
+            const gainsPercent = info.row.original.unrealizedGainsPercentage;
+            if (gains == null)
+              return (
+                <CellNumeric className="text-muted-foreground min-w-32 text-right whitespace-nowrap">
+                  {t("portfolio-holdings-gains-pending")}
+                </CellNumeric>
+              );
+            return (
+              <CellNumeric
+                className={cn(
+                  "min-w-32 text-right whitespace-nowrap",
+                  getFinancialColor(gains),
+                )}
+              >
+                <Amount value={gains} currency={info.row.original.currency} />
+                {gainsPercent != null && (
+                  <span className="ml-1 text-xs">
+                    (
+                    {formatPercentage(gainsPercent / 100, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                      signDisplay: "exceptZero",
+                    })}
+                    )
+                  </span>
+                )}
+              </CellNumeric>
+            );
+          },
+        }),
         columnHelper.accessor("allocation", {
-          header: () => <div className="min-w-[11rem]">{t("allocation")}</div>,
+          header: () => <div className="min-w-28">{t("allocation")}</div>,
           cell: (info) => (
-            <div className="flex min-w-[11rem] items-center gap-4">
+            <div className="flex min-w-28 items-center gap-4">
               {info.getValue() != null ? (
                 <>
-                  <Progress
-                    value={info.getValue() as any}
-                    className="w-[100px]"
-                  />
+                  <Progress value={info.getValue() as any} className="w-12" />
                   <span className="text-foreground font-mono text-sm font-semibold">
                     {formatPercentage(Number(info.getValue()) / 100, {
                       minimumFractionDigits: 1,
@@ -190,6 +232,15 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
               />
             ),
         }),
+        columnHelper.accessor("financialAssetType", {
+          header: t("type"),
+          cell: (info) => (
+            // Badge has no colour prop, so the old per-type `color` fell
+            // through to the DOM and every type rendered as a violet fill.
+            // Asset type is a category, not status or an action: neutral.
+            <Badge variant="outline">{t(info.getValue() as any)}</Badge>
+          ),
+        }),
         columnHelper.accessor("averageBuyPrice", {
           header: () => (
             <div className="min-w-[7.5rem] text-right">
@@ -204,22 +255,6 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                   value={info.getValue()}
                   currency={info.row.original.currency}
                 />
-              </CellNumeric>
-            ),
-        }),
-        columnHelper.accessor("currentValue", {
-          header: () => (
-            <div className="min-w-[7.5rem] text-right">
-              {t("current-value")}
-            </div>
-          ),
-          cell: (info) =>
-            info.row.original.financialAssetType.toLowerCase() ===
-            "cash" ? null : (
-              <CellNumeric className="min-w-[7.5rem] text-right">
-                {info.getValue() != null
-                  ? formatCurrency(info.getValue(), info.row.original.currency)
-                  : t("portfolio-holdings-value-pending")}
               </CellNumeric>
             ),
         }),
@@ -247,44 +282,6 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
                 {t("portfolio-holdings-price-pending")}
               </CellNumeric>
             ),
-        }),
-        columnHelper.accessor("unrealizedGains", {
-          header: () => (
-            <div className="min-w-[10rem] text-right whitespace-nowrap">
-              {t("gain-loss")}
-            </div>
-          ),
-          cell: (info) => {
-            const gains = info.getValue();
-            const gainsPercent = info.row.original.unrealizedGainsPercentage;
-            if (gains == null)
-              return (
-                <CellNumeric className="text-muted-foreground min-w-[10rem] text-right whitespace-nowrap">
-                  {t("portfolio-holdings-gains-pending")}
-                </CellNumeric>
-              );
-            return (
-              <CellNumeric
-                className={cn(
-                  "min-w-[10rem] text-right whitespace-nowrap",
-                  getFinancialColor(gains),
-                )}
-              >
-                <Amount value={gains} currency={info.row.original.currency} />
-                {gainsPercent != null && (
-                  <span className="ml-1 text-xs">
-                    (
-                    {formatPercentage(gainsPercent / 100, {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
-                      signDisplay: "exceptZero",
-                    })}
-                    )
-                  </span>
-                )}
-              </CellNumeric>
-            );
-          },
         }),
         columnHelper.accessor("realizedGains", {
           header: () => (

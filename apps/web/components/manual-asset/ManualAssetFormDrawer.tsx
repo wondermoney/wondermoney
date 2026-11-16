@@ -385,49 +385,56 @@ export default function ManualAssetFormDrawer({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="growthRatePercent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("fields.growthRate")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        inputMode="decimal"
-                        placeholder="0"
-                        className="text-right font-mono"
-                        endAdornment={<span className="font-mono">%</span>}
-                        {...field}
-                        value={formatLocaleNumberInput(field.value, locale)}
+              <details className="space-y-4">
+                <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">
+                  {t("fields.projectionDetails")}
+                </summary>
+                <FormField
+                  control={form.control}
+                  name="growthRatePercent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("fields.growthRate")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          inputMode="decimal"
+                          placeholder="0"
+                          className="text-right font-mono"
+                          endAdornment={<span className="font-mono">%</span>}
+                          {...field}
+                          value={formatLocaleNumberInput(field.value, locale)}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t("fields.growthRateHint")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="growthStartDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>{t("fields.growthStartDate")}</FormLabel>
+                      <DatePicker
+                        form
+                        inModal
+                        value={
+                          field.value ? calendarDay(field.value) : undefined
+                        }
+                        onSelect={(date) => field.onChange(dayString(date))}
+                        placeholder={t("fields.datePlaceholder")}
                       />
-                    </FormControl>
-                    <FormDescription>
-                      {t("fields.growthRateHint")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="growthStartDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("fields.growthStartDate")}</FormLabel>
-                    <DatePicker
-                      form
-                      inModal
-                      value={field.value ? calendarDay(field.value) : undefined}
-                      onSelect={(date) => field.onChange(dayString(date))}
-                      placeholder={t("fields.datePlaceholder")}
-                    />
-                    <FormDescription>
-                      {t("fields.growthStartDateHint")}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormDescription>
+                        {t("fields.growthStartDateHint")}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </details>
             </>
           )}
           {canChangePrivacy ? (

@@ -230,42 +230,55 @@ export function CreateExpenseGroupDialog({
                 const label = row.name.trim() || `${index + 1}`;
                 return (
                   <li key={row.id} className="space-y-1">
-                    <div className="flex items-start gap-2">
-                      <Input
-                        aria-label={t("person-name")}
-                        placeholder={t("person-name")}
-                        maxLength={100}
-                        disabled={busy}
-                        value={row.name}
-                        aria-invalid={missing ? true : undefined}
-                        onChange={(event) =>
-                          setOutsiders((current) =>
-                            current.map((r) =>
-                              r.id === row.id
-                                ? { ...r, name: event.target.value }
-                                : r,
-                            ),
-                          )
-                        }
-                      />
-                      <Input
-                        type="email"
-                        aria-label={t("person-email")}
-                        placeholder={t("person-email")}
-                        maxLength={254}
-                        disabled={busy}
-                        value={row.email}
-                        onChange={(event) =>
-                          setOutsiders((current) =>
-                            current.map((r) =>
-                              r.id === row.id
-                                ? { ...r, email: event.target.value }
-                                : r,
-                            ),
-                          )
-                        }
-                      />
+                    <div className="grid grid-cols-[1fr_auto] items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor={`group-person-${row.id}-name`}>
+                          {t("person-name")}
+                        </Label>
+                        <Input
+                          id={`group-person-${row.id}-name`}
+                          aria-label={t("person-name")}
+                          placeholder={t("person-name")}
+                          maxLength={100}
+                          disabled={busy}
+                          value={row.name}
+                          aria-invalid={missing ? true : undefined}
+                          onChange={(event) =>
+                            setOutsiders((current) =>
+                              current.map((r) =>
+                                r.id === row.id
+                                  ? { ...r, name: event.target.value }
+                                  : r,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="col-start-1 flex flex-col gap-1 sm:col-start-auto">
+                        <Label htmlFor={`group-person-${row.id}-email`}>
+                          {t("person-email")}
+                        </Label>
+                        <Input
+                          id={`group-person-${row.id}-email`}
+                          type="email"
+                          aria-label={t("person-email")}
+                          placeholder={t("person-email")}
+                          maxLength={254}
+                          disabled={busy}
+                          value={row.email}
+                          onChange={(event) =>
+                            setOutsiders((current) =>
+                              current.map((r) =>
+                                r.id === row.id
+                                  ? { ...r, email: event.target.value }
+                                  : r,
+                              ),
+                            )
+                          }
+                        />
+                      </div>
                       <Button
+                        className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto"
                         type="button"
                         variant="ghost"
                         size="icon"

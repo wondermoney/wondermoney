@@ -163,7 +163,8 @@
         "noData": {
           "title": "Sem despesas em nenhum dos meses",
           "description": "Experimenta outros dois meses ou verifica se as contas estão ligadas."
-        }
+        },
+        "percentagePoints": "{value} p.p."
       },
       "spendingVsNormal": {
         "title": "Despesa vs normal",
