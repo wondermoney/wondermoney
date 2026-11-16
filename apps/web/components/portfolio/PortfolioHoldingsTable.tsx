@@ -159,7 +159,7 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
         }),
         columnHelper.accessor("unrealizedGains", {
           header: () => (
-            <div className="min-w-32 text-right whitespace-nowrap">
+            <div className="min-w-44 pr-4 text-right whitespace-nowrap">
               {t("gain-loss")}
             </div>
           ),
@@ -168,14 +168,14 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
             const gainsPercent = info.row.original.unrealizedGainsPercentage;
             if (gains == null)
               return (
-                <CellNumeric className="text-muted-foreground min-w-32 text-right whitespace-nowrap">
+                <CellNumeric className="text-muted-foreground inline-block min-w-44 pr-4 text-right whitespace-nowrap">
                   {t("portfolio-holdings-gains-pending")}
                 </CellNumeric>
               );
             return (
               <CellNumeric
                 className={cn(
-                  "min-w-32 text-right whitespace-nowrap",
+                  "inline-block min-w-44 pr-4 text-right whitespace-nowrap",
                   getFinancialColor(gains),
                 )}
               >

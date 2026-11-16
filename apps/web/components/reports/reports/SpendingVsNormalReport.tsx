@@ -301,7 +301,7 @@ export function SpendingVsNormalReport() {
         </div>
 
         <div className="overflow-x-auto">
-          <SimpleTable>
+          <SimpleTable mobileCards>
             <TableCaption className="sr-only">
               {t("tableCaption", { month: formatMonthLabel(month, locale) })}
             </TableCaption>
@@ -354,7 +354,10 @@ export function SpendingVsNormalReport() {
                         {name}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell
+                      className="text-right font-mono"
+                      mobileLabel={t("spent")}
+                    >
                       {href ? (
                         <Link
                           className="underline-offset-4 hover:underline"
@@ -375,7 +378,10 @@ export function SpendingVsNormalReport() {
                         />
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell
+                      className="text-right font-mono"
+                      mobileLabel={t("normal")}
+                    >
                       {row.normal === null ? (
                         <span className="text-muted-foreground">—</span>
                       ) : (
@@ -385,7 +391,11 @@ export function SpendingVsNormalReport() {
                         />
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell
+                      className="text-right font-mono max-sm:text-base max-sm:font-medium"
+                      mobileLabel={t("change")}
+                      mobilePriority
+                    >
                       <ChangeValue
                         change={spendingVsNormalChange(row)}
                         formatPercentage={formatPercentage}
