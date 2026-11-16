@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Simulador de amortização de crédito",
+      "shortName": "Amortização antecipada",
       "description": "Vê quanto poupas com uma amortização antecipada num crédito a taxa fixa, quer baixes a prestação quer reduzas o prazo.",
       "pageTitle": "Simulador de Amortização Antecipada de Crédito — WonderMoney",
       "pageDescription": "Simulador gratuito de amortização antecipada para crédito habitação e outros créditos a taxa fixa. Compara uma prestação mais baixa com um prazo mais curto: juros poupados, comissão e poupança líquida. Sem registo.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Quanto posso pedir emprestado?",
+      "shortName": "Quanto posso pedir emprestado",
       "description": "Vê o preço máximo de casa que o teu rendimento e as tuas poupanças permitem, qual dos dois te trava e o que o faria subir.",
       "pageTitle": "Quanto posso pedir emprestado? Simulador de capacidade de crédito — WonderMoney",
       "pageDescription": "Simulador grátis de capacidade de crédito. Indica o rendimento líquido, as prestações que já pagas e as poupanças, e vê o maior crédito e o preço de casa ao teu alcance, e qual dos limites te trava. Sem registo.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculadora de depósitos a prazo",
+      "shortName": "Depósitos a prazo",
       "description": "Calcula quanto rende um depósito a prazo antes e depois de impostos, com juros pagos no vencimento ou ao longo do prazo.",
       "pageTitle": "Calculadora de juros de depósitos a prazo, brutos e líquidos — WonderMoney",
       "pageDescription": "Calculadora gratuita de depósitos a prazo. Indica o montante, a TANB, o prazo e o imposto retido para veres os juros brutos e líquidos, o saldo no vencimento, a rentabilidade líquida anual e cada pagamento de juros. Sem registo.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculadora comprar ou arrendar casa",
+      "shortName": "Comprar ou arrendar",
       "description": "Compara o património líquido de comprar casa com crédito habitação com o de arrendar e investir a diferença, ano a ano.",
       "pageTitle": "Comprar ou arrendar casa: calculadora ano a ano — WonderMoney",
       "pageDescription": "Calculadora gratuita para decidir entre comprar ou arrendar casa. Indica o preço, a entrada, o crédito, a renda e as taxas de crescimento e vê que caminho te deixa com mais e em que ano comprar passa à frente. Sem registo.",

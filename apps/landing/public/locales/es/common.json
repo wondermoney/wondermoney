@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Calculadora de amortización anticipada",
+      "shortName": "Amortización anticipada",
       "description": "Mira cuánto ahorras con una amortización anticipada en un préstamo a tipo fijo, tanto si bajas la cuota como si acortas el plazo.",
       "pageTitle": "Calculadora de Amortización Anticipada de Hipoteca y Préstamos — WonderMoney",
       "pageDescription": "Calculadora gratuita de amortización anticipada para hipotecas y préstamos a tipo fijo. Compara una cuota más baja con un plazo más corto: intereses ahorrados, comisión y ahorro neto. Sin registro.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "¿Cuánto puedo pedir prestado?",
+      "shortName": "Cuánto puedo pedir prestado",
       "description": "Mira el precio de vivienda más alto que permiten tus ingresos y tus ahorros, cuál de los dos te frena y qué lo haría subir.",
       "pageTitle": "¿Cuánto puedo pedir prestado? Calculadora de capacidad de endeudamiento — WonderMoney",
       "pageDescription": "Calculadora gratuita de capacidad de endeudamiento. Indica tus ingresos netos, las cuotas que ya pagas y tus ahorros, y descubre la hipoteca y el precio de vivienda a tu alcance, y qué límite te frena. Sin registro.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculadora de depósitos a plazo",
+      "shortName": "Depósitos a plazo",
       "description": "Calcula cuánto rinde un depósito a plazo fijo antes y después de impuestos, con intereses al vencimiento o a lo largo del plazo.",
       "pageTitle": "Calculadora de intereses de depósitos a plazo, brutos y netos — WonderMoney",
       "pageDescription": "Calculadora gratuita de depósitos a plazo. Introduce el importe, el TIN bruto, el plazo y la retención para ver los intereses brutos y netos, el saldo al vencimiento, la rentabilidad neta anual y cada pago de intereses. Sin registro.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculadora comprar o alquilar vivienda",
+      "shortName": "Comprar o alquilar",
       "description": "Compara el patrimonio neto de comprar una vivienda con hipoteca con el de alquilar e invertir la diferencia, año a año.",
       "pageTitle": "¿Comprar o alquilar vivienda? Calculadora año a año — WonderMoney",
       "pageDescription": "Calculadora gratuita para decidir entre comprar o alquilar. Introduce el precio, la entrada, la hipoteca, el alquiler y las tasas de crecimiento y verás qué camino te deja con más y en qué año comprar se pone por delante. Sin registro.",

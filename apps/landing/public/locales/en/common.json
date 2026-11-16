@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Early Repayment Calculator",
+      "shortName": "Early repayment",
       "description": "See what a lump-sum repayment saves on a fixed-rate loan, whether you lower the payment or shorten the term.",
       "pageTitle": "Early Repayment Calculator for Mortgages and Loans — WonderMoney",
       "pageDescription": "Free early repayment calculator for fixed-rate mortgages and loans. Compare a lower monthly payment with a shorter term: interest saved, the fee and your net saving. No sign-up.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Borrowing Capacity Calculator",
+      "shortName": "Borrowing capacity",
       "description": "See the highest home price your income and savings allow, which of the two holds you back, and what would raise it.",
       "pageTitle": "How Much Can I Borrow? Borrowing Capacity Calculator — WonderMoney",
       "pageDescription": "Free borrowing capacity calculator. Enter your net income, existing loan payments and savings to see the largest mortgage and home price within reach, and which limit holds you back. No sign-up.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Term Deposit Calculator",
+      "shortName": "Term deposit",
       "description": "Work out what a fixed-term deposit earns before and after tax, with interest paid at maturity or along the way.",
       "pageTitle": "Term Deposit Interest Calculator, Gross and Net — WonderMoney",
       "pageDescription": "Free term deposit calculator. Enter the amount, gross rate, term and tax withheld to see gross and net interest, the balance at maturity, the net annual yield and every interest payment. No sign-up.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Buy vs Rent Calculator",
+      "shortName": "Buy or rent",
       "description": "Compare the net worth of buying a home with a mortgage against renting and investing the difference, year by year.",
       "pageTitle": "Rent vs Buy Calculator: Compare Net Worth Year by Year — WonderMoney",
       "pageDescription": "Free rent vs buy calculator. Enter the price, down payment, mortgage, rent and growth assumptions to see which path leaves you with more, and the year buying pulls ahead. No sign-up.",

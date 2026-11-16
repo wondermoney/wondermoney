@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Sondertilgungsrechner",
+      "shortName": "Sondertilgung",
       "description": "Sehen Sie, was eine Sondertilgung bei einem Darlehen mit festem Zins spart, ob Sie die Rate senken oder die Laufzeit verkürzen.",
       "pageTitle": "Sondertilgungsrechner für Baufinanzierung und Kredite — WonderMoney",
       "pageDescription": "Kostenloser Sondertilgungsrechner für Darlehen mit festem Zinssatz. Vergleichen Sie eine niedrigere Monatsrate mit einer kürzeren Laufzeit: gesparte Zinsen, Gebühr und Nettoersparnis. Keine Anmeldung.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Wie viel Kredit bekomme ich?",
+      "shortName": "Wie viel Kredit bekomme ich",
       "description": "Sehen Sie, welchen Kaufpreis Ihr Einkommen und Ihr Erspartes höchstens erlauben, welche der beiden Grenzen Sie bremst und was sie anheben würde.",
       "pageTitle": "Wie viel Kredit bekomme ich? Rechner für den Kreditrahmen — WonderMoney",
       "pageDescription": "Kostenloser Rechner für Ihren Kreditrahmen. Geben Sie Nettoeinkommen, laufende Kreditraten und Erspartes ein und sehen Sie das größte Darlehen und den höchsten Kaufpreis in Reichweite, und welche Grenze Sie bremst. Ohne Anmeldung.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Festgeld-Rechner",
+      "shortName": "Festgeld",
       "description": "Berechnen Sie, was eine Festgeldanlage vor und nach Steuern bringt, mit Zinsen am Laufzeitende oder während der Laufzeit.",
       "pageTitle": "Festgeld-Rechner für Zinsen brutto und netto — WonderMoney",
       "pageDescription": "Kostenloser Festgeld-Rechner. Geben Sie Betrag, Bruttozins, Laufzeit und Steuerabzug ein und sehen Sie Brutto- und Nettozinsen, das Guthaben am Laufzeitende, die Nettorendite pro Jahr und jede Zinszahlung. Ohne Anmeldung.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Rechner: Kaufen oder mieten",
+      "shortName": "Kaufen oder mieten",
       "description": "Vergleichen Sie das Nettovermögen beim Kauf einer Immobilie mit Hypothek mit dem beim Mieten und Anlegen der Differenz, Jahr für Jahr.",
       "pageTitle": "Kaufen oder mieten: Rechner mit Vermögen Jahr für Jahr — WonderMoney",
       "pageDescription": "Kostenloser Rechner für die Frage kaufen oder mieten. Geben Sie Preis, Eigenkapital, Kredit, Miete und Wachstumsannahmen ein und sehen Sie, welcher Weg Ihnen mehr lässt und ab welchem Jahr der Kauf vorne liegt. Ohne Anmeldung.",

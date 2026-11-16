@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Calcolatore di estinzione anticipata",
+      "shortName": "Estinzione anticipata",
       "description": "Scopri quanto risparmi con un rimborso anticipato parziale su un prestito a tasso fisso, che tu riduca la rata o la durata.",
       "pageTitle": "Calcolatore di Estinzione Anticipata del Mutuo e dei Prestiti — WonderMoney",
       "pageDescription": "Calcolatore gratuito di estinzione anticipata parziale per mutui e prestiti a tasso fisso. Confronta una rata più bassa con una durata più breve: interessi risparmiati, penale e risparmio netto. Senza registrazione.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Quanto mutuo posso chiedere?",
+      "shortName": "Quanto mutuo posso chiedere",
       "description": "Scopri il prezzo di casa più alto che reddito e risparmi ti permettono, quale dei due ti frena e cosa lo farebbe salire.",
       "pageTitle": "Quanto mutuo posso chiedere? Calcolatore della capacità di credito — WonderMoney",
       "pageDescription": "Calcolatore gratuito della capacità di credito. Inserisci reddito netto, rate che già paghi e risparmi, e scopri il mutuo e il prezzo di casa alla tua portata, e quale limite ti frena. Senza registrazione.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calcolatore conto deposito",
+      "shortName": "Conto deposito",
       "description": "Calcola quanto rende un conto deposito vincolato prima e dopo le imposte, con interessi pagati alla scadenza o durante il vincolo.",
       "pageTitle": "Calcolatore interessi conto deposito vincolato, lordi e netti — WonderMoney",
       "pageDescription": "Calcolatore gratuito per conti deposito vincolati. Inserisci importo, tasso lordo, durata e ritenuta per vedere interessi lordi e netti, saldo alla scadenza, rendimento netto annuo e ogni pagamento di interessi. Senza registrazione.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calcolatore comprare o affittare casa",
+      "shortName": "Comprare o affittare",
       "description": "Confronta il patrimonio netto di chi compra casa con un mutuo con quello di chi affitta e investe la differenza, anno per anno.",
       "pageTitle": "Comprare o affittare casa: calcolatore anno per anno — WonderMoney",
       "pageDescription": "Calcolatore gratuito per scegliere tra comprare o affittare. Inserisci prezzo, anticipo, mutuo, affitto e ipotesi di crescita per vedere quale strada ti lascia di più e in che anno comprare passa in vantaggio. Senza registrazione.",

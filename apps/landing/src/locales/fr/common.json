@@ -991,6 +991,7 @@
     },
     "earlyRepayment": {
       "title": "Simulateur de remboursement anticipé",
+      "shortName": "Remboursement anticipé",
       "description": "Voyez ce que rapporte un remboursement anticipé partiel sur un prêt à taux fixe, en baissant la mensualité ou en raccourcissant la durée.",
       "pageTitle": "Simulateur de Remboursement Anticipé de Prêt Immobilier — WonderMoney",
       "pageDescription": "Simulateur gratuit de remboursement anticipé pour prêts immobiliers et crédits à taux fixe. Comparez une mensualité plus basse et une durée plus courte : intérêts économisés, indemnités et économie nette. Sans inscription.",
@@ -1283,6 +1284,7 @@
     },
     "borrowingCapacity": {
       "title": "Combien puis-je emprunter ?",
+      "shortName": "Capacité d'emprunt",
       "description": "Voyez le prix de logement le plus élevé que vos revenus et votre épargne permettent, lequel des deux vous freine et ce qui le ferait monter.",
       "pageTitle": "Combien puis-je emprunter ? Calculateur de capacité d'emprunt — WonderMoney",
       "pageDescription": "Calculateur gratuit de capacité d'emprunt. Saisissez vos revenus nets, vos mensualités actuelles et votre épargne pour voir le prêt et le prix de logement à votre portée, et la limite qui vous freine. Sans inscription.",
@@ -1441,6 +1443,7 @@
     },
     "termDeposit": {
       "title": "Calculateur de dépôt à terme",
+      "shortName": "Dépôt à terme",
       "description": "Calculez ce que rapporte un dépôt à terme avant et après impôt, avec des intérêts versés à l'échéance ou en cours de route.",
       "pageTitle": "Calculateur d'intérêts de dépôt à terme, bruts et nets — WonderMoney",
       "pageDescription": "Calculateur de dépôt à terme gratuit. Saisissez le montant, le taux brut, la durée et l'impôt prélevé pour voir les intérêts bruts et nets, le solde à l'échéance, le rendement net annuel et chaque versement d'intérêts. Sans inscription.",
@@ -1558,6 +1561,7 @@
     },
     "buyVsRent": {
       "title": "Calculatrice acheter ou louer",
+      "shortName": "Acheter ou louer",
       "description": "Comparez le patrimoine net d'un achat immobilier à crédit avec celui d'une location où vous placez la différence, année après année.",
       "pageTitle": "Acheter ou louer : calculatrice année par année — WonderMoney",
       "pageDescription": "Calculatrice gratuite pour choisir entre acheter ou louer. Saisissez le prix, l'apport, le prêt, le loyer et les hypothèses de croissance pour voir quelle option vous laisse le plus et l'année où l'achat passe devant. Sans inscription.",
