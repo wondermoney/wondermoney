@@ -16,6 +16,8 @@ import HouseholdBudgetCalculatorComp from "@/components/calculators/HouseholdBud
 import HouseholdBudgetGuide from "@/components/calculators/HouseholdBudgetGuide.astro";
 import SavingsGoalCalculatorComp from "@/components/calculators/SavingsGoalCalculatorComp";
 import SavingsGoalGuide from "@/components/calculators/SavingsGoalGuide.astro";
+import TermDepositCalculatorComp from "@/components/calculators/TermDepositCalculatorComp";
+import TermDepositGuide from "@/components/calculators/TermDepositGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -64,6 +66,10 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.savingsGoal.nextStepHeadline"),
     description: t("tools.savingsGoal.nextStepDescription"),
     ctaText: t("tools.savingsGoal.nextStepCta"),
+  },
+  toolTermDeposit: {
+    headline: t("tools.termDeposit.ctaHeadline"),
+    description: t("tools.termDeposit.ctaDescription"),
   },
 };
 
@@ -130,6 +136,7 @@ const schema = {
     {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
     {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
     {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
+    {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -138,6 +145,7 @@ const schema = {
   {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
   {routeId === "toolHouseholdBudget" && <HouseholdBudgetGuide locale={locale} />}
   {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
+  {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

@@ -14,6 +14,7 @@ import MortgageCalculatorComp from "./MortgageCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
 import SavingsGoalCalculatorComp from "./SavingsGoalCalculatorComp";
 import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
+import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
 
 const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["compound interest", CompoundInterestCalculatorComp],
@@ -26,6 +27,7 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["net worth", NetWorthCalculatorComp],
   ["savings goal", SavingsGoalCalculatorComp],
   ["savings rate", SavingsRateCalculatorComp],
+  ["term deposit", TermDepositCalculatorComp],
 ];
 
 beforeAll(() => {
@@ -207,5 +209,31 @@ describe("debt-to-income payment rows", () => {
     expect(amount.value).toBe("");
     await user.type(amount, "12.5");
     expect(amount.value).toBe("12.5");
+  });
+});
+
+describe.each([
+  ["Amount deposited", "Enter the amount you deposit."],
+  ["Gross annual interest rate", "Enter the rate, or 0 for none."],
+  ["Term", "Enter a term of at least 1 month."],
+] as const)("term deposit calculator with the required field %j cleared", (label, message) => {
+  it("asks for a value instead of a result", async () => {
+    const user = userEvent.setup();
+    render(<TermDepositCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: label }));
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(screen.getByText("The result appears once every field has a valid value.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+});
+
+describe("term deposit calculator with the tax cleared", () => {
+  it("counts an empty tax rate as 0%", async () => {
+    const user = userEvent.setup();
+    render(<TermDepositCalculatorComp locale="en" />);
+    const before = figures();
+    await user.clear(screen.getByRole("spinbutton", { name: "Tax withheld on interest" }));
+    expect(figures()).toEqual(before);
+    expect(figures()).toContain("€0.00");
   });
 });

@@ -1111,6 +1111,123 @@
       "nextStepHeadline": "Convierte la aportación necesaria en un objetivo recurrente",
       "nextStepDescription": "Crea el objetivo en WonderMoney con la cantidad, la fecha y la aportación mensual, y sigue tu progreso con los saldos reales de tus cuentas.",
       "nextStepCta": "Crear objetivo"
+    },
+    "termDeposit": {
+      "title": "Calculadora de depósitos a plazo",
+      "description": "Calcula cuánto rinde un depósito a plazo fijo antes y después de impuestos, con intereses al vencimiento o a lo largo del plazo.",
+      "pageTitle": "Calculadora de intereses de depósitos a plazo, brutos y netos — WonderMoney",
+      "pageDescription": "Calculadora gratuita de depósitos a plazo. Introduce el importe, el TIN bruto, el plazo y la retención para ver los intereses brutos y netos, el saldo al vencimiento, la rentabilidad neta anual y cada pago de intereses. Sin registro.",
+      "subtitle": "Introduce el importe, el tipo que anuncia el banco y el plazo para ver cuánto rinde el depósito antes y después de impuestos y con cuánto te quedas al vencimiento. No necesitas registrarte.",
+      "ctaHeadline": "Sigue la fecha de vencimiento y el saldo",
+      "ctaDescription": "Añade el depósito a WonderMoney como cuenta para que su saldo cuente en tu patrimonio neto, y crea un objetivo con la fecha en que vence.",
+      "amount": "Importe depositado",
+      "annualRate": "Tipo de interés nominal anual bruto (TIN)",
+      "annualRateHelp": "El tipo anual antes de impuestos que anuncia el banco. La TAE ya incluye la capitalización, así que con intereses mensuales o trimestrales queda algo por encima del TIN.",
+      "term": "Plazo",
+      "termHelp": "En meses completos, de 1 a {{max}}.",
+      "monthsSuffix": "meses",
+      "monthsOne": "1 mes",
+      "monthsMany": "{{count}} meses",
+      "payout": "Los intereses se pagan",
+      "payouts": {
+        "maturity": "Al vencimiento",
+        "monthly": "Cada mes",
+        "quarterly": "Cada trimestre",
+        "annually": "Cada año"
+      },
+      "reinvest": "Cada pago de intereses se",
+      "reinvestOptions": {
+        "payOut": "Ingresa en mi cuenta",
+        "reinvest": "Suma al depósito"
+      },
+      "reinvestHelp": "Si se suman al depósito, los intereses generan intereses a partir del periodo siguiente. Si se ingresan en tu cuenta, salen del depósito.",
+      "taxRate": "Retención sobre los intereses",
+      "taxRateHelp": "Muchos países retienen impuestos sobre los intereses de los depósitos, con tipos que cambian según el país y a veces según la persona. Introduce el que se te aplica o deja 0% para ver las cifras brutas.",
+      "grossInterest": "Intereses brutos",
+      "tax": "Retención",
+      "netInterest": "Intereses netos",
+      "netYield": "Rentabilidad neta anual",
+      "finalBalance": "Saldo al vencimiento",
+      "totalReceived": "Total recibido",
+      "paymentsOne": "1 pago de intereses",
+      "paymentsMany": "{{count}} pagos de intereses",
+      "resultNote": {
+        "maturity": "Los intereses de {{term}} se pagan de una vez cuando vence el depósito.",
+        "reinvested": "A lo largo de {{term}}, el depósito suma {{payments}} después de impuestos, así que los siguientes rinden sobre un saldo mayor.",
+        "paidOut": "A lo largo de {{term}} recibes {{payments}} después de impuestos y al vencimiento recuperas {{principal}}. El total cuenta ambos."
+      },
+      "errors": {
+        "summary": "El resultado aparece cuando todos los campos tienen un valor válido.",
+        "amount": {
+          "required": "Introduce el importe que depositas.",
+          "negative": "El importe no puede ser negativo.",
+          "tooLarge": "Introduce un importe de hasta {{max}}."
+        },
+        "annualRate": {
+          "required": "Introduce el tipo, o 0 si no hay.",
+          "negative": "El tipo no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "termMonths": {
+          "required": "Introduce un plazo de al menos 1 mes.",
+          "tooLarge": "Introduce un plazo de hasta {{max}} meses.",
+          "notWhole": "Introduce el plazo en meses completos."
+        },
+        "taxRate": {
+          "negative": "La retención no puede ser inferior al 0%.",
+          "tooLarge": "La retención no puede superar el {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Pagos de intereses",
+        "descriptionReinvested": "Una fila por pago: los intereses del periodo, la retención y el depósito después de sumar los intereses netos.",
+        "descriptionPaidOut": "Una fila por pago: los intereses del periodo, la retención y los intereses netos que has recibido hasta ese momento.",
+        "payment": "Pagado al final del",
+        "gross": "Intereses brutos",
+        "tax": "Retención",
+        "net": "Intereses netos",
+        "balance": "Saldo del depósito",
+        "paidOutToDate": "Recibido hasta ahora",
+        "monthLabel": "Mes {{month}}",
+        "showAll": "Mostrar los {{count}} pagos",
+        "showFewer": "Mostrar menos pagos"
+      },
+      "guide": {
+        "whatHeading": "Cuánto rinde un depósito a plazo",
+        "whatBody": "En un depósito a plazo dejas un importe en el banco durante un número fijo de meses a un tipo fijo. Además del tipo, lo que ganas depende de tres cosas: cuánto tiempo se queda el dinero, si los intereses llegan al final o durante el plazo y cuánto se retiene en impuestos. Esta calculadora tiene en cuenta las tres con el tipo que introduzcas, para que compares ofertas en igualdad de condiciones.",
+        "readHeading": "Cómo leer el resultado",
+        "read": {
+          "gross": "Intereses brutos: todo lo que rinde el depósito antes de impuestos.",
+          "tax": "Retención: la parte de cada pago de intereses que se queda para impuestos, al tipo que introduzcas.",
+          "net": "Intereses netos: lo que te llega, los intereses brutos menos la retención.",
+          "final": "Saldo al vencimiento, o total recibido cuando los intereses se ingresan en tu cuenta: el importe depositado más todos los intereses netos.",
+          "yield": "Rentabilidad neta anual: la ganancia neta expresada como un tipo anual, para comparar depósitos con plazos y pagos distintos."
+        },
+        "exampleHeading": "Ejemplo práctico",
+        "exampleSetup": "Supón que depositas {{amount}} durante {{months}} meses a un TIN bruto del {{rate}}, con los intereses al vencimiento. El interés es simple: el importe por el tipo por la parte del año que el dinero se queda en el banco.",
+        "exampleCompounded": "Si el mismo depósito paga intereses cada trimestre y los suma al saldo, hace {{compoundedPayments}} pagos y cada uno rinde sobre un importe algo mayor. Los intereses brutos llegan a {{compoundedGross}}, {{compoundedExtra}} más, con un saldo de {{compoundedFinal}} y una rentabilidad del {{compoundedYield}} anual, frente al {{yield}} cuando todo se paga al final.",
+        "exampleTax": "Ahora supón que se retiene un {{taxRate}} de los intereses al vencimiento, un tipo elegido solo como ilustración y no tomado de las normas de ningún país: la calculadora empieza en 0% para que introduzcas el tuyo. El banco retiene {{tax}}, recibes {{net}} y terminas con {{taxedFinal}}, una rentabilidad neta del {{taxedYield}} anual.",
+        "methodHeading": "Método y supuestos",
+        "methodIntro": "Los intereses se cuentan en meses completos, sin contar días. El tipo que introduces es un tipo nominal anual: cada periodo rinde el tipo por sus meses dividido entre 12.",
+        "methodFormula": "Intereses de un periodo = saldo × tipo anual × meses del periodo ÷ 12. Intereses netos = intereses − retención. Rentabilidad neta anual = el tipo anual que convierte el importe depositado en los pagos netos y el importe devuelto, cada uno contado cuando llega. Con todos los intereses al vencimiento, es (saldo al vencimiento ÷ importe depositado)^(12 ÷ plazo en meses) − 1.",
+        "method": {
+          "maturity": "Al vencimiento, el interés es simple: un único pago de importe × tipo × plazo en meses ÷ 12.",
+          "periodic": "Con pagos mensuales, trimestrales o anuales, cada pago llega al final de su periodo. Si el plazo no es un número entero de periodos, el último es más corto y sus intereses se pagan en proporción al vencimiento. Un plazo más corto que un periodo tiene un único pago al vencimiento.",
+          "reinvest": "Los intereses que se suman al depósito lo hacen después de impuestos, así que el depósito capitaliza con la frecuencia de los pagos. Los intereses que se ingresan en tu cuenta salen del depósito, así que los siguientes se calculan sobre el importe depositado.",
+          "tax": "La retención se aplica a cada pago por separado y se redondea al céntimo, como hace el banco. Todos los importes se calculan en céntimos, así que las filas de pagos suman los totales.",
+          "yield": "La rentabilidad neta anual es la tasa interna de rentabilidad del depósito: el tipo anual al que el importe que pones crece hasta todo lo que recibes, contando cada pago neto en el mes en que se cobra. Por eso, los intereses cobrados durante el plazo valen más que los mismos intereses al vencimiento. Un depósito de menos de un año se supone renovado en las mismas condiciones.",
+          "excluded": "No incluye: penalizaciones por cancelación anticipada, comisiones, cambios del tipo durante el plazo, límites del fondo de garantía de depósitos ni el efecto de la inflación.",
+          "privacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan ni se envían a ninguna parte."
+        },
+        "methodLimits": "Los plazos van de 1 a {{maxMonths}} meses.",
+        "nextHeading": "Calculadoras relacionadas",
+        "nextCompound": "Para ver cómo crece el dinero con los años y con aportaciones periódicas, prueba la calculadora de interés compuesto.",
+        "nextCompoundLink": "Abrir la calculadora de interés compuesto",
+        "nextEmergency": "Un depósito a plazo puede guardar ahorros que no vas a necesitar pronto, mientras tu fondo de emergencia sigue a mano.",
+        "nextEmergencyLink": "Calcular tu fondo de emergencia",
+        "nextSavingsGoal": "¿Estás reuniendo el importe que vas a depositar o planeando qué hacer cuando venza? El simulador de ahorro calcula cuánto apartar cada mes o cuánto tiempo lleva.",
+        "nextSavingsGoalLink": "Abrir el simulador de ahorro"
+      }
     }
   },
   "learn": {

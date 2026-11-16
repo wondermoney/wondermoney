@@ -1111,6 +1111,123 @@
       "nextStepHeadline": "Transforma a contribuição necessária num objetivo recorrente",
       "nextStepDescription": "Cria o objetivo no WonderMoney com o valor, a data e a contribuição mensal, e acompanha o progresso com os saldos reais das tuas contas.",
       "nextStepCta": "Criar objetivo"
+    },
+    "termDeposit": {
+      "title": "Calculadora de depósitos a prazo",
+      "description": "Calcula quanto rende um depósito a prazo antes e depois de impostos, com juros pagos no vencimento ou ao longo do prazo.",
+      "pageTitle": "Calculadora de juros de depósitos a prazo, brutos e líquidos — WonderMoney",
+      "pageDescription": "Calculadora gratuita de depósitos a prazo. Indica o montante, a TANB, o prazo e o imposto retido para veres os juros brutos e líquidos, o saldo no vencimento, a rentabilidade líquida anual e cada pagamento de juros. Sem registo.",
+      "subtitle": "Indica o montante, a taxa que o banco anuncia e o prazo para veres quanto o depósito rende antes e depois de impostos e com quanto ficas no vencimento. Não precisas de te registar.",
+      "ctaHeadline": "Acompanha a data de vencimento e o saldo",
+      "ctaDescription": "Adiciona o depósito ao WonderMoney como conta, para o saldo contar no teu património líquido, e cria um objetivo com a data em que vence.",
+      "amount": "Montante depositado",
+      "annualRate": "Taxa anual nominal bruta (TANB)",
+      "annualRateHelp": "A taxa por ano, antes de impostos, que o banco anuncia. A TANB é nominal: não conta com a capitalização, por isso com juros mensais ou trimestrais a taxa efetiva fica um pouco acima.",
+      "term": "Prazo",
+      "termHelp": "Em meses completos, de 1 a {{max}}.",
+      "monthsSuffix": "meses",
+      "monthsOne": "1 mês",
+      "monthsMany": "{{count}} meses",
+      "payout": "Os juros são pagos",
+      "payouts": {
+        "maturity": "No vencimento",
+        "monthly": "Mensalmente",
+        "quarterly": "Trimestralmente",
+        "annually": "Anualmente"
+      },
+      "reinvest": "Cada pagamento de juros é",
+      "reinvestOptions": {
+        "payOut": "Pago na minha conta",
+        "reinvest": "Somado ao depósito"
+      },
+      "reinvestHelp": "Somados ao depósito, os juros passam a render juros a partir do período seguinte. Pagos a ti, saem do depósito.",
+      "taxRate": "Imposto retido sobre os juros",
+      "taxRateHelp": "Em muitos países, o banco retém imposto sobre os juros dos depósitos, a uma taxa que varia de país para país e, por vezes, de pessoa para pessoa. Indica a taxa que se aplica a ti ou deixa 0% para veres os valores brutos.",
+      "grossInterest": "Juros brutos",
+      "tax": "Imposto retido",
+      "netInterest": "Juros líquidos",
+      "netYield": "Rentabilidade líquida anual",
+      "finalBalance": "Saldo no vencimento",
+      "totalReceived": "Total recebido",
+      "paymentsOne": "1 pagamento de juros",
+      "paymentsMany": "{{count}} pagamentos de juros",
+      "resultNote": {
+        "maturity": "Os juros de {{term}} são pagos de uma só vez quando o depósito vence.",
+        "reinvested": "Ao longo de {{term}}, o depósito recebe {{payments}} depois de impostos, por isso os seguintes rendem sobre um saldo maior.",
+        "paidOut": "Ao longo de {{term}}, recebes {{payments}} depois de impostos e os {{principal}} voltam a ti no vencimento. O total conta com ambos."
+      },
+      "errors": {
+        "summary": "O resultado aparece quando todos os campos tiverem um valor válido.",
+        "amount": {
+          "required": "Indica o montante que depositas.",
+          "negative": "O montante não pode ser negativo.",
+          "tooLarge": "Indica um montante até {{max}}."
+        },
+        "annualRate": {
+          "required": "Indica a taxa, ou 0 se não houver.",
+          "negative": "A taxa não pode ser inferior a 0%.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "termMonths": {
+          "required": "Indica um prazo de pelo menos 1 mês.",
+          "tooLarge": "Indica um prazo até {{max}} meses.",
+          "notWhole": "Indica o prazo em meses completos."
+        },
+        "taxRate": {
+          "negative": "A taxa de imposto não pode ser inferior a 0%.",
+          "tooLarge": "A taxa de imposto não pode ser superior a {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Pagamentos de juros",
+        "descriptionReinvested": "Uma linha por pagamento: os juros do período, o imposto retido e o depósito depois de somados os juros líquidos.",
+        "descriptionPaidOut": "Uma linha por pagamento: os juros do período, o imposto retido e os juros líquidos que já recebeste.",
+        "payment": "Pago no fim do",
+        "gross": "Juros brutos",
+        "tax": "Imposto",
+        "net": "Juros líquidos",
+        "balance": "Saldo do depósito",
+        "paidOutToDate": "Recebido até agora",
+        "monthLabel": "Mês {{month}}",
+        "showAll": "Mostrar os {{count}} pagamentos",
+        "showFewer": "Mostrar menos pagamentos"
+      },
+      "guide": {
+        "whatHeading": "Quanto rende um depósito a prazo",
+        "whatBody": "Num depósito a prazo, deixas um montante no banco durante um número fixo de meses a uma taxa fixa. Além da taxa, o que ganhas depende de três coisas: quanto tempo o dinheiro fica parado, se os juros chegam no fim ou ao longo do prazo e quanto imposto é retido. Esta calculadora trata das três com a taxa que indicares, para comparares propostas da mesma forma.",
+        "readHeading": "Como ler o resultado",
+        "read": {
+          "gross": "Juros brutos: tudo o que o depósito rende antes de impostos.",
+          "tax": "Imposto retido: a parte de cada pagamento de juros que fica retida, à taxa que indicares.",
+          "net": "Juros líquidos: o que chega até ti, os juros brutos menos o imposto.",
+          "final": "Saldo no vencimento, ou total recebido quando os juros são pagos a ti: o montante depositado mais todos os juros líquidos.",
+          "yield": "Rentabilidade líquida anual: o ganho líquido expresso como uma taxa por ano, para comparares depósitos com prazos e pagamentos diferentes."
+        },
+        "exampleHeading": "Exemplo prático",
+        "exampleSetup": "Imagina que depositas {{amount}} durante {{months}} meses a uma TANB de {{rate}}, com os juros pagos no vencimento. Os juros são simples: o montante vezes a taxa vezes a fração do ano em que o dinheiro fica no banco.",
+        "exampleCompounded": "Se o mesmo depósito pagar juros todos os trimestres e os somar ao saldo, faz {{compoundedPayments}} pagamentos e cada um rende sobre um valor um pouco maior. Os juros brutos chegam a {{compoundedGross}}, mais {{compoundedExtra}}, para um saldo de {{compoundedFinal}} e uma rentabilidade de {{compoundedYield}} por ano, contra {{yield}} quando tudo é pago no fim.",
+        "exampleTax": "Agora imagina que são retidos {{taxRate}} dos juros pagos no vencimento, uma taxa escolhida só como ilustração, sem vir das regras de nenhum país: a calculadora começa em 0% para indicares a tua. O banco retém {{tax}}, recebes {{net}} e ficas com {{taxedFinal}}, uma rentabilidade líquida de {{taxedYield}} por ano.",
+        "methodHeading": "Método e pressupostos",
+        "methodIntro": "Os juros contam-se em meses completos, sem contagem de dias. A taxa que indicas é uma taxa anual nominal: cada período rende a taxa vezes o número de meses do período a dividir por 12.",
+        "methodFormula": "Juros de um período = saldo × taxa anual × meses do período ÷ 12. Juros líquidos = juros − imposto. Rentabilidade líquida anual = a taxa por ano que transforma o montante depositado nos pagamentos líquidos e no montante devolvido, cada um contado quando chega. Com todos os juros no vencimento, é (saldo no vencimento ÷ montante depositado)^(12 ÷ prazo em meses) − 1.",
+        "method": {
+          "maturity": "Pagos no vencimento, os juros são simples: um único pagamento de montante × taxa × prazo em meses ÷ 12.",
+          "periodic": "Pagos mensal, trimestral ou anualmente, cada pagamento chega no fim do respetivo período. Quando o prazo não é um número inteiro de períodos, o último é mais curto e os juros desse período são pagos proporcionalmente no vencimento. Um prazo mais curto do que um período tem um único pagamento no vencimento.",
+          "reinvest": "Os juros somados ao depósito entram depois de impostos, por isso o depósito capitaliza à frequência dos pagamentos. Os juros pagos a ti saem do depósito, por isso os juros seguintes são calculados sobre o montante depositado.",
+          "tax": "O imposto é retirado de cada pagamento em separado e arredondado ao cêntimo, como faz o banco. Todos os valores são calculados em cêntimos, por isso as linhas dos pagamentos somam os totais.",
+          "yield": "A rentabilidade líquida anual é a taxa interna de rentabilidade do depósito: a taxa por ano a que o montante que pões cresce até tudo o que recebes de volta, contando cada pagamento líquido no mês em que é pago. Por isso, juros pagos ao longo do prazo valem mais do que os mesmos juros no vencimento. Um depósito com menos de um ano assume-se renovado nas mesmas condições.",
+          "excluded": "Não inclui: penalizações por mobilização antecipada, comissões, alterações da taxa durante o prazo, limites do fundo de garantia de depósitos nem o efeito da inflação.",
+          "privacy": "O cálculo é feito no teu navegador. Os valores que indicas ficam no teu dispositivo e não são guardados nem enviados para lado nenhum."
+        },
+        "methodLimits": "Os prazos vão de 1 a {{maxMonths}} meses.",
+        "nextHeading": "Calculadoras relacionadas",
+        "nextCompound": "Para veres como o dinheiro cresce ao longo dos anos com entregas regulares, experimenta a calculadora de juros compostos.",
+        "nextCompoundLink": "Abrir a calculadora de juros compostos",
+        "nextEmergency": "Um depósito a prazo pode guardar poupanças de que não vais precisar tão cedo, enquanto o teu fundo de emergência fica à mão.",
+        "nextEmergencyLink": "Calcular o teu fundo de emergência",
+        "nextSavingsGoal": "Estás a juntar o montante que vais depositar ou a planear o que fazer quando o depósito vencer? O simulador de poupança calcula quanto pôr de lado por mês ou quanto tempo demora.",
+        "nextSavingsGoalLink": "Abrir o simulador de poupança"
+      }
     }
   },
   "learn": {

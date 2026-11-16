@@ -1111,6 +1111,123 @@
       "nextStepHeadline": "Trasforma il versamento necessario in un obiettivo ricorrente",
       "nextStepDescription": "Crea l'obiettivo in WonderMoney con l'importo, la data e il versamento mensile, e segui i tuoi progressi con i saldi reali dei tuoi conti.",
       "nextStepCta": "Crea obiettivo"
+    },
+    "termDeposit": {
+      "title": "Calcolatore conto deposito",
+      "description": "Calcola quanto rende un conto deposito vincolato prima e dopo le imposte, con interessi pagati alla scadenza o durante il vincolo.",
+      "pageTitle": "Calcolatore interessi conto deposito vincolato, lordi e netti — WonderMoney",
+      "pageDescription": "Calcolatore gratuito per conti deposito vincolati. Inserisci importo, tasso lordo, durata e ritenuta per vedere interessi lordi e netti, saldo alla scadenza, rendimento netto annuo e ogni pagamento di interessi. Senza registrazione.",
+      "subtitle": "Inserisci l'importo, il tasso indicato dalla banca e la durata per vedere quanto rende il deposito prima e dopo le imposte e quanto hai alla scadenza. Non serve registrarsi.",
+      "ctaHeadline": "Tieni d'occhio la data di scadenza e il saldo",
+      "ctaDescription": "Aggiungi il deposito a WonderMoney come conto, così il saldo rientra nel tuo patrimonio netto, e crea un obiettivo con la data in cui scade.",
+      "amount": "Importo depositato",
+      "annualRate": "Tasso annuo nominale lordo (TAN)",
+      "annualRateHelp": "Il tasso annuo prima delle imposte indicato dalla banca. Un tasso effettivo include già la capitalizzazione: con interessi mensili o trimestrali è un po' più alto del TAN.",
+      "term": "Durata del vincolo",
+      "termHelp": "In mesi interi, da 1 a {{max}}.",
+      "monthsSuffix": "mesi",
+      "monthsOne": "1 mese",
+      "monthsMany": "{{count}} mesi",
+      "payout": "Gli interessi sono pagati",
+      "payouts": {
+        "maturity": "Alla scadenza",
+        "monthly": "Ogni mese",
+        "quarterly": "Ogni trimestre",
+        "annually": "Ogni anno"
+      },
+      "reinvest": "Ogni pagamento di interessi viene",
+      "reinvestOptions": {
+        "payOut": "Accreditato sul mio conto",
+        "reinvest": "Aggiunto al deposito"
+      },
+      "reinvestHelp": "Se aggiunti al deposito, gli interessi maturano a loro volta interessi dal periodo successivo. Se accreditati sul tuo conto, escono dal deposito.",
+      "taxRate": "Ritenuta sugli interessi",
+      "taxRateHelp": "Molti paesi trattengono un'imposta sugli interessi dei depositi, con aliquote che cambiano da paese a paese e a volte da persona a persona. Inserisci quella che si applica a te, o lascia 0% per vedere i valori lordi.",
+      "grossInterest": "Interessi lordi",
+      "tax": "Ritenuta",
+      "netInterest": "Interessi netti",
+      "netYield": "Rendimento netto annuo",
+      "finalBalance": "Saldo alla scadenza",
+      "totalReceived": "Totale ricevuto",
+      "paymentsOne": "1 pagamento di interessi",
+      "paymentsMany": "{{count}} pagamenti di interessi",
+      "resultNote": {
+        "maturity": "Gli interessi di {{term}} sono pagati in un'unica soluzione alla scadenza del deposito.",
+        "reinvested": "In {{term}} il deposito riceve {{payments}} al netto delle imposte, quindi i successivi rendono su un saldo più alto.",
+        "paidOut": "In {{term}} ricevi {{payments}} al netto delle imposte e alla scadenza ti tornano {{principal}}. Il totale conta entrambi."
+      },
+      "errors": {
+        "summary": "Il risultato compare quando ogni campo ha un valore valido.",
+        "amount": {
+          "required": "Inserisci l'importo che depositi.",
+          "negative": "L'importo non può essere negativo.",
+          "tooLarge": "Inserisci un importo fino a {{max}}."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso, o 0 se non c'è.",
+          "negative": "Il tasso non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "termMonths": {
+          "required": "Inserisci una durata di almeno 1 mese.",
+          "tooLarge": "Inserisci una durata fino a {{max}} mesi.",
+          "notWhole": "Inserisci la durata in mesi interi."
+        },
+        "taxRate": {
+          "negative": "L'aliquota non può essere inferiore allo 0%.",
+          "tooLarge": "L'aliquota non può superare il {{max}}."
+        }
+      },
+      "schedule": {
+        "title": "Pagamenti di interessi",
+        "descriptionReinvested": "Una riga per pagamento: gli interessi del periodo, la ritenuta e il deposito dopo l'aggiunta degli interessi netti.",
+        "descriptionPaidOut": "Una riga per pagamento: gli interessi del periodo, la ritenuta e gli interessi netti ricevuti fino a quel momento.",
+        "payment": "Pagato alla fine del",
+        "gross": "Interessi lordi",
+        "tax": "Ritenuta",
+        "net": "Interessi netti",
+        "balance": "Saldo del deposito",
+        "paidOutToDate": "Ricevuto finora",
+        "monthLabel": "Mese {{month}}",
+        "showAll": "Mostra tutti i {{count}} pagamenti",
+        "showFewer": "Mostra meno pagamenti"
+      },
+      "guide": {
+        "whatHeading": "Quanto rende un conto deposito vincolato",
+        "whatBody": "Con un conto deposito vincolato lasci una somma in banca per un numero fisso di mesi a un tasso fisso. Oltre al tasso, quanto guadagni dipende da tre cose: per quanto tempo il denaro resta vincolato, se gli interessi arrivano alla fine o durante il vincolo e quanto viene trattenuto in imposte. Questo calcolatore tiene conto di tutte e tre con il tasso che inserisci, così puoi confrontare le offerte sulla stessa base.",
+        "readHeading": "Come leggere il risultato",
+        "read": {
+          "gross": "Interessi lordi: tutto ciò che il deposito rende prima delle imposte.",
+          "tax": "Ritenuta: la parte di ogni pagamento di interessi trattenuta per le imposte, all'aliquota che inserisci.",
+          "net": "Interessi netti: ciò che ti arriva, cioè gli interessi lordi meno la ritenuta.",
+          "final": "Saldo alla scadenza, o totale ricevuto quando gli interessi sono accreditati sul tuo conto: l'importo depositato più tutti gli interessi netti.",
+          "yield": "Rendimento netto annuo: il guadagno netto espresso come tasso annuo, per confrontare depositi con durate e pagamenti diversi."
+        },
+        "exampleHeading": "Esempio pratico",
+        "exampleSetup": "Immagina di depositare {{amount}} per {{months}} mesi a un tasso lordo del {{rate}} annuo, con interessi pagati alla scadenza. L'interesse è semplice: l'importo per il tasso per la parte di anno in cui il denaro resta in banca.",
+        "exampleCompounded": "Se lo stesso deposito paga gli interessi ogni trimestre e li aggiunge al saldo, fa {{compoundedPayments}} pagamenti e ognuno rende su un importo un po' più alto. Gli interessi lordi arrivano a {{compoundedGross}}, {{compoundedExtra}} in più, per un saldo di {{compoundedFinal}} e un rendimento del {{compoundedYield}} annuo, contro il {{yield}} quando tutto è pagato alla fine.",
+        "exampleTax": "Ora immagina che sugli interessi pagati alla scadenza venga trattenuto il {{taxRate}}, un'aliquota scelta solo come esempio e non presa dalle regole di alcun paese: il calcolatore parte da 0% così puoi inserire la tua. La banca trattiene {{tax}}, ricevi {{net}} e finisci con {{taxedFinal}}, un rendimento netto del {{taxedYield}} annuo.",
+        "methodHeading": "Metodo e ipotesi",
+        "methodIntro": "Gli interessi si contano in mesi interi, senza conteggio dei giorni. Il tasso che inserisci è un tasso annuo nominale: ogni periodo rende il tasso per i suoi mesi diviso 12.",
+        "methodFormula": "Interessi di un periodo = saldo × tasso annuo × mesi del periodo ÷ 12. Interessi netti = interessi − ritenuta. Rendimento netto annuo = il tasso annuo che trasforma l'importo depositato nei pagamenti netti e nell'importo restituito, ciascuno contato quando arriva. Con tutti gli interessi alla scadenza, è (saldo alla scadenza ÷ importo depositato)^(12 ÷ durata in mesi) − 1.",
+        "method": {
+          "maturity": "Pagati alla scadenza, gli interessi sono semplici: un unico pagamento di importo × tasso × durata in mesi ÷ 12.",
+          "periodic": "Con pagamenti mensili, trimestrali o annuali, ogni pagamento arriva alla fine del suo periodo. Se la durata non è un numero intero di periodi, l'ultimo è più breve e i suoi interessi sono pagati in proporzione alla scadenza. Una durata più breve di un periodo ha un unico pagamento alla scadenza.",
+          "reinvest": "Gli interessi aggiunti al deposito entrano al netto delle imposte, quindi il deposito si capitalizza con la frequenza dei pagamenti. Gli interessi accreditati sul tuo conto escono dal deposito, quindi i successivi si calcolano sull'importo depositato.",
+          "tax": "La ritenuta si applica a ogni pagamento separatamente ed è arrotondata al centesimo, come fa la banca. Tutti gli importi sono calcolati in centesimi, così le righe dei pagamenti sommano esattamente i totali.",
+          "yield": "Il rendimento netto annuo è il tasso interno di rendimento del deposito: il tasso annuo al quale la somma che versi diventa tutto ciò che ricevi, contando ogni pagamento netto nel mese in cui arriva. Per questo gli interessi pagati durante il vincolo valgono più degli stessi interessi alla scadenza. Un deposito di meno di un anno si considera rinnovato alle stesse condizioni.",
+          "excluded": "Non sono compresi: penali per lo svincolo anticipato, costi del conto, variazioni del tasso durante il vincolo, limiti del fondo di garanzia dei depositi ed effetto dell'inflazione.",
+          "privacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati né inviati."
+        },
+        "methodLimits": "Le durate vanno da 1 a {{maxMonths}} mesi.",
+        "nextHeading": "Calcolatori correlati",
+        "nextCompound": "Per vedere come crescono i risparmi negli anni con versamenti regolari, prova il calcolatore dell'interesse composto.",
+        "nextCompoundLink": "Apri il calcolatore dell'interesse composto",
+        "nextEmergency": "Un conto deposito vincolato può custodire i risparmi che non ti serviranno a breve, mentre il fondo di emergenza resta a portata di mano.",
+        "nextEmergencyLink": "Calcola il tuo fondo di emergenza",
+        "nextSavingsGoal": "Stai mettendo da parte la somma da depositare o pensi a cosa fare alla scadenza? Il simulatore di risparmio calcola quanto accantonare ogni mese o quanto tempo serve.",
+        "nextSavingsGoalLink": "Apri il simulatore di risparmio"
+      }
     }
   },
   "learn": {

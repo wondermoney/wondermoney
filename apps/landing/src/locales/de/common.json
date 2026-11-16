@@ -1111,6 +1111,123 @@
       "nextStepHeadline": "Machen Sie aus der nötigen Sparrate ein wiederkehrendes Ziel",
       "nextStepDescription": "Legen Sie das Ziel in WonderMoney mit Betrag, Termin und monatlicher Sparrate an und verfolgen Sie Ihren Fortschritt mit den echten Salden Ihrer Konten.",
       "nextStepCta": "Ziel anlegen"
+    },
+    "termDeposit": {
+      "title": "Festgeld-Rechner",
+      "description": "Berechnen Sie, was eine Festgeldanlage vor und nach Steuern bringt, mit Zinsen am Laufzeitende oder während der Laufzeit.",
+      "pageTitle": "Festgeld-Rechner für Zinsen brutto und netto — WonderMoney",
+      "pageDescription": "Kostenloser Festgeld-Rechner. Geben Sie Betrag, Bruttozins, Laufzeit und Steuerabzug ein und sehen Sie Brutto- und Nettozinsen, das Guthaben am Laufzeitende, die Nettorendite pro Jahr und jede Zinszahlung. Ohne Anmeldung.",
+      "subtitle": "Geben Sie Betrag, den Zinssatz der Bank und die Laufzeit ein, um zu sehen, was die Anlage vor und nach Steuern bringt und wie viel Sie am Ende haben. Keine Anmeldung nötig.",
+      "ctaHeadline": "Fälligkeitsdatum und Guthaben im Blick behalten",
+      "ctaDescription": "Legen Sie das Festgeld in WonderMoney als Konto an, damit sein Guthaben in Ihr Nettovermögen einfließt, und setzen Sie ein Ziel mit dem Fälligkeitstag als Datum.",
+      "amount": "Anlagebetrag",
+      "annualRate": "Nominalzins pro Jahr (brutto)",
+      "annualRateHelp": "Der Jahreszins vor Steuern, wie die Bank ihn angibt. Die Effektivverzinsung rechnet den Zinseszins schon ein und liegt bei monatlichen oder vierteljährlichen Zinsen etwas höher.",
+      "term": "Laufzeit",
+      "termHelp": "In ganzen Monaten, von 1 bis {{max}}.",
+      "monthsSuffix": "Monate",
+      "monthsOne": "1 Monat",
+      "monthsMany": "{{count}} Monate",
+      "payout": "Zinsen werden gezahlt",
+      "payouts": {
+        "maturity": "Am Laufzeitende",
+        "monthly": "Monatlich",
+        "quarterly": "Vierteljährlich",
+        "annually": "Jährlich"
+      },
+      "reinvest": "Jede Zinszahlung wird",
+      "reinvestOptions": {
+        "payOut": "Auf mein Konto ausgezahlt",
+        "reinvest": "Der Anlage gutgeschrieben"
+      },
+      "reinvestHelp": "Der Anlage gutgeschrieben, bringen die Zinsen ab der nächsten Periode selbst Zinsen. Ausgezahlt, verlassen sie die Anlage.",
+      "taxRate": "Steuerabzug auf Zinsen",
+      "taxRateHelp": "Viele Länder behalten Steuern auf Zinsen direkt ein, zu Sätzen, die je nach Land und manchmal je nach Person verschieden sind. Geben Sie den Satz ein, der für Sie gilt, oder lassen Sie 0 % stehen, um die Bruttowerte zu sehen.",
+      "grossInterest": "Bruttozinsen",
+      "tax": "Einbehaltene Steuer",
+      "netInterest": "Nettozinsen",
+      "netYield": "Nettorendite pro Jahr",
+      "finalBalance": "Guthaben am Laufzeitende",
+      "totalReceived": "Insgesamt erhalten",
+      "paymentsOne": "1 Zinszahlung",
+      "paymentsMany": "{{count}} Zinszahlungen",
+      "resultNote": {
+        "maturity": "Die Zinsen für {{term}} werden auf einmal gezahlt, wenn die Anlage fällig wird.",
+        "reinvested": "Über {{term}} schreibt die Bank der Anlage {{payments}} nach Steuern gut, sodass die späteren auf ein höheres Guthaben anfallen.",
+        "paidOut": "Über {{term}} erhalten Sie {{payments}} nach Steuern, und am Laufzeitende kommen {{principal}} zurück. Die Summe zählt beides."
+      },
+      "errors": {
+        "summary": "Das Ergebnis erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "amount": {
+          "required": "Geben Sie den Anlagebetrag ein.",
+          "negative": "Der Betrag kann nicht negativ sein.",
+          "tooLarge": "Geben Sie einen Betrag bis {{max}} ein."
+        },
+        "annualRate": {
+          "required": "Geben Sie den Zinssatz ein, oder 0, wenn es keinen gibt.",
+          "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "termMonths": {
+          "required": "Geben Sie eine Laufzeit von mindestens 1 Monat ein.",
+          "tooLarge": "Geben Sie eine Laufzeit von höchstens {{max}} Monaten ein.",
+          "notWhole": "Geben Sie die Laufzeit in ganzen Monaten ein."
+        },
+        "taxRate": {
+          "negative": "Der Steuersatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Der Steuersatz kann nicht über {{max}} liegen."
+        }
+      },
+      "schedule": {
+        "title": "Zinszahlungen",
+        "descriptionReinvested": "Eine Zeile pro Zahlung: die Zinsen der Periode, die einbehaltene Steuer und das Guthaben, nachdem die Nettozinsen gutgeschrieben sind.",
+        "descriptionPaidOut": "Eine Zeile pro Zahlung: die Zinsen der Periode, die einbehaltene Steuer und die bis dahin ausgezahlten Nettozinsen.",
+        "payment": "Gezahlt am Ende von",
+        "gross": "Bruttozinsen",
+        "tax": "Steuer",
+        "net": "Nettozinsen",
+        "balance": "Guthaben der Anlage",
+        "paidOutToDate": "Bisher ausgezahlt",
+        "monthLabel": "Monat {{month}}",
+        "showAll": "Alle {{count}} Zahlungen anzeigen",
+        "showFewer": "Weniger Zahlungen anzeigen"
+      },
+      "guide": {
+        "whatHeading": "Was Festgeld bringt",
+        "whatBody": "Beim Festgeld legen Sie einen Betrag für eine feste Zahl von Monaten zu einem festen Zinssatz bei der Bank an. Neben dem Zinssatz hängt der Ertrag von drei Dingen ab: wie lange das Geld angelegt bleibt, ob die Zinsen am Ende oder unterwegs gezahlt werden und wie viel Steuer davon einbehalten wird. Dieser Rechner berücksichtigt alle drei mit dem Zinssatz, den Sie eingeben, damit Sie Angebote auf derselben Grundlage vergleichen können.",
+        "readHeading": "So lesen Sie das Ergebnis",
+        "read": {
+          "gross": "Bruttozinsen: alles, was die Anlage vor Steuern bringt.",
+          "tax": "Einbehaltene Steuer: der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
+          "net": "Nettozinsen: was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
+          "final": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten: der Anlagebetrag plus alle Nettozinsen.",
+          "yield": "Nettorendite pro Jahr: der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
+        },
+        "exampleHeading": "Rechenbeispiel",
+        "exampleSetup": "Angenommen, Sie legen {{amount}} für {{months}} Monate zu einem Bruttozins von {{rate}} pro Jahr an, mit Zinszahlung am Laufzeitende. Der Zins ist ein einfacher Zins: Betrag mal Zinssatz mal Anteil des Jahres, den das Geld angelegt bleibt.",
+        "exampleCompounded": "Zahlt dieselbe Anlage die Zinsen vierteljährlich und schreibt sie dem Guthaben gut, gibt es {{compoundedPayments}} Zahlungen, und jede fällt auf einen etwas höheren Betrag an. Die Bruttozinsen steigen auf {{compoundedGross}}, also {{compoundedExtra}} mehr, für ein Guthaben von {{compoundedFinal}} und eine Rendite von {{compoundedYield}} pro Jahr, gegenüber {{yield}}, wenn alles am Ende gezahlt wird.",
+        "exampleTax": "Nehmen wir nun an, dass von den Zinsen am Laufzeitende {{taxRate}} einbehalten werden, ein Satz, der nur zur Veranschaulichung gewählt und keinen Regeln eines Landes entnommen ist: Der Rechner beginnt bei 0 %, damit Sie Ihren eigenen eingeben. Die Bank behält {{tax}} ein, Sie erhalten {{net}} und haben am Ende {{taxedFinal}}, eine Nettorendite von {{taxedYield}} pro Jahr.",
+        "methodHeading": "Methode und Annahmen",
+        "methodIntro": "Zinsen werden in ganzen Monaten gerechnet, ohne Tageszählung. Der eingegebene Zinssatz ist ein nominaler Jahreszins: Jede Periode bringt den Zinssatz mal ihre Monate geteilt durch 12.",
+        "methodFormula": "Zinsen einer Periode = Guthaben × Jahreszins × Monate der Periode ÷ 12. Nettozinsen = Zinsen − Steuer. Nettorendite pro Jahr = der Jahreszins, mit dem der Anlagebetrag zu den Nettozahlungen und dem zurückgezahlten Betrag wird, jeweils zu ihrem Zeitpunkt gezählt. Kommen alle Zinsen am Laufzeitende, ist das (Guthaben am Laufzeitende ÷ Anlagebetrag)^(12 ÷ Laufzeit in Monaten) − 1.",
+        "method": {
+          "maturity": "Bei Zahlung am Laufzeitende ist der Zins einfach: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
+          "periodic": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
+          "reinvest": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
+          "tax": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
+          "yield": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der Jahreszins, zu dem Ihr Anlagebetrag zu allem wird, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
+          "excluded": "Nicht enthalten: Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
+          "privacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen."
+        },
+        "methodLimits": "Laufzeiten reichen von 1 bis {{maxMonths}} Monaten.",
+        "nextHeading": "Verwandte Rechner",
+        "nextCompound": "Wie Geld über Jahre mit regelmäßigen Einzahlungen wächst, zeigt der Zinseszinsrechner.",
+        "nextCompoundLink": "Zinseszinsrechner öffnen",
+        "nextEmergency": "Festgeld eignet sich für Ersparnisse, die Sie so bald nicht brauchen, während Ihr Notgroschen griffbereit bleibt.",
+        "nextEmergencyLink": "Notgroschen berechnen",
+        "nextSavingsGoal": "Sie sparen den Betrag für das Festgeld erst an oder planen, was nach der Fälligkeit kommt? Der Sparzielrechner ermittelt die monatliche Sparrate oder die nötige Zeit.",
+        "nextSavingsGoalLink": "Sparzielrechner öffnen"
+      }
     }
   },
   "learn": {
