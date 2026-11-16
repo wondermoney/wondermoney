@@ -15,9 +15,10 @@ import {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { NextIntlClientProvider } from "next-intl";
-import type { ReactNode } from "react";
+import { type ReactNode, StrictMode } from "react";
 import { afterEach, beforeEach, test, vi } from "vitest";
 
+import LoginPage from "@/app/[locale]/(no-layout)/auth/login/page";
 import api from "@/lib/api/api";
 import {
   instanceFeatures,
@@ -29,17 +30,19 @@ import LoginForm from "./LoginForm";
 
 const APP_ORIGIN = "http://localhost:3000";
 
-const { authClient } = vi.hoisted(() => ({
+const { authClient, page } = vi.hoisted(() => ({
   authClient: {
     getSession: vi.fn(),
     signIn: { email: vi.fn(), social: vi.fn() },
     signOut: vi.fn(),
   },
+  /** The sign-in page's query string. */
+  page: { search: "" },
 }));
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => new URLSearchParams(page.search),
 }));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
@@ -102,6 +105,7 @@ afterEach(() => {
   vi.clearAllMocks();
   requests.length = 0;
   replies = {};
+  page.search = "";
   api.defaults.adapter = originalAdapter;
   Object.defineProperty(window, "location", {
     configurable: true,
@@ -263,3 +267,122 @@ test("a demo session that cannot be provisioned is signed out and reported", asy
   assert.equal(assign.mock.calls.length, 0);
   assert.equal((demoButton() as HTMLButtonElement).disabled, false);
 });
+
+/** The sign-in page itself at `/en/auth/login?<search>`, as the marketing site links to it. */
+function loginPage(client: QueryClient, strict: boolean) {
+  const tree = (
+    <QueryClientProvider client={client}>
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <LoginPage />
+      </NextIntlClientProvider>
+    </QueryClientProvider>
+  );
+  return strict ? <StrictMode>{tree}</StrictMode> : tree;
+}
+
+function renderLoginPage(
+  client: QueryClient,
+  search: string,
+  { strict = false }: { strict?: boolean } = {},
+) {
+  page.search = search;
+  return render(loginPage(client, strict));
+}
+
+const demoRequests = () =>
+  requests.filter((request) => request.url === "/v1/auth/demo");
+
+const logInButton = () =>
+  screen.queryByRole("button", { name: enMessages["log-in"] });
+
+const DEMO_REPLIES = {
+  "/v1/auth/callback": { data: { outcome: "demo" }, status: 200 },
+  "/v1/auth/demo": { data: DEMO_SESSION, status: 201 },
+} as const;
+
+test("?demo=1 on a server that offers the demo starts it on arrival and lands in the app", async () => {
+  replies = { ...DEMO_REPLIES };
+  renderLoginPage(withDemo(), "demo=1");
+
+  await waitFor(() => assert.equal(assign.mock.calls.length, 1));
+  assert.deepEqual(
+    requests.map((request) => `${request.method} ${request.url}`),
+    ["post /v1/auth/demo", "post /v1/auth/callback"],
+  );
+  const landed = new URL(String(assign.mock.calls[0]![0]), APP_ORIGIN);
+  // A demo sign-in is not a signup: no signup markers ride on the destination.
+  assert.equal(`${landed.pathname}${landed.search}`, "/en");
+  assert.equal(screen.queryByRole("alert"), null);
+});
+
+test("?demo=1 keeps a safe next as the destination", async () => {
+  replies = { ...DEMO_REPLIES };
+  renderLoginPage(withDemo(), "demo=1&next=%2Fen%2Fbudgets");
+
+  await waitFor(() => assert.equal(assign.mock.calls.length, 1));
+  const landed = new URL(String(assign.mock.calls[0]![0]), APP_ORIGIN);
+  assert.equal(`${landed.pathname}${landed.search}`, "/en/budgets");
+});
+
+test("?demo=1 starts one demo session under strict mode and across re-renders", async () => {
+  replies = { ...DEMO_REPLIES };
+  const client = withDemo();
+  const view = renderLoginPage(client, "demo=1", { strict: true });
+  await waitFor(() => assert.equal(assign.mock.calls.length, 1));
+
+  view.rerender(loginPage(client, true));
+  // A fresh copy of the instance description re-renders everything that reads it.
+  client.setQueryData(["instance"], (data: object) => ({ ...data }));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(demoRequests().length, 1);
+  assert.equal(assign.mock.calls.length, 1);
+});
+
+test("a sign-in page without ?demo=1 never starts the demo by itself", async () => {
+  renderLoginPage(withDemo(), "demo=0");
+
+  assert.ok(demoButton());
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(demoRequests(), []);
+});
+
+test("?demo=1 waits for the server to say it offers the demo", () => {
+  renderLoginPage(
+    new QueryClient({ defaultOptions: { queries: { enabled: false } } }),
+    "demo=1",
+  );
+
+  assert.deepEqual(demoRequests(), []);
+  assert.equal(screen.queryByRole("alert"), null);
+});
+
+test("?demo=1 on a server without the demo stays on the sign-in page and says so", async () => {
+  renderLoginPage(
+    queryClientWithInstance(instanceFeatures({ demo: false })),
+    "demo=1",
+  );
+
+  const alert = await screen.findByRole("alert");
+  assert.equal(alert.textContent, enMessages.demo["sign-in-unavailable"]);
+  assert.deepEqual(demoRequests(), []);
+  assert.equal(demoButton(), null);
+  assert.ok(logInButton());
+});
+
+for (const [when, reply, messageKey] of failures) {
+  test(`?demo=1 that fails because ${when} falls back to the sign-in page with the reason`, async () => {
+    replies = { "/v1/auth/demo": reply };
+    renderLoginPage(withDemo(), "demo=1");
+
+    const alert = await screen.findByRole("alert");
+    assert.equal(
+      alert.textContent,
+      enMessages.demo[messageKey as keyof typeof enMessages.demo],
+    );
+    assert.equal(assign.mock.calls.length, 0);
+    assert.equal(demoRequests().length, 1);
+    // The ordinary sign-in stays usable.
+    assert.ok(logInButton());
+  });
+}
