@@ -1273,6 +1273,164 @@
       "nextStepDescription": "Crea l'obiettivo in WonderMoney con l'importo, la data e il versamento mensile, e segui i tuoi progressi con i saldi reali dei tuoi conti.",
       "nextStepCta": "Crea obiettivo"
     },
+    "borrowingCapacity": {
+      "title": "Quanto mutuo posso chiedere?",
+      "description": "Scopri il prezzo di casa più alto che reddito e risparmi ti permettono, quale dei due ti frena e cosa lo farebbe salire.",
+      "pageTitle": "Quanto mutuo posso chiedere? Calcolatore della capacità di credito — WonderMoney",
+      "pageDescription": "Calcolatore gratuito della capacità di credito. Inserisci reddito netto, rate che già paghi e risparmi, e scopri il mutuo e il prezzo di casa alla tua portata, e quale limite ti frena. Senza registrazione.",
+      "subtitle": "Due cose limitano la casa che puoi comprare: la rata che il tuo reddito può sostenere e i soldi da versare in anticipo. Guarda ogni limite da solo e poi il prezzo che entrambi permettono. Senza registrazione.",
+      "budgetHeading": "Il tuo budget mensile",
+      "monthlyIncome": "Reddito netto mensile del nucleo",
+      "monthlyIncomeHelp": "Quanto percepiscono tutte le persone che condivideranno il mutuo, al netto di tasse e contributi.",
+      "existingPayments": "Rate di credito attuali",
+      "existingPaymentsHelp": "Quanto paghi già ogni mese per prestiti auto, prestiti personali, carte e altri crediti. Lascia 0 se non ne hai.",
+      "maxDebtShare": "Quota massima del reddito per tutti i crediti",
+      "maxDebtShareHelp": "Tra {{min}} e {{max}} del reddito netto, per le rate attuali e il nuovo mutuo insieme.",
+      "maxDebtShareBand": "Il calcolatore del rapporto rata/reddito classifica {{share}} così: {{band}}.",
+      "loanHeading": "Il nuovo mutuo",
+      "annualRate": "Tasso di interesse",
+      "annualRateHelp": "Tasso nominale annuo fisso. Tieni un margine sopra le offerte di oggi: le banche spesso provano un tasso più alto.",
+      "termYears": "Durata del mutuo",
+      "years": "anni",
+      "yearsCount": "{{count}} anni",
+      "yearsOne": "1 anno",
+      "savingsHeading": "I tuoi risparmi",
+      "savings": "Risparmi per l'acquisto",
+      "savingsHelp": "Solo ciò che puoi mettere nella casa. Lascia il tuo fondo di emergenza fuori da questa cifra.",
+      "purchaseCostsRate": "Costi una tantum dell'acquisto",
+      "purchaseCostsRateHelp": "Imposte, notaio, registrazione e spese bancarie, in percentuale del prezzo. {{rate}} per iniziare; verifica la cifra dove compri.",
+      "maxLoanToValue": "Finanziamento massimo (LTV)",
+      "maxLoanToValueHelp": "La quota più alta del prezzo che la banca presta; il resto è il tuo anticipo. {{rate}} per iniziare.",
+      "result": {
+        "price": "Prezzo massimo della casa",
+        "loan": "Mutuo",
+        "downPayment": "Anticipo",
+        "purchaseCosts": "Costi dell'acquisto",
+        "monthlyPayment": "Rata mensile al {{rate}} in {{years}}",
+        "totalInterest": "Interessi sulla durata",
+        "totalPaid": "Totale rimborsato",
+        "debtToIncome": "Rapporto rata/reddito con questo mutuo: {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Rapporto rata/reddito con le rate attuali: {{ratio}} ({{band}}).",
+        "scheduleLink": "Apri il calcolatore del mutuo per il piano anno per anno"
+      },
+      "binding": {
+        "monthly": "Il tuo budget mensile fissa il limite. I tuoi risparmi arriverebbero più in là.",
+        "cash": "I tuoi risparmi fissano il limite. Il tuo reddito potrebbe sostenere un mutuo più grande.",
+        "both": "I due limiti si incontrano a questo prezzo."
+      },
+      "lift": {
+        "income": "Con circa {{amount}} di reddito netto in più al mese arriveresti a {{price}}, dove i risparmi diventano il limite.",
+        "incomeStep": "Ogni {{step}} di reddito netto mensile in più aggiunge circa {{amount}} al prezzo.",
+        "savings": "Con circa {{amount}} di risparmi in più arriveresti a {{price}}, dove il budget mensile diventa il limite.",
+        "both": "Per salire ancora ti servirebbero più reddito e più risparmi.",
+        "incomeToBorrow": "Con circa {{amount}} di reddito netto in più al mese ci sarebbe margine per un mutuo di almeno {{min}}."
+      },
+      "status": {
+        "noRoom": "Le tue rate attuali non lasciano margine nel {{share}} del reddito che hai previsto per il credito, o ne lasciano troppo poco per un mutuo di almeno {{min}}. Il prezzo indicato è ciò che i risparmi comprerebbero da soli.",
+        "savingsOnly": "Il mutuo che i tuoi risparmi permettono sarebbe sotto {{min}}, quindi il prezzo indicato è ciò che i risparmi comprerebbero da soli.",
+        "noSavings": "I tuoi risparmi non coprono l'anticipo del {{deposit}} né i costi d'acquisto del {{costs}}, quindi non c'è ancora un prezzo da mostrare.",
+        "nothing": "Senza margine per una nuova rata e senza risparmi non c'è un prezzo da mostrare. Riduci le rate attuali, o consenti una quota più alta del reddito, per vederne uno.",
+        "outOfRange": "Queste cifre richiedono un mutuo oltre {{max}}, più di quanto calcola questo strumento. Controlla gli importi inseriti."
+      },
+      "lenderNote": "Questa è una stima, non un'offerta di mutuo. Ogni banca applica le proprie regole: molte provano la rata con un tasso più alto di quello che pagheresti, contano il reddito a modo loro e seguono limiti all'importo e alle rate che cambiano da paese a paese.",
+      "limits": {
+        "title": "I due limiti, uno accanto all'altro",
+        "intro": "Ogni limite dà il proprio prezzo massimo. Il più basso dei due è il risultato qui sopra.",
+        "setsLimit": "Fissa il limite",
+        "monthlyTitle": "1. Budget mensile",
+        "allowed": "{{share}} del reddito netto per il credito",
+        "existing": "Rate di credito attuali",
+        "room": "Margine per la nuova rata",
+        "maxLoan": "Mutuo massimo al {{rate}} in {{years}}",
+        "monthlyPrice": "Prezzo massimo, con i tuoi risparmi",
+        "noRoom": "Le tue rate attuali non lasciano margine per un nuovo mutuo, o ne lasciano troppo poco per uno di almeno {{min}}.",
+        "cashTitle": "2. Soldi in anticipo",
+        "savings": "Risparmi per l'acquisto",
+        "deposit": "Anticipo (la banca finanzia il {{ltv}})",
+        "costs": "Costi dell'acquisto",
+        "cashShare": "Da coprire con i risparmi, in percentuale del prezzo",
+        "cashPrice": "Prezzo massimo che i risparmi coprono",
+        "noCeiling": "Nessun limite",
+        "noCeilingNote": "Con un finanziamento al 100% e senza costi d'acquisto, niente deve venire dai risparmi, quindi solo il budget mensile limita il prezzo."
+      },
+      "errors": {
+        "summary": "Il risultato compare quando ogni campo ha un valore valido.",
+        "monthlyIncome": {
+          "required": "Inserisci il tuo reddito netto mensile.",
+          "tooLarge": "Inserisci un reddito fino a {{max}} al mese."
+        },
+        "existingPayments": {
+          "negative": "Le rate non possono essere negative. Inserisci 0 se non ne hai.",
+          "tooLarge": "Inserisci rate fino a {{max}} al mese."
+        },
+        "maxDebtShare": {
+          "required": "Inserisci una quota tra {{min}} e {{max}}.",
+          "tooSmall": "Inserisci almeno {{min}}.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso non può essere negativo. Inserisci 0% o più.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata del mutuo in anni.",
+          "tooLarge": "Inserisci una durata fino a {{max}} anni."
+        },
+        "savings": {
+          "negative": "I risparmi non possono essere negativi. Inserisci 0 se non ne hai.",
+          "tooLarge": "Inserisci risparmi fino a {{max}}."
+        },
+        "purchaseCostsRate": {
+          "negative": "I costi non possono essere negativi. Inserisci 0% per escluderli.",
+          "tooLarge": "Inserisci costi fino al {{max}} del prezzo."
+        },
+        "maxLoanToValue": {
+          "required": "Inserisci un finanziamento tra {{min}} e {{max}}.",
+          "tooSmall": "Inserisci almeno {{min}}.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        }
+      },
+      "nextStepHeadline": "Pianifica l'anticipo e i costi mensili della casa",
+      "nextStepDescription": "Crea l'anticipo come obiettivo di risparmio in WonderMoney e prevedi la futura rata nel tuo budget mensile, accanto a ciò che spendi davvero.",
+      "nextStepCta": "Inizia a pianificare",
+      "guide": {
+        "whatTitle": "Due limiti decidono quanto puoi chiedere",
+        "whatBody1": "Il primo è mensile. Le banche vogliono che tutte le tue rate insieme restino sotto una quota del reddito netto. Prendi quella quota, togli ciò che paghi già per altri crediti, e quello che resta è il massimo che può valere la nuova rata. A un dato tasso e durata, quella rata rimborsa un mutuo di un certo importo: il massimo che il tuo reddito sostiene.",
+        "whatBody2": "Il secondo sono i soldi da versare in anticipo. Le banche raramente finanziano tutto il prezzo. La parte che non prestano è il tuo anticipo, e l'acquisto ha anche costi una tantum come imposte, notaio e registrazione. Entrambi escono dai risparmi, che mettono così un proprio tetto al prezzo.",
+        "whatBody3": "Il prezzo alla tua portata è il più basso dei due. Il calcolatore mostra quale limite ti frena e quanto reddito o risparmio in più lo alzerebbe.",
+        "relatedMortgage": "calcola la rata, gli interessi e il piano anno per anno di un mutuo che hai già in mente.",
+        "relatedDebtToIncome": "mostra quale parte del tuo reddito occupano le rate attuali, con le stesse fasce che usa questo strumento.",
+        "exampleTitle": "Esempio pratico",
+        "exampleIntro": "Una coppia guadagna {{income}} netti al mese e paga {{existing}} al mese per un prestito auto. Ha {{savings}} da parte per la casa, conta su un tasso fisso del {{rate}} per {{years}} anni e prevede costi d'acquisto del {{costsRate}} del prezzo. La banca finanzia fino al {{ltv}} del prezzo, e la coppia destina al credito il {{share}} del reddito.",
+        "exampleStep1": "Margine mensile: il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
+        "exampleStep2": "Mutuo massimo: una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
+        "exampleStep3": "Soldi in anticipo: ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
+        "exampleStep4": "Il più basso dei due è {{monthlyPrice}}, quindi è il budget mensile a fissare il limite.",
+        "exampleResult": "A {{price}} la coppia chiederebbe {{loan}}, verserebbe {{downPayment}} di anticipo e pagherebbe {{purchaseCosts}} di costi, usando tutti i {{savings}} risparmiati. Il calcolatore del mutuo porta la rata a {{payment}} al mese.",
+        "exampleLift": "Con circa {{extraIncome}} di reddito netto in più al mese arriverebbe a {{liftPrice}}, dove subentra il limite dei risparmi.",
+        "exampleSavings": "Con solo {{lowSavings}} da parte il quadro si ribalta: i risparmi coprono un prezzo di {{lowSavingsPrice}}, con un mutuo di {{lowSavingsLoan}}, ben dentro ciò che il reddito potrebbe sostenere. Per alzare il limite conta risparmiare di più, non guadagnare di più. Il calcolatore qui sopra parte dalla prima coppia, così puoi inserire le tue cifre.",
+        "methodTitle": "Metodo",
+        "methodIntro": "Il calcolo tratta ogni limite da solo e poi prende il prezzo più basso.",
+        "methodLegend": "I è il reddito netto mensile, d la quota consentita per il credito, E le rate attuali e M il margine per la nuova rata. r è il tasso annuo diviso 12, n il numero di rate mensili e L il mutuo massimo. S sono i risparmi, c i costi d'acquisto e v il finanziamento, entrambi in percentuale del prezzo. P₁ è il prezzo che permette il budget mensile e P₂ quello che permettono i risparmi.",
+        "methodShare": "La quota iniziale del {{share}} rientra nella fascia di attenzione del calcolatore del rapporto rata/reddito (dal {{caution}}% al {{high}}%). È una regola pratica, non un limite di legge.",
+        "methodCosts": "Al prezzo massimo ogni euro di risparmio va nell'acquisto: prima i costi, il resto come anticipo. Il mutuo copre ciò che manca, e mai più di quanto consente il finanziamento massimo.",
+        "methodRounding": "Gli importi sono calcolati in centesimi. Il mutuo è arrotondato per difetto al centesimo, così la prima rata, calcolata dal calcolatore del mutuo, rientra nel tuo margine; le successive possono variare di un centesimo. Il prezzo è esattamente mutuo più anticipo, e il reddito o il risparmio in più è arrotondato per eccesso all'euro.",
+        "methodPrivacy": "Il calcolo avviene nel tuo browser. Le cifre che inserisci restano sul tuo dispositivo e non vengono salvate.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionFixedRate": "Un tasso fisso per tutta la durata, con rate mensili uguali di capitale e interessi.",
+        "assumptionSavings": "Tutti i risparmi che inserisci vanno nell'acquisto. Lascia il fondo di emergenza fuori da questa cifra.",
+        "assumptionPayment": "La rata non comprende assicurazioni, spese di conto né i costi di gestione della casa, come IMU, manutenzione e utenze.",
+        "assumptionCostsShare": "I costi d'acquisto sono una percentuale fissa del prezzo. In pratica le imposte vanno spesso a scaglioni e alcune spese sono importi fissi.",
+        "lendersTitle": "Cosa controllano le banche e questo strumento no",
+        "lendersIntro": "La risposta di una banca può essere più bassa di questa stima, a volte di molto. Le regole cambiano da banca a banca e da paese a paese, e questo calcolatore non ne include nessuna.",
+        "lenderStress": "Tassi di stress: molte banche verificano che potresti ancora pagare se il tasso salisse di qualche punto, soprattutto sui mutui a tasso variabile.",
+        "lenderIncome": "Definizione del reddito: alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
+        "lenderCountry": "Limiti del paese: in molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
+        "lenderProfile": "Il tuo profilo: l'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
+        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te."
+      }
+    },
     "termDeposit": {
       "title": "Calcolatore conto deposito",
       "description": "Calcola quanto rende un conto deposito vincolato prima e dopo le imposte, con interessi pagati alla scadenza o durante il vincolo.",

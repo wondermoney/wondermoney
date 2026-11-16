@@ -22,6 +22,8 @@ import EarlyRepaymentCalculatorComp from "@/components/calculators/EarlyRepaymen
 import EarlyRepaymentGuide from "@/components/calculators/EarlyRepaymentGuide.astro";
 import BuyVsRentCalculatorComp from "@/components/calculators/BuyVsRentCalculatorComp";
 import BuyVsRentGuide from "@/components/calculators/BuyVsRentGuide.astro";
+import BorrowingCapacityCalculatorComp from "@/components/calculators/BorrowingCapacityCalculatorComp";
+import BorrowingCapacityGuide from "@/components/calculators/BorrowingCapacityGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -82,6 +84,11 @@ const nextStepCtaByRouteId: Partial<
   toolBuyVsRent: {
     headline: t("tools.buyVsRent.ctaHeadline"),
     description: t("tools.buyVsRent.ctaDescription"),
+  },
+  toolBorrowingCapacity: {
+    headline: t("tools.borrowingCapacity.nextStepHeadline"),
+    description: t("tools.borrowingCapacity.nextStepDescription"),
+    ctaText: t("tools.borrowingCapacity.nextStepCta"),
   },
 };
 
@@ -151,6 +158,9 @@ const schema = {
     {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
     {routeId === "toolEarlyRepayment" && <EarlyRepaymentCalculatorComp locale={locale} client:load />}
     {routeId === "toolBuyVsRent" && <BuyVsRentCalculatorComp locale={locale} client:load />}
+    {routeId === "toolBorrowingCapacity" && (
+      <BorrowingCapacityCalculatorComp locale={locale} client:load />
+    )}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -162,6 +172,7 @@ const schema = {
   {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
   {routeId === "toolEarlyRepayment" && <EarlyRepaymentGuide locale={locale} />}
   {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
+  {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

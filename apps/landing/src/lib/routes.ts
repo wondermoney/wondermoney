@@ -288,6 +288,14 @@ const ROUTE_SLUGS = {
 		de: "kaufen-oder-mieten-rechner",
 		it: "comprare-o-affittare-casa",
 	},
+	toolBorrowingCapacity: {
+		pt: "quanto-posso-pedir-emprestado",
+		en: "how-much-can-i-borrow",
+		es: "cuanto-puedo-pedir-prestado",
+		fr: "combien-puis-je-emprunter",
+		de: "wie-viel-kredit-bekomme-ich",
+		it: "quanto-mutuo-posso-chiedere",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -398,6 +406,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolTermDeposit",
 	"toolEarlyRepayment",
 	"toolBuyVsRent",
+	"toolBorrowingCapacity",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -642,6 +651,12 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"buy-vs-rent": "toolBuyVsRent",
 	"rent-vs-buy-calculator": "toolBuyVsRent",
 	"comprar-ou-arrendar-casa": "toolBuyVsRent",
+	toolborrowingcapacity: "toolBorrowingCapacity",
+	borrowingcapacitycalculator: "toolBorrowingCapacity",
+	"borrowing-capacity-calculator": "toolBorrowingCapacity",
+	"borrowing-capacity": "toolBorrowingCapacity",
+	"how-much-can-i-borrow": "toolBorrowingCapacity",
+	"quanto-posso-pedir-emprestado": "toolBorrowingCapacity",
 }
 
 function normalizeRouteLookupKey(value: string): string {

@@ -1273,6 +1273,164 @@
       "nextStepDescription": "Créez l'objectif dans WonderMoney avec le montant, la date et le versement mensuel, et suivez vos progrès avec les soldes réels de vos comptes.",
       "nextStepCta": "Créer un objectif"
     },
+    "borrowingCapacity": {
+      "title": "Combien puis-je emprunter ?",
+      "description": "Voyez le prix de logement le plus élevé que vos revenus et votre épargne permettent, lequel des deux vous freine et ce qui le ferait monter.",
+      "pageTitle": "Combien puis-je emprunter ? Calculateur de capacité d'emprunt — WonderMoney",
+      "pageDescription": "Calculateur gratuit de capacité d'emprunt. Saisissez vos revenus nets, vos mensualités actuelles et votre épargne pour voir le prêt et le prix de logement à votre portée, et la limite qui vous freine. Sans inscription.",
+      "subtitle": "Deux choses plafonnent le logement que vous pouvez acheter : la mensualité que vos revenus peuvent porter et l'argent qu'il faut au départ. Voyez chaque limite séparément, puis le prix que les deux permettent. Sans inscription.",
+      "budgetHeading": "Votre budget mensuel",
+      "monthlyIncome": "Revenus nets mensuels du foyer",
+      "monthlyIncomeHelp": "Ce que touchent toutes les personnes qui partageront le prêt, après impôts et cotisations sociales.",
+      "existingPayments": "Mensualités de crédit actuelles",
+      "existingPaymentsHelp": "Ce que vous payez déjà chaque mois pour un crédit auto, un prêt personnel, des cartes et d'autres crédits. Laissez 0 si vous n'en avez pas.",
+      "maxDebtShare": "Part maximale des revenus pour tous les crédits",
+      "maxDebtShareHelp": "Entre {{min}} et {{max}} des revenus nets, pour vos mensualités actuelles et le nouveau prêt ensemble.",
+      "maxDebtShareBand": "Le calculateur de taux d'endettement classe {{share}} ainsi : {{band}}.",
+      "loanHeading": "Le nouveau prêt",
+      "annualRate": "Taux d'intérêt",
+      "annualRateHelp": "Taux nominal annuel fixe. Gardez une marge au-dessus des offres actuelles : les banques testent souvent un taux plus élevé.",
+      "termYears": "Durée du prêt",
+      "years": "ans",
+      "yearsCount": "{{count}} ans",
+      "yearsOne": "1 an",
+      "savingsHeading": "Votre épargne",
+      "savings": "Épargne pour l'achat",
+      "savingsHelp": "Seulement ce que vous pouvez mettre dans le logement. Laissez votre épargne de précaution en dehors de ce montant.",
+      "purchaseCostsRate": "Frais d'achat ponctuels",
+      "purchaseCostsRateHelp": "Taxes, notaire, inscription et frais bancaires, en pourcentage du prix. {{rate}} pour commencer ; vérifiez le chiffre là où vous achetez.",
+      "maxLoanToValue": "Financement maximal (LTV)",
+      "maxLoanToValueHelp": "La plus grande part du prix que la banque prête ; le reste est votre apport. {{rate}} pour commencer.",
+      "result": {
+        "price": "Prix maximal du logement",
+        "loan": "Prêt",
+        "downPayment": "Apport",
+        "purchaseCosts": "Frais d'achat",
+        "monthlyPayment": "Mensualité à {{rate}} sur {{years}}",
+        "totalInterest": "Intérêts sur la durée",
+        "totalPaid": "Total remboursé",
+        "debtToIncome": "Taux d'endettement avec ce prêt : {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Taux d'endettement avec vos mensualités actuelles : {{ratio}} ({{band}}).",
+        "scheduleLink": "Ouvrir le simulateur de prêt immobilier pour le tableau année par année"
+      },
+      "binding": {
+        "monthly": "Votre budget mensuel fixe la limite. Votre épargne irait plus loin.",
+        "cash": "Votre épargne fixe la limite. Vos revenus pourraient porter un prêt plus important.",
+        "both": "Les deux limites se rejoignent à ce prix."
+      },
+      "lift": {
+        "income": "Environ {{amount}} de revenus nets en plus par mois vous mèneraient à {{price}}, où votre épargne devient la limite.",
+        "incomeStep": "Chaque tranche de {{step}} de revenus nets mensuels en plus ajoute environ {{amount}} au prix.",
+        "savings": "Environ {{amount}} d'épargne en plus vous mèneraient à {{price}}, où votre budget mensuel devient la limite.",
+        "both": "Pour aller plus haut, il vous faudrait plus de revenus et plus d'épargne.",
+        "incomeToBorrow": "Environ {{amount}} de revenus nets en plus par mois laisseraient de la marge pour un prêt d'au moins {{min}}."
+      },
+      "status": {
+        "noRoom": "Vos mensualités actuelles ne laissent pas de marge dans les {{share}} de revenus prévus pour le crédit, ou trop peu pour un prêt d'au moins {{min}}. Le prix affiché est ce que votre épargne achèterait seule.",
+        "savingsOnly": "Le prêt que permet votre épargne serait inférieur à {{min}} : le prix affiché est ce que votre épargne achèterait seule.",
+        "noSavings": "Votre épargne ne couvre pas l'apport de {{deposit}} ni les frais d'achat de {{costs}} : il n'y a pas encore de prix à afficher.",
+        "nothing": "Sans marge pour une nouvelle mensualité et sans épargne, il n'y a pas de prix à afficher. Réduisez vos mensualités actuelles, ou prévoyez une part de revenus plus grande, pour en voir un.",
+        "outOfRange": "Ces chiffres demandent un prêt supérieur à {{max}}, au-delà de ce que ce calculateur traite. Vérifiez les montants saisis."
+      },
+      "lenderNote": "Ceci est une estimation, pas une offre de prêt. Chaque banque applique ses propres règles : beaucoup testent la mensualité à un taux plus élevé que celui que vous paieriez, comptent les revenus à leur façon et suivent des limites de montant et de mensualité qui varient selon le pays.",
+      "limits": {
+        "title": "Les deux limites, côte à côte",
+        "intro": "Chaque limite donne son propre prix maximal. Le plus bas des deux est le résultat ci-dessus.",
+        "setsLimit": "Fixe la limite",
+        "monthlyTitle": "1. Budget mensuel",
+        "allowed": "{{share}} des revenus nets pour le crédit",
+        "existing": "Mensualités de crédit actuelles",
+        "room": "Marge pour la nouvelle mensualité",
+        "maxLoan": "Prêt maximal à {{rate}} sur {{years}}",
+        "monthlyPrice": "Prix maximal, avec votre épargne",
+        "noRoom": "Vos mensualités actuelles ne laissent pas de marge pour un nouveau prêt, ou trop peu pour un prêt d'au moins {{min}}.",
+        "cashTitle": "2. Argent au départ",
+        "savings": "Épargne pour l'achat",
+        "deposit": "Apport (la banque finance {{ltv}})",
+        "costs": "Frais d'achat",
+        "cashShare": "À couvrir par l'épargne, en pourcentage du prix",
+        "cashPrice": "Prix maximal que couvre votre épargne",
+        "noCeiling": "Pas de limite",
+        "noCeilingNote": "Avec un financement à 100 % et sans frais d'achat, rien ne doit venir de l'épargne : seul le budget mensuel limite le prix."
+      },
+      "errors": {
+        "summary": "Le résultat s'affiche dès que chaque champ a une valeur valide.",
+        "monthlyIncome": {
+          "required": "Saisissez vos revenus nets mensuels.",
+          "tooLarge": "Saisissez des revenus jusqu'à {{max}} par mois."
+        },
+        "existingPayments": {
+          "negative": "Les mensualités ne peuvent pas être négatives. Saisissez 0 si vous n'en avez pas.",
+          "tooLarge": "Saisissez des mensualités jusqu'à {{max}} par mois."
+        },
+        "maxDebtShare": {
+          "required": "Saisissez une part entre {{min}} et {{max}}.",
+          "tooSmall": "Saisissez au moins {{min}}.",
+          "tooLarge": "Saisissez au plus {{max}}."
+        },
+        "annualRate": {
+          "required": "Saisissez le taux d'intérêt.",
+          "negative": "Le taux ne peut pas être négatif. Saisissez 0 % ou plus.",
+          "tooLarge": "Saisissez un taux jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Saisissez la durée du prêt en années.",
+          "tooLarge": "Saisissez une durée jusqu'à {{max}} ans."
+        },
+        "savings": {
+          "negative": "L'épargne ne peut pas être négative. Saisissez 0 si vous n'en avez pas.",
+          "tooLarge": "Saisissez une épargne jusqu'à {{max}}."
+        },
+        "purchaseCostsRate": {
+          "negative": "Les frais ne peuvent pas être négatifs. Saisissez 0 % pour les exclure.",
+          "tooLarge": "Saisissez des frais jusqu'à {{max}} du prix."
+        },
+        "maxLoanToValue": {
+          "required": "Saisissez un financement entre {{min}} et {{max}}.",
+          "tooSmall": "Saisissez au moins {{min}}.",
+          "tooLarge": "Saisissez au plus {{max}}."
+        }
+      },
+      "nextStepHeadline": "Préparez votre apport et vos frais de logement mensuels",
+      "nextStepDescription": "Créez l'apport comme objectif d'épargne dans WonderMoney et prévoyez la future mensualité dans votre budget mensuel, à côté de vos dépenses réelles.",
+      "nextStepCta": "Commencer à planifier",
+      "guide": {
+        "whatTitle": "Deux limites décident de ce que vous pouvez emprunter",
+        "whatBody1": "La première est mensuelle. Les banques veulent que toutes vos mensualités ensemble restent sous une part de vos revenus nets. Prenez cette part, retirez ce que vous payez déjà pour d'autres crédits, et ce qui reste est le maximum de la nouvelle mensualité. À un taux et une durée donnés, cette mensualité rembourse un prêt d'un montant précis : le maximum que vos revenus supportent.",
+        "whatBody2": "La seconde est l'argent au départ. Les banques financent rarement tout le prix. La part qu'elles ne prêtent pas est votre apport, et l'achat entraîne aussi des frais ponctuels comme les taxes, le notaire et l'inscription. Les deux sortent de l'épargne, qui fixe donc son propre plafond au prix.",
+        "whatBody3": "Le prix à votre portée est le plus bas des deux. Le calculateur montre laquelle des limites vous freine et combien de revenus ou d'épargne en plus la relèveraient.",
+        "relatedMortgage": "calcule la mensualité, les intérêts et le tableau année par année d'un prêt que vous avez déjà en tête.",
+        "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités actuelles prennent, avec les mêmes tranches que cet outil.",
+        "exampleTitle": "Exemple chiffré",
+        "exampleIntro": "Un couple gagne {{income}} nets par mois et paie {{existing}} par mois pour un crédit auto. Il a {{savings}} d'épargne pour le logement, compte sur un taux fixe de {{rate}} sur {{years}} ans et prévoit des frais d'achat de {{costsRate}} du prix. Sa banque finance jusqu'à {{ltv}} du prix, et le couple réserve {{share}} de ses revenus au crédit.",
+        "exampleStep1": "Marge mensuelle : {{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
+        "exampleStep2": "Prêt maximal : une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
+        "exampleStep3": "Argent au départ : chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
+        "exampleStep4": "Le plus bas des deux est {{monthlyPrice}} : c'est donc le budget mensuel qui fixe la limite.",
+        "exampleResult": "À {{price}}, le couple emprunterait {{loan}}, verserait {{downPayment}} d'apport et paierait {{purchaseCosts}} de frais, en utilisant ses {{savings}} d'épargne. Le simulateur de prêt immobilier place la mensualité à {{payment}}.",
+        "exampleLift": "Environ {{extraIncome}} de revenus nets en plus par mois le mèneraient à {{liftPrice}}, où la limite de l'épargne prend le relais.",
+        "exampleSavings": "Avec seulement {{lowSavings}} d'épargne, tout s'inverse : l'épargne couvre un prix de {{lowSavingsPrice}}, avec un prêt de {{lowSavingsLoan}}, bien en deçà de ce que ses revenus pourraient porter. Pour relever la limite, c'est épargner davantage qui compte, pas gagner davantage. Le calculateur ci-dessus part du premier couple, pour que vous y mettiez vos propres chiffres.",
+        "methodTitle": "Méthode",
+        "methodIntro": "Le calcul traite chaque limite séparément, puis retient le prix le plus bas.",
+        "methodLegend": "I désigne les revenus nets mensuels, d la part permise pour le crédit, E les mensualités actuelles et M la marge pour la nouvelle mensualité. r est le taux annuel divisé par 12, n le nombre de mensualités et L le prêt maximal. S désigne l'épargne, c les frais d'achat et v le financement, tous deux en pourcentage du prix. P₁ est le prix que permet le budget mensuel et P₂ celui que permet l'épargne.",
+        "methodShare": "La part de départ de {{share}} se situe dans la tranche de vigilance du calculateur de taux d'endettement ({{caution}} % à {{high}} %). C'est un repère, pas une limite légale.",
+        "methodCosts": "Au prix maximal, chaque euro d'épargne va dans l'achat : d'abord les frais, le reste en apport. Le prêt couvre ce qui manque, et jamais plus que le financement maximal ne le permet.",
+        "methodRounding": "Les montants sont calculés en centimes. Le prêt est arrondi au centime inférieur, si bien que la première mensualité, calculée par le simulateur de prêt immobilier, tient dans votre marge ; les suivantes peuvent varier d'un centime. Le prix vaut exactement le prêt plus l'apport, et les revenus ou l'épargne en plus sont arrondis à l'euro supérieur.",
+        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionFixedRate": "Un taux fixe sur toute la durée, avec des mensualités égales de capital et d'intérêts.",
+        "assumptionSavings": "Toute l'épargne saisie va dans l'achat. Laissez votre épargne de précaution en dehors de ce montant.",
+        "assumptionPayment": "La mensualité n'inclut ni l'assurance, ni les frais de compte, ni les coûts courants du logement comme la taxe foncière, l'entretien et les charges.",
+        "assumptionCostsShare": "Les frais d'achat sont un pourcentage fixe du prix. En pratique, les taxes suivent souvent des tranches et certains frais sont des montants fixes.",
+        "lendersTitle": "Ce que les banques vérifient et que cet outil ne fait pas",
+        "lendersIntro": "La réponse d'une banque peut être inférieure à cette estimation, parfois nettement. Les règles changent d'une banque et d'un pays à l'autre, et ce calculateur n'en intègre aucune.",
+        "lenderStress": "Taux de stress : beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
+        "lenderIncome": "Définition des revenus : certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
+        "lenderCountry": "Limites nationales : dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
+        "lenderProfile": "Votre profil : l'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
+        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous."
+      }
+    },
     "termDeposit": {
       "title": "Calculateur de dépôt à terme",
       "description": "Calculez ce que rapporte un dépôt à terme avant et après impôt, avec des intérêts versés à l'échéance ou en cours de route.",

@@ -1273,6 +1273,164 @@
       "nextStepDescription": "Crea el objetivo en WonderMoney con la cantidad, la fecha y la aportación mensual, y sigue tu progreso con los saldos reales de tus cuentas.",
       "nextStepCta": "Crear objetivo"
     },
+    "borrowingCapacity": {
+      "title": "¿Cuánto puedo pedir prestado?",
+      "description": "Mira el precio de vivienda más alto que permiten tus ingresos y tus ahorros, cuál de los dos te frena y qué lo haría subir.",
+      "pageTitle": "¿Cuánto puedo pedir prestado? Calculadora de capacidad de endeudamiento — WonderMoney",
+      "pageDescription": "Calculadora gratuita de capacidad de endeudamiento. Indica tus ingresos netos, las cuotas que ya pagas y tus ahorros, y descubre la hipoteca y el precio de vivienda a tu alcance, y qué límite te frena. Sin registro.",
+      "subtitle": "Dos cosas limitan la vivienda que puedes comprar: la cuota que tus ingresos pueden asumir y el dinero que necesitas por adelantado. Mira cada límite por separado y luego el precio que permiten ambos. Sin registro.",
+      "budgetHeading": "Tu presupuesto mensual",
+      "monthlyIncome": "Ingresos netos mensuales del hogar",
+      "monthlyIncomeHelp": "Lo que cobran todas las personas que compartirán el préstamo, después de impuestos y cotizaciones.",
+      "existingPayments": "Cuotas de crédito actuales",
+      "existingPaymentsHelp": "Lo que ya pagas al mes en préstamos de coche, préstamos personales, tarjetas y otros créditos. Déjalo en 0 si no tienes ninguno.",
+      "maxDebtShare": "Parte máxima de los ingresos para todo el crédito",
+      "maxDebtShareHelp": "Entre {{min}} y {{max}} de los ingresos netos, para las cuotas actuales y el nuevo préstamo juntos.",
+      "maxDebtShareBand": "La calculadora de ratio de endeudamiento clasifica {{share}} como: {{band}}.",
+      "loanHeading": "El nuevo préstamo",
+      "annualRate": "Tipo de interés",
+      "annualRateHelp": "Tipo nominal anual fijo. Deja margen sobre las ofertas de hoy: los bancos suelen probar uno más alto.",
+      "termYears": "Plazo del préstamo",
+      "years": "años",
+      "yearsCount": "{{count}} años",
+      "yearsOne": "1 año",
+      "savingsHeading": "Tus ahorros",
+      "savings": "Ahorros para la compra",
+      "savingsHelp": "Solo lo que puedes destinar a la vivienda. Deja tu fondo de emergencia fuera de esta cifra.",
+      "purchaseCostsRate": "Gastos únicos de la compra",
+      "purchaseCostsRateHelp": "Impuestos, notaría, registro y comisiones bancarias, como porcentaje del precio. {{rate}} para empezar; comprueba la cifra donde compres.",
+      "maxLoanToValue": "Financiación máxima (LTV)",
+      "maxLoanToValueHelp": "La mayor parte del precio que presta el banco; el resto es tu entrada. {{rate}} para empezar.",
+      "result": {
+        "price": "Precio máximo de la vivienda",
+        "loan": "Préstamo",
+        "downPayment": "Entrada",
+        "purchaseCosts": "Gastos de la compra",
+        "monthlyPayment": "Cuota mensual al {{rate}} a {{years}}",
+        "totalInterest": "Intereses durante el plazo",
+        "totalPaid": "Total pagado",
+        "debtToIncome": "Ratio de endeudamiento con este préstamo: {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Ratio de endeudamiento con tus cuotas actuales: {{ratio}} ({{band}}).",
+        "scheduleLink": "Abrir la calculadora de hipoteca para ver el cuadro año a año"
+      },
+      "binding": {
+        "monthly": "Tu presupuesto mensual marca el límite. Tus ahorros darían para más.",
+        "cash": "Tus ahorros marcan el límite. Tus ingresos podrían asumir un préstamo mayor.",
+        "both": "Los dos límites coinciden en este precio."
+      },
+      "lift": {
+        "income": "Con unos {{amount}} más de ingresos netos al mes llegarías a {{price}}, donde tus ahorros pasan a ser el límite.",
+        "incomeStep": "Cada {{step}} más de ingresos netos al mes suma unos {{amount}} al precio.",
+        "savings": "Con unos {{amount}} más de ahorros llegarías a {{price}}, donde tu presupuesto mensual pasa a ser el límite.",
+        "both": "Para llegar más alto necesitarías más ingresos y más ahorros.",
+        "incomeToBorrow": "Con unos {{amount}} más de ingresos netos al mes habría margen para un préstamo de al menos {{min}}."
+      },
+      "status": {
+        "noRoom": "Tus cuotas actuales no dejan margen dentro del {{share}} de los ingresos que permitiste para crédito, o dejan demasiado poco para un préstamo de al menos {{min}}. El precio que ves es lo que tus ahorros comprarían solos.",
+        "savingsOnly": "El préstamo que permiten tus ahorros quedaría por debajo de {{min}}, así que el precio que ves es lo que tus ahorros comprarían solos.",
+        "noSavings": "Tus ahorros no cubren la entrada del {{deposit}} ni los gastos de compra del {{costs}}, así que todavía no hay precio que mostrar.",
+        "nothing": "Sin margen para una nueva cuota y sin ahorros, no hay precio que mostrar. Reduce tus cuotas actuales, o permite una parte mayor de los ingresos, para ver uno.",
+        "outOfRange": "Estas cifras necesitan un préstamo de más de {{max}}, más de lo que calcula esta herramienta. Revisa los importes que has introducido."
+      },
+      "lenderNote": "Esto es una estimación, no una oferta de préstamo. Cada banco aplica sus propias reglas: muchos prueban la cuota con un tipo más alto que el que pagarías, cuentan los ingresos a su manera y siguen límites al importe y a las cuotas que cambian según el país.",
+      "limits": {
+        "title": "Los dos límites, uno junto a otro",
+        "intro": "Cada límite da su propio precio máximo. El más bajo de los dos es el resultado de arriba.",
+        "setsLimit": "Marca el límite",
+        "monthlyTitle": "1. Presupuesto mensual",
+        "allowed": "{{share}} de los ingresos netos para crédito",
+        "existing": "Cuotas de crédito actuales",
+        "room": "Margen para la nueva cuota",
+        "maxLoan": "Préstamo máximo al {{rate}} a {{years}}",
+        "monthlyPrice": "Precio máximo, con tus ahorros",
+        "noRoom": "Tus cuotas actuales no dejan margen para un nuevo préstamo, o dejan demasiado poco para uno de al menos {{min}}.",
+        "cashTitle": "2. Dinero por adelantado",
+        "savings": "Ahorros para la compra",
+        "deposit": "Entrada (el banco financia el {{ltv}})",
+        "costs": "Gastos de la compra",
+        "cashShare": "A cubrir con ahorros, como porcentaje del precio",
+        "cashPrice": "Precio máximo que cubren tus ahorros",
+        "noCeiling": "Sin límite",
+        "noCeilingNote": "Con una financiación del 100% y sin gastos de compra, nada tiene que salir de los ahorros, así que solo el presupuesto mensual limita el precio."
+      },
+      "errors": {
+        "summary": "El resultado aparece cuando todos los campos tienen un valor válido.",
+        "monthlyIncome": {
+          "required": "Introduce tus ingresos netos mensuales.",
+          "tooLarge": "Introduce unos ingresos de hasta {{max}} al mes."
+        },
+        "existingPayments": {
+          "negative": "Las cuotas no pueden ser negativas. Introduce 0 si no tienes ninguna.",
+          "tooLarge": "Introduce cuotas de hasta {{max}} al mes."
+        },
+        "maxDebtShare": {
+          "required": "Introduce un porcentaje entre {{min}} y {{max}}.",
+          "tooSmall": "Introduce al menos {{min}}.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        },
+        "annualRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo no puede ser negativo. Introduce 0% o más.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo del préstamo en años.",
+          "tooLarge": "Introduce un plazo de hasta {{max}} años."
+        },
+        "savings": {
+          "negative": "Los ahorros no pueden ser negativos. Introduce 0 si no tienes.",
+          "tooLarge": "Introduce ahorros de hasta {{max}}."
+        },
+        "purchaseCostsRate": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0% para dejarlos fuera.",
+          "tooLarge": "Introduce gastos de hasta el {{max}} del precio."
+        },
+        "maxLoanToValue": {
+          "required": "Introduce una financiación entre {{min}} y {{max}}.",
+          "tooSmall": "Introduce al menos {{min}}.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        }
+      },
+      "nextStepHeadline": "Planifica la entrada y los gastos mensuales de la vivienda",
+      "nextStepDescription": "Crea la entrada como objetivo de ahorro en WonderMoney y reserva la futura cuota en tu presupuesto mensual, junto a lo que gastas de verdad.",
+      "nextStepCta": "Empezar a planificar",
+      "guide": {
+        "whatTitle": "Dos límites deciden cuánto puedes pedir",
+        "whatBody1": "El primero es mensual. Los bancos quieren que todas tus cuotas juntas queden por debajo de una parte de tus ingresos netos. Toma esa parte, resta lo que ya pagas en otros créditos, y lo que queda es lo máximo que puede ser la nueva cuota. Con un tipo y un plazo dados, esa cuota devuelve un préstamo de un importe concreto: lo máximo que tus ingresos sostienen.",
+        "whatBody2": "El segundo es el dinero por adelantado. Los bancos rara vez financian el precio entero. La parte que no prestan es tu entrada, y la compra tiene además gastos únicos como impuestos, notaría y registro. Ambos salen de los ahorros, así que tus ahorros ponen su propio techo al precio.",
+        "whatBody3": "El precio a tu alcance es el más bajo de los dos. La calculadora muestra cuál te frena y cuántos ingresos o ahorros más lo harían subir.",
+        "relatedMortgage": "calcula la cuota, los intereses y el cuadro año a año de un préstamo que ya tienes en mente.",
+        "relatedDebtToIncome": "muestra qué parte de tus ingresos ocupan tus cuotas actuales, con los mismos tramos que usa esta herramienta.",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleIntro": "Una pareja ingresa {{income}} netos al mes y paga {{existing}} al mes por un préstamo de coche. Tiene {{savings}} ahorrados para la vivienda, cuenta con un tipo fijo del {{rate}} a {{years}} años y prevé gastos de compra del {{costsRate}} del precio. Su banco financia hasta el {{ltv}} del precio, y la pareja permite un {{share}} de sus ingresos para crédito.",
+        "exampleStep1": "Margen mensual: el {{share}} de {{income}} son {{allowed}}. Restando los {{existing}} del coche, quedan {{room}} al mes para el nuevo préstamo.",
+        "exampleStep2": "Préstamo máximo: una cuota de {{room}} al {{rate}} durante {{years}} años devuelve {{maxLoan}}. Sumando todos los ahorros y pagando los gastos de compra con el total, el límite mensual permite un precio de {{monthlyPrice}}.",
+        "exampleStep3": "Dinero por adelantado: cada euro del precio pide un {{deposit}} para la entrada y un {{costsRate}} para los gastos, un {{cashShare}} en total. {{savings}} ÷ {{cashShare}} da un precio de {{cashPrice}}.",
+        "exampleStep4": "El más bajo de los dos es {{monthlyPrice}}, así que es el presupuesto mensual el que marca el límite.",
+        "exampleResult": "A {{price}}, la pareja pediría {{loan}}, pondría {{downPayment}} de entrada y pagaría {{purchaseCosts}} en gastos, usando todos sus {{savings}}. La calculadora de hipoteca sitúa la cuota en {{payment}} al mes.",
+        "exampleLift": "Con unos {{extraIncome}} más de ingresos netos al mes llegarían a {{liftPrice}}, donde el límite de los ahorros toma el relevo.",
+        "exampleSavings": "Con solo {{lowSavings}} ahorrados, todo cambia: los ahorros cubren un precio de {{lowSavingsPrice}}, con un préstamo de {{lowSavingsLoan}}, muy por debajo de lo que sus ingresos podrían asumir. Para subir el límite, lo que cuenta es ahorrar más, no ganar más. La calculadora de arriba parte de la primera pareja, para que pongas tus propias cifras.",
+        "methodTitle": "Método",
+        "methodIntro": "El cálculo trata cada límite por separado y luego se queda con el precio más bajo.",
+        "methodLegend": "I son los ingresos netos mensuales, d la parte permitida para crédito, E las cuotas actuales y M el margen para la nueva cuota. r es el tipo anual dividido entre 12, n el número de cuotas mensuales y L el préstamo máximo. S son los ahorros, c los gastos de compra y v la financiación, ambos como porcentaje del precio. P₁ es el precio que permite el presupuesto mensual y P₂ el que permiten los ahorros.",
+        "methodShare": "La parte inicial del {{share}} está en el tramo de precaución de la calculadora de ratio de endeudamiento ({{caution}}% a {{high}}%). Es una regla orientativa, no un límite legal.",
+        "methodCosts": "En el precio máximo, cada euro de ahorro va a la compra: primero los gastos y el resto como entrada. El préstamo cubre lo que falta, y nunca más de lo que permite la financiación máxima.",
+        "methodRounding": "Los importes se calculan en céntimos. El préstamo se redondea a la baja al céntimo, así que la primera cuota, calculada por la calculadora de hipoteca, cabe en tu margen; las siguientes pueden variar un céntimo. El precio es exactamente el préstamo más la entrada, y los ingresos o ahorros adicionales se redondean al alza al euro.",
+        "methodPrivacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionFixedRate": "Un tipo fijo durante todo el plazo, con cuotas mensuales iguales de capital e intereses.",
+        "assumptionSavings": "Todos los ahorros que indicas van a la compra. Deja tu fondo de emergencia fuera de esta cifra.",
+        "assumptionPayment": "La cuota no incluye seguros, comisiones de la cuenta ni los gastos de mantener la vivienda, como el IBI, el mantenimiento y los suministros.",
+        "assumptionCostsShare": "Los gastos de compra son un porcentaje fijo del precio. En la práctica, los impuestos suelen ir por tramos y algunas comisiones son importes fijos.",
+        "lendersTitle": "Lo que miran los bancos y esta herramienta no",
+        "lendersIntro": "La respuesta de un banco puede quedar por debajo de esta estimación, a veces bastante. Las reglas cambian de un banco a otro y de un país a otro, y esta calculadora no incluye ninguna.",
+        "lenderStress": "Tipos de estrés: muchos bancos comprueban que podrías seguir pagando si el tipo subiera unos puntos, sobre todo en préstamos a tipo variable.",
+        "lenderIncome": "Definición de ingresos: algunos solo cuentan parte de las primas, de los ingresos como autónomo o de alquileres, o hacen la media de varios años.",
+        "lenderCountry": "Límites del país: en muchos países el regulador limita la financiación, la parte de los ingresos que va a cuotas, el préstamo frente a los ingresos o el plazo.",
+        "lenderProfile": "Tu perfil: la edad al final del plazo, la estabilidad laboral, el historial de crédito y la propia vivienda también cuentan.",
+        "lendersOutro": "Usa el resultado para saber más o menos dónde estás antes de hablar con un banco, y luego pregunta qué límites se aplican en tu caso."
+      }
+    },
     "termDeposit": {
       "title": "Calculadora de depósitos a plazo",
       "description": "Calcula cuánto rinde un depósito a plazo fijo antes y después de impuestos, con intereses al vencimiento o a lo largo del plazo.",

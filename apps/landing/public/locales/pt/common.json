@@ -1273,6 +1273,164 @@
       "nextStepDescription": "Cria o objetivo no WonderMoney com o valor, a data e a contribuição mensal, e acompanha o progresso com os saldos reais das tuas contas.",
       "nextStepCta": "Criar objetivo"
     },
+    "borrowingCapacity": {
+      "title": "Quanto posso pedir emprestado?",
+      "description": "Vê o preço máximo de casa que o teu rendimento e as tuas poupanças permitem, qual dos dois te trava e o que o faria subir.",
+      "pageTitle": "Quanto posso pedir emprestado? Simulador de capacidade de crédito — WonderMoney",
+      "pageDescription": "Simulador grátis de capacidade de crédito. Indica o rendimento líquido, as prestações que já pagas e as poupanças, e vê o maior crédito e o preço de casa ao teu alcance, e qual dos limites te trava. Sem registo.",
+      "subtitle": "Duas coisas limitam a casa que podes comprar: a prestação que o teu rendimento aguenta e o dinheiro de que precisas à cabeça. Vê cada limite à parte e depois o preço que ambos permitem. Sem registo.",
+      "budgetHeading": "O teu orçamento mensal",
+      "monthlyIncome": "Rendimento líquido mensal do agregado",
+      "monthlyIncomeHelp": "O que recebem todos os que vão partilhar o crédito, depois de impostos e contribuições.",
+      "existingPayments": "Prestações de crédito atuais",
+      "existingPaymentsHelp": "O que já pagas por mês em crédito automóvel, crédito pessoal, cartões e outros créditos. Deixa 0 se não tiveres nenhum.",
+      "maxDebtShare": "Parte máxima do rendimento para todo o crédito",
+      "maxDebtShareHelp": "Entre {{min}} e {{max}} do rendimento líquido, para as prestações atuais e o novo crédito juntos.",
+      "maxDebtShareBand": "A calculadora de taxa de esforço classifica {{share}} como: {{band}}.",
+      "loanHeading": "O novo crédito",
+      "annualRate": "Taxa de juro",
+      "annualRateHelp": "Taxa nominal anual fixa. Deixa margem acima das ofertas de hoje: os bancos testam muitas vezes uma taxa mais alta.",
+      "termYears": "Prazo do crédito",
+      "years": "anos",
+      "yearsCount": "{{count}} anos",
+      "yearsOne": "1 ano",
+      "savingsHeading": "As tuas poupanças",
+      "savings": "Poupanças para a compra",
+      "savingsHelp": "Só o que podes pôr na casa. Deixa o teu fundo de emergência fora deste valor.",
+      "purchaseCostsRate": "Custos únicos da compra",
+      "purchaseCostsRateHelp": "Impostos, escritura, registos e comissões bancárias, em percentagem do preço. {{rate}} para começar; confirma o valor para onde compras.",
+      "maxLoanToValue": "Financiamento máximo (LTV)",
+      "maxLoanToValueHelp": "A maior parte do preço que o banco empresta; o resto é a tua entrada. {{rate}} para começar.",
+      "result": {
+        "price": "Preço máximo da casa",
+        "loan": "Crédito",
+        "downPayment": "Entrada",
+        "purchaseCosts": "Custos da compra",
+        "monthlyPayment": "Prestação mensal a {{rate}} em {{years}}",
+        "totalInterest": "Juros ao longo do prazo",
+        "totalPaid": "Total pago",
+        "debtToIncome": "Taxa de esforço com este crédito: {{ratio}} ({{band}}).",
+        "debtToIncomeCurrent": "Taxa de esforço com as prestações atuais: {{ratio}} ({{band}}).",
+        "scheduleLink": "Abrir o simulador de crédito habitação para ver o plano ano a ano"
+      },
+      "binding": {
+        "monthly": "O teu orçamento mensal define o limite. As tuas poupanças dariam para mais.",
+        "cash": "As tuas poupanças definem o limite. O teu rendimento aguentaria um crédito maior.",
+        "both": "Os dois limites encontram-se neste preço."
+      },
+      "lift": {
+        "income": "Com cerca de {{amount}} a mais de rendimento líquido por mês chegavas a {{price}}, onde as poupanças passam a ser o limite.",
+        "incomeStep": "Cada {{step}} a mais de rendimento líquido por mês acrescenta cerca de {{amount}} ao preço.",
+        "savings": "Com cerca de {{amount}} a mais de poupanças chegavas a {{price}}, onde o orçamento mensal passa a ser o limite.",
+        "both": "Para ir mais longe, precisavas de mais rendimento e de mais poupanças.",
+        "incomeToBorrow": "Com cerca de {{amount}} a mais de rendimento líquido por mês, haveria margem para um crédito de pelo menos {{min}}."
+      },
+      "status": {
+        "noRoom": "As tuas prestações atuais não deixam margem dentro dos {{share}} do rendimento que permitiste para crédito, ou deixam pouca demais para um crédito de pelo menos {{min}}. O preço indicado é o que as poupanças compram sozinhas.",
+        "savingsOnly": "O crédito que as tuas poupanças permitem ficaria abaixo de {{min}}, por isso o preço indicado é o que as poupanças compram sozinhas.",
+        "noSavings": "As tuas poupanças não cobrem a entrada de {{deposit}} nem os custos da compra de {{costs}}, por isso ainda não há preço para mostrar.",
+        "nothing": "Sem margem para uma nova prestação e sem poupanças, não há preço para mostrar. Baixa as prestações atuais, ou permite uma parte maior do rendimento, para veres um.",
+        "outOfRange": "Estes valores pedem um crédito acima de {{max}}, mais do que este simulador calcula. Confirma os montantes que introduziste."
+      },
+      "lenderNote": "Isto é uma estimativa, não uma proposta de crédito. Cada banco aplica regras próprias: muitos testam a prestação a uma taxa mais alta do que a que vais pagar, contam o rendimento de forma própria e seguem limites ao montante e às prestações que variam de país para país.",
+      "limits": {
+        "title": "Os dois limites, lado a lado",
+        "intro": "Cada limite dá um preço máximo próprio. O mais baixo dos dois é o resultado acima.",
+        "setsLimit": "Define o limite",
+        "monthlyTitle": "1. Orçamento mensal",
+        "allowed": "{{share}} do rendimento líquido para crédito",
+        "existing": "Prestações de crédito atuais",
+        "room": "Margem para a nova prestação",
+        "maxLoan": "Maior crédito a {{rate}} em {{years}}",
+        "monthlyPrice": "Preço máximo, com as tuas poupanças",
+        "noRoom": "As tuas prestações atuais não deixam margem para um novo crédito, ou deixam pouca demais para um crédito de pelo menos {{min}}.",
+        "cashTitle": "2. Dinheiro à cabeça",
+        "savings": "Poupanças para a compra",
+        "deposit": "Entrada (o banco financia {{ltv}})",
+        "costs": "Custos da compra",
+        "cashShare": "A sair das poupanças, em percentagem do preço",
+        "cashPrice": "Preço máximo que as poupanças cobrem",
+        "noCeiling": "Sem limite",
+        "noCeilingNote": "Com financiamento a 100% e sem custos da compra, nada tem de sair das poupanças, por isso só o orçamento mensal limita o preço."
+      },
+      "errors": {
+        "summary": "O resultado aparece quando todos os campos tiverem um valor válido.",
+        "monthlyIncome": {
+          "required": "Introduz o teu rendimento líquido mensal.",
+          "tooLarge": "Introduz um rendimento até {{max}} por mês."
+        },
+        "existingPayments": {
+          "negative": "As prestações não podem ser negativas. Introduz 0 se não tiveres nenhuma.",
+          "tooLarge": "Introduz prestações até {{max}} por mês."
+        },
+        "maxDebtShare": {
+          "required": "Introduz uma percentagem entre {{min}} e {{max}}.",
+          "tooSmall": "Introduz pelo menos {{min}}.",
+          "tooLarge": "Introduz no máximo {{max}}."
+        },
+        "annualRate": {
+          "required": "Introduz a taxa de juro.",
+          "negative": "A taxa não pode ser negativa. Introduz 0% ou mais.",
+          "tooLarge": "Introduz uma taxa até {{max}}."
+        },
+        "termYears": {
+          "required": "Introduz o prazo do crédito em anos.",
+          "tooLarge": "Introduz um prazo até {{max}} anos."
+        },
+        "savings": {
+          "negative": "As poupanças não podem ser negativas. Introduz 0 se não tiveres nenhuma.",
+          "tooLarge": "Introduz poupanças até {{max}}."
+        },
+        "purchaseCostsRate": {
+          "negative": "Os custos não podem ser negativos. Introduz 0% para os deixar de fora.",
+          "tooLarge": "Introduz custos até {{max}} do preço."
+        },
+        "maxLoanToValue": {
+          "required": "Introduz um financiamento entre {{min}} e {{max}}.",
+          "tooSmall": "Introduz pelo menos {{min}}.",
+          "tooLarge": "Introduz no máximo {{max}}."
+        }
+      },
+      "nextStepHeadline": "Planeia a entrada e os custos mensais da casa",
+      "nextStepDescription": "Cria a entrada como objetivo de poupança no WonderMoney e reserva a futura prestação no teu orçamento mensal, ao lado do que gastas de facto.",
+      "nextStepCta": "Começar a planear",
+      "guide": {
+        "whatTitle": "Dois limites decidem quanto podes pedir",
+        "whatBody1": "O primeiro é mensal. Os bancos querem que todas as tuas prestações juntas fiquem abaixo de uma parte do rendimento líquido. Tira essa parte, subtrai o que já pagas noutros créditos, e o que sobra é o máximo que a nova prestação pode ser. A uma dada taxa e prazo, essa prestação paga um crédito de um certo montante: o máximo que o teu rendimento suporta.",
+        "whatBody2": "O segundo é o dinheiro à cabeça. Os bancos raramente financiam o preço todo. A parte que não emprestam é a tua entrada, e a compra tem ainda custos únicos como impostos, escritura e registos. Ambos saem das poupanças, por isso as poupanças põem um teto próprio ao preço.",
+        "whatBody3": "O preço ao teu alcance é o mais baixo dos dois. O simulador mostra qual deles te trava e quanto mais rendimento ou poupança o faria subir.",
+        "relatedMortgage": "calcula a prestação, os juros e o plano ano a ano de um crédito que já tens em mente.",
+        "relatedDebtToIncome": "mostra que parte do teu rendimento as prestações atuais ocupam, com os mesmos escalões que esta ferramenta usa.",
+        "exampleTitle": "Exemplo prático",
+        "exampleIntro": "Um casal recebe {{income}} líquidos por mês e paga {{existing}} por mês num crédito automóvel. Tem {{savings}} poupados para a casa, conta com uma taxa fixa de {{rate}} a {{years}} anos e prevê custos da compra de {{costsRate}} do preço. O banco financia até {{ltv}} do preço, e o casal permite {{share}} do rendimento para crédito.",
+        "exampleStep1": "Margem mensal: {{share}} de {{income}} são {{allowed}}. Tirando os {{existing}} do crédito automóvel, sobram {{room}} por mês para o novo crédito.",
+        "exampleStep2": "Maior crédito: uma prestação de {{room}} a {{rate}} durante {{years}} anos paga {{maxLoan}}. Somando todas as poupanças e pagando os custos da compra com o total, o limite mensal permite um preço de {{monthlyPrice}}.",
+        "exampleStep3": "Dinheiro à cabeça: cada euro do preço pede {{deposit}} para a entrada e {{costsRate}} para os custos, {{cashShare}} no total. {{savings}} ÷ {{cashShare}} dá um preço de {{cashPrice}}.",
+        "exampleStep4": "O mais baixo dos dois é {{monthlyPrice}}, por isso é o orçamento mensal que define o limite.",
+        "exampleResult": "A {{price}}, o casal pediria {{loan}}, daria {{downPayment}} de entrada e pagaria {{purchaseCosts}} em custos, usando todos os {{savings}}. O simulador de crédito habitação põe a prestação em {{payment}} por mês.",
+        "exampleLift": "Com cerca de {{extraIncome}} a mais de rendimento líquido por mês chegariam a {{liftPrice}}, onde o limite das poupanças passa à frente.",
+        "exampleSavings": "Com apenas {{lowSavings}} poupados, tudo se inverte: as poupanças cobrem um preço de {{lowSavingsPrice}}, com um crédito de {{lowSavingsLoan}}, bem dentro do que o rendimento aguentaria. Para subir o limite, o que conta é poupar mais, não ganhar mais. O simulador acima começa no primeiro casal, para poderes trocar pelos teus valores.",
+        "methodTitle": "Método",
+        "methodIntro": "O cálculo trata cada limite à parte e depois fica com o preço mais baixo.",
+        "methodLegend": "I é o rendimento líquido mensal, d a parte dele permitida para crédito, E as prestações atuais e M a margem para a nova prestação. r é a taxa anual a dividir por 12, n o número de prestações mensais e L o maior crédito. S são as poupanças, c os custos da compra e v o financiamento, ambos em percentagem do preço. P₁ é o preço que o orçamento mensal permite e P₂ o que as poupanças permitem.",
+        "methodShare": "A parte inicial de {{share}} fica no escalão de atenção da calculadora de taxa de esforço ({{caution}}% a {{high}}%). É uma regra prática, não um limite legal.",
+        "methodCosts": "No preço máximo, cada euro das poupanças vai para a compra: primeiro os custos, o resto como entrada. O crédito cobre o que falta, e nunca mais do que o financiamento máximo permite.",
+        "methodRounding": "Os montantes são calculados em cêntimos. O crédito é arredondado para baixo ao cêntimo, por isso a primeira prestação, calculada pelo simulador de crédito habitação, cabe na tua margem; as seguintes podem variar um cêntimo. O preço é exatamente o crédito mais a entrada, e o rendimento ou a poupança a mais é arredondado para cima ao euro.",
+        "methodPrivacy": "O cálculo corre no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionFixedRate": "Uma taxa fixa durante todo o prazo, com prestações mensais iguais de capital e juros.",
+        "assumptionSavings": "Todas as poupanças que indicas vão para a compra. Deixa o fundo de emergência fora deste valor.",
+        "assumptionPayment": "A prestação não inclui seguros, comissões da conta nem os custos de manter a casa, como o IMI, a manutenção e as contas da casa.",
+        "assumptionCostsShare": "Os custos da compra são uma percentagem fixa do preço. Na prática, os impostos têm muitas vezes escalões e algumas comissões são valores fixos.",
+        "lendersTitle": "O que os bancos verificam e esta ferramenta não",
+        "lendersIntro": "A resposta de um banco pode ficar abaixo desta estimativa, por vezes bastante. As regras mudam de banco para banco e de país para país, e este simulador não inclui nenhuma.",
+        "lenderStress": "Taxas de stress: muitos bancos verificam se ainda conseguias pagar com a taxa alguns pontos acima, sobretudo em créditos de taxa variável.",
+        "lenderIncome": "Definição de rendimento: alguns só contam parte dos prémios, do rendimento de trabalho independente ou de rendas, ou fazem a média de vários anos.",
+        "lenderCountry": "Limites do país: em muitos países, o regulador limita o financiamento, a parte do rendimento que vai para prestações, o crédito face ao rendimento ou o prazo.",
+        "lenderProfile": "O teu perfil: a idade no fim do prazo, a estabilidade do emprego, o historial de crédito e a própria casa também contam.",
+        "lendersOutro": "Usa o resultado para saberes mais ou menos onde estás antes de falares com um banco, e depois pergunta que limites se aplicam a ti."
+      }
+    },
     "termDeposit": {
       "title": "Calculadora de depósitos a prazo",
       "description": "Calcula quanto rende um depósito a prazo antes e depois de impostos, com juros pagos no vencimento ou ao longo do prazo.",
