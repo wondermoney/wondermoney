@@ -413,8 +413,11 @@ export class DemoDataRefreshService {
         // Chronological running balances require date as the primary ordering.
         // Balance recomputation must include hidden transactions so the stored running-balance
         // chain and account.balance stay physically accurate; already account/tenant-scoped.
-        // eslint-disable-next-line perfectionist/sort-objects
-        { filters: { [HIDDEN_FILTER]: false }, orderBy: { transactionDate: QueryOrder.ASC, externalTransactionId: QueryOrder.ASC } },
+
+        {
+          filters: { [HIDDEN_FILTER]: false },
+          orderBy: { externalTransactionId: QueryOrder.ASC, transactionDate: QueryOrder.ASC },
+        },
       );
 
       const openingBalance =
@@ -684,7 +687,9 @@ export class DemoDataRefreshService {
     });
     const bankThreshold = Math.max(
       10,
-      demoBankTransactionFixtures.filter((fixture) => fixture.offsetDays <= 30).length,
+      demoBankTransactionFixtures.filter(
+        (fixture) => fixture.monthOffset === 0 || (fixture.monthOffset === undefined && fixture.offsetDays <= 30),
+      ).length,
     );
     if (recentBankTransactions < bankThreshold) {
       throw new Error(
@@ -788,4 +793,3 @@ function amountsEqual(left: number, right: number): boolean {
 function subUtcDays(date: Date, days: number): Date {
   return addUtcDays(date, -days);
 }
-

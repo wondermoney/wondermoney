@@ -63,7 +63,7 @@ export default function ReviewTransactionsClient({
 
   const { data: transactionsData, isLoading: isLoadingTransactions } =
     useTransactions(
-      { unreviewedOnly: true },
+      { unreviewedOnly: true, excludeTransfers: true },
       {
         enabled: accountsData?.accounts && accountsData.accounts.length > 0,
         ...serverSeed(initialTransactionsData, serverRenderedAt),

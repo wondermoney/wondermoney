@@ -6,7 +6,23 @@ export const demoPersona = {
   primaryCurrency: 'EUR',
 } as const;
 
+/** Synthetic household member: no better-auth user or sign-in credentials are created. */
+export const demoCompanion = {
+  email: 'demo-partner@wondermoney.invalid',
+  externalUserId: 'demo-fixture-partner',
+  firstName: 'Miguel',
+  lastName: 'Martins',
+} as const;
+
 export const demoAccounts = {
+  card: {
+    accountId: 'DEMO-CREDIT-CARD-001',
+    accountName: 'Family credit card',
+    accountNumber: 'DEMO-CARD-001',
+    balance: -200,
+    currency: 'EUR',
+    holderName: 'Sofia Martins',
+  },
   current: {
     accountId: '24603cf1-426f-47f0-af1e-b3b56629aaab-DEMO',
     accountName: 'ActivoBank Current Account',

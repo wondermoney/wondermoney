@@ -1,9 +1,7 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { RecurringPaymentsPreview } from "./RecurringNoAccountsEmptyState";
@@ -11,16 +9,12 @@ import { RecurringPaymentsPreview } from "./RecurringNoAccountsEmptyState";
 type Props = {
   currencyCode: string;
   hasScanned: boolean;
-  isScanning: boolean;
-  onScan: () => void;
   referenceTime: number;
 };
 
 export function RecurringDetectionEmptyState({
   currencyCode,
   hasScanned,
-  isScanning,
-  onScan,
   referenceTime,
 }: Props) {
   const t = useTranslations("recurring");
@@ -49,27 +43,6 @@ export function RecurringDetectionEmptyState({
           referenceTime={referenceTime}
         />
       )}
-
-      <Button
-        type="button"
-        className="min-h-11 gap-2"
-        onClick={onScan}
-        disabled={isScanning}
-      >
-        <RefreshCw
-          className={
-            isScanning
-              ? "size-4 animate-spin motion-reduce:animate-none"
-              : "size-4"
-          }
-          aria-hidden="true"
-        />
-        {isScanning
-          ? t("detecting")
-          : hasScanned
-            ? t("scanAgain")
-            : t("detectRecurring")}
-      </Button>
     </div>
   );
 }

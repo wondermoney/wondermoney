@@ -103,7 +103,10 @@ export function DrawerDialog({
             this dialog lives inside this scroll container; the lint config
             rejects `portalled={false}`. */}
         <DialogContent
-          className={cn("max-h-[85dvh] overflow-y-auto", contentClassName)}
+          className={cn(
+            "flex max-h-[85dvh] flex-col overflow-hidden",
+            contentClassName,
+          )}
           {...dialogContentProps}
         >
           {hasHeader && (
@@ -116,10 +119,12 @@ export function DrawerDialog({
               )}
             </DialogHeader>
           )}
-          {children}
+          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
           {footer ? (
             <>
-              <DialogFooter>{footer}</DialogFooter>
+              <DialogFooter className="border-border shrink-0 border-t pt-4">
+                {footer}
+              </DialogFooter>
             </>
           ) : closable ? (
             <DialogFooter>

@@ -14,8 +14,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/components/ui/Link";
+import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { cn } from "@/lib/utils";
 import { RETENTION_GROWTH_EVENTS } from "@/lib/utils/analytics";
 import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
@@ -44,6 +44,7 @@ export function SetupChecklistCard({
 }: SetupChecklistCardProps) {
   const t = useTranslations();
   const posthog = usePostHog();
+  const isDemo = useIsDemoProfile({ fetch: false });
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDismissed, dismiss } = useDismissibleActivation("setup-checklist");
   const visibleSteps = steps;
@@ -63,7 +64,7 @@ export function SetupChecklistCard({
   const allStepsComplete = visibleSteps.every((step) => completed[step.key]);
 
   useEffect(() => {
-    if (isDismissed || allStepsComplete) return;
+    if (isDemo || isDismissed || allStepsComplete) return;
 
     posthog?.capture(RETENTION_GROWTH_EVENTS.profileCompletenessViewed, {
       completedStepsCount,
@@ -81,76 +82,75 @@ export function SetupChecklistCard({
     hasPortfolio,
     hasReviewedTransactions,
     isDismissed,
+    isDemo,
     posthog,
     totalStepsCount,
   ]);
 
-  if (isDismissed || allStepsComplete) {
+  if (isDemo || isDismissed || allStepsComplete) {
     return null;
   }
 
-  const firstIncompleteStep =
-    visibleSteps.find((step) => !completed[step.key]) ?? visibleSteps[0];
   const progressPercent =
     totalStepsCount > 0 ? (completedStepsCount / totalStepsCount) * 100 : 0;
 
   return (
-    <Card className="border-border/70 bg-card">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <p className="text-sm font-medium">
-                {t("activation-setup-progress-title")}
-              </p>
-              <p className="text-muted-foreground text-sm leading-5">
-                {t("activation-setup-progress-count", {
-                  completed: completedStepsCount,
-                  total: totalStepsCount,
-                })}
-              </p>
-              <p className="text-muted-foreground text-sm leading-5">
-                {t("activation-setup-progress-nudge", {
-                  remaining: remainingStepsCount,
-                })}
-              </p>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="size-8"
-                onClick={() => setIsExpanded((current) => !current)}
-                aria-label={
-                  isExpanded
-                    ? t("activation-setup-hide-steps")
-                    : t("activation-setup-view-steps")
-                }
-                aria-expanded={isExpanded}
-                aria-controls={stepsListId}
-              >
-                {isExpanded ? (
-                  <ChevronUp className="size-4" />
-                ) : (
-                  <ChevronDown className="size-4" />
-                )}
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={dismiss}
-                aria-label={t("activation-hide-for-now")}
-              >
-                <X className="size-4" />
-              </Button>
-            </div>
-          </div>
-
+    <section
+      aria-label={t("activation-setup-progress-title")}
+      className={cn(isExpanded && "border-border rounded-md border p-3")}
+    >
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          className="min-h-11 min-w-0 justify-start gap-2 px-2 text-sm"
+          onClick={() => setIsExpanded((current) => !current)}
+          aria-label={t(
+            isExpanded
+              ? "activation-setup-hide-steps"
+              : "activation-setup-view-steps",
+          )}
+          aria-expanded={isExpanded}
+          aria-controls={stepsListId}
+        >
+          <Circle
+            aria-hidden="true"
+            className="text-muted-foreground size-4 shrink-0"
+          />
+          <span>{t("activation-setup-hint")}</span>
+          <span
+            className="text-muted-foreground font-mono text-xs"
+            aria-label={t("activation-setup-progress-count", {
+              completed: completedStepsCount,
+              total: totalStepsCount,
+            })}
+          >
+            {completedStepsCount}/{totalStepsCount}
+          </span>
+          {isExpanded ? (
+            <ChevronUp className="size-4 shrink-0" />
+          ) : (
+            <ChevronDown className="size-4 shrink-0" />
+          )}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-11 shrink-0"
+          onClick={dismiss}
+          aria-label={t("activation-hide-for-now")}
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+      {isExpanded ? (
+        <div className="mt-2 space-y-3 px-2">
+          <p className="text-muted-foreground text-sm">
+            {t("activation-setup-progress-nudge", {
+              remaining: remainingStepsCount,
+            })}
+          </p>
           <div
             className="bg-muted h-1.5 overflow-hidden rounded-full"
             role="progressbar"
@@ -160,76 +160,71 @@ export function SetupChecklistCard({
             aria-valuenow={completedStepsCount}
           >
             <div
-              className="bg-primary h-full w-full rounded-full transition-transform duration-[var(--duration-short)] ease-out motion-reduce:transition-none"
+              className="bg-primary h-full w-full rounded-full"
               style={{ transform: `translateX(-${100 - progressPercent}%)` }}
             />
           </div>
         </div>
+      ) : null}
+      {isExpanded && (
+        <ul
+          id={stepsListId}
+          className="border-border/70 mt-4 flex flex-col gap-1 border-t pt-3"
+        >
+          {visibleSteps.map((step) => {
+            const isComplete = completed[step.key];
 
-        {isExpanded && (
-          <ul
-            id={stepsListId}
-            className="border-border/70 mt-4 flex flex-col gap-1 border-t pt-3"
-          >
-            {visibleSteps.map((step) => {
-              const isComplete = completed[step.key];
-
-              return (
-                <li key={step.key}>
-                  <Link
-                    href={step.href}
-                    onClick={() => {
-                      posthog?.capture(
-                        RETENTION_GROWTH_EVENTS.profileCompletenessItemClicked,
-                        {
-                          itemKey: step.key,
-                          isComplete,
-                          completedStepsCount,
-                          totalStepsCount,
-                        },
-                      );
-                    }}
-                    className={cn(
-                      "group hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-ring focus-visible:ring-offset-background active:bg-muted/70 flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-px",
-                      isComplete
-                        ? "text-muted-foreground"
-                        : "text-foreground/90",
-                    )}
-                  >
-                    {isComplete ? (
-                      <CheckCircle2
-                        aria-hidden="true"
-                        className="text-success-text size-4 shrink-0"
-                      />
-                    ) : (
-                      <Circle
-                        aria-hidden="true"
-                        className="text-muted-foreground size-4 shrink-0"
-                      />
-                    )}
-                    <span
-                      className={cn("min-w-0", !isComplete && "font-medium")}
-                    >
-                      {t(`activation-step-${step.key}`)}
-                    </span>
-                    {!isComplete && (
-                      <MoveUpRight
-                        aria-hidden="true"
-                        className="text-foreground/70 group-hover:text-foreground/90 group-focus-visible:text-foreground/90 size-4 shrink-0 transition-colors"
-                      />
-                    )}
-                    <span className="sr-only">
-                      {isComplete
-                        ? t("activation-step-complete")
-                        : t("activation-step-incomplete")}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+            return (
+              <li key={step.key}>
+                <Link
+                  href={step.href}
+                  onClick={() => {
+                    posthog?.capture(
+                      RETENTION_GROWTH_EVENTS.profileCompletenessItemClicked,
+                      {
+                        itemKey: step.key,
+                        isComplete,
+                        completedStepsCount,
+                        totalStepsCount,
+                      },
+                    );
+                  }}
+                  className={cn(
+                    "group hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-ring focus-visible:ring-offset-background active:bg-muted/70 flex min-h-11 items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-px",
+                    isComplete ? "text-muted-foreground" : "text-foreground/90",
+                  )}
+                >
+                  {isComplete ? (
+                    <CheckCircle2
+                      aria-hidden="true"
+                      className="text-success-text size-4 shrink-0"
+                    />
+                  ) : (
+                    <Circle
+                      aria-hidden="true"
+                      className="text-muted-foreground size-4 shrink-0"
+                    />
+                  )}
+                  <span className={cn("min-w-0", !isComplete && "font-medium")}>
+                    {t(`activation-step-${step.key}`)}
+                  </span>
+                  {!isComplete && (
+                    <MoveUpRight
+                      aria-hidden="true"
+                      className="text-foreground/70 group-hover:text-foreground/90 group-focus-visible:text-foreground/90 size-4 shrink-0 transition-colors"
+                    />
+                  )}
+                  <span className="sr-only">
+                    {isComplete
+                      ? t("activation-step-complete")
+                      : t("activation-step-incomplete")}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

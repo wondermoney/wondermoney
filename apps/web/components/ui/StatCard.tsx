@@ -102,7 +102,7 @@ export function StatCard({
       // more of a 390px screen on frame than on figures.
       // Direction A: a cell of a ruled stat row, not a box. The row's
       // hairlines separate the cells; the first cell sits on the margin.
-      className={cn("py-3 sm:px-6 sm:py-0 sm:first:pl-0", className)}
+      className={cn("min-w-0 py-2 sm:px-6 sm:py-0 sm:first:pl-0", className)}
     >
       <div className="flex items-center justify-between gap-2">
         {/* Sentence case, not letterspaced caps — § 9 density contract. */}
@@ -177,8 +177,8 @@ export function StatCardGrid({
         // Direction A: a ruled stat row on the canvas. Hairlines between the
         // cells (stacked on a phone, side by side from `sm`), no frame around
         // them: boxed stats cost more space than the numbers they hold.
-        "divide-border grid grid-cols-1 divide-y",
-        "sm:grid-cols-3 sm:divide-x sm:divide-y-0",
+        "divide-border grid grid-cols-2 gap-x-4 gap-y-3 [&>:last-child:nth-child(odd)]:col-span-2",
+        "sm:grid-cols-3 sm:gap-0 sm:divide-x sm:[&>:last-child:nth-child(odd)]:col-span-1",
         className,
       )}
     >

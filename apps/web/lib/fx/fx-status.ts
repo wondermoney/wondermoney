@@ -78,20 +78,6 @@ export function accountFxView(
   });
 }
 
-/**
- * Where a user adds an exchange rate by hand: the Currencies tab of Settings.
- * `from` and `date` prefill its form. Until that tab exists, Settings opens on
- * its first tab.
- */
-export function exchangeRateSettingsHref(
-  prefill: { from?: string; date?: string } = {},
-): string {
-  const params = new URLSearchParams({ tab: "currencies" });
-  if (prefill.from) params.set("from", prefill.from);
-  if (prefill.date) params.set("date", prefill.date);
-  return `/settings?${params.toString()}`;
-}
-
 /** A `YYYY-MM-DD` rate date for reading, e.g. "3 Nov 2026". */
 export function formatRateDate(rateDate: string, locale: string): string {
   const date = new Date(`${rateDate}T00:00:00.000Z`);

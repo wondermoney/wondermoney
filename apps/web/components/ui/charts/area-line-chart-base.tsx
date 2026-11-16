@@ -66,7 +66,7 @@ type Props = {
    * formatted currency labels (e.g. "US$340.00" renders as "S$340.00").
    * Left unset, it is estimated from the labels that will actually be drawn
    * rather than reserving the widest case for every chart. */
-  yAxisWidth?: number;
+  yAxisWidth?: number | "auto";
   children?: React.ReactNode;
 };
 
@@ -149,7 +149,9 @@ export function AreaLineChartBase({
           <YAxis
             {...chartAxisProps}
             width={resolvedYAxisWidth}
-            domain={yTicks?.length ? [yTicks[0], yTicks[yTicks.length - 1]] : yDomain}
+            domain={
+              yTicks?.length ? [yTicks[0], yTicks[yTicks.length - 1]] : yDomain
+            }
             ticks={yTicks}
             tickFormatter={(value) =>
               yFormatter?.(Number(value)) ?? String(value)

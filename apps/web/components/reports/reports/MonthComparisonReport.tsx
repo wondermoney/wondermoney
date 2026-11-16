@@ -7,7 +7,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import { ExportCsvButton } from "@/components/reports/export/ExportCsvButton";
-import { formatMonthLabel, monthKeyDateRange, monthKeyOf, MonthPicker, shiftMonthKey } from "@/components/reports/filters/MonthPicker";
+import {
+  formatMonthLabel,
+  monthKeyDateRange,
+  monthKeyOf,
+  MonthPicker,
+  shiftMonthKey,
+} from "@/components/reports/filters/MonthPicker";
 import { useReportFilters } from "@/components/reports/filters/useReportFilters";
 import {
   ReportAmount,
@@ -65,7 +71,9 @@ export function MonthComparisonReport() {
   // Defaults: this month against last month. The report owns its two months
   // rather than borrowing the page's date range, which it does not use.
   const [base, setBase] = useState(() => monthKeyOf(new Date()));
-  const [compare, setCompare] = useState(() => shiftMonthKey(monthKeyOf(new Date()), -1));
+  const [compare, setCompare] = useState(() =>
+    shiftMonthKey(monthKeyOf(new Date()), -1),
+  );
 
   const { data, isPending, error, refetch } = useMonthComparison({
     ...filters,
@@ -187,9 +195,23 @@ export function MonthComparisonReport() {
     ) => (
       <TableRow key={label}>
         <TableCell className="font-medium">{label}</TableCell>
-        <TableCell className="text-right font-mono">{render(baseValue)}</TableCell>
-        <TableCell className="text-right font-mono">{render(compareValue)}</TableCell>
-        <TableCell className="text-right font-mono">
+        <TableCell
+          className="text-right font-mono"
+          mobileLabel={formatMonthLabel(base, locale)}
+        >
+          {render(baseValue)}
+        </TableCell>
+        <TableCell
+          className="text-right font-mono"
+          mobileLabel={formatMonthLabel(compare, locale)}
+        >
+          {render(compareValue)}
+        </TableCell>
+        <TableCell
+          className="text-right font-mono"
+          mobileLabel={t("change")}
+          mobilePriority
+        >
           {render(baseValue - compareValue)}
         </TableCell>
       </TableRow>
@@ -197,7 +219,7 @@ export function MonthComparisonReport() {
 
     return (
       <div className="flex flex-col gap-8">
-        <SimpleTable>
+        <SimpleTable mobileCards>
           <TableHeader>
             <TableRow>
               <TableHead>{t("metric")}</TableHead>
@@ -211,27 +233,69 @@ export function MonthComparisonReport() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {totalRow(t("income"), report.base.income, report.compare.income, (value) => (
-              <ReportAmount value={value} currencyKey={currencyKey} />
-            ))}
-            {totalRow(t("expenses"), report.base.expenses, report.compare.expenses, (value) => (
-              <ReportAmount value={value} currencyKey={currencyKey} />
-            ))}
-            {totalRow(t("net"), report.base.net, report.compare.net, (value) => (
-              <ReportAmount value={value} currencyKey={currencyKey} />
-            ))}
+            {totalRow(
+              t("income"),
+              report.base.income,
+              report.compare.income,
+              (value) => (
+                <ReportAmount value={value} currencyKey={currencyKey} />
+              ),
+            )}
+            {totalRow(
+              t("expenses"),
+              report.base.expenses,
+              report.compare.expenses,
+              (value) => (
+                <ReportAmount value={value} currencyKey={currencyKey} />
+              ),
+            )}
+            {totalRow(
+              t("net"),
+              report.base.net,
+              report.compare.net,
+              (value) => (
+                <ReportAmount value={value} currencyKey={currencyKey} />
+              ),
+            )}
             <TableRow>
               <TableCell className="font-medium">{t("savingsRate")}</TableCell>
-              <TableCell className="text-right font-mono">
-                {formatRate(report.base.savingsRate, formatPercentage, tCommon("currencyUnknown"))}
+              <TableCell
+                className="text-right font-mono"
+                mobileLabel={formatMonthLabel(base, locale)}
+              >
+                {formatRate(
+                  report.base.savingsRate,
+                  formatPercentage,
+                  tCommon("currencyUnknown"),
+                )}
               </TableCell>
-              <TableCell className="text-right font-mono">
-                {formatRate(report.compare.savingsRate, formatPercentage, tCommon("currencyUnknown"))}
+              <TableCell
+                className="text-right font-mono"
+                mobileLabel={formatMonthLabel(compare, locale)}
+              >
+                {formatRate(
+                  report.compare.savingsRate,
+                  formatPercentage,
+                  tCommon("currencyUnknown"),
+                )}
               </TableCell>
-              <TableCell className="text-right font-mono">
-                {report.base.savingsRate === null || report.compare.savingsRate === null
+              <TableCell
+                className="text-right font-mono"
+                mobileLabel={t("change")}
+                mobilePriority
+              >
+                {report.base.savingsRate === null ||
+                report.compare.savingsRate === null
                   ? tCommon("currencyUnknown")
-                  : formatPercentage(report.base.savingsRate - report.compare.savingsRate, { maximumFractionDigits: 1 })}
+                  : t("percentagePoints", {
+                      value: new Intl.NumberFormat(locale, {
+                        maximumFractionDigits: 1,
+                        signDisplay: "exceptZero",
+                      }).format(
+                        (report.base.savingsRate - report.compare.savingsRate) *
+                          100,
+                      ),
+                    })}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -268,7 +332,10 @@ export function MonthComparisonReport() {
                   })
                 }
                 tooltipValueFormatter={(value) => (
-                  <ReportAmount value={Number(value)} currencyKey={currencyKey} />
+                  <ReportAmount
+                    value={Number(value)}
+                    currencyKey={currencyKey}
+                  />
                 )}
               />
               {categories.length > TOP_CHANGE_COUNT ? (
@@ -279,7 +346,7 @@ export function MonthComparisonReport() {
             </div>
 
             <div className="overflow-x-auto">
-              <SimpleTable>
+              <SimpleTable mobileCards>
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("category")}</TableHead>
@@ -295,7 +362,10 @@ export function MonthComparisonReport() {
                 <TableBody>
                   {categories.map((row) => {
                     const baseHref = transactionsHref(base, row.categoryKey);
-                    const compareHref = transactionsHref(compare, row.categoryKey);
+                    const compareHref = transactionsHref(
+                      compare,
+                      row.categoryKey,
+                    );
                     return (
                       <TableRow key={row.categoryKey}>
                         <TableCell>
@@ -308,7 +378,10 @@ export function MonthComparisonReport() {
                             <span>{getCategoryName(row)}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right font-mono">
+                        <TableCell
+                          className="text-right font-mono"
+                          mobileLabel={formatMonthLabel(base, locale)}
+                        >
                           <CategoryAmount
                             currencyKey={currencyKey}
                             href={baseHref}
@@ -317,7 +390,10 @@ export function MonthComparisonReport() {
                             viewLabel={t("viewTransactions")}
                           />
                         </TableCell>
-                        <TableCell className="text-right font-mono">
+                        <TableCell
+                          className="text-right font-mono"
+                          mobileLabel={formatMonthLabel(compare, locale)}
+                        >
                           <CategoryAmount
                             currencyKey={currencyKey}
                             href={compareHref}
@@ -326,7 +402,11 @@ export function MonthComparisonReport() {
                             viewLabel={t("viewTransactions")}
                           />
                         </TableCell>
-                        <TableCell className="text-right font-mono">
+                        <TableCell
+                          className="text-right font-mono"
+                          mobileLabel={t("change")}
+                          mobilePriority
+                        >
                           <span
                             className={cn(
                               row.delta > 0 && "text-destructive-text",
@@ -334,7 +414,10 @@ export function MonthComparisonReport() {
                             )}
                           >
                             {row.delta > 0 ? "+" : ""}
-                            <ReportAmount value={row.delta} currencyKey={currencyKey} />
+                            <ReportAmount
+                              value={row.delta}
+                              currencyKey={currencyKey}
+                            />
                             {row.deltaPct === null ? null : (
                               <span className="text-muted-foreground ml-1 text-xs">
                                 {formatPercentage(row.deltaPct / 100, {
@@ -385,7 +468,10 @@ export function MonthComparisonReport() {
 
 function formatRate(
   value: number | null,
-  formatPercentage: (value: number, options?: Intl.NumberFormatOptions) => string,
+  formatPercentage: (
+    value: number,
+    options?: Intl.NumberFormatOptions,
+  ) => string,
   missing: string,
 ): string {
   return value === null

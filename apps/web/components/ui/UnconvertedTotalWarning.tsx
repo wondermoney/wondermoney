@@ -3,13 +3,11 @@
 import { TriangleAlert } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Link } from "@/components/ui/Link";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { exchangeRateSettingsHref } from "@/lib/fx/fx-status";
 import { cn } from "@/lib/utils";
 
 export interface UnconvertedTotal {
@@ -46,12 +44,7 @@ function WarningBody({
               }).format(currencies),
             })}
           </span>{" "}
-          <Link
-            href={exchangeRateSettingsHref({ from: currencies[0] })}
-            className="text-foreground underline underline-offset-4"
-          >
-            {t("add-rate")}
-          </Link>
+          <span>{t("automatic-rates")}</span>
         </>
       ) : null}
     </>
@@ -60,8 +53,7 @@ function WarningBody({
 
 /**
  * Says that a total is incomplete because some rows could not be converted
- * into `currency`, naming the currencies with no exchange rate and linking to
- * where a rate can be added. Renders nothing when nothing was left out.
+ * into `currency`, naming the currencies with no exchange rate and explaining automatic updates. Renders nothing when nothing was left out.
  *
  * `icon` sits beside a figure as a small warning that opens the explanation;
  * `note` is the explanation inline, under a section's heading.

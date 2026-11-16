@@ -22,6 +22,7 @@ import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { Portfolio } from '@entity/Portfolio';
 import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { Transaction } from '@entity/Transaction';
+import { demoBankTransactionFixtures } from '@service/demo-data/demo-data-fixtures';
 import { DemoDataRefreshService } from '@service/demo-data/demo-data-refresh.service';
 import portfolioSnapshotService from '@service/portfolio/portfolio-snapshot.service';
 import { calculateAmountBudgeted, Recurrency } from '@utils/budget';
@@ -245,7 +246,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 26;
+      if (entity === Transaction) return demoBankTransactionFixtures.length;
       return 0;
     });
 
@@ -1393,7 +1394,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 26;
+      if (entity === Transaction) return demoBankTransactionFixtures.length;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot) return 8;
       return 0;
@@ -1446,7 +1447,7 @@ describe('demo data refresh service', () => {
     );
     em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? 1 : 0));
     const service = createService(em, resolveIdentity, true, { buildPlan });
-    await expect(service.refresh()).rejects.toThrow(/Expected at least 26 demo bank transactions/);
+    await expect(service.refresh()).rejects.toThrow(/Expected at least \d+ demo bank transactions/);
   });
 
   it('ignores unrelated fresh non-generated transactions in bank invariants', async () => {
@@ -1584,7 +1585,7 @@ describe('demo data refresh service', () => {
       return null;
     });
     em.count.mockImplementation(async (entity: unknown) => {
-      if (entity === Transaction) return 26;
+      if (entity === Transaction) return demoBankTransactionFixtures.length;
       if (entity === FinancialTransaction) return 0;
       if (entity === PortfolioSnapshot) return 0;
       return 0;
@@ -1646,7 +1647,7 @@ describe('demo data refresh service', () => {
                   : null,
     );
     em.count.mockImplementation(async (entity: unknown) =>
-      entity === Transaction ? 26 : entity === FinancialTransaction ? 1 : entity === PortfolioSnapshot ? 30 : 0,
+      entity === Transaction ? demoBankTransactionFixtures.length : entity === FinancialTransaction ? 1 : entity === PortfolioSnapshot ? 30 : 0,
     );
     const service = createService(em, resolveIdentity, true, { buildPlan });
     await expect(service.refresh()).rejects.toThrow(/Missing verified demo budget category/);
@@ -1707,7 +1708,7 @@ describe('demo data refresh service', () => {
       if (entity === Transaction) return { transactionDate: asOfDate };
       return null;
     });
-    em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? 26 : 0));
+    em.count.mockImplementation(async (entity: unknown) => (entity === Transaction ? demoBankTransactionFixtures.length : 0));
 
     const service = createService(em, resolveIdentity, true, { buildPlan });
 
@@ -1781,7 +1782,7 @@ describe('demo data refresh service', () => {
                     : null,
     );
     em.count.mockImplementation(async (entity: unknown, where?: any) => {
-      if (entity === Transaction && where?.transactionDate?.$gte) return 26;
+      if (entity === Transaction && where?.transactionDate?.$gte) return demoBankTransactionFixtures.length;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot && where?.snapshotDate?.$gte) return 24;
       return 0;
@@ -1872,7 +1873,7 @@ describe('demo data refresh service', () => {
                       : null,
     );
     em.count.mockImplementation(async (entity: unknown, where?: any) => {
-      if (entity === Transaction && where?.transactionDate?.$gte) return 26;
+      if (entity === Transaction && where?.transactionDate?.$gte) return demoBankTransactionFixtures.length;
       if (entity === FinancialTransaction) return 1;
       if (entity === PortfolioSnapshot && where?.snapshotDate?.$gte) return 19;
       return 0;

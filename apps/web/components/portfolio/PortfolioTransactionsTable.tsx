@@ -548,9 +548,13 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
       );
 
       const renderFilterTrigger = () => (
-        <Button variant="secondary" className="flex shrink-0 gap-2">
+        <Button
+          variant="secondary"
+          aria-label={t("filters")}
+          className="flex size-11 shrink-0 gap-2 p-0 md:h-10 md:w-auto md:px-4"
+        >
           <Filter className="size-4" />
-          {t("filters")}
+          <span className="hidden md:inline">{t("filters")}</span>
           {activeFiltersCount > 0 && (
             <Badge
               variant="secondary"

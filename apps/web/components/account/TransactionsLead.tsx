@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
 import { buttonVariants } from "@/components/ui/button";
@@ -35,12 +36,15 @@ export function TransactionsLead({
   viewTotal?: number | null;
 }) {
   const t = useTranslations("transactionsPage");
+  const common = useTranslations();
+  const [expanded, setExpanded] = useState(false);
   const flows = useTransactions({ fromDate, toDate, limit: 1 });
   const unreviewed = useTransactions({
     fromDate,
     toDate,
     limit: 1,
     unreviewedOnly: true,
+    excludeTransfers: true,
   });
   const currency =
     flows.data?.completeness?.currencyCode ??
@@ -66,7 +70,13 @@ export function TransactionsLead({
             {viewTotal ?? "—"}
           </dd>
         </div>
-        <div className={cell}>
+        <div
+          className={cn(
+            cell,
+            "order-2 sm:order-none",
+            !expanded && "hidden sm:block",
+          )}
+        >
           <dt className="text-muted-foreground text-sm">{t("money-in")}</dt>
           <dd className="mt-1 text-2xl font-medium tracking-tight">
             {figure(
@@ -80,7 +90,13 @@ export function TransactionsLead({
             )}
           </dd>
         </div>
-        <div className={cell}>
+        <div
+          className={cn(
+            cell,
+            "order-2 sm:order-none",
+            !expanded && "hidden sm:block",
+          )}
+        >
           <dt className="text-muted-foreground text-sm">{t("money-out")}</dt>
           <dd className="mt-1 text-2xl font-medium tracking-tight">
             {figure(
@@ -121,7 +137,22 @@ export function TransactionsLead({
           </dd>
         </div>
       </dl>
-      <p className="text-muted-foreground mt-3 text-xs">{t("flows-caption")}</p>
+      <button
+        type="button"
+        className="text-muted-foreground focus-visible:ring-ring mt-1 min-h-11 rounded-md text-sm underline underline-offset-4 focus-visible:ring-2 sm:hidden"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((value) => !value)}
+      >
+        {common(expanded ? "summary-less-details" : "summary-more-details")}
+      </button>
+      <p
+        className={cn(
+          "text-muted-foreground mt-3 text-xs",
+          !expanded && "hidden sm:block",
+        )}
+      >
+        {t("flows-caption")}
+      </p>
       <UnconvertedAmountsNotice
         completeness={flows.data?.completeness ?? undefined}
         className="mt-1 text-xs"

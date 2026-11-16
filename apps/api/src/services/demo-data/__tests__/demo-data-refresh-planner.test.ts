@@ -19,7 +19,7 @@ describe('demo data refresh planner', () => {
     const plan = buildDemoRefreshPlan({ asOfDate });
 
     const bankFixture = demoBankTransactionFixtures.find((row) => row.offsetDays === 30);
-    const portfolioFixture = demoPortfolioTransactionFixtures.find((row) => row.offsetDays === 24);
+    const portfolioFixture = demoPortfolioTransactionFixtures.find((row) => row.offsetDays === 300);
 
     expect(bankFixture).toBeDefined();
     expect(portfolioFixture).toBeDefined();
@@ -41,7 +41,7 @@ describe('demo data refresh planner', () => {
       expect.arrayContaining([
         expect.objectContaining({
           externalTransactionId: portfolioFixture.externalTransactionId,
-          transactionDate: new Date('2026-05-12T00:00:00.000Z'),
+          transactionDate: new Date('2025-08-09T00:00:00.000Z'),
         }),
       ]),
     );

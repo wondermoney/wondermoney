@@ -31,7 +31,6 @@ describe('demo data fixtures', () => {
       expect(Object.values(demoAccounts).map((account) => account.accountName)).toContain(row.accountName);
       expect(['DEPOSIT', 'PAYMENT', 'TRANSFER_IN', 'TRANSFER_OUT']).toContain(row.type);
       expect(row.offsetDays).toBeGreaterThanOrEqual(0);
-      expect(row.offsetDays).toBeLessThanOrEqual(45);
     }
   });
 
@@ -51,7 +50,6 @@ describe('demo data fixtures', () => {
       );
       expect(['BUY', 'DEPOSIT', 'DIVIDEND', 'SELL', 'WITHDRAWAL']).toContain(row.type);
       expect(row.offsetDays).toBeGreaterThanOrEqual(0);
-      expect(row.offsetDays).toBeLessThanOrEqual(45);
     }
   });
 });

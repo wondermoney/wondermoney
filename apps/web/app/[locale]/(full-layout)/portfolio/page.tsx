@@ -169,9 +169,9 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="flex flex-col gap-10 lg:gap-12">
+    <div className="flex flex-col gap-6 sm:gap-10 lg:gap-12">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 max-sm:order-first sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
@@ -184,18 +184,18 @@ const Portfolio = () => {
               {t("help-hint-portfolios")}
             </HelpHint>
           </div>
-          <p className="text-muted-foreground mt-0.5 text-sm">
+          <p className="text-muted-foreground mt-0.5 hidden text-sm sm:block">
             {t("portfolios-overview-description")}
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <MemberFilterControl className="w-40 sm:w-44" />
           <TimeframeSelect
             timeframes={TIMEFRAME_OPTIONS}
             timeframe={period}
             setTimeframe={(value) => setPeriod(value as Period)}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <PortfolioTransactionAddModal
               isOpen={isAddTransactionModalOpen}
               setOpen={setIsAddTransactionModalOpen}
@@ -204,13 +204,22 @@ const Portfolio = () => {
                 setIsImportTransactionModalOpen,
               )}
               trigger={
-                <Button>
+                <Button className="flex-1 sm:flex-none">
                   <Plus className="size-4" />
                   {t("add-transaction")}
                 </Button>
               }
             />
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={() => openPortfolioCreateModal()}
+            >
+              <Plus className="size-4" />
+              {t("create-portfolio")}
+            </Button>
             <PortfolioCreateDialog
+              showTrigger={false}
               isOpen={isCreatePortfolioModalOpen}
               setOpen={(open) => {
                 if (!open) {
@@ -234,10 +243,12 @@ const Portfolio = () => {
 
       {/* Summary */}
       {dashboardData?.summary && (
-        <PortfolioDashboardSummary
-          summary={dashboardData.summary}
-          isAggregate
-        />
+        <div className="max-sm:order-first">
+          <PortfolioDashboardSummary
+            summary={dashboardData.summary}
+            isAggregate
+          />
+        </div>
       )}
 
       {/* Metrics */}
@@ -304,7 +315,7 @@ const Portfolio = () => {
 
       {/* Portfolios Breakdown */}
       {dashboardData?.portfolios && (
-        <section className="border-foreground min-w-0 border-t-2 pt-4">
+        <section className="border-foreground min-w-0 border-t-2 pt-4 max-sm:order-first">
           <div className="mb-4">
             <h2 className="text-foreground text-lg font-semibold tracking-tight">
               {t("portfolio-breakdown")}

@@ -53,6 +53,7 @@ import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 import { parseDateInputValue } from "@/lib/loans/calendar-day";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 
+import { ChooseGroupExpenseDialog } from "./ChooseGroupExpenseDialog";
 import { EditExpenseGroupForm } from "./EditExpenseGroupForm";
 import { GroupMembersSection, useMemberLabel } from "./GroupMembersSection";
 import {
@@ -432,6 +433,7 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
     null,
   );
   const [editing, setEditing] = useState(false);
+  const [choosingExpense, setChoosingExpense] = useState(false);
 
   const back = (
     <Link
@@ -501,7 +503,15 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
 
   const actions = readOnly ? null : (
     <>
-      <Button onClick={() => setRecording({ prefill: null })}>
+      {!group.archived ? (
+        <Button onClick={() => setChoosingExpense(true)}>
+          {t("chooseExpense.action")}
+        </Button>
+      ) : null}
+      <Button
+        variant="secondary"
+        onClick={() => setRecording({ prefill: null })}
+      >
         {t("settlement.action")}
       </Button>
       <Button variant="secondary" onClick={() => setEditing(true)}>
@@ -538,6 +548,12 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
         />
       </div>
 
+      {choosingExpense ? (
+        <ChooseGroupExpenseDialog
+          group={group}
+          onClose={() => setChoosingExpense(false)}
+        />
+      ) : null}
       <BalancesSection
         group={group}
         readOnly={readOnly}

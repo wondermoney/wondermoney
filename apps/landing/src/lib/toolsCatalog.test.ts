@@ -177,11 +177,15 @@ describe("tools hub copy", () => {
 		expect(readLocale("public/locales", lang).tools.hub).toEqual(copy.tools.hub)
 	})
 
-	it.each(SUPPORTED_LANGS)("has a title and description in %s for every tool on the hub", (lang) => {
+	it.each(SUPPORTED_LANGS)("has a title, short name and description in %s for every tool on the hub", (lang) => {
 		const copy = readLocale("src/locales", lang)
 
 		for (const tool of TOOLS_CATALOG) {
 			expect(copy.tools[tool.key]?.title, `${lang} tools.${tool.key}.title`).toEqual(expect.stringMatching(/\S/))
+			// The header's Tools menu lists tools by this name, in columns that fit a 1024 px screen.
+			expect(copy.tools[tool.key]?.shortName, `${lang} tools.${tool.key}.shortName`).toEqual(
+				expect.stringMatching(/^\S.{0,35}$/),
+			)
 			expect(copy.tools[tool.key]?.description, `${lang} tools.${tool.key}.description`).toEqual(
 				expect.stringMatching(/\S/),
 			)

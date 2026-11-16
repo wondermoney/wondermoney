@@ -192,10 +192,8 @@ test("a net worth that leaves out unconverted items carries a warning naming the
   );
   assert.match(note.textContent ?? "", /No exchange rate yet for JPY\./);
   assert.equal(
-    screen
-      .getByRole("link", { name: "Add an exchange rate" })
-      .getAttribute("href"),
-    "/settings?tab=currencies&from=JPY",
+    screen.queryByRole("link", { name: "Add an exchange rate" }),
+    null,
   );
 });
 

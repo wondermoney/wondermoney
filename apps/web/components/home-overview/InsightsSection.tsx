@@ -17,6 +17,7 @@ import useInsights, { type Insight } from "@/lib/api/insights/useInsights";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { cn } from "@/lib/utils";
+import { getCategoryDisplayName } from "@/lib/utils/categories";
 
 import { useInsightPrompt } from "./insight-prompt";
 
@@ -90,6 +91,8 @@ function InsightCard({
   canAsk: boolean;
 }) {
   const t = useTranslations("homeOverview.insights");
+  const tRoot = useTranslations();
+  const categoryLabel = (name: string) => getCategoryDisplayName(tRoot, name);
   const severity = t(`severity.${insight.severity}`);
   const prompt = useInsightPrompt(insight);
   const actions = canAsk ? (
@@ -122,7 +125,7 @@ function InsightCard({
       >
         <p className="text-foreground text-base font-medium">
           {t(`spending.${facts.direction}`, {
-            category: facts.categoryName,
+            category: categoryLabel(facts.categoryName),
             percent,
           })}
         </p>
@@ -150,8 +153,8 @@ function InsightCard({
 
   const facts = insight.facts;
   const category = facts.parentCategoryName
-    ? `${facts.parentCategoryName} / ${facts.categoryName}`
-    : facts.categoryName;
+    ? `${categoryLabel(facts.parentCategoryName)} / ${categoryLabel(facts.categoryName)}`
+    : categoryLabel(facts.categoryName);
   const [year, month] = insight.period.split("-");
   const href = `/budgets/${facts.budgetKey}/${year}/${Number(month)}`;
 
@@ -231,7 +234,7 @@ function InsightCardShell({
         <div className="flex min-w-0 flex-col gap-1">{children}</div>
         <span
           className={cn(
-            "shrink-0 text-xs font-medium tracking-wide uppercase",
+            "shrink-0 text-xs font-medium",
             SEVERITY_TONE[severity],
           )}
         >

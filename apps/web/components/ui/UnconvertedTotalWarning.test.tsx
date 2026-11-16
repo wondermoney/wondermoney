@@ -45,7 +45,7 @@ test("a complete total has no warning", () => {
   assert.equal(container.textContent, "");
 });
 
-test("the icon opens what was left out, naming the currencies and linking to where a rate is added", () => {
+test("the icon opens what was left out, naming the currencies without a manual-rate action", () => {
   renderWithMessages(
     <UnconvertedTotalWarning
       unconverted={{ count: 2, currencies: ["JPY", "USD"] }}
@@ -61,10 +61,8 @@ test("the icon opens what was left out, naming the currencies and linking to whe
   assert.match(note.textContent ?? "", /leaves out 2 accounts/);
   assert.match(note.textContent ?? "", /JPY and USD/);
   assert.equal(
-    screen
-      .getByRole("link", { name: "Add an exchange rate" })
-      .getAttribute("href"),
-    "/settings?tab=currencies&from=JPY",
+    screen.queryByRole("link", { name: "Add an exchange rate" }),
+    null,
   );
 });
 
@@ -85,7 +83,7 @@ test("the note form says the same inline", () => {
   assert.equal(screen.queryByRole("link"), null);
 });
 
-test("a report total that leaves rows out links to where a rate is added", () => {
+test("a report total names the missing currency without a manual-rate action", () => {
   renderWithMessages(
     <UnconvertedAmountsNotice
       completeness={{
@@ -99,9 +97,7 @@ test("a report total that leaves rows out links to where a rate is added", () =>
 
   assert.match(screen.getByRole("note").textContent ?? "", /USD/);
   assert.equal(
-    screen
-      .getByRole("link", { name: "Add an exchange rate" })
-      .getAttribute("href"),
-    "/settings?tab=currencies&from=USD",
+    screen.queryByRole("link", { name: "Add an exchange rate" }),
+    null,
   );
 });

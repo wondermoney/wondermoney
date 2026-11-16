@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
-import { demoPersona } from '@app/database/seeders/demo/demo-fixtures';
+import { demoCompanion, demoPersona } from '@app/database/seeders/demo/demo-fixtures';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
@@ -22,7 +22,11 @@ import { type DemoSessionPort, signInToDemo } from '@service/auth/demo-sign-in.s
 
 const NOW = new Date('2026-11-12T10:00:00.000Z');
 
-interface AuthUser { email: string; id: string; twoFactorEnabled: boolean | null }
+interface AuthUser {
+  email: string;
+  id: string;
+  twoFactorEnabled: boolean | null;
+}
 
 function fakeSessions(users: AuthUser[]) {
   const created: { expiresAt: Date; userId: string }[] = [];
@@ -49,24 +53,38 @@ function fakeSessions(users: AuthUser[]) {
 }
 
 async function seedDemo(em: EntityManager, overrides: { email?: string; externalUserId?: string } = {}) {
-  const currency = (await em.findOne(Currency, { code: 'EUR' })) ?? em.create(Currency, { code: 'EUR', num: '978' }, { partial: true });
+  const currency =
+    (await em.findOne(Currency, { code: 'EUR' })) ??
+    em.create(Currency, { code: 'EUR', num: '978' }, { partial: true });
   const tenantStatus = em.create(TenantStatus, { description: `active-${randomUUID()}` }, { partial: true });
-  const appuser = em.create(Appuser, {
-    accountType: AppuserAccountType.DEMO,
-    currencyKey: currency,
-    emailAddress: overrides.email ?? demoPersona.email,
-    externalUserId: overrides.externalUserId ?? randomUUID(),
-    firstName: demoPersona.firstName,
-  }, { partial: true });
-  const tenant = em.create(Tenant, {
-    name: demoPersona.householdName,
-    ownerAppuserKey: appuser,
-    tenantType: TenantType.DEMO,
-    tentantStatusKey: tenantStatus,
-  }, { partial: true });
+  const appuser = em.create(
+    Appuser,
+    {
+      accountType: AppuserAccountType.DEMO,
+      currencyKey: currency,
+      emailAddress: overrides.email ?? demoPersona.email,
+      externalUserId: overrides.externalUserId ?? randomUUID(),
+      firstName: demoPersona.firstName,
+    },
+    { partial: true },
+  );
+  const tenant = em.create(
+    Tenant,
+    {
+      name: demoPersona.householdName,
+      ownerAppuserKey: appuser,
+      tenantType: TenantType.DEMO,
+      tentantStatusKey: tenantStatus,
+    },
+    { partial: true },
+  );
   em.create(AppuserTenant, { appuserKey: appuser, recordActive: true, tenantKey: tenant }, { partial: true });
   await em.flush();
-  return { appuser, demoAuthUser: { email: demoPersona.email, id: appuser.externalUserId, twoFactorEnabled: false }, tenant };
+  return {
+    appuser,
+    demoAuthUser: { email: demoPersona.email, id: appuser.externalUserId, twoFactorEnabled: false },
+    tenant,
+  };
 }
 
 describe('signing in to the demo', () => {
@@ -92,14 +110,47 @@ describe('signing in to the demo', () => {
     const result = await signInToDemo({ em, enabled: true, now: NOW, sessions: sessions.port });
 
     expect(result.status).toBe('signed-in');
-    expect(sessions.created).toEqual([{ expiresAt: new Date(NOW.getTime() + DEMO_SESSION_TTL_MS), userId: demoAuthUser.id }]);
+    expect(sessions.created).toEqual([
+      { expiresAt: new Date(NOW.getTime() + DEMO_SESSION_TTL_MS), userId: demoAuthUser.id },
+    ]);
     expect(sessions.cleaned).toEqual([demoAuthUser.id]);
+  });
+
+  it.each([false, true])('accepts only a synthetic companion without a login (has login: %s)', async (hasLogin) => {
+    const em = db.em();
+    const { appuser, demoAuthUser, tenant } = await seedDemo(em);
+    const companion = em.create(
+      Appuser,
+      {
+        accountType: AppuserAccountType.DEMO,
+        currencyKey: appuser.currencyKey,
+        emailAddress: demoCompanion.email,
+        externalUserId: demoCompanion.externalUserId,
+        firstName: demoCompanion.firstName,
+      },
+      { partial: true },
+    );
+    em.create(
+      AppuserTenant,
+      { appuserKey: companion, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: tenant },
+      { partial: true },
+    );
+    await em.flush();
+    const sessions = fakeSessions([
+      demoAuthUser,
+      ...(hasLogin ? [{ email: demoCompanion.email, id: demoCompanion.externalUserId, twoFactorEnabled: false }] : []),
+    ]);
+    const result = await signInToDemo({ em, enabled: true, now: NOW, sessions: sessions.port });
+    expect(result.status).toBe(hasLogin ? 'unavailable' : 'signed-in');
+    expect(sessions.created).toHaveLength(hasLogin ? 0 : 1);
   });
 
   it('signs in nobody when the only account is a regular one', async () => {
     const em = db.em();
     const { appuser } = await seedHousehold(em);
-    const sessions = fakeSessions([{ email: appuser.emailAddress, id: appuser.externalUserId, twoFactorEnabled: false }]);
+    const sessions = fakeSessions([
+      { email: appuser.emailAddress, id: appuser.externalUserId, twoFactorEnabled: false },
+    ]);
 
     const result = await signInToDemo({ em, enabled: true, now: NOW, sessions: sessions.port });
 
@@ -111,7 +162,9 @@ describe('signing in to the demo', () => {
     const em = db.em();
     const { appuser: regular } = await seedHousehold(em);
     await seedDemo(em, { externalUserId: regular.externalUserId });
-    const sessions = fakeSessions([{ email: regular.emailAddress, id: regular.externalUserId, twoFactorEnabled: false }]);
+    const sessions = fakeSessions([
+      { email: regular.emailAddress, id: regular.externalUserId, twoFactorEnabled: false },
+    ]);
 
     const result = await signInToDemo({ em, enabled: true, now: NOW, sessions: sessions.port });
 
@@ -135,7 +188,9 @@ describe('signing in to the demo', () => {
     const { appuser } = await seedHousehold(em);
     appuser.accountType = AppuserAccountType.DEMO;
     await em.flush();
-    const sessions = fakeSessions([{ email: appuser.emailAddress, id: appuser.externalUserId, twoFactorEnabled: false }]);
+    const sessions = fakeSessions([
+      { email: appuser.emailAddress, id: appuser.externalUserId, twoFactorEnabled: false },
+    ]);
 
     const result = await signInToDemo({ em, enabled: true, now: NOW, sessions: sessions.port });
 
@@ -180,7 +235,11 @@ describe('signing in to the demo', () => {
     const em = db.em();
     const { demoAuthUser, tenant } = await seedDemo(em);
     const { appuser: regular } = await seedHousehold(em);
-    em.create(AppuserTenant, { appuserKey: regular, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: tenant }, { partial: true });
+    em.create(
+      AppuserTenant,
+      { appuserKey: regular, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: tenant },
+      { partial: true },
+    );
     await em.flush();
     const sessions = fakeSessions([demoAuthUser]);
 
@@ -194,7 +253,11 @@ describe('signing in to the demo', () => {
     const em = db.em();
     const { appuser, demoAuthUser } = await seedDemo(em);
     const household = await seedHousehold(em);
-    em.create(AppuserTenant, { appuserKey: appuser, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: household.tenant }, { partial: true });
+    em.create(
+      AppuserTenant,
+      { appuserKey: appuser, recordActive: true, role: HouseholdRole.MEMBER, tenantKey: household.tenant },
+      { partial: true },
+    );
     await em.flush();
     const sessions = fakeSessions([demoAuthUser]);
 
@@ -207,12 +270,16 @@ describe('signing in to the demo', () => {
   it('refuses when there are two demo households', async () => {
     const em = db.em();
     const { appuser, demoAuthUser } = await seedDemo(em);
-    em.create(Tenant, {
-      name: demoPersona.householdName,
-      ownerAppuserKey: appuser,
-      tenantType: TenantType.DEMO,
-      tentantStatusKey: em.create(TenantStatus, { description: 'second' }, { partial: true }),
-    }, { partial: true });
+    em.create(
+      Tenant,
+      {
+        name: demoPersona.householdName,
+        ownerAppuserKey: appuser,
+        tenantType: TenantType.DEMO,
+        tentantStatusKey: em.create(TenantStatus, { description: 'second' }, { partial: true }),
+      },
+      { partial: true },
+    );
     await em.flush();
     const sessions = fakeSessions([demoAuthUser]);
 

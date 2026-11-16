@@ -189,6 +189,13 @@
       "member-in-use": "Esta persona tiene gastos compartidos o liquidaciones en el grupo, así que no se puede quitar.",
       "not-empty": "Este grupo tiene gastos compartidos o liquidaciones, así que no se puede eliminar. Archívalo en su lugar.",
       "account-read-only": "Puedes ver la cuenta de esta transacción, pero no cambiarla."
+    },
+    "chooseExpense": {
+      "action": "Añadir gasto compartido",
+      "title": "Elegir una transacción",
+      "description": "Elige un gasto contabilizado y decide quién pagó y cómo repartirlo.",
+      "empty": "No hay gastos aptos en esta página. Prueba a cargar transacciones anteriores.",
+      "more": "Cargar transacciones anteriores"
     }
   }
 }

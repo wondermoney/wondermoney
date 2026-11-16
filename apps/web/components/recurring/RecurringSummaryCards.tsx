@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { type ReactNode, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { RecurringSummary } from "@/lib/api/recurring/useRecurringSummary";
@@ -60,7 +61,7 @@ function AmountLine({
   return value === null ? (
     <span className="text-muted-foreground">—</span>
   ) : (
-    <span className="font-mono text-2xl leading-none font-semibold tracking-tight tabular-nums">
+    <span className="font-mono text-lg leading-none font-semibold tracking-tight tabular-nums sm:text-2xl">
       <span className="sr-only">
         {formatAccessibleMoney(value, currencyCode)}
       </span>
@@ -90,7 +91,7 @@ function AmountRange({
       ? formatAccessibleMoney(lower, currencyCode)
       : `${formatAccessibleMoney(lower, currencyCode)} – ${formatAccessibleMoney(upper, currencyCode)}`;
   return (
-    <span className="font-mono text-2xl leading-none font-semibold tracking-tight whitespace-nowrap tabular-nums">
+    <span className="font-mono text-lg leading-none font-semibold tracking-tight whitespace-nowrap tabular-nums sm:text-2xl">
       <span className="sr-only">{accessibleLabel}</span>
       <span aria-hidden="true">
         {lower === upper
@@ -107,23 +108,33 @@ function SummaryCard({
   hint,
   onClick,
   actionLabel,
+  className,
 }: {
   label: ReactNode;
   value: ReactNode;
+  className?: string;
   hint?: ReactNode;
   onClick?: () => void;
   actionLabel?: string;
 }) {
   const content = (
-    <div className="flex min-h-24 flex-col gap-2 p-6 text-left">
+    <div className="flex min-w-0 flex-col gap-2 p-4 text-left sm:p-6">
       <div className="text-muted-foreground text-sm">{label}</div>
       {value}
-      {hint ? <div className="text-muted-foreground text-xs">{hint}</div> : null}
+      {hint ? (
+        <div className="text-muted-foreground text-xs">{hint}</div>
+      ) : null}
     </div>
   );
 
   return (
-    <Card className={cn(onClick && "focus-within:ring-ring transition-colors hover:bg-muted/30 focus-within:ring-2")}>
+    <Card
+      className={cn(
+        className,
+        onClick &&
+          "focus-within:ring-ring hover:bg-muted/30 transition-colors focus-within:ring-2",
+      )}
+    >
       {onClick ? (
         <button
           type="button"
@@ -148,6 +159,8 @@ export function RecurringSummaryCards({
   className,
   onReviewClick,
 }: RecurringSummaryCardsProps) {
+  const t = useTranslations();
+  const [expanded, setExpanded] = useState(false);
   const monthlyMinTotal = isFiniteNumber(summary?.monthlyMinTotal)
     ? summary.monthlyMinTotal
     : null;
@@ -170,8 +183,7 @@ export function RecurringSummaryCards({
     ? summary!.needsReviewCount
     : null;
   const currencyTotals = summary?.currencyTotals as
-    | SummaryCurrencyTotals
-    | undefined;
+    SummaryCurrencyTotals | undefined;
   const currencySummaryEntries = currencyTotals
     ? Object.entries(currencyTotals).flatMap(([code, value]) => {
         if (!isCurrencyCode(code)) return [];
@@ -189,16 +201,22 @@ export function RecurringSummaryCards({
 
   if (currencySummaryEntries.length > 1) {
     return (
-      <div
-        className={cn("grid gap-4 md:grid-cols-2 2xl:grid-cols-4", className)}
-      >
+      <div className={cn("grid grid-cols-2 gap-4 2xl:grid-cols-4", className)}>
         {currencySummaryEntries.map(({ code, totals }) => (
           <Card key={code}>
             <CardContent className="flex flex-col gap-2 p-6">
               <div className="text-muted-foreground text-sm">{code}</div>
               <AmountRange
-                min={isFiniteNumber(totals.monthlyMinTotal) ? totals.monthlyMinTotal : null}
-                max={isFiniteNumber(totals.monthlyMaxTotal) ? totals.monthlyMaxTotal : null}
+                min={
+                  isFiniteNumber(totals.monthlyMinTotal)
+                    ? totals.monthlyMinTotal
+                    : null
+                }
+                max={
+                  isFiniteNumber(totals.monthlyMaxTotal)
+                    ? totals.monthlyMaxTotal
+                    : null
+                }
                 currencyCode={code}
               />
             </CardContent>
@@ -209,30 +227,72 @@ export function RecurringSummaryCards({
   }
 
   return (
-    <div className={cn("grid gap-4 md:grid-cols-2 2xl:grid-cols-4", className)}>
-      <SummaryCard
-        label={labels.monthlyEstimate}
-        value={<AmountRange min={monthlyMinTotal} max={monthlyMaxTotal} currencyCode={currencyCode} />}
-        hint={labels.estimateHint}
-      />
-      <SummaryCard
-        label={labels.subscriptions}
-        value={<AmountRange min={subscriptionMinTotal} max={subscriptionMaxTotal} currencyCode={currencyCode} />}
-      />
-      <SummaryCard
-        label={labels.bills}
-        value={<AmountRange min={billMinTotal} max={billMaxTotal} currencyCode={currencyCode} />}
-      />
-      <SummaryCard
-        label={labels.needsReview}
-        value={
-          <div className="font-mono text-2xl leading-none font-semibold tracking-tight tabular-nums">
-            {needsReviewCount === null ? <span className="text-muted-foreground">—</span> : new Intl.NumberFormat(locale).format(needsReviewCount)}
-          </div>
-        }
-        onClick={needsReviewCount && needsReviewCount > 0 ? onReviewClick : undefined}
-        actionLabel={labels.reviewActionLabel}
-      />
+    <div className="space-y-2">
+      <div className={cn("grid grid-cols-2 gap-4 2xl:grid-cols-4", className)}>
+        <SummaryCard
+          label={labels.monthlyEstimate}
+          value={
+            <AmountRange
+              min={monthlyMinTotal}
+              max={monthlyMaxTotal}
+              currencyCode={currencyCode}
+            />
+          }
+          hint={
+            labels.estimateHint ? (
+              <span className={expanded ? undefined : "hidden sm:inline"}>
+                {labels.estimateHint}
+              </span>
+            ) : undefined
+          }
+        />
+        <SummaryCard
+          className={expanded ? undefined : "hidden sm:block"}
+          label={labels.subscriptions}
+          value={
+            <AmountRange
+              min={subscriptionMinTotal}
+              max={subscriptionMaxTotal}
+              currencyCode={currencyCode}
+            />
+          }
+        />
+        <SummaryCard
+          className={expanded ? undefined : "hidden sm:block"}
+          label={labels.bills}
+          value={
+            <AmountRange
+              min={billMinTotal}
+              max={billMaxTotal}
+              currencyCode={currencyCode}
+            />
+          }
+        />
+        <SummaryCard
+          label={labels.needsReview}
+          value={
+            <div className="font-mono text-lg leading-none font-semibold tracking-tight tabular-nums sm:text-2xl">
+              {needsReviewCount === null ? (
+                <span className="text-muted-foreground">—</span>
+              ) : (
+                new Intl.NumberFormat(locale).format(needsReviewCount)
+              )}
+            </div>
+          }
+          onClick={
+            needsReviewCount && needsReviewCount > 0 ? onReviewClick : undefined
+          }
+          actionLabel={labels.reviewActionLabel}
+        />
+      </div>
+      <button
+        type="button"
+        className="text-muted-foreground focus-visible:ring-ring min-h-11 rounded-md text-sm underline underline-offset-4 focus-visible:ring-2 sm:hidden"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((value) => !value)}
+      >
+        {t(expanded ? "summary-less-details" : "summary-more-details")}
+      </button>
     </div>
   );
 }

@@ -2396,10 +2396,10 @@
       "detail": "No máximo um email por extrato."
     },
     "marketingOptOut": {
-      "title": "Cancelar subscrição de todos os emails de marketing",
-      "description": "Desativa todos os emails opcionais acima de uma só vez. Podes reativá-los a qualquer momento.",
-      "toggleOnLabel": "Cancelar subscrição de todos os emails de marketing",
-      "toggleOffLabel": "Voltar a subscrever emails de marketing"
+      "title": "Pausar todos os emails opcionais",
+      "description": "Pausa os emails opcionais abaixo, incluindo notificações de orçamento, resumos e ligações bancárias. As mensagens de início de sessão e segurança continuam a ser enviadas. Podes retomar os emails opcionais a qualquer momento.",
+      "toggleOnLabel": "Pausar todos os emails opcionais",
+      "toggleOffLabel": "Retomar emails opcionais"
     },
     "dataContext": "Os emails usam a informação de transações atualmente disponível. Podes alterar estas opções a qualquer momento.",
     "status": {
@@ -2409,7 +2409,7 @@
     },
     "pauseReason": {
       "delivery": "Não conseguimos enviar estes emails para o endereço da tua conta. Confirma que é um endereço de email válido.",
-      "marketingOptOut": "Esta preferência está ativa, mas cancelaste a subscrição de todos os emails de marketing.",
+      "marketingOptOut": "Esta preferência está ativa, mas todos os emails opcionais estão pausados.",
       "generic": "Esta preferência está ativa, mas a entrega por email encontra-se em pausa."
     },
     "toggleOnLabel": "Ativar {name}",
@@ -2471,7 +2471,7 @@
     "detectError": "Não foi possível procurar pagamentos recorrentes.",
     "lastChecked": "Última verificação {time}",
     "emptyTitle": "Ainda não foram detetados pagamentos recorrentes",
-    "emptyDescription": "Procura agora nas transações recentes. As próximas sincronizações verificarão automaticamente.",
+    "emptyDescription": "Os pagamentos recorrentes são detetados automaticamente quando adicionas, importas ou sincronizas transações. Os novos resultados aparecem aqui.",
     "emptyScannedDescription": "Verificámos as tuas transações recentes e não encontrámos pagamentos recorrentes. Novos resultados vão aparecer aqui automaticamente.",
     "upcoming": "Próximos",
     "allRecurringPayments": "Todos os pagamentos recorrentes",
@@ -2637,7 +2637,9 @@
     "banner-label": "Conta de demonstração",
     "banner-message": "Esta é uma demonstração partilhada. Os dados são só de leitura e repõem-se todos os dias.",
     "banner-sign-up": "Criar a tua conta",
-    "banner-self-host": "Alojar a tua própria instância"
+    "banner-self-host": "Alojar a tua própria instância",
+    "banner-compact": "Demonstração só de leitura",
+    "banner-sign-up-compact": "Criar conta"
   },
   "pivotBanner": {
     "message": "O WonderMoney é agora gratuito e de código aberto. As ligações bancárias usam a tua própria chave da Enable Banking.",
@@ -2887,7 +2889,8 @@
     "incomplete-label": "Nem todos os valores puderam ser convertidos",
     "total-leaves-out": "Este total deixa de fora {count, plural, one {# conta, empréstimo ou portefólio} other {# contas, empréstimos ou portefólios}} que não foi possível avaliar em {currency}.",
     "missing-rates": "Ainda não há taxa de câmbio para {currencies}.",
-    "add-rate": "Adiciona uma taxa de câmbio"
+    "add-rate": "Adiciona uma taxa de câmbio",
+    "automatic-rates": "As taxas de câmbio são atualizadas automaticamente nos dias úteis. Algumas moedas ou datas podem não estar abrangidas."
   },
   "bank-sync": {
     "errors": {
@@ -3219,5 +3222,21 @@
     "save-error": "Não foi possível guardar a titularidade. Tenta novamente.",
     "save-invalid": "As partes têm de somar 100%."
   },
-  "portfolio-metric-sharpe-basis": "Rendimento e volatilidade de todo o histórico; taxa de referência fixa de 4,5% para todas as moedas."
+  "portfolio-metric-sharpe-basis": "Rendimento e volatilidade de todo o histórico; taxa de referência fixa de 4,5% para todas as moedas.",
+  "file-uploader-choose-file": "Escolher um ficheiro",
+  "budgetWizardProgress": {
+    "step": "Passo {current} de {total} · {name}",
+    "steps": {
+      "visibility": "Visibilidade",
+      "household": "Agregado familiar",
+      "dependents": "Dependentes",
+      "income": "Rendimentos",
+      "categories": "Categorias"
+    },
+    "saveNote": "O teu orçamento é guardado quando continuas após os rendimentos. Os passos anteriores ficam disponíveis apenas enquanto esta página estiver aberta."
+  },
+  "summary-more-details": "Mais detalhes",
+  "summary-less-details": "Menos detalhes",
+  "activation-setup-hint": "Concluir configuração",
+  "financial-markets-example-companies": "Empresas para explorar"
 }

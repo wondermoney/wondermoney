@@ -362,7 +362,7 @@ export default function AccountsTransactionsClient({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 sm:gap-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
@@ -378,9 +378,11 @@ export default function AccountsTransactionsClient({
               exactly like a quiet spending day. */}
           <AccountsFreshness accounts={accountsData?.accounts} />
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
           {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
-          <MemberFilterControl />
+          <div className="col-span-2">
+            <MemberFilterControl />
+          </div>
           {editableAccounts.length > 0 ? (
             <>
               <AccountTransactionImportModal

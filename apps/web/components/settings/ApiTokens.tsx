@@ -40,7 +40,10 @@ import { Heading, Text } from "../ui/Typography";
 const EXPIRY_OPTIONS = [30, 90, 365] as const;
 type ExpiryDays = (typeof EXPIRY_OPTIONS)[number];
 
-function scopeLabel(t: ReturnType<typeof useTranslations>, scope: ApiTokenScope) {
+function scopeLabel(
+  t: ReturnType<typeof useTranslations>,
+  scope: ApiTokenScope,
+) {
   switch (scope) {
     case "calendar:read":
       return t("scope-calendar-read");
@@ -159,7 +162,11 @@ export default function ApiTokens() {
                   className="font-mono"
                   onFocus={(event) => event.currentTarget.select()}
                 />
-                <Button type="button" variant="default" onClick={() => void onCopy()}>
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={() => void onCopy()}
+                >
                   {t("copy")}
                 </Button>
               </div>
@@ -187,37 +194,65 @@ export default function ApiTokens() {
 
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-1 text-sm font-medium">{t("scopes")}</legend>
-            <div className="flex items-center gap-2">
+            <div className="flex min-h-11 items-center gap-3">
               <Checkbox
                 id={`${id}-read`}
                 checked={scopes.includes("read")}
-                onCheckedChange={(checked) => toggleScope("read", checked === true)}
+                onCheckedChange={(checked) =>
+                  toggleScope("read", checked === true)
+                }
               />
-              <Label htmlFor={`${id}-read`}>{t("scope-read")}</Label>
+              <Label
+                className="flex min-h-11 flex-1 cursor-pointer items-center"
+                htmlFor={`${id}-read`}
+              >
+                {t("scope-read")}
+              </Label>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex min-h-11 items-center gap-3">
               <Checkbox
                 id={`${id}-write`}
                 checked={scopes.includes("write")}
-                onCheckedChange={(checked) => toggleScope("write", checked === true)}
+                onCheckedChange={(checked) =>
+                  toggleScope("write", checked === true)
+                }
               />
-              <Label htmlFor={`${id}-write`}>{t("scope-write")}</Label>
+              <Label
+                className="flex min-h-11 flex-1 cursor-pointer items-center"
+                htmlFor={`${id}-write`}
+              >
+                {t("scope-write")}
+              </Label>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex min-h-11 items-center gap-3">
               <Checkbox
                 id={`${id}-mcp`}
                 checked={scopes.includes("mcp:read")}
-                onCheckedChange={(checked) => toggleScope("mcp:read", checked === true)}
+                onCheckedChange={(checked) =>
+                  toggleScope("mcp:read", checked === true)
+                }
               />
-              <Label htmlFor={`${id}-mcp`}>{t("scope-mcp-read")}</Label>
+              <Label
+                className="flex min-h-11 flex-1 cursor-pointer items-center"
+                htmlFor={`${id}-mcp`}
+              >
+                {t("scope-mcp-read")}
+              </Label>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex min-h-11 items-center gap-3">
               <Checkbox
                 id={`${id}-mcp-propose`}
                 checked={scopes.includes("mcp:propose")}
-                onCheckedChange={(checked) => toggleScope("mcp:propose", checked === true)}
+                onCheckedChange={(checked) =>
+                  toggleScope("mcp:propose", checked === true)
+                }
               />
-              <Label htmlFor={`${id}-mcp-propose`}>{t("scope-mcp-propose")}</Label>
+              <Label
+                className="flex min-h-11 flex-1 cursor-pointer items-center"
+                htmlFor={`${id}-mcp-propose`}
+              >
+                {t("scope-mcp-propose")}
+              </Label>
             </div>
             <Text variant="mutedText">{t("scope-write-hint")}</Text>
             <Text variant="mutedText">{t("scope-mcp-read-hint")}</Text>
@@ -228,7 +263,9 @@ export default function ApiTokens() {
             <Label htmlFor={`${id}-expiry`}>{t("expiry")}</Label>
             <Select
               value={String(expiresInDays)}
-              onValueChange={(value) => setExpiresInDays(Number(value) as ExpiryDays)}
+              onValueChange={(value) =>
+                setExpiresInDays(Number(value) as ExpiryDays)
+              }
             >
               <SelectTrigger id={`${id}-expiry`} className="w-full sm:w-56">
                 <SelectValue />
@@ -288,25 +325,41 @@ export default function ApiTokens() {
               {tokens.map((token) => {
                 const revoked = token.revokedAt !== null;
                 return (
-                  <li key={token.id} className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between">
+                  <li
+                    key={token.id}
+                    className="flex flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between"
+                  >
                     <div className="flex flex-col gap-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <Text className="font-medium">{token.name}</Text>
-                        <code className="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">{token.prefix}…</code>
+                        <code className="bg-muted rounded px-1.5 py-0.5 font-mono text-xs">
+                          {token.prefix}…
+                        </code>
                         {revoked ? (
-                          <span className="text-destructive-text text-xs">{t("status-revoked")}</span>
+                          <span className="text-destructive-text text-xs">
+                            {t("status-revoked")}
+                          </span>
                         ) : null}
                       </div>
                       <Text variant="mutedText">
-                        {token.scopes.map((scope) => scopeLabel(t, scope)).join(" · ")}
+                        {token.scopes
+                          .map((scope) => scopeLabel(t, scope))
+                          .join(" · ")}
                       </Text>
                       <Text variant="mutedText">
                         {t("expires-on", {
-                          date: formatShortDateForLocale(token.expiresAt, locale),
+                          date: formatShortDateForLocale(
+                            token.expiresAt,
+                            locale,
+                          ),
                         })}
                         {token.lastUsedAt
                           ? ` · ${t("last-used", {
-                              date: formatShortDateForLocale(token.lastUsedAt, locale, { withTime: true }),
+                              date: formatShortDateForLocale(
+                                token.lastUsedAt,
+                                locale,
+                                { withTime: true },
+                              ),
                             })}`
                           : ` · ${t("never-used")}`}
                       </Text>
@@ -329,7 +382,10 @@ export default function ApiTokens() {
         </div>
       </section>
 
-      <AlertDialog open={revoking !== null} onOpenChange={(open) => !open && setRevoking(null)}>
+      <AlertDialog
+        open={revoking !== null}
+        onOpenChange={(open) => !open && setRevoking(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("revoke-title")}</AlertDialogTitle>

@@ -177,6 +177,14 @@ export function currentChild(
   section: NavigationItem,
   pathname: string,
 ): NavigationChild | undefined {
+  if (
+    (section.id === "accounts" || section.id === "portfolio") &&
+    new RegExp(`^/${section.id}/[^/]+/transactions(?:/|$)`).test(pathname)
+  ) {
+    return section.children?.find(
+      (child) => child.id === `${section.id}.transactions`,
+    );
+  }
   return [...(section.children ?? [])]
     .filter((child) => isWithin(pathname, child.href))
     .sort((a, b) => b.href.length - a.href.length)[0];

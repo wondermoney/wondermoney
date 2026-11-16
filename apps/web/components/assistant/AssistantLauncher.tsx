@@ -36,7 +36,7 @@ export default function AssistantLauncher() {
         <Button
           type="button"
           variant="secondary"
-          className="border-border/70 bg-background/95 fixed right-4 bottom-24 z-40 gap-2 rounded-full px-4 py-3 shadow-lg backdrop-blur md:right-6 md:bottom-6"
+          className="border-border/70 bg-background/95 fixed right-4 bottom-24 z-40 hidden gap-2 rounded-full px-4 py-3 shadow-lg backdrop-blur md:right-6 md:bottom-6 lg:inline-flex"
           onClick={() => openAssistant()}
           data-testid="assistant-launcher"
         >

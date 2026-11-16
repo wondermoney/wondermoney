@@ -73,7 +73,10 @@ test("the balance sheet says what it leaves out for want of an exchange rate", (
     /leaves out 2 accounts, loans or portfolios/,
   );
   assert.match(note.textContent ?? "", /JPY and USD/);
-  assert.ok(screen.getByRole("link", { name: "Add an exchange rate" }));
+  assert.equal(
+    screen.queryByRole("link", { name: "Add an exchange rate" }),
+    null,
+  );
 });
 
 test("a complete balance sheet has no note", () => {

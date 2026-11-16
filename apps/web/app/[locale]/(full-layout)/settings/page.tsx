@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PageShell } from "@/components/layout/PageShell";
@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
@@ -29,7 +28,9 @@ const ApiTokens = dynamic(() => import("@/components/settings/ApiTokens"));
 const ConnectAiClient = dynamic(
   () => import("@/components/settings/ConnectAiClient"),
 );
-const CalendarFeed = dynamic(() => import("@/components/settings/CalendarFeed"));
+const CalendarFeed = dynamic(
+  () => import("@/components/settings/CalendarFeed"),
+);
 const Privacy = dynamic(() => import("@/components/settings/Privacy"));
 const Connections = dynamic(
   () => import("@/components/settings/Connections/Connections"),
@@ -44,7 +45,6 @@ const UserCategoriesTable = dynamic(
 );
 const Tags = dynamic(() => import("@/components/settings/Tags"));
 const Rules = dynamic(() => import("@/components/settings/Rules"));
-const Currencies = dynamic(() => import("@/components/settings/Currencies"));
 const Household = dynamic(() => import("@/components/settings/Household"));
 const Notifications = dynamic(
   () => import("@/components/settings/Notifications"),
@@ -83,11 +83,6 @@ const tabs = [
   },
   { name: "tags", label: "navigation.tags", Component: Tags },
   { name: "rules", label: "navigation.rules", Component: Rules },
-  {
-    name: "currencies",
-    label: "navigation.currencies",
-    Component: Currencies,
-  },
   { name: "household", label: "navigation.household", Component: Household },
   {
     name: "notifications",
@@ -96,32 +91,22 @@ const tabs = [
   },
 ];
 
-/**
- * Grouping for the mobile select. Ten flat entries in a dropdown
- * is reachable but not scannable — the grouping is by what the person is doing,
- * matching how the sidebar rail already splits Day-to-day / Investments /
- * Planning rather than by which service backs each screen.
- *
- * Desktop tabs are deliberately left flat: they fit at 1280px in English and
- * a working surface was not worth restructuring. Other locales can still run
- * wider than the container, so the desktop bar also scrolls with a fade
- * affordance — see the comment on the desktop tab strip below.
- */
+/** Settings destinations grouped by task, at every viewport width. */
 const TAB_GROUPS: readonly { label: string; tabs: readonly string[] }[] = [
   {
     label: "navigation.settings-group-account",
-    tabs: ["profile", "security", "api-tokens", "calendar-feed", "privacy", "household"],
+    tabs: [
+      "profile",
+      "security",
+      "api-tokens",
+      "calendar-feed",
+      "privacy",
+      "household",
+    ],
   },
   {
     label: "navigation.settings-group-money",
-    tabs: [
-      "bank-provider",
-      "connections",
-      "categories",
-      "tags",
-      "rules",
-      "currencies",
-    ],
+    tabs: ["bank-provider", "connections", "categories", "tags", "rules"],
   },
   {
     label: "navigation.settings-group-preferences",
@@ -163,37 +148,6 @@ const SettingsPage = () => {
   const selectedTab = selectedTabConfig?.name ?? "profile";
   const SelectedComponent = selectedTabConfig?.Component;
 
-  // The desktop tab bar fits flat at `lg` in English but not in pt-PT: longer
-  // labels ("Agregado familiar", "Notificações") push the strip past its
-  // container with no scrollbar and no cue, so the last tab clips mid-word.
-  // Rather than hardcode a locale-specific breakpoint, the strip scrolls
-  // and reports its own overflow state so a fade only renders on the edge
-  // that actually has more content — mirrors the scroll-affordance pattern
-  // in components/ui/Table/Table.tsx.
-  const tabListRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const updateScrollAffordance = useCallback(() => {
-    const el = tabListRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const el = tabListRef.current;
-    if (!el) return;
-    updateScrollAffordance();
-    el.addEventListener("scroll", updateScrollAffordance, { passive: true });
-    const resizeObserver = new ResizeObserver(updateScrollAffordance);
-    resizeObserver.observe(el);
-    return () => {
-      el.removeEventListener("scroll", updateScrollAffordance);
-      resizeObserver.disconnect();
-    };
-  }, [updateScrollAffordance]);
-
   // Get a new searchParams string by merging the current searchParams with a provided key/value
   // pair
   const createQueryString = useCallback(
@@ -217,16 +171,8 @@ const SettingsPage = () => {
           the first tab panel's own heading. */}
       <PageHeader title={t("navigation.settings")} />
       <BankConnectionReturn />
-      <Tabs value={selectedTab} onValueChange={handleTabChange}>
-        {/* The settings tabs do not fit a horizontal bar below `lg`.
-            `overflow-x-auto` alone makes them reachable but not discoverable: at
-            360px, four are visible and the rest run off the edge (including
-            Household and Notifications) with no fade, no gradient and
-            a zero-height scrollbar, so the right edge reads as the end of the
-            list. Still three short at 768px, hence the `lg` breakpoint rather
-            than `sm`. A select names the current section and shows all of them
-            in one tap. Both controls drive the same `?tab=` param. */}
-        <div className="lg:hidden">
+      <div>
+        <div className="w-full sm:max-w-sm">
           <label className="sr-only" htmlFor="settings-section">
             {t("navigation.settings")}
           </label>
@@ -253,52 +199,19 @@ const SettingsPage = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="relative hidden lg:block">
-          {/* Direction A: underlined tabs on the canvas, the same treatment as
-              the section tabs under the top bar, not a pill strip. */}
-          <TabsList
-            ref={tabListRef}
-            className="border-border h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b bg-transparent p-0"
-          >
-            {visibleTabs.map((tab) => (
-              <TabsTrigger
-                key={tab.name}
-                value={tab.name}
-                className="h-11 rounded-none px-0 data-[state=active]:bg-transparent data-[state=active]:shadow-[inset_0_-2px_0_var(--primary)] data-[state=inactive]:hover:bg-transparent"
-              >
-                {t(tab.label)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {canScrollLeft && (
-            <div
-              aria-hidden="true"
-              className="from-background pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-linear-to-r to-transparent"
-            />
-          )}
-          {canScrollRight && (
-            <div
-              aria-hidden="true"
-              className="from-background pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l to-transparent"
-            />
-          )}
-        </div>
-        {visibleTabs.map((tab) => (
-          <TabsContent key={tab.name} value={tab.name} className="pt-6">
-            {tab.name === selectedTab ? (
-              tab.name === "api-tokens" ? (
-                <div className="flex flex-col gap-10">
-                  <SelectedComponent />
-                  {/* The MCP panel lives beside API tokens: it mints a token of its own. */}
-                  <ConnectAiClient />
-                </div>
-              ) : (
+        <section className="pt-6" aria-label={t(selectedTabConfig.label)}>
+          {SelectedComponent ? (
+            selectedTab === "api-tokens" ? (
+              <div className="flex flex-col gap-10">
                 <SelectedComponent />
-              )
-            ) : null}
-          </TabsContent>
-        ))}
-      </Tabs>
+                <ConnectAiClient />
+              </div>
+            ) : (
+              <SelectedComponent />
+            )
+          ) : null}
+        </section>
+      </div>
     </PageShell>
   );
 };

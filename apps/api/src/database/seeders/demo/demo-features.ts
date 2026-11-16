@@ -1,4 +1,4 @@
-import type { EntityData, EntityManager, EntityName, FilterQuery } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/core';
 import { addMonths, subMonths } from 'date-fns';
 
 import { Account } from '@entity/Account';
@@ -26,6 +26,8 @@ import { normalizeRecurringMerchant } from '@service/recurring/recurring-detecti
 import { Recurrency } from '@utils/budget';
 
 import { demoBudget } from './demo-budget';
+import { upsertDemoRow as upsert } from './demo-upsert';
+import { upsertDemoWorkflows } from './demo-workflows';
 import { demoAccounts } from './demo-fixtures';
 import { demoLoans } from './demo-loans';
 import { demoTransactionPatterns } from './demo-transactions';
@@ -246,7 +248,7 @@ export async function upsertDemoFeatures(
     );
   }
   // The opening statement must precede the rolling demo repayment dates.
-  mortgage.openingBalanceDate = subMonths(asOfDate, 4);
+  mortgage.openingBalanceDate = subMonths(asOfDate, 18);
 
   for (const symbol of ['AAPL.US', 'NVDA.US', 'GOOGL.US']) {
     await upsert(
@@ -256,23 +258,10 @@ export async function upsertDemoFeatures(
       { appuserKey: appuser, symbol, tenantKey: tenant },
     );
   }
+  await upsertDemoWorkflows(em, appuser, tenant, asOfDate, goal);
   const accounts = await em.find(Account, { accountOwnerAppuserKey: appuser, tenantKey: tenant });
   for (const account of accounts) {
     account.refreshedAt = asOfDate;
     account.transactionsRefreshedAt = asOfDate;
   }
-}
-
-async function upsert<T extends object>(
-  em: EntityManager,
-  entity: EntityName<T>,
-  criteria: FilterQuery<NoInfer<T>>,
-  data: EntityData<NoInfer<T>>,
-): Promise<T> {
-  const existing = await em.findOne<T>(entity, criteria);
-  if (existing) {
-    Object.assign(existing, data);
-    return existing;
-  }
-  return em.create(entity, data, { partial: true });
 }

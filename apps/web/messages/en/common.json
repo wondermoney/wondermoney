@@ -2396,10 +2396,10 @@
       "detail": "At most one email per statement."
     },
     "marketingOptOut": {
-      "title": "Unsubscribe from all marketing emails",
-      "description": "Turn off every optional email above at once. You can turn it back on at any time.",
-      "toggleOnLabel": "Unsubscribe from all marketing emails",
-      "toggleOffLabel": "Resubscribe to marketing emails"
+      "title": "Pause all optional emails",
+      "description": "Pause the optional emails listed below, including budget, summary and bank-connection notifications. Login and security messages are still sent. You can resume optional emails at any time.",
+      "toggleOnLabel": "Pause all optional emails",
+      "toggleOffLabel": "Resume optional emails"
     },
     "dataContext": "Emails use transaction information currently available. You can change these choices at any time.",
     "status": {
@@ -2409,7 +2409,7 @@
     },
     "pauseReason": {
       "delivery": "We can't send these emails to your account's address. Check that it's a valid email address.",
-      "marketingOptOut": "This preference is on, but you're unsubscribed from all marketing emails.",
+      "marketingOptOut": "This preference is on, but all optional emails are paused.",
       "generic": "This preference is on, but email delivery is currently paused."
     },
     "toggleOnLabel": "Turn on {name}",
@@ -2471,7 +2471,7 @@
     "detectError": "Could not scan recurring payments.",
     "lastChecked": "Last checked {time}",
     "emptyTitle": "No recurring payments detected yet",
-    "emptyDescription": "Scan your recent transactions now. Future account syncs will check automatically.",
+    "emptyDescription": "Recurring payments are detected automatically when transactions are added, imported or synced. New matches will appear here.",
     "emptyScannedDescription": "We checked your recent transactions and didn't find any recurring payments. New matches will appear here automatically.",
     "upcoming": "Upcoming",
     "allRecurringPayments": "All recurring payments",
@@ -2637,7 +2637,9 @@
     "banner-label": "Demo account",
     "banner-message": "This is a shared demo. Its data is read-only and resets every day.",
     "banner-sign-up": "Create your own account",
-    "banner-self-host": "Host your own"
+    "banner-self-host": "Host your own",
+    "banner-compact": "Read-only demo",
+    "banner-sign-up-compact": "Create account"
   },
   "pivotBanner": {
     "message": "WonderMoney is now free and open source. Bank connections use your own Enable Banking key.",
@@ -2887,7 +2889,8 @@
     "incomplete-label": "Not every amount could be converted",
     "total-leaves-out": "This total leaves out {count, plural, one {# account, loan or portfolio} other {# accounts, loans or portfolios}} that could not be valued in {currency}.",
     "missing-rates": "No exchange rate yet for {currencies}.",
-    "add-rate": "Add an exchange rate"
+    "add-rate": "Add an exchange rate",
+    "automatic-rates": "Exchange rates update automatically on working days. Some currencies or dates may not be covered."
   },
   "bank-sync": {
     "errors": {
@@ -3219,5 +3222,21 @@
     "save-error": "Ownership could not be saved. Try again.",
     "save-invalid": "The shares must add up to 100%."
   },
-  "portfolio-metric-sharpe-basis": "All-time yield and volatility; fixed 4.5% reference rate for every currency."
+  "portfolio-metric-sharpe-basis": "All-time yield and volatility; fixed 4.5% reference rate for every currency.",
+  "file-uploader-choose-file": "Choose a file",
+  "budgetWizardProgress": {
+    "step": "Step {current} of {total} · {name}",
+    "steps": {
+      "visibility": "Visibility",
+      "household": "Household",
+      "dependents": "Dependents",
+      "income": "Income",
+      "categories": "Categories"
+    },
+    "saveNote": "Your budget is saved when you continue from Income. Earlier steps are kept only while this page stays open."
+  },
+  "summary-more-details": "More details",
+  "summary-less-details": "Fewer details",
+  "activation-setup-hint": "Finish setup",
+  "financial-markets-example-companies": "Companies to explore"
 }

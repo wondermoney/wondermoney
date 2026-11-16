@@ -25,9 +25,15 @@ const state = vi.hoisted(() => ({
 vi.mock("@/lib/api/account/useCurrencies", () => ({
   default: () => ({
     data: {
-      currencies: [{ currencyKey: 1, code: "EUR", description: "Euro" }],
+      currencies: [
+        { currencyKey: 1, code: "CHF", description: "Swiss franc" },
+        { currencyKey: 151, code: "EUR", description: "Euro" },
+      ],
     },
   }),
+}));
+vi.mock("@/lib/api/net-worth/useNetWorth", () => ({
+  default: () => ({ data: { netWorth: { currencyCode: "EUR" } } }),
 }));
 vi.mock("@/lib/api/manual-asset/useManualAssets", () => ({
   default: () => ({ data: { assets: state.assets } }),
@@ -86,7 +92,7 @@ const soldFlat = manualAsset({
 });
 
 const mortgage: LoanDetail = {
-  currency: { code: "EUR", currencyKey: 1 },
+  currency: { code: "EUR", currencyKey: 151 },
   includeInNetWorth: true,
   loanKey: 5,
   name: "Home loan",
@@ -136,6 +142,7 @@ test("a new loan can be secured against an asset still held, and sends its key",
 
   await waitFor(() => assert.equal(state.create.mock.calls.length, 1));
   assert.equal(state.create.mock.calls[0][0].securedAssetKey, 7);
+  assert.equal(state.create.mock.calls[0][0].currencyKey, 151);
 });
 
 test("a new loan secured against nothing does not send the field", async () => {
@@ -202,4 +209,13 @@ test("the asset a loan is secured against stays offered once it is archived", as
     "Family home",
     "Sold flat",
   ]);
+});
+
+test("editing a loan keeps its currency when the household uses another one", async () => {
+  state.update.mockResolvedValue({});
+  const user = userEvent.setup();
+  renderForm({ ...mortgage, currency: { code: "CHF", currencyKey: 1 } });
+  await user.click(screen.getByRole("button", { name: m.actions.save }));
+  await waitFor(() => assert.equal(state.update.mock.calls.length, 1));
+  assert.equal(state.update.mock.calls[0][0].payload.currencyKey, 1);
 });
