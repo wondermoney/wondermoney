@@ -31,8 +31,10 @@ React Native behaviour, and keep Expo packages SDK 58-compatible.
 The Expo owner and the EAS project ID come from environment variables
 (`WONDERMONEY_EXPO_OWNER`, `WONDERMONEY_EAS_PROJECT_ID`), loaded locally from the gitignored
 `.env.local`; the App Store Connect API key lives on EAS. README.md, "EAS configuration",
-explains both. Never write those values, the App Store Connect app ID or the Apple team ID into
-`app.config.ts` or `eas.json`, and give them no defaults.
+explains both. Never write those values or the Apple team ID into `app.config.ts` or
+`eas.json`, and give them no defaults. The exception is the App Store Connect app ID
+(`submit.*.ios.ascAppId` in `eas.json`): it is public, and `eas submit` needs it to submit iOS
+builds non-interactively.
 
 ## Checks
 
