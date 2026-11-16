@@ -42,8 +42,14 @@ export default function Header({ locale }: Props) {
   const toolGroups = buildToolsHub(locale);
   const ctaUrl = useCtaUrl();
 
-  const trackToolClick = (tool: ToolsHubTool) =>
-    pushGtmEvent(toolsMenuClickEvent(tool));
+  const trackToolClick = (tool: ToolsHubTool, position: "header" | "drawer") =>
+    pushGtmEvent(toolsMenuClickEvent(tool, position));
+  // The short name, or the full title for a tool whose short name is still missing in this
+  // locale, so one missing key never fails every page (toolsCatalog.test.ts requires it).
+  const toolName = (tool: ToolsHubTool) =>
+    t(`tools.${tool.key}.shortName`, {
+      defaultValue: t(`tools.${tool.key}.title`),
+    });
 
   const featureItems: Array<{
     nameKey: string;
@@ -188,6 +194,19 @@ export default function Header({ locale }: Props) {
               className="absolute inset-x-6 top-full z-50 pt-1 lg:inset-x-8"
             >
               <div className="max-h-[calc(100vh-5rem)] overflow-y-auto rounded-card border border-border bg-card shadow-lg">
+                {/* The hub link sits at the top, where nothing fixed to the viewport's foot covers it. */}
+                <div className="flex items-center justify-between gap-x-6 border-b border-border px-6 py-3">
+                  <p className="text-sm font-medium text-foreground">
+                    {t("tools.hub.title")}
+                  </p>
+                  <a
+                    href={toolsHubHref}
+                    className="shrink-0 rounded-sm text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
+                    onClick={menus.close}
+                  >
+                    {t("header.toolsMenu.seeAll")}
+                  </a>
+                </div>
                 <div className="grid auto-cols-fr grid-flow-col gap-x-8 px-6 py-6">
                   {toolGroups.map((group) => (
                     <div key={group.id}>
@@ -207,14 +226,15 @@ export default function Header({ locale }: Props) {
                               href={tool.href}
                               className="-mx-2 block rounded-md px-2 py-1.5 text-sm font-medium leading-6 text-foreground transition-colors hover:bg-accent hover:text-primary motion-reduce:transition-none"
                               onClick={() => {
-                                trackToolClick(tool);
+                                trackToolClick(tool, "header");
                                 menus.close();
                               }}
                               onAuxClick={(event) => {
-                                if (event.button === 1) trackToolClick(tool);
+                                if (event.button === 1)
+                                  trackToolClick(tool, "header");
                               }}
                             >
-                              {t(`tools.${tool.key}.shortName`)}
+                              {toolName(tool)}
                             </a>
                           </li>
                         ))}
@@ -222,18 +242,9 @@ export default function Header({ locale }: Props) {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between gap-x-6 border-t border-border px-6 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    {t("tools.hub.description")}
-                  </p>
-                  <a
-                    href={toolsHubHref}
-                    className="shrink-0 rounded-sm text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
-                    onClick={menus.close}
-                  >
-                    {t("header.toolsMenu.seeAll")}
-                  </a>
-                </div>
+                <p className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
+                  {t("tools.hub.description")}
+                </p>
               </div>
             </div>
           </div>
@@ -370,9 +381,9 @@ export default function Header({ locale }: Props) {
                                   <a
                                     href={tool.href}
                                     className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-foreground hover:bg-accent"
-                                    onClick={() => trackToolClick(tool)}
+                                    onClick={() => trackToolClick(tool, "drawer")}
                                   >
-                                    {t(`tools.${tool.key}.shortName`)}
+                                    {toolName(tool)}
                                   </a>
                                 </li>
                               ))}

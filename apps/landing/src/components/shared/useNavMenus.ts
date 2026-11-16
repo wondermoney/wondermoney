@@ -17,6 +17,10 @@ export const HOVER_CLOSE_DELAY_MS = 150
 
 type PendingFocus = "first" | "last"
 
+function focusIsIn(element: HTMLElement | undefined): boolean {
+	return !!element && typeof document !== "undefined" && element.contains(document.activeElement)
+}
+
 function panelLinks(panel: HTMLElement | undefined): HTMLAnchorElement[] {
 	return panel ? Array.from(panel.querySelectorAll<HTMLAnchorElement>("a[href]")) : []
 }
@@ -26,9 +30,10 @@ function panelLinks(panel: HTMLElement | undefined): HTMLAnchorElement[] {
  * open at a time.
  *
  * - A mouse opens a menu by resting on it for `HOVER_OPEN_DELAY_MS` and closes it by leaving it
- *   for `HOVER_CLOSE_DELAY_MS`. The root wraps the trigger and the panel, and the panel's top
- *   padding meets the trigger's area, so the pointer never leaves the root on its way into the
- *   panel. With one menu open, resting on another switches straight away.
+ *   for `HOVER_CLOSE_DELAY_MS`, unless focus is inside its panel. The root wraps the trigger and
+ *   the panel, and the panel's top padding meets the trigger's area, so the pointer never leaves
+ *   the root on its way into the panel. With one menu open, resting on another switches straight away, and focus inside the
+ *   old panel moves to the new trigger instead of falling to the page.
  * - Touch and pen ignore hover: a tap toggles the menu. The pointer type comes from the pointer
  *   events, never the user agent.
  * - A click toggles, except that a click on a menu the mouse has just opened keeps it open.
@@ -108,7 +113,10 @@ export function useNavMenus<Id extends string>(idPrefix = "nav-menu") {
 				clearTimeout(closeTimer.current)
 				if (openRef.current === id) return
 				clearTimeout(openTimer.current)
-				if (openRef.current !== null) {
+				const current = openRef.current
+				if (current !== null) {
+					// Hiding a panel that holds focus would drop it to the body: hand it to this trigger.
+					if (focusIsIn(panels.current.get(current))) triggers.current.get(id)?.focus()
 					show(id, true)
 					return
 				}
@@ -119,7 +127,8 @@ export function useNavMenus<Id extends string>(idPrefix = "nav-menu") {
 				clearTimeout(openTimer.current)
 				if (openRef.current !== id) return
 				closeTimer.current = setTimeout(() => {
-					if (openRef.current === id) show(null)
+					// A keyboard user reading the panel keeps it while the mouse wanders off.
+					if (openRef.current === id && !focusIsIn(panels.current.get(id))) show(null)
 				}, HOVER_CLOSE_DELAY_MS)
 			},
 			onBlur: (event: FocusEvent<HTMLElement>) => {

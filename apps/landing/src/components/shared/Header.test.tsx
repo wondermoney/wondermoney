@@ -29,7 +29,13 @@ vi.mock("@/lib/translations", async (importOriginal) => {
     getTranslations: (lang: Parameters<typeof actual.getTranslations>[0]) => {
       const t = actual.getTranslations(lang);
       return ((key: string, options?: Record<string, unknown>) =>
-        key === "tools.testOnlyPlanner.shortName" ? "Test-only planner" : t(key, options)) as typeof t;
+        key === "tools.testOnlyPlanner.shortName"
+          ? "Test-only planner"
+          : key === "tools.testOnlyPlanner.title"
+            ? "Test-only planner calculator"
+          : key === "tools.testUnnamedPlanner.title"
+            ? "Test-only planner with no short name"
+            : t(key, options)) as typeof t;
     },
   };
 });
@@ -80,7 +86,7 @@ function advance(ms: number) {
 }
 
 describe("Header tools menu", () => {
-  it("lists every catalog tool under its group, with its short name and link, and ends with the hub", () => {
+  it("lists every catalog tool under its group, with its short name and link, after the hub link", () => {
     render(<Header locale="en" />);
     const tools = panel("tools");
 
@@ -96,8 +102,9 @@ describe("Header tools menu", () => {
       );
     }
     const all = within(tools).getAllByRole("link", { hidden: true });
-    expect(all.at(-1)).toHaveProperty("textContent", en("header.toolsMenu.seeAll"));
-    expect(all.at(-1)?.getAttribute("href")).toBe(toToolsHubPath("en"));
+    // At the top, where the consent card fixed to the viewport's foot can't cover it.
+    expect(all[0]).toHaveProperty("textContent", en("header.toolsMenu.seeAll"));
+    expect(all[0].getAttribute("href")).toBe(toToolsHubPath("en"));
     expect(all).toHaveLength(TOOLS_CATALOG.length + 1);
   });
 
@@ -123,6 +130,19 @@ describe("Header tools menu", () => {
       "pathname",
       toToolsHubPath("en"),
     );
+  });
+
+  it("names a tool by its title while its short name is missing, instead of failing the page", () => {
+    added.entries = [{ key: "testUnnamedPlanner", routeId: "toolMortgage", group: "trackWealth" }];
+    render(<Header locale="en" />);
+
+    const desktopGroup = within(panel("tools")).getByRole("list", {
+      name: en("tools.hub.groups.trackWealth.title"),
+      hidden: true,
+    });
+    expect(
+      within(desktopGroup).getByRole("link", { name: "Test-only planner with no short name", hidden: true }),
+    ).toHaveProperty("pathname", toLocalizedPath("toolMortgage", "en"));
   });
 
   it("has no Resources menu: its only link, the hub, moved into Tools", () => {
@@ -189,18 +209,52 @@ describe("Header menus on hover", () => {
     advance(HOVER_OPEN_DELAY_MS);
     const firstLink = within(panel("tools")).getAllByRole("link")[0];
 
-    // Trigger to panel stays inside the menu's wrapper: no leave fires on it.
-    fireEvent.pointerOut(trigger("tools"), { ...mouse, relatedTarget: firstLink });
-    fireEvent.pointerOver(firstLink, { ...mouse, relatedTarget: trigger("tools") });
-    advance(1_000);
-    expect(expanded("tools")).toBe(true);
-
-    // An overshoot that comes back within the close delay keeps it open too.
+    // The panel sits inside the trigger's wrapper, so crossing from one to the other leaves
+    // nothing; a pointer that overshoots and comes back within the close delay keeps it open.
     fireEvent.pointerLeave(menuRoot("tools"), mouse);
     advance(HOVER_CLOSE_DELAY_MS - 10);
     fireEvent.pointerEnter(firstLink, mouse);
     advance(1_000);
     expect(expanded("tools")).toBe(true);
+  });
+
+  it("keeps a panel open while focus is in it, wherever the mouse goes", () => {
+    render(<Header locale="en" />);
+    fireEvent.keyDown(trigger("tools"), { key: "ArrowDown" });
+    const firstLink = within(panel("tools")).getAllByRole("link")[0];
+    expect(document.activeElement).toBe(firstLink);
+
+    fireEvent.pointerEnter(menuRoot("tools"), mouse);
+    fireEvent.pointerLeave(menuRoot("tools"), mouse);
+    advance(1_000);
+
+    expect(expanded("tools")).toBe(true);
+    expect(document.activeElement).toBe(firstLink);
+  });
+
+  it("hands focus to the new trigger when the mouse switches away from a focused panel", () => {
+    render(<Header locale="en" />);
+    fireEvent.keyDown(trigger("features"), { key: "ArrowDown" });
+    expect(panel("features").contains(document.activeElement)).toBe(true);
+
+    fireEvent.pointerEnter(menuRoot("tools"), mouse);
+
+    expect(expanded("tools")).toBe(true);
+    expect(expanded("features")).toBe(false);
+    expect(document.activeElement).toBe(trigger("tools"));
+  });
+
+  it("leaves focus alone on a mouse switch when it wasn't in the old panel", () => {
+    render(<Header locale="en" />);
+    const faq = screen.getByRole("link", { name: en("header.faq") });
+    act(() => faq.focus());
+    fireEvent.pointerEnter(menuRoot("features"), mouse);
+    advance(HOVER_OPEN_DELAY_MS);
+
+    fireEvent.pointerEnter(menuRoot("tools"), mouse);
+
+    expect(expanded("tools")).toBe(true);
+    expect(document.activeElement).toBe(faq);
   });
 
   it("switches straight to another menu when one is open, keeping one open at a time", () => {
@@ -360,7 +414,13 @@ describe("Header tools menu analytics", () => {
     await user.click(within(panel("tools")).getByRole("link", { name: en("tools.compoundInterest.shortName") }));
 
     expect(navClicks()).toEqual([
-      { event: "nav_click", tool: "compound_interest", group: "investAndGrow", page_type: "homepage" },
+      {
+        event: "nav_click",
+        tool: "compound_interest",
+        group: "investAndGrow",
+        nav_position: "header",
+        page_type: "homepage",
+      },
     ]);
   });
 
@@ -375,7 +435,7 @@ describe("Header tools menu analytics", () => {
     await user.click(within(drawer).getByRole("link", { name: en("tools.fire.shortName") }));
 
     expect(navClicks()).toEqual([
-      { event: "nav_click", tool: "fire", group: "investAndGrow", page_type: "homepage" },
+      { event: "nav_click", tool: "fire", group: "investAndGrow", nav_position: "drawer", page_type: "homepage" },
     ]);
   });
 
