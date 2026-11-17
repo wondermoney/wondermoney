@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { FolderPlus, Plus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
@@ -28,6 +28,7 @@ import PortfolioTransactionImportModal from "@/components/portfolio/PortfolioTra
 import { Button } from "@/components/ui/button";
 import { HelpHint } from "@/components/ui/help-hint";
 import { Spinner } from "@/components/ui/Spinner";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import { useRouter } from "@/i18n/navigation";
 import useDividendIncome from "@/lib/api/portfolio/useDividendIncome";
 import {
@@ -171,15 +172,15 @@ const Portfolio = () => {
   return (
     <div className="flex flex-col gap-6 sm:gap-10 lg:gap-12">
       {/* Header */}
-      <div className="flex flex-col gap-4 max-sm:order-first sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-center justify-between gap-2 max-sm:order-first sm:items-start">
         <div>
           <div className="flex items-center gap-1.5">
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+            <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl">
               {t("portfolios")}
             </h1>
             <HelpHint
               href={portfolioMetricsHref}
-              className="rounded-full p-1 hover:no-underline [&_span]:sr-only [&_svg]:size-4"
+              className="hidden rounded-full p-1 hover:no-underline sm:inline-flex [&_span]:sr-only [&_svg]:size-4"
             >
               {t("help-hint-portfolios")}
             </HelpHint>
@@ -188,14 +189,14 @@ const Portfolio = () => {
             {t("portfolios-overview-description")}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <div className="flex shrink-0 items-center gap-1 sm:flex-wrap sm:justify-end sm:gap-2">
           <MemberFilterControl className="w-40 sm:w-44" />
           <TimeframeSelect
             timeframes={TIMEFRAME_OPTIONS}
             timeframe={period}
             setTimeframe={(value) => setPeriod(value as Period)}
           />
-          <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="flex items-center gap-1 sm:gap-2">
             <PortfolioTransactionAddModal
               isOpen={isAddTransactionModalOpen}
               setOpen={setIsAddTransactionModalOpen}
@@ -204,20 +205,18 @@ const Portfolio = () => {
                 setIsImportTransactionModalOpen,
               )}
               trigger={
-                <Button className="flex-1 sm:flex-none">
-                  <Plus className="size-4" />
-                  {t("add-transaction")}
-                </Button>
+                <ToolbarAction
+                  label={t("add-transaction")}
+                  icon={<Plus className="size-4" />}
+                />
               }
             />
-            <Button
+            <ToolbarAction
               variant="outline"
-              className="flex-1 sm:flex-none"
+              label={t("create-portfolio")}
+              icon={<FolderPlus className="size-4" />}
               onClick={() => openPortfolioCreateModal()}
-            >
-              <Plus className="size-4" />
-              {t("create-portfolio")}
-            </Button>
+            />
             <PortfolioCreateDialog
               showTrigger={false}
               isOpen={isCreatePortfolioModalOpen}

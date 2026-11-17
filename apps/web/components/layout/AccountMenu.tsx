@@ -123,18 +123,18 @@ export default function AccountMenu({
             ) : null}
           </span>
           <ChevronsUpDown
-            className="text-muted-foreground size-4"
+            className="text-muted-foreground hidden size-4 sm:block"
             aria-hidden="true"
           />
         </PopoverTrigger>
       ) : (
         <PopoverTrigger
-          className="hover:bg-foreground/5 flex h-10 items-center gap-2 rounded-md px-2 transition-colors duration-[var(--duration-micro)] ease-out motion-reduce:transition-none"
+          className="hover:bg-foreground/5 flex h-11 items-center gap-2 rounded-md px-1 max-sm:w-11 max-sm:justify-center transition-colors duration-[var(--duration-micro)] ease-out motion-reduce:transition-none sm:px-2"
           aria-label={t("open-user-menu")}
         >
           {avatar}
           <ChevronDown
-            className="text-muted-foreground size-4"
+            className="text-muted-foreground hidden size-4 sm:block"
             aria-hidden="true"
           />
         </PopoverTrigger>

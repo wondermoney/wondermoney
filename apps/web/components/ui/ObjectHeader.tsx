@@ -46,6 +46,8 @@ export interface ObjectHeaderProps {
   secondaryCurrency?: string;
   /** Right-hand actions. */
   actions?: ReactNode;
+  /** On phones, keep actions beside the back link and the title full width. */
+  mobileActionsWithBack?: boolean;
   /** As-of line — pass a <DataProvenance />. */
   provenance?: ReactNode;
   /** Extra content inside the same card — supporting figures, a progress bar. */
@@ -65,6 +67,7 @@ export function ObjectHeader({
   secondaryValue,
   secondaryCurrency,
   actions,
+  mobileActionsWithBack = false,
   provenance,
   children,
   className,
@@ -76,17 +79,33 @@ export function ObjectHeader({
       className={cn(
         // Direction A: the object's name and its figure on the canvas, not boxed.
         "flex flex-col gap-6",
+        mobileActionsWithBack && "max-sm:gap-4",
         className,
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-1">
+      <div
+        className={cn(
+          "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+          mobileActionsWithBack &&
+            "max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:items-center max-sm:gap-2",
+        )}
+      >
+        <div
+          className={cn(
+            "min-w-0 space-y-1",
+            mobileActionsWithBack && "max-sm:contents",
+          )}
+        >
           {backHref && backLabel ? (
             <Button
               asChild
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-foreground -ml-2"
+              className={cn(
+                "text-muted-foreground hover:text-foreground -ml-2 w-fit",
+                mobileActionsWithBack &&
+                  "max-sm:col-start-1 max-sm:row-start-1",
+              )}
             >
               <Link href={backHref}>
                 <ArrowLeft className="size-4" aria-hidden="true" />
@@ -95,7 +114,12 @@ export function ObjectHeader({
             </Button>
           ) : null}
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div
+            className={cn(
+              "flex flex-wrap items-center gap-2",
+              mobileActionsWithBack && "max-sm:col-span-2 max-sm:row-start-2",
+            )}
+          >
             <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
               {title}
             </h1>
@@ -103,14 +127,27 @@ export function ObjectHeader({
           </div>
 
           {subtitle ? (
-            <p className="text-muted-foreground text-sm">{subtitle}</p>
+            <p
+              className={cn(
+                "text-muted-foreground text-sm",
+                mobileActionsWithBack && "max-sm:col-span-2 max-sm:row-start-3",
+              )}
+            >
+              {subtitle}
+            </p>
           ) : null}
         </div>
 
         {/* The row owns the spacing so callers can pass bare buttons: a
             fragment of two buttons otherwise renders them edge to edge. */}
         {actions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div
+            className={cn(
+              "flex shrink-0 flex-wrap items-center gap-2",
+              mobileActionsWithBack &&
+                "max-sm:col-start-2 max-sm:row-start-1 max-sm:gap-1",
+            )}
+          >
             {actions}
           </div>
         ) : null}

@@ -28,20 +28,20 @@ export default function AccountSyncBadge({
 
   // Fall back to the legacy refreshedAt-only display when no structured status is present.
   const staleness = syncStatus?.staleness ?? "fresh";
-  const lastSyncedAt = clampSyncedAt(
-    syncStatus?.lastSyncedAt ?? refreshedAt,
-  );
+  const lastSyncedAt = clampSyncedAt(syncStatus?.lastSyncedAt ?? refreshedAt);
 
   if (staleness === "error") {
     return (
       <span
         className={cn(
-          "text-destructive-text inline-flex items-center gap-1 text-xs font-medium",
+          "text-destructive-text inline-flex min-w-0 items-center gap-1 text-xs font-medium",
           className,
         )}
       >
-        <AlertCircle className="h-2.5 w-2.5" aria-hidden />
-        {t("account-sync-reconnect")}
+        <AlertCircle className="h-2.5 w-2.5 shrink-0" aria-hidden />
+        <span className="min-w-0 truncate" title={t("account-sync-reconnect")}>
+          {t("account-sync-reconnect")}
+        </span>
       </span>
     );
   }
@@ -51,31 +51,36 @@ export default function AccountSyncBadge({
     return (
       <span
         className={cn(
-          "text-muted-foreground inline-flex items-center gap-1 text-xs",
+          "text-muted-foreground inline-flex min-w-0 items-center gap-1 text-xs",
           className,
         )}
       >
-        <RefreshCw className="h-2.5 w-2.5" aria-hidden />
-        {t("account-sync-never")}
+        <RefreshCw className="h-2.5 w-2.5 shrink-0" aria-hidden />
+        <span className="min-w-0 truncate" title={t("account-sync-never")}>
+          {t("account-sync-never")}
+        </span>
       </span>
     );
   }
 
+  const label = formatDistanceToNow(new Date(lastSyncedAt), {
+    addSuffix: true,
+    locale: getDateFnsLocale(locale),
+  });
   const isStale = staleness === "stale" || staleness === "very_stale";
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-xs",
+        "inline-flex min-w-0 items-center gap-1 text-xs",
         isStale ? "text-warning-text font-medium" : "text-muted-foreground",
         className,
       )}
     >
-      <RefreshCw className="h-2.5 w-2.5" aria-hidden />
-      {formatDistanceToNow(new Date(lastSyncedAt), {
-        addSuffix: true,
-        locale: getDateFnsLocale(locale),
-      })}
+      <RefreshCw className="h-2.5 w-2.5 shrink-0" aria-hidden />
+      <span className="min-w-0 truncate" title={label}>
+        {label}
+      </span>
     </span>
   );
 }

@@ -28,6 +28,7 @@ import PortfolioUnclassifiedHoldingsBanner from "@/components/portfolio/Portfoli
 import { Button } from "@/components/ui/button";
 import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Spinner } from "@/components/ui/Spinner";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import useDividendIncome from "@/lib/api/portfolio/useDividendIncome";
 import type { GetPortfolioResponse } from "@/lib/api/portfolio/usePortfolio";
 import usePortfolio from "@/lib/api/portfolio/usePortfolio";
@@ -133,7 +134,7 @@ export default function PortfolioClient({
     holdingsData.holdings.length === 0;
 
   return (
-    <div className="flex flex-col gap-10 lg:gap-12">
+    <div className="flex flex-col gap-4 sm:gap-10 lg:gap-12">
       {/* Same header shell as the account and goal detail pages, and a way back
           to the list this was reached from. No `value` is passed: the total
           leads the summary grid immediately below, and repeating it here is
@@ -141,6 +142,7 @@ export default function PortfolioClient({
           "Portfolio dashboard" — the page's own name, already in the nav and
           the title, so it said nothing. */}
       <ObjectHeader
+        mobileActionsWithBack
         backHref="/portfolio"
         backLabel={t("portfolio")}
         title={portfolioData.portfolio.name}
@@ -152,10 +154,10 @@ export default function PortfolioClient({
               defaultPortfolioId={String(portfolioId)}
               importHref={`/${locale}${getPortfolioImportTransactionsHref(String(portfolioId))}`}
               trigger={
-                <Button>
-                  <Plus className="size-4" />
-                  {t("add-transaction")}
-                </Button>
+                <ToolbarAction
+                  label={t("add-transaction")}
+                  icon={<Plus className="size-4" />}
+                />
               }
             />
             <Button

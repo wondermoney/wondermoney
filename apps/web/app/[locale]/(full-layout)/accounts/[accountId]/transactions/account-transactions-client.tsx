@@ -12,6 +12,7 @@ import TransactionsTable from "@/components/account/AccountTransactionsTable";
 import ProjectedTransactions from "@/components/account/ProjectedTransactions";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import {
   canEditAccount,
   readOnlyAccountKeys,
@@ -184,9 +185,8 @@ export default function AccountTransactionsClient({
     },
   );
   const accountForecast =
-    forecastData?.accounts.find(
-      (series) => series.accountKey === accountId,
-    ) ?? null;
+    forecastData?.accounts.find((series) => series.accountKey === accountId) ??
+    null;
 
   const isLoading =
     isLoadingTransactions ||
@@ -202,7 +202,7 @@ export default function AccountTransactionsClient({
     addVariant,
   }: { addVariant?: "default" | "outline" } = {}) =>
     transactionAccount && canEdit ? (
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <AccountTransactionImportModal
           isOpen={isImportTransactionModalOpen}
           setOpen={(open) => {
@@ -214,10 +214,11 @@ export default function AccountTransactionsClient({
           }}
           accounts={[transactionAccount]}
           trigger={
-            <Button variant="outline" className="w-full sm:w-auto">
-              <Download className="size-4" />
-              {t("import-transactions")}
-            </Button>
+            <ToolbarAction
+              variant="outline"
+              label={t("import-transactions")}
+              icon={<Download className="size-4" />}
+            />
           }
         />
         <AccountTransactionAddModal
@@ -231,13 +232,11 @@ export default function AccountTransactionsClient({
           }}
           accounts={[transactionAccount]}
           trigger={
-            <Button
-              {...(addVariant ? { variant: addVariant } : {})}
-              className="w-full sm:w-auto"
-            >
-              <Plus className="size-4" />
-              {t("add-transaction")}
-            </Button>
+            <ToolbarAction
+              variant={addVariant}
+              label={t("add-transaction")}
+              icon={<Plus className="size-4" />}
+            />
           }
         />
       </div>
@@ -261,9 +260,9 @@ export default function AccountTransactionsClient({
     return (
       <div className="flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+            <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl">
               {t("transactions")}
             </h1>
             {accountName && (
@@ -298,11 +297,11 @@ export default function AccountTransactionsClient({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4 sm:gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+          <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl">
             {t("transactions")}
           </h1>
           {accountName && (

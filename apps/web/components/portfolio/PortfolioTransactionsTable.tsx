@@ -598,6 +598,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
                 <div className="flex items-center justify-between gap-2">
                   {transactionDateRange && setTransactionDateRange && (
                     <DatePickerRange
+                      compactOnMobile
                       onSelect={onDateRangeFilterChange}
                       value={transactionDateRange}
                     />
@@ -633,6 +634,7 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
               <div className="flex flex-row flex-wrap items-center justify-between gap-2 md:hidden">
                 {transactionDateRange && setTransactionDateRange && (
                   <DatePickerRange
+                    compactOnMobile
                     onSelect={onDateRangeFilterChange}
                     value={transactionDateRange}
                   />

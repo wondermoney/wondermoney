@@ -19,18 +19,37 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface DatePickerWithRangeProps {
   value?: DateRange;
+  compactOnMobile?: boolean;
   onSelect: OnSelectHandler<DateRange | undefined>;
 }
 
 const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
   value,
   onSelect,
+  compactOnMobile = false,
 }) => {
   const t = useTranslations();
   // The reader's calendar, not the runtime's.
   const locale = useLocale();
   const formatDate = (date: Date) =>
     new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
+
+  const compactDate = (date: Date, year: boolean) =>
+    new Intl.DateTimeFormat(locale, {
+      day: "numeric",
+      month: "short",
+      ...(year ? { year: "numeric" } : {}),
+    }).format(date);
+  const fullLabel = value?.from
+    ? value.to
+      ? `${formatDate(value.from)} – ${formatDate(value.to)}`
+      : formatDate(value.from)
+    : t("pick-date");
+  const compactLabel = value?.from
+    ? value.to
+      ? `${compactDate(value.from, value.from.getFullYear() !== value.to.getFullYear())} – ${compactDate(value.to, true)}`
+      : compactDate(value.from, true)
+    : t("pick-date");
 
   /*
    * A preset rail beside the calendar. § 9 DateRangePopover.
@@ -90,6 +109,8 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
         <Button
           id="date"
           variant="secondary"
+          aria-label={fullLabel}
+          title={fullLabel}
           // Default size, matching the page actions above it (Import/Add) and
           // every other form control, so the toolbar sits at one height.
           className={cn(
@@ -97,20 +118,17 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
             // past a fixed 270px in Portuguese.
             "w-auto max-w-full min-w-[270px] justify-start text-left font-normal",
             !value && "text-muted-foreground",
+            compactOnMobile &&
+              "max-sm:min-w-0 max-sm:flex-1 max-sm:px-2 max-sm:text-xs",
           )}
         >
           <CalendarIcon className="size-4" />
-          {value?.from ? (
-            value.to ? (
-              <>
-                {formatDate(value.from)} – {formatDate(value.to)}
-              </>
-            ) : (
-              formatDate(value.from)
-            )
-          ) : (
-            <span>{t("pick-date")}</span>
-          )}
+          <span className={compactOnMobile ? "hidden sm:inline" : undefined}>
+            {fullLabel}
+          </span>
+          {compactOnMobile ? (
+            <span className="sm:hidden">{compactLabel}</span>
+          ) : null}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

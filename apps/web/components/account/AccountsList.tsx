@@ -31,12 +31,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
-import {
-  type ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -125,11 +120,16 @@ export default function AccountsList({
   const orderedAccounts = useMemo(() => {
     if (!reordering) return accounts;
     const keys = order ?? accounts.map((account) => account.accountKey);
-    const byKey = new Map(accounts.map((account) => [account.accountKey, account]));
+    const byKey = new Map(
+      accounts.map((account) => [account.accountKey, account]),
+    );
     const placed = keys.flatMap((key) => byKey.get(key) ?? []);
     // An account created since the mode opened has no place yet: it goes last.
     const placedKeys = new Set(placed.map((account) => account.accountKey));
-    return [...placed, ...accounts.filter((account) => !placedKeys.has(account.accountKey))];
+    return [
+      ...placed,
+      ...accounts.filter((account) => !placedKeys.has(account.accountKey)),
+    ];
   }, [accounts, order, reordering]);
 
   const move = useCallback(
@@ -151,7 +151,9 @@ export default function AccountsList({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const onDragEnd = (event: DragEndEvent) => {
@@ -221,7 +223,11 @@ export default function AccountsList({
     null,
   );
 
-  const renderRow = (account: Account, index: number, dragHandle?: ReactNode) => {
+  const renderRow = (
+    account: Account,
+    index: number,
+    dragHandle?: ReactNode,
+  ) => {
     const name = account.accountName ?? t("unknown");
     return (
       <div
@@ -235,11 +241,11 @@ export default function AccountsList({
               }
         }
         className={cn(
-          "-mx-2 flex items-center justify-between rounded-md px-2 py-3.5 transition-colors",
+          "-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-3.5 transition-colors",
           reordering ? "bg-muted/40" : "hover:bg-muted/50 cursor-pointer",
         )}
       >
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           {dragHandle}
           <AccountMark
             logoUrl={account.accountFinancialInstitutionKey?.logoUrl}
@@ -251,7 +257,9 @@ export default function AccountsList({
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <p className="text-foreground text-sm font-medium">{name}</p>
+              <p className="text-foreground min-w-0 text-sm font-medium">
+                {name}
+              </p>
               {showMembers && account.attribution ? (
                 <MemberBadge
                   appuserKey={account.attribution.appuserKey}
@@ -303,15 +311,15 @@ export default function AccountsList({
                     <AccountSyncBadge
                       syncStatus={account.syncStatus}
                       refreshedAt={account.refreshedAt}
-                      className="shrink-0 whitespace-nowrap"
+                      className="min-w-0"
                     />
                   </>
                 )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-right">
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="shrink-0 text-right">
             {/* A balance is a level: not coloured by its sign, and a
                 missing one is an em-dash rather than a sentence in the
                 column the eye scans. DESIGN.md § 9 rules 1–3. */}
@@ -350,7 +358,7 @@ export default function AccountsList({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-8 p-0"
+                className="size-8 shrink-0 p-0 max-sm:size-11"
                 aria-label={t("move-account-up", { name })}
                 disabled={index === 0 || reorderAccounts.isPending}
                 onClick={() => void move(index, index - 1)}
@@ -360,7 +368,7 @@ export default function AccountsList({
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-8 p-0"
+                className="size-8 shrink-0 p-0 max-sm:size-11"
                 aria-label={t("move-account-down", { name })}
                 disabled={
                   index === orderedAccounts.length - 1 ||
@@ -376,7 +384,7 @@ export default function AccountsList({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="size-8 p-0"
+                  className="size-8 shrink-0 p-0 max-sm:size-11"
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -421,7 +429,10 @@ export default function AccountsList({
           ) : (
             // A view-only account has nothing to edit, delete or recalculate; the gap keeps the
             // balances in line with the rows that have a menu.
-            <span aria-hidden="true" className="size-8 shrink-0" />
+            <span
+              aria-hidden="true"
+              className="size-8 shrink-0 max-sm:size-11"
+            />
           )}
         </div>
       </div>

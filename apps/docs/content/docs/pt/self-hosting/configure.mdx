@@ -279,7 +279,7 @@ Todos os visitantes partilham a demonstração, por isso é só de leitura:
 
 - Qualquer alteração é recusada com a mensagem de só leitura: os dados do agregado e a própria conta (nome, email, palavra-passe, autenticador, chaves de acesso e terminar a sessão de outros visitantes).
 - Uma sessão de demonstração termina duas horas depois de começar. Os inícios de sessão na demonstração têm um limite por endereço IP, como os inícios de sessão com palavra-passe.
-- Uma faixa em todos os ecrãs diz que os dados são uma demonstração partilhada que é reposta todos os dias, com ligações para criar conta (só quando `SIGNUP_MODE` é `open`) e para estes guias de alojamento próprio.
+- No computador, uma faixa explica que a demonstração partilhada é só de leitura e é reposta todos os dias. No telemóvel, toca em **Demo** no cabeçalho para veres a mesma informação, a opção de criar conta (só quando `SIGNUP_MODE` é `open`) e estes guias de alojamento próprio.
 - A conta de demonstração não tem palavra-passe nem autenticador. O início de sessão na demonstração recusa uma conta com autenticador e nunca inicia a sessão noutra conta.
 
 Cria a conta de demonstração e o agregado antes de ligares a definição:
@@ -298,7 +298,7 @@ Definições recomendadas para uma instância de demonstração:
 | IA (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Vazias, ou limitadas com `AI_DAILY_LIMIT_*` | A conta de demonstração não pode usar o assistente, a leitura de recibos nem o mapeamento de colunas por IA, porque todos guardam alguma coisa. Com a IA desligada, a app esconde-os. Todos os visitantes partilham um agregado, por isso os limites diários também são partilhados |
 | `BANK_PROVIDERS` | `none` | Esconde a sincronização bancária. A conta de demonstração também não consegue ligar um banco |
 | `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Avança as transações da demonstração todos os dias às 01:15 UTC, para continuarem recentes |
-| `SIGNUP_MODE` | `closed` num servidor só de demonstração, `open` para deixar os visitantes criar conta | A faixa só mostra a ligação para criar conta quando é `open` |
+| `SIGNUP_MODE` | `closed` num servidor só de demonstração, `open` para deixar os visitantes criar conta | O aviso da demonstração só mostra a ligação para criar conta quando é `open` |
 
 ## Analytics
 

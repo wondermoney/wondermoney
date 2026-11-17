@@ -17,7 +17,11 @@ vi.mock("@/lib/api/user-preferences/useUserPreferences", () => ({
 }));
 vi.mock("@/lib/utils/useHydrated", () => ({ useHydrated: () => true }));
 vi.mock("@/lib/household/useMemberFilter", () => ({
-  useMemberFilter: () => ({ filter: null, memberKeys: undefined, setFilter: () => {} }),
+  useMemberFilter: () => ({
+    filter: null,
+    memberKeys: undefined,
+    setFilter: () => {},
+  }),
 }));
 vi.mock("@/components/household/MemberFilterSelect", () => ({
   MemberFilterControl: () => null,
@@ -47,13 +51,17 @@ vi.mock("@/lib/api/portfolio/usePortfolios", () => ({
 }));
 
 vi.mock("./NetWorthHero", () => ({
-  NetWorthHero: () => <div data-testid="section-net-worth">net-worth</div>,
+  NetWorthHero: ({ actions }: { actions?: import("react").ReactNode }) => (
+    <div data-testid="section-net-worth">net-worth{actions}</div>
+  ),
 }));
 vi.mock("./InsightsSection", () => ({
   InsightsSection: () => <div data-testid="section-insights">insights</div>,
 }));
 vi.mock("./ThisMonthSection", () => ({
-  ThisMonthSection: () => <div data-testid="section-this-month">this-month</div>,
+  ThisMonthSection: () => (
+    <div data-testid="section-this-month">this-month</div>
+  ),
 }));
 vi.mock("./BalanceSheetSection", () => ({
   BalanceSheetSection: () => (

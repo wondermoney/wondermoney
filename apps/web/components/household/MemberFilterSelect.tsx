@@ -1,5 +1,6 @@
 "use client";
 
+import { UserRound, UsersRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -27,6 +28,7 @@ interface MemberFilterSelectProps {
   value: MemberFilter;
   onChange: (value: MemberFilter) => void;
   className?: string;
+  compactOnMobile?: boolean;
 }
 
 /**
@@ -38,9 +40,19 @@ export function MemberFilterSelect({
   value,
   onChange,
   className,
+  compactOnMobile = false,
 }: MemberFilterSelectProps) {
   const t = useTranslations("household.attribution");
   if (members.length <= 1) return null;
+  const selectedMember = members.find((member) => member.appuserKey === value);
+  const selected =
+    value === null
+      ? t("everyone")
+      : value === SHARED_MEMBER
+        ? t("shared")
+        : selectedMember
+          ? memberDisplayName(selectedMember)
+          : t("filterLabel");
 
   return (
     <Select
@@ -57,9 +69,32 @@ export function MemberFilterSelect({
     >
       <SelectTrigger
         aria-label={t("filterLabel")}
-        className={cn("w-full sm:w-44", className)}
+        className={cn(
+          "w-full sm:w-44",
+          className,
+          compactOnMobile &&
+            "relative max-sm:size-11 max-sm:w-11 max-sm:justify-center max-sm:border-transparent max-sm:p-0 max-sm:[&>svg:last-child]:hidden",
+          compactOnMobile && value !== null && "max-sm:text-primary",
+        )}
+        title={`${t("filterLabel")}: ${selected}`}
+        aria-description={selected}
       >
-        <SelectValue />
+        {compactOnMobile ? (
+          value !== null && value !== SHARED_MEMBER ? (
+            <UserRound className="size-4 sm:hidden" aria-hidden="true" />
+          ) : (
+            <UsersRound className="size-4 sm:hidden" aria-hidden="true" />
+          )
+        ) : null}
+        {compactOnMobile && value !== null ? (
+          <span
+            aria-hidden="true"
+            className="bg-primary absolute top-1 right-1 size-1.5 rounded-full sm:hidden"
+          />
+        ) : null}
+        <span className={compactOnMobile ? "max-sm:sr-only" : undefined}>
+          <SelectValue />
+        </span>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={EVERYONE}>{t("everyone")}</SelectItem>
@@ -81,6 +116,7 @@ export function MemberFilterControl({ className }: { className?: string }) {
   return (
     <MemberFilterSelect
       members={members}
+      compactOnMobile
       value={filter}
       onChange={setFilter}
       className={className}
