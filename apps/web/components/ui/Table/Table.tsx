@@ -42,6 +42,8 @@ import {
   type Table as TableType,
 } from "./features";
 
+const EMPTY_SORTING: SortingState = [];
+
 declare module "@tanstack/react-table" {
   interface TableMeta<
     in out TFeatures extends TableFeatures,
@@ -125,7 +127,7 @@ export function Table<TData extends RowData>({
     data,
     columns,
     state: {
-      sorting: withSorting ? sorting : [],
+      sorting: withSorting ? sorting : EMPTY_SORTING,
       expanded: withExpandableRows ? expanded : {},
       columnVisibility: withColumnVisibility ? columnVisibility : {},
       rowSelection: withSelectRow || withMultiSelectRow ? rowSelection : {},
