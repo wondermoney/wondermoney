@@ -41,6 +41,7 @@ import {
   type Row,
   type Table as TableType,
 } from "./features";
+import { usePaginationReset, useUrlPagination } from "./useUrlPagination";
 
 const EMPTY_SORTING: SortingState = [];
 
@@ -62,6 +63,11 @@ interface DataTableProps<TData extends RowData> {
   withSorting?: boolean;
   withExpandableRows?: boolean;
   withPagination?: boolean;
+  pageParamName?: string;
+  pageSizeParamName?: string;
+  paginationResetKey?: string | number;
+  paginationDataReady?: boolean;
+  paginationBoundsKnown?: boolean;
   withColumnVisibility?: boolean;
   withSelectRow?: boolean;
   withMultiSelectRow?: boolean;
@@ -93,6 +99,11 @@ export function Table<TData extends RowData>({
   withSorting = false,
   withExpandableRows = false,
   withPagination = false,
+  pageParamName = "page",
+  pageSizeParamName = "size",
+  paginationResetKey,
+  paginationDataReady = true,
+  paginationBoundsKnown = true,
   withColumnVisibility = false,
   withSelectRow = false,
   withMultiSelectRow = false,
@@ -122,18 +133,28 @@ export function Table<TData extends RowData>({
   const [columnVisibility, setColumnVisibility] =
     useState<ColumnVisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const { pagination, onPaginationChange } = useUrlPagination(
+    withPagination,
+    pageParamName,
+    pageSizeParamName,
+  );
+  const sortKey = withSorting
+    ? JSON.stringify(sorting.map(({ id, desc }) => [id, desc]))
+    : "disabled";
   const table = useTable({
     features: dataTableFeatures,
     data,
     columns,
     state: {
       sorting: withSorting ? sorting : EMPTY_SORTING,
+      pagination,
       expanded: withExpandableRows ? expanded : {},
       columnVisibility: withColumnVisibility ? columnVisibility : {},
       rowSelection: withSelectRow || withMultiSelectRow ? rowSelection : {},
     },
     onExpandedChange: withExpandableRows ? setExpanded : undefined,
     onSortingChange: withSorting ? setSorting : undefined,
+    onPaginationChange,
     onColumnVisibilityChange: setColumnVisibility,
     enableRowSelection:
       withSelectRow && canSelectRow
@@ -147,9 +168,22 @@ export function Table<TData extends RowData>({
     // here and keeps every row on one page.
     manualPagination: !withPagination,
     debugTable,
-    // Data changes reset to the first page.
-    autoResetPageIndex: true,
+    // usePaginationReset owns explicit data, sort, and filter resets.
+    autoResetPageIndex: false,
     meta,
+  });
+
+  usePaginationReset({
+    enabled: withPagination,
+    data,
+    sortKey,
+    resetKey: paginationResetKey,
+    dataReady: paginationDataReady,
+    boundsKnown: paginationBoundsKnown,
+    pageSize: pagination.pageSize,
+    pageCount: table.getPageCount(),
+    pageParamName,
+    pageSizeParamName,
   });
 
   useEffect(() => {
