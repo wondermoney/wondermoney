@@ -69,9 +69,9 @@ export default function TopBar() {
   return (
     <header className="border-border bg-background sticky top-0 z-40 border-b lg:hidden">
       <div className="flex h-14 items-center gap-1 px-4">
-        <Logo className="h-8 w-24 shrink-0 sm:h-10 sm:w-28" />
+        <Logo className="h-8 w-24 min-w-0 shrink sm:h-10 sm:w-28 sm:shrink-0" />
         <DemoBanner compact />
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <button
             ref={searchRef}
             type="button"
