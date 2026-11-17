@@ -63,6 +63,7 @@ export interface StatCardProps {
     ariaLabel: string;
   };
   className?: string;
+  compactOnMobile?: boolean;
 }
 
 export function StatCard({
@@ -79,6 +80,7 @@ export function StatCard({
   helper,
   help,
   className,
+  compactOnMobile = false,
 }: StatCardProps) {
   const formatPercentage = useFormatPercentage();
   const hasDelta =
@@ -102,15 +104,31 @@ export function StatCard({
       // more of a 390px screen on frame than on figures.
       // Direction A: a cell of a ruled stat row, not a box. The row's
       // hairlines separate the cells; the first cell sits on the margin.
-      className={cn("min-w-0 py-2 sm:px-6 sm:py-0 sm:first:pl-0", className)}
+      className={cn(
+        "min-w-0 py-2 sm:px-6 sm:py-0 sm:first:pl-0",
+        compactOnMobile && "max-sm:flex max-sm:flex-col max-sm:py-0",
+        className,
+      )}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2",
+          compactOnMobile && "max-sm:contents",
+        )}
+      >
         {/* Sentence case, not letterspaced caps — § 9 density contract. */}
-        <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-sm">
+        <div
+          className={cn(
+            "text-muted-foreground flex min-w-0 items-center gap-2 text-sm",
+            compactOnMobile && "max-sm:order-1 max-sm:text-xs",
+          )}
+        >
           {Icon ? (
             <Icon className="size-3.5 shrink-0" aria-hidden="true" />
           ) : null}
-          <span className="truncate">{label}</span>
+          <span className={compactOnMobile ? "sm:truncate" : "truncate"}>
+            {label}
+          </span>
           {help ? (
             <LearningTip
               tooltip={help.tooltip}
@@ -126,6 +144,7 @@ export function StatCard({
             className={cn(
               "flex shrink-0 items-center gap-1 text-xs font-medium",
               isGood ? "text-success-text" : "text-destructive-text",
+              compactOnMobile && "max-sm:order-3 max-sm:mt-1",
             )}
           >
             <TrendIcon className="size-3" aria-hidden="true" />
@@ -136,13 +155,21 @@ export function StatCard({
         ) : null}
       </div>
 
-      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <div
+        className={cn(
+          "mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5",
+          compactOnMobile && "max-sm:order-2 max-sm:mt-1",
+        )}
+      >
         {valueNode ?? (
           <Amount
             value={value}
             currency={currency}
             tone={tone}
-            className="font-mono text-2xl font-medium tracking-tight"
+            className={cn(
+              "font-mono text-2xl font-medium tracking-tight",
+              compactOnMobile && "max-sm:text-xl",
+            )}
           />
         )}
         {showComparison ? (
@@ -158,7 +185,14 @@ export function StatCard({
       </div>
 
       {helper ? (
-        <div className="text-muted-foreground mt-0.5 text-xs">{helper}</div>
+        <div
+          className={cn(
+            "text-muted-foreground mt-0.5 text-xs",
+            compactOnMobile && "max-sm:order-4",
+          )}
+        >
+          {helper}
+        </div>
       ) : null}
     </div>
   );

@@ -2365,7 +2365,10 @@
     "move-money-error": "No se pudo retirar dinero de este objetivo. Inténtalo de nuevo.",
     "confirm-archive-with-balance": "Mueve los {amount} restantes antes de archivar este objetivo.",
     "transfer-explainer": "Las transferencias mueven dinero entre cuentas. Para financiar este objetivo, asígnale dinero presupuestado.",
-    "of-target": "de {amount}"
+    "of-target": "de {amount}",
+    "show-achieved": "Mostrar alcanzados",
+    "show-archived": "Mostrar archivados",
+    "no-active": "No hay objetivos activos. Muestra los alcanzados o crea uno nuevo."
   },
   "notificationPreferences": {
     "title": "Notificaciones por correo electrónico",
@@ -3239,5 +3242,6 @@
   "summary-more-details": "Más detalles",
   "summary-less-details": "Menos detalles",
   "activation-setup-hint": "Completar configuración",
-  "financial-markets-example-companies": "Empresas para explorar"
+  "financial-markets-example-companies": "Empresas para explorar",
+  "price-history-1m": "Historial 1M"
 }

@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { type ReactNode, useMemo } from "react";
 
-import AccountsFreshness from "@/components/account/AccountsFreshness";
 import { Amount } from "@/components/ui/Amount";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { ChartConfig } from "@/components/ui/chart";
@@ -13,7 +12,6 @@ import { Link } from "@/components/ui/Link";
 import { SectionEmpty } from "@/components/ui/RuledSection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UnconvertedTotalWarning } from "@/components/ui/UnconvertedTotalWarning";
-import useAccounts from "@/lib/api/account/useAccounts";
 import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import useNetWorthHistory from "@/lib/api/reports/netWorthHistory";
 import {
@@ -31,7 +29,6 @@ import {
   netWorthAxisLabels,
 } from "@/lib/reports/net-worth-labels";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
-import { useHydrated } from "@/lib/utils/useHydrated";
 
 const FIGURE_CLASS =
   "font-mono text-5xl leading-tight font-medium tracking-tight lg:text-6xl";
@@ -45,10 +42,6 @@ function HeroHeader({
   title: string;
   actions?: ReactNode;
 }) {
-  const { data: accountsData } = useAccounts();
-  // Freshness is relative to the reader's clock: render it once hydrated.
-  const hydrated = useHydrated();
-
   return (
     <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
       <h1
@@ -59,11 +52,6 @@ function HeroHeader({
       </h1>
       {actions ? (
         <div className="flex items-center gap-1">{actions}</div>
-      ) : null}
-      {hydrated ? (
-        <div className="col-span-2">
-          <AccountsFreshness accounts={accountsData?.accounts} />
-        </div>
       ) : null}
     </header>
   );

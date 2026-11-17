@@ -379,9 +379,6 @@ export default function AccountsTransactionsClient({
           </div>
           {/* § 9 rule 6: say how fresh this is. A missing charge otherwise looks
               exactly like a quiet spending day. */}
-          <div className="col-span-2 row-start-2">
-            <AccountsFreshness accounts={accountsData?.accounts} />
-          </div>
         </div>
         <div className="col-start-2 row-start-1 flex items-center gap-1 sm:gap-2">
           {/* Anyone can narrow the list to a member's rows, even with nothing to add to. */}
@@ -472,6 +469,9 @@ export default function AccountsTransactionsClient({
         withMultiSelectRow
         readOnlyAccountKeys={viewOnlyAccountKeys}
       />
+      <footer>
+        <AccountsFreshness accounts={accountsData?.accounts} />
+      </footer>
     </div>
   );
 }

@@ -29,6 +29,7 @@ import {
 } from "@/lib/home/month-overview";
 import { convertBudgetTemplatesIntoRows } from "@/lib/utils/budget";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
+import { useHydrated } from "@/lib/utils/useHydrated";
 
 function BudgetMonthRow({
   budget,
@@ -150,6 +151,7 @@ function BudgetMonthRow({
  * screen uses, so the figures agree with it to the cent.
  */
 export function ThisMonthSection() {
+  const hydrated = useHydrated();
   const t = useTranslations("homeOverview");
   const locale = useLocale();
   const today = useMemo(() => new Date(), []);
@@ -174,7 +176,7 @@ export function ThisMonthSection() {
     month: formatMonthName(today, locale),
   });
 
-  if (budgetsQuery.isPending) {
+  if (!hydrated || budgetsQuery.isPending) {
     return (
       <Section id="month-heading" title={t("month.title")} busy>
         <RowsSkeleton rows={2} />

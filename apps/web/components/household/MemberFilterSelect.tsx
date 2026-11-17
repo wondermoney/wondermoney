@@ -29,6 +29,7 @@ interface MemberFilterSelectProps {
   onChange: (value: MemberFilter) => void;
   className?: string;
   compactOnMobile?: boolean;
+  iconOnly?: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export function MemberFilterSelect({
   onChange,
   className,
   compactOnMobile = false,
+  iconOnly = false,
 }: MemberFilterSelectProps) {
   const t = useTranslations("household.attribution");
   if (members.length <= 1) return null;
@@ -73,26 +75,50 @@ export function MemberFilterSelect({
           "w-full sm:w-44",
           className,
           compactOnMobile &&
+            !iconOnly &&
             "relative max-sm:size-11 max-sm:w-11 max-sm:justify-center max-sm:border-transparent max-sm:p-0 max-sm:[&>svg:last-child]:hidden",
-          compactOnMobile && value !== null && "max-sm:text-primary",
+          iconOnly &&
+            "relative size-11 w-11 justify-center border-transparent p-0 sm:w-11 [&>svg:last-child]:hidden",
+          iconOnly && value !== null && "text-primary",
+          compactOnMobile &&
+            !iconOnly &&
+            value !== null &&
+            "max-sm:text-primary",
         )}
         title={`${t("filterLabel")}: ${selected}`}
         aria-description={selected}
       >
-        {compactOnMobile ? (
+        {compactOnMobile || iconOnly ? (
           value !== null && value !== SHARED_MEMBER ? (
-            <UserRound className="size-4 sm:hidden" aria-hidden="true" />
+            <UserRound
+              className={cn("size-4", !iconOnly && "sm:hidden")}
+              aria-hidden="true"
+            />
           ) : (
-            <UsersRound className="size-4 sm:hidden" aria-hidden="true" />
+            <UsersRound
+              className={cn("size-4", !iconOnly && "sm:hidden")}
+              aria-hidden="true"
+            />
           )
         ) : null}
-        {compactOnMobile && value !== null ? (
+        {(compactOnMobile || iconOnly) && value !== null ? (
           <span
             aria-hidden="true"
-            className="bg-primary absolute top-1 right-1 size-1.5 rounded-full sm:hidden"
+            className={cn(
+              "bg-primary absolute top-1 right-1 size-1.5 rounded-full",
+              !iconOnly && "sm:hidden",
+            )}
           />
         ) : null}
-        <span className={compactOnMobile ? "max-sm:sr-only" : undefined}>
+        <span
+          className={
+            iconOnly
+              ? "sr-only"
+              : compactOnMobile
+                ? "max-sm:sr-only"
+                : undefined
+          }
+        >
           <SelectValue />
         </span>
       </SelectTrigger>
@@ -110,13 +136,20 @@ export function MemberFilterSelect({
 }
 
 /** The member filter of the page it sits on, read from and written to the URL's `member`. */
-export function MemberFilterControl({ className }: { className?: string }) {
+export function MemberFilterControl({
+  className,
+  iconOnly = false,
+}: {
+  className?: string;
+  iconOnly?: boolean;
+}) {
   const { members } = useHouseholdMembers();
   const { filter, setFilter } = useMemberFilter();
   return (
     <MemberFilterSelect
       members={members}
       compactOnMobile
+      iconOnly={iconOnly}
       value={filter}
       onChange={setFilter}
       className={className}

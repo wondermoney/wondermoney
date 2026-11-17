@@ -1,10 +1,15 @@
 "use client";
 
+import { format, subDays } from "date-fns";
 import { ArrowUpRight } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { YAxis } from "recharts";
 
+import { AreaLineChartBase } from "@/components/ui/charts/area-line-chart-base";
 import { Link } from "@/i18n/navigation";
-import useTickerLastClose from "@/lib/api/financial-markets/useTickerLastClose";
+import useTickerHistoryPrice from "@/lib/api/financial-markets/useTickerHistoryPrice";
+import { selectLastClose } from "@/lib/api/financial-markets/useTickerLastClose";
 import useTickerQuote from "@/lib/api/financial-markets/useTickerQuote";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
@@ -39,12 +44,32 @@ function CompanyCard({ symbol, name }: { symbol: string; name: string }) {
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const lastClose = useTickerLastClose(symbol, {
-    enabled: quote.isSuccess && quote.data.price === null,
+  const from = useMemo(() => format(subDays(new Date(), 30), "yyyy-MM-dd"), []);
+  const history = useTickerHistoryPrice(symbol, from, undefined, false, {
+    staleTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
+  const points = useMemo(
+    () =>
+      (history.data?.companyHistoricalPrice.data ?? [])
+        .filter((point) => Number.isFinite(point.close))
+        .toSorted((a, b) => a.date.localeCompare(b.date)),
+    [history.data],
+  );
+  const lastClose = useMemo(() => selectLastClose(points), [points]);
+  const chartConfig = useMemo(
+    () => ({ close: { label: name, color: "var(--chart-1)" } }),
+    [name],
+  );
+  const prices = points.map((point) => point.close);
+  const min = Math.min(...prices),
+    max = Math.max(...prices);
+  const pad = max === min ? Math.abs(max) * 0.02 || 1 : (max - min) * 0.12;
+
   const price = quote.data?.price ?? lastClose?.close;
   const change = quote.data?.changePercentage ?? lastClose?.changePercentage;
-  const closeDate = quote.data?.price === null ? lastClose?.date : null;
+  const closeDate = quote.data?.price == null ? lastClose?.date : null;
 
   return (
     <Link
@@ -52,15 +77,42 @@ function CompanyCard({ symbol, name }: { symbol: string; name: string }) {
         pathname: "/financial-markets/explorer",
         query: { ticker: symbol },
       }}
-      className="border-border hover:bg-accent focus-visible:ring-ring flex min-w-0 flex-col gap-4 rounded-lg border p-4 focus-visible:ring-2 focus-visible:outline-hidden"
+      className="border-border hover:border-input focus-visible:ring-ring relative isolate flex min-w-0 flex-col gap-4 overflow-hidden rounded-lg border p-4 focus-visible:ring-2 focus-visible:outline-hidden"
     >
+      {points.length >= 2 ? (
+        <div
+          aria-hidden="true"
+          inert
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-24 opacity-30"
+        >
+          <AreaLineChartBase
+            data={points}
+            xKey="date"
+            series={[{ key: "close", type: "area" }]}
+            config={chartConfig}
+            className="h-full w-full"
+            showGrid={false}
+            showXAxis={false}
+            showYAxis={false}
+            showLegend={false}
+            showTooltip={false}
+          >
+            <YAxis hide domain={[min - pad, max + pad]} />
+          </AreaLineChartBase>
+        </div>
+      ) : null}
       <div className="flex items-start gap-3">
         <FinancialAssetLogo symbol={symbol} />
         <div className="min-w-0 flex-1">
           <h3 className="text-foreground truncate text-sm font-medium">
             {quote.data?.name ?? name}
           </h3>
-          <p className="text-muted-foreground font-mono text-xs">{symbol}</p>
+          <p className="text-muted-foreground text-xs">
+            <span className="font-mono">{symbol}</span>
+            {points.length >= 2 ? (
+              <span className="ml-2">{t("price-history-1m")}</span>
+            ) : null}
+          </p>
         </div>
         <ArrowUpRight
           aria-hidden="true"

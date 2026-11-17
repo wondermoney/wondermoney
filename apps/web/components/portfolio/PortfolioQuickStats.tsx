@@ -31,7 +31,7 @@ const PortfolioQuickStats: React.FC<PortfolioQuickStatsProps> = ({
         quickStats.holdingsCount == null
           ? formatMissing()
           : String(quickStats.holdingsCount),
-      subValue: quickStats.holdingsCount == null ? "" : t("assets"),
+      subValue: quickStats.holdingsCount == null ? "" : t("navigation.assets"),
       subValueIsWord: true,
     },
     {

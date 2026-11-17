@@ -64,6 +64,8 @@ type Props<TData extends object = object> = {
   /** Width reserved for Y-axis tick labels. Recharts' 60px default clips
    * formatted currency labels (e.g. "US$340.00" renders as "S$340.00"). */
   yAxisWidth?: number;
+  /** Custom category tick, e.g. the category icon and its localized name. */
+  categoryTick?: React.ComponentProps<typeof YAxis>["tick"];
   /** Recharts bar layout. `vertical` renders horizontal bars (category on Y). */
   layout?: "horizontal" | "vertical";
   /** Stack the series on top of each other (principal + interest = payment). */
@@ -91,6 +93,7 @@ export function BarChartBase<TData extends object = object>({
   yDomain,
   yTicks,
   yAxisWidth,
+  categoryTick,
   layout = "horizontal",
   stacked = false,
   isAnimationActive = true,
@@ -188,6 +191,7 @@ export function BarChartBase<TData extends object = object>({
           {...(isVertical
             ? {
                 dataKey: xKey,
+                tick: categoryTick,
                 type: "category" as const,
                 tickFormatter: (value: unknown) =>
                   truncateAxisLabel(

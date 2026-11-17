@@ -386,18 +386,6 @@ export default function AccountClient({
         valueLabel={t("account-balance")}
         secondaryValue={isMultiCurrency ? account.balance : undefined}
         secondaryCurrency={account.currencyKey.code}
-        provenance={
-          <DataProvenance
-            updatedAt={clampSyncedAt(
-              account.syncStatus?.lastSyncedAt ?? account.refreshedAt,
-            )}
-            isStale={
-              account.syncStatus?.staleness === "stale" ||
-              account.syncStatus?.staleness === "very_stale"
-            }
-            label={(time) => t("provenance-balances-updated", { time })}
-          />
-        }
         actions={
           transactionAccount && canEdit ? (
             <>
@@ -466,6 +454,18 @@ export default function AccountClient({
       ) : (
         overviewSections
       )}
+      <footer className="order-last">
+        <DataProvenance
+          updatedAt={clampSyncedAt(
+            account.syncStatus?.lastSyncedAt ?? account.refreshedAt,
+          )}
+          isStale={
+            account.syncStatus?.staleness === "stale" ||
+            account.syncStatus?.staleness === "very_stale"
+          }
+          label={(time) => t("provenance-balances-updated", { time })}
+        />
+      </footer>
     </div>
   );
 }

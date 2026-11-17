@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Receipt } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -146,7 +146,7 @@ export function RecurringMonthCalendar({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-9"
+            className="size-11 sm:size-9"
             aria-label={labels.previousMonth}
             onClick={() => onMonthChange(shiftMonth(month, -1))}
           >
@@ -158,7 +158,7 @@ export function RecurringMonthCalendar({
               type="button"
               variant="ghost"
               size="sm"
-              className="min-h-9"
+              className="min-h-11 sm:min-h-9"
               onClick={onToday}
             >
               {labels.today}
@@ -167,7 +167,7 @@ export function RecurringMonthCalendar({
               type="button"
               variant="ghost"
               size="icon"
-              className="size-9"
+              className="size-11 sm:size-9"
               aria-label={labels.nextMonth}
               onClick={() => onMonthChange(shiftMonth(month, 1))}
             >
@@ -206,6 +206,7 @@ export function RecurringMonthCalendar({
               <button
                 key={day}
                 type="button"
+                aria-label={`${formatDay(day, { day: "numeric", month: "long", year: "numeric" })}${dayItems.length ? `: ${labels.paymentCount(dayItems.length)}, ${totalLabel}` : ""}`}
                 aria-current={isToday ? "date" : undefined}
                 aria-pressed={isSelected}
                 className={cn(
@@ -229,7 +230,7 @@ export function RecurringMonthCalendar({
                     <span
                       aria-hidden="true"
                       className={cn(
-                        "size-1.5 rounded-full",
+                        "hidden size-1.5 rounded-full sm:block",
                         hasOverdue
                           ? "bg-destructive-text"
                           : hasDue
@@ -240,6 +241,12 @@ export function RecurringMonthCalendar({
                   ) : null}
                 </span>
                 {dayItems.length > 0 ? (
+                  <Receipt
+                    className="text-primary size-4 sm:hidden"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                {dayItems.length > 0 ? (
                   <span
                     className="hidden w-full truncate text-xs lg:block"
                     title={dayItems.map((item) => item.name).join(", ")}
@@ -249,7 +256,7 @@ export function RecurringMonthCalendar({
                   </span>
                 ) : null}
                 {dayItems.length > 0 ? (
-                  <span className="text-muted-foreground w-full truncate font-mono text-xs tabular-nums">
+                  <span className="text-muted-foreground hidden w-full truncate font-mono text-xs tabular-nums sm:block">
                     {totalLabel}
                   </span>
                 ) : null}

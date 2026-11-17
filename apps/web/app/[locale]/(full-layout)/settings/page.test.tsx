@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import type { ComponentProps } from "react";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import {
@@ -24,6 +25,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams.current,
 }));
 vi.mock("@/i18n/navigation", () => ({
+  Link: (props: ComponentProps<"a">) => <a {...props} />,
   usePathname: () => "/settings",
   useRouter: () => ({ push: () => {} }),
 }));
@@ -74,7 +76,7 @@ const withoutAssistant = () =>
 test("a server with an assistant model shows the Assistant settings tab", () => {
   renderSettings(instanceFeatures(), "assistant");
 
-  screen.getByRole("region", { name: nav.assistant });
+  screen.getByRole("tabpanel", { name: nav.assistant });
 });
 
 test("a server with MCP but no assistant model keeps the tab for pending changes", () => {
@@ -100,14 +102,14 @@ test("on such a server, a person who hid AI has no Assistant tab", () => {
     }),
   );
 
-  assert.equal(screen.queryByRole("region", { name: nav.assistant }), null);
+  assert.equal(screen.queryByRole("tabpanel", { name: nav.assistant }), null);
 });
 
 test("a server with neither an assistant model nor MCP has no Assistant settings tab", () => {
   renderSettings(withoutAssistant(), "appearance");
 
-  assert.equal(screen.queryByRole("region", { name: nav.assistant }), null);
-  screen.getByRole("region", { name: nav.appearance });
+  assert.equal(screen.queryByRole("tabpanel", { name: nav.assistant }), null);
+  screen.getByRole("tabpanel", { name: nav.appearance });
 });
 
 test("a link to the Assistant tab on such a server opens Profile instead", () => {
