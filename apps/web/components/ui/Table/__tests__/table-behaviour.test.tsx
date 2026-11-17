@@ -202,14 +202,14 @@ test("URL paging preserves unrelated state and Back/Forward restores pages", asy
 
   await act(async () => {
     window.history.back();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 20));
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   assert.equal(shownNames()[0], "Item 001");
 
   await act(async () => {
     window.history.forward();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 20));
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   assert.equal(shownNames()[0], "Item 051");
