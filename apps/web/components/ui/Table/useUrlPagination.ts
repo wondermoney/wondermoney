@@ -5,7 +5,7 @@ import type {
   PaginationState,
   Updater,
 } from "@tanstack/react-table";
-import * as nextNavigation from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 const DEFAULT_PAGINATION: PaginationState = { pageIndex: 0, pageSize: 10 };
@@ -52,10 +52,10 @@ export function useUrlPagination(
   pageParamName: string,
   pageSizeParamName: string,
 ) {
-  const searchParams = nextNavigation.useSearchParams?.();
+  const searchParams = useSearchParams();
   const pagination = enabled
     ? readPagination(
-        new URLSearchParams(searchParams?.toString()),
+        new URLSearchParams(searchParams.toString()),
         pageParamName,
         pageSizeParamName,
       )
@@ -174,7 +174,7 @@ export function usePaginationReset<TData>({
   pageParamName,
   pageSizeParamName,
 }: PaginationResetOptions<TData>) {
-  const searchParams = nextNavigation.useSearchParams?.();
+  const searchParams = useSearchParams();
   const baseline = useRef<PaginationBaseline<TData> | null>(null);
 
   useEffect(() => {

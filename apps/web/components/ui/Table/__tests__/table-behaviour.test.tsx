@@ -7,6 +7,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
 } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { createRef, type ReactNode, useState } from "react";
@@ -200,19 +201,11 @@ test("URL paging preserves unrelated state and Back/Forward restores pages", asy
   assert.equal(window.location.search, "?keep=here&size=50&page=2");
   assert.equal(window.location.hash, "#table");
 
-  await act(async () => {
-    window.history.back();
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
-  assert.equal(shownNames()[0], "Item 001");
+  act(() => window.history.back());
+  await waitFor(() => assert.equal(shownNames()[0], "Item 001"));
 
-  await act(async () => {
-    window.history.forward();
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
-  assert.equal(shownNames()[0], "Item 051");
+  act(() => window.history.forward());
+  await waitFor(() => assert.equal(shownNames()[0], "Item 051"));
 });
 
 test("custom pagination keys isolate two tables on the same page", async () => {
