@@ -70,7 +70,7 @@ export default function DemoBanner({
       <Popover>
         <PopoverTrigger
           aria-label={t("banner-label")}
-          className="focus-visible:ring-ring inline-flex h-11 shrink-0 items-center rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
+          className="focus-visible:ring-ring inline-flex h-11 min-w-11 shrink-0 items-center rounded-md focus-visible:ring-2 focus-visible:outline-hidden"
         >
           <span className="border-border text-muted-foreground rounded-sm border px-1.5 py-0.5 text-xs font-medium">
             {t("badge")}

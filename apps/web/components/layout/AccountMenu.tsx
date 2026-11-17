@@ -129,7 +129,7 @@ export default function AccountMenu({
         </PopoverTrigger>
       ) : (
         <PopoverTrigger
-          className="hover:bg-foreground/5 flex h-11 items-center gap-2 rounded-md px-1 transition-colors duration-[var(--duration-micro)] ease-out motion-reduce:transition-none sm:px-2"
+          className="hover:bg-foreground/5 flex h-11 items-center gap-2 rounded-md px-1 max-sm:w-11 max-sm:justify-center transition-colors duration-[var(--duration-micro)] ease-out motion-reduce:transition-none sm:px-2"
           aria-label={t("open-user-menu")}
         >
           {avatar}
