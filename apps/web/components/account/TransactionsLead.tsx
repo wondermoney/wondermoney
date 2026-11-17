@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -62,8 +63,8 @@ export function TransactionsLead({
     "border-border min-w-0 px-0 sm:border-l sm:px-6 sm:first:border-l-0 sm:first:pl-0";
 
   return (
-    <div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4 sm:gap-x-0">
+    <div className="relative">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 max-sm:pr-12 sm:grid-cols-4 sm:gap-x-0">
         <div className={cell}>
           <dt className="text-muted-foreground text-sm">{t("in-view")}</dt>
           <dd className="text-foreground mt-1 font-mono text-2xl font-medium tracking-tight">
@@ -139,11 +140,17 @@ export function TransactionsLead({
       </dl>
       <button
         type="button"
-        className="text-muted-foreground focus-visible:ring-ring mt-1 min-h-11 rounded-md text-sm underline underline-offset-4 focus-visible:ring-2 sm:hidden"
+        className="text-muted-foreground focus-visible:ring-ring absolute top-0 right-0 flex size-11 items-center justify-center rounded-md focus-visible:ring-2 sm:hidden"
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
       >
-        {common(expanded ? "summary-less-details" : "summary-more-details")}
+        <ChevronDown
+          className={cn("size-4", expanded && "rotate-180")}
+          aria-hidden="true"
+        />
+        <span className="sr-only">
+          {common(expanded ? "summary-less-details" : "summary-more-details")}
+        </span>
       </button>
       <p
         className={cn(

@@ -2629,6 +2629,7 @@
     "q6Body": "Contacta-nos a qualquer momento em {email}. Lemos tudo o que nos escrevem."
   },
   "demo": {
+    "badge": "Demo",
     "sign-in": "Experimentar a demonstração",
     "sign-in-hint": "Explora um agregado familiar de exemplo sem criar conta.",
     "sign-in-unavailable": "A demonstração não está disponível neste servidor.",

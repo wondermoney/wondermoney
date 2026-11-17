@@ -686,10 +686,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                           />
                         ) : null}
                         <span className="truncate">
-                        {transaction.accountKey.accountName} ·{" "}
-                        {formatShortDate(
-                          transactionDisplayDate(transaction.transactionDate),
-                        )}
+                          {transaction.accountKey.accountName} ·{" "}
+                          {formatShortDate(
+                            transactionDisplayDate(transaction.transactionDate),
+                          )}
                         </span>
                       </p>
                       {categoryLabel ? (
@@ -961,7 +961,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                         {/* Whose spending it is, in a household of more than one. */}
                         {showMembers && info.row.original.attribution ? (
                           <MemberBadge
-                            appuserKey={info.row.original.attribution.appuserKey}
+                            appuserKey={
+                              info.row.original.attribution.appuserKey
+                            }
                             displayName={
                               info.row.original.attribution.displayName
                             }
@@ -1765,14 +1767,24 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         </div>
       );
 
-      const renderFilterTrigger = () => (
-        <Button variant="secondary" className="shrink-0">
+      const renderFilterTrigger = (compact = false) => (
+        <Button
+          variant="secondary"
+          aria-label={t("filters")}
+          title={t("filters")}
+          className={cn("shrink-0", compact && "relative size-11 px-0")}
+        >
           <Filter className="size-4" />
-          {t("filters")}
+          <span className={compact ? "sr-only" : undefined}>
+            {t("filters")}
+          </span>
           {activeFiltersCount > 0 && (
             <Badge
               variant="secondary"
-              className="h-5 min-w-5 rounded-full px-1.5 text-xs"
+              className={cn(
+                "h-5 min-w-5 rounded-full px-1.5 text-xs",
+                compact && "absolute -top-1 -right-1",
+              )}
             >
               {activeFiltersCount}
             </Badge>
@@ -1850,9 +1862,10 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                   isLedger && "border-foreground border-t-2 pt-3",
                 )}
               >
-                <div className="flex flex-row flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-row items-center gap-2">
                   {transactionDateRange && onDateRangeFilterChange && (
                     <DatePickerRange
+                      compactOnMobile
                       onSelect={onDateRangeFilterChange}
                       value={transactionDateRange}
                     />
@@ -1860,7 +1873,7 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 
                   <DrawerDialog
                     title={t("filters")}
-                    trigger={renderFilterTrigger()}
+                    trigger={renderFilterTrigger(true)}
                     footer={
                       activeFiltersCount > 0 ? (
                         <Button

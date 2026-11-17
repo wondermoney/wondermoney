@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { Landmark, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -30,6 +30,7 @@ import { Link } from "@/components/ui/Link";
 import { StatCardsSkeleton } from "@/components/ui/PageSkeleton";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import { useRouter } from "@/i18n/navigation";
 import { writableAccounts } from "@/lib/account/account-access";
 import { getAggregateFreshness } from "@/lib/account/accounts-freshness";
@@ -480,13 +481,16 @@ export default function AccountsClient({
   return (
     <div className="flex flex-col gap-6 sm:gap-10 lg:gap-12">
       {/* Header row */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="flex items-center justify-between gap-2 md:items-start">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
-              {t("accounts-overview")}
+              <span className="sm:hidden">{t("accounts")}</span>
+              <span className="hidden sm:inline">{t("accounts-overview")}</span>
             </h1>
-            <AccountsOnboarding />
+            <span className="hidden sm:inline-flex">
+              <AccountsOnboarding />
+            </span>
           </div>
           {/* No subtitle. It read "This is a summary of your accounts,
               including balance growth, latest transactions and insights" —
@@ -495,13 +499,13 @@ export default function AccountsClient({
               swept: Goals keeps its line, because "set aside budgeted money"
               explains the envelope concept the feature rests on. */}
         </div>
-        <div className="flex w-auto flex-col gap-2 xl:flex-row xl:items-center xl:justify-end">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <TimeframeSelect
             timeframes={timeframes}
             timeframe={timeframe}
             setTimeframe={(value) => setTimeframe(value as AccountsTimeframe)}
           />
-          <div className="flex gap-2 sm:items-center">
+          <div className="flex items-center gap-1 sm:gap-2">
             {hasEditableAccounts ? (
               <AccountTransactionAddModal
                 isOpen={isAddManualTransactionModalOpen}
@@ -512,10 +516,10 @@ export default function AccountsClient({
                 }
                 accounts={editableAccounts}
                 trigger={
-                  <Button className="w-full">
-                    <Plus className="size-4" />
-                    {t("add-transaction")}
-                  </Button>
+                  <ToolbarAction
+                    label={t("add-transaction")}
+                    icon={<Plus className="size-4" />}
+                  />
                 }
               />
             ) : null}
@@ -525,14 +529,11 @@ export default function AccountsClient({
               onAddSyncAccountClick={onAddSyncAccountClick}
               onAddOfflineAccountClick={onAddOfflineAccountClick}
               trigger={
-                <Button
+                <ToolbarAction
                   variant="outline"
-                  className="w-full"
-                  aria-label={t("add-account")}
-                >
-                  <Plus className="size-4" />
-                  {t("add-account")}
-                </Button>
+                  label={t("add-account")}
+                  icon={<Landmark className="size-4" />}
+                />
               }
             />
           </div>

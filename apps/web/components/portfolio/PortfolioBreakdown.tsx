@@ -5,10 +5,14 @@ import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
 import { Amount } from "@/components/ui/Amount";
+import { Link } from "@/components/ui/Link";
 import { Progress } from "@/components/ui/progress";
 import { Table } from "@/components/ui/Table";
 import CellNumeric from "@/components/ui/Table/Cell/CellNumeric";
-import { type ColumnDef, createColumnHelper } from "@/components/ui/Table/features";
+import {
+  type ColumnDef,
+  createColumnHelper,
+} from "@/components/ui/Table/features";
 import type { PortfolioBreakdownItem } from "@/lib/api/portfolio/usePortfolioDashboard";
 import { cn } from "@/lib/utils";
 import { getDeltaClassName } from "@/lib/utils/formatCurrency";
@@ -49,7 +53,10 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
         header: () => <div className="text-right">{t("value")}</div>,
         cell: (info) => (
           <CellNumeric className="text-right">
-            <Amount value={info.getValue()} currency={info.row.original.currency} />
+            <Amount
+              value={info.getValue()}
+              currency={info.row.original.currency}
+            />
           </CellNumeric>
         ),
       }),
@@ -65,7 +72,10 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
             <div className="flex items-center gap-2">
               <Progress value={info.getValue()} className="w-[80px]" />
               <span className="text-foreground font-mono text-sm font-medium">
-                {formatPercentage(info.getValue() / 100, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                {formatPercentage(info.getValue() / 100, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })}
               </span>
             </div>
           ),
@@ -104,14 +114,65 @@ const PortfolioBreakdown: React.FC<PortfolioBreakdownProps> = ({
   }
 
   return (
-    <Table
-      columns={columns}
-      data={portfolios}
-      onRowClick={handleRowClick}
-      meta={{
-        getRowClasses: () => ({ "border-b-0": true }),
-      }}
-    />
+    <>
+      <ul className="divide-border divide-y sm:hidden">
+        {portfolios.map((portfolio) => (
+          <li key={portfolio.portfolioKey}>
+            <Link
+              href={`/portfolio/${portfolio.portfolioKey}`}
+              className="focus-visible:ring-ring text-foreground block rounded-md py-3 no-underline focus-visible:ring-2"
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="min-w-0 text-sm font-medium">
+                  {portfolio.name}
+                </span>
+                <Amount
+                  value={portfolio.value}
+                  currency={portfolio.currency}
+                  className="shrink-0 font-mono text-sm font-medium"
+                />
+              </div>
+              <div className="text-muted-foreground mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
+                <span>
+                  {t("weight")}{" "}
+                  <span className="font-mono">
+                    {portfolio.excluded
+                      ? t("portfolio-excluded-badge")
+                      : formatPercentage(portfolio.weight / 100, {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        })}
+                  </span>
+                </span>
+                <span>
+                  {t("gain")}{" "}
+                  <span
+                    className={cn(
+                      "font-mono",
+                      getFinancialColor(portfolio.gainPercent),
+                    )}
+                  >
+                    {formatPercentage(portfolio.gainPercent / 100, {
+                      minimumFractionDigits: 1,
+                      maximumFractionDigits: 1,
+                      signDisplay: "exceptZero",
+                    })}
+                  </span>
+                </span>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden sm:block">
+        <Table
+          columns={columns}
+          data={portfolios}
+          onRowClick={handleRowClick}
+          meta={{ getRowClasses: () => ({ "border-b-0": true }) }}
+        />
+      </div>
+    </>
   );
 };
 

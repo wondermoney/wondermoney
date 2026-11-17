@@ -60,6 +60,8 @@ export default function Stats({
         )}
       >
         {stats.map((item, index) => {
+          const primaryOnMobile =
+            mobilePrimaryCount !== undefined && index < mobilePrimaryCount;
           let colorClass = "text-muted-foreground";
           let Icon = null;
 
@@ -95,15 +97,34 @@ export default function Stats({
               // Direction A: a figure under a hairline, not a box.
               className={cn(
                 "border-border min-w-0 overflow-hidden border-t pt-3",
+                primaryOnMobile && "max-sm:flex max-sm:flex-col",
                 mobilePrimaryCount !== undefined &&
                   index >= mobilePrimaryCount &&
                   !expanded &&
                   "hidden sm:block",
               )}
             >
-              <dt className="text-muted-foreground flex justify-between truncate text-sm">
-                {item.name}
-                <div className={cn("flex items-center", colorClass)}>
+              <dt
+                className={cn(
+                  "text-muted-foreground flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm",
+                  primaryOnMobile && "max-sm:contents",
+                )}
+              >
+                <span
+                  className={cn(
+                    "min-w-0",
+                    primaryOnMobile && "max-sm:order-1 max-sm:text-xs",
+                  )}
+                >
+                  {item.name}
+                </span>
+                <div
+                  className={cn(
+                    "flex shrink-0 items-center",
+                    colorClass,
+                    primaryOnMobile && "max-sm:order-3 max-sm:mt-1",
+                  )}
+                >
                   {!isNeutralChange && Icon && <Icon className="size-4" />}
                   {item.changeValue && (
                     <span className="ml-1 text-xs font-medium">
@@ -112,7 +133,12 @@ export default function Stats({
                   )}
                 </div>
               </dt>
-              <dd className="mt-2 space-y-1">
+              <dd
+                className={cn(
+                  "mt-2 space-y-1",
+                  primaryOnMobile && "max-sm:order-2 max-sm:mt-1",
+                )}
+              >
                 <div className="text-foreground font-mono text-xl font-medium tracking-tight whitespace-nowrap sm:text-2xl">
                   {item.value != null ? (
                     <NumberFlow

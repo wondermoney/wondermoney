@@ -27,6 +27,7 @@ import { ObjectHeader } from "@/components/ui/ObjectHeader";
 import { Section } from "@/components/ui/RuledSection";
 import { Spinner } from "@/components/ui/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import {
   canEditAccount,
   readOnlyAccountKeys,
@@ -343,12 +344,13 @@ export default function AccountClient({
   const isCreditCard = Boolean(account.creditCard);
 
   return (
-    <div className="flex flex-col gap-10 lg:gap-12">
+    <div className="flex flex-col gap-4 sm:gap-10 lg:gap-12">
       {/* One header for the object, replacing a name-only header plus a
           separate "Account balance" card below it — the figure a person opens
           this page to see was the third thing on it, boxed on its own.
           § 9 ObjectHeader. */}
       <ObjectHeader
+        mobileActionsWithBack
         backHref="/accounts"
         backLabel={t("accounts")}
         title={accountName}
@@ -410,10 +412,11 @@ export default function AccountClient({
                 }}
                 accounts={[transactionAccount]}
                 trigger={
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    <Upload className="size-4" />
-                    {t("import-transactions")}
-                  </Button>
+                  <ToolbarAction
+                    variant="outline"
+                    label={t("import-transactions")}
+                    icon={<Upload className="size-4" />}
+                  />
                 }
               />
               <AccountTransactionAddModal
@@ -427,10 +430,10 @@ export default function AccountClient({
                 }}
                 accounts={[transactionAccount]}
                 trigger={
-                  <Button className="w-full sm:w-auto">
-                    <Plus className="size-4" />
-                    {t("add-transaction")}
-                  </Button>
+                  <ToolbarAction
+                    label={t("add-transaction")}
+                    icon={<Plus className="size-4" />}
+                  />
                 }
               />
             </>
@@ -449,7 +452,7 @@ export default function AccountClient({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <div className="flex flex-col gap-10 lg:gap-12">
+            <div className="flex flex-col gap-4 sm:gap-10 lg:gap-12">
               {overviewSections}
             </div>
           </TabsContent>
