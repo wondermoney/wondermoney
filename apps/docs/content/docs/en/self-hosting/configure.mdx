@@ -279,7 +279,7 @@ Everyone who uses the demo shares it, so it is read-only:
 
 - Every change is refused with the read-only message: the household's data, and the account itself (name, email, password, authenticator, passkeys, and signing out other visitors).
 - A demo session ends two hours after it starts. Demo sign-ins are limited per IP address, like password sign-ins.
-- A banner on every screen says the data is a shared demo that resets daily, and links to sign-up (only when `SIGNUP_MODE` is `open`) and to these self-hosting guides.
+- On desktop, a banner explains that the shared demo is read-only and resets daily. On phones, tap **Demo** in the header for the same information, sign-up (only when `SIGNUP_MODE` is `open`) and these self-hosting guides.
 - The demo account has no password and no authenticator. The demo sign-in refuses an account with an authenticator, and never signs in any other account.
 
 Create the demo account and its household before you turn the setting on:
@@ -298,7 +298,7 @@ Recommended settings for a demo instance:
 | AI (`AI_BASE_URL`, `AI_PROVIDER`, `AZURE_OPENAI_*`) | Empty, or limited with `AI_DAILY_LIMIT_*` | The demo account cannot use the assistant, receipt scanning or AI column mapping, which all save something. With AI off the app hides them instead. Every visitor shares one household, so daily limits are shared too |
 | `BANK_PROVIDERS` | `none` | Hides bank sync. The demo account cannot connect a bank either way |
 | `ENABLE_PGBOSS_DEMO_DATA_REFRESH` (worker) | `true` | Moves the demo's transactions forward every day at 01:15 UTC, so they stay recent |
-| `SIGNUP_MODE` | `closed` on a demo-only server, `open` to let visitors sign up | The banner links to sign-up only when it is `open` |
+| `SIGNUP_MODE` | `closed` on a demo-only server, `open` to let visitors sign up | The demo notice offers sign-up only when it is `open` |
 
 ## Analytics
 
