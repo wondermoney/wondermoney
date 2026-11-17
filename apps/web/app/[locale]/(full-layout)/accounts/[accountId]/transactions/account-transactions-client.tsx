@@ -27,6 +27,7 @@ import useAccountTransactions from "@/lib/api/account/useAccountTransactions";
 import type { GetConfigsResponse } from "@/lib/api/configs/useConfigs";
 import useConfigs from "@/lib/api/configs/useConfigs";
 import { serverSeed } from "@/lib/query/server-seed";
+import { useHydrated } from "@/lib/utils/useHydrated";
 
 interface AccountTransactionsClientProps {
   accountId: number;
@@ -51,6 +52,7 @@ export default function AccountTransactionsClient({
   hasAnyTransactions,
   defaultDateRange,
 }: AccountTransactionsClientProps) {
+  const hydrated = useHydrated();
   const t = useTranslations();
   const posthog = usePostHog();
 
@@ -242,7 +244,7 @@ export default function AccountTransactionsClient({
       </div>
     ) : null;
 
-  if (isLoading) {
+  if (!hydrated || isLoading) {
     return <Spinner />;
   }
 

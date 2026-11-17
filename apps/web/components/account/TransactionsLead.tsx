@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
-import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/components/ui/Link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UnconvertedAmountsNotice } from "@/components/ui/UnconvertedAmountsNotice";
@@ -64,13 +63,56 @@ export function TransactionsLead({
 
   return (
     <div className="relative">
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 max-sm:pr-12 sm:grid-cols-4 sm:gap-x-0">
-        <div className={cell}>
-          <dt className="text-muted-foreground text-sm">{t("in-view")}</dt>
-          <dd className="text-foreground mt-1 font-mono text-2xl font-medium tracking-tight">
-            {viewTotal ?? "—"}
-          </dd>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-muted-foreground min-w-0 text-xs sm:text-sm">
+          {t.rich("view-count", {
+            count: viewTotal ?? 0,
+            value: () => (
+              <span className="text-foreground font-mono font-medium">
+                {viewTotal ?? "—"}
+              </span>
+            ),
+          })}
+        </p>
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          {unreviewed.isPending ? (
+            <Skeleton className="h-4 w-32" aria-hidden="true" />
+          ) : unreviewed.isError ? (
+            <span className="text-muted-foreground text-xs">
+              {t("needs-review")}: —
+            </span>
+          ) : reviewCount ? (
+            <Link
+              href="/accounts/transactions/review"
+              className="text-warning-text flex min-h-11 max-w-36 items-center text-xs underline underline-offset-4"
+            >
+              {t("review-count", { count: reviewCount })}
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            className="text-muted-foreground focus-visible:ring-ring flex size-11 items-center justify-center rounded-md focus-visible:ring-2 sm:hidden"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            <ChevronDown
+              className={cn("size-4", expanded && "rotate-180")}
+              aria-hidden="true"
+            />
+            <span className="sr-only">
+              {common(
+                expanded ? "summary-less-details" : "summary-more-details",
+              )}
+            </span>
+          </button>
         </div>
+      </div>
+      <dl
+        className={cn(
+          "grid grid-cols-2 gap-x-6 gap-y-4 sm:gap-x-0",
+          !expanded && "hidden sm:grid",
+        )}
+      >
         <div
           className={cn(
             cell,
@@ -110,48 +152,7 @@ export function TransactionsLead({
             )}
           </dd>
         </div>
-        <div className={cell}>
-          <dt className="text-muted-foreground text-sm">{t("needs-review")}</dt>
-          <dd className="mt-1 flex items-baseline gap-3">
-            {figure(
-              unreviewed.isPending,
-              <span
-                className={cn(
-                  "font-mono text-2xl font-medium tracking-tight",
-                  reviewCount ? "text-warning-text" : "text-foreground",
-                )}
-              >
-                {unreviewed.isError ? "—" : (reviewCount ?? 0)}
-              </span>,
-            )}
-            {reviewCount ? (
-              <Link
-                href="/accounts/transactions/review"
-                className={cn(
-                  buttonVariants({ variant: "link" }),
-                  "h-auto p-0",
-                )}
-              >
-                {t("review-link")}
-              </Link>
-            ) : null}
-          </dd>
-        </div>
       </dl>
-      <button
-        type="button"
-        className="text-muted-foreground focus-visible:ring-ring absolute top-0 right-0 flex size-11 items-center justify-center rounded-md focus-visible:ring-2 sm:hidden"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((value) => !value)}
-      >
-        <ChevronDown
-          className={cn("size-4", expanded && "rotate-180")}
-          aria-hidden="true"
-        />
-        <span className="sr-only">
-          {common(expanded ? "summary-less-details" : "summary-more-details")}
-        </span>
-      </button>
       <p
         className={cn(
           "text-muted-foreground mt-3 text-xs",

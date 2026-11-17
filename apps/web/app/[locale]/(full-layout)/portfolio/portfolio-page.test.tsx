@@ -134,6 +134,7 @@ vi.mock("@/components/portfolio/PortfolioClosedPositions", () =>
 );
 vi.mock("@/components/portfolio/PortfolioDashboardSummary", () => ({
   default: () => null,
+  PortfolioFreshness: () => null,
 }));
 vi.mock("@/components/portfolio/PortfolioBreakdown", () => ({
   default: () => null,

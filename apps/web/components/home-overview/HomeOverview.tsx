@@ -8,6 +8,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
+import AccountsFreshness from "@/components/account/AccountsFreshness";
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
 import { NetWorthViewedEvent } from "@/components/dashboard/NetWorthViewedEvent";
 import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
@@ -114,6 +115,7 @@ export function HomeOverview() {
   // The activation checklist reads the browser's query cache: render it once
   // hydrated.
   const hydrated = useHydrated();
+  const { data: accountsData } = useAccounts();
   const t = useTranslations("homeOverview.customize");
   const preferences = useUserPreferences();
   const [customizing, setCustomizing] = useState(false);
@@ -143,17 +145,16 @@ export function HomeOverview() {
           member={member}
           actions={
             <>
-              <MemberFilterControl />
+              <MemberFilterControl iconOnly />
               <Button
                 size="icon"
                 variant="ghost"
                 aria-label={t("action")}
                 title={t("action")}
-                className="max-sm:size-11 sm:w-auto sm:px-3"
+                className="size-11"
                 onClick={() => setCustomizing(true)}
               >
                 <SlidersHorizontal className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">{t("action")}</span>
               </Button>
             </>
           }
@@ -170,6 +171,11 @@ export function HomeOverview() {
         ))}
 
       <CustomizeHomeSheet open={customizing} onOpenChange={setCustomizing} />
+      {hydrated ? (
+        <footer>
+          <AccountsFreshness accounts={accountsData?.accounts} />
+        </footer>
+      ) : null}
     </div>
   );
 }

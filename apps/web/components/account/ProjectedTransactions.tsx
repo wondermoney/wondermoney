@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { InstallmentBadge } from "@/components/installments/InstallmentBadge";
@@ -81,50 +82,59 @@ export default function ProjectedTransactions({
         className,
       )}
     >
-      <div className="border-border flex flex-wrap items-baseline justify-between gap-2 border-b border-dashed px-4 py-2.5">
-        <p className="text-foreground text-sm font-medium">
-          {t("forecast.projectedTransactions")}
-        </p>
-        <p className="text-muted-foreground text-xs">
-          {t("forecast.notCounted")}
-        </p>
-      </div>
-      <ul className="divide-border divide-y divide-dashed">
-        {rows.map((occurrence) => (
-          <li
-            key={occurrence.key}
-            className="flex items-center justify-between gap-3 px-4 py-3"
-          >
-            <div className="min-w-0">
-              <div className="flex min-w-0 items-center gap-2">
-                <p className="text-foreground truncate text-sm font-medium">
-                  {occurrence.name}
+      <details className="group">
+        <summary className="focus-visible:ring-ring flex min-h-11 cursor-pointer list-none flex-wrap items-center gap-2 rounded-lg px-4 py-2 text-sm focus-visible:ring-2 [&::-webkit-details-marker]:hidden">
+          <ChevronDown
+            className="size-4 shrink-0 transition-transform group-open:rotate-180"
+            aria-hidden="true"
+          />
+          <span className="text-foreground font-medium">
+            {t("forecast.projectedTransactions")}{" "}
+            <span className="text-muted-foreground font-mono text-xs">
+              ({rows.length})
+            </span>
+          </span>
+          <span className="text-muted-foreground ml-auto text-xs">
+            {t("forecast.notCounted")}
+          </span>
+        </summary>
+        <ul className="divide-border border-border divide-y divide-dashed border-t border-dashed">
+          {rows.map((occurrence) => (
+            <li
+              key={occurrence.key}
+              className="flex items-center justify-between gap-3 px-4 py-3"
+            >
+              <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="text-foreground truncate text-sm font-medium">
+                    {occurrence.name}
+                  </p>
+                  <InstallmentBadge installment={occurrence.installment} />
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  {formatShortDate(
+                    transactionDisplayDate(`${occurrence.date}T00:00:00.000Z`),
+                  )}
                 </p>
-                <InstallmentBadge installment={occurrence.installment} />
               </div>
-              <p className="text-muted-foreground text-xs">
-                {formatShortDate(
-                  transactionDisplayDate(`${occurrence.date}T00:00:00.000Z`),
-                )}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Badge
-                variant="outline"
-                className="text-muted-foreground border-dashed text-xs font-normal"
-              >
-                {t("forecast.projected")}
-              </Badge>
-              <span className="text-foreground font-mono text-sm font-semibold tabular-nums">
-                <Amount
-                  value={-occurrence.amount}
-                  currency={occurrence.currency}
-                />
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+              <div className="flex shrink-0 items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="text-muted-foreground border-dashed text-xs font-normal"
+                >
+                  {t("forecast.projected")}
+                </Badge>
+                <span className="text-foreground font-mono text-sm font-semibold tabular-nums">
+                  <Amount
+                    value={-occurrence.amount}
+                    currency={occurrence.currency}
+                  />
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </details>
     </section>
   );
 }

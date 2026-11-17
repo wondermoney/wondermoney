@@ -11,7 +11,9 @@
       "description": "As transações que este relatório contou, com os filtros dele. Os teus filtros restringem-nas ainda mais.",
       "sum": "Somam",
       "show-all": "Mostrar todas as transações"
-    }
+    },
+    "view-count": "<value></value> {count, plural, one {transação nesta vista} other {transações nesta vista}}",
+    "review-count": "{count, plural, one {# transação por rever} other {# transações por rever}}"
   },
   "transactionTags": {
     "label": "Etiquetas",

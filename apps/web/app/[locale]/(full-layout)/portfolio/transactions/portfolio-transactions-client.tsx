@@ -241,11 +241,13 @@ export default function PortfolioTransactionsClient({
             trigger={
               <Button
                 aria-label={t("add-transaction")}
-                className="min-h-11 gap-1 px-3 sm:gap-2 sm:px-4"
+                className="gap-2 max-sm:size-11 max-sm:p-0"
               >
                 <Plus className="size-4" />
-                <span className="sm:hidden">{t("add")}</span>
-                <span className="hidden sm:inline">{t("add-transaction")}</span>
+
+                <span className="sr-only sm:not-sr-only">
+                  {t("add-transaction")}
+                </span>
               </Button>
             }
           />

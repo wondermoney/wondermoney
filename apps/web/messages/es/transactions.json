@@ -11,7 +11,9 @@
       "description": "Las transacciones que este informe contó, con sus filtros. Tus filtros las acotan aún más.",
       "sum": "Suman",
       "show-all": "Mostrar todas las transacciones"
-    }
+    },
+    "view-count": "<value></value> {count, plural, one {transacción en esta vista} other {transacciones en esta vista}}",
+    "review-count": "{count, plural, one {# transacción necesita revisión} other {# transacciones necesitan revisión}}"
   },
   "transactionTags": {
     "label": "Etiquetas",

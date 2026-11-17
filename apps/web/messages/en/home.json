@@ -38,12 +38,17 @@
         "above": "{category} is {percent}% above its usual pace.",
         "below": "{category} is {percent}% below its usual pace.",
         "figures": "<current></current> so far, normally <baseline></baseline> by this point.",
-        "link": "View transactions"
+        "link": "View transactions",
+        "status": {
+          "above": "{percent}% above its usual pace.",
+          "below": "{percent}% below its usual pace."
+        }
       },
       "budget": {
         "pace": "{category} is on course to overrun its budget.",
         "figures": "<projected></projected> projected against <budgeted></budgeted> planned.",
-        "link": "View budget"
+        "link": "View budget",
+        "status": "On course to overrun its budget."
       },
       "ask": {
         "link": "Ask the assistant",

@@ -38,12 +38,17 @@
         "above": "{category} está un {percent}% por encima de su ritmo habitual.",
         "below": "{category} está un {percent}% por debajo de su ritmo habitual.",
         "figures": "<current></current> hasta ahora, normalmente <baseline></baseline> a estas alturas.",
-        "link": "Ver transacciones"
+        "link": "Ver transacciones",
+        "status": {
+          "above": "{percent}% por encima de su ritmo habitual.",
+          "below": "{percent}% por debajo de su ritmo habitual."
+        }
       },
       "budget": {
         "pace": "{category} va camino de superar su presupuesto.",
         "figures": "<projected></projected> previstos frente a <budgeted></budgeted> planificados.",
-        "link": "Ver presupuesto"
+        "link": "Ver presupuesto",
+        "status": "Va camino de superar su presupuesto."
       },
       "ask": {
         "link": "Preguntar al asistente",

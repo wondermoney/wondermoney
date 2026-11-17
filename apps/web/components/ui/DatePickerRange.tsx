@@ -119,7 +119,7 @@ const DatePickerWithRange: React.FC<DatePickerWithRangeProps> = ({
             "w-auto max-w-full min-w-[270px] justify-start text-left font-normal",
             !value && "text-muted-foreground",
             compactOnMobile &&
-              "max-sm:min-w-0 max-sm:flex-1 max-sm:px-2 max-sm:text-xs",
+              "max-md:h-11 max-sm:min-w-0 max-sm:flex-1 max-sm:px-2 max-sm:text-xs",
           )}
         >
           <CalendarIcon className="size-4" />

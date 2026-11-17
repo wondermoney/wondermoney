@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlert, CircleCheck, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -20,6 +21,12 @@ import { cn } from "@/lib/utils";
 import { getCategoryDisplayName } from "@/lib/utils/categories";
 
 import { useInsightPrompt } from "./insight-prompt";
+
+const SEVERITY_ICON = {
+  critical: CircleAlert,
+  warning: TriangleAlert,
+  info: CircleCheck,
+};
 
 const SEVERITY_TONE: Record<Insight["severity"], string> = {
   critical: "text-destructive-text",
@@ -123,11 +130,11 @@ function InsightCard({
         linkLabel={t("spending.link")}
         severity={insight.severity}
       >
-        <p className="text-foreground text-base font-medium">
-          {t(`spending.${facts.direction}`, {
-            category: categoryLabel(facts.categoryName),
-            percent,
-          })}
+        <h3 className="text-foreground text-base font-semibold">
+          {categoryLabel(facts.categoryName)}
+        </h3>
+        <p className="text-foreground text-sm">
+          {t(`spending.status.${facts.direction}`, { percent })}
         </p>
         <p className="text-muted-foreground text-sm">
           {t.rich("spending.figures", {
@@ -140,7 +147,7 @@ function InsightCard({
             ),
             current: () => (
               <Amount
-                className="font-mono"
+                className="text-foreground font-mono font-medium"
                 currency={facts.currency}
                 value={Number(facts.currentAmount)}
               />
@@ -166,9 +173,8 @@ function InsightCard({
       linkLabel={t("budget.link")}
       severity={insight.severity}
     >
-      <p className="text-foreground text-base font-medium">
-        {t("budget.pace", { category })}
-      </p>
+      <h3 className="text-foreground text-base font-semibold">{category}</h3>
+      <p className="text-foreground text-sm">{t("budget.status")}</p>
       <p className="text-muted-foreground text-sm">
         {t.rich("budget.figures", {
           budgeted: () => (
@@ -180,7 +186,7 @@ function InsightCard({
           ),
           projected: () => (
             <Amount
-              className="font-mono"
+              className="text-foreground font-mono font-medium"
               currency={facts.currencyCode}
               value={Number(facts.projectedAmount)}
             />
@@ -228,17 +234,18 @@ function InsightCardShell({
   /** Extra actions beside the link (the assistant link lives here). */
   actions?: ReactNode;
 }) {
+  const StatusIcon = SEVERITY_ICON[severity];
   return (
     <li className="border-border flex flex-col gap-2 border-b py-4 first:pt-0">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">{children}</div>
         <span
-          className={cn(
-            "shrink-0 text-xs font-medium",
-            SEVERITY_TONE[severity],
-          )}
+          role="img"
+          aria-label={label}
+          title={label}
+          className={cn("mt-1 shrink-0", SEVERITY_TONE[severity])}
         >
-          {label}
+          <StatusIcon className="size-5" aria-hidden="true" />
         </span>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

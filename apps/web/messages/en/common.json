@@ -2365,7 +2365,10 @@
     "move-money-error": "Could not move money out of this goal. Try again.",
     "confirm-archive-with-balance": "Move the remaining {amount} before archiving this goal.",
     "transfer-explainer": "Transfers move money between accounts. To fund this goal, assign budgeted money to it.",
-    "of-target": "of {amount}"
+    "of-target": "of {amount}",
+    "show-achieved": "Show achieved",
+    "show-archived": "Show archived",
+    "no-active": "No active goals. Show achieved goals or create a new one."
   },
   "notificationPreferences": {
     "title": "Email notifications",
@@ -3239,5 +3242,6 @@
   "summary-more-details": "More details",
   "summary-less-details": "Fewer details",
   "activation-setup-hint": "Finish setup",
-  "financial-markets-example-companies": "Companies to explore"
+  "financial-markets-example-companies": "Companies to explore",
+  "price-history-1m": "1M history"
 }

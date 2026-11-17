@@ -23,6 +23,7 @@ import {
   ReportLoadingSkeleton,
 } from "@/components/reports/primitives";
 import { useReportsCurrency } from "@/components/reports/ReportsCurrencyContext";
+import CategoryIcon, { categoryIconStyle } from "@/components/ui/CategoryIcon";
 import type { ChartConfig } from "@/components/ui/chart";
 import { BarChartBase } from "@/components/ui/charts";
 import { Link } from "@/components/ui/Link";
@@ -45,10 +46,7 @@ import useMonthComparison, {
 } from "@/lib/api/reports/monthComparison";
 import type { MonthComparisonCategoryRow } from "@/lib/api/reports/types";
 import { cn } from "@/lib/utils";
-import {
-  getAllCategories,
-  getCategoryTranslationKey,
-} from "@/lib/utils/categories";
+import { getCategoryTranslationKey } from "@/lib/utils/categories";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
@@ -85,10 +83,9 @@ export function MonthComparisonReport() {
   const categoryByKey = useMemo(
     () =>
       new Map(
-        getAllCategories(categoriesData?.categories ?? []).map((category) => [
-          category.key.toString(),
-          category,
-        ]),
+        (categoriesData?.categories ?? [])
+          .flatMap((category) => [category, ...(category.childCategory ?? [])])
+          .map((category) => [category.categoryKey.toString(), category]),
       ),
     [categoriesData],
   );
@@ -142,8 +139,10 @@ export function MonthComparisonReport() {
     return rows.map((row) => ({
       delta: row.delta,
       name: getCategoryName(row),
+      icon: categoryByKey.get(row.categoryKey)?.icon ?? "folder",
+      color: row.color,
     }));
-  }, [data, getCategoryName]);
+  }, [data, getCategoryName, categoryByKey]);
 
   const chartConfig = useMemo<ChartConfig>(
     () => ({
@@ -316,6 +315,8 @@ export function MonthComparisonReport() {
                 keys={["delta"]}
                 config={chartConfig}
                 layout="vertical"
+                yAxisWidth={160}
+                categoryTick={<ComparisonCategoryTick categories={chartData} />}
                 isAnimationActive={!shouldReduceMotion}
                 getBarColor={(row) =>
                   (row as { delta: number }).delta > 0
@@ -370,11 +371,16 @@ export function MonthComparisonReport() {
                       <TableRow key={row.categoryKey}>
                         <TableCell>
                           <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className="inline-block size-2 rounded-full"
-                              style={{ backgroundColor: row.color }}
-                              aria-hidden="true"
-                            />
+                            <span aria-hidden="true">
+                              <CategoryIcon
+                                icon={
+                                  categoryByKey.get(row.categoryKey)?.icon ??
+                                  "folder"
+                                }
+                                className="size-4 shrink-0"
+                                style={categoryIconStyle(row.color)}
+                              />
+                            </span>
                             <span>{getCategoryName(row)}</span>
                           </div>
                         </TableCell>
@@ -500,5 +506,38 @@ function CategoryAmount({
         {viewLabel} — {monthLabel}
       </span>
     </Link>
+  );
+}
+
+function ComparisonCategoryTick({
+  x = 0,
+  y = 0,
+  payload,
+  categories,
+}: {
+  x?: number | string;
+  y?: number | string;
+  payload?: { value?: unknown };
+  categories: { name: string; icon: string; color: string }[];
+}) {
+  const category = categories.find((row) => row.name === payload?.value);
+  if (!category) return <g />;
+  return (
+    <g transform={`translate(${Number(x) - 152},${Number(y) - 12})`}>
+      <foreignObject width={144} height={24}>
+        <div className="text-muted-foreground flex h-6 items-center justify-end gap-2 text-xs">
+          <span aria-hidden="true">
+            <CategoryIcon
+              icon={category.icon}
+              className="size-4 shrink-0"
+              style={categoryIconStyle(category.color)}
+            />
+          </span>
+          <span className="truncate" title={category.name}>
+            {category.name}
+          </span>
+        </div>
+      </foreignObject>
+    </g>
   );
 }
