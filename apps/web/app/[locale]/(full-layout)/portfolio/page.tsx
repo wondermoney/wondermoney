@@ -15,7 +15,9 @@ import PortfolioBreakdown from "@/components/portfolio/PortfolioBreakdown";
 import PortfolioCalendar from "@/components/portfolio/PortfolioCalendar";
 import PortfolioClosedPositions from "@/components/portfolio/PortfolioClosedPositions";
 import PortfolioCreateDialog from "@/components/portfolio/PortfolioCreateDialog";
-import PortfolioDashboardSummary from "@/components/portfolio/PortfolioDashboardSummary";
+import PortfolioDashboardSummary, {
+  PortfolioFreshness,
+} from "@/components/portfolio/PortfolioDashboardSummary";
 import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendIncome";
 import PortfolioEmptyState from "@/components/portfolio/PortfolioEmptyState";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
@@ -394,6 +396,9 @@ const Portfolio = () => {
       {/* Each renders nothing until a portfolio has a sale. */}
       <PortfolioRealizedGains portfolioId={null} memberKeys={memberKeys} />
       <PortfolioClosedPositions portfolioId={null} memberKeys={memberKeys} />
+      <footer className="order-last">
+        <PortfolioFreshness summary={dashboardData?.summary} />
+      </footer>
     </div>
   );
 };

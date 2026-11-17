@@ -210,14 +210,22 @@ const PortfolioDashboardSummary: React.FC<PortfolioDashboardSummaryProps> = ({
       {missingSnapshotCount > 0 ? (
         <MissingSnapshotsNote count={missingSnapshotCount} />
       ) : null}
-      {/* `lastUpdated` was being fetched on every dashboard request and never
-          rendered — a valuation with no "as of" reads as live. § 9 rule 6. */}
-      <DataProvenance
-        updatedAt={summary.lastUpdated}
-        label={(time) => t("provenance-portfolio-updated", { time })}
-      />
     </div>
   );
 };
 
 export default PortfolioDashboardSummary;
+
+export function PortfolioFreshness({
+  summary,
+}: {
+  summary?: DashboardSummary;
+}) {
+  const t = useTranslations();
+  return summary ? (
+    <DataProvenance
+      updatedAt={summary.lastUpdated}
+      label={(time) => t("provenance-portfolio-updated", { time })}
+    />
+  ) : null;
+}

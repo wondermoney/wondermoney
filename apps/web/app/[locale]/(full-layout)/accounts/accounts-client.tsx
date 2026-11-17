@@ -544,9 +544,9 @@ export default function AccountsClient({
       {recoveryBanner}
 
       {/* Lead: the total balance, then the period's flows as a ruled stat row. */}
-      <div className="flex flex-col gap-2 sm:gap-8">
-        <div>
-          <p className="text-foreground text-base font-medium">
+      <div className="grid grid-cols-2 gap-4 sm:flex sm:flex-col sm:gap-8">
+        <div className="min-w-0">
+          <p className="text-muted-foreground sm:text-foreground text-xs sm:text-base sm:font-medium">
             {t("total-balance")}
           </p>
           {/* `flex-wrap`, and the delta group cannot shrink: without either, at
@@ -558,10 +558,10 @@ export default function AccountsClient({
             <Amount
               value={totalBalance}
               currency={userCurrency}
-              className="font-mono text-3xl leading-tight font-medium tracking-tight sm:text-5xl lg:text-6xl"
+              className="font-mono text-xl leading-tight font-medium tracking-tight sm:text-5xl lg:text-6xl"
             />
             {totalBalance !== null && netChange !== null && netChange !== 0 && (
-              <div className="flex shrink-0 items-center gap-1">
+              <div className="flex min-w-0 flex-wrap items-center gap-1">
                 {netChange > 0 ? (
                   <TrendingUp className="text-success-text h-3.5 w-3.5" />
                 ) : (
@@ -572,7 +572,7 @@ export default function AccountsClient({
                   currency={userCurrency}
                   tone="delta"
                   signed
-                  className="font-mono text-sm font-medium"
+                  className="font-mono text-xs font-medium sm:text-sm"
                 />
                 <span className="text-muted-foreground text-xs">
                   {t("vs-previous-period")}
@@ -585,27 +585,10 @@ export default function AccountsClient({
               {t("total-balance-incomplete")}
             </p>
           ) : null}
-          {/* § 9 rule 6. A total summed from bank connections with no "as of"
-            invites the reader to assume it is live. The timestamp is the
-            *oldest* sync in the set, because the total is only as current as
-            its stalest component. */}
-          {accountsFreshness ? (
-            <DataProvenance
-              className="mt-1.5"
-              updatedAt={clampSyncedAt(accountsFreshness.oldestSyncedAt)}
-              isStale={accountsFreshness.isStale}
-              errorLabel={
-                accountsFreshness.hasError
-                  ? t("provenance-balances-stale")
-                  : undefined
-              }
-              label={(time) => t("provenance-balances-updated", { time })}
-            />
-          ) : null}
         </div>
 
         {/* Metrics */}
-        <section>
+        <section className="max-sm:contents">
           {/* A skeleton in the cards' own shape, not a 96px box with a spinner
             in it — the spinner told you nothing and then reflowed the page
             when it stopped. § 9. */}
@@ -614,6 +597,8 @@ export default function AccountsClient({
           ) : accountsMetricsData?.metrics &&
             accountsMetricsData.metrics.length > 0 ? (
             <MetricsCards
+              compactOnMobile
+              className="max-sm:contents max-sm:[&>*]:col-span-1 max-sm:[&>:last-child:nth-child(odd)]:col-span-1"
               metrics={accountsMetricsData.metrics}
               userCurrency={userCurrency}
             />
@@ -774,6 +759,25 @@ export default function AccountsClient({
           onImportSuccess={handleCsvImportSuccess}
         />
       ) : null}
+      <footer className="order-last">
+        {/* § 9 rule 6. A total summed from bank connections with no "as of"
+            invites the reader to assume it is live. The timestamp is the
+            *oldest* sync in the set, because the total is only as current as
+            its stalest component. */}
+        {accountsFreshness ? (
+          <DataProvenance
+            className="mt-1.5"
+            updatedAt={clampSyncedAt(accountsFreshness.oldestSyncedAt)}
+            isStale={accountsFreshness.isStale}
+            errorLabel={
+              accountsFreshness.hasError
+                ? t("provenance-balances-stale")
+                : undefined
+            }
+            label={(time) => t("provenance-balances-updated", { time })}
+          />
+        ) : null}
+      </footer>
     </div>
   );
 }

@@ -11,7 +11,9 @@ import PortfolioAllocationEmptyState from "@/components/portfolio/PortfolioAlloc
 import PortfolioAllocationGuidance from "@/components/portfolio/PortfolioAllocationGuidance";
 import PortfolioBenchmarkChart from "@/components/portfolio/PortfolioBenchmarkChart";
 import PortfolioClosedPositions from "@/components/portfolio/PortfolioClosedPositions";
-import PortfolioDashboardSummary from "@/components/portfolio/PortfolioDashboardSummary";
+import PortfolioDashboardSummary, {
+  PortfolioFreshness,
+} from "@/components/portfolio/PortfolioDashboardSummary";
 import PortfolioDividendIncome from "@/components/portfolio/PortfolioDividendIncome";
 import PortfolioHistoryStatusBanner from "@/components/portfolio/PortfolioHistoryStatusBanner";
 import PortfolioHoldingsTable from "@/components/portfolio/PortfolioHoldingsTable";
@@ -368,6 +370,9 @@ export default function PortfolioClient({
           portfolio has a sale. */}
       <PortfolioRealizedGains portfolioId={portfolioId} />
       <PortfolioClosedPositions portfolioId={portfolioId} />
+      <footer className="order-last">
+        <PortfolioFreshness summary={dashboardData?.summary} />
+      </footer>
     </div>
   );
 }

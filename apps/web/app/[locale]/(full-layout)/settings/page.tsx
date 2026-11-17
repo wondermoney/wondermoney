@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import useAiHidden from "@/lib/api/user-preferences/useAiHidden";
 import { useHydrated } from "@/lib/utils/useHydrated";
@@ -171,8 +172,25 @@ const SettingsPage = () => {
           the first tab panel's own heading. */}
       <PageHeader title={t("navigation.settings")} />
       <BankConnectionReturn />
-      <div>
-        <div className="w-full sm:max-w-sm">
+      <Tabs value={selectedTab} activationMode="manual">
+        <TabsList
+          aria-label={t("navigation.settings")}
+          className="border-border hidden h-auto flex-wrap justify-start gap-1 rounded-none border-b bg-transparent p-0 pb-2 lg:flex"
+        >
+          {visibleTabs.map((tab) => (
+            <TabsTrigger
+              key={tab.name}
+              value={tab.name}
+              asChild
+              className="data-[state=active]:border-primary data-[state=active]:text-primary min-h-10 rounded-none border-b-2 border-transparent bg-transparent px-3 shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <Link href={pathname + "?" + createQueryString("tab", tab.name)}>
+                {t(tab.label)}
+              </Link>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <div className="w-full lg:hidden">
           <label className="sr-only" htmlFor="settings-section">
             {t("navigation.settings")}
           </label>
@@ -199,7 +217,11 @@ const SettingsPage = () => {
             </SelectContent>
           </Select>
         </div>
-        <section className="pt-6" aria-label={t(selectedTabConfig.label)}>
+        <TabsContent
+          value={selectedTab}
+          className="pt-6"
+          aria-label={t(selectedTabConfig.label)}
+        >
           {SelectedComponent ? (
             selectedTab === "api-tokens" ? (
               <div className="flex flex-col gap-10">
@@ -210,8 +232,8 @@ const SettingsPage = () => {
               <SelectedComponent />
             )
           ) : null}
-        </section>
-      </div>
+        </TabsContent>
+      </Tabs>
     </PageShell>
   );
 };

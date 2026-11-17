@@ -24,7 +24,9 @@ const labels = {
   today: "Today",
 };
 
-const occurrence = (overrides: Partial<RecurringOccurrence>): RecurringOccurrence => ({
+const occurrence = (
+  overrides: Partial<RecurringOccurrence>,
+): RecurringOccurrence => ({
   currency: "EUR",
   date: "2026-03-05T00:00:00.000Z",
   expectedAmount: 20,
@@ -34,7 +36,9 @@ const occurrence = (overrides: Partial<RecurringOccurrence>): RecurringOccurrenc
   ...overrides,
 });
 
-const renderCalendar = (props: Partial<Parameters<typeof RecurringMonthCalendar>[0]> = {}) =>
+const renderCalendar = (
+  props: Partial<Parameters<typeof RecurringMonthCalendar>[0]> = {},
+) =>
   render(
     <NextIntlClientProvider locale="en-US" messages={{}} onError={() => {}}>
       <RecurringMonthCalendar
@@ -57,7 +61,12 @@ describe("RecurringMonthCalendar", () => {
     const view = renderCalendar({
       items: [
         occurrence({ date: "2026-03-05T00:00:00.000Z", expectedAmount: 20 }),
-        occurrence({ date: "2026-03-05T00:00:00.000Z", expectedAmount: 12.5, name: "Internet", seriesKey: 2 }),
+        occurrence({
+          date: "2026-03-05T00:00:00.000Z",
+          expectedAmount: 12.5,
+          name: "Internet",
+          seriesKey: 2,
+        }),
       ],
     });
 
@@ -68,8 +77,17 @@ describe("RecurringMonthCalendar", () => {
   test("lists the selected day's payments with their status", () => {
     const view = renderCalendar({
       items: [
-        occurrence({ date: "2026-03-05T00:00:00.000Z", name: "Rent", status: "overdue" }),
-        occurrence({ date: "2026-03-05T00:00:00.000Z", name: "Internet", seriesKey: 2, status: "paid" }),
+        occurrence({
+          date: "2026-03-05T00:00:00.000Z",
+          name: "Rent",
+          status: "overdue",
+        }),
+        occurrence({
+          date: "2026-03-05T00:00:00.000Z",
+          name: "Internet",
+          seriesKey: 2,
+          status: "paid",
+        }),
       ],
     });
 
@@ -84,7 +102,11 @@ describe("RecurringMonthCalendar", () => {
     const view = renderCalendar({
       items: [
         occurrence({ date: "2026-03-05T00:00:00.000Z", currency: "EUR" }),
-        occurrence({ date: "2026-03-05T00:00:00.000Z", currency: "USD", seriesKey: 2 }),
+        occurrence({
+          date: "2026-03-05T00:00:00.000Z",
+          currency: "USD",
+          seriesKey: 2,
+        }),
       ],
     });
 
@@ -96,7 +118,7 @@ describe("RecurringMonthCalendar", () => {
     const onMonthChange = vi.fn();
     const view = renderCalendar({ onMonthChange, onSelectDay });
 
-    fireEvent.click(view.getByRole("button", { name: "12" }));
+    fireEvent.click(view.getByRole("button", { name: "March 12, 2026" }));
     expect(onSelectDay).toHaveBeenCalledWith("2026-03-12");
 
     fireEvent.click(view.getByRole("button", { name: "Next month" }));
@@ -114,7 +136,9 @@ describe("RecurringMonthCalendar", () => {
 
   test("lists a card installment on its day, marked n/N, and counts it in the day's total", () => {
     const view = renderCalendar({
-      items: [occurrence({ date: "2026-03-05T00:00:00.000Z", expectedAmount: 20 })],
+      items: [
+        occurrence({ date: "2026-03-05T00:00:00.000Z", expectedAmount: 20 }),
+      ],
       installments: [
         {
           amount: 41.66,

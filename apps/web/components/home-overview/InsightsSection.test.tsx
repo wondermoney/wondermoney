@@ -101,8 +101,9 @@ test("renders a spending card with its sentence, figures and filtered transactio
   };
   renderSection();
 
-  assert.ok(screen.getByText("Food is 50% above its usual pace."));
-  assert.ok(screen.getByText("Worth a look"));
+  assert.ok(screen.getByRole("heading", { level: 3, name: "Food" }));
+  assert.ok(screen.getByText("50% above its usual pace."));
+  assert.ok(screen.getByRole("img", { name: "Worth a look" }));
   const link = screen.getByRole("link", { name: "View transactions" });
   assert.match(link.getAttribute("href") ?? "", /^\/accounts\/transactions\?/);
   assert.match(link.getAttribute("href") ?? "", /categoryKeys=10%2C11/);
@@ -113,10 +114,8 @@ test("renders a budget card with its projection and budget link", () => {
   state.query = { data: { insights: [budget] }, error: null, isPending: false };
   renderSection();
 
-  assert.ok(
-    screen.getByText("Food / Groceries is on course to overrun its budget."),
-  );
-  assert.ok(screen.getByText("Needs attention"));
+  assert.ok(screen.getByText("On course to overrun its budget."));
+  assert.ok(screen.getByRole("img", { name: "Needs attention" }));
   assert.equal(
     screen.getByRole("link", { name: "View budget" }).getAttribute("href"),
     "/budgets/4/2026/11",

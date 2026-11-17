@@ -13,7 +13,14 @@ import commonMessages from "../../messages/en/common.json";
 import ProjectedTransactions from "./ProjectedTransactions";
 
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
+  Link: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: ReactNode;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -56,9 +63,7 @@ describe("ProjectedTransactions", () => {
   it("renders projected rows above the ledger, clearly marked as projections", () => {
     const { container } = renderRows();
 
-    assert.ok(
-      screen.getByRole("region", { name: "Projected transactions" }),
-    );
+    assert.ok(screen.getByRole("region", { name: "Projected transactions" }));
     assert.match(container.textContent ?? "", /Not counted in reports/);
     assert.match(container.textContent ?? "", /Rent/);
     assert.match(container.textContent ?? "", /Streaming/);
@@ -95,6 +100,8 @@ describe("ProjectedTransactions", () => {
       },
     ]);
 
+    assert.equal(container.querySelector("details")!.open, false);
+    container.querySelector("details")!.open = true;
     const items = screen.getAllByRole("listitem");
     assert.deepEqual(
       items.map((item) => item.querySelector("p")?.textContent),
@@ -107,18 +114,21 @@ describe("ProjectedTransactions", () => {
   });
 
   it("shows installments even when no recurring payment is projected", () => {
-    renderRows([], [
-      {
-        accountKey: 1,
-        amount: 10,
-        currency: "EUR",
-        date: "2026-03-07",
-        installmentCount: 3,
-        installmentNumber: 2,
-        installmentPlanKey: 5,
-        name: "Phone",
-      },
-    ]);
+    renderRows(
+      [],
+      [
+        {
+          accountKey: 1,
+          amount: 10,
+          currency: "EUR",
+          date: "2026-03-07",
+          installmentCount: 3,
+          installmentNumber: 2,
+          installmentPlanKey: 5,
+          name: "Phone",
+        },
+      ],
+    );
     assert.ok(screen.getByRole("region", { name: "Projected transactions" }));
     assert.ok(screen.getByText("2/3"));
   });

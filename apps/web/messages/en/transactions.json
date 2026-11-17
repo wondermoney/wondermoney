@@ -11,7 +11,9 @@
       "description": "The transactions this report counted, with its filters. Your own filters narrow them further.",
       "sum": "They add up to",
       "show-all": "Show all transactions"
-    }
+    },
+    "view-count": "<value></value> {count, plural, one {transaction} other {transactions}} in view",
+    "review-count": "{count, plural, one {# transaction needs review} other {# transactions need review}}"
   },
   "transactionTags": {
     "label": "Tags",

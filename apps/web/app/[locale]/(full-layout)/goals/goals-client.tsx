@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, RotateCcw } from "lucide-react";
+import { MoreHorizontal, Plus, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,16 +12,23 @@ import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import GoalSummaryCards from "@/components/goals/GoalSummaryCards";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   CardGridSkeleton,
   StatCardsSkeleton,
 } from "@/components/ui/PageSkeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolbarAction } from "@/components/ui/ToolbarAction";
 import { isDemoReadOnlyError } from "@/lib/api/errors";
 import type { Goal } from "@/lib/api/goals/types";
 import useGoals from "@/lib/api/goals/useGoals";
 import useRestoreGoal from "@/lib/api/goals/useRestoreGoal";
-import { goalsForView, type GoalsView } from "@/lib/goals/view";
+import { goalsForView } from "@/lib/goals/view";
 
 function ArchivedGoalCard({ goal }: { goal: Goal }) {
   const t = useTranslations();
@@ -64,10 +71,9 @@ function ArchivedGoalCard({ goal }: { goal: Goal }) {
 export function GoalsClient() {
   const t = useTranslations();
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
-  const [view, setView] = useState<GoalsView>("active");
-  const { data, isError, isLoading } = useGoals(
-    view === "archived" ? { includeArchived: true } : undefined,
-  );
+  const [showAchieved, setShowAchieved] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const { data, isError, isLoading } = useGoals({ includeArchived: true });
 
   const openCreateGoal = () => setCreateGoalOpen(true);
 
@@ -91,19 +97,25 @@ export function GoalsClient() {
   }
 
   const allGoals = data?.goals ?? [];
-  const goals = goalsForView(allGoals, view);
+  const activeGoals = goalsForView(allGoals, "active").filter(
+    (goal) => goal.status !== "completed",
+  );
+  const goals = goalsForView(allGoals, "active").filter(
+    (goal) => showAchieved || goal.status !== "completed",
+  );
+  const archivedGoals = goalsForView(allGoals, "archived");
 
   // With no goals yet, this header button and the one inside GoalsEmptyState
   // were the same label, icon and variant twice on one screen, 650px apart.
   // The empty state's copy explains what a goal is, so its button is the one
   // worth keeping; the header's earns its place once there is a list to act on.
-  const showHeaderCreateGoal = !(view === "active" && allGoals.length === 0);
+  const showHeaderCreateGoal = allGoals.length > 0;
 
   return (
     <div className="flex flex-col gap-8">
       <GoalCreateDialog isOpen={createGoalOpen} setOpen={setCreateGoalOpen} />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div className="space-y-1">
           <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
             {t("goals.title")}
@@ -113,25 +125,58 @@ export function GoalsClient() {
           </p>
         </div>
         {showHeaderCreateGoal ? (
-          <Button className="inline-flex w-fit gap-2" onClick={openCreateGoal}>
-            <Plus className="size-4" aria-hidden="true" />
-            {t("goals.create")}
-          </Button>
+          <ToolbarAction
+            label={t("goals.create")}
+            icon={<Plus className="size-4" aria-hidden="true" />}
+            onClick={openCreateGoal}
+          />
         ) : null}
       </div>
 
-      <Tabs value={view} onValueChange={(value) => setView(value as GoalsView)}>
-        <TabsList>
-          <TabsTrigger value="active">{t("goals.tab-active")}</TabsTrigger>
-          <TabsTrigger value="archived">{t("goals.tab-archived")}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="flex flex-col gap-10 pt-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-muted-foreground flex min-h-11 cursor-pointer items-center gap-2 text-xs">
+            <Checkbox
+              checked={showAchieved}
+              onCheckedChange={(checked) => setShowAchieved(checked === true)}
+            />
+            {t("goals.show-achieved")}
+          </label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11"
+                aria-label={t("goals.title")}
+              >
+                <MoreHorizontal className="size-4" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                checked={showArchived}
+                onCheckedChange={setShowArchived}
+              >
+                {t("goals.show-archived")}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex flex-col gap-6">
           {goals.length === 0 ? (
-            <GoalsEmptyState onCreateGoal={openCreateGoal} />
+            allGoals.length === 0 ? (
+              <GoalsEmptyState onCreateGoal={openCreateGoal} />
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                {t("goals.no-active")}
+              </p>
+            )
           ) : (
             <>
-              <GoalSummaryCards goals={goals} />
+              {activeGoals.length > 0 ? (
+                <GoalSummaryCards goals={activeGoals} />
+              ) : null}
               {/* A ruled ledger of goals, one per row, each drawn against
                   its own target. */}
               <ul className="border-foreground divide-border divide-y border-t-2">
@@ -141,25 +186,30 @@ export function GoalsClient() {
                   </li>
                 ))}
               </ul>
-              <DebtStrategySection />
+              {activeGoals.length > 0 ? <DebtStrategySection /> : null}
             </>
           )}
-        </TabsContent>
+        </div>
 
-        <TabsContent value="archived" className="flex flex-col gap-6">
-          {goals.length === 0 ? (
-            <Card className="text-muted-foreground p-6 text-sm">
-              {t("goals.archived-empty")}
-            </Card>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {goals.map((goal) => (
-                <ArchivedGoalCard key={goal.goalKey} goal={goal} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+        {showArchived ? (
+          <section className="flex flex-col gap-4">
+            <h2 className="text-foreground text-base font-medium">
+              {t("goals.tab-archived")}
+            </h2>
+            {archivedGoals.length === 0 ? (
+              <Card className="text-muted-foreground p-6 text-sm">
+                {t("goals.archived-empty")}
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {archivedGoals.map((goal) => (
+                  <ArchivedGoalCard key={goal.goalKey} goal={goal} />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
+      </div>
     </div>
   );
 }
