@@ -7,9 +7,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
 import { Button } from "../button";
 import {
@@ -25,8 +23,6 @@ import type { DataTableFeatures } from "./features";
 interface DataTablePaginationProps<TData extends RowData> {
   table: ReactTable<DataTableFeatures, TData>;
   rowSelection?: boolean;
-  pageParamName?: string;
-  pageSizeParamName?: string;
   /**
    * Rows the *server* matched, before its own `limit`.
    *
@@ -46,58 +42,18 @@ interface DataTablePaginationProps<TData extends RowData> {
 export function Pagination<TData extends RowData>({
   table,
   rowSelection = false,
-  pageParamName = "page",
-  pageSizeParamName = "size",
   serverTotal,
 }: DataTablePaginationProps<TData>) {
   const t = useTranslations();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  // Set the initial page and page size from URL on component mount
-  useEffect(() => {
-    const pageParam = searchParams.get(pageParamName);
-    const sizeParam = searchParams.get(pageSizeParamName);
-
-    if (sizeParam) {
-      const pageSize = parseInt(sizeParam, 10);
-      if (!isNaN(pageSize) && pageSize > 0) {
-        table.setPageSize(pageSize);
-      }
-    }
-
-    if (pageParam) {
-      const pageIndex = parseInt(pageParam, 10) - 1; // Convert to 0-indexed
-      if (
-        !isNaN(pageIndex) &&
-        pageIndex >= 0 &&
-        pageIndex < table.getPageCount()
-      ) {
-        table.setPageIndex(pageIndex);
-      }
-    }
-  }, [searchParams, pageParamName, pageSizeParamName, table]);
 
   // Update URL when page changes
   const handlePageChange = (pageIndex: number) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set(pageParamName, (pageIndex + 1).toString()); // Convert to 1-indexed
-    router.push(`${pathname}?${newParams.toString()}`);
     table.setPageIndex(pageIndex);
   };
 
   // Update URL when page size changes
   const handlePageSizeChange = (size: number) => {
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set(pageSizeParamName, size.toString());
-
-    // Reset to first page when changing page size
-    newParams.set(pageParamName, "1");
-    router.push(`${pathname}?${newParams.toString()}`);
-
-    table.setPageSize(size);
-    table.setPageIndex(0);
+    table.setPagination({ pageIndex: 0, pageSize: size });
   };
 
   const filteredCount = table.getFilteredRowModel().rows.length;

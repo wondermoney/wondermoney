@@ -444,6 +444,8 @@ export default function AccountsTransactionsClient({
         layout="ledger"
         transactions={transactionsData?.transactions ?? []}
         serverTotal={transactionsData?.total}
+        paginationBoundsKnown={!hasNextPage}
+        paginationDataReady={transactionsData !== undefined}
         footerActions={
           // Only rendered when the server says there is another page, so it
           // cannot appear on a fully-loaded list and promise nothing.
