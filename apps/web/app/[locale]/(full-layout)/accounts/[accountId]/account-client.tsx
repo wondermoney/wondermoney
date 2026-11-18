@@ -10,6 +10,7 @@ import { DateRange } from "react-day-picker";
 
 import { accountDisplayBalance } from "@/components/account/AccountBalance";
 import AccountForecastCallout from "@/components/account/AccountForecastCallout";
+import { AccountMark } from "@/components/account/AccountMark";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
@@ -354,6 +355,12 @@ export default function AccountClient({
         backHref="/accounts"
         backLabel={t("accounts")}
         title={accountName}
+        icon={
+          <AccountMark
+            logoUrl={account.accountFinancialInstitutionKey?.logoUrl}
+            label={institutionName ?? accountName}
+          />
+        }
         subtitle={institutionName}
         badges={
           <>

@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { StatCard, StatCardGrid } from "@/components/ui/StatCard";
 import { aggregateMetrics } from "@/lib/account/accounts-metrics";
 import type { AccountMetrics } from "@/lib/api/account/useAccountsMetrics";
-import { useFormatPercentage } from "@/lib/utils/useFormatPercentage";
 
 export default function MetricsCards({
   metrics,
@@ -20,12 +19,9 @@ export default function MetricsCards({
   compactOnMobile?: boolean;
 }) {
   const t = useTranslations();
-  const formatPercentage = useFormatPercentage();
   const agg = aggregateMetrics(metrics);
 
   const netSavings = agg.inflowCurrent - agg.outflowCurrent;
-  const savingsRate =
-    agg.inflowCurrent > 0 ? netSavings / agg.inflowCurrent : 0;
   const netSavingsPast = agg.inflowPast - agg.outflowPast;
 
   return (
@@ -64,9 +60,6 @@ export default function MetricsCards({
         currency={userCurrency}
         comparisonValue={netSavingsPast}
         comparisonLabel={t("vs-previous-period")}
-        helper={t("net-savings-rate", {
-          rate: formatPercentage(savingsRate),
-        })}
       />
     </StatCardGrid>
   );
