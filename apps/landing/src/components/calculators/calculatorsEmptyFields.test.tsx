@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import type { ComponentType } from "react";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import * as gtm from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import BorrowingCapacityCalculatorComp from "./BorrowingCapacityCalculatorComp";
 import BuyVsRentCalculatorComp from "./BuyVsRentCalculatorComp";
@@ -14,7 +15,9 @@ import FireCalculatorComp from "./FireCalculatorComp";
 import HouseholdBudgetCalculatorComp from "./HouseholdBudgetCalculatorComp";
 import InvestmentReturnCalculatorComp from "./InvestmentReturnCalculatorComp";
 import MortgageCalculatorComp from "./MortgageCalculatorComp";
+import MortgageTransferCalculatorComp from "./MortgageTransferCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
+import RateRevisionCalculatorComp from "./RateRevisionCalculatorComp";
 import SavingsGoalCalculatorComp from "./SavingsGoalCalculatorComp";
 import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
 import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
@@ -30,7 +33,9 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["household budget", HouseholdBudgetCalculatorComp],
   ["investment return", InvestmentReturnCalculatorComp],
   ["mortgage", MortgageCalculatorComp],
+  ["mortgage transfer", MortgageTransferCalculatorComp],
   ["net worth", NetWorthCalculatorComp],
+  ["rate revision", RateRevisionCalculatorComp],
   ["savings goal", SavingsGoalCalculatorComp],
   ["savings rate", SavingsRateCalculatorComp],
   ["term deposit", TermDepositCalculatorComp],
@@ -347,5 +352,151 @@ describe("early repayment calculator", () => {
     await user.clear(screen.getByRole("spinbutton", { name: "Early repayment fee" }));
     expect(figures().length).toBeGreaterThan(0);
     expect(screen.queryByText(/Enter a fee/)).toBeNull();
+  });
+});
+
+describe("mortgage transfer calculator", () => {
+  const group = (name: string) => within(screen.getByRole("group", { name }));
+
+  it.each([
+    ["Balance still owed", "Enter the balance you still owe."],
+    ["Current interest rate", "Enter the interest rate."],
+    ["New interest rate", "Enter the interest rate."],
+  ] as const)("asks for a value when %j is empty", async (label, message) => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: label }));
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(screen.getByText("Your comparison appears once every field has a valid value.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("reports one completion only after an edit produces a valid result", async () => {
+    const user = userEvent.setup();
+    const track = vi.spyOn(gtm, "pushGtmEvent").mockImplementation(() => {});
+    try {
+      render(<MortgageTransferCalculatorComp locale="en" />);
+      expect(track).not.toHaveBeenCalled();
+      const rate = screen.getByRole("spinbutton", { name: "Current interest rate" });
+      await user.clear(rate);
+      expect(track).not.toHaveBeenCalled();
+      await user.type(rate, "3.5");
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(track).toHaveBeenCalledWith({
+        event: "tool_used",
+        tool: "mortgage_transfer",
+        page_type: gtm.getPageType(),
+      });
+    } finally {
+      track.mockRestore();
+    }
+  });
+
+  it("asks for the time left when both of its fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const timeLeft = group("Time left on the loan");
+    await user.clear(timeLeft.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(timeLeft.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the time left, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("asks for the new term when both of its fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const newTerm = group("New loan term");
+    await user.clear(newTerm.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(newTerm.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the new loan's term, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("starts the new term at the time left and follows it until the new term is set", async () => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    const timeLeftYears = group("Time left on the loan").getByRole("spinbutton", { name: "Years" });
+    const newYears = group("New loan term").getByRole("spinbutton", { name: "Years" }) as HTMLInputElement;
+    expect(newYears.value).toBe("25");
+    await user.clear(timeLeftYears);
+    await user.type(timeLeftYears, "20");
+    expect(newYears.value).toBe("20");
+    await user.clear(newYears);
+    await user.type(newYears, "30");
+    await user.clear(timeLeftYears);
+    await user.type(timeLeftYears, "18");
+    expect(newYears.value).toBe("30");
+    expect(screen.getByRole("note").textContent).toContain("12 years longer");
+  });
+
+  it.each([
+    ["Your current loan", "Insurance and fees a month"],
+    ["The new offer", "Insurance and fees a month"],
+    ["One-off switching costs", "Exit fee on the current loan"],
+    ["One-off switching costs", "New loan fees"],
+    ["One-off switching costs", "Valuation"],
+    ["One-off switching costs", "Legal and registration costs"],
+  ] as const)("in %j, counts an empty %j as 0", async (section, label) => {
+    const user = userEvent.setup();
+    render(<MortgageTransferCalculatorComp locale="en" />);
+    await user.clear(group(section).getByRole("spinbutton", { name: label }));
+    expect(screen.queryByText(/^Enter /)).toBeNull();
+    expect(figures().length).toBeGreaterThan(0);
+  });
+});
+
+describe.each([
+  ["Balance still owed", "Enter the balance you still owe."],
+  ["Index rate today", "Enter the index rate. It can be 0% or negative."],
+  ["Spread", "Enter the spread, or 0% if there is none."],
+  ["New index rate", "Enter the new index rate, or pick a change below."],
+] as const)("rate revision calculator with the required field %j cleared", (label, message) => {
+  it("asks for a value instead of a result", async () => {
+    const user = userEvent.setup();
+    render(<RateRevisionCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: label }));
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(screen.getByText("The new payment appears once every field has a valid value.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+});
+
+describe("rate revision calculator", () => {
+  it("asks for the time left when both term fields are empty", async () => {
+    const user = userEvent.setup();
+    render(<RateRevisionCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: "Years" }));
+    await user.clear(screen.getByRole("spinbutton", { name: "Months" }));
+    expect(screen.getByText("Enter the time left, at least one month.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+
+  it("shows no share of income while the income is empty, and the payments still", async () => {
+    const user = userEvent.setup();
+    render(<RateRevisionCalculatorComp locale="en" />);
+    expect(screen.getByText(/of your net income/)).toBeTruthy();
+    await user.clear(screen.getByRole("spinbutton", { name: "Net monthly income (optional)" }));
+    expect(screen.queryByText(/of your net income/)).toBeNull();
+    expect(screen.getByText("New monthly payment")).toBeTruthy();
+    expect(figures().length).toBeGreaterThan(0);
+  });
+
+  it("sets the new index from a stress button, and offers none while the index is empty", async () => {
+    const user = userEvent.setup();
+    render(<RateRevisionCalculatorComp locale="en" />);
+    const newIndex = screen.getByRole("spinbutton", { name: "New index rate" }) as HTMLInputElement;
+    const plusThree = screen.getByRole("button", { name: "+3 points" });
+    await user.click(plusThree);
+    expect(newIndex.value).toBe("5");
+    expect(plusThree.getAttribute("aria-pressed")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "−1 point" }));
+    expect(newIndex.value).toBe("1");
+
+    await user.clear(screen.getByRole("spinbutton", { name: "Index rate today" }));
+    for (const button of within(screen.getByRole("group", { name: "Try a change in the index" })).getAllByRole(
+      "button",
+    )) {
+      expect((button as HTMLButtonElement).disabled).toBe(true);
+    }
   });
 });

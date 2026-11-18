@@ -1151,6 +1151,223 @@
         "description": "Tragen Sie das Darlehen mit Restschuld, Zinssatz und Laufzeit in WonderMoney ein, verknüpfen Sie die Monatsrate und sehen Sie, wie Ihre Restschuld sinkt, neben Ihrem Budget und Ihrem Vermögen."
       }
     },
+    "mortgageTransfer": {
+      "title": "Umschuldungsrechner für die Baufinanzierung",
+      "shortName": "Umschuldung",
+      "description": "Vergleichen Sie Ihr Darlehen mit einem neuen Angebot: die Monatsrate, die Wechselkosten, wann sie sich rechnen, und die Nettoersparnis.",
+      "pageTitle": "Umschuldungsrechner: Lohnt sich der Wechsel der Baufinanzierung? — WonderMoney",
+      "pageDescription": "Kostenloser Umschuldungsrechner für Baufinanzierungen. Vergleichen Sie Ihr Festzinsdarlehen mit dem Angebot einer anderen Bank, rechnen Sie die Wechselkosten ein und sehen Sie die monatliche Ersparnis, den Monat, in dem sich der Wechsel rechnet, und die Nettoersparnis. Ohne Anmeldung.",
+      "subtitle": "Geben Sie die Restschuld, die Restlaufzeit und Ihren aktuellen Zins ein, dann das Angebot, das Sie erhalten haben, und was der Wechsel kosten würde. Sie sehen beide Monatsraten mit Versicherungen und Gebühren, die Gesamtkosten jedes Darlehens, den Monat, in dem sich der Wechsel rechnet, und was Sie am Ende sparen. Ohne Anmeldung.",
+      "termYears": "Jahre",
+      "termMonths": "Monate",
+      "termRounded": "Berechnet für {{term}}: Die Laufzeit wird auf ganze Monate gerundet.",
+      "current": {
+        "legend": "Ihr aktuelles Darlehen",
+        "balance": "Restschuld",
+        "balanceHelp": "Was Sie heute noch schulden, laut Ihrem letzten Kontoauszug zum Darlehen. Das neue Darlehen übernimmt diesen Betrag.",
+        "termLabel": "Restlaufzeit",
+        "termHelp": "Jahre plus Monate, zum Beispiel 22 Jahre und 4 Monate.",
+        "rate": "Aktueller Zinssatz",
+        "rateHelp": "Fester Sollzins pro Jahr. Variable Zinsen und Mischformen sind nicht abgedeckt.",
+        "fees": "Versicherungen und Gebühren im Monat",
+        "feesHelp": "An das Darlehen gebundene Risikolebens- und Gebäudeversicherung, Kontogebühren und andere monatliche Kosten. Lassen Sie 0, wenn es keine gibt."
+      },
+      "offer": {
+        "legend": "Das neue Angebot",
+        "rate": "Neuer Zinssatz",
+        "rateHelp": "Der feste Sollzins pro Jahr, der Ihnen angeboten wird.",
+        "termLabel": "Laufzeit des neuen Darlehens",
+        "termHelp": "Beginnt mit der Restlaufzeit Ihres aktuellen Darlehens. Eine längere Laufzeit senkt die Rate, kostet aber mehr Zinsen.",
+        "fees": "Versicherungen und Gebühren im Monat",
+        "feesHelp": "Was die neue Bank jeden Monat verlangt: Versicherungen, Kontogebühren und andere Gebühren."
+      },
+      "costs": {
+        "legend": "Einmalige Wechselkosten",
+        "help": "Die Kosten hängen von Land, Bank und Darlehen ab. Geben Sie die Beträge aus Ihrem Angebot und Ihrem Vertrag ein und lassen Sie 0 bei allem, was Sie nicht zahlen.",
+        "exitFee": "Vorfälligkeitsentschädigung",
+        "exitFeeHelp": "Ein Prozentsatz der Restschuld, den Ihre aktuelle Bank für die vorzeitige Rückzahlung verlangt. Prüfen Sie in Ihrem Vertrag den Satz und eine mögliche gesetzliche Obergrenze.",
+        "newLoanFees": "Gebühren für das neue Darlehen",
+        "newLoanFeesHelp": "Bearbeitungs-, Abschluss- oder Vermittlungsgebühren für das neue Darlehen.",
+        "valuationFee": "Wertgutachten",
+        "legalFees": "Notar und Grundbuch",
+        "legalFeesHelp": "Notar, Grundbuchamt, Löschung und Eintragung der Grundschuld und mögliche Steuern auf das neue Darlehen."
+      },
+      "results": {
+        "currentMonthly": "Monatsrate heute",
+        "offerMonthly": "Monatsrate mit dem Angebot",
+        "includesFees": "Erste Rate jedes Darlehens, mit Versicherungen und Gebühren.",
+        "lessEachMonth": "{{amount}} weniger im Monat",
+        "moreEachMonth": "{{amount}} mehr im Monat",
+        "sameEachMonth": "Jeden Monat dieselbe Rate",
+        "netSaving": "Nettoersparnis durch den Wechsel",
+        "netCost": "Nettokosten des Wechsels",
+        "netSavingHelp": "Was beim aktuellen Darlehen noch zu zahlen ist, abzüglich des neuen Darlehens mit den Wechselkosten.",
+        "breakEvenTitle": "Wann sich der Wechsel rechnet",
+        "breakEven": "Im Monat {{month}}, nach {{duration}}: Bis dahin haben die niedrigeren Raten die Wechselkosten gedeckt.",
+        "breakEvenNoCosts": "Ohne Wechselkosten gibt es nichts zurückzuverdienen: Jeder Monat, in dem das Angebot weniger kostet, ist eine Ersparnis.",
+        "breakEvenNever": "Nie innerhalb der Laufzeit: Die Ersparnis deckt die Wechselkosten nicht.",
+        "breakEvenThenLoss": "Die Ersparnis deckt die Wechselkosten im Monat {{month}}, aber die längere Laufzeit kostet am Ende mehr.",
+        "longerTerm": "Die neue Laufzeit ist {{extra}} länger als die Restlaufzeit. Über die Restlaufzeit würde dieses Angebot {{sameTerm}} im Monat kosten: Ein Teil der niedrigeren Rate kommt daher, dass Sie länger zahlen, und das kostet {{interest}} mehr Zinsen.",
+        "longerTermNoInterest": "Die neue Laufzeit ist {{extra}} länger als die Restlaufzeit. Bei 0 % kommen keine Zinsen hinzu, aber Sie zahlen die monatlichen Versicherungen und Gebühren länger.",
+        "costsExceed": "Der Wechsel kostet mehr, als er spart. Fragen Sie die neue Bank, ob sie die Gebühren senken oder übernehmen kann, oder bitten Sie Ihre aktuelle Bank um einen besseren Zins.",
+        "switchingCosts": "Wechselkosten"
+      },
+      "table": {
+        "title": "Ihr aktuelles Darlehen und das Angebot im Vergleich",
+        "caption": "Der Rest Ihres aktuellen Darlehens im Vergleich mit dem neuen Angebot",
+        "figure": "Kennzahl",
+        "current": "Aktuelles Darlehen",
+        "offer": "Neues Angebot",
+        "monthlyPayment": "Monatsrate",
+        "monthlyFees": "Versicherungen und Gebühren im Monat",
+        "monthlyTotal": "Gesamt im Monat",
+        "term": "Zeit bis zur Tilgung",
+        "totalInterest": "Zinsen",
+        "totalFees": "Versicherungen und Gebühren insgesamt",
+        "switchingCosts": "Wechselkosten",
+        "totalCost": "Gesamtkosten"
+      },
+      "resultNote": "Beide Zinssätze bleiben bis zum Ende jedes Darlehens fest. Die Raten sind monatlich, die Wechselkosten werden am Tag des Wechsels bezahlt und das neue Darlehen übernimmt dieselbe Restschuld.",
+      "chart": {
+        "title": "Ersparnis seit dem Wechsel",
+        "description": "Was der Wechsel bisher gespart hat, Rate für Rate, im Vergleich mit den Wechselkosten. Wo die Linie über die gestrichelte Kostenlinie steigt, hat sich der Wechsel gerechnet.",
+        "label": "Diagramm der Ersparnis seit dem Wechsel am Ende jedes Jahres, im Vergleich mit den Wechselkosten. Dieselben Zahlen stehen in der Tabelle darunter.",
+        "year": "Jahr",
+        "saved": "Bisher gespart",
+        "costs": "Wechselkosten"
+      },
+      "yearTable": {
+        "caption": "Ersparnis Jahr für Jahr",
+        "year": "Jahr",
+        "yearLabel": "Jahr {{year}}",
+        "saving": "Im Jahr gespart",
+        "cumulative": "Bisher gespart",
+        "afterCosts": "Nach den Wechselkosten"
+      },
+      "errors": {
+        "summary": "Der Vergleich erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Geben Sie die Restschuld ein.",
+          "tooSmall": "Geben Sie eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre können nicht negativ sein.",
+          "tooLarge": "Geben Sie insgesamt höchstens {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
+        },
+        "newTermYears": {
+          "required": "Geben Sie die Laufzeit des neuen Darlehens ein, mindestens einen Monat.",
+          "negative": "Jahre können nicht negativ sein.",
+          "tooLarge": "Geben Sie insgesamt höchstens {{max}} Jahre ein."
+        },
+        "newTermMonths": {
+          "negative": "Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
+        },
+        "currentRate": {
+          "required": "Geben Sie den Zinssatz ein.",
+          "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "newRate": {
+          "required": "Geben Sie den Zinssatz ein.",
+          "negative": "Der Zinssatz kann nicht unter 0 % liegen.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "currentMonthlyFees": {
+          "negative": "Gebühren können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} im Monat ein."
+        },
+        "newMonthlyFees": {
+          "negative": "Gebühren können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} im Monat ein."
+        },
+        "exitFeePercent": {
+          "negative": "Die Entschädigung kann nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} der Restschuld ein."
+        },
+        "newLoanFees": {
+          "negative": "Kosten können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} ein."
+        },
+        "valuationFee": {
+          "negative": "Kosten können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} ein."
+        },
+        "legalFees": {
+          "negative": "Kosten können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie höchstens {{max}} ein."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Was Sie vor dem Wechsel vergleichen sollten",
+          "intro": "Ihre Baufinanzierung zu einer anderen Bank umzuschulden, oder mit Ihrer Bank neue Konditionen auszuhandeln, kann Ihre Kosten senken. Ein niedrigerer Zins ist nur ein Teil der Rechnung, vergleichen Sie also das ganze Angebot:",
+          "items": {
+            "rate": "Den Zins. Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen.",
+            "monthlyCosts": "Die monatlichen Zusatzkosten. Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer.",
+            "term": "Die Laufzeit. Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen.",
+            "oneOff": "Die einmaligen Kosten. Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+          },
+          "outro": "Der Rechner bringt das zusammen: die Rate mit ihren Zusatzkosten, was jedes Darlehen insgesamt noch kostet, und den Monat, in dem die Wechselkosten wieder hereingeholt sind."
+        },
+        "costs": {
+          "title": "Die Kosten eines Wechsels",
+          "intro": "Was ein Wechsel kostet, hängt vom Land, vom Vertrag und von den beteiligten Banken ab. Die üblichen Posten sind:",
+          "items": {
+            "exitFee": "Die Vorfälligkeitsentschädigung, ein Prozentsatz der Restschuld, den Ihre aktuelle Bank verlangt, wenn das Darlehen vor dem Ende abgelöst wird. Viele Länder begrenzen sie gesetzlich, und manche Darlehen sehen keine vor.",
+            "newLoanFees": "Gebühren für das neue Darlehen: Bearbeitung, Abschluss oder Vermittlung.",
+            "valuation": "Ein Wertgutachten für die Immobilie, das die neue Bank meist verlangt.",
+            "legal": "Notar und Grundbuch: Löschung oder Abtretung der alten Grundschuld, Eintragung der neuen und mögliche Steuern auf das neue Darlehen."
+          },
+          "outro": "Manche Banken übernehmen einen Teil dieser Kosten, um Ihr Darlehen zu gewinnen. Geben Sie nur ein, was Sie selbst zahlen würden, und lassen Sie sich die Beträge von jeder Bank schriftlich geben."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Angenommen, Sie schulden noch {{balance}} bei {{term}} Restlaufzeit und einem festen Zins von {{currentRate}} und zahlen {{currentFees}} im Monat für Versicherungen und Gebühren. Ihre Rate beträgt {{currentMonthly}} im Monat. Eine andere Bank bietet {{newRate}} über dieselbe Laufzeit, mit {{newFees}} Versicherung im Monat: {{offerMonthly}} im Monat, {{monthlySaving}} weniger.",
+          "costs": "Der Wechsel kostet {{costs}}: eine Vorfälligkeitsentschädigung von {{exitFeeRate}}, also {{exitFee}}, {{newLoanFees}} Gebühren für das neue Darlehen, {{valuationFee}} für das Wertgutachten und {{legalFees}} für Notar und Grundbuch. Bei {{monthlySaving}} im Monat rechnet sich der Wechsel im Monat {{breakEvenMonth}}, nach {{breakEvenTime}}.",
+          "total": "Über die restliche Laufzeit kostet das aktuelle Darlehen {{currentTotal}} an Raten, Versicherungen und Gebühren. Das neue Darlehen kostet {{offerTotal}}, die Wechselkosten eingerechnet. Die Nettoersparnis beträgt {{netSaving}}.",
+          "longer": "Nun bietet die neue Bank an, das Darlehen auf {{longerTerm}} zu strecken. Die Rate sinkt auf {{longerMonthly}}, {{longerSaving}} weniger als heute, und die Kosten sind früher gedeckt. Aber die längere Laufzeit kostet {{extraInterest}} mehr Zinsen, und insgesamt kostet der Wechsel {{longerNetCost}} mehr, als Ihr aktuelles Darlehen zu behalten. Eine niedrigere Rate ist nicht dasselbe wie ein günstigeres Darlehen."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Der Rechner ermittelt beide Darlehen mit demselben Festzins-Rechenkern wie der Hypothekenrechner, auf Basis Ihrer Restschuld. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
+          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n. Die Versicherungen und Gebühren jedes Monats kommen hinzu.",
+          "saving": "Die Ersparnis eines Monats ist, was das aktuelle Darlehen in diesem Monat kosten würde, abzüglich dessen, was das neue kostet. Ein getilgtes Darlehen kostet nichts mehr. Bei einer längeren neuen Laufzeit zählen die Monate nach dem Ende Ihres aktuellen Darlehens deshalb als Kosten. Die Gesamtkosten jeder Option sind ihre Raten, Versicherungen und Gebühren, beim neuen Darlehen zuzüglich der Wechselkosten. Die Nettoersparnis ist die Differenz.",
+          "breakEven": "Der Monat, in dem sich der Wechsel rechnet, ist der erste Monat, in dem die bisherige Ersparnis mindestens die Wechselkosten erreicht. Geschieht das nicht, bevor beide Darlehen enden, rechnet sich der Wechsel nicht.",
+          "longerTerm": "Ist die neue Laufzeit länger als die Restlaufzeit, rechnet der Rechner das Angebot zusätzlich über die Restlaufzeit. So sehen Sie, wie viel der niedrigeren Rate vom Zins kommt und wie viel davon, dass Sie länger zahlen.",
+          "assumptionsTitle": "Annahmen",
+          "assumptions": {
+            "fixedRate": "Beide Zinssätze bleiben bis zum Ende jedes Darlehens fest. Variable Zinsen, Mischformen und Zinsbindungen, nach denen ein variabler Zins gilt, sind nicht abgedeckt.",
+            "sameBalance": "Das neue Darlehen übernimmt genau die heutige Restschuld. Es wird nichts zusätzlich geliehen, und die Wechselkosten werden aus eigenen Mitteln bezahlt statt mitfinanziert.",
+            "timing": "Der Wechsel erfolgt heute, direkt nach einer regulären Rate, und die erste Rate des neuen Darlehens ist in einem Monat fällig.",
+            "fees": "Versicherungen und Gebühren bleiben jeden Monat gleich, solange das jeweilige Darlehen läuft.",
+            "noDiscounting": "Ein Euro, der in zehn Jahren gespart wird, zählt so viel wie ein Euro heute: Inflation und Erträge auf das gesparte Geld sind nicht berücksichtigt.",
+            "rounding": "Die Beträge sind in Euro. Zinsen und Rate jedes Monats werden auf den Cent gerundet, deshalb gehen alle Summen auf der Seite genau auf. Die angezeigte Rate ist die erste; die folgenden weichen höchstens um einen Cent davon ab.",
+            "lenderFigures": "Jede Bank zählt Tage und rundet auf ihre Weise, daher können ihre Zahlen leicht abweichen. Lassen Sie sich von jeder Bank ein verbindliches Angebot geben, bevor Sie entscheiden."
+          },
+          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld."
+        },
+        "related": {
+          "title": "Weitere Rechner",
+          "mortgageLink": "Hypothekenrechner",
+          "mortgageBody": "Der vollständige Tilgungsplan des neuen Darlehens, Jahr für Jahr, oder des Darlehens, das Sie heute haben.",
+          "earlyRepaymentLink": "Sondertilgungsrechner",
+          "earlyRepaymentBody": "Was eine Sondertilgung beim aktuellen Darlehen sparen würde, statt umzuschulden.",
+          "debtToIncomeLink": "Schuldendienstquote-Rechner",
+          "debtToIncomeBody": "Der Anteil Ihres Einkommens, der in Kreditraten fließt, heute und mit der neuen Rate."
+        }
+      },
+      "cta": {
+        "headline": "Vergleiche dein Budget vor und nach der Umschuldung",
+        "description": "Fügen Sie Ihre Baufinanzierung mit Zins und Laufzeit in WonderMoney hinzu, planen Sie die Rate jedes Angebots in Ihrem Budget und sehen Sie, wie sie neben Ihren tatsächlichen Ausgaben passt, vor und nach dem Wechsel."
+      }
+    },
     "savingsGoal": {
       "title": "Sparzielrechner",
       "shortName": "Sparziel",
@@ -1704,6 +1921,150 @@
         "relatedMortgageLink": "Hypothekenrechner",
         "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
         "relatedNetWorthLink": "Nettovermögensrechner"
+      }
+    },
+    "rateRevision": {
+      "title": "Zinsanpassungsrechner für variable Kredite",
+      "shortName": "Zinsanpassung",
+      "description": "Sehen Sie, wie sich die Monatsrate eines Kredits mit variablem Zins ändert, wenn sich sein Referenzzins bewegt, über ein Jahr und bis zum Ende der Laufzeit.",
+      "pageTitle": "Rechner für variable Kredite: Ihre Rate nach einer Zinsanpassung — WonderMoney",
+      "pageDescription": "Kostenloser Rechner für Baufinanzierungen und Kredite mit variablem Zins. Geben Sie Restschuld, Restlaufzeit, Referenzzins und Aufschlag ein und sehen Sie die neue Rate nach der Zinsanpassung, die Kosten über ein Jahr und bis zum Ende sowie eine Tabelle von −2 bis +4 Punkten. Keine Anmeldung nötig.",
+      "subtitle": "Geben Sie Ihre Restschuld, die Restlaufzeit, den Referenzzins Ihres Kredits und den Aufschlag der Bank ein, dann den Referenzzins, den Sie bei der nächsten Anpassung erwarten. Sie sehen die neue Monatsrate, was der Unterschied über ein Jahr und bis zum Ende der Laufzeit ausmacht, und die Rate bei einem Referenzzins von 2 Punkten niedriger bis 4 Punkten höher. Keine Anmeldung nötig.",
+      "loanHeading": "Ihr Kredit heute",
+      "balance": "Restschuld",
+      "balanceHelp": "Was Sie heute noch schulden, laut Ihrem letzten Kreditauszug.",
+      "termLabel": "Restlaufzeit",
+      "termYears": "Jahre",
+      "termMonths": "Monate",
+      "termHelp": "Jahre plus Monate, zum Beispiel 22 Jahre und 4 Monate.",
+      "termRounded": "Berechnet für {{term}}: Die Restlaufzeit wird auf ganze Monate gerundet.",
+      "indexRate": "Referenzzins heute",
+      "indexRateHelp": "Der Zinssatz, an den Ihr Kredit gebunden ist, etwa der Euribor oder ein Leitzins, mit dem Wert, den Ihre aktuelle Rate verwendet. Er kann negativ sein.",
+      "spread": "Aufschlag",
+      "spreadHelp": "Die feste Marge, die die Bank auf den Referenzzins aufschlägt, wie in Ihrem Vertrag festgelegt.",
+      "currentRate": "Sie zahlen heute {{rate}}: Referenzzins plus Aufschlag.",
+      "floored": "Referenzzins plus Aufschlag liegen unter 0 %, daher wird der Zins mit 0 % angesetzt. Ihr Vertrag kann eine eigene Untergrenze vorsehen.",
+      "revisionHeading": "Bei der nächsten Anpassung",
+      "newIndexRate": "Neuer Referenzzins",
+      "newIndexRateHelp": "Der Wert, den Sie zum nächsten Anpassungstermin erwarten, oder wählen Sie unten eine Änderung.",
+      "stressLabel": "Probieren Sie eine Änderung des Referenzzinses",
+      "stress": {
+        "one": "{{change}} Punkt",
+        "other": "{{change}} Punkte"
+      },
+      "newRate": "Ihr Zins wäre dann {{rate}}.",
+      "incomeHeading": "Ihr Budget",
+      "monthlyIncome": "Monatliches Nettoeinkommen (optional)",
+      "monthlyIncomeHelp": "Nach Steuern. Geben Sie es ein, um den Anteil der Rate am Einkommen zu sehen, oder lassen Sie das Feld leer.",
+      "result": {
+        "newPayment": "Neue Monatsrate",
+        "up": "{{amount}} mehr im Monat ({{percent}})",
+        "down": "{{amount}} weniger im Monat ({{percent}})",
+        "same": "Die Rate bleibt gleich.",
+        "currentPayment": "Rate heute, bei {{rate}}",
+        "revisedPayment": "Rate nach der Anpassung, bei {{rate}}",
+        "monthlyChange": "Unterschied im Monat",
+        "nextYear": "Über die nächsten 12 Raten",
+        "paymentsLeft": "Über die {{count}} restlichen Raten",
+        "paymentLeft": "Bei der letzten Rate",
+        "totalInterest": "Unterschied bei den Zinsen bis zum Ende der Laufzeit",
+        "incomeShare": "Die neue Rate würde {{revised}} Ihres Nettoeinkommens beanspruchen, gegenüber {{current}} heute. Stufe der Schuldendienstquote: {{band}}.",
+        "exceedsIncome": "Die neue Rate ist höher als das Einkommen, das Sie eingegeben haben.",
+        "bandNote": "Stufen aus dem Schuldendienstquote-Rechner: unter {{caution}} % gesund, {{caution}} % bis {{high}} % Vorsicht, über {{high}} % hoch. Das ist eine Faustregel, keine Grenze einer Bank."
+      },
+      "assumptionNote": "Der neue Zins gilt ab der nächsten Rate bis zum Ende der Laufzeit. Anpassungstermine, Zinsobergrenzen und -untergrenzen hängen von Ihrem Vertrag ab und sind nicht enthalten.",
+      "table": {
+        "title": "Ihre Rate, wenn sich der Referenzzins bewegt",
+        "intro": "Derselbe Kredit mit einem Referenzzins von 2 Punkten unter bis 4 Punkten über dem heutigen und gleichem Aufschlag, jeder Zins ab der nächsten Rate bis zum Ende der Laufzeit.",
+        "caption": "Monatsrate für jede Änderung des Referenzzinses",
+        "change": "Änderung des Referenzzinses",
+        "index": "Referenzzins",
+        "rate": "Ihr Zins",
+        "payment": "Monatsrate",
+        "monthlyChange": "Unterschied im Monat",
+        "interestChange": "Unterschied bei den Zinsen bis zum Ende",
+        "today": "Heute",
+        "selected": "Ihr Szenario"
+      },
+      "errors": {
+        "summary": "Die neue Rate erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Geben Sie Ihre Restschuld ein.",
+          "tooSmall": "Geben Sie eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Geben Sie die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre können nicht negativ sein.",
+          "tooLarge": "Geben Sie insgesamt bis zu {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate können nicht negativ sein.",
+          "tooLarge": "Geben Sie 0 bis 11 Monate ein; ganze Jahre gehören ins Feld Jahre."
+        },
+        "indexRate": {
+          "required": "Geben Sie den Referenzzins ein. Er kann 0 % oder negativ sein.",
+          "tooSmall": "Geben Sie einen Referenzzins von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie einen Referenzzins bis {{max}} ein."
+        },
+        "spread": {
+          "required": "Geben Sie den Aufschlag ein, oder 0 %, wenn es keinen gibt.",
+          "negative": "Der Aufschlag kann nicht negativ sein.",
+          "tooLarge": "Geben Sie einen Aufschlag bis {{max}} ein."
+        },
+        "newIndexRate": {
+          "required": "Geben Sie den neuen Referenzzins ein, oder wählen Sie unten eine Änderung.",
+          "tooSmall": "Geben Sie einen Referenzzins von mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie einen Referenzzins bis {{max}} ein."
+        },
+        "monthlyIncome": {
+          "negative": "Das Einkommen kann nicht negativ sein. Lassen Sie das Feld leer, um es wegzulassen.",
+          "tooLarge": "Geben Sie ein Einkommen bis {{max}} ein."
+        }
+      },
+      "nextStepHeadline": "Planen Sie eine höhere Rate in Ihr Budget ein",
+      "nextStepDescription": "Legen Sie den Kredit in WonderMoney an, planen Sie die höhere Rate in Ihrem Monatsbudget ein und sehen Sie, was für Ihre übrigen Ausgaben und zum Sparen bleibt.",
+      "nextStepCta": "Prüfe, wie belastbar dein Monatsbudget ist",
+      "guide": {
+        "whatTitle": "Wie eine Zinsanpassung Ihre Rate verändert",
+        "whatBody1": "Bei einem Kredit mit variablem Zins besteht Ihr Zins aus zwei Teilen: einem Referenzzins und einem Aufschlag. Der Referenzzins ist ein Markt- oder Leitzins, etwa der Euribor in weiten Teilen des Euroraums; andere Länder nutzen andere Referenzzinsen. Der Aufschlag ist die Marge der Bank und im Vertrag festgelegt.",
+        "whatBody2": "Zu jedem Anpassungstermin, oft alle 3, 6 oder 12 Monate, nimmt die Bank den aktuellen Wert des Referenzzinses, schlägt die Marge auf und berechnet eine neue Rate auf die Restschuld und die Restlaufzeit. Bei gleichem Aufschlag erhöht ein Anstieg des Referenzzinses um 1 Prozentpunkt den Kreditzins um bis zu 1 Prozentpunkt, abhängig von der geltenden Ober- oder Untergrenze.",
+        "whatBody3": "Dieser Rechner zeigt die Rate vor und nach einer Änderung, die Sie wählen. So sehen Sie rechtzeitig, was ein Anstieg oder ein Rückgang für Ihr Monatsbudget bedeuten würde.",
+        "relatedMortgage": "der vollständige Tilgungsplan Jahr für Jahr für einen Kredit zu einem festen Zins.",
+        "relatedDebtToIncome": "der Anteil Ihres Einkommens, der in alle Ihre Kreditraten fließt.",
+        "relatedEarlyRepayment": "was eine Sondertilgung spart und wie stark sie die Rate senkt.",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleSetup": "Angenommen, Sie schulden noch {{balance}} bei einer Restlaufzeit von {{term}}. Ihr Kredit folgt einem Referenzzins von {{index}} plus einem Aufschlag von {{spread}}, Sie zahlen also {{rate}}: {{payment}} im Monat und {{interest}} Zinsen bis zum Ende der Laufzeit.",
+        "exampleRise": "Bei der nächsten Anpassung steigt der Referenzzins auf {{newIndex}}, Ihr Zins also auf {{newRate}}. Die Rate steigt auf {{newPayment}}: {{monthlyChange}} mehr im Monat ({{percent}}), {{yearlyChange}} mehr über die nächsten 12 Raten und {{interestChange}} mehr Zinsen bis zum Ende der Laufzeit, wenn der Zins dort bleibt.",
+        "exampleStress": "Ein Anstieg um {{stressStep}} Punkte, auf einen Zins von {{stressRate}}, würde die Rate stattdessen auf {{stressPayment}} bringen, {{stressChange}} mehr als heute.",
+        "exampleIncome": "Bei einem Nettoeinkommen von {{income}} im Monat beansprucht die Rate heute {{currentShare}} davon, nach dem ersten Anstieg {{newShare}} und nach dem größeren {{stressShare}}, was die Stufen der Schuldendienstquote als „{{stressBand}}“ einordnen.",
+        "methodTitle": "So wird gerechnet",
+        "methodIntro": "Jede Rate ist die gleichbleibende Rate, die die Restschuld in den verbleibenden Monaten tilgt, mit derselben Festzins-Rechnung wie im Hypothekenrechner:",
+        "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
+        "methodItems": {
+          "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
+          "year": "Der Unterschied über ein Jahr ergibt sich aus der Summe der ersten 12 Raten jedes Plans. Sind es weniger als 12, zählen alle verbleibenden Raten. Da jede Rate einzeln gerundet wird, kann die Differenz vom monatlichen Unterschied mal der Anzahl der Raten abweichen.",
+          "interest": "Der Unterschied bei den Zinsen ist die Zinssumme des neuen Plans minus die des heutigen, beide bis zum Ende der Laufzeit.",
+          "income": "Der Anteil am Einkommen ist die Rate geteilt durch das Nettoeinkommen, das Sie eingeben, gelesen mit den Stufen des Schuldendienstquote-Rechners: unter {{caution}} % gesund, {{caution}} % bis {{high}} % Vorsicht und über {{high}} % hoch. Das ist eine Faustregel, keine Grenze einer Bank.",
+          "privacy": "Die Rechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert."
+        },
+        "assumptionsTitle": "Annahmen",
+        "assumptions": {
+          "fromNextMonth": "Der neue Zins gilt ab der nächsten Rate bis zum Ende der Laufzeit. In der Praxis wird er zu jedem Anpassungstermin erneut angepasst, jedes Ergebnis ist also ein Szenario, keine Prognose.",
+          "sameTerm": "Restschuld und Restlaufzeit bleiben gleich, es ändert sich die Rate. Manche Banken können stattdessen die Rate halten und die Laufzeit ändern.",
+          "statement": "Die heutige Rate wird aus dem Referenzzins und dem Aufschlag berechnet, die Sie eingeben. Ihr Auszug kann um einige Cent abweichen, und Versicherungen und Kontogebühren sind nicht enthalten.",
+          "noFeed": "Den Referenzzins geben Sie selbst ein: Der Rechner hat keine eigenen Zinsdaten. Nehmen Sie den aktuellen Wert aus Ihrem Vertrag, von Ihrer Bank oder von der Stelle, die den Referenzzins veröffentlicht."
+        },
+        "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, einen Referenzzins von {{minIndex}} bis {{maxIndex}} und einen Aufschlag bis {{maxSpread}}.",
+        "contractTitle": "Was Ihr Vertrag festlegt",
+        "contractIntro": "Wie eine echte Zinsanpassung abläuft, hängt von Ihrem Vertrag und den Regeln in Ihrem Land ab. Nichts davon ist im Rechner enthalten:",
+        "contractItems": {
+          "resetDates": "Anpassungstermine: wie oft der Zins angepasst wird, der Wert welchen Tages zählt und ab wann die neue Rate gilt.",
+          "capsFloors": "Ober- und Untergrenzen: Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt.",
+          "index": "Der Referenzzins: der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender.",
+          "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+        },
+        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
       }
     }
   },

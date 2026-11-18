@@ -1151,6 +1151,223 @@
         "description": "Adiciona o crédito ao WonderMoney com o capital, a taxa e o prazo, associa a prestação mensal e vê o que ainda deves a descer, ao lado do teu orçamento e do teu património."
       }
     },
+    "mortgageTransfer": {
+      "title": "Simulador de transferência de crédito habitação",
+      "shortName": "Transferência de crédito",
+      "description": "Compara o teu crédito habitação com uma nova proposta: a prestação, os custos de mudar, quando ficam pagos e a poupança líquida.",
+      "pageTitle": "Simulador de Transferência de Crédito Habitação: Compensa Mudar de Banco? — WonderMoney",
+      "pageDescription": "Simulador gratuito de transferência de crédito habitação. Compara o teu crédito a taxa fixa com a proposta de outro banco, junta os custos de mudar e vê a poupança mensal, o mês em que os recuperas e a poupança líquida. Sem registo.",
+      "subtitle": "Indica o capital que ainda deves, o prazo que falta e a taxa atual, depois a proposta que recebeste e quanto custaria mudar. Vê as duas prestações com seguros e comissões, o custo total de cada crédito, o mês em que a mudança se paga e quanto poupas no fim. Não precisas de te registar.",
+      "termYears": "Anos",
+      "termMonths": "Meses",
+      "termRounded": "Calculado para {{term}}: o prazo é arredondado a meses completos.",
+      "current": {
+        "legend": "O teu crédito atual",
+        "balance": "Capital em dívida",
+        "balanceHelp": "O que deves hoje, segundo o último extrato do crédito. O novo crédito fica com este valor.",
+        "termLabel": "Prazo que falta",
+        "termHelp": "Anos e meses, por exemplo 22 anos e 4 meses.",
+        "rate": "Taxa de juro atual",
+        "rateHelp": "Taxa anual nominal fixa (TAN). Taxas variáveis e mistas ficam fora deste simulador.",
+        "fees": "Seguros e comissões por mês",
+        "feesHelp": "Seguros de vida e multirriscos associados ao crédito, comissões de conta e outros custos mensais. Deixa 0 se não houver."
+      },
+      "offer": {
+        "legend": "A nova proposta",
+        "rate": "Nova taxa de juro",
+        "rateHelp": "A taxa anual nominal fixa (TAN) que te propuseram.",
+        "termLabel": "Prazo do novo crédito",
+        "termHelp": "Começa igual ao prazo que falta no crédito atual. Um prazo mais longo baixa a prestação, mas soma juros.",
+        "fees": "Seguros e comissões por mês",
+        "feesHelp": "O que o novo banco pede por mês: seguros, comissões de conta e outros encargos."
+      },
+      "costs": {
+        "legend": "Custos únicos da mudança",
+        "help": "Os custos variam consoante o país, o banco e o crédito, por isso indica os que constam da proposta e do teu contrato. Deixa 0 nos que não vais pagar.",
+        "exitFee": "Comissão de saída do crédito atual",
+        "exitFeeHelp": "Uma percentagem do capital, cobrada pelo banco atual por reembolsares antes do fim. Confirma no contrato a taxa e o limite legal, se houver.",
+        "newLoanFees": "Comissões do novo crédito",
+        "newLoanFeesHelp": "Comissões de abertura, de processamento ou de intermediação do novo crédito.",
+        "valuationFee": "Avaliação do imóvel",
+        "legalFees": "Escritura e registos",
+        "legalFeesHelp": "Notário, registo predial, honorários e impostos sobre o novo crédito."
+      },
+      "results": {
+        "currentMonthly": "Prestação atual",
+        "offerMonthly": "Prestação com a proposta",
+        "includesFees": "Primeira prestação de cada crédito, já com seguros e comissões.",
+        "lessEachMonth": "Menos {{amount}} por mês",
+        "moreEachMonth": "Mais {{amount}} por mês",
+        "sameEachMonth": "A mesma prestação todos os meses",
+        "netSaving": "Poupança líquida com a mudança",
+        "netCost": "Custo líquido da mudança",
+        "netSavingHelp": "O que falta pagar no crédito atual, menos o novo crédito com os custos da mudança.",
+        "breakEvenTitle": "Quando a mudança se paga",
+        "breakEven": "No mês {{month}}, ao fim de {{duration}}: nessa altura as prestações mais baixas já cobriram os custos da mudança.",
+        "breakEvenNoCosts": "Sem custos de mudança não há nada a recuperar: cada mês em que a proposta custa menos é poupança.",
+        "breakEvenNever": "Nunca dentro do prazo: as poupanças não chegam a cobrir os custos da mudança.",
+        "breakEvenThenLoss": "As poupanças cobrem os custos da mudança até ao mês {{month}}, mas o prazo mais longo sai mais caro no fim.",
+        "longerTerm": "O novo prazo é {{extra}} mais longo do que o prazo que falta. No prazo que falta, esta proposta custaria {{sameTerm}} por mês: parte da descida da prestação vem de pagares durante mais tempo, o que soma {{interest}} em juros.",
+        "longerTermNoInterest": "O novo prazo é {{extra}} mais longo do que o prazo que falta. A 0% não soma juros, mas pagas os seguros e comissões mensais durante mais tempo.",
+        "costsExceed": "Mudar custa mais do que poupa. Pergunta ao novo banco se pode baixar ou suportar as comissões, ou pede ao banco atual uma taxa melhor.",
+        "switchingCosts": "Custos da mudança"
+      },
+      "table": {
+        "title": "O teu crédito atual e a proposta lado a lado",
+        "caption": "O que falta do crédito atual comparado com a nova proposta",
+        "figure": "Valor",
+        "current": "Crédito atual",
+        "offer": "Nova proposta",
+        "monthlyPayment": "Prestação mensal",
+        "monthlyFees": "Seguros e comissões por mês",
+        "monthlyTotal": "Total por mês",
+        "term": "Prazo até liquidar",
+        "totalInterest": "Juros",
+        "totalFees": "Seguros e comissões no total",
+        "switchingCosts": "Custos da mudança",
+        "totalCost": "Custo total"
+      },
+      "resultNote": "As duas taxas mantêm-se fixas até ao fim de cada crédito. As prestações são mensais, os custos da mudança pagam-se no dia da mudança e o novo crédito fica com o mesmo capital em dívida.",
+      "chart": {
+        "title": "Poupança desde a mudança",
+        "description": "O que a mudança já poupou, prestação a prestação, face aos custos da mudança. Quando a linha passa acima da linha tracejada dos custos, a mudança está paga.",
+        "label": "Gráfico da poupança desde a mudança no fim de cada ano, face aos custos da mudança. Os mesmos valores estão na tabela abaixo.",
+        "year": "Ano",
+        "saved": "Poupado até agora",
+        "costs": "Custos da mudança"
+      },
+      "yearTable": {
+        "caption": "Poupança ano a ano",
+        "year": "Ano",
+        "yearLabel": "Ano {{year}}",
+        "saving": "Poupado no ano",
+        "cumulative": "Poupado até agora",
+        "afterCosts": "Depois dos custos da mudança"
+      },
+      "errors": {
+        "summary": "A comparação aparece quando todos os campos tiverem um valor válido.",
+        "balance": {
+          "required": "Indica o capital que ainda deves.",
+          "tooSmall": "Indica um capital de pelo menos {{min}}.",
+          "tooLarge": "Indica um capital até {{max}}."
+        },
+        "termYears": {
+          "required": "Indica o prazo que falta, pelo menos um mês.",
+          "negative": "Os anos não podem ser negativos.",
+          "tooLarge": "Indica no máximo {{max}} anos no total."
+        },
+        "termMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Indica de 0 a 11 meses; os anos completos vão no campo dos anos."
+        },
+        "newTermYears": {
+          "required": "Indica o prazo do novo crédito, pelo menos um mês.",
+          "negative": "Os anos não podem ser negativos.",
+          "tooLarge": "Indica no máximo {{max}} anos no total."
+        },
+        "newTermMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Indica de 0 a 11 meses; os anos completos vão no campo dos anos."
+        },
+        "currentRate": {
+          "required": "Indica a taxa de juro.",
+          "negative": "A taxa de juro não pode ser inferior a 0%.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "newRate": {
+          "required": "Indica a taxa de juro.",
+          "negative": "A taxa de juro não pode ser inferior a 0%.",
+          "tooLarge": "Indica uma taxa até {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Os encargos não podem ser negativos. Indica 0 se não houver.",
+          "tooLarge": "Indica no máximo {{max}} por mês."
+        },
+        "newMonthlyFees": {
+          "negative": "Os encargos não podem ser negativos. Indica 0 se não houver.",
+          "tooLarge": "Indica no máximo {{max}} por mês."
+        },
+        "exitFeePercent": {
+          "negative": "A comissão não pode ser negativa. Indica 0 se não houver nenhuma.",
+          "tooLarge": "Indica uma comissão até {{max}} do capital."
+        },
+        "newLoanFees": {
+          "negative": "Os custos não podem ser negativos. Indica 0 se não houver.",
+          "tooLarge": "Indica no máximo {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Os custos não podem ser negativos. Indica 0 se não houver.",
+          "tooLarge": "Indica no máximo {{max}}."
+        },
+        "legalFees": {
+          "negative": "Os custos não podem ser negativos. Indica 0 se não houver.",
+          "tooLarge": "Indica no máximo {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "O que comparar antes de mudar",
+          "intro": "Levar o crédito habitação para outro banco, ou renegociar as condições com o teu, pode baixar o que pagas. Uma taxa mais baixa é só uma parte da conta, por isso compara a proposta inteira:",
+          "items": {
+            "rate": "A taxa. Uma taxa fixa mais baixa reduz os juros cobrados todos os meses sobre o que deves.",
+            "monthlyCosts": "Os extras mensais. É comum o banco pedir que subscrevas com ele os seguros de vida e multirriscos, ou que abras uma conta com comissões. Soma-os à prestação, senão uma taxa mais barata pode sair mais cara.",
+            "term": "O prazo. Um crédito novo a mais anos baixa a prestação, mas pagas juros durante mais tempo.",
+            "oneOff": "Os custos únicos. Sair de um crédito e fazer outro tem encargos, e saem das tuas poupanças."
+          },
+          "outro": "O simulador junta tudo isto: a prestação com os extras, o total que cada crédito ainda custa e o mês em que recuperas os custos da mudança."
+        },
+        "costs": {
+          "title": "Os custos de mudar",
+          "intro": "O que custa mudar depende do país, do contrato e dos bancos envolvidos. As parcelas habituais são:",
+          "items": {
+            "exitFee": "A comissão de saída ou de reembolso antecipado, uma percentagem do capital que o banco atual cobra quando o crédito é liquidado antes do fim. Em muitos países a lei impõe um limite, e há créditos sem comissão.",
+            "newLoanFees": "As comissões do novo crédito: abertura, processamento ou intermediação.",
+            "valuation": "A avaliação do imóvel, que o novo banco costuma pedir.",
+            "legal": "Escritura e registos: notário, registo predial, cancelamento da hipoteca antiga e registo da nova, e os impostos sobre o novo crédito."
+          },
+          "outro": "Alguns bancos suportam parte destes custos para ficarem com o teu crédito. Indica só o que pagarias tu e pede a cada banco os valores por escrito."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Imagina que ainda deves {{balance}}, faltam {{term}} e tens uma taxa fixa de {{currentRate}}, mais {{currentFees}} por mês em seguros e comissões. A tua prestação é de {{currentMonthly}} por mês. Outro banco propõe {{newRate}} no mesmo prazo, com {{newFees}} por mês de seguros: {{offerMonthly}} por mês, menos {{monthlySaving}}.",
+          "costs": "Mudar custa {{costs}}: uma comissão de saída de {{exitFeeRate}}, ou seja {{exitFee}}, {{newLoanFees}} de comissões do novo crédito, {{valuationFee}} pela avaliação e {{legalFees}} de escritura e registos. Com {{monthlySaving}} por mês, a mudança paga-se no mês {{breakEvenMonth}}, ao fim de {{breakEvenTime}}.",
+          "total": "No resto do prazo, o crédito atual custa {{currentTotal}} em prestações, seguros e comissões. O novo crédito custa {{offerTotal}}, já com os custos da mudança. A poupança líquida é de {{netSaving}}.",
+          "longer": "Agora imagina que o novo banco propõe esticar o crédito para {{longerTerm}}. A prestação desce para {{longerMonthly}}, menos {{longerSaving}} do que hoje, e os custos ficam cobertos mais cedo. Mas o prazo mais longo soma {{extraInterest}} em juros e, no total, a mudança custa mais {{longerNetCost}} do que manteres o crédito atual. Uma prestação mais baixa não é o mesmo que um crédito mais barato."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "O simulador calcula os dois créditos com o mesmo motor de taxa fixa do simulador de crédito habitação, sobre o capital que ainda deves. Em cada mês, os juros incidem sobre o capital em dívida e o resto da prestação amortiza o crédito. A prestação constante vem da fórmula das anuidades:",
+          "legend": "M é a prestação mensal, P o capital em dívida, r a taxa anual a dividir por 12 e n o número de prestações. A 0% não há juros, por isso a prestação é simplesmente P a dividir por n. Os seguros e comissões de cada mês somam-se por cima.",
+          "saving": "A poupança de um mês é o que o crédito atual custaria nesse mês menos o que custa o novo. Depois de liquidado, um crédito não custa nada, por isso, com um novo prazo mais longo, os meses depois do fim do crédito atual contam como custo. O custo total de cada opção são as prestações, os seguros e as comissões, mais os custos da mudança no novo crédito. A poupança líquida é a diferença.",
+          "breakEven": "O mês em que a mudança se paga é o primeiro em que a poupança acumulada chega pelo menos aos custos da mudança. Se isso nunca acontecer antes do fim dos dois créditos, a mudança não se paga.",
+          "longerTerm": "Quando o novo prazo é mais longo do que o prazo que falta, o simulador calcula também a proposta no prazo que falta, para veres quanto da descida da prestação vem da taxa e quanto vem de pagares durante mais tempo.",
+          "assumptionsTitle": "Pressupostos",
+          "assumptions": {
+            "fixedRate": "As duas taxas mantêm-se fixas até ao fim de cada crédito. Taxas variáveis e mistas, e períodos fixos que passam a taxa variável, não estão incluídos.",
+            "sameBalance": "O novo crédito fica exatamente com o capital que deves hoje. Não pedes mais dinheiro, e os custos da mudança pagam-se à parte em vez de entrarem no crédito.",
+            "timing": "A mudança acontece hoje, logo a seguir a uma prestação normal, e a primeira prestação do novo crédito vence daqui a um mês.",
+            "fees": "Os seguros e comissões mantêm-se iguais todos os meses enquanto cada crédito durar.",
+            "noDiscounting": "Um euro poupado daqui a dez anos conta o mesmo que um euro hoje: não há inflação nem rendimento sobre o dinheiro poupado.",
+            "rounding": "Os valores estão em euros. Os juros e a prestação de cada mês são arredondados ao cêntimo, por isso todos os totais da página batem certo. A prestação indicada é a primeira; as seguintes ficam a menos de um cêntimo dela.",
+            "lenderFigures": "Cada banco conta os dias e arredonda de forma diferente, por isso os valores podem diferir ligeiramente. Pede a cada um a proposta oficial antes de decidires."
+          },
+          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, prazos até {{maxYears}} anos, taxas até {{maxRate}} e comissões de saída até {{maxExitFee}} do capital."
+        },
+        "related": {
+          "title": "Outros simuladores",
+          "mortgageLink": "Simulador de crédito habitação",
+          "mortgageBody": "O plano completo, ano a ano, do novo crédito ou do que tens agora.",
+          "earlyRepaymentLink": "Simulador de amortização de crédito",
+          "earlyRepaymentBody": "Quanto pouparias com uma amortização no crédito atual, em vez de o transferires.",
+          "debtToIncomeLink": "Calculadora de taxa de esforço",
+          "debtToIncomeBody": "A parte do teu rendimento que vai para prestações, hoje e com a nova prestação."
+        }
+      },
+      "cta": {
+        "headline": "Compara o teu orçamento antes e depois da transferência",
+        "description": "Adiciona o crédito habitação ao WonderMoney com a taxa e o prazo, planeia a prestação de cada proposta no teu orçamento e vê como encaixa ao lado do que gastas de facto, antes e depois de mudares."
+      }
+    },
     "savingsGoal": {
       "title": "Simulador de poupança",
       "shortName": "Objetivo de poupança",
@@ -1704,6 +1921,150 @@
         "relatedMortgageLink": "simulador de crédito habitação",
         "relatedNetWorth": "Para somar a casa, o crédito e as tuas poupanças tal como estão hoje, usa a",
         "relatedNetWorthLink": "calculadora de património líquido"
+      }
+    },
+    "rateRevision": {
+      "title": "Simulador de revisão da taxa do crédito",
+      "shortName": "Revisão da taxa",
+      "description": "Vê como muda a prestação de um crédito a taxa variável quando o indexante sobe ou desce, num ano e até ao fim do empréstimo.",
+      "pageTitle": "Simulador da Prestação com a Euribor: Revisão da Taxa do Crédito — WonderMoney",
+      "pageDescription": "Simulador grátis para crédito habitação e outros empréstimos a taxa variável. Indica o capital em dívida, o prazo, o indexante e o spread e vê a nova prestação depois da revisão, o custo num ano e até ao fim, e uma tabela de −2 a +4 pontos. Sem registo.",
+      "subtitle": "Indica quanto ainda deves, o tempo que falta, o indexante do teu crédito e o spread, e depois o indexante que esperas na próxima revisão. Vê a nova prestação mensal, quanto a diferença soma num ano e até ao fim do crédito, e a prestação com o indexante 2 pontos abaixo até 4 pontos acima. Sem registo.",
+      "loanHeading": "O teu crédito hoje",
+      "balance": "Capital em dívida",
+      "balanceHelp": "O que deves hoje, segundo o último extrato do crédito.",
+      "termLabel": "Prazo que falta",
+      "termYears": "Anos",
+      "termMonths": "Meses",
+      "termHelp": "Anos mais meses, por exemplo 22 anos e 4 meses.",
+      "termRounded": "Calculado a {{term}}: o prazo que falta é arredondado a meses inteiros.",
+      "indexRate": "Indexante atual",
+      "indexRateHelp": "A taxa de referência que o teu crédito segue, como a Euribor ou uma taxa de um banco central, no valor que a prestação atual usa. Pode ser negativa.",
+      "spread": "Spread",
+      "spreadHelp": "A margem fixa que o banco soma ao indexante, tal como está no teu contrato.",
+      "currentRate": "Hoje pagas {{rate}}: o indexante mais o spread.",
+      "floored": "O indexante mais o spread fica abaixo de 0%, por isso a taxa conta como 0%. O teu contrato pode ter um limite mínimo próprio.",
+      "revisionHeading": "Na próxima revisão",
+      "newIndexRate": "Novo indexante",
+      "newIndexRateHelp": "O valor que esperas na próxima data de revisão, ou escolhe uma variação abaixo.",
+      "stressLabel": "Experimenta uma variação do indexante",
+      "stress": {
+        "one": "{{change}} ponto",
+        "other": "{{change}} pontos"
+      },
+      "newRate": "A taxa passa a {{rate}}.",
+      "incomeHeading": "O teu orçamento",
+      "monthlyIncome": "Rendimento líquido mensal (opcional)",
+      "monthlyIncomeHelp": "Depois de impostos. Indica-o para veres o peso da prestação no rendimento, ou deixa vazio.",
+      "result": {
+        "newPayment": "Nova prestação mensal",
+        "up": "Mais {{amount}} por mês ({{percent}})",
+        "down": "Menos {{amount}} por mês ({{percent}})",
+        "same": "A prestação fica igual.",
+        "currentPayment": "Prestação hoje, a {{rate}}",
+        "revisedPayment": "Prestação depois da revisão, a {{rate}}",
+        "monthlyChange": "Diferença por mês",
+        "nextYear": "Nas próximas 12 prestações",
+        "paymentsLeft": "Nas {{count}} prestações que faltam",
+        "paymentLeft": "Na última prestação",
+        "totalInterest": "Diferença nos juros até ao fim do crédito",
+        "incomeShare": "A nova prestação levaria {{revised}} do teu rendimento líquido, contra {{current}} hoje. Nível da taxa de esforço: {{band}}.",
+        "exceedsIncome": "A nova prestação é maior do que o rendimento que indicaste.",
+        "bandNote": "Níveis do simulador de taxa de esforço: abaixo de {{caution}}% saudável, de {{caution}}% a {{high}}% atenção, acima de {{high}}% elevada. São uma referência geral, não o limite de um banco."
+      },
+      "assumptionNote": "A nova taxa aplica-se a partir da próxima prestação até ao fim do crédito. As datas de revisão e os limites máximos e mínimos dependem do teu contrato e não estão incluídos.",
+      "table": {
+        "title": "A tua prestação se o indexante mudar",
+        "intro": "O mesmo crédito com o indexante entre 2 pontos abaixo e 4 pontos acima do atual e o mesmo spread, cada taxa aplicada da próxima prestação até ao fim do crédito.",
+        "caption": "Prestação mensal para cada variação do indexante",
+        "change": "Variação do indexante",
+        "index": "Indexante",
+        "rate": "Taxa que pagas",
+        "payment": "Prestação mensal",
+        "monthlyChange": "Diferença por mês",
+        "interestChange": "Diferença nos juros até ao fim",
+        "today": "Hoje",
+        "selected": "O teu cenário"
+      },
+      "errors": {
+        "summary": "A nova prestação aparece quando todos os campos tiverem um valor válido.",
+        "balance": {
+          "required": "Indica o capital que ainda deves.",
+          "tooSmall": "Indica um capital de pelo menos {{min}}.",
+          "tooLarge": "Indica um capital até {{max}}."
+        },
+        "termYears": {
+          "required": "Indica o prazo que falta, pelo menos um mês.",
+          "negative": "Os anos não podem ser negativos.",
+          "tooLarge": "Indica até {{max}} anos no total."
+        },
+        "termMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Indica de 0 a 11 meses; os anos inteiros vão no campo dos anos."
+        },
+        "indexRate": {
+          "required": "Indica o indexante. Pode ser 0% ou negativo.",
+          "tooSmall": "Indica um indexante de pelo menos {{min}}.",
+          "tooLarge": "Indica um indexante até {{max}}."
+        },
+        "spread": {
+          "required": "Indica o spread, ou 0% se não houver.",
+          "negative": "O spread não pode ser negativo.",
+          "tooLarge": "Indica um spread até {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Indica o novo indexante, ou escolhe uma variação abaixo.",
+          "tooSmall": "Indica um indexante de pelo menos {{min}}.",
+          "tooLarge": "Indica um indexante até {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "O rendimento não pode ser negativo. Deixa vazio para não o usar.",
+          "tooLarge": "Indica um rendimento até {{max}}."
+        }
+      },
+      "nextStepHeadline": "Prepara o teu orçamento para uma prestação mais alta",
+      "nextStepDescription": "Adiciona o crédito ao WonderMoney, reserva a prestação mais alta no teu orçamento mensal e vê quanto sobra para o resto das despesas e da poupança.",
+      "nextStepCta": "Testa a resistência do teu orçamento mensal",
+      "guide": {
+        "whatTitle": "Como a revisão da taxa muda a tua prestação",
+        "whatBody1": "Num crédito a taxa variável, a taxa que pagas tem duas partes: um indexante e um spread. O indexante é uma taxa de mercado ou de um banco central, como a Euribor em grande parte da zona euro; outros países usam outros indexantes. O spread é a margem do banco e está fixado no contrato.",
+        "whatBody2": "Em cada data de revisão, muitas vezes a cada 3, 6 ou 12 meses, o banco pega no valor mais recente do indexante, soma o spread e calcula uma nova prestação sobre o capital em dívida e o prazo que falta. Com o mesmo spread, uma subida de 1 ponto percentual no indexante aumenta a taxa até 1 ponto percentual, consoante o teto ou o mínimo aplicável.",
+        "whatBody3": "Este simulador mostra a prestação antes e depois da variação que escolheres, para saberes com antecedência o que uma subida ou uma descida significa para o teu orçamento mensal.",
+        "relatedMortgage": "o plano completo, ano a ano, de um crédito a uma só taxa.",
+        "relatedDebtToIncome": "a parte do teu rendimento que vai para todas as prestações de crédito.",
+        "relatedEarlyRepayment": "quanto poupa uma amortização antecipada e quanto baixa a prestação.",
+        "exampleTitle": "Exemplo prático",
+        "exampleSetup": "Imagina que ainda deves {{balance}} e faltam {{term}}. O teu crédito segue um indexante de {{index}} mais um spread de {{spread}}, por isso pagas {{rate}}: {{payment}} por mês e {{interest}} de juros até ao fim do crédito.",
+        "exampleRise": "Na próxima revisão o indexante sobe para {{newIndex}} e a taxa passa a {{newRate}}. A prestação sobe para {{newPayment}}: mais {{monthlyChange}} por mês ({{percent}}), mais {{yearlyChange}} nas próximas 12 prestações e mais {{interestChange}} de juros até ao fim do crédito, se a taxa ficar nesse valor.",
+        "exampleStress": "Se em vez disso o indexante subisse {{stressStep}} pontos, para uma taxa de {{stressRate}}, a prestação passaria a {{stressPayment}}, mais {{stressChange}} do que hoje.",
+        "exampleIncome": "Com um rendimento líquido de {{income}} por mês, a prestação leva hoje {{currentShare}} dele, {{newShare}} depois da primeira subida e {{stressShare}} depois da maior, um valor que os níveis da taxa de esforço classificam como “{{stressBand}}”.",
+        "methodTitle": "Como é calculado",
+        "methodIntro": "Cada prestação é a prestação constante que paga o capital em dívida nos meses que faltam, com o mesmo motor de taxa fixa do simulador de crédito habitação:",
+        "methodLegend": "i é o indexante e s o spread, ambos como taxas anuais. r é a taxa mensal, M a prestação mensal, P o capital em dívida e n o número de prestações que faltam. Quando o indexante mais o spread fica abaixo de 0%, a taxa conta como 0% e a prestação é simplesmente P a dividir por n.",
+        "methodItems": {
+          "change": "A diferença por mês é a primeira prestação à nova taxa menos a primeira prestação à taxa atual, ambas sobre o capital de hoje e no mesmo número de meses.",
+          "year": "A diferença anual compara a soma das primeiras 12 prestações de cada plano ou de todas as prestações restantes se faltarem menos. Cada prestação é arredondada individualmente, por isso o total pode diferir da diferença mensal multiplicada pelo número de prestações.",
+          "interest": "A diferença nos juros é o total de juros do novo plano menos o do plano atual, ambos até ao fim do crédito.",
+          "income": "O peso no rendimento é a prestação a dividir pelo rendimento líquido que indicas, lido com os níveis do simulador de taxa de esforço: abaixo de {{caution}}% saudável, de {{caution}}% a {{high}}% atenção e acima de {{high}}% elevada. São uma referência geral, não o limite de um banco.",
+          "privacy": "O cálculo é feito no teu navegador. Os valores que indicas ficam no teu dispositivo e não são guardados."
+        },
+        "assumptionsTitle": "Pressupostos",
+        "assumptions": {
+          "fromNextMonth": "A nova taxa aplica-se da próxima prestação até ao fim do crédito. Na prática, volta a ser revista em cada data de revisão, por isso cada resultado é um cenário, não uma previsão.",
+          "sameTerm": "O capital em dívida e o prazo que falta ficam iguais, e é a prestação que muda. Alguns bancos podem manter a prestação e alterar o prazo.",
+          "statement": "A prestação de hoje é calculada a partir do indexante e do spread que indicas. O teu extrato pode diferir alguns cêntimos, e os seguros e as comissões de conta ficam de fora.",
+          "noFeed": "És tu que indicas o indexante: o simulador não tem dados próprios de indexantes. Tira o valor atual do teu contrato, do teu banco ou da entidade que publica o indexante."
+        },
+        "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, até {{maxYears}} anos de prazo, um indexante de {{minIndex}} a {{maxIndex}} e um spread até {{maxSpread}}.",
+        "contractTitle": "O que o teu contrato decide",
+        "contractIntro": "Uma revisão real depende do teu contrato e das regras do país onde vives. Nada disto está incluído no simulador:",
+        "contractItems": {
+          "resetDates": "Datas de revisão: de quanto em quanto tempo a taxa é revista, de que dia é o valor do indexante que conta e quando começa a nova prestação.",
+          "capsFloors": "Limites máximos e mínimos: alguns contratos limitam quanto a taxa pode subir ou descer, ou impedem que fique abaixo de um certo valor. O simulador só impede que a taxa fique abaixo de 0%.",
+          "index": "O indexante: a Euribor, uma taxa de um banco central ou uma taxa de referência nacional, cada uma com prazos próprios (por exemplo 3, 6 ou 12 meses) e um calendário de publicação próprio.",
+          "mixed": "Créditos a taxa mista: primeiro há um período de taxa fixa e depois a taxa variável. Indica o capital e o prazo tal como vão estar quando começar o período variável."
+        },
+        "contractOutro": "Os valores que contam são os do teu banco. Usa este simulador para te preparares antes de uma revisão e depois compara-o com os valores do banco."
       }
     }
   },

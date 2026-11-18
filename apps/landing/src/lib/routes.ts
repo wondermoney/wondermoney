@@ -256,6 +256,14 @@ const ROUTE_SLUGS = {
 		de: "sondertilgung-rechner",
 		it: "estinzione-anticipata",
 	},
+	toolMortgageTransfer: {
+		pt: "simulador-transferencia-credito-habitacao",
+		en: "mortgage-switch-calculator",
+		es: "cambiar-hipoteca-de-banco",
+		fr: "rachat-credit-immobilier",
+		de: "umschuldung-rechner",
+		it: "surroga-mutuo",
+	},
 	toolHouseholdBudget: {
 		pt: "orcamento-familiar",
 		en: "household-budget-calculator",
@@ -295,6 +303,14 @@ const ROUTE_SLUGS = {
 		fr: "combien-puis-je-emprunter",
 		de: "wie-viel-kredit-bekomme-ich",
 		it: "quanto-mutuo-posso-chiedere",
+	},
+	toolRateRevision: {
+		pt: "simulador-revisao-taxa-credito",
+		en: "variable-rate-payment-calculator",
+		es: "simulador-revision-tipo-interes",
+		fr: "simulateur-revision-taux-variable",
+		de: "zinsanpassung-rechner",
+		it: "simulatore-rata-mutuo-variabile",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -407,6 +423,8 @@ export const TOOL_ROUTE_IDS = [
 	"toolEarlyRepayment",
 	"toolBuyVsRent",
 	"toolBorrowingCapacity",
+	"toolMortgageTransfer",
+	"toolRateRevision",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -626,6 +644,7 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolmortgage: "toolMortgage",
 	mortgagecalculator: "toolMortgage",
 	"mortgage-calculator": "toolMortgage",
+	"loan-calculator": "toolMortgage",
 	"credito-habitacao": "toolMortgage",
 	toolhouseholdbudget: "toolHouseholdBudget",
 	householdbudgetcalculator: "toolHouseholdBudget",
@@ -657,6 +676,18 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"borrowing-capacity": "toolBorrowingCapacity",
 	"how-much-can-i-borrow": "toolBorrowingCapacity",
 	"quanto-posso-pedir-emprestado": "toolBorrowingCapacity",
+	toolmortgagetransfer: "toolMortgageTransfer",
+	mortgagetransfercalculator: "toolMortgageTransfer",
+	"mortgage-transfer-calculator": "toolMortgageTransfer",
+	"mortgage-switch-calculator": "toolMortgageTransfer",
+	"mortgage-transfer": "toolMortgageTransfer",
+	"simulador-transferencia-credito-habitacao": "toolMortgageTransfer",
+	toolraterevision: "toolRateRevision",
+	raterevisioncalculator: "toolRateRevision",
+	"rate-revision-calculator": "toolRateRevision",
+	"rate-revision": "toolRateRevision",
+	"variable-rate-payment-calculator": "toolRateRevision",
+	"simulador-revisao-taxa-credito": "toolRateRevision",
 }
 
 function normalizeRouteLookupKey(value: string): string {
