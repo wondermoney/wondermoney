@@ -69,7 +69,7 @@ describe("tools catalog", () => {
 		])
 		expect(groups).toEqual({
 			budgetAndSave: ["toolHouseholdBudget", "toolSavingsRate", "toolEmergencyFund", "toolSavingsGoal"],
-			borrowAndBuyHome: ["toolMortgage", "toolDebtToIncome", "toolBorrowingCapacity", "toolEarlyRepayment", "toolBuyVsRent"],
+			borrowAndBuyHome: ["toolMortgage", "toolDebtToIncome", "toolBorrowingCapacity", "toolEarlyRepayment", "toolMortgageTransfer", "toolBuyVsRent", "toolRateRevision", "toolPersonalLoan"],
 			investAndGrow: ["toolCompoundInterest", "toolInvestmentReturn", "pageFireCalculator", "toolTermDeposit"],
 			trackWealth: ["toolNetWorth"],
 		})
@@ -112,10 +112,8 @@ describe("tools hub", () => {
 		const hub = buildToolsHub(lang)
 		const rendered = hub.flatMap((group) => group.tools)
 		const toolPages = getToolStaticPaths(lang)
-			.filter((path) => !path.props.redirectTo)
 			.map((path) => `/${lang}/tools/${path.params.tool}`)
 		const topLevelPages = getTopLevelPageStaticPaths(lang)
-			.filter((path) => !path.props.redirectTo)
 			.map((path) => `/${lang}/${path.params.page}`)
 
 		expect(hub.map((group) => group.id)).toEqual(TOOL_GROUPS.map((group) => group.id))

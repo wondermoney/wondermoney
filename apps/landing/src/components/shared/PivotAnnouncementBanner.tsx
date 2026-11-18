@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { X } from "lucide-react";
+import { LAYER } from "@/lib/layers";
+import { cn } from "@/lib/utils";
 import type { Lang } from "@/lib/i18nLocale";
 import { useTranslations } from "@/lib/reactTranslations";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
@@ -39,7 +41,12 @@ function PivotAnnouncementBannerContent() {
   }
 
   return (
-    <div className="relative z-30 w-full border-b border-border bg-primary px-4 py-2.5 text-primary-foreground">
+    <div
+      className={cn(
+        "relative w-full border-b border-border bg-primary px-4 py-2.5 text-primary-foreground",
+        LAYER.banner,
+      )}
+    >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 pr-8 text-center text-sm">
         <span>{t("global.pivotBanner.message")}</span>
         <a

@@ -8,6 +8,7 @@ import {
 } from "@/components/shared/ConsentBannerStatus";
 import { ConsentToggle } from "@/components/shared/ConsentToggle";
 import type { Lang } from "@/lib/i18nLocale";
+import { LAYER } from "@/lib/layers";
 import { getTranslations } from "@/lib/translations";
 import {
   createConsentDecision,
@@ -143,7 +144,7 @@ export function ConsentBanner({ locale }: Readonly<{ locale: Lang }>) {
 
   return (
     <aside
-      className={`fixed z-50 right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-card p-5 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-96 ${customizing ? "max-h-[calc(100dvh-8rem)]" : "max-h-[70vh]"}`}
+      className={`fixed ${LAYER.consent} right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-card p-5 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-96 ${customizing ? "max-h-[calc(100dvh-8rem)]" : "max-h-[70vh]"}`}
       aria-label={t("global.consent.title")}
     >
       {customizing ? (

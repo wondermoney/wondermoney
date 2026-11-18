@@ -75,7 +75,6 @@ describe("buy versus rent tool page", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const pages = getToolStaticPaths(lang).filter((path) => path.props.routeId === "toolBuyVsRent")
 			expect(pages).toHaveLength(1)
-			expect(pages[0].props.redirectTo).toBeUndefined()
 			expect(pages[0].params.tool).toBe(toLocalizedPath("toolBuyVsRent", lang).split("/").pop())
 		}
 	})

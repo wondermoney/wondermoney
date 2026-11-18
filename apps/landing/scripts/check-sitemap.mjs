@@ -1,10 +1,10 @@
-// Runs after `astro build`: fails when the sitemap lists a redirect page, or when a redirect page
-// does not lead to a built page the sitemap lists. Prerendered `Astro.redirect` pages are
-// meta-refresh stubs (the legacy-slug addresses), so they are found by their markup.
+// Validate the built sitemap, the legacy redirects emitted by Vercel, and any HTML redirects.
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { getLegacyRedirects } from "../src/lib/legacySlugs.ts";
 
 const outDir = fileURLToPath(new URL("../dist/client", import.meta.url));
 const site = "https://wonder.money";
@@ -26,17 +26,39 @@ for (const file of readdirSync(outDir, { recursive: true, encoding: "utf8" })) {
   pages.set(path, refresh ? { redirectTo: refresh[1] } : {});
 }
 
-const redirects = [...pages].filter(([, page]) => page.redirectTo);
+const htmlRedirects = [...pages].filter(([, page]) => page.redirectTo);
+const config = JSON.parse(readFileSync(new URL("../.vercel/output/config.json", import.meta.url), "utf8"));
+const filesystemIndex = config.routes.findIndex(({ handle }) => handle === "filesystem");
+assert.ok(filesystemIndex >= 0, "Vercel output is missing the filesystem route");
+const edgeRedirects = config.routes.slice(0, filesystemIndex).flatMap(({ src, status, headers }) => {
+  const location = Object.entries(headers ?? {}).find(([name]) => name.toLowerCase() === "location")?.[1];
+  return src && location ? [{ pattern: new RegExp(src), status, location }] : [];
+});
+const legacyRedirects = getLegacyRedirects();
 const failures = [];
 
-for (const path of sitemapPaths) {
-  if (pages.get(path)?.redirectTo) failures.push(`${path} is in the sitemap but redirects to ${pages.get(path).redirectTo}`);
-}
-for (const [path, { redirectTo }] of redirects) {
-  const target = new URL(redirectTo, site).pathname;
-  if (!pages.has(target) || pages.get(target).redirectTo) failures.push(`${path} redirects to ${target}, which is not a built page`);
-  else if (!sitemap.has(target)) failures.push(`${path} redirects to ${target}, which the sitemap leaves out`);
+function checkDestination(source, destination) {
+  const target = new URL(destination, site).pathname;
+  if (!pages.has(target) || pages.get(target).redirectTo) {
+    failures.push(`${source} redirects to ${target}, which is not a built page`);
+  } else if (!sitemap.has(target)) {
+    failures.push(`${source} redirects to ${target}, which the sitemap leaves out`);
+  }
 }
 
+for (const path of sitemapPaths) {
+  const redirectTo = pages.get(path)?.redirectTo ?? edgeRedirects.find(({ pattern }) => pattern.test(path))?.location;
+  if (redirectTo) failures.push(`${path} is in the sitemap but redirects to ${redirectTo}`);
+}
+
+for (const { source, destination } of legacyRedirects) {
+  const rule = edgeRedirects.find(({ pattern }) => pattern.test(source));
+  if (rule?.status !== 301 || rule.location !== destination) {
+    failures.push(`${source} must have a Vercel 301 to ${destination}, found ${rule?.status ?? "no rule"} ${rule?.location ?? ""}`);
+  }
+  checkDestination(source, destination);
+}
+for (const [path, { redirectTo }] of htmlRedirects) checkDestination(path, redirectTo);
+
 assert.deepEqual(failures, [], `Sitemap check failed:\n${failures.join("\n")}`);
-console.log(`Sitemap check: ${sitemap.size} URLs, none of them redirects; ${redirects.length} redirect pages lead to listed pages.`);
+console.log(`Sitemap check: ${sitemap.size} canonical URLs, ${legacyRedirects.length} legacy HTTP 301s and ${htmlRedirects.length} HTML redirects.`);

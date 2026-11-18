@@ -633,9 +633,9 @@
       "subtitle": "Find out what percentage of your income you are saving each month. Your savings rate is one of the most important numbers in personal finance — it determines how fast you build wealth."
     },
     "investmentReturn": {
-      "title": "Investment Return Calculator",
+      "title": "Investment return and index projection",
       "shortName": "Investment return",
-      "description": "See the annualized return of any investment given a start value, end value, and time period.",
+      "description": "Calculate past investment returns, or project an index investment with monthly contributions and fees.",
       "initialInvestment": "Initial investment",
       "currentValue": "Current value",
       "investmentPeriod": "Investment period (years)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Total return (%)",
       "annualizedReturn": "Annualized return",
       "periodHelp": "Number of years you have held the investment",
-      "pageTitle": "Investment Return Calculator — WonderMoney",
-      "pageDescription": "Free investment return calculator. Calculate the total and annualized return of any investment. Compare performance across different time periods.",
-      "subtitle": "Calculate the total and annualized return of any investment. Enter what you invested, what it is worth now, and how long you have held it."
+      "pageTitle": "Investment Return and Index Fund Calculator — WonderMoney",
+      "pageDescription": "Measure past investment returns or project an ETF or index fund with monthly contributions, a return assumption and annual fees.",
+      "subtitle": "Calculate the total and annualized return on an investment you already hold, or estimate how monthly contributions and fees affect an index investment.",
+      "projection": {
+        "pastHeading": "Measure past performance",
+        "heading": "Project an index fund or ETF",
+        "intro": "Enter your own annual return assumption and fund fee to compare what the same investment could be worth with and without that fee.",
+        "principal": "Starting balance",
+        "monthlyContribution": "Monthly contribution",
+        "annualRate": "Assumed annual return before fees",
+        "annualFee": "Annual fund fee",
+        "years": "Projection period (whole years)",
+        "range": "Range {{min}} to {{max}}",
+        "contributed": "Total contributed",
+        "beforeFees": "Projected value before fees",
+        "afterFees": "Projected value after fees",
+        "feeImpact": "Reduction in projected value due to fees",
+        "incomplete": "Fill in every field to see your projection. Enter zero for a value that does not apply.",
+        "outOfRange": "Use the range shown for each field and a whole number of years.",
+        "tooLarge": "This scenario exceeds the calculator’s limit. Reduce the amount, return or period.",
+        "exampleTitle": "Worked example",
+        "example": "Start with {{principal}}, add {{monthly}} at the end of each month and assume a constant annual return of {{annualRate}} over {{years}} years. With an annual fund fee of {{fee}}, the projected value falls from {{beforeFees}} to {{afterFees}}, a difference of {{feeImpact}}.",
+        "methodTitle": "How the projection works",
+        "method": "We multiply the annual growth factor by one minus the annual fund fee. Both the gross and net annual growth factors are converted to equivalent monthly factors. Each month, we apply growth before adding the contribution.",
+        "assumptions": "This model assumes a constant return and fee, reinvested distributions and month-end contributions. It excludes taxes, brokerage fees, currency movements and inflation. Rates are illustrative assumptions for an index such as the S&P 500. Actual returns vary and can be negative. The fee impact includes the growth those fees could have earned.",
+        "ctaHeadline": "Track your actual investment performance",
+        "ctaDescription": "Use WonderMoney to follow your holdings and compare their actual performance with the scenario you modelled.",
+        "ctaText": "Track actual investments against the scenario"
+      }
     },
     "emergencyFund": {
       "title": "Emergency Fund Calculator",
@@ -1149,6 +1175,223 @@
       "cta": {
         "headline": "Track your remaining debt over time",
         "description": "Add the loan to WonderMoney with its balance, rate and term, link the monthly repayment and watch what you still owe go down, next to your budget and net worth."
+      }
+    },
+    "mortgageTransfer": {
+      "title": "Mortgage Switch Calculator",
+      "shortName": "Mortgage switch",
+      "description": "Compare your mortgage with a new offer: the monthly payment, the switching costs, when they pay for themselves and the net saving.",
+      "pageTitle": "Mortgage Switch Calculator: Is Moving Your Loan Worth It? — WonderMoney",
+      "pageDescription": "Free mortgage switch calculator. Compare your fixed-rate loan with another lender's offer, add the switching costs and see the monthly saving, the break-even month and the net saving. No sign-up.",
+      "subtitle": "Enter what you still owe, the time left and your current rate, then the offer you have been made and what switching would cost. See both monthly payments with insurance and fees, the total cost of each loan, the month the switch pays for itself and what you save overall. Nothing to sign up for.",
+      "termYears": "Years",
+      "termMonths": "Months",
+      "termRounded": "Worked out over {{term}}: the term is rounded to whole months.",
+      "current": {
+        "legend": "Your current loan",
+        "balance": "Balance still owed",
+        "balanceHelp": "What you owe today, from your latest loan statement. The new loan takes over this amount.",
+        "termLabel": "Time left on the loan",
+        "termHelp": "Years plus months, for example 22 years and 4 months.",
+        "rate": "Current interest rate",
+        "rateHelp": "Fixed nominal annual rate. Variable and mixed rates are not covered.",
+        "fees": "Insurance and fees a month",
+        "feesHelp": "Life and home insurance tied to the loan, account charges and other monthly costs. Leave 0 if there are none."
+      },
+      "offer": {
+        "legend": "The new offer",
+        "rate": "New interest rate",
+        "rateHelp": "The fixed nominal annual rate you have been offered.",
+        "termLabel": "New loan term",
+        "termHelp": "Starts at the time left on your current loan. A longer term lowers the payment but adds interest.",
+        "fees": "Insurance and fees a month",
+        "feesHelp": "What the new lender asks for each month: its insurance, account charges and other fees."
+      },
+      "costs": {
+        "legend": "One-off switching costs",
+        "help": "Costs vary by country, lender and loan, so enter the ones in your offer and your contract. Leave 0 for any you will not pay.",
+        "exitFee": "Exit fee on the current loan",
+        "exitFeeHelp": "A percentage of the balance, charged by your current lender for repaying early. Check your contract for the rate and any legal cap.",
+        "newLoanFees": "New loan fees",
+        "newLoanFeesHelp": "Arrangement, processing or broker fees for the new loan.",
+        "valuationFee": "Valuation",
+        "legalFees": "Legal and registration costs",
+        "legalFeesHelp": "Notary, land registry, legal fees and any tax on the new loan."
+      },
+      "results": {
+        "currentMonthly": "Monthly payment now",
+        "offerMonthly": "Monthly payment with the offer",
+        "includesFees": "First payment of each loan, with its insurance and fees.",
+        "lessEachMonth": "{{amount}} less each month",
+        "moreEachMonth": "{{amount}} more each month",
+        "sameEachMonth": "The same payment each month",
+        "netSaving": "Net saving from switching",
+        "netCost": "Net cost of switching",
+        "netSavingHelp": "The rest of your current loan, minus the new loan with the switching costs.",
+        "breakEvenTitle": "When the switch pays for itself",
+        "breakEven": "In month {{month}}, after {{duration}}: by then the lower payments have covered the switching costs.",
+        "breakEvenNoCosts": "With no switching costs there is nothing to earn back: every month the offer costs less is a saving.",
+        "breakEvenNever": "Never within the term: the savings never cover the switching costs.",
+        "breakEvenThenLoss": "The savings cover the switching costs by month {{month}}, but the longer term costs more by the end.",
+        "longerTerm": "The new term is {{extra}} longer than the time left. Over the time left, this offer would cost {{sameTerm}} a month: part of the lower payment comes from paying for longer, which adds {{interest}} in interest.",
+        "longerTermNoInterest": "The new term is {{extra}} longer than the time left. At 0% it adds no interest, but you pay the monthly insurance and fees for longer.",
+        "costsExceed": "Switching costs more than it saves. Ask the new lender whether it can lower or cover the fees, or ask your current lender for a better rate.",
+        "switchingCosts": "Switching costs"
+      },
+      "table": {
+        "title": "Your current loan and the offer side by side",
+        "caption": "The rest of your current loan compared with the new offer",
+        "figure": "Figure",
+        "current": "Current loan",
+        "offer": "New offer",
+        "monthlyPayment": "Monthly payment",
+        "monthlyFees": "Insurance and fees a month",
+        "monthlyTotal": "Monthly total",
+        "term": "Time to pay off",
+        "totalInterest": "Interest",
+        "totalFees": "Insurance and fees in total",
+        "switchingCosts": "Switching costs",
+        "totalCost": "Total cost"
+      },
+      "resultNote": "Both rates stay fixed to the end of each loan. Payments are monthly, the switching costs are paid on the day of the switch, and the new loan takes over the same balance.",
+      "chart": {
+        "title": "Savings since the switch",
+        "description": "What the switch has saved so far, payment by payment, against the switching costs. Where the line rises above the dashed costs line, the switch has paid for itself.",
+        "label": "Chart of the savings since the switch at the end of each year, against the switching costs. The same figures are in the table below.",
+        "year": "Year",
+        "saved": "Saved so far",
+        "costs": "Switching costs"
+      },
+      "yearTable": {
+        "caption": "Savings year by year",
+        "year": "Year",
+        "yearLabel": "Year {{year}}",
+        "saving": "Saved in the year",
+        "cumulative": "Saved so far",
+        "afterCosts": "After switching costs"
+      },
+      "errors": {
+        "summary": "Your comparison appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "newTermYears": {
+          "required": "Enter the new loan's term, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "newTermMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "currentRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "newRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The interest rate can't be below 0%.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}} a month."
+        },
+        "newMonthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}} a month."
+        },
+        "exitFeePercent": {
+          "negative": "The fee can't be negative. Enter 0 if there is none.",
+          "tooLarge": "Enter a fee up to {{max}} of the balance."
+        },
+        "newLoanFees": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        },
+        "legalFees": {
+          "negative": "Costs can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter up to {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "What to compare before you switch",
+          "intro": "Moving your mortgage to another lender, or onto new terms with your own, can lower what you pay. A lower rate is only part of the picture, so compare the whole offer:",
+          "items": {
+            "rate": "The rate. A lower fixed rate cuts the interest charged on what you owe every month.",
+            "monthlyCosts": "The monthly extras. Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer.",
+            "term": "The term. A new loan over more years lowers the payment, but you pay interest for longer.",
+            "oneOff": "The one-off costs. Leaving one loan and taking out another has fees, and they come out of your savings."
+          },
+          "outro": "The calculator puts these together: the payment with its extras, the total each loan still costs and the month the switching costs are paid back."
+        },
+        "costs": {
+          "title": "The costs of switching",
+          "intro": "What a switch costs depends on your country, your contract and the lenders involved. The usual items are:",
+          "items": {
+            "exitFee": "An exit or early repayment fee, a percentage of the balance your current lender charges when the loan is repaid before the end. Many countries cap it by law, and some loans have none.",
+            "newLoanFees": "Fees for the new loan: arrangement, processing or broker fees.",
+            "valuation": "A valuation of the home, which the new lender usually asks for.",
+            "legal": "Legal and registration costs: notary, land registry, cancelling the old charge on the home and registering the new one, and any tax on the new loan."
+          },
+          "outro": "Some lenders pay part of these costs to win your loan. Enter only what you would pay yourself, and ask each lender for the figures in writing."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you still owe {{balance}} with {{term}} left at a fixed {{currentRate}}, and pay {{currentFees}} a month in insurance and fees. Your payment is {{currentMonthly}} a month. Another lender offers {{newRate}} over the same term, with {{newFees}} a month of insurance: {{offerMonthly}} a month, {{monthlySaving}} less.",
+          "costs": "Switching costs {{costs}}: a {{exitFeeRate}} exit fee of {{exitFee}}, {{newLoanFees}} of new loan fees, {{valuationFee}} for the valuation and {{legalFees}} of legal and registration costs. At {{monthlySaving}} a month, the switch pays for itself in month {{breakEvenMonth}}, after {{breakEvenTime}}.",
+          "total": "Over the rest of the term, the current loan costs {{currentTotal}} in payments, insurance and fees. The new loan costs {{offerTotal}}, switching costs included. The net saving is {{netSaving}}.",
+          "longer": "Now say the new lender offers to spread the loan over {{longerTerm}}. The payment falls to {{longerMonthly}}, {{longerSaving}} less than today, and the costs are covered sooner. But the longer term adds {{extraInterest}} in interest, and overall the switch costs {{longerNetCost}} more than keeping your current loan. A lower payment is not the same as a cheaper loan."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator works out both loans with the same fixed-rate engine as the mortgage calculator, on the balance you still owe. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
+          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments. At 0% there is no interest, so the payment is simply P divided by n. Each month's insurance and fees are added on top.",
+          "saving": "A month's saving is what the current loan would cost that month minus what the new one costs. Once a loan is paid off it costs nothing, so with a longer new term the months after your current loan would have ended count as a cost. The total cost of each option is its payments, insurance and fees, plus the switching costs for the new loan. The net saving is the difference.",
+          "breakEven": "The break-even month is the first month in which the savings so far are at least the switching costs. If that never happens before both loans end, the switch does not pay for itself.",
+          "longerTerm": "When the new term is longer than the time left, the calculator also works out the offer over the time left, so you can see how much of the lower payment comes from the rate and how much from paying for longer.",
+          "assumptionsTitle": "Assumptions",
+          "assumptions": {
+            "fixedRate": "Both rates stay fixed to the end of each loan. Variable and mixed rates, and fixed periods that end in a variable rate, are not covered.",
+            "sameBalance": "The new loan takes over exactly the balance you owe today. Nothing is borrowed on top, and the switching costs are paid in cash rather than added to the loan.",
+            "timing": "The switch happens today, straight after a regular payment, and the first payment on the new loan is due in a month.",
+            "fees": "Insurance and fees stay the same each month for as long as each loan runs.",
+            "noDiscounting": "A euro saved in ten years counts the same as a euro today: there is no inflation or return on the money you save.",
+            "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly. The payment shown is the first one; later ones stay within a cent of it.",
+            "lenderFigures": "Lenders count days and round in their own ways, so their figures can differ slightly. Ask each one for its official offer before you decide."
+          },
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance."
+        },
+        "related": {
+          "title": "Related calculators",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "The full year-by-year schedule of the new loan, or of the one you have now.",
+          "earlyRepaymentLink": "Early repayment calculator",
+          "earlyRepaymentBody": "What a lump sum would save on your current loan instead of switching it.",
+          "debtToIncomeLink": "Debt-to-income ratio calculator",
+          "debtToIncomeBody": "The share of your income that goes on debt payments, now and with the new payment."
+        }
+      },
+      "cta": {
+        "headline": "Compare your budget before and after switching",
+        "description": "Add your mortgage to WonderMoney with its rate and term, plan each offer's monthly payment in your budget and see how it fits next to what you really spend, before and after switching."
       }
     },
     "savingsGoal": {
@@ -1704,6 +1947,255 @@
         "relatedMortgageLink": "mortgage calculator",
         "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
         "relatedNetWorthLink": "net worth calculator"
+      }
+    },
+    "rateRevision": {
+      "title": "Variable-Rate Payment Calculator",
+      "shortName": "Rate change",
+      "description": "See how the monthly payment on a variable-rate loan changes when its index moves, over a year and to the end of the loan.",
+      "pageTitle": "Variable-Rate Mortgage Calculator: Your Payment After a Rate Change — WonderMoney",
+      "pageDescription": "Free calculator for variable-rate mortgages and loans. Enter the balance, time left, index and spread to see the new payment after a rate revision, the yearly and total cost, and a table from −2 to +4 points. No sign-up.",
+      "subtitle": "Enter what you still owe, the time left, the index your loan follows and your lender's spread, then the index you expect after the next revision. See the new monthly payment, what the change adds up to over a year and to the end of the loan, and the payment for the index moving from 2 points lower to 4 points higher. Nothing to sign up for.",
+      "loanHeading": "Your loan today",
+      "balance": "Balance still owed",
+      "balanceHelp": "What you owe today, from your latest loan statement.",
+      "termLabel": "Time left on the loan",
+      "termYears": "Years",
+      "termMonths": "Months",
+      "termHelp": "Years plus months, for example 22 years and 4 months.",
+      "termRounded": "Worked out over {{term}}: the time left is rounded to whole months.",
+      "indexRate": "Index rate today",
+      "indexRateHelp": "The reference rate your loan follows, such as Euribor or a central bank rate, at the value your current payment uses. It can be negative.",
+      "spread": "Spread",
+      "spreadHelp": "The fixed margin your lender adds to the index, as set in your contract.",
+      "currentRate": "You pay {{rate}} today: the index plus the spread.",
+      "floored": "The index plus the spread is below 0%, so the rate is taken as 0%. Your contract may set its own floor.",
+      "revisionHeading": "At the next revision",
+      "newIndexRate": "New index rate",
+      "newIndexRateHelp": "The value you expect at the next reset date, or pick a change below.",
+      "stressLabel": "Try a change in the index",
+      "stress": {
+        "one": "{{change}} point",
+        "other": "{{change}} points"
+      },
+      "newRate": "The rate becomes {{rate}}.",
+      "incomeHeading": "Your budget",
+      "monthlyIncome": "Net monthly income (optional)",
+      "monthlyIncomeHelp": "After tax. Add it to see the payment as a share of your income, or leave it empty.",
+      "result": {
+        "newPayment": "New monthly payment",
+        "up": "{{amount}} more a month ({{percent}})",
+        "down": "{{amount}} less a month ({{percent}})",
+        "same": "The payment stays the same.",
+        "currentPayment": "Payment today, at {{rate}}",
+        "revisedPayment": "Payment after the revision, at {{rate}}",
+        "monthlyChange": "Change a month",
+        "nextYear": "Over the next 12 payments",
+        "paymentsLeft": "Over the {{count}} payments left",
+        "paymentLeft": "On the last payment",
+        "totalInterest": "Change in interest to the end of the loan",
+        "incomeShare": "The new payment would take {{revised}} of your net income, against {{current}} today. Debt-to-income band: {{band}}.",
+        "exceedsIncome": "The new payment is more than the income you entered.",
+        "bandNote": "Bands from the debt-to-income calculator: under {{caution}}% healthy, {{caution}}% to {{high}}% caution, above {{high}}% high. They are a rule of thumb, not a lender's limit."
+      },
+      "assumptionNote": "The new rate applies from your next payment to the end of the loan. Reset dates, caps and floors depend on your contract and are not included.",
+      "table": {
+        "title": "Your payment if the index moves",
+        "intro": "The same loan with the index from 2 points lower to 4 points higher than today and the spread unchanged, each rate applied from the next payment to the end of the loan.",
+        "caption": "Monthly payment for each change in the index",
+        "change": "Change in the index",
+        "index": "Index",
+        "rate": "Rate you pay",
+        "payment": "Monthly payment",
+        "monthlyChange": "Change a month",
+        "interestChange": "Change in interest to the end",
+        "today": "Today",
+        "selected": "Your scenario"
+      },
+      "errors": {
+        "summary": "The new payment appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "indexRate": {
+          "required": "Enter the index rate. It can be 0% or negative.",
+          "tooSmall": "Enter an index of at least {{min}}.",
+          "tooLarge": "Enter an index up to {{max}}."
+        },
+        "spread": {
+          "required": "Enter the spread, or 0% if there is none.",
+          "negative": "The spread can't be negative.",
+          "tooLarge": "Enter a spread up to {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Enter the new index rate, or pick a change below.",
+          "tooSmall": "Enter an index of at least {{min}}.",
+          "tooLarge": "Enter an index up to {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Income can't be negative. Leave it empty to skip it.",
+          "tooLarge": "Enter an income up to {{max}}."
+        }
+      },
+      "nextStepHeadline": "Plan for a higher payment in your budget",
+      "nextStepDescription": "Add the loan to WonderMoney, give the higher payment its place in your monthly budget and see what it leaves for the rest of your spending and saving.",
+      "nextStepCta": "Stress-test your monthly cash flow",
+      "guide": {
+        "whatTitle": "How a rate revision changes your payment",
+        "whatBody1": "On a variable-rate loan the rate you pay has two parts: a reference index and a spread. The index is a market or central bank rate, such as Euribor in much of the euro area, and other countries use their own. The spread is the lender's margin and is fixed in your contract.",
+        "whatBody2": "At each reset date, often every 3, 6 or 12 months, the lender takes the latest value of the index, adds the spread and works out a new payment on the balance and the time left. With the same spread, a rise of 1 percentage point in the index raises the rate by up to 1 percentage point, depending on any cap or floor.",
+        "whatBody3": "This calculator shows the payment before and after a change you choose, so you can see ahead of time what a rise or a fall would mean for your monthly budget.",
+        "relatedMortgage": "the full year-by-year schedule of a loan at one rate.",
+        "relatedDebtToIncome": "the share of your income that goes on all your credit payments.",
+        "relatedEarlyRepayment": "what a lump-sum repayment saves, and how much it lowers the payment.",
+        "exampleTitle": "Worked example",
+        "exampleSetup": "Say you still owe {{balance}} with {{term}} left. Your loan follows an index at {{index}} plus a spread of {{spread}}, so you pay {{rate}}: {{payment}} a month, and {{interest}} in interest to the end of the loan.",
+        "exampleRise": "At the next revision the index rises to {{newIndex}}, so your rate becomes {{newRate}}. The payment goes up to {{newPayment}}: {{monthlyChange}} more a month ({{percent}}), {{yearlyChange}} more over the next 12 payments and {{interestChange}} more interest by the end of the loan, if the rate stays there.",
+        "exampleStress": "A rise of {{stressStep}} points instead, to a rate of {{stressRate}}, would take the payment to {{stressPayment}}, {{stressChange}} more than today.",
+        "exampleIncome": "On a net income of {{income}} a month, the payment takes {{currentShare}} of it today, {{newShare}} after the first rise and {{stressShare}} after the larger one, which the debt-to-income bands rate as “{{stressBand}}”.",
+        "methodTitle": "How it is calculated",
+        "methodIntro": "Each payment is the level payment that clears the balance over the months left, from the same fixed-rate engine as the mortgage calculator:",
+        "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
+        "methodItems": {
+          "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
+          "year": "The yearly change compares the sum of the first 12 payments in each schedule, or all remaining payments if fewer are left. Payments are rounded individually, so the total can differ from the monthly change multiplied by the number of payments.",
+          "interest": "The change in interest is the interest of the new schedule minus today's, both to the end of the loan.",
+          "income": "The share of income is the payment divided by the net income you enter, read against the debt-to-income calculator's bands: under {{caution}}% healthy, {{caution}}% to {{high}}% caution and above {{high}}% high. They are a rule of thumb, not a lender's limit.",
+          "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved."
+        },
+        "assumptionsTitle": "Assumptions",
+        "assumptions": {
+          "fromNextMonth": "The new rate applies from your next payment to the end of the loan. In practice it is revised again at every reset date, so each result is one scenario, not a forecast.",
+          "sameTerm": "The balance and the time left stay as they are, and the payment is what changes. Some lenders can keep the payment and change the term instead.",
+          "statement": "Today's payment is worked out from the index and spread you enter. Your statement can differ by a few cents, and insurance and account fees are left out.",
+          "noFeed": "You enter the index yourself: the calculator has no index data of its own. Take the current value from your contract, your lender or the body that publishes the index."
+        },
+        "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, an index from {{minIndex}} to {{maxIndex}} and a spread up to {{maxSpread}}.",
+        "contractTitle": "What your contract decides",
+        "contractIntro": "How a real revision works depends on your contract and on the rules where you live. None of this is built into the calculator:",
+        "contractItems": {
+          "resetDates": "Reset dates: how often the rate is revised, which day's index value counts and when the new payment starts.",
+          "capsFloors": "Caps and floors: some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%.",
+          "index": "The index: Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule.",
+          "mixed": "Mixed-rate loans: a fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+        },
+        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
+      }
+    },
+    "personalLoan": {
+      "title": "Personal Loan Calculator",
+      "shortName": "Personal loan",
+      "description": "Work out the monthly payment, the total cost and an estimated APR of a personal loan, fees included, with the full monthly schedule.",
+      "pageTitle": "Personal Loan Calculator: Monthly Payment, Total Cost and APR — WonderMoney",
+      "pageDescription": "Free personal loan calculator. Enter the amount, term, interest rate and fees to see the monthly payment, the total cost of credit, an estimated APR and the month-by-month schedule. No sign-up.",
+      "subtitle": "Two loans at the same interest rate can cost very different amounts once the fees are added. Enter the offer you have, fees included, and see what it costs each month and in total. Nothing to sign up for.",
+      "amount": "Amount borrowed",
+      "amountHelp": "What the lender lends you, before any fees are taken off.",
+      "termMonths": "Term",
+      "termMonthsHelp": "Number of monthly payments, from {{min}} to {{max}}.",
+      "months": "months",
+      "annualRate": "Interest rate",
+      "annualRateHelp": "The fixed nominal annual rate in the offer, not the APR: the APR is what this calculator works out.",
+      "upfrontFees": "Upfront fees",
+      "upfrontFeesHelp": "One-off charges paid when the loan starts, such as an arrangement or processing fee, and any tax on the loan. Leave 0 if there are none.",
+      "monthlyFees": "Monthly fees and insurance",
+      "monthlyFeesHelp": "Charged with every payment, such as an account or collection fee, or the premium of an insurance the loan requires. Leave 0 if there are none.",
+      "result": {
+        "monthlyPayment": "Monthly payment",
+        "monthlyPaymentSplit": "{{loan}} for the loan plus {{fees}} in fees.",
+        "paymentsNote": "{{count}} monthly payments. Later payments stay within a cent of the first; the last one, {{last}}, clears the balance.",
+        "apr": "Estimated APR, fees included",
+        "aprOver": "over {{max}}",
+        "aprNote": "An estimate of the annual percentage rate (APR), worked out from the money you receive and every payment you make. The figure a lender quotes follows its country's rules and can count costs this calculator doesn't know about.",
+        "totalInterest": "Total interest",
+        "totalFees": "Total fees",
+        "totalCostOfCredit": "Total cost of credit",
+        "totalRepaid": "Total you pay, fees included",
+        "amountReceived": "You receive {{amount}} once the upfront fees are taken off."
+      },
+      "estimateNote": "This is an estimate, not a loan offer or a quote. The rate, the fees and whether you are approved depend on the lender and on your circumstances: compare the figures in each lender's written offer before you sign.",
+      "schedule": {
+        "title": "Monthly schedule",
+        "description": "How each payment splits between interest, principal and fees, and what you still owe after it.",
+        "upfrontNote": "The {{fees}} of upfront fees are paid at the start and aren't in the table.",
+        "show": "Show the monthly schedule",
+        "hide": "Hide the monthly schedule",
+        "month": "Month",
+        "payment": "Payment",
+        "principal": "Principal",
+        "interest": "Interest",
+        "fees": "Fees",
+        "balance": "Balance",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "Your result appears once every field has a valid value.",
+        "amount": {
+          "required": "Enter the amount you want to borrow.",
+          "tooSmall": "Enter at least {{min}}.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        },
+        "termMonths": {
+          "required": "Enter the term in months.",
+          "tooSmall": "Enter a term of at least {{min}} months.",
+          "tooLarge": "Enter a term of up to {{max}} months."
+        },
+        "annualRate": {
+          "required": "Enter the interest rate.",
+          "negative": "The rate can't be negative. Enter 0 for an interest-free loan.",
+          "tooLarge": "Enter a rate up to {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter upfront fees up to {{max}}, half the amount borrowed."
+        },
+        "monthlyFees": {
+          "negative": "Fees can't be negative. Enter 0 if there are none.",
+          "tooLarge": "Enter monthly fees up to {{max}}."
+        }
+      },
+      "nextStepHeadline": "Track this loan alongside your budget",
+      "nextStepDescription": "Add the loan to WonderMoney with its rate and term, plan the monthly payment in your budget and see the balance fall next to what you really spend.",
+      "nextStepCta": "See the payment inside your monthly budget",
+      "guide": {
+        "whatTitle": "What a personal loan really costs",
+        "whatBody1": "With a fixed-rate personal loan, you make roughly equal monthly payments over a fixed term. Each payment covers interest on the outstanding balance and repays part of the principal. As the balance falls, less of the payment goes to interest and more goes to principal.",
+        "whatBody2": "The interest rate is only part of the price. Lenders often add a fee when the loan starts and a monthly charge, such as a collection fee or an insurance premium. Those fees come on top of the interest, and on a small or short loan they can cost more than the interest itself.",
+        "whatBody3": "Before you borrow, check that the payment fits: next to the credit payments you already make, and inside the budget you already live on.",
+        "relatedDebtToIncome": "shows what share of your income your credit payments, this one included, would take.",
+        "relatedHouseholdBudget": "shows where your money goes each month, so you can see what the new payment would have to replace.",
+        "aprTitle": "The interest rate and the APR are not the same",
+        "aprBody1": "The interest rate in an offer is a nominal annual rate: it sets each month's interest, a twelfth of it on the balance still owed. It leaves out the fees and, because interest is charged every month, it understates the yearly cost even of a loan with no fees.",
+        "aprBody2": "The annual percentage rate puts everything into one figure. It is the yearly rate at which the money you actually receive (the amount less the upfront fees) equals every payment you make, fees included. Two offers for the same amount and term can be compared by their APR: the lower one costs less.",
+        "aprBody3": "Each lender works out its APR under its own country's rules, which can include costs this calculator doesn't ask about and count months differently. The APR shown here is an estimate for comparing offers, not the figure in a contract.",
+        "exampleTitle": "Worked example",
+        "exampleIntro": "Say you borrow {{amount}} over {{months}} months at a nominal rate of {{rate}}, with no fees.",
+        "exampleNoFees": "The monthly payment is {{payment}}. Over the term you pay {{interest}} in interest and {{totalRepaid}} in all. Even with no fees, the APR is {{apr}}, a little above {{rate}}, because interest is charged every month.",
+        "exampleFees": "Now add {{upfront}} of upfront fees and {{monthlyFee}} a month in fees. You receive {{received}}, and each payment rises to {{paymentWithFees}}. The fees add {{fees}}, so the cost of credit grows to {{cost}} and you pay {{totalRepaidFees}} in all.",
+        "exampleApr": "The interest rate is still {{rate}}, but the APR rises to {{aprFees}}. That is the figure to compare with another offer: a loan at a higher rate with no fees can cost less.",
+        "exampleOutro": "The calculator above starts from this loan without the fees, so you can enter your own offer.",
+        "methodTitle": "How the calculator works it out",
+        "methodIntro": "The monthly payment is the level payment that repays the amount over the term at the monthly rate, and the APR is the rate that balances what you receive against what you pay:",
+        "methodLegend": "M is the payment of principal and interest, P the amount borrowed, r the nominal annual rate divided by 12 and n the number of months. The monthly fees f are added to each payment.",
+        "methodApr": "The APR is the rate A that solves the second line: what you receive at the start, the amount P less the upfront fees F, equals each month's payment Mₖ plus the fees f, discounted by (1 + A) to the power of k ÷ 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
+        "methodRounding": "Every figure is worked in whole cents. Each payment is worked out again from the balance still owed, so the payments stay within a cent of each other, the last one clears the balance exactly, and the schedule adds up to the totals.",
+        "methodPrivacy": "The calculation runs in your browser. Nothing you enter is sent or stored.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionFixedRate": "The rate is fixed for the whole term, and every payment is made on time.",
+        "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
+        "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
+        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
       }
     }
   },

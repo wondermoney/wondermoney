@@ -56,7 +56,7 @@ describe("FIRE calculator page", () => {
 	it("is prerendered from the top-level static paths in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const pages = getTopLevelPageStaticPaths(lang).filter(
-				(path) => path.props.routeId === "pageFireCalculator" && !path.props.redirectTo,
+				(path) => path.props.routeId === "pageFireCalculator",
 			)
 			expect(pages).toHaveLength(1)
 			expect(pages[0].params.page).toBe(toLocalizedPath("pageFireCalculator", lang).split("/").pop())

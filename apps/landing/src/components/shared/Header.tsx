@@ -11,6 +11,7 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import { LAYER } from "@/lib/layers";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import logo from "../../assets/logo.png";
@@ -96,7 +97,12 @@ export default function Header({ locale }: Props) {
   ];
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 border-b border-border bg-background/95 backdrop-blur-md",
+        LAYER.header,
+      )}
+    >
       <nav
         className="relative mx-auto flex h-16 max-w-7xl items-center gap-x-6 px-6 lg:gap-x-10 lg:px-8"
         aria-label="Global"
@@ -293,8 +299,14 @@ export default function Header({ locale }: Props) {
         open={mobileMenuOpen}
         onClose={setMobileMenuOpen}
       >
-        <div className="fixed inset-0 z-10" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto border-l border-border bg-background px-6 py-6 sm:max-w-sm">
+        {/* Above the banner, the header and the sticky CTA, so a tap lands in the drawer (src/lib/layers.ts) */}
+        <div className={cn("fixed inset-0", LAYER.drawer)} />
+        <DialogPanel
+          className={cn(
+            "fixed inset-y-0 right-0 w-full overflow-y-auto border-l border-border bg-background px-6 py-6 sm:max-w-sm",
+            LAYER.drawer,
+          )}
+        >
           <div className="flex items-center justify-between">
             <a href={homeHref} className="-m-1.5 p-1.5">
               <span className="sr-only">WonderMoney</span>

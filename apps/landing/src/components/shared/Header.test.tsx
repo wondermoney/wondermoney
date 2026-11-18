@@ -7,7 +7,10 @@ import { createConsentDecision, writeConsentDecision } from "@/lib/consent";
 import { SUPPORTED_LANGS, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
 import { TOOLS_CATALOG, buildToolsHub, type ToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
+import { ConsentBanner } from "./ConsentBanner";
 import Header from "./Header";
+import PivotAnnouncementBanner from "./PivotAnnouncementBanner";
+import StickyMobileCta from "./StickyMobileCta";
 import { HOVER_CLOSE_DELAY_MS, HOVER_OPEN_DELAY_MS } from "./useNavMenus";
 
 // Entries a test adds to the catalog, as a new tool would be added to TOOLS_CATALOG.
@@ -453,6 +456,71 @@ describe("Header tools menu analytics", () => {
     await user.keyboard("{Enter}");
     await user.click(within(panel("tools")).getByRole("link", { name: en("header.toolsMenu.seeAll") }));
     expect(navClicks()).toEqual([]);
+  });
+});
+
+describe("Header drawer stacking", () => {
+  /**
+   * The z-index an element stacks at against the rest of the page: that of its outermost
+   * ancestor carrying a `z-*` class, the layer that starts its stacking context at the root.
+   */
+  function rootLayer(element: Element): number {
+    let level: number | undefined;
+    for (let node: Element | null = element; node; node = node.parentElement) {
+      const match = /(?:^|\s)z-(\d+)(?:\s|$)/.exec(node.getAttribute("class") ?? "");
+      if (match) level = Number(match[1]);
+    }
+    if (level === undefined) throw new Error("element has no z-index layer");
+    return level;
+  }
+
+  it.each(SUPPORTED_LANGS)("keeps the drawer and banner controls usable in %s", async (locale) => {
+    const user = userEvent.setup();
+    const t = getTranslations(locale);
+    render(
+      <>
+        <PivotAnnouncementBanner locale={locale} />
+        <Header locale={locale} />
+        <ConsentBanner locale={locale} />
+        <StickyMobileCta locale={locale} />
+      </>,
+    );
+    const dismissLabel = t("global.pivotBanner.dismissLabel");
+    const dismiss = await screen.findByRole("button", { name: dismissLabel });
+    const consent = screen.getByRole("complementary", { name: t("global.consent.title") });
+    const stickyCta = screen.getByText(t("global.mainCtaMicrocopy"));
+
+    await user.click(screen.getByRole("button", { name: t("header.openMainMenu") }));
+    const close = screen.getByRole("button", { name: t("header.closeMenu") });
+    const firstRow = screen.getByRole("button", { name: t("header.features") });
+
+    const banner = rootLayer(dismiss);
+    const header = rootLayer(document.querySelector("header")!);
+    for (const control of [close, firstRow]) {
+      expect(rootLayer(control)).toBeGreaterThan(header);
+      expect(rootLayer(control)).toBeGreaterThan(banner);
+      expect(rootLayer(control)).toBeGreaterThan(rootLayer(stickyCta));
+      expect(rootLayer(control)).toBeLessThan(rootLayer(consent));
+    }
+    expect(header).toBeGreaterThan(banner);
+
+    await user.click(firstRow);
+    expect(firstRow.getAttribute("aria-expanded")).toBe("true");
+    await user.click(close);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(dismiss);
+    expect(screen.queryByRole("button", { name: dismissLabel })).toBeNull();
+  });
+
+  it("raises the drawer backdrop with its panel", async () => {
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+
+    const panel = screen.getByRole("button", { name: en("header.closeMenu") }).closest("[id^=headlessui-dialog-panel]")!;
+    const backdrop = panel.previousElementSibling!;
+    expect(rootLayer(backdrop)).toBe(rootLayer(panel));
+    expect(rootLayer(backdrop)).toBeGreaterThan(rootLayer(document.querySelector("header")!));
   });
 });
 

@@ -8,14 +8,7 @@ export function getStaticPaths() {
   return getToolStaticPaths("es");
 }
 
-const { routeId, redirectTo } = Astro.props as {
-  routeId: ToolRouteId;
-  redirectTo?: string;
-};
-
-if (redirectTo) {
-  return Astro.redirect(`/es/tools/${redirectTo}`, 301);
-}
+const { routeId } = Astro.props as { routeId: ToolRouteId };
 ---
 
 <ToolDetailPage locale="es" routeId={routeId} />

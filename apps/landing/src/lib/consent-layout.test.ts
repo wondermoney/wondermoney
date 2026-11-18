@@ -71,9 +71,9 @@ describe("consent corner-card layout contract", () => {
 
     // When
     const positionedClasses = [
-      ...status.matchAll(/className="([^"]+)"/g),
+      ...status.matchAll(/className=(?:"([^"]+)"|\{`([^`]+)`\})/g),
     ]
-      .map((match) => match[1] ?? "")
+      .map((match) => match[1] ?? match[2] ?? "")
       .filter((className) => className.includes("fixed"));
 
     // Then

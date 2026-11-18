@@ -633,9 +633,9 @@
       "subtitle": "Scopri quale percentuale del tuo reddito stai risparmiando ogni mese. Il tasso di risparmio è uno dei numeri più importanti della finanza personale — determina quanto velocemente costruisci ricchezza."
     },
     "investmentReturn": {
-      "title": "Calcolatore del rendimento degli investimenti",
+      "title": "Rendimento e proiezione di un investimento indicizzato",
       "shortName": "Rendimento degli investimenti",
-      "description": "Calcola il rendimento annualizzato di qualsiasi investimento dato un valore iniziale, un valore finale e un periodo di tempo.",
+      "description": "Calcola il rendimento passato o simula un investimento indicizzato con versamenti mensili e commissioni.",
       "initialInvestment": "Investimento iniziale",
       "currentValue": "Valore attuale",
       "investmentPeriod": "Periodo di investimento (anni)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Rendimento totale (%)",
       "annualizedReturn": "Rendimento annualizzato",
       "periodHelp": "Numero di anni in cui hai detenuto l'investimento",
-      "pageTitle": "Calcolatore del rendimento degli investimenti — WonderMoney",
-      "pageDescription": "Calcolatore gratuito del rendimento degli investimenti. Calcola il rendimento totale e annualizzato di qualsiasi investimento. Confronta le performance su diversi periodi di tempo.",
-      "subtitle": "Calcola il rendimento totale e annualizzato di qualsiasi investimento. Inserisci quanto hai investito, quanto vale ora e per quanto tempo lo hai detenuto."
+      "pageTitle": "Calcolatore del rendimento e dei fondi indicizzati — WonderMoney",
+      "pageDescription": "Calcola il rendimento o simula un ETF o un fondo indicizzato con versamenti mensili, un rendimento ipotizzato e costi annui.",
+      "subtitle": "Calcola il rendimento totale e annualizzato di un investimento che hai già o stima l’effetto di versamenti e costi su un investimento indicizzato.",
+      "projection": {
+        "pastHeading": "Calcola il rendimento passato",
+        "heading": "Simula un fondo indicizzato o un ETF",
+        "intro": "Inserisci un’ipotesi di rendimento annuo e il costo del fondo per confrontare il valore potenziale dello stesso investimento con e senza quel costo.",
+        "principal": "Capitale iniziale",
+        "monthlyContribution": "Versamento mensile",
+        "annualRate": "Rendimento annuo ipotizzato prima dei costi",
+        "annualFee": "Costo annuo del fondo",
+        "years": "Durata della proiezione (anni interi)",
+        "range": "Intervallo da {{min}} a {{max}}",
+        "contributed": "Totale versato",
+        "beforeFees": "Valore previsto prima dei costi",
+        "afterFees": "Valore previsto dopo i costi",
+        "feeImpact": "Riduzione del valore previsto dovuta ai costi",
+        "incomplete": "Compila tutti i campi per vedere la proiezione. Inserisci zero quando un valore non si applica.",
+        "outOfRange": "Rispetta l’intervallo indicato per ogni campo e inserisci un numero intero di anni.",
+        "tooLarge": "Questo scenario supera il limite del calcolatore. Riduci l’importo, il rendimento o la durata.",
+        "exampleTitle": "Esempio di calcolo",
+        "example": "Parti da {{principal}}, versi {{monthly}} alla fine di ogni mese e ipotizzi un rendimento annuo costante del {{annualRate}} per {{years}} anni. Con un costo annuo del {{fee}}, il valore previsto scende da {{beforeFees}} a {{afterFees}}, con una differenza di {{feeImpact}}.",
+        "methodTitle": "Come funziona la proiezione",
+        "method": "Moltiplichiamo il fattore di crescita annuo per uno meno il tasso del costo annuo del fondo. Convertiamo i fattori annui lordo e netto nei corrispondenti fattori mensili. Ogni mese applichiamo la crescita prima di sommare il versamento.",
+        "assumptions": "Il modello ipotizza un rendimento e un costo costanti, il reinvestimento delle distribuzioni e versamenti a fine mese. Esclude tasse, costi di intermediazione, variazioni dei cambi e inflazione. I tassi sono ipotesi illustrative per un indice come l’S&P 500. I rendimenti effettivi variano e possono essere negativi. L’impatto dei costi comprende anche il rendimento che gli importi dedotti avrebbero potuto generare.",
+        "ctaHeadline": "Segui il rendimento effettivo dei tuoi investimenti",
+        "ctaDescription": "Usa WonderMoney per tenere sotto controllo il tuo portafoglio e confrontare il rendimento effettivo con lo scenario simulato.",
+        "ctaText": "Confronta gli investimenti con la proiezione"
+      }
     },
     "emergencyFund": {
       "title": "Calcolatore del fondo di emergenza",
@@ -1149,6 +1175,223 @@
       "cta": {
         "headline": "Segui il debito che ti resta nel tempo",
         "description": "Aggiungi il prestito a WonderMoney con debito residuo, tasso e durata, collega la rata mensile e guarda scendere quanto devi ancora, accanto al tuo budget e al tuo patrimonio."
+      }
+    },
+    "mortgageTransfer": {
+      "title": "Calcolatore di surroga del mutuo",
+      "shortName": "Surroga del mutuo",
+      "description": "Confronta il tuo mutuo con una nuova offerta: la rata, i costi del passaggio, quando si ripagano e il risparmio netto.",
+      "pageTitle": "Calcolatore di Surroga del Mutuo: Conviene Cambiare Banca? — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di surroga del mutuo. Confronta il tuo mutuo a tasso fisso con l'offerta di un'altra banca, aggiungi i costi del passaggio e scopri il risparmio mensile, il mese in cui li recuperi e il risparmio netto. Senza registrazione.",
+      "subtitle": "Inserisci il debito residuo, la durata residua e il tasso attuale, poi l'offerta che hai ricevuto e quanto costerebbe cambiare. Vedi le due rate con assicurazioni e spese, il costo totale di ogni mutuo, il mese in cui il passaggio si ripaga e quanto risparmi alla fine. Nessuna registrazione.",
+      "termYears": "Anni",
+      "termMonths": "Mesi",
+      "termRounded": "Calcolato su {{term}}: la durata è arrotondata a mesi interi.",
+      "current": {
+        "legend": "Il tuo mutuo attuale",
+        "balance": "Debito residuo",
+        "balanceHelp": "Quanto devi oggi, secondo l'ultimo estratto del mutuo. Il nuovo mutuo riprende questo importo.",
+        "termLabel": "Durata residua",
+        "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+        "rate": "Tasso di interesse attuale",
+        "rateHelp": "Tasso annuo nominale fisso (TAN). I tassi variabili e misti non sono inclusi.",
+        "fees": "Assicurazioni e spese al mese",
+        "feesHelp": "Assicurazioni vita e casa legate al mutuo, spese del conto e altri costi mensili. Lascia 0 se non ce ne sono."
+      },
+      "offer": {
+        "legend": "La nuova offerta",
+        "rate": "Nuovo tasso di interesse",
+        "rateHelp": "Il tasso annuo nominale fisso (TAN) che ti hanno proposto.",
+        "termLabel": "Durata del nuovo mutuo",
+        "termHelp": "Parte dalla durata residua del mutuo attuale. Una durata più lunga abbassa la rata, ma aggiunge interessi.",
+        "fees": "Assicurazioni e spese al mese",
+        "feesHelp": "Quello che la nuova banca chiede ogni mese: assicurazioni, spese del conto e altre spese."
+      },
+      "costs": {
+        "legend": "Costi una tantum del passaggio",
+        "help": "I costi variano a seconda del paese, della banca e del mutuo, quindi inserisci quelli della tua offerta e del tuo contratto. Lascia 0 per quelli che non pagherai.",
+        "exitFee": "Penale di uscita dal mutuo attuale",
+        "exitFeeHelp": "Una percentuale del debito residuo che la banca attuale applica per il rimborso anticipato. Controlla nel contratto la percentuale e l'eventuale limite di legge.",
+        "newLoanFees": "Spese del nuovo mutuo",
+        "newLoanFeesHelp": "Spese di istruttoria, di apertura o di mediazione del nuovo mutuo.",
+        "valuationFee": "Perizia dell'immobile",
+        "legalFees": "Notaio e registrazioni",
+        "legalFeesHelp": "Notaio, iscrizione e cancellazione dell'ipoteca, onorari e imposte sul nuovo mutuo."
+      },
+      "results": {
+        "currentMonthly": "Rata attuale",
+        "offerMonthly": "Rata con l'offerta",
+        "includesFees": "Prima rata di ogni mutuo, con assicurazioni e spese.",
+        "lessEachMonth": "{{amount}} in meno al mese",
+        "moreEachMonth": "{{amount}} in più al mese",
+        "sameEachMonth": "La stessa rata ogni mese",
+        "netSaving": "Risparmio netto con il passaggio",
+        "netCost": "Costo netto del passaggio",
+        "netSavingHelp": "Quanto resta da pagare sul mutuo attuale, meno il nuovo mutuo con i costi del passaggio.",
+        "breakEvenTitle": "Quando il passaggio si ripaga",
+        "breakEven": "Al mese {{month}}, dopo {{duration}}: a quel punto le rate più basse hanno coperto i costi del passaggio.",
+        "breakEvenNoCosts": "Senza costi di passaggio non c'è nulla da recuperare: ogni mese in cui l'offerta costa meno è un risparmio.",
+        "breakEvenNever": "Mai entro la durata: il risparmio non arriva a coprire i costi del passaggio.",
+        "breakEvenThenLoss": "Il risparmio copre i costi del passaggio al mese {{month}}, ma la durata più lunga alla fine costa di più.",
+        "longerTerm": "La nuova durata è {{extra}} più lunga della durata residua. Sulla durata residua, questa offerta costerebbe {{sameTerm}} al mese: parte del calo della rata viene dal pagare più a lungo, e questo aggiunge {{interest}} di interessi.",
+        "longerTermNoInterest": "La nuova durata è {{extra}} più lunga della durata residua. Allo 0% non aggiunge interessi, ma paghi le assicurazioni e le spese mensili più a lungo.",
+        "costsExceed": "Il passaggio costa più di quanto fa risparmiare. Chiedi alla nuova banca se può ridurre o farsi carico delle spese, oppure chiedi un tasso migliore alla banca attuale.",
+        "switchingCosts": "Costi del passaggio"
+      },
+      "table": {
+        "title": "Il tuo mutuo attuale e l'offerta a confronto",
+        "caption": "Quanto resta del mutuo attuale a confronto con la nuova offerta",
+        "figure": "Voce",
+        "current": "Mutuo attuale",
+        "offer": "Nuova offerta",
+        "monthlyPayment": "Rata mensile",
+        "monthlyFees": "Assicurazioni e spese al mese",
+        "monthlyTotal": "Totale al mese",
+        "term": "Tempo per estinguerlo",
+        "totalInterest": "Interessi",
+        "totalFees": "Assicurazioni e spese in totale",
+        "switchingCosts": "Costi del passaggio",
+        "totalCost": "Costo totale"
+      },
+      "resultNote": "I due tassi restano fissi fino alla fine di ogni mutuo. Le rate sono mensili, i costi del passaggio si pagano il giorno del passaggio e il nuovo mutuo riprende lo stesso debito residuo.",
+      "chart": {
+        "title": "Risparmio dal passaggio",
+        "description": "Quanto ha fatto risparmiare finora il passaggio, rata dopo rata, rispetto ai costi del passaggio. Quando la linea supera la linea tratteggiata dei costi, il passaggio si è ripagato.",
+        "label": "Grafico del risparmio dal passaggio alla fine di ogni anno, rispetto ai costi del passaggio. Gli stessi valori sono nella tabella qui sotto.",
+        "year": "Anno",
+        "saved": "Risparmiato finora",
+        "costs": "Costi del passaggio"
+      },
+      "yearTable": {
+        "caption": "Risparmio anno per anno",
+        "year": "Anno",
+        "yearLabel": "Anno {{year}}",
+        "saving": "Risparmiato nell'anno",
+        "cumulative": "Risparmiato finora",
+        "afterCosts": "Dopo i costi del passaggio"
+      },
+      "errors": {
+        "summary": "Il confronto compare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il debito residuo.",
+          "tooSmall": "Inserisci un debito di almeno {{min}}.",
+          "tooLarge": "Inserisci un debito fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata residua, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "newTermYears": {
+          "required": "Inserisci la durata del nuovo mutuo, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci al massimo {{max}} anni in tutto."
+        },
+        "newTermMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "currentRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "newRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso di interesse non può essere inferiore allo 0%.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Le spese non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}} al mese."
+        },
+        "newMonthlyFees": {
+          "negative": "Le spese non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}} al mese."
+        },
+        "exitFeePercent": {
+          "negative": "La penale non può essere negativa. Inserisci 0 se non c'è.",
+          "tooLarge": "Inserisci una penale fino a {{max}} del debito."
+        },
+        "newLoanFees": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        },
+        "valuationFee": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        },
+        "legalFees": {
+          "negative": "I costi non possono essere negativi. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci al massimo {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Cosa confrontare prima di cambiare",
+          "intro": "Portare il mutuo in un'altra banca, o rinegoziare le condizioni con la tua, può abbassare quello che paghi. Un tasso più basso è solo una parte del conto, quindi confronta l'offerta per intero:",
+          "items": {
+            "rate": "Il tasso. Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi.",
+            "monthlyCosts": "Gli extra mensili. Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommale alla rata, altrimenti un tasso più conveniente può finire per costare di più.",
+            "term": "La durata. Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo.",
+            "oneOff": "I costi una tantum. Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+          },
+          "outro": "Il calcolatore mette tutto insieme: la rata con gli extra, quanto costa ancora ogni mutuo in totale e il mese in cui recuperi i costi del passaggio."
+        },
+        "costs": {
+          "title": "I costi del passaggio",
+          "intro": "Quanto costa cambiare dipende dal paese, dal contratto e dalle banche coinvolte. Le voci abituali sono:",
+          "items": {
+            "exitFee": "La penale di uscita o di estinzione anticipata, una percentuale del debito residuo che la banca attuale applica quando il mutuo viene chiuso prima della scadenza. In molti paesi la legge la limita o la esclude, e alcuni mutui non la prevedono.",
+            "newLoanFees": "Le spese del nuovo mutuo: istruttoria, apertura o mediazione.",
+            "valuation": "La perizia dell'immobile, che la nuova banca di solito richiede.",
+            "legal": "Notaio e registrazioni: cancellazione o trasferimento della vecchia ipoteca, iscrizione della nuova ed eventuali imposte sul nuovo mutuo."
+          },
+          "outro": "Alcune banche si fanno carico di parte di questi costi per acquisire il tuo mutuo. Inserisci solo quello che pagheresti tu e chiedi a ogni banca gli importi per iscritto."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Supponiamo che tu debba ancora {{balance}}, con {{term}} di durata residua a un tasso fisso del {{currentRate}}, e che paghi {{currentFees}} al mese di assicurazioni e spese. La tua rata è di {{currentMonthly}} al mese. Un'altra banca offre il {{newRate}} sulla stessa durata, con {{newFees}} al mese di assicurazione: {{offerMonthly}} al mese, {{monthlySaving}} in meno.",
+          "costs": "Cambiare costa {{costs}}: una penale di uscita del {{exitFeeRate}}, cioè {{exitFee}}, {{newLoanFees}} di spese del nuovo mutuo, {{valuationFee}} di perizia e {{legalFees}} di notaio e registrazioni. Con {{monthlySaving}} al mese, il passaggio si ripaga al mese {{breakEvenMonth}}, dopo {{breakEvenTime}}.",
+          "total": "Per il resto della durata, il mutuo attuale costa {{currentTotal}} tra rate, assicurazioni e spese. Il nuovo mutuo costa {{offerTotal}}, costi del passaggio compresi. Il risparmio netto è di {{netSaving}}.",
+          "longer": "Ora supponiamo che la nuova banca proponga di allungare il mutuo a {{longerTerm}}. La rata scende a {{longerMonthly}}, {{longerSaving}} in meno di oggi, e i costi si coprono prima. Ma la durata più lunga aggiunge {{extraInterest}} di interessi e, in totale, il passaggio costa {{longerNetCost}} in più che tenere il mutuo attuale. Una rata più bassa non vuol dire un mutuo più conveniente."
+        },
+        "method": {
+          "title": "Come viene calcolato",
+          "intro": "Il calcolatore ricostruisce i due mutui con lo stesso motore a tasso fisso del calcolatore del mutuo, sul debito che hai ancora. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula delle annualità:",
+          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n. Le assicurazioni e le spese di ogni mese si sommano sopra.",
+          "saving": "Il risparmio di un mese è quanto costerebbe quel mese il mutuo attuale meno quanto costa il nuovo. Un mutuo estinto non costa più nulla, quindi con una nuova durata più lunga i mesi dopo la fine del mutuo attuale contano come un costo. Il costo totale di ogni opzione sono le rate, le assicurazioni e le spese, più i costi del passaggio per il nuovo mutuo. Il risparmio netto è la differenza.",
+          "breakEven": "Il mese in cui il passaggio si ripaga è il primo in cui il risparmio accumulato arriva almeno ai costi del passaggio. Se non succede prima della fine dei due mutui, il passaggio non si ripaga.",
+          "longerTerm": "Quando la nuova durata è più lunga della durata residua, il calcolatore calcola anche l'offerta sulla durata residua, così vedi quanto del calo della rata viene dal tasso e quanto dal pagare più a lungo.",
+          "assumptionsTitle": "Ipotesi",
+          "assumptions": {
+            "fixedRate": "I due tassi restano fissi fino alla fine di ogni mutuo. I tassi variabili e misti, e i periodi fissi seguiti da un tasso variabile, non sono inclusi.",
+            "sameBalance": "Il nuovo mutuo riprende esattamente il debito residuo di oggi. Non chiedi altro denaro, e i costi del passaggio si pagano a parte invece di essere aggiunti al mutuo.",
+            "timing": "Il passaggio avviene oggi, appena dopo una rata normale, e la prima rata del nuovo mutuo scade tra un mese.",
+            "fees": "Le assicurazioni e le spese restano uguali ogni mese finché dura ciascun mutuo.",
+            "noDiscounting": "Un euro risparmiato tra dieci anni vale come un euro oggi: non ci sono inflazione né rendimenti sul denaro risparmiato.",
+            "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano. La rata indicata è la prima; le successive restano entro un centesimo da essa.",
+            "lenderFigures": "Ogni banca conta i giorni e arrotonda a modo suo, quindi i suoi importi possono differire di poco. Chiedi a ciascuna l'offerta ufficiale prima di decidere."
+          },
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino a {{maxExitFee}} del debito."
+        },
+        "related": {
+          "title": "Altri calcolatori",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Il piano completo, anno per anno, del nuovo mutuo o di quello che hai ora.",
+          "earlyRepaymentLink": "Calcolatore di estinzione anticipata",
+          "earlyRepaymentBody": "Quanto risparmieresti con un rimborso parziale sul mutuo attuale, invece di surrogarlo.",
+          "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
+          "debtToIncomeBody": "La parte del tuo reddito che va in rate, oggi e con la nuova rata."
+        }
+      },
+      "cta": {
+        "headline": "Confronta il tuo budget prima e dopo la surroga",
+        "description": "Aggiungi il tuo mutuo a WonderMoney con tasso e durata, pianifica la rata di ogni offerta nel tuo budget e guarda come si inserisce accanto a quello che spendi davvero, prima e dopo il passaggio."
       }
     },
     "savingsGoal": {
@@ -1704,6 +1947,255 @@
         "relatedMortgageLink": "calcolatore del mutuo",
         "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
         "relatedNetWorthLink": "calcolatore del patrimonio netto"
+      }
+    },
+    "rateRevision": {
+      "title": "Simulatore della rata a tasso variabile",
+      "shortName": "Rata variabile",
+      "description": "Guarda come cambia la rata di un mutuo o prestito a tasso variabile quando l'indice si muove, in un anno e fino alla fine del prestito.",
+      "pageTitle": "Simulatore Mutuo a Tasso Variabile: la Rata dopo la Revisione del Tasso — WonderMoney",
+      "pageDescription": "Simulatore gratuito per mutui e prestiti a tasso variabile. Inserisci debito residuo, durata, indice e spread e vedi la nuova rata dopo la revisione, il costo in un anno e fino alla fine, e una tabella da −2 a +4 punti. Senza registrazione.",
+      "subtitle": "Inserisci quanto devi ancora, la durata residua, l'indice che segue il tuo prestito e lo spread della banca, poi l'indice che ti aspetti alla prossima revisione. Vedi la nuova rata mensile, quanto pesa la differenza in un anno e fino alla fine del prestito, e la rata con l'indice da 2 punti in meno a 4 punti in più. Non serve registrarsi.",
+      "loanHeading": "Il tuo prestito oggi",
+      "balance": "Debito residuo",
+      "balanceHelp": "Quanto devi oggi, secondo l'ultimo estratto del prestito.",
+      "termLabel": "Durata residua",
+      "termYears": "Anni",
+      "termMonths": "Mesi",
+      "termHelp": "Anni più mesi, per esempio 22 anni e 4 mesi.",
+      "termRounded": "Calcolato su {{term}}: la durata residua è arrotondata a mesi interi.",
+      "indexRate": "Indice attuale",
+      "indexRateHelp": "Il tasso di riferimento che segue il tuo prestito, come l'Euribor o un tasso di banca centrale, al valore usato dalla rata attuale. Può essere negativo.",
+      "spread": "Spread",
+      "spreadHelp": "Il margine fisso che la banca aggiunge all'indice, come previsto dal tuo contratto.",
+      "currentRate": "Oggi paghi il {{rate}}: l'indice più lo spread.",
+      "floored": "L'indice più lo spread è sotto lo 0%, quindi il tasso viene preso allo 0%. Il tuo contratto può prevedere un minimo diverso.",
+      "revisionHeading": "Alla prossima revisione",
+      "newIndexRate": "Nuovo indice",
+      "newIndexRateHelp": "Il valore che ti aspetti alla prossima data di revisione, oppure scegli una variazione qui sotto.",
+      "stressLabel": "Prova una variazione dell'indice",
+      "stress": {
+        "one": "{{change}} punto",
+        "other": "{{change}} punti"
+      },
+      "newRate": "Il tasso diventa il {{rate}}.",
+      "incomeHeading": "Il tuo budget",
+      "monthlyIncome": "Reddito netto mensile (facoltativo)",
+      "monthlyIncomeHelp": "Al netto delle tasse. Inseriscilo per vedere quanta parte del reddito prende la rata, oppure lascia vuoto.",
+      "result": {
+        "newPayment": "Nuova rata mensile",
+        "up": "{{amount}} in più al mese ({{percent}})",
+        "down": "{{amount}} in meno al mese ({{percent}})",
+        "same": "La rata resta uguale.",
+        "currentPayment": "Rata oggi, al {{rate}}",
+        "revisedPayment": "Rata dopo la revisione, al {{rate}}",
+        "monthlyChange": "Differenza al mese",
+        "nextYear": "Nelle prossime 12 rate",
+        "paymentsLeft": "Nelle {{count}} rate che restano",
+        "paymentLeft": "Sull'ultima rata",
+        "totalInterest": "Differenza di interessi fino alla fine del prestito",
+        "incomeShare": "La nuova rata prenderebbe il {{revised}} del tuo reddito netto, contro il {{current}} di oggi. Livello del rapporto rata/reddito: {{band}}.",
+        "exceedsIncome": "La nuova rata supera il reddito che hai inserito.",
+        "bandNote": "Livelli del calcolatore del rapporto rata/reddito: sotto il {{caution}}% sano, dal {{caution}}% al {{high}}% attenzione, sopra il {{high}}% elevato. Sono un riferimento generale, non il limite di una banca."
+      },
+      "assumptionNote": "Il nuovo tasso vale dalla prossima rata fino alla fine del prestito. Le date di revisione, i tetti e i minimi dipendono dal tuo contratto e non sono inclusi.",
+      "table": {
+        "title": "La tua rata se l'indice si muove",
+        "intro": "Lo stesso prestito con l'indice da 2 punti sotto a 4 punti sopra quello di oggi e lo stesso spread, ogni tasso applicato dalla prossima rata fino alla fine del prestito.",
+        "caption": "Rata mensile per ogni variazione dell'indice",
+        "change": "Variazione dell'indice",
+        "index": "Indice",
+        "rate": "Tasso che paghi",
+        "payment": "Rata mensile",
+        "monthlyChange": "Differenza al mese",
+        "interestChange": "Differenza di interessi fino alla fine",
+        "today": "Oggi",
+        "selected": "Il tuo scenario"
+      },
+      "errors": {
+        "summary": "La nuova rata compare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il debito residuo.",
+          "tooSmall": "Inserisci un debito di almeno {{min}}.",
+          "tooLarge": "Inserisci un debito fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci la durata residua, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci fino a {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "indexRate": {
+          "required": "Inserisci l'indice. Può essere 0% o negativo.",
+          "tooSmall": "Inserisci un indice di almeno {{min}}.",
+          "tooLarge": "Inserisci un indice fino a {{max}}."
+        },
+        "spread": {
+          "required": "Inserisci lo spread, oppure 0% se non c'è.",
+          "negative": "Lo spread non può essere negativo.",
+          "tooLarge": "Inserisci uno spread fino a {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Inserisci il nuovo indice, oppure scegli una variazione qui sotto.",
+          "tooSmall": "Inserisci un indice di almeno {{min}}.",
+          "tooLarge": "Inserisci un indice fino a {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Il reddito non può essere negativo. Lascia vuoto per non usarlo.",
+          "tooLarge": "Inserisci un reddito fino a {{max}}."
+        }
+      },
+      "nextStepHeadline": "Prevedi una rata più alta nel tuo budget",
+      "nextStepDescription": "Aggiungi il prestito a WonderMoney, prevedi la rata più alta nel tuo budget mensile e guarda quanto resta per le altre spese e per il risparmio.",
+      "nextStepCta": "Metti alla prova il tuo flusso di cassa mensile",
+      "guide": {
+        "whatTitle": "Come la revisione del tasso cambia la tua rata",
+        "whatBody1": "In un prestito a tasso variabile, il tasso che paghi ha due parti: un indice di riferimento e uno spread. L'indice è un tasso di mercato o di banca centrale, come l'Euribor in gran parte dell'area euro; altri paesi usano altri indici. Lo spread è il margine della banca ed è fissato nel contratto.",
+        "whatBody2": "A ogni data di revisione, spesso ogni 3, 6 o 12 mesi, la banca prende l'ultimo valore dell'indice, aggiunge lo spread e calcola una nuova rata sul debito residuo e sulla durata che resta. A parità di spread, un aumento dell’indice di 1 punto percentuale fa salire il tasso fino a 1 punto percentuale, in base al limite massimo o minimo applicabile.",
+        "whatBody3": "Questo simulatore mostra la rata prima e dopo la variazione che scegli, così vedi in anticipo cosa significherebbe un aumento o un calo per il tuo budget mensile.",
+        "relatedMortgage": "il piano completo, anno per anno, di un prestito a un solo tasso.",
+        "relatedDebtToIncome": "la parte del tuo reddito che va in tutte le rate dei tuoi prestiti.",
+        "relatedEarlyRepayment": "quanto fa risparmiare un rimborso anticipato e di quanto abbassa la rata.",
+        "exampleTitle": "Esempio pratico",
+        "exampleSetup": "Mettiamo che tu debba ancora {{balance}} e manchino {{term}}. Il tuo prestito segue un indice al {{index}} più uno spread del {{spread}}, quindi paghi il {{rate}}: {{payment}} al mese e {{interest}} di interessi fino alla fine del prestito.",
+        "exampleRise": "Alla prossima revisione l'indice sale al {{newIndex}} e il tuo tasso diventa il {{newRate}}. La rata sale a {{newPayment}}: {{monthlyChange}} in più al mese ({{percent}}), {{yearlyChange}} in più nelle prossime 12 rate e {{interestChange}} di interessi in più fino alla fine del prestito, se il tasso resta lì.",
+        "exampleStress": "Un aumento di {{stressStep}} punti, invece, fino a un tasso del {{stressRate}}, porterebbe la rata a {{stressPayment}}, {{stressChange}} in più di oggi.",
+        "exampleIncome": "Con un reddito netto di {{income}} al mese, la rata ne prende oggi il {{currentShare}}, il {{newShare}} dopo il primo aumento e il {{stressShare}} dopo quello più forte, un valore che i livelli del rapporto rata/reddito classificano come «{{stressBand}}».",
+        "methodTitle": "Come si calcola",
+        "methodIntro": "Ogni rata è la rata costante che rimborsa il debito residuo nei mesi che restano, con lo stesso motore a tasso fisso del calcolatore del mutuo:",
+        "methodLegend": "i è l'indice e s lo spread, entrambi come tassi annui. r è il tasso mensile, M la rata mensile, P il debito residuo e n il numero di rate che restano. Quando l'indice più lo spread è sotto lo 0%, il tasso viene preso allo 0% e la rata è semplicemente P diviso n.",
+        "methodItems": {
+          "change": "La differenza al mese è la prima rata al nuovo tasso meno la prima rata al tasso di oggi, entrambe sul debito di oggi e sullo stesso numero di mesi.",
+          "year": "La differenza annua confronta la somma delle prime 12 rate di ciascun piano o di tutte le rate residue se ne restano meno. Ogni rata viene arrotondata singolarmente, quindi il totale può differire dalla differenza mensile moltiplicata per il numero di rate.",
+          "interest": "La differenza di interessi è il totale degli interessi del nuovo piano meno quello del piano di oggi, entrambi fino alla fine del prestito.",
+          "income": "La parte del reddito è la rata divisa per il reddito netto che inserisci, letta con i livelli del calcolatore del rapporto rata/reddito: sotto il {{caution}}% sano, dal {{caution}}% al {{high}}% attenzione e sopra il {{high}}% elevato. Sono un riferimento generale, non il limite di una banca.",
+          "privacy": "Il calcolo avviene nel tuo browser. Le cifre che inserisci restano sul tuo dispositivo e non vengono salvate."
+        },
+        "assumptionsTitle": "Ipotesi",
+        "assumptions": {
+          "fromNextMonth": "Il nuovo tasso vale dalla prossima rata fino alla fine del prestito. In pratica viene rivisto di nuovo a ogni data di revisione, quindi ogni risultato è uno scenario, non una previsione.",
+          "sameTerm": "Il debito residuo e la durata che resta non cambiano: cambia la rata. Alcune banche possono mantenere la rata e cambiare la durata.",
+          "statement": "La rata di oggi è calcolata dall'indice e dallo spread che inserisci. Il tuo estratto può differire di qualche centesimo, e assicurazioni e spese di conto restano fuori.",
+          "noFeed": "L'indice lo inserisci tu: il simulatore non ha dati propri sugli indici. Prendi il valore attuale dal tuo contratto, dalla tua banca o dall'ente che pubblica l'indice."
+        },
+        "limits": "Il simulatore accetta un debito da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni di durata residua, un indice da {{minIndex}} a {{maxIndex}} e uno spread fino al {{maxSpread}}.",
+        "contractTitle": "Cosa decide il tuo contratto",
+        "contractIntro": "Come funziona una revisione reale dipende dal tuo contratto e dalle regole del paese in cui vivi. Niente di tutto questo è incluso nel simulatore:",
+        "contractItems": {
+          "resetDates": "Date di revisione: ogni quanto viene rivisto il tasso, il valore dell'indice di quale giorno conta e da quando parte la nuova rata.",
+          "capsFloors": "Tetti e minimi: alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%.",
+          "index": "L'indice: l'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione.",
+          "mixed": "Prestiti a tasso misto: prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+        },
+        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
+      }
+    },
+    "personalLoan": {
+      "title": "Calcolo prestito personale",
+      "shortName": "Prestito personale",
+      "description": "Calcola la rata, il costo totale e una stima del TAEG di un prestito personale, commissioni comprese, con il piano mese per mese.",
+      "pageTitle": "Calcolo prestito personale: rata, costo totale e TAEG — WonderMoney",
+      "pageDescription": "Calcolatore gratuito di prestito personale. Inserisci importo, durata, tasso di interesse e commissioni e vedi la rata mensile, il costo totale del credito, una stima del TAEG e il piano di ammortamento mese per mese. Senza registrazione.",
+      "subtitle": "Due prestiti allo stesso tasso di interesse possono costare cifre molto diverse quando si aggiungono le commissioni. Inserisci l'offerta che hai, commissioni comprese, e guarda quanto costa al mese e in totale. Senza registrazione.",
+      "amount": "Importo del prestito",
+      "amountHelp": "Quanto ti presta il finanziatore, prima di togliere qualsiasi commissione.",
+      "termMonths": "Durata",
+      "termMonthsHelp": "Numero di rate mensili, da {{min}} a {{max}}.",
+      "months": "mesi",
+      "annualRate": "Tasso di interesse",
+      "annualRateHelp": "Il tasso annuo nominale fisso dell'offerta (TAN), non il TAEG: il TAEG è quello che calcola questo strumento.",
+      "upfrontFees": "Commissioni iniziali",
+      "upfrontFeesHelp": "Spese pagate una sola volta all'inizio del prestito, come le spese di istruttoria, e le eventuali imposte sul prestito. Lascia 0 se non ce ne sono.",
+      "monthlyFees": "Commissioni e assicurazione mensili",
+      "monthlyFeesHelp": "Addebitate con ogni rata, come le spese di incasso rata o il premio di un'assicurazione richiesta dal prestito. Lascia 0 se non ce ne sono.",
+      "result": {
+        "monthlyPayment": "Rata mensile",
+        "monthlyPaymentSplit": "{{loan}} per il prestito più {{fees}} di commissioni.",
+        "paymentsNote": "{{count}} rate mensili. Le successive restano entro un centesimo dalla prima; l'ultima, di {{last}}, estingue il debito residuo.",
+        "apr": "TAEG stimato, commissioni comprese",
+        "aprOver": "oltre {{max}}",
+        "aprNote": "Una stima del tasso annuo effettivo globale (TAEG), calcolata dai soldi che ricevi e da ogni rata che paghi. Il TAEG indicato da un finanziatore segue le regole del suo paese e può includere costi che questo strumento non conosce.",
+        "totalInterest": "Interessi totali",
+        "totalFees": "Commissioni totali",
+        "totalCostOfCredit": "Costo totale del credito",
+        "totalRepaid": "Totale che paghi, commissioni comprese",
+        "amountReceived": "Ricevi {{amount}} dopo aver tolto le commissioni iniziali."
+      },
+      "estimateNote": "Questa è una stima, non un'offerta di prestito né un preventivo. Il tasso, le commissioni e l'approvazione dipendono dal finanziatore e dalla tua situazione: confronta le cifre dell'offerta scritta di ogni finanziatore prima di firmare.",
+      "schedule": {
+        "title": "Piano mensile",
+        "description": "Come ogni rata si divide tra interessi, capitale e commissioni, e quanto devi ancora dopo averla pagata.",
+        "upfrontNote": "Le commissioni iniziali di {{fees}} si pagano all'inizio e non sono nella tabella.",
+        "show": "Mostra il piano mensile",
+        "hide": "Nascondi il piano mensile",
+        "month": "Mese",
+        "payment": "Rata",
+        "principal": "Capitale",
+        "interest": "Interessi",
+        "fees": "Commissioni",
+        "balance": "Debito residuo",
+        "total": "Totale"
+      },
+      "errors": {
+        "summary": "Il risultato compare quando ogni campo ha un valore valido.",
+        "amount": {
+          "required": "Inserisci l'importo che vuoi chiedere.",
+          "tooSmall": "Inserisci almeno {{min}}.",
+          "tooLarge": "Inserisci un importo fino a {{max}}."
+        },
+        "termMonths": {
+          "required": "Inserisci la durata in mesi.",
+          "tooSmall": "Inserisci una durata di almeno {{min}} mesi.",
+          "tooLarge": "Inserisci una durata fino a {{max}} mesi."
+        },
+        "annualRate": {
+          "required": "Inserisci il tasso di interesse.",
+          "negative": "Il tasso non può essere negativo. Inserisci 0 per un prestito senza interessi.",
+          "tooLarge": "Inserisci un tasso fino a {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Le commissioni non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci commissioni iniziali fino a {{max}}, metà dell'importo."
+        },
+        "monthlyFees": {
+          "negative": "Le commissioni non possono essere negative. Inserisci 0 se non ce ne sono.",
+          "tooLarge": "Inserisci commissioni mensili fino a {{max}}."
+        }
+      },
+      "nextStepHeadline": "Segui questo prestito accanto al tuo budget",
+      "nextStepDescription": "Aggiungi il prestito a WonderMoney con tasso e durata, prevedi la rata nel tuo budget mensile e guarda il debito scendere accanto a quello che spendi davvero.",
+      "nextStepCta": "Vedi come la rata si inserisce nel tuo budget mensile",
+      "guide": {
+        "whatTitle": "Quanto costa davvero un prestito personale",
+        "whatBody1": "Con un prestito personale a tasso fisso, paghi rate mensili quasi uguali per una durata prestabilita. Ogni rata copre gli interessi sul capitale residuo e ne rimborsa una parte. Man mano che il debito residuo scende, la quota di interessi diminuisce e quella di capitale aumenta.",
+        "whatBody2": "Il tasso di interesse è solo una parte del prezzo. I finanziatori aggiungono spesso una commissione all'inizio e un costo mensile, come le spese di incasso o un'assicurazione. Queste commissioni si sommano agli interessi e, su un prestito piccolo o breve, possono costare più degli interessi stessi.",
+        "whatBody3": "Prima di chiederlo, verifica che la rata ci stia: accanto alle rate che già paghi e dentro il budget con cui già vivi.",
+        "relatedDebtToIncome": "mostra quale parte del tuo reddito occuperebbero le tue rate, compresa questa.",
+        "relatedHouseholdBudget": "mostra dove vanno i tuoi soldi ogni mese, così vedi cosa dovrebbe sostituire la nuova rata.",
+        "aprTitle": "Tasso di interesse e TAEG non sono la stessa cosa",
+        "aprBody1": "Il tasso di interesse di un'offerta (il TAN) è un tasso annuo nominale: fissa gli interessi di ogni mese, un dodicesimo del tasso sul debito residuo. Lascia fuori le commissioni e, poiché gli interessi si pagano ogni mese, resta sotto il costo annuo anche in un prestito senza commissioni.",
+        "aprBody2": "Il TAEG riunisce tutto in un solo numero. È il tasso annuo al quale i soldi che ricevi davvero (l'importo meno le commissioni iniziali) eguagliano tutte le rate che paghi, commissioni comprese. Due offerte con lo stesso importo e la stessa durata si confrontano con il TAEG: quella più bassa costa meno.",
+        "aprBody3": "Ogni finanziatore calcola il TAEG secondo le regole del suo paese, che possono includere costi che questo strumento non chiede e contare i mesi in modo diverso. Il TAEG che vedi qui è una stima per confrontare offerte, non la cifra di un contratto.",
+        "exampleTitle": "Esempio pratico",
+        "exampleIntro": "Supponiamo che tu chieda {{amount}} in {{months}} mesi a un tasso nominale del {{rate}}, senza commissioni.",
+        "exampleNoFees": "La rata mensile è di {{payment}}. Nel corso della durata paghi {{interest}} di interessi e {{totalRepaid}} in totale. Anche senza commissioni il TAEG è del {{apr}}, un po' sopra il {{rate}}, perché gli interessi si pagano ogni mese.",
+        "exampleFees": "Ora aggiungi {{upfront}} di commissioni iniziali e {{monthlyFee}} al mese di commissioni. Ricevi {{received}} e ogni rata sale a {{paymentWithFees}}. Le commissioni aggiungono {{fees}}, quindi il costo del credito sale a {{cost}} e paghi {{totalRepaidFees}} in totale.",
+        "exampleApr": "Il tasso di interesse resta del {{rate}}, ma il TAEG sale al {{aprFees}}. È questo il numero da confrontare con un'altra offerta: un prestito con un tasso più alto e senza commissioni può costare meno.",
+        "exampleOutro": "Lo strumento qui sopra parte da questo prestito, senza le commissioni, così puoi inserire la tua offerta.",
+        "methodTitle": "Come fa i conti lo strumento",
+        "methodIntro": "La rata è la rata costante che rimborsa l'importo nella durata al tasso mensile, e il TAEG è il tasso che pareggia quello che ricevi e quello che paghi:",
+        "methodLegend": "M è la rata di capitale e interessi, P l'importo del prestito, r il tasso annuo nominale diviso per 12 e n il numero di mesi. Le commissioni mensili f si sommano a ogni rata.",
+        "methodApr": "Il TAEG è il tasso A che risolve la seconda riga: quello che ricevi all'inizio, l'importo P meno le commissioni iniziali F, è pari alla rata di ogni mese Mₖ più le commissioni f, scontata per (1 + A) elevato a k ÷ 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
+        "methodRounding": "Ogni cifra è calcolata in centesimi interi. Ogni rata viene ricalcolata dal debito residuo, così le rate restano entro un centesimo l'una dall'altra, l'ultima estingue il debito esattamente e il piano torna con i totali.",
+        "methodPrivacy": "Il calcolo avviene nel tuo browser. Niente di quello che inserisci viene inviato o salvato.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionFixedRate": "Il tasso è fisso per tutta la durata e ogni rata è pagata puntualmente.",
+        "assumptionFees": "Le commissioni iniziali si pagano, o si tolgono dall'importo, all'inizio del prestito; le commissioni mensili sono uguali ogni mese.",
+        "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
+        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
       }
     }
   },

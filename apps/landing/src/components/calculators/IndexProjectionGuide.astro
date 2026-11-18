@@ -1,0 +1,40 @@
+---
+import {
+  computeIndexProjection,
+  INDEX_PROJECTION_EXAMPLE,
+} from "@/lib/calculators/indexProjection";
+import type { Lang } from "@/lib/i18nLocale";
+import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import { getTranslations } from "@/lib/translations";
+
+const { locale } = Astro.props as { locale: Lang };
+const t = getTranslations(locale);
+const key = "tools.investmentReturn.projection";
+const inputs = INDEX_PROJECTION_EXAMPLE;
+const result = computeIndexProjection(inputs);
+if (result.status !== "ok") throw new Error("Invalid index projection worked example");
+
+const money = (value: number) => formatMoney(locale, value);
+const example = t(`${key}.example`, {
+  principal: money(inputs.principal),
+  monthly: money(inputs.monthlyContribution),
+  years: inputs.years,
+  annualRate: formatPercent(locale, inputs.annualRate),
+  fee: formatPercent(locale, inputs.annualFee, { decimals: 2 }),
+  beforeFees: money(result.beforeFees),
+  afterFees: money(result.afterFees),
+  feeImpact: money(result.feeImpact),
+});
+---
+
+<div class="mt-10 space-y-8 text-muted-foreground">
+  <section class="space-y-3">
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(`${key}.exampleTitle`)}</h2>
+    <p class="max-w-3xl">{example}</p>
+  </section>
+  <section class="space-y-3">
+    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(`${key}.methodTitle`)}</h2>
+    <p class="max-w-3xl">{t(`${key}.method`)}</p>
+    <p class="max-w-3xl">{t(`${key}.assumptions`)}</p>
+  </section>
+</div>

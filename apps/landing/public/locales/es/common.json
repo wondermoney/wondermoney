@@ -633,9 +633,9 @@
       "subtitle": "Descubre qué porcentaje de tus ingresos estás ahorrando cada mes. Tu tasa de ahorro es uno de los números más importantes en las finanzas personales — determina la rapidez con la que acumulas riqueza."
     },
     "investmentReturn": {
-      "title": "Calculadora de rentabilidad de inversión",
+      "title": "Rentabilidad y proyección de inversiones en índices",
       "shortName": "Rentabilidad de inversión",
-      "description": "Ve la rentabilidad anualizada de cualquier inversión dado un valor inicial, valor final y período de tiempo.",
+      "description": "Calcula la rentabilidad pasada o proyecta una inversión indexada con aportaciones mensuales y comisiones.",
       "initialInvestment": "Inversión inicial",
       "currentValue": "Valor actual",
       "investmentPeriod": "Período de inversión (años)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Rentabilidad total (%)",
       "annualizedReturn": "Rentabilidad anualizada",
       "periodHelp": "Número de años que has mantenido la inversión",
-      "pageTitle": "Calculadora de rentabilidad de inversión — WonderMoney",
-      "pageDescription": "Calculadora de rentabilidad de inversión gratuita. Calcula la rentabilidad total y anualizada de cualquier inversión. Compara el rendimiento en diferentes períodos de tiempo.",
-      "subtitle": "Calcula la rentabilidad total y anualizada de cualquier inversión. Introduce lo que invertiste, cuánto vale ahora y cuánto tiempo lo has mantenido."
+      "pageTitle": "Calculadora de rentabilidad y fondos indexados — WonderMoney",
+      "pageDescription": "Calcula la rentabilidad o simula un ETF o fondo indexado con aportaciones mensuales, una rentabilidad supuesta y comisiones anuales.",
+      "subtitle": "Calcula la rentabilidad total y anualizada de una inversión que ya tienes o estima el efecto de las aportaciones y comisiones en una inversión indexada.",
+      "projection": {
+        "pastHeading": "Mide la rentabilidad pasada",
+        "heading": "Simula un fondo indexado o ETF",
+        "intro": "Introduce una hipótesis de rentabilidad anual y la comisión del fondo para comparar el valor que podría alcanzar la misma inversión con y sin esa comisión.",
+        "principal": "Saldo inicial",
+        "monthlyContribution": "Aportación mensual",
+        "annualRate": "Rentabilidad anual supuesta antes de comisiones",
+        "annualFee": "Comisión anual del fondo",
+        "years": "Plazo de la proyección (años enteros)",
+        "range": "Intervalo de {{min}} a {{max}}",
+        "contributed": "Total aportado",
+        "beforeFees": "Valor proyectado antes de comisiones",
+        "afterFees": "Valor proyectado después de comisiones",
+        "feeImpact": "Reducción del valor proyectado por las comisiones",
+        "incomplete": "Rellena todos los campos para ver la proyección. Introduce cero si un valor no se aplica.",
+        "outOfRange": "Respeta el intervalo indicado en cada campo e introduce un número entero de años.",
+        "tooLarge": "Este escenario supera el límite de la calculadora. Reduce el importe, la rentabilidad o el plazo.",
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Empiezas con {{principal}}, aportas {{monthly}} al final de cada mes y supones una rentabilidad anual constante del {{annualRate}} durante {{years}} años. Con una comisión anual del {{fee}}, el valor proyectado pasa de {{beforeFees}} a {{afterFees}}, una diferencia de {{feeImpact}}.",
+        "methodTitle": "Cómo funciona la proyección",
+        "method": "Multiplicamos el factor de crecimiento anual por uno menos la comisión anual del fondo. Convertimos los factores anuales bruto y neto en factores mensuales equivalentes. Cada mes, aplicamos el crecimiento antes de sumar la aportación.",
+        "assumptions": "El modelo supone una rentabilidad y una comisión constantes, el reintegro de las distribuciones en el fondo y aportaciones a final de mes. Excluye impuestos, gastos de intermediación, variaciones de divisa e inflación. Las tasas son hipótesis ilustrativas para un índice como el S&P 500. La rentabilidad real varía y puede ser negativa. El impacto de las comisiones incluye la rentabilidad que esos importes podrían haber generado.",
+        "ctaHeadline": "Sigue la rentabilidad real de tus inversiones",
+        "ctaDescription": "Usa WonderMoney para seguir tu cartera y comparar su rentabilidad real con el escenario que has simulado.",
+        "ctaText": "Compara tus inversiones con la proyección"
+      }
     },
     "emergencyFund": {
       "title": "Calculadora de fondo de emergencia",
@@ -1149,6 +1175,223 @@
       "cta": {
         "headline": "Sigue la deuda que te queda a lo largo del tiempo",
         "description": "Añade el préstamo a WonderMoney con su capital, tipo y plazo, vincula la cuota mensual y mira cómo baja lo que aún debes, junto a tu presupuesto y tu patrimonio."
+      }
+    },
+    "mortgageTransfer": {
+      "title": "Calculadora para cambiar la hipoteca de banco",
+      "shortName": "Cambiar de hipoteca",
+      "description": "Compara tu hipoteca con una nueva oferta: la cuota, los gastos del cambio, cuándo se recuperan y el ahorro neto.",
+      "pageTitle": "Calculadora para Cambiar la Hipoteca de Banco: ¿Compensa la Subrogación? — WonderMoney",
+      "pageDescription": "Calculadora gratuita para cambiar la hipoteca de banco. Compara tu préstamo a tipo fijo con la oferta de otra entidad, suma los gastos del cambio y mira el ahorro mensual, el mes en que los recuperas y el ahorro neto. Sin registro.",
+      "subtitle": "Introduce el capital que aún debes, el plazo que queda y tu tipo actual, luego la oferta que te han hecho y lo que costaría cambiar. Mira las dos cuotas con seguros y comisiones, el coste total de cada préstamo, el mes en que el cambio se paga solo y lo que ahorras al final. Sin necesidad de registrarte.",
+      "termYears": "Años",
+      "termMonths": "Meses",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
+      "current": {
+        "legend": "Tu hipoteca actual",
+        "balance": "Capital pendiente",
+        "balanceHelp": "Lo que debes hoy, según tu último extracto del préstamo. El nuevo préstamo asume este importe.",
+        "termLabel": "Plazo que queda",
+        "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+        "rate": "Tipo de interés actual",
+        "rateHelp": "Tipo nominal anual fijo (TIN). Los tipos variables y mixtos no están incluidos.",
+        "fees": "Seguros y comisiones al mes",
+        "feesHelp": "Seguros de vida y hogar vinculados al préstamo, comisiones de cuenta y otros gastos mensuales. Deja 0 si no hay."
+      },
+      "offer": {
+        "legend": "La nueva oferta",
+        "rate": "Nuevo tipo de interés",
+        "rateHelp": "El tipo nominal anual fijo (TIN) que te han ofrecido.",
+        "termLabel": "Plazo del nuevo préstamo",
+        "termHelp": "Empieza igual al plazo que queda en tu hipoteca actual. Un plazo más largo baja la cuota, pero suma intereses.",
+        "fees": "Seguros y comisiones al mes",
+        "feesHelp": "Lo que pide la nueva entidad cada mes: seguros, comisiones de cuenta y otros gastos."
+      },
+      "costs": {
+        "legend": "Gastos únicos del cambio",
+        "help": "Los gastos varían según el país, la entidad y el préstamo, así que introduce los de tu oferta y tu contrato. Deja 0 en los que no vayas a pagar.",
+        "exitFee": "Comisión de salida de la hipoteca actual",
+        "exitFeeHelp": "Un porcentaje del capital que cobra tu entidad actual por devolver el préstamo antes de tiempo. Comprueba en tu contrato el porcentaje y el límite legal, si lo hay.",
+        "newLoanFees": "Comisiones del nuevo préstamo",
+        "newLoanFeesHelp": "Comisiones de apertura, de estudio o de intermediación del nuevo préstamo.",
+        "valuationFee": "Tasación",
+        "legalFees": "Notaría, registro y gestoría",
+        "legalFeesHelp": "Notario, registro de la propiedad, gestoría, honorarios e impuestos sobre el nuevo préstamo."
+      },
+      "results": {
+        "currentMonthly": "Cuota actual",
+        "offerMonthly": "Cuota con la oferta",
+        "includesFees": "Primera cuota de cada préstamo, con seguros y comisiones.",
+        "lessEachMonth": "{{amount}} menos al mes",
+        "moreEachMonth": "{{amount}} más al mes",
+        "sameEachMonth": "La misma cuota cada mes",
+        "netSaving": "Ahorro neto con el cambio",
+        "netCost": "Coste neto del cambio",
+        "netSavingHelp": "Lo que queda por pagar de tu hipoteca actual, menos el nuevo préstamo con los gastos del cambio.",
+        "breakEvenTitle": "Cuándo se paga el cambio",
+        "breakEven": "En el mes {{month}}, al cabo de {{duration}}: para entonces las cuotas más bajas ya han cubierto los gastos del cambio.",
+        "breakEvenNoCosts": "Sin gastos de cambio no hay nada que recuperar: cada mes en que la oferta cuesta menos es ahorro.",
+        "breakEvenNever": "Nunca dentro del plazo: el ahorro no llega a cubrir los gastos del cambio.",
+        "breakEvenThenLoss": "El ahorro cubre los gastos del cambio en el mes {{month}}, pero el plazo más largo sale más caro al final.",
+        "longerTerm": "El nuevo plazo es {{extra}} más largo que el plazo que queda. En el plazo que queda, esta oferta costaría {{sameTerm}} al mes: parte de la bajada de la cuota viene de pagar durante más tiempo, lo que suma {{interest}} en intereses.",
+        "longerTermNoInterest": "El nuevo plazo es {{extra}} más largo que el plazo que queda. Al 0% no suma intereses, pero pagas los seguros y comisiones mensuales durante más tiempo.",
+        "costsExceed": "Cambiar cuesta más de lo que ahorra. Pregunta a la nueva entidad si puede rebajar o asumir los gastos, o pide a tu entidad actual un tipo mejor.",
+        "switchingCosts": "Gastos del cambio"
+      },
+      "table": {
+        "title": "Tu hipoteca actual y la oferta, una al lado de la otra",
+        "caption": "Lo que queda de tu hipoteca actual comparado con la nueva oferta",
+        "figure": "Concepto",
+        "current": "Hipoteca actual",
+        "offer": "Nueva oferta",
+        "monthlyPayment": "Cuota mensual",
+        "monthlyFees": "Seguros y comisiones al mes",
+        "monthlyTotal": "Total al mes",
+        "term": "Plazo hasta terminar",
+        "totalInterest": "Intereses",
+        "totalFees": "Seguros y comisiones en total",
+        "switchingCosts": "Gastos del cambio",
+        "totalCost": "Coste total"
+      },
+      "resultNote": "Los dos tipos se mantienen fijos hasta el final de cada préstamo. Las cuotas son mensuales, los gastos del cambio se pagan el día del cambio y el nuevo préstamo asume el mismo capital pendiente.",
+      "chart": {
+        "title": "Ahorro desde el cambio",
+        "description": "Lo que el cambio ha ahorrado hasta ahora, cuota a cuota, frente a los gastos del cambio. Cuando la línea supera la línea discontinua de los gastos, el cambio se ha pagado solo.",
+        "label": "Gráfico del ahorro desde el cambio al final de cada año, frente a los gastos del cambio. Las mismas cifras están en la tabla de abajo.",
+        "year": "Año",
+        "saved": "Ahorrado hasta ahora",
+        "costs": "Gastos del cambio"
+      },
+      "yearTable": {
+        "caption": "Ahorro año a año",
+        "year": "Año",
+        "yearLabel": "Año {{year}}",
+        "saving": "Ahorrado en el año",
+        "cumulative": "Ahorrado hasta ahora",
+        "afterCosts": "Después de los gastos del cambio"
+      },
+      "errors": {
+        "summary": "La comparación aparece cuando todos los campos tienen un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo que queda, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce como máximo {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "newTermYears": {
+          "required": "Introduce el plazo del nuevo préstamo, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce como máximo {{max}} años en total."
+        },
+        "newTermMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "currentRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo de interés no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "newRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo de interés no puede ser inferior al 0%.",
+          "tooLarge": "Introduce un tipo de hasta {{max}}."
+        },
+        "currentMonthlyFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}} al mes."
+        },
+        "newMonthlyFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}} al mes."
+        },
+        "exitFeePercent": {
+          "negative": "La comisión no puede ser negativa. Introduce 0 si no hay.",
+          "tooLarge": "Introduce una comisión de hasta {{max}} del capital."
+        },
+        "newLoanFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        },
+        "valuationFee": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        },
+        "legalFees": {
+          "negative": "Los gastos no pueden ser negativos. Introduce 0 si no hay.",
+          "tooLarge": "Introduce como máximo {{max}}."
+        }
+      },
+      "guide": {
+        "compare": {
+          "title": "Qué comparar antes de cambiar",
+          "intro": "Llevar tu hipoteca a otra entidad, o renegociar las condiciones con la tuya, puede bajar lo que pagas. Un tipo más bajo es solo una parte de la cuenta, así que compara la oferta completa:",
+          "items": {
+            "rate": "El tipo. Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes.",
+            "monthlyCosts": "Los extras mensuales. Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro.",
+            "term": "El plazo. Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo.",
+            "oneOff": "Los gastos únicos. Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+          },
+          "outro": "La calculadora junta todo esto: la cuota con los extras, el total que cada préstamo aún cuesta y el mes en que recuperas los gastos del cambio."
+        },
+        "costs": {
+          "title": "Los gastos de cambiar",
+          "intro": "Lo que cuesta cambiar depende del país, del contrato y de las entidades. Las partidas habituales son:",
+          "items": {
+            "exitFee": "La comisión de salida o de amortización anticipada, un porcentaje del capital que cobra tu entidad actual cuando el préstamo se cancela antes de tiempo. En muchos países la ley la limita, y hay préstamos sin comisión.",
+            "newLoanFees": "Las comisiones del nuevo préstamo: apertura, estudio o intermediación.",
+            "valuation": "La tasación de la vivienda, que la nueva entidad suele pedir.",
+            "legal": "Notaría, registro y gestoría: cancelar la hipoteca anterior, inscribir la nueva y los impuestos que correspondan."
+          },
+          "outro": "Algunas entidades asumen parte de estos gastos para quedarse con tu hipoteca. Introduce solo lo que pagarías tú y pide a cada entidad las cifras por escrito."
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Imagina que aún debes {{balance}}, quedan {{term}} a un tipo fijo del {{currentRate}} y pagas {{currentFees}} al mes en seguros y comisiones. Tu cuota es de {{currentMonthly}} al mes. Otra entidad te ofrece un {{newRate}} en el mismo plazo, con {{newFees}} al mes de seguros: {{offerMonthly}} al mes, {{monthlySaving}} menos.",
+          "costs": "Cambiar cuesta {{costs}}: una comisión de salida del {{exitFeeRate}}, es decir {{exitFee}}, {{newLoanFees}} de comisiones del nuevo préstamo, {{valuationFee}} de tasación y {{legalFees}} de notaría, registro y gestoría. Con {{monthlySaving}} al mes, el cambio se paga solo en el mes {{breakEvenMonth}}, al cabo de {{breakEvenTime}}.",
+          "total": "En el resto del plazo, la hipoteca actual cuesta {{currentTotal}} en cuotas, seguros y comisiones. El nuevo préstamo cuesta {{offerTotal}}, con los gastos del cambio incluidos. El ahorro neto es de {{netSaving}}.",
+          "longer": "Ahora imagina que la nueva entidad te ofrece alargar el préstamo a {{longerTerm}}. La cuota baja a {{longerMonthly}}, {{longerSaving}} menos que hoy, y los gastos se cubren antes. Pero el plazo más largo suma {{extraInterest}} en intereses y, en total, el cambio cuesta {{longerNetCost}} más que quedarte con tu hipoteca actual. Una cuota más baja no es lo mismo que un préstamo más barato."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "La calculadora calcula los dos préstamos con el mismo motor de tipo fijo que la calculadora de hipoteca, sobre el capital que aún debes. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
+          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n. Los seguros y comisiones de cada mes se suman encima.",
+          "saving": "El ahorro de un mes es lo que costaría ese mes la hipoteca actual menos lo que cuesta la nueva. Un préstamo ya pagado no cuesta nada, así que, con un nuevo plazo más largo, los meses posteriores al final de tu hipoteca actual cuentan como coste. El coste total de cada opción son sus cuotas, seguros y comisiones, más los gastos del cambio en el nuevo préstamo. El ahorro neto es la diferencia.",
+          "breakEven": "El mes en que el cambio se paga solo es el primero en que el ahorro acumulado llega al menos a los gastos del cambio. Si eso no ocurre antes de que terminen los dos préstamos, el cambio no se paga solo.",
+          "longerTerm": "Cuando el nuevo plazo es más largo que el plazo que queda, la calculadora calcula también la oferta en el plazo que queda, para que veas cuánto de la bajada de la cuota viene del tipo y cuánto de pagar durante más tiempo.",
+          "assumptionsTitle": "Supuestos",
+          "assumptions": {
+            "fixedRate": "Los dos tipos se mantienen fijos hasta el final de cada préstamo. Los tipos variables y mixtos, y los periodos fijos que pasan a tipo variable, no están incluidos.",
+            "sameBalance": "El nuevo préstamo asume exactamente el capital que debes hoy. No pides dinero de más, y los gastos del cambio se pagan aparte en lugar de sumarse al préstamo.",
+            "timing": "El cambio se hace hoy, justo después de una cuota normal, y la primera cuota del nuevo préstamo vence dentro de un mes.",
+            "fees": "Los seguros y comisiones son los mismos cada mes mientras dura cada préstamo.",
+            "noDiscounting": "Un euro ahorrado dentro de diez años cuenta lo mismo que un euro hoy: no hay inflación ni rentabilidad sobre el dinero ahorrado.",
+            "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran. La cuota mostrada es la primera; las siguientes quedan a menos de un céntimo de ella.",
+            "lenderFigures": "Cada entidad cuenta los días y redondea a su manera, así que sus cifras pueden variar un poco. Pide a cada una su oferta vinculante antes de decidir."
+          },
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital."
+        },
+        "related": {
+          "title": "Otras calculadoras",
+          "mortgageLink": "Calculadora de hipoteca",
+          "mortgageBody": "El cuadro completo, año a año, del nuevo préstamo o del que tienes ahora.",
+          "earlyRepaymentLink": "Calculadora de amortización anticipada",
+          "earlyRepaymentBody": "Lo que ahorrarías con una amortización en tu hipoteca actual, en lugar de cambiarla.",
+          "debtToIncomeLink": "Calculadora de ratio de endeudamiento",
+          "debtToIncomeBody": "La parte de tus ingresos que se va en cuotas, hoy y con la nueva cuota."
+        }
+      },
+      "cta": {
+        "headline": "Compara tu presupuesto antes y después de cambiar de hipoteca",
+        "description": "Añade tu hipoteca a WonderMoney con su tipo y su plazo, planifica la cuota de cada oferta en tu presupuesto y mira cómo encaja junto a lo que gastas de verdad, antes y después del cambio."
       }
     },
     "savingsGoal": {
@@ -1704,6 +1947,255 @@
         "relatedMortgageLink": "calculadora de hipoteca",
         "relatedNetWorth": "Para sumar la vivienda, la hipoteca y tus ahorros tal como están hoy, usa la",
         "relatedNetWorthLink": "calculadora de patrimonio neto"
+      }
+    },
+    "rateRevision": {
+      "title": "Simulador de revisión del tipo de interés",
+      "shortName": "Revisión del tipo",
+      "description": "Mira cómo cambia la cuota de un préstamo a tipo variable cuando se mueve su índice, en un año y hasta el final del préstamo.",
+      "pageTitle": "Simulador de Hipoteca Variable: tu Cuota tras la Revisión del Tipo — WonderMoney",
+      "pageDescription": "Simulador gratuito para hipotecas y préstamos a tipo variable. Introduce el capital pendiente, el plazo, el índice y el diferencial y ve la nueva cuota tras la revisión, el coste en un año y hasta el final, y una tabla de −2 a +4 puntos. Sin registro.",
+      "subtitle": "Introduce lo que aún debes, el plazo que queda, el índice que sigue tu préstamo y el diferencial, y después el índice que esperas en la próxima revisión. Ve la nueva cuota mensual, cuánto suma la diferencia en un año y hasta el final del préstamo, y la cuota con el índice desde 2 puntos menos hasta 4 puntos más. Sin registro.",
+      "loanHeading": "Tu préstamo hoy",
+      "balance": "Capital pendiente",
+      "balanceHelp": "Lo que debes hoy, según el último extracto del préstamo.",
+      "termLabel": "Plazo que queda",
+      "termYears": "Años",
+      "termMonths": "Meses",
+      "termHelp": "Años más meses, por ejemplo 22 años y 4 meses.",
+      "termRounded": "Calculado para {{term}}: el plazo se redondea a meses completos.",
+      "indexRate": "Índice actual",
+      "indexRateHelp": "El tipo de referencia que sigue tu préstamo, como el Euríbor o un tipo de un banco central, con el valor que usa tu cuota actual. Puede ser negativo.",
+      "spread": "Diferencial",
+      "spreadHelp": "El margen fijo que el banco suma al índice, tal como figura en tu contrato.",
+      "currentRate": "Hoy pagas un {{rate}}: el índice más el diferencial.",
+      "floored": "El índice más el diferencial queda por debajo del 0%, así que el tipo se toma como 0%. Tu contrato puede fijar su propio suelo.",
+      "revisionHeading": "En la próxima revisión",
+      "newIndexRate": "Nuevo índice",
+      "newIndexRateHelp": "El valor que esperas en la próxima fecha de revisión, o elige una variación abajo.",
+      "stressLabel": "Prueba una variación del índice",
+      "stress": {
+        "one": "{{change}} punto",
+        "other": "{{change}} puntos"
+      },
+      "newRate": "El tipo pasa a ser del {{rate}}.",
+      "incomeHeading": "Tu presupuesto",
+      "monthlyIncome": "Ingresos netos mensuales (opcional)",
+      "monthlyIncomeHelp": "Después de impuestos. Añádelos para ver qué parte de tus ingresos se lleva la cuota, o déjalo vacío.",
+      "result": {
+        "newPayment": "Nueva cuota mensual",
+        "up": "{{amount}} más al mes ({{percent}})",
+        "down": "{{amount}} menos al mes ({{percent}})",
+        "same": "La cuota no cambia.",
+        "currentPayment": "Cuota hoy, al {{rate}}",
+        "revisedPayment": "Cuota tras la revisión, al {{rate}}",
+        "monthlyChange": "Diferencia al mes",
+        "nextYear": "En las próximas 12 cuotas",
+        "paymentsLeft": "En las {{count}} cuotas que quedan",
+        "paymentLeft": "En la última cuota",
+        "totalInterest": "Diferencia de intereses hasta el final del préstamo",
+        "incomeShare": "La nueva cuota se llevaría el {{revised}} de tus ingresos netos, frente al {{current}} de hoy. Nivel del ratio de endeudamiento: {{band}}.",
+        "exceedsIncome": "La nueva cuota es mayor que los ingresos que has introducido.",
+        "bandNote": "Niveles de la calculadora de ratio de endeudamiento: por debajo del {{caution}}% saludable, del {{caution}}% al {{high}}% precaución, por encima del {{high}}% elevado. Son una referencia general, no el límite de un banco."
+      },
+      "assumptionNote": "El nuevo tipo se aplica desde la próxima cuota hasta el final del préstamo. Las fechas de revisión, los techos y los suelos dependen de tu contrato y no se incluyen.",
+      "table": {
+        "title": "Tu cuota si el índice se mueve",
+        "intro": "El mismo préstamo con el índice entre 2 puntos menos y 4 puntos más que hoy y el mismo diferencial, cada tipo aplicado desde la próxima cuota hasta el final del préstamo.",
+        "caption": "Cuota mensual para cada variación del índice",
+        "change": "Variación del índice",
+        "index": "Índice",
+        "rate": "Tipo que pagas",
+        "payment": "Cuota mensual",
+        "monthlyChange": "Diferencia al mes",
+        "interestChange": "Diferencia de intereses hasta el final",
+        "today": "Hoy",
+        "selected": "Tu escenario"
+      },
+      "errors": {
+        "summary": "La nueva cuota aparece cuando todos los campos tienen un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el plazo que queda, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce hasta {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "indexRate": {
+          "required": "Introduce el índice. Puede ser 0% o negativo.",
+          "tooSmall": "Introduce un índice de al menos {{min}}.",
+          "tooLarge": "Introduce un índice de hasta {{max}}."
+        },
+        "spread": {
+          "required": "Introduce el diferencial, o 0% si no hay.",
+          "negative": "El diferencial no puede ser negativo.",
+          "tooLarge": "Introduce un diferencial de hasta {{max}}."
+        },
+        "newIndexRate": {
+          "required": "Introduce el nuevo índice, o elige una variación abajo.",
+          "tooSmall": "Introduce un índice de al menos {{min}}.",
+          "tooLarge": "Introduce un índice de hasta {{max}}."
+        },
+        "monthlyIncome": {
+          "negative": "Los ingresos no pueden ser negativos. Déjalo vacío para no usarlos.",
+          "tooLarge": "Introduce unos ingresos de hasta {{max}}."
+        }
+      },
+      "nextStepHeadline": "Prepara tu presupuesto para una cuota más alta",
+      "nextStepDescription": "Añade el préstamo a WonderMoney, reserva la cuota más alta en tu presupuesto mensual y mira cuánto te queda para el resto de gastos y para ahorrar.",
+      "nextStepCta": "Pon a prueba tu flujo de caja mensual",
+      "guide": {
+        "whatTitle": "Cómo cambia tu cuota con la revisión del tipo",
+        "whatBody1": "En un préstamo a tipo variable, el tipo que pagas tiene dos partes: un índice de referencia y un diferencial. El índice es un tipo de mercado o de un banco central, como el Euríbor en gran parte de la zona euro; otros países usan otros índices. El diferencial es el margen del banco y está fijado en el contrato.",
+        "whatBody2": "En cada fecha de revisión, a menudo cada 3, 6 o 12 meses, el banco toma el último valor del índice, le suma el diferencial y calcula una nueva cuota sobre el capital pendiente y el plazo que queda. Con el mismo diferencial, una subida de 1 punto porcentual del índice aumenta el tipo hasta 1 punto porcentual, según el límite máximo o mínimo que se aplique.",
+        "whatBody3": "Este simulador muestra la cuota antes y después de la variación que elijas, para que veas con tiempo qué supondría una subida o una bajada para tu presupuesto mensual.",
+        "relatedMortgage": "el cuadro completo, año a año, de un préstamo a un solo tipo.",
+        "relatedDebtToIncome": "la parte de tus ingresos que se va en todas tus cuotas de crédito.",
+        "relatedEarlyRepayment": "cuánto ahorra una amortización anticipada y cuánto baja la cuota.",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleSetup": "Imagina que aún debes {{balance}} y te quedan {{term}}. Tu préstamo sigue un índice del {{index}} más un diferencial del {{spread}}, así que pagas un {{rate}}: {{payment}} al mes y {{interest}} de intereses hasta el final del préstamo.",
+        "exampleRise": "En la próxima revisión el índice sube al {{newIndex}} y tu tipo pasa al {{newRate}}. La cuota sube a {{newPayment}}: {{monthlyChange}} más al mes ({{percent}}), {{yearlyChange}} más en las próximas 12 cuotas y {{interestChange}} más de intereses hasta el final del préstamo, si el tipo se queda ahí.",
+        "exampleStress": "Si en cambio el índice subiera {{stressStep}} puntos, hasta un tipo del {{stressRate}}, la cuota pasaría a {{stressPayment}}, {{stressChange}} más que hoy.",
+        "exampleIncome": "Con unos ingresos netos de {{income}} al mes, la cuota se lleva hoy el {{currentShare}}, el {{newShare}} tras la primera subida y el {{stressShare}} tras la mayor, un valor que los niveles del ratio de endeudamiento califican como «{{stressBand}}».",
+        "methodTitle": "Cómo se calcula",
+        "methodIntro": "Cada cuota es la cuota constante que devuelve el capital pendiente en los meses que quedan, con el mismo motor de tipo fijo que la calculadora de hipoteca:",
+        "methodLegend": "i es el índice y s el diferencial, ambos como tipos anuales. r es el tipo mensual, M la cuota mensual, P el capital pendiente y n el número de cuotas que quedan. Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente P dividido entre n.",
+        "methodItems": {
+          "change": "La diferencia al mes es la primera cuota al nuevo tipo menos la primera cuota al tipo actual, ambas sobre el capital de hoy y en el mismo número de meses.",
+          "year": "La diferencia anual compara la suma de las 12 primeras cuotas de cada cuadro o de todas las restantes si quedan menos. Cada cuota se redondea por separado, así que el total puede diferir de la diferencia mensual multiplicada por el número de cuotas.",
+          "interest": "La diferencia de intereses es el total de intereses del nuevo cuadro menos el del actual, ambos hasta el final del préstamo.",
+          "income": "La parte de los ingresos es la cuota dividida entre los ingresos netos que introduces, leída con los niveles de la calculadora de ratio de endeudamiento: por debajo del {{caution}}% saludable, del {{caution}}% al {{high}}% precaución y por encima del {{high}}% elevado. Son una referencia general, no el límite de un banco.",
+          "privacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan."
+        },
+        "assumptionsTitle": "Supuestos",
+        "assumptions": {
+          "fromNextMonth": "El nuevo tipo se aplica desde la próxima cuota hasta el final del préstamo. En la práctica se vuelve a revisar en cada fecha de revisión, así que cada resultado es un escenario, no una previsión.",
+          "sameTerm": "El capital pendiente y el plazo que queda no cambian; lo que cambia es la cuota. Algunos bancos pueden mantener la cuota y cambiar el plazo.",
+          "statement": "La cuota de hoy se calcula a partir del índice y el diferencial que introduces. Tu extracto puede diferir en unos céntimos, y los seguros y las comisiones de cuenta quedan fuera.",
+          "noFeed": "El índice lo introduces tú: el simulador no tiene datos propios de índices. Toma el valor actual de tu contrato, de tu banco o del organismo que publica el índice."
+        },
+        "limits": "El simulador acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años de plazo, un índice del {{minIndex}} al {{maxIndex}} y un diferencial de hasta el {{maxSpread}}.",
+        "contractTitle": "Lo que decide tu contrato",
+        "contractIntro": "Cómo funciona una revisión real depende de tu contrato y de las normas del país donde vives. Nada de esto está incluido en el simulador:",
+        "contractItems": {
+          "resetDates": "Fechas de revisión: cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota.",
+          "capsFloors": "Techos y suelos: algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%.",
+          "index": "El índice: el Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación.",
+          "mixed": "Préstamos a tipo mixto: primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+        },
+        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
+      }
+    },
+    "personalLoan": {
+      "title": "Simulador de préstamo personal",
+      "shortName": "Préstamo personal",
+      "description": "Calcula la cuota, el coste total y una estimación de la TAE de un préstamo personal, con comisiones, y consulta el cuadro mes a mes.",
+      "pageTitle": "Simulador de préstamo personal: cuota, coste total y TAE — WonderMoney",
+      "pageDescription": "Simulador gratuito de préstamo personal. Introduce el importe, el plazo, el tipo de interés y las comisiones y consulta la cuota mensual, el coste total del crédito, una estimación de la TAE y el cuadro mes a mes. Sin registro.",
+      "subtitle": "Dos préstamos con el mismo tipo de interés pueden costar cantidades muy distintas cuando se suman las comisiones. Introduce la oferta que tienes, con sus comisiones, y mira cuánto cuesta al mes y en total. Sin registro.",
+      "amount": "Importe del préstamo",
+      "amountHelp": "Lo que te presta la entidad, antes de descontar ninguna comisión.",
+      "termMonths": "Plazo",
+      "termMonthsHelp": "Número de cuotas mensuales, de {{min}} a {{max}}.",
+      "months": "meses",
+      "annualRate": "Tipo de interés",
+      "annualRateHelp": "El tipo nominal anual fijo de la oferta (TIN), no la TAE: la TAE es lo que calcula este simulador.",
+      "upfrontFees": "Comisiones iniciales",
+      "upfrontFeesHelp": "Gastos que se pagan una sola vez al empezar el préstamo, como la comisión de apertura o de estudio y los impuestos sobre el préstamo. Deja 0 si no hay.",
+      "monthlyFees": "Comisiones y seguros mensuales",
+      "monthlyFeesHelp": "Se cobran con cada cuota, como una comisión de gestión o la prima de un seguro que exija el préstamo. Deja 0 si no hay.",
+      "result": {
+        "monthlyPayment": "Cuota mensual",
+        "monthlyPaymentSplit": "{{loan}} del préstamo más {{fees}} de comisiones.",
+        "paymentsNote": "{{count}} cuotas mensuales. Las siguientes no se alejan más de un céntimo de la primera; la última, de {{last}}, salda la deuda.",
+        "apr": "TAE estimada, con comisiones",
+        "aprOver": "más del {{max}}",
+        "aprNote": "Una estimación de la tasa anual equivalente (TAE), calculada a partir del dinero que recibes y de cada cuota que pagas. La TAE que indica una entidad sigue las normas de su país y puede contar costes que este simulador no conoce.",
+        "totalInterest": "Total de intereses",
+        "totalFees": "Total de comisiones",
+        "totalCostOfCredit": "Coste total del crédito",
+        "totalRepaid": "Total que pagas, con comisiones",
+        "amountReceived": "Recibes {{amount}} una vez descontadas las comisiones iniciales."
+      },
+      "estimateNote": "Esto es una estimación, no una oferta de préstamo ni un presupuesto de una entidad. El tipo, las comisiones y la aprobación dependen de la entidad y de tu situación: compara las cifras de la oferta por escrito de cada entidad antes de firmar.",
+      "schedule": {
+        "title": "Cuadro mensual",
+        "description": "Cómo se reparte cada cuota entre intereses, capital y comisiones, y cuánto debes todavía después de pagarla.",
+        "upfrontNote": "Las comisiones iniciales de {{fees}} se pagan al principio y no aparecen en la tabla.",
+        "show": "Ver el cuadro mensual",
+        "hide": "Ocultar el cuadro mensual",
+        "month": "Mes",
+        "payment": "Cuota",
+        "principal": "Capital",
+        "interest": "Intereses",
+        "fees": "Comisiones",
+        "balance": "Pendiente",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "El resultado aparece cuando todos los campos tienen un valor válido.",
+        "amount": {
+          "required": "Introduce el importe que quieres pedir.",
+          "tooSmall": "Introduce al menos {{min}}.",
+          "tooLarge": "Introduce un importe de hasta {{max}}."
+        },
+        "termMonths": {
+          "required": "Introduce el plazo en meses.",
+          "tooSmall": "Introduce un plazo de al menos {{min}} meses.",
+          "tooLarge": "Introduce un plazo de hasta {{max}} meses."
+        },
+        "annualRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo no puede ser negativo. Introduce 0 para un préstamo sin intereses.",
+          "tooLarge": "Introduce un tipo de hasta el {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Las comisiones no pueden ser negativas. Introduce 0 si no hay.",
+          "tooLarge": "Introduce comisiones iniciales de hasta {{max}}, la mitad del importe."
+        },
+        "monthlyFees": {
+          "negative": "Las comisiones no pueden ser negativas. Introduce 0 si no hay.",
+          "tooLarge": "Introduce comisiones mensuales de hasta {{max}}."
+        }
+      },
+      "nextStepHeadline": "Sigue este préstamo junto a tu presupuesto",
+      "nextStepDescription": "Añade el préstamo a WonderMoney con su tipo y su plazo, reserva la cuota en tu presupuesto mensual y mira cómo baja la deuda junto a lo que gastas de verdad.",
+      "nextStepCta": "Ve cómo encaja la cuota en tu presupuesto mensual",
+      "guide": {
+        "whatTitle": "Lo que cuesta de verdad un préstamo personal",
+        "whatBody1": "Con un préstamo personal a tipo fijo, pagas cuotas mensuales casi iguales durante un plazo fijo. Cada cuota cubre los intereses del saldo pendiente y devuelve parte del capital. A medida que baja el saldo, una parte menor de la cuota va a intereses y una mayor a devolver el capital.",
+        "whatBody2": "El tipo de interés es solo una parte del precio. Las entidades suelen añadir una comisión al principio y un cargo mensual, como una comisión de gestión o un seguro. Esas comisiones se suman a los intereses y, en un préstamo pequeño o corto, pueden costar más que los propios intereses.",
+        "whatBody3": "Antes de pedirlo, comprueba que la cuota cabe: junto a las cuotas que ya pagas y dentro del presupuesto con el que ya vives.",
+        "relatedDebtToIncome": "muestra qué parte de tus ingresos ocuparían tus cuotas, esta incluida.",
+        "relatedHouseholdBudget": "muestra adónde va tu dinero cada mes, para ver qué tendría que sustituir la nueva cuota.",
+        "aprTitle": "El tipo de interés y la TAE no son lo mismo",
+        "aprBody1": "El tipo de interés de una oferta (el TIN) es un tipo nominal anual: fija los intereses de cada mes, una doceava parte de él sobre el capital pendiente. Deja fuera las comisiones y, como los intereses se cobran cada mes, se queda por debajo del coste anual incluso en un préstamo sin comisiones.",
+        "aprBody2": "La TAE lo reúne todo en una cifra. Es el tipo anual al que el dinero que recibes de verdad (el importe menos las comisiones iniciales) iguala todas las cuotas que pagas, con comisiones. Dos ofertas del mismo importe y plazo se comparan por su TAE: la más baja cuesta menos.",
+        "aprBody3": "Cada entidad calcula la TAE según las normas de su país, que pueden incluir costes por los que este simulador no pregunta y contar los meses de otra forma. La TAE que ves aquí es una estimación para comparar ofertas, no la cifra de un contrato.",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleIntro": "Supón que pides {{amount}} a {{months}} meses, con un tipo nominal del {{rate}} y sin comisiones.",
+        "exampleNoFees": "La cuota mensual es de {{payment}}. A lo largo del plazo pagas {{interest}} de intereses y {{totalRepaid}} en total. Incluso sin comisiones, la TAE es del {{apr}}, algo por encima del {{rate}}, porque los intereses se cobran cada mes.",
+        "exampleFees": "Ahora añade {{upfront}} de comisiones iniciales y {{monthlyFee}} al mes de comisiones. Recibes {{received}} y cada cuota sube a {{paymentWithFees}}. Las comisiones suman {{fees}}, así que el coste del crédito pasa a {{cost}} y pagas {{totalRepaidFees}} en total.",
+        "exampleApr": "El tipo de interés sigue siendo del {{rate}}, pero la TAE sube al {{aprFees}}. Esa es la cifra que hay que comparar con otra oferta: un préstamo con un tipo más alto y sin comisiones puede salir más barato.",
+        "exampleOutro": "El simulador de arriba empieza en este préstamo, sin las comisiones, para que puedas introducir tu oferta.",
+        "methodTitle": "Cómo hace las cuentas el simulador",
+        "methodIntro": "La cuota es la cuota constante que devuelve el importe a lo largo del plazo, al tipo mensual, y la TAE es el tipo que equilibra lo que recibes con lo que pagas:",
+        "methodLegend": "M es la cuota de capital e intereses, P el importe del préstamo, r el tipo nominal anual dividido entre 12 y n el número de meses. Las comisiones mensuales f se suman a cada cuota.",
+        "methodApr": "La TAE es el tipo A que resuelve la segunda línea: lo que recibes al principio, el importe P menos las comisiones iniciales F, iguala la cuota de cada mes Mₖ más las comisiones f, descontada por (1 + A) elevado a k ÷ 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
+        "methodRounding": "Todas las cuentas se hacen en céntimos. Cada cuota se vuelve a calcular a partir del capital pendiente, así que las cuotas no se alejan más de un céntimo entre sí, la última salda la deuda exactamente y el cuadro coincide con los totales.",
+        "methodPrivacy": "Las cuentas se hacen en tu navegador. Nada de lo que escribes se envía ni se guarda.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionFixedRate": "El tipo es fijo durante todo el plazo y todas las cuotas se pagan a tiempo.",
+        "assumptionFees": "Las comisiones iniciales se pagan, o se descuentan del importe, al empezar el préstamo; las comisiones mensuales son iguales todos los meses.",
+        "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
+        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
       }
     }
   },

@@ -1,15 +1,14 @@
-// Older addresses of localized pages. Each one is still served, as a page that redirects to the
-// localized address (pageStaticPaths.ts), and kept out of the sitemap (sitemap.ts). This module
-// imports no Sanity or Astro virtual module, so astro.config.mjs can load it.
+// Historical aliases for the Vercel redirects and sitemap filter.
 import {
 	FEATURE_ROUTE_IDS,
 	SUPPORTED_LANGS,
 	TOOL_ROUTE_IDS,
 	TOP_LEVEL_PAGE_ROUTE_IDS,
 	getLocalizedSlug,
+	toLocalizedPath,
 	type Lang,
 	type RouteId,
-} from "./routes"
+} from "./routes.ts"
 
 type TopLevelRouteId = (typeof TOP_LEVEL_PAGE_ROUTE_IDS)[number]
 type FeatureRouteId = (typeof FEATURE_ROUTE_IDS)[number]
@@ -38,7 +37,7 @@ export const LEGACY_FEATURE_SLUG_BY_ROUTE_ID: Record<FeatureRouteId, string> = {
 }
 
 // Only tools that once lived at an English slug have one; new tools start at
-// their localized slug and need no redirect page.
+// their localized slug and need no alias.
 export const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Partial<Record<ToolRouteId, string>> = {
 	toolCompoundInterest: "compound-interest-calculator",
 	toolNetWorth: "net-worth-calculator",
@@ -48,7 +47,7 @@ export const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Partial<Record<ToolRouteId, string>> 
 }
 
 /** The legacy slug of a page in a locale, or undefined when the page has none there. */
-export function getLegacySlug(
+function getLegacySlug(
 	legacySlugByRouteId: Partial<Record<RouteId, string>>,
 	routeId: RouteId,
 	locale: Lang,
@@ -79,7 +78,7 @@ export function getLegacyRedirects(locales: ReadonlyArray<Lang> = SUPPORTED_LANG
 					? [
 							{
 								source: `/${locale}/${prefix}${legacySlug}`,
-								destination: `/${locale}/${prefix}${getLocalizedSlug(routeId, locale)}`,
+								destination: toLocalizedPath(routeId, locale),
 							},
 						]
 					: []
