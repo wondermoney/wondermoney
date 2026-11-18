@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Par où commencer ?",
+    "metaTitle": "Par où commencer avec ses finances personnelles ? | WonderMoney",
+    "metaDescription": "Répondez à deux questions pour trouver un simulateur de budget, d’épargne ou d’investissement, puis essayez un court quiz de culture financière.",
+    "intro": "Trouvez un simulateur pour votre prochaine décision et testez vos connaissances en finances personnelles.",
+    "goalQuestion": "Quel objectif voulez-vous travailler ?",
+    "taskQuestion": "Qu’est-ce qui vous aiderait maintenant ?",
+    "findTool": "Voir par où commencer",
+    "resultTitle": "Un simulateur pour commencer",
+    "browse": "Voir les six simulateurs",
+    "goals": {
+      "budget": "Organiser mes finances",
+      "savings": "Développer mon épargne",
+      "investing": "Comprendre la croissance des placements"
+    },
+    "tasks": {
+      "review": "Faire le point sur ma situation",
+      "plan": "Explorer un scénario futur"
+    },
+    "quiz": {
+      "title": "Quiz de culture financière",
+      "intro": "Essayez quatre questions sur le budget, les frais, l’inflation et la diversification.",
+      "open": "Ouvrir le quiz",
+      "submit": "Vérifier mes réponses",
+      "score": "{{score}} bonnes réponses sur {{total}}",
+      "correct": "Exact",
+      "incorrect": "Bonne réponse",
+      "retry": "Réessayer",
+      "budget": {
+        "question": "Que comparez-vous pour savoir combien il reste dans un budget mensuel ?",
+        "choice0": "Les revenus et les dépenses du mois",
+        "choice1": "Uniquement les factures récurrentes",
+        "choice2": "Les revenus de l’année précédente",
+        "explanation": "En soustrayant les dépenses des revenus du mois, vous voyez s’il reste de l’argent ou si vos dépenses dépassent vos revenus."
+      },
+      "fees": {
+        "question": "Si deux placements ont le même rendement brut, quel est l’effet de frais plus élevés sur le rendement net ?",
+        "choice0": "Ils l’augmentent",
+        "choice1": "Ils le laissent inchangé",
+        "choice2": "Ils le réduisent",
+        "explanation": "Les frais sont déduits du placement. À rendement brut égal, des frais plus élevés réduisent ce qui vous reste."
+      },
+      "inflation": {
+        "question": "Si les prix augmentent globalement et que vos revenus restent stables, que devient votre pouvoir d’achat ?",
+        "choice0": "Il augmente",
+        "choice1": "Il diminue",
+        "choice2": "Il reste stable",
+        "explanation": "Quand les prix augmentent, une même somme d’argent permet d’acheter moins de biens et de services."
+      },
+      "diversification": {
+        "question": "Pourquoi répartir son argent entre plusieurs placements ?",
+        "choice0": "Pour moins dépendre d’un seul placement",
+        "choice1": "Pour garantir un bénéfice",
+        "choice2": "Pour que tous les placements évoluent de la même façon",
+        "explanation": "La diversification peut réduire l’impact des mauvais résultats d’un placement. Un portefeuille diversifié peut perdre de la valeur."
+      }
+    }
+  },
   "global": {
     "mainCta": "Commencer gratuitement",
     "mainCtaMicrocopy": "Gratuit et open source. Utilisez-le ici ou sur votre propre serveur.",

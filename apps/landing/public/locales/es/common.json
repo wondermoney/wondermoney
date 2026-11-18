@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "¿Por dónde empezar?",
+    "metaTitle": "¿Por dónde empezar con tus finanzas personales? | WonderMoney",
+    "metaDescription": "Responde a dos preguntas para encontrar una calculadora de presupuesto, ahorro o inversión. Después, prueba un breve test de educación financiera.",
+    "intro": "Encuentra una calculadora para tu próxima decisión y comprueba lo que sabes de finanzas personales.",
+    "goalQuestion": "¿En qué quieres trabajar?",
+    "taskQuestion": "¿Qué te ayudaría ahora?",
+    "findTool": "Ver por dónde empezar",
+    "resultTitle": "Una calculadora para empezar",
+    "browse": "Ver las seis calculadoras",
+    "goals": {
+      "budget": "Organizar mis finanzas",
+      "savings": "Aumentar mis ahorros",
+      "investing": "Entender cómo crecen las inversiones"
+    },
+    "tasks": {
+      "review": "Revisar mi situación actual",
+      "plan": "Explorar un escenario futuro"
+    },
+    "quiz": {
+      "title": "Test de educación financiera",
+      "intro": "Prueba cuatro preguntas sobre presupuestos, comisiones, inflación y diversificación.",
+      "open": "Abrir el test",
+      "submit": "Comprobar mis respuestas",
+      "score": "{{score}} de {{total}} respuestas correctas",
+      "correct": "Correcto",
+      "incorrect": "Respuesta correcta",
+      "retry": "Volver a intentarlo",
+      "budget": {
+        "question": "¿Qué comparas para saber cuánto sobra en un presupuesto mensual?",
+        "choice0": "Los ingresos y gastos del mes",
+        "choice1": "Solo las facturas recurrentes",
+        "choice2": "Los ingresos del año anterior",
+        "explanation": "Al restar los gastos de los ingresos mensuales, ves si sobra dinero o si gastas más de lo que ingresas."
+      },
+      "fees": {
+        "question": "Si dos inversiones tienen la misma rentabilidad bruta, ¿qué efecto tienen unas comisiones más altas en la rentabilidad neta?",
+        "choice0": "La aumentan",
+        "choice1": "La dejan igual",
+        "choice2": "La reducen",
+        "explanation": "Las comisiones se descuentan de la inversión. Con la misma rentabilidad bruta, una comisión más alta reduce lo que te queda."
+      },
+      "inflation": {
+        "question": "Si los precios suben en general y tus ingresos se mantienen, ¿qué ocurre con tu poder adquisitivo?",
+        "choice0": "Aumenta",
+        "choice1": "Disminuye",
+        "choice2": "Se mantiene",
+        "explanation": "Cuando suben los precios, con la misma cantidad de dinero puedes comprar menos bienes y servicios."
+      },
+      "diversification": {
+        "question": "¿Por qué repartir el dinero entre varias inversiones?",
+        "choice0": "Para depender menos de una sola inversión",
+        "choice1": "Para garantizar un beneficio",
+        "choice2": "Para que todas las inversiones evolucionen igual",
+        "explanation": "Diversificar puede reducir el impacto de una inversión con malos resultados. Una cartera diversificada puede perder valor."
+      }
+    }
+  },
   "global": {
     "mainCta": "Empieza gratis",
     "mainCtaMicrocopy": "Gratis y de código abierto. Úsalo aquí o en tu propio servidor.",

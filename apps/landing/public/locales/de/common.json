@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Wo soll ich anfangen?",
+    "metaTitle": "Wo soll ich bei meinen Finanzen anfangen? | WonderMoney",
+    "metaDescription": "Beantworte zwei Fragen, um einen Rechner für Budget, Sparen oder Geldanlage zu finden. Probiere danach ein kurzes Finanzquiz aus.",
+    "intro": "Finde einen Rechner für deine nächste Entscheidung und teste dein Finanzwissen.",
+    "goalQuestion": "Woran möchtest du arbeiten?",
+    "taskQuestion": "Was würde dir jetzt helfen?",
+    "findTool": "Passenden Rechner finden",
+    "resultTitle": "Ein Rechner für den Einstieg",
+    "browse": "Alle sechs Rechner ansehen",
+    "goals": {
+      "budget": "Meine Finanzen organisieren",
+      "savings": "Meine Ersparnisse aufbauen",
+      "investing": "Das Wachstum von Anlagen verstehen"
+    },
+    "tasks": {
+      "review": "Meine aktuelle Lage prüfen",
+      "plan": "Ein Zukunftsszenario durchspielen"
+    },
+    "quiz": {
+      "title": "Quiz zum Finanzwissen",
+      "intro": "Teste dein Wissen zu Budget, Gebühren, Inflation und Diversifikation mit vier Fragen.",
+      "open": "Quiz öffnen",
+      "submit": "Meine Antworten prüfen",
+      "score": "{{score}} von {{total}} richtig",
+      "correct": "Richtig",
+      "incorrect": "Richtige Antwort",
+      "retry": "Erneut versuchen",
+      "budget": {
+        "question": "Was vergleichst du, um zu sehen, wie viel im Monatsbudget übrig bleibt?",
+        "choice0": "Monatliche Einnahmen und Ausgaben",
+        "choice1": "Nur wiederkehrende Rechnungen",
+        "choice2": "Das Einkommen vom Vorjahr",
+        "explanation": "Wenn du die monatlichen Ausgaben von den Einnahmen abziehst, siehst du, ob Geld übrig bleibt oder ob du mehr ausgibst, als du einnimmst."
+      },
+      "fees": {
+        "question": "Zwei Anlagen haben dieselbe Bruttorendite. Wie wirken sich höhere Gebühren auf die Nettorendite aus?",
+        "choice0": "Sie erhöhen sie",
+        "choice1": "Sie bleibt gleich",
+        "choice2": "Sie senken sie",
+        "explanation": "Gebühren werden von der Anlage abgezogen. Bei gleicher Bruttorendite bleibt dir durch höhere Gebühren weniger übrig."
+      },
+      "inflation": {
+        "question": "Was passiert mit deiner Kaufkraft, wenn die Preise allgemein steigen und dein Einkommen gleich bleibt?",
+        "choice0": "Sie steigt",
+        "choice1": "Sie sinkt",
+        "choice2": "Sie bleibt gleich",
+        "explanation": "Wenn Preise steigen, kannst du mit demselben Geld weniger Waren und Dienstleistungen kaufen."
+      },
+      "diversification": {
+        "question": "Warum kann es sinnvoll sein, Geld auf verschiedene Anlagen zu verteilen?",
+        "choice0": "Um weniger von einer einzelnen Anlage abzuhängen",
+        "choice1": "Um einen Gewinn zu garantieren",
+        "choice2": "Damit sich alle Anlagen gleich entwickeln",
+        "explanation": "Eine Streuung kann die Auswirkungen einer schlecht laufenden Anlage mindern. Auch ein breit gestreutes Portfolio kann an Wert verlieren."
+      }
+    }
+  },
   "global": {
     "mainCta": "Kostenlos starten",
     "mainCtaMicrocopy": "Kostenlos und Open Source. Nutze es hier oder betreibe es selbst.",

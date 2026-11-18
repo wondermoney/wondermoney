@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Por onde começar?",
+    "metaTitle": "Por onde começar com as finanças pessoais? | WonderMoney",
+    "metaDescription": "Responde a duas perguntas para encontrares um simulador de orçamento, poupança ou investimento. Depois, experimenta um teste de literacia financeira.",
+    "intro": "Encontra um simulador para a tua próxima decisão e testa os teus conhecimentos de finanças pessoais.",
+    "goalQuestion": "Em que queres trabalhar?",
+    "taskQuestion": "O que te ajudaria agora?",
+    "findTool": "Ver por onde começar",
+    "resultTitle": "Um simulador para começar",
+    "browse": "Ver os seis simuladores",
+    "goals": {
+      "budget": "Organizar as minhas finanças",
+      "savings": "Reforçar a minha poupança",
+      "investing": "Perceber como crescem os investimentos"
+    },
+    "tasks": {
+      "review": "Avaliar a minha situação atual",
+      "plan": "Explorar um cenário futuro"
+    },
+    "quiz": {
+      "title": "Teste de literacia financeira",
+      "intro": "Experimenta quatro perguntas sobre orçamento, comissões, inflação e diversificação.",
+      "open": "Abrir o teste",
+      "submit": "Verificar as minhas respostas",
+      "score": "{{score}} de {{total}} respostas certas",
+      "correct": "Certo",
+      "incorrect": "Resposta certa",
+      "retry": "Voltar a tentar",
+      "budget": {
+        "question": "O que comparas para saber quanto sobra no orçamento mensal?",
+        "choice0": "Os rendimentos e as despesas do mês",
+        "choice1": "Só as contas recorrentes",
+        "choice2": "Os rendimentos do ano anterior",
+        "explanation": "Ao subtraíres as despesas aos rendimentos do mês, vês se sobra dinheiro ou se gastas mais do que recebes."
+      },
+      "fees": {
+        "question": "Se dois investimentos têm a mesma rentabilidade bruta, que efeito têm comissões mais altas na rentabilidade líquida?",
+        "choice0": "Aumentam-na",
+        "choice1": "Mantêm-na igual",
+        "choice2": "Reduzem-na",
+        "explanation": "As comissões são descontadas do investimento. Com a mesma rentabilidade bruta, uma comissão mais alta deixa-te com menos."
+      },
+      "inflation": {
+        "question": "Se os preços sobem de forma generalizada e o teu rendimento se mantém, o que acontece ao teu poder de compra?",
+        "choice0": "Aumenta",
+        "choice1": "Diminui",
+        "choice2": "Mantém-se",
+        "explanation": "Quando os preços sobem, o mesmo dinheiro permite comprar menos bens e serviços."
+      },
+      "diversification": {
+        "question": "Por que razão podes distribuir o dinheiro por vários investimentos?",
+        "choice0": "Para reduzir a dependência de um só investimento",
+        "choice1": "Para garantir um lucro",
+        "choice2": "Para que todos os investimentos variem da mesma forma",
+        "explanation": "A diversificação pode reduzir o impacto de um mau desempenho de um investimento. Uma carteira diversificada pode perder valor."
+      }
+    }
+  },
   "global": {
     "mainCta": "Começa grátis",
     "mainCtaMicrocopy": "Gratuito e open source. Usa-o aqui ou no teu próprio servidor.",

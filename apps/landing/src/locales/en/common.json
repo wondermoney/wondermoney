@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Where to start",
+    "metaTitle": "Where to start with personal finances | WonderMoney",
+    "metaDescription": "Answer two questions to find a calculator for budgeting, saving or investing. Then try a short financial literacy quiz.",
+    "intro": "Find a calculator for your next money decision and check what you know about the basics.",
+    "goalQuestion": "What would you like to work on?",
+    "taskQuestion": "What would help you now?",
+    "findTool": "See my starting point",
+    "resultTitle": "A tool to start with",
+    "browse": "Browse all six calculators",
+    "goals": {
+      "budget": "Organise my finances",
+      "savings": "Build my savings",
+      "investing": "Understand investment growth"
+    },
+    "tasks": {
+      "review": "Review where I stand",
+      "plan": "Explore a future scenario"
+    },
+    "quiz": {
+      "title": "Financial literacy quiz",
+      "intro": "Try four questions on budgeting, fees, inflation and diversification.",
+      "open": "Open the quiz",
+      "submit": "Check my answers",
+      "score": "{{score}} of {{total}} correct",
+      "correct": "Correct",
+      "incorrect": "Correct answer",
+      "retry": "Try again",
+      "budget": {
+        "question": "What do you compare to see how much money is left in a monthly budget?",
+        "choice0": "Monthly income and expenses",
+        "choice1": "Only recurring bills",
+        "choice2": "Income from the previous year",
+        "explanation": "Subtracting monthly expenses from monthly income shows whether money is left over or spending exceeds income."
+      },
+      "fees": {
+        "question": "If two investments have the same gross return, what do higher fees do to the return you keep?",
+        "choice0": "Increase it",
+        "choice1": "Leave it unchanged",
+        "choice2": "Reduce it",
+        "explanation": "Fees are deducted from your investment, so a higher fee leaves you with less when the gross return is the same."
+      },
+      "inflation": {
+        "question": "If prices generally rise and your income stays the same, what happens to your purchasing power?",
+        "choice0": "It goes up",
+        "choice1": "It goes down",
+        "choice2": "It stays the same",
+        "explanation": "When prices rise, the same amount of money buys fewer goods and services."
+      },
+      "diversification": {
+        "question": "What is one reason to spread money across different investments?",
+        "choice0": "To reduce dependence on any single investment",
+        "choice1": "To guarantee a profit",
+        "choice2": "To make every investment move together",
+        "explanation": "Diversification can reduce the impact of a single investment performing poorly. A diversified portfolio can still lose value."
+      }
+    }
+  },
   "global": {
     "mainCta": "Start free",
     "mainCtaMicrocopy": "Free and open source. Use it here or host your own.",

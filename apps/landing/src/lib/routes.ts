@@ -31,6 +31,14 @@ const ROUTE_SLUGS = {
 		de: "uber-uns",
 		it: "chi-siamo",
 	},
+	pageGuidedStart: {
+		pt: "por-onde-comecar",
+		en: "where-to-start",
+		es: "por-donde-empezar",
+		fr: "par-ou-commencer",
+		de: "wo-anfangen",
+		it: "da-dove-iniziare",
+	},
 	pageEtfTracker: {
 		pt: "rastreador-etf",
 		en: "etf-tracker",
@@ -390,6 +398,7 @@ export type RouteId = keyof typeof ROUTE_SLUGS
 
 export const TOP_LEVEL_PAGE_ROUTE_IDS = [
 	"pageAbout",
+	"pageGuidedStart",
 	"pageEtfTracker",
 	"pagePortfolioTracker",
 	"pageNetWorthTracker",

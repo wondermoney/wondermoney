@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Da dove iniziare?",
+    "metaTitle": "Da dove iniziare con le finanze personali? | WonderMoney",
+    "metaDescription": "Rispondi a due domande per trovare un calcolatore per budget, risparmio o investimenti. Poi prova un breve quiz di educazione finanziaria.",
+    "intro": "Trova un calcolatore per la tua prossima decisione e metti alla prova le tue conoscenze finanziarie.",
+    "goalQuestion": "Su cosa vuoi lavorare?",
+    "taskQuestion": "Che cosa ti aiuterebbe adesso?",
+    "findTool": "Scopri da dove iniziare",
+    "resultTitle": "Un calcolatore per iniziare",
+    "browse": "Vedi tutti e sei i calcolatori",
+    "goals": {
+      "budget": "Organizzare le mie finanze",
+      "savings": "Aumentare i miei risparmi",
+      "investing": "Capire come crescono gli investimenti"
+    },
+    "tasks": {
+      "review": "Valutare la mia situazione attuale",
+      "plan": "Esplorare uno scenario futuro"
+    },
+    "quiz": {
+      "title": "Quiz di educazione finanziaria",
+      "intro": "Prova quattro domande su budget, commissioni, inflazione e diversificazione.",
+      "open": "Apri il quiz",
+      "submit": "Controlla le mie risposte",
+      "score": "{{score}} risposte corrette su {{total}}",
+      "correct": "Esatto",
+      "incorrect": "Risposta corretta",
+      "retry": "Riprova",
+      "budget": {
+        "question": "Che cosa confronti per capire quanto rimane nel bilancio mensile?",
+        "choice0": "Entrate e uscite del mese",
+        "choice1": "Solo le bollette ricorrenti",
+        "choice2": "Le entrate dell’anno precedente",
+        "explanation": "Sottraendo le spese dalle entrate mensili, vedi se rimane del denaro o se spendi più di quanto guadagni."
+      },
+      "fees": {
+        "question": "Se due investimenti hanno lo stesso rendimento lordo, quale effetto hanno commissioni più alte sul rendimento netto?",
+        "choice0": "Lo aumentano",
+        "choice1": "Lo lasciano invariato",
+        "choice2": "Lo riducono",
+        "explanation": "Le commissioni vengono detratte dall’investimento. A parità di rendimento lordo, commissioni più alte ti lasciano meno."
+      },
+      "inflation": {
+        "question": "Se i prezzi salgono in generale e il tuo reddito resta invariato, che cosa succede al tuo potere d’acquisto?",
+        "choice0": "Aumenta",
+        "choice1": "Diminuisce",
+        "choice2": "Resta invariato",
+        "explanation": "Quando i prezzi salgono, con la stessa somma puoi comprare meno beni e servizi."
+      },
+      "diversification": {
+        "question": "Perché distribuire il denaro tra diversi investimenti?",
+        "choice0": "Per dipendere meno da un singolo investimento",
+        "choice1": "Per garantire un guadagno",
+        "choice2": "Per far sì che tutti gli investimenti abbiano lo stesso andamento",
+        "explanation": "Diversificare può ridurre l’impatto di un investimento che va male. Un portafoglio diversificato può comunque perdere valore."
+      }
+    }
+  },
   "global": {
     "mainCta": "Inizia gratis",
     "mainCtaMicrocopy": "Gratuito e open source. Usalo qui o sul tuo server.",
