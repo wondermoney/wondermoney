@@ -72,6 +72,20 @@ describe('account auto sync scheduler service', () => {
     expect(bg.markNeedsAction).not.toHaveBeenCalled();
   });
 
+  it('continues scheduling healthy connections after an invalid owner identity', async () => {
+    em.find.mockResolvedValueOnce([
+      connection(10, { appuserKey: { appuserKey: 8, externalUserId: 'invalid-owner' } }),
+      connection(11),
+    ]);
+    sendMock.mockResolvedValueOnce('healthy-job');
+
+    const result = await service.enqueueDueAccountSyncs({ backgroundOperationService: backgroundOperationService(), scheduleRunId: 'mixed-owners' });
+
+    expect(result).toMatchObject({ enqueued: 1, failed: 1, skipped: 0, total: 2 });
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(sendMock.mock.calls[0]?.[0]).toMatchObject({ bankConnectionKey: '11' });
+  });
+
   it('keeps a crash-after-send attach failure queued with no job id', async () => {
     em.find.mockResolvedValueOnce([connection(10)]);
     const bg = backgroundOperationService();
@@ -85,14 +99,14 @@ describe('account auto sync scheduler service', () => {
   it('leaves duplicate singleton null queued and claimable by the eventual original job', async () => {
     em.find.mockResolvedValueOnce([connection(10)]).mockResolvedValueOnce([connection(10)]);
     const state = { queueJobId: null as null | string, retryable: true, status: 'queued' };
-    const bg = { ...backgroundOperationService(), attachQueueJob: vi.fn(async (_correlationId: string, jobId: string) => { state.queueJobId = jobId; return true; }), findByCorrelation: vi.fn().mockImplementation(async () => state) };
+    const bg = { ...backgroundOperationService(), attachQueueJob: vi.fn((_correlationId: string, jobId: string) => { state.queueJobId = jobId; return Promise.resolve(true); }), findByCorrelation: vi.fn().mockImplementation(() => Promise.resolve(state)) };
     sendMock.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
     await service.enqueueDueAccountSyncs({ backgroundOperationService: bg as unknown as EnqueueBg, scheduleRunId: 'duplicate-run' });
     const rerun = await service.enqueueDueAccountSyncs({ backgroundOperationService: bg as unknown as EnqueueBg, scheduleRunId: 'duplicate-run' });
     expect(rerun).toMatchObject({ enqueued: 0, failed: 1 });
     expect(state).toMatchObject({ queueJobId: null, retryable: true, status: 'queued' });
     expect(bg.markNeedsAction).not.toHaveBeenCalled();
-    const claimJobStart = vi.fn(async (_correlationId: string, jobId: string) => state.status === 'queued' && (state.queueJobId === null || state.queueJobId === jobId));
+    const claimJobStart = vi.fn((_correlationId: string, jobId: string) => Promise.resolve(state.status === 'queued' && (state.queueJobId === null || state.queueJobId === jobId)));
     await expect(claimJobStart('account.auto-sync.requisition:duplicate-run:10', 'original-job')).resolves.toBe(true);
   });
 
