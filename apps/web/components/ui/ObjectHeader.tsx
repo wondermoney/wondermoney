@@ -32,6 +32,8 @@ export interface ObjectHeaderProps {
   backHref?: string;
   backLabel?: string;
   title: ReactNode;
+  /** Institution or object mark beside the title. */
+  icon?: ReactNode;
   /** Institution, description — the line under the title. */
   subtitle?: ReactNode;
   /** Status chips, shown inline with the title. */
@@ -59,6 +61,7 @@ export function ObjectHeader({
   backHref,
   backLabel,
   title,
+  icon,
   subtitle,
   badges,
   value,
@@ -120,9 +123,16 @@ export function ObjectHeader({
               mobileActionsWithBack && "max-sm:col-span-2 max-sm:row-start-2",
             )}
           >
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
-              {title}
-            </h1>
+            <div className="flex min-w-0 items-center gap-3">
+              {icon ? (
+                <div className="shrink-0" aria-hidden="true">
+                  {icon}
+                </div>
+              ) : null}
+              <h1 className="text-foreground text-2xl font-semibold tracking-tight lg:text-3xl">
+                {title}
+              </h1>
+            </div>
             {badges}
           </div>
 

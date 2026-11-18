@@ -1630,6 +1630,7 @@
   "original-settlement-amount": "Montante de liquidação original",
   "edit-transaction-description": "Edita os dados da transação. Clica em Guardar quando terminares.",
   "linked-loan-repayment-context": "Associado a {loanName}, despesa <figure>{expense}</figure> de <figure>{total}</figure>",
+  "linked-loan-repayment-details": "Detalhes do pagamento do empréstimo",
   "is-recurrent-income": "É uma fonte de rendimento recorrente?",
   "budget-insights": "Análise do Orçamento",
   "make-budget-yours": "Torna Este Orçamento Teu",

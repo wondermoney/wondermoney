@@ -50,7 +50,6 @@ import { transactionFxView } from "@/lib/fx/fx-status";
 import { useHouseholdMembers } from "@/lib/household/useHouseholdMembers";
 import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
-import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useFormatShortDate } from "@/lib/utils/useFormatShortDate";
 import { useBreakpoint } from "@/lib/utils/useTailwindBreakpoints";
 
@@ -103,6 +102,7 @@ import {
 } from "./AccountTransactionEditSheet";
 import { LedgerDateCell, LedgerMonthLabel } from "./LedgerCells";
 import { TransactionAmount } from "./TransactionAmount";
+import { TransactionLoanRepaymentInfo } from "./TransactionLoanRepaymentInfo";
 import {
   TransactionReimbursementBadge,
   TransactionReimbursementLinksList,
@@ -212,7 +212,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       readOnlyAccountKeys = NO_READ_ONLY_ACCOUNTS,
     }) => {
       const t = useTranslations();
-      const formatCurrency = useFormatCurrency();
       const formatShortDate = useFormatShortDate();
       const splitSummaryLabel = useSplitSummaryLabel();
       const splitCategoryLabel = useSplitCategoryLabel();
@@ -587,184 +586,198 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         [t, openEditTransactionModal, openDeleteTransactionModal],
       );
 
-      // Read lazily: the page of phone rows is computed further down.
-      const mobileMonthStarts = () =>
-        new Set(
-          isLedger
-            ? mobileTransactions
-                .filter(
-                  (_, index, list) =>
-                    monthBreaks(
-                      list.map((tx) =>
-                        transactionDisplayDate(tx.transactionDate),
-                      ),
-                    )[index],
-                )
-                .map((tx) => tx.transactionKey)
-            : [],
+      const MobileTransactionsList = () => {
+        const dates = mobileTransactions.map((transaction) =>
+          transactionDisplayDate(transaction.transactionDate),
         );
+        const monthStarts = monthBreaks(dates);
+        const dayStarts = dayBreaks(dates);
+        return (
+          <div className="md:hidden">
+            <div
+              className={cn(
+                "divide-border divide-y",
+                isLedger
+                  ? "border-border border-b"
+                  : "border-border bg-card rounded-md",
+              )}
+            >
+              {mobileTransactions.length === 0 ? (
+                <div className="flex min-h-32 items-center justify-center p-4">
+                  <p className="text-muted-foreground text-sm">
+                    {t("table-empty-state")}
+                  </p>
+                </div>
+              ) : null}
+              {mobileTransactions.map((transaction, index) => {
+                const firstCategory =
+                  transaction.appuserTransactionCategories[0];
+                // A split row says so, with how many categories, instead of one category.
+                const categoryLabel = isSplitTransaction(transaction)
+                  ? splitSummaryLabel(transaction.splits ?? [])
+                  : firstCategory
+                    ? firstCategory.isSystemCategory
+                      ? t(getCategoryTranslationKey(firstCategory.name))
+                      : firstCategory.name
+                    : null;
 
-      const MobileTransactionsList = () => (
-        <div className="md:hidden">
-          <div
-            className={cn(
-              "divide-border divide-y",
-              isLedger
-                ? "border-border border-b"
-                : "border-border bg-card rounded-md",
-            )}
-          >
-            {mobileTransactions.length === 0 ? (
-              <div className="flex min-h-32 items-center justify-center p-4">
-                <p className="text-muted-foreground text-sm">
-                  {t("table-empty-state")}
-                </p>
-              </div>
-            ) : null}
-            {mobileTransactions.map((transaction) => {
-              const firstCategory = transaction.appuserTransactionCategories[0];
-              // A split row says so, with how many categories, instead of one category.
-              const categoryLabel = isSplitTransaction(transaction)
-                ? splitSummaryLabel(transaction.splits ?? [])
-                : firstCategory
-                  ? firstCategory.isSystemCategory
-                    ? t(getCategoryTranslationKey(firstCategory.name))
-                    : firstCategory.name
-                  : null;
-
-              return (
-                <div
-                  key={transaction.transactionKey}
-                  className={cn(isLedger ? "py-3" : "p-4", {
-                    "opacity-50": transaction.hidden,
-                  })}
-                >
-                  {isLedger &&
-                  mobileMonthStarts().has(transaction.transactionKey) ? (
-                    <p className="text-foreground -mt-1 mb-2 text-sm font-semibold">
-                      <LedgerMonthLabel date={transaction.transactionDate} />
-                    </p>
-                  ) : null}
-                  {/* § 9 rules 10 and 11: the row stacks several facts with
+                return (
+                  <div
+                    key={transaction.transactionKey}
+                    className={cn(isLedger ? "py-3" : "p-4", {
+                      "opacity-50": transaction.hidden,
+                    })}
+                  >
+                    {isLedger && monthStarts[index] ? (
+                      <p className="text-foreground -mt-1 mb-2 text-sm font-semibold">
+                        <LedgerMonthLabel date={transaction.transactionDate} />
+                      </p>
+                    ) : null}
+                    {/* § 9 rules 10 and 11: the row stacks several facts with
                       the figure on the primary line, rather than pushing the
                       most important fact to a third line of its own. The
                       amount was also `break-all` — which splits -€33.85 mid
                       number, the exact opposite of the never-wrap rule — and
                       hand-rolled its own sign colouring, which a transaction
                       amount does not get: it is a level, not a delta. */}
-                  <div className="space-y-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
-                        {transaction.transactionMerchantKey?.name.trim() ? (
-                          <MerchantAvatar
-                            merchant={transaction.transactionMerchantKey}
+                    <div className="flex items-start gap-3">
+                      {isLedger ? (
+                        <div className="shrink-0 pt-0.5">
+                          <LedgerDateCell
+                            date={transaction.transactionDate}
+                            isMonthStart={false}
+                            isDayStart={dayStarts[index] ?? true}
+                            className="w-8"
                           />
-                        ) : null}
-                        <p className="text-foreground min-w-0 truncate text-sm font-medium">
-                          {transaction.transactionMerchantKey?.name ??
-                            transaction.description ??
-                            "—"}
-                        </p>
-                        <InstallmentBadge
-                          installment={transaction.installment}
-                        />
-                      </div>
-                      <TransactionAmount
-                        transaction={transaction}
-                        className="shrink-0 font-mono text-sm leading-tight font-semibold"
-                      />
-                      {withRowActions && canEditRow(transaction) && (
-                        <TransactionActionsMenu
-                          transaction={transaction}
-                          triggerClassName="-mt-1 flex size-8 shrink-0 p-0"
-                        />
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
-                        {showMembers && transaction.attribution ? (
-                          <MemberBadge
-                            appuserKey={transaction.attribution.appuserKey}
-                            displayName={transaction.attribution.displayName}
+                        </div>
+                      ) : null}
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 flex-1 items-center gap-2">
+                            {!isLedger &&
+                            transaction.transactionMerchantKey?.name.trim() ? (
+                              <MerchantAvatar
+                                merchant={transaction.transactionMerchantKey}
+                              />
+                            ) : null}
+                            <p className="text-foreground min-w-0 truncate text-sm font-medium">
+                              {transaction.transactionMerchantKey?.name ??
+                                transaction.description ??
+                                "—"}
+                            </p>
+                            <InstallmentBadge
+                              installment={transaction.installment}
+                            />
+                          </div>
+                          <TransactionAmount
+                            transaction={transaction}
+                            className="shrink-0 font-mono text-sm leading-tight font-semibold"
                           />
-                        ) : null}
-                        <span className="truncate">
-                          {transaction.accountKey.accountName} ·{" "}
-                          {formatShortDate(
-                            transactionDisplayDate(transaction.transactionDate),
+                          {withRowActions && canEditRow(transaction) && (
+                            <TransactionActionsMenu
+                              transaction={transaction}
+                              triggerClassName="relative -mt-1 flex size-8 shrink-0 p-0 after:absolute after:-inset-2 after:content-['']"
+                            />
                           )}
-                        </span>
-                      </p>
-                      {categoryLabel ? (
-                        <p className="text-muted-foreground truncate text-xs">
-                          {categoryLabel}
-                        </p>
-                      ) : null}
-                      <TagChipList tags={transaction.tags} className="mt-1" />
-                      <TransactionReimbursementBadge
-                        transaction={transaction}
-                        // A 20px chip with a 44px hit area, the touch floor.
-                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
-                        onOpenLinked={(transactionKey) =>
-                          openLinkedTransaction(transaction, transactionKey)
-                        }
-                        onShowLinks={() => setInspectedTransaction(transaction)}
-                      />
-                      <TransactionSharedBadge
-                        transaction={transaction}
-                        // A 20px chip with a 44px hit area, the touch floor.
-                        className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
-                      />
-                      {isLedger && transaction.reviewed === false ? (
-                        <p className="text-warning-text text-xs font-medium">
-                          {t("transaction-review-filter")}
-                        </p>
-                      ) : null}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
+                            {showMembers && transaction.attribution ? (
+                              <MemberBadge
+                                appuserKey={transaction.attribution.appuserKey}
+                                displayName={
+                                  transaction.attribution.displayName
+                                }
+                              />
+                            ) : null}
+                            <span className="truncate">
+                              {transaction.accountKey.accountName}
+                              {!isLedger
+                                ? ` · ${formatShortDate(
+                                    transactionDisplayDate(
+                                      transaction.transactionDate,
+                                    ),
+                                  )}`
+                                : null}
+                            </span>
+                          </p>
+                          {categoryLabel ? (
+                            <p className="text-muted-foreground truncate text-xs">
+                              {categoryLabel}
+                            </p>
+                          ) : null}
+                          <TagChipList
+                            tags={transaction.tags}
+                            className="mt-1"
+                          />
+                          <TransactionReimbursementBadge
+                            transaction={transaction}
+                            // A 20px chip with a 44px hit area, the touch floor.
+                            className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                            onOpenLinked={(transactionKey) =>
+                              openLinkedTransaction(transaction, transactionKey)
+                            }
+                            onShowLinks={() =>
+                              setInspectedTransaction(transaction)
+                            }
+                          />
+                          <TransactionSharedBadge
+                            transaction={transaction}
+                            // A 20px chip with a 44px hit area, the touch floor.
+                            className="relative mt-1 after:absolute after:-inset-3 after:content-['']"
+                          />
+                          {isLedger && transaction.reviewed === false ? (
+                            <p className="text-warning-text text-xs font-medium">
+                              {t("transaction-review-filter")}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+              {withPagination && mobilePageCount > 1 ? (
+                <div className="bg-muted/50 flex items-center justify-between gap-3 p-2">
+                  <span className="text-muted-foreground px-2 text-sm">
+                    {t("page")} {safeMobilePageIndex + 1} {t("of")}{" "}
+                    {mobilePageCount}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label={t("go-to-previous-page")}
+                      disabled={safeMobilePageIndex === 0}
+                      onClick={() =>
+                        setMobilePageIndex((pageIndex) =>
+                          Math.max(0, pageIndex - 1),
+                        )
+                      }
+                    >
+                      {t("previous")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      aria-label={t("go-to-next-page")}
+                      disabled={safeMobilePageIndex >= mobilePageCount - 1}
+                      onClick={() =>
+                        setMobilePageIndex((pageIndex) =>
+                          Math.min(mobilePageCount - 1, pageIndex + 1),
+                        )
+                      }
+                    >
+                      {t("next")}
+                    </Button>
+                  </div>
                 </div>
-              );
-            })}
-            {withPagination && mobilePageCount > 1 ? (
-              <div className="bg-muted/50 flex items-center justify-between gap-3 p-2">
-                <span className="text-muted-foreground px-2 text-sm">
-                  {t("page")} {safeMobilePageIndex + 1} {t("of")}{" "}
-                  {mobilePageCount}
-                </span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label={t("go-to-previous-page")}
-                    disabled={safeMobilePageIndex === 0}
-                    onClick={() =>
-                      setMobilePageIndex((pageIndex) =>
-                        Math.max(0, pageIndex - 1),
-                      )
-                    }
-                  >
-                    {t("previous")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label={t("go-to-next-page")}
-                    disabled={safeMobilePageIndex >= mobilePageCount - 1}
-                    onClick={() =>
-                      setMobilePageIndex((pageIndex) =>
-                        Math.min(mobilePageCount - 1, pageIndex + 1),
-                      )
-                    }
-                  >
-                    {t("next")}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
-        </div>
-      );
+        );
+      };
 
       const columnHelper = useMemo(() => createColumnHelper<Transaction>(), []);
       // Memoize columns to prevent unnecessary table re-renders
@@ -1172,31 +1185,11 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
                       transaction={info.row.original}
                       className="text-foreground font-mono text-sm font-semibold whitespace-nowrap"
                     />
+                    <TransactionLoanRepaymentInfo
+                      transaction={info.row.original}
+                    />
                   </div>
                 </TooltipProvider>
-                {info.row.original.loanRepayment ? (
-                  // The cell is nowrap and right-aligned, so this sentence ran
-                  // left across the Balance column. It wraps inside its own
-                  // width now, in the body face, with only the figures in mono.
-                  <span className="text-muted-foreground max-w-56 text-right font-sans text-xs whitespace-normal">
-                    {t.rich("linked-loan-repayment-context", {
-                      figure: (chunks) => (
-                        <span className="font-mono whitespace-nowrap">
-                          {chunks}
-                        </span>
-                      ),
-                      loanName: info.row.original.loanRepayment.loanName,
-                      expense: formatCurrency(
-                        info.row.original.loanRepayment.spendingAmount,
-                        info.row.original.appuserCurrencyKey.code,
-                      ),
-                      total: formatCurrency(
-                        info.row.original.appuserSettlementAmount ?? 0,
-                        info.row.original.appuserCurrencyKey.code,
-                      ),
-                    })}
-                  </span>
-                ) : null}
                 {/* The original amount, under the converted one; a row with
                     no conversion already shows it as its figure. */}
                 {info.row.original.appuserCurrencyKey.code !==
@@ -1243,7 +1236,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         ],
         [
           columnHelper,
-          formatCurrency,
           formatShortDate,
           t,
           categories,

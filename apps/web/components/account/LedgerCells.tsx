@@ -2,6 +2,7 @@
 
 import { useLocale } from "next-intl";
 
+import { cn } from "@/lib/utils";
 import { transactionDisplayDate } from "@/lib/utils/transaction-date";
 /**
  * The ledger's date cell: the day large in the figure face, the weekday
@@ -15,10 +16,12 @@ export function LedgerDateCell({
   date,
   isMonthStart,
   isDayStart,
+  className,
 }: {
   date: string;
   isMonthStart: boolean;
   isDayStart: boolean;
+  className?: string;
 }) {
   const locale = useLocale();
   const value = transactionDisplayDate(date);
@@ -35,11 +38,17 @@ export function LedgerDateCell({
   );
 
   if (!isDayStart && !isMonthStart) {
-    return <span className="block w-12" />;
+    return <span className={cn("block w-12", className)} />;
   }
 
   return (
-    <span className="flex w-12 flex-col leading-tight">
+    <time
+      dateTime={date}
+      aria-label={new Intl.DateTimeFormat(locale, { dateStyle: "full" }).format(
+        value,
+      )}
+      className={cn("flex w-12 flex-col leading-tight", className)}
+    >
       {isMonthStart ? (
         <span className="text-foreground mb-1 text-xs font-semibold whitespace-nowrap">
           {month}
@@ -49,7 +58,7 @@ export function LedgerDateCell({
         {value.getDate()}
       </span>
       <span className="text-muted-foreground text-xs">{weekday}</span>
-    </span>
+    </time>
   );
 }
 
