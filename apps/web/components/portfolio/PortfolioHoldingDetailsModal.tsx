@@ -185,6 +185,9 @@ const PortfolioHoldingDetailsModal: React.FC<
                   <PortfolioTransactionsTable
                     transactions={filteredTransactions}
                     withTickerFilter={false}
+                    withPagination={isOpen}
+                    pageParamName="holdingTransactionsPage"
+                    pageSizeParamName="holdingTransactionsSize"
                   />
                 </>
               ) : null}

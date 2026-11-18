@@ -126,6 +126,8 @@ interface AccountTransactionTableProps {
   withAccountFilter?: boolean;
   withFilters?: boolean;
   withPagination?: boolean;
+  paginationBoundsKnown?: boolean;
+  paginationDataReady?: boolean;
   withSelectRow?: boolean;
   withMultiSelectRow?: boolean;
   withRowActions?: boolean;
@@ -196,6 +198,8 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       withAccountFilter = true,
       withFilters = true,
       withPagination = true,
+      paginationBoundsKnown = true,
+      paginationDataReady = true,
       withSelectRow = false,
       withMultiSelectRow = false,
       withRowActions = true,
@@ -1519,6 +1523,19 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
         : activeFiltersCount === 0
           ? serverTotal
           : undefined;
+      const paginationResetKey = JSON.stringify({
+        selectionFilter,
+        transactionDateRange: [
+          transactionDateRange?.from?.getTime(),
+          transactionDateRange?.to?.getTime(),
+        ],
+        accountKeysFilter,
+        transactionTypeFilter,
+        transactionCategoryKeysFilter,
+        tagKeysFilter,
+        needsReviewFilter,
+        showHiddenTransactions,
+      });
 
       /*
        * The applied filters, one per selected value.
@@ -1913,6 +1930,9 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
               columns={columnsWithSelect}
               data={filteredTransactions}
               withPagination={withPagination}
+              paginationResetKey={paginationResetKey}
+              paginationBoundsKnown={paginationBoundsKnown}
+              paginationDataReady={paginationDataReady}
               withSelectRow={withSelectRow}
               withMultiSelectRow={withMultiSelectRow}
               onRowSelectionChange={onRowSelect}

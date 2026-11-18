@@ -9,7 +9,10 @@ import { afterEach, test, vi } from "vitest";
 import messages from "../../messages/en/common.json";
 import PortfolioBreakdown from "./PortfolioBreakdown";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 vi.mock("@/components/ui/Link", () => ({
   Link: ({

@@ -48,6 +48,8 @@ interface PortfolioTransactionsTableProps {
   footerActions?: React.ReactNode;
   sticky?: boolean;
   withPagination?: boolean;
+  pageParamName?: string;
+  pageSizeParamName?: string;
 }
 
 const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
@@ -62,6 +64,8 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
       footerActions,
       sticky = true,
       withPagination = true,
+      pageParamName = "page",
+      pageSizeParamName = "size",
     }) => {
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
@@ -165,6 +169,15 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
         transactionTickerFilter,
         transactionPortfolioFilter,
       ]);
+      const paginationResetKey = JSON.stringify({
+        transactionTypeFilter,
+        transactionTickerFilter,
+        transactionPortfolioFilter,
+        transactionDateRange: [
+          transactionDateRange?.from?.getTime(),
+          transactionDateRange?.to?.getTime(),
+        ],
+      });
 
       const onTransactionTypeFilterChange = useCallback(
         (transactionTypes: string[]) => {
@@ -664,6 +677,9 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
             columns={columns}
             data={filteredTransactions}
             withPagination={withPagination}
+            pageParamName={pageParamName}
+            pageSizeParamName={pageSizeParamName}
+            paginationResetKey={paginationResetKey}
             withScrollAffordance
             sticky={sticky}
             footerActions={footerActions}
