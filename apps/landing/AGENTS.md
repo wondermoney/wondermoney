@@ -78,6 +78,10 @@ src/pages/index.astro         # Root redirect only
   locales are 301s in `vercel.json`; `src/lib/routes.test.ts` fails on a second copy or a missing
   redirect.
 - Paid-traffic landing pages under `/{locale}/go/` are `noindex,follow` and kept out of the sitemap.
+- Older slugs of top-level, feature and tool pages live in `src/lib/legacySlugs.ts`. Each is
+  prerendered as a page that redirects to the localized slug, and the sitemap filter
+  (`src/lib/sitemap.ts`) leaves it out. `pnpm build` ends with `scripts/check-sitemap.mjs`,
+  which fails when the sitemap lists a redirect page.
 - Verify generated URLs for all six locales, not only the default route.
 
 ## ANTI-PATTERNS

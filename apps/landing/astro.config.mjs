@@ -6,6 +6,7 @@ import sitemap from "@astrojs/sitemap";
 import sanity from "@sanity/astro";
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
+import { isSitemapPage } from "./src/lib/sitemap.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const defaultLocale = "pt";
@@ -48,9 +49,8 @@ export default defineConfig({
         defaultLocale: "pt",
       },
       // filter: filterSitemapByDefaultLocale({ defaultLocale }),
-      // Paid-traffic ad landing pages are noindex,follow and must
-      // never compete for organic rankings — keep them out of the sitemap too.
-      filter: (page) => !/\/go\//.test(page),
+      // Leaves out the noindex ad landing pages and the legacy-slug redirect pages.
+      filter: isSitemapPage,
     }),
   ],
   vite: {

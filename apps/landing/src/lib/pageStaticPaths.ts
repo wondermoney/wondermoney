@@ -10,6 +10,12 @@ import {
   type Lang,
   toLang,
 } from "./routes";
+import {
+  LEGACY_FEATURE_SLUG_BY_ROUTE_ID,
+  LEGACY_TOOL_SLUG_BY_ROUTE_ID,
+  LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID,
+  getLegacySlug,
+} from "./legacySlugs";
 
 type TopLevelRouteId = (typeof TOP_LEVEL_PAGE_ROUTE_IDS)[number];
 type FeatureRouteId = (typeof FEATURE_ROUTE_IDS)[number];
@@ -123,38 +129,6 @@ type MonthlyContent = {
   body?: ReadonlyArray<unknown>;
 };
 
-const LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID: Partial<Record<TopLevelRouteId, string>> = {
-  pageAbout: "about",
-  pageEtfTracker: "etf-tracker",
-  pagePortfolioTracker: "portfolio-tracker",
-  pageNetWorthTracker: "net-worth-tracker",
-  pageYnabAlternative: "ynab-alternative",
-  pageFireCalculator: "fire-calculator",
-};
-
-const LEGACY_FEATURE_SLUG_BY_ROUTE_ID: Record<FeatureRouteId, string> = {
-  featureAccounts: "accounts",
-  featureBudgeting: "budgeting",
-  featureCategorization: "categorization",
-  featureCredits: "loans",
-  featureFinancialMarkets: "financial-markets",
-  featureGoals: "goals",
-  featureNetWorth: "net-worth",
-  featurePrivacy: "privacy",
-  featurePortfolio: "portfolio",
-  featureReports: "reports",
-};
-
-// Only tools that once lived at an English slug have one; new tools start at
-// their localized slug and need no redirect page.
-const LEGACY_TOOL_SLUG_BY_ROUTE_ID: Partial<Record<ToolRouteId, string>> = {
-  toolCompoundInterest: "compound-interest-calculator",
-  toolNetWorth: "net-worth-calculator",
-  toolSavingsRate: "savings-rate-calculator",
-  toolInvestmentReturn: "investment-return-calculator",
-  toolMortgage: "mortgage-calculator",
-};
-
 function withLegacyAlias<TParam extends string>(
   paramName: TParam,
   slug: string,
@@ -186,7 +160,7 @@ export function getTopLevelPageStaticPaths(locale: Lang) {
     withLegacyAlias(
       "page",
       getLocalizedSlug(routeId, locale),
-      LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID[routeId],
+      getLegacySlug(LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID, routeId, locale),
       routeId,
     ),
   );
@@ -197,7 +171,7 @@ export function getFeatureStaticPaths(locale: Lang) {
     withLegacyAlias(
       "feature",
       getLocalizedSlug(routeId, locale),
-      LEGACY_FEATURE_SLUG_BY_ROUTE_ID[routeId],
+      getLegacySlug(LEGACY_FEATURE_SLUG_BY_ROUTE_ID, routeId, locale),
       routeId,
     ),
   );
@@ -208,7 +182,7 @@ export function getToolStaticPaths(locale: Lang) {
     withLegacyAlias(
       "tool",
       getLocalizedSlug(routeId, locale),
-      LEGACY_TOOL_SLUG_BY_ROUTE_ID[routeId],
+      getLegacySlug(LEGACY_TOOL_SLUG_BY_ROUTE_ID, routeId, locale),
       routeId,
     ),
   );
