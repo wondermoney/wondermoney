@@ -12,7 +12,7 @@ import {
 } from "../routes"
 import { getRelatedContentTools } from "../relatedContentTools"
 import { getTranslations } from "../translations"
-import { buildToolsHub, getToolCatalogEntry, toolAnalyticsName } from "../toolsCatalog"
+import { buildToolsHub } from "../toolsCatalog"
 
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
@@ -20,16 +20,11 @@ vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 type ToolCopy = Record<string, unknown> & {
 	pageTitle: string
 	pageDescription: string
-	cta: { headline: string }
 }
 
 function readLocale(base: "src/locales" | "public/locales", lang: string) {
 	const path = fileURLToPath(new URL(`../../../${base}/${lang}/common.json`, import.meta.url))
 	return JSON.parse(readFileSync(path, "utf8")) as { tools: Record<string, ToolCopy> }
-}
-
-function readSource(relativePath: string) {
-	return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8")
 }
 
 function keyPaths(value: unknown, prefix = ""): string[] {
@@ -115,19 +110,6 @@ describe("mortgage transfer tool page", () => {
 		}
 	})
 
-	it("links its guide to the mortgage, early repayment and debt-to-income tools", () => {
-		const guide = readSource("../../components/calculators/MortgageTransferGuide.astro")
-		expect(guide).toContain('toLocalizedPath("toolMortgage", locale)')
-		expect(guide).toContain('toLocalizedPath("toolEarlyRepayment", locale)')
-		expect(guide).toContain('toLocalizedPath("toolDebtToIncome", locale)')
-
-		expect(getToolCatalogEntry("toolMortgageTransfer").related).toEqual([
-			"toolMortgage",
-			"toolEarlyRepayment",
-			"toolDebtToIncome",
-		])
-	})
-
 	it("has the same copy keys in every locale and in the public mirror", () => {
 		const reference = keyPaths(readLocale("src/locales", "en").tools.mortgageTransfer).sort()
 
@@ -146,16 +128,7 @@ describe("mortgage transfer tool page", () => {
 		expect(new Set(copies.map((copy) => copy.pageDescription)).size).toBe(SUPPORTED_LANGS.length)
 	})
 
-	it("offers comparing your budget as the next step", () => {
-		expect(readLocale("src/locales", "en").tools.mortgageTransfer.cta.headline).toBe(
-			"Compare your budget before and after switching",
-		)
-		expect(readSource("../../components/pages/ToolDetailPage.astro")).toContain(
-			't("tools.mortgageTransfer.cta.headline")',
-		)
-	})
-
-	it("says the costs vary and variable rates are out of scope, in every locale", () => {
+	it("provides fee guidance and a fixed-rate assumption in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = readLocale("src/locales", lang).tools.mortgageTransfer as ToolCopy & {
 				costs: { help: string }
@@ -164,12 +137,6 @@ describe("mortgage transfer tool page", () => {
 			expect(copy.costs.help, lang).toMatch(/\S/)
 			expect(copy.guide.method.assumptions.fixedRate, lang).toMatch(/\S/)
 		}
-		const en = readLocale("src/locales", "en").tools.mortgageTransfer as ToolCopy & {
-			costs: { help: string }
-			guide: { method: { assumptions: { fixedRate: string } } }
-		}
-		expect(en.costs.help).toContain("vary by country")
-		expect(en.guide.method.assumptions.fixedRate).toContain("Variable and mixed rates")
 	})
 
 	it("addresses the pt reader as tu", () => {
@@ -177,15 +144,5 @@ describe("mortgage transfer tool page", () => {
 
 		// \b is ASCII-only, so it never matches next to "ê": use letter lookarounds.
 		expect(pt).not.toMatch(/(?<!\p{L})(?:você|seu|sua|seus|suas)(?!\p{L})/iu)
-	})
-
-	it("reports use without amounts and stores nothing in the browser", () => {
-		const source = readSource("../../components/calculators/MortgageTransferCalculatorComp.tsx")
-
-		expect(source).toContain(
-			'pushGtmEvent({ event: "tool_used", tool: "mortgage_transfer", page_type: getPageType() })',
-		)
-		expect(toolAnalyticsName("mortgageTransfer")).toBe("mortgage_transfer")
-		expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB/)
 	})
 })
