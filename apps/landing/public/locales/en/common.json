@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Personal finance resources | WonderMoney",
+    "metaDescription": "Find personal finance guides, a glossary, monthly updates and calculators for budgeting and building an emergency fund.",
+    "title": "Personal finance resources",
+    "intro": "Find your next practical step, from looking up a term to putting together a budget.",
+    "links": {
+      "guides": {
+        "title": "Personal finance guides",
+        "description": "Read step-by-step explanations of budgeting, saving and investing."
+      },
+      "glossary": {
+        "title": "Financial glossary",
+        "description": "Look up unfamiliar terms you come across while reading about money."
+      },
+      "monthly": {
+        "title": "Monthly updates",
+        "description": "See what changed in key indicators and how they are measured."
+      },
+      "household_budget": {
+        "title": "Household budget calculator",
+        "description": "Compare household income with expenses to see what is left each month."
+      },
+      "emergency_fund": {
+        "title": "Emergency fund calculator",
+        "description": "Estimate how much to set aside to cover several months of essential expenses."
+      },
+      "tools": {
+        "title": "All calculators",
+        "description": "Browse tools for budgeting, borrowing and investing."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Learn — Personal Finance Guides — WonderMoney",

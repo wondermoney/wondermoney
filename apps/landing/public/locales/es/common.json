@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Recursos de educación financiera | WonderMoney",
+    "metaDescription": "Encuentra guías de finanzas personales, un glosario, novedades mensuales y calculadoras de presupuesto y fondo de emergencia.",
+    "title": "Recursos de educación financiera",
+    "intro": "Encuentra tu próximo paso, desde aclarar un término hasta preparar un presupuesto.",
+    "links": {
+      "guides": {
+        "title": "Guías de finanzas personales",
+        "description": "Aprende paso a paso a hacer un presupuesto, ahorrar e invertir."
+      },
+      "glossary": {
+        "title": "Glosario financiero",
+        "description": "Consulta los términos que no conozcas cuando leas sobre finanzas."
+      },
+      "monthly": {
+        "title": "Novedades mensuales",
+        "description": "Descubre qué ha cambiado en los principales indicadores y cómo se calculan."
+      },
+      "household_budget": {
+        "title": "Calculadora de presupuesto familiar",
+        "description": "Compara los ingresos y gastos de tu hogar para saber cuánto te queda al mes."
+      },
+      "emergency_fund": {
+        "title": "Calculadora de fondo de emergencia",
+        "description": "Estima cuánto separar para cubrir varios meses de gastos esenciales."
+      },
+      "tools": {
+        "title": "Todas las calculadoras",
+        "description": "Explora herramientas para hacer presupuestos, evaluar préstamos e invertir."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Aprender — Guías de finanzas personales — WonderMoney",

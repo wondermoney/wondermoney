@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Ressources en finances personnelles | WonderMoney",
+    "metaDescription": "Retrouvez des guides, un glossaire financier, des bilans mensuels et des calculateurs pour votre budget et votre épargne de précaution.",
+    "title": "Ressources en finances personnelles",
+    "intro": "Trouvez la ressource qui vous aidera à comprendre un terme ou à préparer votre budget.",
+    "links": {
+      "guides": {
+        "title": "Guides de finances personnelles",
+        "description": "Apprenez à établir un budget, à épargner et à investir, étape par étape."
+      },
+      "glossary": {
+        "title": "Glossaire financier",
+        "description": "Retrouvez la définition des termes que vous rencontrez en lisant sur les finances."
+      },
+      "monthly": {
+        "title": "Bilans mensuels",
+        "description": "Découvrez comment les principaux indicateurs ont évolué et comment ils sont calculés."
+      },
+      "household_budget": {
+        "title": "Calculateur de budget familial",
+        "description": "Comparez les revenus et les dépenses de votre foyer pour savoir ce qui reste chaque mois."
+      },
+      "emergency_fund": {
+        "title": "Calculateur d’épargne de précaution",
+        "description": "Estimez la somme à mettre de côté pour couvrir plusieurs mois de dépenses essentielles."
+      },
+      "tools": {
+        "title": "Tous les calculateurs",
+        "description": "Explorez les outils pour gérer un budget, évaluer un crédit ou investir."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Apprendre — Guides de finances personnelles — WonderMoney",

@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Risorse per la finanza personale | WonderMoney",
+    "metaDescription": "Trova guide di finanza personale, un glossario, aggiornamenti mensili e calcolatori per il bilancio familiare e il fondo di emergenza.",
+    "title": "Risorse per la finanza personale",
+    "intro": "Trova il tuo prossimo passo, dal chiarire un termine al preparare un bilancio.",
+    "links": {
+      "guides": {
+        "title": "Guide di finanza personale",
+        "description": "Impara passo dopo passo a fare un bilancio, risparmiare e investire."
+      },
+      "glossary": {
+        "title": "Glossario finanziario",
+        "description": "Cerca i termini che non conosci quando leggi di finanza."
+      },
+      "monthly": {
+        "title": "Aggiornamenti mensili",
+        "description": "Scopri come sono cambiati gli indicatori principali e come si calcolano."
+      },
+      "household_budget": {
+        "title": "Calcolatore del bilancio familiare",
+        "description": "Confronta le entrate e le spese di casa per capire quanto resta ogni mese."
+      },
+      "emergency_fund": {
+        "title": "Calcolatore del fondo di emergenza",
+        "description": "Stima quanto mettere da parte per coprire diversi mesi di spese essenziali."
+      },
+      "tools": {
+        "title": "Tutti i calcolatori",
+        "description": "Esplora gli strumenti per il bilancio, i prestiti e gli investimenti."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Impara — Guide alla finanza personale — WonderMoney",

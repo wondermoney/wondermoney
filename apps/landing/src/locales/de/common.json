@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Ressourcen für deine Finanzen | WonderMoney",
+    "metaDescription": "Entdecke Finanzratgeber, ein Glossar, monatliche Berichte und Rechner für dein Haushaltsbudget und deinen Notgroschen.",
+    "title": "Ressourcen für deine Finanzen",
+    "intro": "Finde deinen nächsten Schritt, von der Begriffserklärung bis zum eigenen Haushaltsbudget.",
+    "links": {
+      "guides": {
+        "title": "Ratgeber für deine Finanzen",
+        "description": "Lerne Schritt für Schritt, wie du ein Budget erstellst, sparst und investierst."
+      },
+      "glossary": {
+        "title": "Finanzglossar",
+        "description": "Schlage unbekannte Begriffe nach, die dir beim Lesen über Finanzen begegnen."
+      },
+      "monthly": {
+        "title": "Monatliche Berichte",
+        "description": "Erfahre, wie sich wichtige Kennzahlen verändert haben und wie sie berechnet werden."
+      },
+      "household_budget": {
+        "title": "Haushaltsbudget-Rechner",
+        "description": "Vergleiche Einnahmen und Ausgaben deines Haushalts und sieh, wie viel im Monat übrig bleibt."
+      },
+      "emergency_fund": {
+        "title": "Notgroschen-Rechner",
+        "description": "Schätze, wie viel du für mehrere Monate notwendiger Ausgaben zurücklegen solltest."
+      },
+      "tools": {
+        "title": "Alle Rechner",
+        "description": "Entdecke Rechner für Budgetplanung, Kredite und Geldanlage."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Lernen — Ratgeber zur persönlichen Finanzplanung — WonderMoney",

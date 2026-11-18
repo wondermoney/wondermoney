@@ -56,7 +56,10 @@ export default function Footer({ className, locale }: Props) {
       name: t(nameKey),
       href: toLocalizedPath(routeId, locale),
     })),
-    resources: [{ name: t("footer.tools"), href: toToolsHubPath(locale) }],
+    resources: [
+      { name: t("footer.resources"), href: toLocalizedPath("pageResources", locale) },
+      { name: t("footer.tools"), href: toToolsHubPath(locale) },
+    ],
     support: [
       {
         name: t("footer.faq"),

@@ -2199,6 +2199,38 @@
       }
     }
   },
+  "resources": {
+    "metaTitle": "Recursos de literacia financeira | WonderMoney",
+    "metaDescription": "Encontra guias de finanças pessoais, um glossário, atualizações mensais e calculadoras para o orçamento e o fundo de emergência.",
+    "title": "Recursos de literacia financeira",
+    "intro": "Encontra o teu próximo passo, desde esclarecer um termo até preparar um orçamento.",
+    "links": {
+      "guides": {
+        "title": "Guias de finanças pessoais",
+        "description": "Aprende passo a passo a fazer um orçamento, a poupar e a investir."
+      },
+      "glossary": {
+        "title": "Glossário financeiro",
+        "description": "Consulta os termos que não conheces quando lês sobre finanças."
+      },
+      "monthly": {
+        "title": "Atualizações mensais",
+        "description": "Vê o que mudou nos principais indicadores e como são calculados."
+      },
+      "household_budget": {
+        "title": "Calculadora de orçamento familiar",
+        "description": "Compara os rendimentos com as despesas da família para veres quanto sobra por mês."
+      },
+      "emergency_fund": {
+        "title": "Calculadora de fundo de emergência",
+        "description": "Estima quanto precisas de pôr de lado para cobrir vários meses de despesas essenciais."
+      },
+      "tools": {
+        "title": "Todas as calculadoras",
+        "description": "Explora as ferramentas para fazer orçamentos, avaliar empréstimos e investir."
+      }
+    }
+  },
   "learn": {
     "hub": {
       "pageTitle": "Aprende — guias de finanças pessoais — WonderMoney",

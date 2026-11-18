@@ -7,6 +7,14 @@ import {
 type LocalizedSlugByLang = Record<Lang, string>
 
 const ROUTE_SLUGS = {
+	pageResources: {
+		pt: "recursos",
+		en: "resources",
+		es: "recursos",
+		fr: "ressources",
+		de: "ressourcen",
+		it: "risorse",
+	},
 	pagePricing: {
 		pt: "precos",
 		en: "pricing",
@@ -401,6 +409,7 @@ export type StandalonePageRouteId = (typeof STANDALONE_PAGE_ROUTE_IDS)[number]
 // Other top-level pages with their own route file in each locale tree, such as
 // the lead-magnet guide. Listed so the language switcher maps their slugs too.
 const OTHER_TOP_LEVEL_ROUTE_IDS = [
+	"pageResources",
 	"guideMoneyCheckin",
 ] as const satisfies ReadonlyArray<RouteId>
 
