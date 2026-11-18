@@ -632,6 +632,86 @@
       "pageDescription": "Calculatrice de taux d'épargne gratuite. Découvrez quel pourcentage de vos revenus vous épargnez chaque mois. Comparez avec la règle 50/30/20 et les références du mouvement FIRE.",
       "subtitle": "Découvrez quel pourcentage de vos revenus vous épargnez chaque mois. Votre taux d'épargne est l'un des chiffres les plus importants en finances personnelles — il détermine à quelle vitesse vous accumulez de la richesse."
     },
+    "investorProfile": {
+      "title": "Test de profil investisseur",
+      "shortName": "Profil investisseur",
+      "description": "Réfléchissez à votre capacité financière à supporter des pertes et à votre aisance face au risque.",
+      "pageTitle": "Test de profil investisseur | WonderMoney",
+      "pageDescription": "Répondez à six questions sur votre horizon, votre marge financière et votre réaction aux pertes. Découvrez le barème du test de profil investisseur.",
+      "subtitle": "Choisissez un objectif d’investissement. Répondez à six questions pour comparer votre capacité à supporter des pertes et votre aisance face au risque.",
+      "progress": "Question {{step}} sur {{total}}",
+      "next": "Continuer",
+      "back": "Retour",
+      "finish": "Voir mon résultat",
+      "review": "Revoir les réponses",
+      "required": "Choisissez une réponse pour continuer.",
+      "javascript": "Activez JavaScript pour faire le test.",
+      "capacityLabel": "Capacité financière",
+      "comfortLabel": "Aisance face au risque",
+      "methodHeading": "Comment le test calcule votre résultat",
+      "dimensions": "Les trois premières réponses décrivent votre capacité financière : quand vous aurez besoin de l’argent, la souplesse de cette échéance et l’existence d’une réserve séparée. Les trois autres reflètent votre aisance face au risque : votre réaction à une baisse, votre ressenti face aux fluctuations et votre préférence entre stabilité et potentiel de croissance.",
+      "method": "Chaque réponse vaut 0, 1 ou 2 points selon l’ordre affiché. Chaque groupe totalise de 0 à 6 points. Le plus faible des deux scores détermine le résultat : de 0 à 2, le niveau est faible, de 3 à 4, il est modéré et de 5 à 6, il est élevé.",
+      "exampleHeading": "Exemple",
+      "example": "Si les trois premières réponses valent 0, 1 et 1, la capacité financière atteint 2 sur 6. Si les trois autres valent chacune 2 points, l’aisance atteint 6 sur 6. Le niveau est faible, car le score de capacité est le plus bas.",
+      "assumptionsHeading": "Hypothèses et limites",
+      "limitations": "Le test repose sur des situations hypothétiques et sur vos estimations pour un seul objectif. Vos réponses peuvent évoluer avec vos finances ou votre objectif. Le barème est une règle pédagogique qui n’a pas été validée comme évaluation d’adéquation. Ce test ne fournit aucun conseil en investissement.",
+      "source": "Tolérance au risque (Investor.gov, en anglais)",
+      "nextStepHeadline": "Découvrez la place du risque dans votre vue d’ensemble des investissements",
+      "nextStepDescription": "Voyez comment WonderMoney réunit vos investissements et leur performance.",
+      "nextStepCta": "Explorer la vue d’ensemble du portefeuille",
+      "results": {
+        "lower": {
+          "title": "Niveau de risque faible",
+          "description": "Au moins un des scores est faible pour cet objectif. Comparez-les pour voir si la limite tient à vos finances, à votre aisance face aux pertes ou aux deux."
+        },
+        "middle": {
+          "title": "Niveau de risque modéré",
+          "description": "Le plus bas des scores se situe dans la tranche intermédiaire. Comparez votre marge financière à votre réaction probable en cas de baisse."
+        },
+        "higher": {
+          "title": "Niveau de risque élevé",
+          "description": "Les deux scores sont élevés pour cet objectif d’après vos réponses. Les pertes peuvent toutefois être plus importantes ou durer plus longtemps que dans les scénarios."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "Quand pensez-vous avoir besoin de la majeure partie de cet argent ?",
+          "choice0": "Dans moins de 3 ans",
+          "choice1": "Dans 3 à 7 ans",
+          "choice2": "Dans plus de 7 ans"
+        },
+        "flexibility": {
+          "prompt": "Si la valeur baissait peu avant cette échéance, pourriez-vous attendre pour utiliser l’argent ?",
+          "choice0": "Non, l’échéance est fixe",
+          "choice1": "Oui, de quelques mois",
+          "choice2": "Oui, d’un an ou plus"
+        },
+        "cashBuffer": {
+          "prompt": "Pourriez-vous faire face à une dépense essentielle imprévue sans puiser dans l’argent prévu pour cet objectif ?",
+          "choice0": "Probablement pas",
+          "choice1": "Je pourrais en couvrir une partie",
+          "choice2": "Je pourrais la couvrir avec une réserve séparée"
+        },
+        "drop": {
+          "prompt": "Imaginez que votre investissement perde 20 % en quelques mois. Quel serait votre premier réflexe ?",
+          "choice0": "En vendre la majeure partie ou la totalité",
+          "choice1": "Réduire le montant investi",
+          "choice2": "Revoir mon plan avant de décider si je change quelque chose"
+        },
+        "fluctuations": {
+          "prompt": "Comment vous sentiriez-vous si la valeur montait et baissait fortement pendant plusieurs années ?",
+          "choice0": "J’aurais du mal à suivre mon plan",
+          "choice1": "Je pourrais l’accepter, mais cela m’inquiéterait",
+          "choice2": "Je pourrais vivre avec ces fluctuations"
+        },
+        "tradeoff": {
+          "prompt": "Quel compromis vous convient le mieux pour cet objectif ?",
+          "choice0": "Plus de stabilité, même avec un potentiel de croissance moindre",
+          "choice1": "Un équilibre entre stabilité et potentiel de croissance",
+          "choice2": "Plus de potentiel de croissance, même avec des pertes possibles plus importantes"
+        }
+      }
+    },
     "investmentReturn": {
       "title": "Rendement et projection d’un placement indiciel",
       "shortName": "Rendement d'investissement",

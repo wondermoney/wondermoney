@@ -632,6 +632,86 @@
       "pageDescription": "Free savings rate calculator. Find out what percentage of your income you save each month. Compare against the 50/30/20 rule and FIRE movement benchmarks.",
       "subtitle": "Find out what percentage of your income you are saving each month. Your savings rate is one of the most important numbers in personal finance — it determines how fast you build wealth."
     },
+    "investorProfile": {
+      "title": "Investor profile quiz",
+      "shortName": "Investor profile",
+      "description": "Reflect on how much financial risk you could absorb and how comfortable you are with investment losses.",
+      "pageTitle": "Investor profile quiz | WonderMoney",
+      "pageDescription": "Answer six questions about your time horizon, financial flexibility and reaction to losses. See how the investor profile quiz scores your answers.",
+      "subtitle": "Pick one investment goal. Answer six questions to compare your financial capacity for risk with your comfort with losses.",
+      "progress": "Question {{step}} of {{total}}",
+      "next": "Continue",
+      "back": "Back",
+      "finish": "See my result",
+      "review": "Review answers",
+      "required": "Choose an answer to continue.",
+      "javascript": "Enable JavaScript to take the quiz.",
+      "capacityLabel": "Financial capacity",
+      "comfortLabel": "Comfort with risk",
+      "methodHeading": "How the quiz scores your answers",
+      "dimensions": "The first three answers describe your financial capacity: when you need the money, how flexible that date is and whether you have a separate cash buffer. The other three describe your comfort with risk: your reaction to a drop, how you feel about fluctuations and your preference between stability and growth potential.",
+      "method": "Each answer earns 0, 1 or 2 points in the order shown. Each group adds up to 0–6 points. The lower of the two scores sets your result: 0–2 is lower, 3–4 is moderate and 5–6 is higher.",
+      "exampleHeading": "Worked example",
+      "example": "If your first three answers score 0, 1 and 1, your capacity is 2 out of 6. If the other three score 2 each, your comfort is 6 out of 6. The result is the lower band because capacity is the smaller score.",
+      "assumptionsHeading": "Assumptions and limits",
+      "limitations": "The quiz uses hypothetical scenarios and your own estimates for one goal. Your answers may change with your finances or the goal. The scoring is a teaching heuristic and has not been validated as a suitability assessment. It provides no investment advice.",
+      "source": "Risk tolerance (Investor.gov, in English)",
+      "nextStepHeadline": "Learn how risk fits your investment overview",
+      "nextStepDescription": "See how WonderMoney brings your investments and their performance together.",
+      "nextStepCta": "Explore the portfolio overview",
+      "results": {
+        "lower": {
+          "title": "Lower risk band",
+          "description": "At least one score is low for this goal. Compare the two scores to see whether your finances, your comfort with losses, or both are the limiting factor."
+        },
+        "middle": {
+          "title": "Moderate risk band",
+          "description": "The lower of your two scores is in the middle range. Compare your financial flexibility with how you expect to feel during a decline."
+        },
+        "higher": {
+          "title": "Higher risk band",
+          "description": "Both scores are high for this goal based on your answers. Even then, losses can be larger or last longer than the scenarios suggest."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "When do you expect to need most of this money?",
+          "choice0": "In less than 3 years",
+          "choice1": "In 3 to 7 years",
+          "choice2": "In more than 7 years"
+        },
+        "flexibility": {
+          "prompt": "If the value fell shortly before you needed the money, could you delay using it?",
+          "choice0": "No, the date is fixed",
+          "choice1": "Yes, by a few months",
+          "choice2": "Yes, by a year or more"
+        },
+        "cashBuffer": {
+          "prompt": "Could you cover an unexpected essential expense without using the money for this goal?",
+          "choice0": "Probably not",
+          "choice1": "I could cover part of it",
+          "choice2": "I could cover it with a separate cash buffer"
+        },
+        "drop": {
+          "prompt": "Imagine your investment fell 20% in a few months. What would your first instinct be?",
+          "choice0": "Sell most or all of it",
+          "choice1": "Reduce how much I have invested",
+          "choice2": "Revisit my plan before deciding whether to change anything"
+        },
+        "fluctuations": {
+          "prompt": "How would you feel if the value rose and fell sharply over several years?",
+          "choice0": "I would find it hard to stick to my plan",
+          "choice1": "I could accept it, but it would worry me",
+          "choice2": "I could live with those swings"
+        },
+        "tradeoff": {
+          "prompt": "Which trade-off feels most comfortable for this goal?",
+          "choice0": "More stability, even with less growth potential",
+          "choice1": "A balance between stability and growth potential",
+          "choice2": "More growth potential, even with larger possible losses"
+        }
+      }
+    },
     "investmentReturn": {
       "title": "Investment return and index projection",
       "shortName": "Investment return",

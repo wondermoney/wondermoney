@@ -6,6 +6,8 @@ import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuid
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
 import IndexProjectionCalculator from "@/components/calculators/IndexProjectionCalculator";
+import InvestorProfileQuiz from "@/components/calculators/InvestorProfileQuiz";
+import InvestorProfileGuide from "@/components/calculators/InvestorProfileGuide.astro";
 import IndexProjectionGuide from "@/components/calculators/IndexProjectionGuide.astro";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
 import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
@@ -52,7 +54,7 @@ const { key, related } = getToolCatalogEntry(routeId);
 
 // Tools whose closing call to action names their own next step in the app.
 const nextStepCtaByRouteId: Partial<
-  Record<ToolRouteId, { headline: string; description: string; ctaText?: string }>
+  Record<ToolRouteId, { headline: string; description: string; ctaText?: string; ctaHref?: string }>
 > = {
   toolCompoundInterest: {
     headline: t("tools.compoundInterest.nextStepHeadline"),
@@ -106,6 +108,12 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.investmentReturn.projection.ctaHeadline"),
     description: t("tools.investmentReturn.projection.ctaDescription"),
     ctaText: t("tools.investmentReturn.projection.ctaText"),
+  },
+  toolInvestorProfile: {
+    headline: t("tools.investorProfile.nextStepHeadline"),
+    description: t("tools.investorProfile.nextStepDescription"),
+    ctaText: t("tools.investorProfile.nextStepCta"),
+    ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
   toolRateRevision: {
     headline: t("tools.rateRevision.nextStepHeadline"),
@@ -188,6 +196,7 @@ const schema = {
         <IndexProjectionGuide locale={locale} />
       </>
     )}
+    {routeId === "toolInvestorProfile" && <InvestorProfileQuiz locale={locale} client:load />}
     {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
     {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
     {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
@@ -207,6 +216,7 @@ const schema = {
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
+  {routeId === "toolInvestorProfile" && <InvestorProfileGuide locale={locale} />}
   {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
   {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
   {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}

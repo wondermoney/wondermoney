@@ -232,6 +232,14 @@ const ROUTE_SLUGS = {
 		de: "anlagerendite-rechner",
 		it: "rendimento-investimento",
 	},
+	toolInvestorProfile: {
+		pt: "perfil-investidor",
+		en: "investor-profile-quiz",
+		es: "perfil-inversor",
+		fr: "profil-investisseur",
+		de: "anlegerprofil-test",
+		it: "profilo-investitore",
+	},
 	toolDebtToIncome: {
 		pt: "taxa-de-esforco",
 		en: "debt-to-income-calculator",
@@ -431,6 +439,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolNetWorth",
 	"toolSavingsRate",
 	"toolInvestmentReturn",
+	"toolInvestorProfile",
 	"toolDebtToIncome",
 	"toolEmergencyFund",
 	"toolMortgage",

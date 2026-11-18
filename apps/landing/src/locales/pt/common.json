@@ -632,6 +632,86 @@
       "pageDescription": "Calculadora de taxa de poupança gratuita. Descobre que percentagem do teu rendimento poupas cada mês. Compara com a regra 50/30/20 e os objetivos do movimento FIRE.",
       "subtitle": "Descobre que percentagem do teu rendimento estás a poupar cada mês. A tua taxa de poupança é um dos números mais importantes nas finanças pessoais — determina a rapidez com que constróis riqueza."
     },
+    "investorProfile": {
+      "title": "Teste de perfil de investidor",
+      "shortName": "Perfil de investidor",
+      "description": "Reflete sobre a tua capacidade financeira para suportar perdas e sobre o teu conforto com o risco.",
+      "pageTitle": "Teste de perfil de investidor | WonderMoney",
+      "pageDescription": "Responde a seis perguntas sobre o teu horizonte, a tua margem financeira e a tua reação a perdas. Descobre como o teste de perfil de investidor pontua as respostas.",
+      "subtitle": "Escolhe um objetivo de investimento. Responde a seis perguntas para comparares a tua capacidade financeira para suportar perdas com o teu conforto perante o risco.",
+      "progress": "Pergunta {{step}} de {{total}}",
+      "next": "Continuar",
+      "back": "Voltar",
+      "finish": "Ver o meu resultado",
+      "review": "Rever respostas",
+      "required": "Escolhe uma resposta para continuares.",
+      "javascript": "Ativa o JavaScript para fazeres o teste.",
+      "capacityLabel": "Capacidade financeira",
+      "comfortLabel": "Conforto com o risco",
+      "methodHeading": "Como são pontuadas as tuas respostas",
+      "dimensions": "As primeiras três respostas descrevem a tua capacidade financeira: quando precisas do dinheiro, a flexibilidade dessa data e se tens uma reserva à parte. As restantes refletem o teu conforto com o risco: a reação a uma queda, como encaras as oscilações e o que preferes entre estabilidade e potencial de crescimento.",
+      "method": "Cada resposta vale 0, 1 ou 2 pontos pela ordem apresentada. Cada grupo soma entre 0 e 6 pontos. A menor das duas pontuações determina o resultado: 0 a 2 corresponde a um nível baixo, 3 a 4 a um nível moderado e 5 a 6 a um nível elevado.",
+      "exampleHeading": "Exemplo",
+      "example": "Se as primeiras três respostas valerem 0, 1 e 1, a capacidade soma 2 pontos em 6. Se as outras três valerem 2 pontos cada, o conforto soma 6 em 6. O nível é baixo porque a pontuação da capacidade é a menor.",
+      "assumptionsHeading": "Pressupostos e limites",
+      "limitations": "O teste usa cenários hipotéticos e as tuas estimativas para um único objetivo. As tuas respostas podem mudar com as tuas finanças ou com o objetivo. A pontuação é uma regra didática sem validação como avaliação de adequação. O teste não constitui aconselhamento de investimento.",
+      "source": "Tolerância ao risco (Investor.gov, em inglês)",
+      "nextStepHeadline": "Descobre como o risco se enquadra na visão geral dos teus investimentos",
+      "nextStepDescription": "Vê como o WonderMoney reúne os teus investimentos e o respetivo desempenho.",
+      "nextStepCta": "Explorar a visão geral da carteira",
+      "results": {
+        "lower": {
+          "title": "Nível de risco baixo",
+          "description": "Pelo menos uma das pontuações é baixa para este objetivo. Compara-as para perceberes se o limite está na tua capacidade financeira, no teu conforto com perdas ou em ambos."
+        },
+        "middle": {
+          "title": "Nível de risco moderado",
+          "description": "A menor pontuação está no intervalo intermédio. Compara a tua margem financeira com a forma como esperas reagir numa queda."
+        },
+        "higher": {
+          "title": "Nível de risco elevado",
+          "description": "As duas pontuações são elevadas para este objetivo, segundo as tuas respostas. As perdas podem ser maiores ou durar mais do que os cenários sugerem."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "Quando prevês precisar da maior parte deste dinheiro?",
+          "choice0": "Em menos de 3 anos",
+          "choice1": "Entre 3 e 7 anos",
+          "choice2": "Daqui a mais de 7 anos"
+        },
+        "flexibility": {
+          "prompt": "Se o valor caísse pouco antes de precisares do dinheiro, poderias adiar a sua utilização?",
+          "choice0": "Não, a data é fixa",
+          "choice1": "Sim, por alguns meses",
+          "choice2": "Sim, por um ano ou mais"
+        },
+        "cashBuffer": {
+          "prompt": "Conseguirias pagar uma despesa essencial inesperada sem usar o dinheiro deste objetivo?",
+          "choice0": "Provavelmente não",
+          "choice1": "Conseguiria pagar parte da despesa",
+          "choice2": "Conseguiria pagá-la com uma reserva à parte"
+        },
+        "drop": {
+          "prompt": "Imagina que o teu investimento perdia 20% em poucos meses. Qual seria a tua primeira reação?",
+          "choice0": "Vender a maior parte ou a totalidade",
+          "choice1": "Reduzir o montante investido",
+          "choice2": "Rever o meu plano antes de decidir se mudaria alguma coisa"
+        },
+        "fluctuations": {
+          "prompt": "Como te sentirias se o valor subisse e descesse muito ao longo de vários anos?",
+          "choice0": "Teria dificuldade em manter o meu plano",
+          "choice1": "Aceitaria, mas ficaria preocupado",
+          "choice2": "Conseguiria lidar com essas oscilações"
+        },
+        "tradeoff": {
+          "prompt": "Qual destas opções te deixa mais confortável para este objetivo?",
+          "choice0": "Mais estabilidade, mesmo com menor potencial de crescimento",
+          "choice1": "Um equilíbrio entre estabilidade e potencial de crescimento",
+          "choice2": "Mais potencial de crescimento, mesmo com possíveis perdas maiores"
+        }
+      }
+    },
     "investmentReturn": {
       "title": "Retorno do investimento e projeção de índices",
       "shortName": "Retorno de investimento",

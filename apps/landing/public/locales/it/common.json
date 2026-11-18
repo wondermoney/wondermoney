@@ -632,6 +632,86 @@
       "pageDescription": "Calcolatore gratuito del tasso di risparmio. Scopri quale percentuale del tuo reddito risparmi ogni mese. Confronta con la regola 50/30/20 e i benchmark del movimento FIRE.",
       "subtitle": "Scopri quale percentuale del tuo reddito stai risparmiando ogni mese. Il tasso di risparmio è uno dei numeri più importanti della finanza personale — determina quanto velocemente costruisci ricchezza."
     },
+    "investorProfile": {
+      "title": "Test del profilo di investitore",
+      "shortName": "Profilo di investitore",
+      "description": "Rifletti su quali perdite potresti sostenere e su come ti senti di fronte al rischio di investimento.",
+      "pageTitle": "Test del profilo di investitore | WonderMoney",
+      "pageDescription": "Rispondi a sei domande sui tuoi tempi, sul tuo margine finanziario e sulla tua reazione alle perdite. Scopri come il test del profilo di investitore calcola il risultato.",
+      "subtitle": "Scegli un obiettivo di investimento. Rispondi a sei domande per confrontare la tua capacità finanziaria di sostenere perdite con la tua propensione al rischio.",
+      "progress": "Domanda {{step}} di {{total}}",
+      "next": "Continua",
+      "back": "Indietro",
+      "finish": "Vedi il mio risultato",
+      "review": "Rivedi le risposte",
+      "required": "Scegli una risposta per continuare.",
+      "javascript": "Attiva JavaScript per fare il test.",
+      "capacityLabel": "Capacità finanziaria",
+      "comfortLabel": "Propensione al rischio",
+      "methodHeading": "Come si calcola il risultato",
+      "dimensions": "Le prime tre risposte descrivono la tua capacità finanziaria: quando ti servirà il denaro, quanto è flessibile quella data e se hai una riserva separata. Le altre tre descrivono la tua propensione al rischio: come reagisci a un calo, come vivi le oscillazioni e cosa preferisci tra stabilità e potenziale di crescita.",
+      "method": "Ogni risposta vale 0, 1 o 2 punti nell’ordine in cui è mostrata. Ogni gruppo totalizza da 0 a 6 punti. Il punteggio minore determina il risultato: da 0 a 2 è basso, da 3 a 4 è moderato e da 5 a 6 è alto.",
+      "exampleHeading": "Esempio",
+      "example": "Se le prime tre risposte valgono 0, 1 e 1, la capacità finanziaria totalizza 2 punti su 6. Se le altre tre valgono 2 punti ciascuna, la propensione totalizza 6 su 6. Il livello è basso perché il punteggio della capacità è il minore.",
+      "assumptionsHeading": "Ipotesi e limiti",
+      "limitations": "Il test usa scenari ipotetici e le tue stime per un singolo obiettivo. Le tue risposte possono cambiare con le tue finanze o con l’obiettivo. Il punteggio è una regola didattica che non è stata convalidata come valutazione di adeguatezza. Il test non fornisce consulenza sugli investimenti.",
+      "source": "Tolleranza al rischio (Investor.gov, in inglese)",
+      "nextStepHeadline": "Scopri come il rischio si inserisce nella panoramica dei tuoi investimenti",
+      "nextStepDescription": "Guarda come WonderMoney riunisce i tuoi investimenti e il loro andamento.",
+      "nextStepCta": "Esplora la panoramica del portafoglio",
+      "results": {
+        "lower": {
+          "title": "Livello di rischio basso",
+          "description": "Almeno uno dei punteggi è basso per questo obiettivo. Confrontali per capire se il limite è la tua situazione finanziaria, il tuo modo di vivere le perdite o entrambi."
+        },
+        "middle": {
+          "title": "Livello di rischio moderato",
+          "description": "Il punteggio più basso rientra nella fascia intermedia. Confronta il tuo margine finanziario con la tua probabile reazione a un calo."
+        },
+        "higher": {
+          "title": "Livello di rischio alto",
+          "description": "Entrambi i punteggi sono alti per questo obiettivo secondo le tue risposte. Le perdite possono comunque essere maggiori o durare più a lungo di quanto suggeriscono gli scenari."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "Quando pensi che ti servirà la maggior parte di questo denaro?",
+          "choice0": "Tra meno di 3 anni",
+          "choice1": "Tra 3 e 7 anni",
+          "choice2": "Tra più di 7 anni"
+        },
+        "flexibility": {
+          "prompt": "Se il valore scendesse poco prima che ti serva il denaro, potresti aspettare per usarlo?",
+          "choice0": "No, la data è fissa",
+          "choice1": "Sì, qualche mese",
+          "choice2": "Sì, un anno o più"
+        },
+        "cashBuffer": {
+          "prompt": "Potresti coprire una spesa essenziale imprevista senza usare il denaro destinato a questo obiettivo?",
+          "choice0": "Probabilmente no",
+          "choice1": "Potrei coprirne una parte",
+          "choice2": "Potrei coprirla con una riserva separata"
+        },
+        "drop": {
+          "prompt": "Immagina che il tuo investimento perda il 20% in pochi mesi. Quale sarebbe il tuo primo impulso?",
+          "choice0": "Venderne la maggior parte o tutto",
+          "choice1": "Ridurre l’importo investito",
+          "choice2": "Rivedere il mio piano prima di decidere se cambiare qualcosa"
+        },
+        "fluctuations": {
+          "prompt": "Come ti sentiresti se il valore salisse e scendesse molto per diversi anni?",
+          "choice0": "Farei fatica a seguire il mio piano",
+          "choice1": "Potrei accettarlo, ma mi preoccuperebbe",
+          "choice2": "Potrei convivere con queste oscillazioni"
+        },
+        "tradeoff": {
+          "prompt": "Quale compromesso ti fa sentire più a tuo agio per questo obiettivo?",
+          "choice0": "Più stabilità, anche con meno potenziale di crescita",
+          "choice1": "Un equilibrio tra stabilità e potenziale di crescita",
+          "choice2": "Più potenziale di crescita, anche con possibili perdite maggiori"
+        }
+      }
+    },
     "investmentReturn": {
       "title": "Rendimento e proiezione di un investimento indicizzato",
       "shortName": "Rendimento degli investimenti",

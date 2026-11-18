@@ -632,6 +632,86 @@
       "pageDescription": "Kostenloser Sparquotenrechner. Ermitteln Sie, wie viel Prozent Ihres Einkommens Sie monatlich sparen. Vergleichen Sie mit der 50/30/20-Regel und FIRE-Benchmarks.",
       "subtitle": "Finden Sie heraus, wie viel Prozent Ihres Einkommens Sie monatlich sparen. Die Sparquote ist eine der wichtigsten Kennzahlen in der persönlichen Finanzplanung — sie bestimmt, wie schnell Sie Vermögen aufbauen."
     },
+    "investorProfile": {
+      "title": "Anlegerprofil-Test",
+      "shortName": "Anlegerprofil",
+      "description": "Überlege, welche Verluste du finanziell verkraften könntest und wie wohl du dich mit Anlagerisiken fühlst.",
+      "pageTitle": "Anlegerprofil-Test | WonderMoney",
+      "pageDescription": "Beantworte sechs Fragen zu deinem Anlagehorizont, deinem finanziellen Spielraum und deiner Reaktion auf Verluste. Erfahre, wie der Anlegerprofil-Test deine Antworten auswertet.",
+      "subtitle": "Wähle ein Anlageziel. Beantworte sechs Fragen und vergleiche, welche Verluste du finanziell verkraften könntest und wie wohl du dich mit Anlagerisiken fühlst.",
+      "progress": "Frage {{step}} von {{total}}",
+      "next": "Weiter",
+      "back": "Zurück",
+      "finish": "Mein Ergebnis ansehen",
+      "review": "Antworten überprüfen",
+      "required": "Wähle eine Antwort aus, um fortzufahren.",
+      "javascript": "Aktiviere JavaScript, um den Test zu machen.",
+      "capacityLabel": "Finanzielle Risikotragfähigkeit",
+      "comfortLabel": "Persönliche Risikobereitschaft",
+      "methodHeading": "So wertet der Test deine Antworten aus",
+      "dimensions": "Die ersten drei Antworten beschreiben deinen finanziellen Spielraum: wann du das Geld brauchst, wie flexibel dieser Zeitpunkt ist und ob du eine separate Geldreserve hast. Die anderen drei zeigen deine Risikobereitschaft: wie du auf einen Rückgang reagierst, wie du Schwankungen empfindest und was dir bei Stabilität und Wachstumschancen lieber ist.",
+      "method": "Jede Antwort bringt in der angezeigten Reihenfolge 0, 1 oder 2 Punkte. Jede Gruppe ergibt 0 bis 6 Punkte. Der niedrigere Wert bestimmt das Ergebnis: 0 bis 2 ist niedrig, 3 bis 4 ist moderat und 5 bis 6 ist hoch.",
+      "exampleHeading": "Rechenbeispiel",
+      "example": "Wenn deine ersten drei Antworten 0, 1 und 1 Punkt bringen, beträgt deine Risikotragfähigkeit 2 von 6 Punkten. Bringen die anderen drei Antworten je 2 Punkte, liegt deine Risikobereitschaft bei 6 von 6. Die Einstufung ist niedrig, weil die Risikotragfähigkeit den kleineren Wert hat.",
+      "assumptionsHeading": "Annahmen und Grenzen",
+      "limitations": "Der Test verwendet hypothetische Situationen und deine eigenen Einschätzungen für ein einzelnes Ziel. Deine Antworten können sich mit deiner finanziellen Lage oder deinem Ziel ändern. Die Auswertung ist eine vereinfachte Lernhilfe und wurde nicht als Geeignetheitsprüfung validiert. Der Test bietet keine Anlageberatung.",
+      "source": "Risikotoleranz (Investor.gov, auf Englisch)",
+      "nextStepHeadline": "Erfahre, wie Risiko in deine Anlageübersicht passt",
+      "nextStepDescription": "Sieh dir an, wie WonderMoney deine Anlagen und ihre Wertentwicklung zusammenführt.",
+      "nextStepCta": "Portfolioübersicht ansehen",
+      "results": {
+        "lower": {
+          "title": "Niedrige Risikostufe",
+          "description": "Mindestens einer der beiden Werte ist für dieses Ziel niedrig. Vergleiche die Werte, um zu sehen, ob deine finanzielle Lage, dein Umgang mit Verlusten oder beides den Ausschlag gibt."
+        },
+        "middle": {
+          "title": "Moderate Risikostufe",
+          "description": "Der niedrigere Wert liegt im mittleren Bereich. Vergleiche deinen finanziellen Spielraum mit deiner erwarteten Reaktion auf einen Rückgang."
+        },
+        "higher": {
+          "title": "Hohe Risikostufe",
+          "description": "Deinen Antworten zufolge sind beide Werte für dieses Ziel hoch. Verluste können trotzdem stärker ausfallen oder länger andauern als in den Beispielen."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "Wann brauchst du voraussichtlich den größten Teil dieses Geldes?",
+          "choice0": "In weniger als 3 Jahren",
+          "choice1": "In 3 bis 7 Jahren",
+          "choice2": "In mehr als 7 Jahren"
+        },
+        "flexibility": {
+          "prompt": "Wenn der Wert kurz vorher fallen würde, könntest du später auf das Geld zugreifen?",
+          "choice0": "Nein, der Zeitpunkt steht fest",
+          "choice1": "Ja, ein paar Monate später",
+          "choice2": "Ja, ein Jahr oder mehr später"
+        },
+        "cashBuffer": {
+          "prompt": "Könntest du eine unerwartete notwendige Ausgabe bezahlen, ohne das Geld für dieses Ziel anzutasten?",
+          "choice0": "Wahrscheinlich nicht",
+          "choice1": "Ich könnte einen Teil bezahlen",
+          "choice2": "Ich könnte sie aus einer separaten Geldreserve bezahlen"
+        },
+        "drop": {
+          "prompt": "Stell dir vor, deine Anlage verliert in wenigen Monaten 20 % an Wert. Was wäre dein erster Impuls?",
+          "choice0": "Den größten Teil oder alles verkaufen",
+          "choice1": "Weniger Geld investiert lassen",
+          "choice2": "Meinen Plan überprüfen und dann entscheiden, ob ich etwas ändere"
+        },
+        "fluctuations": {
+          "prompt": "Wie würdest du dich fühlen, wenn der Wert über mehrere Jahre stark schwanken würde?",
+          "choice0": "Es würde mir schwerfallen, bei meinem Plan zu bleiben",
+          "choice1": "Ich könnte es akzeptieren, würde mir aber Sorgen machen",
+          "choice2": "Mit diesen Schwankungen könnte ich leben"
+        },
+        "tradeoff": {
+          "prompt": "Welcher Kompromiss passt für dieses Ziel am besten zu dir?",
+          "choice0": "Mehr Stabilität, auch bei geringeren Wachstumschancen",
+          "choice1": "Ein Gleichgewicht zwischen Stabilität und Wachstumschancen",
+          "choice2": "Mehr Wachstumschancen, auch bei möglichen größeren Verlusten"
+        }
+      }
+    },
     "investmentReturn": {
       "title": "Anlagerendite und Indexprognose",
       "shortName": "Anlagerendite",
