@@ -11,6 +11,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolMortgage", "toolEarlyRepayment"],
     destination: "toolMortgageTransfer",
   },
+  {
+    sources: ["toolMortgage", "toolEarlyRepayment"],
+    destination: "toolRateRevision",
+  },
 ];
 
 export function getRelatedContentTools(
