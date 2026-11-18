@@ -2141,10 +2141,10 @@
       },
       "nextStepHeadline": "Suivez ce prêt à côté de votre budget",
       "nextStepDescription": "Ajoutez le prêt à WonderMoney avec son taux et sa durée, prévoyez la mensualité dans votre budget mensuel et voyez la dette baisser à côté de ce que vous dépensez vraiment.",
-      "nextStepCta": "Commencer le suivi",
+      "nextStepCta": "Voyez comment la mensualité s’intègre à votre budget",
       "guide": {
         "whatTitle": "Ce que coûte vraiment un prêt personnel",
-        "whatBody1": "Un prêt personnel se rembourse en mensualités égales sur un nombre fixe de mois. Chaque mensualité couvre les intérêts sur ce que vous devez encore et rembourse une partie du capital : les premières sont surtout des intérêts, les dernières surtout du capital.",
+        "whatBody1": "Avec un prêt personnel à taux fixe, vous payez des mensualités presque identiques sur une durée fixe. Chaque mensualité couvre les intérêts sur le capital restant dû et en rembourse une partie. À mesure que le solde diminue, la part des intérêts baisse et celle du remboursement du capital augmente.",
         "whatBody2": "Le taux d'intérêt n'est qu'une partie du prix. Les prêteurs ajoutent souvent des frais au départ et un coût mensuel, comme des frais de gestion ou une assurance. Ces frais s'ajoutent aux intérêts et, sur un petit prêt ou un prêt court, ils peuvent coûter plus que les intérêts eux-mêmes.",
         "whatBody3": "Avant d'emprunter, vérifiez que la mensualité tient : à côté des crédits que vous remboursez déjà, et dans le budget avec lequel vous vivez déjà.",
         "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités de crédit, celle-ci comprise, prendraient.",

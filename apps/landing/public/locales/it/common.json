@@ -2141,10 +2141,10 @@
       },
       "nextStepHeadline": "Segui questo prestito accanto al tuo budget",
       "nextStepDescription": "Aggiungi il prestito a WonderMoney con tasso e durata, prevedi la rata nel tuo budget mensile e guarda il debito scendere accanto a quello che spendi davvero.",
-      "nextStepCta": "Inizia a seguirlo",
+      "nextStepCta": "Vedi come la rata si inserisce nel tuo budget mensile",
       "guide": {
         "whatTitle": "Quanto costa davvero un prestito personale",
-        "whatBody1": "Un prestito personale si rimborsa con rate mensili uguali per un numero fisso di mesi. Ogni rata copre gli interessi su quanto devi ancora e restituisce una parte del capitale, quindi le prime rate sono soprattutto interessi e le ultime soprattutto capitale.",
+        "whatBody1": "Con un prestito personale a tasso fisso, paghi rate mensili quasi uguali per una durata prestabilita. Ogni rata copre gli interessi sul capitale residuo e ne rimborsa una parte. Man mano che il debito residuo scende, la quota di interessi diminuisce e quella di capitale aumenta.",
         "whatBody2": "Il tasso di interesse è solo una parte del prezzo. I finanziatori aggiungono spesso una commissione all'inizio e un costo mensile, come le spese di incasso o un'assicurazione. Queste commissioni si sommano agli interessi e, su un prestito piccolo o breve, possono costare più degli interessi stessi.",
         "whatBody3": "Prima di chiederlo, verifica che la rata ci stia: accanto alle rate che già paghi e dentro il budget con cui già vivi.",
         "relatedDebtToIncome": "mostra quale parte del tuo reddito occuperebbero le tue rate, compresa questa.",

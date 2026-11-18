@@ -2141,10 +2141,10 @@
       },
       "nextStepHeadline": "Sigue este préstamo junto a tu presupuesto",
       "nextStepDescription": "Añade el préstamo a WonderMoney con su tipo y su plazo, reserva la cuota en tu presupuesto mensual y mira cómo baja la deuda junto a lo que gastas de verdad.",
-      "nextStepCta": "Empezar a seguirlo",
+      "nextStepCta": "Ve cómo encaja la cuota en tu presupuesto mensual",
       "guide": {
         "whatTitle": "Lo que cuesta de verdad un préstamo personal",
-        "whatBody1": "Un préstamo personal se devuelve en cuotas mensuales iguales durante un número fijo de meses. Cada cuota cubre los intereses de lo que aún debes y devuelve una parte del capital, así que las primeras son sobre todo intereses y las últimas sobre todo capital.",
+        "whatBody1": "Con un préstamo personal a tipo fijo, pagas cuotas mensuales casi iguales durante un plazo fijo. Cada cuota cubre los intereses del saldo pendiente y devuelve parte del capital. A medida que baja el saldo, una parte menor de la cuota va a intereses y una mayor a devolver el capital.",
         "whatBody2": "El tipo de interés es solo una parte del precio. Las entidades suelen añadir una comisión al principio y un cargo mensual, como una comisión de gestión o un seguro. Esas comisiones se suman a los intereses y, en un préstamo pequeño o corto, pueden costar más que los propios intereses.",
         "whatBody3": "Antes de pedirlo, comprueba que la cuota cabe: junto a las cuotas que ya pagas y dentro del presupuesto con el que ya vives.",
         "relatedDebtToIncome": "muestra qué parte de tus ingresos ocuparían tus cuotas, esta incluida.",

@@ -2141,10 +2141,10 @@
       },
       "nextStepHeadline": "Acompanha este crédito ao lado do teu orçamento",
       "nextStepDescription": "Adiciona o crédito ao WonderMoney com a taxa e o prazo, reserva a prestação no teu orçamento mensal e vê o capital em dívida descer ao lado do que gastas de facto.",
-      "nextStepCta": "Começar a acompanhar",
+      "nextStepCta": "Vê como a prestação encaixa no teu orçamento mensal",
       "guide": {
         "whatTitle": "Quanto custa de facto um crédito pessoal",
-        "whatBody1": "Um crédito pessoal paga-se em prestações mensais iguais durante um número fixo de meses. Cada prestação cobre os juros sobre o que ainda deves e devolve parte do capital, por isso as primeiras são sobretudo juros e as últimas sobretudo capital.",
+        "whatBody1": "Num crédito pessoal a taxa fixa, pagas prestações mensais de valor quase igual durante um prazo fixo. Cada prestação cobre os juros sobre o capital em dívida e amortiza uma parte desse capital. À medida que a dívida diminui, a parte da prestação que vai para juros é menor e a que amortiza capital é maior.",
         "whatBody2": "A taxa de juro é só uma parte do preço. Os bancos juntam muitas vezes uma comissão no início e um encargo mensal, como uma comissão de processamento ou um seguro. Essas comissões somam-se aos juros e, num crédito pequeno ou curto, podem custar mais do que os próprios juros.",
         "whatBody3": "Antes de pedir, confirma que a prestação cabe: junto das prestações que já pagas e dentro do orçamento com que já vives.",
         "relatedDebtToIncome": "mostra que parte do rendimento as tuas prestações, incluindo esta, iriam ocupar.",
