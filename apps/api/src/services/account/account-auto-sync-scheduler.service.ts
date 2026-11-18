@@ -64,32 +64,42 @@ export default {
       ],
       ...(nonExpiring.length > 0 ? {} : { accessValidUntil: { $gt: now } }),
       accounts: { $some: { $and: [{ $or: staleOr }, { closed: false }, { deletedAt: undefined }] } },
-      appuserKey: { $ne: null },
+      // Historical deletions can leave linked connections behind. Their anonymized owner ID
+      // is not a sync identity, and their bank feeds must never be scheduled again.
+      appuserKey: { deletedAt: null, recordActive: true },
       deletedAt: undefined,
       provider: { $in: enabledBankProviderIds() },
       status: BankConnectionStatus.LINKED,
     }, { limit, orderBy: { bankConnectionKey: 'ASC' }, populate: ['appuserKey'] });
     const scheduleRunId = input.scheduleRunId ?? String(now.getTime());
     if (!scheduleRunId.trim()) throw new Error('scheduleRunId is required');
+    const failures: { error: unknown; requisitionId: string }[] = [];
+    let preparationFailures = 0;
     const eligible = new Map<string, EligibleSyncTarget>();
     for (const connection of connections) {
       const connectionKey = connection.bankConnectionKey;
       const mapKey = `${connection.provider}:${connectionKey}`;
       if (eligible.has(mapKey)) continue;
-      const owner = connection.appuserKey as undefined | { externalUserId?: string };
-      const correlationId = buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, String(connectionKey));
-      // The admin retry rebuilds the job with the same builders (`bank-sync-job-payload.ts`).
-      eligible.set(mapKey, {
-        appuserKey: connection.appuserKey,
-        buildJobPayload: (incidentId) => buildAccountAutoSyncRequisitionJobPayload(connection, { incidentId, scheduleRunId }),
-        correlationId,
-        distinctId: canonicalBankSyncDistinctId(owner?.externalUserId),
-        requisitionId: bankSyncConnectionId(connection),
-        resourceId: bankConnectionResourceId(connectionKey),
-        singletonKey: accountAutoSyncConnectionSingletonKey(connectionKey),
-      });
+      try {
+        const owner = connection.appuserKey as undefined | { externalUserId?: string };
+        const correlationId = buildAccountAutoSyncRequisitionCorrelationId(scheduleRunId, String(connectionKey));
+        // The admin retry rebuilds the job with the same builders (`bank-sync-job-payload.ts`).
+        eligible.set(mapKey, {
+          appuserKey: connection.appuserKey,
+          buildJobPayload: (incidentId) => buildAccountAutoSyncRequisitionJobPayload(connection, { incidentId, scheduleRunId }),
+          correlationId,
+          distinctId: canonicalBankSyncDistinctId(owner?.externalUserId),
+          requisitionId: bankSyncConnectionId(connection),
+          resourceId: bankConnectionResourceId(connectionKey),
+          singletonKey: accountAutoSyncConnectionSingletonKey(connectionKey),
+        });
+      } catch (error) {
+        // Isolate invalid connection records before enqueueing too: one malformed owner must
+        // not prevent every later household in this scan from reaching its bank.
+        preparationFailures += 1;
+        failures.push({ error, requisitionId: bankConnectionResourceId(connectionKey) });
+      }
     }
-    const failures: { error: unknown; requisitionId: string }[] = [];
     let enqueued = 0;
     const send = input.send ?? input.boss?.send.bind(input.boss);
     const bg = input.backgroundOperationService ?? backgroundOperationService;
@@ -129,6 +139,6 @@ export default {
         failures.push({ error, requisitionId: target.requisitionId });
       }
     }
-    return { enqueued, failed: failures.length, failures, rateLimited, skipped: connections.length - eligible.size + rateLimited, total: connections.length };
+    return { enqueued, failed: failures.length, failures, rateLimited, skipped: connections.length - eligible.size - preparationFailures + rateLimited, total: connections.length };
   },
 };
