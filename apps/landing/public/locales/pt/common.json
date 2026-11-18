@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Prepara o teu orçamento para uma prestação mais alta",
       "nextStepDescription": "Adiciona o crédito ao WonderMoney, reserva a prestação mais alta no teu orçamento mensal e vê quanto sobra para o resto das despesas e da poupança.",
-      "nextStepCta": "Planear o orçamento",
+      "nextStepCta": "Testa a resistência do teu orçamento mensal",
       "guide": {
         "whatTitle": "Como a revisão da taxa muda a tua prestação",
         "whatBody1": "Num crédito a taxa variável, a taxa que pagas tem duas partes: um indexante e um spread. O indexante é uma taxa de mercado ou de um banco central, como a Euribor em grande parte da zona euro; outros países usam outros indexantes. O spread é a margem do banco e está fixado no contrato.",
-        "whatBody2": "Em cada data de revisão, muitas vezes a cada 3, 6 ou 12 meses, o banco pega no valor mais recente do indexante, soma o spread e calcula uma nova prestação sobre o capital em dívida e o prazo que falta. O spread não muda, por isso uma subida de 1 ponto no indexante é uma subida de 1 ponto na taxa.",
+        "whatBody2": "Em cada data de revisão, muitas vezes a cada 3, 6 ou 12 meses, o banco pega no valor mais recente do indexante, soma o spread e calcula uma nova prestação sobre o capital em dívida e o prazo que falta. Com o mesmo spread, uma subida de 1 ponto percentual no indexante aumenta a taxa até 1 ponto percentual, consoante o teto ou o mínimo aplicável.",
         "whatBody3": "Este simulador mostra a prestação antes e depois da variação que escolheres, para saberes com antecedência o que uma subida ou uma descida significa para o teu orçamento mensal.",
         "relatedMortgage": "o plano completo, ano a ano, de um crédito a uma só taxa.",
         "relatedDebtToIncome": "a parte do teu rendimento que vai para todas as prestações de crédito.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i é o indexante e s o spread, ambos como taxas anuais. r é a taxa mensal, M a prestação mensal, P o capital em dívida e n o número de prestações que faltam. Quando o indexante mais o spread fica abaixo de 0%, a taxa conta como 0% e a prestação é simplesmente P a dividir por n.",
         "methodItems": {
           "change": "A diferença por mês é a primeira prestação à nova taxa menos a primeira prestação à taxa atual, ambas sobre o capital de hoje e no mesmo número de meses.",
-          "year": "A diferença em 12 prestações soma as primeiras 12 prestações de cada plano. Cada prestação é arredondada ao cêntimo, por isso pode diferir num cêntimo de 12 vezes a diferença mensal.",
+          "year": "A diferença anual compara a soma das primeiras 12 prestações de cada plano ou de todas as prestações restantes se faltarem menos. Cada prestação é arredondada individualmente, por isso o total pode diferir da diferença mensal multiplicada pelo número de prestações.",
           "interest": "A diferença nos juros é o total de juros do novo plano menos o do plano atual, ambos até ao fim do crédito.",
           "income": "O peso no rendimento é a prestação a dividir pelo rendimento líquido que indicas, lido com os níveis do simulador de taxa de esforço: abaixo de {{caution}}% saudável, de {{caution}}% a {{high}}% atenção e acima de {{high}}% elevada. São uma referência geral, não o limite de um banco.",
           "privacy": "O cálculo é feito no teu navegador. Os valores que indicas ficam no teu dispositivo e não são guardados."

@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Plan for a higher payment in your budget",
       "nextStepDescription": "Add the loan to WonderMoney, give the higher payment its place in your monthly budget and see what it leaves for the rest of your spending and saving.",
-      "nextStepCta": "Plan your budget",
+      "nextStepCta": "Stress-test your monthly cash flow",
       "guide": {
         "whatTitle": "How a rate revision changes your payment",
         "whatBody1": "On a variable-rate loan the rate you pay has two parts: a reference index and a spread. The index is a market or central bank rate, such as Euribor in much of the euro area, and other countries use their own. The spread is the lender's margin and is fixed in your contract.",
-        "whatBody2": "At each reset date, often every 3, 6 or 12 months, the lender takes the latest value of the index, adds the spread and works out a new payment on the balance and the time left. The spread stays the same, so a 1-point rise in the index is a 1-point rise in your rate.",
+        "whatBody2": "At each reset date, often every 3, 6 or 12 months, the lender takes the latest value of the index, adds the spread and works out a new payment on the balance and the time left. With the same spread, a rise of 1 percentage point in the index raises the rate by up to 1 percentage point, depending on any cap or floor.",
         "whatBody3": "This calculator shows the payment before and after a change you choose, so you can see ahead of time what a rise or a fall would mean for your monthly budget.",
         "relatedMortgage": "the full year-by-year schedule of a loan at one rate.",
         "relatedDebtToIncome": "the share of your income that goes on all your credit payments.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
         "methodItems": {
           "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
-          "year": "The change over 12 payments adds up the first 12 payments of each schedule. Each month's payment is rounded to the cent, so it can differ by a cent from 12 times the monthly change.",
+          "year": "The yearly change compares the sum of the first 12 payments in each schedule, or all remaining payments if fewer are left. Payments are rounded individually, so the total can differ from the monthly change multiplied by the number of payments.",
           "interest": "The change in interest is the interest of the new schedule minus today's, both to the end of the loan.",
           "income": "The share of income is the payment divided by the net income you enter, read against the debt-to-income calculator's bands: under {{caution}}% healthy, {{caution}}% to {{high}}% caution and above {{high}}% high. They are a rule of thumb, not a lender's limit.",
           "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved."

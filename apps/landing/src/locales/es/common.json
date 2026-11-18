@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Prepara tu presupuesto para una cuota más alta",
       "nextStepDescription": "Añade el préstamo a WonderMoney, reserva la cuota más alta en tu presupuesto mensual y mira cuánto te queda para el resto de gastos y para ahorrar.",
-      "nextStepCta": "Planificar el presupuesto",
+      "nextStepCta": "Pon a prueba tu flujo de caja mensual",
       "guide": {
         "whatTitle": "Cómo cambia tu cuota con la revisión del tipo",
         "whatBody1": "En un préstamo a tipo variable, el tipo que pagas tiene dos partes: un índice de referencia y un diferencial. El índice es un tipo de mercado o de un banco central, como el Euríbor en gran parte de la zona euro; otros países usan otros índices. El diferencial es el margen del banco y está fijado en el contrato.",
-        "whatBody2": "En cada fecha de revisión, a menudo cada 3, 6 o 12 meses, el banco toma el último valor del índice, le suma el diferencial y calcula una nueva cuota sobre el capital pendiente y el plazo que queda. El diferencial no cambia, así que una subida de 1 punto del índice es una subida de 1 punto de tu tipo.",
+        "whatBody2": "En cada fecha de revisión, a menudo cada 3, 6 o 12 meses, el banco toma el último valor del índice, le suma el diferencial y calcula una nueva cuota sobre el capital pendiente y el plazo que queda. Con el mismo diferencial, una subida de 1 punto porcentual del índice aumenta el tipo hasta 1 punto porcentual, según el límite máximo o mínimo que se aplique.",
         "whatBody3": "Este simulador muestra la cuota antes y después de la variación que elijas, para que veas con tiempo qué supondría una subida o una bajada para tu presupuesto mensual.",
         "relatedMortgage": "el cuadro completo, año a año, de un préstamo a un solo tipo.",
         "relatedDebtToIncome": "la parte de tus ingresos que se va en todas tus cuotas de crédito.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i es el índice y s el diferencial, ambos como tipos anuales. r es el tipo mensual, M la cuota mensual, P el capital pendiente y n el número de cuotas que quedan. Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente P dividido entre n.",
         "methodItems": {
           "change": "La diferencia al mes es la primera cuota al nuevo tipo menos la primera cuota al tipo actual, ambas sobre el capital de hoy y en el mismo número de meses.",
-          "year": "La diferencia en 12 cuotas suma las 12 primeras cuotas de cada cuadro. Cada cuota se redondea al céntimo, así que puede diferir en un céntimo de 12 veces la diferencia mensual.",
+          "year": "La diferencia anual compara la suma de las 12 primeras cuotas de cada cuadro o de todas las restantes si quedan menos. Cada cuota se redondea por separado, así que el total puede diferir de la diferencia mensual multiplicada por el número de cuotas.",
           "interest": "La diferencia de intereses es el total de intereses del nuevo cuadro menos el del actual, ambos hasta el final del préstamo.",
           "income": "La parte de los ingresos es la cuota dividida entre los ingresos netos que introduces, leída con los niveles de la calculadora de ratio de endeudamiento: por debajo del {{caution}}% saludable, del {{caution}}% al {{high}}% precaución y por encima del {{high}}% elevado. Son una referencia general, no el límite de un banco.",
           "privacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan."

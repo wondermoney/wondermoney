@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
@@ -74,19 +74,19 @@ function rateDecimals(value: number): number {
 function RateRevisionCalculatorContent() {
   const { t, locale } = useTranslations();
 
-  const [input, setInput] = useState<RateRevisionInput>({ ...EXAMPLE_INPUT });
+  const [input, setInput] = useState<RateRevisionInput>(EXAMPLE_INPUT);
   const calculation = useMemo(() => computeRateRevision(input), [input]);
 
-  // The shared landing tool event: one `tool_used` per page view, on the visitor's first edit,
-  // without amounts. pushGtmEvent drops it unless analytics consent was given.
+  // Count the first valid result produced by an edit. The default example and invalid
+  // input do not count. The shared tracker applies analytics consent.
   const usageSent = useRef(false);
-  const reportUse = () => {
-    if (usageSent.current) return;
+  useEffect(() => {
+    if (input === EXAMPLE_INPUT || !calculation.ok || usageSent.current) return;
     usageSent.current = true;
     pushGtmEvent({ event: "tool_used", tool: "rate_revision", page_type: getPageType() });
-  };
+  }, [input, calculation.ok]);
+
   const edit = (field: RateRevisionField) => (value: number) => {
-    reportUse();
     setInput((current) => ({ ...current, [field]: value }));
   };
 

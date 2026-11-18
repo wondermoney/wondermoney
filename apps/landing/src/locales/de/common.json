@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Planen Sie eine höhere Rate in Ihr Budget ein",
       "nextStepDescription": "Legen Sie den Kredit in WonderMoney an, planen Sie die höhere Rate in Ihrem Monatsbudget ein und sehen Sie, was für Ihre übrigen Ausgaben und zum Sparen bleibt.",
-      "nextStepCta": "Budget planen",
+      "nextStepCta": "Prüfe, wie belastbar dein Monatsbudget ist",
       "guide": {
         "whatTitle": "Wie eine Zinsanpassung Ihre Rate verändert",
         "whatBody1": "Bei einem Kredit mit variablem Zins besteht Ihr Zins aus zwei Teilen: einem Referenzzins und einem Aufschlag. Der Referenzzins ist ein Markt- oder Leitzins, etwa der Euribor in weiten Teilen des Euroraums; andere Länder nutzen andere Referenzzinsen. Der Aufschlag ist die Marge der Bank und im Vertrag festgelegt.",
-        "whatBody2": "Zu jedem Anpassungstermin, oft alle 3, 6 oder 12 Monate, nimmt die Bank den aktuellen Wert des Referenzzinses, schlägt die Marge auf und berechnet eine neue Rate auf die Restschuld und die Restlaufzeit. Der Aufschlag bleibt gleich: Steigt der Referenzzins um 1 Punkt, steigt Ihr Zins um 1 Punkt.",
+        "whatBody2": "Zu jedem Anpassungstermin, oft alle 3, 6 oder 12 Monate, nimmt die Bank den aktuellen Wert des Referenzzinses, schlägt die Marge auf und berechnet eine neue Rate auf die Restschuld und die Restlaufzeit. Bei gleichem Aufschlag erhöht ein Anstieg des Referenzzinses um 1 Prozentpunkt den Kreditzins um bis zu 1 Prozentpunkt, abhängig von der geltenden Ober- oder Untergrenze.",
         "whatBody3": "Dieser Rechner zeigt die Rate vor und nach einer Änderung, die Sie wählen. So sehen Sie rechtzeitig, was ein Anstieg oder ein Rückgang für Ihr Monatsbudget bedeuten würde.",
         "relatedMortgage": "der vollständige Tilgungsplan Jahr für Jahr für einen Kredit zu einem festen Zins.",
         "relatedDebtToIncome": "der Anteil Ihres Einkommens, der in alle Ihre Kreditraten fließt.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
         "methodItems": {
           "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
-          "year": "Der Unterschied über 12 Raten summiert die ersten 12 Raten jedes Plans. Jede Rate wird auf den Cent gerundet, daher kann er um einen Cent vom Zwölffachen des Monatsunterschieds abweichen.",
+          "year": "Der Unterschied über ein Jahr ergibt sich aus der Summe der ersten 12 Raten jedes Plans. Sind es weniger als 12, zählen alle verbleibenden Raten. Da jede Rate einzeln gerundet wird, kann die Differenz vom monatlichen Unterschied mal der Anzahl der Raten abweichen.",
           "interest": "Der Unterschied bei den Zinsen ist die Zinssumme des neuen Plans minus die des heutigen, beide bis zum Ende der Laufzeit.",
           "income": "Der Anteil am Einkommen ist die Rate geteilt durch das Nettoeinkommen, das Sie eingeben, gelesen mit den Stufen des Schuldendienstquote-Rechners: unter {{caution}} % gesund, {{caution}} % bis {{high}} % Vorsicht und über {{high}} % hoch. Das ist eine Faustregel, keine Grenze einer Bank.",
           "privacy": "Die Rechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert."

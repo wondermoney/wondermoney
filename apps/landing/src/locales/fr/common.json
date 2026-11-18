@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Prévoyez une mensualité plus élevée dans votre budget",
       "nextStepDescription": "Ajoutez le prêt dans WonderMoney, prévoyez la mensualité plus élevée dans votre budget mensuel et voyez ce qu'il reste pour vos autres dépenses et votre épargne.",
-      "nextStepCta": "Planifier mon budget",
+      "nextStepCta": "Mets à l’épreuve ta trésorerie mensuelle",
       "guide": {
         "whatTitle": "Comment une révision de taux change votre mensualité",
         "whatBody1": "Sur un prêt à taux variable, le taux payé a deux composantes : un indice de référence et une marge. L'indice est un taux de marché ou de banque centrale, comme l'Euribor dans une grande partie de la zone euro ; d'autres pays utilisent d'autres indices. La marge est celle de la banque et elle est fixée dans le contrat.",
-        "whatBody2": "À chaque date de révision, souvent tous les 3, 6 ou 12 mois, la banque reprend la dernière valeur de l'indice, y ajoute la marge et calcule une nouvelle mensualité sur le capital restant dû et la durée restante. La marge ne change pas : une hausse de 1 point de l'indice est une hausse de 1 point de votre taux.",
+        "whatBody2": "À chaque date de révision, souvent tous les 3, 6 ou 12 mois, la banque reprend la dernière valeur de l'indice, y ajoute la marge et calcule une nouvelle mensualité sur le capital restant dû et la durée restante. À marge constante, une hausse de 1 point de pourcentage de l’indice augmente le taux de 1 point au maximum, selon le plafond ou le plancher applicable.",
         "whatBody3": "Ce simulateur montre la mensualité avant et après la variation que vous choisissez, pour voir à l'avance ce qu'une hausse ou une baisse signifierait pour votre budget mensuel.",
         "relatedMortgage": "le tableau complet, année par année, d'un prêt à un seul taux.",
         "relatedDebtToIncome": "la part de vos revenus qui part dans toutes vos mensualités de crédit.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i est l'indice et s la marge, tous deux en taux annuels. r est le taux mensuel, M la mensualité, P le capital restant dû et n le nombre de mensualités restantes. Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement P divisé par n.",
         "methodItems": {
           "change": "L'écart par mois est la première mensualité au nouveau taux moins la première mensualité au taux actuel, toutes deux sur le capital d'aujourd'hui et sur le même nombre de mois.",
-          "year": "L'écart sur 12 mensualités additionne les 12 premières mensualités de chaque tableau. Chaque mensualité est arrondie au centime, il peut donc différer d'un centime de 12 fois l'écart mensuel.",
+          "year": "L’écart annuel compare la somme des 12 premières mensualités de chaque tableau, ou de toutes les mensualités restantes s’il en reste moins. Chaque mensualité est arrondie séparément, si bien que le total peut différer de l’écart mensuel multiplié par le nombre de mensualités.",
           "interest": "L'écart d'intérêts est le total des intérêts du nouveau tableau moins celui du tableau actuel, tous deux jusqu'à la fin du prêt.",
           "income": "La part des revenus est la mensualité divisée par le revenu net que vous saisissez, lue avec les seuils du calculateur de taux d'endettement : sous {{caution}} % sain, de {{caution}} % à {{high}} % vigilance et au-dessus de {{high}} % élevé. C'est un repère général, pas la limite d'une banque.",
           "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés."

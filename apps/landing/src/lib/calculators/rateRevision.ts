@@ -69,7 +69,7 @@ export type RateRevisionInput = {
 	spread: number
 	/** The index after the revision, in percent. Empty (NaN) is `required`. */
 	newIndexRate: number
-	/** Net monthly income, in euros. Optional: empty (NaN) or 0 shows no share of income. */
+	/** Net monthly income, in euros. Optional: empty (NaN) or an amount that rounds to zero cents shows no share of income. */
 	monthlyIncome: number
 }
 
@@ -249,7 +249,7 @@ export function computeRateRevision(input: RateRevisionInput): RateRevisionCalcu
 		}
 	})
 
-	const monthlyIncome = Number.isNaN(input.monthlyIncome) ? 0 : input.monthlyIncome
+	const monthlyIncome = fromCents(Math.round(input.monthlyIncome * 100))
 	const income =
 		monthlyIncome > 0
 			? {

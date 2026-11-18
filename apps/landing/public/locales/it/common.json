@@ -2024,11 +2024,11 @@
       },
       "nextStepHeadline": "Prevedi una rata più alta nel tuo budget",
       "nextStepDescription": "Aggiungi il prestito a WonderMoney, prevedi la rata più alta nel tuo budget mensile e guarda quanto resta per le altre spese e per il risparmio.",
-      "nextStepCta": "Pianificare il budget",
+      "nextStepCta": "Metti alla prova il tuo flusso di cassa mensile",
       "guide": {
         "whatTitle": "Come la revisione del tasso cambia la tua rata",
         "whatBody1": "In un prestito a tasso variabile, il tasso che paghi ha due parti: un indice di riferimento e uno spread. L'indice è un tasso di mercato o di banca centrale, come l'Euribor in gran parte dell'area euro; altri paesi usano altri indici. Lo spread è il margine della banca ed è fissato nel contratto.",
-        "whatBody2": "A ogni data di revisione, spesso ogni 3, 6 o 12 mesi, la banca prende l'ultimo valore dell'indice, aggiunge lo spread e calcola una nuova rata sul debito residuo e sulla durata che resta. Lo spread non cambia, quindi un aumento di 1 punto dell'indice è un aumento di 1 punto del tuo tasso.",
+        "whatBody2": "A ogni data di revisione, spesso ogni 3, 6 o 12 mesi, la banca prende l'ultimo valore dell'indice, aggiunge lo spread e calcola una nuova rata sul debito residuo e sulla durata che resta. A parità di spread, un aumento dell’indice di 1 punto percentuale fa salire il tasso fino a 1 punto percentuale, in base al limite massimo o minimo applicabile.",
         "whatBody3": "Questo simulatore mostra la rata prima e dopo la variazione che scegli, così vedi in anticipo cosa significherebbe un aumento o un calo per il tuo budget mensile.",
         "relatedMortgage": "il piano completo, anno per anno, di un prestito a un solo tasso.",
         "relatedDebtToIncome": "la parte del tuo reddito che va in tutte le rate dei tuoi prestiti.",
@@ -2043,7 +2043,7 @@
         "methodLegend": "i è l'indice e s lo spread, entrambi come tassi annui. r è il tasso mensile, M la rata mensile, P il debito residuo e n il numero di rate che restano. Quando l'indice più lo spread è sotto lo 0%, il tasso viene preso allo 0% e la rata è semplicemente P diviso n.",
         "methodItems": {
           "change": "La differenza al mese è la prima rata al nuovo tasso meno la prima rata al tasso di oggi, entrambe sul debito di oggi e sullo stesso numero di mesi.",
-          "year": "La differenza in 12 rate somma le prime 12 rate di ciascun piano. Ogni rata è arrotondata al centesimo, quindi può scostarsi di un centesimo da 12 volte la differenza mensile.",
+          "year": "La differenza annua confronta la somma delle prime 12 rate di ciascun piano o di tutte le rate residue se ne restano meno. Ogni rata viene arrotondata singolarmente, quindi il totale può differire dalla differenza mensile moltiplicata per il numero di rate.",
           "interest": "La differenza di interessi è il totale degli interessi del nuovo piano meno quello del piano di oggi, entrambi fino alla fine del prestito.",
           "income": "La parte del reddito è la rata divisa per il reddito netto che inserisci, letta con i livelli del calcolatore del rapporto rata/reddito: sotto il {{caution}}% sano, dal {{caution}}% al {{high}}% attenzione e sopra il {{high}}% elevato. Sono un riferimento generale, non il limite di una banca.",
           "privacy": "Il calcolo avviene nel tuo browser. Le cifre che inserisci restano sul tuo dispositivo e non vengono salvate."

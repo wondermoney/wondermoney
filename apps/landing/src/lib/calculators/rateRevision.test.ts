@@ -248,9 +248,12 @@ describe("computeRateRevision: edge cases", () => {
 })
 
 describe("computeRateRevision: income", () => {
-	it.each([Number.NaN, 0])("shows no share of income when the income is %s", (monthlyIncome) => {
-		expect(compute({ monthlyIncome }).income).toBeNull()
-	})
+	it.each([Number.NaN, 0, 0.004, 1e-303, 1e-304])(
+		"shows no share of income when it rounds to zero cents or is empty (%s)",
+		(monthlyIncome) => {
+			expect(compute({ monthlyIncome }).income).toBeNull()
+		},
+	)
 
 	it("rejects a negative or huge income", () => {
 		expect(errorsFor({ monthlyIncome: -1 }).monthlyIncome).toBe("negative")
