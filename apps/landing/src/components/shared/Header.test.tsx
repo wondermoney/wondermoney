@@ -10,6 +10,7 @@ import { getTranslations } from "@/lib/translations";
 import { ConsentBanner } from "./ConsentBanner";
 import Header from "./Header";
 import PivotAnnouncementBanner from "./PivotAnnouncementBanner";
+import StickyMobileCta from "./StickyMobileCta";
 import { HOVER_CLOSE_DELAY_MS, HOVER_OPEN_DELAY_MS } from "./useNavMenus";
 
 // Entries a test adds to the catalog, as a new tool would be added to TOOLS_CATALOG.
@@ -473,30 +474,42 @@ describe("Header drawer stacking", () => {
     return level;
   }
 
-  it("stacks the open drawer above the header and the banner, and below the consent card", async () => {
+  it.each(SUPPORTED_LANGS)("keeps the drawer and banner controls usable in %s", async (locale) => {
     const user = userEvent.setup();
+    const t = getTranslations(locale);
     render(
       <>
-        <PivotAnnouncementBanner locale="en" />
-        <Header locale="en" />
-        <ConsentBanner locale="en" />
+        <PivotAnnouncementBanner locale={locale} />
+        <Header locale={locale} />
+        <ConsentBanner locale={locale} />
+        <StickyMobileCta locale={locale} />
       </>,
     );
-    const dismiss = await screen.findByRole("button", { name: en("global.pivotBanner.dismissLabel") });
-    const consent = screen.getByRole("complementary", { name: en("global.consent.title") });
+    const dismissLabel = t("global.pivotBanner.dismissLabel");
+    const dismiss = await screen.findByRole("button", { name: dismissLabel });
+    const consent = screen.getByRole("complementary", { name: t("global.consent.title") });
+    const stickyCta = screen.getByText(t("global.mainCtaMicrocopy"));
 
-    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
-    const close = screen.getByRole("button", { name: en("header.closeMenu") });
-    const firstRow = screen.getByRole("button", { name: en("header.features") });
+    await user.click(screen.getByRole("button", { name: t("header.openMainMenu") }));
+    const close = screen.getByRole("button", { name: t("header.closeMenu") });
+    const firstRow = screen.getByRole("button", { name: t("header.features") });
 
     const banner = rootLayer(dismiss);
     const header = rootLayer(document.querySelector("header")!);
     for (const control of [close, firstRow]) {
       expect(rootLayer(control)).toBeGreaterThan(header);
       expect(rootLayer(control)).toBeGreaterThan(banner);
+      expect(rootLayer(control)).toBeGreaterThan(rootLayer(stickyCta));
       expect(rootLayer(control)).toBeLessThan(rootLayer(consent));
     }
     expect(header).toBeGreaterThan(banner);
+
+    await user.click(firstRow);
+    expect(firstRow.getAttribute("aria-expanded")).toBe("true");
+    await user.click(close);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(dismiss);
+    expect(screen.queryByRole("button", { name: dismissLabel })).toBeNull();
   });
 
   it("raises the drawer backdrop with its panel", async () => {
