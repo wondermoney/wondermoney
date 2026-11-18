@@ -1280,6 +1280,7 @@
   "unreviewed-transactions-count": "Tienes {count, plural, =1 {una transacción sin revisar} other {# transacciones sin revisar}}.",
   "unreviewed-transactions-count-click": "Revisar transacciones",
   "linked-loan-repayment-context": "Vinculado a {loanName}, gasto <figure>{expense}</figure> de <figure>{total}</figure>",
+  "linked-loan-repayment-details": "Detalles del pago del préstamo",
   "portfolio-name-placeholder": "Mi cartera de acciones tecnológicas",
   "portfolio-currency-tooltip": "Esta es la divisa de visualización de tu cartera. Todos los valores se convertirán y mostrarán en esta divisa.",
   "portfolio-currency-help": "Define la divisa de visualización",

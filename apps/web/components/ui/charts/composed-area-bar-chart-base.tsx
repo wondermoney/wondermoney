@@ -24,7 +24,7 @@ import { AMOUNT_MASK } from "@/lib/privacy/mask";
 import { usePrivacyMode } from "@/lib/privacy/usePrivacyMode";
 import { cn } from "@/lib/utils";
 
-import { chartAxisProps, chartGridProps } from "./chart-axis";
+import { chartAxisProps, chartGridProps, chartXAxisProps } from "./chart-axis";
 
 type Props = {
   data: object[];
@@ -34,6 +34,7 @@ type Props = {
   config: ChartConfig;
   className?: string;
   xFormatter?: (value: unknown) => string;
+  xTicks?: (string | number)[];
   yFormatter?: (value: number) => string;
   tooltipFormatter?: React.ComponentProps<
     typeof ChartTooltipContent
@@ -123,6 +124,7 @@ export function ComposedAreaBarChartBase({
   config,
   className,
   xFormatter,
+  xTicks,
   yFormatter: yFormatterProp,
   tooltipFormatter,
   tooltipValueFormatter,
@@ -178,8 +180,9 @@ export function ComposedAreaBarChartBase({
         </defs>
         <CartesianGrid {...chartGridProps} />
         <XAxis
-          {...chartAxisProps}
+          {...chartXAxisProps}
           dataKey={xKey}
+          ticks={xTicks}
           tickFormatter={(value) => xFormatter?.(value) ?? String(value)}
         />
         <YAxis
@@ -239,9 +242,7 @@ export function ComposedAreaBarChartBase({
             dataKey={key}
             stroke={`var(--color-${key})`}
             strokeWidth={2}
-            strokeDasharray={
-              dashedLineKeys.includes(key) ? "6 4" : undefined
-            }
+            strokeDasharray={dashedLineKeys.includes(key) ? "6 4" : undefined}
             dot={lineDot}
             connectNulls={connectNulls}
             isAnimationActive={isAnimationActive}

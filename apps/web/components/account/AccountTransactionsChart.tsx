@@ -9,11 +9,13 @@ import {
   ComposedAreaBarChartBase,
   useChartFormatters,
 } from "@/components/ui/charts";
+import { pickDateAxisTicks } from "@/components/ui/charts/chart-axis";
 import { getAccountChartCurrencyCode } from "@/lib/account/account-display-logic";
 import { mergeForecastIntoChartData } from "@/lib/account/account-forecast-chart-data";
 import { buildAccountTransactionsChartData } from "@/lib/account/account-transactions-chart-data";
 import type { ForecastPoint } from "@/lib/api/account/useAccountForecast";
 import type { Transaction } from "@/lib/api/account/useTransactions";
+import { localCalendarDay } from "@/lib/utils/transaction-date";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import type { ChartConfig } from "../ui/chart";
@@ -29,7 +31,13 @@ interface AccountTransactionsLineChartProps {
 
 const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
   React.memo(
-    ({ currencyCode: displayCurrencyCode, forecast, transactions, fromDate, toDate }) => {
+    ({
+      currencyCode: displayCurrencyCode,
+      forecast,
+      transactions,
+      fromDate,
+      toDate,
+    }) => {
       const t = useTranslations();
       const { formatChartDate } = useChartFormatters();
       const formatCurrency = useFormatCurrency();
@@ -44,11 +52,23 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
       const chartData = useMemo(
         () =>
           mergeForecastIntoChartData(
-            buildAccountTransactionsChartData({ transactions, fromDate, toDate }),
+            buildAccountTransactionsChartData({
+              transactions,
+              fromDate,
+              toDate,
+            }),
             forecast,
             currencyCode,
-          ),
+          ).map((point) => ({ ...point, x: localCalendarDay(point.x) })),
         [transactions, fromDate, toDate, forecast, currencyCode],
+      );
+      const xTicks = useMemo(
+        () =>
+          pickDateAxisTicks(
+            chartData.map((point) => point.x),
+            6,
+          ),
+        [chartData],
       );
 
       const chartConfig: ChartConfig = useMemo(
@@ -72,6 +92,7 @@ const AccountTransactionsChart: React.FC<AccountTransactionsLineChartProps> =
       return (
         <ComposedAreaBarChartBase
           xKey="x"
+          xTicks={xTicks}
           areaKeys={["balance"]}
           barKeys={["dailyAmount"]}
           signedBarKeys={["dailyAmount"]}

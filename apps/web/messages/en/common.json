@@ -1530,6 +1530,7 @@
   "original-settlement-amount": "Original settlement amount",
   "edit-transaction-description": "Edit the transaction data. Click save when you're done.",
   "linked-loan-repayment-context": "Linked to {loanName}, expense <figure>{expense}</figure> of <figure>{total}</figure>",
+  "linked-loan-repayment-details": "Loan payment details",
   "is-recurrent-income": "Is this recurrent income?",
   "budget-insights": "Budget Insights",
   "make-budget-yours": "Make this budget yours",
