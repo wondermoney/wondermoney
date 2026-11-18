@@ -8,6 +8,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
   destination: ToolRouteId;
 }> = [
   {
+    sources: ["toolCompoundInterest"],
+    destination: "toolInvestmentReturn",
+  },
+  {
     sources: ["toolMortgage", "toolEarlyRepayment"],
     destination: "toolMortgageTransfer",
   },

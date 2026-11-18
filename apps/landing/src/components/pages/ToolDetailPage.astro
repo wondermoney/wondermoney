@@ -5,6 +5,8 @@ import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInt
 import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuide.astro";
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
+import IndexProjectionCalculator from "@/components/calculators/IndexProjectionCalculator";
+import IndexProjectionGuide from "@/components/calculators/IndexProjectionGuide.astro";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
 import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
 import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
@@ -100,6 +102,11 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.borrowingCapacity.nextStepDescription"),
     ctaText: t("tools.borrowingCapacity.nextStepCta"),
   },
+  toolInvestmentReturn: {
+    headline: t("tools.investmentReturn.projection.ctaHeadline"),
+    description: t("tools.investmentReturn.projection.ctaDescription"),
+    ctaText: t("tools.investmentReturn.projection.ctaText"),
+  },
   toolRateRevision: {
     headline: t("tools.rateRevision.nextStepHeadline"),
     description: t("tools.rateRevision.nextStepDescription"),
@@ -168,7 +175,18 @@ const schema = {
     {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
     {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
     {routeId === "toolInvestmentReturn" && (
-      <InvestmentReturnCalculatorComp locale={locale} client:load />
+      <>
+        <section class="mb-10 space-y-4">
+          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.pastHeading")}</h2>
+          <InvestmentReturnCalculatorComp locale={locale} client:load />
+        </section>
+        <section class="space-y-4">
+          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.heading")}</h2>
+          <p class="max-w-3xl text-muted-foreground">{t("tools.investmentReturn.projection.intro")}</p>
+          <IndexProjectionCalculator locale={locale} client:load />
+        </section>
+        <IndexProjectionGuide locale={locale} />
+      </>
     )}
     {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
     {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
