@@ -10,12 +10,6 @@ import {
   type Lang,
   toLang,
 } from "./routes";
-import {
-  LEGACY_FEATURE_SLUG_BY_ROUTE_ID,
-  LEGACY_TOOL_SLUG_BY_ROUTE_ID,
-  LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID,
-  getLegacySlug,
-} from "./legacySlugs";
 
 type TopLevelRouteId = (typeof TOP_LEVEL_PAGE_ROUTE_IDS)[number];
 type FeatureRouteId = (typeof FEATURE_ROUTE_IDS)[number];
@@ -129,63 +123,25 @@ type MonthlyContent = {
   body?: ReadonlyArray<unknown>;
 };
 
-function withLegacyAlias<TParam extends string>(
-  paramName: TParam,
-  slug: string,
-  legacySlug: string | undefined,
-  routeId: TopLevelRouteId | FeatureRouteId | ToolRouteId,
-) {
-  const paths: Array<{
-    params: Record<TParam, string>;
-    props: { routeId: TopLevelRouteId | FeatureRouteId | ToolRouteId; redirectTo?: string };
-  }> = [
-    {
-      params: { [paramName]: slug } as Record<TParam, string>,
-      props: { routeId },
-    },
-  ];
-
-  if (legacySlug && legacySlug !== slug) {
-    paths.push({
-      params: { [paramName]: legacySlug } as Record<TParam, string>,
-      props: { routeId, redirectTo: slug },
-    });
-  }
-
-  return paths;
-}
-
 export function getTopLevelPageStaticPaths(locale: Lang) {
-  return TOP_LEVEL_PAGE_ROUTE_IDS.flatMap((routeId) =>
-    withLegacyAlias(
-      "page",
-      getLocalizedSlug(routeId, locale),
-      getLegacySlug(LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID, routeId, locale),
-      routeId,
-    ),
-  );
+  return TOP_LEVEL_PAGE_ROUTE_IDS.map((routeId) => ({
+    params: { page: getLocalizedSlug(routeId, locale) },
+    props: { routeId },
+  }));
 }
 
 export function getFeatureStaticPaths(locale: Lang) {
-  return FEATURE_ROUTE_IDS.flatMap((routeId) =>
-    withLegacyAlias(
-      "feature",
-      getLocalizedSlug(routeId, locale),
-      getLegacySlug(LEGACY_FEATURE_SLUG_BY_ROUTE_ID, routeId, locale),
-      routeId,
-    ),
-  );
+  return FEATURE_ROUTE_IDS.map((routeId) => ({
+    params: { feature: getLocalizedSlug(routeId, locale) },
+    props: { routeId },
+  }));
 }
 
 export function getToolStaticPaths(locale: Lang) {
-  return TOOL_ROUTE_IDS.flatMap((routeId) =>
-    withLegacyAlias(
-      "tool",
-      getLocalizedSlug(routeId, locale),
-      getLegacySlug(LEGACY_TOOL_SLUG_BY_ROUTE_ID, routeId, locale),
-      routeId,
-    ),
-  );
+  return TOOL_ROUTE_IDS.map((routeId) => ({
+    params: { tool: getLocalizedSlug(routeId, locale) },
+    props: { routeId },
+  }));
 }
 
 export function getAdLandingStaticPaths(locale: Lang) {

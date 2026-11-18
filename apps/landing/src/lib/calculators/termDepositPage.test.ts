@@ -64,13 +64,12 @@ describe("term deposit tool page", () => {
 		}
 	})
 
-	it("is prerendered from the tool static paths in every locale, with no legacy slug", () => {
+	it("is prerendered from the tool static paths in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const pages = getToolStaticPaths(lang).filter(
 				(path) => path.props.routeId === "toolTermDeposit",
 			)
 			expect(pages).toHaveLength(1)
-			expect(pages[0].props.redirectTo).toBeUndefined()
 			expect(pages[0].params.tool).toBe(toLocalizedPath("toolTermDeposit", lang).split("/").pop())
 		}
 	})

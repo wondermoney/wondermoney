@@ -46,7 +46,7 @@ describe("compound interest tool page", () => {
 	it("is prerendered from the tool static paths in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const pages = getToolStaticPaths(lang).filter(
-				(path) => path.props.routeId === "toolCompoundInterest" && !path.props.redirectTo,
+				(path) => path.props.routeId === "toolCompoundInterest",
 			)
 			expect(pages).toHaveLength(1)
 		}

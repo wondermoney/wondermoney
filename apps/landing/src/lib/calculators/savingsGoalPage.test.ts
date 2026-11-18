@@ -54,7 +54,6 @@ describe("savings goal tool page", () => {
 				(path) => path.props.routeId === "toolSavingsGoal",
 			)
 			expect(pages).toHaveLength(1)
-			expect(pages[0].props.redirectTo).toBeUndefined()
 			expect(pages[0].params.tool).toBe(expectedPaths[lang].split("/").pop())
 		}
 	})

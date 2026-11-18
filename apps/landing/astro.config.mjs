@@ -6,6 +6,7 @@ import sitemap from "@astrojs/sitemap";
 import sanity from "@sanity/astro";
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
+import { getLegacyRedirects } from "./src/lib/legacySlugs.ts";
 import { isSitemapPage } from "./src/lib/sitemap.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,9 @@ export default defineConfig({
   adapter: vercel(),
   site: "https://wonder.money",
   trailingSlash: "never",
+  redirects: Object.fromEntries(
+    getLegacyRedirects().map(({ source, destination }) => [source, { destination, status: 301 }]),
+  ),
   // Astro 7 defaults to "jsx", which drops whitespace between inline elements the way React
   // does; the copy relies on HTML whitespace (`<strong>x</strong> y`), so keep HTML rules.
   compressHTML: true,
@@ -49,7 +53,7 @@ export default defineConfig({
         defaultLocale: "pt",
       },
       // filter: filterSitemapByDefaultLocale({ defaultLocale }),
-      // Leaves out the noindex ad landing pages and the legacy-slug redirect pages.
+      // Leaves out the noindex ad landing pages and the legacy aliases.
       filter: isSitemapPage,
     }),
   ],

@@ -2,7 +2,7 @@ import {
 	SUPPORTED_LANGS,
 	type Lang,
 	toLang,
-} from "./i18nLocale"
+} from "./i18nLocale.ts"
 
 type LocalizedSlugByLang = Record<Lang, string>
 
