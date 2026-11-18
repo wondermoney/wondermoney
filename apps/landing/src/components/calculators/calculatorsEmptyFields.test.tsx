@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import type { ComponentType } from "react";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import * as gtm from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import BorrowingCapacityCalculatorComp from "./BorrowingCapacityCalculatorComp";
 import BuyVsRentCalculatorComp from "./BuyVsRentCalculatorComp";
@@ -366,6 +367,27 @@ describe("mortgage transfer calculator", () => {
     expect(screen.getByText(message)).toBeTruthy();
     expect(screen.getByText("Your comparison appears once every field has a valid value.")).toBeTruthy();
     expect(figures()).toEqual([]);
+  });
+
+  it("reports one completion only after an edit produces a valid result", async () => {
+    const user = userEvent.setup();
+    const track = vi.spyOn(gtm, "pushGtmEvent").mockImplementation(() => {});
+    try {
+      render(<MortgageTransferCalculatorComp locale="en" />);
+      expect(track).not.toHaveBeenCalled();
+      const rate = screen.getByRole("spinbutton", { name: "Current interest rate" });
+      await user.clear(rate);
+      expect(track).not.toHaveBeenCalled();
+      await user.type(rate, "3.5");
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(track).toHaveBeenCalledWith({
+        event: "tool_used",
+        tool: "mortgage_transfer",
+        page_type: gtm.getPageType(),
+      });
+    } finally {
+      track.mockRestore();
+    }
   });
 
   it("asks for the time left when both of its fields are empty", async () => {

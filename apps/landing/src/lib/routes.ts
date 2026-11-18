@@ -635,6 +635,7 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolmortgage: "toolMortgage",
 	mortgagecalculator: "toolMortgage",
 	"mortgage-calculator": "toolMortgage",
+	"loan-calculator": "toolMortgage",
 	"credito-habitacao": "toolMortgage",
 	toolhouseholdbudget: "toolHouseholdBudget",
 	householdbudgetcalculator: "toolHouseholdBudget",

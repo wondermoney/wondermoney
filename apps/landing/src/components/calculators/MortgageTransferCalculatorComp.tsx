@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -96,16 +96,17 @@ function MortgageTransferCalculatorContent() {
     ],
   );
 
-  // The shared landing tool event: one `tool_used` per page view, on the visitor's first edit,
-  // without amounts. pushGtmEvent drops it unless analytics consent was given.
+  // Count the first valid edited result, excluding the example shown on page load.
+  const edited = useRef(false);
   const usageSent = useRef(false);
-  const reportUse = () => {
-    if (usageSent.current) return;
+  useEffect(() => {
+    if (!edited.current || !calculation.ok || usageSent.current) return;
     usageSent.current = true;
     pushGtmEvent({ event: "tool_used", tool: "mortgage_transfer", page_type: getPageType() });
-  };
+  }, [calculation]);
+
   const edit = (setter: (value: number) => void) => (value: number) => {
-    reportUse();
+    edited.current = true;
     setter(value);
   };
   const editTimeLeft = (setter: (value: number) => void, follow: (value: number) => void) =>

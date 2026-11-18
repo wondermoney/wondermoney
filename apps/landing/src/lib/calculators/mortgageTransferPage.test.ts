@@ -4,11 +4,14 @@ import { describe, expect, it, vi } from "vitest"
 import { getToolStaticPaths } from "../pageStaticPaths"
 import {
 	SUPPORTED_LANGS,
+	resolveCalculatorRouteIdFromLegacy,
 	resolveToolRouteId,
 	resolveToolRouteIdFromLegacy,
 	toLocalizedPath,
 	toLocalizedPathname,
 } from "../routes"
+import { getRelatedContentTools } from "../relatedContentTools"
+import { getTranslations } from "../translations"
 import { buildToolsHub, getToolCatalogEntry, toolAnalyticsName } from "../toolsCatalog"
 
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
@@ -82,6 +85,24 @@ describe("mortgage transfer tool page", () => {
 		)
 	})
 
+	it("adds a localized calculator link to related learn and glossary content", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const mortgage = resolveCalculatorRouteIdFromLegacy("loan-calculator", lang)
+			expect(mortgage).toBe("toolMortgage")
+			if (!mortgage) throw new Error("Missing mortgage route for the CMS calculator key")
+			const items = [{ href: toLocalizedPath(mortgage, lang) }]
+			const t = getTranslations(lang)
+			const transfer = {
+				href: toLocalizedPath("toolMortgageTransfer", lang),
+				title: t("tools.mortgageTransfer.title"),
+				description: "",
+				type: "calculator",
+			}
+			expect(getRelatedContentTools(items, lang, t)).toContainEqual(transfer)
+			expect(getRelatedContentTools([...items, transfer], lang, t)).not.toContainEqual(transfer)
+		}
+	})
+
 	it("is listed on the tools hub in every locale, after early repayment", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const group = buildToolsHub(lang).find((entry) => entry.id === "borrowAndBuyHome")
@@ -125,9 +146,9 @@ describe("mortgage transfer tool page", () => {
 		expect(new Set(copies.map((copy) => copy.pageDescription)).size).toBe(SUPPORTED_LANGS.length)
 	})
 
-	it("offers comparing loan offers as the next step", () => {
+	it("offers comparing your budget as the next step", () => {
 		expect(readLocale("src/locales", "en").tools.mortgageTransfer.cta.headline).toBe(
-			"Compare your loan offers in one place",
+			"Compare your budget before and after switching",
 		)
 		expect(readSource("../../components/pages/ToolDetailPage.astro")).toContain(
 			't("tools.mortgageTransfer.cta.headline")',
