@@ -57,6 +57,7 @@ export default function Footer({ className, locale }: Props) {
       href: toLocalizedPath(routeId, locale),
     })),
     resources: [
+      { name: t("guidedStart.title"), href: toLocalizedPath("pageGuidedStart", locale) },
       { name: t("footer.resources"), href: toLocalizedPath("pageResources", locale) },
       { name: t("footer.tools"), href: toToolsHubPath(locale) },
     ],

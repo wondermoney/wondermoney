@@ -13,10 +13,26 @@ export function buildResourcesHub(locale: Lang) {
     tools: toToolsHubPath(locale),
   };
 
-  return Object.entries(destinations).map(([destination, href]) => ({
+  const links = Object.entries(destinations).map(([destination, href]) => ({
     destination,
     href,
     title: t(`resources.links.${destination}.title`),
     description: t(`resources.links.${destination}.description`),
   }));
+
+  return [
+    {
+      destination: "guided_start",
+      href: toLocalizedPath("pageGuidedStart", locale),
+      title: t("guidedStart.title"),
+      description: t("guidedStart.intro"),
+    },
+    ...links,
+    {
+      destination: "investor_profile",
+      href: toLocalizedPath("toolInvestorProfile", locale),
+      title: t("tools.investorProfile.title"),
+      description: t("tools.investorProfile.description"),
+    },
+  ];
 }
