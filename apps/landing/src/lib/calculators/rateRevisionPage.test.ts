@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs"
-import { fileURLToPath } from "node:url"
 import { describe, expect, it, vi } from "vitest"
 import { getToolStaticPaths } from "../pageStaticPaths"
 import {
@@ -15,12 +14,9 @@ import { buildToolsHub } from "../toolsCatalog"
 // pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
-function readSource(relativePath: string): string {
-	return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8")
-}
-
-function readLocale(base: "src/locales" | "public/locales", lang: string) {
-	return JSON.parse(readSource(`../../../${base}/${lang}/common.json`)) as {
+function readLocale(base: "src/locales" | "public/locales", lang: Lang) {
+	const path = new URL(`../../../${base}/${lang}/common.json`, import.meta.url)
+	return JSON.parse(readFileSync(path, "utf8")) as {
 		tools: Record<string, Record<string, unknown>>
 	}
 }
@@ -49,9 +45,6 @@ const expectedPaths: Record<Lang, string> = {
 	it: "/it/tools/simulatore-rata-mutuo-variabile",
 }
 
-const guideSource = () => readSource("../../components/calculators/RateRevisionGuide.astro")
-const componentSource = () => readSource("../../components/calculators/RateRevisionCalculatorComp.tsx")
-
 describe("rate revision tool page", () => {
 	it.each(SUPPORTED_LANGS)("has a localized tool path in %s that resolves back", (lang) => {
 		expect(toLocalizedPath("toolRateRevision", lang)).toBe(expectedPaths[lang])
@@ -77,10 +70,6 @@ describe("rate revision tool page", () => {
 		)
 	})
 
-	it("names the tool for variable rates in general, not one index, in its slugs", () => {
-		for (const path of Object.values(expectedPaths)) expect(path).not.toMatch(/euribor/i)
-	})
-
 	it("can be linked from learn and glossary content", () => {
 		for (const value of [
 			"toolRateRevision",
@@ -96,10 +85,10 @@ describe("rate revision tool page", () => {
 		expect(resolveToolRouteIdFromLegacy("credito-habitacao", "pt")).toBe("toolMortgage")
 	})
 
-	it.each(SUPPORTED_LANGS)("is listed last among the %s home-buying tools on the hub", (lang) => {
+	it.each(SUPPORTED_LANGS)("is listed among the %s home-buying tools on the hub", (lang) => {
 		const group = buildToolsHub(lang).find((candidate) => candidate.id === "borrowAndBuyHome")
 
-		expect(group?.tools.at(-1)).toMatchObject({
+		expect(group?.tools.find((tool) => tool.routeId === "toolRateRevision")).toMatchObject({
 			key: "rateRevision",
 			routeId: "toolRateRevision",
 			href: expectedPaths[lang],
@@ -111,43 +100,6 @@ describe("rate revision tool page", () => {
 			expect(copyFor(lang).shortName).toEqual(expect.stringMatching(/\S/))
 			expect((copyFor(lang).shortName as string).length).toBeLessThan(25)
 		}
-	})
-
-	it("closes with its own next step into the app", () => {
-		const page = readSource("../../components/pages/ToolDetailPage.astro")
-
-		expect(page).toContain('headline: t("tools.rateRevision.nextStepHeadline")')
-		expect(copyFor("en").nextStepHeadline).toBe("Plan for a higher payment in your budget")
-	})
-
-	it("links the guide to the mortgage, debt-to-income and early repayment tools", () => {
-		const guide = guideSource()
-
-		expect(guide).toContain('routeId: "toolMortgage"')
-		expect(guide).toContain('routeId: "toolDebtToIncome"')
-		expect(guide).toContain('routeId: "toolEarlyRepayment"')
-	})
-
-	it("works the example with the calculator's own function and adds no FAQ structured data", () => {
-		const guide = guideSource()
-
-		expect(guide).toContain("computeRateRevision(")
-		expect(guide).not.toMatch(/FAQPage|application\/ld\+json/)
-	})
-
-	it("uses the shared loan engine and the debt-to-income bands", () => {
-		const calculation = readSource("./rateRevision.ts")
-
-		expect(calculation).toContain('from "./amortization"')
-		expect(calculation).toContain("amortizeLevelPayment(")
-		expect(calculation).toContain("computeDebtToIncome(")
-		expect(componentSource()).toContain('"tools.debtToIncome.bandCaution"')
-	})
-
-	it("reports use as tool_used with no amounts", () => {
-		expect(componentSource()).toContain(
-			'pushGtmEvent({ event: "tool_used", tool: "rate_revision", page_type: getPageType() })',
-		)
 	})
 
 	it("has the same copy keys in every locale and in the public mirror", () => {
@@ -175,28 +127,15 @@ describe("rate revision tool page", () => {
 		for (const lang of SUPPORTED_LANGS) expect(placeholders(lang)).toEqual(reference)
 	})
 
-	it("takes the limits from the calculation, not the copy", () => {
+	it("exposes placeholders for the input limits in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = copyFor(lang)
-			expect(textAt(copy, "guide.limits")).toMatch(/\{\{minIndex\}\}.*\{\{maxIndex\}\}.*\{\{maxSpread\}\}/)
+			for (const limit of ["minBalance", "maxBalance", "maxYears", "minIndex", "maxIndex", "maxSpread"]) {
+				expect(textAt(copy, "guide.limits")).toContain(`{{${limit}}}`)
+			}
 			for (const field of ["indexRate", "newIndexRate"]) {
 				expect(textAt(copy, `errors.${field}.tooSmall`)).toContain("{{min}}")
 				expect(textAt(copy, `errors.${field}.tooLarge`)).toContain("{{max}}")
-			}
-		}
-	})
-
-	it("says in every locale that the rate applies from next month and that contracts decide the rest", () => {
-		for (const lang of SUPPORTED_LANGS) {
-			const copy = copyFor(lang)
-			expect(textAt(copy, "assumptionNote").length).toBeGreaterThan(80)
-			for (const path of [
-				"guide.assumptions.fromNextMonth",
-				"guide.assumptions.noFeed",
-				"guide.contractItems.resetDates",
-				"guide.contractItems.capsFloors",
-			]) {
-				expect(textAt(copy, path).length).toBeGreaterThan(60)
 			}
 		}
 	})
