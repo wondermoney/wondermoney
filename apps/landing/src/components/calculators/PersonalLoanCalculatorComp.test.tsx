@@ -93,10 +93,14 @@ describe("personal loan calculator", () => {
     expect(screen.getByText("Enter upfront fees up to €5,000.00, half the amount borrowed.")).toBeTruthy();
   });
 
-  it("reports use once, on the first edit, with no amounts", async () => {
+  it("reports one completion after a valid edited result, with no amounts", async () => {
     render(<PersonalLoanCalculatorComp locale="en" />);
     expect(pushGtmEvent).not.toHaveBeenCalled();
-    await enter("Amount borrowed", "12000");
+    const user = userEvent.setup();
+    const amount = screen.getByRole("spinbutton", { name: "Amount borrowed" });
+    await user.clear(amount);
+    expect(pushGtmEvent).not.toHaveBeenCalled();
+    await user.type(amount, "12000");
     await enter("Interest rate", "7");
 
     expect(pushGtmEvent).toHaveBeenCalledTimes(1);

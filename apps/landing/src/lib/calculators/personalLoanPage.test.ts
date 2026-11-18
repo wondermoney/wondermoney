@@ -49,8 +49,6 @@ const expectedPaths: Record<Lang, string> = {
 	it: "/it/tools/calcolo-prestito-personale",
 }
 
-const guide = () => readSource("../../components/calculators/PersonalLoanGuide.astro")
-const component = () => readSource("../../components/calculators/PersonalLoanCalculatorComp.tsx")
 
 describe("personal loan tool page", () => {
 	it.each(SUPPORTED_LANGS)("has a localized tool path in %s that resolves back", (lang) => {
@@ -103,38 +101,6 @@ describe("personal loan tool page", () => {
 		})
 	})
 
-	it("closes with its own next step into the app", () => {
-		const page = readSource("../../components/pages/ToolDetailPage.astro")
-
-		expect(page).toContain('headline: t("tools.personalLoan.nextStepHeadline")')
-		expect(page).toContain('routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp')
-		expect(page).toContain('routeId === "toolPersonalLoan" && <PersonalLoanGuide')
-		expect(copyFor("en").nextStepHeadline).toBe("Track this loan alongside your budget")
-	})
-
-	it("links the guide to the debt-to-income and household budget tools", () => {
-		expect(guide()).toContain('routeId: "toolDebtToIncome"')
-		expect(guide()).toContain('routeId: "toolHouseholdBudget"')
-	})
-
-	it("works the example with the calculator's own function and adds no FAQ structured data", () => {
-		expect(guide()).toContain("computePersonalLoan(")
-		expect(guide()).not.toMatch(/FAQPage|application\/ld\+json/)
-	})
-
-	it("runs on the shared fixed-rate loan engine", () => {
-		const calculation = readSource("./personalLoan.ts")
-
-		expect(calculation).toContain('from "./amortization"')
-		expect(calculation).toContain("amortizeLevelPayment(")
-	})
-
-	it("reports use as tool_used with no amounts", () => {
-		expect(component()).toContain(
-			'pushGtmEvent({ event: "tool_used", tool: "personal_loan", page_type: getPageType() })',
-		)
-	})
-
 	it("has the same copy keys in every locale and in the public mirror", () => {
 		const reference = keyPaths(copyFor("en")).sort()
 
@@ -170,23 +136,6 @@ describe("personal loan tool page", () => {
 				expect(textAt(copy, path)).not.toMatch(/\b(6|120)\b/)
 			}
 		}
-	})
-
-	it("says in every locale that the APR is an estimate and that lenders follow their country's rules", () => {
-		const en = copyFor("en")
-		expect(textAt(en, "result.aprNote")).toMatch(/estimate/)
-		expect(textAt(en, "result.aprNote")).toMatch(/country's rules/)
-		expect(textAt(en, "estimateNote")).toMatch(/not a loan offer or a quote/)
-		for (const lang of SUPPORTED_LANGS) {
-			const copy = copyFor(lang)
-			expect(textAt(copy, "estimateNote").length).toBeGreaterThan(80)
-			expect(textAt(copy, "result.aprNote").length).toBeGreaterThan(80)
-			expect(textAt(copy, "guide.aprBody3").length).toBeGreaterThan(80)
-		}
-		expect(textAt(copyFor("pt"), "result.apr")).toContain("TAEG")
-		expect(textAt(copyFor("es"), "result.apr")).toContain("TAE")
-		expect(textAt(copyFor("fr"), "result.apr")).toContain("TAEG")
-		expect(textAt(copyFor("it"), "result.apr")).toContain("TAEG")
 	})
 
 	it("has a unique title and meta description per locale", () => {

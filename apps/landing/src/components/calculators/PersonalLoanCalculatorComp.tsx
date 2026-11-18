@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
@@ -43,14 +43,16 @@ function PersonalLoanCalculatorContent() {
   });
   const calculation = useMemo(() => computePersonalLoan(input), [input]);
 
-  // The shared landing tool event: one `tool_used` per page view, on the visitor's first edit,
-  // without amounts. pushGtmEvent drops it unless analytics consent was given.
+  // Completion means an edit produced a valid result; the shared tracker applies consent.
   const usageSent = useRef(false);
+  const [edited, setEdited] = useState(false);
+  useEffect(() => {
+    if (!edited || !calculation.ok || usageSent.current) return;
+    usageSent.current = true;
+    pushGtmEvent({ event: "tool_used", tool: "personal_loan", page_type: getPageType() });
+  }, [edited, calculation]);
   const edit = (field: PersonalLoanField) => (value: number) => {
-    if (!usageSent.current) {
-      usageSent.current = true;
-      pushGtmEvent({ event: "tool_used", tool: "personal_loan", page_type: getPageType() });
-    }
+    setEdited(true);
     setInput((current) => ({ ...current, [field]: value }));
   };
 
