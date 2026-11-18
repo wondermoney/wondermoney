@@ -633,9 +633,9 @@
       "subtitle": "Finden Sie heraus, wie viel Prozent Ihres Einkommens Sie monatlich sparen. Die Sparquote ist eine der wichtigsten Kennzahlen in der persönlichen Finanzplanung — sie bestimmt, wie schnell Sie Vermögen aufbauen."
     },
     "investmentReturn": {
-      "title": "Anlagerenditerechner",
+      "title": "Anlagerendite und Indexprognose",
       "shortName": "Anlagerendite",
-      "description": "Sehen Sie die annualisierte Rendite einer beliebigen Anlage anhand von Anfangswert, Endwert und Anlagezeitraum.",
+      "description": "Berechnen Sie vergangene Renditen oder simulieren Sie eine Indexanlage mit monatlichen Einzahlungen und Kosten.",
       "initialInvestment": "Anfangsinvestition",
       "currentValue": "Aktueller Wert",
       "investmentPeriod": "Anlagezeitraum (Jahre)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Gesamtrendite (%)",
       "annualizedReturn": "Annualisierte Rendite",
       "periodHelp": "Anzahl der Jahre, die Sie die Anlage gehalten haben",
-      "pageTitle": "Anlagerenditerechner — WonderMoney",
-      "pageDescription": "Kostenloser Anlagerenditerechner. Berechnen Sie die Gesamt- und annualisierte Rendite einer beliebigen Anlage. Vergleichen Sie Entwicklungen über verschiedene Zeiträume.",
-      "subtitle": "Berechnen Sie die Gesamt- und annualisierte Rendite einer Anlage. Geben Sie ein, was Sie investiert haben, was es heute wert ist und wie lange Sie es gehalten haben."
+      "pageTitle": "Rechner für Anlagerendite und Indexfonds — WonderMoney",
+      "pageDescription": "Berechnen Sie eine Anlagerendite oder simulieren Sie einen ETF oder Indexfonds mit monatlichen Einzahlungen, angenommener Rendite und jährlichen Kosten.",
+      "subtitle": "Berechnen Sie die Gesamtrendite und die annualisierte Rendite einer bestehenden Anlage oder schätzen Sie, wie Einzahlungen und Kosten eine Indexanlage beeinflussen.",
+      "projection": {
+        "pastHeading": "Vergangene Rendite berechnen",
+        "heading": "Indexfonds oder ETF simulieren",
+        "intro": "Geben Sie eine angenommene Jahresrendite und die Fondskosten ein und vergleichen Sie den möglichen Wert derselben Anlage mit und ohne diese Kosten.",
+        "principal": "Startkapital",
+        "monthlyContribution": "Monatliche Einzahlung",
+        "annualRate": "Angenommene Jahresrendite vor Kosten",
+        "annualFee": "Jährliche Fondskosten",
+        "years": "Anlagezeitraum (ganze Jahre)",
+        "range": "Zulässig von {{min}} bis {{max}}",
+        "contributed": "Insgesamt eingezahlt",
+        "beforeFees": "Prognostizierter Wert vor Kosten",
+        "afterFees": "Prognostizierter Wert nach Kosten",
+        "feeImpact": "Minderung des prognostizierten Werts durch Kosten",
+        "incomplete": "Füllen Sie alle Felder aus, um die Prognose zu sehen. Geben Sie null ein, wenn ein Wert entfällt.",
+        "outOfRange": "Beachten Sie die angezeigten Wertebereiche und geben Sie die Laufzeit in ganzen Jahren an.",
+        "tooLarge": "Dieses Szenario überschreitet die Grenze des Rechners. Verringern Sie den Betrag, die Rendite oder die Laufzeit.",
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Sie starten mit {{principal}}, zahlen jeweils am Monatsende {{monthly}} ein und nehmen für {{years}} Jahre eine konstante Jahresrendite von {{annualRate}} an. Mit jährlichen Fondskosten von {{fee}} sinkt der prognostizierte Wert von {{beforeFees}} auf {{afterFees}}. Der Unterschied beträgt {{feeImpact}}.",
+        "methodTitle": "So funktioniert die Prognose",
+        "method": "Wir multiplizieren den jährlichen Wachstumsfaktor mit eins abzüglich des jährlichen Kostensatzes. Die jährlichen Brutto- und Nettowachstumsfaktoren rechnen wir in entsprechende Monatsfaktoren um. Jeden Monat berechnen wir erst das Wachstum und addieren dann die Einzahlung.",
+        "assumptions": "Das Modell unterstellt eine konstante Rendite und konstante Kosten, wiederangelegte Ausschüttungen und Einzahlungen am Monatsende. Steuern, Ordergebühren, Wechselkursänderungen und Inflation bleiben unberücksichtigt. Die Zinssätze sind beispielhafte Annahmen für einen Index wie den S&P 500. Tatsächliche Renditen schwanken und können negativ sein. Der Kosteneffekt umfasst auch die entgangene Rendite auf die abgezogenen Beträge.",
+        "ctaHeadline": "Die tatsächliche Wertentwicklung Ihrer Anlagen verfolgen",
+        "ctaDescription": "Verfolgen Sie Ihr Portfolio mit WonderMoney und vergleichen Sie die tatsächliche Wertentwicklung mit dem simulierten Szenario.",
+        "ctaText": "Anlagen mit der Prognose vergleichen"
+      }
     },
     "emergencyFund": {
       "title": "Notgroschen-Rechner",
@@ -2065,6 +2091,111 @@
           "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
         },
         "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
+      }
+    },
+    "personalLoan": {
+      "title": "Privatkredit-Rechner",
+      "shortName": "Privatkredit",
+      "description": "Berechnen Sie die Monatsrate, die Gesamtkosten und einen geschätzten effektiven Jahreszins eines Privatkredits mit Gebühren, samt Tilgungsplan Monat für Monat.",
+      "pageTitle": "Privatkredit-Rechner: Monatsrate, Gesamtkosten und effektiver Jahreszins — WonderMoney",
+      "pageDescription": "Kostenloser Privatkredit-Rechner. Geben Sie Betrag, Laufzeit, Zinssatz und Gebühren ein und sehen Sie die Monatsrate, die Gesamtkosten des Kredits, einen geschätzten effektiven Jahreszins und den Tilgungsplan Monat für Monat. Keine Anmeldung nötig.",
+      "subtitle": "Zwei Kredite mit demselben Zinssatz können sehr unterschiedlich viel kosten, sobald die Gebühren dazukommen. Geben Sie Ihr Angebot mit den Gebühren ein und sehen Sie, was es im Monat und insgesamt kostet. Keine Anmeldung nötig.",
+      "amount": "Kreditbetrag",
+      "amountHelp": "Was der Kreditgeber Ihnen leiht, bevor Gebühren abgezogen werden.",
+      "termMonths": "Laufzeit",
+      "termMonthsHelp": "Anzahl der Monatsraten, von {{min}} bis {{max}}.",
+      "months": "Monate",
+      "annualRate": "Zinssatz",
+      "annualRateHelp": "Der feste Sollzins aus dem Angebot, nicht der effektive Jahreszins: Den berechnet dieser Rechner.",
+      "upfrontFees": "Einmalige Gebühren",
+      "upfrontFeesHelp": "Kosten, die einmal zu Beginn des Kredits anfallen, etwa eine Bearbeitungsgebühr, und Steuern auf den Kredit, falls es sie gibt. Lassen Sie 0 stehen, wenn es keine gibt.",
+      "monthlyFees": "Monatliche Gebühren und Versicherung",
+      "monthlyFeesHelp": "Werden mit jeder Rate fällig, etwa eine Kontoführungsgebühr oder der Beitrag einer Versicherung, die der Kredit verlangt. Lassen Sie 0 stehen, wenn es keine gibt.",
+      "result": {
+        "monthlyPayment": "Monatsrate",
+        "monthlyPaymentSplit": "{{loan}} für den Kredit plus {{fees}} Gebühren.",
+        "paymentsNote": "{{count}} Monatsraten. Die folgenden weichen höchstens einen Cent von der ersten ab; die letzte, {{last}}, tilgt den Rest.",
+        "apr": "Geschätzter effektiver Jahreszins mit Gebühren",
+        "aprOver": "über {{max}}",
+        "aprNote": "Eine Schätzung des effektiven Jahreszinses, berechnet aus dem Geld, das Sie erhalten, und jeder Rate, die Sie zahlen. Die Zahl, die ein Kreditgeber nennt, folgt den Regeln seines Landes und kann Kosten enthalten, die dieser Rechner nicht kennt.",
+        "totalInterest": "Zinsen insgesamt",
+        "totalFees": "Gebühren insgesamt",
+        "totalCostOfCredit": "Gesamtkosten des Kredits",
+        "totalRepaid": "Insgesamt gezahlt, mit Gebühren",
+        "amountReceived": "Sie erhalten {{amount}}, nachdem die einmaligen Gebühren abgezogen sind."
+      },
+      "estimateNote": "Dies ist eine Schätzung, kein Kreditangebot und kein Kostenvoranschlag. Zinssatz, Gebühren und Zusage hängen vom Kreditgeber und von Ihrer Lage ab: Vergleichen Sie vor der Unterschrift die Zahlen im schriftlichen Angebot jedes Kreditgebers.",
+      "schedule": {
+        "title": "Tilgungsplan",
+        "description": "Wie sich jede Rate auf Zinsen, Tilgung und Gebühren aufteilt und was Sie danach noch schulden.",
+        "upfrontNote": "Die einmaligen Gebühren von {{fees}} werden zu Beginn gezahlt und stehen nicht in der Tabelle.",
+        "show": "Tilgungsplan anzeigen",
+        "hide": "Tilgungsplan ausblenden",
+        "month": "Monat",
+        "payment": "Rate",
+        "principal": "Tilgung",
+        "interest": "Zinsen",
+        "fees": "Gebühren",
+        "balance": "Restschuld",
+        "total": "Summe"
+      },
+      "errors": {
+        "summary": "Das Ergebnis erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "amount": {
+          "required": "Geben Sie den Betrag ein, den Sie leihen möchten.",
+          "tooSmall": "Geben Sie mindestens {{min}} ein.",
+          "tooLarge": "Geben Sie einen Betrag bis {{max}} ein."
+        },
+        "termMonths": {
+          "required": "Geben Sie die Laufzeit in Monaten ein.",
+          "tooSmall": "Geben Sie eine Laufzeit von mindestens {{min}} Monaten ein.",
+          "tooLarge": "Geben Sie eine Laufzeit von höchstens {{max}} Monaten ein."
+        },
+        "annualRate": {
+          "required": "Geben Sie den Zinssatz ein.",
+          "negative": "Der Zinssatz kann nicht negativ sein. Geben Sie 0 für einen zinslosen Kredit ein.",
+          "tooLarge": "Geben Sie einen Zinssatz bis {{max}} ein."
+        },
+        "upfrontFees": {
+          "negative": "Gebühren können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie einmalige Gebühren bis {{max}} ein, die Hälfte des Kreditbetrags."
+        },
+        "monthlyFees": {
+          "negative": "Gebühren können nicht negativ sein. Geben Sie 0 ein, wenn es keine gibt.",
+          "tooLarge": "Geben Sie monatliche Gebühren bis {{max}} ein."
+        }
+      },
+      "nextStepHeadline": "Behalten Sie diesen Kredit neben Ihrem Budget im Blick",
+      "nextStepDescription": "Erfassen Sie den Kredit in WonderMoney mit Zinssatz und Laufzeit, planen Sie die Monatsrate in Ihrem Budget ein und sehen Sie, wie die Restschuld neben Ihren tatsächlichen Ausgaben sinkt.",
+      "nextStepCta": "Rate im Monatsbudget sehen",
+      "guide": {
+        "whatTitle": "Was ein Privatkredit wirklich kostet",
+        "whatBody1": "Bei einem Privatkredit mit festem Zinssatz zahlen Sie über eine feste Laufzeit annähernd gleich hohe Monatsraten. Jede Rate deckt die Zinsen auf die Restschuld und tilgt einen Teil des Kredits. Wenn die Restschuld sinkt, wird der Zinsanteil kleiner und der Tilgungsanteil größer.",
+        "whatBody2": "Der Zinssatz ist nur ein Teil des Preises. Kreditgeber verlangen oft eine Gebühr zu Beginn und eine monatliche Gebühr, etwa für die Kontoführung oder eine Versicherung. Diese Gebühren kommen zu den Zinsen hinzu und können bei einem kleinen oder kurzen Kredit mehr kosten als die Zinsen selbst.",
+        "whatBody3": "Prüfen Sie vor dem Abschluss, ob die Rate passt: neben den Krediten, die Sie schon abzahlen, und innerhalb des Budgets, mit dem Sie heute leben.",
+        "relatedDebtToIncome": "zeigt, welchen Anteil Ihres Einkommens Ihre Kreditraten einschließlich dieser beanspruchen würden.",
+        "relatedHouseholdBudget": "zeigt, wohin Ihr Geld jeden Monat geht, damit Sie sehen, was die neue Rate ersetzen müsste.",
+        "aprTitle": "Sollzins und effektiver Jahreszins sind nicht dasselbe",
+        "aprBody1": "Der Zinssatz eines Angebots ist ein nominaler Jahreszins, der Sollzins: Er legt die Zinsen jedes Monats fest, ein Zwölftel davon auf die Restschuld. Gebühren lässt er außen vor, und weil die Zinsen jeden Monat berechnet werden, liegt er selbst bei einem Kredit ohne Gebühren unter den jährlichen Kosten.",
+        "aprBody2": "Der effektive Jahreszins fasst alles in einer Zahl zusammen. Er ist der Jahreszins, bei dem das Geld, das Sie tatsächlich erhalten (der Betrag abzüglich der einmaligen Gebühren), allen Raten entspricht, die Sie mit Gebühren zahlen. Zwei Angebote mit gleichem Betrag und gleicher Laufzeit lassen sich am effektiven Jahreszins vergleichen: Das niedrigere kostet weniger.",
+        "aprBody3": "Jeder Kreditgeber berechnet den effektiven Jahreszins nach den Regeln seines Landes, die Kosten einschließen können, nach denen dieser Rechner nicht fragt, und Monate anders zählen. Der hier gezeigte Wert ist eine Schätzung zum Vergleichen von Angeboten, nicht die Zahl in einem Vertrag.",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleIntro": "Angenommen, Sie leihen {{amount}} über {{months}} Monate zu einem Sollzins von {{rate}}, ohne Gebühren.",
+        "exampleNoFees": "Die Monatsrate beträgt {{payment}}. Über die Laufzeit zahlen Sie {{interest}} Zinsen und insgesamt {{totalRepaid}}. Selbst ohne Gebühren liegt der effektive Jahreszins bei {{apr}}, etwas über {{rate}}, weil die Zinsen jeden Monat berechnet werden.",
+        "exampleFees": "Nehmen Sie jetzt {{upfront}} einmalige Gebühren und {{monthlyFee}} Gebühren im Monat dazu. Sie erhalten {{received}}, und jede Rate steigt auf {{paymentWithFees}}. Die Gebühren kosten {{fees}}, die Kreditkosten steigen damit auf {{cost}}, und Sie zahlen insgesamt {{totalRepaidFees}}.",
+        "exampleApr": "Der Zinssatz bleibt bei {{rate}}, doch der effektive Jahreszins steigt auf {{aprFees}}. Diese Zahl sollten Sie mit einem anderen Angebot vergleichen: Ein Kredit mit höherem Zinssatz und ohne Gebühren kann günstiger sein.",
+        "exampleOutro": "Der Rechner oben beginnt mit diesem Kredit ohne die Gebühren, damit Sie Ihr eigenes Angebot eingeben können.",
+        "methodTitle": "So rechnet der Rechner",
+        "methodIntro": "Die Monatsrate ist die gleichbleibende Rate, die den Betrag über die Laufzeit zum Monatszins zurückzahlt, und der effektive Jahreszins ist der Zins, bei dem sich Erhaltenes und Gezahltes ausgleichen:",
+        "methodLegend": "M ist die Rate aus Tilgung und Zinsen, P der Kreditbetrag, r der nominale Jahreszins geteilt durch 12 und n die Zahl der Monate. Die monatlichen Gebühren f kommen zu jeder Rate hinzu.",
+        "methodApr": "Der effektive Jahreszins ist der Zins A, der die zweite Zeile löst: Was Sie zu Beginn erhalten, der Betrag P abzüglich der einmaligen Gebühren F, entspricht der Rate jedes Monats Mₖ plus den Gebühren f, abgezinst mit (1 + A) hoch k ÷ 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
+        "methodRounding": "Jede Zahl wird in ganzen Cent gerechnet. Jede Rate wird aus der jeweiligen Restschuld neu berechnet, so bleiben die Raten innerhalb eines Cents beieinander, die letzte tilgt den Rest genau, und der Plan ergibt die Summen.",
+        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Nichts, was Sie eingeben, wird gesendet oder gespeichert.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionFixedRate": "Der Zinssatz ist über die ganze Laufzeit fest, und jede Rate wird pünktlich gezahlt.",
+        "assumptionFees": "Die einmaligen Gebühren werden zu Beginn gezahlt oder vom Betrag abgezogen; die monatlichen Gebühren sind jeden Monat gleich.",
+        "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
+        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
       }
     }
   },

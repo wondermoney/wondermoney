@@ -115,11 +115,11 @@ export type ContributionComparison = {
 
 type Clamped = { value: number; adjusted: boolean };
 
-function clamp(value: number, max: number): Clamped {
+function clamp(value: number, max: number, min = 0): Clamped {
   // An empty amount or inflation (NaN) reads as 0, which is in range. An empty return or
   // period is caught before this and reported as `incomplete`.
   if (Number.isNaN(value)) return { value: 0, adjusted: false };
-  if (value < 0) return { value: 0, adjusted: true };
+  if (value < min) return { value: min, adjusted: true };
   if (value > max) return { value: max, adjusted: true };
   return { value, adjusted: false };
 }
@@ -142,10 +142,14 @@ function totalsFromCents(contributedCents: number, finalCents: number): Compound
   return { contributed, growth: finalValue - contributed, finalValue };
 }
 
-export function computeCompoundInterest(params: CompoundInterestParams): CompoundInterestResult {
+export function computeCompoundInterest(
+  params: CompoundInterestParams,
+  { allowNegativeReturn = false } = {},
+): CompoundInterestResult {
   const principal = clamp(params.principal, MAX_AMOUNT);
   const contribution = clamp(params.monthlyContribution, MAX_AMOUNT);
-  const annualRate = clamp(params.annualRate, MAX_RATE);
+  // The lowest nominal rate allowed in a loss scenario is -100%, safely above a total monthly loss.
+  const annualRate = clamp(params.annualRate, MAX_RATE, allowNegativeReturn ? -100 : 0);
   const inflationRate = clamp(params.inflationRate, MAX_RATE);
   const years = clampYears(params.years);
 

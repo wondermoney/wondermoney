@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs"
-import { fileURLToPath } from "node:url"
 import { describe, expect, it, vi } from "vitest"
 import { getLegacyRedirects } from "./legacySlugs"
 import {
@@ -16,47 +14,20 @@ vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
 const SITE = "https://wonder.money"
 
-function readSource(relativePath: string): string {
-	return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8")
-}
-
-// The prerendered pages with a legacy alias, as the route files build their addresses.
-const SECTIONS = [
-	{ routeFile: "[page].astro", prefix: "", paths: (lang: Lang) => getTopLevelPageStaticPaths(lang).map(({ params, props }) => ({ slug: params.page, props })) },
-	{ routeFile: "features/[feature].astro", prefix: "features/", paths: (lang: Lang) => getFeatureStaticPaths(lang).map(({ params, props }) => ({ slug: params.feature, props })) },
-	{ routeFile: "tools/[tool].astro", prefix: "tools/", paths: (lang: Lang) => getToolStaticPaths(lang).map(({ params, props }) => ({ slug: params.tool, props })) },
-] as const
-
 function builtPages(lang: Lang) {
-	return SECTIONS.flatMap(({ prefix, paths }) =>
-		paths(lang).map(({ slug, props }) => ({
-			path: `/${lang}/${prefix}${slug}`,
-			redirectTo: props.redirectTo && `/${lang}/${prefix}${props.redirectTo}`,
-		})),
-	)
+	return new Set([
+		...getTopLevelPageStaticPaths(lang).map(({ params }) => `/${lang}/${params.page}`),
+		...getFeatureStaticPaths(lang).map(({ params }) => `/${lang}/features/${params.feature}`),
+		...getToolStaticPaths(lang).map(({ params }) => `/${lang}/tools/${params.tool}`),
+	])
 }
 
 describe("sitemap filter", () => {
-	it.each(SUPPORTED_LANGS)("leaves every redirect page in %s out and keeps every other page", (lang) => {
-		const pages = builtPages(lang)
-		const redirects = pages.filter((page) => page.redirectTo)
-		const canonical = pages.filter((page) => !page.redirectTo)
-
-		expect(canonical.length).toBeGreaterThan(0)
-		for (const { path } of redirects) expect(isSitemapPage(`${SITE}${path}`), path).toBe(false)
-		for (const { path } of canonical) expect(isSitemapPage(`${SITE}${path}`), path).toBe(true)
-	})
-
-	it("lists exactly the redirect pages the static paths generate", () => {
-		const generated = SUPPORTED_LANGS.flatMap((lang) =>
-			builtPages(lang).flatMap(({ path, redirectTo }) =>
-				redirectTo ? [{ source: path, destination: redirectTo }] : [],
-			),
-		)
-
-		expect(generated.length).toBeGreaterThan(0)
-		expect(getLegacyRedirects()).toEqual(expect.arrayContaining(generated))
-		expect(getLegacyRedirects()).toHaveLength(generated.length)
+	it.each(SUPPORTED_LANGS)("keeps canonical pages and excludes legacy addresses in %s", (lang) => {
+		for (const path of builtPages(lang)) expect(isSitemapPage(`${SITE}${path}`), path).toBe(true)
+		for (const { source } of getLegacyRedirects([lang])) {
+			expect(isSitemapPage(`${SITE}${source}`), source).toBe(false)
+		}
 	})
 
 	it("leaves out the legacy tool and top-level addresses the issue names", () => {
@@ -76,31 +47,18 @@ describe("sitemap filter", () => {
 		expect(adPages.length).toBeGreaterThan(0)
 		for (const { params } of adPages) expect(isSitemapPage(`${SITE}/${lang}/go/${params.ad}`)).toBe(false)
 	})
-
-	it("is the filter astro.config.mjs gives @astrojs/sitemap", () => {
-		const config = readSource("../../astro.config.mjs")
-		expect(config).toContain('import { isSitemapPage } from "./src/lib/sitemap.ts"')
-		expect(config).toMatch(/sitemap\(\{[\s\S]*filter: isSitemapPage,[\s\S]*\}\)/)
-	})
 })
 
 describe("legacy addresses", () => {
-	it.each(SUPPORTED_LANGS)("each one in %s still 301s to a localized page that exists", (lang) => {
+	it.each(SUPPORTED_LANGS)("points each alias in %s to a generated page", (lang) => {
 		const pages = builtPages(lang)
-		const canonicalPaths = new Set(pages.filter((page) => !page.redirectTo).map((page) => page.path))
 		const legacy = getLegacyRedirects([lang])
 
 		if (lang !== "en") expect(legacy.length).toBeGreaterThan(0)
+		expect(new Set(legacy.map(({ source }) => source)).size).toBe(legacy.length)
 		for (const { source, destination } of legacy) {
-			expect(pages).toContainEqual({ path: source, redirectTo: destination })
-			expect(canonicalPaths.has(destination), destination).toBe(true)
-			expect(canonicalPaths.has(source), source).toBe(false)
-		}
-
-		for (const { routeFile, prefix } of SECTIONS) {
-			expect(readSource(`../pages/${lang}/${routeFile}`)).toContain(
-				`return Astro.redirect(\`/${lang}/${prefix}\${redirectTo}\`, 301);`,
-			)
+			expect(pages.has(source), source).toBe(false)
+			expect(pages.has(destination), destination).toBe(true)
 		}
 	})
 

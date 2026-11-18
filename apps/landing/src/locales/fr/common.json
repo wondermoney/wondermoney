@@ -633,9 +633,9 @@
       "subtitle": "Découvrez quel pourcentage de vos revenus vous épargnez chaque mois. Votre taux d'épargne est l'un des chiffres les plus importants en finances personnelles — il détermine à quelle vitesse vous accumulez de la richesse."
     },
     "investmentReturn": {
-      "title": "Calculatrice de rendement d'investissement",
+      "title": "Rendement et projection d’un placement indiciel",
       "shortName": "Rendement d'investissement",
-      "description": "Calculez le rendement annualisé de n'importe quel investissement à partir d'une valeur initiale, d'une valeur finale et d'une durée.",
+      "description": "Calculez le rendement passé ou projetez un placement indiciel avec des versements mensuels et des frais.",
       "initialInvestment": "Investissement initial",
       "currentValue": "Valeur actuelle",
       "investmentPeriod": "Durée d'investissement (années)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Rendement total (%)",
       "annualizedReturn": "Rendement annualisé",
       "periodHelp": "Nombre d'années pendant lesquelles vous avez détenu l'investissement",
-      "pageTitle": "Calculatrice de rendement d'investissement — WonderMoney",
-      "pageDescription": "Calculatrice de rendement d'investissement gratuite. Calculez le rendement total et annualisé de n'importe quel investissement. Comparez les performances sur différentes périodes.",
-      "subtitle": "Calculez le rendement total et annualisé de n'importe quel investissement. Saisissez ce que vous avez investi, sa valeur actuelle et depuis combien de temps vous le détenez."
+      "pageTitle": "Calculateur de rendement et de placement indiciel — WonderMoney",
+      "pageDescription": "Calculez le rendement ou simulez un ETF ou un fonds indiciel avec des versements mensuels, une hypothèse de rendement et des frais annuels.",
+      "subtitle": "Calculez le rendement total et annualisé d’un placement existant ou estimez l’effet des versements et des frais sur un placement indiciel.",
+      "projection": {
+        "pastHeading": "Mesurez le rendement passé",
+        "heading": "Simulez un fonds indiciel ou un ETF",
+        "intro": "Saisissez votre hypothèse de rendement annuel et les frais du fonds pour comparer sa valeur potentielle avec et sans ces frais.",
+        "principal": "Capital de départ",
+        "monthlyContribution": "Versement mensuel",
+        "annualRate": "Rendement annuel supposé avant frais",
+        "annualFee": "Frais annuels du fonds",
+        "years": "Durée de la projection (années entières)",
+        "range": "De {{min}} à {{max}}",
+        "contributed": "Total versé",
+        "beforeFees": "Valeur projetée avant frais",
+        "afterFees": "Valeur projetée après frais",
+        "feeImpact": "Baisse de la valeur projetée due aux frais",
+        "incomplete": "Renseignez chaque champ pour afficher la projection. Saisissez zéro si une valeur ne s’applique pas.",
+        "outOfRange": "Respectez la plage indiquée pour chaque champ et saisissez un nombre entier d’années.",
+        "tooLarge": "Ce scénario dépasse la limite du calculateur. Réduisez le montant, le rendement ou la durée.",
+        "exampleTitle": "Exemple chiffré",
+        "example": "Vous partez de {{principal}}, versez {{monthly}} en fin de mois et supposez un rendement annuel constant de {{annualRate}} sur {{years}} ans. Avec des frais annuels de {{fee}}, la valeur projetée passe de {{beforeFees}} à {{afterFees}}, soit un écart de {{feeImpact}}.",
+        "methodTitle": "Comment fonctionne la projection",
+        "method": "Nous multiplions le facteur de croissance annuel par un moins le taux de frais annuels du fonds. Les facteurs annuels brut et net sont convertis en facteurs mensuels équivalents. Chaque mois, la croissance est appliquée avant d’ajouter le versement.",
+        "assumptions": "Le modèle suppose un rendement et des frais constants, le réinvestissement des distributions et des versements en fin de mois. Il exclut les impôts, les frais de courtage, les variations de change et l’inflation. Les taux sont des hypothèses illustratives pour un indice comme le S&P 500. Les rendements réels varient et peuvent être négatifs. L’effet des frais inclut le rendement que les sommes prélevées auraient pu générer.",
+        "ctaHeadline": "Suivez la performance réelle de vos placements",
+        "ctaDescription": "Utilisez WonderMoney pour suivre votre portefeuille et comparer son rendement réel au scénario simulé.",
+        "ctaText": "Comparez vos placements à la projection"
+      }
     },
     "emergencyFund": {
       "title": "Calculateur d'épargne de précaution",
@@ -2065,6 +2091,111 @@
           "mixed": "Les prêts à taux mixte : une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
         },
         "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
+      }
+    },
+    "personalLoan": {
+      "title": "Simulateur de prêt personnel",
+      "shortName": "Prêt personnel",
+      "description": "Calculez la mensualité, le coût total et une estimation du TAEG d'un prêt personnel, frais compris, avec le tableau mois par mois.",
+      "pageTitle": "Simulateur de prêt personnel : mensualité, coût total et TAEG — WonderMoney",
+      "pageDescription": "Simulateur gratuit de prêt personnel. Saisissez le montant, la durée, le taux d'intérêt et les frais pour voir la mensualité, le coût total du crédit, une estimation du TAEG et le tableau mois par mois. Sans inscription.",
+      "subtitle": "Deux prêts au même taux d'intérêt peuvent coûter des sommes très différentes une fois les frais ajoutés. Saisissez l'offre que vous avez, frais compris, et voyez ce qu'elle coûte chaque mois et au total. Sans inscription.",
+      "amount": "Montant emprunté",
+      "amountHelp": "Ce que le prêteur vous prête, avant de retirer le moindre frais.",
+      "termMonths": "Durée",
+      "termMonthsHelp": "Nombre de mensualités, de {{min}} à {{max}}.",
+      "months": "mois",
+      "annualRate": "Taux d'intérêt",
+      "annualRateHelp": "Le taux annuel nominal fixe de l'offre, pas le TAEG : le TAEG est ce que ce simulateur calcule.",
+      "upfrontFees": "Frais initiaux",
+      "upfrontFeesHelp": "Frais payés une seule fois au départ du prêt, comme les frais de dossier, et les taxes éventuelles sur le prêt. Laissez 0 s'il n'y en a pas.",
+      "monthlyFees": "Frais et assurance mensuels",
+      "monthlyFeesHelp": "Prélevés avec chaque mensualité, comme des frais de gestion ou la prime d'une assurance exigée pour le prêt. Laissez 0 s'il n'y en a pas.",
+      "result": {
+        "monthlyPayment": "Mensualité",
+        "monthlyPaymentSplit": "{{loan}} pour le prêt plus {{fees}} de frais.",
+        "paymentsNote": "{{count}} mensualités. Les suivantes restent à un centime de la première ; la dernière, de {{last}}, solde le capital restant dû.",
+        "apr": "TAEG estimé, frais compris",
+        "aprOver": "plus de {{max}}",
+        "aprNote": "Une estimation du taux annuel effectif global (TAEG), calculée à partir de l'argent que vous recevez et de chaque mensualité que vous payez. Le TAEG qu'annonce un prêteur suit les règles de son pays et peut compter des coûts que ce simulateur ne connaît pas.",
+        "totalInterest": "Total des intérêts",
+        "totalFees": "Total des frais",
+        "totalCostOfCredit": "Coût total du crédit",
+        "totalRepaid": "Total payé, frais compris",
+        "amountReceived": "Vous recevez {{amount}} une fois les frais initiaux retirés."
+      },
+      "estimateNote": "Ceci est une estimation, pas une offre de prêt ni un devis. Le taux, les frais et l'accord dépendent du prêteur et de votre situation : comparez les chiffres de l'offre écrite de chaque prêteur avant de signer.",
+      "schedule": {
+        "title": "Tableau mensuel",
+        "description": "Comment chaque mensualité se répartit entre intérêts, capital et frais, et ce qu'il vous reste à rembourser ensuite.",
+        "upfrontNote": "Les {{fees}} de frais initiaux sont payés au départ et ne figurent pas dans le tableau.",
+        "show": "Afficher le tableau mensuel",
+        "hide": "Masquer le tableau mensuel",
+        "month": "Mois",
+        "payment": "Mensualité",
+        "principal": "Capital",
+        "interest": "Intérêts",
+        "fees": "Frais",
+        "balance": "Restant dû",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "Le résultat s'affiche dès que chaque champ a une valeur valide.",
+        "amount": {
+          "required": "Saisissez le montant que vous voulez emprunter.",
+          "tooSmall": "Saisissez au moins {{min}}.",
+          "tooLarge": "Saisissez un montant jusqu'à {{max}}."
+        },
+        "termMonths": {
+          "required": "Saisissez la durée en mois.",
+          "tooSmall": "Saisissez une durée d'au moins {{min}} mois.",
+          "tooLarge": "Saisissez une durée de {{max}} mois au plus."
+        },
+        "annualRate": {
+          "required": "Saisissez le taux d'intérêt.",
+          "negative": "Le taux ne peut pas être négatif. Saisissez 0 pour un prêt sans intérêts.",
+          "tooLarge": "Saisissez un taux jusqu'à {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Saisissez 0 s'il n'y en a pas.",
+          "tooLarge": "Saisissez des frais initiaux jusqu'à {{max}}, la moitié du montant emprunté."
+        },
+        "monthlyFees": {
+          "negative": "Les frais ne peuvent pas être négatifs. Saisissez 0 s'il n'y en a pas.",
+          "tooLarge": "Saisissez des frais mensuels jusqu'à {{max}}."
+        }
+      },
+      "nextStepHeadline": "Suivez ce prêt à côté de votre budget",
+      "nextStepDescription": "Ajoutez le prêt à WonderMoney avec son taux et sa durée, prévoyez la mensualité dans votre budget mensuel et voyez la dette baisser à côté de ce que vous dépensez vraiment.",
+      "nextStepCta": "Voyez comment la mensualité s’intègre à votre budget",
+      "guide": {
+        "whatTitle": "Ce que coûte vraiment un prêt personnel",
+        "whatBody1": "Avec un prêt personnel à taux fixe, vous payez des mensualités presque identiques sur une durée fixe. Chaque mensualité couvre les intérêts sur le capital restant dû et en rembourse une partie. À mesure que le solde diminue, la part des intérêts baisse et celle du remboursement du capital augmente.",
+        "whatBody2": "Le taux d'intérêt n'est qu'une partie du prix. Les prêteurs ajoutent souvent des frais au départ et un coût mensuel, comme des frais de gestion ou une assurance. Ces frais s'ajoutent aux intérêts et, sur un petit prêt ou un prêt court, ils peuvent coûter plus que les intérêts eux-mêmes.",
+        "whatBody3": "Avant d'emprunter, vérifiez que la mensualité tient : à côté des crédits que vous remboursez déjà, et dans le budget avec lequel vous vivez déjà.",
+        "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités de crédit, celle-ci comprise, prendraient.",
+        "relatedHouseholdBudget": "montre où va votre argent chaque mois, pour voir ce que la nouvelle mensualité devrait remplacer.",
+        "aprTitle": "Le taux d'intérêt et le TAEG ne sont pas la même chose",
+        "aprBody1": "Le taux d'intérêt d'une offre est un taux annuel nominal : il fixe les intérêts de chaque mois, un douzième de ce taux sur le capital restant dû. Il laisse les frais de côté et, comme les intérêts sont prélevés chaque mois, il sous-estime le coût annuel même d'un prêt sans frais.",
+        "aprBody2": "Le TAEG réunit tout en un seul chiffre. C'est le taux annuel auquel l'argent que vous recevez réellement (le montant moins les frais initiaux) égale toutes les mensualités que vous payez, frais compris. Deux offres de même montant et de même durée se comparent par leur TAEG : la plus basse coûte moins.",
+        "aprBody3": "Chaque prêteur calcule son TAEG selon les règles de son pays, qui peuvent inclure des coûts que ce simulateur ne demande pas et compter les mois autrement. Le TAEG affiché ici est une estimation pour comparer des offres, pas le chiffre d'un contrat.",
+        "exampleTitle": "Exemple chiffré",
+        "exampleIntro": "Supposons que vous empruntiez {{amount}} sur {{months}} mois à un taux nominal de {{rate}}, sans frais.",
+        "exampleNoFees": "La mensualité est de {{payment}}. Sur toute la durée, vous payez {{interest}} d'intérêts et {{totalRepaid}} au total. Même sans frais, le TAEG est de {{apr}}, un peu au-dessus de {{rate}}, parce que les intérêts sont prélevés chaque mois.",
+        "exampleFees": "Ajoutez maintenant {{upfront}} de frais initiaux et {{monthlyFee}} de frais par mois. Vous recevez {{received}} et chaque mensualité passe à {{paymentWithFees}}. Les frais ajoutent {{fees}} : le coût du crédit monte à {{cost}} et vous payez {{totalRepaidFees}} au total.",
+        "exampleApr": "Le taux d'intérêt reste de {{rate}}, mais le TAEG monte à {{aprFees}}. C'est ce chiffre qu'il faut comparer à une autre offre : un prêt à un taux plus élevé sans frais peut coûter moins cher.",
+        "exampleOutro": "Le simulateur ci-dessus part de ce prêt, sans les frais, pour que vous puissiez saisir votre propre offre.",
+        "methodTitle": "Comment le simulateur fait le calcul",
+        "methodIntro": "La mensualité est le versement constant qui rembourse le montant sur la durée au taux mensuel, et le TAEG est le taux qui équilibre ce que vous recevez et ce que vous payez :",
+        "methodLegend": "M est la mensualité de capital et d'intérêts, P le montant emprunté, r le taux annuel nominal divisé par 12 et n le nombre de mois. Les frais mensuels f s'ajoutent à chaque mensualité.",
+        "methodApr": "Le TAEG est le taux A qui résout la deuxième ligne : ce que vous recevez au départ, le montant P moins les frais initiaux F, égale la mensualité de chaque mois Mₖ plus les frais f, actualisée par (1 + A) à la puissance k ÷ 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
+        "methodRounding": "Chaque chiffre est calculé en centimes entiers. Chaque mensualité est recalculée à partir du capital restant dû : les mensualités restent à un centime l'une de l'autre, la dernière solde exactement le capital et le tableau correspond aux totaux.",
+        "methodPrivacy": "Le calcul se fait dans votre navigateur. Rien de ce que vous saisissez n'est envoyé ni enregistré.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionFixedRate": "Le taux est fixe sur toute la durée et chaque mensualité est payée à temps.",
+        "assumptionFees": "Les frais initiaux sont payés, ou retirés du montant, au départ du prêt ; les frais mensuels sont les mêmes chaque mois.",
+        "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
+        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
       }
     }
   },

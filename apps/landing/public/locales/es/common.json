@@ -633,9 +633,9 @@
       "subtitle": "Descubre qué porcentaje de tus ingresos estás ahorrando cada mes. Tu tasa de ahorro es uno de los números más importantes en las finanzas personales — determina la rapidez con la que acumulas riqueza."
     },
     "investmentReturn": {
-      "title": "Calculadora de rentabilidad de inversión",
+      "title": "Rentabilidad y proyección de inversiones en índices",
       "shortName": "Rentabilidad de inversión",
-      "description": "Ve la rentabilidad anualizada de cualquier inversión dado un valor inicial, valor final y período de tiempo.",
+      "description": "Calcula la rentabilidad pasada o proyecta una inversión indexada con aportaciones mensuales y comisiones.",
       "initialInvestment": "Inversión inicial",
       "currentValue": "Valor actual",
       "investmentPeriod": "Período de inversión (años)",
@@ -644,9 +644,35 @@
       "totalReturnPct": "Rentabilidad total (%)",
       "annualizedReturn": "Rentabilidad anualizada",
       "periodHelp": "Número de años que has mantenido la inversión",
-      "pageTitle": "Calculadora de rentabilidad de inversión — WonderMoney",
-      "pageDescription": "Calculadora de rentabilidad de inversión gratuita. Calcula la rentabilidad total y anualizada de cualquier inversión. Compara el rendimiento en diferentes períodos de tiempo.",
-      "subtitle": "Calcula la rentabilidad total y anualizada de cualquier inversión. Introduce lo que invertiste, cuánto vale ahora y cuánto tiempo lo has mantenido."
+      "pageTitle": "Calculadora de rentabilidad y fondos indexados — WonderMoney",
+      "pageDescription": "Calcula la rentabilidad o simula un ETF o fondo indexado con aportaciones mensuales, una rentabilidad supuesta y comisiones anuales.",
+      "subtitle": "Calcula la rentabilidad total y anualizada de una inversión que ya tienes o estima el efecto de las aportaciones y comisiones en una inversión indexada.",
+      "projection": {
+        "pastHeading": "Mide la rentabilidad pasada",
+        "heading": "Simula un fondo indexado o ETF",
+        "intro": "Introduce una hipótesis de rentabilidad anual y la comisión del fondo para comparar el valor que podría alcanzar la misma inversión con y sin esa comisión.",
+        "principal": "Saldo inicial",
+        "monthlyContribution": "Aportación mensual",
+        "annualRate": "Rentabilidad anual supuesta antes de comisiones",
+        "annualFee": "Comisión anual del fondo",
+        "years": "Plazo de la proyección (años enteros)",
+        "range": "Intervalo de {{min}} a {{max}}",
+        "contributed": "Total aportado",
+        "beforeFees": "Valor proyectado antes de comisiones",
+        "afterFees": "Valor proyectado después de comisiones",
+        "feeImpact": "Reducción del valor proyectado por las comisiones",
+        "incomplete": "Rellena todos los campos para ver la proyección. Introduce cero si un valor no se aplica.",
+        "outOfRange": "Respeta el intervalo indicado en cada campo e introduce un número entero de años.",
+        "tooLarge": "Este escenario supera el límite de la calculadora. Reduce el importe, la rentabilidad o el plazo.",
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Empiezas con {{principal}}, aportas {{monthly}} al final de cada mes y supones una rentabilidad anual constante del {{annualRate}} durante {{years}} años. Con una comisión anual del {{fee}}, el valor proyectado pasa de {{beforeFees}} a {{afterFees}}, una diferencia de {{feeImpact}}.",
+        "methodTitle": "Cómo funciona la proyección",
+        "method": "Multiplicamos el factor de crecimiento anual por uno menos la comisión anual del fondo. Convertimos los factores anuales bruto y neto en factores mensuales equivalentes. Cada mes, aplicamos el crecimiento antes de sumar la aportación.",
+        "assumptions": "El modelo supone una rentabilidad y una comisión constantes, el reintegro de las distribuciones en el fondo y aportaciones a final de mes. Excluye impuestos, gastos de intermediación, variaciones de divisa e inflación. Las tasas son hipótesis ilustrativas para un índice como el S&P 500. La rentabilidad real varía y puede ser negativa. El impacto de las comisiones incluye la rentabilidad que esos importes podrían haber generado.",
+        "ctaHeadline": "Sigue la rentabilidad real de tus inversiones",
+        "ctaDescription": "Usa WonderMoney para seguir tu cartera y comparar su rentabilidad real con el escenario que has simulado.",
+        "ctaText": "Compara tus inversiones con la proyección"
+      }
     },
     "emergencyFund": {
       "title": "Calculadora de fondo de emergencia",
@@ -2065,6 +2091,111 @@
           "mixed": "Préstamos a tipo mixto: primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
         },
         "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
+      }
+    },
+    "personalLoan": {
+      "title": "Simulador de préstamo personal",
+      "shortName": "Préstamo personal",
+      "description": "Calcula la cuota, el coste total y una estimación de la TAE de un préstamo personal, con comisiones, y consulta el cuadro mes a mes.",
+      "pageTitle": "Simulador de préstamo personal: cuota, coste total y TAE — WonderMoney",
+      "pageDescription": "Simulador gratuito de préstamo personal. Introduce el importe, el plazo, el tipo de interés y las comisiones y consulta la cuota mensual, el coste total del crédito, una estimación de la TAE y el cuadro mes a mes. Sin registro.",
+      "subtitle": "Dos préstamos con el mismo tipo de interés pueden costar cantidades muy distintas cuando se suman las comisiones. Introduce la oferta que tienes, con sus comisiones, y mira cuánto cuesta al mes y en total. Sin registro.",
+      "amount": "Importe del préstamo",
+      "amountHelp": "Lo que te presta la entidad, antes de descontar ninguna comisión.",
+      "termMonths": "Plazo",
+      "termMonthsHelp": "Número de cuotas mensuales, de {{min}} a {{max}}.",
+      "months": "meses",
+      "annualRate": "Tipo de interés",
+      "annualRateHelp": "El tipo nominal anual fijo de la oferta (TIN), no la TAE: la TAE es lo que calcula este simulador.",
+      "upfrontFees": "Comisiones iniciales",
+      "upfrontFeesHelp": "Gastos que se pagan una sola vez al empezar el préstamo, como la comisión de apertura o de estudio y los impuestos sobre el préstamo. Deja 0 si no hay.",
+      "monthlyFees": "Comisiones y seguros mensuales",
+      "monthlyFeesHelp": "Se cobran con cada cuota, como una comisión de gestión o la prima de un seguro que exija el préstamo. Deja 0 si no hay.",
+      "result": {
+        "monthlyPayment": "Cuota mensual",
+        "monthlyPaymentSplit": "{{loan}} del préstamo más {{fees}} de comisiones.",
+        "paymentsNote": "{{count}} cuotas mensuales. Las siguientes no se alejan más de un céntimo de la primera; la última, de {{last}}, salda la deuda.",
+        "apr": "TAE estimada, con comisiones",
+        "aprOver": "más del {{max}}",
+        "aprNote": "Una estimación de la tasa anual equivalente (TAE), calculada a partir del dinero que recibes y de cada cuota que pagas. La TAE que indica una entidad sigue las normas de su país y puede contar costes que este simulador no conoce.",
+        "totalInterest": "Total de intereses",
+        "totalFees": "Total de comisiones",
+        "totalCostOfCredit": "Coste total del crédito",
+        "totalRepaid": "Total que pagas, con comisiones",
+        "amountReceived": "Recibes {{amount}} una vez descontadas las comisiones iniciales."
+      },
+      "estimateNote": "Esto es una estimación, no una oferta de préstamo ni un presupuesto de una entidad. El tipo, las comisiones y la aprobación dependen de la entidad y de tu situación: compara las cifras de la oferta por escrito de cada entidad antes de firmar.",
+      "schedule": {
+        "title": "Cuadro mensual",
+        "description": "Cómo se reparte cada cuota entre intereses, capital y comisiones, y cuánto debes todavía después de pagarla.",
+        "upfrontNote": "Las comisiones iniciales de {{fees}} se pagan al principio y no aparecen en la tabla.",
+        "show": "Ver el cuadro mensual",
+        "hide": "Ocultar el cuadro mensual",
+        "month": "Mes",
+        "payment": "Cuota",
+        "principal": "Capital",
+        "interest": "Intereses",
+        "fees": "Comisiones",
+        "balance": "Pendiente",
+        "total": "Total"
+      },
+      "errors": {
+        "summary": "El resultado aparece cuando todos los campos tienen un valor válido.",
+        "amount": {
+          "required": "Introduce el importe que quieres pedir.",
+          "tooSmall": "Introduce al menos {{min}}.",
+          "tooLarge": "Introduce un importe de hasta {{max}}."
+        },
+        "termMonths": {
+          "required": "Introduce el plazo en meses.",
+          "tooSmall": "Introduce un plazo de al menos {{min}} meses.",
+          "tooLarge": "Introduce un plazo de hasta {{max}} meses."
+        },
+        "annualRate": {
+          "required": "Introduce el tipo de interés.",
+          "negative": "El tipo no puede ser negativo. Introduce 0 para un préstamo sin intereses.",
+          "tooLarge": "Introduce un tipo de hasta el {{max}}."
+        },
+        "upfrontFees": {
+          "negative": "Las comisiones no pueden ser negativas. Introduce 0 si no hay.",
+          "tooLarge": "Introduce comisiones iniciales de hasta {{max}}, la mitad del importe."
+        },
+        "monthlyFees": {
+          "negative": "Las comisiones no pueden ser negativas. Introduce 0 si no hay.",
+          "tooLarge": "Introduce comisiones mensuales de hasta {{max}}."
+        }
+      },
+      "nextStepHeadline": "Sigue este préstamo junto a tu presupuesto",
+      "nextStepDescription": "Añade el préstamo a WonderMoney con su tipo y su plazo, reserva la cuota en tu presupuesto mensual y mira cómo baja la deuda junto a lo que gastas de verdad.",
+      "nextStepCta": "Ve cómo encaja la cuota en tu presupuesto mensual",
+      "guide": {
+        "whatTitle": "Lo que cuesta de verdad un préstamo personal",
+        "whatBody1": "Con un préstamo personal a tipo fijo, pagas cuotas mensuales casi iguales durante un plazo fijo. Cada cuota cubre los intereses del saldo pendiente y devuelve parte del capital. A medida que baja el saldo, una parte menor de la cuota va a intereses y una mayor a devolver el capital.",
+        "whatBody2": "El tipo de interés es solo una parte del precio. Las entidades suelen añadir una comisión al principio y un cargo mensual, como una comisión de gestión o un seguro. Esas comisiones se suman a los intereses y, en un préstamo pequeño o corto, pueden costar más que los propios intereses.",
+        "whatBody3": "Antes de pedirlo, comprueba que la cuota cabe: junto a las cuotas que ya pagas y dentro del presupuesto con el que ya vives.",
+        "relatedDebtToIncome": "muestra qué parte de tus ingresos ocuparían tus cuotas, esta incluida.",
+        "relatedHouseholdBudget": "muestra adónde va tu dinero cada mes, para ver qué tendría que sustituir la nueva cuota.",
+        "aprTitle": "El tipo de interés y la TAE no son lo mismo",
+        "aprBody1": "El tipo de interés de una oferta (el TIN) es un tipo nominal anual: fija los intereses de cada mes, una doceava parte de él sobre el capital pendiente. Deja fuera las comisiones y, como los intereses se cobran cada mes, se queda por debajo del coste anual incluso en un préstamo sin comisiones.",
+        "aprBody2": "La TAE lo reúne todo en una cifra. Es el tipo anual al que el dinero que recibes de verdad (el importe menos las comisiones iniciales) iguala todas las cuotas que pagas, con comisiones. Dos ofertas del mismo importe y plazo se comparan por su TAE: la más baja cuesta menos.",
+        "aprBody3": "Cada entidad calcula la TAE según las normas de su país, que pueden incluir costes por los que este simulador no pregunta y contar los meses de otra forma. La TAE que ves aquí es una estimación para comparar ofertas, no la cifra de un contrato.",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleIntro": "Supón que pides {{amount}} a {{months}} meses, con un tipo nominal del {{rate}} y sin comisiones.",
+        "exampleNoFees": "La cuota mensual es de {{payment}}. A lo largo del plazo pagas {{interest}} de intereses y {{totalRepaid}} en total. Incluso sin comisiones, la TAE es del {{apr}}, algo por encima del {{rate}}, porque los intereses se cobran cada mes.",
+        "exampleFees": "Ahora añade {{upfront}} de comisiones iniciales y {{monthlyFee}} al mes de comisiones. Recibes {{received}} y cada cuota sube a {{paymentWithFees}}. Las comisiones suman {{fees}}, así que el coste del crédito pasa a {{cost}} y pagas {{totalRepaidFees}} en total.",
+        "exampleApr": "El tipo de interés sigue siendo del {{rate}}, pero la TAE sube al {{aprFees}}. Esa es la cifra que hay que comparar con otra oferta: un préstamo con un tipo más alto y sin comisiones puede salir más barato.",
+        "exampleOutro": "El simulador de arriba empieza en este préstamo, sin las comisiones, para que puedas introducir tu oferta.",
+        "methodTitle": "Cómo hace las cuentas el simulador",
+        "methodIntro": "La cuota es la cuota constante que devuelve el importe a lo largo del plazo, al tipo mensual, y la TAE es el tipo que equilibra lo que recibes con lo que pagas:",
+        "methodLegend": "M es la cuota de capital e intereses, P el importe del préstamo, r el tipo nominal anual dividido entre 12 y n el número de meses. Las comisiones mensuales f se suman a cada cuota.",
+        "methodApr": "La TAE es el tipo A que resuelve la segunda línea: lo que recibes al principio, el importe P menos las comisiones iniciales F, iguala la cuota de cada mes Mₖ más las comisiones f, descontada por (1 + A) elevado a k ÷ 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
+        "methodRounding": "Todas las cuentas se hacen en céntimos. Cada cuota se vuelve a calcular a partir del capital pendiente, así que las cuotas no se alejan más de un céntimo entre sí, la última salda la deuda exactamente y el cuadro coincide con los totales.",
+        "methodPrivacy": "Las cuentas se hacen en tu navegador. Nada de lo que escribes se envía ni se guarda.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionFixedRate": "El tipo es fijo durante todo el plazo y todas las cuotas se pagan a tiempo.",
+        "assumptionFees": "Las comisiones iniciales se pagan, o se descuentan del importe, al empezar el préstamo; las comisiones mensuales son iguales todos los meses.",
+        "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
+        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
       }
     }
   },

@@ -11,6 +11,6 @@ export function isSitemapPage(url: string): boolean {
 	// rankings.
 	if (/\/go\//.test(pathname)) return false
 
-	// Legacy addresses are noindex pages that redirect to the localized address.
+	// Legacy addresses redirect to the localized address.
 	return !LEGACY_REDIRECT_PATHS.has(pathname)
 }

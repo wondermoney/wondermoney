@@ -64,7 +64,6 @@ describe("household budget tool page", () => {
 			)
 			// One page per locale and no legacy redirect page: the tool never had another address.
 			expect(pages).toHaveLength(1)
-			expect(pages[0].props.redirectTo).toBeUndefined()
 			expect(pages[0].params.tool).toBe(
 				toLocalizedPath("toolHouseholdBudget", lang).split("/").pop(),
 			)

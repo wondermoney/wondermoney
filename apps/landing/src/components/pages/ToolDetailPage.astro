@@ -5,6 +5,8 @@ import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInt
 import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuide.astro";
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
 import SavingsRateCalculatorComp from "@/components/calculators/SavingsRateCalculatorComp";
+import IndexProjectionCalculator from "@/components/calculators/IndexProjectionCalculator";
+import IndexProjectionGuide from "@/components/calculators/IndexProjectionGuide.astro";
 import InvestmentReturnCalculatorComp from "@/components/calculators/InvestmentReturnCalculatorComp";
 import DebtToIncomeCalculatorComp from "@/components/calculators/DebtToIncomeCalculatorComp";
 import DebtToIncomeGuide from "@/components/calculators/DebtToIncomeGuide.astro";
@@ -28,6 +30,8 @@ import BorrowingCapacityCalculatorComp from "@/components/calculators/BorrowingC
 import BorrowingCapacityGuide from "@/components/calculators/BorrowingCapacityGuide.astro";
 import RateRevisionCalculatorComp from "@/components/calculators/RateRevisionCalculatorComp";
 import RateRevisionGuide from "@/components/calculators/RateRevisionGuide.astro";
+import PersonalLoanCalculatorComp from "@/components/calculators/PersonalLoanCalculatorComp";
+import PersonalLoanGuide from "@/components/calculators/PersonalLoanGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -98,10 +102,20 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.borrowingCapacity.nextStepDescription"),
     ctaText: t("tools.borrowingCapacity.nextStepCta"),
   },
+  toolInvestmentReturn: {
+    headline: t("tools.investmentReturn.projection.ctaHeadline"),
+    description: t("tools.investmentReturn.projection.ctaDescription"),
+    ctaText: t("tools.investmentReturn.projection.ctaText"),
+  },
   toolRateRevision: {
     headline: t("tools.rateRevision.nextStepHeadline"),
     description: t("tools.rateRevision.nextStepDescription"),
     ctaText: t("tools.rateRevision.nextStepCta"),
+  },
+  toolPersonalLoan: {
+    headline: t("tools.personalLoan.nextStepHeadline"),
+    description: t("tools.personalLoan.nextStepDescription"),
+    ctaText: t("tools.personalLoan.nextStepCta"),
   },
 };
 
@@ -161,7 +175,18 @@ const schema = {
     {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
     {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
     {routeId === "toolInvestmentReturn" && (
-      <InvestmentReturnCalculatorComp locale={locale} client:load />
+      <>
+        <section class="mb-10 space-y-4">
+          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.pastHeading")}</h2>
+          <InvestmentReturnCalculatorComp locale={locale} client:load />
+        </section>
+        <section class="space-y-4">
+          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.heading")}</h2>
+          <p class="max-w-3xl text-muted-foreground">{t("tools.investmentReturn.projection.intro")}</p>
+          <IndexProjectionCalculator locale={locale} client:load />
+        </section>
+        <IndexProjectionGuide locale={locale} />
+      </>
     )}
     {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
     {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
@@ -178,6 +203,7 @@ const schema = {
       <BorrowingCapacityCalculatorComp locale={locale} client:load />
     )}
     {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
+    {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -192,6 +218,7 @@ const schema = {
   {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
   {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
   {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
+  {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

@@ -18,6 +18,7 @@ import MortgageCalculatorComp from "./MortgageCalculatorComp";
 import MortgageTransferCalculatorComp from "./MortgageTransferCalculatorComp";
 import NetWorthCalculatorComp from "./NetWorthCalculatorComp";
 import RateRevisionCalculatorComp from "./RateRevisionCalculatorComp";
+import PersonalLoanCalculatorComp from "./PersonalLoanCalculatorComp";
 import SavingsGoalCalculatorComp from "./SavingsGoalCalculatorComp";
 import SavingsRateCalculatorComp from "./SavingsRateCalculatorComp";
 import TermDepositCalculatorComp from "./TermDepositCalculatorComp";
@@ -36,6 +37,7 @@ const CALCULATORS: Array<[string, ComponentType<{ locale: Lang }>]> = [
   ["mortgage transfer", MortgageTransferCalculatorComp],
   ["net worth", NetWorthCalculatorComp],
   ["rate revision", RateRevisionCalculatorComp],
+  ["personal loan", PersonalLoanCalculatorComp],
   ["savings goal", SavingsGoalCalculatorComp],
   ["savings rate", SavingsRateCalculatorComp],
   ["term deposit", TermDepositCalculatorComp],
@@ -253,6 +255,35 @@ describe("borrowing capacity calculator", () => {
     },
   );
 });
+
+describe.each([
+  ["Amount borrowed", "Enter the amount you want to borrow."],
+  ["Term", "Enter the term in months."],
+  ["Interest rate", "Enter the interest rate."],
+] as const)("personal loan calculator with the required field %j cleared", (label, message) => {
+  it("asks for a value instead of a result", async () => {
+    const user = userEvent.setup();
+    render(<PersonalLoanCalculatorComp locale="en" />);
+    await user.clear(screen.getByRole("spinbutton", { name: label }));
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(screen.getByText("Your result appears once every field has a valid value.")).toBeTruthy();
+    expect(figures()).toEqual([]);
+  });
+});
+
+describe.each(["Upfront fees", "Monthly fees and insurance"])(
+  "personal loan calculator with %j cleared",
+  (label) => {
+    it("counts the empty fees as none", async () => {
+      const user = userEvent.setup();
+      render(<PersonalLoanCalculatorComp locale="en" />);
+      const before = figures();
+      await user.clear(screen.getByRole("spinbutton", { name: label }));
+      expect(figures()).toEqual(before);
+      expect(figures()).toContain("€0.00");
+    });
+  },
+);
 
 describe("net worth calculator with every field cleared", () => {
   it("counts every empty line as 0", async () => {

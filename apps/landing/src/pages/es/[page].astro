@@ -8,14 +8,7 @@ export function getStaticPaths() {
   return getTopLevelPageStaticPaths("es");
 }
 
-const { routeId, redirectTo } = Astro.props as {
-  routeId: TopLevelRouteId;
-  redirectTo?: string;
-};
-
-if (redirectTo) {
-  return Astro.redirect(`/es/${redirectTo}`, 301);
-}
+const { routeId } = Astro.props as { routeId: TopLevelRouteId };
 ---
 
 <TopLevelPage locale="es" routeId={routeId} />
