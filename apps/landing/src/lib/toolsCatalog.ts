@@ -120,16 +120,16 @@ export const TOOLS_CATALOG = [
 		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome"],
 	},
 	{
-		key: "personalLoan",
-		routeId: "toolPersonalLoan",
-		group: "borrowAndBuyHome",
-		related: ["toolDebtToIncome", "toolHouseholdBudget", "toolEarlyRepayment"],
-	},
-	{
 		key: "propertyTax",
 		routeId: "toolPropertyTax",
 		group: "borrowAndBuyHome",
 		related: ["toolHouseholdBudget", "toolMortgage", "toolBuyVsRent"],
+	},
+	{
+		key: "personalLoan",
+		routeId: "toolPersonalLoan",
+		group: "borrowAndBuyHome",
+		related: ["toolDebtToIncome", "toolHouseholdBudget", "toolEarlyRepayment"],
 	},
 	// Invest and grow
 	{
