@@ -29,6 +29,10 @@ overrides:
   # Drop each once a release of the parent ships the fixed version.
   # typography pins 6.0.10; 6.1.x is the same major, and the landing CSS builds byte-identical.
   '@tailwindcss/typography>postcss-selector-parser': ^6.1.5
+  # @vercel/analytics (an optional peer under the landing's @astrojs/vercel) resolved next 16.4.3,
+  # inside the range of the 'use cache' root-params advisories (Dependabot alerts 133 and 135).
+  # Pinned to the version web and docs use.
+  '@vercel/analytics>next': 16.4.5
   # routing-utils already runs 6.3.0 beside 6.1.0 (as `path-to-regexp-updated`) and logs any
   # route whose regex differs; the landing build logs none, so its routes are unchanged.
   '@vercel/routing-utils>path-to-regexp': 6.3.0
