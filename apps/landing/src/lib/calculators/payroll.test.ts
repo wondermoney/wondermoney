@@ -8,6 +8,7 @@ import {
   WITHHOLDING_TABLE_SETS,
   annualBracketTaxCents,
   computeNetSalary,
+  computePensionWithholdingCents,
   computeWithholdingCents,
   findRowIndex,
   parcelaCents,
@@ -175,5 +176,30 @@ describe("annual IRS brackets 2026", () => {
     expect(annualBracketTaxCents(0)).toBe(0);
     const last = ANNUAL_IRS_BRACKETS_2026[7].upToCents;
     expect(annualBracketTaxCents(last + 100_000) - annualBracketTaxCents(last)).toBe(48_000);
+  });
+});
+
+describe("pension withholding (Despacho n.º 233-A/2026, table VIII)", () => {
+  it("withholds nothing up to 920 euros", () => {
+    expect(computePensionWithholdingCents(92_000)).toBe(0);
+    expect(computePensionWithholdingCents(0)).toBe(0);
+  });
+
+  it("applies the transition rows with the R-dependent parcela", () => {
+    // 12.5% x 1000 - 12.5% x 2.6 x (1320.92 - 1000) = 125 - 104.30
+    expect(computePensionWithholdingCents(100_000)).toBe(2070);
+    // Effective rate at the limit of the row is 3.8% (the table's own column).
+    expect(computePensionWithholdingCents(104_200) / 104_200).toBeCloseTo(0.038, 3);
+  });
+
+  it("applies the fixed parcelas and the marginal rates of the higher rows", () => {
+    expect(computePensionWithholdingCents(113_300)).toBe(6618); // 15.7% x 1133 - 111.70
+    expect(computePensionWithholdingCents(150_000)).toBe(15_154); // 24.1% x 1500 - 209.96
+    expect(computePensionWithholdingCents(200_000)).toBe(28_121); // 31.1% x 2000 - 340.79
+    expect(computePensionWithholdingCents(2_000_000)).toBe(913_088); // 53% x 20000 - 1469.12
+  });
+
+  it("is lower than the same amount taxed as employment income (no Social Security either)", () => {
+    expect(computePensionWithholdingCents(150_000)).toBeLessThan(computeWithholdingCents(150_000, single));
   });
 });

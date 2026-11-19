@@ -65,12 +65,20 @@ describe("limits and increase", () => {
     expect(result.limit).toBe("referencePay");
   });
 
-  it("adds 5 points on the 55% and 60% bands for low pay and 3 or more descendants", () => {
-    const result = run({ grossMonthly: 480, dependants: 3, sickDays: 100 }); // 16.00 a day, 480 a month
+  it("adds 5 points on the 55% and 60% bands for a reference pay of 500 or less, whatever the household", () => {
+    const result = run({ grossMonthly: 480, dependants: 0, sickDays: 100 }); // 16.00 a day, 480 a month
     expect(result.increaseApplied).toBe(true);
     expect(result.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
-    expect(run({ grossMonthly: 480, dependants: 2 }).increaseApplied).toBe(false);
-    expect(run({ grossMonthly: 600, dependants: 3 }).increaseApplied).toBe(false);
+    expect(run({ grossMonthly: 500, dependants: 0 }).increaseApplied).toBe(true);
+    expect(run({ grossMonthly: 500.01, dependants: 0 }).increaseApplied).toBe(false);
+  });
+
+  it("adds 5 points for 3 or more descendants, whatever the reference pay (art. 17 DL 28/2004: the conditions are alternatives)", () => {
+    const result = run({ grossMonthly: 1500, dependants: 3, sickDays: 100 });
+    expect(result.increaseApplied).toBe(true);
+    expect(result.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
+    expect(run({ grossMonthly: 1500, dependants: 2 }).increaseApplied).toBe(false);
+    expect(run({ grossMonthly: 600, dependants: 2 }).increaseApplied).toBe(false);
   });
 
   it("never pays more than the net reference pay", () => {

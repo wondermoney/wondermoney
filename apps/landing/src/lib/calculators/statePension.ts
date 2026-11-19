@@ -1,4 +1,4 @@
-import { EMPLOYEE_SOCIAL_SECURITY_BP, computeWithholdingCents } from "./payroll";
+import { EMPLOYEE_SOCIAL_SECURITY_BP, computePensionWithholdingCents, computeWithholdingCents } from "./payroll";
 import { IAS_2026_CENTS } from "./unemploymentBenefit";
 
 export { IAS_2026_CENTS };
@@ -132,7 +132,11 @@ export interface StatePensionResult {
   replacementBp: number;
   /** Net pay today per payment (Social Security and estimated IRS deducted). */
   netPayCents: number;
-  /** Monthly shortfall against net pay, never negative. */
+  /** IRS withheld on the pension per payment (2026 pension table VIII; no Social Security on pensions). */
+  pensionWithholdingCents: number;
+  /** Pension per payment after IRS withholding. */
+  netPensionCents: number;
+  /** Monthly shortfall of the net pension against net pay, never negative. */
   gapCents: number;
 }
 
@@ -187,6 +191,10 @@ export function computeStatePension(input: StatePensionInput) {
     Math.round(referenceCents * (1 - EMPLOYEE_SOCIAL_SECURITY_BP / 10_000)) - withholdingCents,
   );
 
+  // Net against net: a pension pays IRS (pension table VIII) but no Social Security.
+  const pensionWithholdingCents = computePensionWithholdingCents(monthlyCents);
+  const netPensionCents = monthlyCents - pensionWithholdingCents;
+
   return {
     ok: true as const,
     result: {
@@ -194,7 +202,9 @@ export function computeStatePension(input: StatePensionInput) {
       monthlyCents,
       replacementBp: Math.round((monthlyCents / referenceCents) * 10_000),
       netPayCents,
-      gapCents: Math.max(0, netPayCents - monthlyCents),
+      pensionWithholdingCents,
+      netPensionCents,
+      gapCents: Math.max(0, netPayCents - netPensionCents),
     } satisfies StatePensionResult,
   };
 }

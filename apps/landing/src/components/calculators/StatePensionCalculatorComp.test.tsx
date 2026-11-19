@@ -50,3 +50,12 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     event: "tool_used", tool: "state_pension", page_type: "tools/portugal-state-pension-calculator",
   });
 });
+
+it("shows the net pension after IRS next to the net pay", () => {
+  const outcome = computeStatePension(STATE_PENSION_EXAMPLE);
+  if (!outcome.ok) throw new Error("example must be valid");
+  render(<StatePensionCalculatorComp locale="en" />);
+  expect(screen.getByText("Estimated net pension (per payment, after IRS)")).toBeTruthy();
+  expect(outcome.result.netPensionCents).toBeLessThan(outcome.result.monthlyCents);
+  expect(outcome.result.pensionWithholdingCents).toBeGreaterThan(0);
+});

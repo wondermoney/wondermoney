@@ -64,6 +64,8 @@ import PropertyCapitalGainsCalculatorComp from "@/components/calculators/Propert
 import PropertyCapitalGainsGuide from "@/components/calculators/PropertyCapitalGainsGuide.astro";
 import StatePensionCalculatorComp from "@/components/calculators/StatePensionCalculatorComp";
 import StatePensionGuide from "@/components/calculators/StatePensionGuide.astro";
+import Sp500HistoryCalculatorComp from "@/components/calculators/Sp500HistoryCalculatorComp";
+import Sp500HistoryGuide from "@/components/calculators/Sp500HistoryGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -231,6 +233,12 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.withholdingTables.nextStepDescription"),
     ctaText: t("tools.withholdingTables.nextStepCta"),
   },
+  toolSp500History: {
+    headline: t("tools.sp500History.nextStepHeadline"),
+    description: t("tools.sp500History.nextStepDescription"),
+    ctaText: t("tools.sp500History.nextStepCta"),
+    ctaHref: toLocalizedPath("featurePortfolio", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -342,6 +350,7 @@ const schema = {
     {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsCalculatorComp locale={locale} client:load />}
     {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
+    {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -374,6 +383,7 @@ const schema = {
   {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}
   {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsGuide locale={locale} />}
   {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
+  {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

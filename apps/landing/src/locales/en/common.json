@@ -2868,7 +2868,8 @@
       "remunerationHelp": "Optional. Enter a gross monthly pay to highlight its row and see the withholding.",
       "errors": {
         "remuneration": "Enter an amount up to {{max}}.",
-        "dependants": "Enter a whole number from 0 to {{max}}."
+        "dependants": "Enter a whole number from 0 to {{max}}.",
+        "remunerationNegative": "Enter an amount of zero or more."
       },
       "result": {
         "withholding": "Monthly IRS withholding",
@@ -2995,8 +2996,8 @@
         "methodTitle": "How the estimate works",
         "methodReference": "The reference remuneration (RR) is all pay registered in the oldest 12 of the 14 months before the month you became unemployed, including the holiday and Christmas allowances, divided by 360. The calculator takes 14 or 12 times your monthly salary.",
         "methodAmount": "The daily benefit is 65% of the RR. The monthly figure is 30 days of it.",
-        "methodLimits": "The monthly benefit cannot exceed 2.5 times the IAS ({{max}} in 2026) or 75% of the net RR, and cannot be below 1 IAS ({{ias}}), except when the net RR is lower than the IAS. When the pay used is at least the minimum wage ({{rmmg}}), the minimum is 1.15 IAS.",
-        "methodNet": "The net RR is the RR minus 11% Social Security and the IRS withholding rate. The calculator estimates that rate from the 2026 mainland withholding tables for your monthly salary, as a single holder, or as married with two earners if your partner is in the household.",
+        "methodLimits": "The monthly benefit cannot exceed 2.5 times the IAS ({{max}} in 2026) or 75% of the net RR, and cannot be below 1 IAS ({{ias}}), except when the net RR is lower than the IAS. The 1 IAS minimum prevails over the 75% cap, but the benefit never exceeds the net RR itself (art. 29 of Decreto-Lei n.º 220/2006). When the pay used is at least the minimum wage ({{rmmg}}), the minimum is 1.15 IAS.",
+        "methodNet": "The net RR is the RR minus 11% Social Security and the IRS withholding rate (art. 29 n.º 4 of Decreto-Lei n.º 220/2006). The rate comes from the withholding tables for your household, according to the net RR. The calculator looks up the 2026 mainland tables at the RR minus 11% and applies that rate to the whole RR, as a single holder, or as married with two earners if your partner is in the household.",
         "methodIncrease": "The benefit goes up 10% when both partners are unemployed and registered, or you are the only parent, and there are children or dependants. It must be requested. The calculator applies it to the limited amount and never above 2.5 IAS.",
         "methodDuration": "The duration depends on your age and months with registered pay, plus extra days for every full 5 years with registered pay in the last 20: 30 days up to age 39, 45 days from 40 to 49 and 60 days from 50.",
         "methodNoReduction": "The old 10% cut after 180 days of payment is not applied: the 2026 Segurança Social guide does not list it.",
@@ -3011,7 +3012,7 @@
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 October 2026), which also lists the 2026 IAS of 537.13 euros (Portaria n.º 480-A/2025/1) and the minimum wage of 920 euros (Decreto-Lei n.º 139/2025)",
         "sourceLaw": "Decreto-Lei n.º 220/2006, as amended: the unemployment protection regime",
         "sourceIncrease": "Decreto-Lei n.º 119/2021: the 10% increase for households with children and the 1.15 IAS minimum",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the Diário da República text of Decreto-Lei n.º 119/2021. The IRS rate behind the 75% cap and the order of the 10% increase are our simplifications, and the end of the 10% cut after 180 days is taken from the guide and press reports, not from the consolidated law."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide (v. October 2026), the gov.pt service page for the benefit (updated 19 October 2026) and the text of art. 29 of Decreto-Lei n.º 220/2006 (read in a secondary copy, not in the official consolidated version). The order of the limits follows that article; the order of the 10% increase relative to the limits is not stated in the sources we read, so it is our simplification. The gov.pt page works one example with a 9.4% IRS rate that we cannot reproduce from the 2026 tables, so the real cap can be lower than shown. The end of the 10% cut after 180 days is taken from the guide and press reports, not from the consolidated law."
       },
       "nextStepHeadline": "Before the income drops, plan the cushion",
       "nextStepDescription": "WonderMoney shows your cash, your monthly spending and how long your savings last on a lower income.",
@@ -3039,7 +3040,7 @@
         "gross": "The base salary in the months counted, before Social Security and IRS. Holiday and Christmas allowances are not part of the reference pay.",
         "allowances": "In twelfths, the calculator takes out the two allowances to get the base salary the reference pay uses.",
         "sickDays": "Total days on the sick note (CIT), counted from the first day. Employees can receive up to 1,095 days.",
-        "dependants": "Used for the 5-point increase, which needs 3 or more children and a reference pay of 500 euros a month or less.",
+        "dependants": "Used for the 5-point increase, which applies with 3 or more children, or when the reference pay is 500 euros a month or less.",
         "hospitalisation": "With a hospital stay or outpatient surgery the benefit is paid from day 1, with no waiting period."
       },
       "errors": {
@@ -3062,7 +3063,7 @@
         "bandsTitle": "By duration band",
         "bandLabel": "Days {{from}} to {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} paid days × {{daily}} = {{amount}}",
-        "increaseApplied": "The 5-point increase for low pay and 3 or more children is included.",
+        "increaseApplied": "The 5-point increase (reference pay of 500 euros or less, or 3 or more children) is included.",
         "allWaiting": "Every day of this leave is a waiting day, so Segurança Social pays nothing. Check whether your contract or collective agreement makes your employer pay these days.",
         "waitingNote": "Segurança Social does not pay the first 3 days. Whether your employer pays them depends on your contract or collective agreement.",
         "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
@@ -3089,7 +3090,7 @@
         "methodBands": "The daily benefit is a percentage of the RR that grows with the length of the leave: 55% up to 30 days, 60% from day 31 to 90, 70% from day 91 to 365 and 75% beyond that, up to 1,095 days for employees. The days count from the first day of the leave, waiting days included.",
         "methodWaiting": "Employees have a waiting period of 3 days that Segurança Social does not pay. With a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it, payment starts on day 1.",
         "methodMinimum": "The daily benefit cannot be below {{min}} (30% of the {{rmmg}} minimum wage). If the RR itself is lower, the benefit equals the RR.",
-        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when the RR is at most 500 euros a month and the household has 3 or more children up to 16 (or 24 with child benefit), or children with the disability bonus. The calculator only models the children count.",
+        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when any one of these applies (art. 17 of Decree-Law 28/2004): the RR is at most 500 euros a month, the household has 3 or more children up to 16 (or 24 with child benefit), or the household has children with the disability bonus. The conditions are alternatives, not cumulative. The calculator models the first two and does not model the disability bonus.",
         "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
         "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
         "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
@@ -3101,7 +3102,7 @@
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
         "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide. The 500 euro limit for the 5-point increase comes from the consolidated law and secondary sources, because the guide text does not show the figure. The estimate of net pay behind the net cap is our simplification."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004. The three alternative conditions for the 5-point increase come from that text; the law says the 500 euro figure is revised periodically, and we could not confirm the current figure in an official text, so we keep 500. The estimate of net pay behind the net cap is our simplification."
       },
       "nextStepHeadline": "Plan for the temporary income gap",
       "nextStepDescription": "WonderMoney shows your cash, your spending and how long your savings cover a lower income.",
@@ -3506,19 +3507,20 @@
           "lateCapped": "Retiring {{months}} months after the normal age ({{normal}}) adds a bonus, which stops at {{bonus}} because the pension cannot exceed 92% of your reference pay."
         },
         "floorApplied": "The pension was raised to the 2026 minimum for your career length.",
-        "gapSome": "To keep your standard of living you would need about {{gap}} a month from savings and investments (before tax).",
+        "gapSome": "To keep your standard of living you would need about {{gap}} a month in net income from savings and investments.",
         "gapNone": "At this age the estimated pension covers your net pay today.",
         "estimate": "A rough estimate for planning, not a decision and not advice. The official simulator in Segurança Social Direta, which uses your real contribution record, is the reference.",
         "limits": "Not covered: careers that began before 2002 (mixed formula), civil servants (CGA), special regimes and pay that varies a lot.",
         "simulatorLink": "Open the official simulator",
-        "fireLink": "Work out the savings you need with the FIRE calculator"
+        "fireLink": "Work out the savings you need with the FIRE calculator",
+        "netPension": "Estimated net pension (per payment, after IRS)"
       },
       "nextStepHeadline": "Close the gap with your own investments",
       "nextStepDescription": "WonderMoney tracks your portfolio and net worth in one place, so you can see how far your investments go towards covering the gap.",
       "nextStepCta": "Track the investments needed to cover your gap",
       "guide": {
         "exampleTitle": "Worked example",
-        "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month, or {{replacement}} of the salary. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
+        "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month gross, or {{replacement}} of the salary. After IRS the pension is {{netPension}} a month. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
         "methodTitle": "How the estimate works",
         "methodReference": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
         "methodRate": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
@@ -3526,7 +3528,7 @@
         "methodEarly": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
         "methodLate": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
         "methodMinimum": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
-        "methodGap": "The gap compares the estimated gross pension, over 14 payments, with your net pay today: gross pay minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. A pension also pays IRS, so the real gap can differ.",
+        "methodGap": "The gap compares the net pension with your net pay today, both per payment over 14 payments. Net pay is the gross salary minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. The net pension is the estimated gross pension minus IRS withheld under the 2026 pension table VIII (Despacho n.º 233-A/2026, unmarried holder or married with two earners, without disability); pensions pay no Social Security and pensions up to 920 euros a month have no withholding. The final IRS depends on your whole income and deductions.",
         "methodBudget": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
         "unsupportedTitle": "Not supported",
         "unsupportedMixed": "Careers that began before 2002 (mixed formula, with the older rules for the years up to 2001). This calculator only covers the whole-career formula for people who started contributing in 2002 or later.",
@@ -3539,7 +3541,130 @@
         "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked against Despacho n.º 233-A/2026 (rules and table assignment) and a transcription of its annex whose rows match the official effective-rate column."
+      }
+    },
+    "sp500History": {
+      "title": "S&P 500 historical returns calculator",
+      "shortName": "S&P 500 history",
+      "subtitle": "See what an investment in the S&P 500 (S&P Composite index) would have been worth between any two years, with or without dividends and inflation.",
+      "description": "Simulate S&P 500 returns between two past years: dividends, inflation, contributions, CAGR and every year's result.",
+      "pageTitle": "S&P 500 Historical Returns Calculator: Dividends and Inflation",
+      "pageDescription": "Choose a start and end year and see what the S&P 500 returned: total or price return, real or nominal, with optional yearly contributions, CAGR, best and worst year and a year-by-year table. Data: Aswath Damodaran (NYU Stern) and Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Start year (invest on 1 January)",
+        "endYear": "End year (to 31 December)",
+        "initial": "Initial amount",
+        "annualContribution": "Yearly contribution (optional)",
+        "reinvest": "Reinvest dividends (total return)",
+        "real": "Adjust for inflation (real value)"
+      },
+      "help": {
+        "years": "Data covers {{first}} to {{last}}. Both years are counted in full.",
+        "initial": "In US dollars, invested on 1 January of the start year.",
+        "contribution": "Added on 1 January of every year in the range, the first included. Leave at 0 for none.",
+        "reinvest": "On: price change plus dividends reinvested. Off: price change only, as if every dividend were spent.",
+        "real": "On: every figure is in {{year}} dollars, after removing US inflation. Off: nominal dollars of each year."
+      },
+      "errors": {
+        "required": "Enter a valid value.",
+        "whole": "Enter a whole year.",
+        "outOfRange": "Choose a year from {{min}} to {{max}}.",
+        "tooSmall": "Enter {{min}} or more.",
+        "tooLarge": "Enter {{max}} or less, or choose a shorter range: the result would exceed what this calculator can show.",
+        "beforeStart": "The end year must be {{start}} or later.",
+        "nothingInvested": "Enter an initial amount or a yearly contribution above zero.",
+        "summary": "Check the highlighted fields to see the result."
+      },
+      "result": {
+        "finalNominal": "Final value (nominal US dollars)",
+        "finalReal": "Final value (in {{year}} US dollars)",
+        "contributed": "Total invested",
+        "gain": "Gain or loss",
+        "cagr": "CAGR (compound annual growth rate)",
+        "best": "Best year in the range",
+        "worst": "Worst year in the range",
+        "basisTotal": "total return with dividends reinvested",
+        "basisPrice": "price return only, dividends not included",
+        "termsNominal": "nominal US dollars",
+        "termsReal": "{{year}} US dollars, inflation removed",
+        "assumptions": "Showing {{basis}}, in {{terms}}, over {{years}} years from 1 January {{start}} to 31 December {{end}}.",
+        "singleYear": "A single year shows that year's luck, not what to expect. Try a range of 10 years or more.",
+        "pastPerformance": "Past performance does not predict future returns. Educational only, not investment advice."
+      },
+      "table": {
+        "title": "Year by year",
+        "caption": "Yearly return, inflation, money added and value at the end of each year",
+        "year": "Year",
+        "return": "Return",
+        "inflation": "US inflation",
+        "contribution": "Money added",
+        "value": "Value at year end"
+      },
+      "chart": {
+        "label": "Line chart of the value at the end of each year against the total invested",
+        "value": "Value",
+        "contributed": "Total invested"
+      },
+      "currencyNote": "Returns are in US dollars. If you invest in euros, the euro-dollar exchange rate adds a currency risk on top of the market's: it can raise or cut the result by several points a year.",
+      "sourceNote": "Source: S&P 500 / S&P Composite index data from Aswath Damodaran (NYU Stern, downloaded {{date}}) and consumer prices from Robert Shiller (Yale, downloaded {{shillerDate}}). Yearly values computed by WonderMoney. Educational only.",
+      "nextStepHeadline": "Compare historical scenarios with your portfolio plan",
+      "nextStepDescription": "Add your holdings to WonderMoney, set a plan and see how your real portfolio compares with the historical scenarios you tried here.",
+      "nextStepCta": "Plan your portfolio",
+      "guide": {
+        "read": {
+          "title": "How to read the result",
+          "intro": "This calculator looks backwards. It takes the yearly returns of the S&P 500 (S&P Composite index data) between the years you choose and applies them to your amount. The data covers {{first}} to {{last}}.",
+          "future": "It is not a forecast. To project an index forward with your own return and fee assumptions, use the index projection on the investment return page."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Invest {{initial}} on 1 January {{start}} and leave it until 31 December {{end}} ({{years}} years), with dividends reinvested and no further contributions. The data turns it into {{finalTotal}}, a compound annual growth rate (CAGR) of {{cagrTotal}}.",
+          "price": "Without dividends (price return only) the same amount ends at {{finalPrice}}, or {{cagrPrice}} a year. The gap is what reinvested dividends added.",
+          "real": "Measured in {{start}} dollars, after removing US inflation, the final value is {{finalReal}}, or {{cagrReal}} a year.",
+          "range": "The path was rough: the best year of the range was {{bestYear}} ({{bestReturn}}) and the worst {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "For every year in your range the calculator does the same four things:",
+          "steps": {
+            "a": "It adds the money invested on 1 January: your initial amount in the first year and the yearly contribution in every year.",
+            "b": "It grows the balance by that year's return: the total return if dividends are reinvested, the price return if not.",
+            "c": "If you ask for inflation-adjusted values, it divides by US consumer prices (CPI), so every figure is in the start year's dollars. Contributions are deflated with the prices of the day they are made.",
+            "d": "It records the value at 31 December for the table and the chart."
+          },
+          "cagr": "The CAGR is the geometric mean of the yearly returns in the range, in the terms you chose. It describes the index over those years and does not depend on how much you contribute.",
+          "contributions": "Yearly contributions are added on 1 January, before that year's return, so they earn the whole year.",
+          "limits": "The first year in the data is {{first}} and the last complete year is {{last}}. Each amount is capped at {{maxAmount}}."
+        },
+        "data": {
+          "title": "Data and method",
+          "source": "Returns are computed by WonderMoney from the year-end S&P 500 level and the dividends in Aswath Damodaran's dataset \"Historical Returns on Stocks, Bonds and Bills\" (NYU Stern), downloaded on {{downloaded}}. Inflation comes from the consumer price index (CPI) in Robert J. Shiller's public dataset \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Yale University), downloaded on {{shillerDownloaded}}.",
+          "returnsLink": "Damodaran's data page",
+          "inflationLink": "Shiller's data page",
+          "method": "For each calendar year the price return is the year-end level divided by the previous year-end level, minus one. The total return adds the year's dividends to the year-end level before dividing, which treats the dividends as reinvested at the year end. Inflation is the change in the CPI between the same two Decembers.",
+          "check": "As a check, every year's total return was compared with the total return Damodaran publishes himself, and none differs by more than 0.1 percentage point. Because years run from year-end to year-end, they line up with the calendar-year figures usually quoted for the index.",
+          "trademark": "\"S&P 500\" and \"S&P Composite\" only name the index. This page shows yearly values derived from public academic data and no daily prices, and is not affiliated with or endorsed by S&P Dow Jones Indices."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "fx": "Currency: returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
+            "fees": "Costs: fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
+            "taxes": "Taxes: tax on dividends and gains is not included, and it depends on where you live.",
+            "sequence": "Hindsight: this is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
+            "past": "Past performance does not predict future returns. This tool is educational and is not investment advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "investmentReturnLink": "Investment return and index projection",
+          "investmentReturnBody": "Measure your own return, or project an index fund forward with your return and fee assumptions.",
+          "compoundInterestLink": "Compound interest calculator",
+          "compoundInterestBody": "See how regular contributions and time compound at a rate you choose.",
+          "investorProfileLink": "Investor profile quiz",
+          "investorProfileBody": "Find out how much market swings like these you can live with."
+        }
       }
     }
   },

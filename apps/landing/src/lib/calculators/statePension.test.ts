@@ -69,7 +69,7 @@ describe("early and late retirement", () => {
     expect(result.adjustmentMonths).toBe(45);
     expect(result.penaltyBp).toBe(2250);
     expect(result.monthlyCents).toBe(98_081);
-    expect(result.gapCents).toBe(result.netPayCents - 98_081);
+    expect(result.gapCents).toBe(result.netPayCents - result.netPensionCents);
   });
 
   it("cuts 40.5% plus the factor at 60", () => {
@@ -124,14 +124,25 @@ describe("bonus table", () => {
 });
 
 describe("replacement rate and gap", () => {
-  it("compares the pension with today's net pay", () => {
+  it("compares the net pension (IRS withheld, no Social Security) with today's net pay", () => {
     const result = run();
     expect(result.replacementBp).toBe(Math.round((result.monthlyCents / 180_000) * 10_000));
     expect(result.netPayCents).toBe(136_153);
-    expect(result.gapCents).toBe(Math.max(0, result.netPayCents - result.monthlyCents));
+    // Pension 1132.68: table VIII, 15.7% x 1132.68 - 111.70 = 66.13.
+    expect(result.monthlyCents).toBe(113_268);
+    expect(result.pensionWithholdingCents).toBe(6613);
+    expect(result.netPensionCents).toBe(113_268 - 6613);
+    expect(result.gapCents).toBe(result.netPayCents - result.netPensionCents);
   });
 
-  it("reports no gap when the pension exceeds net pay", () => {
+  it("does not tax a pension of up to 920 euros", () => {
+    const result = run({ grossMonthly: 700, years: 38, ageYears: 66, ageMonths: 9 });
+    expect(result.monthlyCents).toBeLessThanOrEqual(92_000);
+    expect(result.pensionWithholdingCents).toBe(0);
+    expect(result.netPensionCents).toBe(result.monthlyCents);
+  });
+
+  it("reports no gap when the net pension exceeds net pay", () => {
     expect(run({ grossMonthly: 1500, years: 40, ageYears: 66, ageMonths: 9 }).gapCents).toBe(0);
   });
 });
