@@ -1,0 +1,157 @@
+---
+// Prerendered explanation for the deposit-rate index: what the figure is and is not, a worked
+// example computed from the same function the calculator runs, the method, the data sources with
+// their dates, what the figures leave out, and the tools to go on with.
+import {
+  DEPOSIT_RATES_EXAMPLE,
+  DEPOSIT_RATES_SOURCE,
+  DEPOSIT_TAX_RATE,
+  computeDepositBenchmark,
+  latestYearSummary,
+  monthToDate,
+} from "@/lib/calculators/depositRates";
+import { CPI_SOURCE } from "@/lib/calculators/portugalCpi";
+import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.depositRateIndex.guide.${key}`;
+
+const outcome = computeDepositBenchmark({ ...DEPOSIT_RATES_EXAMPLE });
+if (!outcome.ok) throw new Error("The deposit-rate worked example has invalid inputs");
+const example = outcome.result;
+const year = latestYearSummary();
+
+const eur = (value: number) => formatMoney(locale, value, { currency: "EUR", decimals: 2 });
+const percent = (value: number) => formatPercent(locale, value, { decimals: 2 });
+const values = {
+  amount: formatMoney(locale, DEPOSIT_RATES_EXAMPLE.amount, { currency: "EUR", decimals: 0 }),
+  months: String(DEPOSIT_RATES_EXAMPLE.termMonths),
+  rate: percent(example.ratePct),
+  month: formatMonthYear(locale, monthToDate(example.month)),
+  gross: eur(example.deposit.grossInterest),
+  tax: eur(example.deposit.tax),
+  net: eur(example.deposit.netInterest),
+  taxRate: String(DEPOSIT_TAX_RATE),
+  inflation: percent(DEPOSIT_RATES_EXAMPLE.inflation),
+  inflationCost: eur(example.inflationCost),
+  realGain: eur(example.realGain),
+  year: String(year.year),
+  yearRate: percent(year.pt),
+  yearReal: percent(year.realNet),
+  first: formatMonthYear(locale, monthToDate(DEPOSIT_RATES_SOURCE.firstMonth)),
+  last: formatMonthYear(locale, monthToDate(DEPOSIT_RATES_SOURCE.lastMonth)),
+  retrieved: DEPOSIT_RATES_SOURCE.retrievedOn,
+  cpiRetrieved: CPI_SOURCE.retrieved,
+  seriesPt: DEPOSIT_RATES_SOURCE.seriesPortugal.replace("{m}", "x"),
+  seriesEa: DEPOSIT_RATES_SOURCE.seriesEuroArea.replace("{m}", "x"),
+};
+
+const list = (key: string) =>
+  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+const steps = list("method.steps");
+const limits = list("limits.items");
+
+const related = [
+  { key: "termDeposit", href: toLocalizedPath("toolTermDeposit", locale) },
+  { key: "savingsCertificates", href: toLocalizedPath("toolSavingsCertificates", locale) },
+  { key: "inflation", href: toLocalizedPath("toolInflation", locale) },
+] as const;
+
+const linkClass =
+  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+  <section aria-labelledby="deposit-read">
+    <h2 id="deposit-read" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("read.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("read.what"))}</p>
+      <p>{t(k("read.notBest"))}</p>
+      <p>{t(k("read.noRecommendation"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="deposit-example">
+    <h2 id="deposit-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("example.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+      <p>{t(k("example.real"), values)}</p>
+      <p>{t(k("example.year"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="deposit-method">
+    <h2 id="deposit-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("method.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"))}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {steps.map((item) => <li>{item}</li>)}
+      </ol>
+      <p>{t(k("method.realRate"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="deposit-data">
+    <h2 id="deposit-data" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("data.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("data.source"), values)}</p>
+      <p>
+        <a href={DEPOSIT_RATES_SOURCE.url} class={linkClass} rel="noopener" target="_blank">
+          {t(k("data.ecbLink"))}
+        </a>
+        {" · "}
+        <a href="https://bpstat.bportugal.pt/" class={linkClass} rel="noopener" target="_blank">
+          {t(k("data.bpstatLink"))}
+        </a>
+        {" · "}
+        <a href={CPI_SOURCE.url} class={linkClass} rel="noopener" target="_blank">
+          {t(k("data.cpiLink"))}
+        </a>
+      </p>
+      <p>{t(k("data.inflation"), values)}</p>
+      <p>{t(k("data.reuse"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="deposit-limits">
+    <h2 id="deposit-limits" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("limits.title"))}
+    </h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {limits.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="deposit-related">
+    <h2 id="deposit-related" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("related.title"))}
+    </h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>

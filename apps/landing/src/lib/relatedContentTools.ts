@@ -95,6 +95,18 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile"],
     destination: "toolSp500History",
   },
+  {
+    sources: ["toolMortgage", "toolRateRevision", "toolMortgageTransfer"],
+    destination: "toolEuribor",
+  },
+  {
+    sources: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation"],
+    destination: "toolDepositRateIndex",
+  },
+  {
+    sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
+    destination: "toolElectricityIndex",
+  },
 ];
 
 export function getRelatedContentTools(

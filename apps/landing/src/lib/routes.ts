@@ -472,6 +472,30 @@ const ROUTE_SLUGS = {
 		de: "sp500-historische-rendite-rechner",
 		it: "rendimento-storico-sp500",
 	},
+	toolEuribor: {
+		pt: "euribor-hoje",
+		en: "euribor-today-rates",
+		es: "euribor-hoy",
+		fr: "euribor-aujourdhui",
+		de: "euribor-aktuell",
+		it: "euribor-oggi",
+	},
+	toolDepositRateIndex: {
+		pt: "indice-taxas-depositos-a-prazo",
+		en: "term-deposit-rate-index-portugal",
+		es: "indice-tipos-depositos-plazo-portugal",
+		fr: "indice-taux-depots-a-terme-portugal",
+		de: "festgeldzins-index-portugal",
+		it: "indice-tassi-depositi-vincolati-portogallo",
+	},
+	toolElectricityIndex: {
+		pt: "indice-da-eletricidade",
+		en: "electricity-price-index-portugal",
+		es: "indice-precio-electricidad-portugal",
+		fr: "indice-prix-electricite-portugal",
+		de: "strompreisindex-portugal",
+		it: "indice-prezzo-elettricita-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -614,6 +638,9 @@ export const TOOL_ROUTE_IDS = [
 	"toolPropertyCapitalGains",
 	"toolStatePension",
 	"toolSp500History",
+	"toolEuribor",
+	"toolDepositRateIndex",
+	"toolElectricityIndex",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -941,6 +968,16 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"pensao-de-reforma": "toolStatePension",
 	toolsp500history: "toolSp500History",
 	"sp500-historical-returns": "toolSp500History",
+	tooleuribor: "toolEuribor",
+	euribor: "toolEuribor",
+	"euribor-today": "toolEuribor",
+	"euribor-hoje": "toolEuribor",
+	tooldepositrateindex: "toolDepositRateIndex",
+	"deposit-rate-index": "toolDepositRateIndex",
+	"indice-depositos-a-prazo": "toolDepositRateIndex",
+	toolelectricityindex: "toolElectricityIndex",
+	"electricity-price-index": "toolElectricityIndex",
+	"indice-da-eletricidade": "toolElectricityIndex",
 }
 
 function normalizeRouteLookupKey(value: string): string {

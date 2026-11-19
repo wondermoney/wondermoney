@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
       "nextStepCta": "Incluez vos certificats dans la vue d’ensemble de votre épargne"
     },
+    "depositRateIndex": {
+      "title": "Indice des dépôts à terme : ce que les banques portugaises paient réellement",
+      "shortName": "Indice des dépôts",
+      "subtitle": "Le taux d'intérêt moyen que les banques du Portugal et de la zone euro ont versé sur les nouveaux dépôts à terme des ménages, mois par mois depuis 2003, avec l'inflation et les 28 % d'IRS déduits.",
+      "description": "Taux moyens des nouveaux dépôts à terme au Portugal et dans la zone euro, après inflation et impôt.",
+      "pageTitle": "Indice des Dépôts à Terme au Portugal : Taux Moyens et Inflation",
+      "pageDescription": "Taux d'intérêt moyens officiels des nouveaux dépôts à terme des ménages au Portugal et dans la zone euro depuis 2003, taux réel après inflation et 28 % d'IRS, et un petit simulateur. Données : statistiques de la Banque du Portugal via la BCE.",
+      "snapshot": {
+        "title": "Taux moyen des nouveaux dépôts à terme, {{month}}",
+        "intro": "Moyennes officielles du taux d'intérêt convenu sur les nouveaux dépôts à terme des ménages, déclarées par les banques. C'est une référence, pas une liste d'offres.",
+        "portugal": "Portugal, toutes échéances",
+        "euroArea": "Zone euro, toutes échéances",
+        "asOf": "Données de {{month}}, le dernier mois publié lors de la récupération des données, le {{retrieved}}.",
+        "provisional": "Le dernier mois est provisoire et peut être révisé.",
+        "caption": "Taux moyen des nouveaux dépôts à terme par échéance initiale, Portugal et zone euro",
+        "maturity": "Échéance initiale",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Zone euro",
+        "noData": "n.d."
+      },
+      "real": {
+        "title": "Taux réel en {{year}}, dernière année complète",
+        "nominal": "Taux moyen versé",
+        "inflation": "Inflation",
+        "gross": "Taux réel avant impôt",
+        "net": "Taux réel après {{tax}} % d'IRS",
+        "positive": "En {{year}}, le nouveau dépôt moyen a encore battu l'inflation après IRS.",
+        "negative": "En {{year}}, le nouveau dépôt moyen a perdu du pouvoir d'achat après IRS : les prix ont augmenté plus vite que les intérêts perçus."
+      },
+      "notBestOffer": "Il s'agit d'une moyenne de ce que les banques ont réellement versé sur les nouveaux dépôts, pas de la meilleure offre. Les taux promotionnels ou de campagne sont généralement plus élevés, et certains dépôts rapportent moins. Cette page ne cite aucune banque et ne recommande aucun produit : comparez vous-même les offres actuelles avant de décider.",
+      "calculator": {
+        "title": "Intérêts au taux moyen",
+        "intro": "Saisissez un montant et une durée pour voir les intérêts qu'un dépôt rapporterait au dernier taux moyen de cette échéance, nets de 28 % d'IRS, et ce que l'inflation en retirerait."
+      },
+      "fields": {
+        "amount": "Montant déposé",
+        "term": "Durée",
+        "termSuffix": "mois",
+        "inflation": "Inflation supposée par an"
+      },
+      "help": {
+        "term": "Mois entiers, de 1 à 120. Jusqu'à 12 mois, la moyenne jusqu'à 1 an ; de 13 à 24 mois, celle de 1 à 2 ans ; au-delà, celle de plus de 2 ans.",
+        "inflation": "Préremplie avec l'inflation portugaise de {{year}} (IPC moyen annuel, INE). Modifiez-la pour tester d'autres scénarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Saisissez un montant supérieur à zéro.",
+          "negative": "Le montant ne peut pas être négatif.",
+          "tooLarge": "Saisissez {{max}} ou moins."
+        },
+        "termMonths": {
+          "required": "Saisissez une durée d'au moins 1 mois.",
+          "tooLarge": "La durée peut atteindre {{max}} mois au maximum.",
+          "notWhole": "Saisissez un nombre entier de mois."
+        },
+        "inflation": {
+          "required": "Saisissez un taux d'inflation, ou 0.",
+          "outOfRange": "Saisissez un taux d'inflation de {{min}} % à {{top}} %."
+        },
+        "summary": "Vérifiez les champs signalés pour voir le résultat."
+      },
+      "buckets": {
+        "all": "Toutes échéances",
+        "upTo1y": "Jusqu'à 1 an",
+        "1to2y": "Plus de 1 an et jusqu'à 2 ans",
+        "over2y": "Plus de 2 ans"
+      },
+      "result": {
+        "net": "Intérêts nets après {{tax}} % d'IRS",
+        "gross": "Intérêts bruts",
+        "tax": "IRS retenu ({{tax}} %)",
+        "inflationCost": "Ce que l'inflation retire sur la durée",
+        "realGain": "Intérêts restants après inflation",
+        "realYield": "Rendement annuel réel, après impôt",
+        "assumptions": "Taux moyen des nouveaux dépôts ({{bucket}}) : {{rate}} par an ({{month}}). Intérêts simples versés à l'échéance, {{months}} mois.",
+        "fallback": "Aucun nouveau dépôt n'a été enregistré dans ce groupe d'échéances le dernier mois ; la moyenne de toutes les échéances est utilisée.",
+        "beats": "Avec ces hypothèses, les intérêts, après impôt, couvrent la perte de pouvoir d'achat.",
+        "loses": "Avec ces hypothèses, l'inflation retire plus que les intérêts ne rapportent : à l'échéance, l'argent achète moins.",
+        "note": "Une référence, pas une offre : le taux de votre banque, d'éventuels frais et le décompte exact des jours modifient le résultat. À but éducatif uniquement, pas un conseil financier."
+      },
+      "history": {
+        "title": "Historique depuis 2003",
+        "bucket": "Échéance affichée dans le graphique",
+        "chartLabel": "Graphique linéaire des taux moyens mensuels des nouveaux dépôts à terme au Portugal et dans la zone euro, avec l'inflation annuelle portugaise",
+        "portugal": "Portugal",
+        "euroArea": "Zone euro",
+        "inflation": "Inflation portugaise (année civile)",
+        "chartNote": "Les taux sont des moyennes mensuelles. L'inflation est la variation moyenne annuelle des prix à la consommation de chaque année civile ; elle change donc en janvier, et l'année en cours n'est pas complète.",
+        "caption": "Taux moyen annuel des nouveaux dépôts, inflation et taux réel après IRS",
+        "year": "Année",
+        "realNet": "Taux réel après {{tax}} % d'IRS"
+      },
+      "sourceNote": "Source : taux d'intérêt moyens des nouveaux dépôts à terme des ménages (taux annualisé convenu), statistiques de la Banque du Portugal publiées dans le portail de données de la BCE, dernier mois {{month}}, récupérées le {{retrieved}}. Inflation : indice des prix à la consommation de l'INE via le BPstat de la Banque du Portugal. Chiffres annuels calculés par WonderMoney. À but éducatif uniquement.",
+      "nextStepHeadline": "Passez de la référence à un plan d'épargne personnel",
+      "nextStepDescription": "La moyenne montre ce que le marché a versé. Fixez un objectif d'épargne dans WonderMoney et suivez la comparaison de vos propres dépôts avec elle.",
+      "nextStepCta": "Fixer un objectif d'épargne",
+      "guide": {
+        "read": {
+          "title": "Comment lire l'indice",
+          "what": "Chaque mois, les banques du Portugal déclarent à la Banque du Portugal le taux d'intérêt des nouveaux dépôts à terme reçus des ménages. L'indice est la moyenne de ces taux entre banques, pondérée par le volume de nouvelles opérations : ce qui a réellement été convenu. La ligne de la zone euro est la même statistique pour l'ensemble des banques de la zone, à titre de comparaison.",
+          "notBest": "Ce n'est pas le meilleur taux disponible. Une moyenne inclut de petits dépôts, des clients existants et des banques qui rémunèrent peu ; un taux de campagne ou promotionnel peut donc être bien supérieur, et certains dépôts rapportent moins.",
+          "noRecommendation": "Aucune banque ni aucun produit n'est nommé ou classé ici. Servez-vous de la moyenne pour juger si une offre paraît haute ou basse, puis comparez vous-même les offres actuelles, conditions comprises."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Déposez {{amount}} pendant {{months}} mois au dernier taux moyen de cette échéance, {{rate}} par an ({{month}}). Les intérêts versés à l'échéance sont de {{gross}} ; après {{taxRate}} % d'IRS (impôt retenu : {{tax}}), il vous reste {{net}}.",
+          "real": "Avec une inflation de {{inflation}} par an, cet argent perd {{inflationCost}} de pouvoir d'achat sur la durée ; ce qui reste après inflation est donc de {{realGain}}.",
+          "year": "Avec le recul, en {{year}}, dernière année complète, le nouveau dépôt moyen a rapporté {{yearRate}} ; après inflation et 28 % d'IRS, le taux réel était de {{yearReal}}."
+        },
+        "method": {
+          "title": "Comment c'est calculé",
+          "intro": "Les taux sont des statistiques publiées. WonderMoney ajoute seulement ces calculs :",
+          "steps": {
+            "a": "Taux annuel : la moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
+            "b": "Inflation : la variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année.",
+            "c": "Taux réel : (1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS au taux.",
+            "d": "Simulateur : intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
+          },
+          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages."
+        },
+        "data": {
+          "title": "Données et sources",
+          "source": "Taux : taux d'intérêt moyens mensuels des nouveaux dépôts à échéance convenue des ménages (taux annualisé convenu, tous montants, en euros), de {{first}} à {{last}}, établis par la Banque du Portugal à partir des déclarations des banques et publiés dans le portail de données de la BCE (séries {{seriesPt}} pour le Portugal et {{seriesEa}} pour la zone euro, où x est l'échéance : total, jusqu'à 1 an, plus de 1 an et jusqu'à 2 ans, plus de 2 ans). Récupérés le {{retrieved}}.",
+          "ecbLink": "Portail de données de la BCE (MIR)",
+          "bpstatLink": "BPstat de la Banque du Portugal",
+          "cpiLink": "Indice des prix à la consommation de l'INE dans BPstat",
+          "inflation": "Inflation : indice des prix à la consommation moyen annuel du Portugal, produit par l'INE et diffusé par la Banque du Portugal (série BPstat 12704686), récupéré le {{cpiRetrieved}}.",
+          "reuse": "La BCE autorise l'utilisation libre de ses statistiques lorsqu'elles sont reproduites avec exactitude et que la source est citée. Cette page republie des valeurs mensuelles et ne charge aucune donnée à l'exécution : les chiffres ne changent que lorsque le fichier de données est actualisé."
+        },
+        "limits": {
+          "title": "Ce que ces chiffres ne couvrent pas",
+          "items": {
+            "average": "C'est une moyenne des nouvelles opérations : elle mêle montants, banques et clients. Votre taux peut être plus haut ou plus bas.",
+            "lag": "Les statistiques sont publiées chaque mois avec un délai, et le dernier mois peut être révisé.",
+            "tax": "Impôt : 28 % est le taux de retenue d'IRS sur les intérêts pour les résidents. Votre situation peut différer, par exemple si vous intégrez les intérêts à votre déclaration annuelle.",
+            "inflation": "Inflation : vos propres prix diffèrent de la moyenne nationale et l'inflation future est inconnue. Le simulateur conserve le taux saisi pendant toute la durée.",
+            "buckets": "Les groupes d'échéances sans nouveau dépôt dans un mois s'affichent « n.d. ». Pour une durée de ce groupe, le simulateur utilise la moyenne de toutes les échéances.",
+            "advice": "À but éducatif uniquement : cette page n'est ni un conseil financier ni une offre."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "termDepositLink": "Simulateur de dépôt à terme",
+          "termDepositBody": "Saisissez le taux de votre banque et voyez les intérêts, l'impôt et le rendement net.",
+          "savingsCertificatesLink": "Simulateur de Certificados de Aforro",
+          "savingsCertificatesBody": "Comparez un dépôt aux Certificados de Aforro Série F.",
+          "inflationLink": "Calculateur d'inflation",
+          "inflationBody": "Voyez combien de pouvoir d'achat l'argent a perdu entre deux années quelconques."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calculateur de salaire net au Portugal 2026",
       "shortName": "Salaire net",
@@ -3664,6 +3815,261 @@
           "compoundInterestBody": "Voyez comment les versements réguliers et le temps se composent à un taux de votre choix.",
           "investorProfileLink": "Test de profil d'investisseur",
           "investorProfileBody": "Découvrez avec quelles fluctuations de marché de ce type vous pouvez vivre."
+        }
+      }
+    },
+    "euribor": {
+      "title": "Euribor aujourd'hui : taux actuels et impact sur la mensualité",
+      "shortName": "Euribor aujourd'hui",
+      "subtitle": "Les derniers Euribor à 3, 6 et 12 mois, leur variation sur le mois précédent, l'historique depuis 2000 et l'effet d'un changement sur la mensualité d'un prêt immobilier à taux variable.",
+      "description": "Moyennes mensuelles actuelles de l'Euribor à 3, 6 et 12 mois, historique depuis 2000 et simulateur de l'effet d'une variation sur la mensualité de ton prêt.",
+      "pageTitle": "Euribor aujourd'hui : taux à 3, 6 et 12 mois et impact sur la mensualité",
+      "pageDescription": "Les dernières moyennes mensuelles de l'Euribor à 3, 6 et 12 mois de la Banque du Portugal, la variation sur le mois précédent, un graphique depuis 2000 et un simulateur de l'effet d'une hausse ou d'une baisse sur la mensualité d'un prêt à taux variable.",
+      "asOf": "Données de {{month}} : moyennes mensuelles, récupérées le {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 mois",
+        "6": "Euribor 6 mois",
+        "12": "Euribor 12 mois"
+      },
+      "current": {
+        "title": "Taux Euribor actuels",
+        "change": "{{change}} point par rapport à {{previous}}",
+        "note": "Chaque taux est la moyenne de {{month}}, pas un fixing quotidien. Un prêt est révisé sur le fixing de la date prévue au contrat, qui peut différer de la moyenne mensuelle."
+      },
+      "calc": {
+        "title": "Ce qu'un changement de l'Euribor fait à ta mensualité"
+      },
+      "fields": {
+        "balance": "Capital restant dû",
+        "termYears": "Années restantes",
+        "termMonths": "Mois restants",
+        "spread": "Ta marge",
+        "tenor": "Euribor suivi par ton prêt",
+        "change": "Variation de l'Euribor (points)"
+      },
+      "help": {
+        "spread": "La marge de la banque au-dessus de l'Euribor, en pourcentage. Elle figure dans ton contrat.",
+        "change": "Utilise un nombre négatif pour une baisse. 1 est un point de pourcentage : de 3 % à 4 %."
+      },
+      "errors": {
+        "summary": "La nouvelle mensualité apparaît quand chaque champ a une valeur valide.",
+        "balance": {
+          "required": "Indique le capital que tu dois encore.",
+          "tooSmall": "Indique un capital d'au moins {{min}}.",
+          "tooLarge": "Indique un capital jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Indique le temps restant, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indique jusqu'à {{max}} ans au total."
+        },
+        "termMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indique de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "spread": {
+          "required": "Indique la marge, ou 0 % s'il n'y en a pas.",
+          "negative": "La marge ne peut pas être négative.",
+          "tooLarge": "Indique une marge jusqu'à {{max}}."
+        },
+        "change": {
+          "required": "Indique une variation en points, ou 0 s'il n'y en a pas.",
+          "tooSmall": "Indique une variation de {{min}} ou plus.",
+          "tooLarge": "Indique une variation de {{max}} ou moins."
+        }
+      },
+      "result": {
+        "revised": "Mensualité après la variation",
+        "current": "Mensualité aujourd'hui",
+        "monthlyChange": "Écart par mois",
+        "nextYear": "Écart sur les {{payments}} prochaines mensualités",
+        "assumptions": "Part du taux à {{tenor}} de {{index}} (moyenne de {{month}}) et le porte à {{newIndex}}, avec ta marge en plus, sur les mois restants.",
+        "floored": "L'indice plus la marge passe sous 0 %, le taux est donc pris à 0 %. Les contrats diffèrent : certains ont un plancher, d'autres non.",
+        "termRounded": "La durée restante a été arrondie à des mois entiers.",
+        "noChange": "Sans variation de l'Euribor, la mensualité reste la même.",
+        "caveat": "Estimation pédagogique. Elle suppose que le nouveau taux s'applique dès la prochaine mensualité jusqu'à la fin du prêt ; ton contrat fixe les dates de révision, les plafonds et les planchers."
+      },
+      "history": {
+        "title": "Historique de l'Euribor",
+        "from": "Afficher à partir de l'année",
+        "label": "Graphique en lignes des moyennes mensuelles de l'Euribor à 3, 6 et 12 mois"
+      },
+      "sourceNote": "Source : Banque du Portugal, BPstat, moyennes mensuelles de l'Euribor, dernier mois {{month}}, récupérées le {{fetched}}. Euribor est une marque déposée d'EMMI. À titre pédagogique uniquement.",
+      "nextStepHeadline": "Relie les variations de taux au budget de tes dettes",
+      "nextStepDescription": "Ajoute ton prêt à WonderMoney et vois comment une variation de l'Euribor change ta mensualité et ce qu'il reste pour le reste de ton budget.",
+      "nextStepCta": "Connecte tes dettes",
+      "guide": {
+        "read": {
+          "title": "Comment lire les taux",
+          "intro": "L'Euribor est le taux auquel les banques de la zone euro se prêtent de l'argent pour une durée donnée : 3, 6 ou 12 mois. Beaucoup de prêts à taux variable paient l'Euribor plus une marge fixe : quand il bouge, la mensualité bouge.",
+          "monthly": "Les chiffres sont des moyennes mensuelles, la plus récente étant celle de {{month}}. Ce n'est pas le taux du jour : celui qui fixe ta mensualité est celui de la date prévue au contrat."
+        },
+        "example": {
+          "title": "Exemple",
+          "setup": "Un prêt avec {{balance}} restant dus sur {{years}} ans, une marge de {{spread}} et un Euribor 12 mois de {{index}} (la dernière moyenne mensuelle). L'Euribor monte de {{change}} point à {{newIndex}}.",
+          "result": "La mensualité passe de {{current}} à {{revised}}, soit {{difference}} de plus par mois. C'est le même calcul que le simulateur de révision de taux."
+        },
+        "data": {
+          "title": "Données et méthode",
+          "source": "Les taux sont les moyennes mensuelles de l'Euribor à 3, 6 et 12 mois publiées par la Banque du Portugal dans BPstat, récupérées le {{fetched}}. Le dernier mois des données est {{month}}. Chaque variation est la dernière moyenne moins celle du mois précédent, en points de pourcentage.",
+          "link": "Taux Euribor par durée sur BPstat",
+          "daily": "BPstat publie des moyennes mensuelles, pas des fixings quotidiens : cette page n'affiche donc que des moyennes mensuelles. Pour le fixing du jour, consulte l'EMMI ou ta banque.",
+          "trademark": "Euribor est une marque déposée d'EMMI. Cette page n'est ni affiliée à EMMI ou à la Banque du Portugal, ni approuvée par eux."
+        },
+        "limits": {
+          "title": "Ce que ces chiffres ne comprennent pas",
+          "items": {
+            "average": "Une moyenne mensuelle lisse le mois : le taux d'un jour donné peut être au-dessus ou en dessous.",
+            "reset": "Ton prêt suit l'Euribor d'une date de révision du contrat, souvent tous les 3, 6 ou 12 mois, pas chaque mois.",
+            "terms": "Les plafonds, les planchers et une marge différente après quelques années dépendent du contrat et ne sont pas inclus.",
+            "advice": "Information pédagogique, pas une prévision de l'Euribor ni un conseil financier."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "rateRevisionLink": "Simulateur de révision de taux",
+          "rateRevisionBody": "Essaie ton propre indice, ta marge et ton capital, et vois la mensualité en part de ton revenu.",
+          "mortgageLink": "Simulateur de prêt immobilier",
+          "mortgageBody": "Calcule la mensualité et les intérêts d'un prêt avant toute variation de taux.",
+          "debtToIncomeLink": "Calculateur du taux d'endettement",
+          "debtToIncomeBody": "Vois si une mensualité plus élevée garde tes dettes dans une part confortable du revenu."
+        }
+      }
+    },
+    "electricityIndex": {
+      "title": "Indice de l'électricité et simulateur de facture (Portugal)",
+      "shortName": "Indice de l'électricité",
+      "subtitle": "Estimez une facture mensuelle d'électricité au tarif réglementé et voyez comment le prix payé par les ménages portugais se compare à la moyenne de l'UE.",
+      "description": "Simulateur de facture d'électricité au tarif réglementé pour les ménages portugais, avec le prix du kWh du Portugal face à l'UE dans le temps.",
+      "pageTitle": "Indice de l'électricité au Portugal : simulateur de facture au tarif réglementé",
+      "pageDescription": "Estimez votre facture mensuelle d'électricité au tarif réglementé de l'ERSE (puissance souscrite, kWh, simple ou bi-horaire, TVA et autres charges) et comparez le prix du kWh des ménages portugais à la moyenne de l'UE. Données : ERSE et Eurostat.",
+      "fields": {
+        "power": "Puissance souscrite",
+        "period": "Consommation indiquée",
+        "periodMonth": "Par mois",
+        "periodYear": "Par an",
+        "consumption": "Consommation d'électricité",
+        "option": "Option tarifaire",
+        "optionSimple": "Simple",
+        "optionBi": "Bi-horaire",
+        "offPeak": "Part de la consommation en heures creuses",
+        "largeFamily": "Foyer de cinq personnes ou plus"
+      },
+      "help": {
+        "power": "Ménages en basse tension au Portugal continental : 3,45, 4,6, 5,75 ou 6,9 kVA. Elle figure sur votre facture.",
+        "consumption": "kWh sur la période choisie ci-dessus. Une année est répartie sur douze mois égaux.",
+        "offPeak": "Les heures creuses (« vazio ») sont la période la moins chère du tarif bi-horaire. Votre facture ou les données du compteur donnent la répartition.",
+        "largeFamily": "Fait passer le plafond de TVA réduite de 200 à 300 kWh par mois, si vous l'avez demandé à votre fournisseur."
+      },
+      "errors": {
+        "required": "Saisissez une valeur valide.",
+        "notAllowed": "Choisissez l'une des puissances souscrites de la liste.",
+        "negative": "La consommation ne peut pas être négative.",
+        "tooLarge": "Saisissez {{max}} ou moins.",
+        "percentRange": "Saisissez une part de 0 % à 100 %.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "total": "Facture mensuelle estimée (TVA comprise)",
+        "yearly": "Environ douze mois comme celui-ci",
+        "effective": "Coût réel par kWh, charges fixes comprises",
+        "breakdown": "Détail de la facture : montant hors TVA et taux de TVA de chaque poste",
+        "item": "Poste",
+        "beforeVat": "Hors TVA",
+        "vatRate": "TVA",
+        "power": "Puissance souscrite ({{kva}} kVA, {{days}} jours)",
+        "energyReduced": "Énergie à TVA réduite ({{kwh}})",
+        "energyStandard": "Énergie au-delà du plafond de TVA réduite ({{kwh}})",
+        "cav": "Contribution audiovisuelle (CAV)",
+        "iec": "Taxe spéciale sur la consommation d'électricité (IEC)",
+        "subtotal": "Total hors TVA",
+        "vat": "TVA",
+        "comparisonSame": "Avec l'option {{other}}, le même mois coûterait à peu près autant.",
+        "comparisonCheaper": "Avec l'option {{other}}, le même mois coûterait {{amount}}, soit {{difference}} de moins.",
+        "comparisonDearer": "Avec l'option {{other}}, le même mois coûterait {{amount}}, soit {{difference}} de plus.",
+        "breakEven": "Sur le seul prix de l'énergie, le bi-horaire coûte moins que le simple quand plus de {{percent}} % de la consommation a lieu en heures creuses.",
+        "noConsumption": "Sans consommation, la facture ne comprend que les charges fixes."
+      },
+      "notes": {
+        "tariffs": "Tarifs du marché réglementé de l'ERSE pour les ménages en basse tension au Portugal continental, en vigueur depuis le {{date}} (relevés dans les documents de l'ERSE le {{checked}}). L'ERSE peut les mettre à jour chaque trimestre.",
+        "dgeg": "Non inclus : la petite taxe mensuelle de la DGEG, dont nous n'avons pas pu confirmer le montant dans un document de l'ERSE, ni aucun autre frais de compteur. Votre facture réelle peut différer de quelques centimes.",
+        "freeMarket": "La plupart des ménages achètent sur le marché libre, où les offres varient : certaines sont moins chères que le tarif réglementé, d'autres plus chères. Cette page ne cite ni ne recommande aucun fournisseur. Pour comparer de vraies offres, utilisez le",
+        "simulatorLink": "simulateur de prix officiel de l'ERSE."
+      },
+      "index": {
+        "title": "Le Portugal face à l'UE : prix du kWh dans le temps",
+        "intro": "Prix semestriel d'Eurostat pour un ménage consommant de 2 500 à 4 999 kWh par an (tranche DC), toutes taxes et prélèvements compris, pour le Portugal et pour la moyenne de l'UE à 27.",
+        "chartLabel": "Graphique en lignes du prix de l'électricité par kWh pour les ménages au Portugal et dans l'UE, par semestre",
+        "portugal": "Portugal",
+        "eu": "Moyenne UE",
+        "below": "Au {{period}}, le Portugal a payé {{portugal}} contre {{eu}} dans l'UE : {{gap}} de moins que la moyenne de l'UE.",
+        "above": "Au {{period}}, le Portugal a payé {{portugal}} contre {{eu}} dans l'UE : {{gap}} de plus que la moyenne de l'UE.",
+        "equal": "Au {{period}}, le Portugal a payé {{portugal}} contre {{eu}} dans l'UE : à peu près pareil.",
+        "tableCaption": "Les derniers semestres : Portugal, moyenne de l'UE et écart",
+        "period": "Semestre",
+        "gap": "Portugal vs UE",
+        "asOf": "Données jusqu'au {{last}} (dernier semestre disponible). Eurostat a mis à jour le jeu de données le {{updated}} ; la copie de cette page a été générée le {{fetched}}. Source : Eurostat, tableau nrg_pc_204. À but éducatif uniquement."
+      },
+      "nextStepHeadline": "Comparez les factures du foyer avec un budget réaliste",
+      "nextStepDescription": "Ajoutez l'électricité, l'eau, le gaz et les autres factures du foyer à un budget WonderMoney et voyez ce qu'il reste chaque mois.",
+      "nextStepCta": "Planifiez votre budget",
+      "guide": {
+        "read": {
+          "title": "Comment lire cette page",
+          "estimator": "Le simulateur chiffre un mois de 30 jours au tarif réglementé : la puissance souscrite, l'énergie consommée, la contribution audiovisuelle et la taxe sur l'électricité, puis ajoute la TVA poste par poste, au taux qui s'applique à chacun.",
+          "index": "L'indice regarde les factures de tous les ménages, pas seulement le tarif réglementé : le prix moyen du kWh d'Eurostat au Portugal et dans l'UE, taxes comprises, pour que les deux soient comparables.",
+          "market": "Le tarif réglementé n'est qu'une option. La plupart des ménages sont sur le marché libre, où les fournisseurs fixent leurs propres prix et où les offres peuvent être moins chères ou plus chères que le tarif réglementé. Le simulateur est un repère, pas une recommandation."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Un foyer avec {{kva}} kVA souscrits qui consomme {{kwh}} kWh dans le mois au tarif simple. Puissance : {{powerPrice}} pendant 30 jours. Énergie : {{kwh}} kWh à {{energySimple}}. Plus la contribution audiovisuelle ({{cav}}) et la taxe sur l'électricité ({{iec}}). Avec la TVA ({{vatSimple}} au total), le mois coûte {{totalSimple}}, soit {{effective}} une fois les charges fixes réparties sur les kWh.",
+          "bi": "Au tarif bi-horaire ({{energyPeak}} hors heures creuses, {{energyValley}} en heures creuses), avec la moitié de la consommation en heures creuses, le même mois coûte {{totalBi}}.",
+          "power": "La puissance souscrite compte aussi : à 6,9 kVA et 300 kWh, le mois coûte {{totalBigger}}, car une puissance plus élevée a un prix journalier plus élevé et son terme de puissance paie le taux de TVA normal."
+        },
+        "method": {
+          "title": "Comment c'est calculé",
+          "intro": "Pour un mois de 30 jours, le simulateur fait toujours les mêmes cinq choses :",
+          "steps": {
+            "a": "Puissance : le prix journalier de votre puissance souscrite, multiplié par 30 jours.",
+            "b": "Énergie : vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez.",
+            "c": "Contribution audiovisuelle (CAV) : un montant mensuel fixe, avec TVA réduite.",
+            "d": "Taxe spéciale sur la consommation d'électricité (IEC) : un montant fixe par kWh, avec la TVA au taux normal.",
+            "e": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
+          },
+          "vat": "Règles de TVA, telles que l'ERSE les explique : le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, au terme de puissance pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
+          "bi": "Bi-horaire contre simple : le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
+          "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours."
+        },
+        "data": {
+          "title": "Données et sources",
+          "tariffs": "Tarifs réglementés : ERSE (Entidade Reguladora dos Serviços Energéticos), tarifs transitoires de vente aux clients finals en basse tension jusqu'à 20,7 kVA au Portugal continental, en vigueur depuis le {{from}}, ainsi que la contribution audiovisuelle, la taxe sur l'électricité et les règles de TVA tirées des documents de l'ERSE. Relevés le {{checked}}. L'ERSE peut modifier le prix de l'énergie chaque trimestre.",
+          "eurostat": "Indice de prix : Eurostat, « Electricity prices for household consumers - bi-annual data » (nrg_pc_204), tranche DC (2 500 à 4 999 kWh par an), toutes taxes et prélèvements compris, en euros par kWh, de {{firstPeriod}} à {{lastPeriod}}. Eurostat a mis à jour le jeu de données le {{updated}} et la copie de cette page a été générée le {{fetched}}.",
+          "tariffsLink": "ERSE, tarifs et prix pour 2026 (directive 4/2026)",
+          "chargesLink": "ERSE, manuel du simulateur de prix (charges de la facture)",
+          "vatLink": "ERSE, TVA sur la facture d'électricité",
+          "eurostatLink": "Eurostat, tableau nrg_pc_204",
+          "refresh": "La page lit deux fichiers de données enregistrés et n'interroge jamais ces sources pendant que vous l'utilisez. Les deux portent leur date et sont actualisés à la main."
+        },
+        "limits": {
+          "title": "Ce que ces chiffres ne comprennent pas",
+          "items": {
+            "market": "Marché libre : la plupart des offres ne sont pas le tarif réglementé. Elles peuvent être moins chères ou plus chères, avec des prix, remises et conditions différents. Comparez avec un vrai simulateur avant de décider.",
+            "dgeg": "La petite taxe mensuelle de la DGEG n'est pas incluse, car nous n'avons pas pu confirmer son montant dans un document de l'ERSE, pas plus qu'un éventuel frais de compteur. Consultez votre facture pour le total exact.",
+            "scope": "Le simulateur couvre le Portugal continental et des puissances souscrites de 3,45 à 6,9 kVA. Les puissances supérieures, les Açores et Madère ont d'autres tarifs et taux de TVA.",
+            "social": "Le tarif social de l'électricité, une réduction pour les ménages éligibles, n'est pas appliqué. Demandez à votre fournisseur ou à l'ERSE si vous y avez droit.",
+            "average": "L'indice compare des moyennes pour une tranche de consommation. Votre prix dépend de votre contrat, de votre puissance et de vos heures d'usage, et la moyenne du Portugal mélange contrats du marché réglementé et du marché libre.",
+            "education": "À but éducatif uniquement, ce n'est pas un conseil pour choisir ou changer de fournisseur."
+          },
+          "simulatorLink": "Comparez de vraies offres dans le simulateur de prix officiel de l'ERSE"
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "householdBudgetLink": "Calculateur de budget du foyer",
+          "householdBudgetBody": "Placez la facture d'électricité à côté des autres dépenses du foyer et voyez ce qu'il reste.",
+          "emergencyFundLink": "Calculateur de fonds d'urgence",
+          "emergencyFundBody": "Calculez combien de mois de dépenses essentielles, énergie comprise, vos économies couvriraient.",
+          "inflationLink": "Calculateur d'inflation",
+          "inflationBody": "Voyez comment la hausse des prix change ce que votre argent permet d'acheter avec le temps."
         }
       }
     }

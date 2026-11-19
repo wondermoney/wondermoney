@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
       "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
     },
+    "depositRateIndex": {
+      "title": "Festgeld-Zinsindex: was Banken in Portugal tatsächlich zahlen",
+      "shortName": "Festgeld-Zinsindex",
+      "subtitle": "Der durchschnittliche Zinssatz, den Banken in Portugal und im Euroraum für neue Festgelder privater Haushalte zahlten, Monat für Monat seit 2003, mit Abzug von Inflation und 28 % IRS.",
+      "description": "Durchschnittliche Zinsen auf neue Festgelder in Portugal und im Euroraum, nach Inflation und Steuer.",
+      "pageTitle": "Festgeld-Zinsindex Portugal: Durchschnittszinsen und Inflation",
+      "pageDescription": "Offizielle Durchschnittszinsen auf neue Festgelder privater Haushalte in Portugal und im Euroraum seit 2003, der Realzins nach Inflation und 28 % IRS und ein kleiner Rechner. Daten: Statistiken der Banco de Portugal über die EZB.",
+      "snapshot": {
+        "title": "Durchschnittszins auf neue Festgelder, {{month}}",
+        "intro": "Offizielle Durchschnitte des vereinbarten Zinssatzes auf neue Festgelder privater Haushalte, von den Banken gemeldet. Das ist ein Richtwert, keine Angebotsliste.",
+        "portugal": "Portugal, alle Laufzeiten",
+        "euroArea": "Euroraum, alle Laufzeiten",
+        "asOf": "Datenstand {{month}}, der letzte veröffentlichte Monat beim Abruf der Daten am {{retrieved}}.",
+        "provisional": "Der letzte Monat ist vorläufig und kann revidiert werden.",
+        "caption": "Durchschnittszins auf neue Festgelder nach Ursprungslaufzeit, Portugal und Euroraum",
+        "maturity": "Ursprungslaufzeit",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Euroraum",
+        "noData": "k. A."
+      },
+      "real": {
+        "title": "Realzins {{year}}, das letzte vollständige Jahr",
+        "nominal": "Durchschnittlich gezahlter Zins",
+        "inflation": "Inflation",
+        "gross": "Realzins vor Steuer",
+        "net": "Realzins nach {{tax}} % IRS",
+        "positive": "{{year}} hat das durchschnittliche neue Festgeld nach IRS die Inflation noch übertroffen.",
+        "negative": "{{year}} hat das durchschnittliche neue Festgeld nach IRS Kaufkraft verloren: Die Preise stiegen schneller als die erhaltenen Zinsen."
+      },
+      "notBestOffer": "Dies ist ein Durchschnitt dessen, was Banken tatsächlich auf neue Einlagen gezahlt haben, nicht das beste Angebot. Aktions- und Kampagnenzinsen liegen meist höher, manche Einlagen bringen weniger. Diese Seite nennt keine Banken und empfiehlt kein Produkt: Vergleiche aktuelle Angebote selbst, bevor du dich entscheidest.",
+      "calculator": {
+        "title": "Zinsen zum Durchschnittssatz",
+        "intro": "Gib einen Betrag und eine Laufzeit ein, um zu sehen, welche Zinsen ein Festgeld zum aktuellen Durchschnittssatz dieser Laufzeit bringt, netto nach 28 % IRS, und was die Inflation davon abzieht."
+      },
+      "fields": {
+        "amount": "Angelegter Betrag",
+        "term": "Laufzeit",
+        "termSuffix": "Monate",
+        "inflation": "Angenommene Inflation pro Jahr"
+      },
+      "help": {
+        "term": "Ganze Monate, 1 bis 120. Bis 12 Monate gilt der Durchschnitt bis 1 Jahr, bei 13 bis 24 Monaten der von 1 bis 2 Jahren, bei längeren Laufzeiten der über 2 Jahre.",
+        "inflation": "Vorbelegt mit der portugiesischen Inflation von {{year}} (jahresdurchschnittlicher VPI, INE). Ändere sie, um andere Szenarien zu testen."
+      },
+      "errors": {
+        "amount": {
+          "required": "Gib einen Betrag über null ein.",
+          "negative": "Der Betrag darf nicht negativ sein.",
+          "tooLarge": "Gib {{max}} oder weniger ein."
+        },
+        "termMonths": {
+          "required": "Gib eine Laufzeit von mindestens 1 Monat ein.",
+          "tooLarge": "Die Laufzeit darf höchstens {{max}} Monate betragen.",
+          "notWhole": "Gib eine ganze Zahl an Monaten ein."
+        },
+        "inflation": {
+          "required": "Gib eine Inflationsrate ein, oder 0.",
+          "outOfRange": "Gib eine Inflationsrate von {{min}} % bis {{top}} % ein."
+        },
+        "summary": "Prüfe die markierten Felder, um das Ergebnis zu sehen."
+      },
+      "buckets": {
+        "all": "Alle Laufzeiten",
+        "upTo1y": "Bis 1 Jahr",
+        "1to2y": "Über 1 bis 2 Jahre",
+        "over2y": "Über 2 Jahre"
+      },
+      "result": {
+        "net": "Nettozinsen nach {{tax}} % IRS",
+        "gross": "Bruttozinsen",
+        "tax": "Einbehaltene IRS ({{tax}} %)",
+        "inflationCost": "Was die Inflation über die Laufzeit abzieht",
+        "realGain": "Zinsen nach Inflation",
+        "realYield": "Realer Jahresertrag nach Steuer",
+        "assumptions": "Durchschnittszins neuer Einlagen ({{bucket}}): {{rate}} pro Jahr ({{month}}). Einfache Zinsen, am Ende der Laufzeit gezahlt, {{months}} Monate.",
+        "fallback": "In dieser Laufzeitgruppe wurden im letzten Monat keine neuen Einlagen erfasst, daher gilt der Durchschnitt aller Laufzeiten.",
+        "beats": "Unter diesen Annahmen decken die Zinsen nach Steuer den Kaufkraftverlust.",
+        "loses": "Unter diesen Annahmen zieht die Inflation mehr ab, als die Zinsen bringen: Am Laufzeitende kauft das Geld weniger.",
+        "note": "Ein Richtwert, kein Angebot: Der Zins deiner Bank, mögliche Gebühren und die genaue Tageszählung verändern das Ergebnis. Nur zu Bildungszwecken, keine Finanzberatung."
+      },
+      "history": {
+        "title": "Verlauf seit 2003",
+        "bucket": "Im Diagramm gezeigte Laufzeit",
+        "chartLabel": "Liniendiagramm der monatlichen Durchschnittszinsen auf neue Festgelder in Portugal und im Euroraum mit der jährlichen portugiesischen Inflation",
+        "portugal": "Portugal",
+        "euroArea": "Euroraum",
+        "inflation": "Portugiesische Inflation (Kalenderjahr)",
+        "chartNote": "Die Zinsen sind Monatsdurchschnitte. Die Inflation ist die jahresdurchschnittliche Veränderung der Verbraucherpreise je Kalenderjahr und springt daher im Januar; das laufende Jahr ist noch nicht vollständig.",
+        "caption": "Jahresdurchschnittszins auf neue Festgelder, Inflation und Realzins nach IRS",
+        "year": "Jahr",
+        "realNet": "Realzins nach {{tax}} % IRS"
+      },
+      "sourceNote": "Quelle: Durchschnittszinsen auf neue Festgelder privater Haushalte (annualisierter vereinbarter Satz), Statistiken der Banco de Portugal, veröffentlicht im EZB-Datenportal, letzter Monat {{month}}, abgerufen am {{retrieved}}. Inflation: Verbraucherpreisindex des INE über das BPstat der Banco de Portugal. Jahreswerte von WonderMoney berechnet. Nur zu Bildungszwecken.",
+      "nextStepHeadline": "Vom Richtwert zum persönlichen Sparplan",
+      "nextStepDescription": "Der Durchschnitt zeigt, was der Markt gezahlt hat. Setze dir in WonderMoney ein Sparziel und verfolge, wie deine eigenen Einlagen im Vergleich dazu abschneiden.",
+      "nextStepCta": "Sparziel festlegen",
+      "guide": {
+        "read": {
+          "title": "So liest du den Index",
+          "what": "Jeden Monat melden die Banken in Portugal der Banco de Portugal den Zinssatz der neuen Festgelder, die sie von privaten Haushalten hereingenommen haben. Der Index ist der Durchschnitt dieser Sätze über alle Banken, gewichtet nach dem Volumen des Neugeschäfts: das, was tatsächlich vereinbart wurde. Die Euroraum-Linie ist dieselbe Statistik für alle Banken des Euroraums, zum Vergleich.",
+          "notBest": "Es ist nicht der beste verfügbare Zins. Ein Durchschnitt enthält kleine Einlagen, Bestandskunden und Banken, die wenig zahlen; ein Aktions- oder Kampagnenzins kann daher deutlich darüber liegen, und manche Einlagen bringen weniger.",
+          "noRecommendation": "Hier wird keine Bank und kein Produkt genannt oder bewertet. Nutze den Durchschnitt, um einzuschätzen, ob ein Angebot hoch oder niedrig wirkt, und vergleiche dann aktuelle Angebote selbst, einschließlich ihrer Bedingungen."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Lege {{amount}} für {{months}} Monate zum aktuellen Durchschnittssatz dieser Laufzeit an, {{rate}} pro Jahr ({{month}}). Die am Ende gezahlten Zinsen betragen {{gross}}; nach {{taxRate}} % IRS (einbehaltene Steuer: {{tax}}) bleiben dir {{net}}.",
+          "real": "Bei einer Inflation von {{inflation}} pro Jahr verliert dasselbe Geld über die Laufzeit {{inflationCost}} an Kaufkraft; nach Inflation bleiben also {{realGain}}.",
+          "year": "Rückblickend zahlte das durchschnittliche neue Festgeld {{year}}, im letzten vollständigen Jahr, {{yearRate}}; nach Inflation und 28 % IRS lag der Realzins bei {{yearReal}}."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Die Zinssätze sind veröffentlichte Statistiken. WonderMoney fügt nur diese Berechnungen hinzu:",
+          "steps": {
+            "a": "Jahreszins: der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
+            "b": "Inflation: die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum Jahr.",
+            "c": "Realzins: (1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
+            "d": "Rechner: einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, mit 28 % Einbehalt, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
+          },
+          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "source": "Zinssätze: monatliche Durchschnittszinsen auf neue Einlagen mit vereinbarter Laufzeit privater Haushalte (annualisierter vereinbarter Satz, alle Beträge, in Euro), {{first}} bis {{last}}, von der Banco de Portugal aus den Meldungen der Banken erstellt und im EZB-Datenportal veröffentlicht (Reihen {{seriesPt}} für Portugal und {{seriesEa}} für den Euroraum, wobei x die Laufzeit ist: gesamt, bis 1 Jahr, über 1 bis 2 Jahre, über 2 Jahre). Abgerufen am {{retrieved}}.",
+          "ecbLink": "EZB-Datenportal (MIR)",
+          "bpstatLink": "BPstat der Banco de Portugal",
+          "cpiLink": "Verbraucherpreisindex des INE in BPstat",
+          "inflation": "Inflation: jahresdurchschnittlicher Verbraucherpreisindex für Portugal, vom INE erstellt und von der Banco de Portugal verbreitet (BPstat-Reihe 12704686), abgerufen am {{cpiRetrieved}}.",
+          "reuse": "Die EZB erlaubt die freie Nutzung ihrer Statistiken, wenn sie korrekt wiedergegeben werden und die Quelle genannt wird. Diese Seite veröffentlicht Monatswerte erneut und lädt zur Laufzeit keine Daten: Die Zahlen ändern sich nur, wenn die Datendatei aktualisiert wird."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht abdecken",
+          "items": {
+            "average": "Ein Durchschnitt des Neugeschäfts: Er mischt Einlagenhöhen, Banken und Kunden. Dein Zins kann höher oder niedriger sein.",
+            "lag": "Die Statistiken erscheinen monatlich mit Verzögerung, und der letzte Monat kann revidiert werden.",
+            "tax": "Steuer: 28 % ist der IRS-Einbehalt auf Zinsen für Gebietsansässige. Deine Situation kann abweichen, etwa wenn du die Zinsen in deiner Jahressteuererklärung angibst.",
+            "inflation": "Inflation: Deine eigenen Preise weichen vom nationalen Durchschnitt ab, und die künftige Inflation ist unbekannt. Der Rechner hält die eingegebene Rate über die gesamte Laufzeit konstant.",
+            "buckets": "Laufzeitgruppen ohne neue Einlagen in einem Monat erscheinen als k. A. Für eine Laufzeit in dieser Gruppe nutzt der Rechner den Durchschnitt aller Laufzeiten.",
+            "advice": "Nur zu Bildungszwecken: Diese Seite ist weder Finanzberatung noch ein Angebot."
+          }
+        },
+        "related": {
+          "title": "Weiterlesen",
+          "termDepositLink": "Festgeldrechner",
+          "termDepositBody": "Gib den Zins deiner Bank ein und sieh Zinsen, Steuer und Nettorendite.",
+          "savingsCertificatesLink": "Rechner für Certificados de Aforro",
+          "savingsCertificatesBody": "Vergleiche ein Festgeld mit den Certificados de Aforro Série F.",
+          "inflationLink": "Inflationsrechner",
+          "inflationBody": "Sieh, wie viel Kaufkraft Geld zwischen zwei beliebigen Jahren verloren hat."
+        }
+      }
+    },
     "netSalary": {
       "title": "Nettogehalt-Rechner Portugal 2026",
       "shortName": "Nettogehalt",
@@ -3664,6 +3815,261 @@
           "compoundInterestBody": "Sieh, wie regelmäßige Einzahlungen und Zeit mit einem Zins deiner Wahl wachsen.",
           "investorProfileLink": "Anlegerprofil-Test",
           "investorProfileBody": "Finde heraus, mit wie viel Marktschwankung dieser Art du leben kannst."
+        }
+      }
+    },
+    "euribor": {
+      "title": "Euribor aktuell: Zinssätze und Auswirkung auf die Rate",
+      "shortName": "Euribor aktuell",
+      "subtitle": "Die neuesten Euribor-Sätze für 3, 6 und 12 Monate, ihre Veränderung zum Vormonat, der Verlauf seit 2000 und was eine Änderung bei der Rate eines variabel verzinsten Baukredits bewirkt.",
+      "description": "Aktuelle Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate, Verlauf seit 2000 und ein Rechner für die Wirkung einer Änderung auf deine Kreditrate.",
+      "pageTitle": "Euribor aktuell: 3, 6 und 12 Monate und Wirkung auf die Rate",
+      "pageDescription": "Die neuesten Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate von der Banco de Portugal, die Veränderung zum Vormonat, ein Verlaufsdiagramm seit 2000 und ein Rechner, was ein Anstieg oder Rückgang bei der Rate eines variablen Baukredits bewirkt.",
+      "asOf": "Daten für {{month}}: Monatsdurchschnitte, abgerufen am {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 Monate",
+        "6": "Euribor 6 Monate",
+        "12": "Euribor 12 Monate"
+      },
+      "current": {
+        "title": "Aktuelle Euribor-Sätze",
+        "change": "{{change}} Punkte gegenüber {{previous}}",
+        "note": "Jeder Satz ist der Durchschnitt von {{month}}, keine Tagesfixierung. Ein Kredit wird zur Fixierung am Stichtag deines Vertrags angepasst, die vom Monatsdurchschnitt abweichen kann."
+      },
+      "calc": {
+        "title": "Was eine Euribor-Änderung mit deiner Rate macht"
+      },
+      "fields": {
+        "balance": "Restschuld",
+        "termYears": "Verbleibende Jahre",
+        "termMonths": "Verbleibende Monate",
+        "spread": "Dein Aufschlag",
+        "tenor": "Euribor, an den dein Kredit gebunden ist",
+        "change": "Änderung des Euribor (Punkte)"
+      },
+      "help": {
+        "spread": "Der Aufschlag der Bank auf den Euribor, in Prozent. Er steht in deinem Vertrag.",
+        "change": "Verwende eine negative Zahl für einen Rückgang. 1 ist ein Prozentpunkt: von 3 % auf 4 %."
+      },
+      "errors": {
+        "summary": "Die neue Rate erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Gib die Restschuld ein.",
+          "tooSmall": "Gib eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Gib eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Gib die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre dürfen nicht negativ sein.",
+          "tooLarge": "Gib insgesamt bis zu {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate dürfen nicht negativ sein.",
+          "tooLarge": "Gib 0 bis 11 Monate ein; volle Jahre gehören in das Jahresfeld."
+        },
+        "spread": {
+          "required": "Gib den Aufschlag ein, oder 0 %, falls es keinen gibt.",
+          "negative": "Der Aufschlag darf nicht negativ sein.",
+          "tooLarge": "Gib einen Aufschlag bis {{max}} ein."
+        },
+        "change": {
+          "required": "Gib eine Änderung in Punkten ein, oder 0, falls es keine gibt.",
+          "tooSmall": "Gib eine Änderung von {{min}} oder mehr ein.",
+          "tooLarge": "Gib eine Änderung von {{max}} oder weniger ein."
+        }
+      },
+      "result": {
+        "revised": "Monatsrate nach der Änderung",
+        "current": "Monatsrate heute",
+        "monthlyChange": "Unterschied pro Monat",
+        "nextYear": "Unterschied über die nächsten {{payments}} Raten",
+        "assumptions": "Ausgangspunkt ist der {{tenor}}-Satz von {{index}} (Durchschnitt {{month}}), der auf {{newIndex}} geändert wird, mit deinem Aufschlag obendrauf, über die verbleibenden Monate.",
+        "floored": "Index plus Aufschlag liegen unter 0 %, deshalb wird der Satz mit 0 % angesetzt. Verträge unterscheiden sich: manche haben eine Untergrenze, andere nicht.",
+        "termRounded": "Die Restlaufzeit wurde auf ganze Monate gerundet.",
+        "noChange": "Ohne Änderung des Euribor bleibt die Rate gleich.",
+        "caveat": "Lehrreiche Schätzung. Sie nimmt an, dass der neue Satz ab der nächsten Rate bis zum Ende des Kredits gilt; dein Vertrag legt Anpassungstermine, Ober- und Untergrenzen fest."
+      },
+      "history": {
+        "title": "Euribor-Verlauf",
+        "from": "Anzeigen ab Jahr",
+        "label": "Liniendiagramm der Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate"
+      },
+      "sourceNote": "Quelle: Banco de Portugal, BPstat, Euribor-Monatsdurchschnitte, letzter Monat {{month}}, abgerufen am {{fetched}}. Euribor ist eine eingetragene Marke der EMMI. Nur zu Bildungszwecken.",
+      "nextStepHeadline": "Verbinde Zinsänderungen mit dem Budget deiner Schulden",
+      "nextStepDescription": "Füge deinen Kredit zu WonderMoney hinzu und sieh, wie eine Euribor-Änderung deine Monatsrate verschiebt und was für den Rest deines Budgets bleibt.",
+      "nextStepCta": "Verbinde deine Schulden",
+      "guide": {
+        "read": {
+          "title": "So liest du die Sätze",
+          "intro": "Der Euribor ist der Zinssatz, zu dem sich Banken im Euroraum untereinander Geld für eine feste Dauer leihen: 3, 6 oder 12 Monate. Viele variable Kredite zahlen Euribor plus einen festen Aufschlag, daher bewegt sich die Rate mit.",
+          "monthly": "Die Zahlen sind Monatsdurchschnitte, der neueste ist der von {{month}}. Es ist nicht der Tageswert: Deine Rate bestimmt der Wert am Stichtag deines Vertrags."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Kredit mit {{balance}} Restschuld über {{years}} Jahre, einem Aufschlag von {{spread}} und einem 12-Monats-Euribor von {{index}} (dem letzten Monatsdurchschnitt). Der Euribor steigt um {{change}} Punkt auf {{newIndex}}.",
+          "result": "Die Rate steigt von {{current}} auf {{revised}}, ein Unterschied von {{difference}} im Monat. Es ist dieselbe Rechnung wie im Zinsanpassungsrechner."
+        },
+        "data": {
+          "title": "Daten und Methode",
+          "source": "Die Sätze sind die Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate, die die Banco de Portugal in BPstat veröffentlicht, abgerufen am {{fetched}}. Der letzte Monat der Daten ist {{month}}. Jede Änderung ist der letzte Durchschnitt minus der des Vormonats, in Prozentpunkten.",
+          "link": "Euribor-Sätze nach Laufzeit bei BPstat",
+          "daily": "BPstat veröffentlicht Monatsdurchschnitte, keine Tagesfixierungen, deshalb zeigt diese Seite nur Monatsdurchschnitte. Für den heutigen Wert siehe EMMI oder deine Bank.",
+          "trademark": "Euribor ist eine eingetragene Marke der EMMI. Diese Seite ist weder mit EMMI oder der Banco de Portugal verbunden noch von ihnen unterstützt."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "average": "Ein Monatsdurchschnitt glättet den Monat: Der Satz eines bestimmten Tages kann darüber oder darunter liegen.",
+            "reset": "Dein Kredit folgt dem Euribor eines Anpassungstermins im Vertrag, oft alle 3, 6 oder 12 Monate, nicht jeden Monat.",
+            "terms": "Ober- und Untergrenzen und ein anderer Aufschlag nach einigen Jahren hängen vom Vertrag ab und sind nicht enthalten.",
+            "advice": "Lehrreiche Information, keine Prognose des Euribor und keine Finanzberatung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht es",
+          "rateRevisionLink": "Rechner für variable Kreditraten",
+          "rateRevisionBody": "Probiere deinen eigenen Index, Aufschlag und Saldo aus und sieh die Rate als Anteil deines Einkommens.",
+          "mortgageLink": "Baukreditrechner",
+          "mortgageBody": "Berechne Rate und Zinsen eines Kredits vor jeder Zinsänderung.",
+          "debtToIncomeLink": "Rechner für das Verhältnis Schulden zu Einkommen",
+          "debtToIncomeBody": "Sieh, ob eine höhere Rate deine Schulden in einem komfortablen Anteil des Einkommens hält."
+        }
+      }
+    },
+    "electricityIndex": {
+      "title": "Strompreisindex und Rechnungsschätzer (Portugal)",
+      "shortName": "Strompreisindex",
+      "subtitle": "Schätze eine monatliche Stromrechnung im regulierten Tarif und sieh, wie der Preis portugiesischer Haushalte zum EU-Durchschnitt liegt.",
+      "description": "Schätzer für die Stromrechnung im regulierten Tarif für portugiesische Haushalte, mit dem Preis je kWh in Portugal im Vergleich zur EU im Zeitverlauf.",
+      "pageTitle": "Strompreisindex Portugal: Rechnungsschätzer für den regulierten Tarif",
+      "pageDescription": "Schätze deine monatliche Stromrechnung im regulierten ERSE-Tarif (vertraglich vereinbarte Leistung, kWh, einfach oder zweizeitig, Mehrwertsteuer und weitere Posten) und vergleiche den Haushaltspreis je kWh in Portugal mit dem EU-Durchschnitt. Daten: ERSE und Eurostat.",
+      "fields": {
+        "power": "Vertraglich vereinbarte Leistung",
+        "period": "Verbrauch angegeben",
+        "periodMonth": "Pro Monat",
+        "periodYear": "Pro Jahr",
+        "consumption": "Stromverbrauch",
+        "option": "Tarifoption",
+        "optionSimple": "Einfach",
+        "optionBi": "Zweizeitig",
+        "offPeak": "Anteil des Verbrauchs in der Schwachlastzeit",
+        "largeFamily": "Haushalt mit fünf oder mehr Personen"
+      },
+      "help": {
+        "power": "Haushalte in Niederspannung auf dem portugiesischen Festland: 3,45, 4,6, 5,75 oder 6,9 kVA. Sie steht auf deiner Rechnung.",
+        "consumption": "kWh im oben gewählten Zeitraum. Ein Jahr wird auf zwölf gleiche Monate verteilt.",
+        "offPeak": "Die Schwachlastzeit (\"vazio\") ist der günstigere Zeitraum des zweizeitigen Tarifs. Deine Rechnung oder die Zählerdaten zeigen die Aufteilung.",
+        "largeFamily": "Hebt die Grenze für den ermäßigten Mehrwertsteuersatz von 200 auf 300 kWh im Monat, wenn du sie bei deinem Versorger beantragt hast."
+      },
+      "errors": {
+        "required": "Gib einen gültigen Wert ein.",
+        "notAllowed": "Wähle eine der aufgeführten Leistungen.",
+        "negative": "Der Verbrauch darf nicht negativ sein.",
+        "tooLarge": "Gib {{max}} oder weniger ein.",
+        "percentRange": "Gib einen Anteil von 0 % bis 100 % ein.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Geschätzte Monatsrechnung (inkl. Mehrwertsteuer)",
+        "yearly": "Etwa zwölf solche Monate",
+        "effective": "Tatsächliche Kosten je kWh, Fixkosten eingerechnet",
+        "breakdown": "Aufschlüsselung der Rechnung: Betrag ohne Mehrwertsteuer und Steuersatz je Posten",
+        "item": "Posten",
+        "beforeVat": "Ohne MwSt.",
+        "vatRate": "MwSt.",
+        "power": "Vertraglich vereinbarte Leistung ({{kva}} kVA, {{days}} Tage)",
+        "energyReduced": "Energie mit ermäßigter Mehrwertsteuer ({{kwh}})",
+        "energyStandard": "Energie über der Grenze für den ermäßigten Satz ({{kwh}})",
+        "cav": "Rundfunkbeitrag (CAV)",
+        "iec": "Stromverbrauchsteuer (IEC)",
+        "subtotal": "Summe ohne Mehrwertsteuer",
+        "vat": "Mehrwertsteuer",
+        "comparisonSame": "Mit der Option {{other}} würde derselbe Monat etwa gleich viel kosten.",
+        "comparisonCheaper": "Mit der Option {{other}} würde derselbe Monat {{amount}} kosten, also {{difference}} weniger.",
+        "comparisonDearer": "Mit der Option {{other}} würde derselbe Monat {{amount}} kosten, also {{difference}} mehr.",
+        "breakEven": "Allein nach dem Energiepreis ist zweizeitig günstiger als einfach, wenn mehr als {{percent}} % des Verbrauchs in der Schwachlastzeit liegen.",
+        "noConsumption": "Ohne Verbrauch besteht die Rechnung nur aus den Fixkosten."
+      },
+      "notes": {
+        "tariffs": "Tarife des regulierten Marktes der ERSE für Niederspannungshaushalte auf dem portugiesischen Festland, gültig seit {{date}} (am {{checked}} aus den ERSE-Dokumenten gelesen). Die ERSE kann sie jedes Quartal anpassen.",
+        "dgeg": "Nicht enthalten: die kleine monatliche DGEG-Gebühr, deren Höhe wir in keinem ERSE-Dokument bestätigen konnten, sowie sonstige Zählerkosten. Deine tatsächliche Rechnung kann um wenige Cent abweichen.",
+        "freeMarket": "Die meisten Haushalte kaufen im freien Markt, wo die Angebote variieren: Manche sind günstiger als der regulierte Tarif, andere teurer. Diese Seite nennt keinen Anbieter und empfiehlt keinen. Um echte Angebote zu vergleichen, nutze den",
+        "simulatorLink": "offiziellen Preissimulator der ERSE."
+      },
+      "index": {
+        "title": "Portugal im Vergleich zur EU: Preis je kWh im Zeitverlauf",
+        "intro": "Halbjahrespreis von Eurostat für einen Haushalt mit 2.500 bis 4.999 kWh Jahresverbrauch (Band DC), inklusive aller Steuern und Abgaben, für Portugal und den Durchschnitt der EU-27.",
+        "chartLabel": "Liniendiagramm des Haushaltsstrompreises je kWh in Portugal und in der EU, halbjährlich",
+        "portugal": "Portugal",
+        "eu": "EU-Durchschnitt",
+        "below": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: {{gap}} unter dem EU-Durchschnitt.",
+        "above": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: {{gap}} über dem EU-Durchschnitt.",
+        "equal": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: etwa dasselbe.",
+        "tableCaption": "Die letzten Halbjahre: Portugal, EU-Durchschnitt und der Abstand",
+        "period": "Halbjahr",
+        "gap": "Portugal gegenüber EU",
+        "asOf": "Daten bis {{last}} (das neueste verfügbare Halbjahr). Eurostat hat den Datensatz am {{updated}} aktualisiert; die Kopie dieser Seite wurde am {{fetched}} erstellt. Quelle: Eurostat, Tabelle nrg_pc_204. Nur zu Bildungszwecken."
+      },
+      "nextStepHeadline": "Vergleiche die Haushaltsrechnungen mit einem realistischen Budget",
+      "nextStepDescription": "Trage Strom, Wasser, Gas und die anderen Haushaltsrechnungen in ein WonderMoney-Budget ein und sieh, was jeden Monat übrig bleibt.",
+      "nextStepCta": "Budget planen",
+      "guide": {
+        "read": {
+          "title": "So liest du diese Seite",
+          "estimator": "Der Schätzer rechnet einen Monat mit 30 Tagen im regulierten Tarif: die vertraglich vereinbarte Leistung, die verbrauchte Energie, den Rundfunkbeitrag und die Stromsteuer, und addiert die Mehrwertsteuer Posten für Posten mit dem jeweils geltenden Satz.",
+          "index": "Der Index betrachtet die Rechnungen aller Haushalte, nicht nur den regulierten Tarif: den durchschnittlichen Preis je kWh laut Eurostat in Portugal und in der EU, inklusive Steuern, damit beide vergleichbar sind.",
+          "market": "Der regulierte Tarif ist nur eine Möglichkeit. Die meisten Haushalte sind im freien Markt, wo die Anbieter ihre Preise selbst festlegen und die Angebote günstiger oder teurer als der regulierte Tarif sein können. Der Schätzer ist ein Richtwert, keine Empfehlung."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Haushalt mit {{kva}} kVA vertraglich vereinbarter Leistung, der in einem Monat {{kwh}} kWh im einfachen Tarif verbraucht. Leistung: {{powerPrice}} für 30 Tage. Energie: {{kwh}} kWh zu {{energySimple}}. Dazu der Rundfunkbeitrag ({{cav}}) und die Stromsteuer ({{iec}}). Mit Mehrwertsteuer ({{vatSimple}} insgesamt) kostet der Monat {{totalSimple}}, also {{effective}}, wenn man die Fixkosten auf die kWh verteilt.",
+          "bi": "Im zweizeitigen Tarif ({{energyPeak}} außerhalb der Schwachlastzeit, {{energyValley}} in der Schwachlastzeit) kostet derselbe Monat bei der Hälfte des Verbrauchs in der Schwachlastzeit {{totalBi}}.",
+          "power": "Auch die Leistung zählt: Bei 6,9 kVA und 300 kWh kostet der Monat {{totalBigger}}, weil eine höhere Leistung einen höheren Tagespreis hat und ihr Leistungsanteil den vollen Mehrwertsteuersatz zahlt."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Für einen Monat mit 30 Tagen macht der Schätzer immer dieselben fünf Dinge:",
+          "steps": {
+            "a": "Leistung: der Tagespreis deiner vertraglich vereinbarten Leistung mal 30 Tage.",
+            "b": "Energie: deine kWh zum einfachen Preis oder nach dem eingegebenen Anteil auf die zwei Preise des zweizeitigen Tarifs verteilt.",
+            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer.",
+            "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
+            "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+          },
+          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Leistungsanteil bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "bi": "Zweizeitig gegen einfach: Der einfache Preis liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist einfach günstiger, bei einem größeren zweizeitig.",
+          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "tariffs": "Regulierte Tarife: ERSE (Entidade Reguladora dos Serviços Energéticos), die Übergangstarife für den Verkauf an Endkunden in Niederspannung bis 20,7 kVA auf dem portugiesischen Festland, gültig seit {{from}}, dazu Rundfunkbeitrag, Stromsteuer und Mehrwertsteuerregeln aus ERSE-eigenen Dokumenten. Gelesen am {{checked}}. Die ERSE kann den Energiepreis jedes Quartal ändern.",
+          "eurostat": "Preisindex: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), Band DC (2.500 bis 4.999 kWh pro Jahr), inklusive aller Steuern und Abgaben, in Euro je kWh, von {{firstPeriod}} bis {{lastPeriod}}. Eurostat hat den Datensatz am {{updated}} aktualisiert, die Kopie dieser Seite wurde am {{fetched}} erstellt.",
+          "tariffsLink": "ERSE, Tarife und Preise für 2026 (Richtlinie 4/2026)",
+          "chargesLink": "ERSE, Handbuch des Preissimulators (Rechnungsposten)",
+          "vatLink": "ERSE, Mehrwertsteuer auf der Stromrechnung",
+          "eurostatLink": "Eurostat, Tabelle nrg_pc_204",
+          "refresh": "Die Seite liest zwei gespeicherte Datendateien und fragt diese Quellen nie ab, während du sie nutzt. Beide tragen ihr Datum und werden von Hand aktualisiert."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "market": "Freier Markt: Die meisten Angebote sind nicht der regulierte Tarif. Sie können günstiger oder teurer sein, mit anderen Preisen, Rabatten und Bedingungen. Vergleiche mit einem echten Simulator, bevor du dich entscheidest.",
+            "dgeg": "Die kleine monatliche DGEG-Gebühr ist nicht enthalten, weil wir ihre Höhe in keinem ERSE-Dokument bestätigen konnten, ebenso wenig sonstige Zählerkosten. Den genauen Gesamtbetrag findest du auf deiner Rechnung.",
+            "scope": "Der Schätzer deckt das portugiesische Festland und vertraglich vereinbarte Leistungen von 3,45 bis 6,9 kVA ab. Höhere Leistungen, die Azoren und Madeira haben andere Tarife und Mehrwertsteuersätze.",
+            "social": "Der Sozialtarif für Strom, ein Nachlass für berechtigte Haushalte, ist nicht berücksichtigt. Frage deinen Versorger oder die ERSE, ob du Anspruch haben könntest.",
+            "average": "Der Index vergleicht Durchschnitte für ein Verbrauchsband. Dein Preis hängt von Vertrag, Leistung und Nutzungszeiten ab, und der Durchschnitt Portugals mischt Verträge des regulierten und des freien Marktes.",
+            "education": "Nur zu Bildungszwecken, keine Beratung zur Wahl oder zum Wechsel des Versorgers."
+          },
+          "simulatorLink": "Echte Angebote im offiziellen Preissimulator der ERSE vergleichen"
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "householdBudgetLink": "Haushaltsbudget-Rechner",
+          "householdBudgetBody": "Stelle die Stromrechnung neben deine anderen Haushaltskosten und sieh, was übrig bleibt.",
+          "emergencyFundLink": "Notgroschen-Rechner",
+          "emergencyFundBody": "Berechne, wie viele Monate an notwendigen Ausgaben, Energie eingeschlossen, deine Ersparnisse decken würden.",
+          "inflationLink": "Inflationsrechner",
+          "inflationBody": "Sieh, wie steigende Preise verändern, was dein Geld im Zeitverlauf kaufen kann."
         }
       }
     }

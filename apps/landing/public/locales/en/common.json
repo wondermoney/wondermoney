@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
       "nextStepCta": "Include certificates in your savings overview"
     },
+    "depositRateIndex": {
+      "title": "Term deposit rate index: what banks in Portugal actually pay",
+      "shortName": "Deposit rate index",
+      "subtitle": "The average interest rate banks in Portugal and the euro area paid on new household term deposits, month by month since 2003, with inflation and the 28% IRS taken off.",
+      "description": "Average new term deposit rates in Portugal and the euro area, after inflation and tax.",
+      "pageTitle": "Term Deposit Rate Index Portugal: Average Rates vs Inflation",
+      "pageDescription": "Official average interest rates on new household term deposits in Portugal and the euro area since 2003, the real rate after inflation and the 28% IRS, and a small calculator. Data: Banco de Portugal statistics via the ECB.",
+      "snapshot": {
+        "title": "Average new term deposit rate, {{month}}",
+        "intro": "Official averages of the interest rate agreed on new term deposits from households, as reported by banks. It is a benchmark, not a list of offers.",
+        "portugal": "Portugal, all maturities",
+        "euroArea": "Euro area, all maturities",
+        "asOf": "Data as of {{month}}, the latest month published when the data was retrieved on {{retrieved}}.",
+        "provisional": "The latest month is provisional and may be revised.",
+        "caption": "Average new term deposit rate by original maturity, Portugal and the euro area",
+        "maturity": "Original maturity",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Euro area",
+        "noData": "n/a"
+      },
+      "real": {
+        "title": "Real rate in {{year}}, the latest complete year",
+        "nominal": "Average rate paid",
+        "inflation": "Inflation",
+        "gross": "Real rate before tax",
+        "net": "Real rate after {{tax}}% IRS",
+        "positive": "In {{year}} the average new deposit still beat inflation after IRS.",
+        "negative": "In {{year}} the average new deposit lost purchasing power after IRS: prices rose faster than the interest earned."
+      },
+      "notBestOffer": "This is an average of what banks actually paid on new deposits, not the best offer. Promotional and campaign rates are usually higher, and some deposits pay less. This page names no banks and recommends no product: compare current offers yourself before you decide.",
+      "calculator": {
+        "title": "Interest at the average rate",
+        "intro": "Enter an amount and a term to see the interest a deposit would earn at the latest average rate for that maturity, net of the 28% IRS, and what inflation would take."
+      },
+      "fields": {
+        "amount": "Amount deposited",
+        "term": "Term",
+        "termSuffix": "months",
+        "inflation": "Assumed inflation per year"
+      },
+      "help": {
+        "term": "Whole months, 1 to 120. Up to 12 months uses the up-to-1-year average, 13 to 24 months the 1-to-2-year average, longer terms the over-2-years average.",
+        "inflation": "Pre-filled with Portuguese inflation in {{year}} (annual average CPI, INE). Change it to test other scenarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Enter an amount above zero.",
+          "negative": "The amount cannot be negative.",
+          "tooLarge": "Enter {{max}} or less."
+        },
+        "termMonths": {
+          "required": "Enter a term of at least 1 month.",
+          "tooLarge": "The term can be at most {{max}} months.",
+          "notWhole": "Enter a whole number of months."
+        },
+        "inflation": {
+          "required": "Enter an inflation rate, or 0.",
+          "outOfRange": "Enter an inflation rate from {{min}}% to {{top}}%."
+        },
+        "summary": "Check the highlighted fields to see the result."
+      },
+      "buckets": {
+        "all": "All maturities",
+        "upTo1y": "Up to 1 year",
+        "1to2y": "Over 1 and up to 2 years",
+        "over2y": "Over 2 years"
+      },
+      "result": {
+        "net": "Net interest after {{tax}}% IRS",
+        "gross": "Gross interest",
+        "tax": "IRS withheld ({{tax}}%)",
+        "inflationCost": "What inflation takes over the term",
+        "realGain": "Interest left after inflation",
+        "realYield": "Real yearly yield, after tax",
+        "assumptions": "Average new-deposit rate for {{bucket}}: {{rate}} a year ({{month}}). Simple interest paid at maturity, {{months}} months.",
+        "fallback": "No new deposits were recorded in this maturity group in the latest month, so the all-maturities average is used.",
+        "beats": "On these assumptions the interest, after tax, covers the loss of purchasing power.",
+        "loses": "On these assumptions inflation takes more than the interest earns: the money buys less at maturity.",
+        "note": "A benchmark, not an offer: your bank's rate, any fees and the exact day count change the result. Educational only, not financial advice."
+      },
+      "history": {
+        "title": "History since 2003",
+        "bucket": "Maturity shown in the chart",
+        "chartLabel": "Line chart of monthly average new term deposit rates in Portugal and the euro area, with yearly Portuguese inflation",
+        "portugal": "Portugal",
+        "euroArea": "Euro area",
+        "inflation": "Portuguese inflation (calendar year)",
+        "chartNote": "Rates are monthly averages. Inflation is the annual average consumer price change of each calendar year, so it steps in January; the current year is not complete.",
+        "caption": "Yearly average new deposit rate, inflation and real rate after IRS",
+        "year": "Year",
+        "realNet": "Real rate after {{tax}}% IRS"
+      },
+      "sourceNote": "Source: average interest rates on new household term deposits (annualised agreed rate), Banco de Portugal statistics published in the ECB Data Portal, latest month {{month}}, retrieved {{retrieved}}. Inflation: INE consumer price index through Banco de Portugal's BPstat. Yearly figures computed by WonderMoney. Educational only.",
+      "nextStepHeadline": "Move from the benchmark to a personal savings plan",
+      "nextStepDescription": "The average shows what the market paid. Set a savings goal in WonderMoney and track how your own deposits compare with it.",
+      "nextStepCta": "Set a savings goal",
+      "guide": {
+        "read": {
+          "title": "How to read the index",
+          "what": "Every month banks in Portugal report to Banco de Portugal the interest rate on the new term deposits they took from households. The index is the average of those rates across banks, weighted by the amount of new business: what was actually agreed. The euro-area line is the same statistic for all euro-area banks, for comparison.",
+          "notBest": "It is not the best rate on offer. An average includes small deposits, existing customers and banks that pay little, so a campaign or promotional rate can be well above it, and some deposits earn less.",
+          "noRecommendation": "No bank or product is named or ranked here. Use the average to judge whether an offer looks high or low, then compare current offers yourself, including their conditions."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Deposit {{amount}} for {{months}} months at the latest average rate for that maturity, {{rate}} a year ({{month}}). Interest paid at maturity is {{gross}}; after {{taxRate}}% IRS (tax withheld: {{tax}}) you keep {{net}}.",
+          "real": "With inflation at {{inflation}} a year, the same money loses {{inflationCost}} of purchasing power over the term, so what is left after inflation is {{realGain}}.",
+          "year": "Looking back, in {{year}}, the latest complete year, the average new deposit paid {{yearRate}}; after inflation and the 28% IRS the real rate was {{yearReal}}."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
+          "steps": {
+            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+          },
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+        },
+        "data": {
+          "title": "Data and sources",
+          "source": "Rates: monthly average interest rates on new deposits with agreed maturity from households (annualised agreed rate, all amounts, in euro), {{first}} to {{last}}, compiled from the banks' reports by Banco de Portugal and published in the ECB Data Portal (series {{seriesPt}} for Portugal and {{seriesEa}} for the euro area, where x is the maturity: total, up to 1 year, over 1 and up to 2 years, over 2 years). Retrieved on {{retrieved}}.",
+          "ecbLink": "ECB Data Portal (MIR)",
+          "bpstatLink": "Banco de Portugal BPstat",
+          "cpiLink": "INE consumer price index in BPstat",
+          "inflation": "Inflation: annual average consumer price index for Portugal produced by INE and distributed by Banco de Portugal (BPstat series 12704686), retrieved on {{cpiRetrieved}}.",
+          "reuse": "The ECB allows free use of its statistics when they are reproduced accurately and the source is cited. This page republishes monthly values and loads no data at runtime: the numbers change only when the data file is refreshed."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "An average of new business: it mixes deposit sizes, banks and customers. Your rate may be higher or lower.",
+            "lag": "The statistics are published monthly with a delay, and the latest month can be revised.",
+            "tax": "Tax: 28% is the IRS withholding rate on interest for residents. Your situation can differ, for example if you include the interest in your annual tax return.",
+            "inflation": "Inflation: your own prices differ from the national average, and future inflation is unknown. The calculator holds the rate you enter for the whole term.",
+            "buckets": "Maturity groups with no new deposits in a month show n/a. For a term in such a group the calculator uses the all-maturities average.",
+            "advice": "Educational only: this page is not financial advice or an offer."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "termDepositLink": "Term deposit calculator",
+          "termDepositBody": "Enter your own bank's rate and see the interest, the tax and the net yield.",
+          "savingsCertificatesLink": "Savings certificates calculator",
+          "savingsCertificatesBody": "Compare a deposit with Certificados de Aforro Série F.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how much purchasing power money lost between any two years."
+        }
+      }
+    },
     "netSalary": {
       "title": "Portugal net salary calculator 2026",
       "shortName": "Net salary",
@@ -3664,6 +3815,261 @@
           "compoundInterestBody": "See how regular contributions and time compound at a rate you choose.",
           "investorProfileLink": "Investor profile quiz",
           "investorProfileBody": "Find out how much market swings like these you can live with."
+        }
+      }
+    },
+    "euribor": {
+      "title": "Euribor today: current rates and mortgage impact",
+      "shortName": "Euribor today",
+      "subtitle": "The latest Euribor 3, 6 and 12 month rates, how they moved on the month before, the history since 2000 and what a change does to a variable-rate mortgage payment.",
+      "description": "Current Euribor 3, 6 and 12 month monthly averages, the history since 2000 and a calculator for the effect of a change on your mortgage payment.",
+      "pageTitle": "Euribor Today: 3, 6 and 12 Month Rates and Mortgage Impact",
+      "pageDescription": "Latest Euribor 3, 6 and 12 month monthly averages from Banco de Portugal, the change on the month before, a history chart since 2000 and a calculator showing what a rise or fall does to a variable-rate mortgage payment.",
+      "asOf": "Data as of {{month}}: monthly averages, fetched {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 months",
+        "6": "Euribor 6 months",
+        "12": "Euribor 12 months"
+      },
+      "current": {
+        "title": "Current Euribor rates",
+        "change": "{{change}} points on {{previous}}",
+        "note": "Each rate is the average of {{month}}, not a daily fixing. A loan resets on the fixing of the date its contract sets, which can differ from the monthly average."
+      },
+      "calc": {
+        "title": "What a change in Euribor does to your payment"
+      },
+      "fields": {
+        "balance": "Balance you still owe",
+        "termYears": "Years left",
+        "termMonths": "Months left",
+        "spread": "Your spread",
+        "tenor": "Euribor your loan follows",
+        "change": "Change in Euribor (points)"
+      },
+      "help": {
+        "spread": "The lender's margin on top of Euribor, in percent. It is in your contract.",
+        "change": "Use a negative number for a fall. 1 means one percentage point: from 3% to 4%."
+      },
+      "errors": {
+        "summary": "The new payment appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "spread": {
+          "required": "Enter the spread, or 0% if there is none.",
+          "negative": "The spread can't be negative.",
+          "tooLarge": "Enter a spread up to {{max}}."
+        },
+        "change": {
+          "required": "Enter a change in points, or 0 for none.",
+          "tooSmall": "Enter a change of {{min}} or more.",
+          "tooLarge": "Enter a change of {{max}} or less."
+        }
+      },
+      "result": {
+        "revised": "Monthly payment after the change",
+        "current": "Monthly payment today",
+        "monthlyChange": "Change per month",
+        "nextYear": "Change over the next {{payments}} payments",
+        "assumptions": "Starts from the {{tenor}} rate of {{index}} ({{month}} average) and moves it to {{newIndex}}, with your spread on top, over the months left.",
+        "floored": "Index plus spread is below 0%, so the rate is taken as 0%. Contracts differ: some floor the rate, some do not.",
+        "termRounded": "The time left was rounded to whole months.",
+        "noChange": "With no change in Euribor the payment stays the same.",
+        "caveat": "Educational estimate. It assumes the new rate applies from the next payment to the end of the loan; your contract sets reset dates, caps and floors."
+      },
+      "history": {
+        "title": "Euribor history",
+        "from": "Show from year",
+        "label": "Line chart of the monthly average Euribor 3, 6 and 12 month rates"
+      },
+      "sourceNote": "Source: Banco de Portugal, BPstat, Euribor monthly averages, latest month {{month}}, fetched {{fetched}}. Euribor is a registered trademark of EMMI. Educational only.",
+      "nextStepHeadline": "Connect rate changes to your debt budget",
+      "nextStepDescription": "Add your loan to WonderMoney and see how a change in Euribor moves your monthly payment and what it leaves for the rest of your budget.",
+      "nextStepCta": "Connect your debts",
+      "guide": {
+        "read": {
+          "title": "How to read the rates",
+          "intro": "Euribor is the interest rate at which euro-area banks lend to each other for a set period: 3, 6 or 12 months. Many variable-rate mortgages in Portugal and Spain pay Euribor plus a fixed spread, so when it moves, the payment moves.",
+          "monthly": "The figures here are monthly averages, with the latest for {{month}}. They are not the daily rate: the rate that sets your payment is the one fixed on the date your contract uses."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A loan with {{balance}} left over {{years}} years, a spread of {{spread}} and a 12 month Euribor of {{index}} (the latest monthly average). Euribor rises by {{change}} point to {{newIndex}}.",
+          "result": "The payment goes from {{current}} to {{revised}}, a difference of {{difference}} a month. It is the same calculation as the rate revision calculator."
+        },
+        "data": {
+          "title": "Data and method",
+          "source": "The rates are the Euribor 3, 6 and 12 month monthly averages published by Banco de Portugal in BPstat, fetched on {{fetched}}. The latest month in the data is {{month}}. Each change is the latest average minus the month before, in percentage points.",
+          "link": "Euribor rates by tenor on BPstat",
+          "daily": "BPstat publishes monthly averages, not daily fixings, so this page shows monthly averages only. For today's fixing, see EMMI or your bank.",
+          "trademark": "Euribor is a registered trademark of EMMI. This page is not affiliated with or endorsed by EMMI or Banco de Portugal."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "A monthly average smooths the month: the rate on a given day can be above or below it.",
+            "reset": "Your loan follows the Euribor of a reset date in the contract, often every 3, 6 or 12 months, not every month.",
+            "terms": "Caps, floors and a different spread after some years depend on the contract and are not included.",
+            "advice": "This is educational information, not a forecast of Euribor or financial advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "rateRevisionLink": "Variable-rate payment calculator",
+          "rateRevisionBody": "Try your own index, spread and balance, and see the payment as a share of your income.",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "Work out the payment and the interest of a loan before any rate change.",
+          "debtToIncomeLink": "Debt-to-income calculator",
+          "debtToIncomeBody": "See whether a higher payment keeps your debts within a comfortable share of income."
+        }
+      }
+    },
+    "electricityIndex": {
+      "title": "Electricity price index and bill estimator (Portugal)",
+      "shortName": "Electricity index",
+      "subtitle": "Estimate a monthly electricity bill on the regulated tariff and see how Portuguese household prices compare with the EU average.",
+      "description": "Regulated-tariff electricity bill estimator for Portuguese households, with the price per kWh of Portugal against the EU over time.",
+      "pageTitle": "Electricity Price Index Portugal: Regulated Tariff Bill Estimator",
+      "pageDescription": "Estimate your monthly electricity bill on the ERSE regulated tariff (contracted power, kWh, simple or bi-hourly, VAT and other charges) and compare Portugal's household price per kWh with the EU average. Data: ERSE and Eurostat.",
+      "fields": {
+        "power": "Contracted power",
+        "period": "Consumption given",
+        "periodMonth": "Per month",
+        "periodYear": "Per year",
+        "consumption": "Electricity consumption",
+        "option": "Tariff option",
+        "optionSimple": "Simple",
+        "optionBi": "Bi-hourly",
+        "offPeak": "Share of consumption in off-peak hours",
+        "largeFamily": "Household of five or more people"
+      },
+      "help": {
+        "power": "Low-voltage households in mainland Portugal: 3.45, 4.6, 5.75 or 6.9 kVA. It is on your bill.",
+        "consumption": "kWh in the period chosen above. A year is spread over twelve equal months.",
+        "offPeak": "Off-peak is the \"vazio\" period of the bi-hourly tariff. Your bill or meter data shows the split.",
+        "largeFamily": "Raises the reduced-VAT allowance from 200 to 300 kWh a month, if you have asked your supplier for it."
+      },
+      "errors": {
+        "required": "Enter a valid value.",
+        "notAllowed": "Choose one of the listed contracted powers.",
+        "negative": "Consumption cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "percentRange": "Enter a share from 0% to 100%.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "total": "Estimated monthly bill (VAT included)",
+        "yearly": "About twelve such months",
+        "effective": "Real cost per kWh, fixed charges included",
+        "breakdown": "Bill breakdown: amount before VAT and VAT rate for each item",
+        "item": "Item",
+        "beforeVat": "Before VAT",
+        "vatRate": "VAT",
+        "power": "Contracted power ({{kva}} kVA, {{days}} days)",
+        "energyReduced": "Energy at the reduced VAT rate ({{kwh}})",
+        "energyStandard": "Energy above the reduced allowance ({{kwh}})",
+        "cav": "Audiovisual contribution (CAV)",
+        "iec": "Electricity consumption tax (IEC)",
+        "subtotal": "Total before VAT",
+        "vat": "VAT",
+        "comparisonSame": "On the {{other}} option the same month would cost about the same.",
+        "comparisonCheaper": "On the {{other}} option the same month would cost {{amount}}, {{difference}} less.",
+        "comparisonDearer": "On the {{other}} option the same month would cost {{amount}}, {{difference}} more.",
+        "breakEven": "On energy prices alone, bi-hourly costs less than simple when more than {{percent}}% of your consumption is in off-peak hours.",
+        "noConsumption": "With no consumption the bill is only the fixed charges."
+      },
+      "notes": {
+        "tariffs": "ERSE regulated-market tariffs for low-voltage households in mainland Portugal, in force since {{date}} (read from ERSE's documents on {{checked}}). ERSE can update them every quarter.",
+        "dgeg": "Not included: the small monthly DGEG fee, which we could not confirm in an ERSE document, and any meter or other charge. Your real bill can differ by a few cents.",
+        "freeMarket": "Most households buy in the free market, where offers vary: some are cheaper than the regulated tariff, some dearer. This page names no supplier and recommends none. To compare real offers, use",
+        "simulatorLink": "ERSE's official price simulator."
+      },
+      "index": {
+        "title": "Portugal against the EU: price per kWh over time",
+        "intro": "Eurostat's half-yearly price for a household using 2,500 to 4,999 kWh a year (band DC), all taxes and levies included, for Portugal and for the EU 27 average.",
+        "chartLabel": "Line chart of the household electricity price per kWh in Portugal and in the EU, half-yearly",
+        "portugal": "Portugal",
+        "eu": "EU average",
+        "below": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} below the EU average.",
+        "above": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} above the EU average.",
+        "equal": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: about the same.",
+        "tableCaption": "The latest half-years: Portugal, EU average and the gap",
+        "period": "Half-year",
+        "gap": "Portugal vs EU",
+        "asOf": "Data as of {{last}} (the latest half-year available). Eurostat updated the dataset on {{updated}}; this page's copy was built on {{fetched}}. Source: Eurostat, table nrg_pc_204. Educational only."
+      },
+      "nextStepHeadline": "Compare household bills with a realistic budget",
+      "nextStepDescription": "Put your electricity, water, gas and the other household bills into a WonderMoney budget and see what is left each month.",
+      "nextStepCta": "Plan your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
+          "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
+          "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A household with {{kva}} kVA contracted that uses {{kwh}} kWh in a month on the simple tariff. Power: {{powerPrice}} for 30 days. Energy: {{kwh}} kWh at {{energySimple}}. Plus the audiovisual contribution ({{cav}}) and the electricity tax ({{iec}}). With VAT ({{vatSimple}} in all) the month costs {{totalSimple}}, or {{effective}} once the fixed charges are spread over the kWh.",
+          "bi": "On the bi-hourly tariff ({{energyPeak}} outside off-peak, {{energyValley}} in off-peak hours) with half the consumption in off-peak hours, the same month costs {{totalBi}}.",
+          "power": "Contracted power matters too: at 6.9 kVA and 300 kWh the month costs {{totalBigger}}, because a higher power has a higher daily charge and its power term pays the full VAT rate."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "For one 30-day month the estimator does the same five things:",
+          "steps": {
+            "a": "Power: the daily price for your contracted power, times 30 days.",
+            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
+            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT.",
+            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
+            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+          },
+          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the power term for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+        },
+        "data": {
+          "title": "Data and sources",
+          "tariffs": "Regulated tariffs: ERSE (Entidade Reguladora dos Serviços Energéticos), the transitional sales tariffs for low-voltage households up to 20.7 kVA in mainland Portugal, in force since {{from}}, plus the audiovisual contribution, electricity tax and VAT rules from ERSE's own documents. Read on {{checked}}. ERSE can change the energy price every quarter.",
+          "eurostat": "Price index: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), band DC (2,500 to 4,999 kWh a year), all taxes and levies included, in euro per kWh, from {{firstPeriod}} to {{lastPeriod}}. Eurostat updated the dataset on {{updated}} and this page's copy was built on {{fetched}}.",
+          "tariffsLink": "ERSE, tariffs and prices for 2026 (Directive 4/2026)",
+          "chargesLink": "ERSE, price simulator manual (bill charges)",
+          "vatLink": "ERSE, VAT on the electricity bill",
+          "eurostatLink": "Eurostat, table nrg_pc_204",
+          "refresh": "The page reads two saved data files and never calls these sources while you use it. Both carry their date and are refreshed by hand."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "market": "Free market: most offers are not the regulated tariff. They can be cheaper or dearer, with different prices, discounts and conditions. Compare with a real simulator before you decide.",
+            "dgeg": "The small monthly DGEG fee is not included because we could not confirm its amount in an ERSE document, and nor is any meter or other charge. Check your own bill for the exact total.",
+            "scope": "The estimator covers mainland Portugal and 3.45 to 6.9 kVA of contracted power. Higher powers, the Azores and Madeira have other tariffs and VAT rates.",
+            "social": "The social electricity tariff, a discount for eligible households, is not applied. Ask your supplier or ERSE if you may be entitled.",
+            "average": "The index compares averages for one consumption band. Your own price depends on your contract, power and hours of use, and Portugal's average blends regulated and free-market contracts.",
+            "education": "Educational use only, not advice to choose or change supplier."
+          },
+          "simulatorLink": "Compare real offers in ERSE's official price simulator"
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put the electricity bill next to your other household costs and see what is left.",
+          "emergencyFundLink": "Emergency fund calculator",
+          "emergencyFundBody": "Work out how many months of essential bills, energy included, your savings would cover.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how rising prices change what your money buys over time."
         }
       }
     }
