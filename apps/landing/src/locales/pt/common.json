@@ -3012,6 +3012,96 @@
       "nextStepDescription": "A WonderMoney mostra o seu dinheiro, a despesa mensal e quanto tempo duram as poupanças com um rendimento mais baixo.",
       "nextStepCta": "Estime quanto tempo dura a sua reserva de dinheiro"
     },
+    "sickPay": {
+      "title": "Simulador de subsídio de doença 2026 (baixa médica)",
+      "shortName": "Subsídio de doença",
+      "subtitle": "Estime o subsídio de doença de uma baixa médica: valor por escalão de duração, dias de espera e a perda de rendimento.",
+      "description": "Estime o subsídio de doença em Portugal: valor diário, total, dias de espera e diferença face ao seu salário líquido.",
+      "pageTitle": "Simulador de Subsídio de Doença 2026: Baixa Médica em Portugal",
+      "pageDescription": "Estime o subsídio de doença em Portugal: remuneração de referência a 180 dias, 55% a 75% consoante a duração, os 3 dias de espera, o mínimo de 9,20 € e a perda de rendimento durante a baixa.",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal",
+        "allowances": "Subsídios",
+        "sickDays": "Dias de baixa",
+        "dependants": "Filhos até 16 anos (ou 24 com abono de família)",
+        "hospitalisation": "Internamento hospitalar ou cirurgia de ambulatório"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
+        "twelfths": "Em duodécimos (o salário já os inclui)"
+      },
+      "help": {
+        "gross": "O salário base dos meses considerados, antes de Segurança Social e IRS. Os subsídios de férias e de Natal não entram na remuneração de referência.",
+        "allowances": "Em duodécimos, o simulador retira os dois subsídios para obter o salário base que a remuneração de referência usa.",
+        "sickDays": "Total de dias do certificado de incapacidade temporária (CIT), contados desde o primeiro dia. Os trabalhadores por conta de outrem podem receber até 1095 dias.",
+        "dependants": "Usado no acréscimo de 5 pontos, que exige 3 ou mais filhos e uma remuneração de referência até 500 euros por mês.",
+        "hospitalisation": "Com internamento hospitalar ou cirurgia de ambulatório, o subsídio é pago desde o 1.º dia, sem período de espera."
+      },
+      "errors": {
+        "required": "Introduza um número válido.",
+        "tooSmall": "Introduza um valor de pelo menos {{min}}.",
+        "tooLarge": "Introduza um valor até {{max}}.",
+        "whole": "Introduza um número inteiro.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Total estimado pago pela Segurança Social",
+        "paidDays": "Dias pagos",
+        "waiting": "Dias de espera (não pagos pela Segurança Social)",
+        "waitingValue": "{{days}} dias, cerca de {{amount}} de salário líquido",
+        "waitingNone": "Nenhum",
+        "reference": "Remuneração de referência por dia",
+        "netPay": "Salário líquido normal por mês",
+        "firstGap": "Perda de rendimento nos primeiros 30 dias",
+        "averageGap": "Perda média mensal de rendimento durante toda a baixa",
+        "bandsTitle": "Por escalão de duração",
+        "bandLabel": "Dias {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} dias pagos × {{daily}} = {{amount}}",
+        "increaseApplied": "Inclui o acréscimo de 5 pontos para remunerações baixas e 3 ou mais filhos.",
+        "allWaiting": "Todos os dias desta baixa são dias de espera, por isso a Segurança Social não paga nada. Verifique se o contrato ou o instrumento de regulamentação coletiva obriga a entidade patronal a pagá-los.",
+        "waitingNote": "A Segurança Social não paga os 3 primeiros dias. Se a entidade patronal os paga depende do contrato ou do instrumento de regulamentação coletiva.",
+        "estimate": "Uma estimativa para planear, não uma decisão. A Segurança Social calcula o valor real com as remunerações registadas.",
+        "limit": {
+          "none": "O valor diário é a percentagem da remuneração de referência de cada escalão; sem limites aplicados.",
+          "minimum": "O valor diário foi elevado ao mínimo de {{min}} (30% da retribuição mínima mensal garantida).",
+          "referencePay": "A remuneração de referência é inferior a {{min}} por dia, por isso o subsídio é igual a essa remuneração.",
+          "netCap": "O valor diário foi limitado ao valor líquido estimado da remuneração de referência."
+        }
+      },
+      "checklist": {
+        "title": "Condições a verificar (não é uma decisão)",
+        "certificate": "Tem um certificado de incapacidade temporária (CIT) passado por um médico e enviado eletronicamente para a Segurança Social.",
+        "guarantee": "Tem 6 meses de remunerações registadas (não têm de ser seguidos) no dia em que deixa de trabalhar.",
+        "professionalIndex": "Trabalhou pelo menos 12 dias nos primeiros quatro dos últimos seis meses, contando o mês em que deixa de trabalhar.",
+        "waiting": "Não há período de espera com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e continua depois dele. O simulador só tem opção para a primeira.",
+        "note": "Só a Segurança Social decide se tem direito. Esta lista é um lembrete, não uma decisão."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Um trabalhador com {{gross}} por mês em 14 pagamentos, de baixa durante {{days}} dias e sem internamento. A remuneração de referência é {{reference}} por dia. Os dias 1 a 3 são de espera, por isso o primeiro escalão paga 27 dias a 55% e os 15 seguintes a 60%: {{total}} no total. O salário líquido normal é {{net}} por mês; ao longo da baixa a perda média é de {{gap}} por mês.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodReference": "A remuneração de referência (RR) é a soma das remunerações registadas nos 6 meses mais antigos dos 8 anteriores ao mês em que começa a baixa, sem subsídios de férias e de Natal, a dividir por 180. O simulador usa o seu salário mensal a dividir por 30.",
+        "methodBands": "O subsídio diário é uma percentagem da RR que aumenta com a duração da baixa: 55% até 30 dias, 60% do dia 31 ao 90, 70% do dia 91 ao 365 e 75% depois, até 1095 dias para trabalhadores por conta de outrem. Os dias contam desde o primeiro dia da baixa, incluindo os de espera.",
+        "methodWaiting": "Os trabalhadores por conta de outrem têm um período de espera de 3 dias que a Segurança Social não paga. Com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e vai além dele, o pagamento começa no 1.º dia.",
+        "methodMinimum": "O subsídio diário não pode ser inferior a {{min}} (30% da retribuição mínima mensal garantida de {{rmmg}}). Se a própria RR for inferior, o subsídio é igual à RR.",
+        "methodIncrease": "Nos escalões de 55% e 60%, a percentagem sobe 5 pontos quando a RR é de, no máximo, 500 euros por mês e o agregado tem 3 ou mais filhos até 16 anos (ou 24 com abono de família), ou filhos com bonificação por deficiência. O simulador só considera o número de filhos.",
+        "methodNetCap": "O subsídio diário também não pode ultrapassar o valor líquido da RR. O simulador estima-o com 11% de Segurança Social e a taxa de retenção de IRS de 2026 do continente para um titular não casado.",
+        "methodGap": "A perda de rendimento compara o seu salário líquido normal (14 ou 12 pagamentos, em média por 12 meses) com o que a Segurança Social paga. Os subsídios de férias e de Natal não são repostos pelos dias de baixa.",
+        "methodBudget": "A diferença é o rendimento que tem de cobrir com poupanças ou cortando despesas durante a baixa. Use-a para dimensionar a sua reserva.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedTuberculosis": "Tuberculose, paga a 80% ou 100% da RR consoante os familiares a cargo, sem limite de tempo.",
+        "unsupportedSelfEmployed": "Trabalhadores independentes (10 dias de espera, até 365 dias), seguro social voluntário e trabalhadores do serviço doméstico.",
+        "unsupportedShort": "Ausências curtas cobertas pela autodeclaração de doença do SNS 24: não modelámos as respetivas regras.",
+        "unsupportedOther": "Menos de 6 meses de remunerações registadas, remunerações muito variáveis, indemnizações por acidente de trabalho ou doença profissional e acordos coletivos que complementam o subsídio.",
+        "sourcesTitle": "Fontes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de outubro de 2026), com a retribuição mínima mensal garantida de 2026 de 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, na sua redação atual: o regime de proteção na doença",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social. O limite de 500 euros do acréscimo de 5 pontos vem da lei consolidada e de fontes secundárias, porque o texto do guia não mostra o valor. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa."
+      },
+      "nextStepHeadline": "Planeie a quebra temporária de rendimento",
+      "nextStepDescription": "O WonderMoney mostra o seu dinheiro, as suas despesas e durante quanto tempo as poupanças cobrem um rendimento mais baixo.",
+      "nextStepCta": "Ajuste o seu orçamento à quebra temporária de rendimento"
+    },
     "vehicleTax": {
       "title": "Simulador de IUC",
       "shortName": "IUC",

@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney te muestra tu efectivo, tu gasto mensual y cuánto duran tus ahorros con unos ingresos menores.",
       "nextStepCta": "Estima cuánto durará tu colchón de efectivo"
     },
+    "sickPay": {
+      "title": "Calculadora de baja médica en Portugal 2026 (subsídio de doença)",
+      "shortName": "Baja médica",
+      "subtitle": "Estima el subsídio de doença de una baja médica: importe por tramo de duración, días de espera y la pérdida de ingresos.",
+      "description": "Estima la prestación por enfermedad en Portugal: importe diario, total, días de espera y diferencia con tu sueldo neto.",
+      "pageTitle": "Calculadora de Baja Médica Portugal 2026: Subsídio de Doença",
+      "pageDescription": "Estima el subsídio de doença en Portugal: remuneración de referencia a 180 días, del 55% al 75% según la duración, los 3 días de espera, el mínimo de 9,20 € y tu pérdida de ingresos durante la baja.",
+      "fields": {
+        "grossMonthly": "Salario bruto mensual",
+        "allowances": "Pagas extra",
+        "sickDays": "Días de baja",
+        "dependants": "Hijos hasta 16 años (o 24 con prestación familiar)",
+        "hospitalisation": "Ingreso hospitalario o cirugía ambulatoria"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagos (pagas de vacaciones y Navidad aparte)",
+        "twelfths": "Prorrateadas (el salario ya las incluye)"
+      },
+      "help": {
+        "gross": "El salario base de los meses considerados, antes de Seguridad Social e IRS. Las pagas de vacaciones y Navidad no forman parte de la remuneración de referencia.",
+        "allowances": "Prorrateadas, la calculadora quita las dos pagas para obtener el salario base que usa la remuneración de referencia.",
+        "sickDays": "Total de días del parte de baja (CIT), contados desde el primer día. Los trabajadores por cuenta ajena pueden cobrar hasta 1095 días.",
+        "dependants": "Se usa para el aumento de 5 puntos, que exige 3 o más hijos y una remuneración de referencia de 500 euros al mes o menos.",
+        "hospitalisation": "Con ingreso hospitalario o cirugía ambulatoria la prestación se paga desde el primer día, sin período de espera."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "total": "Total estimado que paga la Seguridad Social",
+        "paidDays": "Días pagados",
+        "waiting": "Días de espera (no los paga la Seguridad Social)",
+        "waitingValue": "{{days}} días, unos {{amount}} de sueldo neto",
+        "waitingNone": "Ninguno",
+        "reference": "Remuneración de referencia por día",
+        "netPay": "Sueldo neto normal al mes",
+        "firstGap": "Pérdida de ingresos en los primeros 30 días",
+        "averageGap": "Pérdida media mensual de ingresos durante toda la baja",
+        "bandsTitle": "Por tramo de duración",
+        "bandLabel": "Días {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} días pagados × {{daily}} = {{amount}}",
+        "increaseApplied": "Incluye el aumento de 5 puntos por remuneración baja y 3 o más hijos.",
+        "allWaiting": "Todos los días de esta baja son días de espera, así que la Seguridad Social no paga nada. Comprueba si tu contrato o convenio obliga a la empresa a pagarlos.",
+        "waitingNote": "La Seguridad Social no paga los 3 primeros días. Que la empresa los pague depende de tu contrato o convenio colectivo.",
+        "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real con tus remuneraciones registradas.",
+        "limit": {
+          "none": "El importe diario es el porcentaje de tu remuneración de referencia de cada tramo; sin límites aplicados.",
+          "minimum": "El importe diario se elevó al mínimo de {{min}} (30% del salario mínimo).",
+          "referencePay": "Tu remuneración de referencia es inferior a {{min}} al día, así que la prestación es igual a esa remuneración.",
+          "netCap": "El importe diario se limitó al valor neto estimado de tu remuneración de referencia."
+        }
+      },
+      "checklist": {
+        "title": "Condiciones a comprobar (no es una decisión)",
+        "certificate": "Tienes un parte de baja (CIT) de un médico, enviado por vía electrónica a la Seguridad Social.",
+        "guarantee": "Tienes 6 meses de remuneraciones registradas (no tienen que ser seguidos) el día que dejas de trabajar.",
+        "professionalIndex": "Trabajaste al menos 12 días en los cuatro primeros de los últimos seis meses, contando el mes en que dejas de trabajar.",
+        "waiting": "No hay período de espera con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y continúa después. La calculadora solo tiene opción para la primera.",
+        "note": "Solo la Seguridad Social decide si tienes derecho. Esta lista es un recordatorio, no un veredicto."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Un trabajador con {{gross}} al mes en 14 pagos, de baja {{days}} días y sin ingreso hospitalario. La remuneración de referencia es de {{reference}} al día. Los días 1 a 3 son de espera, así que el primer tramo paga 27 días al 55% y los 15 siguientes al 60%: {{total}} en total. El sueldo neto normal es de {{net}} al mes; durante la baja la pérdida media es de {{gap}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia (RR) es la suma de lo registrado en los 6 meses más antiguos de los 8 anteriores al mes en que empieza la baja, sin pagas de vacaciones ni Navidad, dividida entre 180. La calculadora usa tu salario mensual dividido entre 30.",
+        "methodBands": "La prestación diaria es un porcentaje de la RR que crece con la duración de la baja: 55% hasta 30 días, 60% del día 31 al 90, 70% del día 91 al 365 y 75% después, hasta 1095 días para trabajadores por cuenta ajena. Los días cuentan desde el primero de la baja, incluidos los de espera.",
+        "methodWaiting": "Los trabajadores por cuenta ajena tienen un período de espera de 3 días que la Seguridad Social no paga. Con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y va más allá, el pago empieza el día 1.",
+        "methodMinimum": "La prestación diaria no puede ser inferior a {{min}} (30% del salario mínimo de {{rmmg}}). Si la propia RR es menor, la prestación es igual a la RR.",
+        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando la RR es de 500 euros al mes como máximo y el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o hijos con bonificación por discapacidad. La calculadora solo modela el número de hijos.",
+        "methodNetCap": "La prestación diaria tampoco puede superar el valor neto de la RR. La calculadora lo estima con un 11% de Seguridad Social y la tasa de retención de IRS de 2026 del continente para un titular soltero.",
+        "methodGap": "La pérdida de ingresos compara tu sueldo neto normal (14 o 12 pagos, en promedio de 12 meses) con lo que paga la Seguridad Social. Las pagas de vacaciones y Navidad no se reponen por los días de baja.",
+        "methodBudget": "La diferencia es el ingreso que tienes que cubrir con ahorros o recortando gastos mientras estás de baja. Úsala para dimensionar tu colchón.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedTuberculosis": "Tuberculosis, pagada al 80% o al 100% de la RR según las personas a cargo, sin límite de tiempo.",
+        "unsupportedSelfEmployed": "Trabajadores autónomos (10 días de espera, hasta 365 días), seguro social voluntario y empleados del hogar.",
+        "unsupportedShort": "Ausencias cortas cubiertas por la autodeclaración de enfermedad del SNS 24: no hemos modelado sus reglas.",
+        "unsupportedOther": "Menos de 6 meses de remuneraciones registradas, remuneraciones muy variables, indemnizaciones por accidente de trabajo o enfermedad profesional y convenios que complementan la prestación.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de octubre de 2026), con el salario mínimo de 2026 de 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, en su redacción actual: el régimen de protección en la enfermedad",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 con la guía de la Segurança Social. El límite de 500 euros del aumento de 5 puntos procede de la ley consolidada y de fuentes secundarias, porque el texto de la guía no muestra la cifra. La estimación del sueldo neto detrás del límite neto es una simplificación nuestra."
+      },
+      "nextStepHeadline": "Planifica la caída temporal de ingresos",
+      "nextStepDescription": "WonderMoney muestra tu efectivo, tus gastos y cuánto tiempo te cubren los ahorros con unos ingresos menores.",
+      "nextStepCta": "Ajusta tu presupuesto a la caída temporal de ingresos"
+    },
     "vehicleTax": {
       "title": "Calculadora del IUC",
       "shortName": "IUC",
