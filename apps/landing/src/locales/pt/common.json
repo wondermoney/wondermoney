@@ -5910,7 +5910,11 @@
       "timer": "Desenho de linhas de um temporizador de cozinha marcado para dez minutos.",
       "containers": "Desenho de linhas de uma prateleira de recipientes, de uma taça aberta a um cofre fechado.",
       "booklets": "Desenho de linhas de guias encostados num suporte.",
-      "calculator": "Desenho de linhas de uma calculadora de secretária."
+      "calculator": "Desenho de linhas de uma calculadora de secretária.",
+      "compass": "Desenho de linhas de uma bússola de bolso pousada sobre um mapa dobrado, com a agulha a apontar ao longo de um percurso tracejado até um ponto marcado.",
+      "cardindex": "Desenho de linhas de um ficheiro de fichas em madeira, com porta-etiqueta e orifício para o dedo, cheio de fichas pautadas e separadores com abas.",
+      "calendar": "Desenho de linhas de um calendário de secretária em pé, com argolas de arame e a grelha de um mês com um dia assinalado.",
+      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado."
     }
   }
 }

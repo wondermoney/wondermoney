@@ -5910,7 +5910,11 @@
       "timer": "Dibujo de líneas de un temporizador de cocina puesto en diez minutos.",
       "containers": "Dibujo lineal de una estantería de recipientes, desde un cuenco abierto hasta una caja fuerte cerrada.",
       "booklets": "Dibujo lineal de guías apoyadas en un soporte.",
-      "calculator": "Dibujo lineal de una calculadora de sobremesa."
+      "calculator": "Dibujo lineal de una calculadora de sobremesa.",
+      "compass": "Dibujo lineal de una brújula de bolsillo sobre un mapa plegado, con la aguja apuntando a lo largo de una ruta discontinua hasta un punto marcado.",
+      "cardindex": "Dibujo lineal de un fichero de madera con portaetiquetas y agujero para el dedo, lleno de fichas rayadas y separadores con pestañas.",
+      "calendar": "Dibujo lineal de un calendario de sobremesa de pie, con espiral de alambre y la cuadrícula de un mes con un día marcado con un círculo.",
+      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz."
     }
   }
 }

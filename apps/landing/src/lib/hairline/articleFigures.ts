@@ -22,6 +22,10 @@ export const FIGURE_NAMES = [
   "containers",
   "booklets",
   "calculator",
+  "compass",
+  "cardindex",
+  "calendar",
+  "riskdial",
 ] as const;
 
 export type FigureName = (typeof FIGURE_NAMES)[number];
@@ -79,15 +83,15 @@ export const PAGE_FIGURES = {
 
 /** Resources hub cards, by their `destination` (src/lib/resourcesHub.ts). */
 export const RESOURCE_CARD_FIGURES: Readonly<Record<string, FigureName>> = {
-  guided_start: "booklets",
+  guided_start: "compass",
   guides: "booklets",
-  glossary: "booklets",
-  monthly: "calculator",
+  glossary: "cardindex",
+  monthly: "calendar",
   household_budget: "envelopes",
   emergency_fund: "jar",
   tools: "calculator",
   savings_guide: "containers",
-  investor_profile: "jar",
+  investor_profile: "riskdial",
 };
 
 export function figureForResource(destination: string): FigureName {
