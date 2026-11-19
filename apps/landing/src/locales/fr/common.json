@@ -507,6 +507,78 @@
         "methodology": "Méthodologie de l’INE"
       }
     },
+    "propertyTax": {
+      "title": "Calculateur de l'IMI portugais",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Estimez l'IMI annuel d'un bien au Portugal, la date de chaque échéance et la somme à mettre de côté chaque mois.",
+      "description": "Estimez l'IMI portugais, les dates de paiement et la provision mensuelle.",
+      "pageTitle": "Calculateur de l'IMI : taxe foncière au Portugal et échéances",
+      "pageDescription": "Estimez votre IMI annuel à partir de la valeur patrimoniale fiscale et du taux municipal, avec les échéances de mai, août et novembre et la provision mensuelle.",
+      "fields": {
+        "kind": "Type de bien",
+        "vpt": "Valeur patrimoniale fiscale (VPT)",
+        "rate": "Taux municipal",
+        "dependants": "Personnes à charge (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Bien urbain",
+        "rustic": "Bien rustique"
+      },
+      "vptHelp": "Le VPT figure sur la caderneta predial et sur l'avis de paiement de l'IMI.",
+      "rateHelp": "Chaque commune fixe son taux pour les biens urbains, entre {{min}} et {{max}}. La valeur par défaut n'est qu'un exemple : utilisez le taux de votre commune.",
+      "rusticNote": "Les biens rustiques sont taxés au taux national de {{rate}}. Il n'y a pas de taux municipal à saisir.",
+      "dependantsHelp": "Uniquement si le bien est votre résidence principale et si votre commune applique la réduction IMI Familiar. Beaucoup ne l'appliquent pas, ou seulement à partir d'un certain nombre de personnes à charge.",
+      "dependantsOptions": {
+        "0": "Aucune réduction",
+        "1": "1 personne à charge (30 €)",
+        "2": "2 personnes à charge (70 €)",
+        "3": "3 personnes à charge ou plus (140 €)"
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "rateRange": "Saisissez un taux de {{min}} à {{max}}, la fourchette légale pour les biens urbains.",
+        "dependants": "Choisissez le nombre de personnes à charge dans la liste.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "annualTax": "IMI annuel estimé",
+        "monthlyProvision": "Provision mensuelle (IMI annuel ÷ 12)",
+        "grossTax": "IMI avant réduction",
+        "deduction": "Réduction IMI Familiar",
+        "scheduleTitle": "Calendrier de paiement",
+        "nothingDue": "Rien à payer : la réduction couvre tout l'impôt."
+      },
+      "months": {
+        "may": "Mai",
+        "august": "Août",
+        "november": "Novembre"
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Un bien d'un VPT de {{vpt}} dans une commune qui applique {{rate}} doit {{tax}} par an. Le montant dépassant 500 €, il se paie en trois échéances de {{instalment}} en mai, août et novembre. Mettre {{monthly}} de côté chaque mois suffit.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodTax": "L'IMI annuel est le VPT multiplié par le taux, arrondi au centime. Les biens urbains utilisent le taux fixé par la commune, compris par la loi entre 0,30 % et 0,45 %. Les biens rustiques utilisent 0,8 %.",
+        "methodFamily": "Si vous choisissez un nombre de personnes à charge, le montant fixe de l'IMI Familiar (30 € pour une, 70 € pour deux, 140 € pour trois ou plus) est déduit de l'impôt, qui ne descend jamais sous zéro. Son application dépend de votre commune.",
+        "methodPayment": "L'impôt se paie en une échéance en mai jusqu'à 100 €, en deux en mai et novembre de 100 € à 500 €, et en trois en mai, août et novembre au-delà de 500 €. Les échéances sont égales ; l'éventuel centime d'arrondi va à la dernière.",
+        "methodBudget": "La provision mensuelle divise l'impôt annuel par 12 pour que l'argent soit prêt à chaque échéance.",
+        "exemptionTitle": "Exonération pour la résidence principale",
+        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI, pendant une durée limitée après l'achat ou tant que le revenu du foyer et le VPT restent sous les plafonds du statut des avantages fiscaux. Les plafonds évoluent et des conditions s'appliquent : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionRate": "Le taux municipal est à saisir par vos soins. Cette page ne contient pas de table des taux communaux, et les communes peuvent majorer ou minorer le taux dans certains cas, par exemple pour des bâtiments vacants ou dégradés, ce que le calculateur ignore.",
+        "assumptionScope": "L'estimation porte sur un seul bien soumis aux règles générales. Elle exclut l'IMI additionnel (AIMI), les exonérations temporaires et les autres déductions communales.",
+        "assumptionEducational": "Il s'agit d'une estimation pédagogique, pas d'un conseil fiscal. Le montant qui compte est celui de l'avis d'IMI de l'administration fiscale.",
+        "sourcesTitle": "Sources",
+        "sourceRates": "Código do IMI, article 112 : taux (consulté le 19 novembre 2026)",
+        "sourcePayment": "Código do IMI, article 120 : paiement par échéances (consulté le 19 novembre 2026)",
+        "sourceExemption": "Portal das Finanças : exonérations d'IMI et IMI Familiar",
+        "reviewed": "Règles vérifiées le 19 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI, d'après des banques et communes portugaises."
+      },
+      "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
+      "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
+      "nextStepCta": "Mettez de côté chaque mois l'argent de votre IMI"
+    },
     "hub": {
       "title": "Outils et calculatrices financiers",
       "description": "Calculatrices interactives gratuites pour vous aider à planifier votre avenir financier. Aucune inscription requise.",

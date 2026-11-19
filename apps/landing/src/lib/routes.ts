@@ -368,6 +368,14 @@ const ROUTE_SLUGS = {
 		de: "inflationsrechner-portugal",
 		it: "calcolo-inflazione-portogallo",
 	},
+	toolPropertyTax: {
+		pt: "simulador-imi",
+		en: "imi-property-tax-calculator",
+		es: "calculadora-imi-portugal",
+		fr: "calculateur-imi-portugal",
+		de: "imi-rechner-portugal",
+		it: "calcolatore-imi-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -488,6 +496,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolPersonalLoan",
 	"toolInflation",
 	"toolSavingsCertificates",
+	"toolPropertyTax",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -767,6 +776,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"personal-loan": "toolPersonalLoan",
 	"simulador-credito-pessoal": "toolPersonalLoan",
 	"credito-pessoal": "toolPersonalLoan",
+	toolpropertytax: "toolPropertyTax",
+	"imi-calculator": "toolPropertyTax",
+	"imi-property-tax": "toolPropertyTax",
+	imi: "toolPropertyTax",
 }
 
 function normalizeRouteLookupKey(value: string): string {
