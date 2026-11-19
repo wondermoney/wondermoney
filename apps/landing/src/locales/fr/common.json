@@ -2912,6 +2912,88 @@
       "nextStepHeadline": "De la retenue à votre plan mensuel",
       "nextStepDescription": "WonderMoney transforme votre net estimé en plan, pour que chaque euro ait un rôle avant le début du mois.",
       "nextStepCta": "Utiliser l'estimation nette dans un plan mensuel"
+    },
+    "vehicleTax": {
+      "title": "Calculateur de l'IUC",
+      "shortName": "IUC",
+      "subtitle": "Estimez l'IUC annuel d'une voiture particulière au Portugal, voyez quand il est dû et combien mettre de côté chaque mois.",
+      "description": "Estimez l'IUC portugais, son échéance et une provision mensuelle.",
+      "pageTitle": "Calculateur IUC 2026 : taxe de circulation portugaise selon la cylindrée et le CO2",
+      "pageDescription": "Estimez l'IUC 2026 d'une voiture immatriculée au Portugal selon la cylindrée, le carburant, les émissions de CO2 et la date d'immatriculation, avec l'échéance et la provision mensuelle.",
+      "fields": {
+        "fuel": "Carburant",
+        "cc": "Cylindrée",
+        "year": "Année de première immatriculation",
+        "month": "Mois de première immatriculation",
+        "co2": "Émissions officielles de CO2",
+        "standard": "Cycle d'essai du CO2"
+      },
+      "fuels": {
+        "petrol": "Essence",
+        "diesel": "Diesel ou autre carburant",
+        "electric": "Électrique"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "En centimètres cubes (cm³), comme indiqué sur la carte grise (champ P.1).",
+      "co2Help": "En grammes par kilomètre, comme indiqué sur la carte grise (champ V.7).",
+      "registrationHelp": "La date de première immatriculation, au Portugal ou dans un autre pays de l'UE ou de l'EEE, détermine la catégorie et le coefficient. Les voitures immatriculées avant juillet 2007 sont en catégorie A ; à partir de juillet 2007, en catégorie B.",
+      "electricNote": "Les voitures entièrement électriques immatriculées à partir de juillet 2007 sont exonérées d'IUC : il n'y a rien à saisir.",
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "zero": "Saisissez une valeur supérieure à zéro.",
+        "negative": "Saisissez une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "yearTooOld": "Ce calculateur couvre les voitures immatriculées à partir de 1981.",
+        "yearTooNew": "Saisissez une année d'immatriculation jusqu'à {{max}}.",
+        "month": "Choisissez un mois dans la liste.",
+        "electricCategoryA": "Les voitures électriques immatriculées avant juillet 2007 ne sont pas prises en charge. Consultez le Portal das Finanças.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "annualTax": "IUC annuel estimé",
+        "monthlyProvision": "Provision mensuelle (IUC annuel ÷ 12)",
+        "category": "Catégorie d'IUC",
+        "baseTax": "Taux de cylindrée et de CO2",
+        "additionalTax": "Taux additionnel",
+        "coefficient": "Coefficient de l'année",
+        "dueMonth": "À payer en 2026 :",
+        "dueMonthValue": "En {{month}}, le mois de l'anniversaire de l'immatriculation.",
+        "scheduleTitle": "À partir de 2027 : calendrier de paiement",
+        "exempt": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC.",
+        "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)"
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une voiture diesel de {{cc}} cm³, avec des émissions officielles WLTP de {{co2}} g/km et immatriculée en {{year}}, doit {{tax}} d'IUC par an. Mettre {{monthly}} de côté chaque mois suffit.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodA": "Catégorie A (voitures immatriculées de 1981 à juin 2007) : l'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
+        "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
+        "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
+        "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
+        "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. À partir de 2027, selon le décret-loi n.º 161/2026, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €.",
+        "methodBudget": "La provision mensuelle divise le montant annuel par 12, pour que l'argent soit prêt à l'échéance.",
+        "exemptionTitle": "Voitures électriques",
+        "exemption": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC et le calculateur affiche zéro. Les hybrides rechargeables et autres véhicules sont taxés selon leur cylindrée et leur CO2 figurant sur la carte grise : saisissez ces valeurs.",
+        "scopeTitle": "Ce qui est couvert",
+        "scopeSupported": "Voitures particulières légères : catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
+        "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
+        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation. Le Portal das Finanças affiche le nouveau calendrier d'avril à partir de 2027, mais pas la rédaction antérieure : confirmez votre date sur le Portal das Finanças. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
+        "assumptionEducational": "Ceci est une estimation éducative, pas un conseil fiscal. Le montant de l'avis de l'administration fiscale fait foi.",
+        "sourcesTitle": "Sources",
+        "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
+        "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
+        "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
+        "sourceDiesel": "Portal das Finanças : supplément diesel, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par l'article 94 de la loi n.º 73-A/2025 (consulté le 19 novembre 2026). La page n'indique aucun montant : les montants viennent des tableaux publiés par l'ACP.",
+        "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}."
+      },
+      "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
+      "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
+      "nextStepCta": "Mettez de côté un douzième de votre taxe auto annuelle"
     }
   },
   "resources": {

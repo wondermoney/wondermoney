@@ -129,7 +129,7 @@ export const TOOLS_CATALOG = [
 		key: "carLoan",
 		routeId: "toolCarLoan",
 		group: "borrowAndBuyHome",
-		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome"],
+		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome", "toolVehicleTax"],
 	},
 	{
 		key: "propertyTax",
@@ -148,6 +148,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolYouthMortgage",
 		group: "borrowAndBuyHome",
 		related: ["toolMortgage", "toolPurchaseTaxes", "toolSavingsGoal"],
+	},
+	{
+		key: "vehicleTax",
+		routeId: "toolVehicleTax",
+		group: "borrowAndBuyHome",
+		related: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
 	},
 	{
 		key: "personalLoan",

@@ -2912,6 +2912,88 @@
       "nextStepHeadline": "De la retención a tu plan mensual",
       "nextStepDescription": "WonderMoney convierte tu neto estimado en un plan, para que cada euro tenga un destino antes de empezar el mes.",
       "nextStepCta": "Usa la estimación neta en un plan mensual"
+    },
+    "vehicleTax": {
+      "title": "Calculadora del IUC",
+      "shortName": "IUC",
+      "subtitle": "Estima el IUC anual de un turismo en Portugal, mira cuándo se paga y cuánto apartar cada mes.",
+      "description": "Estima el IUC portugués, su fecha de pago y una reserva mensual.",
+      "pageTitle": "Calculadora del IUC 2026: impuesto de circulación de Portugal por cilindrada y CO2",
+      "pageDescription": "Estima el IUC de 2026 de un coche matriculado en Portugal según cilindrada, combustible, emisiones de CO2 y fecha de matriculación, con su fecha de pago y la reserva mensual.",
+      "fields": {
+        "fuel": "Combustible",
+        "cc": "Cilindrada",
+        "year": "Año de la primera matriculación",
+        "month": "Mes de la primera matriculación",
+        "co2": "Emisiones oficiales de CO2",
+        "standard": "Ciclo de ensayo de CO2"
+      },
+      "fuels": {
+        "petrol": "Gasolina",
+        "diesel": "Diésel u otro combustible",
+        "electric": "Eléctrico"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "En centímetros cúbicos (cm³), como figura en el documento único del vehículo (campo P.1).",
+      "co2Help": "En gramos por kilómetro, como figura en el documento único del vehículo (campo V.7).",
+      "registrationHelp": "La fecha de la primera matriculación, en Portugal u otro país de la UE o del EEE, determina la categoría y el coeficiente. Los coches matriculados antes de julio de 2007 son de categoría A; desde julio de 2007, de categoría B.",
+      "electricNote": "Los coches totalmente eléctricos matriculados desde julio de 2007 están exentos de IUC, así que no hay nada que introducir.",
+      "errors": {
+        "required": "Introduce un número válido.",
+        "zero": "Introduce un valor superior a cero.",
+        "negative": "Introduce un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "yearTooOld": "Esta calculadora cubre coches matriculados desde 1981.",
+        "yearTooNew": "Introduce un año de matriculación hasta {{max}}.",
+        "month": "Elige un mes de la lista.",
+        "electricCategoryA": "Los coches eléctricos matriculados antes de julio de 2007 no se admiten. Consulta el Portal das Finanças.",
+        "summary": "Revisa los campos resaltados para ver tu estimación."
+      },
+      "result": {
+        "annualTax": "IUC anual estimado",
+        "monthlyProvision": "Reserva mensual (IUC anual ÷ 12)",
+        "category": "Categoría del IUC",
+        "baseTax": "Tasas de cilindrada y CO2",
+        "additionalTax": "Tasa adicional",
+        "coefficient": "Coeficiente del año",
+        "dueMonth": "A pagar en 2026:",
+        "dueMonthValue": "En {{month}}, el mes del aniversario de la matriculación.",
+        "scheduleTitle": "Desde 2027: calendario de pago",
+        "exempt": "Los coches totalmente eléctricos de la categoría B están exentos de IUC.",
+        "dieselSurcharge": "Recargo diésel (no se multiplica por el coeficiente)"
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Un coche diésel de {{cc}} cm³, con emisiones oficiales WLTP de {{co2}} g/km y matriculado en {{year}} paga {{tax}} de IUC al año. Apartar {{monthly}} al mes lo cubre.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodA": "Categoría A (coches matriculados de 1981 a junio de 2007): el impuesto sale de una tabla por combustible, cilindrada y período de matriculación (después de 1995, de 1990 a 1995, de 1981 a 1989).",
+        "methodB": "Categoría B (coches matriculados desde julio de 2007): se suman la tasa de cilindrada y la de CO2 y se multiplica por un coeficiente según el año de matriculación (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 desde 2010). El CO2 se lee en la columna WLTP o NEDC según el ciclo de ensayo de tu documento.",
+        "methodAdditional": "Los coches de la categoría B matriculados después del 1 de enero de 2017 pagan una tasa adicional si las emisiones son altas: 31,77 € por encima de 205 g/km (WLTP) o 180 g/km (NEDC) y 63,74 € por encima de 260 g/km (WLTP) o 250 g/km (NEDC). La tasa adicional también se multiplica por el coeficiente. El texto legal no la limita por combustible, así que la calculadora la aplica a todos.",
+        "methodDiesel": "Los coches diésel pagan además el adicional de IUC (artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por los Presupuestos del Estado). Depende de la cilindrada, se aplica a las categorías A y B y se suma después del coeficiente, sin multiplicarse por él.",
+        "methodPayment": "Hasta 2026 el IUC se paga en el mes del aniversario de la matriculación. Desde 2027, según el Decreto-Ley n.º 161/2026, se liquida hasta abril y se paga en abril hasta 100 €, en abril y octubre de 100 € a 500 €, y en abril, julio y octubre por encima de 500 €.",
+        "methodBudget": "La reserva mensual divide el importe anual entre 12, para que el dinero esté listo cuando llegue el cobro.",
+        "exemptionTitle": "Coches eléctricos",
+        "exemption": "Los coches totalmente eléctricos de la categoría B están exentos de IUC y la calculadora muestra cero. Los híbridos enchufables y otros vehículos tributan según su cilindrada y CO2 del documento, así que introduce esos valores.",
+        "scopeTitle": "Qué cubre",
+        "scopeSupported": "Turismos ligeros: categoría A (matriculados de 1981 a junio de 2007) y categoría B (matriculados desde julio de 2007).",
+        "scopeUnsupported": "No admitido: vehículos de mercancías y más pesados (categorías C y D), motocicletas (E), embarcaciones de recreo (F), aeronaves (G) y coches matriculados antes de 1981.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionYear": "Las tasas son las tablas de {{taxYear}} del Código do IUC (artículos 9 y 10), en la redacción de la {{law}}. El Portal das Finanças no indica cambios posteriores en estas tasas.",
+        "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación. El Portal das Finanças muestra el nuevo calendario de abril desde 2027, pero no la redacción anterior, así que confirma tu fecha en el Portal das Finanças. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
+        "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Cuenta el importe de la notificación de la Autoridad Tributaria.",
+        "sourcesTitle": "Fuentes",
+        "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
+        "sourceCategoryB": "Código do IUC, artículo 10: tasas de la categoría B, tasas adicionales y coeficientes (consultado el 19 de noviembre de 2026)",
+        "sourcePayment": "Código do IUC, artículo 17: pago (consultado el 19 de noviembre de 2026)",
+        "sourceDiesel": "Portal das Finanças: recargo diésel, artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por el artículo 94 de la Ley n.º 73-A/2025 (consultado el 19 de noviembre de 2026). La página no indica importes, así que los importes salen de las tablas publicadas por el ACP.",
+        "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}."
+      },
+      "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
+      "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",
+      "nextStepCta": "Aparta una doceava parte de tu impuesto anual del coche"
     }
   },
   "resources": {
