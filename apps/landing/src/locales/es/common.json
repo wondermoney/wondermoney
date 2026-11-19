@@ -2406,6 +2406,88 @@
       "nextStepDescription": "Reserva dinero en WonderMoney para la cuota, el combustible y las facturas que lleguen a lo largo del año.",
       "nextStepCta": "Empieza tu presupuesto en WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Calculadora de impuestos de compra de vivienda en Portugal (IMT y sello)",
+      "shortName": "Impuestos de compra",
+      "subtitle": "Estima el IMT y el impuesto de timbre (Imposto do Selo) que pagas al comprar un inmueble en Portugal y cuánto efectivo añadir a tu entrada.",
+      "description": "Estima el IMT y el impuesto de timbre al comprar un inmueble en Portugal.",
+      "pageTitle": "Calculadora de IMT y Imposto do Selo al comprar vivienda en Portugal",
+      "pageDescription": "Estima el IMT y el Imposto do Selo de 2026 al comprar un inmueble en Portugal: península o islas, uso, timbre de la hipoteca y exención para jóvenes.",
+      "propertyTitle": "Inmueble",
+      "financingTitle": "Hipoteca",
+      "youngTitle": "Exención para jóvenes (IMT Jovem)",
+      "youngNote": "Solo si se cumplen todas las condiciones en la fecha de la escritura: tienes 35 años o menos, es tu primera vivienda y vivirás en ella de forma permanente. Exención total hasta {{full}}; parcial hasta {{partial}}, con IMT y timbre de la compra solo sobre el exceso.",
+      "youngUnavailable": "La exención solo se aplica a la vivienda propia y permanente. Elige ese uso para comprobar si cumples los requisitos.",
+      "fields": {
+        "price": "Precio de compra",
+        "taxValue": "Valor patrimonial tributario (VPT), opcional",
+        "region": "Ubicación",
+        "use": "Uso del inmueble",
+        "loan": "Importe de la hipoteca",
+        "young": "Cumplo las condiciones de la exención para jóvenes"
+      },
+      "help": {
+        "price": "El precio que figura en la escritura.",
+        "taxValue": "Hacienda grava el mayor entre el precio y el VPT. Déjalo en cero si no lo sabes.",
+        "loan": "Indica cero si compras al contado. El timbre de la hipoteca no queda cubierto por la exención para jóvenes en esta calculadora."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Azores o Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Vivienda propia y permanente",
+        "secondary": "Segunda vivienda u otros fines",
+        "rustic": "Terreno rústico",
+        "otherUrban": "Otros inmuebles urbanos o terrenos"
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "loan": "La hipoteca no puede superar el precio de compra.",
+        "summary": "Revisa los campos resaltados para ver tu estimación."
+      },
+      "result": {
+        "total": "Total de impuestos a pagar",
+        "effectiveRate": "{{rate}} del valor imponible",
+        "reference": "Valor imponible",
+        "imt": "IMT",
+        "stampPurchase": "Timbre de la compra (0,8 %)",
+        "stampLoan": "Timbre de la hipoteca (0,6 %)",
+        "exemptFull": "Exención para jóvenes aplicada: elimina el IMT y el timbre de la compra y ahorra {{saving}}.",
+        "exemptPartial": "Exención parcial para jóvenes aplicada: el IMT y el timbre de la compra se cobran solo sobre la parte que supera el límite de la exención total. Ahorra {{saving}} en total.",
+        "exemptNone": "Con este valor la exención no se aplica. Cubre compras de hasta {{partial}} (total hasta {{full}}) y solo con las condiciones del recuadro de la izquierda.",
+        "tableNote": "Tabla de {{year}}, revisada el {{date}}. Estimación educativa, no es asesoramiento fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Comprar una vivienda propia y permanente en Portugal continental por {{price}} con una hipoteca de {{loan}} supone {{imt}} de IMT, {{stampPurchase}} de timbre de la compra y {{stampLoan}} de timbre de la hipoteca. Son {{total}} en total, que pagas además de la entrada y que conviene sumar a tu objetivo de ahorro.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodBase": "La base es el mayor entre el precio de compra y el valor patrimonial tributario (VPT).",
+        "methodImt": "En vivienda, el IMT es la base por el tipo de su tramo menos una deducción fija (parcela a abater) que hace el impuesto progresivo. Por encima del último tramo progresivo el tipo se aplica a todo el valor sin deducción. El suelo rústico paga el 5 % y otros inmuebles urbanos o terrenos el 6,5 %.",
+        "methodStamp": "El timbre es el 0,8 % de la base en la compra (verba 1.1) y, si pides hipoteca, el 0,6 % del importe prestado (verba 17.1.4, préstamos de cinco años o más).",
+        "methodRounding": "El IMT y cada timbre se redondean por separado al céntimo, como los liquida la autoridad tributaria. El timbre sobre intereses y comisiones no está incluido.",
+        "tableTitle": "Tabla de IMT {{year}}: vivienda propia y permanente, Portugal continental",
+        "tableAbove": "Valores superiores",
+        "tableLimit": "Valor hasta",
+        "tableRate": "Tipo",
+        "tableDeduct": "Deducción",
+        "tableNote": "Hasta {{exempt}} el primer tramo es del 0 %. La segunda vivienda tiene su propia tabla, con el 1 % desde el primer euro, y Azores y Madeira usan los mismos tipos con límites un 25 % más altos.",
+        "sourceImt": "CIMT, artículo 17 (Portal das Finanças)",
+        "sourceStamp": "Código del impuesto de timbre (Portal das Finanças)",
+        "review": "Reglas y límites de {{year}}, revisados por última vez el {{date}}. Compruébalos de nuevo antes de firmar.",
+        "assumptionsTitle": "Supuestos y situaciones admitidas",
+        "assumptionScope": "Esta calculadora sigue la ley fiscal portuguesa y solo se aplica a inmuebles situados en Portugal, sea cual sea tu país de residencia. Es educativa y no es asesoramiento fiscal.",
+        "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. La exención del timbre de la compra es una deducción limitada al 0,8 % del límite de la exención total, así que por encima pagas el 0,8 % solo sobre el exceso. El timbre de la hipoteca se sigue cobrando.",
+        "assumptionLoan": "El timbre de la hipoteca supone un préstamo de cinco años o más y se cobra siempre. No se incluyen comisiones de la hipoteca, tasación ni gastos de notaría o registro.",
+        "assumptionUnsupported": "No admitido: no residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT.",
+        "assumptionIslands": "Para Azores y Madeira los límites son los del continente aumentados un 25 % y redondeados al euro, con los mismos tipos. Confirma los límites regionales con la autoridad tributaria."
+      },
+      "nextStepHeadline": "Planifica el efectivo que necesitas para comprar",
+      "nextStepDescription": "Suma el IMT y el timbre al ahorro que necesitas antes de comprar y sigue tu progreso en WonderMoney.",
+      "nextStepCta": "Incluye los impuestos en tu objetivo de entrada para la vivienda"
+    },
     "personalLoan": {
       "title": "Simulador de préstamo personal",
       "shortName": "Préstamo personal",

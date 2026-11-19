@@ -2406,6 +2406,88 @@
       "nextStepDescription": "Lege in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
       "nextStepCta": "Erstelle dein Budget in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Rechner für Kaufnebenkosten in Portugal (IMT und Stempelsteuer)",
+      "shortName": "Kaufsteuern",
+      "subtitle": "Schätzen Sie die IMT und die Stempelsteuer (Imposto do Selo) beim Immobilienkauf in Portugal und sehen Sie, wie viel Bargeld zusätzlich zur Anzahlung nötig ist.",
+      "description": "Schätzen Sie IMT und Stempelsteuer beim Immobilienkauf in Portugal.",
+      "pageTitle": "IMT- und Stempelsteuer-Rechner für den Immobilienkauf in Portugal",
+      "pageDescription": "Schätzen Sie IMT und Imposto do Selo 2026 beim Immobilienkauf in Portugal: Festland oder Inseln, Nutzung, Stempelsteuer auf das Darlehen und Befreiung für Junge.",
+      "propertyTitle": "Immobilie",
+      "financingTitle": "Hypothek",
+      "youngTitle": "Befreiung für junge Käufer (IMT Jovem)",
+      "youngNote": "Nur wenn alle Bedingungen am Tag der Urkunde erfüllt sind: Sie sind höchstens 35 Jahre alt, es ist Ihre erste Wohnung und Sie wohnen dauerhaft darin. Volle Befreiung bis {{full}}; teilweise bis {{partial}}, mit IMT und Stempelsteuer auf den Kauf nur auf den Mehrbetrag.",
+      "youngUnavailable": "Die Befreiung gilt nur für die eigene dauerhaft bewohnte Wohnung. Wählen Sie diese Nutzung, um die Berechtigung zu prüfen.",
+      "fields": {
+        "price": "Kaufpreis",
+        "taxValue": "Steuerwert (VPT), optional",
+        "region": "Lage",
+        "use": "Nutzung der Immobilie",
+        "loan": "Darlehensbetrag",
+        "young": "Ich erfülle die Bedingungen für junge Käufer"
+      },
+      "help": {
+        "price": "Der in der Urkunde genannte Preis.",
+        "taxValue": "Die Steuerbehörde besteuert den höheren Wert aus Preis und VPT. Lassen Sie 0, wenn unbekannt.",
+        "loan": "Geben Sie 0 bei Barkauf ein. Die Stempelsteuer auf das Darlehen ist in diesem Rechner nicht von der Befreiung für Junge erfasst."
+      },
+      "regions": {
+        "mainland": "Portugiesisches Festland",
+        "islands": "Azoren oder Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Eigene dauerhaft bewohnte Wohnung",
+        "secondary": "Zweitwohnung oder andere Wohnnutzung",
+        "rustic": "Ländliches Grundstück",
+        "otherUrban": "Sonstige städtische Immobilie oder Grundstück"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "loan": "Das Darlehen darf den Kaufpreis nicht übersteigen.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Zu zahlende Steuern gesamt",
+        "effectiveRate": "{{rate}} des steuerpflichtigen Werts",
+        "reference": "Steuerpflichtiger Wert",
+        "imt": "IMT",
+        "stampPurchase": "Stempelsteuer auf den Kauf (0,8 %)",
+        "stampLoan": "Stempelsteuer auf das Darlehen (0,6 %)",
+        "exemptFull": "Befreiung für junge Käufer angewendet: entfallen IMT und Stempelsteuer auf den Kauf und spart {{saving}}.",
+        "exemptPartial": "Teilbefreiung für junge Käufer angewendet: IMT und Stempelsteuer auf den Kauf fallen nur auf den Teil über der Grenze der vollen Befreiung an. Sie spart insgesamt {{saving}}.",
+        "exemptNone": "Bei diesem Wert gilt die Befreiung nicht. Sie gilt für Käufe bis {{partial}} (voll bis {{full}}) und nur unter den Bedingungen im Kasten links.",
+        "tableNote": "Tabelle {{year}}, geprüft am {{date}}. Lehrreiche Schätzung, keine Steuerberatung."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Der Kauf einer eigenen, dauerhaft bewohnten Wohnung auf dem Festland für {{price}} mit einem Darlehen von {{loan}} kostet {{imt}} IMT, {{stampPurchase}} Stempelsteuer auf den Kauf und {{stampLoan}} Stempelsteuer auf das Darlehen. Das sind insgesamt {{total}}, zusätzlich zur Anzahlung, und sollten in Ihr Sparziel einfließen.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodBase": "Bemessungsgrundlage ist der höhere Wert aus Kaufpreis und Steuerwert (VPT).",
+        "methodImt": "Bei Wohnungen ist die IMT die Grundlage mal dem Satz der Stufe minus einem festen Abzug (parcela a abater), der die Steuer progressiv macht. Oberhalb der letzten progressiven Stufe gilt der Satz für den gesamten Wert ohne Abzug. Ländliche Grundstücke zahlen 5 %, sonstige städtische Immobilien oder Grundstücke 6,5 %.",
+        "methodStamp": "Die Stempelsteuer beträgt 0,8 % der Grundlage beim Kauf (verba 1.1) und bei einem Darlehen 0,6 % des Darlehensbetrags (verba 17.1.4, Laufzeit ab fünf Jahren).",
+        "methodRounding": "IMT und jede Stempelsteuer werden getrennt auf den Cent gerundet, wie die Steuerbehörde sie festsetzt. Stempelsteuer auf Zinsen und Gebühren ist nicht enthalten.",
+        "tableTitle": "IMT-Tabelle {{year}}: eigene dauerhaft bewohnte Wohnung, Festland",
+        "tableAbove": "Höhere Werte",
+        "tableLimit": "Wert bis",
+        "tableRate": "Satz",
+        "tableDeduct": "Abzug",
+        "tableNote": "Bis {{exempt}} liegt die erste Stufe bei 0 %. Zweitwohnungen haben eine eigene Tabelle mit 1 % ab dem ersten Euro, und die Azoren und Madeira nutzen dieselben Sätze mit um 25 % höheren Grenzen.",
+        "sourceImt": "CIMT, Artikel 17 (Portal das Finanças)",
+        "sourceStamp": "Stempelsteuergesetz (Portal das Finanças)",
+        "review": "Regeln und Grenzen für {{year}}, zuletzt geprüft am {{date}}. Prüfen Sie sie vor der Unterschrift erneut.",
+        "assumptionsTitle": "Annahmen und unterstützte Fälle",
+        "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
+        "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
+        "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
+        "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
+        "assumptionIslands": "Für die Azoren und Madeira sind die Grenzen die des Festlands plus 25 %, auf den Euro gerundet, mit denselben Sätzen. Bestätigen Sie die regionalen Grenzen bei der Steuerbehörde."
+      },
+      "nextStepHeadline": "Planen Sie das Bargeld für den Kauf",
+      "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
+      "nextStepCta": "Steuern in Ihr Anzahlungsziel einrechnen"
+    },
     "personalLoan": {
       "title": "Privatkredit-Rechner",
       "shortName": "Privatkredit",

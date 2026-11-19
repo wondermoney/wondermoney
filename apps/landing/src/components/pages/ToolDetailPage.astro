@@ -42,6 +42,8 @@ import SavingsCertificatesCalculatorComp from "@/components/calculators/SavingsC
 import SavingsCertificatesGuide from "@/components/calculators/SavingsCertificatesGuide.astro";
 import PropertyTaxCalculatorComp from "@/components/calculators/PropertyTaxCalculatorComp";
 import PropertyTaxGuide from "@/components/calculators/PropertyTaxGuide.astro";
+import PurchaseTaxesCalculatorComp from "@/components/calculators/PurchaseTaxesCalculatorComp";
+import PurchaseTaxesGuide from "@/components/calculators/PurchaseTaxesGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -149,6 +151,11 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.propertyTax.nextStepDescription"),
     ctaText: t("tools.propertyTax.nextStepCta"),
   },
+  toolPurchaseTaxes: {
+    headline: t("tools.purchaseTaxes.nextStepHeadline"),
+    description: t("tools.purchaseTaxes.nextStepDescription"),
+    ctaText: t("tools.purchaseTaxes.nextStepCta"),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -246,6 +253,7 @@ const schema = {
     {routeId === "toolSavingsCertificates" && (
       <SavingsCertificatesCalculatorComp locale={locale} client:load />
     )}
+    {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
   </div>
@@ -266,6 +274,7 @@ const schema = {
   {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
   {routeId === "toolInflation" && <InflationGuide locale={locale} />}
   {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
+  {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
   {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
 
