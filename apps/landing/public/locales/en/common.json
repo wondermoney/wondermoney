@@ -4212,6 +4212,229 @@
           "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Before you rely on this list",
+      "educationalTitle": "Educational only",
+      "educational": "This page is educational. It is not a recommendation or an offer, the order is not a ranking, and no account here is endorsed by WonderMoney. There are no affiliate links on this page.",
+      "confirm": "Conditions change often. Confirm every rate, limit and fee with the bank before you open or move an account.",
+      "source": "Conditions compiled by WonderMoney from the banks' published offers.",
+      "asOf": "Conditions as of {{date}}",
+      "guarantee": {
+        "title": "Deposit guarantee",
+        "body": "In Portugal, the Fundo de Garantia de Depósitos repays deposits up to {{amount}} per depositor and per bank. A joint account is split between its holders. Banks from another country are covered by their home-country scheme, which has the same minimum level in the EU.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Banks abroad and IRS",
+        "body": "Portuguese banks withhold 28% IRS on the interest. A bank based in another country does not: you declare the interest yourself in your IRS return, usually taxed at 28% unless you choose to add it to your other income."
+      },
+      "originalLabel": "Original conditions, in Portuguese",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "freeBankAccounts": {
+      "title": "Free bank accounts in Portugal: which ones, and the fine print",
+      "shortName": "Free bank accounts",
+      "subtitle": "Current accounts with no maintenance fee, with the conditions that come attached, as of a stated date.",
+      "description": "A dated list of free current accounts in Portugal with the conditions of each, and which allow two holders.",
+      "pageTitle": "Free Bank Accounts in Portugal: Conditions and Two Holders",
+      "pageDescription": "A dated list of free current accounts in Portugal: which banks have branches, which are app-only or foreign, who allows two holders, and the conditions to keep the account free.",
+      "filters": {
+        "twoHolders": "Show only accounts that allow two holders"
+      },
+      "count": "Showing {{shown}} of {{total}} accounts",
+      "empty": "No account matches this filter.",
+      "noNotes": "No conditions listed.",
+      "foreignBadge": "Foreign bank",
+      "columns": {
+        "account": "Bank and account",
+        "twoHolders": "Two holders",
+        "notes": "Notes (in Portuguese)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Banks with branches",
+          "intro": "Accounts where the table notes no branch limitation. Some still limit what you can do in person to a partner's branches."
+        },
+        "branchless": {
+          "title": "App-only and online banks, including foreign ones",
+          "intro": "The table notes these have no branches or cash and cheque deposits. Foreign banks are marked: their interest is yours to declare."
+        }
+      },
+      "nextStepHeadline": "See all your accounts in one place",
+      "nextStepDescription": "Free accounts are easier to compare than to manage. Connect them in WonderMoney and follow every balance together.",
+      "nextStepCta": "See all your accounts in one place",
+      "guide": {
+        "read": {
+          "title": "How to read this list",
+          "what": "A bank can charge for keeping a current account open, for the debit card, or for services such as cash deposits. Here, \"free\" means what the bank's own offer says, usually with conditions: a salary paid in, a minimum balance, or a minimum number of card purchases per month.",
+          "notRec": "The list says nothing about which account suits you. It does not cover every bank, and a free account today can start charging tomorrow."
+        },
+        "method": {
+          "title": "How the list was put together",
+          "intro": "Each row is one account and what its published offer says. The notes are shown exactly as compiled, in Portuguese.",
+          "steps": {
+            "a": "Banks are split by what the notes say: those with no branches are listed as app-only or online banks.",
+            "b": "The two holders column records whether the account can have two holders.",
+            "c": "A bank based abroad is marked, because its interest is not taxed at source in Portugal."
+          }
+        },
+        "limits": {
+          "title": "What the list leaves out",
+          "items": {
+            "a": "Card fees, transfer fees and conditions not in the notes.",
+            "b": "Which banks are open to new customers right now, or accept non-residents.",
+            "c": "Service quality, app quality and customer support.",
+            "d": "Any change after the date shown on the page."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "remuneratedLink": "Savings and remunerated accounts",
+          "remuneratedBody": "Rates, limits and net interest for accounts that pay interest.",
+          "budgetLink": "Household budget",
+          "budgetBody": "See what you spend before you choose where it is held."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Remunerated and savings accounts in Portugal: rates, limits and net interest",
+      "shortName": "Savings accounts",
+      "subtitle": "A dated table of what Portuguese and foreign banks pay on savings, with a net-interest calculator.",
+      "description": "A dated table of remunerated and savings accounts in Portugal with filters and net interest after IRS.",
+      "pageTitle": "Remunerated and Savings Accounts in Portugal: Rates and Net Interest",
+      "pageDescription": "A dated table of remunerated and savings accounts, certificates and savings insurance in Portugal: gross rate, limits, IBAN, two holders and IRS, with a calculator for net interest after 28% IRS.",
+      "calculator": {
+        "title": "Net interest over 12 months",
+        "intro": "Enter an amount to see the interest each account would pay over 12 months after {{tax}}% IRS, counting interest only up to the account's maximum. Rows with several plans show each plan."
+      },
+      "fields": {
+        "amount": "Amount saved"
+      },
+      "help": {
+        "amount": "Held for 12 months, at the rate in the table."
+      },
+      "errors": {
+        "amount": {
+          "required": "Enter an amount.",
+          "negative": "The amount cannot be negative.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Type",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Allows two holders",
+        "any": "All"
+      },
+      "types": {
+        "ordem": "Current account",
+        "poupancaComIban": "Savings with IBAN",
+        "poupancaSemIban": "Savings without IBAN",
+        "dividaPublica": "Public debt",
+        "seguro": "Insurance"
+      },
+      "iban": {
+        "any": "All",
+        "withIban": "With IBAN",
+        "withoutIban": "Without IBAN"
+      },
+      "tax": {
+        "any": "All",
+        "withheld": "Withheld by the bank in Portugal",
+        "foreign": "Foreign: you declare it",
+        "foreignBadge": "Foreign: declare in IRS",
+        "withheldBadge": "IRS withheld by the bank"
+      },
+      "sort": {
+        "label": "Sort by",
+        "tanbDesc": "Rate, highest first",
+        "tanbAsc": "Rate, lowest first",
+        "netDesc": "Net interest, highest first"
+      },
+      "count": "Showing {{shown}} of {{total}} accounts",
+      "assumptions": "Net interest is simple interest over 12 months at the table's gross rate (TANB), minus {{tax}}% IRS and any monthly fee the notes state. Promotional discounts and later rate changes in the notes are not applied.",
+      "empty": "No account matches these filters.",
+      "caption": "Remunerated and savings accounts with rate, limits and net interest",
+      "columns": {
+        "tanb": "Rate (TANB)",
+        "account": "Bank, product and type",
+        "limits": "Minimum and maximum",
+        "term": "Term",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "instant": "Instant transfer",
+        "holders": "Two holders",
+        "tax": "IRS",
+        "net": "Net interest in 12 months after {{tax}}% IRS",
+        "notes": "Notes (in Portuguese)"
+      },
+      "rateRange": "{{from}} to {{to}}",
+      "seeNotes": "see notes",
+      "months": "{{count}} months",
+      "noLimit": "none",
+      "holdersPaidPlan": "On a paid plan",
+      "result": {
+        "belowMinimum": "Below the minimum of {{min}}: no interest.",
+        "capped": "Interest is paid only up to {{max}}.",
+        "shortTerm": "The rate runs for {{count}} months; the figure assumes it for 12. Check the notes.",
+        "termNotes": "The term is explained in the notes."
+      },
+      "plans": {
+        "title": "By plan, with its monthly fee",
+        "line": "{{plan}}: {{rate}}, {{fee}}, net {{net}} a year",
+        "fee": "fee {{fee}} a month",
+        "noFee": "no fee"
+      },
+      "certificatesLink": "Open the savings certificates tool",
+      "nextStepHeadline": "Move from the benchmark to a personal savings plan",
+      "nextStepDescription": "A table shows what banks offer today. Set a goal in WonderMoney and track how your own savings compare with it.",
+      "nextStepCta": "Set a savings goal",
+      "guide": {
+        "read": {
+          "title": "How to read this table",
+          "what": "The rate shown is the TANB: the nominal gross yearly rate, before tax. Savings accounts pay it on the balance, usually up to a maximum; some have a minimum, a term, or a rate that changes after an introductory period. Certificates are public debt and an insurance option is not a deposit.",
+          "notRec": "The table is educational. It is not a recommendation, the order is not a ranking, and the best account for you depends on your balance, your other accounts and your tolerance for conditions and fees."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you keep {{amount}} for 12 months in {{product}} at {{bank}}, at {{rate}} a year. It earns {{gross}}; the 28% IRS takes {{tax}}, leaving {{net}}.",
+          "capped": "The maximum matters. {{product2}} at {{bank2}} pays {{rate2}}, but only up to {{cap}}. With {{amount2}}, interest is {{gross2}} before tax and {{net2}} after, as if you had saved {{cap}}.",
+          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}."
+        },
+        "method": {
+          "title": "Method",
+          "intro": "The calculator works the same way for every row:",
+          "steps": {
+            "a": "Only the part of the amount up to the account's maximum earns interest. Where the notes give rates by balance band, each band earns its own rate.",
+            "b": "Gross interest is that part times the TANB, over 12 months, without compounding.",
+            "c": "IRS of 28% is taken off the interest. For foreign banks that tax is yours to declare; the calculator shows the same 28% so rows compare.",
+            "d": "Where the notes state a monthly plan fee, twelve months of it are subtracted. Other costs, promotions and later rate changes are not applied."
+          }
+        },
+        "limits": {
+          "title": "What the table leaves out",
+          "items": {
+            "a": "Rates, limits and conditions change; the table is a photograph of one date.",
+            "b": "Some rates fall after an introductory period or when conditions such as a salary payment stop being met.",
+            "c": "Compounding, withholding on early withdrawal and the option to add interest to your other income for IRS.",
+            "d": "Deposit protection is the same in every row only as a rule: check each bank's scheme."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "depositLink": "Term deposit rate index",
+          "depositBody": "The average rates banks in Portugal paid on new deposits, against inflation.",
+          "certificatesLink": "Savings certificates",
+          "certificatesBody": "Public debt, one of the rows above, in its own calculator.",
+          "termLink": "Term deposit calculator",
+          "termBody": "Interest and tax on a deposit with a fixed term.",
+          "budgetLink": "Household budget",
+          "budgetBody": "Work out how much you can leave in savings."
+        }
+      }
     }
   },
   "resources": {

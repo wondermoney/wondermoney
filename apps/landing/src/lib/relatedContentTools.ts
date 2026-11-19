@@ -104,6 +104,14 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolDepositRateIndex",
   },
   {
+    sources: ["toolDepositRateIndex", "toolSavingsCertificates", "toolTermDeposit", "toolHouseholdBudget"],
+    destination: "toolRemuneratedAccounts",
+  },
+  {
+    sources: ["toolHouseholdBudget", "toolSavingsRate", "toolEmergencyFund"],
+    destination: "toolFreeBankAccounts",
+  },
+  {
     sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
     destination: "toolElectricityIndex",
   },
