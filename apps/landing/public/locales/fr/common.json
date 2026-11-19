@@ -3194,6 +3194,86 @@
       "nextStepHeadline": "Sachez ce que vous pouvez vraiment utiliser de la vente",
       "nextStepDescription": "WonderMoney vous aide à mettre l'impôt de côté et à voir ce qui reste pour votre prochain logement.",
       "nextStepCta": "Planifiez la part du produit de la vente qui reste disponible"
+    },
+    "christmasAllowance": {
+      "title": "Calculateur de la prime de Noël au Portugal 2026",
+      "shortName": "Prime de Noël",
+      "subtitle": "Estimez votre prime de Noël nette (subsídio de Natal) : retenue d'IRS, sécurité sociale, année d'embauche et versement en douzièmes.",
+      "description": "Estimez votre prime de Noël nette au Portugal, avec une première année partielle et un versement en douzièmes.",
+      "pageTitle": "Calculateur de la Prime de Noël au Portugal 2026 : Subsídio de Natal Net",
+      "pageDescription": "Calculez votre prime de Noël nette au Portugal avec les barèmes de retenue d'IRS 2026 et 11 % de sécurité sociale, pour une année complète ou partielle, en une fois ou en douzièmes.",
+      "nextStepHeadline": "Décidez à quoi sert la prime",
+      "nextStepDescription": "WonderMoney vous permet d'affecter un revenu exceptionnel à vos objectifs et à vos prochaines dépenses, pour qu'il ne se perde pas dans le mois.",
+      "nextStepCta": "Répartir la prime entre objectifs et dépenses",
+      "guide": {
+        "example": "Avec un salaire de base de {{salary}} par mois, non marié, sans personne à charge, au Portugal continental et en poste toute l'année, la prime de Noël est de {{gross}} avant déductions. La retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}} : {{net}} arrivent sur votre compte.",
+        "ruleAmount": "La prime de Noël équivaut à un mois de salaire et doit être versée avant le 15 décembre (Código do Trabalho, art. 263, n.º 1).",
+        "ruleHiringYear": "L'année d'embauche, la prime est proportionnelle au temps travaillé dans l'année civile (art. 263, n.º 2). Le calculateur compte les jours calendaires entre la date de début et le 31 décembre ; certains employeurs comptent des mois, ce qui peut différer de quelques euros.",
+        "methodPlan": "Le net est un revenu supplémentaire qui arrive une fois par an : il rend mieux avec un plan, d'abord les objectifs, puis les dépenses à couvrir."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Calculateur de la prime de vacances au Portugal 2026",
+      "shortName": "Prime de vacances",
+      "subtitle": "Estimez votre prime de vacances nette (subsídio de férias) : retenue d'IRS, sécurité sociale, année d'embauche et versement en douzièmes.",
+      "description": "Estimez votre prime de vacances nette au Portugal, avec l'année d'embauche et un versement en douzièmes.",
+      "pageTitle": "Calculateur de la Prime de Vacances au Portugal 2026 : Subsídio de Férias Net",
+      "pageDescription": "Calculez votre prime de vacances nette au Portugal avec les barèmes de retenue d'IRS 2026 et 11 % de sécurité sociale, y compris la règle de 2 jours par mois de l'année d'embauche et le versement en douzièmes.",
+      "nextStepHeadline": "Transformez la prime en vacances",
+      "nextStepDescription": "WonderMoney vous aide à mettre la prime de côté pour le voyage auquel elle est destinée, avec un objectif et une date, au lieu de la laisser se fondre dans le mois.",
+      "nextStepCta": "Créer un fonds vacances avec le montant reçu",
+      "guide": {
+        "example": "Vous avez commencé le 15 mars 2026 avec un salaire de base de {{salary}} par mois, non marié, sans personne à charge, au Portugal continental. Vous avez 9 mois complets, donc {{days}} jours de congés, et la prime de vacances est de {{gross}} avant déductions. La retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}} : {{net}} arrivent sur votre compte.",
+        "ruleAmount": "La prime de vacances couvre la durée minimale des congés, en plus de la rémunération des congés (Código do Trabalho, art. 264, n.º 2), et se verse avant le début des congés sauf accord écrit contraire (n.º 3). Sur une année complète, elle équivaut à un mois de salaire.",
+        "ruleHiringYear": "L'année d'embauche, vous avez droit à 2 jours ouvrables de congés par mois complet de contrat, dans la limite de 20 jours (art. 239, n.º 1). Le calculateur pondère la prime par ces jours rapportés aux 22 jours ouvrables d'une année complète : 18 jours donnent 18/22 d'un mois de salaire.",
+        "methodPlan": "Le net est un argent pensé pour se reposer : mieux vaut le mettre de côté pour le voyage, avec un objectif et une date, avant de le dépenser."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Mode de versement de la prime",
+        "startDate": "Date de début (facultatif)"
+      },
+      "modes": {
+        "lumpSum": "En une fois",
+        "twelfths": "En douzièmes (ajoutés à chaque salaire mensuel)"
+      },
+      "help": {
+        "gross": "Votre salaire de base avant primes, sécurité sociale et IRS.",
+        "mode": "En une fois, la prime est versée d'un seul coup. En douzièmes, elle est répartie sur les mois travaillés dans l'année et versée avec chaque salaire.",
+        "startDate": {
+          "christmas": "Laissez vide si vous avez travaillé toute l'année {{year}}. L'année où vous commencez, la prime de Noël est proportionnelle au temps travaillé.",
+          "holiday": "Laissez vide si vous étiez déjà employé avant {{year}}. L'année d'embauche, vous avez 2 jours ouvrables de congés par mois complet, dans la limite de 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Saisissez une date valide.",
+        "afterYear": "Cette page couvre {{year}}. Saisissez une date de début en {{year}} ou avant, ou laissez vide.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "netAllowance": "Prime nette estimée",
+        "netTwelfth": "Montant net supplémentaire dans chaque salaire mensuel",
+        "gross": "Prime brute",
+        "withholding": "Retenue d'IRS",
+        "socialSecurity": "Sécurité sociale (11 %)",
+        "net": "Prime nette de l'année",
+        "twelfthGross": "Douzième brut ajouté à chaque salaire",
+        "twelfthCount": "Nombre de versements mensuels",
+        "proportion": "Part d'une prime complète : {{percent}}.",
+        "holidayDays": "Jours de congés comptés : {{days}} sur 22 ({{percent}} d'une prime complète).",
+        "noAllowanceYet": "Sans aucun mois complet l'année d'embauche, il n'y a pas encore de prime de vacances à verser. Les 2 jours ouvrables par mois ne comptent qu'une fois le mois complet.",
+        "noWithholdingOnTwelfth": "Chaque douzième est retenu au taux effectif de la prime entière, qui est de 0 % à ce niveau : aucune retenue d'IRS n'est prélevée. Votre employeur peut ajouter le douzième au salaire du mois et retenir sur le total, ce qui retient davantage."
+      },
+      "guide": {
+        "methodWithholding": "Chaque versement est soumis à retenue séparément avec le barème mensuel 2026, sans être ajouté au salaire du mois : le Despacho n.º 233-A/2026 (n.º 10) demande aux employeurs d'indiquer un taux effectif distinct pour chaque rémunération, comme les mois où l'on verse les primes de vacances et de Noël.",
+        "methodTwelfths": "En douzièmes, la prime est répartie à parts égales sur les mois travaillés dans l'année (12 pour une année complète). Chaque douzième est retenu séparément au taux effectif de la prime entière, la pratique habituelle des employeurs depuis la Lei n.º 11/2013, art. 3 (absente du Despacho). Votre employeur peut au contraire ajouter le douzième au salaire du mois et retenir sur le total, ce qui retient en général davantage : vérifiez votre fiche de paie.",
+        "methodSocialSecurity": "La sécurité sociale à la charge du salarié représente 11 % de la prime brute.",
+        "unsupportedNovember": "L'ajustement ponctuel des revenus versés en novembre 2026 (Despacho 12523-A/2026, Portugal continental) est ignoré. Une prime versée en novembre verrait sa retenue réduite de moitié.",
+        "unsupportedOther": "Seul le salaire de base compte. Les compléments d'ancienneté, les autres éléments de rémunération, la fin ou la suspension du contrat en cours d'année, les conventions collectives plus généreuses et les coûts de l'employeur sont hors de cette estimation.",
+        "sourceCode": "Código do Trabalho, art. 239, 263 et 264 : durée des congés, prime de Noël et prime de vacances",
+        "reviewed": "Règles vérifiées le 19 novembre 2026. La retenue séparée de chaque versement du mois a été vérifiée dans le texte original du Despacho n.º 233-A/2026, et les articles du Código do Trabalho dans des copies du texte consolidé. La référence de 22 jours ouvrables de la prime de vacances relève de la pratique courante et ne figure pas dans ces textes. Retenir chaque douzième au taux effectif de la prime entière (Lei n.º 11/2013, art. 3) est la pratique habituelle des employeurs ; cette loi n'a pas été vérifiée dans son texte. Le taux de 11 % de sécurité sociale a été confirmé par des sources secondaires."
+      }
     }
   },
   "resources": {

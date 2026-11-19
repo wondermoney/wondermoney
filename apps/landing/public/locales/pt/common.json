@@ -3194,6 +3194,86 @@
       "nextStepHeadline": "Saiba quanto da venda pode realmente usar",
       "nextStepDescription": "A WonderMoney ajuda a reservar o imposto e a ver o que sobra para a próxima casa.",
       "nextStepCta": "Planeie quanto do valor da venda fica disponível"
+    },
+    "christmasAllowance": {
+      "title": "Simulador do subsídio de Natal 2026",
+      "shortName": "Subsídio de Natal",
+      "subtitle": "Estima o líquido do teu subsídio de Natal: retenção de IRS, Segurança Social, ano de admissão e pagamento em duodécimos.",
+      "description": "Estima o líquido do subsídio de Natal em Portugal, incluindo o primeiro ano de trabalho e o pagamento em duodécimos.",
+      "pageTitle": "Simulador do Subsídio de Natal 2026: Valor Líquido em Portugal",
+      "pageDescription": "Calcula o líquido do teu subsídio de Natal com as tabelas de retenção de IRS de 2026 e 11% de Segurança Social, para um ano completo ou parcial, por inteiro ou em duodécimos.",
+      "nextStepHeadline": "Decide para que serve o subsídio",
+      "nextStepDescription": "A WonderMoney deixa-te atribuir um pagamento extra aos teus objetivos e às próximas despesas, para que não desapareça no mês.",
+      "nextStepCta": "Dividir o subsídio entre objetivos e despesas",
+      "guide": {
+        "example": "Com um salário base de {{salary}} por mês, não casado e sem dependentes, em Portugal Continental e a trabalhar o ano todo, o subsídio de Natal é de {{gross}} antes de descontos. A retenção de IRS é de {{withholding}} e a Segurança Social de {{socialSecurity}}, pelo que recebes {{net}} na conta.",
+        "ruleAmount": "O subsídio de Natal equivale a um mês de retribuição e deve ser pago até 15 de dezembro (Código do Trabalho, art. 263.º, n.º 1).",
+        "ruleHiringYear": "No ano de admissão, o subsídio é proporcional ao tempo de serviço prestado no ano civil (art. 263.º, n.º 2). O simulador conta os dias de calendário entre a data de início e 31 de dezembro; algumas empresas contam meses, o que pode dar uma diferença de poucos euros.",
+        "methodPlan": "O líquido é um dinheiro extra que chega uma vez por ano, por isso rende mais com um plano: primeiro os objetivos, depois as despesas que tem de cobrir."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Simulador do subsídio de férias 2026",
+      "shortName": "Subsídio de férias",
+      "subtitle": "Estima o líquido do teu subsídio de férias: retenção de IRS, Segurança Social, ano de admissão e pagamento em duodécimos.",
+      "description": "Estima o líquido do subsídio de férias em Portugal, incluindo o ano de admissão e o pagamento em duodécimos.",
+      "pageTitle": "Simulador do Subsídio de Férias 2026: Valor Líquido em Portugal",
+      "pageDescription": "Calcula o líquido do teu subsídio de férias com as tabelas de retenção de IRS de 2026 e 11% de Segurança Social, incluindo a regra de 2 dias por mês do ano de admissão e o pagamento em duodécimos.",
+      "nextStepHeadline": "Transforma o subsídio em férias",
+      "nextStepDescription": "A WonderMoney ajuda-te a reservar o subsídio para a viagem a que se destina, com um valor e uma data, em vez de se diluir no mês.",
+      "nextStepCta": "Criar um fundo de férias com o valor recebido",
+      "guide": {
+        "example": "Começaste a 15 de março de 2026 com um salário base de {{salary}} por mês, não casado e sem dependentes, em Portugal Continental. Tens 9 meses completos, logo {{days}} dias de férias, e o subsídio de férias é de {{gross}} antes de descontos. A retenção de IRS é de {{withholding}} e a Segurança Social de {{socialSecurity}}, pelo que recebes {{net}} na conta.",
+        "ruleAmount": "O subsídio de férias cobre a duração mínima das férias, além da retribuição do período de férias (Código do Trabalho, art. 264.º, n.º 2), e é pago antes do início das férias, salvo acordo escrito em contrário (n.º 3). Num ano completo equivale a um mês de retribuição.",
+        "ruleHiringYear": "No ano de admissão tens direito a 2 dias úteis de férias por cada mês completo de contrato, até 20 dias (art. 239.º, n.º 1). O simulador pondera o subsídio por esses dias sobre os 22 dias úteis de um ano completo, pelo que 18 dias dão 18/22 de um mês de retribuição.",
+        "methodPlan": "O líquido é dinheiro pensado para descansar, por isso ajuda reservá-lo para a viagem, com um valor e uma data, antes de ser gasto."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Como é pago o subsídio",
+        "startDate": "Data de início (opcional)"
+      },
+      "modes": {
+        "lumpSum": "De uma só vez",
+        "twelfths": "Em duodécimos (somado a cada salário mensal)"
+      },
+      "help": {
+        "gross": "O salário base antes de subsídios, Segurança Social e IRS.",
+        "mode": "De uma só vez, é pago num único pagamento. Em duodécimos, o subsídio reparte-se pelos meses que trabalhas no ano e é pago com cada salário.",
+        "startDate": {
+          "christmas": "Deixa vazio se trabalhaste todo o ano de {{year}}. No ano em que começas, o subsídio de Natal é proporcional ao tempo trabalhado.",
+          "holiday": "Deixa vazio se já estavas empregado antes de {{year}}. No ano de admissão tens 2 dias úteis de férias por cada mês completo, até 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Introduz uma data válida.",
+        "afterYear": "Esta página cobre {{year}}. Introduz uma data de início em {{year}} ou antes, ou deixa vazio.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "netAllowance": "Subsídio líquido estimado",
+        "netTwelfth": "Valor líquido extra em cada salário mensal",
+        "gross": "Subsídio bruto",
+        "withholding": "Retenção de IRS",
+        "socialSecurity": "Segurança Social (11%)",
+        "net": "Subsídio líquido do ano",
+        "twelfthGross": "Duodécimo bruto somado a cada salário",
+        "twelfthCount": "Número de pagamentos mensais",
+        "proportion": "Fração de um subsídio completo: {{percent}}.",
+        "holidayDays": "Dias de férias contados: {{days}} de 22 ({{percent}} de um subsídio completo).",
+        "noAllowanceYet": "Sem nenhum mês completo no ano de admissão, ainda não há subsídio de férias a pagar. Os 2 dias úteis por mês só contam quando o mês está completo.",
+        "noWithholdingOnTwelfth": "Cada duodécimo é retido à taxa efetiva do subsídio inteiro, que a este nível é 0%, por isso não há retenção de IRS. A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que retém mais."
+      },
+      "guide": {
+        "methodWithholding": "Cada pagamento é retido à parte com a tabela mensal de 2026, sem ser somado ao salário do mês: o Despacho n.º 233-A/2026 (n.º 10) manda as entidades pagadoras apresentar uma taxa efetiva em separado para cada remuneração, como nos meses em que se pagam os subsídios de férias e de Natal.",
+        "methodTwelfths": "Em duodécimos, o subsídio reparte-se por igual pelos meses que trabalhas no ano (12 num ano completo). Cada duodécimo é retido à parte à taxa efetiva do subsídio inteiro, a prática habitual das empresas desde a Lei n.º 11/2013, art. 3.º (não consta do Despacho). A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que costuma reter mais: confere o recibo de vencimento.",
+        "methodSocialSecurity": "A Segurança Social a cargo do trabalhador é 11% do subsídio bruto.",
+        "unsupportedNovember": "O ajustamento extraordinário dos rendimentos pagos em novembro de 2026 (Despacho 12523-A/2026, Continente) é ignorado. Um subsídio pago em novembro teria retenção reduzida a metade.",
+        "unsupportedOther": "Conta só o salário base. Diuturnidades, outras componentes da retribuição, cessação ou suspensão do contrato durante o ano, contratos coletivos que paguem mais e custos do empregador ficam fora desta estimativa.",
+        "sourceCode": "Código do Trabalho, arts. 239.º, 263.º e 264.º: duração das férias, subsídio de Natal e subsídio de férias",
+        "reviewed": "Regras revistas a 19 de novembro de 2026. A retenção em separado de cada pagamento do mês foi confirmada no texto original do Despacho n.º 233-A/2026, e os artigos do Código do Trabalho em cópias do texto consolidado. A referência de 22 dias úteis do subsídio de férias é prática corrente, não consta desses textos. Reter cada duodécimo à taxa efetiva do subsídio inteiro (Lei n.º 11/2013, art. 3.º) é a prática habitual das empresas; essa lei não foi confrontada com o texto. A taxa de 11% da Segurança Social foi confirmada em fontes secundárias."
+      }
     }
   },
   "resources": {
