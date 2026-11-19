@@ -106,7 +106,7 @@ describe("savings guide page", () => {
   it("mentions the guarantee limit and 28% rate in every locale", () => {
     for (const locale of SUPPORTED_LANGS) {
       const t = getTranslations(locale);
-      expect(t("savingsGuide.cells.fgdLimit")).toMatch(/100[\s.,  ]?000/);
+      expect(t("savingsGuide.cells.fgdLimit")).toMatch(/100\p{Z}?000|100[.,]000/u);
       expect(t("savingsGuide.cells.rate28")).toContain("28");
     }
   });
