@@ -336,6 +336,14 @@ const ROUTE_SLUGS = {
 		de: "zinsanpassung-rechner",
 		it: "simulatore-rata-mutuo-variabile",
 	},
+	toolCarLoan: {
+		pt: "simulador-credito-automovel",
+		en: "car-loan-calculator",
+		es: "simulador-prestamo-coche",
+		fr: "simulateur-credit-auto",
+		de: "autokredit-rechner",
+		it: "simulatore-prestito-auto",
+	},
 	toolPersonalLoan: {
 		pt: "simulador-credito-pessoal",
 		en: "personal-loan-calculator",
@@ -460,6 +468,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolBorrowingCapacity",
 	"toolMortgageTransfer",
 	"toolRateRevision",
+	"toolCarLoan",
 	"toolPersonalLoan",
 ] as const satisfies ReadonlyArray<RouteId>
 
@@ -724,6 +733,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"rate-revision": "toolRateRevision",
 	"variable-rate-payment-calculator": "toolRateRevision",
 	"simulador-revisao-taxa-credito": "toolRateRevision",
+	toolcarloan: "toolCarLoan",
+	carloancalculator: "toolCarLoan",
+	"car-loan": "toolCarLoan",
+	"credito-automovel": "toolCarLoan",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",

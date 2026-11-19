@@ -2231,6 +2231,72 @@
         "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
       }
     },
+    "carLoan": {
+      "title": "Simulatore di prestito auto",
+      "shortName": "Prestito auto",
+      "subtitle": "Stima la rata dell’auto e calcola quanto mettere da parte ogni mese per carburante, assicurazione, bollo e manutenzione.",
+      "description": "Stima la rata dell’auto e pianifica i costi di gestione.",
+      "pageTitle": "Simulatore di Prestito Auto e Costi di Gestione",
+      "pageDescription": "Calcola la rata mensile del finanziamento auto e il budget per carburante, assicurazione, bollo e manutenzione.",
+      "financingTitle": "Acquisto e finanziamento",
+      "financingNote": "Usa il tasso annuo nominale fisso (TAN) dell’offerta. Inserisci zero se non sono previsti un anticipo o delle spese.",
+      "cashNote": "Senza finanziamento, il budget mensile comprende solo i costi di gestione.",
+      "runningTitle": "Costi di gestione",
+      "runningNote": "Inserisci le tue stime. Inserisci zero per i costi che non si applicano.",
+      "fields": {
+        "price": "Prezzo dell’auto",
+        "deposit": "Anticipo",
+        "termMonths": "Durata del finanziamento (mesi)",
+        "annualRate": "Tasso annuo nominale (TAN)",
+        "upfrontFees": "Spese iniziali del finanziamento",
+        "monthlyFees": "Spese mensili del finanziamento",
+        "monthlyFuel": "Carburante al mese",
+        "annualInsurance": "Assicurazione auto annuale",
+        "annualTax": "Bollo auto annuale",
+        "annualMaintenance": "Riserva annuale per la manutenzione"
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Inserisci zero o un valore positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "term": "Inserisci un numero intero di mesi a partire da 1.",
+        "deposit": "L’anticipo non può superare il prezzo dell’auto.",
+        "summary": "Controlla i campi evidenziati per visualizzare la stima."
+      },
+      "result": {
+        "monthlyBudget": "Budget mensile dell’auto durante il finanziamento",
+        "monthlyPayment": "Rata mensile, spese incluse",
+        "monthlyRunning": "Costi di gestione mensili",
+        "monthlyFuel": "Carburante",
+        "monthlyInsurance": "Riserva per l’assicurazione",
+        "monthlyTax": "Riserva per il bollo",
+        "monthlyMaintenance": "Riserva per la manutenzione",
+        "cashAtPurchase": "Importo da pagare all’acquisto",
+        "financedAmount": "Importo finanziato",
+        "financingCost": "Totale degli interessi e delle spese di finanziamento",
+        "purchaseWithFinancing": "Prezzo dell’auto con i costi di finanziamento",
+        "apr": "TAEG stimato"
+      },
+      "aprUnavailable": "Non disponibile",
+      "aprOver": "Oltre {{max}}",
+      "guide": {
+        "exampleTitle": "Esempio di calcolo",
+        "exampleLoan": "Per un’auto da {{price}} con un anticipo di {{deposit}}, restano {{financedAmount}} da finanziare. Con una durata di {{months}} mesi, un TAN del {{rate}}, spese iniziali di {{upfrontFees}} e spese mensili di {{monthlyFees}}, il primo pagamento è di {{payment}}.",
+        "exampleRunning": "Metti da parte {{monthlyFuel}} al mese per il carburante e, all’anno, {{annualInsurance}} per l’assicurazione, {{annualTax}} per il bollo e {{annualMaintenance}} per la manutenzione. I costi di gestione sono in media {{running}} al mese, per un budget mensile di {{budget}} durante il finanziamento.",
+        "methodTitle": "Come funziona la stima",
+        "methodLoan": "Si sottrae l’anticipo dal prezzo. La rata mensile si calcola sul debito residuo usando il TAN diviso per 12, poi si aggiungono le spese mensili. Con un tasso dello 0%, si divide l’importo finanziato per il numero di mesi. Il simulatore mostra il primo pagamento. I successivi possono variare leggermente per l’arrotondamento ai centesimi.",
+        "methodBudget": "Si dividono per 12 gli importi annuali di assicurazione, bollo e manutenzione e si arrotonda ogni riserva mensile ai centesimi. Aggiungendo carburante e rata del prestito si ottiene il budget mensile durante il finanziamento. Dopo il rimborso restano solo i costi di gestione.",
+        "methodApr": "Il TAEG stimato è il tasso annuo che rende il valore attuale delle rate e delle spese mensili uguale all’importo finanziato meno le spese iniziali. Si calcola se l’importo netto è positivo. Il TAEG del finanziatore può includere altri costi o date di pagamento. Usa le informazioni del finanziatore per confrontare le offerte.",
+        "source": "Guida La tua Europa al credito al consumo e al TAEG",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionLoan": "La stima presuppone un prestito a tasso fisso con rate mensili, senza maxi rata finale e senza leasing. Inserisci il prezzo e le condizioni dell’offerta per l’auto nuova o usata. Per un’auto che possiedi già, inserisci zero per prezzo e anticipo per stimare i costi di gestione.",
+        "assumptionFees": "Le spese iniziali del finanziamento si pagano all’acquisto insieme all’anticipo. Inserisci una sola volta ogni assicurazione o spesa legata al finanziamento. Il simulatore considera le imposte e le spese che inserisci.",
+        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell’anno."
+      },
+      "nextStepHeadline": "Includi il costo mensile totale dell’auto nel tuo budget",
+      "nextStepDescription": "Metti da parte in WonderMoney i soldi per la rata, il carburante e le spese in scadenza durante l’anno.",
+      "nextStepCta": "Crea il tuo budget in WonderMoney"
+    },
     "personalLoan": {
       "title": "Calcolo prestito personale",
       "shortName": "Prestito personale",

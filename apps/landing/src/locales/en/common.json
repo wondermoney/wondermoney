@@ -2231,6 +2231,72 @@
         "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
       }
     },
+    "carLoan": {
+      "title": "Car loan calculator",
+      "shortName": "Car loan",
+      "subtitle": "Estimate your car payment and see what the car will cost you each month once you add fuel, insurance, vehicle tax and maintenance.",
+      "description": "Estimate car payments and plan for the running costs.",
+      "pageTitle": "Car Loan and Running Cost Calculator",
+      "pageDescription": "Estimate your monthly car loan payment, financing fees and the budget for fuel, insurance, vehicle tax and maintenance in one calculator.",
+      "financingTitle": "Car purchase and financing",
+      "financingNote": "Use the fixed nominal annual rate from your quote. Enter zero for any deposit or fee that does not apply.",
+      "cashNote": "With no amount financed, the monthly budget only includes running costs.",
+      "runningTitle": "Running costs",
+      "runningNote": "Enter your own estimates. Enter zero for any cost that does not apply.",
+      "fields": {
+        "price": "Car price",
+        "deposit": "Deposit",
+        "termMonths": "Loan term (months)",
+        "annualRate": "Nominal annual rate",
+        "upfrontFees": "Upfront financing fees",
+        "monthlyFees": "Monthly financing fees",
+        "monthlyFuel": "Monthly fuel",
+        "annualInsurance": "Annual car insurance",
+        "annualTax": "Annual vehicle tax",
+        "annualMaintenance": "Annual maintenance reserve"
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "term": "Enter a whole number of months, starting at 1.",
+        "deposit": "The deposit cannot exceed the car price.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthlyBudget": "Monthly car budget during the loan",
+        "monthlyPayment": "Monthly loan payment, including fees",
+        "monthlyRunning": "Monthly running costs",
+        "monthlyFuel": "Fuel",
+        "monthlyInsurance": "Insurance reserve",
+        "monthlyTax": "Vehicle tax reserve",
+        "monthlyMaintenance": "Maintenance reserve",
+        "cashAtPurchase": "Cash needed at purchase",
+        "financedAmount": "Amount financed",
+        "financingCost": "Total interest and financing fees",
+        "purchaseWithFinancing": "Car price including financing costs",
+        "apr": "Estimated APR"
+      },
+      "aprUnavailable": "Unavailable",
+      "aprOver": "Over {{max}}",
+      "guide": {
+        "exampleTitle": "Worked example",
+        "exampleLoan": "A car priced at {{price}} with a {{deposit}} deposit leaves {{financedAmount}} to finance. Over {{months}} months at a {{rate}} nominal annual rate, with {{upfrontFees}} in upfront fees and {{monthlyFees}} in monthly fees, the first payment is {{payment}}.",
+        "exampleRunning": "Set aside {{monthlyFuel}} a month for fuel, plus {{annualInsurance}} a year for insurance, {{annualTax}} for tax and {{annualMaintenance}} for maintenance. Running costs average {{running}} per month, putting the monthly budget during the loan at {{budget}}.",
+        "methodTitle": "How the estimate works",
+        "methodLoan": "Subtract the deposit from the price. Calculate a level monthly payment on the balance using the nominal annual rate divided by 12, then add the monthly fee. At 0% interest, divide the amount financed by the number of months. The displayed payment is the first one. Later payments can differ slightly because of cent rounding.",
+        "methodBudget": "Divide the annual insurance, tax and maintenance amounts by 12 and round each monthly reserve to cents. Add fuel and the loan payment to estimate the monthly budget while you repay the loan. Once the loan is paid off, only running costs remain.",
+        "methodApr": "The estimated APR is the annual rate that discounts the monthly payments and their fees to the amount financed less upfront fees. It is available when that net amount is positive. The lender’s APR may include other costs or payment dates, so use the lender’s disclosures when comparing offers.",
+        "source": "Your Europe guide to consumer credit and APR",
+        "assumptionsTitle": "Assumptions",
+        "assumptionLoan": "The estimate assumes a fixed-rate loan with monthly payments, no balloon payment and no lease. Enter the actual price and financing terms you were quoted for the new or used car. Enter zero for both price and deposit to estimate running costs for a car you already own.",
+        "assumptionFees": "Upfront financing fees are paid at purchase with the deposit. Enter any financing-related insurance or fees only once. The calculator does not infer taxes or charges from your quote.",
+        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year."
+      },
+      "nextStepHeadline": "Budget for the full monthly cost of the car",
+      "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
+      "nextStepCta": "Start budgeting in WonderMoney"
+    },
     "personalLoan": {
       "title": "Personal Loan Calculator",
       "shortName": "Personal loan",

@@ -2231,6 +2231,72 @@
         "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
       }
     },
+    "carLoan": {
+      "title": "Simulador de préstamo para coche",
+      "shortName": "Préstamo para coche",
+      "subtitle": "Estima la cuota del coche y calcula cuánto necesitas al mes para cubrir también el combustible, el seguro, el impuesto y el mantenimiento.",
+      "description": "Calcula la cuota del coche y planifica los gastos de uso.",
+      "pageTitle": "Simulador de Préstamo para Coche y Gastos de Uso",
+      "pageDescription": "Calcula la cuota mensual del préstamo para tu coche y el presupuesto para combustible, seguro, impuesto de circulación y mantenimiento.",
+      "financingTitle": "Compra y financiación",
+      "financingNote": "Usa el tipo de interés nominal fijo (TIN) de tu oferta. Pon cero si no hay entrada o comisiones.",
+      "cashNote": "Sin financiación, el presupuesto mensual solo incluye los gastos de uso.",
+      "runningTitle": "Gastos de uso",
+      "runningNote": "Introduce tus estimaciones. Pon cero en los gastos que no correspondan.",
+      "fields": {
+        "price": "Precio del coche",
+        "deposit": "Entrada",
+        "termMonths": "Plazo del préstamo (meses)",
+        "annualRate": "Tipo de interés nominal (TIN)",
+        "upfrontFees": "Gastos iniciales del préstamo",
+        "monthlyFees": "Gastos mensuales del préstamo",
+        "monthlyFuel": "Combustible al mes",
+        "annualInsurance": "Seguro anual del coche",
+        "annualTax": "Impuesto de circulación anual",
+        "annualMaintenance": "Reserva anual para mantenimiento"
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "term": "Introduce un número entero de meses a partir de 1.",
+        "deposit": "La entrada no puede superar el precio del coche.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "monthlyBudget": "Presupuesto mensual del coche durante el préstamo",
+        "monthlyPayment": "Cuota mensual con gastos",
+        "monthlyRunning": "Gastos mensuales de uso",
+        "monthlyFuel": "Combustible",
+        "monthlyInsurance": "Reserva para el seguro",
+        "monthlyTax": "Reserva para el impuesto",
+        "monthlyMaintenance": "Reserva para mantenimiento",
+        "cashAtPurchase": "Importe a pagar al comprar el coche",
+        "financedAmount": "Importe financiado",
+        "financingCost": "Total de intereses y gastos del préstamo",
+        "purchaseWithFinancing": "Precio del coche con financiación",
+        "apr": "TAE estimada"
+      },
+      "aprUnavailable": "No disponible",
+      "aprOver": "Más de {{max}}",
+      "guide": {
+        "exampleTitle": "Ejemplo de cálculo",
+        "exampleLoan": "Un coche de {{price}} con una entrada de {{deposit}} deja {{financedAmount}} por financiar. A {{months}} meses, con un TIN del {{rate}}, gastos iniciales de {{upfrontFees}} y gastos mensuales de {{monthlyFees}}, el primer pago es de {{payment}}.",
+        "exampleRunning": "Reserva {{monthlyFuel}} al mes para combustible y, al año, {{annualInsurance}} para el seguro, {{annualTax}} para el impuesto y {{annualMaintenance}} para mantenimiento. Los gastos de uso son de {{running}} al mes de media, así que el presupuesto mensual durante el préstamo asciende a {{budget}}.",
+        "methodTitle": "Cómo se calcula la estimación",
+        "methodLoan": "Se resta la entrada del precio del coche. Se calcula una cuota fija sobre el saldo pendiente con el TIN dividido entre 12 y se añaden los gastos mensuales. Con un interés del 0 %, se divide el importe financiado entre el número de meses. Se muestra el primer pago. Los siguientes pueden variar ligeramente por el redondeo a céntimos.",
+        "methodBudget": "Se dividen los gastos anuales de seguro, impuesto y mantenimiento entre 12 y se redondea cada reserva mensual a céntimos. Se suman el combustible y la cuota para estimar el presupuesto mensual durante el préstamo. Cuando termines de pagarlo, solo quedarán los gastos de uso.",
+        "methodApr": "La TAE estimada es el tipo anual que iguala el valor actual de las cuotas y sus gastos al importe financiado menos los gastos iniciales. Solo se calcula si ese importe neto es positivo. La TAE de la entidad puede incluir otros costes o fechas de pago. Usa la información del prestamista para comparar ofertas.",
+        "source": "Guía de Tu Europa sobre crédito al consumo y TAE",
+        "assumptionsTitle": "Supuestos",
+        "assumptionLoan": "Se supone un préstamo a tipo fijo, con cuotas mensuales, sin cuota final extraordinaria ni arrendamiento. Introduce el precio y las condiciones de la oferta para el coche nuevo o usado. Para calcular los gastos de un coche que ya tienes, escribe cero en el precio y en la entrada.",
+        "assumptionFees": "Los gastos iniciales se pagan en el momento de la compra junto a la entrada. Introduce una sola vez cada seguro o gasto asociado al préstamo. El simulador solo incluye los impuestos y gastos que introduzcas.",
+        "assumptionRunning": "El presupuesto mensual incluye los gastos indicados. Quedan fuera la depreciación, el valor de reventa, el aparcamiento, los peajes y las reparaciones que superen la reserva de mantenimiento. Las facturas anuales pueden vencer en un solo mes aunque el simulador las reparta durante el año."
+      },
+      "nextStepHeadline": "Incluye el coste mensual total del coche en tu presupuesto",
+      "nextStepDescription": "Reserva dinero en WonderMoney para la cuota, el combustible y las facturas que lleguen a lo largo del año.",
+      "nextStepCta": "Empieza tu presupuesto en WonderMoney"
+    },
     "personalLoan": {
       "title": "Simulador de préstamo personal",
       "shortName": "Préstamo personal",

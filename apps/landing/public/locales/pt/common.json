@@ -2231,6 +2231,72 @@
         "contractOutro": "Os valores que contam são os do teu banco. Usa este simulador para te preparares antes de uma revisão e depois compara-o com os valores do banco."
       }
     },
+    "carLoan": {
+      "title": "Simulador de crédito automóvel",
+      "shortName": "Crédito automóvel",
+      "subtitle": "Estima a prestação do carro e vê quanto precisas por mês para pagar também o combustível, o seguro, o imposto e a manutenção.",
+      "description": "Estima a prestação do carro e planeia as despesas de utilização.",
+      "pageTitle": "Simulador de Crédito Automóvel e Custos do Carro",
+      "pageDescription": "Calcula a prestação mensal do crédito automóvel e estima quanto reservar para combustível, seguro, IUC e manutenção.",
+      "financingTitle": "Compra e financiamento do carro",
+      "financingNote": "Usa a taxa anual nominal fixa (TAN) da proposta. Introduz zero se não tiveres entrada ou encargos.",
+      "cashNote": "Sem financiamento, o orçamento mensal inclui apenas as despesas de utilização.",
+      "runningTitle": "Despesas de utilização",
+      "runningNote": "Introduz as tuas estimativas. Introduz zero para as despesas que não se aplicam.",
+      "fields": {
+        "price": "Preço do carro",
+        "deposit": "Entrada inicial",
+        "termMonths": "Prazo do crédito (meses)",
+        "annualRate": "Taxa anual nominal (TAN)",
+        "upfrontFees": "Encargos iniciais do crédito",
+        "monthlyFees": "Encargos mensais do crédito",
+        "monthlyFuel": "Combustível por mês",
+        "annualInsurance": "Seguro automóvel por ano",
+        "annualTax": "Imposto anual (IUC)",
+        "annualMaintenance": "Reserva anual para manutenção"
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "term": "Introduz um número inteiro de meses, a partir de 1.",
+        "deposit": "A entrada não pode exceder o preço do carro.",
+        "summary": "Revê os campos assinalados para veres a estimativa."
+      },
+      "result": {
+        "monthlyBudget": "Orçamento mensal do carro durante o crédito",
+        "monthlyPayment": "Prestação mensal com encargos",
+        "monthlyRunning": "Despesas mensais de utilização",
+        "monthlyFuel": "Combustível",
+        "monthlyInsurance": "Reserva para seguro",
+        "monthlyTax": "Reserva para imposto",
+        "monthlyMaintenance": "Reserva para manutenção",
+        "cashAtPurchase": "Montante a pagar na compra",
+        "financedAmount": "Montante financiado",
+        "financingCost": "Total de juros e encargos do crédito",
+        "purchaseWithFinancing": "Preço do carro com custos do crédito",
+        "apr": "TAEG estimada"
+      },
+      "aprUnavailable": "Indisponível",
+      "aprOver": "Acima de {{max}}",
+      "guide": {
+        "exampleTitle": "Exemplo de cálculo",
+        "exampleLoan": "Um carro de {{price}} com uma entrada de {{deposit}} deixa {{financedAmount}} por financiar. A {{months}} meses, com uma TAN de {{rate}}, encargos iniciais de {{upfrontFees}} e encargos mensais de {{monthlyFees}}, o primeiro pagamento é de {{payment}}.",
+        "exampleRunning": "Reserva {{monthlyFuel}} por mês para combustível e, por ano, {{annualInsurance}} para seguro, {{annualTax}} para imposto e {{annualMaintenance}} para manutenção. A utilização custa em média {{running}} por mês, o que eleva o orçamento mensal durante o crédito a {{budget}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodLoan": "Subtrai-se a entrada ao preço do carro. A prestação é calculada sobre o montante em dívida com a TAN dividida por 12, somando depois os encargos mensais. A uma taxa de 0%, divide-se o montante financiado pelo número de meses. O simulador mostra a primeira prestação. As seguintes podem variar ligeiramente devido ao arredondamento aos cêntimos.",
+        "methodBudget": "Divide-se o valor anual do seguro, do imposto e da manutenção por 12 e arredonda-se cada reserva mensal aos cêntimos. Soma-se o combustível e a prestação para estimar o orçamento mensal durante o crédito. Quando o crédito estiver pago, ficam as despesas de utilização.",
+        "methodApr": "A TAEG estimada é a taxa anual que torna o valor atual das prestações e encargos mensais igual ao montante financiado menos os encargos iniciais. Só é calculada se esse montante líquido for positivo. A TAEG do credor pode incluir outras despesas ou datas de pagamento. Usa a informação do credor para comparar propostas.",
+        "source": "Guia do portal A Sua Europa sobre crédito ao consumo e TAEG",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionLoan": "A estimativa assume um crédito a taxa fixa, com prestações mensais, sem valor residual a pagar no fim e sem locação. Introduz o preço e as condições propostas para o carro novo ou usado. Para um carro que já tens, usa zero no preço e na entrada para estimar as despesas de utilização.",
+        "assumptionFees": "Pagas os encargos iniciais na compra, juntamente com a entrada. Introduz os seguros e encargos do crédito uma única vez. O simulador só inclui os impostos e encargos que introduzires.",
+        "assumptionRunning": "O orçamento mensal inclui as despesas apresentadas. Ficam de fora a desvalorização, o valor de revenda, o estacionamento, as portagens e as reparações que excedam a reserva para manutenção. As contas anuais podem vencer num único mês, embora o simulador as distribua pelo ano."
+      },
+      "nextStepHeadline": "Inclui o custo mensal total do carro no teu orçamento",
+      "nextStepDescription": "Reserva dinheiro no WonderMoney para a prestação, o combustível e as contas que vencem durante o ano.",
+      "nextStepCta": "Cria o teu orçamento no WonderMoney"
+    },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
       "shortName": "Crédito pessoal",

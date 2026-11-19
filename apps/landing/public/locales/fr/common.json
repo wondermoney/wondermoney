@@ -2231,6 +2231,72 @@
         "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
       }
     },
+    "carLoan": {
+      "title": "Simulateur de crédit auto",
+      "shortName": "Crédit auto",
+      "subtitle": "Estimez la mensualité du crédit auto et le budget à prévoir pour le carburant, l’assurance, la taxe et l’entretien.",
+      "description": "Estimez la mensualité de votre crédit auto et les frais d’utilisation.",
+      "pageTitle": "Simulateur de Crédit Auto et de Coût d’Utilisation",
+      "pageDescription": "Calculez la mensualité de votre crédit auto et le budget à prévoir pour le carburant, l’assurance, la taxe et l’entretien.",
+      "financingTitle": "Achat et financement",
+      "financingNote": "Utilisez le taux nominal annuel fixe indiqué dans votre offre. Saisissez zéro si vous n’avez pas d’apport ou de frais.",
+      "cashNote": "Sans financement, le budget mensuel comprend uniquement les frais d’utilisation.",
+      "runningTitle": "Frais d’utilisation",
+      "runningNote": "Saisissez vos estimations. Saisissez zéro pour les frais qui ne s’appliquent pas.",
+      "fields": {
+        "price": "Prix de la voiture",
+        "deposit": "Apport personnel",
+        "termMonths": "Durée du prêt (mois)",
+        "annualRate": "Taux nominal annuel",
+        "upfrontFees": "Frais de financement initiaux",
+        "monthlyFees": "Frais de financement mensuels",
+        "monthlyFuel": "Carburant par mois",
+        "annualInsurance": "Assurance auto annuelle",
+        "annualTax": "Taxe automobile annuelle",
+        "annualMaintenance": "Réserve annuelle pour l’entretien"
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur inférieure ou égale à {{max}}.",
+        "term": "Saisissez un nombre entier de mois à partir de 1.",
+        "deposit": "L’apport ne peut pas dépasser le prix de la voiture.",
+        "summary": "Vérifiez les champs signalés pour afficher votre estimation."
+      },
+      "result": {
+        "monthlyBudget": "Budget mensuel de la voiture pendant le crédit",
+        "monthlyPayment": "Mensualité du prêt, frais compris",
+        "monthlyRunning": "Frais mensuels d’utilisation",
+        "monthlyFuel": "Carburant",
+        "monthlyInsurance": "Réserve pour l’assurance",
+        "monthlyTax": "Réserve pour la taxe",
+        "monthlyMaintenance": "Réserve pour l’entretien",
+        "cashAtPurchase": "Montant à payer à l’achat",
+        "financedAmount": "Montant financé",
+        "financingCost": "Total des intérêts et frais de financement",
+        "purchaseWithFinancing": "Prix de la voiture, financement compris",
+        "apr": "TAEG estimé"
+      },
+      "aprUnavailable": "Indisponible",
+      "aprOver": "Plus de {{max}}",
+      "guide": {
+        "exampleTitle": "Exemple de calcul",
+        "exampleLoan": "Pour une voiture à {{price}} avec un apport de {{deposit}}, il reste {{financedAmount}} à financer. Sur {{months}} mois à un taux nominal de {{rate}}, avec {{upfrontFees}} de frais initiaux et {{monthlyFees}} de frais mensuels, le premier versement est de {{payment}}.",
+        "exampleRunning": "Prévoyez {{monthlyFuel}} par mois pour le carburant, et chaque année {{annualInsurance}} pour l’assurance, {{annualTax}} pour la taxe et {{annualMaintenance}} pour l’entretien. Les frais d’utilisation s’élèvent en moyenne à {{running}} par mois, ce qui porte le budget mensuel à {{budget}} pendant le crédit.",
+        "methodTitle": "Méthode de calcul",
+        "methodLoan": "Le prix moins l’apport donne le montant financé. La mensualité est calculée sur le solde restant au taux nominal annuel divisé par 12, puis les frais mensuels sont ajoutés. À 0 %, le montant financé est divisé par le nombre de mois. Le simulateur affiche le premier versement. Les suivants peuvent varier légèrement à cause de l’arrondi au centime.",
+        "methodBudget": "Les montants annuels de l’assurance, de la taxe et de l’entretien sont divisés par 12, puis chaque réserve mensuelle est arrondie au centime. On ajoute le carburant et la mensualité du prêt pour obtenir le budget mensuel. Après le remboursement, seuls les frais d’utilisation subsistent.",
+        "methodApr": "Le TAEG estimé est le taux annuel qui ramène la valeur actuelle des versements et de leurs frais au montant financé moins les frais initiaux. Il est calculé si ce montant net est positif. Le TAEG du prêteur peut tenir compte d’autres coûts ou dates de paiement. Utilisez les informations du prêteur pour comparer les offres.",
+        "source": "Guide L’Europe est à vous sur le crédit à la consommation et le TAEG",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionLoan": "L’estimation suppose un prêt à taux fixe, remboursé chaque mois, sans versement final majoré ni location. Saisissez le prix et les conditions proposés pour la voiture neuve ou d’occasion. Pour une voiture que vous possédez déjà, indiquez zéro comme prix et apport pour estimer les frais d’utilisation.",
+        "assumptionFees": "Les frais de financement initiaux sont payés à l’achat avec l’apport. Saisissez chaque assurance ou frais lié au crédit une seule fois. Le simulateur prend en compte les taxes et les frais que vous saisissez.",
+        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d’entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l’année."
+      },
+      "nextStepHeadline": "Prévoyez le coût mensuel total de la voiture dans votre budget",
+      "nextStepDescription": "Mettez de l’argent de côté dans WonderMoney pour la mensualité, le carburant et les factures à payer dans l’année.",
+      "nextStepCta": "Créez votre budget dans WonderMoney"
+    },
     "personalLoan": {
       "title": "Simulateur de prêt personnel",
       "shortName": "Prêt personnel",
