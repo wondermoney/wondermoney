@@ -3456,6 +3456,84 @@
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
       "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
       "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi"
+    },
+    "statePension": {
+      "title": "Calcolatore pensione di vecchiaia Portogallo 2026",
+      "shortName": "Pensione di vecchiaia",
+      "subtitle": "Stima la tua pensione di vecchiaia mensile in Portogallo, il tasso di sostituzione e il divario rispetto al tuo stipendio netto attuale.",
+      "description": "Stima la tua pensione di vecchiaia in Portogallo: importo mensile, tasso di sostituzione e divario rispetto allo stipendio.",
+      "pageTitle": "Calcolatore Pensione di Vecchiaia Portogallo 2026: Stima della Reforma",
+      "pageDescription": "Stima approssimativa della pensione di vecchiaia portoghese (pensão de velhice) per carriere iniziate nel 2002 o dopo: formula 2026, età di pensionamento, penalizzazione per l'uscita anticipata, pensioni minime e il divario rispetto allo stipendio.",
+      "ageValue": "{{years}} anni e {{months}} mesi",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile medio (euro di oggi)",
+        "years": "Anni di contributi al pensionamento",
+        "ageYears": "Età di pensionamento: anni",
+        "ageMonths": "Età di pensionamento: mesi in più"
+      },
+      "help": {
+        "gross": "Il tuo stipendio lordo medio su tutta la carriera in euro di oggi, pagato in 14 mensilità l'anno (tredicesima e quattordicesima a parte). Indica una media reale, non lo stipendio nominale di ogni anno.",
+        "years": "Anni con retribuzioni registrate. Per la pensione contano solo 40 anni; ne servono almeno 15 per avere una pensione di vecchiaia.",
+        "age": "L'età normale nel 2026 è {{normal}}. Dai 60 anni puoi andare in pensione prima con una penalizzazione e, fino ai 70, più tardi con un bonus."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "belowMinimum": "La pensione di vecchiaia richiede almeno {{min}} anni di contributi. Con meno, questa stima non si applica.",
+        "tooLongForAge": "I contributi iniziano a 16 anni al più presto, quindi a questa età il massimo è {{max}} anni.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Pensione lorda mensile stimata (14 mensilità)",
+        "replacement": "Tasso di sostituzione (pensione / stipendio lordo medio)",
+        "statutory": "Pensione prima dell'adeguamento per uscita anticipata o posticipata",
+        "rate": "Tasso globale di formazione",
+        "netPay": "Il tuo stipendio netto oggi (per mensilità)",
+        "gap": "Divario mensile rispetto allo stipendio netto",
+        "adjustment": {
+          "none": "Pensionamento all'età normale del 2026 ({{normal}}): nessuna penalizzazione e nessun bonus.",
+          "early": "Andare in pensione {{months}} mesi prima dell'età normale ({{normal}}) toglie {{penalty}} (0,5% al mese) e applica il fattore di sostenibilità 2026 di {{factor}}.",
+          "late": "Andare in pensione {{months}} mesi dopo l'età normale ({{normal}}) aggiunge un bonus di {{bonus}}.",
+          "lateCapped": "Andare in pensione {{months}} mesi dopo l'età normale ({{normal}}) aggiunge un bonus, che si ferma a {{bonus}} perché la pensione non può superare il 92% della retribuzione di riferimento."
+        },
+        "floorApplied": "La pensione è stata portata al minimo 2026 corrispondente alla tua carriera.",
+        "gapSome": "Per mantenere il tuo tenore di vita ti servirebbero circa {{gap}} al mese da risparmi e investimenti (prima delle imposte).",
+        "gapNone": "A questa età la pensione stimata copre il tuo stipendio netto attuale.",
+        "estimate": "Stima approssimativa per pianificare, non è una decisione né una consulenza. Il riferimento è il simulatore ufficiale della Segurança Social Direta, che usa il tuo storico contributivo reale.",
+        "limits": "Non coperto: carriere iniziate prima del 2002 (formula mista), dipendenti pubblici (CGA), regimi speciali e stipendi molto variabili.",
+        "simulatorLink": "Apri il simulatore ufficiale",
+        "fireLink": "Calcola il risparmio necessario con il calcolatore FIRE"
+      },
+      "nextStepHeadline": "Colma il divario con i tuoi investimenti",
+      "nextStepDescription": "WonderMoney riunisce portafoglio e patrimonio in un unico posto, per vedere fin dove arrivano i tuoi investimenti nel coprire il divario.",
+      "nextStepCta": "Monitora gli investimenti necessari per coprire il divario",
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Una persona con uno stipendio medio di {{gross}} al mese (euro di oggi, 14 mensilità), con {{years}} anni di contributi, va in pensione a {{age}}. La pensione statutaria è di {{statutory}} al mese, un tasso globale di formazione del {{rate}}. Andare in pensione {{months}} mesi prima dell'età normale toglie {{penalty}} e applica il fattore di sostenibilità, lasciando {{monthly}} al mese, cioè il {{replacement}} dello stipendio. Rispetto a uno stipendio netto stimato di {{net}}, il divario è di {{gap}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento è la media delle retribuzioni annuali di tutta la carriera, rivalutate con coefficienti legati ai prezzi al consumo e divise per 14. Il calcolatore lavora in euro di oggi: inserisci uno stipendio mensile medio reale e il risultato è anch'esso in euro di oggi.",
+        "methodRate": "Il tasso annuo dipende dagli scaglioni della retribuzione di riferimento in multipli dell'IAS ({{ias}} nel 2026): {{rates}} per le quote fino a 1,1, fino a 2, fino a 4, fino a 8 e oltre 8 volte l'IAS. Le carriere fino a 20 anni usano un 2% fisso. Il tasso si moltiplica per gli anni di contributi, al massimo 40, e dà il tasso globale di formazione.",
+        "methodAges": "L'età normale di accesso alla pensione di vecchiaia è {{normal2026}} nel 2026 ed è stata fissata a {{normal2027}} per il 2027. Il calcolatore usa il valore del 2026.",
+        "methodEarly": "Prima dell'età normale, dai 60 anni e con almeno 15 anni di contributi, ogni mese di anticipo toglie {{penalty}} e si applica anche il fattore di sostenibilità 2026 ({{factor}}, un taglio del 17,63%). I due si moltiplicano. Le eccezioni, come le carriere molto lunghe, non sono modellate.",
+        "methodLate": "Dopo l'età normale, fino a 70 anni, ogni mese aggiunge un bonus che dipende dagli anni di contributi: 0,33% da 15 anni, 0,50% da 25, 0,65% da 35 e 1% da 40. La pensione con il bonus non può superare il 92% della retribuzione di riferimento.",
+        "methodMinimum": "Se la formula dà meno della pensione minima 2026 per la tua carriera, viene mostrato il minimo: {{min15}} da 15 a 20 anni, {{min21}} da 21 a 30 e {{min31}} da 31 anni in su. Il minimo non si applica al pensionamento anticipato.",
+        "methodGap": "Il divario confronta la pensione lorda stimata, su 14 mensilità, con il tuo stipendio netto di oggi: lordo meno l'11% di previdenza sociale e la ritenuta IRS 2026 per una persona single senza familiari a carico sul continente. Anche la pensione paga l'IRS, quindi il divario reale può variare.",
+        "methodBudget": "Leggi il divario come l'importo mensile che i tuoi risparmi e investimenti dovrebbero coprire. Cambia con ogni ipotesi qui sopra.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedMixed": "Carriere iniziate prima del 2002 (formula mista, con le vecchie regole per gli anni fino al 2001). Questo calcolatore copre solo la formula dell'intera carriera per chi ha iniziato a versare contributi nel 2002 o dopo.",
+        "unsupportedSpecial": "Stipendi molto variabili nella carriera, buchi contributivi e carriere oltre i 40 anni.",
+        "unsupportedCga": "Dipendenti pubblici della CGA, lavoratori autonomi e altri regimi speciali.",
+        "unsupportedOther": "Regimi di pensionamento anticipato senza penalizzazione, pensioni di invalidità e adeguamenti della pensione dopo il pensionamento.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Guida della Segurança Social: pensione di vecchiaia",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, come modificato (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: età normale per il 2027 e fattore di sostenibilità per il 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: adeguamento delle pensioni 2026 e pensioni minime",
+        "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre."
+      }
     }
   },
   "resources": {

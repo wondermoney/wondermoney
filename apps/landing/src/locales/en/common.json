@@ -3456,6 +3456,84 @@
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
       "nextStepCta": "Plan the payout across your upcoming months"
+    },
+    "statePension": {
+      "title": "Portugal state pension estimate 2026",
+      "shortName": "State pension",
+      "subtitle": "Estimate your monthly Portuguese old-age pension, the replacement rate and the gap against your net pay today.",
+      "description": "Estimate your state pension in Portugal: monthly amount, replacement rate and gap.",
+      "pageTitle": "State Pension Calculator Portugal 2026: Estimate Your Reforma",
+      "pageDescription": "Rough estimate of the Portuguese old-age pension (pensão de velhice) for careers that began in 2002 or later: 2026 formula, retirement age, early-retirement penalty, minimum pensions and the gap against your pay.",
+      "ageValue": "{{years}} years and {{months}} months",
+      "fields": {
+        "grossMonthly": "Average gross monthly salary (today's euros)",
+        "years": "Years of contributions at retirement",
+        "ageYears": "Retirement age: years",
+        "ageMonths": "Retirement age: extra months"
+      },
+      "help": {
+        "gross": "Your average gross salary over the whole career in today's euros, as paid 14 times a year (holiday and Christmas allowances separate). Enter a real average, not the nominal pay of each year.",
+        "years": "Years with registered pay. Only 40 years count towards the pension; at least 15 are needed for an old-age pension.",
+        "age": "The normal age in 2026 is {{normal}}. From 60 you can retire earlier with a penalty, and until 70 later with a bonus."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "belowMinimum": "An old-age pension needs at least {{min}} years of contributions. With fewer, this estimate does not apply.",
+        "tooLongForAge": "Contributions start at 16 at the earliest, so at this age {{max}} years is the most.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthly": "Estimated monthly gross pension (14 payments)",
+        "replacement": "Replacement rate (pension / average gross salary)",
+        "statutory": "Pension before early or late adjustment",
+        "rate": "Global formation rate",
+        "netPay": "Your net pay today (per payment)",
+        "gap": "Monthly gap against your net pay",
+        "adjustment": {
+          "none": "Retiring at the 2026 normal age ({{normal}}): no penalty and no bonus.",
+          "early": "Retiring {{months}} months before the normal age ({{normal}}) deducts {{penalty}} (0.5% a month) and applies the 2026 sustainability factor of {{factor}}.",
+          "late": "Retiring {{months}} months after the normal age ({{normal}}) adds a bonus of {{bonus}}.",
+          "lateCapped": "Retiring {{months}} months after the normal age ({{normal}}) adds a bonus, which stops at {{bonus}} because the pension cannot exceed 92% of your reference pay."
+        },
+        "floorApplied": "The pension was raised to the 2026 minimum for your career length.",
+        "gapSome": "To keep your standard of living you would need about {{gap}} a month from savings and investments (before tax).",
+        "gapNone": "At this age the estimated pension covers your net pay today.",
+        "estimate": "A rough estimate for planning, not a decision and not advice. The official simulator in Segurança Social Direta, which uses your real contribution record, is the reference.",
+        "limits": "Not covered: careers that began before 2002 (mixed formula), civil servants (CGA), special regimes and pay that varies a lot.",
+        "simulatorLink": "Open the official simulator",
+        "fireLink": "Work out the savings you need with the FIRE calculator"
+      },
+      "nextStepHeadline": "Close the gap with your own investments",
+      "nextStepDescription": "WonderMoney tracks your portfolio and net worth in one place, so you can see how far your investments go towards covering the gap.",
+      "nextStepCta": "Track the investments needed to cover your gap",
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month, or {{replacement}} of the salary. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
+        "methodRate": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
+        "methodAges": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
+        "methodEarly": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
+        "methodLate": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
+        "methodMinimum": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
+        "methodGap": "The gap compares the estimated gross pension, over 14 payments, with your net pay today: gross pay minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. A pension also pays IRS, so the real gap can differ.",
+        "methodBudget": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedMixed": "Careers that began before 2002 (mixed formula, with the older rules for the years up to 2001). This calculator only covers the whole-career formula for people who started contributing in 2002 or later.",
+        "unsupportedSpecial": "Pay that varies a lot over the career, gaps in contributions and careers longer than 40 years.",
+        "unsupportedCga": "Civil servants in the CGA, self-employed workers and other special regimes.",
+        "unsupportedOther": "Early-retirement regimes without penalty, disability pensions and updates to the pension after retirement.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social guide: old-age pension",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, as amended (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
+        "sourceSimulator": "Segurança Social Direta: official pension simulator",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours."
+      }
     }
   },
   "resources": {

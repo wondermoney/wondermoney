@@ -3456,6 +3456,84 @@
       "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",
       "nextStepDescription": "WonderMoney réunit vos comptes et vos dépenses mensuelles, pour répartir une indemnité sur les mois à venir.",
       "nextStepCta": "Planifier le versement sur vos prochains mois"
+    },
+    "statePension": {
+      "title": "Simulateur de pension de retraite au Portugal 2026",
+      "shortName": "Pension de retraite",
+      "subtitle": "Estimez votre pension de vieillesse mensuelle au Portugal, le taux de remplacement et l'écart avec votre salaire net actuel.",
+      "description": "Estimez votre pension de retraite au Portugal : montant mensuel, taux de remplacement et écart avec votre salaire.",
+      "pageTitle": "Simulateur de Pension de Retraite Portugal 2026 : Estimation de la Reforma",
+      "pageDescription": "Estimation approximative de la pension de vieillesse portugaise (pensão de velhice) pour les carrières commencées en 2002 ou après : formule 2026, âge de départ, décote en cas de départ anticipé, pensions minimales et écart avec votre salaire.",
+      "ageValue": "{{years}} ans et {{months}} mois",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel moyen (euros d'aujourd'hui)",
+        "years": "Années de cotisation au départ",
+        "ageYears": "Âge de départ : années",
+        "ageMonths": "Âge de départ : mois en plus"
+      },
+      "help": {
+        "gross": "Votre salaire brut moyen sur toute la carrière en euros d'aujourd'hui, versé en 14 mensualités par an (primes de vacances et de Noël à part). Indiquez une moyenne réelle, pas le salaire nominal de chaque année.",
+        "years": "Années avec rémunérations enregistrées. Seules 40 années comptent pour la pension ; il en faut au moins 15 pour avoir une pension de vieillesse.",
+        "age": "L'âge normal en 2026 est de {{normal}}. À partir de 60 ans, vous pouvez partir plus tôt avec une décote et, jusqu'à 70 ans, plus tard avec une surcote."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "belowMinimum": "Une pension de vieillesse exige au moins {{min}} années de cotisation. Avec moins, cette estimation ne s'applique pas.",
+        "tooLongForAge": "Les cotisations commencent à 16 ans au plus tôt, donc à cet âge le maximum est de {{max}} années.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "monthly": "Pension brute mensuelle estimée (14 versements)",
+        "replacement": "Taux de remplacement (pension / salaire brut moyen)",
+        "statutory": "Pension avant ajustement pour départ anticipé ou différé",
+        "rate": "Taux global de formation",
+        "netPay": "Votre salaire net aujourd'hui (par versement)",
+        "gap": "Écart mensuel avec votre salaire net",
+        "adjustment": {
+          "none": "Départ à l'âge normal de 2026 ({{normal}}) : ni décote ni surcote.",
+          "early": "Partir {{months}} mois avant l'âge normal ({{normal}}) retire {{penalty}} (0,5 % par mois) et applique le facteur de durabilité 2026 de {{factor}}.",
+          "late": "Partir {{months}} mois après l'âge normal ({{normal}}) ajoute une surcote de {{bonus}}.",
+          "lateCapped": "Partir {{months}} mois après l'âge normal ({{normal}}) ajoute une surcote, qui s'arrête à {{bonus}} car la pension ne peut pas dépasser 92 % de la rémunération de référence."
+        },
+        "floorApplied": "La pension a été relevée au minimum 2026 correspondant à la durée de votre carrière.",
+        "gapSome": "Pour garder votre niveau de vie, il vous faudrait environ {{gap}} par mois issus de l'épargne et des investissements (avant impôt).",
+        "gapNone": "À cet âge, la pension estimée couvre votre salaire net actuel.",
+        "estimate": "Estimation approximative pour planifier, ni décision ni conseil. La référence est le simulateur officiel de la Segurança Social Direta, qui utilise votre relevé réel de cotisations.",
+        "limits": "Non couvert : carrières commencées avant 2002 (formule mixte), fonctionnaires (CGA), régimes spéciaux et salaires très variables.",
+        "simulatorLink": "Ouvrir le simulateur officiel",
+        "fireLink": "Calculez l'épargne nécessaire avec le simulateur FIRE"
+      },
+      "nextStepHeadline": "Comblez l'écart avec vos propres investissements",
+      "nextStepDescription": "WonderMoney réunit votre portefeuille et votre patrimoine au même endroit, pour voir jusqu'où vos investissements permettent de combler l'écart.",
+      "nextStepCta": "Suivez les investissements nécessaires pour combler votre écart",
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne gagnant {{gross}} par mois en moyenne (euros d'aujourd'hui, 14 versements), avec {{years}} années de cotisation, part à {{age}}. La pension statutaire est de {{statutory}} par mois, soit un taux global de formation de {{rate}}. Partir {{months}} mois avant l'âge normal retire {{penalty}} et applique le facteur de durabilité, ce qui laisse {{monthly}} par mois, soit {{replacement}} du salaire. Face à un salaire net estimé de {{net}}, l'écart est de {{gap}} par mois.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodReference": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
+        "methodRate": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
+        "methodAges": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
+        "methodEarly": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation retire {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
+        "methodLate": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
+        "methodMinimum": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
+        "methodGap": "L'écart compare la pension brute estimée, sur 14 versements, à votre salaire net d'aujourd'hui : salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. Une pension est aussi soumise à l'IRS, l'écart réel peut donc différer.",
+        "methodBudget": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il bouge avec chaque hypothèse ci-dessus.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedMixed": "Les carrières commencées avant 2002 (formule mixte, avec les anciennes règles pour les années jusqu'en 2001). Ce simulateur ne couvre que la formule de toute la carrière pour ceux qui ont commencé à cotiser en 2002 ou après.",
+        "unsupportedSpecial": "Les salaires très variables sur la carrière, les trous de cotisation et les carrières de plus de 40 ans.",
+        "unsupportedCga": "Les fonctionnaires de la CGA, les indépendants et les autres régimes spéciaux.",
+        "unsupportedOther": "Les régimes de retraite anticipée sans décote, les pensions d'invalidité et les revalorisations de la pension après le départ.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Guide de la Segurança Social : pension de vieillesse",
+        "sourceLaw": "Décret-loi n.º 187/2007, tel que modifié (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1 : âge normal pour 2027 et facteur de durabilité pour 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
+        "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres."
+      }
     }
   },
   "resources": {

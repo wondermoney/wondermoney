@@ -3456,6 +3456,84 @@
       "nextStepHeadline": "Planifica el cobro antes de que llegue",
       "nextStepDescription": "WonderMoney muestra tus cuentas y tus gastos mensuales juntos, para repartir una indemnización en los meses siguientes.",
       "nextStepCta": "Planificar el cobro en tus próximos meses"
+    },
+    "statePension": {
+      "title": "Calculadora de pensión de jubilación en Portugal 2026",
+      "shortName": "Pensión de jubilación",
+      "subtitle": "Estima tu pensión de jubilación mensual en Portugal, la tasa de sustitución y la diferencia con tu sueldo neto actual.",
+      "description": "Estima tu pensión de jubilación en Portugal: importe mensual, tasa de sustitución y diferencia con tu sueldo.",
+      "pageTitle": "Calculadora de Pensión de Jubilación Portugal 2026: Estimación de la Reforma",
+      "pageDescription": "Estimación aproximada de la pensión de jubilación portuguesa (pensão de velhice) para carreras iniciadas en 2002 o después: fórmula de 2026, edad de jubilación, penalización por jubilación anticipada, pensiones mínimas y la diferencia con tu sueldo.",
+      "ageValue": "{{years}} años y {{months}} meses",
+      "fields": {
+        "grossMonthly": "Sueldo bruto mensual medio (euros de hoy)",
+        "years": "Años de cotización al jubilarte",
+        "ageYears": "Edad de jubilación: años",
+        "ageMonths": "Edad de jubilación: meses adicionales"
+      },
+      "help": {
+        "gross": "Tu sueldo bruto medio durante toda la carrera en euros de hoy, cobrado en 14 pagas al año (las pagas extra de vacaciones y Navidad aparte). Indica una media real, no el sueldo nominal de cada año.",
+        "years": "Años con remuneraciones registradas. Solo cuentan 40 años para la pensión; hacen falta al menos 15 para tener pensión de jubilación.",
+        "age": "La edad normal en 2026 es {{normal}}. Desde los 60 puedes jubilarte antes con penalización y, hasta los 70, más tarde con bonificación."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "belowMinimum": "La pensión de jubilación exige al menos {{min}} años de cotización. Con menos, esta estimación no se aplica.",
+        "tooLongForAge": "Las cotizaciones empiezan a los 16 años como pronto, así que con esta edad el máximo es {{max}} años.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "monthly": "Pensión bruta mensual estimada (14 pagas)",
+        "replacement": "Tasa de sustitución (pensión / sueldo bruto medio)",
+        "statutory": "Pensión antes del ajuste por anticipo o retraso",
+        "rate": "Tasa global de formación",
+        "netPay": "Tu sueldo neto hoy (por paga)",
+        "gap": "Diferencia mensual con tu sueldo neto",
+        "adjustment": {
+          "none": "Jubilación a la edad normal de 2026 ({{normal}}): sin penalización ni bonificación.",
+          "early": "Jubilarte {{months}} meses antes de la edad normal ({{normal}}) resta {{penalty}} (0,5 % al mes) y aplica el factor de sostenibilidad de 2026, de {{factor}}.",
+          "late": "Jubilarte {{months}} meses después de la edad normal ({{normal}}) añade una bonificación de {{bonus}}.",
+          "lateCapped": "Jubilarte {{months}} meses después de la edad normal ({{normal}}) añade una bonificación, que se queda en {{bonus}} porque la pensión no puede superar el 92 % de la remuneración de referencia."
+        },
+        "floorApplied": "La pensión se ha elevado al mínimo de 2026 que corresponde a tu carrera.",
+        "gapSome": "Para mantener tu nivel de vida necesitarías unos {{gap}} al mes procedentes de ahorros e inversiones (antes de impuestos).",
+        "gapNone": "A esta edad, la pensión estimada cubre tu sueldo neto actual.",
+        "estimate": "Estimación aproximada para planificar, no es una decisión ni un consejo. La referencia es el simulador oficial de Segurança Social Direta, que usa tu registro real de cotizaciones.",
+        "limits": "No cubre: carreras iniciadas antes de 2002 (fórmula mixta), funcionarios (CGA), regímenes especiales ni sueldos muy variables.",
+        "simulatorLink": "Abrir el simulador oficial",
+        "fireLink": "Calcula el ahorro necesario con la calculadora FIRE"
+      },
+      "nextStepHeadline": "Cubre la diferencia con tus propias inversiones",
+      "nextStepDescription": "WonderMoney reúne tu cartera y tu patrimonio en un solo lugar, para ver hasta dónde llegan tus inversiones a la hora de cubrir la diferencia.",
+      "nextStepCta": "Sigue las inversiones necesarias para cubrir tu diferencia",
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Alguien con un sueldo medio de {{gross}} al mes (euros de hoy, 14 pagas), con {{years}} años de cotización, que se jubila a los {{age}}. La pensión estatutaria es de {{statutory}} al mes, una tasa global de formación del {{rate}}. Jubilarse {{months}} meses antes de la edad normal resta {{penalty}} y aplica el factor de sostenibilidad, y queda en {{monthly}} al mes, es decir, el {{replacement}} del sueldo. Frente a un sueldo neto estimado de {{net}}, la diferencia es de {{gap}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia es la media de las remuneraciones anuales de toda la carrera, revalorizadas con coeficientes ligados a los precios de consumo y divididas entre 14. La calculadora trabaja en euros de hoy: introduces un sueldo mensual medio real y el resultado también sale en euros de hoy.",
+        "methodRate": "La tasa anual depende de los tramos de la remuneración de referencia, en múltiplos del IAS ({{ias}} en 2026): {{rates}} para los tramos hasta 1,1, hasta 2, hasta 4, hasta 8 y por encima de 8 veces el IAS. Las carreras de hasta 20 años usan un 2 % fijo. La tasa se multiplica por los años de cotización, 40 como máximo, y da la tasa global de formación.",
+        "methodAges": "La edad normal de acceso a la pensión de jubilación es {{normal2026}} en 2026 y se ha fijado en {{normal2027}} para 2027. La calculadora usa el valor de 2026.",
+        "methodEarly": "Antes de la edad normal, desde los 60 años y con al menos 15 años de cotización, cada mes de anticipo resta {{penalty}}, y se aplica además el factor de sostenibilidad de 2026 ({{factor}}, un recorte del 17,63 %). Ambos se multiplican. No se modelan excepciones, como las carreras muy largas.",
+        "methodLate": "Después de la edad normal, hasta los 70 años, cada mes añade una bonificación que depende de los años de cotización: 0,33 % desde 15 años, 0,50 % desde 25, 0,65 % desde 35 y 1 % desde 40. La pensión con bonificación no puede superar el 92 % de la remuneración de referencia.",
+        "methodMinimum": "Si la fórmula da menos que la pensión mínima de 2026 para tu carrera, se muestra el mínimo: {{min15}} para 15 a 20 años, {{min21}} para 21 a 30 y {{min31}} para 31 o más. El mínimo no se aplica a la jubilación anticipada.",
+        "methodGap": "La diferencia compara la pensión bruta estimada, en 14 pagas, con tu sueldo neto de hoy: sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión también tributa IRS, así que la diferencia real puede variar.",
+        "methodBudget": "Lee la diferencia como el importe mensual que tus ahorros e inversiones tendrían que cubrir. Cambia con cada supuesto anterior.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedMixed": "Carreras iniciadas antes de 2002 (fórmula mixta, con las reglas antiguas para los años hasta 2001). Esta calculadora solo cubre la fórmula de toda la carrera para quien empezó a cotizar en 2002 o después.",
+        "unsupportedSpecial": "Sueldos muy variables a lo largo de la carrera, lagunas de cotización y carreras de más de 40 años.",
+        "unsupportedCga": "Funcionarios de la CGA, trabajadores autónomos y otros regímenes especiales.",
+        "unsupportedOther": "Regímenes de jubilación anticipada sin penalización, pensiones de invalidez y actualizaciones de la pensión después de jubilarte.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Guía de la Segurança Social: pensión de vejez",
+        "sourceLaw": "Decreto-Ley n.º 187/2007, en su redacción vigente (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: edad normal de 2027 y factor de sostenibilidad de 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
+        "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras."
+      }
     }
   },
   "resources": {
