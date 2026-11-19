@@ -4,6 +4,7 @@ import FormulaCard from "./FormulaCard.astro"
 import DataTable from "./DataTable.astro"
 import ReferenceList from "./ReferenceList.astro"
 import type { GuideSection } from "@/lib/learningContent"
+import { sectionNumber, type OutlineEntry } from "@/lib/articleOutline"
 import type { Lang } from "@/lib/i18nLocale"
 import { getTranslations } from "@/lib/translations"
 
@@ -17,9 +18,17 @@ interface Props {
 	locale: Lang
 	sections?: ReadonlyArray<GuideSection>
 	references?: ReadonlyArray<ReferenceItem>
+	/** The anchors of the titled concept sections, in order (buildOutline); numbered when there are two or more. */
+	outline?: ReadonlyArray<OutlineEntry>
 }
 
-const { locale, sections = [], references = [] } = Astro.props
+const { locale, sections = [], references = [], outline = [] } = Astro.props
+const numbered = outline.length > 1
+let conceptIndex = 0
+const nextConcept = () => {
+	const index = conceptIndex++
+	return { index, entry: outline[index] }
+}
 const t = getTranslations(locale)
 
 const referenceItems = references.filter((reference) => Boolean(reference.title || reference.url))
@@ -44,13 +53,23 @@ const tableRowsFromSection = (section: GuideSection): ReadonlyArray<ReadonlyArra
 }
 ---
 
-<div class="mt-10 space-y-8">
+<div class="max-w-[40rem] space-y-10">
 	{
 		sections.map((section) => {
 			if (section._type === "concept" && section.body && section.body.length > 0) {
+				const { index, entry } = section.title?.trim() ? nextConcept() : { index: -1, entry: undefined }
 				return (
-					<section class="prose max-w-none lg:prose-lg">
-						{section.title && <h2>{section.title}</h2>}
+					<section class="prose prose-lg article-prose">
+						{section.title && (
+							<h2 id={entry?.id}>
+								{numbered && (
+									<span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">
+										{sectionNumber(index)}
+									</span>
+								)}
+								{section.title}
+							</h2>
+						)}
 						<PortableText value={[...section.body]} />
 					</section>
 				)

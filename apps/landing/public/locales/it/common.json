@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Metti al lavoro il tuo diritto",
       "ctaBody": "Collega i tuoi conti e vedi il tuo quadro finanziario completo — in modo sicuro, alle tue condizioni."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min di lettura",
+    "onThisPage": "In questa pagina",
+    "keepReading": "Continua a leggere"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Disegno al tratto di un barattolo dei risparmi su una mensola, con accanto una pila di monete che passano nel barattolo mese dopo mese.",
+      "envelopes": "Disegno al tratto di buste del budget, una per ogni categoria di spesa.",
+      "snowball": "Disegno al tratto di una palla di neve che cresce rotolando, come rimborsi di debiti che si sommano.",
+      "eggs": "Disegno al tratto di uova distribuite in più cesti.",
+      "etfbox": "Disegno al tratto di una scatola con tante piccole azioni, come un ETF che riunisce tante aziende.",
+      "inflation": "Disegno al tratto di denaro che compra sempre meno mentre i prezzi salgono.",
+      "doorchain": "Disegno al tratto di una porta con catenella di sicurezza: si apre per guardare, non per far entrare.",
+      "taxwedge": "Disegno al tratto di un rendimento diviso tra la parte che tieni e la parte che va in tasse.",
+      "scale": "Disegno al tratto di una bilancia che pesa ciò che possiedi contro ciò che devi.",
+      "timer": "Disegno al tratto di un timer da cucina impostato su dieci minuti.",
+      "containers": "Disegno al tratto di diversi contenitori affiancati, uno per ogni posto in cui tenere i risparmi.",
+      "booklets": "Disegno al tratto di una fila di guide.",
+      "calculator": "Disegno al tratto di una calcolatrice."
+    }
   }
 }

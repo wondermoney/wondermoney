@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Pon tu derecho a trabajar",
       "ctaBody": "Conecta tus cuentas y ve tu panorama financiero completo — de forma segura, en tus condiciones."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de lectura",
+    "onThisPage": "En esta página",
+    "keepReading": "Sigue leyendo"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Dibujo de líneas de un tarro de ahorro en una estantería, con una pila de monedas al lado que pasan al tarro mes a mes.",
+      "envelopes": "Dibujo de líneas de sobres de presupuesto, uno para cada categoría de gasto.",
+      "snowball": "Dibujo de líneas de una bola de nieve que crece al rodar, como pagos de deudas que se suman.",
+      "eggs": "Dibujo de líneas de huevos repartidos en varias cestas.",
+      "etfbox": "Dibujo de líneas de una caja con muchas acciones pequeñas, como un ETF que reúne muchas empresas.",
+      "inflation": "Dibujo de líneas de dinero que compra cada vez menos a medida que suben los precios.",
+      "doorchain": "Dibujo de líneas de una puerta con cadena de seguridad: se abre para mirar, no para dejar entrar.",
+      "taxwedge": "Dibujo de líneas de una rentabilidad dividida entre la parte que te quedas y la parte que va a impuestos.",
+      "scale": "Dibujo de líneas de una balanza que pesa lo que tienes frente a lo que debes.",
+      "timer": "Dibujo de líneas de un temporizador de cocina puesto en diez minutos.",
+      "containers": "Dibujo de líneas de varios recipientes uno al lado del otro, uno para cada lugar donde guardar los ahorros.",
+      "booklets": "Dibujo de líneas de una fila de guías.",
+      "calculator": "Dibujo de líneas de una calculadora."
+    }
   }
 }

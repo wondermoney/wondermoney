@@ -109,6 +109,7 @@ The site keeps its long-standing violet identity rather than pivoting hue: a ful
 - Light-only; radius 8px cards, 6px controls, 4px badges, as in the app
 - Two-font split: Geist Sans for language, Geist Mono reserved for financial figures only (balances, amounts, percentages, prices) with tabular numerals; never for labels
 - Real product screenshots as primary marketing content, never stock photography or invented metrics
+- Long-form content pages may carry one Hairline line figure as their subject, in the tokens (see Components)
 - Hairline-driven surface language — borders over shadows, same as web
 
 ## Colors
@@ -146,7 +147,7 @@ Same five slots as the app, hue fixed per slot, assigned in order and never cycl
 
 **Display Font:** Geist Variable (with Geist, then system sans-serif fallback)
 **Body Font:** Geist Variable, weight 400
-**Financial Font:** Geist Mono Variable, with tabular numerals (`.font-mono` sets `font-variant-numeric: tabular-nums` globally) — every balance, amount, percentage and price. Nothing else: not labels, not tickers set as names, not captions.
+**Financial Font:** Geist Mono Variable, with tabular numerals (`.font-mono` sets `font-variant-numeric: tabular-nums` globally) — every balance, amount, percentage and price. Nothing else: not labels, not tickers set as names, not captions. One exception, a number all the same: the section index ("01", "02"…) over a Long Document's headings, in primary.
 
 **Character:** Confident and precise, matching the app's pairing — a geometric sans for language, with the mono face reserved for the numbers so a figure always reads as a figure.
 
@@ -165,7 +166,10 @@ Three macrostructure families, chosen by page purpose rather than one shape stre
 - **Feature Stack** (homepage, since the 2026-11 full redesign): a hero with the headline, one line and the action on five columns beside the net worth card on seven, then a sticky left pane (the section head and an index of the features, marking the one in view) beside the features scrolling on the right, each a title, a line, a link to its feature page and its product preview. Below it, left-aligned sections on the 12-column grid: works with, the privacy statement, free and open source, questions, and the hero's action again in a closing band.
 - **Workbench** (pricing, about, features, `/go/` ad-landers, affiliates/referral): real dashboard and transaction-preview screenshots are the primary content — the page is a guided tour of the product in use. Page length varies by section-archetype selection (a `/go/` lander is shorter than the homepage) but the underlying shape is shared.
 - **Workbench variant** (calculator tool pages): a sticky input panel plus a live-updating result panel — same tool-first shape as Workbench, adapted for an interactive instrument rather than a scroll.
-- **Long Document** (glossary, learn guides, monthly digest, lead-magnet guides): continuous prose with inline section heads, no hero macrostructure, no marketing scaffolding.
+- **Long Document** (glossary, learn guides, monthly digest, lead-magnet guides, the savings guide): continuous prose with inline section heads and no marketing scaffolding. Since the 2026-11 article redesign ("Direction B"), the learn guides, the lead-magnet and savings guides and the learn and resources hubs share one shape (`ArticleHero.astro`, `FigureCards.astro`, `ContentLayout` with `layout="article"`); the glossary and monthly pages keep the older one until they move:
+  - **Hero split** on the page container, a hairline under it: on the left the breadcrumb and the read time on one line, the H1 (52px at `lg`, tracking -0.035em, 36px on a phone), the dek (20px, `ink-2`) and, for two or more sections, quick-jump chips built from the H2s; on the right the page's subject figure, at most 520px wide, 5:4. Below `lg` the figure stacks under the title. A hub has no read time and may have no figure.
+  - **Body** capped near 65ch (`.article-prose`, a 40rem column), 18px / 1.7 in `ink-2`, left-aligned with the hero. With more than one section the H2s carry their index ("01") on a line of their own, aria-hidden.
+  - **End of the article:** glossary terms as chips, the one contextual CTA as a bordered card (`CTABanner variant="card"`), then "Keep reading": at most three cards, each its destination's figure as a thumbnail over the type label and the title. Hubs list their destinations as the same cards.
 
 **Nav:** an edge-aligned bar, sticky at the top, full width with a hairline under it and the content on the page container: the wordmark, then the real destination set (Features dropdown, Tools menu, FAQ, About), then Login and the one sign-up action at the far edge. Replaced the floating pill in the 2026-11 full redesign. The dropdowns open on hover after a short rest (120 ms) and close 150 ms after the pointer leaves, and still open by click, tap, Enter, Space and the arrow keys; touch never depends on hover. The Tools menu is a panel across the nav's content width that lists every calculator by its short name under the tools hub's task groups, read from `src/lib/toolsCatalog.ts`, and ends with a link to the hub; the mobile drawer carries the same groups. Closed panels stay in the server-rendered page, hidden, so every page links to every tool.
 
@@ -201,13 +205,19 @@ The app's radius scale, from one `--radius: 0.5rem`: `sm` 4px (badges), `md` 6px
 - **No nesting:** a bordered card never holds a second bordered card; inner groups use a background step (`bg-muted`) or a divider, as in the app.
 - **Status cards** use the quiet register: a `-text` border at low alpha and an inline icon beside the heading — no tinted coin, no thick side stripe.
 
+### Hairline figures
+- **One subject figure per content page**, plus thumbnails on the related and hub cards. A figure is a Hairline line drawing (`src/lib/hairline`, the vendored MIT kernel): an object that stands for the page's subject (a jar for the emergency fund), drawn in strokes only, no fills of colour, no text.
+- **In the tokens.** The plate is the page background, the one bright stroke is the primary violet, and the three line weights are ink greys from the input stroke down to the hairline (`.hl-figure` in `globals.css`). A figure sets no colour of its own. The site is light-only, so the figures are too; they read the tokens, so they follow if a dark theme ever lands.
+- **The box is the server's.** It renders the empty 5:4 box, so the figure mounts without moving anything, when it nears the viewport; without JavaScript the box stays empty at its size. The subject figure is `role="img"` with a localized label that describes the drawing; a card's thumbnail is `aria-hidden` and does not react to the pointer (the card's text names the link). The figure's own read-out never shows.
+- Which figure a page shows is `src/lib/hairline/articleFigures.ts`; one not delivered yet draws the stand-in and says so in its label.
+
 ### Motion
 - Composed and minimal — pages are fully visible on load, never staged in with scroll-reveal choreography.
 - Accordions open by animating `grid-template-rows` 0fr→1fr, never `height`; bars grow by `transform: scaleX`, never `width`.
 - One exception: a one-time number count-up on trust-bar/stat elements, playing once on first viewport entry and respecting `prefers-reduced-motion`.
-- Micro-interactions only: hover states, instant `focus-visible` rings (never animated in), button press states, dropdown/accordion open-close.
+- Micro-interactions only: hover states, instant `focus-visible` rings (never animated in), button press states, dropdown/accordion open-close. One exception: a content page's subject figure answers the pointer (the jar fills as the pointer rises), with the kernel's springs and its 700ms tween. It never plays on its own: no tour, no autoplay.
 - Easing: `cubic-bezier(0.16, 1, 0.3, 1)` — no bounce, no overshoot, no parallax, no autoplay.
-- `prefers-reduced-motion: reduce` collapses all motion to instant or a ≤150ms opacity crossfade.
+- `prefers-reduced-motion: reduce` collapses all motion to instant or a ≤150ms opacity crossfade; a Hairline figure still answers the pointer, but lands at once.
 - Silent success over celebratory toasts for form submissions and copy actions. Hover-tooltip delay 800ms; focus-tooltip delay 0ms.
 
 ## Do's and Don'ts
@@ -216,7 +226,7 @@ The app's radius scale, from one `--radius: 0.5rem`: `sm` 4px (badges), `md` 6px
 - **Do** keep the accent under ~5% of any viewport — CTA fill, active nav state, focus rings, one highlighted data point.
 - **Do** use real product screenshots and hand-built SVG diagrams on marketing pages (Tier-A/B enrichment) — never stock photography, never an invented metric.
 - **Do** keep tool pages function-first: the calculator input/output IS the content, with no decorative enrichment competing against it.
-- **Do** keep content pages to typography only — no hero imagery, no marketing CTA interrupting the reading flow beyond one contextual CTA at the end.
+- **Do** keep content pages to typography and their one subject figure — no other hero imagery, no marketing CTA interrupting the reading flow beyond one contextual CTA at the end.
 - **Do** treat the wordmark, Header, and Footer as one shared implementation — never fork them per page.
 - **Do** preserve the violet hue family in any future re-tuning; a hue pivot away from it was considered once and declined to protect existing brand recognition.
 

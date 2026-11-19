@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Põe o teu direito a trabalhar",
       "ctaBody": "Liga as tuas contas e vê o teu panorama financeiro completo — de forma segura, nos teus termos."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de leitura",
+    "onThisPage": "Nesta página",
+    "keepReading": "Continua a ler"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Desenho de linhas de um frasco de poupança numa prateleira, com uma pilha de moedas ao lado que passam para o frasco mês a mês.",
+      "envelopes": "Desenho de linhas de envelopes de orçamento, um para cada categoria de despesa.",
+      "snowball": "Desenho de linhas de uma bola de neve que cresce enquanto rola, como pagamentos de dívidas que se somam.",
+      "eggs": "Desenho de linhas de ovos repartidos por vários cestos.",
+      "etfbox": "Desenho de linhas de uma caixa com muitas ações pequenas, como um ETF que reúne muitas empresas.",
+      "inflation": "Desenho de linhas de dinheiro que compra cada vez menos à medida que os preços sobem.",
+      "doorchain": "Desenho de linhas de uma porta com corrente de segurança: abre para ver, não para deixar entrar.",
+      "taxwedge": "Desenho de linhas de um rendimento dividido entre a parte que fica contigo e a parte que vai para impostos.",
+      "scale": "Desenho de linhas de uma balança que pesa o que tens contra o que deves.",
+      "timer": "Desenho de linhas de um temporizador de cozinha marcado para dez minutos.",
+      "containers": "Desenho de linhas de vários recipientes lado a lado, um para cada sítio onde guardar poupanças.",
+      "booklets": "Desenho de linhas de uma fila de guias.",
+      "calculator": "Desenho de linhas de uma calculadora."
+    }
   }
 }

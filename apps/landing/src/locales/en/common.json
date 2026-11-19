@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Put your legal right to work",
       "ctaBody": "Connect your accounts and see your full financial picture — securely, on your terms."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min read",
+    "onThisPage": "On this page",
+    "keepReading": "Keep reading"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Line drawing of a savings jar on a shelf, with a stack of coins beside it that move into the jar month by month.",
+      "envelopes": "Line drawing of budget envelopes, one for each spending category.",
+      "snowball": "Line drawing of a snowball that grows as it rolls, like debt repayments that build on each other.",
+      "eggs": "Line drawing of eggs spread across several baskets.",
+      "etfbox": "Line drawing of a box that holds many small shares, as one ETF holds many companies.",
+      "inflation": "Line drawing of money that buys less over time as prices rise.",
+      "doorchain": "Line drawing of a door on a security chain: it opens to look, not to let anyone in.",
+      "taxwedge": "Line drawing of a return split into the part you keep and the part that goes to tax.",
+      "scale": "Line drawing of a balance weighing what you own against what you owe.",
+      "timer": "Line drawing of a kitchen timer set to ten minutes.",
+      "containers": "Line drawing of several containers side by side, one for each place to keep savings.",
+      "booklets": "Line drawing of a row of guide booklets.",
+      "calculator": "Line drawing of a calculator."
+    }
   }
 }

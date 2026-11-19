@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Faites valoir votre droit",
       "ctaBody": "Connectez vos comptes et découvrez votre situation financière complète — en toute sécurité, selon vos conditions."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de lecture",
+    "onThisPage": "Sur cette page",
+    "keepReading": "À lire ensuite"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Dessin au trait d’un bocal d’épargne sur une étagère, avec une pile de pièces à côté qui passent dans le bocal mois après mois.",
+      "envelopes": "Dessin au trait d’enveloppes de budget, une par catégorie de dépenses.",
+      "snowball": "Dessin au trait d’une boule de neige qui grossit en roulant, comme des remboursements de dettes qui s’additionnent.",
+      "eggs": "Dessin au trait d’œufs répartis dans plusieurs paniers.",
+      "etfbox": "Dessin au trait d’une boîte qui contient beaucoup de petites actions, comme un ETF réunit beaucoup d’entreprises.",
+      "inflation": "Dessin au trait d’argent qui achète de moins en moins à mesure que les prix montent.",
+      "doorchain": "Dessin au trait d’une porte retenue par une chaîne de sécurité : elle s’ouvre pour regarder, pas pour laisser entrer.",
+      "taxwedge": "Dessin au trait d’un rendement partagé entre la part que vous gardez et la part qui part en impôts.",
+      "scale": "Dessin au trait d’une balance qui pèse ce que vous possédez face à ce que vous devez.",
+      "timer": "Dessin au trait d’un minuteur de cuisine réglé sur dix minutes.",
+      "containers": "Dessin au trait de plusieurs contenants côte à côte, un pour chaque endroit où garder son épargne.",
+      "booklets": "Dessin au trait d’une rangée de guides.",
+      "calculator": "Dessin au trait d’une calculatrice."
+    }
   }
 }

@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Nutzen Sie Ihr gesetzliches Recht",
       "ctaBody": "Verbinden Sie Ihre Konten und sehen Sie Ihr vollständiges finanzielles Bild — sicher, zu Ihren Bedingungen."
     }
+  },
+  "article": {
+    "readTime": "{{count}} Min. Lesezeit",
+    "onThisPage": "Auf dieser Seite",
+    "keepReading": "Weiterlesen"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Strichzeichnung eines Sparglases auf einem Regal, daneben ein Stapel Münzen, die Monat für Monat ins Glas wandern.",
+      "envelopes": "Strichzeichnung von Budget-Umschlägen, einer für jede Ausgabenkategorie.",
+      "snowball": "Strichzeichnung eines Schneeballs, der beim Rollen wächst, wie Schuldentilgungen, die aufeinander aufbauen.",
+      "eggs": "Strichzeichnung von Eiern, verteilt auf mehrere Körbe.",
+      "etfbox": "Strichzeichnung einer Kiste mit vielen kleinen Aktien, so wie ein ETF viele Unternehmen bündelt.",
+      "inflation": "Strichzeichnung von Geld, das mit steigenden Preisen immer weniger kauft.",
+      "doorchain": "Strichzeichnung einer Tür mit Sicherheitskette: Sie öffnet sich zum Nachsehen, nicht zum Hereinlassen.",
+      "taxwedge": "Strichzeichnung einer Rendite, geteilt in den Teil, den du behältst, und den Teil, der an die Steuer geht.",
+      "scale": "Strichzeichnung einer Waage, die dein Vermögen gegen deine Schulden abwägt.",
+      "timer": "Strichzeichnung einer Küchenuhr, auf zehn Minuten gestellt.",
+      "containers": "Strichzeichnung mehrerer Behälter nebeneinander, einer für jeden Ort, an dem Ersparnisse liegen können.",
+      "booklets": "Strichzeichnung einer Reihe von Ratgebern.",
+      "calculator": "Strichzeichnung eines Taschenrechners."
+    }
   }
 }
