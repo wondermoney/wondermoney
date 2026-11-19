@@ -1,0 +1,50 @@
+---
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.withholdingTables.guide.${key}`;
+const sources = [
+  ["sourceMainland", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/Despachos_SEAF/Documents/Despacho-SEAF-2026-01-05-XXV.pdf"],
+  ["sourceRegional", "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/tabela_ret_doclib/Pages/default.aspx"],
+  ["sourceMadeira", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/instrucoes_administrativas/Documents/Circular_2_2026.pdf"],
+  ["sourceAnnual", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/diplomas_legislativos/Documents/decreto-lei-212-2026.pdf"],
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="withholding-how">
+    <h2 id="withholding-how" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("howTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {["howFormula", "howTransition", "howDependants", "howTables"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+  </section>
+  <section aria-labelledby="withholding-final">
+    <h2 id="withholding-final" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("finalTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("final"))}</p>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("unsupportedTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["unsupportedDisability", "unsupportedYouth", "unsupportedNovember", "unsupportedPensions"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key))}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
+  </section>
+</div>

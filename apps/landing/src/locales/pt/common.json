@@ -2660,6 +2660,166 @@
       "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
       "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
+    },
+    "netSalary": {
+      "title": "Simulador de salário líquido 2026",
+      "shortName": "Salário líquido",
+      "subtitle": "Converte o salário bruto mensal no que recebes: retenção de IRS, Segurança Social e subsídio de alimentação, com as tabelas de 2026.",
+      "description": "Estima o teu salário líquido mensal em Portugal com as tabelas de retenção de IRS de 2026.",
+      "pageTitle": "Simulador de Salário Líquido 2026: do Bruto ao Líquido",
+      "pageDescription": "Converte o salário bruto em líquido com as tabelas de retenção de IRS de 2026 para o Continente, os Açores e a Madeira, 11% de Segurança Social e subsídio de alimentação.",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal",
+        "region": "Região",
+        "status": "Situação do titular",
+        "dependants": "Dependentes",
+        "allowances": "Subsídios",
+        "mealGroup": "Subsídio de alimentação",
+        "mealDaily": "Subsídio de alimentação por dia",
+        "mealDays": "Dias por mês",
+        "mealKind": "Pago em"
+      },
+      "regions": {
+        "mainland": "Portugal Continental",
+        "azores": "Açores",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Não casado",
+        "marriedOneEarner": "Casado, único titular",
+        "marriedTwoEarners": "Casado, dois titulares"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
+        "twelfths": "Em duodécimos (repartidos por 12 pagamentos)"
+      },
+      "mealKinds": {
+        "cash": "Em dinheiro, com o salário",
+        "card": "Cartão de refeição"
+      },
+      "help": {
+        "gross": "O salário base antes de subsídios, Segurança Social e IRS.",
+        "status": "Escolhe \"único titular\" só se o cônjuge não tiver rendimentos ou se ganhares pelo menos 95% do rendimento do casal. A união de facto conta como casamento.",
+        "allowances": "Em duodécimos, os dois meses extra são somados a cada pagamento mensal (14 ÷ 12 do salário base).",
+        "meal": "Isento até {{cash}} por dia em dinheiro e {{card}} em cartão. O que exceder é tributado como salário."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "tooSmall": "Introduz um número positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "whole": "Introduz um número inteiro.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "netMonthly": "Líquido estimado num mês normal",
+        "withholding": "Retenção de IRS",
+        "socialSecurity": "Segurança Social (11%)",
+        "allowanceNet": "Líquido de cada pagamento de subsídio",
+        "annualNet": "Líquido estimado num ano",
+        "notFinalTax": "A retenção mensal é um adiantamento do teu IRS anual, não o imposto final. O IRS final é apurado na declaração anual, por isso podes receber reembolso ou ter de pagar mais."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Com um salário bruto de {{gross}} por mês, não casado e sem dependentes, no Continente e com {{meal}} por mês de subsídio de alimentação em dinheiro, a retenção de IRS é {{withholding}} e a Segurança Social é {{socialSecurity}}. Com os subsídios de férias e de Natal pagos à parte, um mês normal rende {{net}} líquidos, cada pagamento de subsídio rende {{allowanceNet}} e o ano rende {{annual}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodWithholding": "A retenção de IRS segue as tabelas mensais de 2026: o rendimento mensal vezes a taxa marginal do escalão, menos a parcela a abater e um valor fixo por cada dependente. A partir de três dependentes, a taxa desce um ponto percentual.",
+        "methodSocialSecurity": "A Segurança Social do trabalhador é 11% da remuneração sujeita, incluindo o subsídio de alimentação acima do limite isento.",
+        "methodMeal": "O subsídio de alimentação está isento até ao limite diário, que depende de ser pago em dinheiro ou em cartão. O simulador soma à remuneração tributável apenas o excesso.",
+        "methodAllowances": "Com 14 pagamentos, os subsídios de férias e de Natal são tributados cada um por si, como as tabelas exigem. Em duodécimos, o valor extra soma-se a cada mês.",
+        "methodBudget": "Os valores líquidos são o que chega à tua conta, por isso são o ponto de partida certo para um orçamento mensal.",
+        "finalTitle": "A retenção não é o teu IRS final",
+        "final": "O que é retido todos os meses é um pagamento por conta. A Autoridade Tributária apura o IRS real na declaração anual, com os rendimentos do ano inteiro e as tuas deduções. A retenção pode ficar acima ou abaixo do imposto devido, e é por isso que muita gente recebe reembolso ou tem imposto a pagar.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedYouth": "O IRS Jovem não é aplicado.",
+        "unsupportedDisability": "Não estão incluídas as tabelas para pessoas com deficiência nem as tabelas de pensões.",
+        "unsupportedNovember": "O ajustamento excecional dos rendimentos pagos em novembro de 2026 (Despacho 12523-A/2026, Continente) é ignorado. Reduz a retenção a metade só nesse mês.",
+        "unsupportedOther": "Outros rendimentos, trabalho suplementar, não residentes, taxas de retenção voluntariamente mais altas e custos do empregador ficam fora desta estimativa.",
+        "sourcesTitle": "Fontes",
+        "sourceDespacho": "Despacho n.º 233-A/2026: tabelas de retenção de 2026, Continente",
+        "sourceRegional": "Portal das Finanças: tabelas de retenção dos Açores e da Madeira",
+        "sourceMeal": "Portal das Finanças: limites de isenção do subsídio de alimentação (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: taxas contributivas",
+        "reviewed": "Tabelas e taxas revistas a 19 de novembro de 2026. A taxa de 11% da Segurança Social e os limites do subsídio de alimentação foram confirmados em fontes secundárias, não nos textos originais."
+      },
+      "nextStepHeadline": "Do salário a um plano para o teu dinheiro",
+      "nextStepDescription": "A WonderMoney parte do que realmente levas para casa e mostra para onde vai cada euro, mês após mês.",
+      "nextStepCta": "Cria um orçamento a partir do teu salário líquido"
+    },
+    "withholdingTables": {
+      "title": "Tabelas de retenção de IRS 2026",
+      "shortName": "Tabelas de retenção de IRS",
+      "subtitle": "As tabelas mensais de retenção de 2026 para o Continente, os Açores e a Madeira, com a fórmula da parcela a abater e os escalões anuais de IRS.",
+      "description": "Consulta as tabelas de retenção de IRS de 2026 e os escalões anuais em Portugal.",
+      "pageTitle": "Tabelas de IRS 2026: Retenção na Fonte e Parcela a Abater",
+      "pageDescription": "As tabelas mensais de retenção de IRS de 2026 para o Continente, os Açores e a Madeira, como funciona a fórmula da parcela a abater e os escalões anuais de IRS.",
+      "fields": {
+        "region": "Região",
+        "table": "Tabela de retenção",
+        "remuneration": "Remuneração mensal",
+        "dependants": "Dependentes"
+      },
+      "regions": {
+        "mainland": "Portugal Continental",
+        "azores": "Açores",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabela I: não casado sem dependentes ou casado dois titulares",
+        "II": "Tabela II: não casado com um ou mais dependentes",
+        "III": "Tabela III: casado, único titular"
+      },
+      "remunerationHelp": "Opcional. Introduz uma remuneração mensal bruta para destacar o escalão e ver a retenção.",
+      "errors": {
+        "remuneration": "Introduz um valor até {{max}}.",
+        "dependants": "Introduz um número inteiro de 0 a {{max}}."
+      },
+      "result": {
+        "withholding": "Retenção mensal de IRS",
+        "row": "A taxa marginal deste escalão é {{rate}}.",
+        "empty": "Introduz uma remuneração mensal e um número válido de dependentes para ver a retenção."
+      },
+      "formula": "Retenção = remuneração × taxa marginal − parcela a abater − {{dependant}} × número de dependentes. Nunca é inferior a zero e, a partir de três dependentes, a taxa desce um ponto percentual.",
+      "notFinalTax": "A retenção é um adiantamento do teu IRS anual, não o imposto final. A declaração anual apura o valor real.",
+      "tableTitle": "Tabela {{table}}: {{region}}",
+      "tableSource": "Aprovada pelo {{act}}, para rendimentos pagos de {{from}} a {{to}}.",
+      "tableCaption": "Taxa marginal e parcela a abater por remuneração mensal",
+      "columns": {
+        "remuneration": "Remuneração mensal",
+        "rate": "Taxa marginal",
+        "parcela": "Parcela a abater",
+        "upTo": "Até {{limit}}",
+        "above": "Superior a {{limit}}"
+      },
+      "annual": {
+        "title": "Escalões anuais de IRS para rendimentos de 2026",
+        "intro": "São as taxas do artigo 68.º do Código do IRS, aplicadas ao rendimento coletável anual. Cada taxa aplica-se apenas à parte do rendimento dentro do respetivo escalão.",
+        "caption": "Taxas anuais de IRS por escalão de rendimento coletável",
+        "income": "Rendimento coletável",
+        "rate": "Taxa sobre a parte do escalão"
+      },
+      "guide": {
+        "howTitle": "Como ler as tabelas",
+        "howFormula": "Procura o escalão onde cabe a remuneração mensal, multiplica-a pela taxa marginal e subtrai a parcela a abater. Subtrai o valor adicional por cada dependente e o resultado é a retenção.",
+        "howTransition": "Nos primeiros escalões a parcela a abater é uma fórmula com a letra R, a remuneração mensal. Faz a retenção subir de forma suave a partir de zero, para que um pequeno aumento nunca reduza o salário líquido.",
+        "howDependants": "Cada dependente reduz a retenção num valor fixo. Com três ou mais dependentes, a taxa marginal do escalão é um ponto percentual mais baixa.",
+        "howTables": "A tabela I serve os não casados sem dependentes e os casados dois titulares. A tabela II serve os não casados com dependentes e a tabela III os casados, único titular.",
+        "finalTitle": "A retenção não é o imposto final",
+        "final": "As tabelas definem quanto a entidade patronal retém todos os meses. Não calculam o teu IRS final, que a declaração anual apura com os escalões acima, o rendimento do ano inteiro e as tuas deduções.",
+        "unsupportedTitle": "Não incluído",
+        "unsupportedDisability": "As tabelas para pessoas com deficiência (IV a VII).",
+        "unsupportedYouth": "O IRS Jovem, que tem regras próprias.",
+        "unsupportedNovember": "O ajustamento excecional dos rendimentos pagos em novembro de 2026 no Continente, que reduz a retenção a metade só nesse mês.",
+        "unsupportedPensions": "As tabelas de pensões (VIII a XI).",
+        "sourcesTitle": "Fontes",
+        "sourceMainland": "Despacho n.º 233-A/2026: tabelas de retenção de 2026, Continente",
+        "sourceRegional": "Portal das Finanças: tabelas de retenção, incluindo os Açores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: tabelas de retenção da Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: artigo 68.º do Código do IRS",
+        "reviewed": "Tabelas revistas a 19 de novembro de 2026 face aos anexos publicados. Consulta o Portal das Finanças para alterações posteriores."
+      },
+      "nextStepHeadline": "Da retenção ao teu plano mensal",
+      "nextStepDescription": "A WonderMoney transforma o teu líquido estimado num plano, para que cada euro tenha uma função antes de o mês começar.",
+      "nextStepCta": "Usa a estimativa líquida num plano mensal"
     }
   },
   "resources": {

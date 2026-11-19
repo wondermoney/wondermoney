@@ -70,6 +70,18 @@ export const TOOLS_CATALOG = [
 		group: "budgetAndSave",
 		related: ["toolHouseholdBudget", "toolSavingsGoal", "toolInvestmentReturn"],
 	},
+	{
+		key: "netSalary",
+		routeId: "toolNetSalary",
+		group: "budgetAndSave",
+		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate"],
+	},
+	{
+		key: "withholdingTables",
+		routeId: "toolWithholdingTables",
+		group: "budgetAndSave",
+		related: ["toolNetSalary", "toolHouseholdBudget", "toolBorrowingCapacity"],
+	},
 	// Borrow and buy a home
 	{
 		key: "mortgage",

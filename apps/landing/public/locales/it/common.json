@@ -2660,6 +2660,166 @@
       "nextStepHeadline": "Vedi i tuoi certificati accanto al resto dei risparmi",
       "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",
       "nextStepCta": "Includi i certificati nella tua panoramica dei risparmi"
+    },
+    "netSalary": {
+      "title": "Calcolatore dello stipendio netto in Portogallo 2026",
+      "shortName": "Stipendio netto",
+      "subtitle": "Trasforma lo stipendio lordo mensile in netto: ritenuta IRS, previdenza sociale e buono pasto, con le tabelle 2026.",
+      "description": "Stima il tuo stipendio netto mensile in Portogallo con le tabelle di ritenuta IRS 2026.",
+      "pageTitle": "Stipendio Netto Portogallo 2026: dal Lordo al Netto",
+      "pageDescription": "Converti lo stipendio lordo in netto con le tabelle di ritenuta IRS 2026 per il Portogallo continentale, le Azzorre e Madeira, l'11% di previdenza sociale e l'indennità pasto.",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile",
+        "region": "Regione",
+        "status": "Situazione del contribuente",
+        "dependants": "Persone a carico",
+        "allowances": "Tredicesima e quattordicesima",
+        "mealGroup": "Indennità pasto",
+        "mealDaily": "Indennità pasto al giorno",
+        "mealDays": "Giorni al mese",
+        "mealKind": "Pagata in"
+      },
+      "regions": {
+        "mainland": "Portogallo continentale",
+        "azores": "Azzorre",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Non sposato",
+        "marriedOneEarner": "Sposato, un solo reddito",
+        "marriedTwoEarners": "Sposato, due redditi"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamenti (mensilità aggiuntive a parte)",
+        "twelfths": "In dodicesimi (ripartite su 12 pagamenti)"
+      },
+      "mealKinds": {
+        "cash": "In contanti con lo stipendio",
+        "card": "Carta pasto"
+      },
+      "help": {
+        "gross": "Lo stipendio base prima di mensilità aggiuntive, previdenza e IRS.",
+        "status": "Scegli \"un solo reddito\" solo se il coniuge non ha redditi o se guadagni almeno il 95% del reddito della coppia. L'unione di fatto conta come matrimonio.",
+        "allowances": "In dodicesimi, i due mesi extra si sommano a ogni pagamento mensile (14 ÷ 12 dello stipendio base).",
+        "meal": "Esente fino a {{cash}} al giorno in contanti e {{card}} su carta pasto. L'eccedenza è tassata come stipendio."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un numero positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "netMonthly": "Netto stimato in un mese normale",
+        "withholding": "Ritenuta IRS",
+        "socialSecurity": "Previdenza sociale (11%)",
+        "allowanceNet": "Netto di ogni mensilità aggiuntiva",
+        "annualNet": "Netto stimato in un anno",
+        "notFinalTax": "La ritenuta mensile è un acconto sull'IRS annuale, non l'imposta definitiva. L'IRS finale si determina nella dichiarazione annuale, quindi puoi avere un rimborso o dover pagare di più."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Con uno stipendio lordo di {{gross}} al mese, non sposato e senza persone a carico, nel Portogallo continentale e con {{meal}} al mese di indennità pasto in contanti, la ritenuta IRS è {{withholding}} e la previdenza sociale è {{socialSecurity}}. Con le mensilità aggiuntive pagate a parte, un mese normale dà {{net}} netti, ogni mensilità aggiuntiva dà {{allowanceNet}} e l'anno dà {{annual}}.",
+        "methodTitle": "Come funziona la stima",
+        "methodWithholding": "La ritenuta IRS segue le tabelle mensili 2026: la retribuzione mensile per l'aliquota marginale dello scaglione, meno la parcela a abater e un importo fisso per ogni persona a carico. Da tre persone a carico l'aliquota scende di un punto percentuale.",
+        "methodSocialSecurity": "La previdenza sociale del lavoratore è l'11% della retribuzione imponibile, compresa l'indennità pasto oltre il limite esente.",
+        "methodMeal": "L'indennità pasto è esente fino al limite giornaliero, che dipende dal pagamento in contanti o con carta. Il calcolatore aggiunge alla retribuzione imponibile solo l'eccedenza.",
+        "methodAllowances": "Con 14 pagamenti, le mensilità aggiuntive sono tassate ciascuna a sé, come richiedono le tabelle. In dodicesimi, l'importo extra si somma a ogni mese.",
+        "methodBudget": "I valori netti sono ciò che arriva sul tuo conto, quindi sono il punto di partenza giusto per un budget mensile.",
+        "finalTitle": "La ritenuta non è il tuo IRS definitivo",
+        "final": "Quanto viene trattenuto ogni mese è un acconto. L'Autorità tributaria determina l'IRS effettivo nella dichiarazione annuale, con i redditi dell'intero anno e le tue deduzioni. La ritenuta può essere superiore o inferiore all'imposta dovuta, ed è per questo che molti ricevono un rimborso o devono pagare.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedYouth": "L'IRS Jovem non è applicato.",
+        "unsupportedDisability": "Le tabelle per le persone con disabilità e quelle delle pensioni non sono incluse.",
+        "unsupportedNovember": "L'adeguamento eccezionale per i redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Dimezza la ritenuta solo per quel mese.",
+        "unsupportedOther": "Altri redditi, straordinari, non residenti, aliquote di ritenuta volontariamente più alte e costi del datore di lavoro restano fuori da questa stima.",
+        "sourcesTitle": "Fonti",
+        "sourceDespacho": "Despacho n.º 233-A/2026: tabelle di ritenuta 2026, Portogallo continentale",
+        "sourceRegional": "Portal das Finanças: tabelle di ritenuta delle Azzorre e di Madeira",
+        "sourceMeal": "Portal das Finanças: limiti di esenzione dell'indennità pasto (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: aliquote contributive",
+        "reviewed": "Tabelle e aliquote riviste il 19 novembre 2026. L'aliquota dell'11% di previdenza sociale e i limiti dell'indennità pasto sono stati verificati su fonti secondarie, non sui testi originali."
+      },
+      "nextStepHeadline": "Dallo stipendio a un piano per il tuo denaro",
+      "nextStepDescription": "WonderMoney parte da ciò che porti davvero a casa e mostra dove va ogni euro, mese dopo mese.",
+      "nextStepCta": "Crea un budget a partire dal tuo stipendio netto"
+    },
+    "withholdingTables": {
+      "title": "Tabelle di ritenuta IRS in Portogallo 2026",
+      "shortName": "Tabelle di ritenuta IRS",
+      "subtitle": "Le tabelle mensili di ritenuta 2026 per il Portogallo continentale, le Azzorre e Madeira, con la formula della parcela a abater e gli scaglioni annuali IRS.",
+      "description": "Consulta le tabelle di ritenuta IRS 2026 e gli scaglioni annuali in Portogallo.",
+      "pageTitle": "Tabelle di Ritenuta IRS 2026 Portogallo: Aliquote e Parcela a Abater",
+      "pageDescription": "Le tabelle mensili di ritenuta IRS 2026 per il Portogallo continentale, le Azzorre e Madeira, come funziona la formula della parcela a abater e gli scaglioni annuali IRS.",
+      "fields": {
+        "region": "Regione",
+        "table": "Tabella di ritenuta",
+        "remuneration": "Retribuzione mensile",
+        "dependants": "Persone a carico"
+      },
+      "regions": {
+        "mainland": "Portogallo continentale",
+        "azores": "Azzorre",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabella I: non sposato senza persone a carico, o sposato con due redditi",
+        "II": "Tabella II: non sposato con una o più persone a carico",
+        "III": "Tabella III: sposato con un solo reddito"
+      },
+      "remunerationHelp": "Facoltativo. Inserisci una retribuzione lorda mensile per evidenziare il suo scaglione e vedere la ritenuta.",
+      "errors": {
+        "remuneration": "Inserisci un importo fino a {{max}}.",
+        "dependants": "Inserisci un numero intero da 0 a {{max}}."
+      },
+      "result": {
+        "withholding": "Ritenuta IRS mensile",
+        "row": "L'aliquota marginale di questo scaglione è {{rate}}.",
+        "empty": "Inserisci una retribuzione mensile e un numero valido di persone a carico per vedere la ritenuta."
+      },
+      "formula": "Ritenuta = retribuzione × aliquota marginale − parcela a abater − {{dependant}} × numero di persone a carico. Non è mai inferiore a zero e, da tre persone a carico, l'aliquota scende di un punto percentuale.",
+      "notFinalTax": "La ritenuta è un acconto sull'IRS annuale, non l'imposta definitiva. La dichiarazione annuale determina l'importo effettivo.",
+      "tableTitle": "Tabella {{table}}: {{region}}",
+      "tableSource": "Approvata dal {{act}}, per i redditi pagati dal {{from}} al {{to}}.",
+      "tableCaption": "Aliquota marginale e parcela a abater per retribuzione mensile",
+      "columns": {
+        "remuneration": "Retribuzione mensile",
+        "rate": "Aliquota marginale",
+        "parcela": "Parcela a abater",
+        "upTo": "Fino a {{limit}}",
+        "above": "Oltre {{limit}}"
+      },
+      "annual": {
+        "title": "Scaglioni annuali IRS per i redditi 2026",
+        "intro": "Sono le aliquote dell'articolo 68 del Código do IRS, applicate al reddito imponibile annuo. Ogni aliquota si applica solo alla parte di reddito compresa nel proprio scaglione.",
+        "caption": "Aliquote annuali IRS per scaglione di reddito imponibile",
+        "income": "Reddito imponibile",
+        "rate": "Aliquota sulla parte dello scaglione"
+      },
+      "guide": {
+        "howTitle": "Come leggere le tabelle",
+        "howFormula": "Trova lo scaglione che contiene la retribuzione mensile, moltiplicala per l'aliquota marginale e sottrai la parcela a abater. Sottrai l'importo aggiuntivo per ogni persona a carico: il risultato è la ritenuta.",
+        "howTransition": "Nei primi scaglioni la parcela a abater è una formula con la lettera R, la retribuzione mensile. Fa salire la ritenuta gradualmente da zero, così un piccolo aumento non riduce mai il netto.",
+        "howDependants": "Ogni persona a carico riduce la ritenuta di un importo fisso. Con tre o più persone a carico, l'aliquota marginale dello scaglione è inferiore di un punto percentuale.",
+        "howTables": "La tabella I vale per i non sposati senza persone a carico e per gli sposati con due redditi. La tabella II vale per i non sposati con persone a carico e la tabella III per gli sposati con un solo reddito.",
+        "finalTitle": "La ritenuta non è l'imposta definitiva",
+        "final": "Le tabelle stabiliscono quanto trattiene il datore di lavoro ogni mese. Non calcolano il tuo IRS definitivo, che la dichiarazione annuale determina con gli scaglioni qui sopra, i redditi dell'intero anno e le tue deduzioni.",
+        "unsupportedTitle": "Non incluso",
+        "unsupportedDisability": "Le tabelle per le persone con disabilità (da IV a VII).",
+        "unsupportedYouth": "L'IRS Jovem, che ha regole proprie.",
+        "unsupportedNovember": "L'adeguamento eccezionale per i redditi pagati a novembre 2026 nel continente, che dimezza la ritenuta solo per quel mese.",
+        "unsupportedPensions": "Le tabelle delle pensioni (da VIII a XI).",
+        "sourcesTitle": "Fonti",
+        "sourceMainland": "Despacho n.º 233-A/2026: tabelle di ritenuta 2026, Portogallo continentale",
+        "sourceRegional": "Portal das Finanças: tabelle di ritenuta, comprese le Azzorre (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: tabelle di ritenuta di Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: articolo 68 del Código do IRS",
+        "reviewed": "Tabelle riviste il 19 novembre 2026 sugli allegati pubblicati. Consulta il Portal das Finanças per le modifiche successive."
+      },
+      "nextStepHeadline": "Dalla ritenuta al tuo piano mensile",
+      "nextStepDescription": "WonderMoney trasforma il tuo netto stimato in un piano, così ogni euro ha un compito prima che il mese inizi.",
+      "nextStepCta": "Usa la stima netta in un piano mensile"
     }
   },
   "resources": {

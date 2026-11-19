@@ -384,6 +384,22 @@ const ROUTE_SLUGS = {
 		de: "immobilienkaufsteuern-portugal-rechner",
 		it: "calcolo-imposte-acquisto-casa-portogallo",
 	},
+	toolNetSalary: {
+		pt: "simulador-salario-liquido",
+		en: "portugal-net-salary-calculator",
+		es: "calculadora-salario-neto-portugal",
+		fr: "calculateur-salaire-net-portugal",
+		de: "nettogehalt-rechner-portugal",
+		it: "calcolatore-stipendio-netto-portogallo",
+	},
+	toolWithholdingTables: {
+		pt: "tabelas-retencao-irs-2026",
+		en: "portugal-irs-withholding-tables",
+		es: "tablas-retencion-irs-portugal",
+		fr: "baremes-retenue-source-irs-portugal",
+		de: "irs-quellensteuer-tabellen-portugal",
+		it: "tabelle-ritenuta-irs-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -506,6 +522,8 @@ export const TOOL_ROUTE_IDS = [
 	"toolSavingsCertificates",
 	"toolPropertyTax",
 	"toolPurchaseTaxes",
+	"toolNetSalary",
+	"toolWithholdingTables",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -792,6 +810,14 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"imi-calculator": "toolPropertyTax",
 	"imi-property-tax": "toolPropertyTax",
 	imi: "toolPropertyTax",
+	toolnetsalary: "toolNetSalary",
+	"net-salary-calculator": "toolNetSalary",
+	"net-salary": "toolNetSalary",
+	"salario-liquido": "toolNetSalary",
+	toolwithholdingtables: "toolWithholdingTables",
+	"irs-withholding-tables": "toolWithholdingTables",
+	"tabelas-de-irs": "toolWithholdingTables",
+	"tabelas-irs": "toolWithholdingTables",
 }
 
 function normalizeRouteLookupKey(value: string): string {

@@ -2660,6 +2660,166 @@
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
       "nextStepCta": "Include certificates in your savings overview"
+    },
+    "netSalary": {
+      "title": "Portugal net salary calculator 2026",
+      "shortName": "Net salary",
+      "subtitle": "Turn a gross monthly salary into take-home pay: IRS withholding, Social Security and meal allowance, with the 2026 tables.",
+      "description": "Estimate your net monthly salary in Portugal from the 2026 IRS withholding tables.",
+      "pageTitle": "Net Salary Calculator Portugal 2026: Gross to Take-Home Pay",
+      "pageDescription": "Convert a gross salary into net pay with the 2026 IRS withholding tables for mainland Portugal, the Azores and Madeira, 11% Social Security and the meal allowance.",
+      "fields": {
+        "grossMonthly": "Gross monthly salary",
+        "region": "Region",
+        "status": "Holder situation",
+        "dependants": "Dependants",
+        "allowances": "Allowances",
+        "mealGroup": "Meal allowance",
+        "mealDaily": "Meal allowance per day",
+        "mealDays": "Days per month",
+        "mealKind": "Paid in"
+      },
+      "regions": {
+        "mainland": "Mainland Portugal",
+        "azores": "Azores",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Unmarried",
+        "marriedOneEarner": "Married, one earner",
+        "marriedTwoEarners": "Married, two earners"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 payments (holiday and Christmas paid separately)",
+        "twelfths": "In twelfths (spread over 12 payments)"
+      },
+      "mealKinds": {
+        "cash": "Cash with the salary",
+        "card": "Meal card"
+      },
+      "help": {
+        "gross": "The base salary before allowances, Social Security and IRS.",
+        "status": "Use \"one earner\" only if your spouse has no income, or you earn at least 95% of the couple's income. Partners in a de facto union count as married.",
+        "allowances": "In twelfths, the two extra months are added to every monthly payment (14 ÷ 12 of your base salary).",
+        "meal": "Tax-free up to {{cash}} a day in cash and {{card}} on a meal card. Anything above is taxed like salary."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a positive number.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "netMonthly": "Estimated net pay in a regular month",
+        "withholding": "IRS withholding",
+        "socialSecurity": "Social Security (11%)",
+        "allowanceNet": "Net pay of each allowance payment",
+        "annualNet": "Estimated net pay in a year",
+        "notFinalTax": "Monthly withholding is an advance on your annual IRS, not the final tax. Your final IRS is settled in the annual return, so you may get a refund or owe more."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "On a gross salary of {{gross}} a month, unmarried with no dependants, in mainland Portugal and with a cash meal allowance of {{meal}} a month, IRS withholding is {{withholding}} and Social Security is {{socialSecurity}}. With the holiday and Christmas allowances paid separately, a regular month nets {{net}}, each allowance payment nets {{allowanceNet}} and the year nets {{annual}}.",
+        "methodTitle": "How the estimate works",
+        "methodWithholding": "IRS withholding follows the 2026 monthly tables: the monthly pay times the marginal rate of its row, minus the row's parcela a abater and a fixed amount for each dependant. From three dependants the rate drops by one percentage point.",
+        "methodSocialSecurity": "Employee Social Security is 11% of the taxable pay, including meal allowance above the exempt limit.",
+        "methodMeal": "The meal allowance is exempt up to the daily limit, which depends on whether it is paid in cash or on a meal card. The calculator adds only the excess to the taxable pay.",
+        "methodAllowances": "With 14 payments, the holiday and Christmas allowances are each taxed on their own, as the tables require. In twelfths, the extra pay is added to each month.",
+        "methodBudget": "The net figures are what reaches your account, so they are the right starting point for a monthly budget.",
+        "finalTitle": "Withholding is not your final IRS",
+        "final": "The amount withheld each month is an advance payment. The Tax Authority settles your real IRS in the annual return, using your whole year's income and your deductions. Withholding can be higher or lower than the tax you finally owe, which is why many people get a refund or a payment due.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedYouth": "IRS Jovem (the young worker regime) is not applied.",
+        "unsupportedDisability": "The tables for people with a disability, and the pension tables, are not included.",
+        "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. It halves the withholding for that month only.",
+        "unsupportedOther": "Other income, overtime, non-residents, voluntary higher withholding rates and employer costs are outside this estimate.",
+        "sourcesTitle": "Sources",
+        "sourceDespacho": "Despacho n.º 233-A/2026: 2026 withholding tables, mainland Portugal",
+        "sourceRegional": "Portal das Finanças: withholding tables for the Azores and Madeira",
+        "sourceMeal": "Portal das Finanças: meal allowance exemption limits (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: contribution rates",
+        "reviewed": "Tables and rates reviewed on 19 November 2026. The 11% Social Security rate and the meal allowance limits were checked against secondary sources, not the original texts."
+      },
+      "nextStepHeadline": "From salary to a plan for your money",
+      "nextStepDescription": "WonderMoney starts from what you really take home and shows where every euro goes, month after month.",
+      "nextStepCta": "Build a budget from your take-home pay"
+    },
+    "withholdingTables": {
+      "title": "Portugal IRS withholding tables 2026",
+      "shortName": "IRS withholding tables",
+      "subtitle": "The 2026 monthly withholding tables for mainland Portugal, the Azores and Madeira, with the parcela a abater formula and the annual IRS brackets.",
+      "description": "Browse the 2026 IRS withholding tables and annual brackets for Portugal.",
+      "pageTitle": "IRS Withholding Tables 2026 Portugal: Rates and Parcela a Abater",
+      "pageDescription": "The 2026 monthly IRS withholding tables for mainland Portugal, the Azores and Madeira, how the parcela a abater formula works, and the annual IRS brackets.",
+      "fields": {
+        "region": "Region",
+        "table": "Withholding table",
+        "remuneration": "Monthly remuneration",
+        "dependants": "Dependants"
+      },
+      "regions": {
+        "mainland": "Mainland Portugal",
+        "azores": "Azores",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Table I: unmarried without dependants, or married with two earners",
+        "II": "Table II: unmarried with one or more dependants",
+        "III": "Table III: married with one earner"
+      },
+      "remunerationHelp": "Optional. Enter a gross monthly pay to highlight its row and see the withholding.",
+      "errors": {
+        "remuneration": "Enter an amount up to {{max}}.",
+        "dependants": "Enter a whole number from 0 to {{max}}."
+      },
+      "result": {
+        "withholding": "Monthly IRS withholding",
+        "row": "The marginal rate of this row is {{rate}}.",
+        "empty": "Enter a monthly remuneration and a valid number of dependants to see the withholding."
+      },
+      "formula": "Withholding = pay × marginal rate − parcela a abater − {{dependant}} × number of dependants. It is never below zero, and from three dependants the rate falls by one percentage point.",
+      "notFinalTax": "Withholding is an advance on your annual IRS, not the final tax. The annual return settles the real amount.",
+      "tableTitle": "Table {{table}}: {{region}}",
+      "tableSource": "Approved by {{act}}, for income paid from {{from}} to {{to}}.",
+      "tableCaption": "Marginal rate and parcela a abater by monthly remuneration",
+      "columns": {
+        "remuneration": "Monthly remuneration",
+        "rate": "Marginal rate",
+        "parcela": "Parcela a abater",
+        "upTo": "Up to {{limit}}",
+        "above": "Above {{limit}}"
+      },
+      "annual": {
+        "title": "Annual IRS brackets for 2026 income",
+        "intro": "These are the rates of article 68 of the Código do IRS, applied to your annual taxable income. Each rate applies only to the slice of income inside its bracket.",
+        "caption": "Annual IRS rates by taxable income bracket",
+        "income": "Taxable income",
+        "rate": "Rate on the slice"
+      },
+      "guide": {
+        "howTitle": "How to read the tables",
+        "howFormula": "Find the row that holds the monthly pay, multiply the pay by the marginal rate and subtract the parcela a abater. Subtract the extra amount for each dependant, and the result is the withholding.",
+        "howTransition": "In the first rows the parcela a abater is a formula with the letter R, which is the monthly pay. It makes the withholding rise gently from zero, so a small raise never lowers net pay.",
+        "howDependants": "Each dependant lowers the withholding by a fixed amount. With three or more dependants, the marginal rate of the row is one percentage point lower.",
+        "howTables": "Table I serves unmarried people without dependants and married people with two earners. Table II serves unmarried people with dependants and table III married people with one earner.",
+        "finalTitle": "Withholding is not the final tax",
+        "final": "The tables set how much your employer withholds each month. They do not calculate your final IRS, which the annual return settles with the brackets above, your whole income and your deductions.",
+        "unsupportedTitle": "Not included",
+        "unsupportedDisability": "The tables for people with a disability (IV to VII).",
+        "unsupportedYouth": "IRS Jovem, which has its own rules.",
+        "unsupportedNovember": "The one-off adjustment for income paid in November 2026 on the mainland, which halves the withholding for that month only.",
+        "unsupportedPensions": "The pension tables (VIII to XI).",
+        "sourcesTitle": "Sources",
+        "sourceMainland": "Despacho n.º 233-A/2026: 2026 withholding tables, mainland Portugal",
+        "sourceRegional": "Portal das Finanças: withholding tables, including the Azores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: withholding tables for Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: article 68 of the Código do IRS",
+        "reviewed": "Tables reviewed on 19 November 2026 against the published annexes. Check the Portal das Finanças for later changes."
+      },
+      "nextStepHeadline": "From withholding to your monthly plan",
+      "nextStepDescription": "WonderMoney turns your estimated take-home pay into a plan, so every euro has a job before the month starts.",
+      "nextStepCta": "Use the net estimate in a monthly plan"
     }
   },
   "resources": {
