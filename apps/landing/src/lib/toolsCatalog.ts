@@ -208,7 +208,13 @@ export const TOOLS_CATALOG = [
 		key: "investmentReturn",
 		routeId: "toolInvestmentReturn",
 		group: "investAndGrow",
-		related: ["toolCompoundInterest", "toolNetWorth", "toolSavingsRate"],
+		related: ["toolSp500History", "toolCompoundInterest", "toolNetWorth"],
+	},
+	{
+		key: "sp500History",
+		routeId: "toolSp500History",
+		group: "investAndGrow",
+		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolInvestorProfile"],
 	},
 	{
 		key: "investorProfile",

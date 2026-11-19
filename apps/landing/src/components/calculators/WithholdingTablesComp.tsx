@@ -47,8 +47,9 @@ function WithholdingTables() {
   const set = WITHHOLDING_TABLE_SETS[state.region];
   const table = set.tables[state.table];
 
+  const remunerationNegative = !Number.isNaN(state.remuneration) && state.remuneration < 0;
   const remunerationError =
-    !Number.isNaN(state.remuneration) && (state.remuneration < 0 || state.remuneration > PAYROLL_LIMITS.grossMonthly);
+    !Number.isNaN(state.remuneration) && (remunerationNegative || state.remuneration > PAYROLL_LIMITS.grossMonthly);
   const dependantsError =
     Number.isNaN(state.dependants) || !Number.isInteger(state.dependants) ||
     state.dependants < 0 || state.dependants > PAYROLL_LIMITS.dependants;
@@ -120,7 +121,7 @@ function WithholdingTables() {
             max={PAYROLL_LIMITS.grossMonthly}
             prefix="€"
             helpText={t(k("remunerationHelp"))}
-            error={remunerationError ? t(k("errors.remuneration"), { max: formatMoney(locale, PAYROLL_LIMITS.grossMonthly, { decimals: 0 }) }) : undefined}
+            error={remunerationError ? t(k(remunerationNegative ? "errors.remunerationNegative" : "errors.remuneration"), { max: formatMoney(locale, PAYROLL_LIMITS.grossMonthly, { decimals: 0 }) }) : undefined}
           />
           <CalculatorInput
             id="withholding-dependants"

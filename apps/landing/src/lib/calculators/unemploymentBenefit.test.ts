@@ -7,6 +7,7 @@ import {
   computeUnemploymentBenefit,
   type UnemploymentBenefitInput,
 } from "./unemploymentBenefit";
+import { computeWithholdingCents } from "./payroll";
 
 function run(overrides: Partial<UnemploymentBenefitInput> = {}) {
   const outcome = computeUnemploymentBenefit({ ...UNEMPLOYMENT_EXAMPLE, ...overrides });
@@ -22,13 +23,33 @@ describe("2026 reference values", () => {
 });
 
 describe("benefit amount", () => {
-  it("reproduces the Segurança Social guide example (14 000 EUR over 12 months gives 758.36)", () => {
-    // 1 000 EUR x 12 plus holiday and Christmas allowances = 14 000 EUR.
-    const result = run({ grossMonthly: 1000 });
+  it("reproduces the Segurança Social guide example (14 000 EUR over 12 months gives 758.36, no limit binding)", () => {
+    // 1 000 EUR x 14 = 14 000 EUR. The guide does not give the household of its example: with one child the IRS
+    // withholding rate is low enough for the 75% cap not to bind, and the guide says no limit applies.
+    const result = run({ grossMonthly: 1000, household: "alone", dependants: 1 });
     expect(result.referenceDailyCents).toBe(3889);
     expect(result.calculatedMonthlyCents).toBe(75_836);
-    // The guide's illustration does not deduct IRS; with the estimated withholding the 75% cap binds slightly.
-    expect(result.monthlyCents).toBeLessThanOrEqual(75_836);
+    expect(result.limit).toBe("none");
+    expect(result.monthlyCents).toBe(75_836);
+    // A single person without children has a higher withholding rate and the 75% cap does bind.
+    expect(run({ grossMonthly: 1000, household: "alone", dependants: 0 }).limit).toBe("netCap");
+  });
+
+  it("takes the IRS rate from the tables at the net reference pay (reference pay minus 11%)", () => {
+    // gov.pt: "taxa constante das tabelas de retenção de IRS de acordo com o valor líquido da remuneração de referência".
+    const result = run({ grossMonthly: 1000, household: "alone", dependants: 0 });
+    const referenceMonthly = 3889 * 30;
+    const lookup = Math.round(referenceMonthly * 0.89);
+    const rate = computeWithholdingCents(lookup, { region: "mainland", status: "single", dependants: 0 }) / lookup;
+    expect(result.netReferenceMonthlyCents).toBe(Math.round(referenceMonthly * (0.89 - rate)));
+    expect(result.limit).toBe("netCap");
+    expect(result.monthlyCents).toBe(Math.round(result.netReferenceMonthlyCents * 0.75));
+  });
+
+  it("lets the 1 IAS floor win over the 75% cap, as art. 29 n.º 2 DL 220/2006 says ('sem prejuízo do n.º 1')", () => {
+    const result = run({ grossMonthly: 800, allowances: "twelfths" });
+    expect(result.netReferenceMonthlyCents * 0.75).toBeLessThan(IAS_2026_CENTS);
+    expect(result.monthlyCents).toBe(IAS_2026_CENTS);
   });
 
   it("is 65% of the reference pay when no limit applies", () => {

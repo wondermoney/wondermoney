@@ -115,11 +115,18 @@ export function computeUnemploymentBenefit(input: UnemploymentBenefitInput) {
   const referenceMonthlyCents = referenceDailyCents * 30;
 
   const status: HolderStatus = input.household === "alone" || input.household === "singleParent" ? "single" : "marriedTwoEarners";
-  // Estimate of the "taxa de retenção" Social Security deducts from the reference pay: the withholding rate of the
-  // regular monthly payment under the 2026 mainland tables, applied to the whole reference remuneration.
-  const monthlyPaymentCents = toCents(input.grossMonthly);
+  // Net reference pay (art. 29 n.º 4 DL 220/2006): the reference pay minus the 11% Social Security and the IRS
+  // withholding rate. gov.pt: the rate is the one "constante das tabelas de retenção de IRS de acordo com o valor
+  // líquido da remuneração de referência" for the household, in force when the benefit was requested. A table is
+  // looked up at the reference pay minus Social Security (the IRS-free net), and the rate found applies to the
+  // whole reference pay. The 2026 mainland tables for dependent work are used.
+  const afterSocialSecurityCents = Math.max(
+    1,
+    Math.round((referenceMonthlyCents * (10_000 - EMPLOYEE_SOCIAL_SECURITY_BP)) / 10_000),
+  );
   const withholdingRate =
-    computeWithholdingCents(monthlyPaymentCents, { region: "mainland", status, dependants: input.dependants }) / monthlyPaymentCents;
+    computeWithholdingCents(afterSocialSecurityCents, { region: "mainland", status, dependants: input.dependants }) /
+    afterSocialSecurityCents;
   const netReferenceMonthlyCents = Math.max(
     0,
     Math.round(referenceMonthlyCents * (1 - EMPLOYEE_SOCIAL_SECURITY_BP / 10_000 - withholdingRate)),
@@ -146,7 +153,8 @@ export function computeUnemploymentBenefit(input: UnemploymentBenefitInput) {
     }
   }
 
-  // Simplification: the increase is applied to the limited amount and capped at 2.5 IAS.
+  // Simplification: the increase is applied to the limited amount and capped at 2.5 IAS. The sources read do not say
+  // whether the 10% comes before or after the limits.
   if (childrenIncrease) {
     monthlyCents = Math.min(iasCents(MAX_IAS_HUNDREDTHS), Math.round((monthlyCents * (100 + CHILDREN_INCREASE_PERCENT)) / 100));
   }

@@ -464,6 +464,14 @@ const ROUTE_SLUGS = {
 		de: "abfindungsrechner-kuendigung-portugal",
 		it: "calcolatore-indennita-licenziamento-portogallo",
 	},
+	toolSp500History: {
+		pt: "rentabilidade-sp500-historica",
+		en: "sp500-historical-returns-calculator",
+		es: "rentabilidad-historica-sp500",
+		fr: "rendement-historique-sp500",
+		de: "sp500-historische-rendite-rechner",
+		it: "rendimento-storico-sp500",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -605,6 +613,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolVehicleTax",
 	"toolPropertyCapitalGains",
 	"toolStatePension",
+	"toolSp500History",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -930,6 +939,8 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"state-pension-calculator": "toolStatePension",
 	"state-pension": "toolStatePension",
 	"pensao-de-reforma": "toolStatePension",
+	toolsp500history: "toolSp500History",
+	"sp500-historical-returns": "toolSp500History",
 }
 
 function normalizeRouteLookupKey(value: string): string {

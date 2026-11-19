@@ -17,7 +17,12 @@ export { REFERENCE_DATE, RMMG_2026_CENTS } from "./unemploymentBenefit";
 export const MIN_DAILY_CENTS = Math.round((RMMG_2026_CENTS * 30) / 100 / 30);
 export const WAITING_DAYS = 3;
 export const MAX_SICK_DAYS = 1095;
-/** +5 points on the 55% and 60% bands: reference pay at or below this monthly value and 3+ descendants. */
+/**
+ * +5 points on the 55% and 60% bands (art. 17 DL 28/2004): when the reference pay is at or below this monthly
+ * value, OR the household has 3 or more descendants (the conditions are alternatives, not cumulative). The
+ * law says the 500 euro figure is revised periodically with the minimum wage; the current value could not
+ * be confirmed in an official text, so 500 is kept.
+ */
 export const INCREASE_POINTS = 5;
 export const INCREASE_MAX_REFERENCE_MONTHLY_CENTS = 50_000;
 export const INCREASE_MIN_DESCENDANTS = 3;
@@ -117,7 +122,7 @@ export function computeSickPay(input: SickPayInput) {
   );
 
   const increaseApplied =
-    referenceDailyCents * 30 <= INCREASE_MAX_REFERENCE_MONTHLY_CENTS && input.dependants >= INCREASE_MIN_DESCENDANTS;
+    baseMonthlyCents <= INCREASE_MAX_REFERENCE_MONTHLY_CENTS || input.dependants >= INCREASE_MIN_DESCENDANTS;
   const waitingTotal = input.hospitalisation ? 0 : WAITING_DAYS;
   let limit: SickPayResult["limit"] = "none";
 

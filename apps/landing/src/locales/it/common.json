@@ -2868,7 +2868,8 @@
       "remunerationHelp": "Facoltativo. Inserisci una retribuzione lorda mensile per evidenziare il suo scaglione e vedere la ritenuta.",
       "errors": {
         "remuneration": "Inserisci un importo fino a {{max}}.",
-        "dependants": "Inserisci un numero intero da 0 a {{max}}."
+        "dependants": "Inserisci un numero intero da 0 a {{max}}.",
+        "remunerationNegative": "Inserisci un importo pari o superiore a zero."
       },
       "result": {
         "withholding": "Ritenuta IRS mensile",
@@ -2995,8 +2996,8 @@
         "methodTitle": "Come funziona la stima",
         "methodReference": "La retribuzione di riferimento (RR) è il totale delle retribuzioni registrate nei 12 mesi più vecchi dei 14 precedenti il mese della disoccupazione, comprese le mensilità aggiuntive di ferie e Natale, diviso 360. Il calcolatore usa 14 o 12 volte lo stipendio mensile.",
         "methodAmount": "Il sussidio giornaliero è il 65% della RR. L'importo mensile corrisponde a 30 giorni.",
-        "methodLimits": "Il sussidio mensile non può superare 2,5 volte lo IAS ({{max}} nel 2026) né il 75% della RR netta, e non può essere inferiore a 1 IAS ({{ias}}), salvo che la RR netta sia inferiore allo IAS. Quando le retribuzioni usate sono almeno pari al salario minimo ({{rmmg}}), il minimo è 1,15 IAS.",
-        "methodNet": "La RR netta è la RR meno l'11% di previdenza sociale e l'aliquota di ritenuta IRS. Il calcolatore stima quell'aliquota con le tabelle di ritenuta 2026 del continente per il tuo stipendio mensile, come single, o come sposato con due redditi se il partner è nel nucleo.",
+        "methodLimits": "Il sussidio mensile non può superare 2,5 volte lo IAS ({{max}} nel 2026) né il 75% della RR netta, e non può essere inferiore a 1 IAS ({{ias}}), salvo che la RR netta sia inferiore allo IAS. Il minimo di 1 IAS prevale sul limite del 75%, ma il sussidio non supera mai la RR netta stessa (art. 29 del Decreto-Lei n.º 220/2006). Quando le retribuzioni usate sono almeno pari al salario minimo ({{rmmg}}), il minimo è 1,15 IAS.",
+        "methodNet": "La RR netta è la RR meno l'11% di previdenza sociale e l'aliquota di ritenuta IRS (art. 29, n.º 4, del Decreto-Lei n.º 220/2006). L'aliquota viene dalle tabelle di ritenuta per il tuo nucleo, in base alla RR netta. Il calcolatore cerca nelle tabelle 2026 del continente il valore della RR meno l'11% e applica quell'aliquota a tutta la RR, come single, o come sposato con due redditi se il partner è nel nucleo.",
         "methodIncrease": "Il sussidio aumenta del 10% quando entrambi i partner sono disoccupati e iscritti, o sei l'unico genitore, e ci sono figli o persone a carico. Va richiesto. Il calcolatore lo applica all'importo già limitato e mai oltre 2,5 IAS.",
         "methodDuration": "La durata dipende dall'età e dai mesi con retribuzione registrata, più giorni extra per ogni 5 anni completi con retribuzione negli ultimi 20: 30 giorni fino a 39 anni, 45 giorni da 40 a 49 e 60 giorni dai 50.",
         "methodNoReduction": "La vecchia riduzione del 10% dopo 180 giorni di pagamento non è applicata: la guida della previdenza sociale del 2026 non la menziona.",
@@ -3011,7 +3012,7 @@
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 ottobre 2026), che riporta anche lo IAS 2026 di 537,13 euro (Portaria n.º 480-A/2025/1) e il salario minimo di 920 euro (Decreto-Lei n.º 139/2025)",
         "sourceLaw": "Decreto-Lei n.º 220/2006, nel testo vigente: regime di protezione in caso di disoccupazione",
         "sourceIncrease": "Decreto-Lei n.º 119/2021: maggiorazione del 10% per i nuclei con figli e minimo di 1,15 IAS",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della previdenza sociale e sul testo del Decreto-Lei n.º 119/2021 nel Diário da República. L'aliquota IRS dietro il limite del 75% e l'ordine della maggiorazione del 10% sono nostre semplificazioni, e la fine della riduzione del 10% dopo 180 giorni deriva dalla guida e dalla stampa, non dalla legge consolidata."
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della previdenza sociale (versione di ottobre 2026), sulla pagina del servizio su gov.pt (aggiornata il 19 ottobre 2026) e sul testo dell'art. 29 del Decreto-Lei n.º 220/2006 (letto in una copia secondaria, non nella versione consolidata ufficiale). L'ordine dei limiti segue quell'articolo; l'ordine della maggiorazione del 10% rispetto ai limiti non risulta dalle fonti lette, quindi è una nostra semplificazione. La pagina gov.pt risolve un esempio con un'aliquota IRS del 9,4% che non riusciamo a riprodurre con le tabelle 2026, quindi il limite reale può essere più basso di quello mostrato. La fine della riduzione del 10% dopo 180 giorni deriva dalla guida e dalla stampa, non dalla legge consolidata."
       },
       "nextStepHeadline": "Prima che il reddito scenda, pianifica il cuscinetto",
       "nextStepDescription": "WonderMoney mostra la tua liquidità, le spese mensili e quanto durano i risparmi con un reddito più basso.",
@@ -3039,7 +3040,7 @@
         "gross": "Lo stipendio base dei mesi considerati, prima di previdenza e IRS. Le mensilità aggiuntive non fanno parte della retribuzione di riferimento.",
         "allowances": "In dodicesimi, il calcolatore toglie le due mensilità per ottenere lo stipendio base usato dalla retribuzione di riferimento.",
         "sickDays": "Totale dei giorni del certificato (CIT), contati dal primo giorno. I lavoratori dipendenti possono ricevere fino a 1095 giorni.",
-        "dependants": "Serve per la maggiorazione di 5 punti, che richiede 3 o più figli e una retribuzione di riferimento di 500 euro al mese o meno.",
+        "dependants": "Serve per la maggiorazione di 5 punti, che si applica con 3 o più figli, oppure quando la retribuzione di riferimento è di 500 euro al mese o meno.",
         "hospitalisation": "Con ricovero ospedaliero o chirurgia ambulatoriale l'indennità è pagata dal primo giorno, senza periodo di carenza."
       },
       "errors": {
@@ -3062,7 +3063,7 @@
         "bandsTitle": "Per fascia di durata",
         "bandLabel": "Giorni da {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} giorni pagati × {{daily}} = {{amount}}",
-        "increaseApplied": "Inclusa la maggiorazione di 5 punti per retribuzione bassa e 3 o più figli.",
+        "increaseApplied": "Inclusa la maggiorazione di 5 punti (retribuzione di riferimento fino a 500 euro, oppure 3 o più figli).",
         "allWaiting": "Ogni giorno di questa malattia è di carenza, quindi la Segurança Social non paga nulla. Verifica se il contratto o il contratto collettivo obbliga il datore di lavoro a pagarli.",
         "waitingNote": "La Segurança Social non paga i primi 3 giorni. Se li paga il datore di lavoro dipende dal contratto o dal contratto collettivo.",
         "estimate": "Una stima per pianificare, non una decisione. La Segurança Social calcola l'importo reale dalle retribuzioni registrate.",
@@ -3089,7 +3090,7 @@
         "methodBands": "L'indennità giornaliera è una percentuale della RR che cresce con la durata: 55% fino a 30 giorni, 60% dal giorno 31 al 90, 70% dal giorno 91 al 365 e 75% oltre, fino a 1095 giorni per i dipendenti. I giorni contano dal primo giorno, carenza inclusa.",
         "methodWaiting": "I dipendenti hanno 3 giorni di carenza che la Segurança Social non paga. Con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e lo supera, il pagamento parte dal giorno 1.",
         "methodMinimum": "L'indennità giornaliera non può essere inferiore a {{min}} (30% del salario minimo di {{rmmg}}). Se la RR stessa è più bassa, l'indennità è uguale alla RR.",
-        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando la RR è al massimo di 500 euro al mese e la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure figli con bonus per disabilità. Il calcolatore considera solo il numero di figli.",
+        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando si verifica una di queste situazioni (art. 17 del decreto-legge 28/2004): la RR è al massimo di 500 euro al mese, la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure la famiglia ha figli con bonus per disabilità. Le condizioni sono alternative, non cumulative. Il calcolatore considera le prime due e non il bonus per disabilità.",
         "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di previdenza e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
         "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive non vengono ricostituite per i giorni di malattia.",
         "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
@@ -3101,7 +3102,7 @@
         "sourcesTitle": "Fonti",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
         "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social. Il limite di 500 euro della maggiorazione di 5 punti proviene dalla legge consolidata e da fonti secondarie, perché il testo della guida non mostra la cifra. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social e sul testo dell'art. 17 del decreto-legge 28/2004. Le tre condizioni alternative della maggiorazione di 5 punti provengono da quel testo; la legge prevede che l'importo di 500 euro sia rivisto periodicamente e non abbiamo potuto confermare l'importo attuale in un testo ufficiale, quindi manteniamo 500. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
       },
       "nextStepHeadline": "Pianifica il calo temporaneo di reddito",
       "nextStepDescription": "WonderMoney mostra la tua liquidità, le tue spese e per quanto tempo i risparmi coprono un reddito più basso.",
@@ -3506,19 +3507,20 @@
           "lateCapped": "Andare in pensione {{months}} mesi dopo l'età normale ({{normal}}) aggiunge un bonus, che si ferma a {{bonus}} perché la pensione non può superare il 92% della retribuzione di riferimento."
         },
         "floorApplied": "La pensione è stata portata al minimo 2026 corrispondente alla tua carriera.",
-        "gapSome": "Per mantenere il tuo tenore di vita ti servirebbero circa {{gap}} al mese da risparmi e investimenti (prima delle imposte).",
+        "gapSome": "Per mantenere il tuo tenore di vita ti servirebbero circa {{gap}} netti al mese da risparmi e investimenti.",
         "gapNone": "A questa età la pensione stimata copre il tuo stipendio netto attuale.",
         "estimate": "Stima approssimativa per pianificare, non è una decisione né una consulenza. Il riferimento è il simulatore ufficiale della Segurança Social Direta, che usa il tuo storico contributivo reale.",
         "limits": "Non coperto: carriere iniziate prima del 2002 (formula mista), dipendenti pubblici (CGA), regimi speciali e stipendi molto variabili.",
         "simulatorLink": "Apri il simulatore ufficiale",
-        "fireLink": "Calcola il risparmio necessario con il calcolatore FIRE"
+        "fireLink": "Calcola il risparmio necessario con il calcolatore FIRE",
+        "netPension": "Pensione netta stimata (per mensilità, dopo IRS)"
       },
       "nextStepHeadline": "Colma il divario con i tuoi investimenti",
       "nextStepDescription": "WonderMoney riunisce portafoglio e patrimonio in un unico posto, per vedere fin dove arrivano i tuoi investimenti nel coprire il divario.",
       "nextStepCta": "Monitora gli investimenti necessari per coprire il divario",
       "guide": {
         "exampleTitle": "Esempio pratico",
-        "example": "Una persona con uno stipendio medio di {{gross}} al mese (euro di oggi, 14 mensilità), con {{years}} anni di contributi, va in pensione a {{age}}. La pensione statutaria è di {{statutory}} al mese, un tasso globale di formazione del {{rate}}. Andare in pensione {{months}} mesi prima dell'età normale toglie {{penalty}} e applica il fattore di sostenibilità, lasciando {{monthly}} al mese, cioè il {{replacement}} dello stipendio. Rispetto a uno stipendio netto stimato di {{net}}, il divario è di {{gap}} al mese.",
+        "example": "Una persona con uno stipendio medio di {{gross}} al mese (euro di oggi, 14 mensilità), con {{years}} anni di contributi, va in pensione a {{age}}. La pensione statutaria è di {{statutory}} al mese, un tasso globale di formazione del {{rate}}. Andare in pensione {{months}} mesi prima dell'età normale toglie {{penalty}} e applica il fattore di sostenibilità, lasciando {{monthly}} lordi al mese, cioè il {{replacement}} dello stipendio. Dopo l'IRS la pensione è di {{netPension}} al mese. Rispetto a uno stipendio netto stimato di {{net}}, il divario è di {{gap}} al mese.",
         "methodTitle": "Come funziona la stima",
         "methodReference": "La retribuzione di riferimento è la media delle retribuzioni annuali di tutta la carriera, rivalutate con coefficienti legati ai prezzi al consumo e divise per 14. Il calcolatore lavora in euro di oggi: inserisci uno stipendio mensile medio reale e il risultato è anch'esso in euro di oggi.",
         "methodRate": "Il tasso annuo dipende dagli scaglioni della retribuzione di riferimento in multipli dell'IAS ({{ias}} nel 2026): {{rates}} per le quote fino a 1,1, fino a 2, fino a 4, fino a 8 e oltre 8 volte l'IAS. Le carriere fino a 20 anni usano un 2% fisso. Il tasso si moltiplica per gli anni di contributi, al massimo 40, e dà il tasso globale di formazione.",
@@ -3526,7 +3528,7 @@
         "methodEarly": "Prima dell'età normale, dai 60 anni e con almeno 15 anni di contributi, ogni mese di anticipo toglie {{penalty}} e si applica anche il fattore di sostenibilità 2026 ({{factor}}, un taglio del 17,63%). I due si moltiplicano. Le eccezioni, come le carriere molto lunghe, non sono modellate.",
         "methodLate": "Dopo l'età normale, fino a 70 anni, ogni mese aggiunge un bonus che dipende dagli anni di contributi: 0,33% da 15 anni, 0,50% da 25, 0,65% da 35 e 1% da 40. La pensione con il bonus non può superare il 92% della retribuzione di riferimento.",
         "methodMinimum": "Se la formula dà meno della pensione minima 2026 per la tua carriera, viene mostrato il minimo: {{min15}} da 15 a 20 anni, {{min21}} da 21 a 30 e {{min31}} da 31 anni in su. Il minimo non si applica al pensionamento anticipato.",
-        "methodGap": "Il divario confronta la pensione lorda stimata, su 14 mensilità, con il tuo stipendio netto di oggi: lordo meno l'11% di previdenza sociale e la ritenuta IRS 2026 per una persona single senza familiari a carico sul continente. Anche la pensione paga l'IRS, quindi il divario reale può variare.",
+        "methodGap": "Il divario confronta la pensione netta con il tuo stipendio netto di oggi, entrambi per mensilità, su 14 mensilità. Lo stipendio netto è il lordo meno l'11% di previdenza sociale e la ritenuta IRS 2026 per una persona single senza familiari a carico sul continente. La pensione netta è la pensione lorda stimata meno l'IRS trattenuto secondo la tabella di ritenuta per pensioni VIII del 2026 (Despacho n.º 233-A/2026, titolare non coniugato o coniugato con due redditi, senza disabilità); le pensioni non pagano previdenza sociale e quelle fino a 920 euro al mese non hanno ritenuta. L'IRS definitivo dipende dal tuo reddito complessivo e dalle deduzioni.",
         "methodBudget": "Leggi il divario come l'importo mensile che i tuoi risparmi e investimenti dovrebbero coprire. Cambia con ogni ipotesi qui sopra.",
         "unsupportedTitle": "Non supportato",
         "unsupportedMixed": "Carriere iniziate prima del 2002 (formula mista, con le vecchie regole per gli anni fino al 2001). Questo calcolatore copre solo la formula dell'intera carriera per chi ha iniziato a versare contributi nel 2002 o dopo.",
@@ -3539,7 +3541,130 @@
         "sourceAges": "Portaria n.º 476/2025/1: età normale per il 2027 e fattore di sostenibilità per il 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: adeguamento delle pensioni 2026 e pensioni minime",
         "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre."
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre. La tabella di ritenuta per pensioni VIII è stata verificata rispetto al Despacho n.º 233-A/2026 (regole e assegnazione della tabella) e a una trascrizione del suo allegato le cui righe coincidono con la colonna ufficiale dell'aliquota effettiva."
+      }
+    },
+    "sp500History": {
+      "title": "Calcolatore del rendimento storico dell'S&P 500",
+      "shortName": "S&P 500 storico",
+      "subtitle": "Scopri quanto varrebbe un investimento nell'S&P 500 (indice S&P Composite) tra due anni qualsiasi, con o senza dividendi e inflazione.",
+      "description": "Simula il rendimento dell'S&P 500 tra due anni passati: dividendi, inflazione, versamenti annuali, CAGR e il risultato di ogni anno.",
+      "pageTitle": "Rendimento storico dell'S&P 500: calcolatore con dividendi e inflazione",
+      "pageDescription": "Scegli un anno iniziale e uno finale e vedi quanto ha reso l'S&P 500: rendimento totale o di prezzo, reale o nominale, con versamenti annuali facoltativi, CAGR, anno migliore e peggiore e una tabella anno per anno. Dati: Aswath Damodaran (NYU Stern) e Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Anno iniziale (investi il 1° gennaio)",
+        "endYear": "Anno finale (fino al 31 dicembre)",
+        "initial": "Importo iniziale",
+        "annualContribution": "Versamento annuale (facoltativo)",
+        "reinvest": "Reinvesti i dividendi (rendimento totale)",
+        "real": "Correggi per l'inflazione (valore reale)"
+      },
+      "help": {
+        "years": "I dati vanno dal {{first}} al {{last}}. Entrambi gli anni contano per intero.",
+        "initial": "In dollari statunitensi, investiti il 1° gennaio dell'anno iniziale.",
+        "contribution": "Aggiunto il 1° gennaio di ogni anno dell'intervallo, il primo compreso. Lascia 0 se non c'è.",
+        "reinvest": "Attivo: variazione del prezzo più dividendi reinvestiti. Disattivo: solo la variazione del prezzo, come se spendessi tutti i dividendi.",
+        "real": "Attivo: tutte le cifre sono in dollari del {{year}}, senza l'inflazione USA. Disattivo: dollari nominali di ogni anno."
+      },
+      "errors": {
+        "required": "Inserisci un valore valido.",
+        "whole": "Inserisci un anno intero.",
+        "outOfRange": "Scegli un anno tra {{min}} e {{max}}.",
+        "tooSmall": "Inserisci {{min}} o più.",
+        "tooLarge": "Inserisci {{max}} o meno, oppure scegli un intervallo più breve: il risultato supererebbe ciò che questo calcolatore può mostrare.",
+        "beforeStart": "L'anno finale deve essere {{start}} o successivo.",
+        "nothingInvested": "Inserisci un importo iniziale o un versamento annuale superiore a zero.",
+        "summary": "Controlla i campi evidenziati per vedere il risultato."
+      },
+      "result": {
+        "finalNominal": "Valore finale (dollari nominali)",
+        "finalReal": "Valore finale (in dollari del {{year}})",
+        "contributed": "Totale investito",
+        "gain": "Guadagno o perdita",
+        "cagr": "CAGR (tasso di crescita annuo composto)",
+        "best": "Anno migliore dell'intervallo",
+        "worst": "Anno peggiore dell'intervallo",
+        "basisTotal": "rendimento totale con dividendi reinvestiti",
+        "basisPrice": "solo il rendimento di prezzo, senza dividendi",
+        "termsNominal": "dollari nominali",
+        "termsReal": "dollari del {{year}}, senza inflazione",
+        "assumptions": "Si mostra {{basis}}, in {{terms}}, su {{years}} anni, dal 1° gennaio {{start}} al 31 dicembre {{end}}.",
+        "singleYear": "Un solo anno mostra la fortuna di quell'anno, non cosa aspettarsi. Prova un intervallo di 10 anni o più.",
+        "pastPerformance": "I rendimenti passati non sono indicativi di quelli futuri. Solo a scopo educativo, non è consulenza finanziaria."
+      },
+      "table": {
+        "title": "Anno per anno",
+        "caption": "Rendimento annuo, inflazione, denaro versato e valore alla fine di ogni anno",
+        "year": "Anno",
+        "return": "Rendimento",
+        "inflation": "Inflazione USA",
+        "contribution": "Denaro versato",
+        "value": "Valore a fine anno"
+      },
+      "chart": {
+        "label": "Grafico a linee del valore alla fine di ogni anno rispetto al totale investito",
+        "value": "Valore",
+        "contributed": "Totale investito"
+      },
+      "currencyNote": "I rendimenti sono in dollari statunitensi. Se investi in euro, il cambio euro-dollaro aggiunge un rischio di cambio a quello del mercato: può aumentare o ridurre il risultato di diversi punti l'anno.",
+      "sourceNote": "Fonte: dati dell'indice S&P 500 / S&P Composite di Aswath Damodaran (NYU Stern, scaricati il {{date}}) e prezzi al consumo di Robert Shiller (Yale, scaricati il {{shillerDate}}). Valori annuali calcolati da WonderMoney. Solo a scopo educativo.",
+      "nextStepHeadline": "Confronta scenari storici con il tuo piano di portafoglio",
+      "nextStepDescription": "Aggiungi le tue posizioni a WonderMoney, definisci un piano e vedi come si confronta il tuo portafoglio reale con gli scenari storici provati qui.",
+      "nextStepCta": "Pianifica il tuo portafoglio",
+      "guide": {
+        "read": {
+          "title": "Come leggere il risultato",
+          "intro": "Questo calcolatore guarda indietro. Prende i rendimenti annuali dell'S&P 500 (dati dell'indice S&P Composite) tra gli anni scelti e li applica al tuo importo. I dati vanno dal {{first}} al {{last}}.",
+          "future": "Non è una previsione. Per proiettare un indice in avanti con le tue ipotesi di rendimento e costi, usa la proiezione di indici nella pagina sul rendimento degli investimenti."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Investi {{initial}} il 1° gennaio {{start}} e lascia fino al 31 dicembre {{end}} ({{years}} anni), con i dividendi reinvestiti e senza altri versamenti. Secondo i dati diventano {{finalTotal}}, un tasso di crescita annuo composto (CAGR) di {{cagrTotal}}.",
+          "price": "Senza dividendi (solo rendimento di prezzo) lo stesso importo finisce a {{finalPrice}}, ovvero {{cagrPrice}} l'anno. La differenza è ciò che hanno aggiunto i dividendi reinvestiti.",
+          "real": "Misurato in dollari del {{start}}, senza l'inflazione USA, il valore finale è {{finalReal}}, ovvero {{cagrReal}} l'anno.",
+          "range": "Il percorso fu accidentato: l'anno migliore dell'intervallo è stato il {{bestYear}} ({{bestReturn}}) e il peggiore il {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Per ogni anno dell'intervallo il calcolatore fa le stesse quattro cose:",
+          "steps": {
+            "a": "Somma il denaro investito il 1° gennaio: l'importo iniziale il primo anno e il versamento annuale ogni anno.",
+            "b": "Fa crescere il saldo del rendimento di quell'anno: il rendimento totale se i dividendi sono reinvestiti, quello di prezzo altrimenti.",
+            "c": "Se chiedi valori corretti per l'inflazione, divide per i prezzi al consumo USA (CPI) e tutte le cifre sono in dollari dell'anno iniziale. I versamenti sono deflazionati con i prezzi del giorno in cui avvengono.",
+            "d": "Registra il valore al 31 dicembre per la tabella e il grafico."
+          },
+          "cagr": "Il CAGR è la media geometrica dei rendimenti annuali dell'intervallo, nei termini scelti. Descrive l'indice in quegli anni e non dipende da quanto versi.",
+          "contributions": "I versamenti annuali sono aggiunti il 1° gennaio, prima del rendimento di quell'anno, quindi rendono l'anno intero.",
+          "limits": "Il primo anno nei dati è il {{first}} e l'ultimo anno completo è il {{last}}. Ogni importo è limitato a {{maxAmount}}."
+        },
+        "data": {
+          "title": "Dati e metodo",
+          "source": "I rendimenti sono calcolati da WonderMoney dal livello dell'S&P 500 a fine anno e dai dividendi del dataset \"Historical Returns on Stocks, Bonds and Bills\" di Aswath Damodaran (NYU Stern), scaricato il {{downloaded}}. L'inflazione deriva dall'indice dei prezzi al consumo (CPI) del dataset pubblico di Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Università di Yale), scaricato il {{shillerDownloaded}}.",
+          "returnsLink": "Pagina dei dati di Damodaran",
+          "inflationLink": "Pagina dei dati di Shiller",
+          "method": "Per ogni anno solare il rendimento di prezzo è il livello di fine anno diviso per quello di fine anno precedente, meno uno. Il rendimento totale somma i dividendi dell'anno al livello di fine anno prima di dividere, il che tratta i dividendi come reinvestiti a fine anno. L'inflazione è la variazione del CPI tra gli stessi due dicembri.",
+          "check": "Come verifica, il rendimento totale di ogni anno è stato confrontato con quello che pubblica lo stesso Damodaran, e nessuno differisce di più di 0,1 punti percentuali. Poiché gli anni vanno da fine anno a fine anno, coincidono con le cifre annuali di solito citate per l'indice.",
+          "trademark": "\"S&P 500\" e \"S&P Composite\" nominano soltanto l'indice. Questa pagina mostra valori annuali derivati da dati accademici pubblici e nessuna quotazione giornaliera, e non è affiliata né approvata da S&P Dow Jones Indices."
+        },
+        "limits": {
+          "title": "Cosa queste cifre non includono",
+          "items": {
+            "fx": "Valuta: i rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
+            "fees": "Costi: commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
+            "taxes": "Tasse: l'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
+            "sequence": "Col senno di poi: è un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
+            "past": "I rendimenti passati non sono indicativi di quelli futuri. Questo strumento è educativo e non è consulenza finanziaria."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "investmentReturnLink": "Rendimento degli investimenti e proiezione di indici",
+          "investmentReturnBody": "Misura il tuo rendimento, oppure proietta un fondo indicizzato in avanti con le tue ipotesi di rendimento e costi.",
+          "compoundInterestLink": "Calcolatore di interesse composto",
+          "compoundInterestBody": "Guarda come versamenti regolari e tempo si compongono a un tasso a tua scelta.",
+          "investorProfileLink": "Test del profilo di investitore",
+          "investorProfileBody": "Scopri con quante oscillazioni di mercato come queste riesci a convivere."
+        }
       }
     }
   },
