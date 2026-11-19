@@ -95,7 +95,7 @@ describe.each(PAGES)("$key tool page", (page) => {
 
 	it("offers its next step and addresses the pt reader as tu", () => {
 		expect(readLocale("src/locales", "en").tools[page.key].nextStepCta).toBeTruthy()
-		expect((readLocale("src/locales", "en").tools[page.key] as { nextStepHeadline: string }).nextStepHeadline).toBe(
+		expect((readLocale("src/locales", "en").tools[page.key] as unknown as { nextStepHeadline: string }).nextStepHeadline).toBe(
 			page.cta,
 		)
 		expect(readSource("../../components/pages/ToolDetailPage.astro")).toContain(
