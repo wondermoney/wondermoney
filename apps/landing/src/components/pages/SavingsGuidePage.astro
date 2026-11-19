@@ -1,0 +1,207 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import {
+  SAVINGS_COLUMN_IDS,
+  SAVINGS_GUIDE_CHECKED_ON,
+  SAVINGS_GUIDE_RELATED_ROUTE_IDS,
+  SAVINGS_PRODUCT_IDS,
+  SAVINGS_SOURCE_IDS,
+  SAVINGS_SOURCES,
+  getProductCells,
+  getTableRowCells,
+} from "@/content/savingsGuide";
+import type { Lang } from "@/lib/i18nLocale";
+import { formatMonthYear } from "@/lib/numberFormat";
+import { buildAlternateLinks, toLocalizedPath } from "@/lib/routes";
+import { getToolCatalogEntry } from "@/lib/toolsCatalog";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const routeId = "pageSavingsGuide";
+const canonicalPath = toLocalizedPath(routeId, locale);
+const canonicalUrl = `${Astro.url.origin}${canonicalPath}`;
+const checkedOn = formatMonthYear(locale, new Date(`${SAVINGS_GUIDE_CHECKED_ON}T00:00:00Z`));
+
+const cellText = (part: string) => t(`savingsGuide.cells.${part}`);
+// Labels that introduce the lines after them rather than being a line of their own.
+const LABEL_PARTS = new Set(["domesticBanks", "foreignBanks"]);
+
+const relatedTools = SAVINGS_GUIDE_RELATED_ROUTE_IDS.map((toolRouteId) => {
+  const key = getToolCatalogEntry(toolRouteId).key;
+  return {
+    href: toLocalizedPath(toolRouteId, locale),
+    title: t(`tools.${key}.title`),
+    description: t(`tools.${key}.description`),
+  };
+});
+
+const taxItems = ["domestic", "foreign", "insurance", "ppr"] as const;
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: t("savingsGuide.title"),
+  description: t("savingsGuide.metaDescription"),
+  url: canonicalUrl,
+  inLanguage: locale,
+  publisher: { "@type": "Organization", name: "WonderMoney", url: "https://wonder.money" },
+};
+---
+
+<ContentLayout
+  title={t("savingsGuide.metaTitle")}
+  description={t("savingsGuide.metaDescription")}
+  canonicalUrl={canonicalUrl}
+  alternateLinks={buildAlternateLinks(routeId)}
+  breadcrumbs={[
+    { label: t("footer.resources"), href: toLocalizedPath("pageResources", locale) },
+    { label: t("savingsGuide.breadcrumbLabel"), href: canonicalPath },
+  ]}
+  freshnessLabel={t("savingsGuide.checked", { date: checkedOn })}
+  structuredData={articleSchema}
+  locale={locale}
+>
+  <article class="max-w-5xl">
+    <header>
+      <h1 class="break-words text-3xl font-bold tracking-tight sm:text-4xl">{t("savingsGuide.title")}</h1>
+      <p class="mt-3 max-w-prose text-lg text-muted-foreground">{t("savingsGuide.intro")}</p>
+    </header>
+
+    <section aria-labelledby="savings-table-title" class="mt-10">
+      <h2 id="savings-table-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.tableTitle")}</h2>
+      <p class="mt-2 max-w-prose text-sm text-muted-foreground">{t("savingsGuide.tableHint")}</p>
+
+      <div class="mt-4 hidden lg:block" data-savings-table>
+        <table class="w-full table-fixed border-collapse text-left text-sm">
+          <caption class="sr-only">{t("savingsGuide.tableCaption")}</caption>
+          <thead>
+            <tr class="border-b-2 border-border">
+              <th scope="col" class="w-[13%] p-2 align-bottom font-semibold">{t("savingsGuide.productColumn")}</th>
+              {SAVINGS_COLUMN_IDS.map((column) => (
+                <th scope="col" class="p-2 align-bottom font-semibold">{t(`savingsGuide.columns.${column}`)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {SAVINGS_PRODUCT_IDS.map((product) => (
+              <tr class="border-b border-border">
+                <th scope="row" class="p-2 align-top font-semibold">
+                  <a href={`#${product}`} class="underline decoration-border underline-offset-4 hover:decoration-current">
+                    {t(`savingsGuide.products.${product}.name`)}
+                  </a>
+                </th>
+                {getTableRowCells(product).map(({ column, rowSpan, parts }) => (
+                  <td
+                    rowspan={rowSpan}
+                    data-column={column}
+                    class:list={["p-2 align-top", rowSpan > 1 && "border-x border-border bg-muted/30"]}
+                  >
+                    {parts.map((part) => (
+                      <p class:list={[LABEL_PARTS.has(part) ? "mt-2 font-medium first:mt-0" : "leading-5"]}>
+                        {cellText(part)}
+                      </p>
+                    ))}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ul role="list" class="mt-4 grid gap-4 lg:hidden" data-savings-cards>
+        {SAVINGS_PRODUCT_IDS.map((product) => (
+          <li class="min-w-0 rounded-lg border border-border p-4">
+            <h3 class="break-words text-base font-semibold">
+              <a href={`#${product}`} class="underline decoration-border underline-offset-4">
+                {t(`savingsGuide.products.${product}.name`)}
+              </a>
+            </h3>
+            <dl class="mt-3 grid gap-3 text-sm">
+              {getProductCells(product).map(({ column, parts }) => (
+                <div class="min-w-0">
+                  <dt class="font-medium text-muted-foreground">{t(`savingsGuide.columns.${column}`)}</dt>
+                  <dd class="mt-0.5 break-words">
+                    {parts.map((part) => (
+                      <p class:list={[LABEL_PARTS.has(part) && "mt-1 font-medium"]}>{cellText(part)}</p>
+                    ))}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section aria-labelledby="savings-products-title" class="mt-12">
+      <h2 id="savings-products-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.productsTitle")}</h2>
+      <div class="mt-4 grid gap-8 md:grid-cols-2">
+        {SAVINGS_PRODUCT_IDS.map((product) => (
+          <section id={product} class="min-w-0 scroll-mt-24">
+            <h3 class="break-words text-lg font-semibold">{t(`savingsGuide.products.${product}.name`)}</h3>
+            <p class="mt-2 leading-7 text-muted-foreground">{t(`savingsGuide.products.${product}.text`)}</p>
+          </section>
+        ))}
+      </div>
+    </section>
+
+    <section id="fgd" aria-labelledby="savings-fgd-title" class="mt-12 max-w-prose scroll-mt-24">
+      <h2 id="savings-fgd-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.fgd.title")}</h2>
+      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p1")}</p>
+      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p2")}</p>
+      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p3")}</p>
+    </section>
+
+    <section id="irs" aria-labelledby="savings-tax-title" class="mt-12 scroll-mt-24">
+      <h2 id="savings-tax-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.tax.title")}</h2>
+      <p class="mt-3 max-w-prose leading-7">{t("savingsGuide.tax.intro")}</p>
+      <div class="mt-4 grid gap-6 md:grid-cols-2">
+        {taxItems.map((item) => (
+          <section class="min-w-0">
+            <h3 class="text-lg font-semibold">{t(`savingsGuide.tax.${item}.title`)}</h3>
+            <p class="mt-2 leading-7 text-muted-foreground">{t(`savingsGuide.tax.${item}.text`)}</p>
+          </section>
+        ))}
+      </div>
+    </section>
+
+    <section aria-labelledby="savings-related-title" class="mt-12">
+      <h2 id="savings-related-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.related.title")}</h2>
+      <p class="mt-2 max-w-prose text-muted-foreground">{t("savingsGuide.related.intro")}</p>
+      <ul role="list" class="mt-4 grid gap-x-8 border-t border-border sm:grid-cols-2" data-savings-related>
+        {relatedTools.map(({ href, title, description }) => (
+          <li class="min-w-0 border-b border-border">
+            <a href={href} class="group block rounded-sm py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              <span class="block text-base font-semibold underline decoration-border underline-offset-4 group-hover:decoration-current">{title}</span>
+              <span class="mt-1 block text-sm leading-6 text-muted-foreground">{description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="sources" aria-labelledby="savings-sources-title" class="mt-12 scroll-mt-24">
+      <h2 id="savings-sources-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.sources.title")}</h2>
+      <p class="mt-2 max-w-prose text-muted-foreground">{t("savingsGuide.sources.intro")}</p>
+      <ul role="list" class="mt-4 space-y-2 text-sm">
+        {SAVINGS_SOURCE_IDS.map((source) => (
+          <li class="break-words">
+            <a href={SAVINGS_SOURCES[source].url} rel="noopener noreferrer" class="underline decoration-border underline-offset-4 hover:decoration-current">
+              {t(`savingsGuide.sources.items.${source}`)}
+            </a>
+            <span class="text-muted-foreground"> · {t("savingsGuide.sources.checkedOn", { date: checkedOn })}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <p class="mt-10 max-w-prose text-sm text-muted-foreground">{t("savingsGuide.disclaimer")}</p>
+  </article>
+</ContentLayout>

@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Term deposit comparison: offers in Portugal by term and amount",
+      "shortName": "Deposit offers",
+      "subtitle": "Compare term deposit offers from banks available in Portugal by term, amount and conditions, with the interest you would keep after the 28% IRS.",
+      "description": "Compare term deposit offers by term and amount, with interest after tax.",
+      "pageTitle": "Term Deposit Comparison Portugal: Best Rates by Term and Amount",
+      "pageDescription": "Compare term deposit offers in Portugal by rate (TANB), term and amount, with net interest after the 28% IRS, conditions and the date they were compiled. Educational only.",
+      "asOfBanner": "Offers as of {{date}}",
+      "offers": {
+        "title": "Deposit offers, highest rate first",
+        "intro": "Enter the amount you want to invest and narrow the list by term and conditions. The interest shown is simple interest paid at maturity, after the 28% IRS. Bank conditions are shown in Portuguese, as the banks publish them.",
+        "caption": "Term deposit offers by rate, term, limits, net interest and conditions"
+      },
+      "filters": {
+        "amount": "Amount I want to invest",
+        "amountHelp": "Offers whose minimum is above it, or whose maximum is below it, are hidden.",
+        "term": "Term",
+        "termAll": "Any term",
+        "termOption": "{{months}} months",
+        "irs": "Bank and IRS",
+        "irsAll": "All banks",
+        "irsWithheld": "Portuguese IRS withheld by the bank",
+        "irsNotWithheld": "Foreign bank: IRS not withheld, you declare it",
+        "conditions": "Conditions",
+        "existingClients": "For existing clients (hide new-client-only offers)",
+        "noNewMoney": "No new-money requirement",
+        "earlyWithdrawal": "Early withdrawal allowed"
+      },
+      "errors": {
+        "amountRequired": "Enter an amount above zero to see the interest, or leave it to see every offer.",
+        "amountPositive": "The amount must be above zero.",
+        "amountTooLarge": "Enter {{max}} or less."
+      },
+      "count": "Showing {{count}} of {{total}} offers.",
+      "none": "No offer matches these filters. Try another term or amount, or relax a condition.",
+      "notStated": "not stated",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Term (months)",
+        "bank": "Bank and product",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "netInterest": "Net interest at maturity",
+        "netYield": "Net annual yield",
+        "conditions": "Conditions"
+      },
+      "badges": {
+        "newClients": "New clients only",
+        "newMoney": "New money required",
+        "early": {
+          "yes": "Early withdrawal allowed",
+          "seeNotes": "Early withdrawal: see notes",
+          "no": "Early withdrawal not stated"
+        },
+        "irsNotWithheld": "Foreign bank: IRS not withheld",
+        "irsWithheld": "IRS withheld in Portugal"
+      },
+      "notesLabel": "Original conditions in Portuguese",
+      "compare": {
+        "title": "How these offers compare",
+        "average": "Official average rate on new household deposits in Portugal, {{bucket}}: {{rate}} a year ({{month}}).",
+        "averageFallback": "No new deposits were recorded in this maturity group in the latest month, so the all-maturities average is used: {{rate}} a year ({{month}}).",
+        "above": "The top offer shown ({{bank}}, {{tanb}}) is {{gap}} points above it.",
+        "below": "The top offer shown ({{bank}}, {{tanb}}) is {{gap}} points below it.",
+        "benchmarkLink": "See the official deposit rate benchmark",
+        "certificates": "For comparison, Certificados de Aforro Série F over the first year: {{net}} of interest after IRS, a net annual yield of {{yield}} (base rate {{rate}} in {{month}}, before the permanence premium).",
+        "certificatesLink": "Compare with the savings certificates calculator"
+      },
+      "disclaimers": {
+        "asOf": "Offers compiled as of {{date}}.",
+        "change": "Conditions change often and some offers are campaigns that end without notice.",
+        "confirm": "Confirm every rate and condition with the bank before you deposit.",
+        "fgd": "The Fundo de Garantia de Depósitos covers deposits in Portuguese banks up to €100,000 per depositor and per bank. Source:",
+        "foreign": "Foreign banks are covered by their own country's deposit guarantee scheme, not by the Portuguese fund.",
+        "assumptions": "Interest is simple, paid at maturity, with {{tax}}% IRS taken off. For foreign banks the figure assumes you declare the interest and pay the same rate.",
+        "educational": "Educational only: this is not a recommendation or financial advice, and no bank is endorsed.",
+        "noAffiliate": "This page has no affiliate links."
+      },
+      "sourceNote": "Conditions compiled by WonderMoney from the banks' published offers, as of {{date}}. Net figures computed by WonderMoney.",
+      "nextStepHeadline": "Track deposits and maturity dates together",
+      "nextStepDescription": "Add your deposits to WonderMoney to see them with your other accounts and know when each one matures.",
+      "nextStepCta": "Track my deposits",
+      "guide": {
+        "read": {
+          "title": "How to read the comparison",
+          "what": "The table lists {{count}} term deposit offers from banks available in Portugal, as of {{date}}. TANB is the gross nominal annual rate. For the amount you enter, each row shows the interest you would keep at maturity and the net annual yield.",
+          "noRecommendation": "The list is sorted by rate, not by quality. It does not recommend any bank or product: a higher rate can come with conditions such as new money, a maintenance fee or limited early withdrawal. Read the conditions and compare current offers yourself."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "The highest rate listed is {{bank}} at {{rate}} for {{months}} months. On {{amount}} that is {{gross}} of gross interest; after {{taxRate}}% IRS you keep {{net}}, a net annual yield of {{yearly}}."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "Each figure comes from the same engine as the term deposit calculator:",
+          "steps": {
+            "a": "Gross interest: amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
+            "b": "Tax: {{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
+            "c": "Net annual yield: the net interest annualised over the term.",
+            "d": "Filters: an offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
+          }
+        },
+        "data": {
+          "title": "Data and sources",
+          "source": "Conditions compiled by WonderMoney from the banks' published offers, as of {{date}}. Notes are the original Portuguese text of the conditions and are not translated, so no condition is lost in translation.",
+          "refresh": "The list is updated by hand when conditions are compiled again, and the date above always shows when. Nothing is fetched while you use the page, so a late update never shows wrong figures as current: check the date.",
+          "fgd": "Deposit guarantee: the Fundo de Garantia de Depósitos covers €100,000 per depositor and per bank. Source:"
+        },
+        "limits": {
+          "title": "What the comparison leaves out",
+          "items": {
+            "a": "Offers change and some end without notice: the figures are a snapshot, not a quote.",
+            "b": "Fees, account opening costs, bonuses and tiered rates for existing customers are only in the notes, if at all.",
+            "c": "Interest paid before maturity and reinvestment are not modelled: every figure is simple interest at maturity.",
+            "d": "Your own tax situation, and the rules for a foreign bank's interest, may differ. This is not tax advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "termDepositLink": "Term deposit calculator",
+          "termDepositBody": "Enter your own bank's rate and see the interest, the tax and the net yield.",
+          "depositRateIndexLink": "Deposit rate index",
+          "depositRateIndexBody": "See the official average new-deposit rate, month by month, against inflation.",
+          "savingsCertificatesLink": "Savings certificates calculator",
+          "savingsCertificatesBody": "Compare a deposit with Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Portugal net salary calculator 2026",
       "shortName": "Net salary",
@@ -4212,6 +4340,229 @@
           "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Before you rely on this list",
+      "educationalTitle": "Educational only",
+      "educational": "This page is educational. It is not a recommendation or an offer, the order is not a ranking, and no account here is endorsed by WonderMoney. There are no affiliate links on this page.",
+      "confirm": "Conditions change often. Confirm every rate, limit and fee with the bank before you open or move an account.",
+      "source": "Conditions compiled by WonderMoney from the banks' published offers.",
+      "asOf": "Conditions as of {{date}}",
+      "guarantee": {
+        "title": "Deposit guarantee",
+        "body": "In Portugal, the Fundo de Garantia de Depósitos repays deposits up to {{amount}} per depositor and per bank. A joint account is split between its holders. Banks from another country are covered by their home-country scheme, which has the same minimum level in the EU.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Banks abroad and IRS",
+        "body": "Portuguese banks withhold 28% IRS on the interest. A bank based in another country does not: you declare the interest yourself in your IRS return, usually taxed at 28% unless you choose to add it to your other income."
+      },
+      "originalLabel": "Original conditions, in Portuguese",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "freeBankAccounts": {
+      "title": "Free bank accounts in Portugal: which ones, and the fine print",
+      "shortName": "Free bank accounts",
+      "subtitle": "Current accounts with no maintenance fee, with the conditions that come attached, as of a stated date.",
+      "description": "A dated list of free current accounts in Portugal with the conditions of each, and which allow two holders.",
+      "pageTitle": "Free Bank Accounts in Portugal: Conditions and Two Holders",
+      "pageDescription": "A dated list of free current accounts in Portugal: which banks have branches, which are app-only or foreign, who allows two holders, and the conditions to keep the account free.",
+      "filters": {
+        "twoHolders": "Show only accounts that allow two holders"
+      },
+      "count": "Showing {{shown}} of {{total}} accounts",
+      "empty": "No account matches this filter.",
+      "noNotes": "No conditions listed.",
+      "foreignBadge": "Foreign bank",
+      "columns": {
+        "account": "Bank and account",
+        "twoHolders": "Two holders",
+        "notes": "Notes (in Portuguese)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Banks with branches",
+          "intro": "Accounts where the table notes no branch limitation. Some still limit what you can do in person to a partner's branches."
+        },
+        "branchless": {
+          "title": "App-only and online banks, including foreign ones",
+          "intro": "The table notes these have no branches or cash and cheque deposits. Foreign banks are marked: their interest is yours to declare."
+        }
+      },
+      "nextStepHeadline": "See all your accounts in one place",
+      "nextStepDescription": "Free accounts are easier to compare than to manage. Connect them in WonderMoney and follow every balance together.",
+      "nextStepCta": "See all your accounts in one place",
+      "guide": {
+        "read": {
+          "title": "How to read this list",
+          "what": "A bank can charge for keeping a current account open, for the debit card, or for services such as cash deposits. Here, \"free\" means what the bank's own offer says, usually with conditions: a salary paid in, a minimum balance, or a minimum number of card purchases per month.",
+          "notRec": "The list says nothing about which account suits you. It does not cover every bank, and a free account today can start charging tomorrow."
+        },
+        "method": {
+          "title": "How the list was put together",
+          "intro": "Each row is one account and what its published offer says. The notes are shown exactly as compiled, in Portuguese.",
+          "steps": {
+            "a": "Banks are split by what the notes say: those with no branches are listed as app-only or online banks.",
+            "b": "The two holders column records whether the account can have two holders.",
+            "c": "A bank based abroad is marked, because its interest is not taxed at source in Portugal."
+          }
+        },
+        "limits": {
+          "title": "What the list leaves out",
+          "items": {
+            "a": "Card fees, transfer fees and conditions not in the notes.",
+            "b": "Which banks are open to new customers right now, or accept non-residents.",
+            "c": "Service quality, app quality and customer support.",
+            "d": "Any change after the date shown on the page."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "remuneratedLink": "Savings and remunerated accounts",
+          "remuneratedBody": "Rates, limits and net interest for accounts that pay interest.",
+          "budgetLink": "Household budget",
+          "budgetBody": "See what you spend before you choose where it is held."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Remunerated and savings accounts in Portugal: rates, limits and net interest",
+      "shortName": "Savings accounts",
+      "subtitle": "A dated table of what Portuguese and foreign banks pay on savings, with a net-interest calculator.",
+      "description": "A dated table of remunerated and savings accounts in Portugal with filters and net interest after IRS.",
+      "pageTitle": "Remunerated and Savings Accounts in Portugal: Rates and Net Interest",
+      "pageDescription": "A dated table of remunerated and savings accounts, certificates and savings insurance in Portugal: gross rate, limits, IBAN, two holders and IRS, with a calculator for net interest after 28% IRS.",
+      "calculator": {
+        "title": "Net interest over 12 months",
+        "intro": "Enter an amount to see the interest each account would pay over 12 months after {{tax}}% IRS, counting interest only up to the account's maximum. Rows with several plans show each plan."
+      },
+      "fields": {
+        "amount": "Amount saved"
+      },
+      "help": {
+        "amount": "Held for 12 months, at the rate in the table."
+      },
+      "errors": {
+        "amount": {
+          "required": "Enter an amount.",
+          "negative": "The amount cannot be negative.",
+          "tooLarge": "Enter an amount up to {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Type",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Allows two holders",
+        "any": "All"
+      },
+      "types": {
+        "ordem": "Current account",
+        "poupancaComIban": "Savings with IBAN",
+        "poupancaSemIban": "Savings without IBAN",
+        "dividaPublica": "Public debt",
+        "seguro": "Insurance"
+      },
+      "iban": {
+        "any": "All",
+        "withIban": "With IBAN",
+        "withoutIban": "Without IBAN"
+      },
+      "tax": {
+        "any": "All",
+        "withheld": "Withheld by the bank in Portugal",
+        "foreign": "Foreign: you declare it",
+        "foreignBadge": "Foreign: declare in IRS",
+        "withheldBadge": "IRS withheld by the bank"
+      },
+      "sort": {
+        "label": "Sort by",
+        "tanbDesc": "Rate, highest first",
+        "tanbAsc": "Rate, lowest first",
+        "netDesc": "Net interest, highest first"
+      },
+      "count": "Showing {{shown}} of {{total}} accounts",
+      "assumptions": "Net interest is simple interest over 12 months at the table's gross rate (TANB), minus {{tax}}% IRS and any monthly fee the notes state. Promotional discounts and later rate changes in the notes are not applied.",
+      "empty": "No account matches these filters.",
+      "caption": "Remunerated and savings accounts with rate, limits and net interest",
+      "columns": {
+        "tanb": "Rate (TANB)",
+        "account": "Bank, product and type",
+        "limits": "Minimum and maximum",
+        "term": "Term",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "instant": "Instant transfer",
+        "holders": "Two holders",
+        "tax": "IRS",
+        "net": "Net interest in 12 months after {{tax}}% IRS",
+        "notes": "Notes (in Portuguese)"
+      },
+      "rateRange": "{{from}} to {{to}}",
+      "seeNotes": "see notes",
+      "months": "{{count}} months",
+      "noLimit": "none",
+      "holdersPaidPlan": "On a paid plan",
+      "result": {
+        "belowMinimum": "Below the minimum of {{min}}: no interest.",
+        "capped": "Interest is paid only up to {{max}}.",
+        "shortTerm": "The rate runs for {{count}} months; the figure assumes it for 12. Check the notes.",
+        "termNotes": "The term is explained in the notes."
+      },
+      "plans": {
+        "title": "By plan, with its monthly fee",
+        "line": "{{plan}}: {{rate}}, {{fee}}, net {{net}} a year",
+        "fee": "fee {{fee}} a month",
+        "noFee": "no fee"
+      },
+      "certificatesLink": "Open the savings certificates tool",
+      "nextStepHeadline": "Move from the benchmark to a personal savings plan",
+      "nextStepDescription": "A table shows what banks offer today. Set a goal in WonderMoney and track how your own savings compare with it.",
+      "nextStepCta": "Set a savings goal",
+      "guide": {
+        "read": {
+          "title": "How to read this table",
+          "what": "The rate shown is the TANB: the nominal gross yearly rate, before tax. Savings accounts pay it on the balance, usually up to a maximum; some have a minimum, a term, or a rate that changes after an introductory period. Certificates are public debt and an insurance option is not a deposit.",
+          "notRec": "The table is educational. It is not a recommendation, the order is not a ranking, and the best account for you depends on your balance, your other accounts and your tolerance for conditions and fees."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Say you keep {{amount}} for 12 months in {{product}} at {{bank}}, at {{rate}} a year. It earns {{gross}}; the 28% IRS takes {{tax}}, leaving {{net}}.",
+          "capped": "The maximum matters. {{product2}} at {{bank2}} pays {{rate2}}, but only up to {{cap}}. With {{amount2}}, interest is {{gross2}} before tax and {{net2}} after, as if you had saved {{cap}}.",
+          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}."
+        },
+        "method": {
+          "title": "Method",
+          "intro": "The calculator works the same way for every row:",
+          "steps": {
+            "a": "Only the part of the amount up to the account's maximum earns interest. Where the notes give rates by balance band, each band earns its own rate.",
+            "b": "Gross interest is that part times the TANB, over 12 months, without compounding.",
+            "c": "IRS of 28% is taken off the interest. For foreign banks that tax is yours to declare; the calculator shows the same 28% so rows compare.",
+            "d": "Where the notes state a monthly plan fee, twelve months of it are subtracted. Other costs, promotions and later rate changes are not applied."
+          }
+        },
+        "limits": {
+          "title": "What the table leaves out",
+          "items": {
+            "a": "Rates, limits and conditions change; the table is a photograph of one date.",
+            "b": "Some rates fall after an introductory period or when conditions such as a salary payment stop being met.",
+            "c": "Compounding, withholding on early withdrawal and the option to add interest to your other income for IRS.",
+            "d": "Deposit protection is the same in every row only as a rule: check each bank's scheme."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "depositLink": "Term deposit rate index",
+          "depositBody": "The average rates banks in Portugal paid on new deposits, against inflation.",
+          "certificatesLink": "Savings certificates",
+          "certificatesBody": "Public debt, one of the rows above, in its own calculator.",
+          "termLink": "Term deposit calculator",
+          "termBody": "Interest and tax on a deposit with a fixed term.",
+          "budgetLink": "Household budget",
+          "budgetBody": "Work out how much you can leave in savings."
+        }
+      }
     }
   },
   "resources": {
@@ -4245,6 +4596,141 @@
         "description": "Browse tools for budgeting, borrowing and investing."
       }
     }
+  },
+  "savingsGuide": {
+    "metaTitle": "Where to keep your savings in Portugal: products compared | WonderMoney",
+    "metaDescription": "Compare savings certificates, treasury certificates, remunerated accounts, savings accounts, term deposits and capitalisation or PPR insurance in Portugal: guarantee, top-ups, withdrawals, interest and IRS.",
+    "breadcrumbLabel": "Where to keep your savings",
+    "title": "Where to keep your savings in Portugal",
+    "intro": "Seven ways to keep cash in Portugal, side by side: who guarantees the money, whether you can add to it, when you can take it out, how the interest is paid and how IRS applies. Educational only: this page does not recommend any product or provider.",
+    "checked": "Facts checked against official sources in {{date}}",
+    "tableTitle": "The comparison table",
+    "tableCaption": "Savings products in Portugal compared by guarantee, top-ups, withdrawals, interest and IRS",
+    "tableHint": "Rates, fees and conditions of each product change and vary between providers: always read the terms of the one you consider.",
+    "productColumn": "Product",
+    "columns": {
+      "guarantee": "Guarantee",
+      "topUp": "Top-ups",
+      "withdrawal": "Withdrawals",
+      "interest": "Interest",
+      "irs": "IRS"
+    },
+    "productsTitle": "The products, one by one",
+    "products": {
+      "aforro": {
+        "name": "Savings certificates (Certificados de Aforro)",
+        "text": "Public debt issued by the Portuguese State and run by IGCP, the Treasury and public debt agency, for people with a Portuguese tax number. Série F lasts up to 15 years. Its rate follows the 3-month Euribor and adds a permanence bonus that grows the longer you hold. Interest accrues every quarter and is added to the balance after IRS. The first purchase is at least 100 units of €1 and later ones at least 10. You can redeem from the first quarterly interest date, losing the interest of the quarter in progress."
+      },
+      "tesouro": {
+        "name": "Treasury certificates (Certificados do Tesouro)",
+        "text": "Also State debt run by IGCP, and still on sale in 2026: the new Série 5, open since July 2026, replaced the Poupança Valor series, which no longer takes subscriptions. At launch it paid a fixed rate rising each year, from 2.35% in year one to 3.35% in year ten, with interest paid yearly. The minimum is €1,000 and the maximum €1 million per holder. You can redeem from the end of the first year, losing the interest of the year in progress. Rates for new subscriptions can change."
+      },
+      "demand": {
+        "name": "Remunerated current account",
+        "text": "A current account that pays interest on the balance. The money is available at any time with no loss of interest, but the rate can change and sometimes depends on conditions the bank sets. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "savings": {
+        "name": "Savings account",
+        "text": "A deposit account for savings, often linked to a current account. Some accept transfers straight from another bank, others only from the linked account. Most allow withdrawals at any time, and many without losing interest. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "term": {
+        "name": "Term deposit",
+        "text": "You lock in an amount for a set term at a rate agreed upfront. You cannot add to it, and most pay the interest at the end of the term. Early withdrawal is allowed by only some, and usually costs half or more of the interest accrued. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "capitalisation": {
+        "name": "Capitalisation insurance",
+        "text": "A life insurance contract that accumulates savings. The guarantee is the insurer's, not the Deposit Guarantee Fund's, and whether capital is guaranteed depends on the contract, so check it. Most charge a fee on early withdrawal in the first years. The gain is taxed when you withdraw, and the rate falls the longer you hold."
+      },
+      "ppr": {
+        "name": "PPR insurance (retirement savings plan)",
+        "text": "A retirement savings plan sold here as insurance. Like capitalisation insurance, the guarantee is the insurer's and depends on the contract. Early withdrawal carries a fee in the first years unless it is for a reason set out in law, such as retirement, long-term unemployment, serious illness or permanent incapacity. Deducting contributions in your IRS return comes with conditions: see the tax section."
+      }
+    },
+    "cells": {
+      "state": "Portuguese State",
+      "noLimit": "No limit",
+      "fgd": "Deposit Guarantee Fund",
+      "fgdLimit": "€100,000 per bank and holder",
+      "insurer": "The insurer",
+      "certificatesTopUp": "Only additional subscriptions: pay by entity and reference in the CTT app, pay the State through AforroNet, or pay at a CTT counter",
+      "demandTopUp": "Top up the balance, directly by transfer from another bank",
+      "savingsTopUp": "Top up the balance: some accounts take transfers from another bank directly, others only through the current account",
+      "notAllowed": "Not allowed",
+      "insuranceTopUp": "Some allow top-ups to the balance, by transfer, entity and reference payment or debit from the current account",
+      "aforroWithdrawal": "After 3 months, losing the interest of the quarter in progress",
+      "tesouroWithdrawal": "After 1 year, losing the interest of the year in progress",
+      "demandWithdrawal": "At any time, with no loss of interest",
+      "savingsWithdrawal": "At any time, many with no loss of interest",
+      "termWithdrawal": "Some allow it, usually losing 50% or more of the accrued interest",
+      "capitalisationWithdrawal": "Most charge a fee (a % of the balance) in the first years",
+      "pprWithdrawal": "A fee (a % of the balance) in the first years, unless the withdrawal is for a reason set out in law",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly",
+      "frequencyVaries": "Frequency varies",
+      "paidAtTermEnd": "Most pay at the end of the term",
+      "creditedBalanceNet": "Added to the balance after IRS",
+      "paidAccountNet": "Paid into the current account after IRS",
+      "creditedBalanceDomesticNet": "Added to the balance (after IRS, at Portuguese banks)",
+      "creditedBalanceOrAccountDomesticNet": "Added to the balance or paid into the current account (after IRS, at Portuguese banks)",
+      "creditedAccountDomesticNet": "Paid into the current account (after IRS, at Portuguese banks)",
+      "creditedBalanceGross": "Added to the balance, gross",
+      "irsAtPayment": "When the interest is paid",
+      "rate28": "28%",
+      "domesticBanks": "Portuguese banks",
+      "foreignBanks": "Foreign banks",
+      "irsInReturn": "In your IRS return (declaration mandatory)",
+      "irsOnWithdrawal": "When you withdraw",
+      "capitalisationRates": "11.2% to 28%, depending on how long you held it",
+      "pprRates": "8% to 20%, depending on how long you held it",
+      "pprLegalRate": "8% if the withdrawal is for a reason set out in law"
+    },
+    "fgd": {
+      "title": "The Deposit Guarantee Fund",
+      "p1": "The Fundo de Garantia de Depósitos (FGD) repays deposits at its member banks, up to €100,000 per depositor and per bank, if a bank cannot pay.",
+      "p2": "It covers current, savings and term deposits. The limit is per bank: balances you hold at the same bank add up to one €100,000 limit, while balances at different banks are each covered up to their own limit.",
+      "p3": "It does not cover savings or treasury certificates, which are State debt, nor insurance, which relies on the insurer. An account at a bank in another country is usually covered by that country's scheme, not the Portuguese one."
+    },
+    "tax": {
+      "title": "How IRS applies",
+      "intro": "Interest and gains from savings are capital income (category E of IRS). The rules differ by product.",
+      "domestic": {
+        "title": "Certificates and Portuguese banks",
+        "text": "Interest is taxed by withholding at source at 28%, a final rate (CIRS art. 71). You can choose to add it to the rest of your income instead (englobamento), in which case the amount withheld counts as a payment on account."
+      },
+      "foreign": {
+        "title": "Foreign banks",
+        "text": "A bank abroad does not withhold Portuguese tax. If you are resident in Portugal you must declare the interest in your IRS return, where it is taxed at 28% unless you choose englobamento (CIRS art. 72)."
+      },
+      "insurance": {
+        "title": "Capitalisation insurance",
+        "text": "The gain is taxed when you withdraw, at 28%. If you held the contract for more than 5 and up to 8 years, a fifth of the gain is excluded (22.4%), and after 8 years three fifths are (11.2%). These reductions apply only if at least 35% of the premiums were paid in the first half of the contract (CIRS art. 5(3))."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "If you withdraw for a reason set out in law, the gain is taxed at 8% (20% on two fifths of it). Outside those cases the gain is taxed at 20%, reduced to 16% after 5 years and to 8% after 8 years if at least 35% of contributions were paid in the first half. You also give back what you deducted in your IRS return, plus 10% for each year or part of a year, except after 5 years in the cases set out in law (EBF art. 21)."
+      }
+    },
+    "sources": {
+      "title": "Sources",
+      "intro": "Each guarantee and tax statement above was checked against these official pages. Rules change, so confirm the current text before you decide.",
+      "checkedOn": "Checked {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: deposit guarantee",
+        "aforro": "IGCP: Certificados de Aforro, Série F (conditions in force from June 2026)",
+        "tesouro": "gov.pt: new Certificados do Tesouro, Série 5 (July 2026)",
+        "tesouroRedemption": "gov.pt: redeeming Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS art. 71: 28% withholding and the aggregation option",
+        "cirs72": "Portal das Finanças, CIRS art. 72: 28% on income without withholding",
+        "cirs5": "Portal das Finanças, CIRS art. 5(3): life insurance withdrawals",
+        "ebf21": "Portal das Finanças, EBF art. 21: retirement savings plans"
+      }
+    },
+    "related": {
+      "title": "Run the numbers",
+      "intro": "Put figures on the products above with these free tools."
+    },
+    "disclaimer": "This guide is educational and not financial or tax advice. It names no providers and recommends no product.",
+    "hubDescription": "Compare certificates, deposits, savings accounts and insurance on guarantee, withdrawals and tax."
   },
   "learn": {
     "hub": {

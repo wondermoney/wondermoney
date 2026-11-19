@@ -1,0 +1,131 @@
+---
+// Prerendered explanation for the term deposit offers comparison: what the table is and is not, a
+// worked example computed by the same function the table runs, the method, the data and its
+// date, what the figures leave out, and the tools to go on with.
+import { DEPOSIT_TAX_RATE } from "@/lib/calculators/depositRates";
+import {
+  TERM_DEPOSIT_OFFERS,
+  TERM_DEPOSIT_OFFERS_AS_OF,
+  offerReturn,
+  sortOffers,
+} from "@/lib/calculators/termDepositOffers";
+import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.termDepositOffers.guide.${key}`;
+
+const EXAMPLE_AMOUNT = 10_000;
+const top = sortOffers(TERM_DEPOSIT_OFFERS)[0];
+const example = offerReturn(top, EXAMPLE_AMOUNT);
+if (!example) throw new Error("The term deposit offers worked example has invalid inputs");
+
+const eur = (value: number) => formatMoney(locale, value, { currency: "EUR", decimals: 2 });
+const percent = (value: number) => formatPercent(locale, value, { decimals: 2 });
+const values = {
+  amount: formatMoney(locale, EXAMPLE_AMOUNT, { currency: "EUR", decimals: 0 }),
+  months: String(top.termMonths),
+  rate: percent(top.tanb),
+  bank: top.bank,
+  gross: eur(example.grossInterest),
+  net: eur(example.netInterest),
+  yearly: percent(example.netAnnualYield),
+  taxRate: String(DEPOSIT_TAX_RATE),
+  date: TERM_DEPOSIT_OFFERS_AS_OF,
+  count: String(TERM_DEPOSIT_OFFERS.length),
+};
+
+const list = (key: string) =>
+  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+const steps = list("method.steps");
+const limits = list("limits.items");
+
+const related = [
+  { key: "termDeposit", href: toLocalizedPath("toolTermDeposit", locale) },
+  { key: "depositRateIndex", href: toLocalizedPath("toolDepositRateIndex", locale) },
+  { key: "savingsCertificates", href: toLocalizedPath("toolSavingsCertificates", locale) },
+] as const;
+
+const linkClass =
+  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+  <section aria-labelledby="offers-read">
+    <h2 id="offers-read" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("read.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("read.what"), values)}</p>
+      <p>{t(k("read.noRecommendation"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="offers-example">
+    <h2 id="offers-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("example.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="offers-method">
+    <h2 id="offers-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("method.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"))}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {steps.map((item) => <li>{item}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="offers-data">
+    <h2 id="offers-data" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("data.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("data.source"), values)}</p>
+      <p>{t(k("data.refresh"))}</p>
+      <p>
+        {t(k("data.fgd"))}{" "}
+        <a href="https://www.fgd.pt/en" class={linkClass} rel="noopener" target="_blank">fgd.pt</a>
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="offers-limits">
+    <h2 id="offers-limits" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("limits.title"))}
+    </h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {limits.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="offers-related">
+    <h2 id="offers-related" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("related.title"))}
+    </h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>

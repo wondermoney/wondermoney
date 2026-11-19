@@ -1,6 +1,7 @@
 ---
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import { SAVINGS_GUIDE_RELATED_ROUTE_IDS } from "@/content/savingsGuide";
 import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInterestCalculatorComp";
 import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuide.astro";
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
@@ -70,10 +71,16 @@ import EuriborCalculatorComp from "@/components/calculators/EuriborCalculatorCom
 import EuriborGuide from "@/components/calculators/EuriborGuide.astro";
 import DepositRateIndexComp from "@/components/calculators/DepositRateIndexComp";
 import DepositRateIndexGuide from "@/components/calculators/DepositRateIndexGuide.astro";
+import TermDepositOffersComp from "@/components/calculators/TermDepositOffersComp";
+import TermDepositOffersGuide from "@/components/calculators/TermDepositOffersGuide.astro";
 import ElectricityIndexComp from "@/components/calculators/ElectricityIndexComp";
 import ElectricityIndexGuide from "@/components/calculators/ElectricityIndexGuide.astro";
 import FuelPricesComp from "@/components/calculators/FuelPricesComp";
 import FuelPricesGuide from "@/components/calculators/FuelPricesGuide.astro";
+import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp";
+import FreeBankAccountsGuide from "@/components/calculators/FreeBankAccountsGuide.astro";
+import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccountsComp";
+import RemuneratedAccountsGuide from "@/components/calculators/RemuneratedAccountsGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -259,6 +266,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.depositRateIndex.nextStepCta"),
     ctaHref: toLocalizedPath("featureGoals", locale),
   },
+  toolTermDepositOffers: {
+    headline: t("tools.termDepositOffers.nextStepHeadline"),
+    description: t("tools.termDepositOffers.nextStepDescription"),
+    ctaText: t("tools.termDepositOffers.nextStepCta"),
+    ctaHref: toLocalizedPath("featureAccounts", locale),
+  },
   toolElectricityIndex: {
     headline: t("tools.electricityIndex.nextStepHeadline"),
     description: t("tools.electricityIndex.nextStepDescription"),
@@ -271,6 +284,18 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.fuelPrices.nextStepCta"),
     ctaHref: toLocalizedPath("featureBudgeting", locale),
   },
+  toolFreeBankAccounts: {
+    headline: t("tools.freeBankAccounts.nextStepHeadline"),
+    description: t("tools.freeBankAccounts.nextStepDescription"),
+    ctaText: t("tools.freeBankAccounts.nextStepCta"),
+    ctaHref: toLocalizedPath("featureAccounts", locale),
+  },
+  toolRemuneratedAccounts: {
+    headline: t("tools.remuneratedAccounts.nextStepHeadline"),
+    description: t("tools.remuneratedAccounts.nextStepDescription"),
+    ctaText: t("tools.remuneratedAccounts.nextStepCta"),
+    ctaHref: toLocalizedPath("featureGoals", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -278,16 +303,27 @@ const nextStepCtaByRouteId: Partial<
   },
 };
 
-const relatedItems = related.map((relatedRouteId) => {
+type RelatedItem = { title: string; description: string; href: string; type: "calculator" | "guide" };
+
+const relatedItems: RelatedItem[] = related.map((relatedRouteId) => {
   const relatedKey = getToolCatalogEntry(relatedRouteId).key;
 
   return {
     title: t(`tools.${relatedKey}.title`),
     description: t(`tools.${relatedKey}.description`),
     href: toLocalizedPath(relatedRouteId, locale),
-    type: "calculator" as const,
+    type: "calculator",
   };
 });
+
+if ((SAVINGS_GUIDE_RELATED_ROUTE_IDS as readonly string[]).includes(routeId)) {
+  relatedItems.push({
+    title: t("savingsGuide.title"),
+    description: t("savingsGuide.hubDescription"),
+    href: toLocalizedPath("pageSavingsGuide", locale),
+    type: "guide",
+  });
+}
 
 const alternateLinks = buildAlternateLinks(routeId);
 const pageTitle = t(`tools.${key}.pageTitle`);
@@ -385,6 +421,9 @@ const schema = {
     {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
     {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
     {routeId === "toolDepositRateIndex" && <DepositRateIndexComp locale={locale} client:load />}
+    {routeId === "toolTermDepositOffers" && <TermDepositOffersComp locale={locale} client:load />}
+    {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
+    {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
     {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
     {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
   </div>
@@ -422,6 +461,9 @@ const schema = {
   {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
   {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
   {routeId === "toolDepositRateIndex" && <DepositRateIndexGuide locale={locale} />}
+  {routeId === "toolTermDepositOffers" && <TermDepositOffersGuide locale={locale} />}
+  {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
+  {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
   {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
   {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
 
