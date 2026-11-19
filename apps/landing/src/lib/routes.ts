@@ -344,6 +344,14 @@ const ROUTE_SLUGS = {
 		de: "autokredit-rechner",
 		it: "simulatore-prestito-auto",
 	},
+	toolSavingsCertificates: {
+		pt: "simulador-certificados-de-aforro",
+		en: "savings-certificates-calculator",
+		es: "simulador-certificados-de-ahorro-portugal",
+		fr: "simulateur-certificats-epargne-portugal",
+		de: "sparzertifikate-portugal-rechner",
+		it: "simulatore-certificati-risparmio-portogallo",
+	},
 	toolPersonalLoan: {
 		pt: "simulador-credito-pessoal",
 		en: "personal-loan-calculator",
@@ -479,6 +487,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolCarLoan",
 	"toolPersonalLoan",
 	"toolInflation",
+	"toolSavingsCertificates",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -748,6 +757,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"credito-automovel": "toolCarLoan",
 	toolinflation: "toolInflation",
 	"inflation-calculator": "toolInflation",
+	toolsavingscertificates: "toolSavingsCertificates",
+	"certificados-de-aforro": "toolSavingsCertificates",
+	"certificados-de-aforro-serie-f": "toolSavingsCertificates",
+	"savings-certificates": "toolSavingsCertificates",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",

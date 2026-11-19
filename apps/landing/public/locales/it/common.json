@@ -2438,6 +2438,74 @@
         "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
         "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulatore dei certificati di risparmio portoghesi (Certificados de Aforro)",
+      "shortName": "Certificati di risparmio",
+      "subtitle": "Stima quanto possono rendere i Certificados de Aforro Série F del Portogallo: interessi trimestrali, premi di permanenza e 28% di IRS trattenuta, lordo e netto.",
+      "description": "Stima interessi, premi e imposta dei Certificados de Aforro Série F.",
+      "pageTitle": "Simulatore Certificados de Aforro Série F: interessi, premi e rendimento netto",
+      "pageDescription": "Stima il rendimento dei Certificados de Aforro Série F con i premi di permanenza, la ritenuta del 28% di IRS e un tasso base modificabile, al lordo e al netto.",
+      "assumption": "Il tasso base cambia ogni mese con l’Euribor a 3 mesi. Questa stima mantiene il tasso che inserisci per tutti i trimestri, quindi il risultato è un’illustrazione, non una previsione.",
+      "fields": {
+        "amount": "Importo sottoscritto",
+        "years": "Anni di permanenza",
+        "baseRate": "Tasso base (ipotesi)",
+        "baseRateHelp": "Tasso annuo lordo, fino a {{rate}} (il massimo previsto dalle regole). Modificalo per provare altri scenari."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Inserisci zero o un tasso positivo.",
+        "tooSmall": "Il minimo per conto è {{min}}.",
+        "tooLarge": "Il massimo per conto è {{max}}.",
+        "years": "Inserisci un numero intero di anni, da 1 a {{years}}.",
+        "baseRate": "Il tasso base non può superare {{rate}}.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "finalValue": "Valore netto stimato alla fine",
+        "invested": "Importo sottoscritto",
+        "grossInterest": "Interessi lordi",
+        "irs": "IRS trattenuta (28%)",
+        "netInterest": "Interessi netti",
+        "premiumInterest": "Degli interessi lordi, derivano da premi di permanenza",
+        "netYield": "Rendimento netto annuo"
+      },
+      "table": {
+        "title": "Anno per anno",
+        "year": "Anno",
+        "rate": "Tasso lordo",
+        "gross": "Interessi lordi",
+        "net": "Interessi netti",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Regole della Série F seguite dal simulatore",
+        "rulesIntro": "Regole pubblicate dall’IGCP nella scheda prodotto della Série F di {{rulesDate}} (Portaria n.º 149-A/2023). Le regole possono cambiare e contano le condizioni vigenti dell’emittente.",
+        "ruleTerm": "Durata di {{termYears}} anni. Puoi riscattare, in tutto o in parte, dalla prima scadenza degli interessi; il simulatore usa anni interi di permanenza.",
+        "ruleRate": "Ogni trimestre rende il tasso base in vigore all’inizio del trimestre più il premio di permanenza dell’anno di sottoscrizione. Il tasso base segue l’Euribor a 3 mesi, con massimo {{maxBase}} e minimo 0%.",
+        "ruleTax": "Gli interessi maturano ogni trimestre e vengono capitalizzati automaticamente dopo l’IRS, trattenuta alla fonte al {{irsRate}}.",
+        "ruleRedeem": "Possono essere titolari solo persone fisiche. Il limite è {{maxAmount}} per conto aforro nella Série F, con un minimo di {{minAmount}}.",
+        "premiumTitle": "Premio di permanenza per anno di sottoscrizione",
+        "premiumYears": "Anno",
+        "premiumPoints": "Punti percentuali",
+        "sourceSheet": "Scheda prodotto Série F dell’IGCP (aprile 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "aprile 2026",
+        "exampleTitle": "Esempio pratico",
+        "exampleText": "Sottoscrivi {{amount}} e li mantieni per {{years}} anni con un tasso base del {{baseRate}}. I certificati rendono {{grossInterest}} di interessi lordi, di cui {{irs}} vanno all’IRS, lasciando {{netInterest}} netti. Il saldo arriva a {{finalValue}}, un rendimento netto del {{netYield}} annuo.",
+        "methodTitle": "Come funziona la stima",
+        "methodQuarter": "Ogni trimestre rende un quarto del tasso annuo (tasso base più premio) sul saldo corrente. Gli importi sono arrotondati al centesimo a ogni trimestre.",
+        "methodTax": "Si trattiene il {{irsRate}} degli interessi di ogni trimestre e gli interessi netti si sommano al saldo, così i trimestri successivi maturano interessi anche su di essi.",
+        "methodYield": "Il rendimento netto annuo è la crescita composta annua dall’importo sottoscritto al saldo finale. I valori lordi mostrano gli interessi prima dell’IRS.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Il tasso reale viene rivisto ogni mese, quindi gli interessi effettivi saranno diversi.",
+        "assumptionRules": "L’aliquota IRS è quella generale per questo tipo di reddito. La tua situazione fiscale e le modifiche alle regole successive a {{rulesDate}} non sono considerate.",
+        "assumptionScope": "Informazione generale, non una raccomandazione a sottoscrivere o evitare un prodotto, e non confronta i certificati con altri risparmi."
+      },
+      "nextStepHeadline": "Vedi i tuoi certificati accanto al resto dei risparmi",
+      "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",
+      "nextStepCta": "Includi i certificati nella tua panoramica dei risparmi"
     }
   },
   "resources": {

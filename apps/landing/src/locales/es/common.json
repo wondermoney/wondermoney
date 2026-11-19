@@ -2438,6 +2438,74 @@
         "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
         "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Calculadora de certificados de ahorro (Certificados de Aforro)",
+      "shortName": "Certificados de ahorro",
+      "subtitle": "Estima lo que podrían rendir los Certificados de Aforro Série F de Portugal: intereses trimestrales, primas de permanencia y 28% de IRS retenido, en bruto y en neto.",
+      "description": "Estima intereses, primas e impuestos de los Certificados de Aforro Série F.",
+      "pageTitle": "Calculadora de Certificados de Aforro Série F: intereses, primas y rentabilidad neta",
+      "pageDescription": "Estima la rentabilidad de los Certificados de Aforro Série F con primas de permanencia, retención del 28% de IRS y tipo base editable, en bruto y neto.",
+      "assumption": "El tipo base cambia cada mes con el Euríbor a 3 meses. Esta estimación mantiene el tipo que introduces en todos los trimestres, así que el resultado es una ilustración, no una previsión.",
+      "fields": {
+        "amount": "Importe suscrito",
+        "years": "Años de permanencia",
+        "baseRate": "Tipo base (supuesto)",
+        "baseRateHelp": "Tipo anual bruto, hasta {{rate}} (el límite de las normas). Edítalo para probar otros escenarios."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un tipo positivo.",
+        "tooSmall": "El mínimo por cuenta es {{min}}.",
+        "tooLarge": "El máximo por cuenta es {{max}}.",
+        "years": "Introduce un número entero de años, de 1 a {{years}}.",
+        "baseRate": "El tipo base no puede superar {{rate}}.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "finalValue": "Valor neto estimado al final",
+        "invested": "Importe suscrito",
+        "grossInterest": "Intereses brutos",
+        "irs": "IRS retenido (28%)",
+        "netInterest": "Intereses netos",
+        "premiumInterest": "De los intereses brutos, proceden de primas de permanencia",
+        "netYield": "Rentabilidad neta anual"
+      },
+      "table": {
+        "title": "Año a año",
+        "year": "Año",
+        "rate": "Tipo bruto",
+        "gross": "Intereses brutos",
+        "net": "Intereses netos",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Normas de la Série F que sigue la calculadora",
+        "rulesIntro": "Normas publicadas por el IGCP en la ficha de producto de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Las normas pueden cambiar y cuentan las condiciones vigentes del emisor.",
+        "ruleTerm": "Plazo de {{termYears}} años. Puedes reembolsar, total o parcialmente, desde el primer vencimiento de intereses; la calculadora usa años completos de permanencia.",
+        "ruleRate": "Cada trimestre rinde el tipo base vigente al inicio del trimestre más la prima de permanencia del año de suscripción. El tipo base sigue el Euríbor a 3 meses, con máximo de {{maxBase}} y mínimo de 0%.",
+        "ruleTax": "Los intereses vencen trimestralmente y se capitalizan automáticamente después de IRS, retenido en origen al {{irsRate}}.",
+        "ruleRedeem": "Solo pueden ser titulares personas físicas. El límite es {{maxAmount}} por cuenta aforro en la Série F, con un mínimo de {{minAmount}}.",
+        "premiumTitle": "Prima de permanencia por año de suscripción",
+        "premiumYears": "Año",
+        "premiumPoints": "Puntos porcentuales",
+        "sourceSheet": "Ficha de producto de la Série F del IGCP (abril de 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "abril de 2026",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleText": "Suscribes {{amount}} y los mantienes {{years}} años con un tipo base de {{baseRate}}. Los certificados generan {{grossInterest}} de intereses brutos, de los que {{irs}} van a IRS, y quedan {{netInterest}} netos. El saldo llega a {{finalValue}}, una rentabilidad neta de {{netYield}} al año.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodQuarter": "Cada trimestre rinde un cuarto del tipo anual (tipo base más prima) sobre el saldo actual. Los importes se redondean al céntimo cada trimestre.",
+        "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
+        "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. El tipo real se revisa cada mes, por lo que los intereses efectivos serán distintos.",
+        "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
+        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
+      },
+      "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
+      "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
+      "nextStepCta": "Incluye los certificados en tu visión general del ahorro"
     }
   },
   "resources": {

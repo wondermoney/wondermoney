@@ -151,6 +151,12 @@ export const TOOLS_CATALOG = [
 		group: "investAndGrow",
 		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund"],
 	},
+	{
+		key: "savingsCertificates",
+		routeId: "toolSavingsCertificates",
+		group: "investAndGrow",
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation"],
+	},
 	// Track your wealth
 	{
 		key: "netWorth",
