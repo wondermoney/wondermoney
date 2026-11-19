@@ -3,10 +3,16 @@ import { toIntlLocale } from "@/lib/numberFormat";
 import "@/styles/globals.css";
 import { PortableText } from "astro-portabletext";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import ArticleSection from "@/components/learning/ArticleSection.astro";
 import ReferenceList from "@/components/learning/ReferenceList.astro";
 import DataTable from "@/components/learning/DataTable.astro";
+import { buildOutline, portableTextToPlain, readingMinutes } from "@/lib/articleOutline";
+import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/i18nLocale";
+import type { PortableTextBlock } from "@/lib/learningContent";
 import type { MonthlyContent } from "@/lib/pageStaticPaths";
+import { getTranslations } from "@/lib/translations";
 
 interface Props {
   locale: Lang;
@@ -14,6 +20,7 @@ interface Props {
 }
 
 const { locale, item: monthlyItem } = Astro.props;
+const t = getTranslations(locale);
 const learnPrefix = `/${locale}/learn`;
 const monthlyPrefix = `${learnPrefix}/monthly`;
 
@@ -40,6 +47,43 @@ const chartSummary = monthlyItem.trendChartConfig?.series ?? [];
 const deltaRows = (monthlyItem.changeVsPrevious ?? []).filter((entry) => Boolean(entry.metric));
 const references = monthlyItem.references ?? monthlyItem.dataSources ?? [];
 
+const seriesTitle = t("resources.links.monthly.title");
+const title = monthlyItem.title || seriesTitle;
+const whatChanged = monthlyItem.whatChanged ?? [];
+const whoShouldCare = monthlyItem.whoShouldCare ?? [];
+const bodyBlocks = Array.isArray(monthlyItem.body) ? (monthlyItem.body as PortableTextBlock[]) : [];
+
+// The indicator sections, in reading order; numbered when there are two or more.
+type SectionKey = "methodology" | "snapshot" | "change" | "whatChanged" | "whoShouldCare" | "trend";
+const sectionTitles: Array<[SectionKey, string]> = [];
+if (monthlyItem.methodology) sectionTitles.push(["methodology", t("learn.monthly.methodology")]);
+if (monthlyItem.snapshotTable) sectionTitles.push(["snapshot", monthlyItem.snapshotTable.title || t("learn.monthly.snapshotTable")]);
+if (deltaRows.length > 0) sectionTitles.push(["change", t("learn.monthly.changeVsPrevious")]);
+if (whatChanged.length > 0) sectionTitles.push(["whatChanged", t("learn.monthly.whatChanged")]);
+if (whoShouldCare.length > 0) sectionTitles.push(["whoShouldCare", t("learn.monthly.whoShouldCare")]);
+if (chartSummary.length > 0) sectionTitles.push(["trend", monthlyItem.trendChartConfig?.title || t("learn.monthly.trendChart")]);
+
+const outline = buildOutline(sectionTitles.map(([, sectionTitle]) => sectionTitle));
+const section = (key: SectionKey) => {
+  const index = sectionTitles.findIndex(([candidate]) => candidate === key);
+  return index < 0 ? undefined : { entry: outline[index], index, numbered: outline.length > 1 };
+};
+const methodologySection = section("methodology");
+const snapshotSection = section("snapshot");
+const changeSection = section("change");
+const whatChangedSection = section("whatChanged");
+const whoShouldCareSection = section("whoShouldCare");
+const trendSection = section("trend");
+
+const readMinutes = readingMinutes([
+  monthlyItem.excerpt ?? "",
+  monthlyItem.methodology ?? "",
+  ...deltaRows.map((entry) => `${entry.metric} ${entry.note ?? ""}`),
+  ...whatChanged.map((change) => `${change.title ?? ""} ${change.detail ?? ""}`),
+  ...whoShouldCare,
+  portableTextToPlain(bodyBlocks),
+]);
+
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -57,130 +101,121 @@ const articleSchema = {
 ---
 
 <ContentLayout
-  title={monthlyItem.seoTitle || `${monthlyItem.title || "Monthly update"} - WonderMoney`}
+  title={monthlyItem.seoTitle || `${title} - WonderMoney`}
   description={monthlyItem.seoDescription || monthlyItem.excerpt || ""}
   ogImage={monthlyItem.ogImageUrl}
   ogType="article"
-  breadcrumbs={[
-    { label: locale === "pt" ? "Aprenda" : "Learn", href: learnPrefix },
-    { label: locale === "pt" ? "Mensal" : "Monthly", href: monthlyPrefix },
-    { label: monthlyItem.title || (locale === "pt" ? "Atualizacao" : "Update"), href: "#" },
-  ]}
+  layout="article"
   locale={locale}
   structuredData={articleSchema}
 >
-  <article class="mx-auto max-w-3xl">
-    <section>
-      {monthYearLabel && (
-        <p class="text-sm text-muted-foreground"><time datetime={`${monthlyItem.year}-${String(monthlyItem.month).padStart(2, "0")}`}>{monthYearLabel}</time></p>
-      )}
-      <h1 class="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{monthlyItem.title}</h1>
-      {monthlyItem.excerpt && <p class="mt-4 text-lg leading-8 text-muted-foreground">{monthlyItem.excerpt}</p>}
-      {publishedLabel && <p class="mt-4 text-sm text-muted-foreground">{publishedLabel}</p>}
-    </section>
-
-    {monthlyItem.methodology && (
-      <section class="mt-10 rounded-card border border-info/30 bg-info/5 p-5">
-        <h2 class="text-xl font-semibold text-info-text">
-          {locale === "pt" ? "Metodologia" : "Methodology"}
-        </h2>
-        <p class="mt-3 text-sm leading-7 text-info-text">{monthlyItem.methodology}</p>
-      </section>
-    )}
-
-    {monthlyItem.snapshotTable && (
-      <div class="mt-8">
-        <DataTable
-          title={monthlyItem.snapshotTable.title || (locale === "pt" ? "Tabela de snapshot" : "Snapshot table")}
-          columns={monthlyItem.snapshotTable.columns ?? []}
-          rows={monthlyItem.snapshotTable.rows ?? []}
-        />
-      </div>
-    )}
-
-    {deltaRows.length > 0 && (
-      <section class="mt-8 rounded-card border border-success/30 bg-success/5 p-5">
-        <h2 class="text-xl font-semibold text-success-text">
-          {locale === "pt" ? "Mudanca face ao periodo anterior" : "Change vs previous period"}
-        </h2>
-        <ul class="mt-3 space-y-2 text-sm text-success-text">
-          {deltaRows.map((entry) => (
-            <li>
-              <span class="font-semibold">{entry.metric}:</span>{" "}
-              {entry.delta ?? 0}
-              {entry.unit ? ` ${entry.unit}` : ""}
-              {entry.note ? ` - ${entry.note}` : ""}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
-
-    {monthlyItem.whatChanged && monthlyItem.whatChanged.length > 0 && (
-      <section class="mt-8 rounded-card border border-border bg-background p-5">
-        <h2 class="text-xl font-semibold text-foreground">
-          {locale === "pt" ? "O que mudou" : "What changed"}
-        </h2>
-        <div class="mt-3 space-y-3">
-          {monthlyItem.whatChanged.map((change) => (
-            <div class="rounded-md border border-border p-3">
-              {change.title && <h3 class="font-medium text-foreground">{change.title}</h3>}
-              {change.detail && <p class="mt-1 text-sm text-muted-foreground">{change.detail}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-    )}
-
-    {monthlyItem.whoShouldCare && monthlyItem.whoShouldCare.length > 0 && (
-      <section class="mt-8 rounded-card border border-warning/30 bg-warning/5 p-5">
-        <h2 class="text-xl font-semibold text-warning-text">
-          {locale === "pt" ? "Quem deve prestar atencao" : "Who should care"}
-        </h2>
-        <ul class="mt-3 list-disc space-y-2 pl-5 text-sm text-warning-text">
-          {monthlyItem.whoShouldCare.map((item) => (
-            <li>{item}</li>
-          ))}
-        </ul>
-      </section>
-    )}
-
-    {chartSummary.length > 0 && (
-      <section class="mt-8 rounded-card border border-border bg-paper-2 p-5">
-        <h2 class="text-xl font-semibold text-foreground">
-          {monthlyItem.trendChartConfig?.title || (locale === "pt" ? "Tendencia" : "Trend chart")}
-        </h2>
-        <p class="mt-2 text-sm text-muted-foreground">
-          {locale === "pt" ? "Tipo de grafico" : "Chart type"}: {monthlyItem.trendChartConfig?.chartType || "line"}
+  <article>
+    <ArticleHero
+      locale={locale}
+      title={title}
+      dek={monthlyItem.excerpt}
+      breadcrumbs={[
+        { label: t("header.learn"), href: learnPrefix },
+        { label: seriesTitle, href: monthlyPrefix },
+      ]}
+      readMinutes={readMinutes}
+      outline={outline}
+      figure={PAGE_FIGURES.monthlyHub}
+    >
+      {(monthYearLabel || publishedLabel) && (
+        <p class="mt-5 text-sm text-muted-foreground">
+          {monthYearLabel && (
+            <time datetime={`${monthlyItem.year}-${String(monthlyItem.month).padStart(2, "0")}`}>{monthYearLabel}</time>
+          )}
+          {monthYearLabel && publishedLabel && <span aria-hidden="true"> · </span>}
+          {publishedLabel && <time datetime={monthlyItem.publishedAt}>{publishedLabel}</time>}
         </p>
-        <ul class="mt-3 space-y-1 text-sm text-muted-foreground">
-          {chartSummary.map((series) => (
-            <li>
-              <span class="font-medium text-foreground">{series.label}:</span>{" "}
-              {(series.values ?? []).join(", ")}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
+      )}
+    </ArticleHero>
 
-    {Array.isArray(monthlyItem.body) && monthlyItem.body.length > 0 && (
-      <section class="prose mt-10 lg:prose-lg">
-        <PortableText value={monthlyItem.body} />
-      </section>
-    )}
+    <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+      <div class="max-w-[40rem] space-y-10">
+        {methodologySection && (
+          <ArticleSection {...methodologySection}>
+            <p>{monthlyItem.methodology}</p>
+          </ArticleSection>
+        )}
 
-    <div class="mt-10">
-      <ReferenceList title={locale === "pt" ? "Referencias" : "References"} references={references} />
-    </div>
+        {snapshotSection && (
+          <ArticleSection {...snapshotSection}>
+            <div class="not-prose">
+              <DataTable
+                columns={monthlyItem.snapshotTable?.columns ?? []}
+                rows={monthlyItem.snapshotTable?.rows ?? []}
+              />
+            </div>
+          </ArticleSection>
+        )}
 
-    {monthlyItem.dataSources && monthlyItem.dataSources.length > 0 && (
-      <div class="mt-8">
-        <ReferenceList
-          title={locale === "pt" ? "Fontes de dados" : "Data sources"}
-          references={monthlyItem.dataSources}
-        />
+        {changeSection && (
+          <ArticleSection {...changeSection}>
+            <ul>
+              {deltaRows.map((entry) => (
+                <li>
+                  <strong>{entry.metric}:</strong>{" "}
+                  {entry.delta ?? 0}
+                  {entry.unit ? ` ${entry.unit}` : ""}
+                  {entry.note ? ` - ${entry.note}` : ""}
+                </li>
+              ))}
+            </ul>
+          </ArticleSection>
+        )}
+
+        {whatChangedSection && (
+          <ArticleSection {...whatChangedSection}>
+            {whatChanged.map((change) => (
+              <>
+                {change.title && <h3>{change.title}</h3>}
+                {change.detail && <p>{change.detail}</p>}
+              </>
+            ))}
+          </ArticleSection>
+        )}
+
+        {whoShouldCareSection && (
+          <ArticleSection {...whoShouldCareSection}>
+            <ul>
+              {whoShouldCare.map((entry) => (
+                <li>{entry}</li>
+              ))}
+            </ul>
+          </ArticleSection>
+        )}
+
+        {trendSection && (
+          <ArticleSection {...trendSection}>
+            <p>
+              {t("learn.monthly.chartType")}: {monthlyItem.trendChartConfig?.chartType || "line"}
+            </p>
+            <ul>
+              {chartSummary.map((series) => (
+                <li>
+                  <strong>{series.label}:</strong>{" "}
+                  {(series.values ?? []).join(", ")}
+                </li>
+              ))}
+            </ul>
+          </ArticleSection>
+        )}
+
+        {bodyBlocks.length > 0 && (
+          <section class="prose prose-lg article-prose">
+            <PortableText value={[...bodyBlocks]} />
+          </section>
+        )}
+
+        <ReferenceList title={t("glossary.term.references")} references={references} />
+
+        {monthlyItem.dataSources && monthlyItem.dataSources.length > 0 && (
+          <ReferenceList title={t("learn.monthly.dataSources")} references={monthlyItem.dataSources} />
+        )}
       </div>
-    )}
+    </div>
   </article>
 </ContentLayout>

@@ -1,0 +1,31 @@
+---
+/**
+ * One titled section in the reading column of a long-form page (Direction B),
+ * set like a learn guide's (GuideSections.astro): prose type, and the h2 with
+ * its index ("01") above it when the page has two or more sections. A table or
+ * card that brings its own styling goes in a `not-prose` wrapper in the slot.
+ */
+import { sectionNumber, type OutlineEntry } from "@/lib/articleOutline";
+
+interface Props {
+  /** The section's anchor and title, from buildOutline. */
+  entry: OutlineEntry;
+  /** Its position in the outline. */
+  index: number;
+  numbered: boolean;
+}
+
+const { entry, index, numbered } = Astro.props;
+---
+
+<section class="prose prose-lg article-prose">
+  <h2 id={entry.id}>
+    {numbered && (
+      <span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">
+        {sectionNumber(index)}
+      </span>
+    )}
+    {entry.title}
+  </h2>
+  <slot />
+</section>

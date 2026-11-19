@@ -4754,6 +4754,17 @@
       "reviewed": "Geprüft",
       "glossaryTerms": "Glossarbegriffe",
       "result": "Ergebnis"
+    },
+    "monthly": {
+      "comingSoon": "Die monatlichen Berichte folgen in Kürze.",
+      "methodology": "Methodik",
+      "snapshotTable": "Die Zahlen des Monats",
+      "changeVsPrevious": "Veränderung gegenüber dem Vorzeitraum",
+      "whatChanged": "Was sich geändert hat",
+      "whoShouldCare": "Wen es betrifft",
+      "trendChart": "Trend",
+      "chartType": "Diagrammtyp",
+      "dataSources": "Datenquellen"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Ein umfassendes Glossar mit Finanz- und Anlagebegriffen.",
       "description": "Jeder Finanz- und Anlagebegriff in verständlicher Sprache erklärt. Nach Buchstabe durchsuchen oder nach einem bestimmten Begriff suchen.",
       "searchPlaceholder": "Begriffe suchen...",
-      "comingSoon": "Glossarbegriffe folgen in Kürze."
+      "comingSoon": "Glossarbegriffe folgen in Kürze.",
+      "letterNav": "Begriffe nach Buchstaben"
     },
     "term": {
       "whyItMatters": "Warum es wichtig ist",

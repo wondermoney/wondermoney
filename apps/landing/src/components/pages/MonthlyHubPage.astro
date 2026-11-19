@@ -2,6 +2,9 @@
 import { toIntlLocale } from "@/lib/numberFormat";
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import FigureCards from "@/components/shared/FigureCards.astro";
+import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import { sanityClient } from "sanity:client";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
@@ -54,14 +57,22 @@ const monthYearLabel = (year?: number, month?: number) => {
   });
 };
 
+const title = t("resources.links.monthly.title");
+const dek = t("resources.links.monthly.description");
+
+const cards = validMonthlyItems.map((item) => ({
+  href: `${monthlyPrefix}/${item.slug}`,
+  title: item.title as string,
+  description: item.excerpt,
+  figure: PAGE_FIGURES.monthlyHub,
+  kind: monthYearLabel(item.year, item.month) ?? undefined,
+}));
+
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  name: locale === "pt" ? "Atualizacoes Mensais" : "Monthly Updates",
-  description:
-    locale === "pt"
-      ? "Atualizacoes mensais com contexto, metodologia e principais mudancas de mercado."
-      : "Monthly updates with context, methodology, and key market changes.",
+  name: title,
+  description: dek,
   url: `https://wonder.money${monthlyPrefix}`,
   numberOfItems: validMonthlyItems.length,
   itemListElement: validMonthlyItems.map((item, index) => ({
@@ -74,67 +85,30 @@ const itemListSchema = {
 ---
 
 <ContentLayout
-  title={locale === "pt" ? "Aprenda - Atualizacoes Mensais - WonderMoney" : "Learn - Monthly Updates - WonderMoney"}
-  description={locale === "pt"
-    ? "Acompanha as atualizacoes mensais com metodologia, fontes e principais mudancas nos indicadores."
-    : "Follow monthly updates with methodology, sources, and key indicator changes."}
+  title={`${t("header.learn")} - ${title} - WonderMoney`}
+  description={t("learn.monthlySeries.description")}
   alternateLinks={alternateLinks}
-  breadcrumbs={[
-    { label: locale === "pt" ? "Aprenda" : "Learn", href: learnPrefix },
-    { label: locale === "pt" ? "Mensal" : "Monthly", href: "#" },
-  ]}
+  layout="article"
   locale={locale}
   structuredData={itemListSchema}
 >
-  <section>
-    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-      {locale === "pt" ? "Atualizacoes Mensais" : "Monthly Updates"}
-    </h1>
-    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
-      {locale === "pt"
-        ? "Relatorios mensais com metodologia, fontes de dados e o que mudou face ao periodo anterior."
-        : "Monthly reports with methodology, data sources, and what changed versus the previous period."}
-    </p>
-  </section>
+  <ArticleHero
+    locale={locale}
+    title={title}
+    dek={dek}
+    breadcrumbs={[{ label: t("header.learn"), href: learnPrefix }, { label: title }]}
+    figure={PAGE_FIGURES.monthlyHub}
+  />
 
-  {
-    validMonthlyItems.length === 0 ? (
-      <div class="mt-12 rounded-card border border-border bg-paper-2 p-12 text-center">
-        <p class="text-lg text-muted-foreground">
-          {locale === "pt" ? "Atualizacoes mensais em breve." : "Monthly updates coming soon."}
+  <div class="mx-auto max-w-7xl px-6 pb-16 pt-10 lg:px-8">
+    {
+      cards.length === 0 ? (
+        <p class="max-w-[40rem] rounded-card border border-border bg-paper-2 p-8 text-lg text-muted-foreground">
+          {t("learn.monthly.comingSoon")}
         </p>
-      </div>
-    ) : (
-      <div class="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
-        {validMonthlyItems.map((item) => (
-          <a
-            href={`${monthlyPrefix}/${item.slug}`}
-            class="group rounded-card border border-border bg-background p-6 transition-colors hover:border-primary/40 hover:bg-accent"
-          >
-            {monthYearLabel(item.year, item.month) && (
-              <p class="text-sm text-muted-foreground">
-                <time datetime={`${item.year}-${String(item.month).padStart(2, "0")}`}>{monthYearLabel(item.year, item.month)}</time>
-              </p>
-            )}
-            <h2 class="mt-2 text-xl font-semibold text-foreground group-hover:text-primary">
-              {item.title || (locale === "pt" ? "Sem titulo" : "Untitled")}
-            </h2>
-            {item.excerpt && <p class="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{item.excerpt}</p>}
-            {item.publishedAt && (
-              <p class="mt-3 text-xs text-muted-foreground">
-                {new Date(item.publishedAt).toLocaleDateString(toIntlLocale(locale), {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </p>
-            )}
-            <span class="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 decoration-primary/40 group-hover:opacity-80">
-              {t("learn.monthlySeries.readUpdate")}
-            </span>
-          </a>
-        ))}
-      </div>
-    )
-  }
+      ) : (
+        <FigureCards locale={locale} cards={cards} headingLevel={2} />
+      )
+    }
+  </div>
 </ContentLayout>

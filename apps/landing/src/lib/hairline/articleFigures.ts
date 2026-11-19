@@ -88,6 +88,8 @@ export const PAGE_FIGURES = {
   guideMoneyCheckin: "timer",
   pageSavingsGuide: "containers",
   learnHub: "booklets",
+  glossaryHub: "cardindex",
+  monthlyHub: "calendar",
 } as const satisfies Record<string, FigureName>;
 
 /** Resources hub cards, by their `destination` (src/lib/resourcesHub.ts). */
