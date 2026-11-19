@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
       "nextStepCta": "Incluye los certificados en tu visión general del ahorro"
     },
+    "depositRateIndex": {
+      "title": "Índice de depósitos a plazo: lo que pagan de verdad los bancos en Portugal",
+      "shortName": "Índice de depósitos",
+      "subtitle": "El tipo de interés medio que los bancos de Portugal y de la zona del euro pagaron en los nuevos depósitos a plazo de los hogares, mes a mes desde 2003, con la inflación y el 28 % de IRS descontados.",
+      "description": "Tipos medios de los nuevos depósitos a plazo en Portugal y la zona del euro, tras la inflación y el impuesto.",
+      "pageTitle": "Índice de Depósitos a Plazo en Portugal: Tipos Medios frente a Inflación",
+      "pageDescription": "Tipos de interés medios oficiales de los nuevos depósitos a plazo de los hogares en Portugal y la zona del euro desde 2003, el tipo real tras la inflación y el 28 % de IRS, y una calculadora sencilla. Datos: estadísticas del Banco de Portugal a través del BCE.",
+      "snapshot": {
+        "title": "Tipo medio de los nuevos depósitos a plazo, {{month}}",
+        "intro": "Medias oficiales del tipo de interés acordado en los nuevos depósitos a plazo de los hogares, comunicadas por los bancos. Es una referencia, no una lista de ofertas.",
+        "portugal": "Portugal, todos los plazos",
+        "euroArea": "Zona del euro, todos los plazos",
+        "asOf": "Datos de {{month}}, el último mes publicado cuando se obtuvieron los datos, el {{retrieved}}.",
+        "provisional": "El último mes es provisional y puede revisarse.",
+        "caption": "Tipo medio de los nuevos depósitos a plazo por plazo original, Portugal y zona del euro",
+        "maturity": "Plazo original",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Zona del euro",
+        "noData": "n/d"
+      },
+      "real": {
+        "title": "Tipo real en {{year}}, el último año completo",
+        "nominal": "Tipo medio pagado",
+        "inflation": "Inflación",
+        "gross": "Tipo real antes de impuestos",
+        "net": "Tipo real tras el {{tax}} % de IRS",
+        "positive": "En {{year}}, el nuevo depósito medio todavía superó la inflación tras el IRS.",
+        "negative": "En {{year}}, el nuevo depósito medio perdió poder adquisitivo tras el IRS: los precios subieron más deprisa que los intereses cobrados."
+      },
+      "notBestOffer": "Esto es una media de lo que los bancos pagaron realmente en los nuevos depósitos, no la mejor oferta. Los tipos promocionales y de campaña suelen ser más altos, y algunos depósitos pagan menos. Esta página no nombra bancos ni recomienda productos: compara tú las ofertas actuales antes de decidir.",
+      "calculator": {
+        "title": "Intereses al tipo medio",
+        "intro": "Introduce un importe y un plazo para ver los intereses que rendiría un depósito al último tipo medio de ese plazo, netos del 28 % de IRS, y lo que se llevaría la inflación."
+      },
+      "fields": {
+        "amount": "Importe depositado",
+        "term": "Plazo",
+        "termSuffix": "meses",
+        "inflation": "Inflación supuesta por año"
+      },
+      "help": {
+        "term": "Meses completos, de 1 a 120. Hasta 12 meses usa la media de hasta 1 año, de 13 a 24 meses la de 1 a 2 años, y los plazos mayores la de más de 2 años.",
+        "inflation": "Rellenada con la inflación portuguesa de {{year}} (IPC medio anual, INE). Cámbiala para probar otros escenarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Introduce un importe superior a cero.",
+          "negative": "El importe no puede ser negativo.",
+          "tooLarge": "Introduce {{max}} o menos."
+        },
+        "termMonths": {
+          "required": "Introduce un plazo de al menos 1 mes.",
+          "tooLarge": "El plazo puede ser como máximo de {{max}} meses.",
+          "notWhole": "Introduce un número entero de meses."
+        },
+        "inflation": {
+          "required": "Introduce una tasa de inflación, o 0.",
+          "outOfRange": "Introduce una tasa de inflación de {{min}} % a {{top}} %."
+        },
+        "summary": "Revisa los campos marcados para ver el resultado."
+      },
+      "buckets": {
+        "all": "Todos los plazos",
+        "upTo1y": "Hasta 1 año",
+        "1to2y": "Más de 1 y hasta 2 años",
+        "over2y": "Más de 2 años"
+      },
+      "result": {
+        "net": "Intereses netos tras el {{tax}} % de IRS",
+        "gross": "Intereses brutos",
+        "tax": "IRS retenido ({{tax}} %)",
+        "inflationCost": "Lo que se lleva la inflación durante el plazo",
+        "realGain": "Intereses que quedan tras la inflación",
+        "realYield": "Rentabilidad anual real, tras impuestos",
+        "assumptions": "Tipo medio de los nuevos depósitos de {{bucket}}: {{rate}} al año ({{month}}). Interés simple pagado al vencimiento, {{months}} meses.",
+        "fallback": "No hubo nuevos depósitos en este grupo de plazos en el último mes, así que se usa la media de todos los plazos.",
+        "beats": "Con estos supuestos, los intereses, tras impuestos, cubren la pérdida de poder adquisitivo.",
+        "loses": "Con estos supuestos, la inflación se lleva más de lo que rinden los intereses: al vencimiento el dinero compra menos.",
+        "note": "Una referencia, no una oferta: el tipo de tu banco, las comisiones y el cómputo exacto de días cambian el resultado. Solo con fines educativos, no es asesoramiento financiero."
+      },
+      "history": {
+        "title": "Historial desde 2003",
+        "bucket": "Plazo que muestra el gráfico",
+        "chartLabel": "Gráfico de líneas de los tipos medios mensuales de los nuevos depósitos a plazo en Portugal y la zona del euro, con la inflación anual portuguesa",
+        "portugal": "Portugal",
+        "euroArea": "Zona del euro",
+        "inflation": "Inflación portuguesa (año natural)",
+        "chartNote": "Los tipos son medias mensuales. La inflación es la variación media anual de los precios de consumo de cada año natural, por eso cambia en enero; el año en curso aún no está completo.",
+        "caption": "Tipo medio anual de los nuevos depósitos, inflación y tipo real tras el IRS",
+        "year": "Año",
+        "realNet": "Tipo real tras el {{tax}} % de IRS"
+      },
+      "sourceNote": "Fuente: tipos de interés medios de los nuevos depósitos a plazo de los hogares (tasa anualizada acordada), estadísticas del Banco de Portugal publicadas en el Portal de Datos del BCE, último mes {{month}}, obtenidas el {{retrieved}}. Inflación: índice de precios de consumo del INE a través del BPstat del Banco de Portugal. Cifras anuales calculadas por WonderMoney. Solo con fines educativos.",
+      "nextStepHeadline": "Pasa de la referencia a un plan de ahorro personal",
+      "nextStepDescription": "La media muestra lo que pagó el mercado. Fija una meta de ahorro en WonderMoney y comprueba cómo se comparan tus propios depósitos con ella.",
+      "nextStepCta": "Fijar una meta de ahorro",
+      "guide": {
+        "read": {
+          "title": "Cómo leer el índice",
+          "what": "Cada mes, los bancos de Portugal comunican al Banco de Portugal el tipo de interés de los nuevos depósitos a plazo que captaron de los hogares. El índice es la media de esos tipos entre bancos, ponderada por el volumen de nuevo negocio: lo que realmente se acordó. La línea de la zona del euro es la misma estadística para todos los bancos de la zona, a efectos de comparación.",
+          "notBest": "No es el mejor tipo disponible. Una media incluye depósitos pequeños, clientes existentes y bancos que pagan poco, así que un tipo de campaña o promocional puede estar bastante por encima, y algunos depósitos rinden menos.",
+          "noRecommendation": "Aquí no se nombra ni se clasifica ningún banco o producto. Usa la media para juzgar si una oferta parece alta o baja y después compara tú las ofertas actuales, incluidas sus condiciones."
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Deposita {{amount}} durante {{months}} meses al último tipo medio de ese plazo, {{rate}} al año ({{month}}). Los intereses pagados al vencimiento son {{gross}}; tras el {{taxRate}} % de IRS (impuesto retenido: {{tax}}) te quedas con {{net}}.",
+          "real": "Con una inflación del {{inflation}} anual, ese dinero pierde {{inflationCost}} de poder adquisitivo durante el plazo, así que lo que queda tras la inflación es {{realGain}}.",
+          "year": "Mirando atrás, en {{year}}, el último año completo, el nuevo depósito medio pagó {{yearRate}}; tras la inflación y el 28 % de IRS, el tipo real fue {{yearReal}}."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "Los tipos son estadísticas publicadas. WonderMoney añade solo estos cálculos:",
+          "steps": {
+            "a": "Tipo anual: la media simple de las doce medias mensuales del año. No pondera los meses por lo depositado.",
+            "b": "Inflación: la variación del índice de precios de consumo portugués, en media anual, del año anterior al año.",
+            "c": "Tipo real: (1 + tipo) ÷ (1 + inflación) − 1. Para la cifra tras impuestos, primero se descuenta el 28 % de IRS al tipo.",
+            "d": "Calculadora: interés simple durante el plazo en meses completos, pagado al vencimiento, con el 28 % retenido, al tipo medio del grupo de plazos. Lo que se lleva la inflación es el importe × ((1 + inflación)^(meses ÷ 12) − 1)."
+          },
+          "realRate": "Dividir en lugar de restar importa cuando los tipos son altos: mide cuánto más puede comprar el dinero, no solo la diferencia entre dos porcentajes."
+        },
+        "data": {
+          "title": "Datos y fuentes",
+          "source": "Tipos: tipos de interés medios mensuales de los nuevos depósitos con plazo acordado de los hogares (tasa anualizada acordada, todos los importes, en euros), de {{first}} a {{last}}, compilados por el Banco de Portugal a partir de las declaraciones de los bancos y publicados en el Portal de Datos del BCE (series {{seriesPt}} para Portugal y {{seriesEa}} para la zona del euro, donde x es el plazo: total, hasta 1 año, más de 1 y hasta 2 años, más de 2 años). Obtenidos el {{retrieved}}.",
+          "ecbLink": "Portal de Datos del BCE (MIR)",
+          "bpstatLink": "BPstat del Banco de Portugal",
+          "cpiLink": "Índice de precios de consumo del INE en BPstat",
+          "inflation": "Inflación: índice de precios de consumo medio anual de Portugal, elaborado por el INE y distribuido por el Banco de Portugal (serie BPstat 12704686), obtenido el {{cpiRetrieved}}.",
+          "reuse": "El BCE permite el uso libre de sus estadísticas cuando se reproducen con exactitud y se cita la fuente. Esta página republica valores mensuales y no carga datos en tiempo de ejecución: las cifras solo cambian cuando se actualiza el archivo de datos."
+        },
+        "limits": {
+          "title": "Lo que estas cifras no incluyen",
+          "items": {
+            "average": "Es una media del nuevo negocio: mezcla importes, bancos y clientes. Tu tipo puede ser más alto o más bajo.",
+            "lag": "Las estadísticas se publican cada mes con retraso, y el último mes puede revisarse.",
+            "tax": "Impuestos: el 28 % es el tipo de retención de IRS sobre los intereses para residentes. Tu situación puede ser distinta, por ejemplo si incluyes los intereses en la declaración anual.",
+            "inflation": "Inflación: tus precios difieren de la media nacional y la inflación futura es desconocida. La calculadora mantiene la tasa que introduces durante todo el plazo.",
+            "buckets": "Los grupos de plazos sin nuevos depósitos en un mes aparecen como n/d. Para un plazo de ese grupo, la calculadora usa la media de todos los plazos.",
+            "advice": "Solo con fines educativos: esta página no es asesoramiento financiero ni una oferta."
+          }
+        },
+        "related": {
+          "title": "Sigue explorando",
+          "termDepositLink": "Calculadora de depósitos a plazo",
+          "termDepositBody": "Introduce el tipo de tu banco y mira los intereses, el impuesto y la rentabilidad neta.",
+          "savingsCertificatesLink": "Calculadora de Certificados de Aforro",
+          "savingsCertificatesBody": "Compara un depósito con los Certificados de Aforro Série F.",
+          "inflationLink": "Calculadora de inflación",
+          "inflationBody": "Mira cuánto poder adquisitivo perdió el dinero entre dos años cualesquiera."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calculadora de salario neto en Portugal 2026",
       "shortName": "Salario neto",

@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
       "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
     },
+    "depositRateIndex": {
+      "title": "Índice de depósitos a prazo: o que os bancos em Portugal pagam de facto",
+      "shortName": "Índice de depósitos",
+      "subtitle": "A taxa de juro média que os bancos em Portugal e na área do euro pagaram nos novos depósitos a prazo das famílias, mês a mês desde 2003, com a inflação e os 28% de IRS descontados.",
+      "description": "Taxas médias dos novos depósitos a prazo em Portugal e na área do euro, depois da inflação e do imposto.",
+      "pageTitle": "Índice de Depósitos a Prazo em Portugal: Taxas Médias vs Inflação",
+      "pageDescription": "Taxas de juro médias oficiais dos novos depósitos a prazo das famílias em Portugal e na área do euro desde 2003, a taxa real depois da inflação e dos 28% de IRS, e um pequeno simulador. Dados: estatísticas do Banco de Portugal através do BCE.",
+      "snapshot": {
+        "title": "Taxa média dos novos depósitos a prazo, {{month}}",
+        "intro": "Médias oficiais da taxa de juro acordada nos novos depósitos a prazo das famílias, comunicadas pelos bancos. É uma referência, não uma lista de ofertas.",
+        "portugal": "Portugal, todas as maturidades",
+        "euroArea": "Área do euro, todas as maturidades",
+        "asOf": "Dados de {{month}}, o último mês publicado quando os dados foram obtidos, em {{retrieved}}.",
+        "provisional": "O último mês é provisório e pode ser revisto.",
+        "caption": "Taxa média dos novos depósitos a prazo por prazo original, Portugal e área do euro",
+        "maturity": "Prazo original",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Área do euro",
+        "noData": "n/d"
+      },
+      "real": {
+        "title": "Taxa real em {{year}}, o último ano completo",
+        "nominal": "Taxa média paga",
+        "inflation": "Inflação",
+        "gross": "Taxa real antes de imposto",
+        "net": "Taxa real depois de {{tax}}% de IRS",
+        "positive": "Em {{year}}, o novo depósito médio ainda ganhou à inflação depois de IRS.",
+        "negative": "Em {{year}}, o novo depósito médio perdeu poder de compra depois de IRS: os preços subiram mais depressa do que os juros recebidos."
+      },
+      "notBestOffer": "Isto é uma média do que os bancos pagaram de facto nos novos depósitos, não a melhor oferta. As taxas promocionais e de campanha costumam ser mais altas, e alguns depósitos pagam menos. Esta página não nomeia bancos nem recomenda produtos: compara tu as ofertas atuais antes de decidires.",
+      "calculator": {
+        "title": "Juros à taxa média",
+        "intro": "Indica um valor e um prazo para veres os juros que um depósito renderia à última taxa média desse prazo, líquidos de 28% de IRS, e o que a inflação levaria."
+      },
+      "fields": {
+        "amount": "Montante depositado",
+        "term": "Prazo",
+        "termSuffix": "meses",
+        "inflation": "Inflação assumida por ano"
+      },
+      "help": {
+        "term": "Meses inteiros, de 1 a 120. Até 12 meses usa a média até 1 ano, de 13 a 24 meses a média de 1 a 2 anos, prazos maiores a média de mais de 2 anos.",
+        "inflation": "Preenchida com a inflação portuguesa de {{year}} (IPC médio anual, INE). Altera-a para testares outros cenários."
+      },
+      "errors": {
+        "amount": {
+          "required": "Indica um montante superior a zero.",
+          "negative": "O montante não pode ser negativo.",
+          "tooLarge": "Indica {{max}} ou menos."
+        },
+        "termMonths": {
+          "required": "Indica um prazo de pelo menos 1 mês.",
+          "tooLarge": "O prazo pode ser no máximo de {{max}} meses.",
+          "notWhole": "Indica um número inteiro de meses."
+        },
+        "inflation": {
+          "required": "Indica uma taxa de inflação, ou 0.",
+          "outOfRange": "Indica uma taxa de inflação de {{min}}% a {{top}}%."
+        },
+        "summary": "Verifica os campos assinalados para ver o resultado."
+      },
+      "buckets": {
+        "all": "Todas as maturidades",
+        "upTo1y": "Até 1 ano",
+        "1to2y": "Mais de 1 e até 2 anos",
+        "over2y": "Mais de 2 anos"
+      },
+      "result": {
+        "net": "Juros líquidos depois de {{tax}}% de IRS",
+        "gross": "Juros brutos",
+        "tax": "IRS retido ({{tax}}%)",
+        "inflationCost": "O que a inflação leva ao longo do prazo",
+        "realGain": "Juros que sobram depois da inflação",
+        "realYield": "Rendimento anual real, depois de imposto",
+        "assumptions": "Taxa média dos novos depósitos de {{bucket}}: {{rate}} ao ano ({{month}}). Juro simples pago no vencimento, {{months}} meses.",
+        "fallback": "Não houve novos depósitos neste grupo de prazos no último mês, por isso usa-se a média de todas as maturidades.",
+        "beats": "Com estes pressupostos, os juros, depois de imposto, cobrem a perda de poder de compra.",
+        "loses": "Com estes pressupostos, a inflação leva mais do que os juros rendem: no vencimento o dinheiro compra menos.",
+        "note": "Uma referência, não uma oferta: a taxa do teu banco, eventuais comissões e a contagem exata dos dias alteram o resultado. Apenas educativo, não é aconselhamento financeiro."
+      },
+      "history": {
+        "title": "Histórico desde 2003",
+        "bucket": "Prazo mostrado no gráfico",
+        "chartLabel": "Gráfico de linhas das taxas médias mensais dos novos depósitos a prazo em Portugal e na área do euro, com a inflação anual portuguesa",
+        "portugal": "Portugal",
+        "euroArea": "Área do euro",
+        "inflation": "Inflação portuguesa (ano civil)",
+        "chartNote": "As taxas são médias mensais. A inflação é a variação média anual dos preços no consumidor de cada ano civil, por isso muda em janeiro; o ano em curso ainda não está completo.",
+        "caption": "Taxa média anual dos novos depósitos, inflação e taxa real depois de IRS",
+        "year": "Ano",
+        "realNet": "Taxa real depois de {{tax}}% de IRS"
+      },
+      "sourceNote": "Fonte: taxas de juro médias dos novos depósitos a prazo das famílias (taxa anualizada acordada), estatísticas do Banco de Portugal publicadas no Portal de Dados do BCE, último mês {{month}}, obtidas em {{retrieved}}. Inflação: índice de preços no consumidor do INE através do BPstat do Banco de Portugal. Valores anuais calculados pela WonderMoney. Apenas educativo.",
+      "nextStepHeadline": "Passa da referência para um plano de poupança pessoal",
+      "nextStepDescription": "A média mostra o que o mercado pagou. Define um objetivo de poupança na WonderMoney e acompanha como os teus depósitos se comparam com ela.",
+      "nextStepCta": "Definir um objetivo de poupança",
+      "guide": {
+        "read": {
+          "title": "Como ler o índice",
+          "what": "Todos os meses, os bancos em Portugal comunicam ao Banco de Portugal a taxa de juro dos novos depósitos a prazo que receberam das famílias. O índice é a média dessas taxas entre bancos, ponderada pelo montante de novos negócios: o que foi realmente acordado. A linha da área do euro é a mesma estatística para todos os bancos da área do euro, para comparação.",
+          "notBest": "Não é a melhor taxa disponível. Uma média inclui depósitos pequenos, clientes antigos e bancos que pagam pouco, por isso uma taxa de campanha ou promocional pode estar bem acima, e alguns depósitos rendem menos.",
+          "noRecommendation": "Aqui não se nomeia nem se ordena nenhum banco ou produto. Usa a média para avaliares se uma oferta parece alta ou baixa e depois compara tu as ofertas atuais, incluindo as condições."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Deposita {{amount}} durante {{months}} meses à última taxa média desse prazo, {{rate}} ao ano ({{month}}). Os juros pagos no vencimento são {{gross}}; depois de {{taxRate}}% de IRS (imposto retido: {{tax}}) ficas com {{net}}.",
+          "real": "Com a inflação a {{inflation}} ao ano, o mesmo dinheiro perde {{inflationCost}} de poder de compra ao longo do prazo, pelo que o que sobra depois da inflação é {{realGain}}.",
+          "year": "Olhando para trás, em {{year}}, o último ano completo, o novo depósito médio pagou {{yearRate}}; depois da inflação e dos 28% de IRS, a taxa real foi {{yearReal}}."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "As taxas são estatísticas publicadas. A WonderMoney acrescenta apenas estes cálculos:",
+          "steps": {
+            "a": "Taxa anual: a média simples das doze médias mensais do ano. Não pondera os meses pelo montante depositado.",
+            "b": "Inflação: a variação do índice de preços no consumidor português, em média anual, do ano anterior para o ano.",
+            "c": "Taxa real: (1 + taxa) ÷ (1 + inflação) − 1. Para o valor depois de imposto, desconta-se primeiro 28% de IRS à taxa.",
+            "d": "Simulador: juro simples durante o prazo em meses inteiros, pago no vencimento, com 28% retidos, à taxa média do grupo de prazos. O que a inflação leva é o montante × ((1 + inflação)^(meses ÷ 12) − 1)."
+          },
+          "realRate": "Dividir em vez de subtrair importa quando as taxas são altas: mede quanto mais o dinheiro pode comprar, e não apenas a diferença entre duas percentagens."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "source": "Taxas: taxas de juro médias mensais dos novos depósitos com prazo acordado das famílias (taxa anualizada acordada, todos os montantes, em euros), de {{first}} a {{last}}, compiladas pelo Banco de Portugal a partir das comunicações dos bancos e publicadas no Portal de Dados do BCE (séries {{seriesPt}} para Portugal e {{seriesEa}} para a área do euro, em que x é o prazo: total, até 1 ano, mais de 1 e até 2 anos, mais de 2 anos). Obtidas em {{retrieved}}.",
+          "ecbLink": "Portal de Dados do BCE (MIR)",
+          "bpstatLink": "BPstat do Banco de Portugal",
+          "cpiLink": "Índice de preços no consumidor do INE no BPstat",
+          "inflation": "Inflação: índice de preços no consumidor médio anual de Portugal, produzido pelo INE e distribuído pelo Banco de Portugal (série BPstat 12704686), obtido em {{cpiRetrieved}}.",
+          "reuse": "O BCE permite a utilização livre das estatísticas que publica quando são reproduzidas com exatidão e a fonte é citada. Esta página republica valores mensais e não carrega dados em execução: os números só mudam quando o ficheiro de dados é atualizado."
+        },
+        "limits": {
+          "title": "O que estes valores não incluem",
+          "items": {
+            "average": "É uma média dos novos negócios: mistura montantes, bancos e clientes. A tua taxa pode ser mais alta ou mais baixa.",
+            "lag": "As estatísticas são publicadas todos os meses com algum atraso, e o último mês pode ser revisto.",
+            "tax": "Imposto: 28% é a taxa de retenção de IRS sobre os juros para residentes. A tua situação pode ser diferente, por exemplo se incluíres os juros na declaração anual de rendimentos.",
+            "inflation": "Inflação: os teus preços diferem da média nacional e a inflação futura é desconhecida. O simulador mantém a taxa que indicas durante todo o prazo.",
+            "buckets": "Os grupos de prazos sem novos depósitos num mês aparecem como n/d. Para um prazo desse grupo, o simulador usa a média de todas as maturidades.",
+            "advice": "Apenas educativo: esta página não é aconselhamento financeiro nem uma oferta."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "termDepositLink": "Simulador de depósitos a prazo",
+          "termDepositBody": "Indica a taxa do teu banco e vê os juros, o imposto e o rendimento líquido.",
+          "savingsCertificatesLink": "Simulador de Certificados de Aforro",
+          "savingsCertificatesBody": "Compara um depósito com os Certificados de Aforro Série F.",
+          "inflationLink": "Calculadora de inflação",
+          "inflationBody": "Vê quanto poder de compra o dinheiro perdeu entre dois anos quaisquer."
+        }
+      }
+    },
     "netSalary": {
       "title": "Simulador de salário líquido 2026",
       "shortName": "Salário líquido",

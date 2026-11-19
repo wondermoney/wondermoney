@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
       "nextStepCta": "Incluez vos certificats dans la vue d’ensemble de votre épargne"
     },
+    "depositRateIndex": {
+      "title": "Indice des dépôts à terme : ce que les banques portugaises paient réellement",
+      "shortName": "Indice des dépôts",
+      "subtitle": "Le taux d'intérêt moyen que les banques du Portugal et de la zone euro ont versé sur les nouveaux dépôts à terme des ménages, mois par mois depuis 2003, avec l'inflation et les 28 % d'IRS déduits.",
+      "description": "Taux moyens des nouveaux dépôts à terme au Portugal et dans la zone euro, après inflation et impôt.",
+      "pageTitle": "Indice des Dépôts à Terme au Portugal : Taux Moyens et Inflation",
+      "pageDescription": "Taux d'intérêt moyens officiels des nouveaux dépôts à terme des ménages au Portugal et dans la zone euro depuis 2003, taux réel après inflation et 28 % d'IRS, et un petit simulateur. Données : statistiques de la Banque du Portugal via la BCE.",
+      "snapshot": {
+        "title": "Taux moyen des nouveaux dépôts à terme, {{month}}",
+        "intro": "Moyennes officielles du taux d'intérêt convenu sur les nouveaux dépôts à terme des ménages, déclarées par les banques. C'est une référence, pas une liste d'offres.",
+        "portugal": "Portugal, toutes échéances",
+        "euroArea": "Zone euro, toutes échéances",
+        "asOf": "Données de {{month}}, le dernier mois publié lors de la récupération des données, le {{retrieved}}.",
+        "provisional": "Le dernier mois est provisoire et peut être révisé.",
+        "caption": "Taux moyen des nouveaux dépôts à terme par échéance initiale, Portugal et zone euro",
+        "maturity": "Échéance initiale",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Zone euro",
+        "noData": "n.d."
+      },
+      "real": {
+        "title": "Taux réel en {{year}}, dernière année complète",
+        "nominal": "Taux moyen versé",
+        "inflation": "Inflation",
+        "gross": "Taux réel avant impôt",
+        "net": "Taux réel après {{tax}} % d'IRS",
+        "positive": "En {{year}}, le nouveau dépôt moyen a encore battu l'inflation après IRS.",
+        "negative": "En {{year}}, le nouveau dépôt moyen a perdu du pouvoir d'achat après IRS : les prix ont augmenté plus vite que les intérêts perçus."
+      },
+      "notBestOffer": "Il s'agit d'une moyenne de ce que les banques ont réellement versé sur les nouveaux dépôts, pas de la meilleure offre. Les taux promotionnels ou de campagne sont généralement plus élevés, et certains dépôts rapportent moins. Cette page ne cite aucune banque et ne recommande aucun produit : comparez vous-même les offres actuelles avant de décider.",
+      "calculator": {
+        "title": "Intérêts au taux moyen",
+        "intro": "Saisissez un montant et une durée pour voir les intérêts qu'un dépôt rapporterait au dernier taux moyen de cette échéance, nets de 28 % d'IRS, et ce que l'inflation en retirerait."
+      },
+      "fields": {
+        "amount": "Montant déposé",
+        "term": "Durée",
+        "termSuffix": "mois",
+        "inflation": "Inflation supposée par an"
+      },
+      "help": {
+        "term": "Mois entiers, de 1 à 120. Jusqu'à 12 mois, la moyenne jusqu'à 1 an ; de 13 à 24 mois, celle de 1 à 2 ans ; au-delà, celle de plus de 2 ans.",
+        "inflation": "Préremplie avec l'inflation portugaise de {{year}} (IPC moyen annuel, INE). Modifiez-la pour tester d'autres scénarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Saisissez un montant supérieur à zéro.",
+          "negative": "Le montant ne peut pas être négatif.",
+          "tooLarge": "Saisissez {{max}} ou moins."
+        },
+        "termMonths": {
+          "required": "Saisissez une durée d'au moins 1 mois.",
+          "tooLarge": "La durée peut atteindre {{max}} mois au maximum.",
+          "notWhole": "Saisissez un nombre entier de mois."
+        },
+        "inflation": {
+          "required": "Saisissez un taux d'inflation, ou 0.",
+          "outOfRange": "Saisissez un taux d'inflation de {{min}} % à {{top}} %."
+        },
+        "summary": "Vérifiez les champs signalés pour voir le résultat."
+      },
+      "buckets": {
+        "all": "Toutes échéances",
+        "upTo1y": "Jusqu'à 1 an",
+        "1to2y": "Plus de 1 an et jusqu'à 2 ans",
+        "over2y": "Plus de 2 ans"
+      },
+      "result": {
+        "net": "Intérêts nets après {{tax}} % d'IRS",
+        "gross": "Intérêts bruts",
+        "tax": "IRS retenu ({{tax}} %)",
+        "inflationCost": "Ce que l'inflation retire sur la durée",
+        "realGain": "Intérêts restants après inflation",
+        "realYield": "Rendement annuel réel, après impôt",
+        "assumptions": "Taux moyen des nouveaux dépôts ({{bucket}}) : {{rate}} par an ({{month}}). Intérêts simples versés à l'échéance, {{months}} mois.",
+        "fallback": "Aucun nouveau dépôt n'a été enregistré dans ce groupe d'échéances le dernier mois ; la moyenne de toutes les échéances est utilisée.",
+        "beats": "Avec ces hypothèses, les intérêts, après impôt, couvrent la perte de pouvoir d'achat.",
+        "loses": "Avec ces hypothèses, l'inflation retire plus que les intérêts ne rapportent : à l'échéance, l'argent achète moins.",
+        "note": "Une référence, pas une offre : le taux de votre banque, d'éventuels frais et le décompte exact des jours modifient le résultat. À but éducatif uniquement, pas un conseil financier."
+      },
+      "history": {
+        "title": "Historique depuis 2003",
+        "bucket": "Échéance affichée dans le graphique",
+        "chartLabel": "Graphique linéaire des taux moyens mensuels des nouveaux dépôts à terme au Portugal et dans la zone euro, avec l'inflation annuelle portugaise",
+        "portugal": "Portugal",
+        "euroArea": "Zone euro",
+        "inflation": "Inflation portugaise (année civile)",
+        "chartNote": "Les taux sont des moyennes mensuelles. L'inflation est la variation moyenne annuelle des prix à la consommation de chaque année civile ; elle change donc en janvier, et l'année en cours n'est pas complète.",
+        "caption": "Taux moyen annuel des nouveaux dépôts, inflation et taux réel après IRS",
+        "year": "Année",
+        "realNet": "Taux réel après {{tax}} % d'IRS"
+      },
+      "sourceNote": "Source : taux d'intérêt moyens des nouveaux dépôts à terme des ménages (taux annualisé convenu), statistiques de la Banque du Portugal publiées dans le portail de données de la BCE, dernier mois {{month}}, récupérées le {{retrieved}}. Inflation : indice des prix à la consommation de l'INE via le BPstat de la Banque du Portugal. Chiffres annuels calculés par WonderMoney. À but éducatif uniquement.",
+      "nextStepHeadline": "Passez de la référence à un plan d'épargne personnel",
+      "nextStepDescription": "La moyenne montre ce que le marché a versé. Fixez un objectif d'épargne dans WonderMoney et suivez la comparaison de vos propres dépôts avec elle.",
+      "nextStepCta": "Fixer un objectif d'épargne",
+      "guide": {
+        "read": {
+          "title": "Comment lire l'indice",
+          "what": "Chaque mois, les banques du Portugal déclarent à la Banque du Portugal le taux d'intérêt des nouveaux dépôts à terme reçus des ménages. L'indice est la moyenne de ces taux entre banques, pondérée par le volume de nouvelles opérations : ce qui a réellement été convenu. La ligne de la zone euro est la même statistique pour l'ensemble des banques de la zone, à titre de comparaison.",
+          "notBest": "Ce n'est pas le meilleur taux disponible. Une moyenne inclut de petits dépôts, des clients existants et des banques qui rémunèrent peu ; un taux de campagne ou promotionnel peut donc être bien supérieur, et certains dépôts rapportent moins.",
+          "noRecommendation": "Aucune banque ni aucun produit n'est nommé ou classé ici. Servez-vous de la moyenne pour juger si une offre paraît haute ou basse, puis comparez vous-même les offres actuelles, conditions comprises."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Déposez {{amount}} pendant {{months}} mois au dernier taux moyen de cette échéance, {{rate}} par an ({{month}}). Les intérêts versés à l'échéance sont de {{gross}} ; après {{taxRate}} % d'IRS (impôt retenu : {{tax}}), il vous reste {{net}}.",
+          "real": "Avec une inflation de {{inflation}} par an, cet argent perd {{inflationCost}} de pouvoir d'achat sur la durée ; ce qui reste après inflation est donc de {{realGain}}.",
+          "year": "Avec le recul, en {{year}}, dernière année complète, le nouveau dépôt moyen a rapporté {{yearRate}} ; après inflation et 28 % d'IRS, le taux réel était de {{yearReal}}."
+        },
+        "method": {
+          "title": "Comment c'est calculé",
+          "intro": "Les taux sont des statistiques publiées. WonderMoney ajoute seulement ces calculs :",
+          "steps": {
+            "a": "Taux annuel : la moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
+            "b": "Inflation : la variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année.",
+            "c": "Taux réel : (1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS au taux.",
+            "d": "Simulateur : intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
+          },
+          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages."
+        },
+        "data": {
+          "title": "Données et sources",
+          "source": "Taux : taux d'intérêt moyens mensuels des nouveaux dépôts à échéance convenue des ménages (taux annualisé convenu, tous montants, en euros), de {{first}} à {{last}}, établis par la Banque du Portugal à partir des déclarations des banques et publiés dans le portail de données de la BCE (séries {{seriesPt}} pour le Portugal et {{seriesEa}} pour la zone euro, où x est l'échéance : total, jusqu'à 1 an, plus de 1 an et jusqu'à 2 ans, plus de 2 ans). Récupérés le {{retrieved}}.",
+          "ecbLink": "Portail de données de la BCE (MIR)",
+          "bpstatLink": "BPstat de la Banque du Portugal",
+          "cpiLink": "Indice des prix à la consommation de l'INE dans BPstat",
+          "inflation": "Inflation : indice des prix à la consommation moyen annuel du Portugal, produit par l'INE et diffusé par la Banque du Portugal (série BPstat 12704686), récupéré le {{cpiRetrieved}}.",
+          "reuse": "La BCE autorise l'utilisation libre de ses statistiques lorsqu'elles sont reproduites avec exactitude et que la source est citée. Cette page republie des valeurs mensuelles et ne charge aucune donnée à l'exécution : les chiffres ne changent que lorsque le fichier de données est actualisé."
+        },
+        "limits": {
+          "title": "Ce que ces chiffres ne couvrent pas",
+          "items": {
+            "average": "C'est une moyenne des nouvelles opérations : elle mêle montants, banques et clients. Votre taux peut être plus haut ou plus bas.",
+            "lag": "Les statistiques sont publiées chaque mois avec un délai, et le dernier mois peut être révisé.",
+            "tax": "Impôt : 28 % est le taux de retenue d'IRS sur les intérêts pour les résidents. Votre situation peut différer, par exemple si vous intégrez les intérêts à votre déclaration annuelle.",
+            "inflation": "Inflation : vos propres prix diffèrent de la moyenne nationale et l'inflation future est inconnue. Le simulateur conserve le taux saisi pendant toute la durée.",
+            "buckets": "Les groupes d'échéances sans nouveau dépôt dans un mois s'affichent « n.d. ». Pour une durée de ce groupe, le simulateur utilise la moyenne de toutes les échéances.",
+            "advice": "À but éducatif uniquement : cette page n'est ni un conseil financier ni une offre."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "termDepositLink": "Simulateur de dépôt à terme",
+          "termDepositBody": "Saisissez le taux de votre banque et voyez les intérêts, l'impôt et le rendement net.",
+          "savingsCertificatesLink": "Simulateur de Certificados de Aforro",
+          "savingsCertificatesBody": "Comparez un dépôt aux Certificados de Aforro Série F.",
+          "inflationLink": "Calculateur d'inflation",
+          "inflationBody": "Voyez combien de pouvoir d'achat l'argent a perdu entre deux années quelconques."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calculateur de salaire net au Portugal 2026",
       "shortName": "Salaire net",
