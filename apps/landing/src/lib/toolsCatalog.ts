@@ -118,6 +118,12 @@ export const TOOLS_CATALOG = [
 		group: "budgetAndSave",
 		related: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
 	},
+	{
+		key: "fuelPrices",
+		routeId: "toolFuelPrices",
+		group: "budgetAndSave",
+		related: ["toolHouseholdBudget", "toolCarLoan", "toolVehicleTax"],
+	},
 	// Borrow and buy a home
 	{
 		key: "mortgage",

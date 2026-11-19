@@ -107,6 +107,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
     destination: "toolElectricityIndex",
   },
+  {
+    sources: ["toolCarLoan", "toolVehicleTax", "toolHouseholdBudget"],
+    destination: "toolFuelPrices",
+  },
 ];
 
 export function getRelatedContentTools(

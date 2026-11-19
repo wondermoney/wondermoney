@@ -4072,6 +4072,127 @@
           "inflationBody": "Guarda come l'aumento dei prezzi cambia ciò che il tuo denaro può comprare nel tempo."
         }
       }
+    },
+    "fuelPrices": {
+      "title": "Prezzi dei carburanti in Portogallo e costo mensile",
+      "shortName": "Prezzi dei carburanti",
+      "subtitle": "Guarda il prezzo medio ufficiale di gasolio, benzina e GPL in Portogallo, il suo storico e quanto ti costa guidare ogni mese.",
+      "description": "Prezzi medi ufficiali della DGEG dei carburanti nel Portogallo continentale, con variazione settimanale e storico, e un calcolatore del costo mensile del carburante.",
+      "pageTitle": "Prezzi dei Carburanti in Portogallo: Media Ufficiale e Costo Mensile",
+      "pageDescription": "L'ultimo prezzo medio della DGEG di gasolio, benzina 95 e GPL in Portogallo, con la variazione sulla settimana e cinque anni di storico, e un calcolatore del tuo costo mensile di carburante. Dati ufficiali, nessuna previsione.",
+      "fuels": {
+        "diesel": "Gasolio (gasóleo simples)",
+        "gasoline95": "Benzina 95 (gasolina simples 95)",
+        "lpg": "GPL auto"
+      },
+      "fields": {
+        "fuel": "Carburante",
+        "period": "La distanza che inserisci è",
+        "periodMonth": "Al mese",
+        "periodWeek": "A settimana",
+        "periodTrip": "Per viaggio",
+        "distance": "Distanza",
+        "trips": "Viaggi al mese",
+        "consumption": "Consumo di carburante",
+        "price": "Prezzo al litro",
+        "resetPrice": "Usa l'ultima media ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Chilometri nel periodo scelto sopra. Una settimana vale 52/12 settimane al mese.",
+        "trips": "Quante volte al mese fai questo viaggio.",
+        "consumption": "Litri per 100 km, dal computer di bordo o dalla scheda tecnica dell'auto. Il consumo reale di solito è superiore a quello ufficiale.",
+        "price": "Parte dall'ultima media nazionale della DGEG, {{price}}/L il {{date}}. Cambialo con il prezzo che paghi davvero."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Non può essere negativo.",
+        "tooLarge": "Inserisci {{max}} o meno.",
+        "zero": "Inserisci un valore superiore a zero.",
+        "notWhole": "Inserisci un numero intero di viaggi.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Costo stimato di carburante al mese",
+        "week": "Costo della distanza settimanale",
+        "trip": "Costo di un viaggio",
+        "litres": "Carburante usato al mese",
+        "yearly": "Circa dodici mesi così",
+        "per100": "Costo per 100 km",
+        "nothing": "Senza chilometri percorsi non c'è costo di carburante.",
+        "budget": "{{amount}} al mese è la voce carburante del tuo budget per i trasporti. Aggiungi accanto gli altri costi dell'auto per vedere il quadro completo."
+      },
+      "notes": {
+        "assumptions": "Stima: distanza per consumo per prezzo al litro. Presuppone lo stesso consumo in ogni viaggio e lo stesso prezzo per tutto il mese. Non è una consulenza."
+      },
+      "latest": {
+        "title": "Ultimo prezzo medio nazionale",
+        "asOf": "Dati al {{date}} (DGEG). La variazione è rispetto al {{previous}}, una settimana prima.",
+        "change": "{{amount}}/L ({{percent}}) in una settimana",
+        "flat": "Nessuna variazione in una settimana",
+        "note": "Media giornaliera del Portogallo continentale, ponderata per le quantità vendute e comprensiva degli sconti dei distributori. È una media del passato, non una previsione: questa pagina non prevede il prezzo della settimana prossima."
+      },
+      "history": {
+        "title": "Prezzi dei carburanti negli ultimi cinque anni",
+        "intro": "Prezzo medio al litro della DGEG, un valore a settimana per ogni carburante.",
+        "chartLabel": "Grafico a linee del prezzo medio settimanale al litro di gasolio, benzina 95 e GPL in Portogallo su cinque anni",
+        "tableCaption": "Le ultime settimane: prezzo medio al litro di ogni carburante",
+        "date": "Data",
+        "asOf": "Dati al {{date}}, l'ultimo giorno pubblicato dalla DGEG. Un valore a settimana, dal {{first}}. La copia di questa pagina è stata creata il {{fetched}}. Fonte: DGEG, Preço Médio Diário (Portogallo continentale)."
+      },
+      "nextStepHeadline": "Metti il carburante nel tuo budget",
+      "nextStepDescription": "Il carburante fa parte di ciò che costa spostarsi. Aggiungilo a un budget WonderMoney insieme agli altri costi di trasporto e guarda quanto resta ogni mese.",
+      "nextStepCta": "Rivedi la voce trasporti nel tuo budget",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa pagina",
+          "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
+          "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
+          "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Un'auto diesel che percorre {{distance}} al mese con un consumo di {{consumption}}, all'ultima media di {{price}}. Carburante usato: {{distance}} per {{consumption}} diviso 100 fa {{litres}}. Costo: {{litres}} per {{price}} fa {{monthly}} al mese, circa {{yearly}} all'anno, ovvero {{per100}} ogni 100 km.",
+          "trips": "La distanza può essere anche un viaggio. Un'andata e ritorno di 40 km fatta 20 volte al mese con la stessa auto costa {{tripCost}} ogni volta, {{tripMonthly}} al mese."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Il calcolatore fa quattro cose:",
+          "steps": {
+            "a": "Distanza al mese: la distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese.",
+            "b": "Litri: distanza per consumo diviso 100.",
+            "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
+            "d": "Anno: dodici mesi così."
+          },
+          "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente."
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "dgeg": "Prezzi: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dei carburanti stradali nel Portogallo continentale, per gasóleo simples, gasolina simples 95 e GPL auto. L'ultimo giorno è il {{asOf}}; la copia di questa pagina è stata creata il {{fetched}}. Lo storico è un valore della DGEG ogni sette giorni fino al {{first}}, copiato come la DGEG lo pubblica.",
+          "terms": "La DGEG indica che queste informazioni sono gratuite e possono essere usate liberamente, a patto di citare la DGEG come fonte, indicare la data dell'ultimo aggiornamento e riprodurre fedelmente l'informazione. I prezzi sono comunicati dai distributori, che ne sono responsabili.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "La pagina legge un file di dati salvato e non chiama mai la DGEG mentre la usi. Il file è aggiornato da uno script che rifiuta dati obsoleti o inverosimili, quindi un aggiornamento fallito conserva gli ultimi numeri buoni e la loro data ({{asOf}})."
+        },
+        "limits": {
+          "title": "Cosa non includono questi valori",
+          "items": {
+            "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
+            "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
+            "stations": "Nessun distributore: questa pagina non nomina né classifica alcun distributore. Il sito della DGEG elenca i prezzi per distributore, se vuoi guardare.",
+            "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
+            "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
+            "education": "Solo a scopo educativo, non è una consulenza."
+          }
+        },
+        "related": {
+          "title": "Per andare avanti",
+          "householdBudgetLink": "Calcolatore del budget familiare",
+          "householdBudgetBody": "Metti il carburante accanto agli altri costi mensili e guarda quanto resta.",
+          "carLoanLink": "Simulatore di prestito auto",
+          "carLoanBody": "Somma la rata al carburante per vedere quanto costa l'auto in tutto.",
+          "vehicleTaxLink": "Calcolo del bollo auto portoghese (IUC)",
+          "vehicleTaxBody": "Stima l'imposta annuale del veicolo, un altro costo dell'auto."
+        }
+      }
     }
   },
   "resources": {

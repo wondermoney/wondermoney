@@ -4072,6 +4072,127 @@
           "inflationBody": "See how rising prices change what your money buys over time."
         }
       }
+    },
+    "fuelPrices": {
+      "title": "Fuel prices in Portugal and monthly fuel cost",
+      "shortName": "Fuel prices",
+      "subtitle": "See the official average price of diesel, petrol and LPG in Portugal, its history, and what your driving costs a month.",
+      "description": "Official DGEG average fuel prices in mainland Portugal with weekly change and history, plus a monthly fuel cost calculator.",
+      "pageTitle": "Fuel Prices in Portugal: Official Average and Monthly Cost",
+      "pageDescription": "The latest DGEG average price of diesel, petrol 95 and LPG in Portugal with week-on-week change and five-year history, and a calculator for your monthly fuel cost. Official data, no forecast.",
+      "fuels": {
+        "diesel": "Diesel (gasóleo simples)",
+        "gasoline95": "Petrol 95 (gasolina simples 95)",
+        "lpg": "Autogas (GPL auto)"
+      },
+      "fields": {
+        "fuel": "Fuel",
+        "period": "The distance you enter is",
+        "periodMonth": "Per month",
+        "periodWeek": "Per week",
+        "periodTrip": "Per trip",
+        "distance": "Distance",
+        "trips": "Trips per month",
+        "consumption": "Fuel consumption",
+        "price": "Price per litre",
+        "resetPrice": "Use the latest average ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Kilometres in the period chosen above. A week is counted as 52/12 weeks a month.",
+        "trips": "How many times a month you make this trip.",
+        "consumption": "Litres per 100 km, from your car's trip computer or its data sheet. A real figure is usually higher than the official one.",
+        "price": "Starts at the latest DGEG national average, {{price}}/L on {{date}}. Change it to the price you actually pay."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "This cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "zero": "Enter a value above zero.",
+        "notWhole": "Enter a whole number of trips.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "monthly": "Estimated fuel cost per month",
+        "week": "Cost of the weekly distance",
+        "trip": "Cost of one trip",
+        "litres": "Fuel used per month",
+        "yearly": "About twelve such months",
+        "per100": "Cost per 100 km",
+        "nothing": "With no distance driven there is no fuel cost.",
+        "budget": "{{amount}} a month is the fuel line of your transport budget. Add the other car costs next to it to see the whole picture."
+      },
+      "notes": {
+        "assumptions": "Estimate: distance times consumption times price per litre. It assumes the same consumption on every trip and the same price all month. Not advice."
+      },
+      "latest": {
+        "title": "Latest national average price",
+        "asOf": "Data as of {{date}} (DGEG). Change is against {{previous}}, a week earlier.",
+        "change": "{{amount}}/L ({{percent}}) in a week",
+        "flat": "No change in a week",
+        "note": "Daily average of mainland Portugal, weighted by quantities sold and including station discounts. It is an average of the past, not a forecast: this page does not predict next week's price."
+      },
+      "history": {
+        "title": "Fuel prices over the last five years",
+        "intro": "DGEG's average price per litre, one value a week for each fuel.",
+        "chartLabel": "Line chart of the weekly average price per litre of diesel, petrol 95 and autogas in Portugal over five years",
+        "tableCaption": "The latest weeks: average price per litre of each fuel",
+        "date": "Date",
+        "asOf": "Data as of {{date}}, the latest day DGEG published. One value a week, from {{first}}. This page's copy was built on {{fetched}}. Source: DGEG, Preço Médio Diário (mainland Portugal)."
+      },
+      "nextStepHeadline": "Put fuel in your budget",
+      "nextStepDescription": "Fuel is part of what getting around costs. Add it to a WonderMoney budget with the other transport costs and see what is left each month.",
+      "nextStepCta": "Review the transport allowance in your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
+          "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
+          "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A diesel car driven {{distance}} a month using {{consumption}}, at the latest average of {{price}}. Fuel used: {{distance}} times {{consumption}} divided by 100 is {{litres}}. Cost: {{litres}} times {{price}} is {{monthly}} a month, about {{yearly}} a year, or {{per100}} for every 100 km.",
+          "trips": "Distance can also be a trip. A 40 km round trip made 20 times a month with the same car costs {{tripCost}} each time, {{tripMonthly}} a month."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator does four things:",
+          "steps": {
+            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
+            "b": "Litres: distance times consumption divided by 100.",
+            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
+            "d": "Year: twelve such months."
+          },
+          "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price."
+        },
+        "data": {
+          "title": "Data and sources",
+          "dgeg": "Prices: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário of road fuels in mainland Portugal, for gasóleo simples, gasolina simples 95 and GPL auto. The latest day is {{asOf}}; this page's copy was built on {{fetched}}. The history is one DGEG value every seven days back to {{first}}, copied as DGEG publishes it.",
+          "terms": "DGEG states that this information is free and may be used freely, provided DGEG is named as the source, the date of the latest update is shown and the information is reproduced faithfully. The prices are reported by the stations, which are responsible for them.",
+          "dgegLink": "DGEG, daily average price (Preço Médio Diário)",
+          "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}})."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
+            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
+            "stations": "No stations: this page names no station and ranks none. DGEG's own site lists prices by station if you want to look.",
+            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
+            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
+            "education": "Educational use only, not advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put fuel next to your other monthly costs and see what is left.",
+          "carLoanLink": "Car loan calculator",
+          "carLoanBody": "Add the instalment to fuel to see what the car costs in total.",
+          "vehicleTaxLink": "Vehicle tax calculator",
+          "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
+        }
+      }
     }
   },
   "resources": {

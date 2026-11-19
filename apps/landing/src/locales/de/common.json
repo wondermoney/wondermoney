@@ -4072,6 +4072,127 @@
           "inflationBody": "Sieh, wie steigende Preise verändern, was dein Geld im Zeitverlauf kaufen kann."
         }
       }
+    },
+    "fuelPrices": {
+      "title": "Spritpreise in Portugal und monatliche Tankkosten",
+      "shortName": "Spritpreise",
+      "subtitle": "Sieh den offiziellen Durchschnittspreis für Diesel, Benzin und Autogas in Portugal, seinen Verlauf und was dein Fahren im Monat kostet.",
+      "description": "Offizielle DGEG-Durchschnittspreise für Kraftstoffe in Festlandportugal mit Wochenänderung und Verlauf sowie ein Rechner für die monatlichen Tankkosten.",
+      "pageTitle": "Spritpreise in Portugal: Offizieller Durchschnitt und Monatskosten",
+      "pageDescription": "Der aktuelle DGEG-Durchschnittspreis für Diesel, Benzin 95 und Autogas in Portugal mit Änderung zur Vorwoche und fünf Jahren Verlauf, plus ein Rechner für deine monatlichen Tankkosten. Offizielle Daten, keine Prognose.",
+      "fuels": {
+        "diesel": "Diesel (gasóleo simples)",
+        "gasoline95": "Benzin 95 (gasolina simples 95)",
+        "lpg": "Autogas (GPL auto)"
+      },
+      "fields": {
+        "fuel": "Kraftstoff",
+        "period": "Die eingegebene Strecke gilt",
+        "periodMonth": "Pro Monat",
+        "periodWeek": "Pro Woche",
+        "periodTrip": "Pro Fahrt",
+        "distance": "Strecke",
+        "trips": "Fahrten pro Monat",
+        "consumption": "Kraftstoffverbrauch",
+        "price": "Preis pro Liter",
+        "resetPrice": "Aktuellen Durchschnitt verwenden ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Kilometer im oben gewählten Zeitraum. Eine Woche zählt als 52/12 Wochen pro Monat.",
+        "trips": "Wie oft du diese Fahrt im Monat machst.",
+        "consumption": "Liter pro 100 km, aus dem Bordcomputer oder dem Datenblatt deines Autos. Der reale Verbrauch liegt meist über dem offiziellen.",
+        "price": "Beginnt beim aktuellen nationalen DGEG-Durchschnitt, {{price}}/L am {{date}}. Ändere ihn auf den Preis, den du wirklich zahlst."
+      },
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "negative": "Das darf nicht negativ sein.",
+        "tooLarge": "Gib {{max}} oder weniger ein.",
+        "zero": "Gib einen Wert über null ein.",
+        "notWhole": "Gib eine ganze Zahl an Fahrten ein.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Geschätzte Tankkosten pro Monat",
+        "week": "Kosten der Wochenstrecke",
+        "trip": "Kosten einer Fahrt",
+        "litres": "Kraftstoffverbrauch pro Monat",
+        "yearly": "Etwa zwölf solche Monate",
+        "per100": "Kosten pro 100 km",
+        "nothing": "Ohne gefahrene Strecke fallen keine Tankkosten an.",
+        "budget": "{{amount}} im Monat sind die Spritzeile deines Verkehrsbudgets. Setze die übrigen Autokosten daneben, um das ganze Bild zu sehen."
+      },
+      "notes": {
+        "assumptions": "Schätzung: Strecke mal Verbrauch mal Literpreis. Sie nimmt auf jeder Fahrt denselben Verbrauch und den ganzen Monat denselben Preis an. Keine Beratung."
+      },
+      "latest": {
+        "title": "Aktueller nationaler Durchschnittspreis",
+        "asOf": "Stand der Daten: {{date}} (DGEG). Die Änderung bezieht sich auf den {{previous}}, eine Woche früher.",
+        "change": "{{amount}}/L ({{percent}}) in einer Woche",
+        "flat": "Keine Änderung in einer Woche",
+        "note": "Tagesdurchschnitt für Festlandportugal, nach Verkaufsmengen gewichtet und inklusive Rabatten der Tankstellen. Er ist ein Durchschnitt der Vergangenheit, keine Prognose: Diese Seite sagt den Preis der nächsten Woche nicht voraus."
+      },
+      "history": {
+        "title": "Spritpreise der letzten fünf Jahre",
+        "intro": "Durchschnittspreis pro Liter der DGEG, ein Wert pro Woche für jeden Kraftstoff.",
+        "chartLabel": "Liniendiagramm des wöchentlichen Durchschnittspreises pro Liter für Diesel, Benzin 95 und Autogas in Portugal über fünf Jahre",
+        "tableCaption": "Die letzten Wochen: Durchschnittspreis pro Liter je Kraftstoff",
+        "date": "Datum",
+        "asOf": "Stand der Daten: {{date}}, der letzte von der DGEG veröffentlichte Tag. Ein Wert pro Woche, ab {{first}}. Die Kopie dieser Seite wurde am {{fetched}} erstellt. Quelle: DGEG, Preço Médio Diário (Festlandportugal)."
+      },
+      "nextStepHeadline": "Nimm den Sprit in dein Budget auf",
+      "nextStepDescription": "Sprit gehört zu dem, was Mobilität kostet. Trage ihn mit den anderen Verkehrskosten in ein WonderMoney-Budget ein und sieh, was jeden Monat übrig bleibt.",
+      "nextStepCta": "Prüfe den Verkehrsposten in deinem Budget",
+      "guide": {
+        "read": {
+          "title": "So liest du diese Seite",
+          "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
+          "calculator": "Der Rechner macht aus deinem Fahren monatliche Tankkosten. Du gibst Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und du kannst ihn auf den Preis ändern, den du wirklich zahlst.",
+          "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was dein Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Dieselauto, {{distance}} im Monat gefahren, mit einem Verbrauch von {{consumption}}, beim aktuellen Durchschnitt von {{price}}. Verbrauchter Kraftstoff: {{distance}} mal {{consumption}} geteilt durch 100 ergibt {{litres}}. Kosten: {{litres}} mal {{price}} ergibt {{monthly}} im Monat, etwa {{yearly}} im Jahr oder {{per100}} je 100 km.",
+          "trips": "Die Strecke kann auch eine Fahrt sein. Eine Hin- und Rückfahrt von 40 km, 20-mal im Monat mit demselben Auto gefahren, kostet {{tripCost}} pro Fahrt, {{tripMonthly}} im Monat."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Der Rechner macht vier Dinge:",
+          "steps": {
+            "a": "Strecke pro Monat: die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat.",
+            "b": "Liter: Strecke mal Verbrauch geteilt durch 100.",
+            "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
+            "d": "Jahr: zwölf solche Monate."
+          },
+          "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "dgeg": "Preise: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário der Straßenkraftstoffe in Festlandportugal, für gasóleo simples, gasolina simples 95 und GPL auto. Der letzte Tag ist der {{asOf}}; die Kopie dieser Seite wurde am {{fetched}} erstellt. Der Verlauf ist ein DGEG-Wert alle sieben Tage bis zum {{first}}, so übernommen, wie die DGEG ihn veröffentlicht.",
+          "terms": "Die DGEG erklärt, diese Informationen seien kostenlos und frei nutzbar, sofern die DGEG als Quelle genannt, das Datum der letzten Aktualisierung angegeben und die Information originalgetreu wiedergegeben wird. Die Preise melden die Tankstellen, die dafür verantwortlich sind.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "Die Seite liest eine gespeicherte Datendatei und ruft die DGEG nie auf, während du sie nutzt. Die Datei wird von einem Skript aktualisiert, das veraltete oder unplausible Daten ablehnt; eine fehlgeschlagene Aktualisierung behält daher die letzten guten Zahlen mit ihrem Datum ({{asOf}})."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
+            "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an deiner Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
+            "stations": "Keine Tankstellen: Diese Seite nennt und bewertet keine Tankstelle. Die Website der DGEG listet die Preise je Tankstelle, falls du nachsehen willst.",
+            "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
+            "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
+            "education": "Nur zu Bildungszwecken, keine Beratung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "householdBudgetLink": "Haushaltsbudget-Rechner",
+          "householdBudgetBody": "Stelle den Sprit neben deine anderen Monatskosten und sieh, was übrig bleibt.",
+          "carLoanLink": "Autokredit-Rechner",
+          "carLoanBody": "Addiere die Rate zum Sprit, um zu sehen, was das Auto insgesamt kostet.",
+          "vehicleTaxLink": "Kfz-Steuer-Rechner (IUC)",
+          "vehicleTaxBody": "Schätze die jährliche Fahrzeugsteuer, eine weitere Kostenposition des Autos."
+        }
+      }
     }
   },
   "resources": {
