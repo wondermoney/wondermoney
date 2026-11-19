@@ -9,7 +9,8 @@
  *   year the holiday entitlement is 2 working days per month of the contract, up to 20 (art.
  *   239, n.º 1 and 4); the allowance is scaled by those days over the 22-day reference.
  * - Withholding: each remuneration is withheld on its own with the monthly table (Despacho n.º
- *   233-A/2026, n.º 10). Paid in twelfths, each twelfth is withheld on its own as well.
+ *   233-A/2026, n.º 10). Paid in twelfths, each twelfth is withheld autonomously at the effective
+ *   rate of the whole allowance (usual practice, Lei n.º 11/2013, art. 3).
  * - Employee Social Security 11%.
  */
 import {
@@ -156,10 +157,20 @@ export function computeAllowance(input: AllowanceInput) {
   if (input.mode === "lumpSum") {
     return { ok: true as const, result: { ...base, total: payment(grossCents), twelfth: null } satisfies AllowanceResult };
   }
-  // Spread evenly over the months of the year the person works (12 for a whole year), each
-  // twelfth withheld on its own.
+  // Spread evenly over the months of the year the person works (12 for a whole year). Each
+  // twelfth is withheld on its own at the effective rate of the whole allowance (the usual
+  // payroll practice since Lei n.º 11/2013, art. 3).
   const payments = worked.startsInYear ? 12 - parseIsoDate(input.startDate)!.getUTCMonth() : 12;
-  const each = payment(Math.round(grossCents / payments));
+  const full = payment(grossCents);
+  const twelfthCents = Math.round(grossCents / payments);
+  const twelfthWithholding = grossCents > 0 ? Math.round((twelfthCents * full.withholdingCents) / grossCents) : 0;
+  const twelfthSocialSecurity = Math.round((twelfthCents * EMPLOYEE_SOCIAL_SECURITY_BP) / 10_000);
+  const each: AllowancePayment = {
+    grossCents: twelfthCents,
+    withholdingCents: twelfthWithholding,
+    socialSecurityCents: twelfthSocialSecurity,
+    netCents: twelfthCents - twelfthWithholding - twelfthSocialSecurity,
+  };
   const withholdingCents = each.withholdingCents * payments;
   const socialSecurityCents = each.socialSecurityCents * payments;
   return {

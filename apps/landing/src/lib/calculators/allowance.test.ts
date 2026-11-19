@@ -42,21 +42,26 @@ describe("computeAllowance", () => {
     expect(run({ kind: "holiday", startDate: "2026-12-10" })).toMatchObject({ holidayDays: 0, total: { grossCents: 0, netCents: 0 } });
   });
 
-  it("withholds each twelfth on its own and reports the monthly extra amount", () => {
+  it("withholds each twelfth at the effective rate of the whole allowance", () => {
     const r = run({ mode: "twelfths" });
+    const lump = run({});
     expect(r.twelfth).toMatchObject({ grossCents: 12_500, payments: 12 });
-    const ctx = { region: "mainland", status: "single", dependants: 0 } as const;
-    expect(r.twelfth!.withholdingCents).toBe(computeWithholdingCents(12_500, ctx));
+    expect(r.twelfth!.withholdingCents).toBeGreaterThan(0);
+    expect(r.twelfth!.withholdingCents).toBe(Math.round((12_500 * lump.total.withholdingCents) / 150_000));
+    expect(Math.abs(r.total.withholdingCents - lump.total.withholdingCents)).toBeLessThanOrEqual(12);
     expect(r.total.grossCents).toBe(150_000);
-    expect(r.total.withholdingCents).toBe(r.twelfth!.withholdingCents * 12);
     expect(r.total.netCents).toBe(150_000 - r.total.withholdingCents - r.total.socialSecurityCents);
-    // A twelfth is far below the 920 exemption threshold: no IRS on it.
-    expect(r.twelfth!.withholdingCents).toBe(0);
   });
 
-  it("spreads the hiring-year allowance over the months worked", () => {
+  it("takes the rate from the full prorated allowance in a partial year", () => {
+    const lump = run({ startDate: "2026-03-15" });
     const r = run({ mode: "twelfths", startDate: "2026-03-15" });
     expect(r.twelfth!.payments).toBe(10);
+    expect(r.total.grossCents).toBe(lump.total.grossCents);
+    expect(r.twelfth!.withholdingCents).toBe(
+      Math.round((r.twelfth!.grossCents * lump.total.withholdingCents) / lump.total.grossCents),
+    );
+    expect(Math.abs(r.total.withholdingCents - lump.total.withholdingCents)).toBeLessThanOrEqual(10);
   });
 
   it("uses the dependants, status and region tables", () => {

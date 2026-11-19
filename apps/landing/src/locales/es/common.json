@@ -3063,16 +3063,16 @@
         "proportion": "Parte de una paga completa: {{percent}}.",
         "holidayDays": "Días de vacaciones contados: {{days}} de 22 ({{percent}} de una paga completa).",
         "noAllowanceYet": "Sin ningún mes completo todavía en el año de incorporación, no hay paga de vacaciones que cobrar. Los 2 días hábiles por mes solo cuentan cuando el mes está completo.",
-        "noWithholdingOnTwelfth": "Cada doceava queda por debajo del límite de exención mensual, así que no se retiene IRS sobre ella. Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que retiene más."
+        "noWithholdingOnTwelfth": "Cada doceava se retiene al tipo efectivo de la paga completa, que a este nivel es 0%, así que no se retiene IRS. Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que retiene más."
       },
       "guide": {
         "methodWithholding": "Cada pago se retiene por separado con la tabla mensual de 2026, sin sumarlo al salario del mes: el Despacho n.º 233-A/2026 (n.º 10) pide a las empresas mostrar un tipo efectivo distinto para cada remuneración, como en los meses en que se pagan las pagas de vacaciones y de Navidad.",
-        "methodTwelfths": "En doceavas, la paga se reparte por igual entre los meses que trabajas en el año (12 en un año completo) y esta página retiene cada doceava por separado. Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que suele retener más: revisa tu nómina.",
+        "methodTwelfths": "En doceavas, la paga se reparte por igual entre los meses que trabajas en el año (12 en un año completo). Cada doceava se retiene por separado al tipo efectivo de la paga completa, la práctica habitual de las empresas desde la Lei n.º 11/2013, art. 3 (no figura en el Despacho). Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que suele retener más: revisa tu nómina.",
         "methodSocialSecurity": "La Seguridad Social a cargo del trabajador es el 11% de la paga bruta.",
         "unsupportedNovember": "El ajuste puntual de los ingresos pagados en noviembre de 2026 (Despacho 12523-A/2026, Portugal continental) se ignora. Una paga cobrada en noviembre tendría la retención reducida a la mitad.",
         "unsupportedOther": "Solo cuenta el salario base. Los complementos de antigüedad, otros conceptos retributivos, la extinción o suspensión del contrato durante el año, los convenios que paguen más y los costes de la empresa quedan fuera de esta estimación.",
         "sourceCode": "Código do Trabalho, arts. 239, 263 y 264: duración de las vacaciones, paga de Navidad y paga de vacaciones",
-        "reviewed": "Reglas revisadas el 19 de noviembre de 2026. La retención por separado de cada pago del mes se comprobó en el texto original del Despacho n.º 233-A/2026, y los artículos del Código do Trabalho en copias del texto consolidado. La referencia de 22 días hábiles de la paga de vacaciones y la retención de cada doceava por separado son práctica habitual, no figuran en esos textos. El 11% de Seguridad Social se comprobó en fuentes secundarias."
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026. La retención por separado de cada pago del mes se comprobó en el texto original del Despacho n.º 233-A/2026, y los artículos del Código do Trabalho en copias del texto consolidado. La referencia de 22 días hábiles de la paga de vacaciones es práctica habitual, no figura en esos textos. Retener cada doceava al tipo efectivo de la paga completa (Lei n.º 11/2013, art. 3) es la práctica habitual de las empresas; esa ley no se comprobó con su texto. El 11% de Seguridad Social se comprobó en fuentes secundarias."
       }
     }
   },

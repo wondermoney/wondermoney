@@ -3063,16 +3063,16 @@
         "proportion": "Quota di un importo completo: {{percent}}.",
         "holidayDays": "Giorni di ferie conteggiati: {{days}} su 22 ({{percent}} di un importo completo).",
         "noAllowanceYet": "Senza alcun mese completo nell'anno di assunzione, non c'è ancora un'indennità di ferie da pagare. I 2 giorni lavorativi al mese contano solo a mese completo.",
-        "noWithholdingOnTwelfth": "Ogni dodicesimo resta sotto la soglia di esenzione mensile, quindi non subisce ritenuta IRS. Il tuo datore di lavoro può sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che trattiene di più."
+        "noWithholdingOnTwelfth": "Ogni dodicesimo è tassato all'aliquota effettiva dell'importo intero, che a questo livello è 0%, quindi non c'è ritenuta IRS. Il tuo datore di lavoro può sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che trattiene di più."
       },
       "guide": {
         "methodWithholding": "Ogni pagamento è tassato a parte con la tabella mensile 2026, senza essere sommato allo stipendio del mese: il Despacho n.º 233-A/2026 (n. 10) chiede ai datori di lavoro di indicare un'aliquota effettiva separata per ogni retribuzione, come nei mesi in cui si pagano l'indennità di ferie e la tredicesima.",
-        "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero) e questa pagina tassa ogni dodicesimo a parte. Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che di solito trattiene di più: controlla la busta paga.",
+        "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero). Ogni dodicesimo è tassato a parte all'aliquota effettiva dell'importo intero, la prassi abituale delle buste paga dalla Lei n.º 11/2013, art. 3 (non indicata nel Despacho). Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che di solito trattiene di più: controlla la busta paga.",
         "methodSocialSecurity": "La previdenza sociale a carico del lavoratore è l'11% dell'importo lordo.",
         "unsupportedNovember": "L'aggiustamento una tantum dei redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Un importo pagato a novembre avrebbe la ritenuta dimezzata.",
         "unsupportedOther": "Conta solo lo stipendio base. Scatti di anzianità, altre voci retributive, cessazione o sospensione del contratto durante l'anno, contratti collettivi più generosi e costi del datore di lavoro restano fuori da questa stima.",
         "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
-        "reviewed": "Regole riviste il 19 novembre 2026. La ritenuta separata su ogni pagamento del mese è stata verificata nel testo originale del Despacho n.º 233-A/2026, e gli articoli del Código do Trabalho in copie del testo consolidato. Il riferimento di 22 giorni lavorativi per l'indennità di ferie e la ritenuta su ogni dodicesimo a parte sono prassi comune, non indicati in quei testi. L'aliquota dell'11% di previdenza sociale è stata verificata su fonti secondarie."
+        "reviewed": "Regole riviste il 19 novembre 2026. La ritenuta separata su ogni pagamento del mese è stata verificata nel testo originale del Despacho n.º 233-A/2026, e gli articoli del Código do Trabalho in copie del testo consolidato. Il riferimento di 22 giorni lavorativi per l'indennità di ferie è prassi comune, non indicato in quei testi. Trattenere ogni dodicesimo all'aliquota effettiva dell'importo intero (Lei n.º 11/2013, art. 3) è la prassi abituale delle buste paga; quella legge non è stata verificata sul testo. L'aliquota dell'11% di previdenza sociale è stata verificata su fonti secondarie."
       }
     }
   },

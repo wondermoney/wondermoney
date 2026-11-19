@@ -3063,16 +3063,16 @@
         "proportion": "Anteil einer vollen Sonderzahlung: {{percent}}.",
         "holidayDays": "Angerechnete Urlaubstage: {{days}} von 22 ({{percent}} einer vollen Sonderzahlung).",
         "noAllowanceYet": "Ohne vollen Monat im Eintrittsjahr gibt es noch kein Urlaubsgeld. Die 2 Arbeitstage pro Monat zählen erst, wenn der Monat voll ist.",
-        "noWithholdingOnTwelfth": "Jedes Zwölftel liegt unter der monatlichen Freigrenze, daher wird darauf keine IRS einbehalten. Ihr Arbeitgeber kann das Zwölftel zum Monatsgehalt addieren und auf die Summe einbehalten, was mehr einbehält."
+        "noWithholdingOnTwelfth": "Jedes Zwölftel wird mit dem effektiven Satz der gesamten Sonderzahlung besteuert, der auf diesem Niveau 0 % beträgt, daher wird keine IRS einbehalten. Ihr Arbeitgeber kann das Zwölftel zum Monatsgehalt addieren und auf die Summe einbehalten, was mehr einbehält."
       },
       "guide": {
         "methodWithholding": "Jede Zahlung wird für sich mit der monatlichen Tabelle 2026 besteuert und nicht zum Monatsgehalt addiert: Das Despacho n.º 233-A/2026 (Nr. 10) verlangt von Arbeitgebern einen getrennten effektiven Satz je Vergütung, wie in den Monaten, in denen Urlaubs- und Weihnachtsgeld gezahlt werden.",
-        "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr), und diese Seite besteuert jedes Zwölftel für sich. Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und auf die Summe einbehalten, was meist mehr einbehält: Prüfen Sie Ihre Gehaltsabrechnung.",
+        "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr). Jedes Zwölftel wird für sich mit dem effektiven Satz der gesamten Sonderzahlung besteuert, übliche Lohnabrechnungspraxis seit dem Lei n.º 11/2013, Art. 3 (nicht im Despacho geregelt). Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und auf die Summe einbehalten, was meist mehr einbehält: Prüfen Sie Ihre Gehaltsabrechnung.",
         "methodSocialSecurity": "Die Sozialversicherung zulasten des Arbeitnehmers beträgt 11 % der Brutto-Sonderzahlung.",
         "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Eine im November gezahlte Sonderzahlung würde nur zur Hälfte einbehalten.",
         "unsupportedOther": "Es zählt nur das Grundgehalt. Dienstalterszulagen, andere Vergütungsbestandteile, Vertragsende oder Ruhen im Jahr, großzügigere Tarifverträge und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
         "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
-        "reviewed": "Regeln geprüft am 19. November 2026. Die getrennte Quellensteuer je Zahlung eines Monats wurde im Originaltext des Despacho n.º 233-A/2026 geprüft, die Artikel des Código do Trabalho in Kopien des konsolidierten Textes. Die Referenz von 22 Arbeitstagen beim Urlaubsgeld und die getrennte Besteuerung jedes Zwölftels entsprechen der gängigen Praxis und stehen nicht in diesen Texten. Der Sozialversicherungssatz von 11 % wurde anhand von Sekundärquellen geprüft."
+        "reviewed": "Regeln geprüft am 19. November 2026. Die getrennte Quellensteuer je Zahlung eines Monats wurde im Originaltext des Despacho n.º 233-A/2026 geprüft, die Artikel des Código do Trabalho in Kopien des konsolidierten Textes. Die Referenz von 22 Arbeitstagen beim Urlaubsgeld entspricht der gängigen Praxis und steht nicht in diesen Texten. Die Quellensteuer je Zwölftel mit dem effektiven Satz der gesamten Sonderzahlung (Lei n.º 11/2013, Art. 3) ist übliche Lohnabrechnungspraxis; dieses Gesetz wurde nicht am Text geprüft. Der Sozialversicherungssatz von 11 % wurde anhand von Sekundärquellen geprüft."
       }
     }
   },

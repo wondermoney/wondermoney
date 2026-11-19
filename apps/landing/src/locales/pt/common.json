@@ -3063,16 +3063,16 @@
         "proportion": "Fração de um subsídio completo: {{percent}}.",
         "holidayDays": "Dias de férias contados: {{days}} de 22 ({{percent}} de um subsídio completo).",
         "noAllowanceYet": "Sem nenhum mês completo no ano de admissão, ainda não há subsídio de férias a pagar. Os 2 dias úteis por mês só contam quando o mês está completo.",
-        "noWithholdingOnTwelfth": "Cada duodécimo fica abaixo do limite de isenção mensal, por isso não há retenção de IRS sobre ele. A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que retém mais."
+        "noWithholdingOnTwelfth": "Cada duodécimo é retido à taxa efetiva do subsídio inteiro, que a este nível é 0%, por isso não há retenção de IRS. A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que retém mais."
       },
       "guide": {
         "methodWithholding": "Cada pagamento é retido à parte com a tabela mensal de 2026, sem ser somado ao salário do mês: o Despacho n.º 233-A/2026 (n.º 10) manda as entidades pagadoras apresentar uma taxa efetiva em separado para cada remuneração, como nos meses em que se pagam os subsídios de férias e de Natal.",
-        "methodTwelfths": "Em duodécimos, o subsídio reparte-se por igual pelos meses que trabalhas no ano (12 num ano completo) e esta página retém cada duodécimo à parte. A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que costuma reter mais: confere o recibo de vencimento.",
+        "methodTwelfths": "Em duodécimos, o subsídio reparte-se por igual pelos meses que trabalhas no ano (12 num ano completo). Cada duodécimo é retido à parte à taxa efetiva do subsídio inteiro, a prática habitual das empresas desde a Lei n.º 11/2013, art. 3.º (não consta do Despacho). A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que costuma reter mais: confere o recibo de vencimento.",
         "methodSocialSecurity": "A Segurança Social a cargo do trabalhador é 11% do subsídio bruto.",
         "unsupportedNovember": "O ajustamento extraordinário dos rendimentos pagos em novembro de 2026 (Despacho 12523-A/2026, Continente) é ignorado. Um subsídio pago em novembro teria retenção reduzida a metade.",
         "unsupportedOther": "Conta só o salário base. Diuturnidades, outras componentes da retribuição, cessação ou suspensão do contrato durante o ano, contratos coletivos que paguem mais e custos do empregador ficam fora desta estimativa.",
         "sourceCode": "Código do Trabalho, arts. 239.º, 263.º e 264.º: duração das férias, subsídio de Natal e subsídio de férias",
-        "reviewed": "Regras revistas a 19 de novembro de 2026. A retenção em separado de cada pagamento do mês foi confirmada no texto original do Despacho n.º 233-A/2026, e os artigos do Código do Trabalho em cópias do texto consolidado. A referência de 22 dias úteis do subsídio de férias e a retenção de cada duodécimo à parte são prática corrente, não constam desses textos. A taxa de 11% da Segurança Social foi confirmada em fontes secundárias."
+        "reviewed": "Regras revistas a 19 de novembro de 2026. A retenção em separado de cada pagamento do mês foi confirmada no texto original do Despacho n.º 233-A/2026, e os artigos do Código do Trabalho em cópias do texto consolidado. A referência de 22 dias úteis do subsídio de férias é prática corrente, não consta desses textos. Reter cada duodécimo à taxa efetiva do subsídio inteiro (Lei n.º 11/2013, art. 3.º) é a prática habitual das empresas; essa lei não foi confrontada com o texto. A taxa de 11% da Segurança Social foi confirmada em fontes secundárias."
       }
     }
   },

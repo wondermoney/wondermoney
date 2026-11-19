@@ -3063,16 +3063,16 @@
         "proportion": "Share of a full allowance: {{percent}}.",
         "holidayDays": "Holiday days counted: {{days}} of 22 ({{percent}} of a full allowance).",
         "noAllowanceYet": "With no complete month yet in the hiring year, there is no holiday allowance to pay. The 2 working days per month only start counting once a month is complete.",
-        "noWithholdingOnTwelfth": "Each twelfth is below the monthly exemption threshold, so no IRS is withheld on it. Your payroll may add the twelfth to the month's salary and withhold on the total, which withholds more."
+        "noWithholdingOnTwelfth": "Each twelfth is withheld at the effective rate of the whole allowance, which is 0% at this level, so no IRS is withheld on it. Your payroll may add the twelfth to the month's salary and withhold on the total, which withholds more."
       },
       "guide": {
         "methodWithholding": "Each payment is withheld on its own with the 2026 monthly table, never added to the month's salary: Despacho n.º 233-A/2026 (n.º 10) asks employers to show a separate effective rate for each remuneration, as in the months the holiday and Christmas allowances are paid.",
-        "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year) and this page withholds each twelfth on its own. Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
+        "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year). Each twelfth is withheld on its own at the effective rate of the whole allowance, the usual payroll practice since Lei n.º 11/2013, art. 3 (not stated in the Despacho). Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
         "methodSocialSecurity": "Employee Social Security is 11% of the gross allowance.",
         "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. An allowance paid in November would be withheld at half.",
         "unsupportedOther": "Only the base salary counts. Seniority supplements, other pay components, a contract ending or suspended during the year, collective agreements that pay more and employer costs are outside this estimate.",
         "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
-        "reviewed": "Rules reviewed on 19 November 2026. The separate withholding on each payment of a month was checked in the original text of Despacho n.º 233-A/2026, and the Código do Trabalho articles in consolidated-text copies. The 22-working-day reference for the holiday allowance and withholding on each twelfth on its own are common practice, not stated in those texts. The 11% Social Security rate was checked against secondary sources."
+        "reviewed": "Rules reviewed on 19 November 2026. The separate withholding on each payment of a month was checked in the original text of Despacho n.º 233-A/2026, and the Código do Trabalho articles in consolidated-text copies. The 22-working-day reference for the holiday allowance is common practice, not stated in those texts. Withholding each twelfth at the effective rate of the whole allowance (Lei n.º 11/2013, art. 3) is the usual payroll practice; that law was not checked against its text. The 11% Social Security rate was checked against secondary sources."
       }
     }
   },
