@@ -5,7 +5,7 @@ import {
 } from "./dismissalCompensation";
 
 const base = (overrides: Partial<DismissalCompensationInput>): DismissalCompensationInput => ({
-  baseMonthly: 3000, seniorityPay: 0, startDate: "2020-01-01", endDate: "2026-12-31", ...overrides,
+  contractType: "permanent", baseMonthly: 3000, seniorityPay: 0, startDate: "2020-01-01", endDate: "2026-12-31", ...overrides,
 });
 const run = (overrides: Partial<DismissalCompensationInput>) => {
   const outcome = computeDismissalCompensation(base(overrides), "2026-11-19");
@@ -126,6 +126,53 @@ describe("worked example", () => {
     expect(outcome.result.regime).toBe("from2011");
     expect(outcome.result.compensationCents).toBeGreaterThan(0);
     expect(outcome.result.compensationCents).toBeLessThanOrEqual(outcome.result.capCents);
+  });
+});
+
+describe("fixed-term contract expiry (arts. 344(2) and 345(4) CT, Lei 13/2023)", () => {
+  const fixed = (overrides: Partial<DismissalCompensationInput> = {}) =>
+    run({ contractType: "fixedTerm", startDate: "2025-01-01", endDate: "2026-12-31", ...overrides });
+
+  it("pays 24 days of base pay and diuturnidades per year, on the whole duration", () => {
+    // Exactly 2 years at 100 euros a day (3000 / 30): 2 x 24 x 100 = 4800 euros.
+    const result = fixed();
+    expect(result.regime).toBe("fixedTerm");
+    expect(result.seniorityYears).toBeCloseTo(2, 10);
+    expect(result.lines.map((line) => line.key)).toEqual(["twentyFourDays"]);
+    expect(result.lines[0].daysPerYear).toBe(24);
+    expect(result.compensationCents).toBe(2 * 24 * 10_000);
+    expect(result.caps).toEqual({ monthlyBase: false, total: false, earlyPartExceedsCap: false });
+  });
+
+  it("applies 24 days to a contract signed before 1 May 2023 that expires in 2026 (IGeFE nota informativa 10/2023, art. 35(1) of Lei 13/2023)", () => {
+    // 2021-01-01 to 2026-12-31 is 6 years: no 12/14-day split, no early regimes.
+    const result = fixed({ startDate: "2021-01-01" });
+    expect(result.lines.map((line) => line.key)).toEqual(["twentyFourDays"]);
+    expect(result.compensationCents).toBe(6 * 24 * 10_000);
+    const old = fixed({ startDate: "2010-05-03" }); // would be a 2013 transitional contract if permanent
+    expect(old.regime).toBe("fixedTerm");
+    expect(old.lines.map((line) => line.key)).toEqual(["twentyFourDays"]);
+  });
+
+  it("counts a fraction of a year proportionally and adds diuturnidades", () => {
+    const result = fixed({ baseMonthly: 2900, seniorityPay: 100, startDate: "2026-01-01", endDate: "2026-06-30" });
+    expect(result.seniorityYears).toBeCloseTo(181 / 365, 10);
+    expect(result.compensationCents).toBe(Math.round((181 / 365) * 24 * 10_000));
+  });
+
+  it("limits the monthly base to 20 times the minimum wage and the total to 12 monthly amounts (art. 366(2))", () => {
+    const rich = fixed({ baseMonthly: 50_000, startDate: "2025-01-01" });
+    expect(rich.usedMonthlyCents).toBe(20 * RMMG_2026_CENTS);
+    expect(rich.caps.monthlyBase).toBe(true);
+    // 17 years x 24 days = 408 days: above 12 x 30 = 360 days, so the total cap binds.
+    const long = fixed({ baseMonthly: 1500, startDate: "2009-12-31" });
+    expect(long.caps.total).toBe(true);
+    expect(long.compensationCents).toBe(12 * 150_000);
+    expect(long.caps.earlyPartExceedsCap).toBe(false);
+  });
+
+  it("leaves permanent contracts untouched", () => {
+    expect(run({ contractType: "permanent" }).regime).toBe("from2013");
   });
 });
 

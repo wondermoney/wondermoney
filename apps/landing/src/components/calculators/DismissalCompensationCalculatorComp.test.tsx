@@ -44,3 +44,17 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     event: "tool_used", tool: "dismissal_compensation", page_type: "tools/portugal-dismissal-compensation-calculator",
   });
 });
+
+it("switches to fixed-term expiry: 24 days a year on the whole duration, with its own scope and start-date help", () => {
+  render(<DismissalCompensationCalculatorComp locale="en" />);
+  const type = screen.getByLabelText("Type of termination");
+  fireEvent.change(type, { target: { value: "fixedTerm" } });
+  fireEvent.change(screen.getByLabelText("Contract start date"), { target: { value: "2025-01-01" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly base pay (gross)" }), { target: { value: "3000" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly seniority supplements (diuturnidades)" }), { target: { value: "0" } });
+  const euros = new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(4800);
+  expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros);
+  expect(screen.getByText("Fixed-term contract expiry, 24 days a year")).toBeTruthy();
+  expect(screen.getByText(/Covers the expiry of a fixed-term contract/)).toBeTruthy();
+  expect(screen.getByText(/If it was renewed, count from the first day/)).toBeTruthy();
+});

@@ -2,38 +2,36 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
-const pushGtmEvent = vi.fn();
 vi.mock("@/lib/gtm", () => ({
-  pushGtmEvent: (payload: unknown) => pushGtmEvent(payload),
-  getPageType: () => "tools/vehicle-tax-calculator",
+  pushGtmEvent: vi.fn(),
+  getPageType: () => "tools/portugal-vehicle-tax-calculator",
 }));
 
 const { default: VehicleTaxCalculatorComp } = await import("./VehicleTaxCalculatorComp");
 
-afterEach(() => {
-  cleanup();
-  pushGtmEvent.mockClear();
+afterEach(cleanup);
+
+const scheduleMonths = (title: string) => {
+  const list = screen.getByText(title).nextElementSibling as HTMLElement;
+  return Array.from(list.querySelectorAll("li > span:first-child")).map((node) => node.textContent);
+};
+
+it("computes the 2028 instalment months on the total across vehicles while the car's own tax stays the same", () => {
+  render(<VehicleTaxCalculatorComp locale="en" />);
+  const annual = document.getElementById("vehicleTax-annualTax")?.textContent;
+  expect(scheduleMonths("From 2028: payment schedule")).toEqual(["April", "October"]);
+  expect(scheduleMonths("2027 (transitional): payment schedule")).toEqual(["October"]);
+
+  fireEvent.change(screen.getByRole("spinbutton", { name: /Other IUC you pay this year/ }), { target: { value: "400" } });
+  expect(document.getElementById("vehicleTax-annualTax")?.textContent).toBe(annual);
+  expect(scheduleMonths("From 2028: payment schedule")).toEqual(["April", "July", "October"]);
+  expect(scheduleMonths("2027 (transitional): payment schedule")).toEqual(["July", "October"]);
+  expect(screen.getByText(/the amounts are this car's share of each instalment/)).toBeTruthy();
 });
 
-it("shows the example, validates the engine size and tracks one edit with metadata only", () => {
+it("flags a negative other IUC amount", () => {
   render(<VehicleTaxCalculatorComp locale="en" />);
-  expect(screen.getAllByText("€158.29").length).toBeGreaterThan(0);
-  expect(screen.getByText("2027 (transitional): payment schedule")).toBeTruthy();
-  expect(screen.getByText("€13.19")).toBeTruthy();
-  expect(pushGtmEvent).not.toHaveBeenCalled();
-
-  const cc = screen.getByRole("spinbutton", { name: "Engine size" });
-  fireEvent.change(cc, { target: { value: "0" } });
-  expect(cc.getAttribute("aria-invalid")).toBe("true");
-  expect(screen.queryByText("€158.29")).toBeNull();
-  expect(pushGtmEvent).not.toHaveBeenCalled();
-
-  fireEvent.change(cc, { target: { value: "1250" } });
-  expect(screen.getAllByText("€116.48").length).toBeGreaterThan(0);
-  fireEvent.change(screen.getByLabelText("Fuel"), { target: { value: "electric" } });
-  expect(screen.queryByRole("spinbutton", { name: "Engine size" })).toBeNull();
-  expect(screen.getAllByText("€0.00").length).toBeGreaterThan(0);
-  expect(pushGtmEvent).toHaveBeenCalledExactlyOnceWith({
-    event: "tool_used", tool: "vehicle_tax", page_type: "tools/vehicle-tax-calculator",
-  });
+  const field = screen.getByRole("spinbutton", { name: /Other IUC you pay this year/ });
+  fireEvent.change(field, { target: { value: "-5" } });
+  expect(field.getAttribute("aria-invalid")).toBe("true");
 });

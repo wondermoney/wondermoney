@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",
       "nextStepCta": "Includi i certificati nella tua panoramica dei risparmi"
     },
+    "depositRateIndex": {
+      "title": "Indice dei depositi a termine: cosa pagano davvero le banche in Portogallo",
+      "shortName": "Indice dei depositi",
+      "subtitle": "Il tasso d'interesse medio che le banche in Portogallo e nell'area euro hanno pagato sui nuovi depositi a termine delle famiglie, mese per mese dal 2003, con inflazione e 28% di IRS detratti.",
+      "description": "Tassi medi dei nuovi depositi a termine in Portogallo e nell'area euro, al netto di inflazione e imposta.",
+      "pageTitle": "Indice dei Depositi a Termine in Portogallo: Tassi Medi e Inflazione",
+      "pageDescription": "Tassi d'interesse medi ufficiali sui nuovi depositi a termine delle famiglie in Portogallo e nell'area euro dal 2003, il tasso reale dopo inflazione e 28% di IRS e un piccolo calcolatore. Dati: statistiche della Banca del Portogallo tramite la BCE.",
+      "snapshot": {
+        "title": "Tasso medio sui nuovi depositi a termine, {{month}}",
+        "intro": "Medie ufficiali del tasso d'interesse concordato sui nuovi depositi a termine delle famiglie, segnalate dalle banche. È un riferimento, non un elenco di offerte.",
+        "portugal": "Portogallo, tutte le scadenze",
+        "euroArea": "Area euro, tutte le scadenze",
+        "asOf": "Dati di {{month}}, l'ultimo mese pubblicato al momento del recupero dei dati, il {{retrieved}}.",
+        "provisional": "L'ultimo mese è provvisorio e può essere rivisto.",
+        "caption": "Tasso medio sui nuovi depositi a termine per scadenza originaria, Portogallo e area euro",
+        "maturity": "Scadenza originaria",
+        "portugalShort": "Portogallo",
+        "euroAreaShort": "Area euro",
+        "noData": "n.d."
+      },
+      "real": {
+        "title": "Tasso reale nel {{year}}, l'ultimo anno completo",
+        "nominal": "Tasso medio pagato",
+        "inflation": "Inflazione",
+        "gross": "Tasso reale prima delle imposte",
+        "net": "Tasso reale dopo il {{tax}}% di IRS",
+        "positive": "Nel {{year}} il nuovo deposito medio ha ancora battuto l'inflazione dopo l'IRS.",
+        "negative": "Nel {{year}} il nuovo deposito medio ha perso potere d'acquisto dopo l'IRS: i prezzi sono saliti più in fretta degli interessi incassati."
+      },
+      "notBestOffer": "Questa è una media di ciò che le banche hanno effettivamente pagato sui nuovi depositi, non la migliore offerta. I tassi promozionali e di campagna sono di solito più alti e alcuni depositi rendono meno. Questa pagina non cita banche e non consiglia prodotti: confronta tu le offerte attuali prima di decidere.",
+      "calculator": {
+        "title": "Interessi al tasso medio",
+        "intro": "Inserisci un importo e una durata per vedere gli interessi che un deposito renderebbe all'ultimo tasso medio di quella scadenza, al netto del 28% di IRS, e quanto toglierebbe l'inflazione."
+      },
+      "fields": {
+        "amount": "Importo depositato",
+        "term": "Durata",
+        "termSuffix": "mesi",
+        "inflation": "Inflazione ipotizzata all'anno"
+      },
+      "help": {
+        "term": "Mesi interi, da 1 a 120. Fino a 12 mesi si usa la media fino a 1 anno, da 13 a 24 mesi quella da 1 a 2 anni, per durate maggiori quella oltre 2 anni.",
+        "inflation": "Precompilata con l'inflazione portoghese del {{year}} (IPC medio annuo, INE). Modificala per provare altri scenari."
+      },
+      "errors": {
+        "amount": {
+          "required": "Inserisci un importo superiore a zero.",
+          "negative": "L'importo non può essere negativo.",
+          "tooLarge": "Inserisci {{max}} o meno."
+        },
+        "termMonths": {
+          "required": "Inserisci una durata di almeno 1 mese.",
+          "tooLarge": "La durata può essere al massimo di {{max}} mesi.",
+          "notWhole": "Inserisci un numero intero di mesi."
+        },
+        "inflation": {
+          "required": "Inserisci un tasso di inflazione, oppure 0.",
+          "outOfRange": "Inserisci un tasso di inflazione da {{min}}% a {{top}}%."
+        },
+        "summary": "Controlla i campi evidenziati per vedere il risultato."
+      },
+      "buckets": {
+        "all": "Tutte le scadenze",
+        "upTo1y": "Fino a 1 anno",
+        "1to2y": "Oltre 1 anno e fino a 2",
+        "over2y": "Oltre 2 anni"
+      },
+      "result": {
+        "net": "Interessi netti dopo il {{tax}}% di IRS",
+        "gross": "Interessi lordi",
+        "tax": "IRS trattenuta ({{tax}}%)",
+        "inflationCost": "Quanto toglie l'inflazione nella durata",
+        "realGain": "Interessi che restano dopo l'inflazione",
+        "realYield": "Rendimento annuo reale, dopo le imposte",
+        "assumptions": "Tasso medio dei nuovi depositi ({{bucket}}): {{rate}} all'anno ({{month}}). Interessi semplici pagati alla scadenza, {{months}} mesi.",
+        "fallback": "Nell'ultimo mese non sono stati registrati nuovi depositi in questo gruppo di scadenze, quindi si usa la media di tutte le scadenze.",
+        "beats": "Con queste ipotesi gli interessi, al netto delle imposte, coprono la perdita di potere d'acquisto.",
+        "loses": "Con queste ipotesi l'inflazione toglie più di quanto rendano gli interessi: alla scadenza il denaro compra meno.",
+        "note": "Un riferimento, non un'offerta: il tasso della tua banca, eventuali commissioni e il computo esatto dei giorni cambiano il risultato. Solo a scopo educativo, non è consulenza finanziaria."
+      },
+      "history": {
+        "title": "Storico dal 2003",
+        "bucket": "Scadenza mostrata nel grafico",
+        "chartLabel": "Grafico a linee dei tassi medi mensili sui nuovi depositi a termine in Portogallo e nell'area euro, con l'inflazione annua portoghese",
+        "portugal": "Portogallo",
+        "euroArea": "Area euro",
+        "inflation": "Inflazione portoghese (anno solare)",
+        "chartNote": "I tassi sono medie mensili. L'inflazione è la variazione media annua dei prezzi al consumo di ciascun anno solare, quindi cambia a gennaio; l'anno in corso non è completo.",
+        "caption": "Tasso medio annuo sui nuovi depositi, inflazione e tasso reale dopo l'IRS",
+        "year": "Anno",
+        "realNet": "Tasso reale dopo il {{tax}}% di IRS"
+      },
+      "sourceNote": "Fonte: tassi d'interesse medi sui nuovi depositi a termine delle famiglie (tasso annualizzato concordato), statistiche della Banca del Portogallo pubblicate nel portale dei dati della BCE, ultimo mese {{month}}, recuperate il {{retrieved}}. Inflazione: indice dei prezzi al consumo dell'INE tramite il BPstat della Banca del Portogallo. Valori annui calcolati da WonderMoney. Solo a scopo educativo.",
+      "nextStepHeadline": "Dal riferimento a un piano di risparmio personale",
+      "nextStepDescription": "La media mostra quanto ha pagato il mercato. Imposta un obiettivo di risparmio in WonderMoney e segui come i tuoi depositi si confrontano con essa.",
+      "nextStepCta": "Imposta un obiettivo di risparmio",
+      "guide": {
+        "read": {
+          "title": "Come leggere l'indice",
+          "what": "Ogni mese le banche in Portogallo segnalano alla Banca del Portogallo il tasso d'interesse dei nuovi depositi a termine raccolti dalle famiglie. L'indice è la media di questi tassi tra le banche, ponderata per il volume delle nuove operazioni: ciò che è stato realmente concordato. La linea dell'area euro è la stessa statistica per tutte le banche dell'area, a titolo di confronto.",
+          "notBest": "Non è il miglior tasso disponibile. Una media comprende depositi piccoli, clienti già acquisiti e banche che pagano poco, quindi un tasso di campagna o promozionale può essere molto più alto, e alcuni depositi rendono meno.",
+          "noRecommendation": "Qui non si cita né si classifica alcuna banca o prodotto. Usa la media per capire se un'offerta sembra alta o bassa, poi confronta tu le offerte attuali, comprese le condizioni."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Deposita {{amount}} per {{months}} mesi all'ultimo tasso medio di quella scadenza, {{rate}} all'anno ({{month}}). Gli interessi pagati alla scadenza sono {{gross}}; dopo il {{taxRate}}% di IRS (imposta trattenuta: {{tax}}) ti restano {{net}}.",
+          "real": "Con l'inflazione al {{inflation}} annuo, lo stesso denaro perde {{inflationCost}} di potere d'acquisto nella durata, quindi ciò che resta dopo l'inflazione è {{realGain}}.",
+          "year": "Guardando indietro, nel {{year}}, l'ultimo anno completo, il nuovo deposito medio ha pagato {{yearRate}}; dopo inflazione e 28% di IRS il tasso reale è stato {{yearReal}}."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "I tassi sono statistiche pubblicate. WonderMoney aggiunge soltanto questi calcoli:",
+          "steps": {
+            "a": "Tasso annuo: la media semplice delle dodici medie mensili dell'anno. Non pondera i mesi in base agli importi depositati.",
+            "b": "Inflazione: la variazione dell'indice dei prezzi al consumo portoghese, in media annua, dall'anno precedente all'anno.",
+            "c": "Tasso reale: (1 + tasso) ÷ (1 + inflazione) − 1. Per il valore dopo le imposte si detrae prima il 28% di IRS dal tasso.",
+            "d": "Calcolatore: interessi semplici per la durata in mesi interi, pagati alla scadenza, con il 28% trattenuto, al tasso medio del gruppo di scadenze. Ciò che toglie l'inflazione è importo × ((1 + inflazione)^(mesi ÷ 12) − 1)."
+          },
+          "realRate": "Dividere invece di sottrarre conta quando i tassi sono alti: misura quanto in più può comprare il denaro, non solo la differenza tra due percentuali."
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "source": "Tassi: tassi d'interesse medi mensili sui nuovi depositi con scadenza concordata delle famiglie (tasso annualizzato concordato, tutti gli importi, in euro), da {{first}} a {{last}}, compilati dalla Banca del Portogallo sulla base delle segnalazioni delle banche e pubblicati nel portale dei dati della BCE (serie {{seriesPt}} per il Portogallo e {{seriesEa}} per l'area euro, dove x è la scadenza: totale, fino a 1 anno, oltre 1 e fino a 2 anni, oltre 2 anni). Recuperati il {{retrieved}}.",
+          "ecbLink": "Portale dei dati della BCE (MIR)",
+          "bpstatLink": "BPstat della Banca del Portogallo",
+          "cpiLink": "Indice dei prezzi al consumo dell'INE in BPstat",
+          "inflation": "Inflazione: indice dei prezzi al consumo medio annuo del Portogallo, prodotto dall'INE e distribuito dalla Banca del Portogallo (serie BPstat 12704686), recuperato il {{cpiRetrieved}}.",
+          "reuse": "La BCE consente l'uso libero delle sue statistiche se riprodotte con accuratezza e con citazione della fonte. Questa pagina ripubblica valori mensili e non carica dati in esecuzione: i numeri cambiano solo quando il file di dati viene aggiornato."
+        },
+        "limits": {
+          "title": "Cosa questi valori non includono",
+          "items": {
+            "average": "È una media delle nuove operazioni: mescola importi, banche e clienti. Il tuo tasso può essere più alto o più basso.",
+            "lag": "Le statistiche sono pubblicate ogni mese con un certo ritardo e l'ultimo mese può essere rivisto.",
+            "tax": "Imposte: il 28% è l'aliquota di ritenuta IRS sugli interessi per i residenti. La tua situazione può essere diversa, per esempio se includi gli interessi nella dichiarazione annuale.",
+            "inflation": "Inflazione: i tuoi prezzi differiscono dalla media nazionale e l'inflazione futura è sconosciuta. Il calcolatore mantiene il tasso inserito per tutta la durata.",
+            "buckets": "I gruppi di scadenze senza nuovi depositi in un mese compaiono come n.d. Per una durata di quel gruppo il calcolatore usa la media di tutte le scadenze.",
+            "advice": "Solo a scopo educativo: questa pagina non è consulenza finanziaria né un'offerta."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "termDepositLink": "Calcolatore di depositi a termine",
+          "termDepositBody": "Inserisci il tasso della tua banca e vedi interessi, imposta e rendimento netto.",
+          "savingsCertificatesLink": "Calcolatore dei Certificados de Aforro",
+          "savingsCertificatesBody": "Confronta un deposito con i Certificados de Aforro Série F.",
+          "inflationLink": "Calcolatore dell'inflazione",
+          "inflationBody": "Scopri quanto potere d'acquisto ha perso il denaro tra due anni qualsiasi."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calcolatore dello stipendio netto in Portogallo 2026",
       "shortName": "Stipendio netto",
@@ -3071,7 +3222,8 @@
           "none": "L'importo giornaliero è la percentuale della retribuzione di riferimento di ogni fascia; nessun limite applicato.",
           "minimum": "L'importo giornaliero è stato portato al minimo di {{min}} (30% del salario minimo).",
           "referencePay": "La retribuzione di riferimento è inferiore a {{min}} al giorno, quindi l'indennità è uguale a tale retribuzione.",
-          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento."
+          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento.",
+          "floor": "L'importo giornaliero è stato portato al minimo dell'art. 17, n. 2: sopra 500 euro di retribuzione di riferimento, gli scaglioni del 55% e 60% non scendono mai sotto l'indennità maggiorata (60% e 65%) calcolata su 500 euro."
         }
       },
       "checklist": {
@@ -3101,8 +3253,9 @@
         "unsupportedOther": "Meno di 6 mesi di retribuzioni registrate, retribuzioni molto variabili, indennizzi per infortunio sul lavoro o malattia professionale e contratti collettivi che integrano l'indennità.",
         "sourcesTitle": "Fonti",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social e sul testo dell'art. 17 del decreto-legge 28/2004. Le tre condizioni alternative della maggiorazione di 5 punti provengono da quel testo; la legge prevede che l'importo di 500 euro sia rivisto periodicamente e non abbiamo potuto confermare l'importo attuale in un testo ufficiale, quindi manteniamo 500. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
+        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia (art. 17 nel testo dell'art. 9 del Decreto-Lei n.º 133/2012, pubblicato dalla CITE)",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social e sul testo dell'art. 17 del Decreto-Lei 28/2004 nel testo del Decreto-Lei n.º 133/2012. Le tre condizioni alternative della maggiorazione di 5 punti e il minimo sopra 500 euro vengono da quel testo. L'art. 17, n. 4, dice che il valore di 500 euro è aggiornato con lo IAS; la guida in vigore (ISS 5001 v4.55, 23 ottobre 2026) indica ancora 500,00 euro, quindi manteniamo 500. La stima dello stipendio netto dietro il tetto netto è una nostra semplificazione.",
+        "methodFloor": "Sopra una retribuzione di riferimento di 500 euro al mese, l'indennità giornaliera al 55% e 60% non può essere inferiore all'indennità maggiorata calcolata su 500 euro: 60% e 65% di 500 diviso 30, cioè {{floor55}} e {{floor60}} al giorno (art. 17, n. 2, del Decreto-Lei 28/2004). Conta solo per una retribuzione di riferimento poco sopra 500 euro, fino a circa 545 euro, quando non c'è maggiorazione. Non si applica agli scaglioni del 70% e 75%."
       },
       "nextStepHeadline": "Pianifica il calo temporaneo di reddito",
       "nextStepDescription": "WonderMoney mostra la tua liquidità, le tue spese e per quanto tempo i risparmi coprono un reddito più basso.",
@@ -3121,7 +3274,8 @@
         "year": "Anno della prima immatricolazione",
         "month": "Mese della prima immatricolazione",
         "co2": "Emissioni ufficiali di CO2",
-        "standard": "Ciclo di prova della CO2"
+        "standard": "Ciclo di prova della CO2",
+        "otherIuc": "Altro IUC che paghi quest'anno (facoltativo)"
       },
       "fuels": {
         "petrol": "Benzina",
@@ -3159,7 +3313,9 @@
         "scheduleTitle": "2027 (transitorio): calendario dei pagamenti",
         "exempt": "Le auto interamente elettriche della categoria B sono esenti dall'IUC.",
         "dieselSurcharge": "Supplemento diesel (non moltiplicato per il coefficiente)",
-        "scheduleTitle2028": "Dal 2028: calendario dei pagamenti"
+        "scheduleTitle2028": "Dal 2028: calendario dei pagamenti",
+        "totalAnnualTax": "IUC totale per le soglie delle rate",
+        "scheduleShareNote": "I mesi seguono il tuo totale di {{total}} su tutti i veicoli; gli importi sono la quota di questa auto in ogni rata."
       },
       "guide": {
         "exampleTitle": "Esempio pratico",
@@ -3178,7 +3334,7 @@
         "scopeUnsupported": "Non supportati: veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
         "assumptionsTitle": "Ipotesi",
         "assumptionYear": "Le aliquote sono le tabelle {{taxYear}} del Código do IUC (articoli 9 e 10), nella versione della {{law}}. Il Portal das Finanças non indica modifiche successive a queste aliquote.",
-        "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. I calendari 2027 e 2028 valgono per questa sola auto: la legge applica le soglie al totale di tutti i tuoi veicoli, quindi la ripartizione reale può essere diversa. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
+        "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. I calendari 2027 e 2028 mostrano la quota di questa auto in ogni rata; i mesi seguono il totale di tutti i tuoi veicoli, che puoi inserire come altro IUC (la legge applica le soglie a quel totale). Senza, il calcolatore presume che sia il tuo unico veicolo. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
         "assumptionEducational": "È una stima a scopo educativo, non una consulenza fiscale. Conta l'importo dell'avviso dell'Autorità Tributaria.",
         "sourcesTitle": "Fonti",
         "sourceCategoryA": "Código do IUC, articolo 9: aliquote della categoria A (consultato il 19 novembre 2026)",
@@ -3190,7 +3346,8 @@
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così la scadenza è già coperta.",
-      "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale"
+      "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale",
+      "otherIucHelp": "L'IUC annuale di tutti i tuoi altri veicoli, in euro. Dal 2027 i mesi di pagamento dipendono dal totale di tutti i tuoi veicoli. Inserisci 0 se è il tuo unico veicolo."
     },
     "propertyCapitalGains": {
       "title": "Calcolatore delle plusvalenze sulla vendita di casa",
@@ -3376,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Calcolatore indennità di licenziamento in Portogallo 2026",
       "shortName": "Indennità di licenziamento",
-      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, con i limiti e le aliquote in base alla data del contratto.",
-      "description": "Stima la tua indennità di licenziamento in Portogallo: aliquote per data del contratto, limiti e piano di incasso.",
+      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, o per la scadenza di un contratto a termine, con i limiti e le aliquote.",
+      "description": "Stima la tua indennità di licenziamento o di scadenza del contratto a termine in Portogallo: aliquote, limiti e piano di incasso.",
       "pageTitle": "Calcolatore Indennità di Licenziamento Portogallo 2026: Stima dell'art. 366",
-      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto: 12, 18, 20 o 30 giorni per anno in base alla data del contratto, il tetto di 12 mensilità e un piano di incasso.",
+      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto (12, 18, 20 o 30 giorni per anno a seconda della data del contratto) o per la scadenza di un contratto a termine (24 giorni per anno), con il limite di 12 mesi e un piano di incasso.",
       "fields": {
         "baseMonthly": "Retribuzione base mensile (lorda)",
         "seniorityPay": "Integrazioni mensili di anzianità (diuturnidades)",
         "startDate": "Data di inizio del contratto",
-        "endDate": "Data di cessazione"
+        "endDate": "Data di cessazione",
+        "contractType": "Tipo di cessazione"
       },
       "help": {
         "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima di previdenza e IRS. Non includere tredicesima, premi né straordinari.",
         "seniorityPay": "Le diuturnidades sono integrazioni pagate per l'anzianità. Inserisci 0 se non ne hai.",
         "startDate": "Il giorno in cui è iniziato il contratto a tempo indeterminato. In caso di gruppo di imprese o di un contratto precedente con lo stesso datore di lavoro, verifica come viene conteggiata la tua anzianità.",
-        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}."
+        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}.",
+        "contractType": "Il licenziamento copre il licenziamento collettivo, la soppressione del posto e l'inidoneità. La scadenza è la fine di un contratto a termine, certo o incerto (artt. 344 e 345 del Código do Trabalho). Non è dovuta quando il contratto finisce perché hai dichiarato di non volerlo rinnovare.",
+        "startDateFixedTerm": "Il giorno in cui è iniziato il contratto a termine. Se è stato rinnovato, conta dal primo giorno: tutta la durata, rinnovi compresi, è pagata a 24 giorni per anno."
       },
-      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre contratti a termine, licenziamento per giusta causa, licenziamento illegittimo, risoluzione consensuale né il settore pubblico.",
+      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico. Per la fine di un contratto a termine, scegli scadenza di un contratto a termine.",
       "errors": {
         "required": "Inserisci un valore valido.",
         "tooSmall": "Inserisci un valore di almeno {{min}}.",
@@ -3411,7 +3571,8 @@
         "regimes": {
           "before2011": "Contratto precedente al 1° novembre 2011",
           "from2011": "Contratto dal 1° novembre 2011 al 30 settembre 2013",
-          "from2013": "Contratto dal 1° ottobre 2013"
+          "from2013": "Contratto dal 1° ottobre 2013",
+          "fixedTerm": "Scadenza di contratto a termine, 24 giorni per anno"
         },
         "usedMonthly": "Importo mensile usato",
         "daily": "Importo giornaliero (importo mensile diviso 30)",
@@ -3422,7 +3583,8 @@
           "twentyDays": "{{years}} anni a {{days}} giorni per anno",
           "eighteenDays": "{{years}} anni a {{days}} giorni per anno",
           "twelveDays": "{{years}} anni a {{days}} giorni per anno",
-          "fourteenDays": "{{years}} anni a {{days}} giorni per anno"
+          "fourteenDays": "{{years}} anni a {{days}} giorni per anno",
+          "twentyFourDays": "{{years}} anni a {{days}} giorni per anno"
         },
         "caps": {
           "none": "Nessun limite applicato.",
@@ -3447,9 +3609,9 @@
         "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
         "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale indennità di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
         "supportedTitle": "Situazioni coperte",
-        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore, in un contratto a tempo indeterminato, con cessazione nel 2026.",
+        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore in un contratto a tempo indeterminato, e scadenza di un contratto a termine, certo o incerto, con cessazione nel 2026.",
         "unsupportedTitle": "Non coperto",
-        "unsupportedFixedTerm": "La scadenza dei contratti a termine (artt. 344 e 345 del Código do Trabalho), che ha aliquote e regole transitorie proprie.",
+        "unsupportedFixedTerm": "Contratti a termine scaduti prima del 1° maggio 2023 (18 giorni per anno nel testo precedente), cessazione anticipata di un contratto a termine e scadenza causata da una dichiarazione del lavoratore stesso.",
         "unsupportedJustCause": "Il licenziamento per giusta causa (disciplinare), che segue altre regole.",
         "unsupportedUnlawful": "Il licenziamento illegittimo, in cui il tribunale fissa l'indennità, in genere tra 15 e 45 giorni di retribuzione base per anno di anzianità.",
         "unsupportedAgreement": "La risoluzione consensuale, in cui l'importo è negoziato e non c'è una formula di legge.",
@@ -3459,11 +3621,19 @@
         "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
         "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
         "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
-        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il tetto dell'art. 366 provengono dai riepiloghi di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. Informazione didattica, non consulenza legale."
+        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assembleia da República, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il limite dell'art. 366 vengono dai riassunti di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. I 24 giorni della scadenza del contratto a termine e la loro applicazione a tutti i contratti che scadono dal 1° maggio 2023 vengono dal testo della Lei n.º 13/2023 riprodotto dalla PGDL (artt. 344, 345 e 35) e dalla nota dell'IGeFE, non dalla pagina del Diário da República. Informazione didattica, non consulenza legale.",
+        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e la nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023. Quindi tutta la durata conta a 24 giorni, qualunque sia la data di inizio, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano.",
+        "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile: nuovo testo degli artt. 344, n. 2, e 345, n. 4, del Código do Trabalho e art. 35 sull'applicazione nel tempo (riproduzione della PGDL del testo del Diário da República)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula"
       },
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
       "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
-      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi"
+      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi",
+      "contractTypes": {
+        "permanent": "Licenziamento in un contratto a tempo indeterminato",
+        "fixedTerm": "Scadenza di un contratto a termine"
+      },
+      "scopeFixedTerm": "Copre la scadenza di un contratto a termine, certo o incerto, con cessazione nel {{year}}: 24 giorni di retribuzione base e diuturnidades per anno di tutta la durata del contratto, con l'importo giornaliero e i limiti dell'art. 366. Non copre contratti scaduti prima del 1° maggio 2023, cessazione anticipata, licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico."
     },
     "statePension": {
       "title": "Calcolatore pensione di vecchiaia Portogallo 2026",
@@ -3664,6 +3834,382 @@
           "compoundInterestBody": "Guarda come versamenti regolari e tempo si compongono a un tasso a tua scelta.",
           "investorProfileLink": "Test del profilo di investitore",
           "investorProfileBody": "Scopri con quante oscillazioni di mercato come queste riesci a convivere."
+        }
+      }
+    },
+    "euribor": {
+      "title": "Euribor oggi: tassi attuali e impatto sulla rata",
+      "shortName": "Euribor oggi",
+      "subtitle": "Gli ultimi Euribor a 3, 6 e 12 mesi, la variazione sul mese precedente, lo storico dal 2000 e cosa fa una variazione alla rata di un mutuo a tasso variabile.",
+      "description": "Medie mensili attuali dell'Euribor a 3, 6 e 12 mesi, storico dal 2000 e un simulatore dell'effetto di una variazione sulla rata del tuo mutuo.",
+      "pageTitle": "Euribor oggi: tassi a 3, 6 e 12 mesi e impatto sulla rata",
+      "pageDescription": "Le ultime medie mensili dell'Euribor a 3, 6 e 12 mesi della Banca del Portogallo, la variazione sul mese precedente, un grafico dal 2000 e un simulatore di cosa fa un aumento o un calo alla rata di un mutuo a tasso variabile.",
+      "asOf": "Dati di {{month}}: medie mensili, recuperati il {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 mesi",
+        "6": "Euribor 6 mesi",
+        "12": "Euribor 12 mesi"
+      },
+      "current": {
+        "title": "Tassi Euribor attuali",
+        "change": "{{change}} punti rispetto a {{previous}}",
+        "note": "Ogni tasso è la media di {{month}}, non una rilevazione giornaliera. Un mutuo si adegua alla rilevazione della data prevista dal contratto, che può differire dalla media mensile."
+      },
+      "calc": {
+        "title": "Cosa fa una variazione dell'Euribor alla tua rata"
+      },
+      "fields": {
+        "balance": "Capitale residuo",
+        "termYears": "Anni rimanenti",
+        "termMonths": "Mesi rimanenti",
+        "spread": "Il tuo spread",
+        "tenor": "Euribor a cui è legato il tuo mutuo",
+        "change": "Variazione dell'Euribor (punti)"
+      },
+      "help": {
+        "spread": "Il margine della banca sopra l'Euribor, in percentuale. È nel tuo contratto.",
+        "change": "Usa un numero negativo per un calo. 1 è un punto percentuale: dal 3% al 4%."
+      },
+      "errors": {
+        "summary": "La nuova rata appare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il capitale che devi ancora.",
+          "tooSmall": "Inserisci un capitale di almeno {{min}}.",
+          "tooLarge": "Inserisci un capitale fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci il tempo rimanente, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci fino a {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "spread": {
+          "required": "Inserisci lo spread, o 0% se non c'è.",
+          "negative": "Lo spread non può essere negativo.",
+          "tooLarge": "Inserisci uno spread fino a {{max}}."
+        },
+        "change": {
+          "required": "Inserisci una variazione in punti, o 0 se non c'è.",
+          "tooSmall": "Inserisci una variazione di {{min}} o più.",
+          "tooLarge": "Inserisci una variazione di {{max}} o meno."
+        }
+      },
+      "result": {
+        "revised": "Rata mensile dopo la variazione",
+        "current": "Rata mensile oggi",
+        "monthlyChange": "Differenza al mese",
+        "nextYear": "Differenza sulle prossime {{payments}} rate",
+        "assumptions": "Parte dal tasso a {{tenor}} del {{index}} (media di {{month}}) e lo porta al {{newIndex}}, con il tuo spread sopra, sui mesi rimanenti.",
+        "floored": "Indice più spread è sotto lo 0%, quindi il tasso è preso come 0%. I contratti differiscono: alcuni hanno un pavimento, altri no.",
+        "termRounded": "La durata rimanente è stata arrotondata a mesi interi.",
+        "noChange": "Senza variazione dell'Euribor la rata resta uguale.",
+        "caveat": "Stima a scopo educativo. Assume che il nuovo tasso valga dalla prossima rata fino alla fine del mutuo; il tuo contratto fissa date di revisione, tetti e pavimenti."
+      },
+      "history": {
+        "title": "Storico dell'Euribor",
+        "from": "Mostra dall'anno",
+        "label": "Grafico a linee delle medie mensili dell'Euribor a 3, 6 e 12 mesi"
+      },
+      "sourceNote": "Fonte: Banco de Portugal, BPstat, medie mensili dell'Euribor, ultimo mese {{month}}, recuperate il {{fetched}}. Euribor è un marchio registrato di EMMI. Solo a scopo educativo.",
+      "nextStepHeadline": "Collega le variazioni dei tassi al budget dei tuoi debiti",
+      "nextStepDescription": "Aggiungi il tuo mutuo a WonderMoney e guarda come una variazione dell'Euribor sposta la rata mensile e cosa lascia al resto del budget.",
+      "nextStepCta": "Collega i tuoi debiti",
+      "guide": {
+        "read": {
+          "title": "Come leggere i tassi",
+          "intro": "L'Euribor è il tasso a cui le banche dell'area euro si prestano denaro per una durata: 3, 6 o 12 mesi. Molti mutui a tasso variabile pagano Euribor più uno spread fisso, quindi quando si muove, si muove la rata.",
+          "monthly": "I valori sono medie mensili, l'ultima è quella di {{month}}. Non sono il tasso del giorno: quello che fissa la tua rata è il valore della data usata dal tuo contratto."
+        },
+        "example": {
+          "title": "Esempio",
+          "setup": "Un mutuo con {{balance}} residui su {{years}} anni, spread del {{spread}} ed Euribor a 12 mesi del {{index}} (l'ultima media mensile). L'Euribor sale di {{change}} punto al {{newIndex}}.",
+          "result": "La rata passa da {{current}} a {{revised}}, una differenza di {{difference}} al mese. È lo stesso calcolo del simulatore di revisione del tasso."
+        },
+        "data": {
+          "title": "Dati e metodo",
+          "source": "I tassi sono le medie mensili dell'Euribor a 3, 6 e 12 mesi pubblicate dalla Banca del Portogallo in BPstat, recuperate il {{fetched}}. L'ultimo mese dei dati è {{month}}. Ogni variazione è l'ultima media meno quella del mese precedente, in punti percentuali.",
+          "link": "Tassi Euribor per durata su BPstat",
+          "daily": "BPstat pubblica medie mensili, non rilevazioni giornaliere, quindi questa pagina mostra solo medie mensili. Per il valore di oggi consulta EMMI o la tua banca.",
+          "trademark": "Euribor è un marchio registrato di EMMI. Questa pagina non è affiliata né approvata da EMMI o dalla Banca del Portogallo."
+        },
+        "limits": {
+          "title": "Cosa non includono questi valori",
+          "items": {
+            "average": "Una media mensile leviga il mese: il tasso di un giorno preciso può essere sopra o sotto.",
+            "reset": "Il tuo mutuo segue l'Euribor di una data di revisione del contratto, spesso ogni 3, 6 o 12 mesi, non ogni mese.",
+            "terms": "Tetti, pavimenti e uno spread diverso dopo alcuni anni dipendono dal contratto e non sono inclusi.",
+            "advice": "Informazione educativa, non una previsione dell'Euribor né una consulenza finanziaria."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "rateRevisionLink": "Simulatore di revisione del tasso",
+          "rateRevisionBody": "Prova il tuo indice, spread e capitale, e guarda la rata come quota del reddito.",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Calcola rata e interessi di un mutuo prima di qualsiasi variazione del tasso.",
+          "debtToIncomeLink": "Calcolatore del rapporto debito-reddito",
+          "debtToIncomeBody": "Guarda se una rata più alta mantiene i tuoi debiti in una quota comoda del reddito."
+        }
+      }
+    },
+    "electricityIndex": {
+      "title": "Indice dell'elettricità e stima della bolletta (Portogallo)",
+      "shortName": "Indice dell'elettricità",
+      "subtitle": "Stima una bolletta mensile dell'elettricità con la tariffa regolata e guarda come si confronta il prezzo delle famiglie portoghesi con la media UE.",
+      "description": "Stima della bolletta dell'elettricità con la tariffa regolata per le famiglie portoghesi, con il prezzo al kWh del Portogallo rispetto all'UE nel tempo.",
+      "pageTitle": "Indice dell'elettricità in Portogallo: stima della bolletta con tariffa regolata",
+      "pageDescription": "Stima la tua bolletta mensile dell'elettricità con la tariffa regolata dell'ERSE (potenza contrattuale, kWh, semplice o bioraria, IVA e altri oneri) e confronta il prezzo al kWh delle famiglie in Portogallo con la media UE. Dati: ERSE ed Eurostat.",
+      "fields": {
+        "power": "Potenza contrattuale",
+        "period": "Consumo indicato",
+        "periodMonth": "Al mese",
+        "periodYear": "All'anno",
+        "consumption": "Consumo di elettricità",
+        "option": "Opzione tariffaria",
+        "optionSimple": "Semplice",
+        "optionBi": "Bioraria",
+        "offPeak": "Quota del consumo nelle ore vuote",
+        "largeFamily": "Famiglia di cinque o più persone"
+      },
+      "help": {
+        "power": "Famiglie in bassa tensione nel Portogallo continentale: 3,45, 4,6, 5,75 o 6,9 kVA. È indicata in bolletta.",
+        "consumption": "kWh nel periodo scelto sopra. Un anno è ripartito in dodici mesi uguali.",
+        "offPeak": "Le ore vuote (\"vazio\") sono il periodo più economico della tariffa bioraria. La bolletta o i dati del contatore mostrano la ripartizione.",
+        "largeFamily": "Alza il limite dell'IVA ridotta da 200 a 300 kWh al mese, se l'hai richiesto al tuo fornitore."
+      },
+      "errors": {
+        "required": "Inserisci un valore valido.",
+        "notAllowed": "Scegli una delle potenze contrattuali dell'elenco.",
+        "negative": "Il consumo non può essere negativo.",
+        "tooLarge": "Inserisci {{max}} o meno.",
+        "percentRange": "Inserisci una quota da 0% a 100%.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "total": "Bolletta mensile stimata (IVA inclusa)",
+        "yearly": "Circa dodici mesi così",
+        "effective": "Costo reale al kWh, oneri fissi inclusi",
+        "breakdown": "Dettaglio della bolletta: importo senza IVA e aliquota IVA di ogni voce",
+        "item": "Voce",
+        "beforeVat": "Senza IVA",
+        "vatRate": "IVA",
+        "power": "Potenza contrattuale ({{kva}} kVA, {{days}} giorni)",
+        "energyReduced": "Energia con IVA ridotta ({{kwh}})",
+        "energyStandard": "Energia oltre il limite dell'IVA ridotta ({{kwh}})",
+        "cav": "Contributo audiovisivo (CAV)",
+        "iec": "Imposta speciale sul consumo di elettricità (IEC)",
+        "subtotal": "Totale senza IVA",
+        "vat": "IVA",
+        "comparisonSame": "Con l'opzione {{other}}, lo stesso mese costerebbe circa lo stesso.",
+        "comparisonCheaper": "Con l'opzione {{other}}, lo stesso mese costerebbe {{amount}}, cioè {{difference}} in meno.",
+        "comparisonDearer": "Con l'opzione {{other}}, lo stesso mese costerebbe {{amount}}, cioè {{difference}} in più.",
+        "breakEven": "Considerando solo il prezzo dell'energia, la bioraria costa meno della semplice quando oltre il {{percent}}% del consumo avviene nelle ore vuote.",
+        "noConsumption": "Senza consumo, la bolletta comprende solo gli oneri fissi."
+      },
+      "notes": {
+        "tariffs": "Tariffe del mercato regolato dell'ERSE per le famiglie in bassa tensione nel Portogallo continentale, in vigore dal {{date}} (lette nei documenti dell'ERSE il {{checked}}). L'ERSE può aggiornarle ogni trimestre.",
+        "dgeg": "Non incluso: la piccola tassa mensile della DGEG, il cui importo non abbiamo potuto confermare in un documento dell'ERSE, né altri oneri del contatore. La tua bolletta reale può differire di qualche centesimo.",
+        "freeMarket": "La maggior parte delle famiglie compra sul mercato libero, dove le offerte variano: alcune costano meno della tariffa regolata, altre di più. Questa pagina non cita né consiglia alcun fornitore. Per confrontare offerte reali, usa il",
+        "simulatorLink": "simulatore di prezzi ufficiale dell'ERSE."
+      },
+      "index": {
+        "title": "Il Portogallo rispetto all'UE: prezzo al kWh nel tempo",
+        "intro": "Prezzo semestrale di Eurostat per una famiglia che consuma da 2.500 a 4.999 kWh all'anno (fascia DC), con tutte le imposte e gli oneri, per il Portogallo e per la media dell'UE a 27.",
+        "chartLabel": "Grafico a linee del prezzo dell'elettricità al kWh per le famiglie in Portogallo e nell'UE, per semestre",
+        "portugal": "Portogallo",
+        "eu": "Media UE",
+        "below": "Nel {{period}} il Portogallo ha pagato {{portugal}} contro {{eu}} nell'UE: {{gap}} sotto la media UE.",
+        "above": "Nel {{period}} il Portogallo ha pagato {{portugal}} contro {{eu}} nell'UE: {{gap}} sopra la media UE.",
+        "equal": "Nel {{period}} il Portogallo ha pagato {{portugal}} contro {{eu}} nell'UE: più o meno uguale.",
+        "tableCaption": "Gli ultimi semestri: Portogallo, media UE e differenza",
+        "period": "Semestre",
+        "gap": "Portogallo vs UE",
+        "asOf": "Dati fino al {{last}} (l'ultimo semestre disponibile). Eurostat ha aggiornato il set di dati il {{updated}}; la copia di questa pagina è stata generata il {{fetched}}. Fonte: Eurostat, tabella nrg_pc_204. Solo a scopo educativo."
+      },
+      "nextStepHeadline": "Confronta le bollette di casa con un budget realistico",
+      "nextStepDescription": "Inserisci elettricità, acqua, gas e le altre bollette di casa in un budget WonderMoney e guarda cosa resta ogni mese.",
+      "nextStepCta": "Pianifica il tuo budget",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa pagina",
+          "estimator": "La stima calcola un mese di 30 giorni con la tariffa regolata: la potenza contrattuale, l'energia che consumi, il contributo audiovisivo e l'imposta sull'elettricità, poi aggiunge l'IVA voce per voce, con l'aliquota che spetta a ciascuna.",
+          "index": "L'indice guarda le bollette di tutte le famiglie, non solo la tariffa regolata: il prezzo medio al kWh di Eurostat in Portogallo e nell'UE, imposte incluse, così che i due siano confrontabili.",
+          "market": "La tariffa regolata è solo un'opzione. La maggior parte delle famiglie è sul mercato libero, dove i fornitori fissano i propri prezzi e le offerte possono costare meno o più della tariffa regolata. La stima è un punto di riferimento, non un consiglio."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Una famiglia con {{kva}} kVA contrattuali che consuma {{kwh}} kWh in un mese con la tariffa semplice. Potenza: {{powerPrice}} per 30 giorni. Energia: {{kwh}} kWh a {{energySimple}}. Più il contributo audiovisivo ({{cav}}) e l'imposta sull'elettricità ({{iec}}). Con l'IVA ({{vatSimple}} in tutto), il mese costa {{totalSimple}}, ovvero {{effective}} una volta ripartiti gli oneri fissi sui kWh.",
+          "bi": "Con la tariffa bioraria ({{energyPeak}} fuori dalle ore vuote, {{energyValley}} nelle ore vuote) e metà del consumo nelle ore vuote, lo stesso mese costa {{totalBi}}.",
+          "power": "Conta anche la potenza contrattuale: con 6,9 kVA e 300 kWh il mese costa {{totalBigger}}, perché una potenza maggiore ha un prezzo giornaliero maggiore e il suo termine di potenza paga l'aliquota IVA ordinaria."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Per un mese di 30 giorni, la stima fa sempre le stesse cinque cose:",
+          "steps": {
+            "a": "Potenza: il prezzo giornaliero della tua potenza contrattuale, per 30 giorni.",
+            "b": "Energia: i tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi.",
+            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta.",
+            "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
+            "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+          },
+          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, al termine di potenza con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
+          "bi": "Bioraria contro semplice: il prezzo semplice è {{energySimple}}, contro {{energyPeak}} fuori dalle ore vuote e {{energyValley}} nelle ore vuote. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore vuote. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
+          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni."
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "tariffs": "Tariffe regolate: ERSE (Entidade Reguladora dos Serviços Energéticos), le tariffe transitorie di vendita ai clienti finali in bassa tensione fino a 20,7 kVA nel Portogallo continentale, in vigore dal {{from}}, più il contributo audiovisivo, l'imposta sull'elettricità e le regole dell'IVA dai documenti dell'ERSE stessa. Lette il {{checked}}. L'ERSE può cambiare il prezzo dell'energia ogni trimestre.",
+          "eurostat": "Indice dei prezzi: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), fascia DC (da 2.500 a 4.999 kWh all'anno), con tutte le imposte e gli oneri, in euro al kWh, da {{firstPeriod}} a {{lastPeriod}}. Eurostat ha aggiornato il set di dati il {{updated}} e la copia di questa pagina è stata generata il {{fetched}}.",
+          "tariffsLink": "ERSE, tariffe e prezzi per il 2026 (Direttiva 4/2026)",
+          "chargesLink": "ERSE, manuale del simulatore di prezzi (oneri della bolletta)",
+          "vatLink": "ERSE, IVA sulla bolletta dell'elettricità",
+          "eurostatLink": "Eurostat, tabella nrg_pc_204",
+          "refresh": "La pagina legge due file di dati salvati e non interroga mai queste fonti mentre la usi. Entrambi portano la propria data e vengono aggiornati a mano."
+        },
+        "limits": {
+          "title": "Cosa questi valori non comprendono",
+          "items": {
+            "market": "Mercato libero: la maggior parte delle offerte non è la tariffa regolata. Possono costare meno o più, con prezzi, sconti e condizioni diversi. Confronta con un vero simulatore prima di decidere.",
+            "dgeg": "La piccola tassa mensile della DGEG non è inclusa perché non abbiamo potuto confermarne l'importo in un documento dell'ERSE, e nemmeno eventuali altri oneri del contatore. Controlla la tua bolletta per il totale esatto.",
+            "scope": "La stima copre il Portogallo continentale e potenze contrattuali da 3,45 a 6,9 kVA. Potenze superiori, le Azzorre e Madeira hanno altre tariffe e aliquote IVA.",
+            "social": "La tariffa sociale dell'elettricità, uno sconto per le famiglie che ne hanno diritto, non è applicata. Chiedi al tuo fornitore o all'ERSE se potresti averne diritto.",
+            "average": "L'indice confronta medie per una fascia di consumo. Il tuo prezzo dipende da contratto, potenza e ore di utilizzo, e la media del Portogallo mescola contratti del mercato regolato e del mercato libero.",
+            "education": "Solo a scopo educativo, non è un consiglio per scegliere o cambiare fornitore."
+          },
+          "simulatorLink": "Confronta offerte reali nel simulatore di prezzi ufficiale dell'ERSE"
+        },
+        "related": {
+          "title": "Per continuare",
+          "householdBudgetLink": "Calcolatore del budget familiare",
+          "householdBudgetBody": "Metti la bolletta dell'elettricità accanto alle altre spese di casa e guarda cosa resta.",
+          "emergencyFundLink": "Calcolatore del fondo di emergenza",
+          "emergencyFundBody": "Calcola quanti mesi di spese essenziali, energia compresa, coprirebbero i tuoi risparmi.",
+          "inflationLink": "Calcolatore dell'inflazione",
+          "inflationBody": "Guarda come l'aumento dei prezzi cambia ciò che il tuo denaro può comprare nel tempo."
+        }
+      }
+    },
+    "fuelPrices": {
+      "title": "Prezzi dei carburanti in Portogallo e costo mensile",
+      "shortName": "Prezzi dei carburanti",
+      "subtitle": "Guarda il prezzo medio ufficiale di gasolio, benzina e GPL in Portogallo, il suo storico e quanto ti costa guidare ogni mese.",
+      "description": "Prezzi medi ufficiali della DGEG dei carburanti nel Portogallo continentale, con variazione settimanale e storico, e un calcolatore del costo mensile del carburante.",
+      "pageTitle": "Prezzi dei Carburanti in Portogallo: Media Ufficiale e Costo Mensile",
+      "pageDescription": "L'ultimo prezzo medio della DGEG di gasolio, benzina 95 e GPL in Portogallo, con la variazione sulla settimana e cinque anni di storico, e un calcolatore del tuo costo mensile di carburante. Dati ufficiali, nessuna previsione.",
+      "fuels": {
+        "diesel": "Gasolio (gasóleo simples)",
+        "gasoline95": "Benzina 95 (gasolina simples 95)",
+        "lpg": "GPL auto"
+      },
+      "fields": {
+        "fuel": "Carburante",
+        "period": "La distanza che inserisci è",
+        "periodMonth": "Al mese",
+        "periodWeek": "A settimana",
+        "periodTrip": "Per viaggio",
+        "distance": "Distanza",
+        "trips": "Viaggi al mese",
+        "consumption": "Consumo di carburante",
+        "price": "Prezzo al litro",
+        "resetPrice": "Usa l'ultima media ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Chilometri nel periodo scelto sopra. Una settimana vale 52/12 settimane al mese.",
+        "trips": "Quante volte al mese fai questo viaggio.",
+        "consumption": "Litri per 100 km, dal computer di bordo o dalla scheda tecnica dell'auto. Il consumo reale di solito è superiore a quello ufficiale.",
+        "price": "Parte dall'ultima media nazionale della DGEG, {{price}}/L il {{date}}. Cambialo con il prezzo che paghi davvero."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Non può essere negativo.",
+        "tooLarge": "Inserisci {{max}} o meno.",
+        "zero": "Inserisci un valore superiore a zero.",
+        "notWhole": "Inserisci un numero intero di viaggi.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Costo stimato di carburante al mese",
+        "week": "Costo della distanza settimanale",
+        "trip": "Costo di un viaggio",
+        "litres": "Carburante usato al mese",
+        "yearly": "Circa dodici mesi così",
+        "per100": "Costo per 100 km",
+        "nothing": "Senza chilometri percorsi non c'è costo di carburante.",
+        "budget": "{{amount}} al mese è la voce carburante del tuo budget per i trasporti. Aggiungi accanto gli altri costi dell'auto per vedere il quadro completo."
+      },
+      "notes": {
+        "assumptions": "Stima: distanza per consumo per prezzo al litro. Presuppone lo stesso consumo in ogni viaggio e lo stesso prezzo per tutto il mese. Non è una consulenza."
+      },
+      "latest": {
+        "title": "Ultimo prezzo medio nazionale",
+        "asOf": "Dati al {{date}} (DGEG). La variazione è rispetto al {{previous}}, una settimana prima.",
+        "change": "{{amount}}/L ({{percent}}) in una settimana",
+        "flat": "Nessuna variazione in una settimana",
+        "note": "Media giornaliera del Portogallo continentale, ponderata per le quantità vendute e comprensiva degli sconti dei distributori. È una media del passato, non una previsione: questa pagina non prevede il prezzo della settimana prossima."
+      },
+      "history": {
+        "title": "Prezzi dei carburanti negli ultimi cinque anni",
+        "intro": "Prezzo medio al litro della DGEG, un valore a settimana per ogni carburante.",
+        "chartLabel": "Grafico a linee del prezzo medio settimanale al litro di gasolio, benzina 95 e GPL in Portogallo su cinque anni",
+        "tableCaption": "Le ultime settimane: prezzo medio al litro di ogni carburante",
+        "date": "Data",
+        "asOf": "Dati al {{date}}, l'ultimo giorno pubblicato dalla DGEG. Un valore a settimana, dal {{first}}. La copia di questa pagina è stata creata il {{fetched}}. Fonte: DGEG, Preço Médio Diário (Portogallo continentale)."
+      },
+      "nextStepHeadline": "Metti il carburante nel tuo budget",
+      "nextStepDescription": "Il carburante fa parte di ciò che costa spostarsi. Aggiungilo a un budget WonderMoney insieme agli altri costi di trasporto e guarda quanto resta ogni mese.",
+      "nextStepCta": "Rivedi la voce trasporti nel tuo budget",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa pagina",
+          "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
+          "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
+          "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Un'auto diesel che percorre {{distance}} al mese con un consumo di {{consumption}}, all'ultima media di {{price}}. Carburante usato: {{distance}} per {{consumption}} diviso 100 fa {{litres}}. Costo: {{litres}} per {{price}} fa {{monthly}} al mese, circa {{yearly}} all'anno, ovvero {{per100}} ogni 100 km.",
+          "trips": "La distanza può essere anche un viaggio. Un'andata e ritorno di 40 km fatta 20 volte al mese con la stessa auto costa {{tripCost}} ogni volta, {{tripMonthly}} al mese."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Il calcolatore fa quattro cose:",
+          "steps": {
+            "a": "Distanza al mese: la distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese.",
+            "b": "Litri: distanza per consumo diviso 100.",
+            "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
+            "d": "Anno: dodici mesi così."
+          },
+          "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente."
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "dgeg": "Prezzi: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dei carburanti stradali nel Portogallo continentale, per gasóleo simples, gasolina simples 95 e GPL auto. L'ultimo giorno è il {{asOf}}; la copia di questa pagina è stata creata il {{fetched}}. Lo storico è un valore della DGEG ogni sette giorni fino al {{first}}, copiato come la DGEG lo pubblica.",
+          "terms": "La DGEG indica che queste informazioni sono gratuite e possono essere usate liberamente, a patto di citare la DGEG come fonte, indicare la data dell'ultimo aggiornamento e riprodurre fedelmente l'informazione. I prezzi sono comunicati dai distributori, che ne sono responsabili.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "La pagina legge un file di dati salvato e non chiama mai la DGEG mentre la usi. Il file è aggiornato da uno script che rifiuta dati obsoleti o inverosimili, quindi un aggiornamento fallito conserva gli ultimi numeri buoni e la loro data ({{asOf}})."
+        },
+        "limits": {
+          "title": "Cosa non includono questi valori",
+          "items": {
+            "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
+            "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
+            "stations": "Nessun distributore: questa pagina non nomina né classifica alcun distributore. Il sito della DGEG elenca i prezzi per distributore, se vuoi guardare.",
+            "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
+            "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
+            "education": "Solo a scopo educativo, non è una consulenza."
+          }
+        },
+        "related": {
+          "title": "Per andare avanti",
+          "householdBudgetLink": "Calcolatore del budget familiare",
+          "householdBudgetBody": "Metti il carburante accanto agli altri costi mensili e guarda quanto resta.",
+          "carLoanLink": "Simulatore di prestito auto",
+          "carLoanBody": "Somma la rata al carburante per vedere quanto costa l'auto in tutto.",
+          "vehicleTaxLink": "Calcolo del bollo auto portoghese (IUC)",
+          "vehicleTaxBody": "Stima l'imposta annuale del veicolo, un altro costo dell'auto."
         }
       }
     }

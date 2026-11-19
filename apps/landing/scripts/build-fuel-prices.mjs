@@ -1,0 +1,168 @@
+#!/usr/bin/env node
+// Refresh script for src/lib/calculators/data/fuelPrices.ts.
+//
+// Source: DGEG (Direcao-Geral de Energia e Geologia), "Preco Medio Diario" of road fuels in
+// mainland Portugal, from the public API behind https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/
+// DGEG's terms (site footer): the information is free and may be used freely, provided DGEG is
+// identified as the source, the date of the last update of the prices is stated and the
+// information is reproduced faithfully. So this page shows DGEG's own daily averages untouched,
+// names DGEG and dates every figure. The average is weighted by quantities sold and includes the
+// discounts stations give (fleet cards and similar).
+//
+//   id 2101  Gasoleo simples
+//   id 3201  Gasolina simples 95
+//   id 1120  GPL Auto
+//
+// History: DGEG's daily value on the latest available day and on every 7th day before it, 260
+// weeks back (about five years). Week-on-week change is the latest day against the day seven days
+// before. Nothing is interpolated: a missing value stops the script.
+//
+// Usage, from apps/landing (needs network; Node 18+ for fetch):
+//
+//   node scripts/build-fuel-prices.mjs [--from-file <response.json>] [--date YYYY-MM-DD]
+//
+// --from-file reads a saved list of the API's rows instead of calling the API; --date sets the
+// "fetched on" stamp (defaults to today, UTC). The generated module is committed: the page never
+// calls DGEG. A stale or implausible response is refused, so a failed refresh keeps the old file.
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+export const SOURCE = {
+  name: "DGEG, Preco Medio Diario dos combustiveis (Portugal continental)",
+  url: "https://precoscombustiveis.dgeg.gov.pt/estatistica/preco-medio-diario/",
+};
+export const API_URL = "https://precoscombustiveis.dgeg.gov.pt/api/PrecoComb/PMD";
+/** DGEG fuel type id and the label its API returns, in the column order of the module. */
+export const FUELS = [
+  { column: "diesel", id: 2101, label: "Gasóleo simples" },
+  { column: "gasoline95", id: 3201, label: "Gasolina simples 95" },
+  { column: "lpg", id: 1120, label: "GPL Auto" },
+];
+export const WEEKS = 260;
+/** The newest day must be at most this many days before the fetch date. */
+export const MAX_AGE_DAYS = 10;
+export const PRICE_RANGE = { min: 0.5, max: 4 };
+
+const DAY = 86_400_000;
+const isoDay = (ms) => new Date(ms).toISOString().slice(0, 10);
+const dayMs = (iso) => Date.parse(`${iso}T00:00:00Z`);
+
+/** "1,018 €" to 1.018. */
+export function parsePrice(text) {
+  const value = Number(String(text).replace("€", "").trim().replace(",", "."));
+  if (!Number.isFinite(value)) throw new Error(`Unreadable price ${JSON.stringify(text)}`);
+  return value;
+}
+
+/**
+ * The API's rows ({ Data, TipoCombustivel, PrecoMedio }) to [{ date, diesel, gasoline95, lpg }],
+ * oldest first: the newest day on which all three fuels have a price, and every 7th day before it.
+ * Throws on a stale newest day, a missing sample, an implausible price or too little history.
+ */
+export function deriveRows(apiRows, { fetchedOn, weeks = WEEKS } = {}) {
+  if (!Array.isArray(apiRows)) throw new Error("Not a list of rows");
+  const byFuel = new Map(FUELS.map((fuel) => [fuel.column, new Map()]));
+  for (const row of apiRows) {
+    const fuel = FUELS.find((candidate) => candidate.label === row.TipoCombustivel);
+    if (!fuel) continue;
+    const price = parsePrice(row.PrecoMedio);
+    if (!(price > PRICE_RANGE.min && price < PRICE_RANGE.max)) {
+      throw new Error(`Implausible ${fuel.label} price ${price} on ${row.Data}`);
+    }
+    byFuel.get(fuel.column).set(row.Data, price);
+  }
+  for (const fuel of FUELS) {
+    if (byFuel.get(fuel.column).size === 0) throw new Error(`No ${fuel.label} prices`);
+  }
+  const common = [...byFuel.get("diesel").keys()].filter((date) =>
+    FUELS.every((fuel) => byFuel.get(fuel.column).has(date)),
+  );
+  if (common.length === 0) throw new Error("No day has all three fuels");
+  const latest = common.sort().at(-1);
+  if (fetchedOn !== undefined) {
+    const age = (dayMs(fetchedOn) - dayMs(latest)) / DAY;
+    if (age > MAX_AGE_DAYS) throw new Error(`Newest price is from ${latest}, ${age} days before ${fetchedOn}: stale`);
+    if (age < 0) throw new Error(`Newest price ${latest} is after the fetch date ${fetchedOn}`);
+  }
+  const rows = [];
+  for (let week = weeks; week >= 0; week--) {
+    const date = isoDay(dayMs(latest) - week * 7 * DAY);
+    const row = { date };
+    for (const fuel of FUELS) {
+      const price = byFuel.get(fuel.column).get(date);
+      if (price === undefined) throw new Error(`No ${fuel.label} price on ${date}`);
+      row[fuel.column] = price;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+export function renderModule(rows, { fetchedOn }) {
+  const lines = rows.map((r) => `  [${JSON.stringify(r.date)}, ${r.diesel}, ${r.gasoline95}, ${r.lpg}],`);
+  return `// Generated by scripts/build-fuel-prices.mjs. Do not edit by hand: rerun the script.
+//
+// DGEG's daily average price of road fuels in mainland Portugal, in euro per litre, on the latest
+// available day and on every 7th day before it. The average is weighted by quantities sold and
+// includes the discounts stations give. The page reads this module only: it never calls DGEG.
+// Educational data, not a quote.
+
+export const FUEL_PRICES_SOURCE = {
+  name: ${JSON.stringify(SOURCE.name)},
+  url: ${JSON.stringify(SOURCE.url)},
+  /** The day of the newest prices: DGEG's own date, the "data as of" the page shows. */
+  asOf: ${JSON.stringify(rows.at(-1).date)},
+  /** When this file was generated from the API. */
+  fetchedOn: ${JSON.stringify(fetchedOn)},
+  firstDate: ${JSON.stringify(rows[0].date)},
+  /** Days between two rows. */
+  stepDays: 7,
+  /** Bump when the derivation changes, not when new weeks are appended. */
+  version: 1,
+} as const;
+
+/** One day: [date "YYYY-MM-DD", gasoleo simples, gasolina simples 95, GPL auto], euro per litre. */
+export type FuelPriceRow = readonly [date: string, diesel: number, gasoline95: number, lpg: number];
+
+export const FUEL_PRICES: readonly FuelPriceRow[] = [
+${lines.join("\n")}
+];
+`;
+}
+
+/** Fetches the API for the sampled span, one request per year, and concatenates the rows. */
+export async function fetchRows(today) {
+  const end = dayMs(today);
+  const start = end - (WEEKS * 7 + 14) * DAY;
+  const ids = FUELS.map((fuel) => fuel.id).join(",");
+  const all = [];
+  for (let from = start; from <= end; from += 366 * DAY) {
+    const to = Math.min(from + 365 * DAY, end);
+    const url = `${API_URL}?idsTiposComb=${ids}&dataIni=${isoDay(from)}&dataFim=${isoDay(to)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`DGEG answered ${response.status}`);
+    const json = await response.json();
+    if (!json.status || !Array.isArray(json.resultado)) throw new Error(`DGEG: ${json.mensagem ?? "no result"}`);
+    all.push(...json.resultado);
+  }
+  return all;
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const option = (name) => {
+    const at = args.indexOf(name);
+    return at === -1 ? undefined : args[at + 1];
+  };
+  const fetchedOn = option("--date") ?? new Date().toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fetchedOn)) throw new Error("--date must be YYYY-MM-DD");
+  const file = option("--from-file");
+  const apiRows = file ? JSON.parse(readFileSync(file, "utf8")) : await fetchRows(fetchedOn);
+  const rows = deriveRows(apiRows, { fetchedOn });
+  const out = fileURLToPath(new URL("../src/lib/calculators/data/fuelPrices.ts", import.meta.url));
+  writeFileSync(out, renderModule(rows, { fetchedOn }));
+  console.log(`Wrote ${rows.length} weekly samples (${rows[0].date} to ${rows.at(-1).date}) to ${out}`);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) await main();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { formatMoney, formatPercent, toIntlLocale } from "./numberFormat"
+import { formatMoney, formatMonth, formatMonthYear, formatPercent, toIntlLocale } from "./numberFormat"
 
 // Intl separates with no-break spaces; compare on plain spaces.
 const plain = (text: string) => text.replace(/[\u00a0\u202f]/g, " ")
@@ -24,5 +24,12 @@ describe("numberFormat", () => {
 	it("gives the calculators Portugal's currency format for a whole-euro figure", () => {
 		const eur = new Intl.NumberFormat(toIntlLocale("pt"), { style: "currency", currency: "EUR", maximumFractionDigits: 0 })
 		expect(plain(eur.format(250000))).toBe("250 000 €")
+	})
+
+	it("formats a month and year the same way on the server and in the browser", () => {
+		const september = new Date(Date.UTC(2026, 8, 1))
+		expect(formatMonthYear("pt", september)).toBe(`${formatMonth("pt", september)} 2026`)
+		expect(formatMonthYear("pt", september)).not.toMatch(/ de |\//)
+		expect(formatMonthYear("en", september)).toBe(`${formatMonth("en", september)} 2026`)
 	})
 })

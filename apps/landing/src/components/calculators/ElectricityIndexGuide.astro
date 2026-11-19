@@ -1,0 +1,166 @@
+---
+// Prerendered explanation for the electricity price index and regulated-tariff bill estimator: how
+// to read the two views, a worked example computed from the same function the estimator runs, the
+// method, the official sources with their dates, what the figures leave out, and the tools to go
+// on with.
+import {
+  ELECTRICITY_BILL_EXAMPLE,
+  ELECTRICITY_PRICES_SOURCE,
+  ERSE_TARIFFS,
+  computeElectricityBill,
+  breakEvenOffPeakPercent,
+} from "@/lib/calculators/electricityBill";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.electricityIndex.guide.${key}`;
+
+function calculate(overrides: Partial<typeof ELECTRICITY_BILL_EXAMPLE>) {
+  const outcome = computeElectricityBill({ ...ELECTRICITY_BILL_EXAMPLE, ...overrides });
+  if (!outcome.ok) throw new Error("The electricity bill worked example has invalid inputs");
+  return outcome.result;
+}
+
+const simple = calculate({});
+const biMostlyOffPeak = calculate({ option: "biHourly", offPeakPercent: 50 });
+const bigger = calculate({ contractedPower: 6.9, consumption: 300 });
+
+const euro = (value: number, decimals = 2) => formatMoney(locale, value, { decimals });
+const perKwh = (value: number) => `${formatMoney(locale, value, { decimals: 4 })}/kWh`;
+const values = {
+  kva: formatNumber(locale, ELECTRICITY_BILL_EXAMPLE.contractedPower, 2),
+  kwh: formatNumber(locale, ELECTRICITY_BILL_EXAMPLE.consumption, 0),
+  powerPrice: `${formatMoney(locale, ERSE_TARIFFS.powerPerDay[3.45], { decimals: 4 })}/day`,
+  energySimple: perKwh(ERSE_TARIFFS.energyPerKwh.simple),
+  energyPeak: perKwh(ERSE_TARIFFS.energyPerKwh.biPeak),
+  energyValley: perKwh(ERSE_TARIFFS.energyPerKwh.biOffPeak),
+  cav: euro(ERSE_TARIFFS.cavPerMonth),
+  iec: `${formatMoney(locale, ERSE_TARIFFS.iecPerKwh, { decimals: 3 })}/kWh`,
+  totalSimple: euro(simple.total),
+  vatSimple: euro(simple.vat),
+  totalBi: euro(biMostlyOffPeak.total),
+  totalBigger: euro(bigger.total),
+  breakEven: formatNumber(locale, breakEvenOffPeakPercent(), 0),
+  effective: `${formatMoney(locale, simple.effectivePerKwh ?? 0, { decimals: 3 })}/kWh`,
+  from: ERSE_TARIFFS.effectiveFrom,
+  checked: ERSE_TARIFFS.checkedOn,
+  updated: ELECTRICITY_PRICES_SOURCE.updatedOn,
+  fetched: ELECTRICITY_PRICES_SOURCE.fetchedOn,
+  firstPeriod: ELECTRICITY_PRICES_SOURCE.firstPeriod.replace("-S", " S"),
+  lastPeriod: ELECTRICITY_PRICES_SOURCE.lastPeriod.replace("-S", " S"),
+  allowance: String(ERSE_TARIFFS.vat.reducedKwhPer30Days),
+  allowanceLarge: String(ERSE_TARIFFS.vat.reducedKwhPer30DaysLargeFamily),
+  reduced: formatPercent(locale, ERSE_TARIFFS.vat.reduced * 100, { decimals: 0 }),
+  standard: formatPercent(locale, ERSE_TARIFFS.vat.standard * 100, { decimals: 0 }),
+};
+
+const list = (key: string) =>
+  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+const steps = list("method.steps");
+const assumptions = list("limits.items");
+
+const related = [
+  { key: "householdBudget", href: toLocalizedPath("toolHouseholdBudget", locale) },
+  { key: "emergencyFund", href: toLocalizedPath("toolEmergencyFund", locale) },
+  { key: "inflation", href: toLocalizedPath("toolInflation", locale) },
+] as const;
+
+const { tariffs, charges, vat } = ERSE_TARIFFS.sources;
+const linkClass =
+  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+  <section aria-labelledby="electricity-read">
+    <h2 id="electricity-read" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("read.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("read.estimator"))}</p>
+      <p>{t(k("read.index"))}</p>
+      <p>{t(k("read.market"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="electricity-example">
+    <h2 id="electricity-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("example.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+      <p>{t(k("example.bi"), values)}</p>
+      <p>{t(k("example.power"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="electricity-method">
+    <h2 id="electricity-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("method.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"))}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {steps.map((item) => <li>{item}</li>)}
+      </ol>
+      <p>{t(k("method.vat"), values)}</p>
+      <p>{t(k("method.bi"), values)}</p>
+      <p>{t(k("method.days"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="electricity-data">
+    <h2 id="electricity-data" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("data.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("data.tariffs"), values)}</p>
+      <p>{t(k("data.eurostat"), values)}</p>
+      <ul class="space-y-1">
+        <li><a href={tariffs.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.tariffsLink"))}</a></li>
+        <li><a href={charges.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.chargesLink"))}</a></li>
+        <li><a href={vat.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.vatLink"))}</a></li>
+        <li><a href={ELECTRICITY_PRICES_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.eurostatLink"))}</a></li>
+      </ul>
+      <p>{t(k("data.refresh"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="electricity-limits">
+    <h2 id="electricity-limits" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("limits.title"))}
+    </h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {assumptions.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="mt-4 leading-7">
+      <a href={ERSE_TARIFFS.sources.simulator.url} class={linkClass} rel="noopener" target="_blank">
+        {t(k("limits.simulatorLink"))}
+      </a>
+    </p>
+  </section>
+
+  <section aria-labelledby="electricity-related">
+    <h2 id="electricity-related" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("related.title"))}
+    </h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>

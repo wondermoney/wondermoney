@@ -68,7 +68,7 @@ export const TOOLS_CATALOG = [
 		key: "inflation",
 		routeId: "toolInflation",
 		group: "budgetAndSave",
-		related: ["toolHouseholdBudget", "toolSavingsGoal", "toolInvestmentReturn"],
+		related: ["toolHouseholdBudget", "toolSavingsGoal", "toolInvestmentReturn", "toolDepositRateIndex"],
 	},
 	{
 		key: "netSalary",
@@ -112,6 +112,18 @@ export const TOOLS_CATALOG = [
 		group: "budgetAndSave",
 		related: ["toolUnemploymentBenefit", "toolEmergencyFund", "toolNetSalary"],
 	},
+	{
+		key: "electricityIndex",
+		routeId: "toolElectricityIndex",
+		group: "budgetAndSave",
+		related: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
+	},
+	{
+		key: "fuelPrices",
+		routeId: "toolFuelPrices",
+		group: "budgetAndSave",
+		related: ["toolHouseholdBudget", "toolCarLoan", "toolVehicleTax"],
+	},
 	// Borrow and buy a home
 	{
 		key: "mortgage",
@@ -154,6 +166,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolRateRevision",
 		group: "borrowAndBuyHome",
 		related: ["toolMortgage", "toolDebtToIncome", "toolEarlyRepayment"],
+	},
+	{
+		key: "euribor",
+		routeId: "toolEuribor",
+		group: "borrowAndBuyHome",
+		related: ["toolRateRevision", "toolMortgage", "toolDebtToIncome"],
 	},
 	{
 		key: "carLoan",
@@ -233,13 +251,19 @@ export const TOOLS_CATALOG = [
 		key: "termDeposit",
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
-		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund"],
+		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund", "toolDepositRateIndex"],
 	},
 	{
 		key: "savingsCertificates",
 		routeId: "toolSavingsCertificates",
 		group: "investAndGrow",
-		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation"],
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex"],
+	},
+	{
+		key: "depositRateIndex",
+		routeId: "toolDepositRateIndex",
+		group: "investAndGrow",
+		related: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation"],
 	},
 	// Track your wealth
 	{

@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
       "nextStepCta": "Include certificates in your savings overview"
     },
+    "depositRateIndex": {
+      "title": "Term deposit rate index: what banks in Portugal actually pay",
+      "shortName": "Deposit rate index",
+      "subtitle": "The average interest rate banks in Portugal and the euro area paid on new household term deposits, month by month since 2003, with inflation and the 28% IRS taken off.",
+      "description": "Average new term deposit rates in Portugal and the euro area, after inflation and tax.",
+      "pageTitle": "Term Deposit Rate Index Portugal: Average Rates vs Inflation",
+      "pageDescription": "Official average interest rates on new household term deposits in Portugal and the euro area since 2003, the real rate after inflation and the 28% IRS, and a small calculator. Data: Banco de Portugal statistics via the ECB.",
+      "snapshot": {
+        "title": "Average new term deposit rate, {{month}}",
+        "intro": "Official averages of the interest rate agreed on new term deposits from households, as reported by banks. It is a benchmark, not a list of offers.",
+        "portugal": "Portugal, all maturities",
+        "euroArea": "Euro area, all maturities",
+        "asOf": "Data as of {{month}}, the latest month published when the data was retrieved on {{retrieved}}.",
+        "provisional": "The latest month is provisional and may be revised.",
+        "caption": "Average new term deposit rate by original maturity, Portugal and the euro area",
+        "maturity": "Original maturity",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Euro area",
+        "noData": "n/a"
+      },
+      "real": {
+        "title": "Real rate in {{year}}, the latest complete year",
+        "nominal": "Average rate paid",
+        "inflation": "Inflation",
+        "gross": "Real rate before tax",
+        "net": "Real rate after {{tax}}% IRS",
+        "positive": "In {{year}} the average new deposit still beat inflation after IRS.",
+        "negative": "In {{year}} the average new deposit lost purchasing power after IRS: prices rose faster than the interest earned."
+      },
+      "notBestOffer": "This is an average of what banks actually paid on new deposits, not the best offer. Promotional and campaign rates are usually higher, and some deposits pay less. This page names no banks and recommends no product: compare current offers yourself before you decide.",
+      "calculator": {
+        "title": "Interest at the average rate",
+        "intro": "Enter an amount and a term to see the interest a deposit would earn at the latest average rate for that maturity, net of the 28% IRS, and what inflation would take."
+      },
+      "fields": {
+        "amount": "Amount deposited",
+        "term": "Term",
+        "termSuffix": "months",
+        "inflation": "Assumed inflation per year"
+      },
+      "help": {
+        "term": "Whole months, 1 to 120. Up to 12 months uses the up-to-1-year average, 13 to 24 months the 1-to-2-year average, longer terms the over-2-years average.",
+        "inflation": "Pre-filled with Portuguese inflation in {{year}} (annual average CPI, INE). Change it to test other scenarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Enter an amount above zero.",
+          "negative": "The amount cannot be negative.",
+          "tooLarge": "Enter {{max}} or less."
+        },
+        "termMonths": {
+          "required": "Enter a term of at least 1 month.",
+          "tooLarge": "The term can be at most {{max}} months.",
+          "notWhole": "Enter a whole number of months."
+        },
+        "inflation": {
+          "required": "Enter an inflation rate, or 0.",
+          "outOfRange": "Enter an inflation rate from {{min}}% to {{top}}%."
+        },
+        "summary": "Check the highlighted fields to see the result."
+      },
+      "buckets": {
+        "all": "All maturities",
+        "upTo1y": "Up to 1 year",
+        "1to2y": "Over 1 and up to 2 years",
+        "over2y": "Over 2 years"
+      },
+      "result": {
+        "net": "Net interest after {{tax}}% IRS",
+        "gross": "Gross interest",
+        "tax": "IRS withheld ({{tax}}%)",
+        "inflationCost": "What inflation takes over the term",
+        "realGain": "Interest left after inflation",
+        "realYield": "Real yearly yield, after tax",
+        "assumptions": "Average new-deposit rate for {{bucket}}: {{rate}} a year ({{month}}). Simple interest paid at maturity, {{months}} months.",
+        "fallback": "No new deposits were recorded in this maturity group in the latest month, so the all-maturities average is used.",
+        "beats": "On these assumptions the interest, after tax, covers the loss of purchasing power.",
+        "loses": "On these assumptions inflation takes more than the interest earns: the money buys less at maturity.",
+        "note": "A benchmark, not an offer: your bank's rate, any fees and the exact day count change the result. Educational only, not financial advice."
+      },
+      "history": {
+        "title": "History since 2003",
+        "bucket": "Maturity shown in the chart",
+        "chartLabel": "Line chart of monthly average new term deposit rates in Portugal and the euro area, with yearly Portuguese inflation",
+        "portugal": "Portugal",
+        "euroArea": "Euro area",
+        "inflation": "Portuguese inflation (calendar year)",
+        "chartNote": "Rates are monthly averages. Inflation is the annual average consumer price change of each calendar year, so it steps in January; the current year is not complete.",
+        "caption": "Yearly average new deposit rate, inflation and real rate after IRS",
+        "year": "Year",
+        "realNet": "Real rate after {{tax}}% IRS"
+      },
+      "sourceNote": "Source: average interest rates on new household term deposits (annualised agreed rate), Banco de Portugal statistics published in the ECB Data Portal, latest month {{month}}, retrieved {{retrieved}}. Inflation: INE consumer price index through Banco de Portugal's BPstat. Yearly figures computed by WonderMoney. Educational only.",
+      "nextStepHeadline": "Move from the benchmark to a personal savings plan",
+      "nextStepDescription": "The average shows what the market paid. Set a savings goal in WonderMoney and track how your own deposits compare with it.",
+      "nextStepCta": "Set a savings goal",
+      "guide": {
+        "read": {
+          "title": "How to read the index",
+          "what": "Every month banks in Portugal report to Banco de Portugal the interest rate on the new term deposits they took from households. The index is the average of those rates across banks, weighted by the amount of new business: what was actually agreed. The euro-area line is the same statistic for all euro-area banks, for comparison.",
+          "notBest": "It is not the best rate on offer. An average includes small deposits, existing customers and banks that pay little, so a campaign or promotional rate can be well above it, and some deposits earn less.",
+          "noRecommendation": "No bank or product is named or ranked here. Use the average to judge whether an offer looks high or low, then compare current offers yourself, including their conditions."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Deposit {{amount}} for {{months}} months at the latest average rate for that maturity, {{rate}} a year ({{month}}). Interest paid at maturity is {{gross}}; after {{taxRate}}% IRS (tax withheld: {{tax}}) you keep {{net}}.",
+          "real": "With inflation at {{inflation}} a year, the same money loses {{inflationCost}} of purchasing power over the term, so what is left after inflation is {{realGain}}.",
+          "year": "Looking back, in {{year}}, the latest complete year, the average new deposit paid {{yearRate}}; after inflation and the 28% IRS the real rate was {{yearReal}}."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
+          "steps": {
+            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+          },
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+        },
+        "data": {
+          "title": "Data and sources",
+          "source": "Rates: monthly average interest rates on new deposits with agreed maturity from households (annualised agreed rate, all amounts, in euro), {{first}} to {{last}}, compiled from the banks' reports by Banco de Portugal and published in the ECB Data Portal (series {{seriesPt}} for Portugal and {{seriesEa}} for the euro area, where x is the maturity: total, up to 1 year, over 1 and up to 2 years, over 2 years). Retrieved on {{retrieved}}.",
+          "ecbLink": "ECB Data Portal (MIR)",
+          "bpstatLink": "Banco de Portugal BPstat",
+          "cpiLink": "INE consumer price index in BPstat",
+          "inflation": "Inflation: annual average consumer price index for Portugal produced by INE and distributed by Banco de Portugal (BPstat series 12704686), retrieved on {{cpiRetrieved}}.",
+          "reuse": "The ECB allows free use of its statistics when they are reproduced accurately and the source is cited. This page republishes monthly values and loads no data at runtime: the numbers change only when the data file is refreshed."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "An average of new business: it mixes deposit sizes, banks and customers. Your rate may be higher or lower.",
+            "lag": "The statistics are published monthly with a delay, and the latest month can be revised.",
+            "tax": "Tax: 28% is the IRS withholding rate on interest for residents. Your situation can differ, for example if you include the interest in your annual tax return.",
+            "inflation": "Inflation: your own prices differ from the national average, and future inflation is unknown. The calculator holds the rate you enter for the whole term.",
+            "buckets": "Maturity groups with no new deposits in a month show n/a. For a term in such a group the calculator uses the all-maturities average.",
+            "advice": "Educational only: this page is not financial advice or an offer."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "termDepositLink": "Term deposit calculator",
+          "termDepositBody": "Enter your own bank's rate and see the interest, the tax and the net yield.",
+          "savingsCertificatesLink": "Savings certificates calculator",
+          "savingsCertificatesBody": "Compare a deposit with Certificados de Aforro Série F.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how much purchasing power money lost between any two years."
+        }
+      }
+    },
     "netSalary": {
       "title": "Portugal net salary calculator 2026",
       "shortName": "Net salary",
@@ -3071,7 +3222,8 @@
           "none": "The daily amount is the percentage of your reference pay for each band; no limit applied.",
           "minimum": "The daily amount was raised to the minimum of {{min}} (30% of the minimum wage).",
           "referencePay": "Your reference pay is below {{min}} a day, so the benefit equals the reference pay.",
-          "netCap": "The daily amount was limited to the estimated net value of your reference pay."
+          "netCap": "The daily amount was limited to the estimated net value of your reference pay.",
+          "floor": "The daily amount was raised to the floor of art. 17(2): above 500 euros of reference pay, the 55% and 60% bands are never below the increased benefit (60% and 65%) computed on 500 euros."
         }
       },
       "checklist": {
@@ -3101,8 +3253,9 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004. The three alternative conditions for the 5-point increase come from that text; the law says the 500 euro figure is revised periodically, and we could not confirm the current figure in an official text, so we keep 500. The estimate of net pay behind the net cap is our simplification."
+        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, as published by CITE)",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004 in the wording of Decreto-Lei n.º 133/2012. The three alternative conditions for the 5-point increase and the floor above 500 euros come from that text. Art. 17(4) says the 500 euro figure is updated with the IAS; the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
+        "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },
       "nextStepHeadline": "Plan for the temporary income gap",
       "nextStepDescription": "WonderMoney shows your cash, your spending and how long your savings cover a lower income.",
@@ -3121,7 +3274,8 @@
         "year": "Year of first registration",
         "month": "Month of first registration",
         "co2": "Official CO2 emissions",
-        "standard": "CO2 test cycle"
+        "standard": "CO2 test cycle",
+        "otherIuc": "Other IUC you pay this year (optional)"
       },
       "fuels": {
         "petrol": "Petrol",
@@ -3159,7 +3313,9 @@
         "scheduleTitle": "2027 (transitional): payment schedule",
         "exempt": "Fully electric cars in category B are exempt from IUC.",
         "dieselSurcharge": "Diesel surcharge (not multiplied by the coefficient)",
-        "scheduleTitle2028": "From 2028: payment schedule"
+        "scheduleTitle2028": "From 2028: payment schedule",
+        "totalAnnualTax": "Total IUC for the instalment thresholds",
+        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment."
       },
       "guide": {
         "exampleTitle": "Worked example",
@@ -3178,7 +3334,7 @@
         "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
-        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 are for this car alone: the law applies its thresholds to the total of all your vehicles, so the real split can differ. In the year of registration the tax is paid within 30 days of the registration deadline.",
+        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 give this car's share of each instalment; the months follow the total of all your vehicles, which you can enter as other IUC (the law applies its thresholds to that total). Without it, the calculator assumes this is your only vehicle. In the year of registration the tax is paid within 30 days of the registration deadline.",
         "assumptionEducational": "This is an educational estimate, not tax advice. The amount on the notice from the Tax Authority is the one that counts.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
@@ -3190,7 +3346,8 @@
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
-      "nextStepCta": "Set aside one twelfth of your annual car tax"
+      "nextStepCta": "Set aside one twelfth of your annual car tax",
+      "otherIucHelp": "The yearly IUC of all your other vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if this is your only vehicle."
     },
     "propertyCapitalGains": {
       "title": "Property capital gains calculator",
@@ -3376,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Portugal dismissal compensation calculator 2026",
       "shortName": "Dismissal compensation",
-      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, with the caps and the rates by contract date.",
-      "description": "Estimate your dismissal compensation in Portugal: rates by contract date, caps and a payout plan.",
+      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, or for the expiry of a fixed-term contract, with the caps and the rates.",
+      "description": "Estimate your dismissal or fixed-term expiry compensation in Portugal: rates, caps and a payout plan.",
       "pageTitle": "Dismissal Compensation Calculator Portugal 2026: Art. 366 Estimate",
-      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post: 12, 18, 20 or 30 days per year by contract date, the 12-month cap and a payout plan.",
+      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post (12, 18, 20 or 30 days per year by contract date) or for the expiry of a fixed-term contract (24 days per year), with the 12-month cap and a payout plan.",
       "fields": {
         "baseMonthly": "Monthly base pay (gross)",
         "seniorityPay": "Monthly seniority supplements (diuturnidades)",
         "startDate": "Contract start date",
-        "endDate": "Termination date"
+        "endDate": "Termination date",
+        "contractType": "Type of termination"
       },
       "help": {
         "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
         "seniorityPay": "Diuturnidades are supplements paid for length of service. Enter 0 if you have none.",
         "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
-        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}."
+        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}.",
+        "contractType": "Dismissal covers a collective dismissal, extinction of the post or unsuitability. Expiry is the end of a fixed-term contract, of certain or uncertain term (arts. 344 and 345 of the Código do Trabalho). It is not due when the contract ends because you declared you would not renew it.",
+        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year."
       },
-      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: fixed-term contracts, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: dismissal with just cause, unlawful dismissal, mutual agreement and the public sector. For the end of a fixed-term contract, choose expiry of a fixed-term contract.",
       "errors": {
         "required": "Enter a valid value.",
         "tooSmall": "Enter a value of at least {{min}}.",
@@ -3411,7 +3571,8 @@
         "regimes": {
           "before2011": "Contract before 1 November 2011",
           "from2011": "Contract from 1 November 2011 to 30 September 2013",
-          "from2013": "Contract from 1 October 2013"
+          "from2013": "Contract from 1 October 2013",
+          "fixedTerm": "Fixed-term contract expiry, 24 days a year"
         },
         "usedMonthly": "Monthly amount used",
         "daily": "Daily amount (monthly amount divided by 30)",
@@ -3422,7 +3583,8 @@
           "twentyDays": "{{years}} years at {{days}} days a year",
           "eighteenDays": "{{years}} years at {{days}} days a year",
           "twelveDays": "{{years}} years at {{days}} days a year",
-          "fourteenDays": "{{years}} years at {{days}} days a year"
+          "fourteenDays": "{{years}} years at {{days}} days a year",
+          "twentyFourDays": "{{years}} years at {{days}} days a year"
         },
         "caps": {
           "none": "No cap applied.",
@@ -3447,9 +3609,9 @@
         "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
         "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
         "supportedTitle": "Supported",
-        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker, on a permanent contract, with termination in 2026.",
+        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker on a permanent contract, and the expiry of a fixed-term contract of certain or uncertain term, with termination in 2026.",
         "unsupportedTitle": "Not supported",
-        "unsupportedFixedTerm": "Expiry of fixed-term contracts (arts. 344 and 345 of the Código do Trabalho), which has its own rates and transitional rules.",
+        "unsupportedFixedTerm": "Fixed-term contracts that expired before 1 May 2023 (18 days a year under the earlier text), early termination of a fixed-term contract, and expiry caused by the worker's own declaration.",
         "unsupportedJustCause": "Dismissal with just cause (disciplinary), which follows different rules.",
         "unsupportedUnlawful": "Unlawful dismissal, where the court sets the compensation, in general between 15 and 45 days of base pay per year of seniority.",
         "unsupportedAgreement": "Termination by mutual agreement, where the amount is negotiated and there is no legal formula.",
@@ -3459,11 +3621,19 @@
         "sourceLaw13": "APEL guide to the Agenda do Trabalho Digno: Lei n.º 13/2023, which raised the rate of art. 366(1) to 14 days from 1 May 2023",
         "sourceCode": "Código do Trabalho, consolidated text (PGDL): arts. 344, 345 and 366",
         "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
-        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. Educational, not legal advice."
+        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. The fixed-term rate of 24 days and its application to every contract that expires from 1 May 2023 come from the text of Lei n.º 13/2023 reproduced by PGDL (arts. 344, 345 and 35) and the IGeFE note, not from the Diário da República page. Educational, not legal advice.",
+        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and the IGeFE note of 5 July 2023 reads it as 24 days for every contract that expires from 1 May 2023. So the whole duration counts at 24 days whatever the start date, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply.",
+        "sourceLaw13Text": "Lei n.º 13/2023, of 3 April: new wording of arts. 344(2) and 345(4) of the Código do Trabalho and art. 35 on its application in time (PGDL reproduction of the Diário da República text)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date"
       },
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
-      "nextStepCta": "Plan the payout across your upcoming months"
+      "nextStepCta": "Plan the payout across your upcoming months",
+      "contractTypes": {
+        "permanent": "Dismissal on a permanent contract",
+        "fixedTerm": "Expiry of a fixed-term contract"
+      },
+      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector."
     },
     "statePension": {
       "title": "Portugal state pension estimate 2026",
@@ -3664,6 +3834,382 @@
           "compoundInterestBody": "See how regular contributions and time compound at a rate you choose.",
           "investorProfileLink": "Investor profile quiz",
           "investorProfileBody": "Find out how much market swings like these you can live with."
+        }
+      }
+    },
+    "euribor": {
+      "title": "Euribor today: current rates and mortgage impact",
+      "shortName": "Euribor today",
+      "subtitle": "The latest Euribor 3, 6 and 12 month rates, how they moved on the month before, the history since 2000 and what a change does to a variable-rate mortgage payment.",
+      "description": "Current Euribor 3, 6 and 12 month monthly averages, the history since 2000 and a calculator for the effect of a change on your mortgage payment.",
+      "pageTitle": "Euribor Today: 3, 6 and 12 Month Rates and Mortgage Impact",
+      "pageDescription": "Latest Euribor 3, 6 and 12 month monthly averages from Banco de Portugal, the change on the month before, a history chart since 2000 and a calculator showing what a rise or fall does to a variable-rate mortgage payment.",
+      "asOf": "Data as of {{month}}: monthly averages, fetched {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 months",
+        "6": "Euribor 6 months",
+        "12": "Euribor 12 months"
+      },
+      "current": {
+        "title": "Current Euribor rates",
+        "change": "{{change}} points on {{previous}}",
+        "note": "Each rate is the average of {{month}}, not a daily fixing. A loan resets on the fixing of the date its contract sets, which can differ from the monthly average."
+      },
+      "calc": {
+        "title": "What a change in Euribor does to your payment"
+      },
+      "fields": {
+        "balance": "Balance you still owe",
+        "termYears": "Years left",
+        "termMonths": "Months left",
+        "spread": "Your spread",
+        "tenor": "Euribor your loan follows",
+        "change": "Change in Euribor (points)"
+      },
+      "help": {
+        "spread": "The lender's margin on top of Euribor, in percent. It is in your contract.",
+        "change": "Use a negative number for a fall. 1 means one percentage point: from 3% to 4%."
+      },
+      "errors": {
+        "summary": "The new payment appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "spread": {
+          "required": "Enter the spread, or 0% if there is none.",
+          "negative": "The spread can't be negative.",
+          "tooLarge": "Enter a spread up to {{max}}."
+        },
+        "change": {
+          "required": "Enter a change in points, or 0 for none.",
+          "tooSmall": "Enter a change of {{min}} or more.",
+          "tooLarge": "Enter a change of {{max}} or less."
+        }
+      },
+      "result": {
+        "revised": "Monthly payment after the change",
+        "current": "Monthly payment today",
+        "monthlyChange": "Change per month",
+        "nextYear": "Change over the next {{payments}} payments",
+        "assumptions": "Starts from the {{tenor}} rate of {{index}} ({{month}} average) and moves it to {{newIndex}}, with your spread on top, over the months left.",
+        "floored": "Index plus spread is below 0%, so the rate is taken as 0%. Contracts differ: some floor the rate, some do not.",
+        "termRounded": "The time left was rounded to whole months.",
+        "noChange": "With no change in Euribor the payment stays the same.",
+        "caveat": "Educational estimate. It assumes the new rate applies from the next payment to the end of the loan; your contract sets reset dates, caps and floors."
+      },
+      "history": {
+        "title": "Euribor history",
+        "from": "Show from year",
+        "label": "Line chart of the monthly average Euribor 3, 6 and 12 month rates"
+      },
+      "sourceNote": "Source: Banco de Portugal, BPstat, Euribor monthly averages, latest month {{month}}, fetched {{fetched}}. Euribor is a registered trademark of EMMI. Educational only.",
+      "nextStepHeadline": "Connect rate changes to your debt budget",
+      "nextStepDescription": "Add your loan to WonderMoney and see how a change in Euribor moves your monthly payment and what it leaves for the rest of your budget.",
+      "nextStepCta": "Connect your debts",
+      "guide": {
+        "read": {
+          "title": "How to read the rates",
+          "intro": "Euribor is the interest rate at which euro-area banks lend to each other for a set period: 3, 6 or 12 months. Many variable-rate mortgages in Portugal and Spain pay Euribor plus a fixed spread, so when it moves, the payment moves.",
+          "monthly": "The figures here are monthly averages, with the latest for {{month}}. They are not the daily rate: the rate that sets your payment is the one fixed on the date your contract uses."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A loan with {{balance}} left over {{years}} years, a spread of {{spread}} and a 12 month Euribor of {{index}} (the latest monthly average). Euribor rises by {{change}} point to {{newIndex}}.",
+          "result": "The payment goes from {{current}} to {{revised}}, a difference of {{difference}} a month. It is the same calculation as the rate revision calculator."
+        },
+        "data": {
+          "title": "Data and method",
+          "source": "The rates are the Euribor 3, 6 and 12 month monthly averages published by Banco de Portugal in BPstat, fetched on {{fetched}}. The latest month in the data is {{month}}. Each change is the latest average minus the month before, in percentage points.",
+          "link": "Euribor rates by tenor on BPstat",
+          "daily": "BPstat publishes monthly averages, not daily fixings, so this page shows monthly averages only. For today's fixing, see EMMI or your bank.",
+          "trademark": "Euribor is a registered trademark of EMMI. This page is not affiliated with or endorsed by EMMI or Banco de Portugal."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "A monthly average smooths the month: the rate on a given day can be above or below it.",
+            "reset": "Your loan follows the Euribor of a reset date in the contract, often every 3, 6 or 12 months, not every month.",
+            "terms": "Caps, floors and a different spread after some years depend on the contract and are not included.",
+            "advice": "This is educational information, not a forecast of Euribor or financial advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "rateRevisionLink": "Variable-rate payment calculator",
+          "rateRevisionBody": "Try your own index, spread and balance, and see the payment as a share of your income.",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "Work out the payment and the interest of a loan before any rate change.",
+          "debtToIncomeLink": "Debt-to-income calculator",
+          "debtToIncomeBody": "See whether a higher payment keeps your debts within a comfortable share of income."
+        }
+      }
+    },
+    "electricityIndex": {
+      "title": "Electricity price index and bill estimator (Portugal)",
+      "shortName": "Electricity index",
+      "subtitle": "Estimate a monthly electricity bill on the regulated tariff and see how Portuguese household prices compare with the EU average.",
+      "description": "Regulated-tariff electricity bill estimator for Portuguese households, with the price per kWh of Portugal against the EU over time.",
+      "pageTitle": "Electricity Price Index Portugal: Regulated Tariff Bill Estimator",
+      "pageDescription": "Estimate your monthly electricity bill on the ERSE regulated tariff (contracted power, kWh, simple or bi-hourly, VAT and other charges) and compare Portugal's household price per kWh with the EU average. Data: ERSE and Eurostat.",
+      "fields": {
+        "power": "Contracted power",
+        "period": "Consumption given",
+        "periodMonth": "Per month",
+        "periodYear": "Per year",
+        "consumption": "Electricity consumption",
+        "option": "Tariff option",
+        "optionSimple": "Simple",
+        "optionBi": "Bi-hourly",
+        "offPeak": "Share of consumption in off-peak hours",
+        "largeFamily": "Household of five or more people"
+      },
+      "help": {
+        "power": "Low-voltage households in mainland Portugal: 3.45, 4.6, 5.75 or 6.9 kVA. It is on your bill.",
+        "consumption": "kWh in the period chosen above. A year is spread over twelve equal months.",
+        "offPeak": "Off-peak is the \"vazio\" period of the bi-hourly tariff. Your bill or meter data shows the split.",
+        "largeFamily": "Raises the reduced-VAT allowance from 200 to 300 kWh a month, if you have asked your supplier for it."
+      },
+      "errors": {
+        "required": "Enter a valid value.",
+        "notAllowed": "Choose one of the listed contracted powers.",
+        "negative": "Consumption cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "percentRange": "Enter a share from 0% to 100%.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "total": "Estimated monthly bill (VAT included)",
+        "yearly": "About twelve such months",
+        "effective": "Real cost per kWh, fixed charges included",
+        "breakdown": "Bill breakdown: amount before VAT and VAT rate for each item",
+        "item": "Item",
+        "beforeVat": "Before VAT",
+        "vatRate": "VAT",
+        "power": "Contracted power ({{kva}} kVA, {{days}} days)",
+        "energyReduced": "Energy at the reduced VAT rate ({{kwh}})",
+        "energyStandard": "Energy above the reduced allowance ({{kwh}})",
+        "cav": "Audiovisual contribution (CAV)",
+        "iec": "Electricity consumption tax (IEC)",
+        "subtotal": "Total before VAT",
+        "vat": "VAT",
+        "comparisonSame": "On the {{other}} option the same month would cost about the same.",
+        "comparisonCheaper": "On the {{other}} option the same month would cost {{amount}}, {{difference}} less.",
+        "comparisonDearer": "On the {{other}} option the same month would cost {{amount}}, {{difference}} more.",
+        "breakEven": "On energy prices alone, bi-hourly costs less than simple when more than {{percent}}% of your consumption is in off-peak hours.",
+        "noConsumption": "With no consumption the bill is only the fixed charges."
+      },
+      "notes": {
+        "tariffs": "ERSE regulated-market tariffs for low-voltage households in mainland Portugal, in force since {{date}} (read from ERSE's documents on {{checked}}). ERSE can update them every quarter.",
+        "dgeg": "Not included: the small monthly DGEG fee, which we could not confirm in an ERSE document, and any meter or other charge. Your real bill can differ by a few cents.",
+        "freeMarket": "Most households buy in the free market, where offers vary: some are cheaper than the regulated tariff, some dearer. This page names no supplier and recommends none. To compare real offers, use",
+        "simulatorLink": "ERSE's official price simulator."
+      },
+      "index": {
+        "title": "Portugal against the EU: price per kWh over time",
+        "intro": "Eurostat's half-yearly price for a household using 2,500 to 4,999 kWh a year (band DC), all taxes and levies included, for Portugal and for the EU 27 average.",
+        "chartLabel": "Line chart of the household electricity price per kWh in Portugal and in the EU, half-yearly",
+        "portugal": "Portugal",
+        "eu": "EU average",
+        "below": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} below the EU average.",
+        "above": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} above the EU average.",
+        "equal": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: about the same.",
+        "tableCaption": "The latest half-years: Portugal, EU average and the gap",
+        "period": "Half-year",
+        "gap": "Portugal vs EU",
+        "asOf": "Data as of {{last}} (the latest half-year available). Eurostat updated the dataset on {{updated}}; this page's copy was built on {{fetched}}. Source: Eurostat, table nrg_pc_204. Educational only."
+      },
+      "nextStepHeadline": "Compare household bills with a realistic budget",
+      "nextStepDescription": "Put your electricity, water, gas and the other household bills into a WonderMoney budget and see what is left each month.",
+      "nextStepCta": "Plan your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
+          "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
+          "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A household with {{kva}} kVA contracted that uses {{kwh}} kWh in a month on the simple tariff. Power: {{powerPrice}} for 30 days. Energy: {{kwh}} kWh at {{energySimple}}. Plus the audiovisual contribution ({{cav}}) and the electricity tax ({{iec}}). With VAT ({{vatSimple}} in all) the month costs {{totalSimple}}, or {{effective}} once the fixed charges are spread over the kWh.",
+          "bi": "On the bi-hourly tariff ({{energyPeak}} outside off-peak, {{energyValley}} in off-peak hours) with half the consumption in off-peak hours, the same month costs {{totalBi}}.",
+          "power": "Contracted power matters too: at 6.9 kVA and 300 kWh the month costs {{totalBigger}}, because a higher power has a higher daily charge and its power term pays the full VAT rate."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "For one 30-day month the estimator does the same five things:",
+          "steps": {
+            "a": "Power: the daily price for your contracted power, times 30 days.",
+            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
+            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT.",
+            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
+            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+          },
+          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the power term for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+        },
+        "data": {
+          "title": "Data and sources",
+          "tariffs": "Regulated tariffs: ERSE (Entidade Reguladora dos Serviços Energéticos), the transitional sales tariffs for low-voltage households up to 20.7 kVA in mainland Portugal, in force since {{from}}, plus the audiovisual contribution, electricity tax and VAT rules from ERSE's own documents. Read on {{checked}}. ERSE can change the energy price every quarter.",
+          "eurostat": "Price index: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), band DC (2,500 to 4,999 kWh a year), all taxes and levies included, in euro per kWh, from {{firstPeriod}} to {{lastPeriod}}. Eurostat updated the dataset on {{updated}} and this page's copy was built on {{fetched}}.",
+          "tariffsLink": "ERSE, tariffs and prices for 2026 (Directive 4/2026)",
+          "chargesLink": "ERSE, price simulator manual (bill charges)",
+          "vatLink": "ERSE, VAT on the electricity bill",
+          "eurostatLink": "Eurostat, table nrg_pc_204",
+          "refresh": "The page reads two saved data files and never calls these sources while you use it. Both carry their date and are refreshed by hand."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "market": "Free market: most offers are not the regulated tariff. They can be cheaper or dearer, with different prices, discounts and conditions. Compare with a real simulator before you decide.",
+            "dgeg": "The small monthly DGEG fee is not included because we could not confirm its amount in an ERSE document, and nor is any meter or other charge. Check your own bill for the exact total.",
+            "scope": "The estimator covers mainland Portugal and 3.45 to 6.9 kVA of contracted power. Higher powers, the Azores and Madeira have other tariffs and VAT rates.",
+            "social": "The social electricity tariff, a discount for eligible households, is not applied. Ask your supplier or ERSE if you may be entitled.",
+            "average": "The index compares averages for one consumption band. Your own price depends on your contract, power and hours of use, and Portugal's average blends regulated and free-market contracts.",
+            "education": "Educational use only, not advice to choose or change supplier."
+          },
+          "simulatorLink": "Compare real offers in ERSE's official price simulator"
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put the electricity bill next to your other household costs and see what is left.",
+          "emergencyFundLink": "Emergency fund calculator",
+          "emergencyFundBody": "Work out how many months of essential bills, energy included, your savings would cover.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how rising prices change what your money buys over time."
+        }
+      }
+    },
+    "fuelPrices": {
+      "title": "Fuel prices in Portugal and monthly fuel cost",
+      "shortName": "Fuel prices",
+      "subtitle": "See the official average price of diesel, petrol and LPG in Portugal, its history, and what your driving costs a month.",
+      "description": "Official DGEG average fuel prices in mainland Portugal with weekly change and history, plus a monthly fuel cost calculator.",
+      "pageTitle": "Fuel Prices in Portugal: Official Average and Monthly Cost",
+      "pageDescription": "The latest DGEG average price of diesel, petrol 95 and LPG in Portugal with week-on-week change and five-year history, and a calculator for your monthly fuel cost. Official data, no forecast.",
+      "fuels": {
+        "diesel": "Diesel (gasóleo simples)",
+        "gasoline95": "Petrol 95 (gasolina simples 95)",
+        "lpg": "Autogas (GPL auto)"
+      },
+      "fields": {
+        "fuel": "Fuel",
+        "period": "The distance you enter is",
+        "periodMonth": "Per month",
+        "periodWeek": "Per week",
+        "periodTrip": "Per trip",
+        "distance": "Distance",
+        "trips": "Trips per month",
+        "consumption": "Fuel consumption",
+        "price": "Price per litre",
+        "resetPrice": "Use the latest average ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Kilometres in the period chosen above. A week is counted as 52/12 weeks a month.",
+        "trips": "How many times a month you make this trip.",
+        "consumption": "Litres per 100 km, from your car's trip computer or its data sheet. A real figure is usually higher than the official one.",
+        "price": "Starts at the latest DGEG national average, {{price}}/L on {{date}}. Change it to the price you actually pay."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "This cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "zero": "Enter a value above zero.",
+        "notWhole": "Enter a whole number of trips.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "monthly": "Estimated fuel cost per month",
+        "week": "Cost of the weekly distance",
+        "trip": "Cost of one trip",
+        "litres": "Fuel used per month",
+        "yearly": "About twelve such months",
+        "per100": "Cost per 100 km",
+        "nothing": "With no distance driven there is no fuel cost.",
+        "budget": "{{amount}} a month is the fuel line of your transport budget. Add the other car costs next to it to see the whole picture."
+      },
+      "notes": {
+        "assumptions": "Estimate: distance times consumption times price per litre. It assumes the same consumption on every trip and the same price all month. Not advice."
+      },
+      "latest": {
+        "title": "Latest national average price",
+        "asOf": "Data as of {{date}} (DGEG). Change is against {{previous}}, a week earlier.",
+        "change": "{{amount}}/L ({{percent}}) in a week",
+        "flat": "No change in a week",
+        "note": "Daily average of mainland Portugal, weighted by quantities sold and including station discounts. It is an average of the past, not a forecast: this page does not predict next week's price."
+      },
+      "history": {
+        "title": "Fuel prices over the last five years",
+        "intro": "DGEG's average price per litre, one value a week for each fuel.",
+        "chartLabel": "Line chart of the weekly average price per litre of diesel, petrol 95 and autogas in Portugal over five years",
+        "tableCaption": "The latest weeks: average price per litre of each fuel",
+        "date": "Date",
+        "asOf": "Data as of {{date}}, the latest day DGEG published. One value a week, from {{first}}. This page's copy was built on {{fetched}}. Source: DGEG, Preço Médio Diário (mainland Portugal)."
+      },
+      "nextStepHeadline": "Put fuel in your budget",
+      "nextStepDescription": "Fuel is part of what getting around costs. Add it to a WonderMoney budget with the other transport costs and see what is left each month.",
+      "nextStepCta": "Review the transport allowance in your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
+          "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
+          "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A diesel car driven {{distance}} a month using {{consumption}}, at the latest average of {{price}}. Fuel used: {{distance}} times {{consumption}} divided by 100 is {{litres}}. Cost: {{litres}} times {{price}} is {{monthly}} a month, about {{yearly}} a year, or {{per100}} for every 100 km.",
+          "trips": "Distance can also be a trip. A 40 km round trip made 20 times a month with the same car costs {{tripCost}} each time, {{tripMonthly}} a month."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator does four things:",
+          "steps": {
+            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
+            "b": "Litres: distance times consumption divided by 100.",
+            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
+            "d": "Year: twelve such months."
+          },
+          "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price."
+        },
+        "data": {
+          "title": "Data and sources",
+          "dgeg": "Prices: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário of road fuels in mainland Portugal, for gasóleo simples, gasolina simples 95 and GPL auto. The latest day is {{asOf}}; this page's copy was built on {{fetched}}. The history is one DGEG value every seven days back to {{first}}, copied as DGEG publishes it.",
+          "terms": "DGEG states that this information is free and may be used freely, provided DGEG is named as the source, the date of the latest update is shown and the information is reproduced faithfully. The prices are reported by the stations, which are responsible for them.",
+          "dgegLink": "DGEG, daily average price (Preço Médio Diário)",
+          "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}})."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
+            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
+            "stations": "No stations: this page names no station and ranks none. DGEG's own site lists prices by station if you want to look.",
+            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
+            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
+            "education": "Educational use only, not advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put fuel next to your other monthly costs and see what is left.",
+          "carLoanLink": "Car loan calculator",
+          "carLoanBody": "Add the instalment to fuel to see what the car costs in total.",
+          "vehicleTaxLink": "Vehicle tax calculator",
+          "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
         }
       }
     }
