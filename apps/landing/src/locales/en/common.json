@@ -4374,6 +4374,141 @@
       }
     }
   },
+  "savingsGuide": {
+    "metaTitle": "Where to keep your savings in Portugal: products compared | WonderMoney",
+    "metaDescription": "Compare savings certificates, treasury certificates, remunerated accounts, savings accounts, term deposits and capitalisation or PPR insurance in Portugal: guarantee, top-ups, withdrawals, interest and IRS.",
+    "breadcrumbLabel": "Where to keep your savings",
+    "title": "Where to keep your savings in Portugal",
+    "intro": "Seven ways to keep cash in Portugal, side by side: who guarantees the money, whether you can add to it, when you can take it out, how the interest is paid and how IRS applies. Educational only: this page does not recommend any product or provider.",
+    "checked": "Facts checked against official sources in {{date}}",
+    "tableTitle": "The comparison table",
+    "tableCaption": "Savings products in Portugal compared by guarantee, top-ups, withdrawals, interest and IRS",
+    "tableHint": "Rates, fees and conditions of each product change and vary between providers: always read the terms of the one you consider.",
+    "productColumn": "Product",
+    "columns": {
+      "guarantee": "Guarantee",
+      "topUp": "Top-ups",
+      "withdrawal": "Withdrawals",
+      "interest": "Interest",
+      "irs": "IRS"
+    },
+    "productsTitle": "The products, one by one",
+    "products": {
+      "aforro": {
+        "name": "Savings certificates (Certificados de Aforro)",
+        "text": "Public debt issued by the Portuguese State and run by IGCP, the Treasury and public debt agency, for people with a Portuguese tax number. Série F lasts up to 15 years. Its rate follows the 3-month Euribor and adds a permanence bonus that grows the longer you hold. Interest accrues every quarter and is added to the balance after IRS. The first purchase is at least 100 units of €1 and later ones at least 10. You can redeem from the first quarterly interest date, losing the interest of the quarter in progress."
+      },
+      "tesouro": {
+        "name": "Treasury certificates (Certificados do Tesouro)",
+        "text": "Also State debt run by IGCP, and still on sale in 2026: the new Série 5, open since July 2026, replaced the Poupança Valor series, which no longer takes subscriptions. At launch it paid a fixed rate rising each year, from 2.35% in year one to 3.35% in year ten, with interest paid yearly. The minimum is €1,000 and the maximum €1 million per holder. You can redeem from the end of the first year, losing the interest of the year in progress. Rates for new subscriptions can change."
+      },
+      "demand": {
+        "name": "Remunerated current account",
+        "text": "A current account that pays interest on the balance. The money is available at any time with no loss of interest, but the rate can change and sometimes depends on conditions the bank sets. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "savings": {
+        "name": "Savings account",
+        "text": "A deposit account for savings, often linked to a current account. Some accept transfers straight from another bank, others only from the linked account. Most allow withdrawals at any time, and many without losing interest. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "term": {
+        "name": "Term deposit",
+        "text": "You lock in an amount for a set term at a rate agreed upfront. You cannot add to it, and most pay the interest at the end of the term. Early withdrawal is allowed by only some, and usually costs half or more of the interest accrued. It is covered by the Deposit Guarantee Fund up to the limit."
+      },
+      "capitalisation": {
+        "name": "Capitalisation insurance",
+        "text": "A life insurance contract that accumulates savings. The guarantee is the insurer's, not the Deposit Guarantee Fund's, and whether capital is guaranteed depends on the contract, so check it. Most charge a fee on early withdrawal in the first years. The gain is taxed when you withdraw, and the rate falls the longer you hold."
+      },
+      "ppr": {
+        "name": "PPR insurance (retirement savings plan)",
+        "text": "A retirement savings plan sold here as insurance. Like capitalisation insurance, the guarantee is the insurer's and depends on the contract. Early withdrawal carries a fee in the first years unless it is for a reason set out in law, such as retirement, long-term unemployment, serious illness or permanent incapacity. Deducting contributions in your IRS return comes with conditions: see the tax section."
+      }
+    },
+    "cells": {
+      "state": "Portuguese State",
+      "noLimit": "No limit",
+      "fgd": "Deposit Guarantee Fund",
+      "fgdLimit": "€100,000 per bank and holder",
+      "insurer": "The insurer",
+      "certificatesTopUp": "Only additional subscriptions: pay by entity and reference in the CTT app, pay the State through AforroNet, or pay at a CTT counter",
+      "demandTopUp": "Top up the balance, directly by transfer from another bank",
+      "savingsTopUp": "Top up the balance: some accounts take transfers from another bank directly, others only through the current account",
+      "notAllowed": "Not allowed",
+      "insuranceTopUp": "Some allow top-ups to the balance, by transfer, entity and reference payment or debit from the current account",
+      "aforroWithdrawal": "After 3 months, losing the interest of the quarter in progress",
+      "tesouroWithdrawal": "After 1 year, losing the interest of the year in progress",
+      "demandWithdrawal": "At any time, with no loss of interest",
+      "savingsWithdrawal": "At any time, many with no loss of interest",
+      "termWithdrawal": "Some allow it, usually losing 50% or more of the accrued interest",
+      "capitalisationWithdrawal": "Most charge a fee (a % of the balance) in the first years",
+      "pprWithdrawal": "A fee (a % of the balance) in the first years, unless the withdrawal is for a reason set out in law",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly",
+      "frequencyVaries": "Frequency varies",
+      "paidAtTermEnd": "Most pay at the end of the term",
+      "creditedBalanceNet": "Added to the balance after IRS",
+      "paidAccountNet": "Paid into the current account after IRS",
+      "creditedBalanceDomesticNet": "Added to the balance (after IRS, at Portuguese banks)",
+      "creditedBalanceOrAccountDomesticNet": "Added to the balance or paid into the current account (after IRS, at Portuguese banks)",
+      "creditedAccountDomesticNet": "Paid into the current account (after IRS, at Portuguese banks)",
+      "creditedBalanceGross": "Added to the balance, gross",
+      "irsAtPayment": "When the interest is paid",
+      "rate28": "28%",
+      "domesticBanks": "Portuguese banks",
+      "foreignBanks": "Foreign banks",
+      "irsInReturn": "In your IRS return (declaration mandatory)",
+      "irsOnWithdrawal": "When you withdraw",
+      "capitalisationRates": "11.2% to 28%, depending on how long you held it",
+      "pprRates": "8% to 20%, depending on how long you held it",
+      "pprLegalRate": "8% if the withdrawal is for a reason set out in law"
+    },
+    "fgd": {
+      "title": "The Deposit Guarantee Fund",
+      "p1": "The Fundo de Garantia de Depósitos (FGD) repays deposits at its member banks, up to €100,000 per depositor and per bank, if a bank cannot pay.",
+      "p2": "It covers current, savings and term deposits. The limit is per bank: balances you hold at the same bank add up to one €100,000 limit, while balances at different banks are each covered up to their own limit.",
+      "p3": "It does not cover savings or treasury certificates, which are State debt, nor insurance, which relies on the insurer. An account at a bank in another country is usually covered by that country's scheme, not the Portuguese one."
+    },
+    "tax": {
+      "title": "How IRS applies",
+      "intro": "Interest and gains from savings are capital income (category E of IRS). The rules differ by product.",
+      "domestic": {
+        "title": "Certificates and Portuguese banks",
+        "text": "Interest is taxed by withholding at source at 28%, a final rate (CIRS art. 71). You can choose to add it to the rest of your income instead (englobamento), in which case the amount withheld counts as a payment on account."
+      },
+      "foreign": {
+        "title": "Foreign banks",
+        "text": "A bank abroad does not withhold Portuguese tax. If you are resident in Portugal you must declare the interest in your IRS return, where it is taxed at 28% unless you choose englobamento (CIRS art. 72)."
+      },
+      "insurance": {
+        "title": "Capitalisation insurance",
+        "text": "The gain is taxed when you withdraw, at 28%. If you held the contract for more than 5 and up to 8 years, a fifth of the gain is excluded (22.4%), and after 8 years three fifths are (11.2%). These reductions apply only if at least 35% of the premiums were paid in the first half of the contract (CIRS art. 5(3))."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "If you withdraw for a reason set out in law, the gain is taxed at 8% (20% on two fifths of it). Outside those cases the gain is taxed at 20%, reduced to 16% after 5 years and to 8% after 8 years if at least 35% of contributions were paid in the first half. You also give back what you deducted in your IRS return, plus 10% for each year or part of a year, except after 5 years in the cases set out in law (EBF art. 21)."
+      }
+    },
+    "sources": {
+      "title": "Sources",
+      "intro": "Each guarantee and tax statement above was checked against these official pages. Rules change, so confirm the current text before you decide.",
+      "checkedOn": "Checked {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: deposit guarantee",
+        "aforro": "IGCP: Certificados de Aforro, Série F (conditions in force from June 2026)",
+        "tesouro": "gov.pt: new Certificados do Tesouro, Série 5 (July 2026)",
+        "tesouroRedemption": "gov.pt: redeeming Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS art. 71: 28% withholding and the aggregation option",
+        "cirs72": "Portal das Finanças, CIRS art. 72: 28% on income without withholding",
+        "cirs5": "Portal das Finanças, CIRS art. 5(3): life insurance withdrawals",
+        "ebf21": "Portal das Finanças, EBF art. 21: retirement savings plans"
+      }
+    },
+    "related": {
+      "title": "Run the numbers",
+      "intro": "Put figures on the products above with these free tools."
+    },
+    "disclaimer": "This guide is educational and not financial or tax advice. It names no providers and recommends no product.",
+    "hubDescription": "Compare certificates, deposits, savings accounts and insurance on guarantee, withdrawals and tax."
+  },
   "learn": {
     "hub": {
       "pageTitle": "Learn — Personal Finance Guides — WonderMoney",

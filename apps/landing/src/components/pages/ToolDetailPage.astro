@@ -1,6 +1,7 @@
 ---
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import { SAVINGS_GUIDE_RELATED_ROUTE_IDS } from "@/content/savingsGuide";
 import CompoundInterestCalculatorComp from "@/components/calculators/CompoundInterestCalculatorComp";
 import CompoundInterestGuide from "@/components/calculators/CompoundInterestGuide.astro";
 import NetWorthCalculatorComp from "@/components/calculators/NetWorthCalculatorComp";
@@ -286,16 +287,27 @@ const nextStepCtaByRouteId: Partial<
   },
 };
 
-const relatedItems = related.map((relatedRouteId) => {
+type RelatedItem = { title: string; description: string; href: string; type: "calculator" | "guide" };
+
+const relatedItems: RelatedItem[] = related.map((relatedRouteId) => {
   const relatedKey = getToolCatalogEntry(relatedRouteId).key;
 
   return {
     title: t(`tools.${relatedKey}.title`),
     description: t(`tools.${relatedKey}.description`),
     href: toLocalizedPath(relatedRouteId, locale),
-    type: "calculator" as const,
+    type: "calculator",
   };
 });
+
+if ((SAVINGS_GUIDE_RELATED_ROUTE_IDS as readonly string[]).includes(routeId)) {
+  relatedItems.push({
+    title: t("savingsGuide.title"),
+    description: t("savingsGuide.hubDescription"),
+    href: toLocalizedPath("pageSavingsGuide", locale),
+    type: "guide",
+  });
+}
 
 const alternateLinks = buildAlternateLinks(routeId);
 const pageTitle = t(`tools.${key}.pageTitle`);
