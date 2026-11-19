@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Confronto depositi vincolati: offerte in Portogallo per durata e importo",
+      "shortName": "Offerte di depositi",
+      "subtitle": "Confronta le offerte di depositi vincolati delle banche disponibili in Portogallo per durata, importo e condizioni, con gli interessi che ti restano dopo il 28% di IRS.",
+      "description": "Confronta le offerte di depositi vincolati per durata e importo, con interessi al netto delle tasse.",
+      "pageTitle": "Confronto Depositi Vincolati Portogallo: Migliori Tassi per Durata e Importo",
+      "pageDescription": "Confronta le offerte di depositi vincolati in Portogallo per tasso (TANB), durata e importo, con gli interessi netti dopo il 28% di IRS, le condizioni e la data di compilazione. Solo a scopo educativo.",
+      "asOfBanner": "Offerte alla data del {{date}}",
+      "offers": {
+        "title": "Offerte di depositi, dal tasso più alto al più basso",
+        "intro": "Inserisci l'importo che vuoi investire e restringi l'elenco per durata e condizioni. Gli interessi mostrati sono semplici, pagati alla scadenza, dopo il 28% di IRS. Le condizioni delle banche sono in portoghese, come le pubblicano le banche.",
+        "caption": "Offerte di depositi vincolati per tasso, durata, limiti, interessi netti e condizioni"
+      },
+      "filters": {
+        "amount": "Importo che voglio investire",
+        "amountHelp": "Le offerte con un minimo superiore, o un massimo inferiore, a questo importo vengono nascoste.",
+        "term": "Durata",
+        "termAll": "Qualsiasi durata",
+        "termOption": "{{months}} mesi",
+        "irs": "Banca e IRS",
+        "irsAll": "Tutte le banche",
+        "irsWithheld": "IRS portoghese trattenuta dalla banca",
+        "irsNotWithheld": "Banca estera: IRS non trattenuta, la dichiari tu",
+        "conditions": "Condizioni",
+        "existingClients": "Per clienti esistenti (nasconde le offerte solo per nuovi clienti)",
+        "noNewMoney": "Senza obbligo di nuova liquidità",
+        "earlyWithdrawal": "Svincolo anticipato consentito"
+      },
+      "errors": {
+        "amountRequired": "Inserisci un importo superiore a zero per vedere gli interessi, oppure lascia vuoto per vedere tutte le offerte.",
+        "amountPositive": "L'importo deve essere superiore a zero.",
+        "amountTooLarge": "Inserisci {{max}} o meno."
+      },
+      "count": "Mostrate {{count}} offerte su {{total}}.",
+      "none": "Nessuna offerta corrisponde a questi filtri. Prova un'altra durata o un altro importo, o allenta una condizione.",
+      "notStated": "non indicato",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Durata (mesi)",
+        "bank": "Banca e prodotto",
+        "minimum": "Minimo",
+        "maximum": "Massimo",
+        "netInterest": "Interessi netti a scadenza",
+        "netYield": "Rendimento netto annuo",
+        "conditions": "Condizioni"
+      },
+      "badges": {
+        "newClients": "Solo nuovi clienti",
+        "newMoney": "Richiede nuova liquidità",
+        "early": {
+          "yes": "Svincolo anticipato consentito",
+          "seeNotes": "Svincolo anticipato: vedi note",
+          "no": "Svincolo anticipato non indicato"
+        },
+        "irsNotWithheld": "Banca estera: IRS non trattenuta",
+        "irsWithheld": "IRS trattenuta in Portogallo"
+      },
+      "notesLabel": "Condizioni originali in portoghese",
+      "compare": {
+        "title": "Come si confrontano queste offerte",
+        "average": "Tasso medio ufficiale dei nuovi depositi delle famiglie in Portogallo, {{bucket}}: {{rate}} annuo ({{month}}).",
+        "averageFallback": "Nell'ultimo mese non ci sono stati nuovi depositi in questo gruppo di scadenze, quindi si usa la media di tutte le scadenze: {{rate}} annuo ({{month}}).",
+        "above": "La migliore offerta mostrata ({{bank}}, {{tanb}}) è {{gap}} punti sopra.",
+        "below": "La migliore offerta mostrata ({{bank}}, {{tanb}}) è {{gap}} punti sotto.",
+        "benchmarkLink": "Vedi il tasso medio ufficiale dei depositi",
+        "certificates": "Per confronto, i Certificados de Aforro Série F nel primo anno: {{net}} di interessi dopo l'IRS, un rendimento netto annuo del {{yield}} (tasso base {{rate}} a {{month}}, prima del premio di permanenza).",
+        "certificatesLink": "Confronta con il calcolatore dei certificati di risparmio"
+      },
+      "disclaimers": {
+        "asOf": "Offerte compilate alla data del {{date}}.",
+        "change": "Le condizioni cambiano spesso e alcune offerte sono campagne che terminano senza preavviso.",
+        "confirm": "Conferma ogni tasso e condizione con la banca prima di depositare.",
+        "fgd": "Il Fundo de Garantia de Depósitos copre i depositi nelle banche portoghesi fino a 100.000 € per depositante e per banca. Fonte:",
+        "foreign": "Le banche estere sono coperte dal sistema di garanzia dei depositi del proprio Paese, non dal fondo portoghese.",
+        "assumptions": "Gli interessi sono semplici, pagati alla scadenza, con il {{tax}}% di IRS detratto. Per le banche estere il valore presume che tu dichiari gli interessi e paghi la stessa aliquota.",
+        "educational": "Solo a scopo educativo: non è una raccomandazione né una consulenza finanziaria, e nessuna banca è raccomandata.",
+        "noAffiliate": "Questa pagina non contiene link di affiliazione."
+      },
+      "sourceNote": "Condizioni compilate da WonderMoney a partire dalle offerte pubblicate dalle banche, alla data del {{date}}. Valori netti calcolati da WonderMoney.",
+      "nextStepHeadline": "Tieni insieme depositi e scadenze",
+      "nextStepDescription": "Aggiungi i tuoi depositi a WonderMoney per vederli con gli altri conti e sapere quando scade ciascuno.",
+      "nextStepCta": "Segui i miei depositi",
+      "guide": {
+        "read": {
+          "title": "Come leggere il confronto",
+          "what": "La tabella elenca {{count}} offerte di depositi vincolati di banche disponibili in Portogallo, alla data del {{date}}. La TANB è il tasso nominale annuo lordo. Per l'importo che inserisci, ogni riga mostra gli interessi che ti restano a scadenza e il rendimento netto annuo.",
+          "noRecommendation": "L'elenco è ordinato per tasso, non per qualità. Non raccomanda nessuna banca né prodotto: un tasso più alto può avere condizioni come nuova liquidità, commissioni di gestione o svincolo anticipato limitato. Leggi le condizioni e confronta tu stesso le offerte attuali."
+        },
+        "example": {
+          "title": "Esempio",
+          "setup": "Il tasso più alto dell'elenco è quello di {{bank}}, {{rate}} a {{months}} mesi. Su {{amount}} sono {{gross}} di interessi lordi; dopo il {{taxRate}}% di IRS ti restano {{net}}, un rendimento netto annuo di {{yearly}}."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Ogni valore viene dallo stesso motore del calcolatore di depositi vincolati:",
+          "steps": {
+            "a": "Interessi lordi: importo × TANB × durata in mesi ÷ 12, pagati in un'unica soluzione a scadenza.",
+            "b": "Imposta: il {{taxRate}}% degli interessi. Le banche estere non la trattengono in Portogallo, quindi il valore presume che tu dichiari gli interessi e paghi la stessa aliquota.",
+            "c": "Rendimento netto annuo: gli interessi netti annualizzati sulla durata.",
+            "d": "Filtri: un'offerta viene nascosta se il suo minimo supera il tuo importo o il suo massimo è inferiore. Un'offerta senza limite indicato resta."
+          }
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "source": "Condizioni compilate da WonderMoney a partire dalle offerte pubblicate dalle banche, alla data del {{date}}. Le note sono il testo originale in portoghese delle condizioni e non sono tradotte, perché nessuna condizione si perda nella traduzione.",
+          "refresh": "L'elenco viene aggiornato a mano quando le condizioni vengono compilate di nuovo, e la data qui sopra indica sempre quando. Mentre usi la pagina non viene scaricato nulla, quindi un aggiornamento in ritardo non mostra mai valori errati come attuali: controlla la data.",
+          "fgd": "Garanzia dei depositi: il Fundo de Garantia de Depósitos copre 100.000 € per depositante e per banca. Fonte:"
+        },
+        "limits": {
+          "title": "Cosa il confronto lascia fuori",
+          "items": {
+            "a": "Le offerte cambiano e alcune terminano senza preavviso: i valori sono un'istantanea, non un preventivo.",
+            "b": "Commissioni, costi di apertura del conto, bonus e tassi a scaglioni per clienti esistenti compaiono solo nelle note, se compaiono.",
+            "c": "Interessi pagati prima della scadenza e reinvestimento non sono modellati: tutti i valori sono interessi semplici a scadenza.",
+            "d": "La tua situazione fiscale, e le regole sugli interessi di una banca estera, possono essere diverse. Questa non è consulenza fiscale."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "termDepositLink": "Calcolatore di depositi vincolati",
+          "termDepositBody": "Inserisci il tasso della tua banca e vedi interessi, imposta e rendimento netto.",
+          "depositRateIndexLink": "Indice dei tassi sui depositi",
+          "depositRateIndexBody": "Vedi il tasso medio ufficiale dei nuovi depositi, mese per mese, rispetto all'inflazione.",
+          "savingsCertificatesLink": "Calcolatore dei certificati di risparmio",
+          "savingsCertificatesBody": "Confronta un deposito con i Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calcolatore dello stipendio netto in Portogallo 2026",
       "shortName": "Stipendio netto",

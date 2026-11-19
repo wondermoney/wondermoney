@@ -488,6 +488,14 @@ const ROUTE_SLUGS = {
 		de: "festgeldzins-index-portugal",
 		it: "indice-tassi-depositi-vincolati-portogallo",
 	},
+	toolTermDepositOffers: {
+		pt: "comparador-depositos-a-prazo",
+		en: "term-deposit-comparison-portugal",
+		es: "comparador-depositos-plazo-portugal",
+		fr: "comparateur-depots-a-terme-portugal",
+		de: "festgeld-vergleich-portugal",
+		it: "confronto-depositi-vincolati-portogallo",
+	},
 	toolElectricityIndex: {
 		pt: "indice-da-eletricidade",
 		en: "electricity-price-index-portugal",
@@ -648,6 +656,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolSp500History",
 	"toolEuribor",
 	"toolDepositRateIndex",
+	"toolTermDepositOffers",
 	"toolElectricityIndex",
 	"toolFuelPrices",
 ] as const satisfies ReadonlyArray<RouteId>
@@ -984,6 +993,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	tooldepositrateindex: "toolDepositRateIndex",
 	"deposit-rate-index": "toolDepositRateIndex",
 	"indice-depositos-a-prazo": "toolDepositRateIndex",
+	tooltermdepositoffers: "toolTermDepositOffers",
+	"term-deposit-offers": "toolTermDepositOffers",
+	"comparador-depositos-a-prazo": "toolTermDepositOffers",
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",

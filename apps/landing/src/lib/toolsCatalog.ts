@@ -251,19 +251,25 @@ export const TOOLS_CATALOG = [
 		key: "termDeposit",
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
-		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund", "toolDepositRateIndex"],
+		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund", "toolDepositRateIndex", "toolTermDepositOffers"],
 	},
 	{
 		key: "savingsCertificates",
 		routeId: "toolSavingsCertificates",
 		group: "investAndGrow",
-		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex"],
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex", "toolTermDepositOffers"],
 	},
 	{
 		key: "depositRateIndex",
 		routeId: "toolDepositRateIndex",
 		group: "investAndGrow",
-		related: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation"],
+		related: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation", "toolTermDepositOffers"],
+	},
+	{
+		key: "termDepositOffers",
+		routeId: "toolTermDepositOffers",
+		group: "investAndGrow",
+		related: ["toolTermDeposit", "toolDepositRateIndex", "toolSavingsCertificates"],
 	},
 	// Track your wealth
 	{

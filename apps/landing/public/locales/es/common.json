@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Comparador de depósitos a plazo: ofertas en Portugal por plazo e importe",
+      "shortName": "Ofertas de depósitos",
+      "subtitle": "Compara ofertas de depósitos a plazo de bancos disponibles en Portugal por plazo, importe y condiciones, con los intereses que te quedan tras el 28% de IRS.",
+      "description": "Compara ofertas de depósitos a plazo por plazo e importe, con intereses netos de impuestos.",
+      "pageTitle": "Comparador de Depósitos a Plazo en Portugal: Mejores Tipos por Plazo e Importe",
+      "pageDescription": "Compara ofertas de depósitos a plazo en Portugal por tipo (TANB), plazo e importe, con los intereses netos tras el 28% de IRS, las condiciones y la fecha en que se recopilaron. Solo educativo.",
+      "asOfBanner": "Ofertas a fecha de {{date}}",
+      "offers": {
+        "title": "Ofertas de depósitos, del tipo más alto al más bajo",
+        "intro": "Indica el importe que quieres invertir y filtra la lista por plazo y condiciones. Los intereses mostrados son simples, pagados al vencimiento, tras el 28% de IRS. Las condiciones de los bancos aparecen en portugués, tal como las publican.",
+        "caption": "Ofertas de depósitos a plazo por tipo, plazo, límites, intereses netos y condiciones"
+      },
+      "filters": {
+        "amount": "Importe que quiero invertir",
+        "amountHelp": "Se ocultan las ofertas cuyo mínimo sea superior o cuyo máximo sea inferior a este importe.",
+        "term": "Plazo",
+        "termAll": "Cualquier plazo",
+        "termOption": "{{months}} meses",
+        "irs": "Banco e IRS",
+        "irsAll": "Todos los bancos",
+        "irsWithheld": "IRS portugués retenido por el banco",
+        "irsNotWithheld": "Banco extranjero: IRS sin retener, lo declaras tú",
+        "conditions": "Condiciones",
+        "existingClients": "Para clientes existentes (oculta ofertas solo para nuevos clientes)",
+        "noNewMoney": "Sin exigencia de dinero nuevo",
+        "earlyWithdrawal": "Cancelación anticipada permitida"
+      },
+      "errors": {
+        "amountRequired": "Indica un importe superior a cero para ver los intereses, o déjalo vacío para ver todas las ofertas.",
+        "amountPositive": "El importe debe ser superior a cero.",
+        "amountTooLarge": "Indica {{max}} o menos."
+      },
+      "count": "Mostrando {{count}} de {{total}} ofertas.",
+      "none": "Ninguna oferta cumple estos filtros. Prueba otro plazo o importe, o relaja una condición.",
+      "notStated": "no indicado",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Plazo (meses)",
+        "bank": "Banco y producto",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "netInterest": "Intereses netos al vencimiento",
+        "netYield": "Rentabilidad neta anual",
+        "conditions": "Condiciones"
+      },
+      "badges": {
+        "newClients": "Solo nuevos clientes",
+        "newMoney": "Exige dinero nuevo",
+        "early": {
+          "yes": "Cancelación anticipada permitida",
+          "seeNotes": "Cancelación anticipada: ver notas",
+          "no": "Cancelación anticipada no indicada"
+        },
+        "irsNotWithheld": "Banco extranjero: IRS sin retener",
+        "irsWithheld": "IRS retenido en Portugal"
+      },
+      "notesLabel": "Condiciones originales en portugués",
+      "compare": {
+        "title": "Cómo se comparan estas ofertas",
+        "average": "Tipo medio oficial de los nuevos depósitos de hogares en Portugal, {{bucket}}: {{rate}} al año ({{month}}).",
+        "averageFallback": "El último mes no hubo nuevos depósitos en este grupo de plazos, así que se usa la media de todos los plazos: {{rate}} al año ({{month}}).",
+        "above": "La mejor oferta mostrada ({{bank}}, {{tanb}}) queda {{gap}} puntos por encima.",
+        "below": "La mejor oferta mostrada ({{bank}}, {{tanb}}) queda {{gap}} puntos por debajo.",
+        "benchmarkLink": "Ver el tipo medio oficial de los depósitos",
+        "certificates": "Como referencia, los Certificados de Aforro Série F en el primer año: {{net}} de intereses tras el IRS, una rentabilidad neta anual de {{yield}} (tipo base del {{rate}} en {{month}}, antes de la prima de permanencia).",
+        "certificatesLink": "Compara con la calculadora de certificados de ahorro"
+      },
+      "disclaimers": {
+        "asOf": "Ofertas recopiladas a fecha de {{date}}.",
+        "change": "Las condiciones cambian a menudo y algunas ofertas son campañas que terminan sin aviso.",
+        "confirm": "Confirma cada tipo y condición con el banco antes de depositar.",
+        "fgd": "El Fundo de Garantia de Depósitos cubre los depósitos en bancos portugueses hasta 100.000 € por depositante y por banco. Fuente:",
+        "foreign": "Los bancos extranjeros están cubiertos por el sistema de garantía de depósitos de su propio país, no por el fondo portugués.",
+        "assumptions": "Los intereses son simples, pagados al vencimiento, con un {{tax}}% de IRS descontado. En los bancos extranjeros, la cifra supone que declaras los intereses y pagas el mismo tipo.",
+        "educational": "Solo educativo: no es una recomendación ni asesoramiento financiero, y no se recomienda ningún banco.",
+        "noAffiliate": "Esta página no tiene enlaces de afiliados."
+      },
+      "sourceNote": "Condiciones recopiladas por WonderMoney a partir de las ofertas publicadas por los bancos, a fecha de {{date}}. Cifras netas calculadas por WonderMoney.",
+      "nextStepHeadline": "Sigue tus depósitos y sus vencimientos en un solo lugar",
+      "nextStepDescription": "Añade tus depósitos a WonderMoney para verlos junto a tus otras cuentas y saber cuándo vence cada uno.",
+      "nextStepCta": "Seguir mis depósitos",
+      "guide": {
+        "read": {
+          "title": "Cómo leer el comparador",
+          "what": "La tabla lista {{count}} ofertas de depósitos a plazo de bancos disponibles en Portugal, a fecha de {{date}}. La TANB es el tipo nominal anual bruto. Para el importe que indiques, cada fila muestra los intereses que te quedan al vencimiento y la rentabilidad neta anual.",
+          "noRecommendation": "La lista está ordenada por tipo, no por calidad. No recomienda ningún banco ni producto: un tipo más alto puede venir con condiciones como dinero nuevo, comisión de mantenimiento o cancelación anticipada limitada. Lee las condiciones y compara tú mismo las ofertas vigentes."
+        },
+        "example": {
+          "title": "Ejemplo",
+          "setup": "El tipo más alto de la lista es el de {{bank}}, {{rate}} a {{months}} meses. Con {{amount}} son {{gross}} de intereses brutos; tras el {{taxRate}}% de IRS te quedas con {{net}}, una rentabilidad neta anual de {{yearly}}."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "Cada cifra sale del mismo motor que la calculadora de depósitos a plazo:",
+          "steps": {
+            "a": "Intereses brutos: importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
+            "b": "Impuesto: el {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
+            "c": "Rentabilidad neta anual: los intereses netos anualizados a lo largo del plazo.",
+            "d": "Filtros: una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
+          }
+        },
+        "data": {
+          "title": "Datos y fuentes",
+          "source": "Condiciones recopiladas por WonderMoney a partir de las ofertas publicadas por los bancos, a fecha de {{date}}. Las notas son el texto original en portugués de las condiciones y no se traducen, para que ninguna condición se pierda en la traducción.",
+          "refresh": "La lista se actualiza a mano cuando se vuelven a recopilar las condiciones, y la fecha de arriba indica siempre cuándo. No se descarga nada mientras usas la página, así que una actualización tardía nunca muestra cifras erróneas como actuales: comprueba la fecha.",
+          "fgd": "Garantía de depósitos: el Fundo de Garantia de Depósitos cubre 100.000 € por depositante y por banco. Fuente:"
+        },
+        "limits": {
+          "title": "Qué deja fuera el comparador",
+          "items": {
+            "a": "Las ofertas cambian y algunas terminan sin aviso: las cifras son una instantánea, no una cotización.",
+            "b": "Comisiones, costes de apertura de cuenta, bonificaciones y tipos escalonados para clientes existentes solo aparecen en las notas, si aparecen.",
+            "c": "Los intereses pagados antes del vencimiento y la reinversión no se modelan: todas las cifras son intereses simples al vencimiento.",
+            "d": "Tu situación fiscal, y las reglas de los intereses de un banco extranjero, pueden ser distintas. Esto no es asesoramiento fiscal."
+          }
+        },
+        "related": {
+          "title": "Sigue explorando",
+          "termDepositLink": "Calculadora de depósitos a plazo",
+          "termDepositBody": "Introduce el tipo de tu banco y mira los intereses, el impuesto y la rentabilidad neta.",
+          "depositRateIndexLink": "Índice de tipos de depósitos",
+          "depositRateIndexBody": "Consulta el tipo medio oficial de los nuevos depósitos, mes a mes, frente a la inflación.",
+          "savingsCertificatesLink": "Calculadora de certificados de ahorro",
+          "savingsCertificatesBody": "Compara un depósito con los Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calculadora de salario neto en Portugal 2026",
       "shortName": "Salario neto",
