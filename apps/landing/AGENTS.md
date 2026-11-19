@@ -12,7 +12,7 @@ prerendered.
 ## STRUCTURE
 
 ```text
-src/pages/             # Root redirect plus 17 mirrored route files per locale
+src/pages/             # Root redirect and mirrored locale route files
 src/components/pages/  # Shared page archetypes/composition
 src/components/shared/ # Layout, SEO, structured data
 src/lib/               # Locale, routes, static paths, Sanity clients
@@ -55,8 +55,7 @@ public/                # Static assets
 
 ## LOCALIZED ROUTES
 
-102 localized Astro route files: 17 mirrored files for each of the six locales, plus the root
-redirect to `/pt`.
+Localized Astro route files mirror the six locale trees, plus the root redirect to `/pt`.
 
 ```text
 src/pages/{locale}/index.astro

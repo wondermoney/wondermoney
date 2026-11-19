@@ -12,6 +12,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolInvestmentReturn",
   },
   {
+    sources: ["toolCompoundInterest", "toolInvestmentReturn"],
+    destination: "toolInvestorProfile",
+  },
+  {
     sources: ["toolMortgage", "toolEarlyRepayment"],
     destination: "toolMortgageTransfer",
   },

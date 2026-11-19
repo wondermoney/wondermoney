@@ -19,6 +19,7 @@ import HowToCalculateNetWorth from "@/components/landing/HowToCalculateNetWorth"
 import PersonalFinanceApp from "@/components/landing/PersonalFinanceApp";
 import OpenBankingApp from "@/components/landing/OpenBankingApp";
 import BudgetApp from "@/components/landing/BudgetApp";
+import GuidedStart from "@/components/landing/GuidedStart.astro";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import NotABank from "@/components/shared/NotABank";
 import RelatedSeoPages from "@/components/landing/sections/RelatedSeoPages";
@@ -138,6 +139,10 @@ const faqSchemas: Partial<Record<RouteId, Record<string, unknown>>> = Object.fro
 );
 
 const pageMeta: Record<TopLevelRouteId, { title: string; description: string }> = {
+  pageGuidedStart: {
+    title: t("guidedStart.metaTitle"),
+    description: t("guidedStart.metaDescription"),
+  },
   pageAbout: {
     title: t("lp.about.metaTitle"),
     description: t("lp.about.metaDescription"),
@@ -234,6 +239,7 @@ const structuredData = softwareSchemas[routeId]
     {routeId === "pagePersonalFinanceApp" && <PersonalFinanceApp locale={locale} client:idle />}
     {routeId === "pageOpenBankingApp" && <OpenBankingApp locale={locale} client:idle />}
     {routeId === "pageBudgetApp" && <BudgetApp locale={locale} client:idle />}
+    {routeId === "pageGuidedStart" && <GuidedStart locale={locale} />}
     {showFinancialDisclaimer && (
       <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <FinancialDisclaimer locale={locale} client:idle />
@@ -244,7 +250,7 @@ const structuredData = softwareSchemas[routeId]
         <NotABank locale={locale} client:idle />
       </div>
     )}
-    <RelatedSeoPages locale={locale} routeId={routeId} client:idle />
+    {routeId !== "pageGuidedStart" && <RelatedSeoPages locale={locale} routeId={routeId} client:idle />}
   </main>
   <Footer locale={locale} client:idle />
   {structuredData && <StructuredData data={structuredData} />}

@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Where to start",
+    "metaTitle": "Where to start with personal finances | WonderMoney",
+    "metaDescription": "Answer two questions to find a calculator for budgeting, saving or investing. Then try a short financial literacy quiz.",
+    "intro": "Find a calculator for your next money decision and check what you know about the basics.",
+    "goalQuestion": "What would you like to work on?",
+    "taskQuestion": "What would help you now?",
+    "findTool": "See my starting point",
+    "resultTitle": "A tool to start with",
+    "browse": "Browse all six calculators",
+    "goals": {
+      "budget": "Organise my finances",
+      "savings": "Build my savings",
+      "investing": "Understand investment growth"
+    },
+    "tasks": {
+      "review": "Review where I stand",
+      "plan": "Explore a future scenario"
+    },
+    "quiz": {
+      "title": "Financial literacy quiz",
+      "intro": "Try four questions on budgeting, fees, inflation and diversification.",
+      "open": "Open the quiz",
+      "submit": "Check my answers",
+      "score": "{{score}} of {{total}} correct",
+      "correct": "Correct",
+      "incorrect": "Correct answer",
+      "retry": "Try again",
+      "budget": {
+        "question": "What do you compare to see how much money is left in a monthly budget?",
+        "choice0": "Monthly income and expenses",
+        "choice1": "Only recurring bills",
+        "choice2": "Income from the previous year",
+        "explanation": "Subtracting monthly expenses from monthly income shows whether money is left over or spending exceeds income."
+      },
+      "fees": {
+        "question": "If two investments have the same gross return, what do higher fees do to the return you keep?",
+        "choice0": "Increase it",
+        "choice1": "Leave it unchanged",
+        "choice2": "Reduce it",
+        "explanation": "Fees are deducted from your investment, so a higher fee leaves you with less when the gross return is the same."
+      },
+      "inflation": {
+        "question": "If prices generally rise and your income stays the same, what happens to your purchasing power?",
+        "choice0": "It goes up",
+        "choice1": "It goes down",
+        "choice2": "It stays the same",
+        "explanation": "When prices rise, the same amount of money buys fewer goods and services."
+      },
+      "diversification": {
+        "question": "What is one reason to spread money across different investments?",
+        "choice0": "To reduce dependence on any single investment",
+        "choice1": "To guarantee a profit",
+        "choice2": "To make every investment move together",
+        "explanation": "Diversification can reduce the impact of a single investment performing poorly. A diversified portfolio can still lose value."
+      }
+    }
+  },
   "global": {
     "mainCta": "Start free",
     "mainCtaMicrocopy": "Free and open source. Use it here or host your own.",
@@ -631,6 +689,86 @@
       "pageTitle": "Savings Rate Calculator — WonderMoney",
       "pageDescription": "Free savings rate calculator. Find out what percentage of your income you save each month. Compare against the 50/30/20 rule and FIRE movement benchmarks.",
       "subtitle": "Find out what percentage of your income you are saving each month. Your savings rate is one of the most important numbers in personal finance — it determines how fast you build wealth."
+    },
+    "investorProfile": {
+      "title": "Investor profile quiz",
+      "shortName": "Investor profile",
+      "description": "Reflect on how much financial risk you could absorb and how comfortable you are with investment losses.",
+      "pageTitle": "Investor profile quiz | WonderMoney",
+      "pageDescription": "Answer six questions about your time horizon, financial flexibility and reaction to losses. See how the investor profile quiz scores your answers.",
+      "subtitle": "Pick one investment goal. Answer six questions to compare your financial capacity for risk with your comfort with losses.",
+      "progress": "Question {{step}} of {{total}}",
+      "next": "Continue",
+      "back": "Back",
+      "finish": "See my result",
+      "review": "Review answers",
+      "required": "Choose an answer to continue.",
+      "javascript": "Enable JavaScript to take the quiz.",
+      "capacityLabel": "Financial capacity",
+      "comfortLabel": "Comfort with risk",
+      "methodHeading": "How the quiz scores your answers",
+      "dimensions": "The first three answers describe your financial capacity: when you need the money, how flexible that date is and whether you have a separate cash buffer. The other three describe your comfort with risk: your reaction to a drop, how you feel about fluctuations and your preference between stability and growth potential.",
+      "method": "Each answer earns 0, 1 or 2 points in the order shown. Each group adds up to 0–6 points. The lower of the two scores sets your result: 0–2 is lower, 3–4 is moderate and 5–6 is higher.",
+      "exampleHeading": "Worked example",
+      "example": "If your first three answers score 0, 1 and 1, your capacity is 2 out of 6. If the other three score 2 each, your comfort is 6 out of 6. The result is the lower band because capacity is the smaller score.",
+      "assumptionsHeading": "Assumptions and limits",
+      "limitations": "The quiz uses hypothetical scenarios and your own estimates for one goal. Your answers may change with your finances or the goal. The scoring is a teaching heuristic and has not been validated as a suitability assessment. It provides no investment advice.",
+      "source": "Risk tolerance (Investor.gov, in English)",
+      "nextStepHeadline": "Learn how risk fits your investment overview",
+      "nextStepDescription": "See how WonderMoney brings your investments and their performance together.",
+      "nextStepCta": "Explore the portfolio overview",
+      "results": {
+        "lower": {
+          "title": "Lower risk band",
+          "description": "At least one score is low for this goal. Compare the two scores to see whether your finances, your comfort with losses, or both are the limiting factor."
+        },
+        "middle": {
+          "title": "Moderate risk band",
+          "description": "The lower of your two scores is in the middle range. Compare your financial flexibility with how you expect to feel during a decline."
+        },
+        "higher": {
+          "title": "Higher risk band",
+          "description": "Both scores are high for this goal based on your answers. Even then, losses can be larger or last longer than the scenarios suggest."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "When do you expect to need most of this money?",
+          "choice0": "In less than 3 years",
+          "choice1": "In 3 to 7 years",
+          "choice2": "In more than 7 years"
+        },
+        "flexibility": {
+          "prompt": "If the value fell shortly before you needed the money, could you delay using it?",
+          "choice0": "No, the date is fixed",
+          "choice1": "Yes, by a few months",
+          "choice2": "Yes, by a year or more"
+        },
+        "cashBuffer": {
+          "prompt": "Could you cover an unexpected essential expense without using the money for this goal?",
+          "choice0": "Probably not",
+          "choice1": "I could cover part of it",
+          "choice2": "I could cover it with a separate cash buffer"
+        },
+        "drop": {
+          "prompt": "Imagine your investment fell 20% in a few months. What would your first instinct be?",
+          "choice0": "Sell most or all of it",
+          "choice1": "Reduce how much I have invested",
+          "choice2": "Revisit my plan before deciding whether to change anything"
+        },
+        "fluctuations": {
+          "prompt": "How would you feel if the value rose and fell sharply over several years?",
+          "choice0": "I would find it hard to stick to my plan",
+          "choice1": "I could accept it, but it would worry me",
+          "choice2": "I could live with those swings"
+        },
+        "tradeoff": {
+          "prompt": "Which trade-off feels most comfortable for this goal?",
+          "choice0": "More stability, even with less growth potential",
+          "choice1": "A balance between stability and growth potential",
+          "choice2": "More growth potential, even with larger possible losses"
+        }
+      }
     },
     "investmentReturn": {
       "title": "Investment return and index projection",
@@ -2196,6 +2334,38 @@
         "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
         "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
+      }
+    }
+  },
+  "resources": {
+    "metaTitle": "Personal finance resources | WonderMoney",
+    "metaDescription": "Find personal finance guides, a glossary, monthly updates and calculators for budgeting and building an emergency fund.",
+    "title": "Personal finance resources",
+    "intro": "Find your next practical step, from looking up a term to putting together a budget.",
+    "links": {
+      "guides": {
+        "title": "Personal finance guides",
+        "description": "Read step-by-step explanations of budgeting, saving and investing."
+      },
+      "glossary": {
+        "title": "Financial glossary",
+        "description": "Look up unfamiliar terms you come across while reading about money."
+      },
+      "monthly": {
+        "title": "Monthly updates",
+        "description": "See what changed in key indicators and how they are measured."
+      },
+      "household_budget": {
+        "title": "Household budget calculator",
+        "description": "Compare household income with expenses to see what is left each month."
+      },
+      "emergency_fund": {
+        "title": "Emergency fund calculator",
+        "description": "Estimate how much to set aside to cover several months of essential expenses."
+      },
+      "tools": {
+        "title": "All calculators",
+        "description": "Browse tools for budgeting, borrowing and investing."
       }
     }
   },

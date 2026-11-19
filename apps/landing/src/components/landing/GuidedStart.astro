@@ -1,0 +1,146 @@
+---
+import { buttonVariants } from "@/components/ui/button";
+import { GUIDED_GOALS, GUIDED_TASKS, LITERACY_CHOICES, LITERACY_QUESTIONS, getGuidedDestination } from "@/lib/guidedStart";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getToolCatalogEntry } from "@/lib/toolsCatalog";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const destinations = GUIDED_GOALS.flatMap((goal) =>
+  GUIDED_TASKS.map((task) => getGuidedDestination(goal, task)),
+);
+const linkClass = "inline-block py-1 text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring";
+const optionClass = "flex min-h-10 cursor-pointer items-start gap-3 rounded-md px-2 py-2 hover:bg-background";
+const radioClass = "mt-1 size-4 shrink-0 accent-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+---
+
+<div data-guided-start class="mx-auto max-w-5xl px-6 py-10 sm:py-16 lg:px-8">
+  <header class="max-w-2xl">
+    <h1 class="break-words text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+      {t("guidedStart.title")}
+    </h1>
+    <p class="mt-4 text-lg text-muted-foreground">{t("guidedStart.intro")}</p>
+  </header>
+
+  <form data-guided-discovery hidden class="ph-no-capture mt-8 rounded-card border border-border bg-muted p-4 sm:p-6">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <fieldset class="min-w-0">
+        <legend class="mb-2 font-semibold">{t("guidedStart.goalQuestion")}</legend>
+        {GUIDED_GOALS.map((goal) => (
+          <label class={optionClass}>
+            <input required type="radio" name="goal" value={goal} class={radioClass} />
+            {t(`guidedStart.goals.${goal}`)}
+          </label>
+        ))}
+      </fieldset>
+      <fieldset class="min-w-0">
+        <legend class="mb-2 font-semibold">{t("guidedStart.taskQuestion")}</legend>
+        {GUIDED_TASKS.map((task) => (
+          <label class={optionClass}>
+            <input required type="radio" name="task" value={task} class={radioClass} />
+            {t(`guidedStart.tasks.${task}`)}
+          </label>
+        ))}
+      </fieldset>
+    </div>
+    <button type="submit" class:list={[buttonVariants(), "mt-5 whitespace-normal"]}>{t("guidedStart.findTool")}</button>
+    <section data-guided-result hidden class="mt-5 border-t border-border pt-4">
+      <h2 tabindex="-1" class="scroll-mt-24 font-semibold focus-visible:outline-none">{t("guidedStart.resultTitle")}</h2>
+      {destinations.map((routeId) => {
+        const { key } = getToolCatalogEntry(routeId);
+        return (
+          <div data-guided-destination={routeId} hidden>
+            <p class="mt-1 max-w-2xl text-muted-foreground">{t(`tools.${key}.description`)}</p>
+            <a href={toLocalizedPath(routeId, locale)} data-guided-link="result" data-route-id={routeId} class:list={[linkClass, "mt-2"]}>
+              {t(`tools.${key}.title`)}
+            </a>
+          </div>
+        );
+      })}
+    </section>
+  </form>
+
+  <details class="mt-7 rounded-card border border-border p-4 sm:px-6">
+    <summary class="cursor-pointer rounded-md font-semibold focus-visible:ring-2 focus-visible:ring-ring">{t("guidedStart.browse")}</summary>
+    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+      {GUIDED_GOALS.map((goal) => (
+        <section>
+          <h2 class="font-medium">{t(`guidedStart.goals.${goal}`)}</h2>
+          <ul class="mt-1">
+            {GUIDED_TASKS.map((task) => {
+              const routeId = getGuidedDestination(goal, task);
+              return (
+                <li>
+                  <a href={toLocalizedPath(routeId, locale)} data-guided-link="browse" data-route-id={routeId} class={linkClass}>
+                    {t(`tools.${getToolCatalogEntry(routeId).key}.title`)}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </details>
+
+  <section aria-labelledby="literacy-title" class="mt-10 border-t border-border pt-7 sm:mt-14 sm:pt-9">
+    <h2 id="literacy-title" class="text-2xl font-semibold tracking-tight">{t("guidedStart.quiz.title")}</h2>
+    <p class="mt-2 text-muted-foreground">{t("guidedStart.quiz.intro")}</p>
+    <div data-literacy-quiz hidden class="ph-no-capture mt-4">
+      <details class="rounded-card border border-border bg-muted p-4 sm:px-6">
+        <summary class="cursor-pointer rounded-md font-semibold focus-visible:ring-2 focus-visible:ring-ring">{t("guidedStart.quiz.open")}</summary>
+        <form data-literacy-form class="mt-4">
+          <div class="grid gap-5 sm:grid-cols-2">
+            {LITERACY_QUESTIONS.map(({ id }) => (
+              <fieldset class="min-w-0 border-t border-border pt-3">
+                <legend class="pr-2 font-semibold">{t(`guidedStart.quiz.${id}.question`)}</legend>
+                {LITERACY_CHOICES.map((choice) => (
+                  <label class={optionClass}>
+                    <input required type="radio" name={id} value={choice} class={radioClass} />
+                    {t(`guidedStart.quiz.${id}.choice${choice}`)}
+                  </label>
+                ))}
+              </fieldset>
+            ))}
+          </div>
+          <button type="submit" class:list={[buttonVariants(), "mt-5 whitespace-normal"]}>{t("guidedStart.quiz.submit")}</button>
+          <section data-literacy-result hidden class="mt-5 border-t border-border pt-4">
+            <h3 tabindex="-1" class="scroll-mt-24 text-lg font-semibold focus-visible:outline-none">
+              {Array.from({ length: LITERACY_QUESTIONS.length + 1 }, (_, score) => (
+                <span data-literacy-score={score} hidden>
+                  {t("guidedStart.quiz.score", { score, total: LITERACY_QUESTIONS.length })}
+                </span>
+              ))}
+            </h3>
+            <ul class="mt-4 space-y-4">
+              {LITERACY_QUESTIONS.map(({ id, correct }) => (
+                <li data-literacy-feedback={id}>
+                  <p class="font-medium">{t(`guidedStart.quiz.${id}.question`)}</p>
+                  <p data-literacy-correct hidden class="mt-1 text-success-text">{t("guidedStart.quiz.correct")}</p>
+                  <p data-literacy-incorrect hidden class="mt-1 text-foreground">{t("guidedStart.quiz.incorrect")}</p>
+                  <p class="mt-1 text-foreground">{t(`guidedStart.quiz.${id}.choice${correct}`)}</p>
+                  <p class="mt-1 text-muted-foreground">{t(`guidedStart.quiz.${id}.explanation`)}</p>
+                </li>
+              ))}
+            </ul>
+            <button type="reset" class:list={[buttonVariants({ variant: "outline" }), "mt-5 whitespace-normal"]}>
+              {t("guidedStart.quiz.retry")}
+            </button>
+          </section>
+        </form>
+      </details>
+    </div>
+  </section>
+</div>
+
+<script>
+  import { activateGuidedStart } from "@/lib/guidedStartInteraction";
+
+  const page = document.querySelector<HTMLElement>("[data-guided-start]");
+  if (page) activateGuidedStart(page);
+</script>

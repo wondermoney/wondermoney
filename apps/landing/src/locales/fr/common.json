@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "Par où commencer ?",
+    "metaTitle": "Par où commencer avec ses finances personnelles ? | WonderMoney",
+    "metaDescription": "Répondez à deux questions pour trouver un simulateur de budget, d’épargne ou d’investissement, puis essayez un court quiz de culture financière.",
+    "intro": "Trouvez un simulateur pour votre prochaine décision et testez vos connaissances en finances personnelles.",
+    "goalQuestion": "Quel objectif voulez-vous travailler ?",
+    "taskQuestion": "Qu’est-ce qui vous aiderait maintenant ?",
+    "findTool": "Voir par où commencer",
+    "resultTitle": "Un simulateur pour commencer",
+    "browse": "Voir les six simulateurs",
+    "goals": {
+      "budget": "Organiser mes finances",
+      "savings": "Développer mon épargne",
+      "investing": "Comprendre la croissance des placements"
+    },
+    "tasks": {
+      "review": "Faire le point sur ma situation",
+      "plan": "Explorer un scénario futur"
+    },
+    "quiz": {
+      "title": "Quiz de culture financière",
+      "intro": "Essayez quatre questions sur le budget, les frais, l’inflation et la diversification.",
+      "open": "Ouvrir le quiz",
+      "submit": "Vérifier mes réponses",
+      "score": "{{score}} bonnes réponses sur {{total}}",
+      "correct": "Exact",
+      "incorrect": "Bonne réponse",
+      "retry": "Réessayer",
+      "budget": {
+        "question": "Que comparez-vous pour savoir combien il reste dans un budget mensuel ?",
+        "choice0": "Les revenus et les dépenses du mois",
+        "choice1": "Uniquement les factures récurrentes",
+        "choice2": "Les revenus de l’année précédente",
+        "explanation": "En soustrayant les dépenses des revenus du mois, vous voyez s’il reste de l’argent ou si vos dépenses dépassent vos revenus."
+      },
+      "fees": {
+        "question": "Si deux placements ont le même rendement brut, quel est l’effet de frais plus élevés sur le rendement net ?",
+        "choice0": "Ils l’augmentent",
+        "choice1": "Ils le laissent inchangé",
+        "choice2": "Ils le réduisent",
+        "explanation": "Les frais sont déduits du placement. À rendement brut égal, des frais plus élevés réduisent ce qui vous reste."
+      },
+      "inflation": {
+        "question": "Si les prix augmentent globalement et que vos revenus restent stables, que devient votre pouvoir d’achat ?",
+        "choice0": "Il augmente",
+        "choice1": "Il diminue",
+        "choice2": "Il reste stable",
+        "explanation": "Quand les prix augmentent, une même somme d’argent permet d’acheter moins de biens et de services."
+      },
+      "diversification": {
+        "question": "Pourquoi répartir son argent entre plusieurs placements ?",
+        "choice0": "Pour moins dépendre d’un seul placement",
+        "choice1": "Pour garantir un bénéfice",
+        "choice2": "Pour que tous les placements évoluent de la même façon",
+        "explanation": "La diversification peut réduire l’impact des mauvais résultats d’un placement. Un portefeuille diversifié peut perdre de la valeur."
+      }
+    }
+  },
   "global": {
     "mainCta": "Commencer gratuitement",
     "mainCtaMicrocopy": "Gratuit et open source. Utilisez-le ici ou sur votre propre serveur.",
@@ -631,6 +689,86 @@
       "pageTitle": "Calculatrice de taux d'épargne — WonderMoney",
       "pageDescription": "Calculatrice de taux d'épargne gratuite. Découvrez quel pourcentage de vos revenus vous épargnez chaque mois. Comparez avec la règle 50/30/20 et les références du mouvement FIRE.",
       "subtitle": "Découvrez quel pourcentage de vos revenus vous épargnez chaque mois. Votre taux d'épargne est l'un des chiffres les plus importants en finances personnelles — il détermine à quelle vitesse vous accumulez de la richesse."
+    },
+    "investorProfile": {
+      "title": "Test de profil investisseur",
+      "shortName": "Profil investisseur",
+      "description": "Réfléchissez à votre capacité financière à supporter des pertes et à votre aisance face au risque.",
+      "pageTitle": "Test de profil investisseur | WonderMoney",
+      "pageDescription": "Répondez à six questions sur votre horizon, votre marge financière et votre réaction aux pertes. Découvrez le barème du test de profil investisseur.",
+      "subtitle": "Choisissez un objectif d’investissement. Répondez à six questions pour comparer votre capacité à supporter des pertes et votre aisance face au risque.",
+      "progress": "Question {{step}} sur {{total}}",
+      "next": "Continuer",
+      "back": "Retour",
+      "finish": "Voir mon résultat",
+      "review": "Revoir les réponses",
+      "required": "Choisissez une réponse pour continuer.",
+      "javascript": "Activez JavaScript pour faire le test.",
+      "capacityLabel": "Capacité financière",
+      "comfortLabel": "Aisance face au risque",
+      "methodHeading": "Comment le test calcule votre résultat",
+      "dimensions": "Les trois premières réponses décrivent votre capacité financière : quand vous aurez besoin de l’argent, la souplesse de cette échéance et l’existence d’une réserve séparée. Les trois autres reflètent votre aisance face au risque : votre réaction à une baisse, votre ressenti face aux fluctuations et votre préférence entre stabilité et potentiel de croissance.",
+      "method": "Chaque réponse vaut 0, 1 ou 2 points selon l’ordre affiché. Chaque groupe totalise de 0 à 6 points. Le plus faible des deux scores détermine le résultat : de 0 à 2, le niveau est faible, de 3 à 4, il est modéré et de 5 à 6, il est élevé.",
+      "exampleHeading": "Exemple",
+      "example": "Si les trois premières réponses valent 0, 1 et 1, la capacité financière atteint 2 sur 6. Si les trois autres valent chacune 2 points, l’aisance atteint 6 sur 6. Le niveau est faible, car le score de capacité est le plus bas.",
+      "assumptionsHeading": "Hypothèses et limites",
+      "limitations": "Le test repose sur des situations hypothétiques et sur vos estimations pour un seul objectif. Vos réponses peuvent évoluer avec vos finances ou votre objectif. Le barème est une règle pédagogique qui n’a pas été validée comme évaluation d’adéquation. Ce test ne fournit aucun conseil en investissement.",
+      "source": "Tolérance au risque (Investor.gov, en anglais)",
+      "nextStepHeadline": "Découvrez la place du risque dans votre vue d’ensemble des investissements",
+      "nextStepDescription": "Voyez comment WonderMoney réunit vos investissements et leur performance.",
+      "nextStepCta": "Explorer la vue d’ensemble du portefeuille",
+      "results": {
+        "lower": {
+          "title": "Niveau de risque faible",
+          "description": "Au moins un des scores est faible pour cet objectif. Comparez-les pour voir si la limite tient à vos finances, à votre aisance face aux pertes ou aux deux."
+        },
+        "middle": {
+          "title": "Niveau de risque modéré",
+          "description": "Le plus bas des scores se situe dans la tranche intermédiaire. Comparez votre marge financière à votre réaction probable en cas de baisse."
+        },
+        "higher": {
+          "title": "Niveau de risque élevé",
+          "description": "Les deux scores sont élevés pour cet objectif d’après vos réponses. Les pertes peuvent toutefois être plus importantes ou durer plus longtemps que dans les scénarios."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "Quand pensez-vous avoir besoin de la majeure partie de cet argent ?",
+          "choice0": "Dans moins de 3 ans",
+          "choice1": "Dans 3 à 7 ans",
+          "choice2": "Dans plus de 7 ans"
+        },
+        "flexibility": {
+          "prompt": "Si la valeur baissait peu avant cette échéance, pourriez-vous attendre pour utiliser l’argent ?",
+          "choice0": "Non, l’échéance est fixe",
+          "choice1": "Oui, de quelques mois",
+          "choice2": "Oui, d’un an ou plus"
+        },
+        "cashBuffer": {
+          "prompt": "Pourriez-vous faire face à une dépense essentielle imprévue sans puiser dans l’argent prévu pour cet objectif ?",
+          "choice0": "Probablement pas",
+          "choice1": "Je pourrais en couvrir une partie",
+          "choice2": "Je pourrais la couvrir avec une réserve séparée"
+        },
+        "drop": {
+          "prompt": "Imaginez que votre investissement perde 20 % en quelques mois. Quel serait votre premier réflexe ?",
+          "choice0": "En vendre la majeure partie ou la totalité",
+          "choice1": "Réduire le montant investi",
+          "choice2": "Revoir mon plan avant de décider si je change quelque chose"
+        },
+        "fluctuations": {
+          "prompt": "Comment vous sentiriez-vous si la valeur montait et baissait fortement pendant plusieurs années ?",
+          "choice0": "J’aurais du mal à suivre mon plan",
+          "choice1": "Je pourrais l’accepter, mais cela m’inquiéterait",
+          "choice2": "Je pourrais vivre avec ces fluctuations"
+        },
+        "tradeoff": {
+          "prompt": "Quel compromis vous convient le mieux pour cet objectif ?",
+          "choice0": "Plus de stabilité, même avec un potentiel de croissance moindre",
+          "choice1": "Un équilibre entre stabilité et potentiel de croissance",
+          "choice2": "Plus de potentiel de croissance, même avec des pertes possibles plus importantes"
+        }
+      }
     },
     "investmentReturn": {
       "title": "Rendement et projection d’un placement indiciel",
@@ -2196,6 +2334,38 @@
         "assumptionFees": "Les frais initiaux sont payés, ou retirés du montant, au départ du prêt ; les frais mensuels sont les mêmes chaque mois.",
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
         "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
+      }
+    }
+  },
+  "resources": {
+    "metaTitle": "Ressources en finances personnelles | WonderMoney",
+    "metaDescription": "Retrouvez des guides, un glossaire financier, des bilans mensuels et des calculateurs pour votre budget et votre épargne de précaution.",
+    "title": "Ressources en finances personnelles",
+    "intro": "Trouvez la ressource qui vous aidera à comprendre un terme ou à préparer votre budget.",
+    "links": {
+      "guides": {
+        "title": "Guides de finances personnelles",
+        "description": "Apprenez à établir un budget, à épargner et à investir, étape par étape."
+      },
+      "glossary": {
+        "title": "Glossaire financier",
+        "description": "Retrouvez la définition des termes que vous rencontrez en lisant sur les finances."
+      },
+      "monthly": {
+        "title": "Bilans mensuels",
+        "description": "Découvrez comment les principaux indicateurs ont évolué et comment ils sont calculés."
+      },
+      "household_budget": {
+        "title": "Calculateur de budget familial",
+        "description": "Comparez les revenus et les dépenses de votre foyer pour savoir ce qui reste chaque mois."
+      },
+      "emergency_fund": {
+        "title": "Calculateur d’épargne de précaution",
+        "description": "Estimez la somme à mettre de côté pour couvrir plusieurs mois de dépenses essentielles."
+      },
+      "tools": {
+        "title": "Tous les calculateurs",
+        "description": "Explorez les outils pour gérer un budget, évaluer un crédit ou investir."
       }
     }
   },
