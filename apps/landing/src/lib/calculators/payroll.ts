@@ -40,7 +40,7 @@ export interface WithholdingRow {
 }
 
 export interface WithholdingTable {
-  readonly id: WithholdingTableId;
+  readonly id: WithholdingTableId | "VIII";
   /** Parcela adicional a abater per dependant, in cents. */
   readonly dependantParcelaCents: number;
   readonly rows: readonly WithholdingRow[];
@@ -62,7 +62,7 @@ type RowTuple = readonly [upTo: number | null, ratePercent: number, parcela: num
 
 const toCents = (euros: number) => Math.round(euros * 100);
 
-function buildTable(id: WithholdingTableId, dependantParcela: number, rows: readonly RowTuple[]): WithholdingTable {
+function buildTable(id: WithholdingTable["id"], dependantParcela: number, rows: readonly RowTuple[]): WithholdingTable {
   return {
     id,
     dependantParcelaCents: toCents(dependantParcela),
@@ -245,6 +245,32 @@ export const WITHHOLDING_TABLE_SETS: Readonly<Record<PayrollRegion, WithholdingT
     MADEIRA_ROWS,
   ),
 };
+
+/**
+ * Pension withholding table VIII (Despacho n.º 233-A/2026, n.º 1 c): pensions of an unmarried holder or a married
+ * holder in a two-earner couple, without disability, mainland. Withholding is R x rate - parcela, with no Social
+ * Security. Rows transcribed from the annex as reproduced by Maisvalias and checked against the effective-rate
+ * column of the official table (the annex PDF text could not be extracted).
+ */
+const PENSION_TABLE_VIII = buildTable("VIII", DEPENDANT_PARCELA.II, [
+  [920, 0, 0],
+  [1042, 12.5, [2.6, 1320.92]],
+  [1100, 15.7, [1.35, 1627.01]],
+  [1133, 15.7, 111.7],
+  [1239, 21.2, 174.02],
+  [1869, 24.1, 209.96],
+  [2114, 31.1, 340.79],
+  [2361, 34.9, 421.13],
+  [3462, 43.1, 614.74],
+  [5833, 44.6, 666.67],
+  [18_332, 50.5, 1010.82],
+  [null, 53, 1469.12],
+]);
+
+/** Monthly IRS withholding on a pension of a single holder without dependants (table VIII), in cents. */
+export function computePensionWithholdingCents(monthlyPensionCents: number): number {
+  return computeTableWithholdingCents(PENSION_TABLE_VIII, monthlyPensionCents, 0);
+}
 
 /** Employee Social Security contribution (taxa contributiva dos trabalhadores), in basis points. */
 export const EMPLOYEE_SOCIAL_SECURITY_BP = 1100;

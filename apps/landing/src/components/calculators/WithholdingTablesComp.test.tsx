@@ -31,3 +31,13 @@ it("highlights the row, switches table and region, and tracks one edit with meta
     event: "tool_used", tool: "withholding_tables", page_type: "tools/portugal-irs-withholding-tables",
   });
 });
+
+it("says a negative remuneration must be zero or more, and a too large one gives the maximum", () => {
+  render(<WithholdingTablesComp locale="en" />);
+  const field = screen.getByRole("spinbutton", { name: "Monthly remuneration" });
+  fireEvent.change(field, { target: { value: "-5" } });
+  expect(screen.getByText("Enter an amount of zero or more.")).toBeTruthy();
+  expect(screen.queryByText(/up to/)).toBeNull();
+  fireEvent.change(field, { target: { value: "150000" } });
+  expect(screen.getByText(/Enter an amount up to/)).toBeTruthy();
+});

@@ -138,6 +138,7 @@ function StatePensionCalculator() {
                 { label: t(k("result.replacement")), value: percent(result.replacementBp, 1) },
                 { label: t(k("result.statutory")), value: money(result.statutoryCents) },
                 { label: t(k("result.rate")), value: percent(result.globalRateBp) },
+                { label: t(k("result.netPension")), value: money(result.netPensionCents) },
                 { label: t(k("result.netPay")), value: money(result.netPayCents) },
                 {
                   label: t(k("result.gap")),

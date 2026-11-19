@@ -2868,7 +2868,8 @@
       "remunerationHelp": "Opcional. Introduce una remuneración bruta mensual para resaltar su tramo y ver la retención.",
       "errors": {
         "remuneration": "Introduce un importe de hasta {{max}}.",
-        "dependants": "Introduce un número entero de 0 a {{max}}."
+        "dependants": "Introduce un número entero de 0 a {{max}}.",
+        "remunerationNegative": "Introduce un importe de cero o más."
       },
       "result": {
         "withholding": "Retención mensual de IRS",
@@ -2995,8 +2996,8 @@
         "methodTitle": "Cómo funciona la estimación",
         "methodReference": "La remuneración de referencia (RR) es el total de las remuneraciones registradas en los 12 meses más antiguos de los 14 anteriores al mes del desempleo, incluidas las pagas de vacaciones y Navidad, dividido entre 360. La calculadora usa 14 o 12 veces tu salario mensual.",
         "methodAmount": "El subsidio diario es el 65% de la RR. La cifra mensual son 30 días.",
-        "methodLimits": "El subsidio mensual no puede superar 2,5 veces el IAS ({{max}} en 2026) ni el 75% de la RR neta, ni ser inferior a 1 IAS ({{ias}}), salvo que la RR neta sea inferior al IAS. Cuando las remuneraciones usadas son al menos iguales al salario mínimo ({{rmmg}}), el mínimo es 1,15 IAS.",
-        "methodNet": "La RR neta es la RR menos el 11% de Seguridad Social y el tipo de retención de IRS. La calculadora estima ese tipo con las tablas de retención de 2026 del continente para tu salario mensual, como soltero/a, o como casado/a con dos perceptores si tu pareja está en el hogar.",
+        "methodLimits": "El subsidio mensual no puede superar 2,5 veces el IAS ({{max}} en 2026) ni el 75% de la RR neta, ni ser inferior a 1 IAS ({{ias}}), salvo que la RR neta sea inferior al IAS. El mínimo de 1 IAS prevalece sobre el límite del 75%, pero el subsidio nunca supera la propia RR neta (art. 29 del Decreto-Lei n.º 220/2006). Cuando las remuneraciones usadas son al menos iguales al salario mínimo ({{rmmg}}), el mínimo es 1,15 IAS.",
+        "methodNet": "La RR neta es la RR menos el 11% de Seguridad Social y el tipo de retención de IRS (art. 29, n.º 4, del Decreto-Lei n.º 220/2006). El tipo sale de las tablas de retención de tu hogar, según la RR neta. La calculadora busca en las tablas de 2026 del continente el valor de la RR menos el 11% y aplica ese tipo a toda la RR, como soltero/a, o como casado/a con dos perceptores si tu pareja está en el hogar.",
         "methodIncrease": "El subsidio sube un 10% cuando ambos miembros de la pareja están en paro e inscritos, o eres el único progenitor, y hay hijos o personas a cargo. Hay que solicitarlo. La calculadora lo aplica al importe ya limitado y nunca por encima de 2,5 IAS.",
         "methodDuration": "La duración depende de tu edad y de los meses con remuneración registrada, más días extra por cada 5 años completos con registro en los últimos 20: 30 días hasta los 39 años, 45 días de 40 a 49 y 60 días desde los 50.",
         "methodNoReduction": "No se aplica el antiguo recorte del 10% tras 180 días de cobro: la guía de la Seguridad Social de 2026 no lo recoge.",
@@ -3011,7 +3012,7 @@
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 de octubre de 2026), que recoge también el IAS de 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) y el salario mínimo de 920 euros (Decreto-Lei n.º 139/2025)",
         "sourceLaw": "Decreto-Lei n.º 220/2006, en su redacción actual: régimen de protección por desempleo",
         "sourceIncrease": "Decreto-Lei n.º 119/2021: aumento del 10% para hogares con hijos y mínimo de 1,15 IAS",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente a la guía de la Seguridad Social y al texto del Decreto-Lei n.º 119/2021 en el Diário da República. El tipo de IRS detrás del límite del 75% y el orden del aumento del 10% son simplificaciones nuestras, y el fin del recorte del 10% tras 180 días procede de la guía y de la prensa, no de la ley consolidada."
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente a la guía de la Seguridad Social (versión de octubre de 2026), la página del servicio en gov.pt (actualizada el 19 de octubre de 2026) y el texto del art. 29 del Decreto-Lei n.º 220/2006 (leído en una copia secundaria, no en la versión consolidada oficial). El orden de los límites sigue ese artículo; el orden del aumento del 10% respecto a los límites no figura en las fuentes que leímos, así que es una simplificación nuestra. La página de gov.pt resuelve un ejemplo con un tipo de IRS del 9,4% que no logramos reproducir con las tablas de 2026, por lo que el límite real puede ser menor que el mostrado. El fin del recorte del 10% tras 180 días procede de la guía y de la prensa, no de la ley consolidada."
       },
       "nextStepHeadline": "Antes de que bajen los ingresos, planifica el colchón",
       "nextStepDescription": "WonderMoney te muestra tu efectivo, tu gasto mensual y cuánto duran tus ahorros con unos ingresos menores.",
@@ -3039,7 +3040,7 @@
         "gross": "El salario base de los meses considerados, antes de Seguridad Social e IRS. Las pagas de vacaciones y Navidad no forman parte de la remuneración de referencia.",
         "allowances": "Prorrateadas, la calculadora quita las dos pagas para obtener el salario base que usa la remuneración de referencia.",
         "sickDays": "Total de días del parte de baja (CIT), contados desde el primer día. Los trabajadores por cuenta ajena pueden cobrar hasta 1095 días.",
-        "dependants": "Se usa para el aumento de 5 puntos, que exige 3 o más hijos y una remuneración de referencia de 500 euros al mes o menos.",
+        "dependants": "Se usa para el aumento de 5 puntos, que se aplica con 3 o más hijos, o cuando la remuneración de referencia es de 500 euros al mes o menos.",
         "hospitalisation": "Con ingreso hospitalario o cirugía ambulatoria la prestación se paga desde el primer día, sin período de espera."
       },
       "errors": {
@@ -3062,7 +3063,7 @@
         "bandsTitle": "Por tramo de duración",
         "bandLabel": "Días {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} días pagados × {{daily}} = {{amount}}",
-        "increaseApplied": "Incluye el aumento de 5 puntos por remuneración baja y 3 o más hijos.",
+        "increaseApplied": "Incluye el aumento de 5 puntos (remuneración de referencia de 500 euros o menos, o 3 o más hijos).",
         "allWaiting": "Todos los días de esta baja son días de espera, así que la Seguridad Social no paga nada. Comprueba si tu contrato o convenio obliga a la empresa a pagarlos.",
         "waitingNote": "La Seguridad Social no paga los 3 primeros días. Que la empresa los pague depende de tu contrato o convenio colectivo.",
         "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real con tus remuneraciones registradas.",
@@ -3089,7 +3090,7 @@
         "methodBands": "La prestación diaria es un porcentaje de la RR que crece con la duración de la baja: 55% hasta 30 días, 60% del día 31 al 90, 70% del día 91 al 365 y 75% después, hasta 1095 días para trabajadores por cuenta ajena. Los días cuentan desde el primero de la baja, incluidos los de espera.",
         "methodWaiting": "Los trabajadores por cuenta ajena tienen un período de espera de 3 días que la Seguridad Social no paga. Con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y va más allá, el pago empieza el día 1.",
         "methodMinimum": "La prestación diaria no puede ser inferior a {{min}} (30% del salario mínimo de {{rmmg}}). Si la propia RR es menor, la prestación es igual a la RR.",
-        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando la RR es de 500 euros al mes como máximo y el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o hijos con bonificación por discapacidad. La calculadora solo modela el número de hijos.",
+        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando se da cualquiera de estas situaciones (art. 17 del Decreto-Ley 28/2004): la RR es de 500 euros al mes como máximo, el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o el hogar tiene hijos con bonificación por discapacidad. Las condiciones son alternativas, no acumulativas. La calculadora modela las dos primeras y no modela la bonificación por discapacidad.",
         "methodNetCap": "La prestación diaria tampoco puede superar el valor neto de la RR. La calculadora lo estima con un 11% de Seguridad Social y la tasa de retención de IRS de 2026 del continente para un titular soltero.",
         "methodGap": "La pérdida de ingresos compara tu sueldo neto normal (14 o 12 pagos, en promedio de 12 meses) con lo que paga la Seguridad Social. Las pagas de vacaciones y Navidad no se reponen por los días de baja.",
         "methodBudget": "La diferencia es el ingreso que tienes que cubrir con ahorros o recortando gastos mientras estás de baja. Úsala para dimensionar tu colchón.",
@@ -3101,7 +3102,7 @@
         "sourcesTitle": "Fuentes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de octubre de 2026), con el salario mínimo de 2026 de 920 euros",
         "sourceLaw": "Decreto-Lei n.º 28/2004, en su redacción actual: el régimen de protección en la enfermedad",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 con la guía de la Segurança Social. El límite de 500 euros del aumento de 5 puntos procede de la ley consolidada y de fuentes secundarias, porque el texto de la guía no muestra la cifra. La estimación del sueldo neto detrás del límite neto es una simplificación nuestra."
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 con la guía de la Segurança Social y el texto del art. 17 del Decreto-Ley 28/2004. Las tres condiciones alternativas del aumento de 5 puntos proceden de ese texto; la ley prevé que la cifra de 500 euros se revise periódicamente y no pudimos confirmar la cifra actual en un texto oficial, así que mantenemos 500. La estimación del sueldo neto detrás del límite neto es una simplificación nuestra."
       },
       "nextStepHeadline": "Planifica la caída temporal de ingresos",
       "nextStepDescription": "WonderMoney muestra tu efectivo, tus gastos y cuánto tiempo te cubren los ahorros con unos ingresos menores.",
@@ -3506,19 +3507,20 @@
           "lateCapped": "Jubilarte {{months}} meses después de la edad normal ({{normal}}) añade una bonificación, que se queda en {{bonus}} porque la pensión no puede superar el 92 % de la remuneración de referencia."
         },
         "floorApplied": "La pensión se ha elevado al mínimo de 2026 que corresponde a tu carrera.",
-        "gapSome": "Para mantener tu nivel de vida necesitarías unos {{gap}} al mes procedentes de ahorros e inversiones (antes de impuestos).",
+        "gapSome": "Para mantener tu nivel de vida necesitarías unos {{gap}} netos al mes procedentes de ahorros e inversiones.",
         "gapNone": "A esta edad, la pensión estimada cubre tu sueldo neto actual.",
         "estimate": "Estimación aproximada para planificar, no es una decisión ni un consejo. La referencia es el simulador oficial de Segurança Social Direta, que usa tu registro real de cotizaciones.",
         "limits": "No cubre: carreras iniciadas antes de 2002 (fórmula mixta), funcionarios (CGA), regímenes especiales ni sueldos muy variables.",
         "simulatorLink": "Abrir el simulador oficial",
-        "fireLink": "Calcula el ahorro necesario con la calculadora FIRE"
+        "fireLink": "Calcula el ahorro necesario con la calculadora FIRE",
+        "netPension": "Pensión neta estimada (por paga, tras el IRS)"
       },
       "nextStepHeadline": "Cubre la diferencia con tus propias inversiones",
       "nextStepDescription": "WonderMoney reúne tu cartera y tu patrimonio en un solo lugar, para ver hasta dónde llegan tus inversiones a la hora de cubrir la diferencia.",
       "nextStepCta": "Sigue las inversiones necesarias para cubrir tu diferencia",
       "guide": {
         "exampleTitle": "Ejemplo práctico",
-        "example": "Alguien con un sueldo medio de {{gross}} al mes (euros de hoy, 14 pagas), con {{years}} años de cotización, que se jubila a los {{age}}. La pensión estatutaria es de {{statutory}} al mes, una tasa global de formación del {{rate}}. Jubilarse {{months}} meses antes de la edad normal resta {{penalty}} y aplica el factor de sostenibilidad, y queda en {{monthly}} al mes, es decir, el {{replacement}} del sueldo. Frente a un sueldo neto estimado de {{net}}, la diferencia es de {{gap}} al mes.",
+        "example": "Alguien con un sueldo medio de {{gross}} al mes (euros de hoy, 14 pagas), con {{years}} años de cotización, que se jubila a los {{age}}. La pensión estatutaria es de {{statutory}} al mes, una tasa global de formación del {{rate}}. Jubilarse {{months}} meses antes de la edad normal resta {{penalty}} y aplica el factor de sostenibilidad, y queda en {{monthly}} brutos al mes, es decir, el {{replacement}} del sueldo. Tras el IRS, la pensión es de {{netPension}} al mes. Frente a un sueldo neto estimado de {{net}}, la diferencia es de {{gap}} al mes.",
         "methodTitle": "Cómo funciona la estimación",
         "methodReference": "La remuneración de referencia es la media de las remuneraciones anuales de toda la carrera, revalorizadas con coeficientes ligados a los precios de consumo y divididas entre 14. La calculadora trabaja en euros de hoy: introduces un sueldo mensual medio real y el resultado también sale en euros de hoy.",
         "methodRate": "La tasa anual depende de los tramos de la remuneración de referencia, en múltiplos del IAS ({{ias}} en 2026): {{rates}} para los tramos hasta 1,1, hasta 2, hasta 4, hasta 8 y por encima de 8 veces el IAS. Las carreras de hasta 20 años usan un 2 % fijo. La tasa se multiplica por los años de cotización, 40 como máximo, y da la tasa global de formación.",
@@ -3526,7 +3528,7 @@
         "methodEarly": "Antes de la edad normal, desde los 60 años y con al menos 15 años de cotización, cada mes de anticipo resta {{penalty}}, y se aplica además el factor de sostenibilidad de 2026 ({{factor}}, un recorte del 17,63 %). Ambos se multiplican. No se modelan excepciones, como las carreras muy largas.",
         "methodLate": "Después de la edad normal, hasta los 70 años, cada mes añade una bonificación que depende de los años de cotización: 0,33 % desde 15 años, 0,50 % desde 25, 0,65 % desde 35 y 1 % desde 40. La pensión con bonificación no puede superar el 92 % de la remuneración de referencia.",
         "methodMinimum": "Si la fórmula da menos que la pensión mínima de 2026 para tu carrera, se muestra el mínimo: {{min15}} para 15 a 20 años, {{min21}} para 21 a 30 y {{min31}} para 31 o más. El mínimo no se aplica a la jubilación anticipada.",
-        "methodGap": "La diferencia compara la pensión bruta estimada, en 14 pagas, con tu sueldo neto de hoy: sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión también tributa IRS, así que la diferencia real puede variar.",
+        "methodGap": "La diferencia compara la pensión neta con tu sueldo neto de hoy, ambos por paga, en 14 pagas. El sueldo neto es el sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión neta es la pensión bruta estimada menos el IRS retenido según la tabla de retención de pensiones VIII de 2026 (Despacho n.º 233-A/2026, titular no casado o casado con dos titulares, sin discapacidad); las pensiones no pagan Seguridad Social y las pensiones de hasta 920 euros al mes no tienen retención. El IRS final depende de tus ingresos totales y deducciones.",
         "methodBudget": "Lee la diferencia como el importe mensual que tus ahorros e inversiones tendrían que cubrir. Cambia con cada supuesto anterior.",
         "unsupportedTitle": "No admitido",
         "unsupportedMixed": "Carreras iniciadas antes de 2002 (fórmula mixta, con las reglas antiguas para los años hasta 2001). Esta calculadora solo cubre la fórmula de toda la carrera para quien empezó a cotizar en 2002 o después.",
@@ -3539,7 +3541,7 @@
         "sourceAges": "Portaria n.º 476/2025/1: edad normal de 2027 y factor de sostenibilidad de 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras."
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó con el Despacho n.º 233-A/2026 (reglas y asignación de la tabla) y con una transcripción de su anexo cuyas filas coinciden con la columna oficial de tasa efectiva."
       }
     }
   },
