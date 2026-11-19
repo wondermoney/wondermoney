@@ -21,6 +21,11 @@ interface Props {
 	structuredData?: Record<string, unknown> | Record<string, unknown>[];
 	breadcrumbs?: BreadcrumbItem[];
 	freshnessLabel?: string;
+	/**
+	 * `article`: the page draws its own hero (ArticleHero.astro) with the breadcrumb in it,
+	 * and its own containers, so the bar, the freshness pill and the padded main are left out.
+	 */
+	layout?: "default" | "article";
 	locale: Lang;
 }
 
@@ -34,6 +39,7 @@ const {
 	structuredData,
 	breadcrumbs,
 	freshnessLabel,
+	layout = "default",
 	locale,
 } =
 	Astro.props;
@@ -54,7 +60,7 @@ const homeLabel = translate("nav.home");
 >
 	<Header locale={locale} client:load />
 	{
-		breadcrumbs && breadcrumbs.length > 0 && (
+		layout === "default" && breadcrumbs && breadcrumbs.length > 0 && (
 			<nav aria-label="Breadcrumb" class="mx-auto max-w-7xl px-6 pt-4 lg:px-8">
 				<ol class="flex items-center gap-2 text-sm text-muted-foreground">
 					<li>
@@ -79,7 +85,7 @@ const homeLabel = translate("nav.home");
 		)
 	}
 	{
-		freshnessLabel && (
+		layout === "default" && freshnessLabel && (
 			<div class="mx-auto max-w-7xl px-6 pt-3 lg:px-8">
 				<span class="inline-flex items-center rounded-full border border-info/30 bg-info/5 px-3 py-1 text-xs font-medium text-info-text">
 					{freshnessLabel}
@@ -87,7 +93,7 @@ const homeLabel = translate("nav.home");
 			</div>
 		)
 	}
-	<main class="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+	<main class:list={[layout === "default" && "mx-auto max-w-7xl px-6 py-8 lg:px-8"]}>
 		<slot />
 	</main>
 	<Footer locale={locale} client:idle />

@@ -5890,5 +5890,31 @@
       "ctaHeadline": "Pon tu derecho a trabajar",
       "ctaBody": "Conecta tus cuentas y ve tu panorama financiero completo — de forma segura, en tus condiciones."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de lectura",
+    "onThisPage": "En esta página",
+    "keepReading": "Sigue leyendo"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Dibujo de líneas de un tarro de ahorro en una estantería, con una pila de monedas al lado que pasan al tarro mes a mes.",
+      "envelopes": "Dibujo lineal de una bandeja con sobres de presupuesto, uno por categoría de gasto, con billetes asomando.",
+      "snowball": "Dibujo lineal de una fila de fichas de dominó, de la más pequeña a la más grande, que caen una tras otra como deudas pagadas por orden.",
+      "eggs": "Dibujo lineal de una caja de huevos, cada huevo en su propio hueco.",
+      "etfbox": "Dibujo lineal de una caja llena de piezas pequeñas, como un ETF reúne muchas empresas.",
+      "inflation": "Dibujo lineal de una balanza con monedas en un lado y una cesta de la compra en el otro, que se inclina a medida que suben los precios.",
+      "doorchain": "Dibujo de líneas de una puerta con cadena de seguridad: se abre para mirar, no para dejar entrar.",
+      "taxwedge": "Dibujo lineal de una pila de monedas cortada como una tarta, con una porción, el impuesto, apartada.",
+      "scale": "Dibujo de líneas de una balanza que pesa lo que tienes frente a lo que debes.",
+      "timer": "Dibujo de líneas de un temporizador de cocina puesto en diez minutos.",
+      "containers": "Dibujo lineal de una estantería de recipientes, desde un cuenco abierto hasta una caja fuerte cerrada.",
+      "booklets": "Dibujo lineal de guías apoyadas en un soporte.",
+      "calculator": "Dibujo lineal de una calculadora de sobremesa.",
+      "compass": "Dibujo lineal de una brújula de bolsillo sobre un mapa plegado, con la aguja apuntando a lo largo de una ruta discontinua hasta un punto marcado.",
+      "cardindex": "Dibujo lineal de un fichero de madera con portaetiquetas y agujero para el dedo, lleno de fichas rayadas y separadores con pestañas.",
+      "calendar": "Dibujo lineal de un calendario de sobremesa de pie, con espiral de alambre y la cuadrícula de un mes con un día marcado con un círculo.",
+      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz."
+    }
   }
 }

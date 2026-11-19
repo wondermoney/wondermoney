@@ -32,6 +32,9 @@ export function classifyMatch(file, context = "") {
   if (/\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file)) return "not-claim";
   if (/\bfrom\s+["']node:crypto["']|crossorigin=["']anonymous["']/iu.test(context)) return "technical";
   if (/\.(?:ts|tsx|js|jsx)$/.test(file) && /(?:adapter|client|schema|type|mock|fixture)/i.test(file)) return "technical";
+  // The vendored Hairline kernel and the figure scripts: drawing code, none of it page copy
+  // (a figure's accessible label comes from the locale files).
+  if (/^src\/lib\/hairline\/(?:figures\/)?[\w-]+\.js$/.test(file)) return "technical";
   if (/(?:disconnect|revoke|widerruf|trenn|desconect|revog|déconnect|révoqu|disconnett|revoc)[^\n]{0,80}(?:immediately|imediatamente|inmediatamente|immédiatement|immediatamente|sofort|umgehend|subito|de inmediato)/iu.test(context)) return "not-claim";
   return "claim";
 }

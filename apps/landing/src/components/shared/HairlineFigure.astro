@@ -1,0 +1,40 @@
+---
+/**
+ * A Hairline line figure (src/lib/hairline). The server renders the sized,
+ * empty 5:4 box; the script mounts the figure when the box nears the
+ * viewport. Without JavaScript the box stays empty at its size.
+ *
+ * `hero` is the page's one subject figure: an image with the figure's label.
+ * `thumb` sits on a card whose text already names the link: decorative.
+ */
+import { resolveFigure, type FigureName } from "@/lib/hairline/articleFigures";
+import type { Lang } from "@/lib/i18nLocale";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  figure: FigureName;
+  locale: Lang;
+  variant?: "hero" | "thumb";
+  class?: string;
+}
+
+const { figure, locale, variant = "hero", class: className } = Astro.props;
+const t = getTranslations(locale);
+const drawn = resolveFigure(figure);
+const hero = variant === "hero";
+---
+
+<div
+  class:list={["hl-figure", className]}
+  data-hl-figure={drawn.name}
+  data-hl-variant={variant}
+  role={hero ? "img" : undefined}
+  aria-label={hero ? t(drawn.labelKey) : undefined}
+  aria-hidden={hero ? undefined : "true"}
+></div>
+
+<script>
+  import { mountFigures } from "@/lib/hairline/mount";
+
+  mountFigures();
+</script>

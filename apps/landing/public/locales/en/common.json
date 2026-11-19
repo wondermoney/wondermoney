@@ -5890,5 +5890,31 @@
       "ctaHeadline": "Put your legal right to work",
       "ctaBody": "Connect your accounts and see your full financial picture — securely, on your terms."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min read",
+    "onThisPage": "On this page",
+    "keepReading": "Keep reading"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Line drawing of a savings jar on a shelf, with a stack of coins beside it that move into the jar month by month.",
+      "envelopes": "Line drawing of a desk tray of budget envelopes, one for each spending category, with notes peeking out.",
+      "snowball": "Line drawing of a row of dominoes from smallest to largest, toppling one after another like debts paid off in turn.",
+      "eggs": "Line drawing of an egg carton, each egg in its own cup.",
+      "etfbox": "Line drawing of a box packed with many small pieces, as one ETF holds many companies.",
+      "inflation": "Line drawing of a balance with coins on one side and a shopping basket on the other, tipping as prices rise.",
+      "doorchain": "Line drawing of a door on a security chain: it opens to look, not to let anyone in.",
+      "taxwedge": "Line drawing of a stack of coins cut like a pie, with one slice, the tax, set apart.",
+      "scale": "Line drawing of a balance weighing what you own against what you owe.",
+      "timer": "Line drawing of a kitchen timer set to ten minutes.",
+      "containers": "Line drawing of a shelf of containers, from an open bowl to a locked safe.",
+      "booklets": "Line drawing of guide booklets leaning in a stand.",
+      "calculator": "Line drawing of a desk calculator.",
+      "compass": "Line drawing of a pocket compass lying on a folded map, its needle pointing along a dashed route to a marked spot.",
+      "cardindex": "Line drawing of a wooden card index box with a label holder and a finger hole, filled with ruled cards and tabbed dividers.",
+      "calendar": "Line drawing of a desk calendar standing on its fold, with a wire binding and a month grid with one day circled.",
+      "riskdial": "Line drawing of a gauge on a base, its needle swinging across five segments from cautious to bold."
+    }
   }
 }

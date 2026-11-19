@@ -1,0 +1,97 @@
+---
+/**
+ * The hero of a long-form page (Direction B): the breadcrumb and read time,
+ * the title, the dek and the quick-jump chips on the left; the page's one
+ * subject figure on the right, under the title below `lg`.
+ */
+import HairlineFigure from "./HairlineFigure.astro";
+import type { OutlineEntry } from "@/lib/articleOutline";
+import type { FigureName } from "@/lib/hairline/articleFigures";
+import type { Lang } from "@/lib/i18nLocale";
+import { getTranslations } from "@/lib/translations";
+
+interface Crumb {
+  label: string;
+  /** Left out for a crumb that is a label, not a page. */
+  href?: string;
+}
+
+interface Props {
+  locale: Lang;
+  title: string;
+  dek?: string;
+  breadcrumbs: Crumb[];
+  readMinutes?: number;
+  /** Section anchors; chips are shown for two or more. */
+  outline?: ReadonlyArray<OutlineEntry>;
+  figure?: FigureName;
+}
+
+const { locale, title, dek, breadcrumbs, readMinutes, outline = [], figure } = Astro.props;
+const t = getTranslations(locale);
+const trail: Crumb[] = [{ label: t("nav.home"), href: `/${locale}` }, ...breadcrumbs];
+---
+
+<section class="border-b border-border">
+  <div
+    class:list={[
+      "mx-auto grid max-w-7xl gap-10 px-6 pb-12 pt-8 sm:pt-10 lg:gap-12 lg:px-8 lg:pb-14",
+      figure && "lg:grid-cols-[minmax(0,1fr)_minmax(0,32.5rem)] lg:items-center",
+    ]}
+  >
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+        <nav aria-label="Breadcrumb">
+          <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {trail.map((crumb, index) => (
+              <li class="flex items-center gap-2">
+                {index > 0 && <span aria-hidden="true">/</span>}
+                {crumb.href ? (
+                  <a href={crumb.href} class="hover:text-foreground">{crumb.label}</a>
+                ) : (
+                  <span>{crumb.label}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+        {readMinutes && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{t("article.readTime", { count: readMinutes })}</span>
+          </>
+        )}
+      </div>
+
+      <h1 class="mt-5 max-w-[20ch] text-[2.25rem] font-bold leading-[1.06] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-[3.25rem] lg:leading-[1.04] lg:tracking-[-0.035em]">
+        {title}
+      </h1>
+      {dek && <p class="mt-5 max-w-[35rem] text-lg leading-[1.55] text-ink-2 sm:text-xl">{dek}</p>}
+
+      <slot />
+
+      {outline.length > 1 && (
+        <nav aria-label={t("article.onThisPage")} class="mt-7">
+          <ul role="list" class="flex flex-wrap gap-2.5">
+            {outline.map((entry) => (
+              <li class="min-w-0">
+                <a
+                  href={`#${entry.id}`}
+                  class="inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  {entry.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </div>
+
+    {figure && (
+      <div class="w-full max-w-[32.5rem] lg:justify-self-end">
+        <HairlineFigure figure={figure} locale={locale} variant="hero" />
+      </div>
+    )}
+  </div>
+</section>

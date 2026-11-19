@@ -12,6 +12,8 @@ export type Props = {
   ctaHref?: string;
   /** Optional short line under the button, e.g. "No signup needed." */
   ctaNote?: string;
+  /** `banner`: the centred closing band. `card`: a bordered card at the end of an article (Direction B). */
+  variant?: "banner" | "card";
   locale?: Lang;
 };
 
@@ -21,6 +23,7 @@ export default function CTABanner({
   ctaText,
   ctaHref = CTA_URL,
   ctaNote,
+  variant,
   locale,
 }: Props) {
   if (locale) {
@@ -32,6 +35,7 @@ export default function CTABanner({
           ctaText={ctaText}
           ctaHref={ctaHref}
           ctaNote={ctaNote}
+          variant={variant}
         />
       </ReactTranslationsProvider>
     );
@@ -44,6 +48,7 @@ export default function CTABanner({
       ctaText={ctaText}
       ctaHref={ctaHref}
       ctaNote={ctaNote}
+      variant={variant}
     />
   );
 }
@@ -54,8 +59,45 @@ function CTABannerContent({
   ctaText,
   ctaHref = CTA_URL,
   ctaNote,
+  variant = "banner",
 }: Omit<Props, "locale">) {
   const { t } = useTranslations();
+  const action = (
+    <Button asChild size={variant === "card" ? "default" : "lg"}>
+      <a
+        href={ctaHref}
+        onClick={() =>
+          pushGtmEvent({
+            event: "cta_click",
+            cta_position: "cta_banner",
+            page_type: getPageType(),
+          })
+        }
+      >
+        {ctaText || t("global.mainCta")}
+      </a>
+    </Button>
+  );
+
+  if (variant === "card") {
+    return (
+      <section className="flex flex-col gap-6 rounded-card border border-border bg-card p-6 sm:p-8 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0 max-w-xl">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            {headline || t("global.ctaBanner.headline")}
+          </h2>
+          <p className="mt-2 text-base leading-7 text-muted-foreground">
+            {description || t("global.ctaBanner.description")}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-start gap-2 md:items-end">
+          {action}
+          {ctaNote && <p className="text-sm text-muted-foreground">{ctaNote}</p>}
+          <p className="text-sm text-muted-foreground">{t("global.mainCtaMicrocopy")}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-border bg-paper-2 px-6 py-16 text-center sm:px-12 lg:px-16">
@@ -66,20 +108,7 @@ function CTABannerContent({
         {description || t("global.ctaBanner.description")}
       </p>
       <div className="mt-8 flex flex-col items-center gap-3">
-        <Button asChild size="lg">
-          <a
-            href={ctaHref}
-            onClick={() =>
-              pushGtmEvent({
-                event: "cta_click",
-                cta_position: "cta_banner",
-                page_type: getPageType(),
-              })
-            }
-          >
-            {ctaText || t("global.mainCta")}
-          </a>
-        </Button>
+        {action}
         {ctaNote && <p className="text-sm text-muted-foreground">{ctaNote}</p>}
         <p className="text-sm text-muted-foreground">
           {t("global.mainCtaMicrocopy")}

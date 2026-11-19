@@ -14,6 +14,9 @@ describe("public claims alignment", () => {
     expect(classifyMatch("src/locales/en/common.json", "Disconnect your bank immediately.")).toBe("not-claim");
     expect(classifyMatch("src/lib/envelope.ts", 'import { createHmac } from "node:crypto";')).toBe("technical");
     expect(classifyMatch("src/layouts/Layout.astro", 'crossorigin="anonymous"')).toBe("technical");
+    expect(classifyMatch("src/lib/hairline/kernel.js")).toBe("technical");
+    expect(classifyMatch("src/lib/hairline/figures/jar.js")).toBe("technical");
+    expect(classifyMatch("src/lib/hairline/articleFigures.ts")).toBe("claim");
   });
 
   it("detects expanded timing, security, and crypto variants", () => {

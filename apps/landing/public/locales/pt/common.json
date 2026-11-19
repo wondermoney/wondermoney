@@ -5890,5 +5890,31 @@
       "ctaHeadline": "Põe o teu direito a trabalhar",
       "ctaBody": "Liga as tuas contas e vê o teu panorama financeiro completo — de forma segura, nos teus termos."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de leitura",
+    "onThisPage": "Nesta página",
+    "keepReading": "Continua a ler"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Desenho de linhas de um frasco de poupança numa prateleira, com uma pilha de moedas ao lado que passam para o frasco mês a mês.",
+      "envelopes": "Desenho de linhas de um tabuleiro com envelopes de orçamento, um por categoria de despesa, com notas à vista.",
+      "snowball": "Desenho de linhas de uma fila de dominós, do mais pequeno ao maior, a cair uns atrás dos outros, como dívidas pagas uma a uma.",
+      "eggs": "Desenho de linhas de uma caixa de ovos, cada ovo no seu próprio espaço.",
+      "etfbox": "Desenho de linhas de uma caixa cheia de pequenas peças, como um ETF reúne muitas empresas.",
+      "inflation": "Desenho de linhas de uma balança com moedas de um lado e um cesto de compras do outro, que pende à medida que os preços sobem.",
+      "doorchain": "Desenho de linhas de uma porta com corrente de segurança: abre para ver, não para deixar entrar.",
+      "taxwedge": "Desenho de linhas de uma pilha de moedas cortada como uma tarte, com uma fatia, o imposto, posta à parte.",
+      "scale": "Desenho de linhas de uma balança que pesa o que tens contra o que deves.",
+      "timer": "Desenho de linhas de um temporizador de cozinha marcado para dez minutos.",
+      "containers": "Desenho de linhas de uma prateleira de recipientes, de uma taça aberta a um cofre fechado.",
+      "booklets": "Desenho de linhas de guias encostados num suporte.",
+      "calculator": "Desenho de linhas de uma calculadora de secretária.",
+      "compass": "Desenho de linhas de uma bússola de bolso pousada sobre um mapa dobrado, com a agulha a apontar ao longo de um percurso tracejado até um ponto marcado.",
+      "cardindex": "Desenho de linhas de um ficheiro de fichas em madeira, com porta-etiqueta e orifício para o dedo, cheio de fichas pautadas e separadores com abas.",
+      "calendar": "Desenho de linhas de um calendário de secretária em pé, com argolas de arame e a grelha de um mês com um dia assinalado.",
+      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado."
+    }
   }
 }

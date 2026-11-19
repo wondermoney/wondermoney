@@ -213,3 +213,32 @@ html {
   --tw-prose-th-borders: oklch(var(--border));
   --tw-prose-td-borders: oklch(var(--border-2));
 }
+
+/* Hairline figures (src/lib/hairline, HairlineFigure.astro): the box is sized
+ * on the server, 5:4 like the figure's 400 × 320 drawing, so mounting it
+ * shifts nothing. The kernel's stroke classes read these properties: the
+ * plate is the page, the one highlight is the primary violet, and the three
+ * line weights are the ink greys from the input stroke down to the hairline. */
+.hl-figure {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  --hairline-plate: oklch(var(--background));
+  --hairline-hi: oklch(var(--primary));
+  --hairline-edge: oklch(var(--input));
+  --hairline-mid: color-mix(in oklch, oklch(var(--input)) 45%, oklch(var(--border)));
+  --hairline-lo: oklch(var(--border));
+}
+
+/* Long Document body (Direction B): one readable measure, 18px / 1.7, in the
+ * softer content ink. Unlayered after .prose so it wins over prose-lg. */
+.article-prose {
+  --tw-prose-body: oklch(var(--ink-2));
+  max-width: 65ch;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+.article-prose :where(h2) {
+  scroll-margin-top: 6rem;
+}
