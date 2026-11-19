@@ -96,6 +96,8 @@ export function instalmentMonths(annualEuros: number): InstalmentMonth[] {
   return annualEuros <= TWO_INSTALMENTS_MAX ? [4, 10] : [4, 7, 10];
 }
 
+interface CategoryARow { upTo: number; cents: Record<"recent" | "mid" | "old", number> }
+
 const bandOf = <T extends { upTo: number }>(bands: readonly T[], value: number) =>
   bands.find((band) => value <= band.upTo) as T;
 
@@ -138,7 +140,8 @@ export function computeVehicleTax(input: VehicleTaxInput) {
   let coefficient = 1;
 
   if (category === "A") {
-    const table = input.fuel === "petrol" ? IUC_TABLES.categoryAGasoline : IUC_TABLES.categoryAOther;
+    const table: readonly CategoryARow[] =
+      input.fuel === "petrol" ? IUC_TABLES.categoryAGasoline : IUC_TABLES.categoryAOther;
     const age = year > 1995 ? "recent" : year >= 1990 ? "mid" : "old";
     baseCents = bandOf(table, input.cc).cents[age];
     annualCents = baseCents;
