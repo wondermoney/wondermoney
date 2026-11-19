@@ -76,6 +76,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolSickPay",
   },
   {
+    sources: ["toolUnemploymentBenefit", "toolNetSalary", "toolEmergencyFund"],
+    destination: "toolDismissalCompensation",
+  },
+  {
     sources: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
     destination: "toolVehicleTax",
   },

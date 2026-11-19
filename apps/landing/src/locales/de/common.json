@@ -3364,6 +3364,98 @@
         "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
         "reviewed": "Regeln geprüft am 19. November 2026. Die getrennte Quellensteuer je Zahlung eines Monats wurde im Originaltext des Despacho n.º 233-A/2026 geprüft, die Artikel des Código do Trabalho in Kopien des konsolidierten Textes. Die Referenz von 22 Arbeitstagen beim Urlaubsgeld entspricht der gängigen Praxis und steht nicht in diesen Texten. Die Quellensteuer je Zwölftel mit dem effektiven Satz der gesamten Sonderzahlung (Lei n.º 11/2013, Art. 3) ist übliche Lohnabrechnungspraxis; dieses Gesetz wurde nicht am Text geprüft. Der Sozialversicherungssatz von 11 % wurde anhand von Sekundärquellen geprüft."
       }
+    },
+    "dismissalCompensation": {
+      "title": "Abfindungsrechner Kündigung Portugal 2026",
+      "shortName": "Abfindung bei Kündigung",
+      "subtitle": "Schätze die Entschädigung bei Massenentlassung, Wegfall der Stelle oder Nichteignung in einem unbefristeten Vertrag, mit Obergrenzen und Sätzen nach Vertragsdatum.",
+      "description": "Schätze deine Abfindung bei Kündigung in Portugal: Sätze nach Vertragsdatum, Obergrenzen und Auszahlungsplan.",
+      "pageTitle": "Abfindungsrechner Portugal 2026: Schätzung nach Art. 366",
+      "pageDescription": "Schätze die compensação por despedimento in Portugal bei Massenentlassung oder Wegfall der Stelle: 12, 18, 20 oder 30 Tage pro Jahr je nach Vertragsdatum, die Grenze von 12 Monatsbeträgen und ein Auszahlungsplan.",
+      "fields": {
+        "baseMonthly": "Monatliches Grundgehalt (brutto)",
+        "seniorityPay": "Monatliche Dienstalterszulagen (diuturnidades)",
+        "startDate": "Vertragsbeginn",
+        "endDate": "Datum der Beendigung"
+      },
+      "help": {
+        "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
+        "seniorityPay": "Diuturnidades sind Zulagen für die Betriebszugehörigkeit. Gib 0 ein, wenn du keine hast.",
+        "startDate": "Der Tag, an dem der unbefristete Vertrag begann. Bei einem Konzern oder einem früheren Vertrag mit demselben Arbeitgeber prüfe, wie deine Betriebszugehörigkeit gezählt wird.",
+        "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}."
+      },
+      "scope": "Gilt für Massenentlassung, Wegfall der Stelle und Nichteignung in einem unbefristeten Vertrag. Nicht abgedeckt: befristete Verträge, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und der öffentliche Dienst.",
+      "errors": {
+        "required": "Gib einen gültigen Wert ein.",
+        "tooSmall": "Gib einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Gib einen Wert bis {{max}} ein.",
+        "invalidDate": "Gib ein gültiges Datum ein.",
+        "endBeforeStart": "Das Beendigungsdatum darf nicht vor dem Vertragsbeginn liegen.",
+        "startFuture": "Der Vertrag kann nicht in der Zukunft beginnen.",
+        "endOutsideYear": "Diese Schätzung gilt für Beendigungen im Jahr {{year}}, dessen Mindestlohn die Grenzen nutzen.",
+        "summary": "Prüfe die markierten Felder, um deine Schätzung zu sehen."
+      },
+      "result": {
+        "compensation": "Geschätzte Abfindung",
+        "seniority": "Betriebszugehörigkeit",
+        "seniorityValue": "{{years}} Jahre",
+        "regime": "Angewandte Regeln",
+        "regimes": {
+          "before2011": "Vertrag vor dem 1. November 2011",
+          "from2011": "Vertrag vom 1. November 2011 bis 30. September 2013",
+          "from2013": "Vertrag ab dem 1. Oktober 2013"
+        },
+        "usedMonthly": "Verwendeter Monatsbetrag",
+        "daily": "Tagesbetrag (Monatsbetrag geteilt durch 30)",
+        "cap": "Gesamtgrenze (12 Monatsbeträge)",
+        "breakdownTitle": "Aufschlüsselung nach Zeitraum",
+        "periods": {
+          "oneMonth": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "twentyDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "eighteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "twelveDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "fourteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr"
+        },
+        "caps": {
+          "none": "Keine Grenze angewandt.",
+          "monthlyBase": "Der Monatsbetrag wurde auf das 20-Fache des Mindestlohns begrenzt ({{limit}}; der Mindestlohn beträgt {{rmmg}}).",
+          "total": "Die Abfindung wurde auf 12 Monatsbeträge begrenzt ({{cap}}).",
+          "earlyPart": "Der Teil bis zum 30. September 2013 erreicht bereits die Grenze von {{cap}}, daher wird der spätere Zeitraum nicht addiert."
+        },
+        "payoutTitle": "Auszahlung auf die kommenden Monate verteilt",
+        "payoutValue": "Über {{months}} Monate: {{amount}} pro Monat (vor Steuern)",
+        "payoutNote": "Nur ein Vorschlag zur Planung: Der Arbeitgeber zahlt die Abfindung normalerweise am Ende des Vertrags in einer Summe.",
+        "estimate": "Eine Schätzung zum Lernen und Planen, keine Rechtsberatung. Dein Arbeitgeber, ein Anwalt, die Arbeitsinspektion (ACT) oder deine Gewerkschaft können den Betrag bestätigen."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Wer {{base}} im Monat plus {{seniorityPay}} Diuturnidades verdient, mit einem Vertrag, der am {{start}} begann und am {{end}} endete, hat {{seniority}} Jahre Betriebszugehörigkeit. Der Tagesbetrag beträgt {{daily}}. Der Vertrag begann zwischen dem 1. November 2011 und dem 30. September 2013: {{twentyYears}} Jahre bis zum 30. September 2013 zählen 20 Tage ({{twentyAmount}}), {{eighteenYears}} Jahre vervollständigen die ersten drei Jahre zu 18 Tagen ({{eighteenAmount}}), {{twelveYears}} Jahre bis zum 30. April 2023 zählen 12 Tage ({{twelveAmount}}) und die letzten {{fourteenYears}} Jahre zählen 14 Tage ({{fourteenAmount}}). Die Summe beträgt {{total}}, unter der Grenze von {{cap}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodBase": "Die Basis ist das monatliche Grundgehalt plus Diuturnidades. Der Tagesbetrag ist dieser Monatsbetrag geteilt durch 30.",
+        "methodRates": "Für die Betriebszugehörigkeit ab dem 1. Mai 2023 beträgt die Abfindung 14 Tage Grundgehalt und Diuturnidades pro vollem Jahr (Art. 366 Abs. 1 des Código do Trabalho in der Fassung der Lei n.º 13/2023). Frühere Zugehörigkeit behält den alten Satz: 12 Tage pro Jahr seit dem 1. Oktober 2013.",
+        "methodTransitional": "Ältere Verträge behalten die früheren Sätze für die bereits gearbeitete Zeit (Art. 5 der Lei n.º 69/2013). Vor dem 1. November 2011: ein Monat pro Jahr bis 31. Oktober 2012, danach 20 Tage pro Jahr bis 30. September 2013. Vom 1. November 2011 bis 30. September 2013: 20 Tage pro Jahr bis 30. September 2013. Vom 1. Oktober 2013 bis 30. April 2023 zählt jeder Vertrag 12 Tage pro Jahr, außer dass die ersten drei Jahre der Betriebszugehörigkeit 18 Tage zählen, wenn der Vertrag am 1. Oktober 2013 jünger als drei Jahre war. Ab dem 1. Mai 2023 zählt jedes Jahr 14 Tage.",
+        "methodCaps": "Der Monatsbetrag darf das 20-Fache des Mindestlohns nicht übersteigen ({{baseCap}} bei einem Mindestlohn von {{rmmg}} in 2026), und die gesamte Abfindung darf 12 Monatsbeträge nicht übersteigen, höchstens {{totalCapRmmg}} (240-facher Mindestlohn). Erreicht der Teil bis zum 30. September 2013 diese Grenze bereits, werden spätere Zeiträume nicht addiert.",
+        "methodFraction": "Ein unvollständiges Jahr zählt anteilig: Der Rechner zählt volle Jahrestage ab Vertragsbeginn plus die Tage seit dem letzten, geteilt durch die Tage dieses Jahres. Das Beendigungsdatum zählt als Arbeitstag.",
+        "methodTax": "Nur zur Information, nicht Teil der Zahl: Ein Teil der Abfindung kann nach Art. 2 Abs. 4 des CIRS von der IRS ausgenommen sein, bis zu einer Grenze, die an dein reguläres Entgelt der letzten 12 Monate und deine Dienstjahre gebunden ist. Der Rest ist steuerpflichtiges Einkommen. Frage die Steuerbehörde oder einen Steuerberater nach der genauen Grenze in deinem Fall.",
+        "methodBudget": "Die Abfindung ist ein einmaliger Betrag. Verteilst du sie auf die kommenden Monate, zusammen mit einem möglichen Arbeitslosengeld, siehst du, wie lange sie deine Ausgaben deckt.",
+        "supportedTitle": "Abgedeckt",
+        "supported": "Massenentlassung, Wegfall der Stelle und Nichteignung des Arbeitnehmers, in einem unbefristeten Vertrag, mit Beendigung im Jahr 2026.",
+        "unsupportedTitle": "Nicht abgedeckt",
+        "unsupportedFixedTerm": "Das Auslaufen befristeter Verträge (Art. 344 und 345 des Código do Trabalho), das eigene Sätze und Übergangsregeln hat.",
+        "unsupportedJustCause": "Kündigung aus wichtigem Grund (disziplinarisch), die anderen Regeln folgt.",
+        "unsupportedUnlawful": "Rechtswidrige Kündigung, bei der das Gericht die Entschädigung festlegt, in der Regel zwischen 15 und 45 Tagen Grundgehalt pro Dienstjahr.",
+        "unsupportedAgreement": "Aufhebungsvertrag, bei dem der Betrag verhandelt wird und es keine gesetzliche Formel gibt.",
+        "unsupportedPublic": "Beschäftigte im öffentlichen Dienst, für die andere Regeln gelten.",
+        "sourcesTitle": "Quellen",
+        "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelung des Art. 5",
+        "sourceLaw13": "APEL-Leitfaden zur Agenda do Trabalho Digno: Lei n.º 13/2023, die den Satz des Art. 366 Abs. 1 ab 1. Mai 2023 auf 14 Tage erhöhte",
+        "sourceCode": "Código do Trabalho, konsolidierter Text (PGDL): Art. 344, 345 und 366",
+        "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
+        "reviewed": "Regeln am 19. November 2026 geprüft anhand des Textes der Lei n.º 69/2013, veröffentlicht von der Assembleia da República, und des Mindestlohns 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage pro Jahr der Lei n.º 13/2023, in Kraft seit 1. Mai 2023, sowie die 12 Tage und die Grenze des Art. 366 stammen aus den Zusammenfassungen von APEL und DGERT und dem konsolidierten Código do Trabalho, nicht aus dem Text des Diário da República. Wir wenden die 14 Tage nur auf die Betriebszugehörigkeit ab 1. Mai 2023 an, die übliche Lesart der Übergangsregel. Zur Information, keine Rechtsberatung."
+      },
+      "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
+      "nextStepDescription": "WonderMoney zeigt deine Konten und monatlichen Ausgaben zusammen, damit du eine Abfindung auf die kommenden Monate verteilen kannst.",
+      "nextStepCta": "Die Auszahlung auf deine kommenden Monate verteilen"
     }
   },
   "resources": {

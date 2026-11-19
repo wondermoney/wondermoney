@@ -3364,6 +3364,98 @@
         "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
         "reviewed": "Regole riviste il 19 novembre 2026. La ritenuta separata su ogni pagamento del mese è stata verificata nel testo originale del Despacho n.º 233-A/2026, e gli articoli del Código do Trabalho in copie del testo consolidato. Il riferimento di 22 giorni lavorativi per l'indennità di ferie è prassi comune, non indicato in quei testi. Trattenere ogni dodicesimo all'aliquota effettiva dell'importo intero (Lei n.º 11/2013, art. 3) è la prassi abituale delle buste paga; quella legge non è stata verificata sul testo. L'aliquota dell'11% di previdenza sociale è stata verificata su fonti secondarie."
       }
+    },
+    "dismissalCompensation": {
+      "title": "Calcolatore indennità di licenziamento in Portogallo 2026",
+      "shortName": "Indennità di licenziamento",
+      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, con i limiti e le aliquote in base alla data del contratto.",
+      "description": "Stima la tua indennità di licenziamento in Portogallo: aliquote per data del contratto, limiti e piano di incasso.",
+      "pageTitle": "Calcolatore Indennità di Licenziamento Portogallo 2026: Stima dell'art. 366",
+      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto: 12, 18, 20 o 30 giorni per anno in base alla data del contratto, il tetto di 12 mensilità e un piano di incasso.",
+      "fields": {
+        "baseMonthly": "Retribuzione base mensile (lorda)",
+        "seniorityPay": "Integrazioni mensili di anzianità (diuturnidades)",
+        "startDate": "Data di inizio del contratto",
+        "endDate": "Data di cessazione"
+      },
+      "help": {
+        "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima di previdenza e IRS. Non includere tredicesima, premi né straordinari.",
+        "seniorityPay": "Le diuturnidades sono integrazioni pagate per l'anzianità. Inserisci 0 se non ne hai.",
+        "startDate": "Il giorno in cui è iniziato il contratto a tempo indeterminato. In caso di gruppo di imprese o di un contratto precedente con lo stesso datore di lavoro, verifica come viene conteggiata la tua anzianità.",
+        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}."
+      },
+      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre contratti a termine, licenziamento per giusta causa, licenziamento illegittimo, risoluzione consensuale né il settore pubblico.",
+      "errors": {
+        "required": "Inserisci un valore valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "invalidDate": "Inserisci una data valida.",
+        "endBeforeStart": "La data di cessazione non può precedere la data di inizio.",
+        "startFuture": "Il contratto non può iniziare nel futuro.",
+        "endOutsideYear": "Questa stima copre le cessazioni nel {{year}}, l'anno del salario minimo usato dai limiti.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "compensation": "Indennità stimata",
+        "seniority": "Anzianità",
+        "seniorityValue": "{{years}} anni",
+        "regime": "Regole applicate",
+        "regimes": {
+          "before2011": "Contratto precedente al 1° novembre 2011",
+          "from2011": "Contratto dal 1° novembre 2011 al 30 settembre 2013",
+          "from2013": "Contratto dal 1° ottobre 2013"
+        },
+        "usedMonthly": "Importo mensile usato",
+        "daily": "Importo giornaliero (importo mensile diviso 30)",
+        "cap": "Tetto complessivo (12 importi mensili)",
+        "breakdownTitle": "Dettaglio per periodo",
+        "periods": {
+          "oneMonth": "{{years}} anni a {{days}} giorni per anno",
+          "twentyDays": "{{years}} anni a {{days}} giorni per anno",
+          "eighteenDays": "{{years}} anni a {{days}} giorni per anno",
+          "twelveDays": "{{years}} anni a {{days}} giorni per anno",
+          "fourteenDays": "{{years}} anni a {{days}} giorni per anno"
+        },
+        "caps": {
+          "none": "Nessun limite applicato.",
+          "monthlyBase": "L'importo mensile è stato limitato a 20 volte il salario minimo ({{limit}}; il salario minimo è {{rmmg}}).",
+          "total": "L'indennità è stata limitata a 12 importi mensili ({{cap}}).",
+          "earlyPart": "La parte fino al 30 settembre 2013 raggiunge già il tetto di {{cap}}, quindi il periodo successivo non viene sommato."
+        },
+        "payoutTitle": "Incasso ripartito sui prossimi mesi",
+        "payoutValue": "In {{months}} mesi: {{amount}} al mese (prima delle imposte)",
+        "payoutNote": "Solo un suggerimento per pianificare: il datore di lavoro di norma paga l'indennità alla fine del contratto, in un'unica soluzione.",
+        "estimate": "Una stima per imparare e pianificare, non una consulenza legale. Il datore di lavoro, un avvocato, l'ispettorato del lavoro (ACT) o il tuo sindacato possono confermare l'importo."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Chi guadagna {{base}} al mese più {{seniorityPay}} di diuturnidades, con un contratto iniziato il {{start}} e terminato il {{end}}, ha {{seniority}} anni di anzianità. L'importo giornaliero è {{daily}}. Il contratto è iniziato tra il 1° novembre 2011 e il 30 settembre 2013: {{twentyYears}} anni fino al 30 settembre 2013 contano 20 giorni ({{twentyAmount}}), {{eighteenYears}} anni completano i primi tre anni a 18 giorni ({{eighteenAmount}}), {{twelveYears}} anni fino al 30 aprile 2023 contano 12 giorni ({{twelveAmount}}) e gli ultimi {{fourteenYears}} anni contano 14 giorni ({{fourteenAmount}}). Il totale è {{total}}, sotto il tetto di {{cap}}.",
+        "methodTitle": "Come funziona la stima",
+        "methodBase": "La base è la retribuzione base mensile più le diuturnidades. L'importo giornaliero è quell'importo mensile diviso 30.",
+        "methodRates": "Per l'anzianità dal 1° maggio 2023, l'indennità è di 14 giorni di retribuzione base e diuturnidades per ogni anno completo (art. 366, n. 1, del Código do Trabalho, come modificato dalla Lei n.º 13/2023). L'anzianità precedente mantiene l'aliquota vecchia: 12 giorni per anno dal 1° ottobre 2013.",
+        "methodTransitional": "I contratti più vecchi mantengono le aliquote precedenti per il tempo già lavorato (art. 5 della Lei n.º 69/2013). Prima del 1° novembre 2011: un mese per anno fino al 31 ottobre 2012, poi 20 giorni per anno fino al 30 settembre 2013. Dal 1° novembre 2011 al 30 settembre 2013: 20 giorni per anno fino al 30 settembre 2013. Dal 1° ottobre 2013 al 30 aprile 2023 ogni contratto conta 12 giorni per anno, tranne che i primi tre anni di anzianità contano 18 giorni se il contratto aveva meno di tre anni il 1° ottobre 2013. Dal 1° maggio 2023 ogni anno conta 14 giorni.",
+        "methodCaps": "L'importo mensile non può superare 20 volte il salario minimo ({{baseCap}} con il salario minimo di {{rmmg}} del 2026) e l'indennità totale non può superare 12 importi mensili, al massimo {{totalCapRmmg}} (240 volte il salario minimo). Quando la parte fino al 30 settembre 2013 raggiunge già questo tetto, i periodi successivi non vengono sommati.",
+        "methodFraction": "Un anno incompleto conta in proporzione: il calcolatore conta gli anniversari completi della data di inizio più i giorni dall'ultimo, divisi per i giorni di quell'anno. La data di cessazione conta come giorno lavorato.",
+        "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
+        "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale indennità di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
+        "supportedTitle": "Situazioni coperte",
+        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore, in un contratto a tempo indeterminato, con cessazione nel 2026.",
+        "unsupportedTitle": "Non coperto",
+        "unsupportedFixedTerm": "La scadenza dei contratti a termine (artt. 344 e 345 del Código do Trabalho), che ha aliquote e regole transitorie proprie.",
+        "unsupportedJustCause": "Il licenziamento per giusta causa (disciplinare), che segue altre regole.",
+        "unsupportedUnlawful": "Il licenziamento illegittimo, in cui il tribunale fissa l'indennità, in genere tra 15 e 45 giorni di retribuzione base per anno di anzianità.",
+        "unsupportedAgreement": "La risoluzione consensuale, in cui l'importo è negoziato e non c'è una formula di legge.",
+        "unsupportedPublic": "I dipendenti del settore pubblico, che seguono altre regole.",
+        "sourcesTitle": "Fonti",
+        "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regime transitorio dell'art. 5",
+        "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
+        "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
+        "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
+        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il tetto dell'art. 366 provengono dai riepiloghi di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. Informazione didattica, non consulenza legale."
+      },
+      "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
+      "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
+      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi"
     }
   },
   "resources": {

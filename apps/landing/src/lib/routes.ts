@@ -456,6 +456,14 @@ const ROUTE_SLUGS = {
 		de: "krankengeld-rechner-portugal",
 		it: "calcolatore-indennita-malattia-portogallo",
 	},
+	toolDismissalCompensation: {
+		pt: "simulador-compensacao-despedimento",
+		en: "portugal-dismissal-compensation-calculator",
+		es: "calculadora-indemnizacion-despido-portugal",
+		fr: "calculateur-indemnite-licenciement-portugal",
+		de: "abfindungsrechner-kuendigung-portugal",
+		it: "calcolatore-indennita-licenziamento-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -585,6 +593,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolWithholdingTables",
 	"toolUnemploymentBenefit",
 	"toolSickPay",
+	"toolDismissalCompensation",
 	"toolVehicleTax",
 	"toolPropertyCapitalGains",
 ] as const satisfies ReadonlyArray<RouteId>
@@ -898,6 +907,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"sick-pay": "toolSickPay",
 	"subsidio-de-doenca": "toolSickPay",
 	"baixa-medica": "toolSickPay",
+	tooldismissalcompensation: "toolDismissalCompensation",
+	"dismissal-compensation": "toolDismissalCompensation",
+	"compensacao-por-despedimento": "toolDismissalCompensation",
 	toolvehicletax: "toolVehicleTax",
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",
