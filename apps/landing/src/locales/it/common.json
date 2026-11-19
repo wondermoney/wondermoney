@@ -5918,7 +5918,12 @@
       "house": "Disegno al tratto di una piccola casa sul suo terreno, con camino, porta, finestre e un vialetto di pietre, le cui tegole vengono posate man mano che il mutuo viene pagato.",
       "deed": "Disegno al tratto di un atto di proprietà con un sigillo di ceralacca e un nastro, con la chiave di una casa appoggiata sopra.",
       "car": "Disegno al tratto di una piccola utilitaria su un tratto di strada, con le ruote che girano mentre avanza.",
-      "payslip": "Disegno al tratto di un cedolino dello stipendio con righe di importi accanto a una busta, dove la quota netta di una riga è infilata come una banconota."
+      "payslip": "Disegno al tratto di un cedolino dello stipendio con righe di importi accanto a una busta, dove la quota netta di una riga è infilata come una banconota.",
+      "easelchart": "Disegno al tratto di un cavalletto per lavagna a fogli su tre gambe, con sul blocco un grafico a linee degli anni che sale tra alcune cadute e un cursore che segna un anno.",
+      "meter": "Disegno al tratto di un vecchio contatore elettrico, con una fila di quadranti e un disco che gira dietro il vetro, più veloce quando il carico sale.",
+      "pump": "Disegno al tratto di una pompa di benzina sulla sua isola, con la pistola che si solleva dal supporto attaccata al tubo mentre l’indicatore di riempimento sale.",
+      "wallet": "Disegno al tratto di un portafoglio aperto con tre carte in fessure a scalini, una delle quali scivola fuori.",
+      "safe": "Disegno al tratto di una piccola cassaforte con un disco a combinazione e una maniglia a raggi, la cui porta si apre su pile di monete."
     }
   }
 }
