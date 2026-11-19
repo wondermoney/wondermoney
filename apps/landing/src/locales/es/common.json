@@ -2752,6 +2752,166 @@
       "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
       "nextStepCta": "Incluye los certificados en tu visión general del ahorro"
+    },
+    "netSalary": {
+      "title": "Calculadora de salario neto en Portugal 2026",
+      "shortName": "Salario neto",
+      "subtitle": "Convierte el salario bruto mensual en lo que cobras: retención de IRS, Seguridad Social y subsidio de comida, con las tablas de 2026.",
+      "description": "Estima tu salario neto mensual en Portugal con las tablas de retención de IRS de 2026.",
+      "pageTitle": "Calculadora de Salario Neto Portugal 2026: del Bruto al Neto",
+      "pageDescription": "Convierte el salario bruto en neto con las tablas de retención de IRS de 2026 para Portugal continental, Azores y Madeira, el 11% de Seguridad Social y el subsidio de comida.",
+      "fields": {
+        "grossMonthly": "Salario bruto mensual",
+        "region": "Región",
+        "status": "Situación del titular",
+        "dependants": "Dependientes",
+        "allowances": "Pagas extra",
+        "mealGroup": "Subsidio de comida",
+        "mealDaily": "Subsidio de comida por día",
+        "mealDays": "Días al mes",
+        "mealKind": "Pagado en"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Azores",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "No casado",
+        "marriedOneEarner": "Casado, un titular",
+        "marriedTwoEarners": "Casado, dos titulares"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagos (pagas de vacaciones y de Navidad aparte)",
+        "twelfths": "En doceavos (repartidas en 12 pagos)"
+      },
+      "mealKinds": {
+        "cash": "En efectivo con el salario",
+        "card": "Tarjeta de comida"
+      },
+      "help": {
+        "gross": "El salario base antes de pagas extra, Seguridad Social e IRS.",
+        "status": "Elige \"un titular\" solo si tu cónyuge no tiene ingresos o si ganas al menos el 95% de los ingresos de la pareja. La unión de hecho cuenta como matrimonio.",
+        "allowances": "En doceavos, los dos meses extra se suman a cada pago mensual (14 ÷ 12 del salario base).",
+        "meal": "Exento hasta {{cash}} al día en efectivo y {{card}} en tarjeta. Lo que exceda tributa como salario."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un número positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "netMonthly": "Neto estimado en un mes normal",
+        "withholding": "Retención de IRS",
+        "socialSecurity": "Seguridad Social (11%)",
+        "allowanceNet": "Neto de cada pago de paga extra",
+        "annualNet": "Neto estimado en un año",
+        "notFinalTax": "La retención mensual es un anticipo de tu IRS anual, no el impuesto final. El IRS definitivo se liquida en la declaración anual, así que puedes recibir una devolución o pagar más."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Con un salario bruto de {{gross}} al mes, sin casar y sin dependientes, en Portugal continental y con {{meal}} al mes de subsidio de comida en efectivo, la retención de IRS es {{withholding}} y la Seguridad Social es {{socialSecurity}}. Con las pagas de vacaciones y de Navidad aparte, un mes normal deja {{net}} netos, cada paga extra deja {{allowanceNet}} y el año deja {{annual}}.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodWithholding": "La retención de IRS sigue las tablas mensuales de 2026: el sueldo mensual por el tipo marginal de su tramo, menos la parcela a abater y un importe fijo por cada dependiente. Desde tres dependientes, el tipo baja un punto porcentual.",
+        "methodSocialSecurity": "La Seguridad Social del trabajador es el 11% de la remuneración sujeta, incluido el subsidio de comida por encima del límite exento.",
+        "methodMeal": "El subsidio de comida está exento hasta el límite diario, que depende de si se paga en efectivo o en tarjeta. La calculadora suma a la remuneración tributable solo el exceso.",
+        "methodAllowances": "Con 14 pagos, las pagas de vacaciones y de Navidad tributan cada una por separado, como exigen las tablas. En doceavos, el importe extra se suma a cada mes.",
+        "methodBudget": "Las cifras netas son lo que llega a tu cuenta, así que son el punto de partida adecuado para un presupuesto mensual.",
+        "finalTitle": "La retención no es tu IRS final",
+        "final": "Lo que se retiene cada mes es un pago a cuenta. La Autoridad Tributaria liquida el IRS real en la declaración anual, con los ingresos de todo el año y tus deducciones. La retención puede quedar por encima o por debajo del impuesto debido, por eso mucha gente recibe devolución o tiene algo que pagar.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedYouth": "No se aplica el IRS Jovem.",
+        "unsupportedDisability": "No se incluyen las tablas para personas con discapacidad ni las de pensiones.",
+        "unsupportedNovember": "Se ignora el ajuste excepcional de los ingresos pagados en noviembre de 2026 (Despacho 12523-A/2026, Portugal continental). Reduce la retención a la mitad solo ese mes.",
+        "unsupportedOther": "Otros ingresos, horas extra, no residentes, tipos de retención voluntariamente más altos y costes del empleador quedan fuera de esta estimación.",
+        "sourcesTitle": "Fuentes",
+        "sourceDespacho": "Despacho n.º 233-A/2026: tablas de retención de 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças: tablas de retención de Azores y Madeira",
+        "sourceMeal": "Portal das Finanças: límites de exención del subsidio de comida (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: tasas de cotización",
+        "reviewed": "Tablas y tipos revisados el 19 de noviembre de 2026. El 11% de Seguridad Social y los límites del subsidio de comida se comprobaron en fuentes secundarias, no en los textos originales."
+      },
+      "nextStepHeadline": "Del salario a un plan para tu dinero",
+      "nextStepDescription": "WonderMoney parte de lo que realmente te llevas a casa y muestra adónde va cada euro, mes tras mes.",
+      "nextStepCta": "Crea un presupuesto a partir de tu salario neto"
+    },
+    "withholdingTables": {
+      "title": "Tablas de retención de IRS en Portugal 2026",
+      "shortName": "Tablas de retención de IRS",
+      "subtitle": "Las tablas mensuales de retención de 2026 para Portugal continental, Azores y Madeira, con la fórmula de la parcela a abater y los tramos anuales de IRS.",
+      "description": "Consulta las tablas de retención de IRS de 2026 y los tramos anuales en Portugal.",
+      "pageTitle": "Tablas de Retención de IRS 2026 en Portugal: Tipos y Parcela a Abater",
+      "pageDescription": "Las tablas mensuales de retención de IRS de 2026 para Portugal continental, Azores y Madeira, cómo funciona la fórmula de la parcela a abater y los tramos anuales de IRS.",
+      "fields": {
+        "region": "Región",
+        "table": "Tabla de retención",
+        "remuneration": "Remuneración mensual",
+        "dependants": "Dependientes"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Azores",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabla I: no casado sin dependientes o casado con dos titulares",
+        "II": "Tabla II: no casado con uno o más dependientes",
+        "III": "Tabla III: casado, un titular"
+      },
+      "remunerationHelp": "Opcional. Introduce una remuneración bruta mensual para resaltar su tramo y ver la retención.",
+      "errors": {
+        "remuneration": "Introduce un importe de hasta {{max}}.",
+        "dependants": "Introduce un número entero de 0 a {{max}}."
+      },
+      "result": {
+        "withholding": "Retención mensual de IRS",
+        "row": "El tipo marginal de este tramo es {{rate}}.",
+        "empty": "Introduce una remuneración mensual y un número válido de dependientes para ver la retención."
+      },
+      "formula": "Retención = remuneración × tipo marginal − parcela a abater − {{dependant}} × número de dependientes. Nunca es inferior a cero y, desde tres dependientes, el tipo baja un punto porcentual.",
+      "notFinalTax": "La retención es un anticipo de tu IRS anual, no el impuesto final. La declaración anual liquida el importe real.",
+      "tableTitle": "Tabla {{table}}: {{region}}",
+      "tableSource": "Aprobada por el {{act}}, para ingresos pagados del {{from}} al {{to}}.",
+      "tableCaption": "Tipo marginal y parcela a abater por remuneración mensual",
+      "columns": {
+        "remuneration": "Remuneración mensual",
+        "rate": "Tipo marginal",
+        "parcela": "Parcela a abater",
+        "upTo": "Hasta {{limit}}",
+        "above": "Superior a {{limit}}"
+      },
+      "annual": {
+        "title": "Tramos anuales de IRS para ingresos de 2026",
+        "intro": "Son los tipos del artículo 68 del Código do IRS, aplicados a la base liquidable anual. Cada tipo se aplica solo a la parte de la renta dentro de su tramo.",
+        "caption": "Tipos anuales de IRS por tramo de base liquidable",
+        "income": "Base liquidable",
+        "rate": "Tipo sobre la parte del tramo"
+      },
+      "guide": {
+        "howTitle": "Cómo leer las tablas",
+        "howFormula": "Busca el tramo donde cae la remuneración mensual, multiplícala por el tipo marginal y resta la parcela a abater. Resta el importe adicional por cada dependiente y el resultado es la retención.",
+        "howTransition": "En los primeros tramos la parcela a abater es una fórmula con la letra R, la remuneración mensual. Hace que la retención suba suavemente desde cero, para que una pequeña subida nunca reduzca el neto.",
+        "howDependants": "Cada dependiente reduce la retención en un importe fijo. Con tres o más dependientes, el tipo marginal del tramo es un punto porcentual menor.",
+        "howTables": "La tabla I sirve a los no casados sin dependientes y a los casados con dos titulares. La tabla II sirve a los no casados con dependientes y la tabla III a los casados con un titular.",
+        "finalTitle": "La retención no es el impuesto final",
+        "final": "Las tablas fijan cuánto retiene tu empresa cada mes. No calculan tu IRS final, que la declaración anual liquida con los tramos de arriba, los ingresos de todo el año y tus deducciones.",
+        "unsupportedTitle": "No incluido",
+        "unsupportedDisability": "Las tablas para personas con discapacidad (IV a VII).",
+        "unsupportedYouth": "El IRS Jovem, que tiene reglas propias.",
+        "unsupportedNovember": "El ajuste excepcional de los ingresos pagados en noviembre de 2026 en Portugal continental, que reduce la retención a la mitad solo ese mes.",
+        "unsupportedPensions": "Las tablas de pensiones (VIII a XI).",
+        "sourcesTitle": "Fuentes",
+        "sourceMainland": "Despacho n.º 233-A/2026: tablas de retención de 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças: tablas de retención, incluidas las de Azores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: tablas de retención de Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: artículo 68 del Código do IRS",
+        "reviewed": "Tablas revisadas el 19 de noviembre de 2026 frente a los anexos publicados. Consulta el Portal das Finanças por si hay cambios posteriores."
+      },
+      "nextStepHeadline": "De la retención a tu plan mensual",
+      "nextStepDescription": "WonderMoney convierte tu neto estimado en un plan, para que cada euro tenga un destino antes de empezar el mes.",
+      "nextStepCta": "Usa la estimación neta en un plan mensual"
     }
   },
   "resources": {

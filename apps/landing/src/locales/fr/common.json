@@ -2752,6 +2752,166 @@
       "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
       "nextStepCta": "Incluez vos certificats dans la vue d’ensemble de votre épargne"
+    },
+    "netSalary": {
+      "title": "Calculateur de salaire net au Portugal 2026",
+      "shortName": "Salaire net",
+      "subtitle": "Transformez un salaire brut mensuel en salaire net : retenue d'IRS, sécurité sociale et indemnité repas, avec les barèmes 2026.",
+      "description": "Estimez votre salaire net mensuel au Portugal avec les barèmes de retenue d'IRS 2026.",
+      "pageTitle": "Calculateur de Salaire Net Portugal 2026 : du Brut au Net",
+      "pageDescription": "Convertissez un salaire brut en net avec les barèmes de retenue d'IRS 2026 pour le Portugal continental, les Açores et Madère, 11 % de sécurité sociale et l'indemnité repas.",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel",
+        "region": "Région",
+        "status": "Situation du titulaire",
+        "dependants": "Personnes à charge",
+        "allowances": "Primes de vacances et de Noël",
+        "mealGroup": "Indemnité repas",
+        "mealDaily": "Indemnité repas par jour",
+        "mealDays": "Jours par mois",
+        "mealKind": "Versée en"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Açores",
+        "madeira": "Madère"
+      },
+      "statuses": {
+        "single": "Non marié",
+        "marriedOneEarner": "Marié, un seul revenu",
+        "marriedTwoEarners": "Marié, deux revenus"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 versements (primes de vacances et de Noël à part)",
+        "twelfths": "En douzièmes (répartis sur 12 versements)"
+      },
+      "mealKinds": {
+        "cash": "En espèces avec le salaire",
+        "card": "Carte repas"
+      },
+      "help": {
+        "gross": "Le salaire de base avant primes, sécurité sociale et IRS.",
+        "status": "Choisissez « un seul revenu » uniquement si votre conjoint n'a aucun revenu ou si vous gagnez au moins 95 % des revenus du couple. L'union de fait compte comme un mariage.",
+        "allowances": "En douzièmes, les deux mois supplémentaires s'ajoutent à chaque versement mensuel (14 ÷ 12 du salaire de base).",
+        "meal": "Exonérée jusqu'à {{cash}} par jour en espèces et {{card}} sur carte repas. Le surplus est imposé comme un salaire."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez un nombre positif.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "netMonthly": "Net estimé pour un mois ordinaire",
+        "withholding": "Retenue d'IRS",
+        "socialSecurity": "Sécurité sociale (11 %)",
+        "allowanceNet": "Net de chaque versement de prime",
+        "annualNet": "Net estimé sur une année",
+        "notFinalTax": "La retenue mensuelle est une avance sur votre IRS annuel, pas l'impôt définitif. L'IRS final est établi dans la déclaration annuelle : vous pouvez donc être remboursé ou devoir davantage."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Avec un salaire brut de {{gross}} par mois, sans être marié ni avoir de personnes à charge, au Portugal continental et avec {{meal}} par mois d'indemnité repas en espèces, la retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}}. Avec les primes de vacances et de Noël versées à part, un mois ordinaire donne {{net}} net, chaque versement de prime donne {{allowanceNet}} et l'année donne {{annual}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodWithholding": "La retenue d'IRS suit les barèmes mensuels 2026 : la rémunération mensuelle multipliée par le taux marginal de sa tranche, moins la parcela a abater et un montant fixe par personne à charge. À partir de trois personnes à charge, le taux baisse d'un point.",
+        "methodSocialSecurity": "La sécurité sociale du salarié est de 11 % de la rémunération soumise, y compris l'indemnité repas au-delà du plafond exonéré.",
+        "methodMeal": "L'indemnité repas est exonérée jusqu'au plafond journalier, qui dépend du versement en espèces ou sur carte. Le calculateur n'ajoute que l'excédent à la rémunération imposable.",
+        "methodAllowances": "Avec 14 versements, les primes de vacances et de Noël sont imposées chacune séparément, comme l'exigent les barèmes. En douzièmes, le supplément s'ajoute à chaque mois.",
+        "methodBudget": "Les montants nets sont ce qui arrive sur votre compte : c'est le bon point de départ d'un budget mensuel.",
+        "finalTitle": "La retenue n'est pas votre IRS définitif",
+        "final": "Ce qui est retenu chaque mois est un acompte. L'administration fiscale établit votre IRS réel dans la déclaration annuelle, avec les revenus de toute l'année et vos déductions. La retenue peut être supérieure ou inférieure à l'impôt dû, d'où les remboursements ou les compléments à payer.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedYouth": "L'IRS Jovem n'est pas appliqué.",
+        "unsupportedDisability": "Les barèmes pour les personnes handicapées et ceux des pensions ne sont pas inclus.",
+        "unsupportedNovember": "L'ajustement exceptionnel des revenus versés en novembre 2026 (Despacho 12523-A/2026, Portugal continental) est ignoré. Il divise par deux la retenue de ce seul mois.",
+        "unsupportedOther": "Les autres revenus, les heures supplémentaires, les non-résidents, les taux de retenue volontairement plus élevés et les coûts de l'employeur sont hors de cette estimation.",
+        "sourcesTitle": "Sources",
+        "sourceDespacho": "Despacho n.º 233-A/2026 : barèmes de retenue 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças : barèmes de retenue des Açores et de Madère",
+        "sourceMeal": "Portal das Finanças : plafonds d'exonération de l'indemnité repas (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social : taux de cotisation",
+        "reviewed": "Barèmes et taux vérifiés le 19 novembre 2026. Le taux de 11 % de sécurité sociale et les plafonds de l'indemnité repas ont été confirmés par des sources secondaires, pas par les textes originaux."
+      },
+      "nextStepHeadline": "Du salaire à un plan pour votre argent",
+      "nextStepDescription": "WonderMoney part de ce que vous touchez réellement et montre où va chaque euro, mois après mois.",
+      "nextStepCta": "Construire un budget à partir de votre salaire net"
+    },
+    "withholdingTables": {
+      "title": "Barèmes de retenue d'IRS au Portugal 2026",
+      "shortName": "Barèmes de retenue d'IRS",
+      "subtitle": "Les barèmes mensuels de retenue 2026 pour le Portugal continental, les Açores et Madère, avec la formule de la parcela a abater et les tranches annuelles d'IRS.",
+      "description": "Consultez les barèmes de retenue d'IRS 2026 et les tranches annuelles au Portugal.",
+      "pageTitle": "Barèmes de Retenue d'IRS 2026 au Portugal : Taux et Parcela a Abater",
+      "pageDescription": "Les barèmes mensuels de retenue d'IRS 2026 pour le Portugal continental, les Açores et Madère, le fonctionnement de la formule de la parcela a abater et les tranches annuelles d'IRS.",
+      "fields": {
+        "region": "Région",
+        "table": "Barème de retenue",
+        "remuneration": "Rémunération mensuelle",
+        "dependants": "Personnes à charge"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Açores",
+        "madeira": "Madère"
+      },
+      "tableOptions": {
+        "I": "Barème I : non marié sans personne à charge, ou marié avec deux revenus",
+        "II": "Barème II : non marié avec une ou plusieurs personnes à charge",
+        "III": "Barème III : marié avec un seul revenu"
+      },
+      "remunerationHelp": "Facultatif. Saisissez une rémunération brute mensuelle pour mettre sa tranche en évidence et voir la retenue.",
+      "errors": {
+        "remuneration": "Saisissez un montant jusqu'à {{max}}.",
+        "dependants": "Saisissez un nombre entier de 0 à {{max}}."
+      },
+      "result": {
+        "withholding": "Retenue mensuelle d'IRS",
+        "row": "Le taux marginal de cette tranche est de {{rate}}.",
+        "empty": "Saisissez une rémunération mensuelle et un nombre valide de personnes à charge pour voir la retenue."
+      },
+      "formula": "Retenue = rémunération × taux marginal − parcela a abater − {{dependant}} × nombre de personnes à charge. Elle n'est jamais inférieure à zéro et, à partir de trois personnes à charge, le taux baisse d'un point.",
+      "notFinalTax": "La retenue est une avance sur votre IRS annuel, pas l'impôt définitif. La déclaration annuelle établit le montant réel.",
+      "tableTitle": "Barème {{table}} : {{region}}",
+      "tableSource": "Approuvé par le {{act}}, pour les revenus versés du {{from}} au {{to}}.",
+      "tableCaption": "Taux marginal et parcela a abater selon la rémunération mensuelle",
+      "columns": {
+        "remuneration": "Rémunération mensuelle",
+        "rate": "Taux marginal",
+        "parcela": "Parcela a abater",
+        "upTo": "Jusqu'à {{limit}}",
+        "above": "Au-delà de {{limit}}"
+      },
+      "annual": {
+        "title": "Tranches annuelles d'IRS pour les revenus 2026",
+        "intro": "Ce sont les taux de l'article 68 du Código do IRS, appliqués au revenu imposable annuel. Chaque taux ne s'applique qu'à la part du revenu située dans sa tranche.",
+        "caption": "Taux annuels d'IRS par tranche de revenu imposable",
+        "income": "Revenu imposable",
+        "rate": "Taux sur la part de la tranche"
+      },
+      "guide": {
+        "howTitle": "Comment lire les barèmes",
+        "howFormula": "Trouvez la tranche qui contient la rémunération mensuelle, multipliez-la par le taux marginal et soustrayez la parcela a abater. Soustrayez le montant supplémentaire par personne à charge : le résultat est la retenue.",
+        "howTransition": "Dans les premières tranches, la parcela a abater est une formule avec la lettre R, la rémunération mensuelle. Elle fait monter la retenue progressivement à partir de zéro, si bien qu'une petite augmentation ne réduit jamais le net.",
+        "howDependants": "Chaque personne à charge réduit la retenue d'un montant fixe. À partir de trois personnes à charge, le taux marginal de la tranche est inférieur d'un point.",
+        "howTables": "Le barème I s'applique aux non mariés sans personne à charge et aux mariés avec deux revenus. Le barème II s'applique aux non mariés avec personnes à charge et le barème III aux mariés avec un seul revenu.",
+        "finalTitle": "La retenue n'est pas l'impôt définitif",
+        "final": "Les barèmes fixent ce que votre employeur retient chaque mois. Ils ne calculent pas votre IRS final, que la déclaration annuelle établit avec les tranches ci-dessus, les revenus de toute l'année et vos déductions.",
+        "unsupportedTitle": "Non inclus",
+        "unsupportedDisability": "Les barèmes pour les personnes handicapées (IV à VII).",
+        "unsupportedYouth": "L'IRS Jovem, qui a ses propres règles.",
+        "unsupportedNovember": "L'ajustement exceptionnel des revenus versés en novembre 2026 au Portugal continental, qui divise par deux la retenue de ce seul mois.",
+        "unsupportedPensions": "Les barèmes des pensions (VIII à XI).",
+        "sourcesTitle": "Sources",
+        "sourceMainland": "Despacho n.º 233-A/2026 : barèmes de retenue 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças : barèmes de retenue, dont les Açores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026 : barèmes de retenue de Madère",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026 : article 68 du Código do IRS",
+        "reviewed": "Barèmes vérifiés le 19 novembre 2026 sur les annexes publiées. Consultez le Portal das Finanças pour les changements ultérieurs."
+      },
+      "nextStepHeadline": "De la retenue à votre plan mensuel",
+      "nextStepDescription": "WonderMoney transforme votre net estimé en plan, pour que chaque euro ait un rôle avant le début du mois.",
+      "nextStepCta": "Utiliser l'estimation nette dans un plan mensuel"
     }
   },
   "resources": {

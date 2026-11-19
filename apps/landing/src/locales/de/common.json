@@ -2752,6 +2752,166 @@
       "nextStepHeadline": "Sieh deine Zertifikate neben deinem übrigen Erspartem",
       "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
       "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
+    },
+    "netSalary": {
+      "title": "Nettogehalt-Rechner Portugal 2026",
+      "shortName": "Nettogehalt",
+      "subtitle": "Rechnen Sie das monatliche Bruttogehalt in Ihr Netto um: IRS-Quellensteuer, Sozialversicherung und Essenszuschuss mit den Tabellen 2026.",
+      "description": "Schätzen Sie Ihr monatliches Nettogehalt in Portugal mit den IRS-Quellensteuertabellen 2026.",
+      "pageTitle": "Nettogehalt-Rechner Portugal 2026: vom Brutto zum Netto",
+      "pageDescription": "Rechnen Sie Brutto in Netto um, mit den IRS-Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, 11 % Sozialversicherung und Essenszuschuss.",
+      "fields": {
+        "grossMonthly": "Monatliches Bruttogehalt",
+        "region": "Region",
+        "status": "Situation des Steuerpflichtigen",
+        "dependants": "Unterhaltsberechtigte",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "mealGroup": "Essenszuschuss",
+        "mealDaily": "Essenszuschuss pro Tag",
+        "mealDays": "Tage pro Monat",
+        "mealKind": "Ausgezahlt als"
+      },
+      "regions": {
+        "mainland": "Festlandportugal",
+        "azores": "Azoren",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Nicht verheiratet",
+        "marriedOneEarner": "Verheiratet, ein Einkommen",
+        "marriedTwoEarners": "Verheiratet, zwei Einkommen"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld separat)",
+        "twelfths": "In Zwölfteln (auf 12 Zahlungen verteilt)"
+      },
+      "mealKinds": {
+        "cash": "Bar mit dem Gehalt",
+        "card": "Essenskarte"
+      },
+      "help": {
+        "gross": "Das Grundgehalt vor Zuschlägen, Sozialversicherung und IRS.",
+        "status": "Wählen Sie \"ein Einkommen\" nur, wenn Ihr Ehepartner kein Einkommen hat oder Sie mindestens 95 % des Paareinkommens verdienen. Eine eheähnliche Gemeinschaft zählt als Ehe.",
+        "allowances": "In Zwölfteln werden die beiden zusätzlichen Monate auf jede Monatszahlung aufgeschlagen (14 ÷ 12 des Grundgehalts).",
+        "meal": "Steuerfrei bis {{cash}} pro Tag in bar und {{card}} auf der Essenskarte. Der Mehrbetrag wird wie Gehalt besteuert."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie eine positive Zahl ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "netMonthly": "Geschätztes Netto in einem normalen Monat",
+        "withholding": "IRS-Quellensteuer",
+        "socialSecurity": "Sozialversicherung (11 %)",
+        "allowanceNet": "Netto jeder Sonderzahlung",
+        "annualNet": "Geschätztes Netto im Jahr",
+        "notFinalTax": "Die monatliche Quellensteuer ist ein Vorschuss auf Ihre jährliche IRS, nicht die endgültige Steuer. Die endgültige IRS wird in der Jahreserklärung festgesetzt, es kann also eine Erstattung oder eine Nachzahlung geben."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Bei einem Bruttogehalt von {{gross}} im Monat, unverheiratet und ohne Unterhaltsberechtigte, in Festlandportugal und mit {{meal}} im Monat Essenszuschuss in bar betragen die IRS-Quellensteuer {{withholding}} und die Sozialversicherung {{socialSecurity}}. Wenn Urlaubs- und Weihnachtsgeld separat gezahlt werden, bleiben in einem normalen Monat {{net}} netto, jede Sonderzahlung bringt {{allowanceNet}} und das Jahr {{annual}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodWithholding": "Die IRS-Quellensteuer folgt den Monatstabellen 2026: das Monatsentgelt mal Grenzsteuersatz der Zeile, minus Parcela a abater und ein fester Betrag je Unterhaltsberechtigtem. Ab drei Unterhaltsberechtigten sinkt der Satz um einen Prozentpunkt.",
+        "methodSocialSecurity": "Die Sozialversicherung des Arbeitnehmers beträgt 11 % des beitragspflichtigen Entgelts, einschließlich des Essenszuschusses über dem steuerfreien Limit.",
+        "methodMeal": "Der Essenszuschuss ist bis zum Tageslimit steuerfrei, das davon abhängt, ob er bar oder per Karte gezahlt wird. Der Rechner addiert nur den Mehrbetrag zum steuerpflichtigen Entgelt.",
+        "methodAllowances": "Bei 14 Zahlungen werden Urlaubs- und Weihnachtsgeld jeweils für sich besteuert, wie es die Tabellen verlangen. In Zwölfteln wird der Zusatzbetrag auf jeden Monat aufgeschlagen.",
+        "methodBudget": "Die Nettowerte sind das, was auf Ihrem Konto ankommt, und damit der richtige Ausgangspunkt für ein Monatsbudget.",
+        "finalTitle": "Die Quellensteuer ist nicht Ihre endgültige IRS",
+        "final": "Was jeden Monat einbehalten wird, ist eine Vorauszahlung. Die Steuerbehörde setzt Ihre tatsächliche IRS in der Jahreserklärung fest, mit dem Einkommen des ganzen Jahres und Ihren Abzügen. Die Quellensteuer kann über oder unter der geschuldeten Steuer liegen, deshalb gibt es Erstattungen oder Nachzahlungen.",
+        "unsupportedTitle": "Nicht unterstützt",
+        "unsupportedYouth": "IRS Jovem wird nicht angewendet.",
+        "unsupportedDisability": "Die Tabellen für Menschen mit Behinderung und die Rententabellen sind nicht enthalten.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Sie halbiert die Quellensteuer nur in diesem Monat.",
+        "unsupportedOther": "Sonstige Einkünfte, Überstunden, Nichtansässige, freiwillig höhere Quellensteuersätze und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
+        "sourcesTitle": "Quellen",
+        "sourceDespacho": "Despacho n.º 233-A/2026: Quellensteuertabellen 2026, Festlandportugal",
+        "sourceRegional": "Portal das Finanças: Quellensteuertabellen für die Azoren und Madeira",
+        "sourceMeal": "Portal das Finanças: Freigrenzen für den Essenszuschuss (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: Beitragssätze",
+        "reviewed": "Tabellen und Sätze geprüft am 19. November 2026. Der Sozialversicherungssatz von 11 % und die Limits des Essenszuschusses wurden anhand von Sekundärquellen geprüft, nicht anhand der Originaltexte."
+      },
+      "nextStepHeadline": "Vom Gehalt zum Plan für Ihr Geld",
+      "nextStepDescription": "WonderMoney geht von dem aus, was Sie wirklich ausgezahlt bekommen, und zeigt, wohin jeder Euro geht, Monat für Monat.",
+      "nextStepCta": "Ein Budget aus Ihrem Nettogehalt erstellen"
+    },
+    "withholdingTables": {
+      "title": "IRS-Quellensteuertabellen Portugal 2026",
+      "shortName": "IRS-Quellensteuertabellen",
+      "subtitle": "Die monatlichen Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, mit der Formel der Parcela a abater und den jährlichen IRS-Stufen.",
+      "description": "Die IRS-Quellensteuertabellen 2026 und die jährlichen Stufen für Portugal im Überblick.",
+      "pageTitle": "IRS-Quellensteuertabellen 2026 Portugal: Sätze und Parcela a Abater",
+      "pageDescription": "Die monatlichen IRS-Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, wie die Formel der Parcela a abater funktioniert, und die jährlichen IRS-Stufen.",
+      "fields": {
+        "region": "Region",
+        "table": "Quellensteuertabelle",
+        "remuneration": "Monatliches Entgelt",
+        "dependants": "Unterhaltsberechtigte"
+      },
+      "regions": {
+        "mainland": "Festlandportugal",
+        "azores": "Azoren",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabelle I: nicht verheiratet ohne Unterhaltsberechtigte oder verheiratet mit zwei Einkommen",
+        "II": "Tabelle II: nicht verheiratet mit einem oder mehreren Unterhaltsberechtigten",
+        "III": "Tabelle III: verheiratet mit einem Einkommen"
+      },
+      "remunerationHelp": "Optional. Geben Sie ein monatliches Bruttoentgelt ein, um die Zeile hervorzuheben und die Quellensteuer zu sehen.",
+      "errors": {
+        "remuneration": "Geben Sie einen Betrag bis {{max}} ein.",
+        "dependants": "Geben Sie eine ganze Zahl von 0 bis {{max}} ein."
+      },
+      "result": {
+        "withholding": "Monatliche IRS-Quellensteuer",
+        "row": "Der Grenzsteuersatz dieser Zeile beträgt {{rate}}.",
+        "empty": "Geben Sie ein monatliches Entgelt und eine gültige Zahl von Unterhaltsberechtigten ein, um die Quellensteuer zu sehen."
+      },
+      "formula": "Quellensteuer = Entgelt × Grenzsteuersatz − Parcela a abater − {{dependant}} × Zahl der Unterhaltsberechtigten. Sie ist nie kleiner als null, und ab drei Unterhaltsberechtigten sinkt der Satz um einen Prozentpunkt.",
+      "notFinalTax": "Die Quellensteuer ist ein Vorschuss auf Ihre jährliche IRS, nicht die endgültige Steuer. Die Jahreserklärung setzt den tatsächlichen Betrag fest.",
+      "tableTitle": "Tabelle {{table}}: {{region}}",
+      "tableSource": "Genehmigt durch {{act}}, für Einkünfte, die vom {{from}} bis {{to}} gezahlt werden.",
+      "tableCaption": "Grenzsteuersatz und Parcela a abater nach monatlichem Entgelt",
+      "columns": {
+        "remuneration": "Monatliches Entgelt",
+        "rate": "Grenzsteuersatz",
+        "parcela": "Parcela a abater",
+        "upTo": "Bis {{limit}}",
+        "above": "Über {{limit}}"
+      },
+      "annual": {
+        "title": "Jährliche IRS-Stufen für Einkünfte 2026",
+        "intro": "Das sind die Sätze nach Artikel 68 des Código do IRS, angewendet auf das jährliche zu versteuernde Einkommen. Jeder Satz gilt nur für den Teil des Einkommens innerhalb seiner Stufe.",
+        "caption": "Jährliche IRS-Sätze nach Stufe des zu versteuernden Einkommens",
+        "income": "Zu versteuerndes Einkommen",
+        "rate": "Satz auf den Teil der Stufe"
+      },
+      "guide": {
+        "howTitle": "So lesen Sie die Tabellen",
+        "howFormula": "Suchen Sie die Zeile, in die das Monatsentgelt fällt, multiplizieren Sie es mit dem Grenzsteuersatz und ziehen Sie die Parcela a abater ab. Ziehen Sie den Zusatzbetrag je Unterhaltsberechtigtem ab, das Ergebnis ist die Quellensteuer.",
+        "howTransition": "In den ersten Zeilen ist die Parcela a abater eine Formel mit dem Buchstaben R, dem Monatsentgelt. Sie lässt die Quellensteuer ab null sanft steigen, damit eine kleine Gehaltserhöhung das Netto nie senkt.",
+        "howDependants": "Jeder Unterhaltsberechtigte senkt die Quellensteuer um einen festen Betrag. Ab drei Unterhaltsberechtigten liegt der Grenzsteuersatz der Zeile einen Prozentpunkt niedriger.",
+        "howTables": "Tabelle I gilt für Nicht-Verheiratete ohne Unterhaltsberechtigte und für Verheiratete mit zwei Einkommen. Tabelle II gilt für Nicht-Verheiratete mit Unterhaltsberechtigten und Tabelle III für Verheiratete mit einem Einkommen.",
+        "finalTitle": "Die Quellensteuer ist nicht die endgültige Steuer",
+        "final": "Die Tabellen legen fest, wie viel Ihr Arbeitgeber jeden Monat einbehält. Sie berechnen nicht Ihre endgültige IRS, die die Jahreserklärung mit den obigen Stufen, dem Einkommen des ganzen Jahres und Ihren Abzügen festsetzt.",
+        "unsupportedTitle": "Nicht enthalten",
+        "unsupportedDisability": "Die Tabellen für Menschen mit Behinderung (IV bis VII).",
+        "unsupportedYouth": "IRS Jovem, das eigene Regeln hat.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 auf dem Festland gezahlte Einkünfte, die die Quellensteuer nur in diesem Monat halbiert.",
+        "unsupportedPensions": "Die Rententabellen (VIII bis XI).",
+        "sourcesTitle": "Quellen",
+        "sourceMainland": "Despacho n.º 233-A/2026: Quellensteuertabellen 2026, Festlandportugal",
+        "sourceRegional": "Portal das Finanças: Quellensteuertabellen, einschließlich der Azoren (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: Quellensteuertabellen für Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: Artikel 68 des Código do IRS",
+        "reviewed": "Tabellen am 19. November 2026 anhand der veröffentlichten Anhänge geprüft. Spätere Änderungen finden Sie im Portal das Finanças."
+      },
+      "nextStepHeadline": "Von der Quellensteuer zu Ihrem Monatsplan",
+      "nextStepDescription": "WonderMoney macht aus Ihrem geschätzten Netto einen Plan, damit jeder Euro vor Monatsbeginn eine Aufgabe hat.",
+      "nextStepCta": "Die Netto-Schätzung in einem Monatsplan nutzen"
     }
   },
   "resources": {

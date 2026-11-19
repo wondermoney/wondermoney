@@ -46,6 +46,10 @@ import PurchaseTaxesCalculatorComp from "@/components/calculators/PurchaseTaxesC
 import PurchaseTaxesGuide from "@/components/calculators/PurchaseTaxesGuide.astro";
 import YouthMortgageCalculatorComp from "@/components/calculators/YouthMortgageCalculatorComp";
 import YouthMortgageGuide from "@/components/calculators/YouthMortgageGuide.astro";
+import NetSalaryCalculatorComp from "@/components/calculators/NetSalaryCalculatorComp";
+import NetSalaryGuide from "@/components/calculators/NetSalaryGuide.astro";
+import WithholdingTablesComp from "@/components/calculators/WithholdingTablesComp";
+import WithholdingTablesGuide from "@/components/calculators/WithholdingTablesGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -163,6 +167,16 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.youthMortgage.nextStepDescription"),
     ctaText: t("tools.youthMortgage.nextStepCta"),
   },
+  toolNetSalary: {
+    headline: t("tools.netSalary.nextStepHeadline"),
+    description: t("tools.netSalary.nextStepDescription"),
+    ctaText: t("tools.netSalary.nextStepCta"),
+  },
+  toolWithholdingTables: {
+    headline: t("tools.withholdingTables.nextStepHeadline"),
+    description: t("tools.withholdingTables.nextStepDescription"),
+    ctaText: t("tools.withholdingTables.nextStepCta"),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -262,6 +276,8 @@ const schema = {
     )}
     {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
     {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
+    {routeId === "toolNetSalary" && <NetSalaryCalculatorComp locale={locale} client:load />}
+    {routeId === "toolWithholdingTables" && <WithholdingTablesComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
   </div>
@@ -284,6 +300,8 @@ const schema = {
   {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
   {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
   {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
+  {routeId === "toolNetSalary" && <NetSalaryGuide locale={locale} />}
+  {routeId === "toolWithholdingTables" && <WithholdingTablesGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
   {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
 

@@ -1,0 +1,68 @@
+---
+import { NET_SALARY_EXAMPLE, computeNetSalary } from "@/lib/calculators/payroll";
+import { formatMoney } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.netSalary.guide.${key}`;
+const example = computeNetSalary(NET_SALARY_EXAMPLE);
+if (!example.ok) throw new Error("Invalid net salary worked example");
+
+const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
+const { monthly, allowancePayment, annual } = example.result;
+const values = {
+  gross: formatMoney(locale, NET_SALARY_EXAMPLE.grossMonthly, { decimals: 0 }),
+  withholding: money(monthly.withholdingCents),
+  socialSecurity: money(monthly.socialSecurityCents),
+  meal: money(monthly.mealAllowanceCents),
+  net: money(monthly.netCents),
+  allowanceNet: money(allowancePayment?.netCents ?? 0),
+  annual: money(annual.netCents),
+};
+const sources = [
+  ["sourceDespacho", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/Despachos_SEAF/Documents/Despacho-SEAF-2026-01-05-XXV.pdf"],
+  ["sourceRegional", "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/tabela_ret_doclib/Pages/default.aspx"],
+  ["sourceMeal", "https://www.portaldasfinancas.gov.pt/"],
+  ["sourceSocialSecurity", "https://www.seg-social.pt/"],
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="net-salary-example">
+    <h2 id="net-salary-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="net-salary-method">
+    <h2 id="net-salary-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {["methodWithholding", "methodSocialSecurity", "methodMeal", "methodAllowances", "methodBudget"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("finalTitle"))}</h3>
+    <p class="mt-3">{t(k("final"))}</p>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("unsupportedTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["unsupportedYouth", "unsupportedDisability", "unsupportedNovember", "unsupportedOther"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key))}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
+  </section>
+</div>
