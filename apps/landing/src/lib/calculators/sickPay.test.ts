@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_DAILY_CENTS, SICK_PAY_EXAMPLE, computeSickPay, type SickPayInput } from "./sickPay";
+import { INCREASE_MAX_REFERENCE_MONTHLY_CENTS, MIN_DAILY_CENTS, SICK_PAY_EXAMPLE, computeSickPay, type SickPayInput } from "./sickPay";
 
 function run(overrides: Partial<SickPayInput> = {}) {
   const outcome = computeSickPay({ ...SICK_PAY_EXAMPLE, ...overrides });
@@ -79,6 +79,31 @@ describe("limits and increase", () => {
     expect(result.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
     expect(run({ grossMonthly: 1500, dependants: 2 }).increaseApplied).toBe(false);
     expect(run({ grossMonthly: 600, dependants: 2 }).increaseApplied).toBe(false);
+  });
+
+  it("keeps the 500 euro threshold: the Segurança Social guide v4.55 (23 October 2026) still says 500,00 euros", () => {
+    expect(INCREASE_MAX_REFERENCE_MONTHLY_CENTS).toBe(50_000);
+  });
+
+  it("never pays less above 500 than the increased benefit on 500 (art. 17(2) DL 28/2004)", () => {
+    // 520 a month, 17.33 a day: 55% is 9.53 and 60% is 10.40, below the floors of 10.00 (60% of 500/30) and 10.83 (65%).
+    const result = run({ grossMonthly: 520, dependants: 0, sickDays: 100 });
+    expect(result.increaseApplied).toBe(false);
+    expect(result.bands.map((band) => band.percent)).toEqual([55, 60, 70]);
+    expect(result.bands[0].dailyCents).toBe(1000);
+    expect(result.bands[1].dailyCents).toBe(1083);
+    expect(result.limit).toBe("floor");
+    // 70% is not covered by art. 17(2): 520 / 30 x 70% = 12.13.
+    expect(result.bands[2].dailyCents).toBe(Math.round((1733 * 70) / 100));
+  });
+
+  it("does not raise the benefit once the percentage already exceeds the floor, or at 500 or less", () => {
+    // 545.46 a month: 18.182 a day x 55% = 10.00, the floor is no longer above the plain benefit.
+    expect(run({ grossMonthly: 600, sickDays: 10 }).bands[0].dailyCents).toBe(Math.round((2000 * 55) / 100));
+    expect(run({ grossMonthly: 600, sickDays: 10 }).limit).toBe("none");
+    expect(run({ grossMonthly: 500, sickDays: 10 }).bands[0].dailyCents).toBe(Math.round((1667 * 60) / 100));
+    // With 3 children the 5 points already apply, so 60% of 520 / 30 is above 10.00.
+    expect(run({ grossMonthly: 520, dependants: 3, sickDays: 10 }).bands[0].dailyCents).toBe(Math.round((1733 * 60) / 100));
   });
 
   it("never pays more than the net reference pay", () => {

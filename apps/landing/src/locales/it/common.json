@@ -3222,7 +3222,8 @@
           "none": "L'importo giornaliero è la percentuale della retribuzione di riferimento di ogni fascia; nessun limite applicato.",
           "minimum": "L'importo giornaliero è stato portato al minimo di {{min}} (30% del salario minimo).",
           "referencePay": "La retribuzione di riferimento è inferiore a {{min}} al giorno, quindi l'indennità è uguale a tale retribuzione.",
-          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento."
+          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento.",
+          "floor": "L'importo giornaliero è stato portato al minimo dell'art. 17, n. 2: sopra 500 euro di retribuzione di riferimento, gli scaglioni del 55% e 60% non scendono mai sotto l'indennità maggiorata (60% e 65%) calcolata su 500 euro."
         }
       },
       "checklist": {
@@ -3252,8 +3253,9 @@
         "unsupportedOther": "Meno di 6 mesi di retribuzioni registrate, retribuzioni molto variabili, indennizzi per infortunio sul lavoro o malattia professionale e contratti collettivi che integrano l'indennità.",
         "sourcesTitle": "Fonti",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social e sul testo dell'art. 17 del decreto-legge 28/2004. Le tre condizioni alternative della maggiorazione di 5 punti provengono da quel testo; la legge prevede che l'importo di 500 euro sia rivisto periodicamente e non abbiamo potuto confermare l'importo attuale in un testo ufficiale, quindi manteniamo 500. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
+        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia (art. 17 nel testo dell'art. 9 del Decreto-Lei n.º 133/2012, pubblicato dalla CITE)",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social e sul testo dell'art. 17 del Decreto-Lei 28/2004 nel testo del Decreto-Lei n.º 133/2012. Le tre condizioni alternative della maggiorazione di 5 punti e il minimo sopra 500 euro vengono da quel testo. L'art. 17, n. 4, dice che il valore di 500 euro è aggiornato con lo IAS; la guida in vigore (ISS 5001 v4.55, 23 ottobre 2026) indica ancora 500,00 euro, quindi manteniamo 500. La stima dello stipendio netto dietro il tetto netto è una nostra semplificazione.",
+        "methodFloor": "Sopra una retribuzione di riferimento di 500 euro al mese, l'indennità giornaliera al 55% e 60% non può essere inferiore all'indennità maggiorata calcolata su 500 euro: 60% e 65% di 500 diviso 30, cioè {{floor55}} e {{floor60}} al giorno (art. 17, n. 2, del Decreto-Lei 28/2004). Conta solo per una retribuzione di riferimento poco sopra 500 euro, fino a circa 545 euro, quando non c'è maggiorazione. Non si applica agli scaglioni del 70% e 75%."
       },
       "nextStepHeadline": "Pianifica il calo temporaneo di reddito",
       "nextStepDescription": "WonderMoney mostra la tua liquidità, le tue spese e per quanto tempo i risparmi coprono un reddito più basso.",
@@ -3272,7 +3274,8 @@
         "year": "Anno della prima immatricolazione",
         "month": "Mese della prima immatricolazione",
         "co2": "Emissioni ufficiali di CO2",
-        "standard": "Ciclo di prova della CO2"
+        "standard": "Ciclo di prova della CO2",
+        "otherIuc": "Altro IUC che paghi quest'anno (facoltativo)"
       },
       "fuels": {
         "petrol": "Benzina",
@@ -3310,7 +3313,9 @@
         "scheduleTitle": "2027 (transitorio): calendario dei pagamenti",
         "exempt": "Le auto interamente elettriche della categoria B sono esenti dall'IUC.",
         "dieselSurcharge": "Supplemento diesel (non moltiplicato per il coefficiente)",
-        "scheduleTitle2028": "Dal 2028: calendario dei pagamenti"
+        "scheduleTitle2028": "Dal 2028: calendario dei pagamenti",
+        "totalAnnualTax": "IUC totale per le soglie delle rate",
+        "scheduleShareNote": "I mesi seguono il tuo totale di {{total}} su tutti i veicoli; gli importi sono la quota di questa auto in ogni rata."
       },
       "guide": {
         "exampleTitle": "Esempio pratico",
@@ -3329,7 +3334,7 @@
         "scopeUnsupported": "Non supportati: veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
         "assumptionsTitle": "Ipotesi",
         "assumptionYear": "Le aliquote sono le tabelle {{taxYear}} del Código do IUC (articoli 9 e 10), nella versione della {{law}}. Il Portal das Finanças non indica modifiche successive a queste aliquote.",
-        "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. I calendari 2027 e 2028 valgono per questa sola auto: la legge applica le soglie al totale di tutti i tuoi veicoli, quindi la ripartizione reale può essere diversa. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
+        "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. I calendari 2027 e 2028 mostrano la quota di questa auto in ogni rata; i mesi seguono il totale di tutti i tuoi veicoli, che puoi inserire come altro IUC (la legge applica le soglie a quel totale). Senza, il calcolatore presume che sia il tuo unico veicolo. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
         "assumptionEducational": "È una stima a scopo educativo, non una consulenza fiscale. Conta l'importo dell'avviso dell'Autorità Tributaria.",
         "sourcesTitle": "Fonti",
         "sourceCategoryA": "Código do IUC, articolo 9: aliquote della categoria A (consultato il 19 novembre 2026)",
@@ -3341,7 +3346,8 @@
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così la scadenza è già coperta.",
-      "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale"
+      "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale",
+      "otherIucHelp": "L'IUC annuale di tutti i tuoi altri veicoli, in euro. Dal 2027 i mesi di pagamento dipendono dal totale di tutti i tuoi veicoli. Inserisci 0 se è il tuo unico veicolo."
     },
     "propertyCapitalGains": {
       "title": "Calcolatore delle plusvalenze sulla vendita di casa",
@@ -3527,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Calcolatore indennità di licenziamento in Portogallo 2026",
       "shortName": "Indennità di licenziamento",
-      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, con i limiti e le aliquote in base alla data del contratto.",
-      "description": "Stima la tua indennità di licenziamento in Portogallo: aliquote per data del contratto, limiti e piano di incasso.",
+      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, o per la scadenza di un contratto a termine, con i limiti e le aliquote.",
+      "description": "Stima la tua indennità di licenziamento o di scadenza del contratto a termine in Portogallo: aliquote, limiti e piano di incasso.",
       "pageTitle": "Calcolatore Indennità di Licenziamento Portogallo 2026: Stima dell'art. 366",
-      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto: 12, 18, 20 o 30 giorni per anno in base alla data del contratto, il tetto di 12 mensilità e un piano di incasso.",
+      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto (12, 18, 20 o 30 giorni per anno a seconda della data del contratto) o per la scadenza di un contratto a termine (24 giorni per anno), con il limite di 12 mesi e un piano di incasso.",
       "fields": {
         "baseMonthly": "Retribuzione base mensile (lorda)",
         "seniorityPay": "Integrazioni mensili di anzianità (diuturnidades)",
         "startDate": "Data di inizio del contratto",
-        "endDate": "Data di cessazione"
+        "endDate": "Data di cessazione",
+        "contractType": "Tipo di cessazione"
       },
       "help": {
         "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima di previdenza e IRS. Non includere tredicesima, premi né straordinari.",
         "seniorityPay": "Le diuturnidades sono integrazioni pagate per l'anzianità. Inserisci 0 se non ne hai.",
         "startDate": "Il giorno in cui è iniziato il contratto a tempo indeterminato. In caso di gruppo di imprese o di un contratto precedente con lo stesso datore di lavoro, verifica come viene conteggiata la tua anzianità.",
-        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}."
+        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}.",
+        "contractType": "Il licenziamento copre il licenziamento collettivo, la soppressione del posto e l'inidoneità. La scadenza è la fine di un contratto a termine, certo o incerto (artt. 344 e 345 del Código do Trabalho). Non è dovuta quando il contratto finisce perché hai dichiarato di non volerlo rinnovare.",
+        "startDateFixedTerm": "Il giorno in cui è iniziato il contratto a termine. Se è stato rinnovato, conta dal primo giorno: tutta la durata, rinnovi compresi, è pagata a 24 giorni per anno."
       },
-      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre contratti a termine, licenziamento per giusta causa, licenziamento illegittimo, risoluzione consensuale né il settore pubblico.",
+      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico. Per la fine di un contratto a termine, scegli scadenza di un contratto a termine.",
       "errors": {
         "required": "Inserisci un valore valido.",
         "tooSmall": "Inserisci un valore di almeno {{min}}.",
@@ -3562,7 +3571,8 @@
         "regimes": {
           "before2011": "Contratto precedente al 1° novembre 2011",
           "from2011": "Contratto dal 1° novembre 2011 al 30 settembre 2013",
-          "from2013": "Contratto dal 1° ottobre 2013"
+          "from2013": "Contratto dal 1° ottobre 2013",
+          "fixedTerm": "Scadenza di contratto a termine, 24 giorni per anno"
         },
         "usedMonthly": "Importo mensile usato",
         "daily": "Importo giornaliero (importo mensile diviso 30)",
@@ -3573,7 +3583,8 @@
           "twentyDays": "{{years}} anni a {{days}} giorni per anno",
           "eighteenDays": "{{years}} anni a {{days}} giorni per anno",
           "twelveDays": "{{years}} anni a {{days}} giorni per anno",
-          "fourteenDays": "{{years}} anni a {{days}} giorni per anno"
+          "fourteenDays": "{{years}} anni a {{days}} giorni per anno",
+          "twentyFourDays": "{{years}} anni a {{days}} giorni per anno"
         },
         "caps": {
           "none": "Nessun limite applicato.",
@@ -3598,9 +3609,9 @@
         "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
         "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale indennità di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
         "supportedTitle": "Situazioni coperte",
-        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore, in un contratto a tempo indeterminato, con cessazione nel 2026.",
+        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore in un contratto a tempo indeterminato, e scadenza di un contratto a termine, certo o incerto, con cessazione nel 2026.",
         "unsupportedTitle": "Non coperto",
-        "unsupportedFixedTerm": "La scadenza dei contratti a termine (artt. 344 e 345 del Código do Trabalho), che ha aliquote e regole transitorie proprie.",
+        "unsupportedFixedTerm": "Contratti a termine scaduti prima del 1° maggio 2023 (18 giorni per anno nel testo precedente), cessazione anticipata di un contratto a termine e scadenza causata da una dichiarazione del lavoratore stesso.",
         "unsupportedJustCause": "Il licenziamento per giusta causa (disciplinare), che segue altre regole.",
         "unsupportedUnlawful": "Il licenziamento illegittimo, in cui il tribunale fissa l'indennità, in genere tra 15 e 45 giorni di retribuzione base per anno di anzianità.",
         "unsupportedAgreement": "La risoluzione consensuale, in cui l'importo è negoziato e non c'è una formula di legge.",
@@ -3610,11 +3621,19 @@
         "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
         "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
         "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
-        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il tetto dell'art. 366 provengono dai riepiloghi di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. Informazione didattica, non consulenza legale."
+        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assembleia da República, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il limite dell'art. 366 vengono dai riassunti di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. I 24 giorni della scadenza del contratto a termine e la loro applicazione a tutti i contratti che scadono dal 1° maggio 2023 vengono dal testo della Lei n.º 13/2023 riprodotto dalla PGDL (artt. 344, 345 e 35) e dalla nota dell'IGeFE, non dalla pagina del Diário da República. Informazione didattica, non consulenza legale.",
+        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e la nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023. Quindi tutta la durata conta a 24 giorni, qualunque sia la data di inizio, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano.",
+        "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile: nuovo testo degli artt. 344, n. 2, e 345, n. 4, del Código do Trabalho e art. 35 sull'applicazione nel tempo (riproduzione della PGDL del testo del Diário da República)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula"
       },
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
       "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
-      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi"
+      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi",
+      "contractTypes": {
+        "permanent": "Licenziamento in un contratto a tempo indeterminato",
+        "fixedTerm": "Scadenza di un contratto a termine"
+      },
+      "scopeFixedTerm": "Copre la scadenza di un contratto a termine, certo o incerto, con cessazione nel {{year}}: 24 giorni di retribuzione base e diuturnidades per anno di tutta la durata del contratto, con l'importo giornaliero e i limiti dell'art. 366. Non copre contratti scaduti prima del 1° maggio 2023, cessazione anticipata, licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico."
     },
     "statePension": {
       "title": "Calcolatore pensione di vecchiaia Portogallo 2026",

@@ -81,7 +81,7 @@ export const IUC_TABLES = {
   },
 } as const;
 
-export const VEHICLE_TAX_LIMITS = { cc: 10_000, co2: 1_000, firstYear: 1981, lastYear: 2026 } as const;
+export const VEHICLE_TAX_LIMITS = { cc: 10_000, co2: 1_000, firstYear: 1981, lastYear: 2026, otherIuc: 1_000_000 } as const;
 /** Category A covers first registrations from 1981 up to June 2007; category B starts in July 2007. */
 export const CATEGORY_B_START = { year: 2007, month: 7 } as const;
 /**
@@ -94,7 +94,7 @@ export const TWO_INSTALMENTS_MAX = 500;
 
 export type VehicleFuel = "petrol" | "diesel" | "electric";
 export type Co2Standard = "wltp" | "nedc";
-export type VehicleTaxField = "cc" | "co2" | "year" | "month" | "fuel";
+export type VehicleTaxField = "cc" | "co2" | "year" | "month" | "fuel" | "otherIucEuros";
 export type VehicleTaxCategory = "A" | "B";
 type FieldError =
   | "required" | "zero" | "tooLarge" | "negative" | "year" | "yearTooOld" | "yearTooNew"
@@ -110,10 +110,15 @@ export interface VehicleTaxInput {
   /** Year and month of first registration. */
   year: number;
   month: number;
+  /**
+   * Euros of IUC the taxpayer pays on all their other vehicles in the same year; 0 for none. The 2027 and 2028
+   * instalments depend on the taxpayer's total across vehicles (Decreto-Lei n.º 161/2026, arts. 6(1) and 17(3)).
+   */
+  otherIucEuros: number;
 }
 
 export const VEHICLE_TAX_EXAMPLE: VehicleTaxInput = {
-  fuel: "diesel", cc: 1598, co2: 120, standard: "wltp", year: 2019, month: 3,
+  fuel: "diesel", cc: 1598, co2: 120, standard: "wltp", year: 2019, month: 3, otherIucEuros: 0,
 };
 
 export type InstalmentMonth = 4 | 7 | 10;
@@ -169,6 +174,9 @@ export function computeVehicleTax(input: VehicleTaxInput) {
   } else if (isCategoryA) {
     errors.fuel = "electricCategoryA";
   }
+  if (Number.isNaN(input.otherIucEuros)) errors.otherIucEuros = "required";
+  else if (input.otherIucEuros < 0) errors.otherIucEuros = "negative";
+  else if (input.otherIucEuros > VEHICLE_TAX_LIMITS.otherIuc) errors.otherIucEuros = "tooLarge";
   if (Object.keys(errors).length > 0) return { ok: false as const, errors };
 
   const category: VehicleTaxCategory = isCategoryA ? "A" : "B";
@@ -201,7 +209,11 @@ export function computeVehicleTax(input: VehicleTaxInput) {
     annualCents = Math.round(((baseCents + additionalCents) * coefficientHundredths) / 100) + dieselCents;
   }
 
-  const split = (months: InstalmentMonth[]) => {
+  const otherCents = Math.round(input.otherIucEuros * 100);
+  const totalCents = annualCents + otherCents;
+  // The instalment months follow the taxpayer's total; the amounts are this car's share of each instalment.
+  const split = (monthsFor: (totalEuros: number) => InstalmentMonth[]) => {
+    const months = annualCents > 0 ? monthsFor(totalCents / 100) : [];
     const count = months.length;
     const share = count ? Math.floor(annualCents / count) : 0;
     return months.map((m, index) => ({
@@ -219,13 +231,15 @@ export function computeVehicleTax(input: VehicleTaxInput) {
       additionalTax: additionalCents / 100,
       dieselSurcharge: dieselCents / 100,
       annualTax: annualCents / 100,
+      /** This car plus the other IUC entered: what the instalment thresholds apply to. */
+      totalAnnualTax: totalCents / 100,
       monthlyProvision: Math.round(annualCents / 12) / 100,
       /** Month (1-12) the 2026 IUC is paid: the month of the registration anniversary. */
       dueMonth: month,
       /** 2027, transitional: October, or July and October above 500 euros. */
-      schedule2027: split(transitionalMonths2027(annualCents / 100)),
+      schedule2027: split(transitionalMonths2027),
       /** From 2028: settled by April and paid in April, July and October by instalment thresholds. */
-      schedule2028: split(instalmentMonths(annualCents / 100)),
+      schedule2028: split(instalmentMonths),
     },
   };
 }
