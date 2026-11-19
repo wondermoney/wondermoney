@@ -47,6 +47,22 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolMortgage", "toolBorrowingCapacity", "toolBuyVsRent"],
     destination: "toolPurchaseTaxes",
   },
+  {
+    sources: ["toolMortgage", "toolBorrowingCapacity", "toolBuyVsRent"],
+    destination: "toolYouthMortgage",
+  },
+  {
+    sources: ["toolHouseholdBudget", "toolSavingsRate", "toolDebtToIncome"],
+    destination: "toolNetSalary",
+  },
+  {
+    sources: ["toolNetSalary", "toolHouseholdBudget", "toolBorrowingCapacity"],
+    destination: "toolWithholdingTables",
+  },
+  {
+    sources: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
+    destination: "toolVehicleTax",
+  },
 ];
 
 export function getRelatedContentTools(

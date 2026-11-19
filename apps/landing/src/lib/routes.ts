@@ -376,6 +376,14 @@ const ROUTE_SLUGS = {
 		de: "imi-rechner-portugal",
 		it: "calcolatore-imi-portogallo",
 	},
+	toolVehicleTax: {
+		pt: "simulador-iuc",
+		en: "portugal-vehicle-tax-iuc-calculator",
+		es: "calculadora-iuc-portugal",
+		fr: "calculateur-iuc-portugal",
+		de: "kfz-steuer-iuc-rechner-portugal",
+		it: "calcolatore-iuc-portogallo",
+	},
 	toolPurchaseTaxes: {
 		pt: "simulador-imt-imposto-selo",
 		en: "property-purchase-taxes-calculator",
@@ -383,6 +391,30 @@ const ROUTE_SLUGS = {
 		fr: "simulateur-taxes-achat-immobilier-portugal",
 		de: "immobilienkaufsteuern-portugal-rechner",
 		it: "calcolo-imposte-acquisto-casa-portogallo",
+	},
+	toolYouthMortgage: {
+		pt: "simulador-credito-habitacao-jovem",
+		en: "youth-mortgage-calculator-portugal",
+		es: "calculadora-hipoteca-joven-portugal",
+		fr: "simulateur-credit-immobilier-jeune-portugal",
+		de: "jugend-immobilienkredit-portugal-rechner",
+		it: "calcolo-mutuo-giovani-portogallo",
+	},
+	toolNetSalary: {
+		pt: "simulador-salario-liquido",
+		en: "portugal-net-salary-calculator",
+		es: "calculadora-salario-neto-portugal",
+		fr: "calculateur-salaire-net-portugal",
+		de: "nettogehalt-rechner-portugal",
+		it: "calcolatore-stipendio-netto-portogallo",
+	},
+	toolWithholdingTables: {
+		pt: "tabelas-retencao-irs-2026",
+		en: "portugal-irs-withholding-tables",
+		es: "tablas-retencion-irs-portugal",
+		fr: "baremes-retenue-source-irs-portugal",
+		de: "irs-quellensteuer-tabellen-portugal",
+		it: "tabelle-ritenuta-irs-portogallo",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -506,6 +538,10 @@ export const TOOL_ROUTE_IDS = [
 	"toolSavingsCertificates",
 	"toolPropertyTax",
 	"toolPurchaseTaxes",
+	"toolYouthMortgage",
+	"toolNetSalary",
+	"toolWithholdingTables",
+	"toolVehicleTax",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -782,6 +818,8 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolpurchasetaxes: "toolPurchaseTaxes",
 	"imt-calculator": "toolPurchaseTaxes",
 	"simulador-imt": "toolPurchaseTaxes",
+	toolyouthmortgage: "toolYouthMortgage",
+	"credito-habitacao-jovem": "toolYouthMortgage",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",
@@ -792,6 +830,18 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"imi-calculator": "toolPropertyTax",
 	"imi-property-tax": "toolPropertyTax",
 	imi: "toolPropertyTax",
+	toolnetsalary: "toolNetSalary",
+	"net-salary-calculator": "toolNetSalary",
+	"net-salary": "toolNetSalary",
+	"salario-liquido": "toolNetSalary",
+	toolwithholdingtables: "toolWithholdingTables",
+	"irs-withholding-tables": "toolWithholdingTables",
+	"tabelas-de-irs": "toolWithholdingTables",
+	"tabelas-irs": "toolWithholdingTables",
+	toolvehicletax: "toolVehicleTax",
+	"iuc-calculator": "toolVehicleTax",
+	"vehicle-tax": "toolVehicleTax",
+	iuc: "toolVehicleTax",
 }
 
 function normalizeRouteLookupKey(value: string): string {
