@@ -17,13 +17,13 @@
   },
   "dependencies": {
     "@scalar/api-client-react": "^2.0.64",
-    "fumadocs-core": "16.18.1",
-    "fumadocs-mdx": "15.5.0",
-    "fumadocs-openapi": "12.6.0",
-    "fumadocs-ui": "16.18.1",
+    "fumadocs-core": "16.19.0",
+    "fumadocs-mdx": "15.6.1",
+    "fumadocs-openapi": "12.6.2",
+    "fumadocs-ui": "16.19.0",
     "json-schema-typed": "^9.0.0",
     "lucide-react": "^1.17.0",
-    "next": "16.4.5",
+    "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "sharp": "^0.35.5"
