@@ -5899,18 +5899,18 @@
   "hairline": {
     "labels": {
       "jar": "Line drawing of a savings jar on a shelf, with a stack of coins beside it that move into the jar month by month.",
-      "envelopes": "Line drawing of budget envelopes, one for each spending category.",
-      "snowball": "Line drawing of a snowball that grows as it rolls, like debt repayments that build on each other.",
-      "eggs": "Line drawing of eggs spread across several baskets.",
-      "etfbox": "Line drawing of a box that holds many small shares, as one ETF holds many companies.",
-      "inflation": "Line drawing of money that buys less over time as prices rise.",
+      "envelopes": "Line drawing of a desk tray of budget envelopes, one for each spending category, with notes peeking out.",
+      "snowball": "Line drawing of a row of dominoes from smallest to largest, toppling one after another like debts paid off in turn.",
+      "eggs": "Line drawing of an egg carton, each egg in its own cup.",
+      "etfbox": "Line drawing of a box packed with many small pieces, as one ETF holds many companies.",
+      "inflation": "Line drawing of a balance with coins on one side and a shopping basket on the other, tipping as prices rise.",
       "doorchain": "Line drawing of a door on a security chain: it opens to look, not to let anyone in.",
-      "taxwedge": "Line drawing of a return split into the part you keep and the part that goes to tax.",
+      "taxwedge": "Line drawing of a stack of coins cut like a pie, with one slice, the tax, set apart.",
       "scale": "Line drawing of a balance weighing what you own against what you owe.",
       "timer": "Line drawing of a kitchen timer set to ten minutes.",
-      "containers": "Line drawing of several containers side by side, one for each place to keep savings.",
-      "booklets": "Line drawing of a row of guide booklets.",
-      "calculator": "Line drawing of a calculator."
+      "containers": "Line drawing of a shelf of containers, from an open bowl to a locked safe.",
+      "booklets": "Line drawing of guide booklets leaning in a stand.",
+      "calculator": "Line drawing of a desk calculator."
     }
   }
 }

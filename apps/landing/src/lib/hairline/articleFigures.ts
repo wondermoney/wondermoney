@@ -27,20 +27,7 @@ export const FIGURE_NAMES = [
 export type FigureName = (typeof FIGURE_NAMES)[number];
 
 /** Figures not delivered yet. Empty it as figures land. */
-export const PENDING: readonly FigureName[] = [
-  "envelopes",
-  "snowball",
-  "eggs",
-  "etfbox",
-  "inflation",
-  "doorchain",
-  "taxwedge",
-  "scale",
-  "timer",
-  "containers",
-  "booklets",
-  "calculator",
-];
+export const PENDING: readonly FigureName[] = [];
 
 const STAND_IN: FigureName = "jar";
 

@@ -5899,18 +5899,18 @@
   "hairline": {
     "labels": {
       "jar": "Dibujo de líneas de un tarro de ahorro en una estantería, con una pila de monedas al lado que pasan al tarro mes a mes.",
-      "envelopes": "Dibujo de líneas de sobres de presupuesto, uno para cada categoría de gasto.",
-      "snowball": "Dibujo de líneas de una bola de nieve que crece al rodar, como pagos de deudas que se suman.",
-      "eggs": "Dibujo de líneas de huevos repartidos en varias cestas.",
-      "etfbox": "Dibujo de líneas de una caja con muchas acciones pequeñas, como un ETF que reúne muchas empresas.",
-      "inflation": "Dibujo de líneas de dinero que compra cada vez menos a medida que suben los precios.",
+      "envelopes": "Dibujo lineal de una bandeja con sobres de presupuesto, uno por categoría de gasto, con billetes asomando.",
+      "snowball": "Dibujo lineal de una fila de fichas de dominó, de la más pequeña a la más grande, que caen una tras otra como deudas pagadas por orden.",
+      "eggs": "Dibujo lineal de una caja de huevos, cada huevo en su propio hueco.",
+      "etfbox": "Dibujo lineal de una caja llena de piezas pequeñas, como un ETF reúne muchas empresas.",
+      "inflation": "Dibujo lineal de una balanza con monedas en un lado y una cesta de la compra en el otro, que se inclina a medida que suben los precios.",
       "doorchain": "Dibujo de líneas de una puerta con cadena de seguridad: se abre para mirar, no para dejar entrar.",
-      "taxwedge": "Dibujo de líneas de una rentabilidad dividida entre la parte que te quedas y la parte que va a impuestos.",
+      "taxwedge": "Dibujo lineal de una pila de monedas cortada como una tarta, con una porción, el impuesto, apartada.",
       "scale": "Dibujo de líneas de una balanza que pesa lo que tienes frente a lo que debes.",
       "timer": "Dibujo de líneas de un temporizador de cocina puesto en diez minutos.",
-      "containers": "Dibujo de líneas de varios recipientes uno al lado del otro, uno para cada lugar donde guardar los ahorros.",
-      "booklets": "Dibujo de líneas de una fila de guías.",
-      "calculator": "Dibujo de líneas de una calculadora."
+      "containers": "Dibujo lineal de una estantería de recipientes, desde un cuenco abierto hasta una caja fuerte cerrada.",
+      "booklets": "Dibujo lineal de guías apoyadas en un soporte.",
+      "calculator": "Dibujo lineal de una calculadora de sobremesa."
     }
   }
 }

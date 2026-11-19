@@ -5899,18 +5899,18 @@
   "hairline": {
     "labels": {
       "jar": "Desenho de linhas de um frasco de poupança numa prateleira, com uma pilha de moedas ao lado que passam para o frasco mês a mês.",
-      "envelopes": "Desenho de linhas de envelopes de orçamento, um para cada categoria de despesa.",
-      "snowball": "Desenho de linhas de uma bola de neve que cresce enquanto rola, como pagamentos de dívidas que se somam.",
-      "eggs": "Desenho de linhas de ovos repartidos por vários cestos.",
-      "etfbox": "Desenho de linhas de uma caixa com muitas ações pequenas, como um ETF que reúne muitas empresas.",
-      "inflation": "Desenho de linhas de dinheiro que compra cada vez menos à medida que os preços sobem.",
+      "envelopes": "Desenho de linhas de um tabuleiro com envelopes de orçamento, um por categoria de despesa, com notas à vista.",
+      "snowball": "Desenho de linhas de uma fila de dominós, do mais pequeno ao maior, a cair uns atrás dos outros, como dívidas pagas uma a uma.",
+      "eggs": "Desenho de linhas de uma caixa de ovos, cada ovo no seu próprio espaço.",
+      "etfbox": "Desenho de linhas de uma caixa cheia de pequenas peças, como um ETF reúne muitas empresas.",
+      "inflation": "Desenho de linhas de uma balança com moedas de um lado e um cesto de compras do outro, que pende à medida que os preços sobem.",
       "doorchain": "Desenho de linhas de uma porta com corrente de segurança: abre para ver, não para deixar entrar.",
-      "taxwedge": "Desenho de linhas de um rendimento dividido entre a parte que fica contigo e a parte que vai para impostos.",
+      "taxwedge": "Desenho de linhas de uma pilha de moedas cortada como uma tarte, com uma fatia, o imposto, posta à parte.",
       "scale": "Desenho de linhas de uma balança que pesa o que tens contra o que deves.",
       "timer": "Desenho de linhas de um temporizador de cozinha marcado para dez minutos.",
-      "containers": "Desenho de linhas de vários recipientes lado a lado, um para cada sítio onde guardar poupanças.",
-      "booklets": "Desenho de linhas de uma fila de guias.",
-      "calculator": "Desenho de linhas de uma calculadora."
+      "containers": "Desenho de linhas de uma prateleira de recipientes, de uma taça aberta a um cofre fechado.",
+      "booklets": "Desenho de linhas de guias encostados num suporte.",
+      "calculator": "Desenho de linhas de uma calculadora de secretária."
     }
   }
 }
