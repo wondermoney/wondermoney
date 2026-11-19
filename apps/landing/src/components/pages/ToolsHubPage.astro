@@ -1,7 +1,11 @@
 ---
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
-import { buttonVariants } from "@/components/ui/button";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import FigureCards from "@/components/shared/FigureCards.astro";
+import { sectionNumber } from "@/lib/articleOutline";
+import type { FigureCard } from "@/lib/figureCards";
+import { figureForTool } from "@/lib/hairline/articleFigures";
 import { buildAlternateLinksForPath, toToolsHubPath, type Lang } from "@/lib/routes";
 import { buildToolsHub, buildToolsHubItemList, toolAnalyticsName } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
@@ -12,89 +16,83 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getTranslations(locale);
-const toolsHubHref = toToolsHubPath(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => toToolsHubPath(lang));
 const groups = buildToolsHub(locale);
 const itemListSchema = buildToolsHubItemList(locale, t);
+const calculatorLabel = t("tools.hub.badge");
+const cardsFor = (group: (typeof groups)[number]): FigureCard[] =>
+  group.tools.map((tool) => ({
+    href: tool.href,
+    title: t(`tools.${tool.key}.title`),
+    description: t(`tools.${tool.key}.description`),
+    figure: figureForTool(tool.routeId),
+    kind: calculatorLabel,
+    data: {
+      "data-tools-hub-link": "tool",
+      "data-tool": toolAnalyticsName(tool.key),
+      "data-group": group.id,
+      "data-position": String(tool.position),
+    },
+  }));
 ---
 
 <ContentLayout
   title={t("tools.hub.pageTitle")}
   description={t("tools.hub.pageDescription")}
   alternateLinks={alternateLinks}
-  breadcrumbs={[{ label: t("header.tools"), href: toolsHubHref }]}
+  layout="article"
   locale={locale}
   structuredData={itemListSchema}
 >
   <div data-tools-hub>
-    <section>
-      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        {t("tools.hub.title")}
-      </h1>
-      <p class="mt-3 max-w-3xl text-lg text-muted-foreground">
-        {t("tools.hub.description")}
-      </p>
-    </section>
+    <ArticleHero
+      locale={locale}
+      title={t("tools.hub.title")}
+      dek={t("tools.hub.description")}
+      breadcrumbs={[{ label: t("header.tools") }]}
+      figure="calculator"
+    >
+      <nav class="mt-7" aria-labelledby="tools-hub-tasks">
+        <h2 id="tools-hub-tasks" class="text-sm font-medium text-foreground">
+          {t("tools.hub.tasks.title")}
+        </h2>
+        <p class="mt-1 text-sm text-muted-foreground">{t("tools.hub.tasks.description")}</p>
+        <ul role="list" class="mt-3 flex flex-wrap gap-2.5">
+          {
+            groups.map((group) => (
+              <li class="min-w-0">
+                <a
+                  href={`#${group.anchor}`}
+                  data-tools-hub-link="task"
+                  data-group={group.id}
+                  class="inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  {t(`tools.hub.groups.${group.id}.title`)}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </ArticleHero>
 
-    <nav class="mt-8" aria-labelledby="tools-hub-tasks">
-      <h2 id="tools-hub-tasks" class="text-xl font-semibold text-foreground">
-        {t("tools.hub.tasks.title")}
-      </h2>
-      <p class="mt-1 text-sm text-muted-foreground">{t("tools.hub.tasks.description")}</p>
-      <ul class="mt-4 flex flex-wrap gap-3">
-        {
-          groups.map((group) => (
-            <li>
-              <a
-                href={`#${group.anchor}`}
-                data-tools-hub-link="task"
-                data-group={group.id}
-                class={buttonVariants({ variant: "secondary" })}
-              >
-                {t(`tools.hub.groups.${group.id}.title`)}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-
-    <div class="mt-12 space-y-12">
+    <div class="mx-auto max-w-7xl space-y-16 px-6 pb-16 pt-12 lg:px-8 lg:pt-16">
       {
-        groups.map((group) => (
+        groups.map((group, index) => (
           <section id={group.anchor} class="scroll-mt-28" aria-labelledby={`${group.anchor}-title`}>
             <h2
               id={`${group.anchor}-title`}
-              class="border-b border-border pb-2 text-2xl font-bold text-foreground"
+              class="text-2xl font-bold tracking-[-0.015em] text-foreground sm:text-3xl"
             >
+              <span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">
+                {sectionNumber(index)}
+              </span>
               {t(`tools.hub.groups.${group.id}.title`)}
             </h2>
-            <p class="mt-3 max-w-3xl text-muted-foreground">
+            <p class="mt-3 max-w-[40rem] text-lg leading-[1.7] text-ink-2">
               {t(`tools.hub.groups.${group.id}.intro`)}
             </p>
-            <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {group.tools.map((tool) => (
-                <a
-                  href={tool.href}
-                  data-tools-hub-link="tool"
-                  data-tool={toolAnalyticsName(tool.key)}
-                  data-group={group.id}
-                  data-position={tool.position}
-                  class="group relative rounded-card border border-border p-6 transition-colors hover:border-primary/40 hover:bg-accent"
-                >
-                  <h3 class="text-lg font-semibold text-foreground group-hover:text-primary">
-                    <span class="mb-1 block text-sm tracking-normal">{t("tools.hub.badge")}</span>{" "}
-                    {t(`tools.${tool.key}.title`)}
-                  </h3>
-                  <p class="mt-2 text-sm leading-6 text-muted-foreground">
-                    {t(`tools.${tool.key}.description`)}
-                  </p>
-                  <span class="mt-4 inline-block text-sm font-medium text-primary underline underline-offset-4 decoration-primary/40 group-hover:opacity-80">
-                    {t("tools.hub.openCalculator")}
-                  </span>
-                </a>
-              ))}
-            </div>
+            <FigureCards locale={locale} cards={cardsFor(group)} class="mt-6" />
           </section>
         ))
       }

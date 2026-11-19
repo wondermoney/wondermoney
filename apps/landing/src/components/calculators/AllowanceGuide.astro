@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import {
   ALLOWANCE_EXAMPLE,
   HOLIDAY_HIRING_YEAR_EXAMPLE,
@@ -42,7 +43,7 @@ const sources = [
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby={`${kind}-allowance-example`}>
     <h2 id={`${kind}-allowance-example`} class="text-2xl font-semibold tracking-tight text-foreground">
       {t(net("exampleTitle"))}
@@ -78,4 +79,4 @@ const linkClass = "font-medium text-primary underline decoration-primary/40 unde
     </ul>
     <p class="mt-4 text-sm">{t(shared("reviewed"))}</p>
   </section>
-</div>
+</ToolGuide>

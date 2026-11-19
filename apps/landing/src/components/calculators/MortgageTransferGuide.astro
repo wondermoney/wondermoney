@@ -2,6 +2,7 @@
 // Prerendered explanation for the mortgage transfer calculator: what to compare, the costs of
 // switching, a worked example computed from the same function the calculator runs, and the
 // method.
+import ToolGuide from "./ToolGuide.astro";
 import {
   MORTGAGE_TRANSFER_EXAMPLE,
   MORTGAGE_TRANSFER_LIMITS,
@@ -90,7 +91,7 @@ const linkClass =
   "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="mortgage-transfer-compare">
     <h2 id="mortgage-transfer-compare" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("compare.title"))}
@@ -167,4 +168,4 @@ const linkClass =
       }
     </ul>
   </section>
-</div>
+</ToolGuide>

@@ -3,6 +3,7 @@
 // to read the two views, a worked example computed from the same function the estimator runs, the
 // method, the official sources with their dates, what the figures leave out, and the tools to go
 // on with.
+import ToolGuide from "./ToolGuide.astro";
 import {
   ELECTRICITY_BILL_EXAMPLE,
   ELECTRICITY_PRICES_SOURCE,
@@ -77,7 +78,7 @@ const linkClass =
   "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="electricity-read">
     <h2 id="electricity-read" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("read.title"))}
@@ -163,4 +164,4 @@ const linkClass =
       }
     </ul>
   </section>
-</div>
+</ToolGuide>

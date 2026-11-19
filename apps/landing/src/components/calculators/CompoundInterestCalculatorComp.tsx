@@ -450,7 +450,7 @@ function ComparisonCard({
         <p className="mt-1 text-sm text-muted-foreground">{t(k("comparisonIntro"))}</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start">
         <CalculatorInput
           id="comparisonMonthly"
           label={t(k("comparisonContribution"))}

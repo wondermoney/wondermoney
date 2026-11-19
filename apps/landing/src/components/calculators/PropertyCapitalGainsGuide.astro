@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import { CAPITAL_GAINS_EXAMPLE, CAPITAL_GAINS_TABLES, computeCapitalGains } from "@/lib/calculators/propertyCapitalGains";
 import { formatMoney } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
@@ -39,7 +40,7 @@ const sources = [
 ] as const;
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="capital-gains-example">
     <h2 id="capital-gains-example" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("exampleTitle"))}
@@ -73,4 +74,4 @@ const sources = [
     </ul>
     <p class="mt-4 text-sm">{t(k("reviewed"), values)}</p>
   </section>
-</div>
+</ToolGuide>

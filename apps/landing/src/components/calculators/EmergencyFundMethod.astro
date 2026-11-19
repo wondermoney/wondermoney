@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import {
   EXAMPLE_INPUTS,
   GUIDANCE_RANGE_MONTHS,
@@ -44,7 +45,7 @@ const methodSteps = ["method1", "method2", "method3", "method4"].map((key) =>
 );
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section>
     <h2 class="text-2xl font-semibold tracking-tight text-foreground">
       {t("tools.emergencyFund.whatTitle")}
@@ -72,4 +73,4 @@ const methodSteps = ["method1", "method2", "method3", "method4"].map((key) =>
       {methodSteps.map((step) => <li>{step}</li>)}
     </ul>
   </section>
-</div>
+</ToolGuide>

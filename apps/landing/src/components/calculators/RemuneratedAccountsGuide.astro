@@ -2,6 +2,7 @@
 // Prerendered explanation for the remunerated accounts table: how to read it, a worked example
 // computed with the same functions the calculator runs, the method, what it leaves out and the
 // tools to go on with.
+import ToolGuide from "./ToolGuide.astro";
 import {
   BANK_INTEREST_EXAMPLE_AMOUNT,
   computeNetInterest,
@@ -82,7 +83,7 @@ const linkClass =
   "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="rem-read">
     <h2 id="rem-read" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("read.title"))}
@@ -142,4 +143,4 @@ const linkClass =
       }
     </ul>
   </section>
-</div>
+</ToolGuide>
