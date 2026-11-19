@@ -2660,6 +2660,85 @@
       "nextStepHeadline": "Sieh deine Zertifikate neben deinem übrigen Erspartem",
       "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
       "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
+    },
+    "vehicleTax": {
+      "title": "Kfz-Steuer-Rechner (IUC)",
+      "shortName": "Kfz-Steuer (IUC)",
+      "subtitle": "Schätze die jährliche IUC für einen Pkw in Portugal, sieh, wann sie fällig ist und wie viel du jeden Monat zurücklegen solltest.",
+      "description": "Schätze die portugiesische IUC, ihre Fälligkeit und eine monatliche Rücklage.",
+      "pageTitle": "IUC-Rechner 2026: portugiesische Kfz-Steuer nach Hubraum und CO2",
+      "pageDescription": "Schätze die IUC 2026 für ein in Portugal zugelassenes Auto nach Hubraum, Kraftstoff, CO2-Ausstoß und Zulassungsdatum, mit Fälligkeit und monatlicher Rücklage.",
+      "fields": {
+        "fuel": "Kraftstoff",
+        "cc": "Hubraum",
+        "year": "Jahr der Erstzulassung",
+        "month": "Monat der Erstzulassung",
+        "co2": "Offizieller CO2-Ausstoß",
+        "standard": "CO2-Prüfzyklus"
+      },
+      "fuels": {
+        "petrol": "Benzin",
+        "diesel": "Diesel oder anderer Kraftstoff",
+        "electric": "Elektro"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "In Kubikzentimetern (cm³), wie im Fahrzeugschein angegeben (Feld P.1).",
+      "co2Help": "In Gramm pro Kilometer, wie im Fahrzeugschein angegeben (Feld V.7).",
+      "registrationHelp": "Das Datum der Erstzulassung in Portugal oder einem anderen EU- oder EWR-Land bestimmt Kategorie und Koeffizient. Autos, die vor Juli 2007 zugelassen wurden, gehören zu Kategorie A, ab Juli 2007 zu Kategorie B.",
+      "electricNote": "Reine Elektroautos, die ab Juli 2007 zugelassen wurden, sind von der IUC befreit, daher gibt es nichts einzugeben.",
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "zero": "Gib einen Wert über null ein.",
+        "negative": "Gib einen positiven Wert ein.",
+        "tooLarge": "Gib einen Wert bis {{max}} ein.",
+        "yearTooOld": "Dieser Rechner deckt Autos ab, die ab 1981 erstmals zugelassen wurden.",
+        "yearTooNew": "Gib ein Zulassungsjahr bis {{max}} ein.",
+        "month": "Wähle einen Monat aus der Liste.",
+        "electricCategoryA": "Elektroautos mit Zulassung vor Juli 2007 werden nicht unterstützt. Prüfe das Portal das Finanças.",
+        "summary": "Prüfe die markierten Felder, um deine Schätzung zu sehen."
+      },
+      "result": {
+        "annualTax": "Geschätzte jährliche IUC",
+        "monthlyProvision": "Monatliche Rücklage (jährliche IUC ÷ 12)",
+        "category": "IUC-Kategorie",
+        "baseTax": "Hubraum- plus CO2-Satz",
+        "additionalTax": "Zusatzsatz",
+        "coefficient": "Jahreskoeffizient",
+        "dueMonth": "Fällig 2026:",
+        "dueMonthValue": "Im {{month}}, dem Monat des Zulassungsjahrestags.",
+        "scheduleTitle": "Ab 2027: Zahlungsplan",
+        "exempt": "Reine Elektroautos der Kategorie B sind von der IUC befreit."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Ein Diesel mit {{cc}} cm³ Hubraum, offiziellen WLTP-Emissionen von {{co2}} g/km und Erstzulassung {{year}} zahlt {{tax}} IUC im Jahr. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodA": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007): Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
+        "methodB": "Kategorie B (Autos mit Zulassung ab Juli 2007): Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
+        "methodAdditional": "Autos der Kategorie B mit Erstzulassung nach dem 1. Januar 2017 zahlen bei hohen Emissionen einen Zusatzsatz: 31,77 € über 205 g/km (WLTP) oder 180 g/km (NEDC) und 63,74 € über 260 g/km (WLTP) oder 250 g/km (NEDC). Auch der Zusatzsatz wird mit dem Koeffizienten multipliziert. Der Gesetzestext beschränkt ihn nicht nach Kraftstoff, daher wendet der Rechner ihn auf alle an.",
+        "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Ab 2027 wird sie nach dem Decreto-Lei Nr. 161/2026 bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt.",
+        "methodBudget": "Die monatliche Rücklage teilt den Jahresbetrag durch 12, damit das Geld bereitsteht, wenn der Bescheid kommt.",
+        "exemptionTitle": "Elektroautos",
+        "exemption": "Reine Elektroautos der Kategorie B sind von der IUC befreit, der Rechner zeigt null. Plug-in-Hybride und andere Fahrzeuge werden nach Hubraum und CO2 laut Fahrzeugschein besteuert, gib diese Werte ein.",
+        "scopeTitle": "Was abgedeckt ist",
+        "scopeSupported": "Leichte Pkw: Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
+        "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags. Das Portal das Finanças zeigt den neuen April-Zahlungsplan ab 2027, aber nicht die frühere Fassung, bestätige also dein Datum im Portal das Finanças. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionEducational": "Das ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
+        "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
+        "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
+        "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}."
+      },
+      "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
+      "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
+      "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück"
     }
   },
   "resources": {

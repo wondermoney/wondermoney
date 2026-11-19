@@ -2660,6 +2660,85 @@
       "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
       "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
+    },
+    "vehicleTax": {
+      "title": "Simulador de IUC",
+      "shortName": "IUC",
+      "subtitle": "Estima o IUC anual de um automóvel ligeiro de passageiros em Portugal, vê quando se paga e quanto deves reservar todos os meses.",
+      "description": "Estima o IUC, a data de pagamento e a reserva mensal.",
+      "pageTitle": "Simulador de IUC 2026: Imposto Único de Circulação por Cilindrada e CO2",
+      "pageDescription": "Calcula o IUC de 2026 de um automóvel a partir da cilindrada, do combustível, das emissões de CO2 e da data da matrícula, vê quando se paga e quanto reservar por mês.",
+      "fields": {
+        "fuel": "Combustível",
+        "cc": "Cilindrada",
+        "year": "Ano da primeira matrícula",
+        "month": "Mês da primeira matrícula",
+        "co2": "Emissões oficiais de CO2",
+        "standard": "Ciclo de ensaio de CO2"
+      },
+      "fuels": {
+        "petrol": "Gasolina",
+        "diesel": "Gasóleo ou outro combustível",
+        "electric": "Elétrico"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "Em centímetros cúbicos (cm³), como consta do documento único automóvel (campo P.1).",
+      "co2Help": "Em gramas por quilómetro, como consta do documento único automóvel (campo V.7).",
+      "registrationHelp": "A data da primeira matrícula, em Portugal ou noutro país da UE ou do EEE, define a categoria e o coeficiente. Os carros matriculados antes de julho de 2007 são da categoria A; a partir de julho de 2007 são da categoria B.",
+      "electricNote": "Os automóveis totalmente elétricos matriculados a partir de julho de 2007 estão isentos de IUC, por isso não há nada para introduzir.",
+      "errors": {
+        "required": "Introduz um número válido.",
+        "zero": "Introduz um valor superior a zero.",
+        "negative": "Introduz um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "yearTooOld": "Este simulador cobre automóveis matriculados a partir de 1981.",
+        "yearTooNew": "Introduz um ano de matrícula até {{max}}.",
+        "month": "Escolhe um mês da lista.",
+        "electricCategoryA": "Os automóveis elétricos matriculados antes de julho de 2007 não são suportados. Consulta o Portal das Finanças.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "annualTax": "IUC anual estimado",
+        "monthlyProvision": "Reserva mensal (IUC anual ÷ 12)",
+        "category": "Categoria do IUC",
+        "baseTax": "Taxas de cilindrada e CO2",
+        "additionalTax": "Taxa adicional",
+        "coefficient": "Coeficiente do ano",
+        "dueMonth": "A pagar em 2026:",
+        "dueMonthValue": "Em {{month}}, o mês do aniversário da matrícula.",
+        "scheduleTitle": "A partir de 2027: calendário de pagamento",
+        "exempt": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Um automóvel a gasóleo com {{cc}} cm³, emissões oficiais WLTP de {{co2}} g/km e matriculado em {{year}} paga {{tax}} de IUC por ano. Reservar {{monthly}} por mês cobre o valor.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodA": "Categoria A (carros matriculados de 1981 até junho de 2007): o imposto vem de uma tabela por combustível, cilindrada e período de matrícula (depois de 1995, de 1990 a 1995, de 1981 a 1989).",
+        "methodB": "Categoria B (carros matriculados a partir de julho de 2007): somam-se a taxa da cilindrada e a taxa do CO2 e multiplica-se por um coeficiente que depende do ano da matrícula (1,00 em 2007, 1,05 em 2008, 1,10 em 2009, 1,15 a partir de 2010). O CO2 lê-se na coluna WLTP ou NEDC, conforme o ciclo de ensaio do documento único automóvel.",
+        "methodAdditional": "Os carros da categoria B matriculados depois de 1 de janeiro de 2017 pagam uma taxa adicional quando as emissões são elevadas: 31,77 € acima de 205 g/km (WLTP) ou 180 g/km (NEDC) e 63,74 € acima de 260 g/km (WLTP) ou 250 g/km (NEDC). A taxa adicional também é multiplicada pelo coeficiente. O texto legal não a limita por combustível, por isso o simulador aplica-a a todos.",
+        "methodPayment": "Até 2026 o IUC paga-se no mês do aniversário da matrícula. A partir de 2027, pelo Decreto-Lei n.º 161/2026, é liquidado até abril e pago em abril até 100 €, em abril e outubro de 100 € até 500 €, e em abril, julho e outubro acima de 500 €.",
+        "methodBudget": "A reserva mensal divide o valor anual por 12, para o dinheiro estar pronto quando chegar a cobrança.",
+        "exemptionTitle": "Automóveis elétricos",
+        "exemption": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC e o simulador mostra zero. Os híbridos plug-in e outros veículos pagam conforme a cilindrada e o CO2 do documento único automóvel, por isso introduz esses valores.",
+        "scopeTitle": "O que está coberto",
+        "scopeSupported": "Automóveis ligeiros de passageiros: categoria A (matriculados de 1981 a junho de 2007) e categoria B (matriculados a partir de julho de 2007).",
+        "scopeUnsupported": "Não suportado: veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionYear": "As taxas são as tabelas de {{taxYear}} do Código do IUC (artigos 9.º e 10.º), na redação da {{law}}. O Portal das Finanças não indica alterações posteriores a estas taxas.",
+        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula. O Portal das Finanças mostra o novo calendário de abril a partir de 2027, mas não a redação anterior, por isso confirma a tua data no Portal das Finanças. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
+        "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. Conta o valor da nota de cobrança da Autoridade Tributária.",
+        "sourcesTitle": "Fontes",
+        "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
+        "sourceCategoryB": "Código do IUC, artigo 10.º: taxas da categoria B, taxas adicionais e coeficientes (consultado a 19 de novembro de 2026)",
+        "sourcePayment": "Código do IUC, artigo 17.º: pagamento (consultado a 19 de novembro de 2026)",
+        "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}."
+      },
+      "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
+      "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
+      "nextStepCta": "Reserva um doze avos do teu imposto automóvel anual"
     }
   },
   "resources": {

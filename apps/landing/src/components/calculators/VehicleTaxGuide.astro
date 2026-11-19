@@ -1,0 +1,72 @@
+---
+import { IUC_TABLES, VEHICLE_TAX_EXAMPLE, computeVehicleTax } from "@/lib/calculators/vehicleTax";
+import { formatMoney } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.vehicleTax.guide.${key}`;
+const example = computeVehicleTax(VEHICLE_TAX_EXAMPLE);
+if (!example.ok) throw new Error("Invalid vehicle tax worked example");
+
+const money = (value: number) => formatMoney(locale, value, { decimals: 2 });
+const values = {
+  cc: String(VEHICLE_TAX_EXAMPLE.cc),
+  co2: String(VEHICLE_TAX_EXAMPLE.co2),
+  year: String(VEHICLE_TAX_EXAMPLE.year),
+  tax: money(example.result.annualTax),
+  monthly: money(example.result.monthlyProvision),
+  taxYear: String(IUC_TABLES.taxYear),
+  reviewed: new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(IUC_TABLES.reviewed)),
+  law: IUC_TABLES.law,
+};
+const base = "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/iuc/Pages/";
+const sources = [
+  ["sourceCategoryA", `${base}iuc9.aspx`],
+  ["sourceCategoryB", `${base}iuc10.aspx`],
+  ["sourcePayment", `${base}iuc17.aspx`],
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="vehicle-tax-example">
+    <h2 id="vehicle-tax-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="vehicle-tax-method">
+    <h2 id="vehicle-tax-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {["methodA", "methodB", "methodAdditional", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
+    <p class="mt-3">{t(k("exemption"))}</p>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("scopeTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["scopeSupported", "scopeUnsupported"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["assumptionYear", "assumptionPayment", "assumptionEducational"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key), values)}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"), values)}</p>
+  </section>
+</div>

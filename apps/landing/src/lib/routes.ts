@@ -376,6 +376,14 @@ const ROUTE_SLUGS = {
 		de: "imi-rechner-portugal",
 		it: "calcolatore-imi-portogallo",
 	},
+	toolVehicleTax: {
+		pt: "simulador-iuc",
+		en: "portugal-vehicle-tax-iuc-calculator",
+		es: "calculadora-iuc-portugal",
+		fr: "calculateur-iuc-portugal",
+		de: "kfz-steuer-iuc-rechner-portugal",
+		it: "calcolatore-iuc-portogallo",
+	},
 	toolPurchaseTaxes: {
 		pt: "simulador-imt-imposto-selo",
 		en: "property-purchase-taxes-calculator",
@@ -506,6 +514,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolSavingsCertificates",
 	"toolPropertyTax",
 	"toolPurchaseTaxes",
+	"toolVehicleTax",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -792,6 +801,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"imi-calculator": "toolPropertyTax",
 	"imi-property-tax": "toolPropertyTax",
 	imi: "toolPropertyTax",
+	toolvehicletax: "toolVehicleTax",
+	"iuc-calculator": "toolVehicleTax",
+	"vehicle-tax": "toolVehicleTax",
+	iuc: "toolVehicleTax",
 }
 
 function normalizeRouteLookupKey(value: string): string {

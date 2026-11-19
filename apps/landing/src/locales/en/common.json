@@ -2660,6 +2660,85 @@
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
       "nextStepCta": "Include certificates in your savings overview"
+    },
+    "vehicleTax": {
+      "title": "Vehicle tax (IUC) calculator",
+      "shortName": "Vehicle tax (IUC)",
+      "subtitle": "Estimate the annual IUC on a passenger car in Portugal, see when it is due and how much to set aside every month.",
+      "description": "Estimate the Portuguese IUC, its due date and a monthly provision.",
+      "pageTitle": "IUC Calculator 2026: Portuguese Vehicle Tax by Engine Size and CO2",
+      "pageDescription": "Estimate the 2026 IUC for a car registered in Portugal from engine size, fuel, CO2 emissions and registration date, see when it is due and the monthly amount to set aside.",
+      "fields": {
+        "fuel": "Fuel",
+        "cc": "Engine size",
+        "year": "Year of first registration",
+        "month": "Month of first registration",
+        "co2": "Official CO2 emissions",
+        "standard": "CO2 test cycle"
+      },
+      "fuels": {
+        "petrol": "Petrol",
+        "diesel": "Diesel or other fuel",
+        "electric": "Electric"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "In cubic centimetres (cm³), as shown on the registration document (field P.1).",
+      "co2Help": "In grams per kilometre, as shown on the registration document (field V.7).",
+      "registrationHelp": "The date of the first registration, in Portugal or another EU or EEA country, decides the category and the coefficient. Cars registered before July 2007 are category A; from July 2007 they are category B.",
+      "electricNote": "Fully electric cars registered from July 2007 are exempt from IUC, so there is nothing to enter.",
+      "errors": {
+        "required": "Enter a valid number.",
+        "zero": "Enter a value above zero.",
+        "negative": "Enter a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "yearTooOld": "This calculator covers cars first registered from 1981.",
+        "yearTooNew": "Enter a registration year up to {{max}}.",
+        "month": "Choose a month from the list.",
+        "electricCategoryA": "Electric cars registered before July 2007 are not supported. Check the Portal das Finanças.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "annualTax": "Estimated annual IUC",
+        "monthlyProvision": "Monthly provision (annual IUC ÷ 12)",
+        "category": "IUC category",
+        "baseTax": "Engine size plus CO2 rates",
+        "additionalTax": "Additional rate",
+        "coefficient": "Year coefficient",
+        "dueMonth": "Due in 2026:",
+        "dueMonthValue": "In {{month}}, the month of your registration anniversary.",
+        "scheduleTitle": "From 2027: payment schedule",
+        "exempt": "Fully electric cars in category B are exempt from IUC."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "A diesel car with a {{cc}} cm³ engine, official WLTP emissions of {{co2}} g/km and first registered in {{year}} owes {{tax}} of IUC a year. Setting aside {{monthly}} a month covers it.",
+        "methodTitle": "How the estimate works",
+        "methodA": "Category A (cars registered from 1981 up to June 2007): the tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
+        "methodB": "Category B (cars registered from July 2007): the engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
+        "methodAdditional": "Category B cars first registered after 1 January 2017 pay an additional rate when emissions are high: €31.77 above 205 g/km (WLTP) or 180 g/km (NEDC), and €63.74 above 260 g/km (WLTP) or 250 g/km (NEDC). The additional rate is also multiplied by the coefficient. The legal text does not limit it by fuel, so the calculator applies it to every fuel.",
+        "methodPayment": "Until 2026 the IUC is paid in the month of the registration anniversary. From 2027, under Decreto-Lei n.º 161/2026, it is settled by April and paid in April up to €100, in April and October from €100 up to €500, and in April, July and October above €500.",
+        "methodBudget": "The monthly provision divides the annual amount by 12, so the money is ready when the bill arrives.",
+        "exemptionTitle": "Electric cars",
+        "exemption": "Fully electric cars in category B are exempt from IUC, and the calculator shows zero. Plug-in hybrids and other vehicles are taxed by their engine size and CO2 as shown on the registration document, so enter those values.",
+        "scopeTitle": "What is covered",
+        "scopeSupported": "Light passenger cars: category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
+        "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
+        "assumptionPayment": "The 2026 due month follows the registration anniversary rule. The Portal das Finanças shows the new April schedule from 2027, but not the earlier wording, so confirm your date on the Portal das Finanças. In the year of registration the tax is paid within 30 days of the registration deadline.",
+        "assumptionEducational": "This is an educational estimate, not tax advice. The amount on the notice from the Tax Authority is the one that counts.",
+        "sourcesTitle": "Sources",
+        "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
+        "sourceCategoryB": "Código do IUC, article 10: category B rates, additional rates and coefficients (consulted 19 November 2026)",
+        "sourcePayment": "Código do IUC, article 17: payment (consulted 19 November 2026)",
+        "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}."
+      },
+      "nextStepHeadline": "Never be caught out by the car tax",
+      "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
+      "nextStepCta": "Set aside one twelfth of your annual car tax"
     }
   },
   "resources": {
