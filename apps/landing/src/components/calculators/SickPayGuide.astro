@@ -4,6 +4,7 @@ import {
   RMMG_2026_CENTS,
   SICK_PAY_EXAMPLE,
   computeSickPay,
+  floorDailyCents,
 } from "@/lib/calculators/sickPay";
 import { formatMoney } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
@@ -29,9 +30,11 @@ const values = {
   net: money(result.netMonthlyCents),
   gap: money(result.averageMonthlyGapCents),
 };
-const limitValues = { min: money(MIN_DAILY_CENTS), rmmg: money(RMMG_2026_CENTS) };
+const limitValues = {
+  min: money(MIN_DAILY_CENTS), rmmg: money(RMMG_2026_CENTS), floor55: money(floorDailyCents(55)), floor60: money(floorDailyCents(60)),
+};
 const methods = [
-  "methodReference", "methodBands", "methodWaiting", "methodMinimum", "methodIncrease",
+  "methodReference", "methodBands", "methodWaiting", "methodMinimum", "methodIncrease", "methodFloor",
   "methodNetCap", "methodGap", "methodBudget",
 ];
 ---
