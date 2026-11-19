@@ -384,6 +384,14 @@ const ROUTE_SLUGS = {
 		de: "kfz-steuer-iuc-rechner-portugal",
 		it: "calcolatore-iuc-portogallo",
 	},
+	toolPropertyCapitalGains: {
+		pt: "simulador-mais-valias-venda-casa",
+		en: "portugal-property-capital-gains-calculator",
+		es: "calculadora-plusvalias-venta-vivienda-portugal",
+		fr: "calculateur-plus-values-immobilieres-portugal",
+		de: "immobilien-veraeusserungsgewinn-rechner-portugal",
+		it: "calcolatore-plusvalenze-immobiliari-portogallo",
+	},
 	toolPurchaseTaxes: {
 		pt: "simulador-imt-imposto-selo",
 		en: "property-purchase-taxes-calculator",
@@ -542,6 +550,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolNetSalary",
 	"toolWithholdingTables",
 	"toolVehicleTax",
+	"toolPropertyCapitalGains",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -842,6 +851,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",
 	iuc: "toolVehicleTax",
+	toolpropertycapitalgains: "toolPropertyCapitalGains",
+	"capital-gains-calculator": "toolPropertyCapitalGains",
+	"mais-valias": "toolPropertyCapitalGains",
 }
 
 function normalizeRouteLookupKey(value: string): string {
