@@ -2344,7 +2344,7 @@
       "propertyTitle": "Immobilie",
       "financingTitle": "Hypothek",
       "youngTitle": "Befreiung für junge Käufer (IMT Jovem)",
-      "youngNote": "Nur wenn alle Bedingungen am Tag der Urkunde erfüllt sind: Sie sind höchstens 35 Jahre alt, es ist Ihre erste Wohnung und Sie wohnen dauerhaft darin. Volle Befreiung bis {{full}}; teilweise bis {{partial}}, mit IMT nur auf den Mehrbetrag.",
+      "youngNote": "Nur wenn alle Bedingungen am Tag der Urkunde erfüllt sind: Sie sind höchstens 35 Jahre alt, es ist Ihre erste Wohnung und Sie wohnen dauerhaft darin. Volle Befreiung bis {{full}}; teilweise bis {{partial}}, mit IMT und Stempelsteuer auf den Kauf nur auf den Mehrbetrag.",
       "youngUnavailable": "Die Befreiung gilt nur für die eigene dauerhaft bewohnte Wohnung. Wählen Sie diese Nutzung, um die Berechtigung zu prüfen.",
       "fields": {
         "price": "Kaufpreis",
@@ -2384,7 +2384,7 @@
         "stampPurchase": "Stempelsteuer auf den Kauf (0,8 %)",
         "stampLoan": "Stempelsteuer auf das Darlehen (0,6 %)",
         "exemptFull": "Befreiung für junge Käufer angewendet: entfallen IMT und Stempelsteuer auf den Kauf und spart {{saving}}.",
-        "exemptPartial": "Teilbefreiung für junge Käufer angewendet: IMT fällt nur auf den Teil über der Grenze der vollen Befreiung an. Sie spart insgesamt {{saving}}.",
+        "exemptPartial": "Teilbefreiung für junge Käufer angewendet: IMT und Stempelsteuer auf den Kauf fallen nur auf den Teil über der Grenze der vollen Befreiung an. Sie spart insgesamt {{saving}}.",
         "exemptNone": "Bei diesem Wert gilt die Befreiung nicht. Sie gilt für Käufe bis {{partial}} (voll bis {{full}}) und nur unter den Bedingungen im Kasten links.",
         "tableNote": "Tabelle {{year}}, geprüft am {{date}}. Lehrreiche Schätzung, keine Steuerberatung."
       },
@@ -2407,7 +2407,7 @@
         "review": "Regeln und Grenzen für {{year}}, zuletzt geprüft am {{date}}. Prüfen Sie sie vor der Unterschrift erneut.",
         "assumptionsTitle": "Annahmen und unterstützte Fälle",
         "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
-        "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Stempelsteuer auf den Kauf behandeln wir nur innerhalb der vollen Grenze als befreit.",
+        "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
         "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
         "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
         "assumptionIslands": "Für die Azoren und Madeira sind die Grenzen die des Festlands plus 25 %, auf den Euro gerundet, mit denselben Sätzen. Bestätigen Sie die regionalen Grenzen bei der Steuerbehörde."

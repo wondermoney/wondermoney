@@ -2344,7 +2344,7 @@
       "propertyTitle": "Imóvel",
       "financingTitle": "Crédito à habitação",
       "youngTitle": "Isenção para jovens (IMT Jovem)",
-      "youngNote": "Só se todas as condições se verificarem na data da escritura: tens 35 anos ou menos, é a tua primeira casa e vais viver nela de forma permanente. Isenção total até {{full}}; isenção parcial até {{partial}}, com IMT apenas sobre o excedente.",
+      "youngNote": "Só se todas as condições se verificarem na data da escritura: tens 35 anos ou menos, é a tua primeira casa e vais viver nela de forma permanente. Isenção total até {{full}}; isenção parcial até {{partial}}, com IMT e selo da compra apenas sobre o excedente.",
       "youngUnavailable": "A isenção só se aplica a habitação própria e permanente. Escolhe esse uso para verificar a elegibilidade.",
       "fields": {
         "price": "Preço de compra",
@@ -2384,7 +2384,7 @@
         "stampPurchase": "Imposto do Selo da compra (0,8%)",
         "stampLoan": "Imposto do Selo do crédito (0,6%)",
         "exemptFull": "Isenção para jovens aplicada: elimina o IMT e o selo da compra e poupa {{saving}}.",
-        "exemptPartial": "Isenção parcial para jovens aplicada: o IMT incide apenas sobre a parte acima do limite da isenção total. Poupa {{saving}} no total.",
+        "exemptPartial": "Isenção parcial para jovens aplicada: o IMT e o selo da compra incidem apenas sobre a parte acima do limite da isenção total. Poupa {{saving}} no total.",
         "exemptNone": "Com este valor a isenção não se aplica. Abrange compras até {{partial}} (total até {{full}}) e apenas nas condições indicadas à esquerda.",
         "tableNote": "Tabela de {{year}}, revista em {{date}}. Estimativa educativa, não é aconselhamento fiscal."
       },
@@ -2407,7 +2407,7 @@
         "review": "Regras e limites de {{year}}, revistos pela última vez em {{date}}. Confirma-os de novo antes de assinar.",
         "assumptionsTitle": "Pressupostos e situações suportadas",
         "assumptionScope": "Este simulador segue a lei fiscal portuguesa e só se aplica a imóveis situados em Portugal, seja qual for o teu país de residência. É educativo e não constitui aconselhamento fiscal.",
-        "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. Consideramos o selo da compra isento apenas dentro do limite total.",
+        "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. A isenção do selo da compra é uma dedução limitada a 0,8% do limite da isenção total, por isso acima dele pagas 0,8% apenas sobre o excedente. O selo do crédito continua a ser cobrado.",
         "assumptionLoan": "O selo do crédito pressupõe um empréstimo de cinco anos ou mais e é sempre cobrado. Comissões do crédito, avaliação e custos de notário ou registo não estão incluídos.",
         "assumptionUnsupported": "Não suportado: não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT.",
         "assumptionIslands": "Para os Açores e a Madeira os limites são os do continente aumentados em 25% e arredondados ao euro, com as mesmas taxas. Confirma os limites regionais com a Autoridade Tributária."

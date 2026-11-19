@@ -2344,7 +2344,7 @@
       "propertyTitle": "Property",
       "financingTitle": "Mortgage",
       "youngTitle": "Young-buyer exemption (IMT Jovem)",
-      "youngNote": "Only if every condition holds on the deed date: you are 35 or younger, it is your first home, and you will live in it permanently. Full exemption up to {{full}}; partial exemption up to {{partial}}, with IMT on the excess only.",
+      "youngNote": "Only if every condition holds on the deed date: you are 35 or younger, it is your first home, and you will live in it permanently. Full exemption up to {{full}}; partial exemption up to {{partial}}, with IMT and purchase stamp duty on the excess only.",
       "youngUnavailable": "The exemption only applies to an own permanent home. Choose that use to check eligibility.",
       "fields": {
         "price": "Purchase price",
@@ -2384,7 +2384,7 @@
         "stampPurchase": "Stamp duty on the purchase (0.8%)",
         "stampLoan": "Stamp duty on the mortgage (0.6%)",
         "exemptFull": "Young-buyer exemption applied: it removes IMT and purchase stamp duty, saving {{saving}}.",
-        "exemptPartial": "Partial young-buyer exemption applied: IMT is charged only on the part above the full-exemption limit. It saves {{saving}} in total.",
+        "exemptPartial": "Partial young-buyer exemption applied: IMT and purchase stamp duty are charged only on the part above the full-exemption limit. It saves {{saving}} in total.",
         "exemptNone": "At this value the exemption does not apply. It covers purchases up to {{partial}} (full up to {{full}}) and only for the conditions in the box on the left.",
         "tableNote": "Table for {{year}}, reviewed on {{date}}. Educational estimate, not tax advice."
       },
@@ -2407,7 +2407,7 @@
         "review": "Rules and limits for {{year}}, last reviewed on {{date}}. Check them again before you sign.",
         "assumptionsTitle": "Assumptions and supported situations",
         "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
-        "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. We treat purchase stamp duty as exempt only within the full limit.",
+        "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. The purchase stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit, so above it you pay 0.8% only on the excess. Mortgage stamp duty is still charged.",
         "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
         "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
         "assumptionIslands": "For the Azores and Madeira the limits are the mainland limits increased by 25% and rounded to the euro, with the same rates. Confirm the regional limits with the tax authority."

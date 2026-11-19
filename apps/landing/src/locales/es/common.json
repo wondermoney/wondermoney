@@ -2344,7 +2344,7 @@
       "propertyTitle": "Inmueble",
       "financingTitle": "Hipoteca",
       "youngTitle": "Exención para jóvenes (IMT Jovem)",
-      "youngNote": "Solo si se cumplen todas las condiciones en la fecha de la escritura: tienes 35 años o menos, es tu primera vivienda y vivirás en ella de forma permanente. Exención total hasta {{full}}; parcial hasta {{partial}}, con IMT solo sobre el exceso.",
+      "youngNote": "Solo si se cumplen todas las condiciones en la fecha de la escritura: tienes 35 años o menos, es tu primera vivienda y vivirás en ella de forma permanente. Exención total hasta {{full}}; parcial hasta {{partial}}, con IMT y timbre de la compra solo sobre el exceso.",
       "youngUnavailable": "La exención solo se aplica a la vivienda propia y permanente. Elige ese uso para comprobar si cumples los requisitos.",
       "fields": {
         "price": "Precio de compra",
@@ -2384,7 +2384,7 @@
         "stampPurchase": "Timbre de la compra (0,8 %)",
         "stampLoan": "Timbre de la hipoteca (0,6 %)",
         "exemptFull": "Exención para jóvenes aplicada: elimina el IMT y el timbre de la compra y ahorra {{saving}}.",
-        "exemptPartial": "Exención parcial para jóvenes aplicada: el IMT se cobra solo sobre la parte que supera el límite de la exención total. Ahorra {{saving}} en total.",
+        "exemptPartial": "Exención parcial para jóvenes aplicada: el IMT y el timbre de la compra se cobran solo sobre la parte que supera el límite de la exención total. Ahorra {{saving}} en total.",
         "exemptNone": "Con este valor la exención no se aplica. Cubre compras de hasta {{partial}} (total hasta {{full}}) y solo con las condiciones del recuadro de la izquierda.",
         "tableNote": "Tabla de {{year}}, revisada el {{date}}. Estimación educativa, no es asesoramiento fiscal."
       },
@@ -2407,7 +2407,7 @@
         "review": "Reglas y límites de {{year}}, revisados por última vez el {{date}}. Compruébalos de nuevo antes de firmar.",
         "assumptionsTitle": "Supuestos y situaciones admitidas",
         "assumptionScope": "Esta calculadora sigue la ley fiscal portuguesa y solo se aplica a inmuebles situados en Portugal, sea cual sea tu país de residencia. Es educativa y no es asesoramiento fiscal.",
-        "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. Consideramos el timbre de la compra exento solo dentro del límite total.",
+        "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. La exención del timbre de la compra es una deducción limitada al 0,8 % del límite de la exención total, así que por encima pagas el 0,8 % solo sobre el exceso. El timbre de la hipoteca se sigue cobrando.",
         "assumptionLoan": "El timbre de la hipoteca supone un préstamo de cinco años o más y se cobra siempre. No se incluyen comisiones de la hipoteca, tasación ni gastos de notaría o registro.",
         "assumptionUnsupported": "No admitido: no residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT.",
         "assumptionIslands": "Para Azores y Madeira los límites son los del continente aumentados un 25 % y redondeados al euro, con los mismos tipos. Confirma los límites regionales con la autoridad tributaria."

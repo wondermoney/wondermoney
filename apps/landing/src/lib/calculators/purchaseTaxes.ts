@@ -165,6 +165,8 @@ export function computePurchaseTaxes(input: PurchaseTaxesInput) {
       exemption = "full";
     } else if (referenceCents <= limits.partial * 100) {
       imt = taxCents(referenceCents - limits.full * 100, YOUNG_PARTIAL_BP);
+      // The stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit.
+      stamp = stampFull - taxCents(limits.full * 100, STAMP_PURCHASE_BP);
       exemption = "partial";
     }
   }

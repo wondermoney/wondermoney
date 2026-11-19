@@ -2344,7 +2344,7 @@
       "propertyTitle": "Immobile",
       "financingTitle": "Mutuo",
       "youngTitle": "Esenzione per i giovani (IMT Jovem)",
-      "youngNote": "Solo se tutte le condizioni sono soddisfatte alla data dell'atto: hai 35 anni o meno, è la tua prima casa e ci vivrai in modo permanente. Esenzione totale fino a {{full}}; parziale fino a {{partial}}, con IMT solo sulla parte eccedente.",
+      "youngNote": "Solo se tutte le condizioni sono soddisfatte alla data dell'atto: hai 35 anni o meno, è la tua prima casa e ci vivrai in modo permanente. Esenzione totale fino a {{full}}; parziale fino a {{partial}}, con IMT e bollo sull'acquisto solo sulla parte eccedente.",
       "youngUnavailable": "L'esenzione vale solo per l'abitazione propria e permanente. Scegli questo uso per verificare se ne hai diritto.",
       "fields": {
         "price": "Prezzo d'acquisto",
@@ -2384,7 +2384,7 @@
         "stampPurchase": "Imposta di bollo sull'acquisto (0,8%)",
         "stampLoan": "Imposta di bollo sul mutuo (0,6%)",
         "exemptFull": "Esenzione per i giovani applicata: elimina IMT e bollo sull'acquisto e fa risparmiare {{saving}}.",
-        "exemptPartial": "Esenzione parziale per i giovani applicata: l'IMT si paga solo sulla parte oltre il limite dell'esenzione totale. Fa risparmiare {{saving}} in tutto.",
+        "exemptPartial": "Esenzione parziale per i giovani applicata: l'IMT e il bollo sull'acquisto si pagano solo sulla parte oltre il limite dell'esenzione totale. Fa risparmiare {{saving}} in tutto.",
         "exemptNone": "A questo valore l'esenzione non si applica. Copre acquisti fino a {{partial}} (totale fino a {{full}}) e solo alle condizioni indicate a sinistra.",
         "tableNote": "Tabella {{year}}, rivista il {{date}}. Stima a scopo educativo, non è consulenza fiscale."
       },
@@ -2407,7 +2407,7 @@
         "review": "Regole e limiti per il {{year}}, riviste l'ultima volta il {{date}}. Ricontrollali prima di firmare.",
         "assumptionsTitle": "Ipotesi e situazioni supportate",
         "assumptionScope": "Questo calcolo segue la legge fiscale portoghese e vale solo per immobili situati in Portogallo, qualunque sia il tuo paese di residenza. È a scopo educativo e non è consulenza fiscale.",
-        "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. Consideriamo il bollo sull'acquisto esente solo entro il limite totale.",
+        "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. L'esenzione del bollo sull'acquisto è una deduzione limitata allo 0,8% del limite dell'esenzione totale, quindi oltre paghi lo 0,8% solo sulla parte eccedente. Il bollo sul mutuo resta dovuto.",
         "assumptionLoan": "Il bollo sul mutuo presuppone un finanziamento di cinque anni o più e si paga sempre. Commissioni del mutuo, perizia e costi di notaio o registro non sono inclusi.",
         "assumptionUnsupported": "Non supportati: non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni dell'articolo 9 del CIMT.",
         "assumptionIslands": "Per Azzorre e Madeira i limiti sono quelli del continente aumentati del 25% e arrotondati all'euro, con le stesse aliquote. Conferma i limiti regionali con l'autorità fiscale."

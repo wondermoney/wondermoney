@@ -64,9 +64,12 @@ describe("purchase taxes (IMT and Imposto do Selo, 2026 table)", () => {
     expect(resultFor({ young: false, loan: 0 }).exemption).toBe("none");
     expect(resultFor({ young: true, use: "secondary", loan: 0 }).exemption).toBe("none");
     expect(resultFor({ young: true, price: 400_000, loan: 0 })).toMatchObject({
-      exemption: "partial", imt: 5_556.88, stampPurchase: 3_200,
+      exemption: "partial", imt: 5_556.88, stampPurchase: 555.69,
     });
     expect(resultFor({ young: true, price: 700_000, loan: 0 }).exemption).toBe("none");
+    expect(resultFor({ young: true, price: 600_000, region: "islands", loan: 100_000 })).toMatchObject({
+      exemption: "partial", imt: 14_946.08, stampPurchase: 1_494.61, stampLoan: 600,
+    });
     expect(resultFor({ young: true, region: "islands", price: 400_000, loan: 0 }).exemption).toBe("full");
   });
 
