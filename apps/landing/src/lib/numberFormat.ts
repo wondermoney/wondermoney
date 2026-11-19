@@ -67,7 +67,10 @@ export function formatNumber(lang: Lang, value: number, decimals = 0): string {
 
 /** A month and year, e.g. "mar. de 2029" in pt. */
 export function formatMonthYear(lang: Lang, date: Date): string {
-	return new Intl.DateTimeFormat(toIntlLocale(lang), { month: "short", year: "numeric", timeZone: "UTC" }).format(date)
+	// Composed from the month name rather than Intl's month-year pattern: that pattern differs
+	// between ICU builds (pt-PT is "set. de 2026" in Node and "09/2026" in Chrome), which breaks
+	// hydration of prerendered pages. Short month names agree across both.
+	return `${formatMonth(lang, date)} ${date.getUTCFullYear()}`
 }
 
 /** A short month name, e.g. "mai." in pt. */
