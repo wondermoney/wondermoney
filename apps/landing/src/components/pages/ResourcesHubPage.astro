@@ -1,0 +1,58 @@
+---
+import "@/styles/globals.css";
+import ContentLayout from "@/layouts/ContentLayout.astro";
+import type { Lang } from "@/lib/i18nLocale";
+import { buildResourcesHub } from "@/lib/resourcesHub";
+import { buildAlternateLinks, toLocalizedPath } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const links = buildResourcesHub(locale);
+const routeId = "pageResources";
+---
+
+<ContentLayout
+  title={t("resources.metaTitle")}
+  description={t("resources.metaDescription")}
+  alternateLinks={buildAlternateLinks(routeId)}
+  breadcrumbs={[{ label: t("footer.resources"), href: toLocalizedPath(routeId, locale) }]}
+  locale={locale}
+>
+  <section aria-labelledby="resources-title" class="max-w-4xl">
+    <h1 id="resources-title" class="break-words text-3xl font-bold tracking-tight sm:text-4xl">
+      {t("resources.title")}
+    </h1>
+    <p class="mt-3 max-w-prose text-lg text-muted-foreground">
+      {t("resources.intro")}
+    </p>
+
+    <ul id="resources-hub-links" role="list" class="mt-6 grid gap-x-8 border-t border-border sm:grid-cols-2">
+      {links.map(({ destination, href, title, description }) => (
+        <li class="min-w-0 border-b border-border">
+          <a
+            href={href}
+            data-resource-destination={destination}
+            class="group block rounded-sm py-4 active:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            <h2 class="text-base font-semibold underline decoration-border underline-offset-4 group-hover:decoration-current">
+              {title}
+            </h2>
+            <p class="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</ContentLayout>
+
+<script>
+  import { trackResourcesHubClicks } from "@/lib/resourcesHubTracking";
+
+  const links = document.getElementById("resources-hub-links");
+  if (links) trackResourcesHubClicks(links);
+</script>

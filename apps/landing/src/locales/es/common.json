@@ -1,4 +1,62 @@
 {
+  "guidedStart": {
+    "title": "¿Por dónde empezar?",
+    "metaTitle": "¿Por dónde empezar con tus finanzas personales? | WonderMoney",
+    "metaDescription": "Responde a dos preguntas para encontrar una calculadora de presupuesto, ahorro o inversión. Después, prueba un breve test de educación financiera.",
+    "intro": "Encuentra una calculadora para tu próxima decisión y comprueba lo que sabes de finanzas personales.",
+    "goalQuestion": "¿En qué quieres trabajar?",
+    "taskQuestion": "¿Qué te ayudaría ahora?",
+    "findTool": "Ver por dónde empezar",
+    "resultTitle": "Una calculadora para empezar",
+    "browse": "Ver las seis calculadoras",
+    "goals": {
+      "budget": "Organizar mis finanzas",
+      "savings": "Aumentar mis ahorros",
+      "investing": "Entender cómo crecen las inversiones"
+    },
+    "tasks": {
+      "review": "Revisar mi situación actual",
+      "plan": "Explorar un escenario futuro"
+    },
+    "quiz": {
+      "title": "Test de educación financiera",
+      "intro": "Prueba cuatro preguntas sobre presupuestos, comisiones, inflación y diversificación.",
+      "open": "Abrir el test",
+      "submit": "Comprobar mis respuestas",
+      "score": "{{score}} de {{total}} respuestas correctas",
+      "correct": "Correcto",
+      "incorrect": "Respuesta correcta",
+      "retry": "Volver a intentarlo",
+      "budget": {
+        "question": "¿Qué comparas para saber cuánto sobra en un presupuesto mensual?",
+        "choice0": "Los ingresos y gastos del mes",
+        "choice1": "Solo las facturas recurrentes",
+        "choice2": "Los ingresos del año anterior",
+        "explanation": "Al restar los gastos de los ingresos mensuales, ves si sobra dinero o si gastas más de lo que ingresas."
+      },
+      "fees": {
+        "question": "Si dos inversiones tienen la misma rentabilidad bruta, ¿qué efecto tienen unas comisiones más altas en la rentabilidad neta?",
+        "choice0": "La aumentan",
+        "choice1": "La dejan igual",
+        "choice2": "La reducen",
+        "explanation": "Las comisiones se descuentan de la inversión. Con la misma rentabilidad bruta, una comisión más alta reduce lo que te queda."
+      },
+      "inflation": {
+        "question": "Si los precios suben en general y tus ingresos se mantienen, ¿qué ocurre con tu poder adquisitivo?",
+        "choice0": "Aumenta",
+        "choice1": "Disminuye",
+        "choice2": "Se mantiene",
+        "explanation": "Cuando suben los precios, con la misma cantidad de dinero puedes comprar menos bienes y servicios."
+      },
+      "diversification": {
+        "question": "¿Por qué repartir el dinero entre varias inversiones?",
+        "choice0": "Para depender menos de una sola inversión",
+        "choice1": "Para garantizar un beneficio",
+        "choice2": "Para que todas las inversiones evolucionen igual",
+        "explanation": "Diversificar puede reducir el impacto de una inversión con malos resultados. Una cartera diversificada puede perder valor."
+      }
+    }
+  },
   "global": {
     "mainCta": "Empieza gratis",
     "mainCtaMicrocopy": "Gratis y de código abierto. Úsalo aquí o en tu propio servidor.",
@@ -631,6 +689,86 @@
       "pageTitle": "Calculadora de tasa de ahorro — WonderMoney",
       "pageDescription": "Calculadora de tasa de ahorro gratuita. Descubre qué porcentaje de tus ingresos ahorras cada mes. Compara con la regla 50/30/20 y los objetivos del movimiento FIRE.",
       "subtitle": "Descubre qué porcentaje de tus ingresos estás ahorrando cada mes. Tu tasa de ahorro es uno de los números más importantes en las finanzas personales — determina la rapidez con la que acumulas riqueza."
+    },
+    "investorProfile": {
+      "title": "Test de perfil inversor",
+      "shortName": "Perfil inversor",
+      "description": "Reflexiona sobre tu capacidad financiera para asumir pérdidas y tu comodidad ante el riesgo.",
+      "pageTitle": "Test de perfil inversor | WonderMoney",
+      "pageDescription": "Responde seis preguntas sobre tu horizonte, tu margen financiero y tu reacción a las pérdidas. Descubre cómo se puntúa el test de perfil inversor.",
+      "subtitle": "Elige un objetivo de inversión. Responde seis preguntas para comparar tu capacidad financiera para asumir pérdidas con tu comodidad ante el riesgo.",
+      "progress": "Pregunta {{step}} de {{total}}",
+      "next": "Continuar",
+      "back": "Atrás",
+      "finish": "Ver mi resultado",
+      "review": "Revisar respuestas",
+      "required": "Elige una respuesta para continuar.",
+      "javascript": "Activa JavaScript para hacer el test.",
+      "capacityLabel": "Capacidad financiera",
+      "comfortLabel": "Comodidad ante el riesgo",
+      "methodHeading": "Cómo se puntúan tus respuestas",
+      "dimensions": "Las tres primeras respuestas describen tu capacidad financiera: cuándo necesitas el dinero, cuánto puedes aplazar esa fecha y si tienes una reserva aparte. Las otras tres reflejan tu comodidad ante el riesgo: tu reacción a una caída, cómo llevas las oscilaciones y qué prefieres entre estabilidad y potencial de crecimiento.",
+      "method": "Cada respuesta vale 0, 1 o 2 puntos según el orden en el que aparece. Cada grupo suma entre 0 y 6 puntos. La menor puntuación determina el resultado: 0 a 2 es bajo, 3 a 4 es moderado y 5 a 6 es alto.",
+      "exampleHeading": "Ejemplo",
+      "example": "Si tus tres primeras respuestas valen 0, 1 y 1, tu capacidad suma 2 de 6 puntos. Si las otras tres valen 2 puntos cada una, tu comodidad suma 6 de 6. El nivel es bajo porque la capacidad tiene la puntuación menor.",
+      "assumptionsHeading": "Supuestos y límites",
+      "limitations": "El test usa situaciones hipotéticas y tus propias estimaciones para un único objetivo. Tus respuestas pueden cambiar si cambian tus finanzas o tu objetivo. La puntuación es una regla didáctica sin validar como evaluación de idoneidad. El test no ofrece asesoramiento de inversión.",
+      "source": "Tolerancia al riesgo (Investor.gov, en inglés)",
+      "nextStepHeadline": "Descubre cómo encaja el riesgo en la visión general de tus inversiones",
+      "nextStepDescription": "Mira cómo WonderMoney reúne tus inversiones y su evolución.",
+      "nextStepCta": "Explorar el resumen de la cartera",
+      "results": {
+        "lower": {
+          "title": "Nivel de riesgo bajo",
+          "description": "Al menos una puntuación es baja para este objetivo. Compáralas para ver si el límite está en tu capacidad financiera, en tu comodidad ante las pérdidas o en ambas."
+        },
+        "middle": {
+          "title": "Nivel de riesgo moderado",
+          "description": "La menor puntuación está en el tramo intermedio. Compara tu margen financiero con cómo esperas reaccionar ante una caída."
+        },
+        "higher": {
+          "title": "Nivel de riesgo alto",
+          "description": "Las dos puntuaciones son altas para este objetivo según tus respuestas. Aun así, las pérdidas pueden ser mayores o durar más de lo que sugieren los escenarios."
+        }
+      },
+      "questions": {
+        "horizon": {
+          "prompt": "¿Cuándo crees que necesitarás la mayor parte de este dinero?",
+          "choice0": "En menos de 3 años",
+          "choice1": "Entre 3 y 7 años",
+          "choice2": "Dentro de más de 7 años"
+        },
+        "flexibility": {
+          "prompt": "Si el valor bajara poco antes de necesitar el dinero, ¿podrías aplazar su uso?",
+          "choice0": "No, la fecha es fija",
+          "choice1": "Sí, unos meses",
+          "choice2": "Sí, un año o más"
+        },
+        "cashBuffer": {
+          "prompt": "¿Podrías cubrir un gasto esencial imprevisto sin usar el dinero de este objetivo?",
+          "choice0": "Probablemente no",
+          "choice1": "Podría cubrir una parte",
+          "choice2": "Podría cubrirlo con una reserva aparte"
+        },
+        "drop": {
+          "prompt": "Imagina que tu inversión baja un 20 % en pocos meses. ¿Cuál sería tu primera reacción?",
+          "choice0": "Vender casi todo o todo",
+          "choice1": "Reducir el importe invertido",
+          "choice2": "Revisar mi plan antes de decidir si cambio algo"
+        },
+        "fluctuations": {
+          "prompt": "¿Cómo te sentirías si el valor subiera y bajara mucho durante varios años?",
+          "choice0": "Me costaría mantener mi plan",
+          "choice1": "Podría aceptarlo, pero me preocuparía",
+          "choice2": "Podría convivir con esos cambios"
+        },
+        "tradeoff": {
+          "prompt": "¿Qué opción te resulta más cómoda para este objetivo?",
+          "choice0": "Más estabilidad, aunque haya menos potencial de crecimiento",
+          "choice1": "Un equilibrio entre estabilidad y potencial de crecimiento",
+          "choice2": "Más potencial de crecimiento, aunque las posibles pérdidas sean mayores"
+        }
+      }
     },
     "investmentReturn": {
       "title": "Rentabilidad y proyección de inversiones en índices",
@@ -2196,6 +2334,38 @@
         "assumptionFees": "Las comisiones iniciales se pagan, o se descuentan del importe, al empezar el préstamo; las comisiones mensuales son iguales todos los meses.",
         "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
         "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
+      }
+    }
+  },
+  "resources": {
+    "metaTitle": "Recursos de educación financiera | WonderMoney",
+    "metaDescription": "Encuentra guías de finanzas personales, un glosario, novedades mensuales y calculadoras de presupuesto y fondo de emergencia.",
+    "title": "Recursos de educación financiera",
+    "intro": "Encuentra tu próximo paso, desde aclarar un término hasta preparar un presupuesto.",
+    "links": {
+      "guides": {
+        "title": "Guías de finanzas personales",
+        "description": "Aprende paso a paso a hacer un presupuesto, ahorrar e invertir."
+      },
+      "glossary": {
+        "title": "Glosario financiero",
+        "description": "Consulta los términos que no conozcas cuando leas sobre finanzas."
+      },
+      "monthly": {
+        "title": "Novedades mensuales",
+        "description": "Descubre qué ha cambiado en los principales indicadores y cómo se calculan."
+      },
+      "household_budget": {
+        "title": "Calculadora de presupuesto familiar",
+        "description": "Compara los ingresos y gastos de tu hogar para saber cuánto te queda al mes."
+      },
+      "emergency_fund": {
+        "title": "Calculadora de fondo de emergencia",
+        "description": "Estima cuánto separar para cubrir varios meses de gastos esenciales."
+      },
+      "tools": {
+        "title": "Todas las calculadoras",
+        "description": "Explora herramientas para hacer presupuestos, evaluar préstamos e invertir."
       }
     }
   },
