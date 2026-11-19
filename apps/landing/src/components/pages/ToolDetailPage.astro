@@ -50,6 +50,8 @@ import YouthMortgageCalculatorComp from "@/components/calculators/YouthMortgageC
 import YouthMortgageGuide from "@/components/calculators/YouthMortgageGuide.astro";
 import NetSalaryCalculatorComp from "@/components/calculators/NetSalaryCalculatorComp";
 import NetSalaryGuide from "@/components/calculators/NetSalaryGuide.astro";
+import UnemploymentBenefitCalculatorComp from "@/components/calculators/UnemploymentBenefitCalculatorComp";
+import UnemploymentBenefitGuide from "@/components/calculators/UnemploymentBenefitGuide.astro";
 import WithholdingTablesComp from "@/components/calculators/WithholdingTablesComp";
 import WithholdingTablesGuide from "@/components/calculators/WithholdingTablesGuide.astro";
 import PropertyCapitalGainsCalculatorComp from "@/components/calculators/PropertyCapitalGainsCalculatorComp";
@@ -186,6 +188,11 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.netSalary.nextStepDescription"),
     ctaText: t("tools.netSalary.nextStepCta"),
   },
+  toolUnemploymentBenefit: {
+    headline: t("tools.unemploymentBenefit.nextStepHeadline"),
+    description: t("tools.unemploymentBenefit.nextStepDescription"),
+    ctaText: t("tools.unemploymentBenefit.nextStepCta"),
+  },
   toolWithholdingTables: {
     headline: t("tools.withholdingTables.nextStepHeadline"),
     description: t("tools.withholdingTables.nextStepDescription"),
@@ -292,6 +299,7 @@ const schema = {
     {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
     {routeId === "toolNetSalary" && <NetSalaryCalculatorComp locale={locale} client:load />}
     {routeId === "toolWithholdingTables" && <WithholdingTablesComp locale={locale} client:load />}
+    {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitCalculatorComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
     {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
@@ -318,6 +326,7 @@ const schema = {
   {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
   {routeId === "toolNetSalary" && <NetSalaryGuide locale={locale} />}
   {routeId === "toolWithholdingTables" && <WithholdingTablesGuide locale={locale} />}
+  {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
   {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
   {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}

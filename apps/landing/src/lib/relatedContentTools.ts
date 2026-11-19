@@ -60,6 +60,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolWithholdingTables",
   },
   {
+    sources: ["toolNetSalary", "toolEmergencyFund", "toolHouseholdBudget"],
+    destination: "toolUnemploymentBenefit",
+  },
+  {
     sources: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
     destination: "toolVehicleTax",
   },

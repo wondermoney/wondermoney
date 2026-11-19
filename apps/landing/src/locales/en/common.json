@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney turns your estimated take-home pay into a plan, so every euro has a job before the month starts.",
       "nextStepCta": "Use the net estimate in a monthly plan"
     },
+    "unemploymentBenefit": {
+      "title": "Portugal unemployment benefit calculator 2026",
+      "shortName": "Unemployment benefit",
+      "subtitle": "Estimate the monthly subsídio de desemprego, how long it lasts and the total, with the 2026 limits.",
+      "description": "Estimate your unemployment benefit in Portugal: monthly amount, duration and total.",
+      "pageTitle": "Unemployment Benefit Calculator Portugal 2026: Amount and Duration",
+      "pageDescription": "Estimate the subsídio de desemprego in Portugal: 65% of your reference pay, the 2026 IAS limits, the duration by age and contributions, and a reduced-income figure for your budget.",
+      "fields": {
+        "grossMonthly": "Gross monthly salary",
+        "allowances": "Allowances",
+        "age": "Age when you became unemployed",
+        "contributionMonths": "Months with registered pay",
+        "years20": "Years with registered pay in the last 20",
+        "household": "Household",
+        "dependants": "Children or dependants"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 payments (holiday and Christmas paid separately)",
+        "twelfths": "In twelfths (the salary already includes them)"
+      },
+      "households": {
+        "alone": "I live alone or my partner has no right to the increase",
+        "partnerWorking": "My partner is working",
+        "partnerUnemployed": "My partner is also unemployed (registered at IEFP)",
+        "singleParent": "I am the only parent in the household"
+      },
+      "help": {
+        "gross": "The base salary in the last months, before Social Security and IRS. The 12 months counted include the holiday and Christmas allowances.",
+        "allowances": "With 14 payments the calculator counts 14 times your salary; in twelfths it counts 12 times, because the allowances are already inside.",
+        "age": "Your age on the day you became unemployed.",
+        "months": "Months with registered pay since you last received unemployment benefit. The table starts at 12 months.",
+        "years20": "Full years with registered pay in the last 20 years. Every 5 years add extra days.",
+        "household": "The 10% increase needs children or dependants and either both partners unemployed and registered, or a single-parent household. It must be requested."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "belowTable": "The duration table starts at {{min}} months with registered pay. With less, this estimate does not apply.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthly": "Estimated monthly benefit (30 days)",
+        "daily": "Benefit per day",
+        "duration": "Estimated duration",
+        "durationValue": "{{days}} days (about {{months}} months)",
+        "durationParts": "Of which base period and extra days",
+        "durationPartsValue": "{{base}} + {{extra}} days",
+        "total": "Estimated total over the whole period",
+        "netBefore": "Estimated net reference pay per month",
+        "drop": "Monthly income drop for your budget",
+        "increaseApplied": "The 10% increase for households with children is included.",
+        "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
+        "limit": {
+          "none": "The amount is 65% of your reference pay; no limit applied.",
+          "max": "The amount reached the maximum of 2.5 times the IAS ({{max}} a month).",
+          "netCap": "The amount was limited to 75% of your estimated net reference pay.",
+          "minimum": "The amount was raised to the minimum, 1 IAS ({{ias}} a month).",
+          "minimumWage": "The amount was raised to 1.15 times the IAS, the minimum when the pay used is at least the minimum wage."
+        }
+      },
+      "checklist": {
+        "title": "Conditions to check (not a decision)",
+        "involuntary": "Your unemployment is involuntary, for example a dismissal or the end of a fixed-term contract.",
+        "contributions": "You have at least 360 days of registered pay in the 24 months before you became unemployed.",
+        "registration": "You are registered at the employment centre (IEFP).",
+        "ready": "You live in Portugal and are able and available to work.",
+        "deadline": "You request the benefit within 90 days of becoming unemployed.",
+        "note": "Only Segurança Social decides whether you are entitled. This list is a reminder, not a verdict."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone aged {{age}}, earning {{gross}} a month in 14 payments, with {{months}} months and {{years}} years of registered pay in the last 20, living alone. The reference pay is {{reference}} a day, so 65% for 30 days gives {{monthly}} a month ({{daily}} a day). The period is {{base}} days plus {{extra}} extra days, {{days}} days in total, so about {{total}} over the whole period. Compared with an estimated net pay of {{net}} a month, the income drop is {{drop}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference remuneration (RR) is all pay registered in the oldest 12 of the 14 months before the month you became unemployed, including the holiday and Christmas allowances, divided by 360. The calculator takes 14 or 12 times your monthly salary.",
+        "methodAmount": "The daily benefit is 65% of the RR. The monthly figure is 30 days of it.",
+        "methodLimits": "The monthly benefit cannot exceed 2.5 times the IAS ({{max}} in 2026) or 75% of the net RR, and cannot be below 1 IAS ({{ias}}), except when the net RR is lower than the IAS. When the pay used is at least the minimum wage ({{rmmg}}), the minimum is 1.15 IAS.",
+        "methodNet": "The net RR is the RR minus 11% Social Security and the IRS withholding rate. The calculator estimates that rate from the 2026 mainland withholding tables for your monthly salary, as a single holder, or as married with two earners if your partner is in the household.",
+        "methodIncrease": "The benefit goes up 10% when both partners are unemployed and registered, or you are the only parent, and there are children or dependants. It must be requested. The calculator applies it to the limited amount and never above 2.5 IAS.",
+        "methodDuration": "The duration depends on your age and months with registered pay, plus extra days for every full 5 years with registered pay in the last 20: 30 days up to age 39, 45 days from 40 to 49 and 60 days from 50.",
+        "methodNoReduction": "The old 10% cut after 180 days of payment is not applied: the 2026 Segurança Social guide does not list it.",
+        "methodTax": "The Segurança Social guide says the benefit does not have to be declared for IRS. Confirm your own case with the Tax Authority.",
+        "methodBudget": "The monthly benefit is the income to plan with. Compare it with your net pay to see the drop, then see how long your savings cover the gap.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedTransitional": "The transitional table for people who already met the contribution requirement on 31 March 2012 and have not been unemployed since. The calculator uses only the general table.",
+        "unsupportedSocial": "The social unemployment benefit (subsídio social de desemprego), which the guide says can only be requested until 30 December 2026.",
+        "unsupportedSelfEmployed": "Self-employed workers, company managers, partial unemployment benefit, teachers with their own contribution rules and former invalidity pensioners.",
+        "unsupportedOther": "Pay that varied a lot in the 12 months counted, periods without registered pay inside them, other income and the one-off lump-sum payment to start a business.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 October 2026), which also lists the 2026 IAS of 537.13 euros (Portaria n.º 480-A/2025/1) and the minimum wage of 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, as amended: the unemployment protection regime",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: the 10% increase for households with children and the 1.15 IAS minimum",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the Diário da República text of Decreto-Lei n.º 119/2021. The IRS rate behind the 75% cap and the order of the 10% increase are our simplifications, and the end of the 10% cut after 180 days is taken from the guide and press reports, not from the consolidated law."
+      },
+      "nextStepHeadline": "Before the income drops, plan the cushion",
+      "nextStepDescription": "WonderMoney shows your cash, your monthly spending and how long your savings last on a lower income.",
+      "nextStepCta": "Estimate how long your cash buffer will last"
+    },
     "vehicleTax": {
       "title": "Vehicle tax (IUC) calculator",
       "shortName": "Vehicle tax (IUC)",
