@@ -38,6 +38,12 @@ import CarLoanGuide from "@/components/calculators/CarLoanGuide.astro";
 import PersonalLoanGuide from "@/components/calculators/PersonalLoanGuide.astro";
 import InflationCalculatorComp from "@/components/calculators/InflationCalculatorComp";
 import InflationGuide from "@/components/calculators/InflationGuide.astro";
+import SavingsCertificatesCalculatorComp from "@/components/calculators/SavingsCertificatesCalculatorComp";
+import SavingsCertificatesGuide from "@/components/calculators/SavingsCertificatesGuide.astro";
+import PropertyTaxCalculatorComp from "@/components/calculators/PropertyTaxCalculatorComp";
+import PropertyTaxGuide from "@/components/calculators/PropertyTaxGuide.astro";
+import PurchaseTaxesCalculatorComp from "@/components/calculators/PurchaseTaxesCalculatorComp";
+import PurchaseTaxesGuide from "@/components/calculators/PurchaseTaxesGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -135,6 +141,21 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.inflation.nextStepCta"),
     ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
+  toolSavingsCertificates: {
+    headline: t("tools.savingsCertificates.nextStepHeadline"),
+    description: t("tools.savingsCertificates.nextStepDescription"),
+    ctaText: t("tools.savingsCertificates.nextStepCta"),
+  },
+  toolPropertyTax: {
+    headline: t("tools.propertyTax.nextStepHeadline"),
+    description: t("tools.propertyTax.nextStepDescription"),
+    ctaText: t("tools.propertyTax.nextStepCta"),
+  },
+  toolPurchaseTaxes: {
+    headline: t("tools.purchaseTaxes.nextStepHeadline"),
+    description: t("tools.purchaseTaxes.nextStepDescription"),
+    ctaText: t("tools.purchaseTaxes.nextStepCta"),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -229,7 +250,12 @@ const schema = {
     {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
     {routeId === "toolCarLoan" && <CarLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolInflation" && <InflationCalculatorComp locale={locale} client:load />}
+    {routeId === "toolSavingsCertificates" && (
+      <SavingsCertificatesCalculatorComp locale={locale} client:load />
+    )}
+    {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
+    {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -247,7 +273,10 @@ const schema = {
   {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
   {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
   {routeId === "toolInflation" && <InflationGuide locale={locale} />}
+  {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
+  {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
+  {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

@@ -507,6 +507,78 @@
         "methodology": "Metodología del INE"
       }
     },
+    "propertyTax": {
+      "title": "Calculadora del IMI portugués",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Estima el IMI anual de un inmueble en Portugal, cuándo vence cada plazo y cuánto apartar cada mes.",
+      "description": "Estima el IMI portugués, las fechas de pago y la reserva mensual.",
+      "pageTitle": "Calculadora del IMI: impuesto municipal sobre inmuebles en Portugal",
+      "pageDescription": "Estima el IMI anual a partir del valor patrimonial tributario y el tipo municipal, con los plazos de mayo, agosto y noviembre y el importe mensual a reservar.",
+      "fields": {
+        "kind": "Tipo de inmueble",
+        "vpt": "Valor patrimonial tributario (VPT)",
+        "rate": "Tipo municipal",
+        "dependants": "Dependientes (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Inmueble urbano",
+        "rustic": "Inmueble rústico"
+      },
+      "vptHelp": "El VPT figura en la caderneta predial y en el aviso de cobro del IMI.",
+      "rateHelp": "Cada municipio fija su tipo para inmuebles urbanos, entre {{min}} y {{max}}. El valor inicial es solo un ejemplo: usa el tipo de tu municipio.",
+      "rusticNote": "Los inmuebles rústicos tributan al tipo nacional del {{rate}}. No hay tipo municipal que introducir.",
+      "dependantsHelp": "Solo si el inmueble es tu vivienda habitual y tu municipio aplica la reducción del IMI Familiar. Muchos no la aplican, o solo a partir de cierto número de dependientes.",
+      "dependantsOptions": {
+        "0": "Sin reducción",
+        "1": "1 dependiente (30 €)",
+        "2": "2 dependientes (70 €)",
+        "3": "3 o más dependientes (140 €)"
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "rateRange": "Introduce un tipo de {{min}} a {{max}}, el intervalo legal para inmuebles urbanos.",
+        "dependants": "Elige el número de dependientes de la lista.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "annualTax": "IMI anual estimado",
+        "monthlyProvision": "Reserva mensual (IMI anual ÷ 12)",
+        "grossTax": "IMI antes de la reducción",
+        "deduction": "Reducción del IMI Familiar",
+        "scheduleTitle": "Calendario de pago",
+        "nothingDue": "Nada que pagar: la reducción cubre todo el impuesto."
+      },
+      "months": {
+        "may": "Mayo",
+        "august": "Agosto",
+        "november": "Noviembre"
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo",
+        "example": "Un inmueble con un VPT de {{vpt}} en un municipio que aplica el {{rate}} debe {{tax}} al año. Como el importe supera 500 €, se paga en tres plazos de {{instalment}} en mayo, agosto y noviembre. Apartar {{monthly}} al mes lo cubre.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodTax": "El IMI anual es el VPT por el tipo, redondeado al céntimo. Los inmuebles urbanos usan el tipo fijado por el municipio, que por ley está entre el 0,30 % y el 0,45 %. Los rústicos usan el 0,8 %.",
+        "methodFamily": "Si eliges un número de dependientes, el importe fijo del IMI Familiar (30 € con uno, 70 € con dos, 140 € con tres o más) se resta del impuesto, que nunca baja de cero. Que se aplique depende de tu municipio.",
+        "methodPayment": "El impuesto se paga en un plazo en mayo hasta 100 €, en dos en mayo y noviembre entre 100 € y 500 €, y en tres en mayo, agosto y noviembre por encima de 500 €. Los plazos son iguales; el céntimo de redondeo, si lo hay, va al último.",
+        "methodBudget": "La reserva mensual divide el impuesto anual entre 12 para tener el dinero listo cuando venza cada plazo.",
+        "exemptionTitle": "Exención para la vivienda habitual",
+        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI, durante un tiempo limitado tras la compra o mientras los ingresos del hogar y el VPT queden por debajo de los límites del Estatuto de los Beneficios Fiscales. Los límites cambian y hay condiciones, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionRate": "El tipo municipal lo introduces tú. Esta página no incluye una tabla de tipos municipales, y los municipios pueden subir o bajar el tipo en casos concretos, como edificios vacíos o degradados, que la calculadora ignora.",
+        "assumptionScope": "La estimación cubre un único inmueble con las reglas generales. No incluye el IMI adicional (AIMI), las exenciones temporales ni otras deducciones municipales.",
+        "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Lo que cuenta es el importe del aviso de cobro del IMI de la Autoridad Tributaria.",
+        "sourcesTitle": "Fuentes",
+        "sourceRates": "Código do IMI, artículo 112: tipos (consultado el 19 de noviembre de 2026)",
+        "sourcePayment": "Código do IMI, artículo 120: pago a plazos (consultado el 19 de noviembre de 2026)",
+        "sourceExemption": "Portal das Finanças: exenciones del IMI e IMI Familiar",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI, según bancos y municipios portugueses."
+      },
+      "nextStepHeadline": "Que el IMI no te pille por sorpresa",
+      "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del IMI cada mes, para que los plazos ya estén cubiertos.",
+      "nextStepCta": "Reserva dinero cada mes para tu IMI"
+    },
     "hub": {
       "title": "Herramientas y calculadoras financieras",
       "description": "Calculadoras interactivas gratuitas para ayudarte a planificar tu futuro financiero. Sin registro.",
@@ -2334,6 +2406,88 @@
       "nextStepDescription": "Reserva dinero en WonderMoney para la cuota, el combustible y las facturas que lleguen a lo largo del año.",
       "nextStepCta": "Empieza tu presupuesto en WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Calculadora de impuestos de compra de vivienda en Portugal (IMT y sello)",
+      "shortName": "Impuestos de compra",
+      "subtitle": "Estima el IMT y el impuesto de timbre (Imposto do Selo) que pagas al comprar un inmueble en Portugal y cuánto efectivo añadir a tu entrada.",
+      "description": "Estima el IMT y el impuesto de timbre al comprar un inmueble en Portugal.",
+      "pageTitle": "Calculadora de IMT y Imposto do Selo al comprar vivienda en Portugal",
+      "pageDescription": "Estima el IMT y el Imposto do Selo de 2026 al comprar un inmueble en Portugal: península o islas, uso, timbre de la hipoteca y exención para jóvenes.",
+      "propertyTitle": "Inmueble",
+      "financingTitle": "Hipoteca",
+      "youngTitle": "Exención para jóvenes (IMT Jovem)",
+      "youngNote": "Solo si se cumplen todas las condiciones en la fecha de la escritura: tienes 35 años o menos, es tu primera vivienda y vivirás en ella de forma permanente. Exención total hasta {{full}}; parcial hasta {{partial}}, con IMT y timbre de la compra solo sobre el exceso.",
+      "youngUnavailable": "La exención solo se aplica a la vivienda propia y permanente. Elige ese uso para comprobar si cumples los requisitos.",
+      "fields": {
+        "price": "Precio de compra",
+        "taxValue": "Valor patrimonial tributario (VPT), opcional",
+        "region": "Ubicación",
+        "use": "Uso del inmueble",
+        "loan": "Importe de la hipoteca",
+        "young": "Cumplo las condiciones de la exención para jóvenes"
+      },
+      "help": {
+        "price": "El precio que figura en la escritura.",
+        "taxValue": "Hacienda grava el mayor entre el precio y el VPT. Déjalo en cero si no lo sabes.",
+        "loan": "Indica cero si compras al contado. El timbre de la hipoteca no queda cubierto por la exención para jóvenes en esta calculadora."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Azores o Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Vivienda propia y permanente",
+        "secondary": "Segunda vivienda u otros fines",
+        "rustic": "Terreno rústico",
+        "otherUrban": "Otros inmuebles urbanos o terrenos"
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "loan": "La hipoteca no puede superar el precio de compra.",
+        "summary": "Revisa los campos resaltados para ver tu estimación."
+      },
+      "result": {
+        "total": "Total de impuestos a pagar",
+        "effectiveRate": "{{rate}} del valor imponible",
+        "reference": "Valor imponible",
+        "imt": "IMT",
+        "stampPurchase": "Timbre de la compra (0,8 %)",
+        "stampLoan": "Timbre de la hipoteca (0,6 %)",
+        "exemptFull": "Exención para jóvenes aplicada: elimina el IMT y el timbre de la compra y ahorra {{saving}}.",
+        "exemptPartial": "Exención parcial para jóvenes aplicada: el IMT y el timbre de la compra se cobran solo sobre la parte que supera el límite de la exención total. Ahorra {{saving}} en total.",
+        "exemptNone": "Con este valor la exención no se aplica. Cubre compras de hasta {{partial}} (total hasta {{full}}) y solo con las condiciones del recuadro de la izquierda.",
+        "tableNote": "Tabla de {{year}}, revisada el {{date}}. Estimación educativa, no es asesoramiento fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Comprar una vivienda propia y permanente en Portugal continental por {{price}} con una hipoteca de {{loan}} supone {{imt}} de IMT, {{stampPurchase}} de timbre de la compra y {{stampLoan}} de timbre de la hipoteca. Son {{total}} en total, que pagas además de la entrada y que conviene sumar a tu objetivo de ahorro.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodBase": "La base es el mayor entre el precio de compra y el valor patrimonial tributario (VPT).",
+        "methodImt": "En vivienda, el IMT es la base por el tipo de su tramo menos una deducción fija (parcela a abater) que hace el impuesto progresivo. Por encima del último tramo progresivo el tipo se aplica a todo el valor sin deducción. El suelo rústico paga el 5 % y otros inmuebles urbanos o terrenos el 6,5 %.",
+        "methodStamp": "El timbre es el 0,8 % de la base en la compra (verba 1.1) y, si pides hipoteca, el 0,6 % del importe prestado (verba 17.1.4, préstamos de cinco años o más).",
+        "methodRounding": "El IMT y cada timbre se redondean por separado al céntimo, como los liquida la autoridad tributaria. El timbre sobre intereses y comisiones no está incluido.",
+        "tableTitle": "Tabla de IMT {{year}}: vivienda propia y permanente, Portugal continental",
+        "tableAbove": "Valores superiores",
+        "tableLimit": "Valor hasta",
+        "tableRate": "Tipo",
+        "tableDeduct": "Deducción",
+        "tableNote": "Hasta {{exempt}} el primer tramo es del 0 %. La segunda vivienda tiene su propia tabla, con el 1 % desde el primer euro, y Azores y Madeira usan los mismos tipos con límites un 25 % más altos.",
+        "sourceImt": "CIMT, artículo 17 (Portal das Finanças)",
+        "sourceStamp": "Código del impuesto de timbre (Portal das Finanças)",
+        "review": "Reglas y límites de {{year}}, revisados por última vez el {{date}}. Compruébalos de nuevo antes de firmar.",
+        "assumptionsTitle": "Supuestos y situaciones admitidas",
+        "assumptionScope": "Esta calculadora sigue la ley fiscal portuguesa y solo se aplica a inmuebles situados en Portugal, sea cual sea tu país de residencia. Es educativa y no es asesoramiento fiscal.",
+        "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. La exención del timbre de la compra es una deducción limitada al 0,8 % del límite de la exención total, así que por encima pagas el 0,8 % solo sobre el exceso. El timbre de la hipoteca se sigue cobrando.",
+        "assumptionLoan": "El timbre de la hipoteca supone un préstamo de cinco años o más y se cobra siempre. No se incluyen comisiones de la hipoteca, tasación ni gastos de notaría o registro.",
+        "assumptionUnsupported": "No admitido: no residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT.",
+        "assumptionIslands": "Para Azores y Madeira los límites son los del continente aumentados un 25 % y redondeados al euro, con los mismos tipos. Confirma los límites regionales con la autoridad tributaria."
+      },
+      "nextStepHeadline": "Planifica el efectivo que necesitas para comprar",
+      "nextStepDescription": "Suma el IMT y el timbre al ahorro que necesitas antes de comprar y sigue tu progreso en WonderMoney.",
+      "nextStepCta": "Incluye los impuestos en tu objetivo de entrada para la vivienda"
+    },
     "personalLoan": {
       "title": "Simulador de préstamo personal",
       "shortName": "Préstamo personal",
@@ -2438,6 +2592,74 @@
         "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
         "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Calculadora de certificados de ahorro (Certificados de Aforro)",
+      "shortName": "Certificados de ahorro",
+      "subtitle": "Estima lo que podrían rendir los Certificados de Aforro Série F de Portugal: intereses trimestrales, primas de permanencia y 28% de IRS retenido, en bruto y en neto.",
+      "description": "Estima intereses, primas e impuestos de los Certificados de Aforro Série F.",
+      "pageTitle": "Calculadora de Certificados de Aforro Série F: intereses, primas y rentabilidad neta",
+      "pageDescription": "Estima la rentabilidad de los Certificados de Aforro Série F con primas de permanencia, retención del 28% de IRS y tipo base editable, en bruto y neto.",
+      "assumption": "El tipo base cambia cada mes con el Euríbor a 3 meses. Esta estimación mantiene el tipo que introduces en todos los trimestres, así que el resultado es una ilustración, no una previsión.",
+      "fields": {
+        "amount": "Importe suscrito",
+        "years": "Años de permanencia",
+        "baseRate": "Tipo base (supuesto)",
+        "baseRateHelp": "Tipo anual bruto, hasta {{rate}} (el límite de las normas). Edítalo para probar otros escenarios."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un tipo positivo.",
+        "tooSmall": "El mínimo por cuenta es {{min}}.",
+        "tooLarge": "El máximo por cuenta es {{max}}.",
+        "years": "Introduce un número entero de años, de 1 a {{years}}.",
+        "baseRate": "El tipo base no puede superar {{rate}}.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "finalValue": "Valor neto estimado al final",
+        "invested": "Importe suscrito",
+        "grossInterest": "Intereses brutos",
+        "irs": "IRS retenido (28%)",
+        "netInterest": "Intereses netos",
+        "premiumInterest": "De los intereses brutos, proceden de primas de permanencia",
+        "netYield": "Rentabilidad neta anual"
+      },
+      "table": {
+        "title": "Año a año",
+        "year": "Año",
+        "rate": "Tipo bruto",
+        "gross": "Intereses brutos",
+        "net": "Intereses netos",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Normas de la Série F que sigue la calculadora",
+        "rulesIntro": "Normas publicadas por el IGCP en la ficha de producto de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Las normas pueden cambiar y cuentan las condiciones vigentes del emisor.",
+        "ruleTerm": "Plazo de {{termYears}} años. Puedes reembolsar, total o parcialmente, desde el primer vencimiento de intereses; la calculadora usa años completos de permanencia.",
+        "ruleRate": "Cada trimestre rinde el tipo base vigente al inicio del trimestre más la prima de permanencia del año de suscripción. El tipo base sigue el Euríbor a 3 meses, con máximo de {{maxBase}} y mínimo de 0%.",
+        "ruleTax": "Los intereses vencen trimestralmente y se capitalizan automáticamente después de IRS, retenido en origen al {{irsRate}}.",
+        "ruleRedeem": "Solo pueden ser titulares personas físicas. El límite es {{maxAmount}} por cuenta aforro en la Série F, con un mínimo de {{minAmount}}.",
+        "premiumTitle": "Prima de permanencia por año de suscripción",
+        "premiumYears": "Año",
+        "premiumPoints": "Puntos porcentuales",
+        "sourceSheet": "Ficha de producto de la Série F del IGCP (abril de 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "abril de 2026",
+        "exampleTitle": "Ejemplo práctico",
+        "exampleText": "Suscribes {{amount}} y los mantienes {{years}} años con un tipo base de {{baseRate}}. Los certificados generan {{grossInterest}} de intereses brutos, de los que {{irs}} van a IRS, y quedan {{netInterest}} netos. El saldo llega a {{finalValue}}, una rentabilidad neta de {{netYield}} al año.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodQuarter": "Cada trimestre rinde un cuarto del tipo anual (tipo base más prima) sobre el saldo actual. Los importes se redondean al céntimo cada trimestre.",
+        "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
+        "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. El tipo real se revisa cada mes, por lo que los intereses efectivos serán distintos.",
+        "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
+        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
+      },
+      "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
+      "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
+      "nextStepCta": "Incluye los certificados en tu visión general del ahorro"
     }
   },
   "resources": {

@@ -344,6 +344,14 @@ const ROUTE_SLUGS = {
 		de: "autokredit-rechner",
 		it: "simulatore-prestito-auto",
 	},
+	toolSavingsCertificates: {
+		pt: "simulador-certificados-de-aforro",
+		en: "savings-certificates-calculator",
+		es: "simulador-certificados-de-ahorro-portugal",
+		fr: "simulateur-certificats-epargne-portugal",
+		de: "sparzertifikate-portugal-rechner",
+		it: "simulatore-certificati-risparmio-portogallo",
+	},
 	toolPersonalLoan: {
 		pt: "simulador-credito-pessoal",
 		en: "personal-loan-calculator",
@@ -359,6 +367,22 @@ const ROUTE_SLUGS = {
 		fr: "calculateur-inflation-portugal",
 		de: "inflationsrechner-portugal",
 		it: "calcolo-inflazione-portogallo",
+	},
+	toolPropertyTax: {
+		pt: "simulador-imi",
+		en: "imi-property-tax-calculator",
+		es: "calculadora-imi-portugal",
+		fr: "calculateur-imi-portugal",
+		de: "imi-rechner-portugal",
+		it: "calcolatore-imi-portogallo",
+	},
+	toolPurchaseTaxes: {
+		pt: "simulador-imt-imposto-selo",
+		en: "property-purchase-taxes-calculator",
+		es: "calculadora-impuestos-compra-vivienda-portugal",
+		fr: "simulateur-taxes-achat-immobilier-portugal",
+		de: "immobilienkaufsteuern-portugal-rechner",
+		it: "calcolo-imposte-acquisto-casa-portogallo",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -479,6 +503,9 @@ export const TOOL_ROUTE_IDS = [
 	"toolCarLoan",
 	"toolPersonalLoan",
 	"toolInflation",
+	"toolSavingsCertificates",
+	"toolPropertyTax",
+	"toolPurchaseTaxes",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -748,12 +775,23 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"credito-automovel": "toolCarLoan",
 	toolinflation: "toolInflation",
 	"inflation-calculator": "toolInflation",
+	toolsavingscertificates: "toolSavingsCertificates",
+	"certificados-de-aforro": "toolSavingsCertificates",
+	"certificados-de-aforro-serie-f": "toolSavingsCertificates",
+	"savings-certificates": "toolSavingsCertificates",
+	toolpurchasetaxes: "toolPurchaseTaxes",
+	"imt-calculator": "toolPurchaseTaxes",
+	"simulador-imt": "toolPurchaseTaxes",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",
 	"personal-loan": "toolPersonalLoan",
 	"simulador-credito-pessoal": "toolPersonalLoan",
 	"credito-pessoal": "toolPersonalLoan",
+	toolpropertytax: "toolPropertyTax",
+	"imi-calculator": "toolPropertyTax",
+	"imi-property-tax": "toolPropertyTax",
+	imi: "toolPropertyTax",
 }
 
 function normalizeRouteLookupKey(value: string): string {

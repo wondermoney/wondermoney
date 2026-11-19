@@ -120,6 +120,18 @@ export const TOOLS_CATALOG = [
 		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome"],
 	},
 	{
+		key: "propertyTax",
+		routeId: "toolPropertyTax",
+		group: "borrowAndBuyHome",
+		related: ["toolHouseholdBudget", "toolMortgage", "toolBuyVsRent"],
+	},
+	{
+		key: "purchaseTaxes",
+		routeId: "toolPurchaseTaxes",
+		group: "borrowAndBuyHome",
+		related: ["toolMortgage", "toolBorrowingCapacity", "toolSavingsGoal"],
+	},
+	{
 		key: "personalLoan",
 		routeId: "toolPersonalLoan",
 		group: "borrowAndBuyHome",
@@ -150,6 +162,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
 		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund"],
+	},
+	{
+		key: "savingsCertificates",
+		routeId: "toolSavingsCertificates",
+		group: "investAndGrow",
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation"],
 	},
 	// Track your wealth
 	{

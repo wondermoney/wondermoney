@@ -507,6 +507,78 @@
         "methodology": "Metodologia do INE"
       }
     },
+    "propertyTax": {
+      "title": "Simulador de IMI",
+      "shortName": "IMI",
+      "subtitle": "Estima o IMI anual de um imóvel em Portugal, vê quando se paga cada prestação e quanto deves reservar todos os meses.",
+      "description": "Estima o IMI, as datas de pagamento e a reserva mensal.",
+      "pageTitle": "Simulador de IMI: Imposto Municipal sobre Imóveis e Prazos de Pagamento",
+      "pageDescription": "Calcula o IMI anual a partir do valor patrimonial tributário e da taxa municipal, vê as prestações de maio, agosto e novembro e quanto reservar por mês.",
+      "fields": {
+        "kind": "Tipo de prédio",
+        "vpt": "Valor patrimonial tributário (VPT)",
+        "rate": "Taxa municipal",
+        "dependants": "Dependentes (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Prédio urbano",
+        "rustic": "Prédio rústico"
+      },
+      "vptHelp": "O VPT consta da caderneta predial e da nota de cobrança do IMI.",
+      "rateHelp": "Cada município fixa a sua taxa para prédios urbanos, entre {{min}} e {{max}}. O valor inicial é apenas um exemplo: usa a taxa do teu município.",
+      "rusticNote": "Os prédios rústicos pagam a taxa nacional de {{rate}}. Não há taxa municipal para introduzir.",
+      "dependantsHelp": "Só se o prédio for a tua habitação própria e permanente e o teu município aplicar a redução do IMI Familiar. Muitos não aplicam, ou só a partir de um certo número de dependentes.",
+      "dependantsOptions": {
+        "0": "Sem redução",
+        "1": "1 dependente (30 €)",
+        "2": "2 dependentes (70 €)",
+        "3": "3 ou mais dependentes (140 €)"
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "rateRange": "Introduz uma taxa entre {{min}} e {{max}}, o intervalo legal para prédios urbanos.",
+        "dependants": "Escolhe o número de dependentes na lista.",
+        "summary": "Revê os campos assinalados para veres a estimativa."
+      },
+      "result": {
+        "annualTax": "IMI anual estimado",
+        "monthlyProvision": "Reserva mensal (IMI anual ÷ 12)",
+        "grossTax": "IMI antes da redução",
+        "deduction": "Redução do IMI Familiar",
+        "scheduleTitle": "Calendário de pagamento",
+        "nothingDue": "Nada a pagar: a redução cobre todo o imposto."
+      },
+      "months": {
+        "may": "Maio",
+        "august": "Agosto",
+        "november": "Novembro"
+      },
+      "guide": {
+        "exampleTitle": "Exemplo de cálculo",
+        "example": "Um prédio com VPT de {{vpt}} num município que cobra {{rate}} paga {{tax}} por ano. Como o imposto excede 500 €, é pago em três prestações de {{instalment}}, em maio, agosto e novembro. Reservar {{monthly}} por mês chega para o pagar.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodTax": "O IMI anual é o VPT multiplicado pela taxa, arredondado ao cêntimo. Nos prédios urbanos usa-se a taxa fixada pelo teu município, que por lei está entre 0,30% e 0,45%. Nos prédios rústicos usa-se 0,8%.",
+        "methodFamily": "Se escolheres um número de dependentes, o montante fixo do IMI Familiar (30 € com um, 70 € com dois, 140 € com três ou mais) é subtraído ao imposto, que nunca fica abaixo de zero. A aplicação depende do teu município.",
+        "methodPayment": "O imposto é pago numa prestação em maio até 100 €, em duas em maio e novembro entre 100 € e 500 €, e em três em maio, agosto e novembro acima de 500 €. As prestações são iguais; o eventual cêntimo de arredondamento fica na última.",
+        "methodBudget": "A reserva mensal divide o imposto anual por 12, para teres o dinheiro pronto quando cada prestação vencer.",
+        "exemptionTitle": "Isenção para habitação própria e permanente",
+        "exemption": "Alguns proprietários de habitação própria e permanente estão isentos de IMI, durante um período limitado após a compra ou enquanto o rendimento do agregado e o VPT ficarem abaixo dos limites do Estatuto dos Benefícios Fiscais. Os limites mudam ao longo do tempo e há condições a cumprir, por isso o simulador não aplica nenhuma isenção. Confirma se tens direito no Portal das Finanças antes de usares o resultado.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionRate": "A taxa municipal é introduzida por ti. Esta página não tem uma tabela das taxas dos municípios, e os municípios podem majorar ou minorar a taxa em casos específicos, por exemplo prédios devolutos ou degradados, que o simulador ignora.",
+        "assumptionScope": "A estimativa cobre um único prédio sujeito às regras gerais. Não inclui o adicional ao IMI (AIMI), as isenções temporárias nem outras deduções municipais.",
+        "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. O valor que conta é o da nota de cobrança do IMI emitida pela Autoridade Tributária.",
+        "sourcesTitle": "Fontes",
+        "sourceRates": "Código do IMI, artigo 112.º: taxas (consultado a 19 de novembro de 2026)",
+        "sourcePayment": "Código do IMI, artigo 120.º: pagamento em prestações (consultado a 19 de novembro de 2026)",
+        "sourceExemption": "Portal das Finanças: isenções de IMI e IMI Familiar",
+        "reviewed": "Regras revistas a 19 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI, segundo bancos e municípios portugueses."
+      },
+      "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IMI",
+      "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IMI todos os meses, para as prestações já estarem cobertas.",
+      "nextStepCta": "Reserva dinheiro todos os meses para o teu IMI"
+    },
     "hub": {
       "title": "Ferramentas e calculadoras financeiras",
       "description": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Sem registo necessário.",
@@ -2334,6 +2406,88 @@
       "nextStepDescription": "Reserva dinheiro no WonderMoney para a prestação, o combustível e as contas que vencem durante o ano.",
       "nextStepCta": "Cria o teu orçamento no WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Simulador de IMT e Imposto do Selo na compra de casa",
+      "shortName": "IMT e Selo",
+      "subtitle": "Estima o IMT e o Imposto do Selo a pagar na compra de um imóvel em Portugal e vê quanto dinheiro deves juntar à entrada.",
+      "description": "Estima o IMT e o Imposto do Selo na compra de imóveis em Portugal.",
+      "pageTitle": "Simulador de IMT e Imposto do Selo 2026 na compra de casa",
+      "pageDescription": "Estima o IMT e o Imposto do Selo de 2026 na compra de um imóvel em Portugal: continente ou ilhas, tipo de uso, selo do crédito à habitação e isenção para jovens.",
+      "propertyTitle": "Imóvel",
+      "financingTitle": "Crédito à habitação",
+      "youngTitle": "Isenção para jovens (IMT Jovem)",
+      "youngNote": "Só se todas as condições se verificarem na data da escritura: tens 35 anos ou menos, é a tua primeira casa e vais viver nela de forma permanente. Isenção total até {{full}}; isenção parcial até {{partial}}, com IMT e selo da compra apenas sobre o excedente.",
+      "youngUnavailable": "A isenção só se aplica a habitação própria e permanente. Escolhe esse uso para verificar a elegibilidade.",
+      "fields": {
+        "price": "Preço de compra",
+        "taxValue": "Valor patrimonial tributário (VPT), opcional",
+        "region": "Localização",
+        "use": "Uso do imóvel",
+        "loan": "Montante do crédito",
+        "young": "Cumpro as condições da isenção para jovens"
+      },
+      "help": {
+        "price": "O preço que consta da escritura.",
+        "taxValue": "A Autoridade Tributária tributa o maior valor entre o preço e o VPT. Deixa a zero se não souberes.",
+        "loan": "Indica zero numa compra a pronto. O selo do crédito não é abrangido pela isenção para jovens neste simulador."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Açores ou Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Habitação própria e permanente",
+        "secondary": "Habitação secundária ou outros fins",
+        "rustic": "Prédio rústico",
+        "otherUrban": "Outros prédios urbanos ou terrenos"
+      },
+      "errors": {
+        "required": "Indica um número válido.",
+        "negative": "Indica zero ou um valor positivo.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "loan": "O crédito não pode exceder o preço de compra.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Total de impostos a pagar",
+        "effectiveRate": "{{rate}} do valor tributável",
+        "reference": "Valor tributável",
+        "imt": "IMT",
+        "stampPurchase": "Imposto do Selo da compra (0,8%)",
+        "stampLoan": "Imposto do Selo do crédito (0,6%)",
+        "exemptFull": "Isenção para jovens aplicada: elimina o IMT e o selo da compra e poupa {{saving}}.",
+        "exemptPartial": "Isenção parcial para jovens aplicada: o IMT e o selo da compra incidem apenas sobre a parte acima do limite da isenção total. Poupa {{saving}} no total.",
+        "exemptNone": "Com este valor a isenção não se aplica. Abrange compras até {{partial}} (total até {{full}}) e apenas nas condições indicadas à esquerda.",
+        "tableNote": "Tabela de {{year}}, revista em {{date}}. Estimativa educativa, não é aconselhamento fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Comprar uma habitação própria e permanente no continente por {{price}} com um crédito de {{loan}} custa {{imt}} de IMT, {{stampPurchase}} de Imposto do Selo da compra e {{stampLoan}} de selo do crédito. São {{total}} no total, a pagar para além da entrada e que deves somar à tua meta de poupança.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodBase": "A base de cálculo é o maior valor entre o preço de compra e o valor patrimonial tributário (VPT).",
+        "methodImt": "Nas habitações, o IMT é a base multiplicada pela taxa do escalão menos uma parcela a abater fixa, que torna o imposto progressivo. Acima do último escalão progressivo, a taxa aplica-se a todo o valor sem parcela a abater. Os prédios rústicos pagam 5% e os outros prédios urbanos ou terrenos 6,5%.",
+        "methodStamp": "O Imposto do Selo é 0,8% da base na compra (verba 1.1) e, se pedires crédito, 0,6% do montante emprestado (verba 17.1.4, créditos de cinco anos ou mais).",
+        "methodRounding": "O IMT e cada Imposto do Selo são arredondados separadamente ao cêntimo, como a Autoridade Tributária os liquida. O selo sobre juros e comissões não está incluído.",
+        "tableTitle": "Tabela de IMT {{year}}: habitação própria e permanente, continente",
+        "tableAbove": "Valores superiores",
+        "tableLimit": "Valor até",
+        "tableRate": "Taxa",
+        "tableDeduct": "Parcela a abater",
+        "tableNote": "Até {{exempt}} o primeiro escalão é 0%. A habitação secundária tem tabela própria, com 1% desde o primeiro euro, e os Açores e a Madeira usam as mesmas taxas com limites 25% mais altos.",
+        "sourceImt": "CIMT, artigo 17.º (Portal das Finanças)",
+        "sourceStamp": "Código do Imposto do Selo (Portal das Finanças)",
+        "review": "Regras e limites de {{year}}, revistos pela última vez em {{date}}. Confirma-os de novo antes de assinar.",
+        "assumptionsTitle": "Pressupostos e situações suportadas",
+        "assumptionScope": "Este simulador segue a lei fiscal portuguesa e só se aplica a imóveis situados em Portugal, seja qual for o teu país de residência. É educativo e não constitui aconselhamento fiscal.",
+        "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. A isenção do selo da compra é uma dedução limitada a 0,8% do limite da isenção total, por isso acima dele pagas 0,8% apenas sobre o excedente. O selo do crédito continua a ser cobrado.",
+        "assumptionLoan": "O selo do crédito pressupõe um empréstimo de cinco anos ou mais e é sempre cobrado. Comissões do crédito, avaliação e custos de notário ou registo não estão incluídos.",
+        "assumptionUnsupported": "Não suportado: não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT.",
+        "assumptionIslands": "Para os Açores e a Madeira os limites são os do continente aumentados em 25% e arredondados ao euro, com as mesmas taxas. Confirma os limites regionais com a Autoridade Tributária."
+      },
+      "nextStepHeadline": "Planeia o dinheiro de que precisas para comprar",
+      "nextStepDescription": "Soma o IMT e o Imposto do Selo à poupança de que precisas antes de comprar e acompanha o progresso no WonderMoney.",
+      "nextStepCta": "Inclui os impostos na meta da entrada da casa"
+    },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
       "shortName": "Crédito pessoal",
@@ -2438,6 +2592,74 @@
         "assumptionOtherCosts": "Ficam de fora custos que o simulador não pergunta, como seguros opcionais, encargos por atraso ou uma comissão de reembolso antecipado.",
         "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulador de certificados de aforro",
+      "shortName": "Certificados de aforro",
+      "subtitle": "Estima quanto podem render os Certificados de Aforro Série F: juros trimestrais, prémios de permanência e 28% de IRS retido, em bruto e em líquido.",
+      "description": "Estima juros, prémios e imposto dos Certificados de Aforro Série F.",
+      "pageTitle": "Simulador de Certificados de Aforro Série F: juros, prémios e rendimento líquido",
+      "pageDescription": "Simula a rentabilidade dos Certificados de Aforro Série F com prémios de permanência, retenção de 28% de IRS e taxa base editável, em bruto e líquido.",
+      "assumption": "A taxa base muda todos os meses com a Euribor a 3 meses. Esta estimativa mantém a taxa que indicas em todos os trimestres, por isso o resultado é uma ilustração, não uma previsão.",
+      "fields": {
+        "amount": "Montante subscrito",
+        "years": "Anos de permanência",
+        "baseRate": "Taxa base (pressuposto)",
+        "baseRateHelp": "Taxa anual bruta, até {{rate}} (o limite das regras). Altera-a para testar outros cenários."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou uma taxa positiva.",
+        "tooSmall": "O mínimo por conta é {{min}}.",
+        "tooLarge": "O máximo por conta é {{max}}.",
+        "years": "Introduz um número inteiro de anos, de 1 a {{years}}.",
+        "baseRate": "A taxa base não pode exceder {{rate}}.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "finalValue": "Valor líquido estimado no fim",
+        "invested": "Montante subscrito",
+        "grossInterest": "Juros brutos",
+        "irs": "IRS retido (28%)",
+        "netInterest": "Juros líquidos",
+        "premiumInterest": "Dos juros brutos, vêm de prémios de permanência",
+        "netYield": "Rendimento líquido anual"
+      },
+      "table": {
+        "title": "Ano a ano",
+        "year": "Ano",
+        "rate": "Taxa bruta",
+        "gross": "Juros brutos",
+        "net": "Juros líquidos",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Regras da Série F que o simulador segue",
+        "rulesIntro": "Regras publicadas pelo IGCP na ficha de produto da Série F de {{rulesDate}} (Portaria n.º 149-A/2023). As regras podem mudar, e as condições em vigor do emitente é que contam.",
+        "ruleTerm": "Prazo de {{termYears}} anos. Podes resgatar, total ou parcialmente, a partir do primeiro vencimento de juros; o simulador usa anos completos de permanência.",
+        "ruleRate": "Cada trimestre rende a taxa base em vigor no início do trimestre mais o prémio de permanência do ano da subscrição. A taxa base segue a Euribor a 3 meses, com máximo de {{maxBase}} e mínimo de 0%.",
+        "ruleTax": "Os juros vencem trimestralmente e são capitalizados automaticamente depois de IRS, retido na fonte a {{irsRate}}.",
+        "ruleRedeem": "Só pessoas singulares podem ser titulares. O limite é {{maxAmount}} por conta aforro na Série F, com um mínimo de {{minAmount}}.",
+        "premiumTitle": "Prémio de permanência por ano da subscrição",
+        "premiumYears": "Ano",
+        "premiumPoints": "Pontos percentuais",
+        "sourceSheet": "Ficha de produto da Série F do IGCP (abril de 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "abril de 2026",
+        "exampleTitle": "Exemplo prático",
+        "exampleText": "Subscreves {{amount}} e manténs durante {{years}} anos, com uma taxa base de {{baseRate}}. Os certificados rendem {{grossInterest}} de juros brutos, dos quais {{irs}} vão para IRS, ficando {{netInterest}} líquidos. O saldo chega a {{finalValue}}, um rendimento líquido de {{netYield}} ao ano.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodQuarter": "Cada trimestre rende um quarto da taxa anual (taxa base mais prémio) sobre o saldo atual. Os valores são arredondados ao cêntimo em cada trimestre.",
+        "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
+        "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. A taxa real é revista todos os meses, por isso os juros efetivos serão diferentes.",
+        "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
+        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
+      },
+      "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
+      "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
+      "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
     }
   },
   "resources": {

@@ -1,0 +1,99 @@
+---
+import {
+  PURCHASE_TAXES_EXAMPLE,
+  PURCHASE_TAXES_TABLE,
+  YOUNG_LIMITS,
+  computePurchaseTaxes,
+  imtBands,
+  ownPermanentExemptionLimit,
+} from "@/lib/calculators/purchaseTaxes";
+import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.purchaseTaxes.guide.${key}`;
+const example = computePurchaseTaxes(PURCHASE_TAXES_EXAMPLE);
+if (!example.ok) throw new Error("Invalid purchase taxes worked example");
+const { price, loan } = PURCHASE_TAXES_EXAMPLE;
+const { imt, stampPurchase, stampLoan, total } = example.result;
+const money = (value: number, decimals = 0) => formatMoney(locale, value, { decimals });
+const young = YOUNG_LIMITS("mainland");
+const values = {
+  price: money(price),
+  loan: money(loan),
+  imt: money(imt, 2),
+  stampPurchase: money(stampPurchase, 2),
+  stampLoan: money(stampLoan, 2),
+  total: money(total, 2),
+  year: String(PURCHASE_TAXES_TABLE.year),
+  date: PURCHASE_TAXES_TABLE.reviewedOn,
+  exempt: money(ownPermanentExemptionLimit("mainland")),
+  youngFull: money(young.full),
+  youngPartial: money(young.partial),
+};
+const rate = (bp: number) => formatPercent(locale, bp / 100, { decimals: bp % 100 ? 1 : 0 });
+const bands = imtBands("ownPermanent", "mainland");
+const row = (upTo: number, rateBp: number, deductCents: number) => ({
+  limit: Number.isFinite(upTo) ? money(upTo) : t(k("tableAbove")),
+  rate: rate(rateBp),
+  deduct: deductCents ? money(deductCents / 100, 2) : "-",
+});
+const rows = bands.map((band) => row(band.upTo, band.rateBp, band.deductCents));
+const link = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="purchase-taxes-example">
+    <h2 id="purchase-taxes-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="purchase-taxes-method">
+    <h2 id="purchase-taxes-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {["methodBase", "methodImt", "methodStamp", "methodRounding"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("tableTitle"), values)}</h3>
+    <div class="mt-3 overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-border">
+            <th class="py-2 pr-4 font-semibold">{t(k("tableLimit"))}</th>
+            <th class="py-2 pr-4 font-semibold">{t(k("tableRate"))}</th>
+            <th class="py-2 font-semibold">{t(k("tableDeduct"))}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr class="border-b border-border/50">
+              <td class="py-2 pr-4">{r.limit}</td>
+              <td class="py-2 pr-4">{r.rate}</td>
+              <td class="py-2">{r.deduct}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4">{t(k("tableNote"), values)}</p>
+    <p class="mt-4">
+      <a href={PURCHASE_TAXES_TABLE.sources.cimt} class={link}>{t(k("sourceImt"))}</a>
+      {" · "}
+      <a href={PURCHASE_TAXES_TABLE.sources.stampDuty} class={link}>{t(k("sourceStamp"))}</a>
+    </p>
+    <p class="mt-4 text-sm">{t(k("review"), values)}</p>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["assumptionScope", "assumptionYoung", "assumptionLoan", "assumptionUnsupported", "assumptionIslands"]
+        .map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+  </section>
+</div>

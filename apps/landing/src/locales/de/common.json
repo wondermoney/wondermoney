@@ -507,6 +507,78 @@
         "methodology": "Methodik des INE"
       }
     },
+    "propertyTax": {
+      "title": "IMI-Rechner (portugiesische Grundsteuer)",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Schätzen Sie die jährliche IMI für eine Immobilie in Portugal, die Fälligkeiten der Raten und den Betrag, den Sie monatlich zurücklegen sollten.",
+      "description": "IMI in Portugal, Zahlungstermine und monatliche Rücklage schätzen.",
+      "pageTitle": "IMI-Rechner: Grundsteuer in Portugal und Zahlungstermine",
+      "pageDescription": "Schätzen Sie die jährliche IMI aus Steuerwert und kommunalem Satz, mit den Raten im Mai, August und November und der monatlichen Rücklage.",
+      "fields": {
+        "kind": "Art der Immobilie",
+        "vpt": "Steuerlicher Vermögenswert (VPT)",
+        "rate": "Kommunaler Satz",
+        "dependants": "Unterhaltsberechtigte (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Städtische Immobilie",
+        "rustic": "Ländliche Immobilie"
+      },
+      "vptHelp": "Der VPT steht in der Caderneta Predial und im IMI-Bescheid.",
+      "rateHelp": "Jede Gemeinde legt ihren Satz für städtische Immobilien zwischen {{min}} und {{max}} fest. Der Vorgabewert ist nur ein Beispiel: Nehmen Sie den Satz Ihrer Gemeinde.",
+      "rusticNote": "Ländliche Immobilien werden mit dem landesweiten Satz von {{rate}} besteuert. Ein kommunaler Satz ist nicht einzugeben.",
+      "dependantsHelp": "Nur wenn die Immobilie Ihr Hauptwohnsitz ist und Ihre Gemeinde die Ermäßigung IMI Familiar anwendet. Viele tun das nicht oder erst ab einer bestimmten Zahl Unterhaltsberechtigter.",
+      "dependantsOptions": {
+        "0": "Keine Ermäßigung",
+        "1": "1 Unterhaltsberechtigter (30 €)",
+        "2": "2 Unterhaltsberechtigte (70 €)",
+        "3": "3 oder mehr Unterhaltsberechtigte (140 €)"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "rateRange": "Geben Sie einen Satz von {{min}} bis {{max}} ein, die gesetzliche Spanne für städtische Immobilien.",
+        "dependants": "Wählen Sie die Anzahl der Unterhaltsberechtigten aus der Liste.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "annualTax": "Geschätzte jährliche IMI",
+        "monthlyProvision": "Monatliche Rücklage (jährliche IMI ÷ 12)",
+        "grossTax": "IMI vor der Ermäßigung",
+        "deduction": "Ermäßigung IMI Familiar",
+        "scheduleTitle": "Zahlungsplan",
+        "nothingDue": "Nichts zu zahlen: Die Ermäßigung deckt die gesamte Steuer."
+      },
+      "months": {
+        "may": "Mai",
+        "august": "August",
+        "november": "November"
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine Immobilie mit einem VPT von {{vpt}} in einer Gemeinde mit {{rate}} schuldet {{tax}} im Jahr. Da der Betrag über 500 € liegt, wird er in drei Raten zu {{instalment}} im Mai, August und November gezahlt. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodTax": "Die jährliche IMI ist der VPT mal Satz, auf den Cent gerundet. Städtische Immobilien nutzen den Satz Ihrer Gemeinde, der gesetzlich zwischen 0,30 % und 0,45 % liegt. Ländliche Immobilien nutzen 0,8 %.",
+        "methodFamily": "Wählen Sie eine Zahl Unterhaltsberechtigter, wird der feste Betrag der IMI Familiar (30 € bei einem, 70 € bei zwei, 140 € bei drei oder mehr) von der Steuer abgezogen; sie sinkt nie unter null. Ob er gilt, entscheidet Ihre Gemeinde.",
+        "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
+        "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
+        "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit, für begrenzte Zeit nach dem Kauf oder solange Haushaltseinkommen und VPT unter den Grenzen des Steuervergünstigungsstatuts liegen. Die Grenzen ändern sich und es gelten Bedingungen, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
+        "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
+        "assumptionEducational": "Dies ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im IMI-Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
+        "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
+        "sourceExemption": "Portal das Finanças: IMI-Befreiungen und IMI Familiar",
+        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI, wie von portugiesischen Banken und Gemeinden wiedergegeben."
+      },
+      "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
+      "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
+      "nextStepCta": "Legen Sie monatlich Geld für Ihre IMI zurück"
+    },
     "hub": {
       "title": "Finanztools & Rechner",
       "description": "Kostenlose interaktive Rechner, die Ihnen helfen, Ihre finanzielle Zukunft zu planen. Keine Registrierung erforderlich.",
@@ -2334,6 +2406,88 @@
       "nextStepDescription": "Lege in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
       "nextStepCta": "Erstelle dein Budget in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Rechner für Kaufnebenkosten in Portugal (IMT und Stempelsteuer)",
+      "shortName": "Kaufsteuern",
+      "subtitle": "Schätzen Sie die IMT und die Stempelsteuer (Imposto do Selo) beim Immobilienkauf in Portugal und sehen Sie, wie viel Bargeld zusätzlich zur Anzahlung nötig ist.",
+      "description": "Schätzen Sie IMT und Stempelsteuer beim Immobilienkauf in Portugal.",
+      "pageTitle": "IMT- und Stempelsteuer-Rechner für den Immobilienkauf in Portugal",
+      "pageDescription": "Schätzen Sie IMT und Imposto do Selo 2026 beim Immobilienkauf in Portugal: Festland oder Inseln, Nutzung, Stempelsteuer auf das Darlehen und Befreiung für Junge.",
+      "propertyTitle": "Immobilie",
+      "financingTitle": "Hypothek",
+      "youngTitle": "Befreiung für junge Käufer (IMT Jovem)",
+      "youngNote": "Nur wenn alle Bedingungen am Tag der Urkunde erfüllt sind: Sie sind höchstens 35 Jahre alt, es ist Ihre erste Wohnung und Sie wohnen dauerhaft darin. Volle Befreiung bis {{full}}; teilweise bis {{partial}}, mit IMT und Stempelsteuer auf den Kauf nur auf den Mehrbetrag.",
+      "youngUnavailable": "Die Befreiung gilt nur für die eigene dauerhaft bewohnte Wohnung. Wählen Sie diese Nutzung, um die Berechtigung zu prüfen.",
+      "fields": {
+        "price": "Kaufpreis",
+        "taxValue": "Steuerwert (VPT), optional",
+        "region": "Lage",
+        "use": "Nutzung der Immobilie",
+        "loan": "Darlehensbetrag",
+        "young": "Ich erfülle die Bedingungen für junge Käufer"
+      },
+      "help": {
+        "price": "Der in der Urkunde genannte Preis.",
+        "taxValue": "Die Steuerbehörde besteuert den höheren Wert aus Preis und VPT. Lassen Sie 0, wenn unbekannt.",
+        "loan": "Geben Sie 0 bei Barkauf ein. Die Stempelsteuer auf das Darlehen ist in diesem Rechner nicht von der Befreiung für Junge erfasst."
+      },
+      "regions": {
+        "mainland": "Portugiesisches Festland",
+        "islands": "Azoren oder Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Eigene dauerhaft bewohnte Wohnung",
+        "secondary": "Zweitwohnung oder andere Wohnnutzung",
+        "rustic": "Ländliches Grundstück",
+        "otherUrban": "Sonstige städtische Immobilie oder Grundstück"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "loan": "Das Darlehen darf den Kaufpreis nicht übersteigen.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Zu zahlende Steuern gesamt",
+        "effectiveRate": "{{rate}} des steuerpflichtigen Werts",
+        "reference": "Steuerpflichtiger Wert",
+        "imt": "IMT",
+        "stampPurchase": "Stempelsteuer auf den Kauf (0,8 %)",
+        "stampLoan": "Stempelsteuer auf das Darlehen (0,6 %)",
+        "exemptFull": "Befreiung für junge Käufer angewendet: entfallen IMT und Stempelsteuer auf den Kauf und spart {{saving}}.",
+        "exemptPartial": "Teilbefreiung für junge Käufer angewendet: IMT und Stempelsteuer auf den Kauf fallen nur auf den Teil über der Grenze der vollen Befreiung an. Sie spart insgesamt {{saving}}.",
+        "exemptNone": "Bei diesem Wert gilt die Befreiung nicht. Sie gilt für Käufe bis {{partial}} (voll bis {{full}}) und nur unter den Bedingungen im Kasten links.",
+        "tableNote": "Tabelle {{year}}, geprüft am {{date}}. Lehrreiche Schätzung, keine Steuerberatung."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Der Kauf einer eigenen, dauerhaft bewohnten Wohnung auf dem Festland für {{price}} mit einem Darlehen von {{loan}} kostet {{imt}} IMT, {{stampPurchase}} Stempelsteuer auf den Kauf und {{stampLoan}} Stempelsteuer auf das Darlehen. Das sind insgesamt {{total}}, zusätzlich zur Anzahlung, und sollten in Ihr Sparziel einfließen.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodBase": "Bemessungsgrundlage ist der höhere Wert aus Kaufpreis und Steuerwert (VPT).",
+        "methodImt": "Bei Wohnungen ist die IMT die Grundlage mal dem Satz der Stufe minus einem festen Abzug (parcela a abater), der die Steuer progressiv macht. Oberhalb der letzten progressiven Stufe gilt der Satz für den gesamten Wert ohne Abzug. Ländliche Grundstücke zahlen 5 %, sonstige städtische Immobilien oder Grundstücke 6,5 %.",
+        "methodStamp": "Die Stempelsteuer beträgt 0,8 % der Grundlage beim Kauf (verba 1.1) und bei einem Darlehen 0,6 % des Darlehensbetrags (verba 17.1.4, Laufzeit ab fünf Jahren).",
+        "methodRounding": "IMT und jede Stempelsteuer werden getrennt auf den Cent gerundet, wie die Steuerbehörde sie festsetzt. Stempelsteuer auf Zinsen und Gebühren ist nicht enthalten.",
+        "tableTitle": "IMT-Tabelle {{year}}: eigene dauerhaft bewohnte Wohnung, Festland",
+        "tableAbove": "Höhere Werte",
+        "tableLimit": "Wert bis",
+        "tableRate": "Satz",
+        "tableDeduct": "Abzug",
+        "tableNote": "Bis {{exempt}} liegt die erste Stufe bei 0 %. Zweitwohnungen haben eine eigene Tabelle mit 1 % ab dem ersten Euro, und die Azoren und Madeira nutzen dieselben Sätze mit um 25 % höheren Grenzen.",
+        "sourceImt": "CIMT, Artikel 17 (Portal das Finanças)",
+        "sourceStamp": "Stempelsteuergesetz (Portal das Finanças)",
+        "review": "Regeln und Grenzen für {{year}}, zuletzt geprüft am {{date}}. Prüfen Sie sie vor der Unterschrift erneut.",
+        "assumptionsTitle": "Annahmen und unterstützte Fälle",
+        "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
+        "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
+        "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
+        "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
+        "assumptionIslands": "Für die Azoren und Madeira sind die Grenzen die des Festlands plus 25 %, auf den Euro gerundet, mit denselben Sätzen. Bestätigen Sie die regionalen Grenzen bei der Steuerbehörde."
+      },
+      "nextStepHeadline": "Planen Sie das Bargeld für den Kauf",
+      "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
+      "nextStepCta": "Steuern in Ihr Anzahlungsziel einrechnen"
+    },
     "personalLoan": {
       "title": "Privatkredit-Rechner",
       "shortName": "Privatkredit",
@@ -2438,6 +2592,74 @@
         "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
         "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Rechner für portugiesische Sparzertifikate (Certificados de Aforro)",
+      "shortName": "Sparzertifikate",
+      "subtitle": "Schätze, was die portugiesischen Certificados de Aforro Série F bringen können: vierteljährliche Zinsen, Treueprämien und 28 % einbehaltene IRS, brutto und netto.",
+      "description": "Schätze Zinsen, Prämien und Steuer der Certificados de Aforro Série F.",
+      "pageTitle": "Certificados de Aforro Série F Rechner: Zinsen, Prämien und Nettorendite",
+      "pageDescription": "Schätze die Rendite der Certificados de Aforro Série F mit Treueprämien, 28 % IRS-Einbehalt und anpassbarem Basiszins, brutto und netto.",
+      "assumption": "Der Basiszins ändert sich jeden Monat mit dem 3-Monats-Euribor. Diese Schätzung hält den eingegebenen Zins für alle Quartale konstant, das Ergebnis ist also eine Illustration, keine Prognose.",
+      "fields": {
+        "amount": "Gezeichneter Betrag",
+        "years": "Jahre Haltedauer",
+        "baseRate": "Basiszins (Annahme)",
+        "baseRateHelp": "Brutto-Jahreszins, bis {{rate}} (die Obergrenze der Regeln). Ändere ihn, um andere Szenarien zu testen."
+      },
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "negative": "Gib null oder einen positiven Zins ein.",
+        "tooSmall": "Das Minimum pro Konto beträgt {{min}}.",
+        "tooLarge": "Das Maximum pro Konto beträgt {{max}}.",
+        "years": "Gib eine ganze Zahl von Jahren von 1 bis {{years}} ein.",
+        "baseRate": "Der Basiszins darf {{rate}} nicht überschreiten.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "finalValue": "Geschätzter Nettowert am Ende",
+        "invested": "Gezeichneter Betrag",
+        "grossInterest": "Bruttozinsen",
+        "irs": "Einbehaltene IRS (28 %)",
+        "netInterest": "Nettozinsen",
+        "premiumInterest": "Davon aus Treueprämien (brutto)",
+        "netYield": "Netto-Jahresrendite"
+      },
+      "table": {
+        "title": "Jahr für Jahr",
+        "year": "Jahr",
+        "rate": "Bruttozins",
+        "gross": "Bruttozinsen",
+        "net": "Nettozinsen",
+        "balance": "Guthaben"
+      },
+      "guide": {
+        "rulesTitle": "Regeln der Série F, denen der Rechner folgt",
+        "rulesIntro": "Regeln, wie der IGCP sie im Produktblatt der Série F von {{rulesDate}} veröffentlicht hat (Portaria n.º 149-A/2023). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
+        "ruleTerm": "Laufzeit von {{termYears}} Jahren. Du kannst ab dem ersten Zinstermin ganz oder teilweise zurückgeben; der Rechner nutzt volle Jahre Haltedauer.",
+        "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins folgt dem 3-Monats-Euribor, mit Obergrenze {{maxBase}} und Untergrenze 0 %.",
+        "ruleTax": "Zinsen fallen vierteljährlich an und werden nach IRS automatisch kapitalisiert; die IRS wird an der Quelle mit {{irsRate}} einbehalten.",
+        "ruleRedeem": "Nur natürliche Personen können Inhaber sein. Die Grenze liegt bei {{maxAmount}} pro Aforro-Konto in der Série F, das Minimum bei {{minAmount}}.",
+        "premiumTitle": "Treueprämie nach Zeichnungsjahr",
+        "premiumYears": "Jahr",
+        "premiumPoints": "Prozentpunkte",
+        "sourceSheet": "IGCP-Produktblatt Série F (April 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "April 2026",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleText": "Du zeichnest {{amount}} und hältst {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodQuarter": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
+        "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
+        "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Der echte Zins wird monatlich neu festgelegt, die tatsächlichen Zinsen weichen daher ab.",
+        "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Einkommen. Deine persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
+        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
+      },
+      "nextStepHeadline": "Sieh deine Zertifikate neben deinem übrigen Erspartem",
+      "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
+      "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
     }
   },
   "resources": {

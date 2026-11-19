@@ -507,6 +507,78 @@
         "methodology": "INE methodology"
       }
     },
+    "propertyTax": {
+      "title": "Property tax (IMI) calculator",
+      "shortName": "Property tax (IMI)",
+      "subtitle": "Estimate the annual IMI bill on a property in Portugal, see when each instalment falls due and how much to set aside every month.",
+      "description": "Estimate Portuguese IMI, the instalment dates and a monthly provision.",
+      "pageTitle": "IMI Calculator: Portuguese Property Tax and Payment Dates",
+      "pageDescription": "Estimate your annual IMI from the taxable property value and municipal rate, see the May, August and November instalments and the monthly amount to set aside.",
+      "fields": {
+        "kind": "Property kind",
+        "vpt": "Taxable property value (VPT)",
+        "rate": "Municipal rate",
+        "dependants": "Dependants (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Urban property",
+        "rustic": "Rustic property"
+      },
+      "vptHelp": "The VPT is on your property tax booklet (caderneta predial) and on the IMI notice.",
+      "rateHelp": "Each municipality sets its own rate for urban property, between {{min}} and {{max}}. The default is only an example: use your municipality's rate.",
+      "rusticNote": "Rustic property is taxed at the national rate of {{rate}}. There is no municipal rate to enter.",
+      "dependantsHelp": "Only if the property is your permanent home and your municipality applies the IMI Familiar reduction. Many do not, or only from a given number of dependants.",
+      "dependantsOptions": {
+        "0": "No reduction",
+        "1": "1 dependant (€30)",
+        "2": "2 dependants (€70)",
+        "3": "3 or more dependants (€140)"
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "rateRange": "Enter a rate from {{min}} to {{max}}, the legal range for urban property.",
+        "dependants": "Choose a number of dependants from the list.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "annualTax": "Estimated annual IMI",
+        "monthlyProvision": "Monthly provision (annual IMI ÷ 12)",
+        "grossTax": "IMI before the reduction",
+        "deduction": "IMI Familiar reduction",
+        "scheduleTitle": "Payment schedule",
+        "nothingDue": "Nothing to pay: the reduction covers the whole bill."
+      },
+      "months": {
+        "may": "May",
+        "august": "August",
+        "november": "November"
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "A property with a VPT of {{vpt}} in a municipality that charges {{rate}} owes {{tax}} a year. Because the bill is above €500, it is paid in three instalments of {{instalment}} in May, August and November. Setting aside {{monthly}} a month covers it.",
+        "methodTitle": "How the estimate works",
+        "methodTax": "Annual IMI is the VPT times the rate, rounded to the cent. Urban property uses the rate your municipality set, which by law lies between 0.30% and 0.45%. Rustic property uses 0.8%.",
+        "methodFamily": "If you choose a number of dependants, the fixed IMI Familiar amount (€30 for one, €70 for two, €140 for three or more) is subtracted from the bill, and the bill never goes below zero. Whether it applies is up to your municipality.",
+        "methodPayment": "The bill is paid in one instalment in May up to €100, in two in May and November from €100 up to €500, and in three in May, August and November above €500. Instalments are equal; any cent of rounding goes to the last one.",
+        "methodBudget": "The monthly provision divides the annual bill by 12, so the money is ready when each instalment is due.",
+        "exemptionTitle": "Exemption for your own permanent home",
+        "exemption": "Some owners of a permanent home are exempt from IMI, for a limited time after buying it or for as long as their household income and the VPT stay under limits set in the tax benefits statute. The limits change over time and some conditions apply, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionRate": "The municipal rate is yours to enter. This page does not hold a table of municipal rates, and municipalities can also raise or lower the rate in specific cases, for example for vacant or dilapidated buildings, which the calculator ignores.",
+        "assumptionScope": "The estimate covers a single property taxed under the ordinary rules. It excludes additional IMI (AIMI), the temporary exemptions and any other municipal deduction.",
+        "assumptionEducational": "This is an educational estimate, not tax advice. The amount on your IMI notice from the Tax Authority is the one that counts.",
+        "sourcesTitle": "Sources",
+        "sourceRates": "Código do IMI, article 112: rates (consulted 19 November 2026)",
+        "sourcePayment": "Código do IMI, article 120: payment in instalments (consulted 19 November 2026)",
+        "sourceExemption": "Portal das Finanças: IMI exemptions and IMI Familiar",
+        "reviewed": "Rules reviewed on 19 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI as reported by Portuguese banks and municipalities."
+      },
+      "nextStepHeadline": "Never be caught out by the IMI bill",
+      "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
+      "nextStepCta": "Reserve money monthly for your IMI bill"
+    },
     "hub": {
       "title": "Financial Tools & Calculators",
       "description": "Free interactive calculators to help you plan your financial future. No sign-up required.",
@@ -2334,6 +2406,88 @@
       "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
       "nextStepCta": "Start budgeting in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Property purchase taxes calculator (IMT and stamp duty)",
+      "shortName": "Purchase taxes",
+      "subtitle": "Estimate the IMT and stamp duty (Imposto do Selo) due when you buy a property in Portugal, and see how much cash to add to your deposit.",
+      "description": "Estimate IMT and stamp duty on a Portuguese property purchase.",
+      "pageTitle": "IMT and Stamp Duty Calculator for Buying Property in Portugal",
+      "pageDescription": "Estimate the 2026 IMT and Imposto do Selo on a property purchase in Portugal: mainland or islands, home use, mortgage stamp duty and the young-buyer exemption.",
+      "propertyTitle": "Property",
+      "financingTitle": "Mortgage",
+      "youngTitle": "Young-buyer exemption (IMT Jovem)",
+      "youngNote": "Only if every condition holds on the deed date: you are 35 or younger, it is your first home, and you will live in it permanently. Full exemption up to {{full}}; partial exemption up to {{partial}}, with IMT and purchase stamp duty on the excess only.",
+      "youngUnavailable": "The exemption only applies to an own permanent home. Choose that use to check eligibility.",
+      "fields": {
+        "price": "Purchase price",
+        "taxValue": "Tax value (VPT), optional",
+        "region": "Location",
+        "use": "Use of the property",
+        "loan": "Mortgage amount",
+        "young": "I meet the young-buyer conditions"
+      },
+      "help": {
+        "price": "The price on the deed.",
+        "taxValue": "The tax authority taxes the higher of the price and the VPT. Leave at zero if unknown.",
+        "loan": "Enter zero for a cash purchase. Mortgage stamp duty is not covered by the young-buyer exemption here."
+      },
+      "regions": {
+        "mainland": "Mainland Portugal",
+        "islands": "Azores or Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Own permanent home",
+        "secondary": "Secondary home or other housing",
+        "rustic": "Rustic land",
+        "otherUrban": "Other urban property or land"
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "loan": "The mortgage cannot exceed the purchase price.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "total": "Total taxes to pay",
+        "effectiveRate": "{{rate}} of the taxable value",
+        "reference": "Taxable value",
+        "imt": "IMT",
+        "stampPurchase": "Stamp duty on the purchase (0.8%)",
+        "stampLoan": "Stamp duty on the mortgage (0.6%)",
+        "exemptFull": "Young-buyer exemption applied: it removes IMT and purchase stamp duty, saving {{saving}}.",
+        "exemptPartial": "Partial young-buyer exemption applied: IMT and purchase stamp duty are charged only on the part above the full-exemption limit. It saves {{saving}} in total.",
+        "exemptNone": "At this value the exemption does not apply. It covers purchases up to {{partial}} (full up to {{full}}) and only for the conditions in the box on the left.",
+        "tableNote": "Table for {{year}}, reviewed on {{date}}. Educational estimate, not tax advice."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Buying an own permanent home on the mainland for {{price}} with a {{loan}} mortgage costs {{imt}} of IMT, {{stampPurchase}} of stamp duty on the purchase and {{stampLoan}} of stamp duty on the mortgage. That is {{total}} in total, which you pay on top of the deposit and should add to your savings target.",
+        "methodTitle": "How the estimate works",
+        "methodBase": "The tax base is the higher of the purchase price and the patrimonial tax value (VPT).",
+        "methodImt": "For homes, IMT is the base multiplied by the rate of its band minus a fixed deduction (parcela a abater) that makes the tax progressive. Above the last progressive band the rate applies to the whole value without deduction. Rustic land pays 5% and other urban property or land 6.5%.",
+        "methodStamp": "Stamp duty is 0.8% of the base on the purchase (verba 1.1) and, if you take a mortgage, 0.6% of the amount borrowed (verba 17.1.4, loans of five years or more).",
+        "methodRounding": "IMT and each stamp duty are rounded to the cent separately, as the tax authority assesses them. Stamp duty on interest and fees is not included.",
+        "tableTitle": "IMT table {{year}}: own permanent home, mainland",
+        "tableAbove": "Higher values",
+        "tableLimit": "Value up to",
+        "tableRate": "Rate",
+        "tableDeduct": "Deduction",
+        "tableNote": "Up to {{exempt}} the first band is 0%. Secondary homes use their own table with 1% from the first euro, and the Azores and Madeira use the same rates with limits 25% higher.",
+        "sourceImt": "CIMT, article 17 (Portal das Finanças)",
+        "sourceStamp": "Stamp duty code (Portal das Finanças)",
+        "review": "Rules and limits for {{year}}, last reviewed on {{date}}. Check them again before you sign.",
+        "assumptionsTitle": "Assumptions and supported situations",
+        "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
+        "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. The purchase stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit, so above it you pay 0.8% only on the excess. Mortgage stamp duty is still charged.",
+        "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
+        "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
+        "assumptionIslands": "For the Azores and Madeira the limits are the mainland limits increased by 25% and rounded to the euro, with the same rates. Confirm the regional limits with the tax authority."
+      },
+      "nextStepHeadline": "Plan the cash you need to buy",
+      "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
+      "nextStepCta": "Include taxes in your house-deposit target"
+    },
     "personalLoan": {
       "title": "Personal Loan Calculator",
       "shortName": "Personal loan",
@@ -2438,6 +2592,74 @@
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
         "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Savings certificates calculator (Certificados de Aforro)",
+      "shortName": "Savings certificates",
+      "subtitle": "Estimate what Portuguese Certificados de Aforro Série F could pay: quarterly interest, permanence bonuses and the 28% IRS withheld, gross and net.",
+      "description": "Estimate Certificados de Aforro Série F interest, bonuses and tax.",
+      "pageTitle": "Certificados de Aforro Calculator: Série F Interest, Bonuses and Net Return",
+      "pageDescription": "Estimate Certificados de Aforro Série F returns with the permanence bonuses, the 28% IRS withholding and an editable base rate, shown gross and net.",
+      "assumption": "The base rate changes every month with the 3-month Euribor. This estimate holds the rate you enter for every quarter, so treat the result as an illustration, not a forecast.",
+      "fields": {
+        "amount": "Amount subscribed",
+        "years": "Years held",
+        "baseRate": "Base rate (assumption)",
+        "baseRateHelp": "Annual gross rate, up to {{rate}} (the ceiling in the rules). Edit it to test other scenarios."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive rate.",
+        "tooSmall": "The minimum per account is {{min}}.",
+        "tooLarge": "The maximum per account is {{max}}.",
+        "years": "Enter a whole number of years from 1 to {{years}}.",
+        "baseRate": "The base rate cannot exceed {{rate}}.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "finalValue": "Estimated net value at the end",
+        "invested": "Amount subscribed",
+        "grossInterest": "Gross interest",
+        "irs": "IRS withheld (28%)",
+        "netInterest": "Net interest",
+        "premiumInterest": "Of the gross interest, from permanence bonuses",
+        "netYield": "Net annual yield"
+      },
+      "table": {
+        "title": "Year by year",
+        "year": "Year",
+        "rate": "Gross rate",
+        "gross": "Gross interest",
+        "net": "Net interest",
+        "balance": "Balance"
+      },
+      "guide": {
+        "rulesTitle": "Série F rules this calculator follows",
+        "rulesIntro": "Rules as published by IGCP in the Série F product sheet of {{rulesDate}} (Portaria n.º 149-A/2023). Rules can change, and the issuer’s current terms are the ones that count.",
+        "ruleTerm": "Term of {{termYears}} years. You can redeem, in whole or in part, from the first interest date; the calculator uses whole years held.",
+        "ruleRate": "Each quarter earns the base rate at the start of that quarter plus the permanence bonus for the subscription year. The base rate follows the 3-month Euribor and is capped at {{maxBase}} and floored at 0%.",
+        "ruleTax": "Interest is paid quarterly and capitalised automatically after IRS, withheld at source at {{irsRate}}.",
+        "ruleRedeem": "Only individuals can hold certificates. The limit is {{maxAmount}} per savings account in Série F, with a minimum of {{minAmount}}.",
+        "premiumTitle": "Permanence bonus by subscription year",
+        "premiumYears": "Year",
+        "premiumPoints": "Percentage points",
+        "sourceSheet": "IGCP Série F product sheet (April 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "April 2026",
+        "exampleTitle": "Worked example",
+        "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
+        "methodTitle": "How the estimate works",
+        "methodQuarter": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
+        "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
+        "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. The real rate is reset monthly, so actual interest will differ.",
+        "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
+        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
+      },
+      "nextStepHeadline": "See your certificates next to the rest of your savings",
+      "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
+      "nextStepCta": "Include certificates in your savings overview"
     }
   },
   "resources": {
