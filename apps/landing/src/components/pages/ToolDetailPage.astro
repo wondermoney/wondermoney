@@ -58,6 +58,8 @@ import WithholdingTablesComp from "@/components/calculators/WithholdingTablesCom
 import WithholdingTablesGuide from "@/components/calculators/WithholdingTablesGuide.astro";
 import PropertyCapitalGainsCalculatorComp from "@/components/calculators/PropertyCapitalGainsCalculatorComp";
 import PropertyCapitalGainsGuide from "@/components/calculators/PropertyCapitalGainsGuide.astro";
+import StatePensionCalculatorComp from "@/components/calculators/StatePensionCalculatorComp";
+import StatePensionGuide from "@/components/calculators/StatePensionGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -174,6 +176,11 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.propertyCapitalGains.nextStepHeadline"),
     description: t("tools.propertyCapitalGains.nextStepDescription"),
     ctaText: t("tools.propertyCapitalGains.nextStepCta"),
+  },
+  toolStatePension: {
+    headline: t("tools.statePension.nextStepHeadline"),
+    description: t("tools.statePension.nextStepDescription"),
+    ctaText: t("tools.statePension.nextStepCta"),
   },
   toolPurchaseTaxes: {
     headline: t("tools.purchaseTaxes.nextStepHeadline"),
@@ -318,6 +325,7 @@ const schema = {
     {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
     {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsCalculatorComp locale={locale} client:load />}
+    {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -347,6 +355,7 @@ const schema = {
   {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
   {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}
   {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsGuide locale={locale} />}
+  {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

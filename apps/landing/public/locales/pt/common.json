@@ -3274,6 +3274,84 @@
         "sourceCode": "Código do Trabalho, arts. 239.º, 263.º e 264.º: duração das férias, subsídio de Natal e subsídio de férias",
         "reviewed": "Regras revistas a 19 de novembro de 2026. A retenção em separado de cada pagamento do mês foi confirmada no texto original do Despacho n.º 233-A/2026, e os artigos do Código do Trabalho em cópias do texto consolidado. A referência de 22 dias úteis do subsídio de férias é prática corrente, não consta desses textos. Reter cada duodécimo à taxa efetiva do subsídio inteiro (Lei n.º 11/2013, art. 3.º) é a prática habitual das empresas; essa lei não foi confrontada com o texto. A taxa de 11% da Segurança Social foi confirmada em fontes secundárias."
       }
+    },
+    "statePension": {
+      "title": "Simulador da pensão de reforma 2026",
+      "shortName": "Pensão de reforma",
+      "subtitle": "Estime a sua pensão de velhice mensal, a taxa de substituição e a diferença face ao salário líquido de hoje.",
+      "description": "Estime a pensão de reforma em Portugal: valor mensal, taxa de substituição e diferença face ao salário.",
+      "pageTitle": "Simulador de Pensão de Reforma 2026: Estimativa da Pensão de Velhice",
+      "pageDescription": "Estimativa aproximada da pensão de velhice em Portugal para carreiras iniciadas em 2002 ou depois: fórmula de 2026, idade de reforma, penalização da reforma antecipada, pensões mínimas e a diferença face ao salário.",
+      "ageValue": "{{years}} anos e {{months}} meses",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal médio (euros de hoje)",
+        "years": "Anos de descontos na reforma",
+        "ageYears": "Idade de reforma: anos",
+        "ageMonths": "Idade de reforma: meses a mais"
+      },
+      "help": {
+        "gross": "O seu salário bruto médio ao longo da carreira, em euros de hoje, pago 14 vezes por ano (subsídios de férias e de Natal à parte). Indique uma média real, não o salário nominal de cada ano.",
+        "years": "Anos com remunerações registadas. Só contam 40 anos para a pensão; são precisos pelo menos 15 para ter pensão de velhice.",
+        "age": "A idade normal em 2026 é {{normal}}. A partir dos 60 anos pode reformar-se mais cedo com penalização e, até aos 70, mais tarde com bonificação."
+      },
+      "errors": {
+        "required": "Indique um número válido.",
+        "tooSmall": "Indique um valor de pelo menos {{min}}.",
+        "tooLarge": "Indique um valor até {{max}}.",
+        "whole": "Indique um número inteiro.",
+        "belowMinimum": "A pensão de velhice exige pelo menos {{min}} anos de descontos. Com menos, esta estimativa não se aplica.",
+        "tooLongForAge": "Os descontos começam aos 16 anos, no mínimo, por isso com esta idade o máximo é {{max}} anos.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Pensão bruta mensal estimada (14 pagamentos)",
+        "replacement": "Taxa de substituição (pensão / salário bruto médio)",
+        "statutory": "Pensão antes do ajuste por antecipação ou adiamento",
+        "rate": "Taxa global de formação",
+        "netPay": "O seu salário líquido hoje (por pagamento)",
+        "gap": "Diferença mensal face ao salário líquido",
+        "adjustment": {
+          "none": "Reforma na idade normal de 2026 ({{normal}}): sem penalização nem bonificação.",
+          "early": "Reformar-se {{months}} meses antes da idade normal ({{normal}}) retira {{penalty}} (0,5% por mês) e aplica o fator de sustentabilidade de 2026, de {{factor}}.",
+          "late": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação de {{bonus}}.",
+          "lateCapped": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação, que fica em {{bonus}} porque a pensão não pode passar 92% da remuneração de referência."
+        },
+        "floorApplied": "A pensão foi elevada para o mínimo de 2026 correspondente à sua carreira.",
+        "gapSome": "Para manter o nível de vida precisaria de cerca de {{gap}} por mês vindos de poupanças e investimentos (antes de impostos).",
+        "gapNone": "Com esta idade, a pensão estimada cobre o seu salário líquido de hoje.",
+        "estimate": "Estimativa aproximada para planeamento, não é uma decisão nem aconselhamento. A referência é o simulador oficial da Segurança Social Direta, que usa o seu registo de remunerações real.",
+        "limits": "Não abrange: carreiras iniciadas antes de 2002 (fórmula mista), funcionários públicos (CGA), regimes especiais e salários muito variáveis.",
+        "simulatorLink": "Abrir o simulador oficial",
+        "fireLink": "Calcule a poupança necessária com o simulador FIRE"
+      },
+      "nextStepHeadline": "Cubra a diferença com os seus investimentos",
+      "nextStepDescription": "A WonderMoney junta a sua carteira e o seu património num só lugar, para ver até onde os investimentos chegam para cobrir a diferença.",
+      "nextStepCta": "Acompanhe os investimentos necessários para cobrir a diferença",
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Alguém com um salário médio de {{gross}} por mês (euros de hoje, 14 pagamentos), com {{years}} anos de descontos, reforma-se com {{age}}. A pensão estatutária é de {{statutory}} por mês, uma taxa global de formação de {{rate}}. Reformar-se {{months}} meses antes da idade normal retira {{penalty}} e aplica o fator de sustentabilidade, ficando em {{monthly}} por mês, ou {{replacement}} do salário. Face a um salário líquido estimado de {{net}}, a diferença é de {{gap}} por mês.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodReference": "A remuneração de referência é a média das remunerações anuais de toda a carreira, revalorizadas com coeficientes ligados aos preços no consumidor e divididas por 14. O simulador trabalha em euros de hoje: indica um salário mensal médio real e o resultado também vem em euros de hoje.",
+        "methodRate": "A taxa anual depende dos escalões da remuneração de referência, em múltiplos do IAS ({{ias}} em 2026): {{rates}} para as parcelas até 1,1, até 2, até 4, até 8 e acima de 8 vezes o IAS. Carreiras até 20 anos usam 2% fixos. A taxa é multiplicada pelos anos de descontos, no máximo 40, e dá a taxa global de formação.",
+        "methodAges": "A idade normal de acesso à pensão de velhice é {{normal2026}} em 2026 e foi fixada em {{normal2027}} para 2027. O simulador usa o valor de 2026.",
+        "methodEarly": "Antes da idade normal, a partir dos 60 anos e com pelo menos 15 anos de descontos, cada mês de antecipação retira {{penalty}}, e aplica-se ainda o fator de sustentabilidade de 2026 ({{factor}}, um corte de 17,63%). Os dois multiplicam. Não estão modeladas exceções, como as carreiras muito longas.",
+        "methodLate": "Depois da idade normal, até aos 70 anos, cada mês acrescenta uma bonificação que depende dos anos de descontos: 0,33% desde 15 anos, 0,50% desde 25, 0,65% desde 35 e 1% desde 40. A pensão com bonificação não pode passar 92% da remuneração de referência.",
+        "methodMinimum": "Se a fórmula der menos do que a pensão mínima de 2026 para a sua carreira, mostra-se o mínimo: {{min15}} para 15 a 20 anos, {{min21}} para 21 a 30 e {{min31}} para 31 ou mais. O mínimo não se aplica à reforma antecipada.",
+        "methodGap": "A diferença compara a pensão bruta estimada, em 14 pagamentos, com o seu salário líquido de hoje: salário bruto menos 11% de Segurança Social e a retenção de IRS de 2026 para uma pessoa solteira sem dependentes no continente. A pensão também paga IRS, por isso a diferença real pode variar.",
+        "methodBudget": "Leia a diferença como o valor mensal que as suas poupanças e investimentos teriam de cobrir. Muda com cada pressuposto acima.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedMixed": "Carreiras iniciadas antes de 2002 (fórmula mista, com as regras antigas para os anos até 2001). Este simulador só cobre a fórmula de toda a carreira para quem começou a descontar em 2002 ou depois.",
+        "unsupportedSpecial": "Salários muito variáveis ao longo da carreira, lacunas nos descontos e carreiras com mais de 40 anos.",
+        "unsupportedCga": "Funcionários públicos da CGA, trabalhadores independentes e outros regimes especiais.",
+        "unsupportedOther": "Regimes de reforma antecipada sem penalização, pensões de invalidez e atualizações da pensão depois da reforma.",
+        "sourcesTitle": "Fontes",
+        "sourceGuide": "Guia da Segurança Social: pensão de velhice",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, na redação em vigor (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: idade normal de 2027 e fator de sustentabilidade de 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: atualização das pensões de 2026 e pensões mínimas",
+        "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas."
+      }
     }
   },
   "resources": {

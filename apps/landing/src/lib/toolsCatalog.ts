@@ -206,6 +206,12 @@ export const TOOLS_CATALOG = [
 	},
 	{ key: "fire", routeId: "pageFireCalculator", group: "investAndGrow" },
 	{
+		key: "statePension",
+		routeId: "toolStatePension",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"],
+	},
+	{
 		key: "termDeposit",
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
