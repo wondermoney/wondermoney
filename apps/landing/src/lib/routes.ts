@@ -15,6 +15,14 @@ const ROUTE_SLUGS = {
 		de: "ressourcen",
 		it: "risorse",
 	},
+	pageSavingsGuide: {
+		pt: "onde-guardar-poupancas",
+		en: "where-to-keep-savings-portugal",
+		es: "donde-guardar-ahorros-portugal",
+		fr: "ou-placer-epargne-portugal",
+		de: "wo-ersparnisse-anlegen-portugal",
+		it: "dove-tenere-risparmi-portogallo",
+	},
 	pagePricing: {
 		pt: "precos",
 		en: "pricing",
@@ -488,6 +496,14 @@ const ROUTE_SLUGS = {
 		de: "festgeldzins-index-portugal",
 		it: "indice-tassi-depositi-vincolati-portogallo",
 	},
+	toolTermDepositOffers: {
+		pt: "comparador-depositos-a-prazo",
+		en: "term-deposit-comparison-portugal",
+		es: "comparador-depositos-plazo-portugal",
+		fr: "comparateur-depots-a-terme-portugal",
+		de: "festgeld-vergleich-portugal",
+		it: "confronto-depositi-vincolati-portogallo",
+	},
 	toolElectricityIndex: {
 		pt: "indice-da-eletricidade",
 		en: "electricity-price-index-portugal",
@@ -503,6 +519,22 @@ const ROUTE_SLUGS = {
 		fr: "prix-carburants-portugal",
 		de: "kraftstoffpreise-portugal",
 		it: "prezzi-carburanti-portogallo",
+	},
+	toolFreeBankAccounts: {
+		pt: "contas-bancarias-gratuitas",
+		en: "free-bank-accounts-portugal",
+		es: "cuentas-bancarias-gratuitas-portugal",
+		fr: "comptes-bancaires-gratuits-portugal",
+		de: "kostenlose-bankkonten-portugal",
+		it: "conti-bancari-gratuiti-portogallo",
+	},
+	toolRemuneratedAccounts: {
+		pt: "contas-remuneradas",
+		en: "savings-accounts-portugal-comparison",
+		es: "cuentas-remuneradas-portugal",
+		fr: "comptes-remuneres-portugal",
+		de: "verzinste-konten-portugal",
+		it: "conti-remunerati-portogallo",
 	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
@@ -595,6 +627,7 @@ export type StandalonePageRouteId = (typeof STANDALONE_PAGE_ROUTE_IDS)[number]
 // the lead-magnet guide. Listed so the language switcher maps their slugs too.
 const OTHER_TOP_LEVEL_ROUTE_IDS = [
 	"pageResources",
+	"pageSavingsGuide",
 	"guideMoneyCheckin",
 ] as const satisfies ReadonlyArray<RouteId>
 
@@ -648,8 +681,11 @@ export const TOOL_ROUTE_IDS = [
 	"toolSp500History",
 	"toolEuribor",
 	"toolDepositRateIndex",
+	"toolTermDepositOffers",
 	"toolElectricityIndex",
 	"toolFuelPrices",
+	"toolFreeBankAccounts",
+	"toolRemuneratedAccounts",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -984,6 +1020,15 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	tooldepositrateindex: "toolDepositRateIndex",
 	"deposit-rate-index": "toolDepositRateIndex",
 	"indice-depositos-a-prazo": "toolDepositRateIndex",
+	tooltermdepositoffers: "toolTermDepositOffers",
+	"term-deposit-offers": "toolTermDepositOffers",
+	"comparador-depositos-a-prazo": "toolTermDepositOffers",
+	toolfreebankaccounts: "toolFreeBankAccounts",
+	"free-bank-accounts": "toolFreeBankAccounts",
+	"contas-gratuitas": "toolFreeBankAccounts",
+	toolremuneratedaccounts: "toolRemuneratedAccounts",
+	"savings-accounts": "toolRemuneratedAccounts",
+	"contas-poupanca": "toolRemuneratedAccounts",
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",

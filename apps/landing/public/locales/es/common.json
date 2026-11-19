@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Comparador de depósitos a plazo: ofertas en Portugal por plazo e importe",
+      "shortName": "Ofertas de depósitos",
+      "subtitle": "Compara ofertas de depósitos a plazo de bancos disponibles en Portugal por plazo, importe y condiciones, con los intereses que te quedan tras el 28% de IRS.",
+      "description": "Compara ofertas de depósitos a plazo por plazo e importe, con intereses netos de impuestos.",
+      "pageTitle": "Comparador de Depósitos a Plazo en Portugal: Mejores Tipos por Plazo e Importe",
+      "pageDescription": "Compara ofertas de depósitos a plazo en Portugal por tipo (TANB), plazo e importe, con los intereses netos tras el 28% de IRS, las condiciones y la fecha en que se recopilaron. Solo educativo.",
+      "asOfBanner": "Ofertas a fecha de {{date}}",
+      "offers": {
+        "title": "Ofertas de depósitos, del tipo más alto al más bajo",
+        "intro": "Indica el importe que quieres invertir y filtra la lista por plazo y condiciones. Los intereses mostrados son simples, pagados al vencimiento, tras el 28% de IRS. Las condiciones de los bancos aparecen en portugués, tal como las publican.",
+        "caption": "Ofertas de depósitos a plazo por tipo, plazo, límites, intereses netos y condiciones"
+      },
+      "filters": {
+        "amount": "Importe que quiero invertir",
+        "amountHelp": "Se ocultan las ofertas cuyo mínimo sea superior o cuyo máximo sea inferior a este importe.",
+        "term": "Plazo",
+        "termAll": "Cualquier plazo",
+        "termOption": "{{months}} meses",
+        "irs": "Banco e IRS",
+        "irsAll": "Todos los bancos",
+        "irsWithheld": "IRS portugués retenido por el banco",
+        "irsNotWithheld": "Banco extranjero: IRS sin retener, lo declaras tú",
+        "conditions": "Condiciones",
+        "existingClients": "Para clientes existentes (oculta ofertas solo para nuevos clientes)",
+        "noNewMoney": "Sin exigencia de dinero nuevo",
+        "earlyWithdrawal": "Cancelación anticipada permitida"
+      },
+      "errors": {
+        "amountRequired": "Indica un importe superior a cero para ver los intereses, o déjalo vacío para ver todas las ofertas.",
+        "amountPositive": "El importe debe ser superior a cero.",
+        "amountTooLarge": "Indica {{max}} o menos."
+      },
+      "count": "Mostrando {{count}} de {{total}} ofertas.",
+      "none": "Ninguna oferta cumple estos filtros. Prueba otro plazo o importe, o relaja una condición.",
+      "notStated": "no indicado",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Plazo (meses)",
+        "bank": "Banco y producto",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "netInterest": "Intereses netos al vencimiento",
+        "netYield": "Rentabilidad neta anual",
+        "conditions": "Condiciones"
+      },
+      "badges": {
+        "newClients": "Solo nuevos clientes",
+        "newMoney": "Exige dinero nuevo",
+        "early": {
+          "yes": "Cancelación anticipada permitida",
+          "seeNotes": "Cancelación anticipada: ver notas",
+          "no": "Cancelación anticipada no indicada"
+        },
+        "irsNotWithheld": "Banco extranjero: IRS sin retener",
+        "irsWithheld": "IRS retenido en Portugal"
+      },
+      "notesLabel": "Condiciones originales en portugués",
+      "compare": {
+        "title": "Cómo se comparan estas ofertas",
+        "average": "Tipo medio oficial de los nuevos depósitos de hogares en Portugal, {{bucket}}: {{rate}} al año ({{month}}).",
+        "averageFallback": "El último mes no hubo nuevos depósitos en este grupo de plazos, así que se usa la media de todos los plazos: {{rate}} al año ({{month}}).",
+        "above": "La mejor oferta mostrada ({{bank}}, {{tanb}}) queda {{gap}} puntos por encima.",
+        "below": "La mejor oferta mostrada ({{bank}}, {{tanb}}) queda {{gap}} puntos por debajo.",
+        "benchmarkLink": "Ver el tipo medio oficial de los depósitos",
+        "certificates": "Como referencia, los Certificados de Aforro Série F en el primer año: {{net}} de intereses tras el IRS, una rentabilidad neta anual de {{yield}} (tipo base del {{rate}} en {{month}}, antes de la prima de permanencia).",
+        "certificatesLink": "Compara con la calculadora de certificados de ahorro"
+      },
+      "disclaimers": {
+        "asOf": "Ofertas recopiladas a fecha de {{date}}.",
+        "change": "Las condiciones cambian a menudo y algunas ofertas son campañas que terminan sin aviso.",
+        "confirm": "Confirma cada tipo y condición con el banco antes de depositar.",
+        "fgd": "El Fundo de Garantia de Depósitos cubre los depósitos en bancos portugueses hasta 100.000 € por depositante y por banco. Fuente:",
+        "foreign": "Los bancos extranjeros están cubiertos por el sistema de garantía de depósitos de su propio país, no por el fondo portugués.",
+        "assumptions": "Los intereses son simples, pagados al vencimiento, con un {{tax}}% de IRS descontado. En los bancos extranjeros, la cifra supone que declaras los intereses y pagas el mismo tipo.",
+        "educational": "Solo educativo: no es una recomendación ni asesoramiento financiero, y no se recomienda ningún banco.",
+        "noAffiliate": "Esta página no tiene enlaces de afiliados."
+      },
+      "sourceNote": "Condiciones recopiladas por WonderMoney a partir de las ofertas publicadas por los bancos, a fecha de {{date}}. Cifras netas calculadas por WonderMoney.",
+      "nextStepHeadline": "Sigue tus depósitos y sus vencimientos en un solo lugar",
+      "nextStepDescription": "Añade tus depósitos a WonderMoney para verlos junto a tus otras cuentas y saber cuándo vence cada uno.",
+      "nextStepCta": "Seguir mis depósitos",
+      "guide": {
+        "read": {
+          "title": "Cómo leer el comparador",
+          "what": "La tabla lista {{count}} ofertas de depósitos a plazo de bancos disponibles en Portugal, a fecha de {{date}}. La TANB es el tipo nominal anual bruto. Para el importe que indiques, cada fila muestra los intereses que te quedan al vencimiento y la rentabilidad neta anual.",
+          "noRecommendation": "La lista está ordenada por tipo, no por calidad. No recomienda ningún banco ni producto: un tipo más alto puede venir con condiciones como dinero nuevo, comisión de mantenimiento o cancelación anticipada limitada. Lee las condiciones y compara tú mismo las ofertas vigentes."
+        },
+        "example": {
+          "title": "Ejemplo",
+          "setup": "El tipo más alto de la lista es el de {{bank}}, {{rate}} a {{months}} meses. Con {{amount}} son {{gross}} de intereses brutos; tras el {{taxRate}}% de IRS te quedas con {{net}}, una rentabilidad neta anual de {{yearly}}."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "Cada cifra sale del mismo motor que la calculadora de depósitos a plazo:",
+          "steps": {
+            "a": "Intereses brutos: importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
+            "b": "Impuesto: el {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
+            "c": "Rentabilidad neta anual: los intereses netos anualizados a lo largo del plazo.",
+            "d": "Filtros: una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
+          }
+        },
+        "data": {
+          "title": "Datos y fuentes",
+          "source": "Condiciones recopiladas por WonderMoney a partir de las ofertas publicadas por los bancos, a fecha de {{date}}. Las notas son el texto original en portugués de las condiciones y no se traducen, para que ninguna condición se pierda en la traducción.",
+          "refresh": "La lista se actualiza a mano cuando se vuelven a recopilar las condiciones, y la fecha de arriba indica siempre cuándo. No se descarga nada mientras usas la página, así que una actualización tardía nunca muestra cifras erróneas como actuales: comprueba la fecha.",
+          "fgd": "Garantía de depósitos: el Fundo de Garantia de Depósitos cubre 100.000 € por depositante y por banco. Fuente:"
+        },
+        "limits": {
+          "title": "Qué deja fuera el comparador",
+          "items": {
+            "a": "Las ofertas cambian y algunas terminan sin aviso: las cifras son una instantánea, no una cotización.",
+            "b": "Comisiones, costes de apertura de cuenta, bonificaciones y tipos escalonados para clientes existentes solo aparecen en las notas, si aparecen.",
+            "c": "Los intereses pagados antes del vencimiento y la reinversión no se modelan: todas las cifras son intereses simples al vencimiento.",
+            "d": "Tu situación fiscal, y las reglas de los intereses de un banco extranjero, pueden ser distintas. Esto no es asesoramiento fiscal."
+          }
+        },
+        "related": {
+          "title": "Sigue explorando",
+          "termDepositLink": "Calculadora de depósitos a plazo",
+          "termDepositBody": "Introduce el tipo de tu banco y mira los intereses, el impuesto y la rentabilidad neta.",
+          "depositRateIndexLink": "Índice de tipos de depósitos",
+          "depositRateIndexBody": "Consulta el tipo medio oficial de los nuevos depósitos, mes a mes, frente a la inflación.",
+          "savingsCertificatesLink": "Calculadora de certificados de ahorro",
+          "savingsCertificatesBody": "Compara un depósito con los Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Calculadora de salario neto en Portugal 2026",
       "shortName": "Salario neto",
@@ -4212,6 +4340,229 @@
           "vehicleTaxBody": "Estima el impuesto anual del vehículo, otro coste de tener coche."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Antes de fiarte de esta lista",
+      "educationalTitle": "Solo educativo",
+      "educational": "Esta página es educativa. No es una recomendación ni una oferta, el orden no es un ranking y WonderMoney no recomienda ninguna de las cuentas. No hay enlaces de afiliados en esta página.",
+      "confirm": "Las condiciones cambian con frecuencia. Confirma con el banco cada tipo, límite y comisión antes de abrir o cambiar de cuenta.",
+      "source": "Condiciones recopiladas por WonderMoney a partir de las ofertas publicadas por los bancos.",
+      "asOf": "Condiciones a fecha de {{date}}",
+      "guarantee": {
+        "title": "Garantía de depósitos",
+        "body": "En Portugal, el Fundo de Garantia de Depósitos reembolsa los depósitos hasta {{amount}} por depositante y por banco. En una cuenta conjunta, el saldo se reparte entre los titulares. Los bancos de otro país están cubiertos por el sistema de su país de origen, con el mismo nivel mínimo en la UE.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Bancos extranjeros e IRS",
+        "body": "Los bancos portugueses retienen un 28% de IRS sobre los intereses. Un banco con sede en otro país no lo hace: los intereses los declaras tú en el IRS, por lo general al 28%, salvo que optes por sumarlos al resto de tus ingresos."
+      },
+      "originalLabel": "Condiciones originales, en portugués",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "freeBankAccounts": {
+      "title": "Cuentas bancarias gratuitas en Portugal: cuáles son y sus condiciones",
+      "shortName": "Cuentas bancarias gratuitas",
+      "subtitle": "Cuentas corrientes sin comisión de mantenimiento, con las condiciones que llevan asociadas, a una fecha indicada.",
+      "description": "Lista fechada de cuentas corrientes gratuitas en Portugal, con las condiciones de cada una y cuáles admiten dos titulares.",
+      "pageTitle": "Cuentas Bancarias Gratuitas en Portugal: Condiciones y 2 Titulares",
+      "pageDescription": "Lista fechada de cuentas corrientes gratuitas en Portugal: qué bancos tienen sucursales, cuáles son solo digitales o extranjeros, cuáles admiten dos titulares y las condiciones para que la cuenta sea gratis.",
+      "filters": {
+        "twoHolders": "Mostrar solo cuentas que admiten dos titulares"
+      },
+      "count": "Mostrando {{shown}} de {{total}} cuentas",
+      "empty": "Ninguna cuenta coincide con este filtro.",
+      "noNotes": "Sin condiciones indicadas.",
+      "foreignBadge": "Banco extranjero",
+      "columns": {
+        "account": "Banco y cuenta",
+        "twoHolders": "2 titulares",
+        "notes": "Notas (en portugués)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Bancos con sucursales",
+          "intro": "Cuentas en las que la tabla no indica falta de sucursales. Algunas limitan la atención presencial a las sucursales de un banco asociado."
+        },
+        "branchless": {
+          "title": "Bancos solo digitales y en línea, incluidos los extranjeros",
+          "intro": "La tabla indica que no tienen sucursales ni depósito de efectivo o cheques. Los bancos extranjeros están marcados: los intereses los declaras tú."
+        }
+      },
+      "nextStepHeadline": "Ve todas tus cuentas en un solo lugar",
+      "nextStepDescription": "Las cuentas gratuitas son más fáciles de comparar que de gestionar. Conéctalas en WonderMoney y sigue todos los saldos juntos.",
+      "nextStepCta": "Ve todas tus cuentas en un solo lugar",
+      "guide": {
+        "read": {
+          "title": "Cómo leer esta lista",
+          "what": "Un banco puede cobrar por mantener abierta una cuenta corriente, por la tarjeta de débito o por servicios como los depósitos en efectivo. Aquí, \"gratuita\" es lo que dice la oferta del propio banco, normalmente con condiciones: nómina domiciliada, saldo mínimo o un número mínimo de compras con tarjeta al mes.",
+          "notRec": "La lista no dice qué cuenta te conviene. No cubre todos los bancos y una cuenta gratuita hoy puede empezar a cobrar mañana."
+        },
+        "method": {
+          "title": "Cómo se hizo la lista",
+          "intro": "Cada fila es una cuenta y lo que dice su oferta publicada. Las notas se muestran tal como se recopilaron, en portugués.",
+          "steps": {
+            "a": "Los bancos se dividen según las notas: los que no tienen sucursales figuran como bancos solo digitales o en línea.",
+            "b": "La columna de 2 titulares indica si la cuenta puede tener dos titulares.",
+            "c": "Un banco con sede en el extranjero aparece marcado, porque sus intereses no tienen retención en origen en Portugal."
+          }
+        },
+        "limits": {
+          "title": "Lo que la lista no incluye",
+          "items": {
+            "a": "Comisiones de tarjeta y de transferencias y condiciones que no estén en las notas.",
+            "b": "Qué bancos admiten nuevos clientes ahora o no residentes.",
+            "c": "La calidad del servicio, de la aplicación y de la atención al cliente.",
+            "d": "Cualquier cambio posterior a la fecha que figura en la página."
+          }
+        },
+        "related": {
+          "title": "Sigue explorando",
+          "remuneratedLink": "Cuentas remuneradas y de ahorro",
+          "remuneratedBody": "Tipos, límites e intereses netos de las cuentas que pagan intereses.",
+          "budgetLink": "Presupuesto familiar",
+          "budgetBody": "Mira cuánto gastas antes de elegir dónde guardarlo."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Cuentas remuneradas y de ahorro en Portugal: tipos, límites e intereses netos",
+      "shortName": "Cuentas remuneradas",
+      "subtitle": "Una tabla fechada de lo que pagan los bancos portugueses y extranjeros por el ahorro, con una calculadora de intereses netos.",
+      "description": "Tabla fechada de cuentas remuneradas y de ahorro en Portugal, con filtros e intereses netos después de IRS.",
+      "pageTitle": "Cuentas Remuneradas y de Ahorro en Portugal: Tipos e Intereses Netos",
+      "pageDescription": "Tabla fechada de cuentas remuneradas, cuentas de ahorro, certificados y seguros de ahorro en Portugal: tipo bruto, límites, IBAN, dos titulares e IRS, con una calculadora de intereses netos tras el 28% de IRS.",
+      "calculator": {
+        "title": "Intereses netos en 12 meses",
+        "intro": "Introduce un importe para ver los intereses que pagaría cada cuenta en 12 meses tras el {{tax}}% de IRS, contando intereses solo hasta el máximo de la cuenta. Las filas con varios planes muestran cada plan."
+      },
+      "fields": {
+        "amount": "Importe ahorrado"
+      },
+      "help": {
+        "amount": "Mantenido durante 12 meses, al tipo de la tabla."
+      },
+      "errors": {
+        "amount": {
+          "required": "Introduce un importe.",
+          "negative": "El importe no puede ser negativo.",
+          "tooLarge": "Introduce un importe de hasta {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Tipo",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Admite 2 titulares",
+        "any": "Todos"
+      },
+      "types": {
+        "ordem": "Cuenta corriente",
+        "poupancaComIban": "Ahorro con IBAN",
+        "poupancaSemIban": "Ahorro sin IBAN",
+        "dividaPublica": "Deuda pública",
+        "seguro": "Seguro"
+      },
+      "iban": {
+        "any": "Todos",
+        "withIban": "Con IBAN",
+        "withoutIban": "Sin IBAN"
+      },
+      "tax": {
+        "any": "Todos",
+        "withheld": "Retenido por el banco en Portugal",
+        "foreign": "Extranjero: lo declaras tú",
+        "foreignBadge": "Extranjero: declarar en el IRS",
+        "withheldBadge": "IRS retenido por el banco"
+      },
+      "sort": {
+        "label": "Ordenar por",
+        "tanbDesc": "Tipo, de mayor a menor",
+        "tanbAsc": "Tipo, de menor a mayor",
+        "netDesc": "Intereses netos, de mayor a menor"
+      },
+      "count": "Mostrando {{shown}} de {{total}} cuentas",
+      "assumptions": "Los intereses netos son interés simple en 12 meses al tipo bruto (TANB) de la tabla, menos el {{tax}}% de IRS y cualquier cuota mensual que indiquen las notas. No se aplican descuentos promocionales ni cambios posteriores de tipo indicados en las notas.",
+      "empty": "Ninguna cuenta coincide con estos filtros.",
+      "caption": "Cuentas remuneradas y de ahorro con tipo, límites e intereses netos",
+      "columns": {
+        "tanb": "Tipo (TANB)",
+        "account": "Banco, producto y tipo",
+        "limits": "Mínimo y máximo",
+        "term": "Plazo",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "instant": "Transferencia inmediata",
+        "holders": "2 titulares",
+        "tax": "IRS",
+        "net": "Intereses netos en 12 meses tras el {{tax}}% de IRS",
+        "notes": "Notas (en portugués)"
+      },
+      "rateRange": "{{from}} a {{to}}",
+      "seeNotes": "ver notas",
+      "months": "{{count}} meses",
+      "noLimit": "sin límite",
+      "holdersPaidPlan": "En plan de pago",
+      "result": {
+        "belowMinimum": "Por debajo del mínimo de {{min}}: sin intereses.",
+        "capped": "Solo paga intereses hasta {{max}}.",
+        "shortTerm": "El tipo dura {{count}} meses; la cifra lo supone durante 12. Revisa las notas.",
+        "termNotes": "El plazo se explica en las notas."
+      },
+      "plans": {
+        "title": "Por plan, con su cuota mensual",
+        "line": "{{plan}}: {{rate}}, {{fee}}, neto {{net}} al año",
+        "fee": "coste {{fee}} al mes",
+        "noFee": "sin coste"
+      },
+      "certificatesLink": "Abre la herramienta de certificados de ahorro",
+      "nextStepHeadline": "Pasa del punto de referencia a un plan de ahorro personal",
+      "nextStepDescription": "Una tabla muestra lo que ofrecen los bancos hoy. Fija un objetivo en WonderMoney y sigue cómo se compara tu propio ahorro.",
+      "nextStepCta": "Fijar un objetivo de ahorro",
+      "guide": {
+        "read": {
+          "title": "Cómo leer esta tabla",
+          "what": "El tipo mostrado es la TANB: el tipo anual nominal bruto, antes de impuestos. Las cuentas de ahorro lo pagan sobre el saldo, por lo general hasta un máximo; algunas tienen mínimo, plazo o un tipo que cambia tras un periodo inicial. Los certificados son deuda pública y la opción de seguro no es un depósito.",
+          "notRec": "La tabla es educativa. No es una recomendación, el orden no es un ranking y la mejor cuenta para ti depende de tu saldo, de tus otras cuentas y de cuánto toleres condiciones y comisiones."
+        },
+        "example": {
+          "title": "Ejemplo",
+          "setup": "Supón que guardas {{amount}} durante 12 meses en {{product}} de {{bank}}, al {{rate}} anual. Genera {{gross}}; el 28% de IRS se lleva {{tax}} y quedan {{net}}.",
+          "capped": "El máximo importa. {{product2}} de {{bank2}} paga {{rate2}}, pero solo hasta {{cap}}. Con {{amount2}}, los intereses son {{gross2}} antes de impuestos y {{net2}} después, como si hubieras ahorrado {{cap}}.",
+          "plans": "Las comisiones también importan. {{product3}} de {{bank3}} va de {{low}} a {{high}} según el plan. Con {{amount}}, el plan Standard deja {{standardNet}} netos, mientras que el plan Ultra, tras {{ultraFees}} al año en costes, deja {{ultraNet}}."
+        },
+        "method": {
+          "title": "Método",
+          "intro": "La calculadora funciona igual para todas las filas:",
+          "steps": {
+            "a": "Solo la parte del importe hasta el máximo de la cuenta genera intereses. Cuando las notas dan tipos por tramos de saldo, cada tramo gana su tipo.",
+            "b": "Los intereses brutos son esa parte por la TANB, en 12 meses, sin capitalización.",
+            "c": "Se resta el 28% de IRS a los intereses. En los bancos extranjeros ese impuesto lo declaras tú; la calculadora muestra el mismo 28% para que las filas sean comparables.",
+            "d": "Cuando las notas indican una cuota mensual del plan, se restan doce meses de ella. No se aplican otros costes, promociones ni cambios posteriores de tipo."
+          }
+        },
+        "limits": {
+          "title": "Lo que la tabla no incluye",
+          "items": {
+            "a": "Los tipos, límites y condiciones cambian; la tabla es una fotografía de una fecha.",
+            "b": "Algunos tipos bajan tras un periodo inicial o cuando dejan de cumplirse condiciones como la nómina domiciliada.",
+            "c": "La capitalización, la retención en retiradas anticipadas y la opción de sumar los intereses a tus otros ingresos en el IRS.",
+            "d": "La protección de depósitos solo es igual en todas las filas como regla: comprueba el sistema de cada banco."
+          }
+        },
+        "related": {
+          "title": "Sigue explorando",
+          "depositLink": "Índice de tipos de depósitos a plazo",
+          "depositBody": "Los tipos medios que pagaron los bancos en Portugal en nuevos depósitos, frente a la inflación.",
+          "certificatesLink": "Certificados de ahorro",
+          "certificatesBody": "Deuda pública, una de las filas de arriba, en su propia calculadora.",
+          "termLink": "Calculadora de depósito a plazo",
+          "termBody": "Intereses e impuesto de un depósito a plazo fijo.",
+          "budgetLink": "Presupuesto familiar",
+          "budgetBody": "Calcula cuánto puedes dejar en ahorro."
+        }
+      }
     }
   },
   "resources": {
@@ -4245,6 +4596,141 @@
         "description": "Explora herramientas para hacer presupuestos, evaluar préstamos e invertir."
       }
     }
+  },
+  "savingsGuide": {
+    "metaTitle": "Dónde guardar tus ahorros en Portugal: productos comparados | WonderMoney",
+    "metaDescription": "Compara certificados de ahorro, certificados del tesoro, cuentas corrientes remuneradas, cuentas de ahorro, depósitos a plazo y seguros de capitalización o PPR en Portugal: garantía, aportaciones, retiradas, intereses e IRS.",
+    "breadcrumbLabel": "Dónde guardar los ahorros",
+    "title": "Dónde guardar tus ahorros en Portugal",
+    "intro": "Siete formas de guardar dinero en Portugal, lado a lado: quién garantiza el dinero, si puedes añadir más, cuándo puedes retirarlo, cómo se pagan los intereses y cómo se aplica el IRS. Contenido educativo: esta página no recomienda ningún producto ni entidad.",
+    "checked": "Datos contrastados con fuentes oficiales en {{date}}",
+    "tableTitle": "La tabla comparativa",
+    "tableCaption": "Productos de ahorro en Portugal comparados por garantía, aportaciones, retiradas, intereses e IRS",
+    "tableHint": "Los tipos, comisiones y condiciones de cada producto cambian y varían entre entidades: lee siempre las condiciones del que estés valorando.",
+    "productColumn": "Producto",
+    "columns": {
+      "guarantee": "Garantía",
+      "topUp": "Aportaciones",
+      "withdrawal": "Retiradas",
+      "interest": "Intereses",
+      "irs": "IRS"
+    },
+    "productsTitle": "Los productos, uno a uno",
+    "products": {
+      "aforro": {
+        "name": "Certificados de ahorro (Certificados de Aforro)",
+        "text": "Deuda pública emitida por el Estado portugués y gestionada por el IGCP, la agencia de tesorería y deuda pública, para quien tiene NIF portugués. La Serie F dura hasta 15 años. Su tipo sigue el Euríbor a 3 meses y suma una prima de permanencia que crece cuanto más tiempo mantienes. Los intereses se devengan cada trimestre y se suman al saldo ya después del IRS. La primera suscripción es de al menos 100 unidades de 1 € y las siguientes de al menos 10. Puedes reembolsar desde el primer vencimiento trimestral de intereses, perdiendo los intereses del trimestre en curso."
+      },
+      "tesouro": {
+        "name": "Certificados del tesoro (Certificados do Tesouro)",
+        "text": "También deuda del Estado gestionada por el IGCP, y todavía a la venta en 2026: la nueva Serie 5, abierta desde julio de 2026, sustituyó a la serie Poupança Valor, que ya no admite suscripciones. En su lanzamiento pagaba un tipo fijo creciente, del 2,35 % el primer año al 3,35 % el décimo, con intereses pagados cada año. El mínimo es de 1000 € y el máximo de 1 millón de euros por titular. Puedes reembolsar desde el final del primer año, perdiendo los intereses del año en curso. Los tipos de las nuevas suscripciones pueden cambiar."
+      },
+      "demand": {
+        "name": "Cuenta corriente remunerada",
+        "text": "Una cuenta corriente que paga intereses sobre el saldo. El dinero está disponible en cualquier momento sin perder intereses, pero el tipo puede cambiar y a veces depende de condiciones que fija el banco. Está cubierta por el Fondo de Garantía de Depósitos hasta el límite."
+      },
+      "savings": {
+        "name": "Cuenta de ahorro",
+        "text": "Una cuenta de depósito para ahorrar, a menudo vinculada a una cuenta corriente. Algunas aceptan transferencias directas de otro banco, otras solo desde la cuenta corriente. La mayoría permite retirar en cualquier momento, y muchas sin perder intereses. Está cubierta por el Fondo de Garantía de Depósitos hasta el límite."
+      },
+      "term": {
+        "name": "Depósito a plazo",
+        "text": "Inmovilizas un importe durante un plazo fijo a un tipo acordado de antemano. No puedes añadir más y la mayoría paga los intereses al final del plazo. Solo algunos permiten la retirada anticipada, y suele costar la mitad o más de los intereses acumulados. Está cubierto por el Fondo de Garantía de Depósitos hasta el límite."
+      },
+      "capitalisation": {
+        "name": "Seguro de capitalización",
+        "text": "Un contrato de seguro de vida que acumula ahorro. La garantía es de la aseguradora y no del Fondo de Garantía de Depósitos, y que el capital esté o no garantizado depende del contrato, así que compruébalo. La mayoría cobra comisión por la retirada anticipada en los primeros años. La ganancia tributa cuando retiras, y el tipo baja cuanto más tiempo mantienes el contrato."
+      },
+      "ppr": {
+        "name": "Seguro PPR (plan de ahorro para la jubilación)",
+        "text": "Un plan de ahorro para la jubilación vendido aquí como seguro. Igual que en el seguro de capitalización, la garantía es de la aseguradora y depende del contrato. La retirada anticipada lleva comisión en los primeros años salvo por un motivo previsto en la ley, como jubilación, desempleo de larga duración, enfermedad grave o incapacidad permanente. Deducir las aportaciones en el IRS tiene condiciones: mira la sección de impuestos."
+      }
+    },
+    "cells": {
+      "state": "Estado portugués",
+      "noLimit": "Sin límite",
+      "fgd": "Fondo de Garantía de Depósitos",
+      "fgdLimit": "100 000 € por banco y titular",
+      "insurer": "La aseguradora",
+      "certificatesTopUp": "Solo suscripciones adicionales: pago por entidad y referencia en la app de CTT, pago al Estado por AforroNet o en una ventanilla de CTT",
+      "demandTopUp": "Aportación al saldo, directamente por transferencia desde otro banco",
+      "savingsTopUp": "Aportación al saldo: unas cuentas aceptan transferencia directa desde otro banco, otras solo a través de la cuenta corriente",
+      "notAllowed": "No permitido",
+      "insuranceTopUp": "Algunos permiten aportar al saldo, por transferencia, pago por entidad y referencia o adeudo en la cuenta corriente",
+      "aforroWithdrawal": "Tras 3 meses, con pérdida de los intereses del trimestre en curso",
+      "tesouroWithdrawal": "Tras 1 año, con pérdida de los intereses del año en curso",
+      "demandWithdrawal": "En cualquier momento, sin pérdida de intereses",
+      "savingsWithdrawal": "En cualquier momento, muchas sin pérdida de intereses",
+      "termWithdrawal": "Algunos lo permiten, normalmente con pérdida del 50 % o más de los intereses acumulados",
+      "capitalisationWithdrawal": "La mayoría con comisión (% del saldo) en los primeros años",
+      "pprWithdrawal": "Con comisión (% del saldo) en los primeros años, salvo si es por un motivo previsto en la ley",
+      "quarterly": "Trimestrales",
+      "yearly": "Anuales",
+      "frequencyVaries": "Frecuencia variable",
+      "paidAtTermEnd": "La mayoría, al final del plazo",
+      "creditedBalanceNet": "Abonados en el saldo tras el IRS",
+      "paidAccountNet": "Pagados en la cuenta corriente tras el IRS",
+      "creditedBalanceDomesticNet": "Abonados en el saldo (tras el IRS, en bancos portugueses)",
+      "creditedBalanceOrAccountDomesticNet": "Abonados en el saldo o en la cuenta corriente (tras el IRS, en bancos portugueses)",
+      "creditedAccountDomesticNet": "Abonados en la cuenta corriente (tras el IRS, en bancos portugueses)",
+      "creditedBalanceGross": "Abonados brutos en el saldo",
+      "irsAtPayment": "Al pagarse los intereses",
+      "rate28": "28 %",
+      "domesticBanks": "Bancos portugueses",
+      "foreignBanks": "Bancos extranjeros",
+      "irsInReturn": "En la declaración del IRS (declaración obligatoria)",
+      "irsOnWithdrawal": "Al retirar",
+      "capitalisationRates": "11,2 % a 28 %, según la antigüedad",
+      "pprRates": "8 % a 20 %, según la antigüedad",
+      "pprLegalRate": "8 % si la retirada es por un motivo previsto en la ley"
+    },
+    "fgd": {
+      "title": "El Fondo de Garantía de Depósitos",
+      "p1": "El Fundo de Garantia de Depósitos (FGD) reembolsa los depósitos en los bancos que forman parte de él, hasta 100 000 € por depositante y por banco, si un banco no puede pagar.",
+      "p2": "Cubre depósitos a la vista, de ahorro y a plazo. El límite es por banco: los saldos en el mismo banco se suman en un único límite de 100 000 €, mientras que los saldos en bancos distintos están cubiertos cada uno hasta su propio límite.",
+      "p3": "No cubre los certificados de ahorro ni del tesoro, que son deuda del Estado, ni los seguros, que dependen de la aseguradora. Una cuenta en un banco de otro país suele estar cubierta por el sistema de ese país, no por el portugués."
+    },
+    "tax": {
+      "title": "Cómo se aplica el IRS",
+      "intro": "Los intereses y las ganancias del ahorro son rendimientos del capital (categoría E del IRS). Las reglas cambian según el producto.",
+      "domestic": {
+        "title": "Certificados y bancos portugueses",
+        "text": "Los intereses tributan mediante retención en origen al 28 %, un tipo liberatorio (CIRS, art. 71). Puedes optar por sumarlos al resto de tus ingresos (englobamento), en cuyo caso lo retenido cuenta como pago a cuenta."
+      },
+      "foreign": {
+        "title": "Bancos extranjeros",
+        "text": "Un banco en el extranjero no retiene impuesto portugués. Si resides en Portugal, debes declarar los intereses en la declaración del IRS, donde tributan al 28 % salvo que optes por el englobamento (CIRS, art. 72)."
+      },
+      "insurance": {
+        "title": "Seguro de capitalización",
+        "text": "La ganancia tributa cuando retiras, al 28 %. Si mantuviste el contrato más de 5 y hasta 8 años, se excluye una quinta parte de la ganancia (22,4 %), y pasados 8 años se excluyen tres quintas partes (11,2 %). Estas reducciones solo se aplican si al menos el 35 % de las primas se pagó en la primera mitad del contrato (CIRS, art. 5.3)."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "Si retiras por un motivo previsto en la ley, la ganancia tributa al 8 % (20 % sobre dos quintas partes). Fuera de esos casos tributa al 20 %, reducido al 16 % a los 5 años y al 8 % a los 8 años si al menos el 35 % de las aportaciones se hizo en la primera mitad. Además devuelves lo que dedujiste en el IRS, más un 10 % por cada año o fracción, salvo pasados 5 años en los casos previstos en la ley (EBF, art. 21)."
+      }
+    },
+    "sources": {
+      "title": "Fuentes",
+      "intro": "Cada afirmación sobre garantías e impuestos se contrastó con estas páginas oficiales. Las reglas cambian, así que confirma el texto vigente antes de decidir.",
+      "checkedOn": "Consultado en {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: garantía de depósitos",
+        "aforro": "IGCP: Certificados de Aforro, Serie F (condiciones vigentes desde junio de 2026)",
+        "tesouro": "gov.pt: nuevos Certificados do Tesouro, Serie 5 (julio de 2026)",
+        "tesouroRedemption": "gov.pt: reembolso de Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS art. 71: retención del 28 % y opción de englobamento",
+        "cirs72": "Portal das Finanças, CIRS art. 72: 28 % sobre rendimientos sin retención",
+        "cirs5": "Portal das Finanças, CIRS art. 5.3: rescates de seguros de vida",
+        "ebf21": "Portal das Finanças, EBF art. 21: planes de ahorro para la jubilación"
+      }
+    },
+    "related": {
+      "title": "Haz las cuentas",
+      "intro": "Pon cifras a los productos anteriores con estas herramientas gratuitas."
+    },
+    "disclaimer": "Esta guía es educativa y no constituye asesoramiento financiero ni fiscal. No nombra entidades ni recomienda productos.",
+    "hubDescription": "Compara certificados, depósitos, cuentas de ahorro y seguros en garantía, retiradas e impuestos."
   },
   "learn": {
     "hub": {
