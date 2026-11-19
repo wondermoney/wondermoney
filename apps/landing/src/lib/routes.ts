@@ -472,6 +472,14 @@ const ROUTE_SLUGS = {
 		de: "sp500-historische-rendite-rechner",
 		it: "rendimento-storico-sp500",
 	},
+	toolElectricityIndex: {
+		pt: "indice-da-eletricidade",
+		en: "electricity-price-index-portugal",
+		es: "indice-precio-electricidad-portugal",
+		fr: "indice-prix-electricite-portugal",
+		de: "strompreisindex-portugal",
+		it: "indice-prezzo-elettricita-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -614,6 +622,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolPropertyCapitalGains",
 	"toolStatePension",
 	"toolSp500History",
+	"toolElectricityIndex",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -941,6 +950,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"pensao-de-reforma": "toolStatePension",
 	toolsp500history: "toolSp500History",
 	"sp500-historical-returns": "toolSp500History",
+	toolelectricityindex: "toolElectricityIndex",
+	"electricity-price-index": "toolElectricityIndex",
+	"indice-da-eletricidade": "toolElectricityIndex",
 }
 
 function normalizeRouteLookupKey(value: string): string {

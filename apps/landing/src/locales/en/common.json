@@ -3666,6 +3666,143 @@
           "investorProfileBody": "Find out how much market swings like these you can live with."
         }
       }
+    },
+    "electricityIndex": {
+      "title": "Electricity price index and bill estimator (Portugal)",
+      "shortName": "Electricity index",
+      "subtitle": "Estimate a monthly electricity bill on the regulated tariff and see how Portuguese household prices compare with the EU average.",
+      "description": "Regulated-tariff electricity bill estimator for Portuguese households, with the price per kWh of Portugal against the EU over time.",
+      "pageTitle": "Electricity Price Index Portugal: Regulated Tariff Bill Estimator",
+      "pageDescription": "Estimate your monthly electricity bill on the ERSE regulated tariff (contracted power, kWh, simple or bi-hourly, VAT and other charges) and compare Portugal's household price per kWh with the EU average. Data: ERSE and Eurostat.",
+      "fields": {
+        "power": "Contracted power",
+        "period": "Consumption given",
+        "periodMonth": "Per month",
+        "periodYear": "Per year",
+        "consumption": "Electricity consumption",
+        "option": "Tariff option",
+        "optionSimple": "Simple",
+        "optionBi": "Bi-hourly",
+        "offPeak": "Share of consumption in off-peak hours",
+        "largeFamily": "Household of five or more people"
+      },
+      "help": {
+        "power": "Low-voltage households in mainland Portugal: 3.45, 4.6, 5.75 or 6.9 kVA. It is on your bill.",
+        "consumption": "kWh in the period chosen above. A year is spread over twelve equal months.",
+        "offPeak": "Off-peak is the \"vazio\" period of the bi-hourly tariff. Your bill or meter data shows the split.",
+        "largeFamily": "Raises the reduced-VAT allowance from 200 to 300 kWh a month, if you have asked your supplier for it."
+      },
+      "errors": {
+        "required": "Enter a valid value.",
+        "notAllowed": "Choose one of the listed contracted powers.",
+        "negative": "Consumption cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "percentRange": "Enter a share from 0% to 100%.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "total": "Estimated monthly bill (VAT included)",
+        "yearly": "About twelve such months",
+        "effective": "Real cost per kWh, fixed charges included",
+        "breakdown": "Bill breakdown: amount before VAT and VAT rate for each item",
+        "item": "Item",
+        "beforeVat": "Before VAT",
+        "vatRate": "VAT",
+        "power": "Contracted power ({{kva}} kVA, {{days}} days)",
+        "energyReduced": "Energy at the reduced VAT rate ({{kwh}})",
+        "energyStandard": "Energy above the reduced allowance ({{kwh}})",
+        "cav": "Audiovisual contribution (CAV)",
+        "iec": "Electricity consumption tax (IEC)",
+        "subtotal": "Total before VAT",
+        "vat": "VAT",
+        "comparisonSame": "On the {{other}} option the same month would cost about the same.",
+        "comparisonCheaper": "On the {{other}} option the same month would cost {{amount}}, {{difference}} less.",
+        "comparisonDearer": "On the {{other}} option the same month would cost {{amount}}, {{difference}} more.",
+        "breakEven": "On energy prices alone, bi-hourly costs less than simple when more than {{percent}}% of your consumption is in off-peak hours.",
+        "noConsumption": "With no consumption the bill is only the fixed charges."
+      },
+      "notes": {
+        "tariffs": "ERSE regulated-market tariffs for low-voltage households in mainland Portugal, in force since {{date}} (read from ERSE's documents on {{checked}}). ERSE can update them every quarter.",
+        "dgeg": "Not included: the small monthly DGEG fee, which we could not confirm in an ERSE document, and any meter or other charge. Your real bill can differ by a few cents.",
+        "freeMarket": "Most households buy in the free market, where offers vary: some are cheaper than the regulated tariff, some dearer. This page names no supplier and recommends none. To compare real offers, use",
+        "simulatorLink": "ERSE's official price simulator."
+      },
+      "index": {
+        "title": "Portugal against the EU: price per kWh over time",
+        "intro": "Eurostat's half-yearly price for a household using 2,500 to 4,999 kWh a year (band DC), all taxes and levies included, for Portugal and for the EU 27 average.",
+        "chartLabel": "Line chart of the household electricity price per kWh in Portugal and in the EU, half-yearly",
+        "portugal": "Portugal",
+        "eu": "EU average",
+        "below": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} below the EU average.",
+        "above": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: {{gap}} above the EU average.",
+        "equal": "In {{period}} Portugal paid {{portugal}} against {{eu}} in the EU: about the same.",
+        "tableCaption": "The latest half-years: Portugal, EU average and the gap",
+        "period": "Half-year",
+        "gap": "Portugal vs EU",
+        "asOf": "Data as of {{last}} (the latest half-year available). Eurostat updated the dataset on {{updated}}; this page's copy was built on {{fetched}}. Source: Eurostat, table nrg_pc_204. Educational only."
+      },
+      "nextStepHeadline": "Compare household bills with a realistic budget",
+      "nextStepDescription": "Put your electricity, water, gas and the other household bills into a WonderMoney budget and see what is left each month.",
+      "nextStepCta": "Plan your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
+          "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
+          "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A household with {{kva}} kVA contracted that uses {{kwh}} kWh in a month on the simple tariff. Power: {{powerPrice}} for 30 days. Energy: {{kwh}} kWh at {{energySimple}}. Plus the audiovisual contribution ({{cav}}) and the electricity tax ({{iec}}). With VAT ({{vatSimple}} in all) the month costs {{totalSimple}}, or {{effective}} once the fixed charges are spread over the kWh.",
+          "bi": "On the bi-hourly tariff ({{energyPeak}} outside off-peak, {{energyValley}} in off-peak hours) with half the consumption in off-peak hours, the same month costs {{totalBi}}.",
+          "power": "Contracted power matters too: at 6.9 kVA and 300 kWh the month costs {{totalBigger}}, because a higher power has a higher daily charge and its power term pays the full VAT rate."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "For one 30-day month the estimator does the same five things:",
+          "steps": {
+            "a": "Power: the daily price for your contracted power, times 30 days.",
+            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
+            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT.",
+            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
+            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+          },
+          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the power term for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+        },
+        "data": {
+          "title": "Data and sources",
+          "tariffs": "Regulated tariffs: ERSE (Entidade Reguladora dos Serviços Energéticos), the transitional sales tariffs for low-voltage households up to 20.7 kVA in mainland Portugal, in force since {{from}}, plus the audiovisual contribution, electricity tax and VAT rules from ERSE's own documents. Read on {{checked}}. ERSE can change the energy price every quarter.",
+          "eurostat": "Price index: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), band DC (2,500 to 4,999 kWh a year), all taxes and levies included, in euro per kWh, from {{firstPeriod}} to {{lastPeriod}}. Eurostat updated the dataset on {{updated}} and this page's copy was built on {{fetched}}.",
+          "tariffsLink": "ERSE, tariffs and prices for 2026 (Directive 4/2026)",
+          "chargesLink": "ERSE, price simulator manual (bill charges)",
+          "vatLink": "ERSE, VAT on the electricity bill",
+          "eurostatLink": "Eurostat, table nrg_pc_204",
+          "refresh": "The page reads two saved data files and never calls these sources while you use it. Both carry their date and are refreshed by hand."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "market": "Free market: most offers are not the regulated tariff. They can be cheaper or dearer, with different prices, discounts and conditions. Compare with a real simulator before you decide.",
+            "dgeg": "The small monthly DGEG fee is not included because we could not confirm its amount in an ERSE document, and nor is any meter or other charge. Check your own bill for the exact total.",
+            "scope": "The estimator covers mainland Portugal and 3.45 to 6.9 kVA of contracted power. Higher powers, the Azores and Madeira have other tariffs and VAT rates.",
+            "social": "The social electricity tariff, a discount for eligible households, is not applied. Ask your supplier or ERSE if you may be entitled.",
+            "average": "The index compares averages for one consumption band. Your own price depends on your contract, power and hours of use, and Portugal's average blends regulated and free-market contracts.",
+            "education": "Educational use only, not advice to choose or change supplier."
+          },
+          "simulatorLink": "Compare real offers in ERSE's official price simulator"
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put the electricity bill next to your other household costs and see what is left.",
+          "emergencyFundLink": "Emergency fund calculator",
+          "emergencyFundBody": "Work out how many months of essential bills, energy included, your savings would cover.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how rising prices change what your money buys over time."
+        }
+      }
     }
   },
   "resources": {

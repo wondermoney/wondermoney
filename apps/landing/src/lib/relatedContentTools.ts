@@ -95,6 +95,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile"],
     destination: "toolSp500History",
   },
+  {
+    sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
+    destination: "toolElectricityIndex",
+  },
 ];
 
 export function getRelatedContentTools(
