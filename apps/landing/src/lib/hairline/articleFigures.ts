@@ -30,6 +30,11 @@ export const FIGURE_NAMES = [
   "deed",
   "car",
   "payslip",
+  "easelchart",
+  "meter",
+  "pump",
+  "wallet",
+  "safe",
 ] as const;
 
 export type FigureName = (typeof FIGURE_NAMES)[number];
@@ -133,6 +138,18 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolSickPay: "payslip",
   toolDismissalCompensation: "payslip",
   toolStatePension: "payslip",
+  toolSp500History: "easelchart",
+  toolInvestmentReturn: "easelchart",
+  toolEuribor: "easelchart",
+  toolDepositRateIndex: "easelchart",
+  toolElectricityIndex: "meter",
+  toolFuelPrices: "pump",
+  toolFreeBankAccounts: "wallet",
+  toolRemuneratedAccounts: "wallet",
+  toolPersonalLoan: "wallet",
+  toolTermDeposit: "safe",
+  toolTermDepositOffers: "safe",
+  toolSavingsCertificates: "safe",
 };
 
 export function figureForTool(routeId: string | undefined): FigureName {

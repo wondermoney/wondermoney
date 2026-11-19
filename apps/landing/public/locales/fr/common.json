@@ -5918,7 +5918,12 @@
       "house": "Dessin au trait d'une petite maison sur son terrain, avec une cheminée, une porte, des fenêtres et un chemin de pierres, dont les tuiles se posent à mesure que le prêt est remboursé.",
       "deed": "Dessin au trait d'un acte de propriété sous un sceau de cire avec un ruban, une clé de maison posée dessus.",
       "car": "Dessin au trait d'une petite citadine sur un tronçon de route, ses roues tournant à mesure qu'elle avance.",
-      "payslip": "Dessin au trait d'une fiche de paie avec des lignes de montants, à côté d'une enveloppe où la part nette d'une ligne est rangée comme un billet."
+      "payslip": "Dessin au trait d'une fiche de paie avec des lignes de montants, à côté d'une enveloppe où la part nette d'une ligne est rangée comme un billet.",
+      "easelchart": "Dessin au trait d’un chevalet de conférence sur trois pieds, avec sur son bloc une courbe des années qui monte malgré des creux et un curseur marquant une année.",
+      "meter": "Dessin au trait d’un ancien compteur électrique, avec une rangée de cadrans et un disque qui tourne derrière la vitre, plus vite quand la charge augmente.",
+      "pump": "Dessin au trait d’une pompe à essence sur son îlot, le pistolet sortant de son support au bout du tuyau tandis que la jauge de remplissage monte.",
+      "wallet": "Dessin au trait d’un portefeuille ouvert avec trois cartes dans des fentes en escalier, l’une d’elles glissant au-dehors.",
+      "safe": "Dessin au trait d’un petit coffre-fort avec un cadran à combinaison et une poignée à rayons, sa porte s’ouvrant sur des piles de pièces."
     }
   }
 }
