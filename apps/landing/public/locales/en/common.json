@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Term deposit comparison: offers in Portugal by term and amount",
+      "shortName": "Deposit offers",
+      "subtitle": "Compare term deposit offers from banks available in Portugal by term, amount and conditions, with the interest you would keep after the 28% IRS.",
+      "description": "Compare term deposit offers by term and amount, with interest after tax.",
+      "pageTitle": "Term Deposit Comparison Portugal: Best Rates by Term and Amount",
+      "pageDescription": "Compare term deposit offers in Portugal by rate (TANB), term and amount, with net interest after the 28% IRS, conditions and the date they were compiled. Educational only.",
+      "asOfBanner": "Offers as of {{date}}",
+      "offers": {
+        "title": "Deposit offers, highest rate first",
+        "intro": "Enter the amount you want to invest and narrow the list by term and conditions. The interest shown is simple interest paid at maturity, after the 28% IRS. Bank conditions are shown in Portuguese, as the banks publish them.",
+        "caption": "Term deposit offers by rate, term, limits, net interest and conditions"
+      },
+      "filters": {
+        "amount": "Amount I want to invest",
+        "amountHelp": "Offers whose minimum is above it, or whose maximum is below it, are hidden.",
+        "term": "Term",
+        "termAll": "Any term",
+        "termOption": "{{months}} months",
+        "irs": "Bank and IRS",
+        "irsAll": "All banks",
+        "irsWithheld": "Portuguese IRS withheld by the bank",
+        "irsNotWithheld": "Foreign bank: IRS not withheld, you declare it",
+        "conditions": "Conditions",
+        "existingClients": "For existing clients (hide new-client-only offers)",
+        "noNewMoney": "No new-money requirement",
+        "earlyWithdrawal": "Early withdrawal allowed"
+      },
+      "errors": {
+        "amountRequired": "Enter an amount above zero to see the interest, or leave it to see every offer.",
+        "amountPositive": "The amount must be above zero.",
+        "amountTooLarge": "Enter {{max}} or less."
+      },
+      "count": "Showing {{count}} of {{total}} offers.",
+      "none": "No offer matches these filters. Try another term or amount, or relax a condition.",
+      "notStated": "not stated",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Term (months)",
+        "bank": "Bank and product",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "netInterest": "Net interest at maturity",
+        "netYield": "Net annual yield",
+        "conditions": "Conditions"
+      },
+      "badges": {
+        "newClients": "New clients only",
+        "newMoney": "New money required",
+        "early": {
+          "yes": "Early withdrawal allowed",
+          "seeNotes": "Early withdrawal: see notes",
+          "no": "Early withdrawal not stated"
+        },
+        "irsNotWithheld": "Foreign bank: IRS not withheld",
+        "irsWithheld": "IRS withheld in Portugal"
+      },
+      "notesLabel": "Original conditions in Portuguese",
+      "compare": {
+        "title": "How these offers compare",
+        "average": "Official average rate on new household deposits in Portugal, {{bucket}}: {{rate}} a year ({{month}}).",
+        "averageFallback": "No new deposits were recorded in this maturity group in the latest month, so the all-maturities average is used: {{rate}} a year ({{month}}).",
+        "above": "The top offer shown ({{bank}}, {{tanb}}) is {{gap}} points above it.",
+        "below": "The top offer shown ({{bank}}, {{tanb}}) is {{gap}} points below it.",
+        "benchmarkLink": "See the official deposit rate benchmark",
+        "certificates": "For comparison, Certificados de Aforro Série F over the first year: {{net}} of interest after IRS, a net annual yield of {{yield}} (base rate {{rate}} in {{month}}, before the permanence premium).",
+        "certificatesLink": "Compare with the savings certificates calculator"
+      },
+      "disclaimers": {
+        "asOf": "Offers compiled as of {{date}}.",
+        "change": "Conditions change often and some offers are campaigns that end without notice.",
+        "confirm": "Confirm every rate and condition with the bank before you deposit.",
+        "fgd": "The Fundo de Garantia de Depósitos covers deposits in Portuguese banks up to €100,000 per depositor and per bank. Source:",
+        "foreign": "Foreign banks are covered by their own country's deposit guarantee scheme, not by the Portuguese fund.",
+        "assumptions": "Interest is simple, paid at maturity, with {{tax}}% IRS taken off. For foreign banks the figure assumes you declare the interest and pay the same rate.",
+        "educational": "Educational only: this is not a recommendation or financial advice, and no bank is endorsed.",
+        "noAffiliate": "This page has no affiliate links."
+      },
+      "sourceNote": "Conditions compiled by WonderMoney from the banks' published offers, as of {{date}}. Net figures computed by WonderMoney.",
+      "nextStepHeadline": "Track deposits and maturity dates together",
+      "nextStepDescription": "Add your deposits to WonderMoney to see them with your other accounts and know when each one matures.",
+      "nextStepCta": "Track my deposits",
+      "guide": {
+        "read": {
+          "title": "How to read the comparison",
+          "what": "The table lists {{count}} term deposit offers from banks available in Portugal, as of {{date}}. TANB is the gross nominal annual rate. For the amount you enter, each row shows the interest you would keep at maturity and the net annual yield.",
+          "noRecommendation": "The list is sorted by rate, not by quality. It does not recommend any bank or product: a higher rate can come with conditions such as new money, a maintenance fee or limited early withdrawal. Read the conditions and compare current offers yourself."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "The highest rate listed is {{bank}} at {{rate}} for {{months}} months. On {{amount}} that is {{gross}} of gross interest; after {{taxRate}}% IRS you keep {{net}}, a net annual yield of {{yearly}}."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "Each figure comes from the same engine as the term deposit calculator:",
+          "steps": {
+            "a": "Gross interest: amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
+            "b": "Tax: {{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
+            "c": "Net annual yield: the net interest annualised over the term.",
+            "d": "Filters: an offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
+          }
+        },
+        "data": {
+          "title": "Data and sources",
+          "source": "Conditions compiled by WonderMoney from the banks' published offers, as of {{date}}. Notes are the original Portuguese text of the conditions and are not translated, so no condition is lost in translation.",
+          "refresh": "The list is updated by hand when conditions are compiled again, and the date above always shows when. Nothing is fetched while you use the page, so a late update never shows wrong figures as current: check the date.",
+          "fgd": "Deposit guarantee: the Fundo de Garantia de Depósitos covers €100,000 per depositor and per bank. Source:"
+        },
+        "limits": {
+          "title": "What the comparison leaves out",
+          "items": {
+            "a": "Offers change and some end without notice: the figures are a snapshot, not a quote.",
+            "b": "Fees, account opening costs, bonuses and tiered rates for existing customers are only in the notes, if at all.",
+            "c": "Interest paid before maturity and reinvestment are not modelled: every figure is simple interest at maturity.",
+            "d": "Your own tax situation, and the rules for a foreign bank's interest, may differ. This is not tax advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "termDepositLink": "Term deposit calculator",
+          "termDepositBody": "Enter your own bank's rate and see the interest, the tax and the net yield.",
+          "depositRateIndexLink": "Deposit rate index",
+          "depositRateIndexBody": "See the official average new-deposit rate, month by month, against inflation.",
+          "savingsCertificatesLink": "Savings certificates calculator",
+          "savingsCertificatesBody": "Compare a deposit with Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Portugal net salary calculator 2026",
       "shortName": "Net salary",

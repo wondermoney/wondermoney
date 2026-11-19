@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Comparador de depósitos a prazo: ofertas em Portugal por prazo e montante",
+      "shortName": "Ofertas de depósitos",
+      "subtitle": "Compara ofertas de depósitos a prazo de bancos disponíveis em Portugal por prazo, montante e condições, com os juros que ficas a receber depois dos 28% de IRS.",
+      "description": "Compara ofertas de depósitos a prazo por prazo e montante, com juros líquidos de imposto.",
+      "pageTitle": "Comparador de Depósitos a Prazo: Melhores Taxas por Prazo e Montante",
+      "pageDescription": "Compara ofertas de depósitos a prazo em Portugal por taxa (TANB), prazo e montante, com os juros líquidos após 28% de IRS, as condições e a data em que foram compiladas. Apenas educativo.",
+      "asOfBanner": "Ofertas à data de {{date}}",
+      "offers": {
+        "title": "Ofertas de depósitos, da taxa mais alta para a mais baixa",
+        "intro": "Indica o montante que queres investir e filtra a lista por prazo e condições. Os juros apresentados são juros simples pagos no vencimento, depois dos 28% de IRS. As condições dos bancos aparecem em português, tal como os bancos as publicam.",
+        "caption": "Ofertas de depósitos a prazo por taxa, prazo, limites, juros líquidos e condições"
+      },
+      "filters": {
+        "amount": "Montante que quero investir",
+        "amountHelp": "As ofertas cujo mínimo seja superior, ou cujo máximo seja inferior, a este valor ficam ocultas.",
+        "term": "Prazo",
+        "termAll": "Qualquer prazo",
+        "termOption": "{{months}} meses",
+        "irs": "Banco e IRS",
+        "irsAll": "Todos os bancos",
+        "irsWithheld": "IRS português retido pelo banco",
+        "irsNotWithheld": "Banco estrangeiro: IRS não retido, tu declaras",
+        "conditions": "Condições",
+        "existingClients": "Para clientes existentes (oculta ofertas só para novos clientes)",
+        "noNewMoney": "Sem exigência de novos recursos",
+        "earlyWithdrawal": "Mobilização antecipada permitida"
+      },
+      "errors": {
+        "amountRequired": "Indica um montante superior a zero para ver os juros, ou deixa em branco para ver todas as ofertas.",
+        "amountPositive": "O montante tem de ser superior a zero.",
+        "amountTooLarge": "Indica {{max}} ou menos."
+      },
+      "count": "A mostrar {{count}} de {{total}} ofertas.",
+      "none": "Nenhuma oferta corresponde a estes filtros. Experimenta outro prazo ou montante, ou relaxa uma condição.",
+      "notStated": "não indicado",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Prazo (meses)",
+        "bank": "Banco e produto",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "netInterest": "Juros líquidos no vencimento",
+        "netYield": "Rendimento líquido anual",
+        "conditions": "Condições"
+      },
+      "badges": {
+        "newClients": "Só novos clientes",
+        "newMoney": "Exige novos recursos",
+        "early": {
+          "yes": "Mobilização antecipada permitida",
+          "seeNotes": "Mobilização antecipada: ver notas",
+          "no": "Mobilização antecipada não indicada"
+        },
+        "irsNotWithheld": "Banco estrangeiro: IRS não retido",
+        "irsWithheld": "IRS retido em Portugal"
+      },
+      "notesLabel": "Notas do banco",
+      "compare": {
+        "title": "Como estas ofertas se comparam",
+        "average": "Taxa média oficial dos novos depósitos de particulares em Portugal, {{bucket}}: {{rate}} ao ano ({{month}}).",
+        "averageFallback": "No último mês não houve novos depósitos neste grupo de prazos, por isso usa-se a média de todas as maturidades: {{rate}} ao ano ({{month}}).",
+        "above": "A melhor oferta apresentada ({{bank}}, {{tanb}}) fica {{gap}} pontos acima.",
+        "below": "A melhor oferta apresentada ({{bank}}, {{tanb}}) fica {{gap}} pontos abaixo.",
+        "benchmarkLink": "Ver a taxa média oficial dos depósitos",
+        "certificates": "Para comparar, os Certificados de Aforro Série F no primeiro ano: {{net}} de juros depois de IRS, um rendimento líquido anual de {{yield}} (taxa base de {{rate}} em {{month}}, antes do prémio de permanência).",
+        "certificatesLink": "Compara com a calculadora de certificados de aforro"
+      },
+      "disclaimers": {
+        "asOf": "Ofertas compiladas à data de {{date}}.",
+        "change": "As condições mudam com frequência e algumas ofertas são campanhas que terminam sem aviso.",
+        "confirm": "Confirma cada taxa e condição junto do banco antes de depositar.",
+        "fgd": "O Fundo de Garantia de Depósitos cobre os depósitos em bancos portugueses até 100 000 € por depositante e por banco. Fonte:",
+        "foreign": "Os bancos estrangeiros são cobertos pelo sistema de garantia de depósitos do próprio país, não pelo fundo português.",
+        "assumptions": "Os juros são simples, pagos no vencimento, com {{tax}}% de IRS descontado. Nos bancos estrangeiros, o valor assume que declaras os juros e pagas a mesma taxa.",
+        "educational": "Apenas educativo: não é uma recomendação nem aconselhamento financeiro, e nenhum banco é recomendado.",
+        "noAffiliate": "Esta página não tem ligações de afiliados."
+      },
+      "sourceNote": "Condições compiladas pela WonderMoney a partir das ofertas publicadas pelos bancos, à data de {{date}}. Valores líquidos calculados pela WonderMoney.",
+      "nextStepHeadline": "Acompanha depósitos e datas de vencimento num só sítio",
+      "nextStepDescription": "Adiciona os teus depósitos ao WonderMoney para os veres com as tuas outras contas e saberes quando cada um vence.",
+      "nextStepCta": "Acompanhar os meus depósitos",
+      "guide": {
+        "read": {
+          "title": "Como ler o comparador",
+          "what": "A tabela lista {{count}} ofertas de depósitos a prazo de bancos disponíveis em Portugal, à data de {{date}}. A TANB é a taxa anual nominal bruta. Para o montante que indicares, cada linha mostra os juros que recebes no vencimento e o rendimento líquido anual.",
+          "noRecommendation": "A lista está ordenada por taxa, não por qualidade. Não recomenda nenhum banco ou produto: uma taxa mais alta pode vir com condições como novos recursos, comissão de manutenção ou mobilização antecipada limitada. Lê as condições e compara as ofertas atuais por ti."
+        },
+        "example": {
+          "title": "Exemplo",
+          "setup": "A taxa mais alta da lista é a do {{bank}}, {{rate}} a {{months}} meses. Em {{amount}} são {{gross}} de juros brutos; depois de {{taxRate}}% de IRS ficas com {{net}}, um rendimento líquido anual de {{yearly}}."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "Cada valor vem do mesmo motor da calculadora de depósitos a prazo:",
+          "steps": {
+            "a": "Juros brutos: montante × TANB × prazo em meses ÷ 12, pagos de uma só vez no vencimento.",
+            "b": "Imposto: {{taxRate}}% dos juros. Os bancos estrangeiros não o retêm em Portugal, por isso o valor assume que declaras os juros e pagas a mesma taxa.",
+            "c": "Rendimento líquido anual: os juros líquidos anualizados ao longo do prazo.",
+            "d": "Filtros: uma oferta fica oculta se o mínimo for superior ao teu montante ou o máximo for inferior. Uma oferta sem limite indicado mantém-se."
+          }
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "source": "Condições compiladas pela WonderMoney a partir das ofertas publicadas pelos bancos, à data de {{date}}. As notas são o texto original em português das condições e não são traduzidas, para nenhuma condição se perder na tradução.",
+          "refresh": "A lista é atualizada à mão quando as condições são compiladas de novo, e a data acima mostra sempre quando. Nada é pedido enquanto usas a página, por isso uma atualização atrasada nunca mostra valores errados como atuais: confirma a data.",
+          "fgd": "Garantia de depósitos: o Fundo de Garantia de Depósitos cobre 100 000 € por depositante e por banco. Fonte:"
+        },
+        "limits": {
+          "title": "O que o comparador deixa de fora",
+          "items": {
+            "a": "As ofertas mudam e algumas terminam sem aviso: os valores são um retrato, não uma cotação.",
+            "b": "Comissões, custos de abertura de conta, bónus e taxas escalonadas para clientes existentes só aparecem nas notas, se aparecerem.",
+            "c": "Juros pagos antes do vencimento e reinvestimento não são modelados: todos os valores são juros simples no vencimento.",
+            "d": "A tua situação fiscal, e as regras dos juros de um banco estrangeiro, podem ser diferentes. Isto não é aconselhamento fiscal."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "termDepositLink": "Calculadora de depósitos a prazo",
+          "termDepositBody": "Indica a taxa do teu banco e vê os juros, o imposto e o rendimento líquido.",
+          "depositRateIndexLink": "Índice de taxas de depósitos",
+          "depositRateIndexBody": "Vê a taxa média oficial dos novos depósitos, mês a mês, face à inflação.",
+          "savingsCertificatesLink": "Calculadora de certificados de aforro",
+          "savingsCertificatesBody": "Compara um depósito com os Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Simulador de salário líquido 2026",
       "shortName": "Salário líquido",

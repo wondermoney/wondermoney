@@ -2909,6 +2909,134 @@
         }
       }
     },
+    "termDepositOffers": {
+      "title": "Festgeld-Vergleich: Angebote in Portugal nach Laufzeit und Betrag",
+      "shortName": "Festgeld-Angebote",
+      "subtitle": "Vergleiche Festgeldangebote von Banken in Portugal nach Laufzeit, Betrag und Bedingungen, mit den Zinsen, die dir nach 28 % IRS bleiben.",
+      "description": "Festgeldangebote nach Laufzeit und Betrag vergleichen, mit Zinsen nach Steuer.",
+      "pageTitle": "Festgeld-Vergleich Portugal: Beste Zinsen nach Laufzeit und Betrag",
+      "pageDescription": "Vergleiche Festgeldangebote in Portugal nach Zinssatz (TANB), Laufzeit und Betrag, mit Nettozinsen nach 28 % IRS, den Bedingungen und dem Datum der Zusammenstellung. Nur zur Information.",
+      "asOfBanner": "Angebote, Stand {{date}}",
+      "offers": {
+        "title": "Festgeldangebote, höchster Zins zuerst",
+        "intro": "Gib den Betrag ein, den du anlegen willst, und grenze die Liste nach Laufzeit und Bedingungen ein. Die gezeigten Zinsen sind einfache Zinsen bei Fälligkeit, nach 28 % IRS. Die Bedingungen der Banken stehen auf Portugiesisch, so wie die Banken sie veröffentlichen.",
+        "caption": "Festgeldangebote nach Zinssatz, Laufzeit, Grenzen, Nettozinsen und Bedingungen"
+      },
+      "filters": {
+        "amount": "Betrag, den ich anlegen möchte",
+        "amountHelp": "Angebote, deren Mindestbetrag darüber oder deren Höchstbetrag darunter liegt, werden ausgeblendet.",
+        "term": "Laufzeit",
+        "termAll": "Jede Laufzeit",
+        "termOption": "{{months}} Monate",
+        "irs": "Bank und IRS",
+        "irsAll": "Alle Banken",
+        "irsWithheld": "Portugiesische IRS von der Bank einbehalten",
+        "irsNotWithheld": "Ausländische Bank: IRS nicht einbehalten, du erklärst sie selbst",
+        "conditions": "Bedingungen",
+        "existingClients": "Für Bestandskunden (Angebote nur für Neukunden ausblenden)",
+        "noNewMoney": "Kein Neugeld erforderlich",
+        "earlyWithdrawal": "Vorzeitige Auflösung möglich"
+      },
+      "errors": {
+        "amountRequired": "Gib einen Betrag über null ein, um die Zinsen zu sehen, oder lass das Feld leer, um alle Angebote zu sehen.",
+        "amountPositive": "Der Betrag muss größer als null sein.",
+        "amountTooLarge": "Gib {{max}} oder weniger ein."
+      },
+      "count": "{{count}} von {{total}} Angeboten werden angezeigt.",
+      "none": "Kein Angebot passt zu diesen Filtern. Probiere eine andere Laufzeit oder einen anderen Betrag oder lockere eine Bedingung.",
+      "notStated": "nicht angegeben",
+      "columns": {
+        "tanb": "TANB",
+        "term": "Laufzeit (Monate)",
+        "bank": "Bank und Produkt",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "netInterest": "Nettozinsen bei Fälligkeit",
+        "netYield": "Nettorendite pro Jahr",
+        "conditions": "Bedingungen"
+      },
+      "badges": {
+        "newClients": "Nur Neukunden",
+        "newMoney": "Neugeld erforderlich",
+        "early": {
+          "yes": "Vorzeitige Auflösung möglich",
+          "seeNotes": "Vorzeitige Auflösung: siehe Hinweise",
+          "no": "Vorzeitige Auflösung nicht angegeben"
+        },
+        "irsNotWithheld": "Ausländische Bank: IRS nicht einbehalten",
+        "irsWithheld": "IRS in Portugal einbehalten"
+      },
+      "notesLabel": "Originalbedingungen auf Portugiesisch",
+      "compare": {
+        "title": "Wie sich diese Angebote vergleichen",
+        "average": "Offizieller Durchschnittszins für neue Haushaltseinlagen in Portugal, {{bucket}}: {{rate}} pro Jahr ({{month}}).",
+        "averageFallback": "Im letzten Monat gab es in dieser Laufzeitgruppe keine neuen Einlagen, daher wird der Durchschnitt aller Laufzeiten verwendet: {{rate}} pro Jahr ({{month}}).",
+        "above": "Das beste angezeigte Angebot ({{bank}}, {{tanb}}) liegt {{gap}} Punkte darüber.",
+        "below": "Das beste angezeigte Angebot ({{bank}}, {{tanb}}) liegt {{gap}} Punkte darunter.",
+        "benchmarkLink": "Den offiziellen Einlagenzins-Durchschnitt ansehen",
+        "certificates": "Zum Vergleich: Certificados de Aforro Série F im ersten Jahr: {{net}} Zinsen nach IRS, eine Nettorendite von {{yield}} pro Jahr (Basiszins {{rate}} im {{month}}, vor der Treueprämie).",
+        "certificatesLink": "Mit dem Rechner für Sparzertifikate vergleichen"
+      },
+      "disclaimers": {
+        "asOf": "Angebote zusammengestellt, Stand {{date}}.",
+        "change": "Die Bedingungen ändern sich häufig, und manche Angebote sind Aktionen, die ohne Vorankündigung enden.",
+        "confirm": "Lass dir jeden Zinssatz und jede Bedingung von der Bank bestätigen, bevor du einzahlst.",
+        "fgd": "Der Fundo de Garantia de Depósitos sichert Einlagen bei portugiesischen Banken bis 100.000 € pro Einleger und Bank. Quelle:",
+        "foreign": "Ausländische Banken sind durch das Einlagensicherungssystem ihres eigenen Landes gedeckt, nicht durch den portugiesischen Fonds.",
+        "assumptions": "Die Zinsen sind einfache Zinsen bei Fälligkeit, abzüglich {{tax}} % IRS. Bei ausländischen Banken geht die Zahl davon aus, dass du die Zinsen erklärst und denselben Satz zahlst.",
+        "educational": "Nur zur Information: keine Empfehlung und keine Finanzberatung, und keine Bank wird empfohlen.",
+        "noAffiliate": "Diese Seite enthält keine Affiliate-Links."
+      },
+      "sourceNote": "Bedingungen von WonderMoney aus den veröffentlichten Angeboten der Banken zusammengestellt, Stand {{date}}. Nettowerte von WonderMoney berechnet.",
+      "nextStepHeadline": "Festgelder und Fälligkeiten an einem Ort verfolgen",
+      "nextStepDescription": "Füge deine Festgelder in WonderMoney hinzu, um sie zusammen mit deinen anderen Konten zu sehen und zu wissen, wann jedes fällig wird.",
+      "nextStepCta": "Meine Festgelder verfolgen",
+      "guide": {
+        "read": {
+          "title": "So liest du den Vergleich",
+          "what": "Die Tabelle listet {{count}} Festgeldangebote von Banken in Portugal, Stand {{date}}. TANB ist der nominale Bruttojahreszins. Für den eingegebenen Betrag zeigt jede Zeile die Zinsen, die dir bei Fälligkeit bleiben, und die Nettorendite pro Jahr.",
+          "noRecommendation": "Die Liste ist nach Zinssatz sortiert, nicht nach Qualität. Sie empfiehlt keine Bank und kein Produkt: Ein höherer Zins kann mit Bedingungen wie Neugeld, Kontoführungsgebühr oder eingeschränkter vorzeitiger Auflösung verbunden sein. Lies die Bedingungen und vergleiche die aktuellen Angebote selbst."
+        },
+        "example": {
+          "title": "Beispiel",
+          "setup": "Der höchste Zins der Liste ist der von {{bank}}, {{rate}} für {{months}} Monate. Bei {{amount}} sind das {{gross}} Bruttozinsen; nach {{taxRate}} % IRS bleiben dir {{net}}, eine Nettorendite von {{yearly}} pro Jahr."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Jede Zahl stammt aus derselben Rechenlogik wie der Festgeld-Rechner:",
+          "steps": {
+            "a": "Bruttozinsen: Betrag × TANB × Laufzeit in Monaten ÷ 12, in einer Zahlung bei Fälligkeit.",
+            "b": "Steuer: {{taxRate}} % der Zinsen. Ausländische Banken behalten sie in Portugal nicht ein, daher geht die Zahl davon aus, dass du die Zinsen erklärst und denselben Satz zahlst.",
+            "c": "Nettorendite pro Jahr: die Nettozinsen, auf ein Jahr hochgerechnet.",
+            "d": "Filter: Ein Angebot wird ausgeblendet, wenn sein Mindestbetrag über deinem Betrag oder sein Höchstbetrag darunter liegt. Ein Angebot ohne angegebene Grenze bleibt sichtbar."
+          }
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "source": "Bedingungen von WonderMoney aus den veröffentlichten Angeboten der Banken zusammengestellt, Stand {{date}}. Die Hinweise sind der portugiesische Originaltext der Bedingungen und werden nicht übersetzt, damit keine Bedingung in der Übersetzung verloren geht.",
+          "refresh": "Die Liste wird von Hand aktualisiert, wenn die Bedingungen neu zusammengestellt werden, und das Datum oben zeigt immer, wann. Während du die Seite nutzt, wird nichts abgerufen; eine verspätete Aktualisierung zeigt also nie falsche Zahlen als aktuell: Prüfe das Datum.",
+          "fgd": "Einlagensicherung: Der Fundo de Garantia de Depósitos deckt 100.000 € pro Einleger und Bank. Quelle:"
+        },
+        "limits": {
+          "title": "Was der Vergleich nicht abdeckt",
+          "items": {
+            "a": "Angebote ändern sich und manche enden ohne Vorankündigung: Die Zahlen sind eine Momentaufnahme, kein Angebot.",
+            "b": "Gebühren, Kosten der Kontoeröffnung, Prämien und gestaffelte Zinsen für Bestandskunden stehen nur in den Hinweisen, falls überhaupt.",
+            "c": "Zinszahlungen vor Fälligkeit und Wiederanlage werden nicht abgebildet: Alle Zahlen sind einfache Zinsen bei Fälligkeit.",
+            "d": "Deine steuerliche Situation und die Regeln für Zinsen einer ausländischen Bank können abweichen. Das ist keine Steuerberatung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht es",
+          "termDepositLink": "Festgeld-Rechner",
+          "termDepositBody": "Gib den Zinssatz deiner Bank ein und sieh Zinsen, Steuer und Nettorendite.",
+          "depositRateIndexLink": "Festgeldzins-Index",
+          "depositRateIndexBody": "Sieh den offiziellen Durchschnittszins für neue Einlagen, Monat für Monat, im Vergleich zur Inflation.",
+          "savingsCertificatesLink": "Rechner für Sparzertifikate",
+          "savingsCertificatesBody": "Vergleiche ein Festgeld mit den Certificados de Aforro Série F."
+        }
+      }
+    },
     "netSalary": {
       "title": "Nettogehalt-Rechner Portugal 2026",
       "shortName": "Nettogehalt",
