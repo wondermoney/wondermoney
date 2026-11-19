@@ -1,6 +1,8 @@
 ---
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import FigureCards from "@/components/shared/FigureCards.astro";
 import {
   SAVINGS_COLUMN_IDS,
   SAVINGS_GUIDE_CHECKED_ON,
@@ -11,6 +13,8 @@ import {
   getProductCells,
   getTableRowCells,
 } from "@/content/savingsGuide";
+import { readingMinutes, sectionNumber } from "@/lib/articleOutline";
+import { figureForTool, PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMonthYear } from "@/lib/numberFormat";
 import { buildAlternateLinks, toLocalizedPath } from "@/lib/routes";
@@ -38,10 +42,33 @@ const relatedTools = SAVINGS_GUIDE_RELATED_ROUTE_IDS.map((toolRouteId) => {
     href: toLocalizedPath(toolRouteId, locale),
     title: t(`tools.${key}.title`),
     description: t(`tools.${key}.description`),
+    figure: figureForTool(toolRouteId),
+    kind: t("global.relatedContent.calculator"),
   };
 });
 
 const taxItems = ["domestic", "foreign", "insurance", "ppr"] as const;
+
+// The page's sections, in order: the hero's chips and the numbers on the headings.
+const outline = [
+  { id: "savings-table-title", title: t("savingsGuide.tableTitle") },
+  { id: "savings-products-title", title: t("savingsGuide.productsTitle") },
+  { id: "savings-fgd-title", title: t("savingsGuide.fgd.title") },
+  { id: "savings-tax-title", title: t("savingsGuide.tax.title") },
+  { id: "savings-related-title", title: t("savingsGuide.related.title") },
+  { id: "savings-sources-title", title: t("savingsGuide.sources.title") },
+];
+const number = (id: string) => sectionNumber(outline.findIndex((entry) => entry.id === id));
+const readMinutes = readingMinutes([
+  t("savingsGuide.intro"),
+  ...SAVINGS_PRODUCT_IDS.map((product) => t(`savingsGuide.products.${product}.text`)),
+  t("savingsGuide.fgd.p1"),
+  t("savingsGuide.fgd.p2"),
+  t("savingsGuide.fgd.p3"),
+  t("savingsGuide.tax.intro"),
+  ...taxItems.map((item) => t(`savingsGuide.tax.${item}.text`)),
+]);
+const h2 = "scroll-mt-24 text-2xl font-semibold tracking-tight";
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -59,22 +86,32 @@ const articleSchema = {
   description={t("savingsGuide.metaDescription")}
   canonicalUrl={canonicalUrl}
   alternateLinks={buildAlternateLinks(routeId)}
-  breadcrumbs={[
-    { label: t("footer.resources"), href: toLocalizedPath("pageResources", locale) },
-    { label: t("savingsGuide.breadcrumbLabel"), href: canonicalPath },
-  ]}
-  freshnessLabel={t("savingsGuide.checked", { date: checkedOn })}
+  layout="article"
   structuredData={articleSchema}
   locale={locale}
 >
-  <article class="max-w-5xl">
-    <header>
-      <h1 class="break-words text-3xl font-bold tracking-tight sm:text-4xl">{t("savingsGuide.title")}</h1>
-      <p class="mt-3 max-w-prose text-lg text-muted-foreground">{t("savingsGuide.intro")}</p>
-    </header>
+  <article>
+    <ArticleHero
+      locale={locale}
+      title={t("savingsGuide.title")}
+      dek={t("savingsGuide.intro")}
+      breadcrumbs={[{ label: t("footer.resources"), href: toLocalizedPath("pageResources", locale) }]}
+      readMinutes={readMinutes}
+      outline={outline}
+      figure={PAGE_FIGURES.pageSavingsGuide}
+    >
+      <p class="mt-5">
+        <span class="inline-flex items-center rounded-full border border-info/30 bg-info/5 px-3 py-1 text-xs font-medium text-info-text">
+          {t("savingsGuide.checked", { date: checkedOn })}
+        </span>
+      </p>
+    </ArticleHero>
+
+    <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+    <div class="max-w-5xl">
 
     <section aria-labelledby="savings-table-title" class="mt-10">
-      <h2 id="savings-table-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.tableTitle")}</h2>
+      <h2 id="savings-table-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-table-title")}</span>{t("savingsGuide.tableTitle")}</h2>
       <p class="mt-2 max-w-prose text-sm text-muted-foreground">{t("savingsGuide.tableHint")}</p>
 
       <div class="mt-4 hidden lg:block" data-savings-table>
@@ -141,7 +178,7 @@ const articleSchema = {
     </section>
 
     <section aria-labelledby="savings-products-title" class="mt-12">
-      <h2 id="savings-products-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.productsTitle")}</h2>
+      <h2 id="savings-products-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-products-title")}</span>{t("savingsGuide.productsTitle")}</h2>
       <div class="mt-4 grid gap-8 md:grid-cols-2">
         {SAVINGS_PRODUCT_IDS.map((product) => (
           <section id={product} class="min-w-0 scroll-mt-24">
@@ -153,14 +190,14 @@ const articleSchema = {
     </section>
 
     <section id="fgd" aria-labelledby="savings-fgd-title" class="mt-12 max-w-prose scroll-mt-24">
-      <h2 id="savings-fgd-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.fgd.title")}</h2>
-      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p1")}</p>
-      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p2")}</p>
-      <p class="mt-3 leading-7">{t("savingsGuide.fgd.p3")}</p>
+      <h2 id="savings-fgd-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-fgd-title")}</span>{t("savingsGuide.fgd.title")}</h2>
+      <p class="mt-3 text-lg leading-[1.7] text-ink-2">{t("savingsGuide.fgd.p1")}</p>
+      <p class="mt-3 text-lg leading-[1.7] text-ink-2">{t("savingsGuide.fgd.p2")}</p>
+      <p class="mt-3 text-lg leading-[1.7] text-ink-2">{t("savingsGuide.fgd.p3")}</p>
     </section>
 
     <section id="irs" aria-labelledby="savings-tax-title" class="mt-12 scroll-mt-24">
-      <h2 id="savings-tax-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.tax.title")}</h2>
+      <h2 id="savings-tax-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-tax-title")}</span>{t("savingsGuide.tax.title")}</h2>
       <p class="mt-3 max-w-prose leading-7">{t("savingsGuide.tax.intro")}</p>
       <div class="mt-4 grid gap-6 md:grid-cols-2">
         {taxItems.map((item) => (
@@ -173,22 +210,13 @@ const articleSchema = {
     </section>
 
     <section aria-labelledby="savings-related-title" class="mt-12">
-      <h2 id="savings-related-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.related.title")}</h2>
+      <h2 id="savings-related-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-related-title")}</span>{t("savingsGuide.related.title")}</h2>
       <p class="mt-2 max-w-prose text-muted-foreground">{t("savingsGuide.related.intro")}</p>
-      <ul role="list" class="mt-4 grid gap-x-8 border-t border-border sm:grid-cols-2" data-savings-related>
-        {relatedTools.map(({ href, title, description }) => (
-          <li class="min-w-0 border-b border-border">
-            <a href={href} class="group block rounded-sm py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-              <span class="block text-base font-semibold underline decoration-border underline-offset-4 group-hover:decoration-current">{title}</span>
-              <span class="mt-1 block text-sm leading-6 text-muted-foreground">{description}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <FigureCards locale={locale} cards={relatedTools} class="mt-6" />
     </section>
 
     <section id="sources" aria-labelledby="savings-sources-title" class="mt-12 scroll-mt-24">
-      <h2 id="savings-sources-title" class="text-2xl font-semibold tracking-tight">{t("savingsGuide.sources.title")}</h2>
+      <h2 id="savings-sources-title" class={h2}><span aria-hidden="true" class="mb-2 block font-mono text-sm font-medium tracking-normal text-primary">{number("savings-sources-title")}</span>{t("savingsGuide.sources.title")}</h2>
       <p class="mt-2 max-w-prose text-muted-foreground">{t("savingsGuide.sources.intro")}</p>
       <ul role="list" class="mt-4 space-y-2 text-sm">
         {SAVINGS_SOURCE_IDS.map((source) => (
@@ -203,5 +231,7 @@ const articleSchema = {
     </section>
 
     <p class="mt-10 max-w-prose text-sm text-muted-foreground">{t("savingsGuide.disclaimer")}</p>
+    </div>
+    </div>
   </article>
 </ContentLayout>

@@ -1,0 +1,45 @@
+---
+/**
+ * Link cards that lead with the destination's figure (Direction B): "Keep
+ * reading" under an article, and the hub grids. The whole card is the link;
+ * the figure is decorative, the title names it.
+ */
+import HairlineFigure from "./HairlineFigure.astro";
+import type { FigureCard } from "@/lib/figureCards";
+import type { Lang } from "@/lib/i18nLocale";
+
+interface Props {
+  locale: Lang;
+  cards: ReadonlyArray<FigureCard>;
+  /** Rendered as a heading-level title per card: h2 on a hub, h3 under an article's h2. */
+  headingLevel?: 2 | 3;
+  id?: string;
+  class?: string;
+}
+
+const { locale, cards, headingLevel = 3, id, class: className } = Astro.props;
+const Heading = `h${headingLevel}` as "h2" | "h3";
+---
+
+<ul id={id} role="list" class:list={["grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3", className]}>
+  {cards.map((card) => (
+    <li class="min-w-0">
+      <a
+        href={card.href}
+        {...card.data}
+        class="group grid h-full grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-4 rounded-card border border-border bg-card p-3 pr-4 transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:flex sm:flex-col sm:items-stretch sm:gap-0 sm:px-5 sm:pb-6 sm:pt-3"
+      >
+        <HairlineFigure figure={card.figure} locale={locale} variant="thumb" class="pointer-events-none" />
+        <div class="min-w-0">
+          {card.kind && <span class="text-sm text-muted-foreground sm:mt-1 sm:block">{card.kind}</span>}
+          <Heading class="mt-0.5 text-base font-semibold tracking-[-0.01em] text-foreground group-hover:text-primary sm:mt-1 sm:text-lg">
+            {card.title}
+          </Heading>
+          {card.description && (
+            <p class="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground sm:mt-2 sm:line-clamp-none">{card.description}</p>
+          )}
+        </div>
+      </a>
+    </li>
+  ))}
+</ul>

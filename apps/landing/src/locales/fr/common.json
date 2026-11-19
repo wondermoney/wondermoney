@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Faites valoir votre droit",
       "ctaBody": "Connectez vos comptes et découvrez votre situation financière complète — en toute sécurité, selon vos conditions."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min de lecture",
+    "onThisPage": "Sur cette page",
+    "keepReading": "À lire ensuite"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Dessin au trait d’un bocal d’épargne sur une étagère, avec une pile de pièces à côté qui passent dans le bocal mois après mois.",
+      "envelopes": "Dessin au trait d'un bac à enveloppes de budget, une par poste de dépense, avec des billets qui dépassent.",
+      "snowball": "Dessin au trait d'une rangée de dominos, du plus petit au plus grand, qui tombent l'un après l'autre comme des dettes remboursées dans l'ordre.",
+      "eggs": "Dessin au trait d'une boîte à œufs, chaque œuf dans son alvéole.",
+      "etfbox": "Dessin au trait d'une boîte remplie de petites pièces, comme un ETF regroupe de nombreuses entreprises.",
+      "inflation": "Dessin au trait d'une balance avec des pièces d'un côté et un panier de courses de l'autre, qui penche à mesure que les prix montent.",
+      "doorchain": "Dessin au trait d’une porte retenue par une chaîne de sécurité : elle s’ouvre pour regarder, pas pour laisser entrer.",
+      "taxwedge": "Dessin au trait d'une pile de pièces coupée comme une tarte, dont une part, l'impôt, est mise de côté.",
+      "scale": "Dessin au trait d’une balance qui pèse ce que vous possédez face à ce que vous devez.",
+      "timer": "Dessin au trait d’un minuteur de cuisine réglé sur dix minutes.",
+      "containers": "Dessin au trait d'une étagère de contenants, d'un bol ouvert à un coffre-fort fermé.",
+      "booklets": "Dessin au trait de guides appuyés dans un présentoir.",
+      "calculator": "Dessin au trait d'une calculatrice de bureau."
+    }
   }
 }

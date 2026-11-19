@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Nutzen Sie Ihr gesetzliches Recht",
       "ctaBody": "Verbinden Sie Ihre Konten und sehen Sie Ihr vollständiges finanzielles Bild — sicher, zu Ihren Bedingungen."
     }
+  },
+  "article": {
+    "readTime": "{{count}} Min. Lesezeit",
+    "onThisPage": "Auf dieser Seite",
+    "keepReading": "Weiterlesen"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Strichzeichnung eines Sparglases auf einem Regal, daneben ein Stapel Münzen, die Monat für Monat ins Glas wandern.",
+      "envelopes": "Strichzeichnung einer Ablage mit Budgetumschlägen, einer pro Ausgabenkategorie, aus denen Scheine ragen.",
+      "snowball": "Strichzeichnung einer Reihe von Dominosteinen, vom kleinsten zum größten, die nacheinander umfallen wie Schulden, die der Reihe nach getilgt werden.",
+      "eggs": "Strichzeichnung eines Eierkartons, jedes Ei in seiner eigenen Mulde.",
+      "etfbox": "Strichzeichnung einer Schachtel voller kleiner Teile, so wie ein ETF viele Unternehmen bündelt.",
+      "inflation": "Strichzeichnung einer Waage mit Münzen auf der einen und einem Einkaufskorb auf der anderen Seite, die sich mit steigenden Preisen neigt.",
+      "doorchain": "Strichzeichnung einer Tür mit Sicherheitskette: Sie öffnet sich zum Nachsehen, nicht zum Hereinlassen.",
+      "taxwedge": "Strichzeichnung eines Münzstapels, wie eine Torte angeschnitten, mit einem Stück, der Steuer, beiseitegelegt.",
+      "scale": "Strichzeichnung einer Waage, die dein Vermögen gegen deine Schulden abwägt.",
+      "timer": "Strichzeichnung einer Küchenuhr, auf zehn Minuten gestellt.",
+      "containers": "Strichzeichnung eines Regals mit Behältern, von einer offenen Schale bis zu einem verschlossenen Tresor.",
+      "booklets": "Strichzeichnung von Ratgeberheften, die in einem Ständer lehnen.",
+      "calculator": "Strichzeichnung eines Tischrechners."
+    }
   }
 }

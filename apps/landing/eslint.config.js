@@ -61,6 +61,10 @@ export default [
       ".github",
       "types.generated.d.ts",
       ".astro",
+      // Vendored Hairline kernel and figure scripts in the skill's own format (globals HL and
+      // hairline); the skill's validator checks them, src/lib/hairline/README.md has the details.
+      "src/lib/hairline/kernel.js",
+      "src/lib/hairline/figures/**",
     ],
   },
 ];

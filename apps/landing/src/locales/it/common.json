@@ -5890,5 +5890,27 @@
       "ctaHeadline": "Metti al lavoro il tuo diritto",
       "ctaBody": "Collega i tuoi conti e vedi il tuo quadro finanziario completo — in modo sicuro, alle tue condizioni."
     }
+  },
+  "article": {
+    "readTime": "{{count}} min di lettura",
+    "onThisPage": "In questa pagina",
+    "keepReading": "Continua a leggere"
+  },
+  "hairline": {
+    "labels": {
+      "jar": "Disegno al tratto di un barattolo dei risparmi su una mensola, con accanto una pila di monete che passano nel barattolo mese dopo mese.",
+      "envelopes": "Disegno al tratto di un vassoio con buste per il budget, una per ogni categoria di spesa, con banconote che spuntano.",
+      "snowball": "Disegno al tratto di una fila di tessere del domino, dalla più piccola alla più grande, che cadono una dopo l'altra come debiti saldati in ordine.",
+      "eggs": "Disegno al tratto di un cartone di uova, ogni uovo nel proprio alloggiamento.",
+      "etfbox": "Disegno al tratto di una scatola piena di piccoli pezzi, come un ETF riunisce molte aziende.",
+      "inflation": "Disegno al tratto di una bilancia con monete da un lato e un cestino della spesa dall'altro, che pende man mano che i prezzi salgono.",
+      "doorchain": "Disegno al tratto di una porta con catenella di sicurezza: si apre per guardare, non per far entrare.",
+      "taxwedge": "Disegno al tratto di una pila di monete tagliata come una torta, con una fetta, le tasse, messa da parte.",
+      "scale": "Disegno al tratto di una bilancia che pesa ciò che possiedi contro ciò che devi.",
+      "timer": "Disegno al tratto di un timer da cucina impostato su dieci minuti.",
+      "containers": "Disegno al tratto di uno scaffale di contenitori, da una ciotola aperta a una cassaforte chiusa.",
+      "booklets": "Disegno al tratto di guide appoggiate in un espositore.",
+      "calculator": "Disegno al tratto di una calcolatrice da tavolo."
+    }
   }
 }
