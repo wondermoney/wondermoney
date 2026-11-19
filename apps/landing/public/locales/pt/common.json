@@ -507,6 +507,78 @@
         "methodology": "Metodologia do INE"
       }
     },
+    "propertyTax": {
+      "title": "Simulador de IMI",
+      "shortName": "IMI",
+      "subtitle": "Estima o IMI anual de um imóvel em Portugal, vê quando se paga cada prestação e quanto deves reservar todos os meses.",
+      "description": "Estima o IMI, as datas de pagamento e a reserva mensal.",
+      "pageTitle": "Simulador de IMI: Imposto Municipal sobre Imóveis e Prazos de Pagamento",
+      "pageDescription": "Calcula o IMI anual a partir do valor patrimonial tributário e da taxa municipal, vê as prestações de maio, agosto e novembro e quanto reservar por mês.",
+      "fields": {
+        "kind": "Tipo de prédio",
+        "vpt": "Valor patrimonial tributário (VPT)",
+        "rate": "Taxa municipal",
+        "dependants": "Dependentes (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Prédio urbano",
+        "rustic": "Prédio rústico"
+      },
+      "vptHelp": "O VPT consta da caderneta predial e da nota de cobrança do IMI.",
+      "rateHelp": "Cada município fixa a sua taxa para prédios urbanos, entre {{min}} e {{max}}. O valor inicial é apenas um exemplo: usa a taxa do teu município.",
+      "rusticNote": "Os prédios rústicos pagam a taxa nacional de {{rate}}. Não há taxa municipal para introduzir.",
+      "dependantsHelp": "Só se o prédio for a tua habitação própria e permanente e o teu município aplicar a redução do IMI Familiar. Muitos não aplicam, ou só a partir de um certo número de dependentes.",
+      "dependantsOptions": {
+        "0": "Sem redução",
+        "1": "1 dependente (30 €)",
+        "2": "2 dependentes (70 €)",
+        "3": "3 ou mais dependentes (140 €)"
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "rateRange": "Introduz uma taxa entre {{min}} e {{max}}, o intervalo legal para prédios urbanos.",
+        "dependants": "Escolhe o número de dependentes na lista.",
+        "summary": "Revê os campos assinalados para veres a estimativa."
+      },
+      "result": {
+        "annualTax": "IMI anual estimado",
+        "monthlyProvision": "Reserva mensal (IMI anual ÷ 12)",
+        "grossTax": "IMI antes da redução",
+        "deduction": "Redução do IMI Familiar",
+        "scheduleTitle": "Calendário de pagamento",
+        "nothingDue": "Nada a pagar: a redução cobre todo o imposto."
+      },
+      "months": {
+        "may": "Maio",
+        "august": "Agosto",
+        "november": "Novembro"
+      },
+      "guide": {
+        "exampleTitle": "Exemplo de cálculo",
+        "example": "Um prédio com VPT de {{vpt}} num município que cobra {{rate}} paga {{tax}} por ano. Como o imposto excede 500 €, é pago em três prestações de {{instalment}}, em maio, agosto e novembro. Reservar {{monthly}} por mês chega para o pagar.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodTax": "O IMI anual é o VPT multiplicado pela taxa, arredondado ao cêntimo. Nos prédios urbanos usa-se a taxa fixada pelo teu município, que por lei está entre 0,30% e 0,45%. Nos prédios rústicos usa-se 0,8%.",
+        "methodFamily": "Se escolheres um número de dependentes, o montante fixo do IMI Familiar (30 € com um, 70 € com dois, 140 € com três ou mais) é subtraído ao imposto, que nunca fica abaixo de zero. A aplicação depende do teu município.",
+        "methodPayment": "O imposto é pago numa prestação em maio até 100 €, em duas em maio e novembro entre 100 € e 500 €, e em três em maio, agosto e novembro acima de 500 €. As prestações são iguais; o eventual cêntimo de arredondamento fica na última.",
+        "methodBudget": "A reserva mensal divide o imposto anual por 12, para teres o dinheiro pronto quando cada prestação vencer.",
+        "exemptionTitle": "Isenção para habitação própria e permanente",
+        "exemption": "Alguns proprietários de habitação própria e permanente estão isentos de IMI, durante um período limitado após a compra ou enquanto o rendimento do agregado e o VPT ficarem abaixo dos limites do Estatuto dos Benefícios Fiscais. Os limites mudam ao longo do tempo e há condições a cumprir, por isso o simulador não aplica nenhuma isenção. Confirma se tens direito no Portal das Finanças antes de usares o resultado.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionRate": "A taxa municipal é introduzida por ti. Esta página não tem uma tabela das taxas dos municípios, e os municípios podem majorar ou minorar a taxa em casos específicos, por exemplo prédios devolutos ou degradados, que o simulador ignora.",
+        "assumptionScope": "A estimativa cobre um único prédio sujeito às regras gerais. Não inclui o adicional ao IMI (AIMI), as isenções temporárias nem outras deduções municipais.",
+        "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. O valor que conta é o da nota de cobrança do IMI emitida pela Autoridade Tributária.",
+        "sourcesTitle": "Fontes",
+        "sourceRates": "Código do IMI, artigo 112.º: taxas (consultado a 19 de novembro de 2026)",
+        "sourcePayment": "Código do IMI, artigo 120.º: pagamento em prestações (consultado a 19 de novembro de 2026)",
+        "sourceExemption": "Portal das Finanças: isenções de IMI e IMI Familiar",
+        "reviewed": "Regras revistas a 19 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI, segundo bancos e municípios portugueses."
+      },
+      "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IMI",
+      "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IMI todos os meses, para as prestações já estarem cobertas.",
+      "nextStepCta": "Reserva dinheiro todos os meses para o teu IMI"
+    },
     "hub": {
       "title": "Ferramentas e calculadoras financeiras",
       "description": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Sem registo necessário.",

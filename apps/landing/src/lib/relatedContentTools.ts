@@ -35,6 +35,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolPersonalLoan", "toolDebtToIncome", "toolHouseholdBudget"],
     destination: "toolCarLoan",
   },
+  {
+    sources: ["toolMortgage", "toolBuyVsRent", "toolHouseholdBudget"],
+    destination: "toolPropertyTax",
+  },
 ];
 
 export function getRelatedContentTools(

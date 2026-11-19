@@ -507,6 +507,78 @@
         "methodology": "Methodik des INE"
       }
     },
+    "propertyTax": {
+      "title": "IMI-Rechner (portugiesische Grundsteuer)",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Schätzen Sie die jährliche IMI für eine Immobilie in Portugal, die Fälligkeiten der Raten und den Betrag, den Sie monatlich zurücklegen sollten.",
+      "description": "IMI in Portugal, Zahlungstermine und monatliche Rücklage schätzen.",
+      "pageTitle": "IMI-Rechner: Grundsteuer in Portugal und Zahlungstermine",
+      "pageDescription": "Schätzen Sie die jährliche IMI aus Steuerwert und kommunalem Satz, mit den Raten im Mai, August und November und der monatlichen Rücklage.",
+      "fields": {
+        "kind": "Art der Immobilie",
+        "vpt": "Steuerlicher Vermögenswert (VPT)",
+        "rate": "Kommunaler Satz",
+        "dependants": "Unterhaltsberechtigte (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Städtische Immobilie",
+        "rustic": "Ländliche Immobilie"
+      },
+      "vptHelp": "Der VPT steht in der Caderneta Predial und im IMI-Bescheid.",
+      "rateHelp": "Jede Gemeinde legt ihren Satz für städtische Immobilien zwischen {{min}} und {{max}} fest. Der Vorgabewert ist nur ein Beispiel: Nehmen Sie den Satz Ihrer Gemeinde.",
+      "rusticNote": "Ländliche Immobilien werden mit dem landesweiten Satz von {{rate}} besteuert. Ein kommunaler Satz ist nicht einzugeben.",
+      "dependantsHelp": "Nur wenn die Immobilie Ihr Hauptwohnsitz ist und Ihre Gemeinde die Ermäßigung IMI Familiar anwendet. Viele tun das nicht oder erst ab einer bestimmten Zahl Unterhaltsberechtigter.",
+      "dependantsOptions": {
+        "0": "Keine Ermäßigung",
+        "1": "1 Unterhaltsberechtigter (30 €)",
+        "2": "2 Unterhaltsberechtigte (70 €)",
+        "3": "3 oder mehr Unterhaltsberechtigte (140 €)"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "rateRange": "Geben Sie einen Satz von {{min}} bis {{max}} ein, die gesetzliche Spanne für städtische Immobilien.",
+        "dependants": "Wählen Sie die Anzahl der Unterhaltsberechtigten aus der Liste.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "annualTax": "Geschätzte jährliche IMI",
+        "monthlyProvision": "Monatliche Rücklage (jährliche IMI ÷ 12)",
+        "grossTax": "IMI vor der Ermäßigung",
+        "deduction": "Ermäßigung IMI Familiar",
+        "scheduleTitle": "Zahlungsplan",
+        "nothingDue": "Nichts zu zahlen: Die Ermäßigung deckt die gesamte Steuer."
+      },
+      "months": {
+        "may": "Mai",
+        "august": "August",
+        "november": "November"
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine Immobilie mit einem VPT von {{vpt}} in einer Gemeinde mit {{rate}} schuldet {{tax}} im Jahr. Da der Betrag über 500 € liegt, wird er in drei Raten zu {{instalment}} im Mai, August und November gezahlt. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodTax": "Die jährliche IMI ist der VPT mal Satz, auf den Cent gerundet. Städtische Immobilien nutzen den Satz Ihrer Gemeinde, der gesetzlich zwischen 0,30 % und 0,45 % liegt. Ländliche Immobilien nutzen 0,8 %.",
+        "methodFamily": "Wählen Sie eine Zahl Unterhaltsberechtigter, wird der feste Betrag der IMI Familiar (30 € bei einem, 70 € bei zwei, 140 € bei drei oder mehr) von der Steuer abgezogen; sie sinkt nie unter null. Ob er gilt, entscheidet Ihre Gemeinde.",
+        "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
+        "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
+        "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit, für begrenzte Zeit nach dem Kauf oder solange Haushaltseinkommen und VPT unter den Grenzen des Steuervergünstigungsstatuts liegen. Die Grenzen ändern sich und es gelten Bedingungen, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
+        "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
+        "assumptionEducational": "Dies ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im IMI-Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
+        "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
+        "sourceExemption": "Portal das Finanças: IMI-Befreiungen und IMI Familiar",
+        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI, wie von portugiesischen Banken und Gemeinden wiedergegeben."
+      },
+      "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
+      "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
+      "nextStepCta": "Legen Sie monatlich Geld für Ihre IMI zurück"
+    },
     "hub": {
       "title": "Finanztools & Rechner",
       "description": "Kostenlose interaktive Rechner, die Ihnen helfen, Ihre finanzielle Zukunft zu planen. Keine Registrierung erforderlich.",

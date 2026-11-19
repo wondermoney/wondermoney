@@ -507,6 +507,78 @@
         "methodology": "Metodologia dell’INE"
       }
     },
+    "propertyTax": {
+      "title": "Calcolatore dell'IMI portoghese",
+      "shortName": "IMI (Portogallo)",
+      "subtitle": "Stima l'IMI annuale di un immobile in Portogallo, quando scade ogni rata e quanto mettere da parte ogni mese.",
+      "description": "Stima l'IMI portoghese, le date di pagamento e l'accantonamento mensile.",
+      "pageTitle": "Calcolatore IMI: imposta municipale sugli immobili in Portogallo",
+      "pageDescription": "Stima l'IMI annuale dal valore patrimoniale tributario e dall'aliquota comunale, con le rate di maggio, agosto e novembre e l'importo mensile da accantonare.",
+      "fields": {
+        "kind": "Tipo di immobile",
+        "vpt": "Valore patrimoniale tributario (VPT)",
+        "rate": "Aliquota comunale",
+        "dependants": "Persone a carico (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Immobile urbano",
+        "rustic": "Immobile rustico"
+      },
+      "vptHelp": "Il VPT è indicato nella caderneta predial e nell'avviso di pagamento dell'IMI.",
+      "rateHelp": "Ogni comune fissa la propria aliquota per gli immobili urbani, tra {{min}} e {{max}}. Il valore iniziale è solo un esempio: usa l'aliquota del tuo comune.",
+      "rusticNote": "Gli immobili rustici sono tassati con l'aliquota nazionale del {{rate}}. Non c'è un'aliquota comunale da inserire.",
+      "dependantsHelp": "Solo se l'immobile è la tua abitazione principale e il tuo comune applica la riduzione IMI Familiar. Molti non la applicano, o solo da un certo numero di persone a carico.",
+      "dependantsOptions": {
+        "0": "Nessuna riduzione",
+        "1": "1 persona a carico (30 €)",
+        "2": "2 persone a carico (70 €)",
+        "3": "3 o più persone a carico (140 €)"
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Inserisci zero o un valore positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "rateRange": "Inserisci un'aliquota da {{min}} a {{max}}, l'intervallo legale per gli immobili urbani.",
+        "dependants": "Scegli il numero di persone a carico dall'elenco.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "annualTax": "IMI annuale stimata",
+        "monthlyProvision": "Accantonamento mensile (IMI annuale ÷ 12)",
+        "grossTax": "IMI prima della riduzione",
+        "deduction": "Riduzione IMI Familiar",
+        "scheduleTitle": "Calendario dei pagamenti",
+        "nothingDue": "Niente da pagare: la riduzione copre tutta l'imposta."
+      },
+      "months": {
+        "may": "Maggio",
+        "august": "Agosto",
+        "november": "Novembre"
+      },
+      "guide": {
+        "exampleTitle": "Esempio",
+        "example": "Un immobile con VPT di {{vpt}} in un comune che applica {{rate}} paga {{tax}} l'anno. Poiché l'importo supera 500 €, si paga in tre rate da {{instalment}} a maggio, agosto e novembre. Accantonare {{monthly}} al mese basta a coprirlo.",
+        "methodTitle": "Come funziona la stima",
+        "methodTax": "L'IMI annuale è il VPT per l'aliquota, arrotondato al centesimo. Gli immobili urbani usano l'aliquota fissata dal comune, che per legge è compresa tra 0,30% e 0,45%. Quelli rustici usano lo 0,8%.",
+        "methodFamily": "Se scegli un numero di persone a carico, l'importo fisso dell'IMI Familiar (30 € con una, 70 € con due, 140 € con tre o più) viene sottratto dall'imposta, che non scende mai sotto zero. L'applicazione dipende dal tuo comune.",
+        "methodPayment": "L'imposta si paga in una rata a maggio fino a 100 €, in due rate a maggio e novembre da 100 € a 500 €, e in tre rate a maggio, agosto e novembre sopra i 500 €. Le rate sono uguali; l'eventuale centesimo di arrotondamento va all'ultima.",
+        "methodBudget": "L'accantonamento mensile divide l'imposta annuale per 12, così il denaro è pronto a ogni scadenza.",
+        "exemptionTitle": "Esenzione per l'abitazione principale",
+        "exemption": "Alcuni proprietari della propria abitazione principale sono esenti dall'IMI, per un periodo limitato dopo l'acquisto o finché il reddito del nucleo e il VPT restano sotto i limiti dello statuto dei benefici fiscali. I limiti cambiano e valgono condizioni, perciò il calcolatore non applica alcuna esenzione. Verifica se ne hai diritto sul Portal das Finanças prima di usare il risultato.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionRate": "L'aliquota comunale la inserisci tu. Questa pagina non contiene una tabella delle aliquote dei comuni, e i comuni possono aumentare o ridurre l'aliquota in casi specifici, per esempio edifici sfitti o degradati, cosa che il calcolatore ignora.",
+        "assumptionScope": "La stima riguarda un solo immobile con le regole generali. Esclude l'IMI aggiuntiva (AIMI), le esenzioni temporanee e altre detrazioni comunali.",
+        "assumptionEducational": "È una stima a scopo educativo, non una consulenza fiscale. Conta l'importo dell'avviso IMI dell'Autorità Tributaria.",
+        "sourcesTitle": "Fonti",
+        "sourceRates": "Código do IMI, articolo 112: aliquote (consultato il 19 novembre 2026)",
+        "sourcePayment": "Código do IMI, articolo 120: pagamento rateale (consultato il 19 novembre 2026)",
+        "sourceExemption": "Portal das Finanças: esenzioni IMI e IMI Familiar",
+        "reviewed": "Regole verificate il 19 novembre 2026 per l'IMI dovuta nel 2026 e nel 2027. Gli importi dell'IMI Familiar provengono dall'articolo 112-A del Código do IMI, secondo banche e comuni portoghesi."
+      },
+      "nextStepHeadline": "Non farti sorprendere dall'IMI",
+      "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo dell'IMI ogni mese, così le rate sono già coperte.",
+      "nextStepCta": "Metti da parte ogni mese i soldi per la tua IMI"
+    },
     "hub": {
       "title": "Strumenti e calcolatori finanziari",
       "description": "Calcolatori interattivi gratuiti per aiutarti a pianificare il tuo futuro finanziario. Nessuna registrazione richiesta.",

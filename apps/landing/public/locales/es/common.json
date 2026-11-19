@@ -507,6 +507,78 @@
         "methodology": "Metodología del INE"
       }
     },
+    "propertyTax": {
+      "title": "Calculadora del IMI portugués",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Estima el IMI anual de un inmueble en Portugal, cuándo vence cada plazo y cuánto apartar cada mes.",
+      "description": "Estima el IMI portugués, las fechas de pago y la reserva mensual.",
+      "pageTitle": "Calculadora del IMI: impuesto municipal sobre inmuebles en Portugal",
+      "pageDescription": "Estima el IMI anual a partir del valor patrimonial tributario y el tipo municipal, con los plazos de mayo, agosto y noviembre y el importe mensual a reservar.",
+      "fields": {
+        "kind": "Tipo de inmueble",
+        "vpt": "Valor patrimonial tributario (VPT)",
+        "rate": "Tipo municipal",
+        "dependants": "Dependientes (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Inmueble urbano",
+        "rustic": "Inmueble rústico"
+      },
+      "vptHelp": "El VPT figura en la caderneta predial y en el aviso de cobro del IMI.",
+      "rateHelp": "Cada municipio fija su tipo para inmuebles urbanos, entre {{min}} y {{max}}. El valor inicial es solo un ejemplo: usa el tipo de tu municipio.",
+      "rusticNote": "Los inmuebles rústicos tributan al tipo nacional del {{rate}}. No hay tipo municipal que introducir.",
+      "dependantsHelp": "Solo si el inmueble es tu vivienda habitual y tu municipio aplica la reducción del IMI Familiar. Muchos no la aplican, o solo a partir de cierto número de dependientes.",
+      "dependantsOptions": {
+        "0": "Sin reducción",
+        "1": "1 dependiente (30 €)",
+        "2": "2 dependientes (70 €)",
+        "3": "3 o más dependientes (140 €)"
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Introduce cero o un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "rateRange": "Introduce un tipo de {{min}} a {{max}}, el intervalo legal para inmuebles urbanos.",
+        "dependants": "Elige el número de dependientes de la lista.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "annualTax": "IMI anual estimado",
+        "monthlyProvision": "Reserva mensual (IMI anual ÷ 12)",
+        "grossTax": "IMI antes de la reducción",
+        "deduction": "Reducción del IMI Familiar",
+        "scheduleTitle": "Calendario de pago",
+        "nothingDue": "Nada que pagar: la reducción cubre todo el impuesto."
+      },
+      "months": {
+        "may": "Mayo",
+        "august": "Agosto",
+        "november": "Noviembre"
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo",
+        "example": "Un inmueble con un VPT de {{vpt}} en un municipio que aplica el {{rate}} debe {{tax}} al año. Como el importe supera 500 €, se paga en tres plazos de {{instalment}} en mayo, agosto y noviembre. Apartar {{monthly}} al mes lo cubre.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodTax": "El IMI anual es el VPT por el tipo, redondeado al céntimo. Los inmuebles urbanos usan el tipo fijado por el municipio, que por ley está entre el 0,30 % y el 0,45 %. Los rústicos usan el 0,8 %.",
+        "methodFamily": "Si eliges un número de dependientes, el importe fijo del IMI Familiar (30 € con uno, 70 € con dos, 140 € con tres o más) se resta del impuesto, que nunca baja de cero. Que se aplique depende de tu municipio.",
+        "methodPayment": "El impuesto se paga en un plazo en mayo hasta 100 €, en dos en mayo y noviembre entre 100 € y 500 €, y en tres en mayo, agosto y noviembre por encima de 500 €. Los plazos son iguales; el céntimo de redondeo, si lo hay, va al último.",
+        "methodBudget": "La reserva mensual divide el impuesto anual entre 12 para tener el dinero listo cuando venza cada plazo.",
+        "exemptionTitle": "Exención para la vivienda habitual",
+        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI, durante un tiempo limitado tras la compra o mientras los ingresos del hogar y el VPT queden por debajo de los límites del Estatuto de los Beneficios Fiscales. Los límites cambian y hay condiciones, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionRate": "El tipo municipal lo introduces tú. Esta página no incluye una tabla de tipos municipales, y los municipios pueden subir o bajar el tipo en casos concretos, como edificios vacíos o degradados, que la calculadora ignora.",
+        "assumptionScope": "La estimación cubre un único inmueble con las reglas generales. No incluye el IMI adicional (AIMI), las exenciones temporales ni otras deducciones municipales.",
+        "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Lo que cuenta es el importe del aviso de cobro del IMI de la Autoridad Tributaria.",
+        "sourcesTitle": "Fuentes",
+        "sourceRates": "Código do IMI, artículo 112: tipos (consultado el 19 de noviembre de 2026)",
+        "sourcePayment": "Código do IMI, artículo 120: pago a plazos (consultado el 19 de noviembre de 2026)",
+        "sourceExemption": "Portal das Finanças: exenciones del IMI e IMI Familiar",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI, según bancos y municipios portugueses."
+      },
+      "nextStepHeadline": "Que el IMI no te pille por sorpresa",
+      "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del IMI cada mes, para que los plazos ya estén cubiertos.",
+      "nextStepCta": "Reserva dinero cada mes para tu IMI"
+    },
     "hub": {
       "title": "Herramientas y calculadoras financieras",
       "description": "Calculadoras interactivas gratuitas para ayudarte a planificar tu futuro financiero. Sin registro.",
