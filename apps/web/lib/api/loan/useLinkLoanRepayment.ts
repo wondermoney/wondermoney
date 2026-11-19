@@ -9,12 +9,20 @@ export interface LinkLoanRepaymentMutationRequest {
   payload: LinkLoanRepaymentRequest;
 }
 
+export function linkLoanRepayment({
+  loanId,
+  payload: { transactionKey, ...allocation },
+}: LinkLoanRepaymentMutationRequest) {
+  return api.post(`/v1/loan/${loanId}/repayments/link`, allocation, {
+    params: { transactionKey },
+  });
+}
+
 const useLinkLoanRepayment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ loanId, payload }: LinkLoanRepaymentMutationRequest) =>
-      api.post(`/v1/loan/${loanId}/repayments/link`, payload),
+    mutationFn: linkLoanRepayment,
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["loans"] });
       queryClient.invalidateQueries({ queryKey: ["loans", "overview"] });
