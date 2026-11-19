@@ -3543,6 +3543,129 @@
         "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
         "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde anhand des Despacho n.º 233-A/2026 (Regeln und Tabellenzuordnung) und einer Abschrift seines Anhangs geprüft, deren Zeilen zur offiziellen Spalte des effektiven Satzes passen."
       }
+    },
+    "sp500History": {
+      "title": "S&P-500-Rendite-Rechner: historische Wertentwicklung",
+      "shortName": "S&P 500 historisch",
+      "subtitle": "Sieh, was eine Anlage im S&P 500 (S&P-Composite-Index) zwischen zwei beliebigen Jahren wert gewesen wäre, mit oder ohne Dividenden und Inflation.",
+      "description": "Simuliere die Rendite des S&P 500 zwischen zwei vergangenen Jahren: Dividenden, Inflation, jährliche Einzahlungen, CAGR und das Ergebnis jedes Jahres.",
+      "pageTitle": "S&P 500 historische Rendite: Rechner mit Dividenden und Inflation",
+      "pageDescription": "Wähle ein Start- und ein Endjahr und sieh, was der S&P 500 gebracht hat: Gesamt- oder Kursrendite, real oder nominal, mit optionalen jährlichen Einzahlungen, CAGR, bestem und schlechtestem Jahr und einer Tabelle Jahr für Jahr. Daten: Aswath Damodaran (NYU Stern) und Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Startjahr (Anlage am 1. Januar)",
+        "endYear": "Endjahr (bis 31. Dezember)",
+        "initial": "Anfangsbetrag",
+        "annualContribution": "Jährliche Einzahlung (optional)",
+        "reinvest": "Dividenden wiederanlegen (Gesamtrendite)",
+        "real": "Inflation berücksichtigen (realer Wert)"
+      },
+      "help": {
+        "years": "Die Daten reichen von {{first}} bis {{last}}. Beide Jahre zählen vollständig.",
+        "initial": "In US-Dollar, angelegt am 1. Januar des Startjahrs.",
+        "contribution": "Wird am 1. Januar jedes Jahres im Zeitraum eingezahlt, das erste eingeschlossen. Lass 0 stehen, wenn es keine gibt.",
+        "reinvest": "An: Kursänderung plus wiederangelegte Dividenden. Aus: nur die Kursänderung, als würdest du alle Dividenden ausgeben.",
+        "real": "An: Alle Zahlen sind in Dollar von {{year}}, ohne die US-Inflation. Aus: nominale Dollar des jeweiligen Jahres."
+      },
+      "errors": {
+        "required": "Gib einen gültigen Wert ein.",
+        "whole": "Gib ein ganzes Jahr ein.",
+        "outOfRange": "Wähle ein Jahr von {{min}} bis {{max}}.",
+        "tooSmall": "Gib {{min}} oder mehr ein.",
+        "tooLarge": "Gib höchstens {{max}} ein oder wähle einen kürzeren Zeitraum: Das Ergebnis läge über dem, was dieser Rechner anzeigen kann.",
+        "beforeStart": "Das Endjahr muss {{start}} oder später sein.",
+        "nothingInvested": "Gib einen Anfangsbetrag oder eine jährliche Einzahlung über null ein.",
+        "summary": "Prüfe die markierten Felder, um das Ergebnis zu sehen."
+      },
+      "result": {
+        "finalNominal": "Endwert (nominale US-Dollar)",
+        "finalReal": "Endwert (in US-Dollar von {{year}})",
+        "contributed": "Insgesamt angelegt",
+        "gain": "Gewinn oder Verlust",
+        "cagr": "CAGR (jährliche Wachstumsrate)",
+        "best": "Bestes Jahr im Zeitraum",
+        "worst": "Schlechtestes Jahr im Zeitraum",
+        "basisTotal": "Gesamtrendite mit wiederangelegten Dividenden",
+        "basisPrice": "nur die Kursrendite, ohne Dividenden",
+        "termsNominal": "nominalen US-Dollar",
+        "termsReal": "US-Dollar von {{year}}, ohne Inflation",
+        "assumptions": "Angezeigt wird {{basis}}, in {{terms}}, über {{years}} Jahre vom 1. Januar {{start}} bis 31. Dezember {{end}}.",
+        "singleYear": "Ein einzelnes Jahr zeigt das Glück dieses Jahres, nicht was zu erwarten ist. Probiere einen Zeitraum von 10 Jahren oder mehr.",
+        "pastPerformance": "Die Wertentwicklung der Vergangenheit ist kein verlässlicher Indikator für die Zukunft. Nur zu Bildungszwecken, keine Anlageberatung."
+      },
+      "table": {
+        "title": "Jahr für Jahr",
+        "caption": "Jahresrendite, Inflation, eingezahltes Geld und Wert am Ende jedes Jahres",
+        "year": "Jahr",
+        "return": "Rendite",
+        "inflation": "US-Inflation",
+        "contribution": "Eingezahlt",
+        "value": "Wert am Jahresende"
+      },
+      "chart": {
+        "label": "Liniendiagramm des Werts am Ende jedes Jahres im Vergleich zur Gesamtanlage",
+        "value": "Wert",
+        "contributed": "Insgesamt angelegt"
+      },
+      "currencyNote": "Die Renditen sind in US-Dollar. Wenn du in Euro anlegst, kommt zum Marktrisiko ein Währungsrisiko durch den Euro-Dollar-Kurs hinzu: Es kann das Ergebnis um mehrere Prozentpunkte pro Jahr erhöhen oder senken.",
+      "sourceNote": "Quelle: Daten zum S&P 500 / S&P-Composite-Index von Aswath Damodaran (NYU Stern, heruntergeladen am {{date}}) und Verbraucherpreise von Robert Shiller (Yale, heruntergeladen am {{shillerDate}}). Jahreswerte von WonderMoney berechnet. Nur zu Bildungszwecken.",
+      "nextStepHeadline": "Vergleiche historische Szenarien mit deinem Portfolioplan",
+      "nextStepDescription": "Füge deine Positionen zu WonderMoney hinzu, lege einen Plan fest und sieh, wie sich dein echtes Portfolio zu den hier ausprobierten historischen Szenarien verhält.",
+      "nextStepCta": "Portfolio planen",
+      "guide": {
+        "read": {
+          "title": "So liest du das Ergebnis",
+          "intro": "Dieser Rechner blickt zurück. Er nimmt die Jahresrenditen des S&P 500 (Daten des S&P-Composite-Index) zwischen den gewählten Jahren und wendet sie auf deinen Betrag an. Die Daten reichen von {{first}} bis {{last}}.",
+          "future": "Es ist keine Prognose. Um einen Index mit eigenen Annahmen zu Rendite und Kosten in die Zukunft fortzuschreiben, nutze die Indexprojektion auf der Seite zur Anlagerendite."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Lege {{initial}} am 1. Januar {{start}} an und lass sie bis zum 31. Dezember {{end}} liegen ({{years}} Jahre), mit wiederangelegten Dividenden und ohne weitere Einzahlungen. Laut den Daten werden daraus {{finalTotal}}, eine jährliche Wachstumsrate (CAGR) von {{cagrTotal}}.",
+          "price": "Ohne Dividenden (nur Kursrendite) endet derselbe Betrag bei {{finalPrice}}, also {{cagrPrice}} pro Jahr. Der Unterschied ist das, was die wiederangelegten Dividenden beigetragen haben.",
+          "real": "In Dollar von {{start}} gemessen, ohne die US-Inflation, beträgt der Endwert {{finalReal}}, also {{cagrReal}} pro Jahr.",
+          "range": "Der Weg war holprig: Das beste Jahr des Zeitraums war {{bestYear}} ({{bestReturn}}), das schlechteste {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Für jedes Jahr deines Zeitraums macht der Rechner dieselben vier Schritte:",
+          "steps": {
+            "a": "Er addiert das am 1. Januar angelegte Geld: im ersten Jahr den Anfangsbetrag, in jedem Jahr die jährliche Einzahlung.",
+            "b": "Er lässt das Guthaben um die Rendite dieses Jahres wachsen: die Gesamtrendite, wenn Dividenden wiederangelegt werden, sonst die Kursrendite.",
+            "c": "Wenn du inflationsbereinigte Werte willst, teilt er durch die US-Verbraucherpreise (CPI), sodass alle Zahlen in Dollar des Startjahrs sind. Einzahlungen werden mit den Preisen des Tages deflationiert, an dem sie erfolgen.",
+            "d": "Er hält den Wert am 31. Dezember für Tabelle und Diagramm fest."
+          },
+          "cagr": "Die CAGR ist das geometrische Mittel der Jahresrenditen im Zeitraum, in den gewählten Größen. Sie beschreibt den Index in diesen Jahren und hängt nicht davon ab, wie viel du einzahlst.",
+          "contributions": "Jährliche Einzahlungen kommen am 1. Januar hinzu, vor der Rendite des Jahres, und verdienen so das ganze Jahr mit.",
+          "limits": "Das erste Jahr in den Daten ist {{first}}, das letzte vollständige Jahr {{last}}. Jeder Betrag ist auf {{maxAmount}} begrenzt."
+        },
+        "data": {
+          "title": "Daten und Methode",
+          "source": "Die Renditen berechnet WonderMoney aus dem S&P-500-Stand zum Jahresende und den Dividenden im Datensatz „Historical Returns on Stocks, Bonds and Bills“ von Aswath Damodaran (NYU Stern), heruntergeladen am {{downloaded}}. Die Inflation stammt vom Verbraucherpreisindex (CPI) in Robert J. Shillers öffentlichem Datensatz „U.S. Stock Markets 1871-Present and CAPE Ratio“ (Yale University), heruntergeladen am {{shillerDownloaded}}.",
+          "returnsLink": "Damodarans Datenseite",
+          "inflationLink": "Shillers Datenseite",
+          "method": "Für jedes Kalenderjahr ist die Kursrendite der Stand zum Jahresende geteilt durch den Stand zum Vorjahresende, minus eins. Die Gesamtrendite addiert vor der Division die Dividenden des Jahres zum Stand am Jahresende, was die Dividenden als zum Jahresende wiederangelegt behandelt. Die Inflation ist die Veränderung des CPI zwischen denselben beiden Dezembern.",
+          "check": "Zur Kontrolle wurde die Gesamtrendite jedes Jahres mit der verglichen, die Damodaran selbst veröffentlicht, und keine weicht um mehr als 0,1 Prozentpunkte ab. Da die Jahre von Jahresende zu Jahresende laufen, passen sie zu den Kalenderjahreszahlen, die für den Index üblicherweise genannt werden.",
+          "trademark": "„S&P 500“ und „S&P Composite“ bezeichnen nur den Index. Diese Seite zeigt aus öffentlichen akademischen Daten abgeleitete Jahreswerte und keine Tageskurse und ist weder mit S&P Dow Jones Indices verbunden noch von ihnen empfohlen."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "fx": "Währung: Die Renditen sind in US-Dollar. Wenn du aus dem Euroraum anlegst, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
+            "fees": "Kosten: Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt den Index minus seine Kosten.",
+            "taxes": "Steuern: Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo du lebst.",
+            "sequence": "Rückblick: Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
+            "past": "Die Wertentwicklung der Vergangenheit ist kein verlässlicher Indikator für die Zukunft. Dieses Werkzeug dient der Bildung und ist keine Anlageberatung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht es",
+          "investmentReturnLink": "Anlagerendite und Indexprojektion",
+          "investmentReturnBody": "Miss deine eigene Rendite oder schreibe einen Indexfonds mit deinen Annahmen zu Rendite und Kosten fort.",
+          "compoundInterestLink": "Zinseszinsrechner",
+          "compoundInterestBody": "Sieh, wie regelmäßige Einzahlungen und Zeit mit einem Zins deiner Wahl wachsen.",
+          "investorProfileLink": "Anlegerprofil-Test",
+          "investorProfileBody": "Finde heraus, mit wie viel Marktschwankung dieser Art du leben kannst."
+        }
+      }
     }
   },
   "resources": {

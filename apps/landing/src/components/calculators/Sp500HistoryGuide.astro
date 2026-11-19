@@ -1,0 +1,158 @@
+---
+// Prerendered explanation for the S&P 500 historical returns calculator: how to read it, a worked
+// example computed from the same function the calculator runs, the method, the data source with
+// its download date, what the figures leave out, and the tools to go on with.
+import {
+  SP500_HISTORY_EXAMPLE,
+  SP500_HISTORY_LIMITS,
+  SP500_HISTORY_SOURCE,
+  computeSp500History,
+} from "@/lib/calculators/sp500History";
+import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.sp500History.guide.${key}`;
+
+function calculate(overrides: Partial<typeof SP500_HISTORY_EXAMPLE>) {
+  const outcome = computeSp500History({ ...SP500_HISTORY_EXAMPLE, ...overrides });
+  if (!outcome.ok) throw new Error("The S&P 500 history worked example has invalid inputs");
+  return outcome.result;
+}
+
+const total = calculate({});
+const priceOnly = calculate({ reinvestDividends: false });
+const real = calculate({ inflationAdjusted: true });
+
+const usd = (value: number) => formatMoney(locale, value, { currency: "USD", decimals: 0 });
+const percent = (value: number, sign: "auto" | "always" = "always") =>
+  formatPercent(locale, value, { decimals: 1, sign });
+const values = {
+  start: String(SP500_HISTORY_EXAMPLE.startYear),
+  end: String(SP500_HISTORY_EXAMPLE.endYear),
+  years: String(total.years.length),
+  initial: usd(SP500_HISTORY_EXAMPLE.initial),
+  finalTotal: usd(total.finalValue),
+  cagrTotal: percent(total.cagrPct),
+  finalPrice: usd(priceOnly.finalValue),
+  cagrPrice: percent(priceOnly.cagrPct),
+  finalReal: usd(real.finalValue),
+  cagrReal: percent(real.cagrPct),
+  worstYear: String(total.worst.year),
+  worstReturn: percent(total.worst.returnPct),
+  bestYear: String(total.best.year),
+  bestReturn: percent(total.best.returnPct),
+  first: String(SP500_HISTORY_LIMITS.firstYear),
+  last: String(SP500_HISTORY_LIMITS.lastYear),
+  downloaded: SP500_HISTORY_SOURCE.returns.downloadedOn,
+  shillerDownloaded: SP500_HISTORY_SOURCE.inflation.downloadedOn,
+  maxAmount: usd(SP500_HISTORY_LIMITS.maxAmount),
+};
+
+const list = (key: string) =>
+  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+const steps = list("method.steps");
+const assumptions = list("limits.items");
+
+const related = [
+  { key: "investmentReturn", href: toLocalizedPath("toolInvestmentReturn", locale) },
+  { key: "compoundInterest", href: toLocalizedPath("toolCompoundInterest", locale) },
+  { key: "investorProfile", href: toLocalizedPath("toolInvestorProfile", locale) },
+] as const;
+
+const linkClass =
+  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+  <section aria-labelledby="sp500-read">
+    <h2 id="sp500-read" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("read.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("read.intro"), values)}</p>
+      <p>{t(k("read.future"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sp500-example">
+    <h2 id="sp500-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("example.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+      <p>{t(k("example.price"), values)}</p>
+      <p>{t(k("example.real"), values)}</p>
+      <p>{t(k("example.range"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sp500-method">
+    <h2 id="sp500-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("method.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"))}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {steps.map((item) => <li>{item}</li>)}
+      </ol>
+      <p>{t(k("method.cagr"))}</p>
+      <p>{t(k("method.contributions"))}</p>
+      <p>{t(k("method.limits"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sp500-data">
+    <h2 id="sp500-data" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("data.title"))}
+    </h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("data.source"), values)}</p>
+      <p>
+        <a href={SP500_HISTORY_SOURCE.returns.url} class={linkClass} rel="noopener" target="_blank">
+          {t(k("data.returnsLink"))}
+        </a>
+        {" · "}
+        <a href={SP500_HISTORY_SOURCE.inflation.url} class={linkClass} rel="noopener" target="_blank">
+          {t(k("data.inflationLink"))}
+        </a>
+      </p>
+      <p>{t(k("data.method"))}</p>
+      <p>{t(k("data.check"))}</p>
+      <p>{t(k("data.trademark"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sp500-limits">
+    <h2 id="sp500-limits" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("limits.title"))}
+    </h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {assumptions.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="sp500-related">
+    <h2 id="sp500-related" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("related.title"))}
+    </h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>

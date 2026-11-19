@@ -3543,6 +3543,129 @@
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
         "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked against Despacho n.º 233-A/2026 (rules and table assignment) and a transcription of its annex whose rows match the official effective-rate column."
       }
+    },
+    "sp500History": {
+      "title": "S&P 500 historical returns calculator",
+      "shortName": "S&P 500 history",
+      "subtitle": "See what an investment in the S&P 500 (S&P Composite index) would have been worth between any two years, with or without dividends and inflation.",
+      "description": "Simulate S&P 500 returns between two past years: dividends, inflation, contributions, CAGR and every year's result.",
+      "pageTitle": "S&P 500 Historical Returns Calculator: Dividends and Inflation",
+      "pageDescription": "Choose a start and end year and see what the S&P 500 returned: total or price return, real or nominal, with optional yearly contributions, CAGR, best and worst year and a year-by-year table. Data: Aswath Damodaran (NYU Stern) and Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Start year (invest on 1 January)",
+        "endYear": "End year (to 31 December)",
+        "initial": "Initial amount",
+        "annualContribution": "Yearly contribution (optional)",
+        "reinvest": "Reinvest dividends (total return)",
+        "real": "Adjust for inflation (real value)"
+      },
+      "help": {
+        "years": "Data covers {{first}} to {{last}}. Both years are counted in full.",
+        "initial": "In US dollars, invested on 1 January of the start year.",
+        "contribution": "Added on 1 January of every year in the range, the first included. Leave at 0 for none.",
+        "reinvest": "On: price change plus dividends reinvested. Off: price change only, as if every dividend were spent.",
+        "real": "On: every figure is in {{year}} dollars, after removing US inflation. Off: nominal dollars of each year."
+      },
+      "errors": {
+        "required": "Enter a valid value.",
+        "whole": "Enter a whole year.",
+        "outOfRange": "Choose a year from {{min}} to {{max}}.",
+        "tooSmall": "Enter {{min}} or more.",
+        "tooLarge": "Enter {{max}} or less, or choose a shorter range: the result would exceed what this calculator can show.",
+        "beforeStart": "The end year must be {{start}} or later.",
+        "nothingInvested": "Enter an initial amount or a yearly contribution above zero.",
+        "summary": "Check the highlighted fields to see the result."
+      },
+      "result": {
+        "finalNominal": "Final value (nominal US dollars)",
+        "finalReal": "Final value (in {{year}} US dollars)",
+        "contributed": "Total invested",
+        "gain": "Gain or loss",
+        "cagr": "CAGR (compound annual growth rate)",
+        "best": "Best year in the range",
+        "worst": "Worst year in the range",
+        "basisTotal": "total return with dividends reinvested",
+        "basisPrice": "price return only, dividends not included",
+        "termsNominal": "nominal US dollars",
+        "termsReal": "{{year}} US dollars, inflation removed",
+        "assumptions": "Showing {{basis}}, in {{terms}}, over {{years}} years from 1 January {{start}} to 31 December {{end}}.",
+        "singleYear": "A single year shows that year's luck, not what to expect. Try a range of 10 years or more.",
+        "pastPerformance": "Past performance does not predict future returns. Educational only, not investment advice."
+      },
+      "table": {
+        "title": "Year by year",
+        "caption": "Yearly return, inflation, money added and value at the end of each year",
+        "year": "Year",
+        "return": "Return",
+        "inflation": "US inflation",
+        "contribution": "Money added",
+        "value": "Value at year end"
+      },
+      "chart": {
+        "label": "Line chart of the value at the end of each year against the total invested",
+        "value": "Value",
+        "contributed": "Total invested"
+      },
+      "currencyNote": "Returns are in US dollars. If you invest in euros, the euro-dollar exchange rate adds a currency risk on top of the market's: it can raise or cut the result by several points a year.",
+      "sourceNote": "Source: S&P 500 / S&P Composite index data from Aswath Damodaran (NYU Stern, downloaded {{date}}) and consumer prices from Robert Shiller (Yale, downloaded {{shillerDate}}). Yearly values computed by WonderMoney. Educational only.",
+      "nextStepHeadline": "Compare historical scenarios with your portfolio plan",
+      "nextStepDescription": "Add your holdings to WonderMoney, set a plan and see how your real portfolio compares with the historical scenarios you tried here.",
+      "nextStepCta": "Plan your portfolio",
+      "guide": {
+        "read": {
+          "title": "How to read the result",
+          "intro": "This calculator looks backwards. It takes the yearly returns of the S&P 500 (S&P Composite index data) between the years you choose and applies them to your amount. The data covers {{first}} to {{last}}.",
+          "future": "It is not a forecast. To project an index forward with your own return and fee assumptions, use the index projection on the investment return page."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Invest {{initial}} on 1 January {{start}} and leave it until 31 December {{end}} ({{years}} years), with dividends reinvested and no further contributions. The data turns it into {{finalTotal}}, a compound annual growth rate (CAGR) of {{cagrTotal}}.",
+          "price": "Without dividends (price return only) the same amount ends at {{finalPrice}}, or {{cagrPrice}} a year. The gap is what reinvested dividends added.",
+          "real": "Measured in {{start}} dollars, after removing US inflation, the final value is {{finalReal}}, or {{cagrReal}} a year.",
+          "range": "The path was rough: the best year of the range was {{bestYear}} ({{bestReturn}}) and the worst {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "For every year in your range the calculator does the same four things:",
+          "steps": {
+            "a": "It adds the money invested on 1 January: your initial amount in the first year and the yearly contribution in every year.",
+            "b": "It grows the balance by that year's return: the total return if dividends are reinvested, the price return if not.",
+            "c": "If you ask for inflation-adjusted values, it divides by US consumer prices (CPI), so every figure is in the start year's dollars. Contributions are deflated with the prices of the day they are made.",
+            "d": "It records the value at 31 December for the table and the chart."
+          },
+          "cagr": "The CAGR is the geometric mean of the yearly returns in the range, in the terms you chose. It describes the index over those years and does not depend on how much you contribute.",
+          "contributions": "Yearly contributions are added on 1 January, before that year's return, so they earn the whole year.",
+          "limits": "The first year in the data is {{first}} and the last complete year is {{last}}. Each amount is capped at {{maxAmount}}."
+        },
+        "data": {
+          "title": "Data and method",
+          "source": "Returns are computed by WonderMoney from the year-end S&P 500 level and the dividends in Aswath Damodaran's dataset \"Historical Returns on Stocks, Bonds and Bills\" (NYU Stern), downloaded on {{downloaded}}. Inflation comes from the consumer price index (CPI) in Robert J. Shiller's public dataset \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Yale University), downloaded on {{shillerDownloaded}}.",
+          "returnsLink": "Damodaran's data page",
+          "inflationLink": "Shiller's data page",
+          "method": "For each calendar year the price return is the year-end level divided by the previous year-end level, minus one. The total return adds the year's dividends to the year-end level before dividing, which treats the dividends as reinvested at the year end. Inflation is the change in the CPI between the same two Decembers.",
+          "check": "As a check, every year's total return was compared with the total return Damodaran publishes himself, and none differs by more than 0.1 percentage point. Because years run from year-end to year-end, they line up with the calendar-year figures usually quoted for the index.",
+          "trademark": "\"S&P 500\" and \"S&P Composite\" only name the index. This page shows yearly values derived from public academic data and no daily prices, and is not affiliated with or endorsed by S&P Dow Jones Indices."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "fx": "Currency: returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
+            "fees": "Costs: fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
+            "taxes": "Taxes: tax on dividends and gains is not included, and it depends on where you live.",
+            "sequence": "Hindsight: this is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
+            "past": "Past performance does not predict future returns. This tool is educational and is not investment advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "investmentReturnLink": "Investment return and index projection",
+          "investmentReturnBody": "Measure your own return, or project an index fund forward with your return and fee assumptions.",
+          "compoundInterestLink": "Compound interest calculator",
+          "compoundInterestBody": "See how regular contributions and time compound at a rate you choose.",
+          "investorProfileLink": "Investor profile quiz",
+          "investorProfileBody": "Find out how much market swings like these you can live with."
+        }
+      }
     }
   },
   "resources": {

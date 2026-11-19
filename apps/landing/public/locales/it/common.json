@@ -3543,6 +3543,129 @@
         "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
         "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre. La tabella di ritenuta per pensioni VIII è stata verificata rispetto al Despacho n.º 233-A/2026 (regole e assegnazione della tabella) e a una trascrizione del suo allegato le cui righe coincidono con la colonna ufficiale dell'aliquota effettiva."
       }
+    },
+    "sp500History": {
+      "title": "Calcolatore del rendimento storico dell'S&P 500",
+      "shortName": "S&P 500 storico",
+      "subtitle": "Scopri quanto varrebbe un investimento nell'S&P 500 (indice S&P Composite) tra due anni qualsiasi, con o senza dividendi e inflazione.",
+      "description": "Simula il rendimento dell'S&P 500 tra due anni passati: dividendi, inflazione, versamenti annuali, CAGR e il risultato di ogni anno.",
+      "pageTitle": "Rendimento storico dell'S&P 500: calcolatore con dividendi e inflazione",
+      "pageDescription": "Scegli un anno iniziale e uno finale e vedi quanto ha reso l'S&P 500: rendimento totale o di prezzo, reale o nominale, con versamenti annuali facoltativi, CAGR, anno migliore e peggiore e una tabella anno per anno. Dati: Aswath Damodaran (NYU Stern) e Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Anno iniziale (investi il 1° gennaio)",
+        "endYear": "Anno finale (fino al 31 dicembre)",
+        "initial": "Importo iniziale",
+        "annualContribution": "Versamento annuale (facoltativo)",
+        "reinvest": "Reinvesti i dividendi (rendimento totale)",
+        "real": "Correggi per l'inflazione (valore reale)"
+      },
+      "help": {
+        "years": "I dati vanno dal {{first}} al {{last}}. Entrambi gli anni contano per intero.",
+        "initial": "In dollari statunitensi, investiti il 1° gennaio dell'anno iniziale.",
+        "contribution": "Aggiunto il 1° gennaio di ogni anno dell'intervallo, il primo compreso. Lascia 0 se non c'è.",
+        "reinvest": "Attivo: variazione del prezzo più dividendi reinvestiti. Disattivo: solo la variazione del prezzo, come se spendessi tutti i dividendi.",
+        "real": "Attivo: tutte le cifre sono in dollari del {{year}}, senza l'inflazione USA. Disattivo: dollari nominali di ogni anno."
+      },
+      "errors": {
+        "required": "Inserisci un valore valido.",
+        "whole": "Inserisci un anno intero.",
+        "outOfRange": "Scegli un anno tra {{min}} e {{max}}.",
+        "tooSmall": "Inserisci {{min}} o più.",
+        "tooLarge": "Inserisci {{max}} o meno, oppure scegli un intervallo più breve: il risultato supererebbe ciò che questo calcolatore può mostrare.",
+        "beforeStart": "L'anno finale deve essere {{start}} o successivo.",
+        "nothingInvested": "Inserisci un importo iniziale o un versamento annuale superiore a zero.",
+        "summary": "Controlla i campi evidenziati per vedere il risultato."
+      },
+      "result": {
+        "finalNominal": "Valore finale (dollari nominali)",
+        "finalReal": "Valore finale (in dollari del {{year}})",
+        "contributed": "Totale investito",
+        "gain": "Guadagno o perdita",
+        "cagr": "CAGR (tasso di crescita annuo composto)",
+        "best": "Anno migliore dell'intervallo",
+        "worst": "Anno peggiore dell'intervallo",
+        "basisTotal": "rendimento totale con dividendi reinvestiti",
+        "basisPrice": "solo il rendimento di prezzo, senza dividendi",
+        "termsNominal": "dollari nominali",
+        "termsReal": "dollari del {{year}}, senza inflazione",
+        "assumptions": "Si mostra {{basis}}, in {{terms}}, su {{years}} anni, dal 1° gennaio {{start}} al 31 dicembre {{end}}.",
+        "singleYear": "Un solo anno mostra la fortuna di quell'anno, non cosa aspettarsi. Prova un intervallo di 10 anni o più.",
+        "pastPerformance": "I rendimenti passati non sono indicativi di quelli futuri. Solo a scopo educativo, non è consulenza finanziaria."
+      },
+      "table": {
+        "title": "Anno per anno",
+        "caption": "Rendimento annuo, inflazione, denaro versato e valore alla fine di ogni anno",
+        "year": "Anno",
+        "return": "Rendimento",
+        "inflation": "Inflazione USA",
+        "contribution": "Denaro versato",
+        "value": "Valore a fine anno"
+      },
+      "chart": {
+        "label": "Grafico a linee del valore alla fine di ogni anno rispetto al totale investito",
+        "value": "Valore",
+        "contributed": "Totale investito"
+      },
+      "currencyNote": "I rendimenti sono in dollari statunitensi. Se investi in euro, il cambio euro-dollaro aggiunge un rischio di cambio a quello del mercato: può aumentare o ridurre il risultato di diversi punti l'anno.",
+      "sourceNote": "Fonte: dati dell'indice S&P 500 / S&P Composite di Aswath Damodaran (NYU Stern, scaricati il {{date}}) e prezzi al consumo di Robert Shiller (Yale, scaricati il {{shillerDate}}). Valori annuali calcolati da WonderMoney. Solo a scopo educativo.",
+      "nextStepHeadline": "Confronta scenari storici con il tuo piano di portafoglio",
+      "nextStepDescription": "Aggiungi le tue posizioni a WonderMoney, definisci un piano e vedi come si confronta il tuo portafoglio reale con gli scenari storici provati qui.",
+      "nextStepCta": "Pianifica il tuo portafoglio",
+      "guide": {
+        "read": {
+          "title": "Come leggere il risultato",
+          "intro": "Questo calcolatore guarda indietro. Prende i rendimenti annuali dell'S&P 500 (dati dell'indice S&P Composite) tra gli anni scelti e li applica al tuo importo. I dati vanno dal {{first}} al {{last}}.",
+          "future": "Non è una previsione. Per proiettare un indice in avanti con le tue ipotesi di rendimento e costi, usa la proiezione di indici nella pagina sul rendimento degli investimenti."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Investi {{initial}} il 1° gennaio {{start}} e lascia fino al 31 dicembre {{end}} ({{years}} anni), con i dividendi reinvestiti e senza altri versamenti. Secondo i dati diventano {{finalTotal}}, un tasso di crescita annuo composto (CAGR) di {{cagrTotal}}.",
+          "price": "Senza dividendi (solo rendimento di prezzo) lo stesso importo finisce a {{finalPrice}}, ovvero {{cagrPrice}} l'anno. La differenza è ciò che hanno aggiunto i dividendi reinvestiti.",
+          "real": "Misurato in dollari del {{start}}, senza l'inflazione USA, il valore finale è {{finalReal}}, ovvero {{cagrReal}} l'anno.",
+          "range": "Il percorso fu accidentato: l'anno migliore dell'intervallo è stato il {{bestYear}} ({{bestReturn}}) e il peggiore il {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "Per ogni anno dell'intervallo il calcolatore fa le stesse quattro cose:",
+          "steps": {
+            "a": "Somma il denaro investito il 1° gennaio: l'importo iniziale il primo anno e il versamento annuale ogni anno.",
+            "b": "Fa crescere il saldo del rendimento di quell'anno: il rendimento totale se i dividendi sono reinvestiti, quello di prezzo altrimenti.",
+            "c": "Se chiedi valori corretti per l'inflazione, divide per i prezzi al consumo USA (CPI) e tutte le cifre sono in dollari dell'anno iniziale. I versamenti sono deflazionati con i prezzi del giorno in cui avvengono.",
+            "d": "Registra il valore al 31 dicembre per la tabella e il grafico."
+          },
+          "cagr": "Il CAGR è la media geometrica dei rendimenti annuali dell'intervallo, nei termini scelti. Descrive l'indice in quegli anni e non dipende da quanto versi.",
+          "contributions": "I versamenti annuali sono aggiunti il 1° gennaio, prima del rendimento di quell'anno, quindi rendono l'anno intero.",
+          "limits": "Il primo anno nei dati è il {{first}} e l'ultimo anno completo è il {{last}}. Ogni importo è limitato a {{maxAmount}}."
+        },
+        "data": {
+          "title": "Dati e metodo",
+          "source": "I rendimenti sono calcolati da WonderMoney dal livello dell'S&P 500 a fine anno e dai dividendi del dataset \"Historical Returns on Stocks, Bonds and Bills\" di Aswath Damodaran (NYU Stern), scaricato il {{downloaded}}. L'inflazione deriva dall'indice dei prezzi al consumo (CPI) del dataset pubblico di Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Università di Yale), scaricato il {{shillerDownloaded}}.",
+          "returnsLink": "Pagina dei dati di Damodaran",
+          "inflationLink": "Pagina dei dati di Shiller",
+          "method": "Per ogni anno solare il rendimento di prezzo è il livello di fine anno diviso per quello di fine anno precedente, meno uno. Il rendimento totale somma i dividendi dell'anno al livello di fine anno prima di dividere, il che tratta i dividendi come reinvestiti a fine anno. L'inflazione è la variazione del CPI tra gli stessi due dicembri.",
+          "check": "Come verifica, il rendimento totale di ogni anno è stato confrontato con quello che pubblica lo stesso Damodaran, e nessuno differisce di più di 0,1 punti percentuali. Poiché gli anni vanno da fine anno a fine anno, coincidono con le cifre annuali di solito citate per l'indice.",
+          "trademark": "\"S&P 500\" e \"S&P Composite\" nominano soltanto l'indice. Questa pagina mostra valori annuali derivati da dati accademici pubblici e nessuna quotazione giornaliera, e non è affiliata né approvata da S&P Dow Jones Indices."
+        },
+        "limits": {
+          "title": "Cosa queste cifre non includono",
+          "items": {
+            "fx": "Valuta: i rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
+            "fees": "Costi: commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
+            "taxes": "Tasse: l'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
+            "sequence": "Col senno di poi: è un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
+            "past": "I rendimenti passati non sono indicativi di quelli futuri. Questo strumento è educativo e non è consulenza finanziaria."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "investmentReturnLink": "Rendimento degli investimenti e proiezione di indici",
+          "investmentReturnBody": "Misura il tuo rendimento, oppure proietta un fondo indicizzato in avanti con le tue ipotesi di rendimento e costi.",
+          "compoundInterestLink": "Calcolatore di interesse composto",
+          "compoundInterestBody": "Guarda come versamenti regolari e tempo si compongono a un tasso a tua scelta.",
+          "investorProfileLink": "Test del profilo di investitore",
+          "investorProfileBody": "Scopri con quante oscillazioni di mercato come queste riesci a convivere."
+        }
+      }
     }
   },
   "resources": {
