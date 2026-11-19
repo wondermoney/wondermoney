@@ -2334,6 +2334,88 @@
       "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
       "nextStepCta": "Start budgeting in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Property purchase taxes calculator (IMT and stamp duty)",
+      "shortName": "Purchase taxes",
+      "subtitle": "Estimate the IMT and stamp duty (Imposto do Selo) due when you buy a property in Portugal, and see how much cash to add to your deposit.",
+      "description": "Estimate IMT and stamp duty on a Portuguese property purchase.",
+      "pageTitle": "IMT and Stamp Duty Calculator for Buying Property in Portugal",
+      "pageDescription": "Estimate the 2026 IMT and Imposto do Selo on a property purchase in Portugal: mainland or islands, home use, mortgage stamp duty and the young-buyer exemption.",
+      "propertyTitle": "Property",
+      "financingTitle": "Mortgage",
+      "youngTitle": "Young-buyer exemption (IMT Jovem)",
+      "youngNote": "Only if every condition holds on the deed date: you are 35 or younger, it is your first home, and you will live in it permanently. Full exemption up to {{full}}; partial exemption up to {{partial}}, with IMT on the excess only.",
+      "youngUnavailable": "The exemption only applies to an own permanent home. Choose that use to check eligibility.",
+      "fields": {
+        "price": "Purchase price",
+        "taxValue": "Tax value (VPT), optional",
+        "region": "Location",
+        "use": "Use of the property",
+        "loan": "Mortgage amount",
+        "young": "I meet the young-buyer conditions"
+      },
+      "help": {
+        "price": "The price on the deed.",
+        "taxValue": "The tax authority taxes the higher of the price and the VPT. Leave at zero if unknown.",
+        "loan": "Enter zero for a cash purchase. Mortgage stamp duty is not covered by the young-buyer exemption here."
+      },
+      "regions": {
+        "mainland": "Mainland Portugal",
+        "islands": "Azores or Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Own permanent home",
+        "secondary": "Secondary home or other housing",
+        "rustic": "Rustic land",
+        "otherUrban": "Other urban property or land"
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "loan": "The mortgage cannot exceed the purchase price.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "total": "Total taxes to pay",
+        "effectiveRate": "{{rate}} of the taxable value",
+        "reference": "Taxable value",
+        "imt": "IMT",
+        "stampPurchase": "Stamp duty on the purchase (0.8%)",
+        "stampLoan": "Stamp duty on the mortgage (0.6%)",
+        "exemptFull": "Young-buyer exemption applied: it removes IMT and purchase stamp duty, saving {{saving}}.",
+        "exemptPartial": "Partial young-buyer exemption applied: IMT is charged only on the part above the full-exemption limit. It saves {{saving}} in total.",
+        "exemptNone": "At this value the exemption does not apply. It covers purchases up to {{partial}} (full up to {{full}}) and only for the conditions in the box on the left.",
+        "tableNote": "Table for {{year}}, reviewed on {{date}}. Educational estimate, not tax advice."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Buying an own permanent home on the mainland for {{price}} with a {{loan}} mortgage costs {{imt}} of IMT, {{stampPurchase}} of stamp duty on the purchase and {{stampLoan}} of stamp duty on the mortgage. That is {{total}} in total, which you pay on top of the deposit and should add to your savings target.",
+        "methodTitle": "How the estimate works",
+        "methodBase": "The tax base is the higher of the purchase price and the patrimonial tax value (VPT).",
+        "methodImt": "For homes, IMT is the base multiplied by the rate of its band minus a fixed deduction (parcela a abater) that makes the tax progressive. Above the last progressive band the rate applies to the whole value without deduction. Rustic land pays 5% and other urban property or land 6.5%.",
+        "methodStamp": "Stamp duty is 0.8% of the base on the purchase (verba 1.1) and, if you take a mortgage, 0.6% of the amount borrowed (verba 17.1.4, loans of five years or more).",
+        "methodRounding": "IMT and each stamp duty are rounded to the cent separately, as the tax authority assesses them. Stamp duty on interest and fees is not included.",
+        "tableTitle": "IMT table {{year}}: own permanent home, mainland",
+        "tableAbove": "Higher values",
+        "tableLimit": "Value up to",
+        "tableRate": "Rate",
+        "tableDeduct": "Deduction",
+        "tableNote": "Up to {{exempt}} the first band is 0%. Secondary homes use their own table with 1% from the first euro, and the Azores and Madeira use the same rates with limits 25% higher.",
+        "sourceImt": "CIMT, article 17 (Portal das Finanças)",
+        "sourceStamp": "Stamp duty code (Portal das Finanças)",
+        "review": "Rules and limits for {{year}}, last reviewed on {{date}}. Check them again before you sign.",
+        "assumptionsTitle": "Assumptions and supported situations",
+        "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
+        "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. We treat purchase stamp duty as exempt only within the full limit.",
+        "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
+        "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
+        "assumptionIslands": "For the Azores and Madeira the limits are the mainland limits increased by 25% and rounded to the euro, with the same rates. Confirm the regional limits with the tax authority."
+      },
+      "nextStepHeadline": "Plan the cash you need to buy",
+      "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
+      "nextStepCta": "Include taxes in your house-deposit target"
+    },
     "personalLoan": {
       "title": "Personal Loan Calculator",
       "shortName": "Personal loan",

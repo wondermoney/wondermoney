@@ -360,6 +360,14 @@ const ROUTE_SLUGS = {
 		de: "inflationsrechner-portugal",
 		it: "calcolo-inflazione-portogallo",
 	},
+	toolPurchaseTaxes: {
+		pt: "simulador-imt-imposto-selo",
+		en: "property-purchase-taxes-calculator",
+		es: "calculadora-impuestos-compra-vivienda-portugal",
+		fr: "simulateur-taxes-achat-immobilier-portugal",
+		de: "immobilienkaufsteuern-portugal-rechner",
+		it: "calcolo-imposte-acquisto-casa-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -479,6 +487,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolCarLoan",
 	"toolPersonalLoan",
 	"toolInflation",
+	"toolPurchaseTaxes",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -748,6 +757,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"credito-automovel": "toolCarLoan",
 	toolinflation: "toolInflation",
 	"inflation-calculator": "toolInflation",
+	toolpurchasetaxes: "toolPurchaseTaxes",
+	"imt-calculator": "toolPurchaseTaxes",
+	"simulador-imt": "toolPurchaseTaxes",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",

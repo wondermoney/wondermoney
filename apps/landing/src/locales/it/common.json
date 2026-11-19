@@ -2334,6 +2334,88 @@
       "nextStepDescription": "Metti da parte in WonderMoney i soldi per la rata, il carburante e le spese in scadenza durante l’anno.",
       "nextStepCta": "Crea il tuo budget in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Calcolo delle imposte sull'acquisto di casa in Portogallo (IMT e bollo)",
+      "shortName": "Imposte d'acquisto",
+      "subtitle": "Stima l'IMT e l'imposta di bollo (Imposto do Selo) dovute per comprare un immobile in Portogallo e quanto contante aggiungere all'anticipo.",
+      "description": "Stima IMT e imposta di bollo per l'acquisto di un immobile in Portogallo.",
+      "pageTitle": "Calcolo IMT e imposta di bollo per comprare casa in Portogallo",
+      "pageDescription": "Stima IMT e Imposto do Selo 2026 per l'acquisto di un immobile in Portogallo: continente o isole, uso, bollo sul mutuo ed esenzione per i giovani.",
+      "propertyTitle": "Immobile",
+      "financingTitle": "Mutuo",
+      "youngTitle": "Esenzione per i giovani (IMT Jovem)",
+      "youngNote": "Solo se tutte le condizioni sono soddisfatte alla data dell'atto: hai 35 anni o meno, è la tua prima casa e ci vivrai in modo permanente. Esenzione totale fino a {{full}}; parziale fino a {{partial}}, con IMT solo sulla parte eccedente.",
+      "youngUnavailable": "L'esenzione vale solo per l'abitazione propria e permanente. Scegli questo uso per verificare se ne hai diritto.",
+      "fields": {
+        "price": "Prezzo d'acquisto",
+        "taxValue": "Valore patrimoniale tributario (VPT), facoltativo",
+        "region": "Ubicazione",
+        "use": "Uso dell'immobile",
+        "loan": "Importo del mutuo",
+        "young": "Soddisfo le condizioni dell'esenzione per i giovani"
+      },
+      "help": {
+        "price": "Il prezzo indicato nell'atto.",
+        "taxValue": "L'autorità fiscale tassa il maggiore tra prezzo e VPT. Lascia zero se non lo conosci.",
+        "loan": "Inserisci zero per un acquisto in contanti. Il bollo sul mutuo non rientra nell'esenzione per i giovani in questo calcolo."
+      },
+      "regions": {
+        "mainland": "Portogallo continentale",
+        "islands": "Azzorre o Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Abitazione propria e permanente",
+        "secondary": "Seconda casa o altri usi abitativi",
+        "rustic": "Terreno rustico",
+        "otherUrban": "Altri immobili urbani o terreni"
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Inserisci zero o un valore positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "loan": "Il mutuo non può superare il prezzo d'acquisto.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "total": "Totale imposte da pagare",
+        "effectiveRate": "{{rate}} del valore imponibile",
+        "reference": "Valore imponibile",
+        "imt": "IMT",
+        "stampPurchase": "Imposta di bollo sull'acquisto (0,8%)",
+        "stampLoan": "Imposta di bollo sul mutuo (0,6%)",
+        "exemptFull": "Esenzione per i giovani applicata: elimina IMT e bollo sull'acquisto e fa risparmiare {{saving}}.",
+        "exemptPartial": "Esenzione parziale per i giovani applicata: l'IMT si paga solo sulla parte oltre il limite dell'esenzione totale. Fa risparmiare {{saving}} in tutto.",
+        "exemptNone": "A questo valore l'esenzione non si applica. Copre acquisti fino a {{partial}} (totale fino a {{full}}) e solo alle condizioni indicate a sinistra.",
+        "tableNote": "Tabella {{year}}, rivista il {{date}}. Stima a scopo educativo, non è consulenza fiscale."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Comprare un'abitazione propria e permanente nel continente per {{price}} con un mutuo di {{loan}} costa {{imt}} di IMT, {{stampPurchase}} di bollo sull'acquisto e {{stampLoan}} di bollo sul mutuo. In totale sono {{total}}, da pagare oltre all'anticipo e da sommare al tuo obiettivo di risparmio.",
+        "methodTitle": "Come funziona la stima",
+        "methodBase": "La base è il maggiore tra il prezzo d'acquisto e il valore patrimoniale tributario (VPT).",
+        "methodImt": "Per le abitazioni l'IMT è la base moltiplicata per l'aliquota dello scaglione meno una deduzione fissa (parcela a abater) che rende l'imposta progressiva. Oltre l'ultimo scaglione progressivo l'aliquota si applica a tutto il valore senza deduzione. I terreni rustici pagano il 5% e gli altri immobili urbani o terreni il 6,5%.",
+        "methodStamp": "Il bollo è lo 0,8% della base all'acquisto (verba 1.1) e, se prendi un mutuo, lo 0,6% dell'importo finanziato (verba 17.1.4, mutui di cinque anni o più).",
+        "methodRounding": "L'IMT e ogni bollo sono arrotondati separatamente al centesimo, come li liquida l'autorità fiscale. Il bollo su interessi e commissioni non è incluso.",
+        "tableTitle": "Tabella IMT {{year}}: abitazione propria e permanente, continente",
+        "tableAbove": "Valori superiori",
+        "tableLimit": "Valore fino a",
+        "tableRate": "Aliquota",
+        "tableDeduct": "Deduzione",
+        "tableNote": "Fino a {{exempt}} il primo scaglione è allo 0%. La seconda casa ha una tabella propria, con l'1% dal primo euro, e Azzorre e Madeira usano le stesse aliquote con limiti più alti del 25%.",
+        "sourceImt": "CIMT, articolo 17 (Portal das Finanças)",
+        "sourceStamp": "Codice dell'imposta di bollo (Portal das Finanças)",
+        "review": "Regole e limiti per il {{year}}, riviste l'ultima volta il {{date}}. Ricontrollali prima di firmare.",
+        "assumptionsTitle": "Ipotesi e situazioni supportate",
+        "assumptionScope": "Questo calcolo segue la legge fiscale portoghese e vale solo per immobili situati in Portogallo, qualunque sia il tuo paese di residenza. È a scopo educativo e non è consulenza fiscale.",
+        "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. Consideriamo il bollo sull'acquisto esente solo entro il limite totale.",
+        "assumptionLoan": "Il bollo sul mutuo presuppone un finanziamento di cinque anni o più e si paga sempre. Commissioni del mutuo, perizia e costi di notaio o registro non sono inclusi.",
+        "assumptionUnsupported": "Non supportati: non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni dell'articolo 9 del CIMT.",
+        "assumptionIslands": "Per Azzorre e Madeira i limiti sono quelli del continente aumentati del 25% e arrotondati all'euro, con le stesse aliquote. Conferma i limiti regionali con l'autorità fiscale."
+      },
+      "nextStepHeadline": "Pianifica il contante che ti serve per comprare",
+      "nextStepDescription": "Aggiungi IMT e bollo al risparmio che ti serve prima di comprare e segui i progressi in WonderMoney.",
+      "nextStepCta": "Includi le imposte nell'obiettivo dell'anticipo per la casa"
+    },
     "personalLoan": {
       "title": "Calcolo prestito personale",
       "shortName": "Prestito personale",

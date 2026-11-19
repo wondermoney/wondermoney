@@ -2334,6 +2334,88 @@
       "nextStepDescription": "Reserva dinheiro no WonderMoney para a prestação, o combustível e as contas que vencem durante o ano.",
       "nextStepCta": "Cria o teu orçamento no WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Simulador de IMT e Imposto do Selo na compra de casa",
+      "shortName": "IMT e Selo",
+      "subtitle": "Estima o IMT e o Imposto do Selo a pagar na compra de um imóvel em Portugal e vê quanto dinheiro deves juntar à entrada.",
+      "description": "Estima o IMT e o Imposto do Selo na compra de imóveis em Portugal.",
+      "pageTitle": "Simulador de IMT e Imposto do Selo 2026 na compra de casa",
+      "pageDescription": "Estima o IMT e o Imposto do Selo de 2026 na compra de um imóvel em Portugal: continente ou ilhas, tipo de uso, selo do crédito à habitação e isenção para jovens.",
+      "propertyTitle": "Imóvel",
+      "financingTitle": "Crédito à habitação",
+      "youngTitle": "Isenção para jovens (IMT Jovem)",
+      "youngNote": "Só se todas as condições se verificarem na data da escritura: tens 35 anos ou menos, é a tua primeira casa e vais viver nela de forma permanente. Isenção total até {{full}}; isenção parcial até {{partial}}, com IMT apenas sobre o excedente.",
+      "youngUnavailable": "A isenção só se aplica a habitação própria e permanente. Escolhe esse uso para verificar a elegibilidade.",
+      "fields": {
+        "price": "Preço de compra",
+        "taxValue": "Valor patrimonial tributário (VPT), opcional",
+        "region": "Localização",
+        "use": "Uso do imóvel",
+        "loan": "Montante do crédito",
+        "young": "Cumpro as condições da isenção para jovens"
+      },
+      "help": {
+        "price": "O preço que consta da escritura.",
+        "taxValue": "A Autoridade Tributária tributa o maior valor entre o preço e o VPT. Deixa a zero se não souberes.",
+        "loan": "Indica zero numa compra a pronto. O selo do crédito não é abrangido pela isenção para jovens neste simulador."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Açores ou Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Habitação própria e permanente",
+        "secondary": "Habitação secundária ou outros fins",
+        "rustic": "Prédio rústico",
+        "otherUrban": "Outros prédios urbanos ou terrenos"
+      },
+      "errors": {
+        "required": "Indica um número válido.",
+        "negative": "Indica zero ou um valor positivo.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "loan": "O crédito não pode exceder o preço de compra.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Total de impostos a pagar",
+        "effectiveRate": "{{rate}} do valor tributável",
+        "reference": "Valor tributável",
+        "imt": "IMT",
+        "stampPurchase": "Imposto do Selo da compra (0,8%)",
+        "stampLoan": "Imposto do Selo do crédito (0,6%)",
+        "exemptFull": "Isenção para jovens aplicada: elimina o IMT e o selo da compra e poupa {{saving}}.",
+        "exemptPartial": "Isenção parcial para jovens aplicada: o IMT incide apenas sobre a parte acima do limite da isenção total. Poupa {{saving}} no total.",
+        "exemptNone": "Com este valor a isenção não se aplica. Abrange compras até {{partial}} (total até {{full}}) e apenas nas condições indicadas à esquerda.",
+        "tableNote": "Tabela de {{year}}, revista em {{date}}. Estimativa educativa, não é aconselhamento fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Comprar uma habitação própria e permanente no continente por {{price}} com um crédito de {{loan}} custa {{imt}} de IMT, {{stampPurchase}} de Imposto do Selo da compra e {{stampLoan}} de selo do crédito. São {{total}} no total, a pagar para além da entrada e que deves somar à tua meta de poupança.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodBase": "A base de cálculo é o maior valor entre o preço de compra e o valor patrimonial tributário (VPT).",
+        "methodImt": "Nas habitações, o IMT é a base multiplicada pela taxa do escalão menos uma parcela a abater fixa, que torna o imposto progressivo. Acima do último escalão progressivo, a taxa aplica-se a todo o valor sem parcela a abater. Os prédios rústicos pagam 5% e os outros prédios urbanos ou terrenos 6,5%.",
+        "methodStamp": "O Imposto do Selo é 0,8% da base na compra (verba 1.1) e, se pedires crédito, 0,6% do montante emprestado (verba 17.1.4, créditos de cinco anos ou mais).",
+        "methodRounding": "O IMT e cada Imposto do Selo são arredondados separadamente ao cêntimo, como a Autoridade Tributária os liquida. O selo sobre juros e comissões não está incluído.",
+        "tableTitle": "Tabela de IMT {{year}}: habitação própria e permanente, continente",
+        "tableAbove": "Valores superiores",
+        "tableLimit": "Valor até",
+        "tableRate": "Taxa",
+        "tableDeduct": "Parcela a abater",
+        "tableNote": "Até {{exempt}} o primeiro escalão é 0%. A habitação secundária tem tabela própria, com 1% desde o primeiro euro, e os Açores e a Madeira usam as mesmas taxas com limites 25% mais altos.",
+        "sourceImt": "CIMT, artigo 17.º (Portal das Finanças)",
+        "sourceStamp": "Código do Imposto do Selo (Portal das Finanças)",
+        "review": "Regras e limites de {{year}}, revistos pela última vez em {{date}}. Confirma-os de novo antes de assinar.",
+        "assumptionsTitle": "Pressupostos e situações suportadas",
+        "assumptionScope": "Este simulador segue a lei fiscal portuguesa e só se aplica a imóveis situados em Portugal, seja qual for o teu país de residência. É educativo e não constitui aconselhamento fiscal.",
+        "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. Consideramos o selo da compra isento apenas dentro do limite total.",
+        "assumptionLoan": "O selo do crédito pressupõe um empréstimo de cinco anos ou mais e é sempre cobrado. Comissões do crédito, avaliação e custos de notário ou registo não estão incluídos.",
+        "assumptionUnsupported": "Não suportado: não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT.",
+        "assumptionIslands": "Para os Açores e a Madeira os limites são os do continente aumentados em 25% e arredondados ao euro, com as mesmas taxas. Confirma os limites regionais com a Autoridade Tributária."
+      },
+      "nextStepHeadline": "Planeia o dinheiro de que precisas para comprar",
+      "nextStepDescription": "Soma o IMT e o Imposto do Selo à poupança de que precisas antes de comprar e acompanha o progresso no WonderMoney.",
+      "nextStepCta": "Inclui os impostos na meta da entrada da casa"
+    },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
       "shortName": "Crédito pessoal",
