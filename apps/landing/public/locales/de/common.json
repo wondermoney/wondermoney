@@ -548,7 +548,8 @@
         "grossTax": "IMI vor der Ermäßigung",
         "deduction": "Ermäßigung IMI Familiar",
         "scheduleTitle": "Zahlungsplan",
-        "nothingDue": "Nichts zu zahlen: Die Ermäßigung deckt die gesamte Steuer."
+        "nothingDue": "Nichts zu zahlen: Die Ermäßigung deckt die gesamte Steuer.",
+        "belowMinimum": "Nichts einzuziehen: IMI unter 10 € wird nicht festgesetzt (Artikel 113 des Código do IMI)."
       },
       "months": {
         "may": "Mai",
@@ -564,7 +565,7 @@
         "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
         "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
         "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
-        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit, für begrenzte Zeit nach dem Kauf oder solange Haushaltseinkommen und VPT unter den Grenzen des Steuervergünstigungsstatuts liegen. Die Grenzen ändern sich und es gelten Bedingungen, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit. Artikel 46 des Steuervergünstigungsstatuts (EBF) gewährt drei Jahre Befreiung nach Kauf oder Bau einer Wohnung mit einem VPT bis 125.000 €, wenn das Bruttoeinkommen des Haushalts im Vorjahr höchstens 153.300 € betrug; die Wohnung muss binnen sechs Monaten als Hauptwohnsitz genutzt und die Befreiung fristgerecht beantragt werden. Artikel 11-A des Código do IMI befreit zeitlich unbegrenzt die Wohnung eines Haushalts mit einem Bruttoeinkommen von höchstens dem 2,3-Fachen von 14 IAS (rund 17.300 € beim IAS 2026 von 537,13 €), dessen Immobilien zusammen einen VPT von höchstens dem 10-Fachen von 14 IAS haben (75.198,20 € beim IAS 2026). Es gelten weitere Bedingungen, und die Grenzen können sich ändern, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
         "assumptionsTitle": "Annahmen",
         "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
         "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
@@ -572,8 +573,11 @@
         "sourcesTitle": "Quellen",
         "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
-        "sourceExemption": "Portal das Finanças: IMI-Befreiungen und IMI Familiar",
-        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI, wie von portugiesischen Banken und Gemeinden wiedergegeben."
+        "sourceExemption": "Código do IMI, Artikel 11-A: Befreiung bei niedrigem Einkommen (abgerufen am 19. November 2026)",
+        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
+        "methodMinimum": "Liegt die einzuziehende Steuer nach einer etwaigen IMI-Familiar-Ermäßigung unter 10 €, wird keine IMI festgesetzt, und der Rechner zeigt 0 € mit einem Hinweis (Artikel 113 Nr. 6 des Código do IMI).",
+        "sourceMinimum": "Código do IMI, Artikel 113: Festsetzung, keine IMI unter 10 € (abgerufen am 19. November 2026)",
+        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: dreijährige Befreiung (abgerufen am 19. November 2026, Fassung des Lei 12/2022; spätere Änderungen prüfen)"
       },
       "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
@@ -2473,7 +2477,7 @@
         "tableLimit": "Wert bis",
         "tableRate": "Satz",
         "tableDeduct": "Abzug",
-        "tableNote": "Bis {{exempt}} liegt die erste Stufe bei 0 %. Zweitwohnungen haben eine eigene Tabelle mit 1 % ab dem ersten Euro, und die Azoren und Madeira nutzen dieselben Sätze mit um 25 % höheren Grenzen.",
+        "tableNote": "Bis {{exempt}} liegt die erste Stufe bei 0 %. Zweitwohnungen haben eine eigene Tabelle mit 1 % ab dem ersten Euro. Die Azoren und Madeira haben eigene Tabellen mit höheren Grenzen.",
         "sourceImt": "CIMT, Artikel 17 (Portal das Finanças)",
         "sourceStamp": "Stempelsteuergesetz (Portal das Finanças)",
         "review": "Regeln und Grenzen für {{year}}, zuletzt geprüft am {{date}}. Prüfen Sie sie vor der Unterschrift erneut.",
@@ -2482,7 +2486,8 @@
         "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
         "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
         "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
-        "assumptionIslands": "Für die Azoren und Madeira sind die Grenzen die des Festlands plus 25 %, auf den Euro gerundet, mit denselben Sätzen. Bestätigen Sie die regionalen Grenzen bei der Steuerbehörde."
+        "assumptionIslands": "Für die Azoren und Madeira verwendet der Rechner die regionalen Grenzen der Tabellen IV bis VI des Ofício Circulado 40129/2026, mit denselben Sätzen wie auf dem Festland.",
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT-Tabellen (Steuerbehörde)"
       },
       "nextStepHeadline": "Planen Sie das Bargeld für den Kauf",
       "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
@@ -2697,7 +2702,7 @@
         "amount": "Gezeichneter Betrag",
         "years": "Jahre Haltedauer",
         "baseRate": "Basiszins (Annahme)",
-        "baseRateHelp": "Brutto-Jahreszins, bis {{rate}} (die Obergrenze der Regeln). Ändere ihn, um andere Szenarien zu testen."
+        "baseRateHelp": "Brutto-Jahreszins, von 0 % bis {{rate}} (die Obergrenze der Regeln). Voreingestellt ist der für {{month}} gemeldete Zins; der echte Zins ändert sich jeden Monat. Ändere ihn, um andere Szenarien zu testen."
       },
       "errors": {
         "required": "Gib eine gültige Zahl ein.",
@@ -2729,7 +2734,7 @@
         "rulesTitle": "Regeln der Série F, denen der Rechner folgt",
         "rulesIntro": "Regeln, wie der IGCP sie im Produktblatt der Série F von {{rulesDate}} veröffentlicht hat (Portaria n.º 149-A/2023). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
         "ruleTerm": "Laufzeit von {{termYears}} Jahren. Du kannst ab dem ersten Zinstermin ganz oder teilweise zurückgeben; der Rechner nutzt volle Jahre Haltedauer.",
-        "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins folgt dem 3-Monats-Euribor, mit Obergrenze {{maxBase}} und Untergrenze 0 %.",
+        "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins ist E3, der Durchschnitt des 3-Monats-Euribor der vorangegangenen 10 Werktage, auf drei Dezimalstellen gerundet, ohne Aufschlag. Er wird am drittletzten Werktag jedes Monats für den Folgemonat festgelegt und liegt zwischen 0 % und {{maxBase}}.",
         "ruleTax": "Zinsen fallen vierteljährlich an und werden nach IRS automatisch kapitalisiert; die IRS wird an der Quelle mit {{irsRate}} einbehalten.",
         "ruleRedeem": "Nur natürliche Personen können Inhaber sein. Die Grenze liegt bei {{maxAmount}} pro Aforro-Konto in der Série F, das Minimum bei {{minAmount}}.",
         "premiumTitle": "Treueprämie nach Zeichnungsjahr",
@@ -2745,7 +2750,7 @@
         "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
         "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
-        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Der echte Zins wird monatlich neu festgelegt, die tatsächlichen Zinsen weichen daher ab.",
+        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Er beginnt beim für {{referenceMonth}} gemeldeten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt, die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins findest du bei AforroNet.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Einkommen. Deine persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
         "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
       },
@@ -3150,9 +3155,10 @@
         "coefficient": "Jahreskoeffizient",
         "dueMonth": "Fällig 2026:",
         "dueMonthValue": "Im {{month}}, dem Monat des Zulassungsjahrestags.",
-        "scheduleTitle": "Ab 2027: Zahlungsplan",
+        "scheduleTitle": "2027 (Übergang): Zahlungsplan",
         "exempt": "Reine Elektroautos der Kategorie B sind von der IUC befreit.",
-        "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)"
+        "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)",
+        "scheduleTitle2028": "Ab 2028: Zahlungsplan"
       },
       "guide": {
         "exampleTitle": "Rechenbeispiel",
@@ -3162,7 +3168,7 @@
         "methodB": "Kategorie B (Autos mit Zulassung ab Juli 2007): Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
         "methodAdditional": "Autos der Kategorie B mit Erstzulassung nach dem 1. Januar 2017 zahlen bei hohen Emissionen einen Zusatzsatz: 31,77 € über 205 g/km (WLTP) oder 180 g/km (NEDC) und 63,74 € über 260 g/km (WLTP) oder 250 g/km (NEDC). Auch der Zusatzsatz wird mit dem Koeffizienten multipliziert. Der Gesetzestext beschränkt ihn nicht nach Kraftstoff, daher wendet der Rechner ihn auf alle an.",
         "methodDiesel": "Dieselfahrzeuge zahlen zusätzlich den Dieselzuschlag (adicional de IUC, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 durch den Staatshaushalt weitergeführt). Er hängt vom Hubraum ab, gilt für die Kategorien A und B und wird nach dem Koeffizienten addiert, nicht damit multipliziert.",
-        "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Ab 2027 wird sie nach dem Decreto-Lei Nr. 161/2026 bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt.",
+        "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Das Decreto-Lei Nr. 161/2026 (4. August 2026) führt eine jährliche Festsetzung je Steuerpflichtigem für alle Fahrzeuge ein. 2027 ist ein Übergangsjahr: eine Zahlung im Oktober bis 500 €, sonst zwei im Juli und Oktober (oder alles im Juli). Ab 2028 wird sie bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt. Die Grenzen gelten für die Summe aller Ihrer Fahrzeuge.",
         "methodBudget": "Die monatliche Rücklage teilt den Jahresbetrag durch 12, damit das Geld bereitsteht, wenn der Bescheid kommt.",
         "exemptionTitle": "Elektroautos",
         "exemption": "Reine Elektroautos der Kategorie B sind von der IUC befreit, der Rechner zeigt null. Plug-in-Hybride und andere Fahrzeuge werden nach Hubraum und CO2 laut Fahrzeugschein besteuert, gib diese Werte ein.",
@@ -3171,14 +3177,15 @@
         "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
-        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags. Das Portal das Finanças zeigt den neuen April-Zahlungsplan ab 2027, aber nicht die frühere Fassung, bestätige also dein Datum im Portal das Finanças. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Die Zahlungspläne für 2027 und 2028 gelten nur für dieses Auto: Das Gesetz wendet die Grenzen auf die Summe aller Ihrer Fahrzeuge an, die tatsächliche Aufteilung kann daher abweichen. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
         "assumptionEducational": "Das ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
         "sourcesTitle": "Quellen",
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
         "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
-        "sourceDiesel": "Portal das Finanças: Dieselzuschlag, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 fortgeführt durch Artikel 94 des Gesetzes Nr. 73-A/2025 (abgerufen am 19. November 2026). Die Seite nennt keine Beträge, daher stammen die Beträge aus den veröffentlichten ACP-Tabellen.",
-        "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}."
+        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 19. November 2026). Die Fortführung für 2026 durch Artikel 94 des Gesetzes Nr. 73-A/2025 wurde hier nicht erneut geprüft.",
+        "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
+        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)"
       },
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",

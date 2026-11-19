@@ -548,7 +548,8 @@
         "grossTax": "IMI avant réduction",
         "deduction": "Réduction IMI Familiar",
         "scheduleTitle": "Calendrier de paiement",
-        "nothingDue": "Rien à payer : la réduction couvre tout l'impôt."
+        "nothingDue": "Rien à payer : la réduction couvre tout l'impôt.",
+        "belowMinimum": "Rien à percevoir : l'IMI inférieur à 10 € n'est pas liquidé (article 113 du Código do IMI)."
       },
       "months": {
         "may": "Mai",
@@ -564,7 +565,7 @@
         "methodPayment": "L'impôt se paie en une échéance en mai jusqu'à 100 €, en deux en mai et novembre de 100 € à 500 €, et en trois en mai, août et novembre au-delà de 500 €. Les échéances sont égales ; l'éventuel centime d'arrondi va à la dernière.",
         "methodBudget": "La provision mensuelle divise l'impôt annuel par 12 pour que l'argent soit prêt à chaque échéance.",
         "exemptionTitle": "Exonération pour la résidence principale",
-        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI, pendant une durée limitée après l'achat ou tant que le revenu du foyer et le VPT restent sous les plafonds du statut des avantages fiscaux. Les plafonds évoluent et des conditions s'appliquent : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
+        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI. L'article 46 du statut des avantages fiscaux (EBF) accorde trois ans d'exonération après l'achat ou la construction d'un logement dont le VPT ne dépasse pas 125 000 €, si le revenu brut du foyer de l'année précédente n'excédait pas 153 300 € ; il faut y établir sa résidence principale dans les six mois et demander l'exonération dans le délai. L'article 11-A du Código do IMI exonère, sans limite de durée, le logement d'un foyer dont le revenu brut ne dépasse pas 2,3 fois 14 IAS (environ 17 300 € avec l'IAS 2026 de 537,13 €) et dont les biens ont un VPT total d'au plus 10 fois 14 IAS (75 198,20 € avec l'IAS 2026). D'autres conditions s'appliquent et les plafonds peuvent changer : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
         "assumptionsTitle": "Hypothèses",
         "assumptionRate": "Le taux municipal est à saisir par vos soins. Cette page ne contient pas de table des taux communaux, et les communes peuvent majorer ou minorer le taux dans certains cas, par exemple pour des bâtiments vacants ou dégradés, ce que le calculateur ignore.",
         "assumptionScope": "L'estimation porte sur un seul bien soumis aux règles générales. Elle exclut l'IMI additionnel (AIMI), les exonérations temporaires et les autres déductions communales.",
@@ -572,8 +573,11 @@
         "sourcesTitle": "Sources",
         "sourceRates": "Código do IMI, article 112 : taux (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IMI, article 120 : paiement par échéances (consulté le 19 novembre 2026)",
-        "sourceExemption": "Portal das Finanças : exonérations d'IMI et IMI Familiar",
-        "reviewed": "Règles vérifiées le 19 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI, d'après des banques et communes portugaises."
+        "sourceExemption": "Código do IMI, article 11-A : exonération pour faibles revenus (consulté le 19 novembre 2026)",
+        "reviewed": "Règles vérifiées le 19 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI (Portal das Finanças).",
+        "methodMinimum": "Si l'impôt à percevoir, après toute réduction de l'IMI Familiar, est inférieur à 10 €, aucun IMI n'est liquidé et le calculateur affiche 0 € avec une note (article 113, n.º 6, du Código do IMI).",
+        "sourceMinimum": "Código do IMI, article 113 : liquidation, pas d'IMI en dessous de 10 € (consulté le 19 novembre 2026)",
+        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de trois ans (consulté le 19 novembre 2026, rédaction de la Lei 12/2022 ; vérifiez les modifications ultérieures)"
       },
       "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
@@ -2473,7 +2477,7 @@
         "tableLimit": "Valeur jusqu'à",
         "tableRate": "Taux",
         "tableDeduct": "Déduction",
-        "tableNote": "Jusqu'à {{exempt}}, la première tranche est à 0 %. La résidence secondaire a son propre barème, à 1 % dès le premier euro, et les Açores et Madère appliquent les mêmes taux avec des plafonds supérieurs de 25 %.",
+        "tableNote": "Jusqu'à {{exempt}}, la première tranche est à 0 %. La résidence secondaire a son propre barème, avec 1 % dès le premier euro. Les Açores et Madère ont leurs propres barèmes, avec des plafonds plus élevés.",
         "sourceImt": "CIMT, article 17 (Portal das Finanças)",
         "sourceStamp": "Code du droit de timbre (Portal das Finanças)",
         "review": "Règles et plafonds de {{year}}, revus pour la dernière fois le {{date}}. Vérifiez-les à nouveau avant de signer.",
@@ -2482,7 +2486,8 @@
         "assumptionYoung": "L'exonération des jeunes (35 ans ou moins, premier logement permanent, conditions remplies à la date de l'acte, logement gardé comme résidence permanente) est un choix distinct, pris en compte seulement si vous la cochez. Elle est totale jusqu'à {{youngFull}} et partielle jusqu'à {{youngPartial}}. L'exonération du timbre d'achat est une déduction plafonnée à 0,8 % du plafond d'exonération totale : au-delà, vous payez 0,8 % uniquement sur l'excédent. Le timbre du prêt reste dû.",
         "assumptionLoan": "Le timbre du prêt suppose un crédit de cinq ans ou plus et est toujours dû. Les frais de dossier, l'expertise et les frais de notaire ou de registre ne sont pas inclus.",
         "assumptionUnsupported": "Non pris en charge : non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT.",
-        "assumptionIslands": "Pour les Açores et Madère, les plafonds sont ceux du continent majorés de 25 % et arrondis à l'euro, avec les mêmes taux. Confirmez les plafonds régionaux auprès de l'administration fiscale."
+        "assumptionIslands": "Pour les Açores et Madère, le simulateur utilise les plafonds régionaux des tableaux IV à VI de l'Ofício Circulado 40129/2026, avec les mêmes taux que le continent.",
+        "sourceCircular": "Ofício Circulado 40129/2026 : barèmes de l'IMT (Autorité fiscale)"
       },
       "nextStepHeadline": "Planifiez la somme dont vous avez besoin pour acheter",
       "nextStepDescription": "Ajoutez l'IMT et le timbre à l'épargne nécessaire avant d'acheter, puis suivez votre progression dans WonderMoney.",
@@ -2697,7 +2702,7 @@
         "amount": "Montant souscrit",
         "years": "Années de détention",
         "baseRate": "Taux de base (hypothèse)",
-        "baseRateHelp": "Taux annuel brut, jusqu’à {{rate}} (le plafond des règles). Modifiez-le pour tester d’autres scénarios."
+        "baseRateHelp": "Taux annuel brut, de 0 % jusqu’à {{rate}} (le plafond des règles). La valeur par défaut est le taux annoncé pour {{month}} ; le taux réel change chaque mois. Modifiez-le pour tester d’autres scénarios."
       },
       "errors": {
         "required": "Saisissez un nombre valide.",
@@ -2729,7 +2734,7 @@
         "rulesTitle": "Règles de la Série F suivies par le simulateur",
         "rulesIntro": "Règles publiées par l’IGCP dans la fiche produit de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Les règles peuvent changer et ce sont les conditions en vigueur de l’émetteur qui comptent.",
         "ruleTerm": "Durée de {{termYears}} ans. Vous pouvez racheter, en tout ou en partie, à partir de la première échéance d’intérêts ; le simulateur utilise des années entières de détention.",
-        "ruleRate": "Chaque trimestre rapporte le taux de base en vigueur au début du trimestre plus la prime de permanence de l’année de souscription. Le taux de base suit l’Euribor à 3 mois, plafonné à {{maxBase}} et plancher à 0 %.",
+        "ruleRate": "Chaque trimestre rapporte le taux de base en vigueur au début du trimestre plus la prime de permanence de l’année de souscription. Le taux de base est E3, la moyenne de l’Euribor à 3 mois des 10 jours ouvrés précédents, arrondie à trois décimales, sans marge ajoutée. Il est fixé l’avant-avant-dernier jour ouvré de chaque mois pour le mois suivant, et limité entre 0 % et {{maxBase}}.",
         "ruleTax": "Les intérêts sont versés chaque trimestre et capitalisés automatiquement après IRS, retenu à la source à {{irsRate}}.",
         "ruleRedeem": "Seules les personnes physiques peuvent être titulaires. La limite est de {{maxAmount}} par compte aforro en Série F, avec un minimum de {{minAmount}}.",
         "premiumTitle": "Prime de permanence selon l’année de souscription",
@@ -2745,7 +2750,7 @@
         "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s’ajoutent au solde, de sorte que les trimestres suivants rapportent des intérêts dessus.",
         "methodYield": "Le rendement net annuel est la croissance composée annuelle entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
         "assumptionsTitle": "Hypothèses",
-        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Le taux réel est révisé chaque mois : les intérêts effectifs seront différents.",
+        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Il part du taux annoncé pour {{referenceMonth}} ({{referenceRate}}, le plafond), que l’IGCP fixe de nouveau chaque mois : les intérêts effectifs seront différents. Vérifiez le taux actuel sur AforroNet.",
         "assumptionRules": "Le taux d’IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
         "assumptionScope": "Information générale, pas une recommandation de souscrire ou d’éviter un produit, et aucune comparaison avec d’autres épargnes."
       },
@@ -3150,9 +3155,10 @@
         "coefficient": "Coefficient de l'année",
         "dueMonth": "À payer en 2026 :",
         "dueMonthValue": "En {{month}}, le mois de l'anniversaire de l'immatriculation.",
-        "scheduleTitle": "À partir de 2027 : calendrier de paiement",
+        "scheduleTitle": "2027 (transitoire) : calendrier de paiement",
         "exempt": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC.",
-        "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)"
+        "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)",
+        "scheduleTitle2028": "À partir de 2028 : calendrier de paiement"
       },
       "guide": {
         "exampleTitle": "Exemple chiffré",
@@ -3162,7 +3168,7 @@
         "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
         "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
         "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
-        "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. À partir de 2027, selon le décret-loi n.º 161/2026, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €.",
+        "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. Le décret-loi n.º 161/2026 (4 août 2026) instaure une liquidation annuelle par contribuable, couvrant tous ses véhicules. 2027 est une année transitoire : un paiement en octobre jusqu'à 500 €, sinon deux en juillet et octobre (ou tout en juillet). À partir de 2028, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €. Les seuils s'appliquent au total de tous vos véhicules.",
         "methodBudget": "La provision mensuelle divise le montant annuel par 12, pour que l'argent soit prêt à l'échéance.",
         "exemptionTitle": "Voitures électriques",
         "exemption": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC et le calculateur affiche zéro. Les hybrides rechargeables et autres véhicules sont taxés selon leur cylindrée et leur CO2 figurant sur la carte grise : saisissez ces valeurs.",
@@ -3171,14 +3177,15 @@
         "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
         "assumptionsTitle": "Hypothèses",
         "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
-        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation. Le Portal das Finanças affiche le nouveau calendrier d'avril à partir de 2027, mais pas la rédaction antérieure : confirmez votre date sur le Portal das Finanças. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
+        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation, que le préambule du décret-loi n.º 161/2026 confirme comme la règle en vigueur. Les calendriers de 2027 et 2028 valent pour cette seule voiture : la loi applique ses seuils au total de tous vos véhicules, la répartition réelle peut donc différer. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
         "assumptionEducational": "Ceci est une estimation éducative, pas un conseil fiscal. Le montant de l'avis de l'administration fiscale fait foi.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
-        "sourceDiesel": "Portal das Finanças : supplément diesel, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par l'article 94 de la loi n.º 73-A/2025 (consulté le 19 novembre 2026). La page n'indique aucun montant : les montants viennent des tableaux publiés par l'ACP.",
-        "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}."
+        "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 19 novembre 2026). Son maintien en 2026 par l'article 94 de la loi n.º 73-A/2025 n'a pas été revérifié ici.",
+        "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}.",
+        "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)"
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",

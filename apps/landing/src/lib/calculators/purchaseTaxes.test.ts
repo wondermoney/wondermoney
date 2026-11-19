@@ -3,6 +3,7 @@ import {
   PURCHASE_TAXES_EXAMPLE,
   PURCHASE_TAXES_LIMITS,
   computePurchaseTaxes,
+  YOUNG_LIMITS,
   imtBands,
   type PurchaseTaxesInput,
 } from "./purchaseTaxes";
@@ -21,6 +22,27 @@ describe("purchase taxes (IMT and Imposto do Selo, 2026 table)", () => {
     expect(imtBands("secondary", "mainland")[1].deductCents).toBe(106_346);
   });
 
+  it("matches the parcela a abater of every table in Ofício Circulado 40129/2026", () => {
+    const deducts = (use: "ownPermanent" | "secondary", region: "mainland" | "islands") =>
+      imtBands(use, region).map((band) => band.deductCents / 100);
+    expect(deducts("ownPermanent", "mainland").slice(0, 5)).toEqual([0, 2_126.92, 6_491.02, 10_457.96, 13_763.35]);
+    expect(deducts("secondary", "mainland").slice(0, 5)).toEqual([0, 1_063.46, 5_427.56, 9_394.5, 12_699.89]);
+    expect(deducts("ownPermanent", "islands").slice(0, 5)).toEqual([0, 2_658.66, 8_113.8, 13_072.48, 17_204.22]);
+    expect(deducts("secondary", "islands").slice(0, 5)).toEqual([0, 1_329.33, 6_784.47, 11_743.15, 15_874.89]);
+  });
+
+  it("uses the published regional limits and the regional young tables", () => {
+    expect(imtBands("ownPermanent", "islands").map((band) => band.upTo)).toEqual([
+      132_933, 181_838, 247_934, 413_174, 826_228, 1_438_566, Infinity,
+    ]);
+    expect(imtBands("secondary", "islands")[4].upTo).toBe(792_414);
+    expect(YOUNG_LIMITS("islands")).toEqual({ full: 413_174, partial: 826_228 });
+    // Table IV: 8% of the value minus 17,204.22 above 413,174.
+    expect(resultFor({ region: "islands", price: 500_000, loan: 0 }).imt).toBe(22_795.78);
+    // Table VI: 7% minus 11,743.15 at 400,000.
+    expect(resultFor({ region: "islands", use: "secondary", price: 400_000, loan: 0 }).imt).toBe(16_256.85);
+  });
+
   it("taxes an own permanent home progressively, and stamp duty on the price and the loan", () => {
     expect(resultFor({ price: 200_000, loan: 0 })).toMatchObject({
       imt: 3_542.04, stampPurchase: 1_600, stampLoan: 0, total: 5_142.04,
@@ -30,10 +52,11 @@ describe("purchase taxes (IMT and Imposto do Selo, 2026 table)", () => {
     });
   });
 
-  it("is exempt below the first limit and taxes the whole value at 8% above 330,539", () => {
+  it("is exempt below the first limit, deducts 13,763.35 from 8% above 330,539 and taxes 6% flat above 660,982", () => {
     expect(resultFor({ price: 106_346, loan: 0 }).imt).toBe(0);
     expect(resultFor({ price: 330_539, loan: 0 }).imt).toBe(12_679.77);
-    expect(resultFor({ price: 400_000, loan: 0 }).imt).toBe(32_000);
+    expect(resultFor({ price: 400_000, loan: 0 }).imt).toBe(18_236.65);
+    expect(resultFor({ price: 660_982, loan: 0 }).imt).toBe(39_115.21);
     expect(resultFor({ price: 1_000_000, loan: 0 }).imt).toBe(60_000);
     expect(resultFor({ price: 2_000_000, loan: 0 }).imt).toBe(150_000);
   });

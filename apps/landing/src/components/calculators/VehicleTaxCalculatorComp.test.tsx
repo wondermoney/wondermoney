@@ -17,7 +17,8 @@ afterEach(() => {
 
 it("shows the example, validates the engine size and tracks one edit with metadata only", () => {
   render(<VehicleTaxCalculatorComp locale="en" />);
-  expect(screen.getByText("€158.29")).toBeTruthy();
+  expect(screen.getAllByText("€158.29").length).toBeGreaterThan(0);
+  expect(screen.getByText("2027 (transitional): payment schedule")).toBeTruthy();
   expect(screen.getByText("€13.19")).toBeTruthy();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
@@ -28,7 +29,7 @@ it("shows the example, validates the engine size and tracks one edit with metada
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   fireEvent.change(cc, { target: { value: "1250" } });
-  expect(screen.getByText("€116.48")).toBeTruthy();
+  expect(screen.getAllByText("€116.48").length).toBeGreaterThan(0);
   fireEvent.change(screen.getByLabelText("Fuel"), { target: { value: "electric" } });
   expect(screen.queryByRole("spinbutton", { name: "Engine size" })).toBeNull();
   expect(screen.getAllByText("€0.00").length).toBeGreaterThan(0);
