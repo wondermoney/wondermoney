@@ -64,6 +64,12 @@ export const TOOLS_CATALOG = [
 		group: "budgetAndSave",
 		related: ["toolCompoundInterest", "toolSavingsRate", "toolEmergencyFund"],
 	},
+	{
+		key: "inflation",
+		routeId: "toolInflation",
+		group: "budgetAndSave",
+		related: ["toolHouseholdBudget", "toolSavingsGoal", "toolInvestmentReturn"],
+	},
 	// Borrow and buy a home
 	{
 		key: "mortgage",
@@ -106,6 +112,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolRateRevision",
 		group: "borrowAndBuyHome",
 		related: ["toolMortgage", "toolDebtToIncome", "toolEarlyRepayment"],
+	},
+	{
+		key: "carLoan",
+		routeId: "toolCarLoan",
+		group: "borrowAndBuyHome",
+		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome"],
 	},
 	{
 		key: "personalLoan",
