@@ -77,6 +77,12 @@ describe("article figure registry", () => {
   it("gives a calculator its subject's figure when there is one", () => {
     expect(figureForTool("toolEmergencyFund")).toBe("jar");
     expect(figureForTool("toolHouseholdBudget")).toBe("envelopes");
+    expect(figureForTool("toolCompoundInterest")).toBe("snowball");
+    expect(figureForTool("toolSavingsGoal")).toBe("containers");
+    expect(figureForTool("toolSavingsRate")).toBe("jar");
+    expect(figureForTool("toolNetWorth")).toBe("scale");
+    expect(figureForTool("toolDebtToIncome")).toBe("scale");
+    expect(figureForTool("toolInvestorProfile")).toBe("riskdial");
     expect(figureForTool("toolMortgage")).toBe("calculator");
     expect(figureForTool(undefined)).toBe("calculator");
   });

@@ -1,6 +1,7 @@
 ---
 // Prerendered explanation, worked example and method for the household budget
 // calculator. The figures come from the same calculation the calculator runs.
+import ToolGuide from "./ToolGuide.astro";
 import {
   HOUSEHOLD_BUDGET_WORKED_EXAMPLE,
   computeHouseholdBudget,
@@ -52,7 +53,7 @@ const methodItems = [
 const nextHref = toLocalizedPath("featureBudgeting", locale);
 ---
 
-<div class="mx-auto mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section>
     <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("whatHeading"))}</h2>
     <p class="mt-3">{t(k("whatBody"))}</p>
@@ -101,4 +102,4 @@ const nextHref = toLocalizedPath("featureBudgeting", locale);
       </a>
     </p>
   </section>
-</div>
+</ToolGuide>

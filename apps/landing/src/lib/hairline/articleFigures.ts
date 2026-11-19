@@ -103,6 +103,12 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolEmergencyFund: "jar",
   toolHouseholdBudget: "envelopes",
   toolInflation: "inflation",
+  toolCompoundInterest: "snowball",
+  toolSavingsGoal: "containers",
+  toolSavingsRate: "jar",
+  toolNetWorth: "scale",
+  toolDebtToIncome: "scale",
+  toolInvestorProfile: "riskdial",
 };
 
 export function figureForTool(routeId: string | undefined): FigureName {

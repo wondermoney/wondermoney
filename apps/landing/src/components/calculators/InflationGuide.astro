@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import { computeInflation, INFLATION_EXAMPLE } from "@/lib/calculators/inflation";
 import { CPI_SOURCE, CPI_YEARS } from "@/lib/calculators/portugalCpi";
 import { formatMoney, formatPercent, toIntlLocale } from "@/lib/numberFormat";
@@ -32,7 +33,7 @@ const retrieved = new Intl.DateTimeFormat(toIntlLocale(locale), {
 }).format(new Date(CPI_SOURCE.retrieved));
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="inflation-example">
     <h2 id="inflation-example" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(key("exampleTitle"))}
@@ -59,4 +60,4 @@ const retrieved = new Intl.DateTimeFormat(toIntlLocale(locale), {
       </a>
     </p>
   </section>
-</div>
+</ToolGuide>

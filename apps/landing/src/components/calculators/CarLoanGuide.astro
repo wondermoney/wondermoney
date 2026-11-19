@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import { CAR_LOAN_EXAMPLE, computeCarLoan } from "@/lib/calculators/carLoan";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
@@ -37,7 +38,7 @@ const values = {
 const creditSource = `https://europa.eu/youreurope/citizens/consumers/financial-products-and-services/consumer-credits-and-loans/index_${locale}.htm`;
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="car-loan-example">
     <h2 id="car-loan-example" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("exampleTitle"))}
@@ -62,4 +63,4 @@ const creditSource = `https://europa.eu/youreurope/citizens/consumers/financial-
       {["assumptionLoan", "assumptionFees", "assumptionRunning"].map((key) => <li>{t(k(key))}</li>)}
     </ul>
   </section>
-</div>
+</ToolGuide>
