@@ -336,6 +336,14 @@ const ROUTE_SLUGS = {
 		de: "zinsanpassung-rechner",
 		it: "simulatore-rata-mutuo-variabile",
 	},
+	toolCarLoan: {
+		pt: "simulador-credito-automovel",
+		en: "car-loan-calculator",
+		es: "simulador-prestamo-coche",
+		fr: "simulateur-credit-auto",
+		de: "autokredit-rechner",
+		it: "simulatore-prestito-auto",
+	},
 	toolPersonalLoan: {
 		pt: "simulador-credito-pessoal",
 		en: "personal-loan-calculator",
@@ -343,6 +351,14 @@ const ROUTE_SLUGS = {
 		fr: "simulateur-pret-personnel",
 		de: "privatkredit-rechner",
 		it: "calcolo-prestito-personale",
+	},
+	toolInflation: {
+		pt: "calculadora-inflacao-portugal",
+		en: "portugal-inflation-calculator",
+		es: "calculadora-inflacion-portugal",
+		fr: "calculateur-inflation-portugal",
+		de: "inflationsrechner-portugal",
+		it: "calcolo-inflazione-portogallo",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -460,7 +476,9 @@ export const TOOL_ROUTE_IDS = [
 	"toolBorrowingCapacity",
 	"toolMortgageTransfer",
 	"toolRateRevision",
+	"toolCarLoan",
 	"toolPersonalLoan",
+	"toolInflation",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -724,6 +742,12 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"rate-revision": "toolRateRevision",
 	"variable-rate-payment-calculator": "toolRateRevision",
 	"simulador-revisao-taxa-credito": "toolRateRevision",
+	toolcarloan: "toolCarLoan",
+	carloancalculator: "toolCarLoan",
+	"car-loan": "toolCarLoan",
+	"credito-automovel": "toolCarLoan",
+	toolinflation: "toolInflation",
+	"inflation-calculator": "toolInflation",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",

@@ -1,0 +1,62 @@
+---
+import { computeInflation, INFLATION_EXAMPLE } from "@/lib/calculators/inflation";
+import { CPI_SOURCE, CPI_YEARS } from "@/lib/calculators/portugalCpi";
+import { formatMoney, formatPercent, toIntlLocale } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const key = (name: string) => `tools.inflation.guide.${name}`;
+
+const example = computeInflation(INFLATION_EXAMPLE);
+if (!example || example.realValue === null) throw new Error("Invalid inflation worked example");
+
+const money = (value: number) => formatMoney(locale, value, { decimals: 2 });
+const variables = {
+  ...INFLATION_EXAMPLE,
+  amount: money(INFLATION_EXAMPLE.amount),
+  finalValue: money(INFLATION_EXAMPLE.finalValue),
+  equivalent: money(example.equivalent),
+  realValue: money(example.realValue),
+  inflation: formatPercent(locale, example.priceChange, { decimals: 2 }),
+};
+
+const retrieved = new Intl.DateTimeFormat(toIntlLocale(locale), {
+  dateStyle: "long",
+  timeZone: "UTC",
+}).format(new Date(CPI_SOURCE.retrieved));
+---
+
+<div class="mt-12 max-w-3xl space-y-10 leading-7 text-ink-2">
+  <section aria-labelledby="inflation-example">
+    <h2 id="inflation-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(key("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(key("exampleBudget"), variables)}</p>
+    <p class="mt-4">{t(key("exampleInvestment"), variables)}</p>
+  </section>
+  <section aria-labelledby="inflation-method">
+    <h2 id="inflation-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(key("methodTitle"))}
+    </h2>
+    <p class="mt-4">{t(key("method"), { baseYear: CPI_SOURCE.baseYear })}</p>
+    <p class="mt-4">{t(key("limitations"))}</p>
+    <p class="mt-4">{t(key("coverage"), { first: CPI_YEARS[0], last: CPI_YEARS.at(-1) })}</p>
+    <p class="mt-4">
+      {t(key("retrieved"), { date: retrieved })}
+      {" "}
+      <a class="font-medium text-primary underline underline-offset-4" href={CPI_SOURCE.url}>
+        {t(key("source"), { id: CPI_SOURCE.id })}
+      </a>
+      {" · "}
+      <a class="font-medium text-primary underline underline-offset-4" href={CPI_SOURCE.methodologyUrl}>
+        {t(key("methodology"))}
+      </a>
+    </p>
+  </section>
+</div>

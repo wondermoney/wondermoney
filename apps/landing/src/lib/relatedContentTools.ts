@@ -12,6 +12,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolInvestmentReturn",
   },
   {
+    sources: ["toolHouseholdBudget", "toolCompoundInterest", "toolInvestmentReturn", "toolSavingsGoal"],
+    destination: "toolInflation",
+  },
+  {
     sources: ["toolCompoundInterest", "toolInvestmentReturn"],
     destination: "toolInvestorProfile",
   },
@@ -26,6 +30,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
   {
     sources: ["toolMortgage", "toolEarlyRepayment", "toolDebtToIncome"],
     destination: "toolPersonalLoan",
+  },
+  {
+    sources: ["toolPersonalLoan", "toolDebtToIncome", "toolHouseholdBudget"],
+    destination: "toolCarLoan",
   },
 ];
 
