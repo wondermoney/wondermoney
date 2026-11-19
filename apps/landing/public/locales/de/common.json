@@ -470,6 +470,43 @@
     "microcopy": "Kostenlos und Open Source"
   },
   "tools": {
+    "inflation": {
+      "title": "Inflationsrechner für Portugal",
+      "shortName": "Inflation in Portugal",
+      "description": "Vergleiche die Kaufkraft in Portugal zwischen zwei Jahren und bereinige Spar- oder Anlagebeträge um die Inflation.",
+      "pageTitle": "Inflationsrechner für Portugal und Kaufkraft | WonderMoney",
+      "pageDescription": "Vergleiche die Kaufkraft anhand des amtlichen portugiesischen Verbraucherpreisindex. Berechne die Auswirkungen auf Budget, Ersparnisse oder Anlagen.",
+      "subtitle": "Berechne, welches Budget in Portugal die gleiche Kaufkraft hat und wie sich Inflation auf den Wert deiner Ersparnisse oder Anlagen auswirkt.",
+      "from": "Ausgangsjahr",
+      "to": "Vergleichsjahr",
+      "amount": "Betrag im Jahr {{year}}",
+      "amountHelp": "Gib ein Budget ein, um den entsprechenden Betrag für das Vergleichsjahr zu berechnen. Für Ersparnisse oder Anlagen gib den Anfangsbestand ein.",
+      "includeBalance": "Spar- oder Anlagebetrag vergleichen",
+      "finalValue": "Spar- oder Anlagebetrag im Jahr {{year}}",
+      "finalValueHelp": "Gib den nominalen Endbetrag im Vergleichsjahr ein, um seine Kaufkraft in Euro des Ausgangsjahres zu sehen.",
+      "amountError": "Gib einen Betrag zwischen 0 € und {{max}} ein.",
+      "invalid": "Prüfe die Beträge, um das Ergebnis zu sehen.",
+      "equivalent": "Gleiche Kaufkraft im Jahr {{year}}",
+      "priceChange": "Preisänderung",
+      "budgetChange": "Änderung des benötigten Budgets",
+      "realValue": "Endbetrag in Euro des Jahres {{year}}",
+      "realChange": "Änderung der Kaufkraft des Anlagebetrags",
+      "nextStepHeadline": "Prüfe, ob deine Ersparnisse ihre Kaufkraft behalten",
+      "nextStepDescription": "Verfolge mit WonderMoney, wie sich der Wert deiner Ersparnisse und Anlagen entwickelt.",
+      "nextStepCta": "Portfolio-Funktionen entdecken",
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "exampleBudget": "Ein Budget von {{amount}} im Jahr {{from}} entspricht {{equivalent}} im Jahr {{to}} für denselben Warenkorb. Die durchschnittlichen Preise änderten sich um {{inflation}}.",
+        "exampleInvestment": "Steigt eine Anlage von {{amount}} im Jahr {{from}} auf {{finalValue}} im Jahr {{to}}, entspricht der Endbetrag {{realValue}} in Euro des Jahres {{from}}.",
+        "methodTitle": "So funktioniert die Inflationsbereinigung",
+        "method": "Wir verwenden den Jahresdurchschnitt des portugiesischen Verbraucherpreisindex (VPI) für alle Waren und Dienstleistungen mit Basisjahr {{baseYear}}. Jedes Jahr steht für den Durchschnitt der Preise von Januar bis Dezember. Teile den VPI des Vergleichsjahres durch den VPI des Ausgangsjahres. Multipliziere den Ausgangsbetrag mit diesem Verhältnis und teile den Endbetrag durch dasselbe Verhältnis, um ihn in Euro des Ausgangsjahres auszudrücken.",
+        "limitations": "Deine Ausgaben können sich anders entwickeln als der landesweite Warenkorb. Der Anlagevergleich geht von einem Anfangs- und Endbetrag ohne Ein- oder Auszahlungen aus. Gebühren und Steuern sind berücksichtigt, wenn sie bereits im eingegebenen Endbetrag enthalten sind. Gib alle Beträge in Euro ein und rechne historische Escudo-Beträge vorher um.",
+        "coverage": "Die Daten decken die vollständigen Jahre von {{first}} bis {{last}} ab.",
+        "retrieved": "Daten abgerufen am {{date}}.",
+        "source": "Jährlicher VPI des INE über Banco de Portugal, Reihe {{id}}",
+        "methodology": "Methodik des INE"
+      }
+    },
     "hub": {
       "title": "Finanztools & Rechner",
       "description": "Kostenlose interaktive Rechner, die Ihnen helfen, Ihre finanzielle Zukunft zu planen. Keine Registrierung erforderlich.",

@@ -470,6 +470,43 @@
     "microcopy": "Gratis y de código abierto"
   },
   "tools": {
+    "inflation": {
+      "title": "Calculadora de inflación en Portugal",
+      "shortName": "Inflación en Portugal",
+      "description": "Compara el poder adquisitivo en Portugal entre años y ajusta tus ahorros o inversiones por la inflación.",
+      "pageTitle": "Calculadora de inflación y poder adquisitivo en Portugal | WonderMoney",
+      "pageDescription": "Compara el poder adquisitivo entre años con el índice anual de precios de Portugal. Mide el efecto de la inflación sobre tu presupuesto, ahorros o inversiones.",
+      "subtitle": "Compara cuánto necesitas para mantener el poder adquisitivo de tu presupuesto y cómo cambia el valor de tus ahorros o inversiones en Portugal.",
+      "from": "Año de partida",
+      "to": "Año de comparación",
+      "amount": "Importe en {{year}}",
+      "amountHelp": "Introduce un presupuesto para ver cuánto costaría en el año de comparación. Para comparar ahorros o inversiones, introduce el saldo inicial.",
+      "includeBalance": "Comparar un saldo de ahorro o inversión",
+      "finalValue": "Saldo de ahorro o inversión en {{year}}",
+      "finalValueHelp": "Introduce el saldo nominal del año de comparación para ver su poder adquisitivo en euros del año de partida.",
+      "amountError": "Introduce un importe entre 0 € y {{max}}.",
+      "invalid": "Revisa los importes para ver el resultado.",
+      "equivalent": "Mismo poder adquisitivo en {{year}}",
+      "priceChange": "Variación de los precios",
+      "budgetChange": "Variación del presupuesto necesario",
+      "realValue": "Saldo en euros de {{year}}",
+      "realChange": "Variación del poder adquisitivo del saldo",
+      "nextStepHeadline": "Comprueba si tus ahorros mantienen su poder adquisitivo",
+      "nextStepDescription": "Sigue el valor de tus ahorros e inversiones a lo largo del tiempo con WonderMoney.",
+      "nextStepCta": "Explora el seguimiento de cartera",
+      "guide": {
+        "exampleTitle": "Ejemplo de cálculo",
+        "exampleBudget": "Un presupuesto de {{amount}} en {{from}} requiere {{equivalent}} en {{to}} para comprar la misma cesta. Los precios medios variaron un {{inflation}}.",
+        "exampleInvestment": "Si una inversión pasa de {{amount}} en {{from}} a {{finalValue}} en {{to}}, su saldo final equivale a {{realValue}} en euros de {{from}}.",
+        "methodTitle": "Cómo se ajusta por la inflación",
+        "method": "Usamos el índice general de precios de consumo (IPC) de Portugal, en promedio anual y con base {{baseYear}}. Cada año representa el promedio de los precios de enero a diciembre. Divide el IPC del año de comparación entre el del año de partida y multiplica el importe inicial por ese cociente. Divide el saldo final por el mismo cociente para expresarlo en euros del año de partida.",
+        "limitations": "Tus gastos pueden diferir de la cesta nacional. La comparación de inversiones supone un saldo inicial y uno final sin aportaciones ni retiradas. Las comisiones y los impuestos se reflejan solo si ya están incluidos en el saldo nominal que introduces. Introduce todos los valores en euros y convierte primero los importes históricos en escudos.",
+        "coverage": "El periodo disponible es {{first}}–{{last}} y solo incluye años completos.",
+        "retrieved": "Datos consultados el {{date}}.",
+        "source": "IPC anual del INE vía Banco de Portugal, serie {{id}}",
+        "methodology": "Metodología del INE"
+      }
+    },
     "hub": {
       "title": "Herramientas y calculadoras financieras",
       "description": "Calculadoras interactivas gratuitas para ayudarte a planificar tu futuro financiero. Sin registro.",

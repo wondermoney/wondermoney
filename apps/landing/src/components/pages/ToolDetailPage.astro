@@ -36,6 +36,8 @@ import PersonalLoanCalculatorComp from "@/components/calculators/PersonalLoanCal
 import CarLoanCalculatorComp from "@/components/calculators/CarLoanCalculatorComp";
 import CarLoanGuide from "@/components/calculators/CarLoanGuide.astro";
 import PersonalLoanGuide from "@/components/calculators/PersonalLoanGuide.astro";
+import InflationCalculatorComp from "@/components/calculators/InflationCalculatorComp";
+import InflationGuide from "@/components/calculators/InflationGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -126,6 +128,12 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.carLoan.nextStepHeadline"),
     description: t("tools.carLoan.nextStepDescription"),
     ctaText: t("tools.carLoan.nextStepCta"),
+  },
+  toolInflation: {
+    headline: t("tools.inflation.nextStepHeadline"),
+    description: t("tools.inflation.nextStepDescription"),
+    ctaText: t("tools.inflation.nextStepCta"),
+    ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
@@ -220,6 +228,7 @@ const schema = {
     )}
     {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
     {routeId === "toolCarLoan" && <CarLoanCalculatorComp locale={locale} client:load />}
+    {routeId === "toolInflation" && <InflationCalculatorComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
   </div>
 
@@ -237,6 +246,7 @@ const schema = {
   {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
   {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
   {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
+  {routeId === "toolInflation" && <InflationGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
 
   <div class="mt-8">

@@ -470,6 +470,43 @@
     "microcopy": "Gratuit et open source"
   },
   "tools": {
+    "inflation": {
+      "title": "Calculateur d’inflation au Portugal",
+      "shortName": "Inflation au Portugal",
+      "description": "Comparez le pouvoir d’achat au Portugal entre deux années et corrigez vos soldes de l’inflation.",
+      "pageTitle": "Calculateur d’inflation et de pouvoir d’achat au Portugal | WonderMoney",
+      "pageDescription": "Comparez le pouvoir d’achat entre deux années à partir de l’indice annuel des prix portugais. Mesurez les effets sur votre budget, épargne ou placement.",
+      "subtitle": "Calculez le budget nécessaire pour conserver le même pouvoir d’achat au Portugal et ajustez la valeur de votre épargne ou de vos placements à l’inflation.",
+      "from": "Année de départ",
+      "to": "Année de comparaison",
+      "amount": "Montant en {{year}}",
+      "amountHelp": "Saisissez un budget pour connaître son équivalent dans l’année de comparaison. Pour une épargne ou un placement, indiquez le solde initial.",
+      "includeBalance": "Comparer un solde d’épargne ou de placement",
+      "finalValue": "Solde de l’épargne ou du placement en {{year}}",
+      "finalValueHelp": "Saisissez le solde nominal de l’année de comparaison pour voir son pouvoir d’achat en euros de l’année de départ.",
+      "amountError": "Saisissez un montant compris entre 0 € et {{max}}.",
+      "invalid": "Vérifiez les montants pour afficher le résultat.",
+      "equivalent": "Même pouvoir d’achat en {{year}}",
+      "priceChange": "Variation des prix",
+      "budgetChange": "Variation du budget nécessaire",
+      "realValue": "Solde en euros de {{year}}",
+      "realChange": "Variation du pouvoir d’achat du solde",
+      "nextStepHeadline": "Vérifiez si votre épargne conserve son pouvoir d’achat",
+      "nextStepDescription": "Suivez l’évolution de votre épargne et de vos placements dans WonderMoney.",
+      "nextStepCta": "Découvrir le suivi de portefeuille",
+      "guide": {
+        "exampleTitle": "Exemple de calcul",
+        "exampleBudget": "Un budget de {{amount}} en {{from}} exige {{equivalent}} en {{to}} pour acheter le même panier. Les prix moyens ont varié de {{inflation}}.",
+        "exampleInvestment": "Si un placement passe de {{amount}} en {{from}} à {{finalValue}} en {{to}}, le solde final représente {{realValue}} en euros de {{from}}.",
+        "methodTitle": "Comment fonctionne la correction de l’inflation",
+        "method": "Nous utilisons la moyenne annuelle de l’indice général des prix à la consommation (IPC) au Portugal, en base {{baseYear}}. Chaque année représente la moyenne des prix de janvier à décembre. Divisez l’IPC de l’année de comparaison par celui de l’année de départ, puis multipliez le montant initial par ce rapport. Divisez le solde final par le même rapport pour l’exprimer en euros de l’année de départ.",
+        "limitations": "Vos dépenses peuvent évoluer différemment du panier national. La comparaison d’un placement suppose un solde de départ et un solde final sans versement ni retrait. Les frais et impôts sont pris en compte s’ils figurent déjà dans le solde nominal saisi. Indiquez tous les montants en euros après avoir converti les éventuels montants historiques en escudos.",
+        "coverage": "La période disponible va de {{first}} à {{last}} et couvre uniquement les années complètes.",
+        "retrieved": "Données consultées le {{date}}.",
+        "source": "IPC annuel de l’INE via Banco de Portugal, série {{id}}",
+        "methodology": "Méthodologie de l’INE"
+      }
+    },
     "hub": {
       "title": "Outils et calculatrices financiers",
       "description": "Calculatrices interactives gratuites pour vous aider à planifier votre avenir financier. Aucune inscription requise.",

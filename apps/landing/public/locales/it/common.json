@@ -470,6 +470,43 @@
     "microcopy": "Gratuito e open source"
   },
   "tools": {
+    "inflation": {
+      "title": "Calcolatore dell’inflazione in Portogallo",
+      "shortName": "Inflazione in Portogallo",
+      "description": "Confronta il potere d’acquisto in Portogallo tra due anni e correggi risparmi o investimenti per l’inflazione.",
+      "pageTitle": "Calcolatore dell’inflazione e del potere d’acquisto in Portogallo | WonderMoney",
+      "pageDescription": "Confronta il potere d’acquisto con l’indice annuale dei prezzi al consumo del Portogallo e misura l’effetto su budget, risparmi e investimenti.",
+      "subtitle": "Calcola quanto serve per mantenere lo stesso potere d’acquisto in Portogallo e come cambia il valore dei tuoi risparmi o investimenti.",
+      "from": "Anno di partenza",
+      "to": "Anno di confronto",
+      "amount": "Importo nel {{year}}",
+      "amountHelp": "Inserisci un budget per vedere a quanto equivale nell’anno di confronto. Per confrontare risparmi o investimenti, inserisci il saldo iniziale.",
+      "includeBalance": "Confronta il saldo di risparmi o investimenti",
+      "finalValue": "Saldo dei risparmi o dell’investimento nel {{year}}",
+      "finalValueHelp": "Inserisci il saldo nominale nell’anno di confronto per vederne il potere d’acquisto in euro dell’anno di partenza.",
+      "amountError": "Inserisci un importo tra 0 € e {{max}}.",
+      "invalid": "Controlla gli importi per vedere il risultato.",
+      "equivalent": "Stesso potere d’acquisto nel {{year}}",
+      "priceChange": "Variazione dei prezzi",
+      "budgetChange": "Variazione del budget necessario",
+      "realValue": "Saldo in euro del {{year}}",
+      "realChange": "Variazione del potere d’acquisto del saldo",
+      "nextStepHeadline": "Verifica se i tuoi risparmi mantengono il potere d’acquisto",
+      "nextStepDescription": "Segui nel tempo il valore dei tuoi risparmi e investimenti in WonderMoney.",
+      "nextStepCta": "Scopri il monitoraggio del portafoglio",
+      "guide": {
+        "exampleTitle": "Esempio di calcolo",
+        "exampleBudget": "Un budget di {{amount}} nel {{from}} richiede {{equivalent}} nel {{to}} per comprare lo stesso paniere. I prezzi medi sono variati del {{inflation}}.",
+        "exampleInvestment": "Se un investimento passa da {{amount}} nel {{from}} a {{finalValue}} nel {{to}}, il saldo finale equivale a {{realValue}} in euro del {{from}}.",
+        "methodTitle": "Come si calcola l’adeguamento all’inflazione",
+        "method": "Usiamo la media annua dell’indice generale dei prezzi al consumo (IPC) del Portogallo, con base {{baseYear}}. Ogni anno rappresenta la media dei prezzi da gennaio a dicembre. Dividi l’IPC dell’anno di confronto per l’IPC dell’anno di partenza e moltiplica l’importo iniziale per quel rapporto. Dividi il saldo finale per lo stesso rapporto per esprimerlo in euro dell’anno di partenza.",
+        "limitations": "Le tue spese possono variare diversamente dal paniere nazionale. Il confronto di un investimento considera un saldo iniziale e uno finale senza versamenti o prelievi. Le commissioni e le imposte incidono se sono già incluse nel saldo nominale inserito. Indica tutti gli importi in euro dopo avere convertito eventuali importi storici in escudi.",
+        "coverage": "Il periodo disponibile è {{first}}–{{last}} e include solo anni completi.",
+        "retrieved": "Dati consultati il {{date}}.",
+        "source": "IPC annuale dell’INE tramite Banco de Portugal, serie {{id}}",
+        "methodology": "Metodologia dell’INE"
+      }
+    },
     "hub": {
       "title": "Strumenti e calcolatori finanziari",
       "description": "Calcolatori interattivi gratuiti per aiutarti a pianificare il tuo futuro finanziario. Nessuna registrazione richiesta.",

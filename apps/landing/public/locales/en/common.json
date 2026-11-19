@@ -470,6 +470,43 @@
     "microcopy": "Free and open source"
   },
   "tools": {
+    "inflation": {
+      "title": "Portugal inflation calculator",
+      "shortName": "Portugal inflation",
+      "description": "Compare what money buys in Portugal across years and adjust savings or investment balances for inflation.",
+      "pageTitle": "Portugal inflation calculator and purchasing power | WonderMoney",
+      "pageDescription": "Compare purchasing power between years with Portugal’s official annual consumer price index. See what inflation does to your budget, savings or investments.",
+      "subtitle": "See what the same budget buys across years in Portugal and how inflation changes the value of your savings or investments.",
+      "from": "Starting year",
+      "to": "Comparison year",
+      "amount": "Amount in {{year}}",
+      "amountHelp": "Enter a budget to see what it would cost in the comparison year. Use the initial balance to compare an investment or savings balance.",
+      "includeBalance": "Compare a savings or investment balance",
+      "finalValue": "Savings or investment balance in {{year}}",
+      "finalValueHelp": "Enter the nominal balance for the comparison year to see its purchasing power in starting-year euros.",
+      "amountError": "Enter an amount from €0 to {{max}}.",
+      "invalid": "Check the amounts to see your result.",
+      "equivalent": "Same buying power in {{year}}",
+      "priceChange": "Change in prices",
+      "budgetChange": "Change in required budget",
+      "realValue": "Balance in {{year}} euros",
+      "realChange": "Change in buying power of the balance",
+      "nextStepHeadline": "Review whether your savings keep their buying power",
+      "nextStepDescription": "Track the value of your savings and investments over time in WonderMoney.",
+      "nextStepCta": "Explore portfolio tracking",
+      "guide": {
+        "exampleTitle": "Worked example",
+        "exampleBudget": "A {{amount}} budget in {{from}} needs {{equivalent}} in {{to}} to buy the same basket. Average prices changed by {{inflation}}.",
+        "exampleInvestment": "If an investment rose from {{amount}} in {{from}} to {{finalValue}} in {{to}}, the final balance would be worth {{realValue}} in {{from}} euros.",
+        "methodTitle": "How the inflation adjustment works",
+        "method": "We use the annual average of Portugal’s all-items consumer price index (CPI), with {{baseYear}} as the base year. Each year represents average prices from January to December. Divide the comparison-year CPI by the starting-year CPI, then multiply the starting amount by that ratio. Divide the final balance by the same ratio to express it in starting-year euros.",
+        "limitations": "Your own spending can differ from the national basket. The investment comparison assumes a single starting and final balance with zero contributions or withdrawals. It uses the nominal balance you enter, so fees and taxes are reflected only if they are already included. Enter euro amounts throughout, converting any historical escudo figures first.",
+        "coverage": "Coverage is {{first}}–{{last}}. The series includes complete years only.",
+        "retrieved": "Data retrieved on {{date}}.",
+        "source": "INE annual CPI via Banco de Portugal, series {{id}}",
+        "methodology": "INE methodology"
+      }
+    },
     "hub": {
       "title": "Financial Tools & Calculators",
       "description": "Free interactive calculators to help you plan your financial future. No sign-up required.",

@@ -352,6 +352,14 @@ const ROUTE_SLUGS = {
 		de: "privatkredit-rechner",
 		it: "calcolo-prestito-personale",
 	},
+	toolInflation: {
+		pt: "calculadora-inflacao-portugal",
+		en: "portugal-inflation-calculator",
+		es: "calculadora-inflacion-portugal",
+		fr: "calculateur-inflation-portugal",
+		de: "inflationsrechner-portugal",
+		it: "calcolo-inflazione-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -470,6 +478,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolRateRevision",
 	"toolCarLoan",
 	"toolPersonalLoan",
+	"toolInflation",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -737,6 +746,8 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	carloancalculator: "toolCarLoan",
 	"car-loan": "toolCarLoan",
 	"credito-automovel": "toolCarLoan",
+	toolinflation: "toolInflation",
+	"inflation-calculator": "toolInflation",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",
