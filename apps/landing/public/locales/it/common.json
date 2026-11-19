@@ -2913,6 +2913,195 @@
       "nextStepDescription": "WonderMoney trasforma il tuo netto stimato in un piano, così ogni euro ha un compito prima che il mese inizi.",
       "nextStepCta": "Usa la stima netta in un piano mensile"
     },
+    "unemploymentBenefit": {
+      "title": "Calcolatore del sussidio di disoccupazione in Portogallo 2026",
+      "shortName": "Sussidio di disoccupazione",
+      "subtitle": "Stima il sussidio di disoccupazione mensile (subsídio de desemprego), quanto dura e il totale, con i limiti del 2026.",
+      "description": "Stima il tuo sussidio di disoccupazione in Portogallo: importo mensile, durata e totale.",
+      "pageTitle": "Calcolatore Sussidio di Disoccupazione Portogallo 2026: Importo e Durata",
+      "pageDescription": "Stima il sussidio di disoccupazione in Portogallo: 65% della retribuzione di riferimento, i limiti dello IAS 2026, la durata per età e contributi e un reddito ridotto per il tuo budget.",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile",
+        "allowances": "Tredicesima e quattordicesima",
+        "age": "Età al momento della disoccupazione",
+        "contributionMonths": "Mesi con retribuzione registrata",
+        "years20": "Anni con retribuzione registrata negli ultimi 20",
+        "household": "Nucleo familiare",
+        "dependants": "Figli o persone a carico"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamenti (ferie e Natale a parte)",
+        "twelfths": "In dodicesimi (lo stipendio le include già)"
+      },
+      "households": {
+        "alone": "Vivo da solo/a o il/la partner non dà diritto alla maggiorazione",
+        "partnerWorking": "Il/la mio/a partner lavora",
+        "partnerUnemployed": "Anche il/la mio/a partner è disoccupato/a (iscritto/a all'IEFP)",
+        "singleParent": "Sono l'unico genitore del nucleo"
+      },
+      "help": {
+        "gross": "Lo stipendio base degli ultimi mesi, prima di previdenza sociale e IRS. I 12 mesi conteggiati includono le mensilità aggiuntive di ferie e Natale.",
+        "allowances": "Con 14 pagamenti il calcolatore conta 14 volte lo stipendio; in dodicesimi ne conta 12, perché le mensilità aggiuntive sono già incluse.",
+        "age": "La tua età il giorno in cui sei diventato disoccupato.",
+        "months": "Mesi con retribuzione registrata dall'ultima volta che hai percepito il sussidio. La tabella parte da 12 mesi.",
+        "years20": "Anni completi con retribuzione registrata negli ultimi 20. Ogni 5 anni aggiungono giorni.",
+        "household": "La maggiorazione del 10% richiede figli o persone a carico e che entrambi i partner siano disoccupati e iscritti, oppure un nucleo monoparentale. Va richiesta."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "belowTable": "La tabella della durata parte da {{min}} mesi con retribuzione registrata. Con meno, questa stima non si applica.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Sussidio mensile stimato (30 giorni)",
+        "daily": "Sussidio al giorno",
+        "duration": "Durata stimata",
+        "durationValue": "{{days}} giorni (circa {{months}} mesi)",
+        "durationParts": "Di cui periodo base e giorni aggiuntivi",
+        "durationPartsValue": "{{base}} + {{extra}} giorni",
+        "total": "Totale stimato nell'intero periodo",
+        "netBefore": "Retribuzione di riferimento netta stimata al mese",
+        "drop": "Calo di reddito mensile per il tuo budget",
+        "increaseApplied": "Include la maggiorazione del 10% per i nuclei con figli.",
+        "estimate": "Una stima per pianificare, non una decisione. La previdenza sociale calcola l'importo reale dalle tue retribuzioni registrate.",
+        "limit": {
+          "none": "L'importo è il 65% della retribuzione di riferimento; nessun limite applicato.",
+          "max": "L'importo ha raggiunto il massimo di 2,5 volte lo IAS ({{max}} al mese).",
+          "netCap": "L'importo è stato limitato al 75% della retribuzione di riferimento netta stimata.",
+          "minimum": "L'importo è stato portato al minimo, 1 IAS ({{ias}} al mese).",
+          "minimumWage": "L'importo è stato portato a 1,15 volte lo IAS, il minimo quando le retribuzioni usate raggiungono il salario minimo."
+        }
+      },
+      "checklist": {
+        "title": "Condizioni da verificare (non è una decisione)",
+        "involuntary": "La disoccupazione è involontaria, per esempio un licenziamento o la fine di un contratto a termine.",
+        "contributions": "Hai almeno 360 giorni di retribuzione registrata nei 24 mesi precedenti la disoccupazione.",
+        "registration": "Sei iscritto al centro per l'impiego (IEFP).",
+        "ready": "Vivi in Portogallo e sei in grado e disponibile a lavorare.",
+        "deadline": "Richiedi il sussidio entro 90 giorni dall'inizio della disoccupazione.",
+        "note": "Solo la previdenza sociale decide se hai diritto. Questo elenco è un promemoria, non un verdetto."
+      },
+      "guide": {
+        "exampleTitle": "Esempio",
+        "example": "Una persona di {{age}} anni, con {{gross}} al mese in 14 pagamenti, con {{months}} mesi e {{years}} anni di retribuzione registrata negli ultimi 20, che vive da sola. La retribuzione di riferimento è {{reference}} al giorno, quindi il 65% per 30 giorni dà {{monthly}} al mese ({{daily}} al giorno). Il periodo è di {{base}} giorni più {{extra}} giorni aggiuntivi, {{days}} giorni in totale, cioè circa {{total}} nell'intero periodo. Rispetto a una retribuzione netta stimata di {{net}} al mese, il calo di reddito è di {{drop}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento (RR) è il totale delle retribuzioni registrate nei 12 mesi più vecchi dei 14 precedenti il mese della disoccupazione, comprese le mensilità aggiuntive di ferie e Natale, diviso 360. Il calcolatore usa 14 o 12 volte lo stipendio mensile.",
+        "methodAmount": "Il sussidio giornaliero è il 65% della RR. L'importo mensile corrisponde a 30 giorni.",
+        "methodLimits": "Il sussidio mensile non può superare 2,5 volte lo IAS ({{max}} nel 2026) né il 75% della RR netta, e non può essere inferiore a 1 IAS ({{ias}}), salvo che la RR netta sia inferiore allo IAS. Quando le retribuzioni usate sono almeno pari al salario minimo ({{rmmg}}), il minimo è 1,15 IAS.",
+        "methodNet": "La RR netta è la RR meno l'11% di previdenza sociale e l'aliquota di ritenuta IRS. Il calcolatore stima quell'aliquota con le tabelle di ritenuta 2026 del continente per il tuo stipendio mensile, come single, o come sposato con due redditi se il partner è nel nucleo.",
+        "methodIncrease": "Il sussidio aumenta del 10% quando entrambi i partner sono disoccupati e iscritti, o sei l'unico genitore, e ci sono figli o persone a carico. Va richiesto. Il calcolatore lo applica all'importo già limitato e mai oltre 2,5 IAS.",
+        "methodDuration": "La durata dipende dall'età e dai mesi con retribuzione registrata, più giorni extra per ogni 5 anni completi con retribuzione negli ultimi 20: 30 giorni fino a 39 anni, 45 giorni da 40 a 49 e 60 giorni dai 50.",
+        "methodNoReduction": "La vecchia riduzione del 10% dopo 180 giorni di pagamento non è applicata: la guida della previdenza sociale del 2026 non la menziona.",
+        "methodTax": "La guida della previdenza sociale dice che il sussidio non va dichiarato ai fini IRS. Verifica il tuo caso con l'Autorità Tributaria.",
+        "methodBudget": "Il sussidio mensile è il reddito con cui pianificare. Confrontalo con lo stipendio netto per vedere il calo e poi guarda quanto a lungo i risparmi coprono la differenza.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedTransitional": "La tabella transitoria per chi soddisfaceva già il requisito contributivo al 31 marzo 2012 e non è stato disoccupato da allora. Il calcolatore usa solo la tabella generale.",
+        "unsupportedSocial": "Il sussidio sociale di disoccupazione (subsídio social de desemprego), che secondo la guida può essere richiesto solo fino al 30 dicembre 2026.",
+        "unsupportedSelfEmployed": "Lavoratori autonomi, amministratori e gerenti, sussidio di disoccupazione parziale, insegnanti con regole proprie ed ex pensionati di invalidità.",
+        "unsupportedOther": "Stipendi molto variabili nei 12 mesi conteggiati, periodi senza retribuzione registrata al loro interno, altri redditi e il pagamento unico per avviare un'attività.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 ottobre 2026), che riporta anche lo IAS 2026 di 537,13 euro (Portaria n.º 480-A/2025/1) e il salario minimo di 920 euro (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, nel testo vigente: regime di protezione in caso di disoccupazione",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: maggiorazione del 10% per i nuclei con figli e minimo di 1,15 IAS",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della previdenza sociale e sul testo del Decreto-Lei n.º 119/2021 nel Diário da República. L'aliquota IRS dietro il limite del 75% e l'ordine della maggiorazione del 10% sono nostre semplificazioni, e la fine della riduzione del 10% dopo 180 giorni deriva dalla guida e dalla stampa, non dalla legge consolidata."
+      },
+      "nextStepHeadline": "Prima che il reddito scenda, pianifica il cuscinetto",
+      "nextStepDescription": "WonderMoney mostra la tua liquidità, le spese mensili e quanto durano i risparmi con un reddito più basso.",
+      "nextStepCta": "Stima quanto durerà il tuo cuscinetto di liquidità"
+    },
+    "sickPay": {
+      "title": "Calcolatore indennità di malattia Portogallo 2026 (subsídio de doença)",
+      "shortName": "Indennità di malattia",
+      "subtitle": "Stima il subsídio de doença per un periodo di malattia: importo per fascia di durata, giorni di carenza e perdita di reddito.",
+      "description": "Stima l'indennità di malattia in Portogallo: importo giornaliero, totale, giorni di carenza e differenza con lo stipendio netto.",
+      "pageTitle": "Calcolatore Indennità di Malattia Portogallo 2026: Baixa Médica",
+      "pageDescription": "Stima il subsídio de doença in Portogallo: retribuzione di riferimento su 180 giorni, dal 55% al 75% in base alla durata, i 3 giorni di carenza, il minimo di 9,20 € e la perdita di reddito durante la malattia.",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile",
+        "allowances": "Tredicesima e quattordicesima",
+        "sickDays": "Giorni di malattia",
+        "dependants": "Figli fino a 16 anni (o 24 con assegno familiare)",
+        "hospitalisation": "Ricovero ospedaliero o chirurgia ambulatoriale"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamenti (mensilità aggiuntive a parte)",
+        "twelfths": "In dodicesimi (lo stipendio le include già)"
+      },
+      "help": {
+        "gross": "Lo stipendio base dei mesi considerati, prima di previdenza e IRS. Le mensilità aggiuntive non fanno parte della retribuzione di riferimento.",
+        "allowances": "In dodicesimi, il calcolatore toglie le due mensilità per ottenere lo stipendio base usato dalla retribuzione di riferimento.",
+        "sickDays": "Totale dei giorni del certificato (CIT), contati dal primo giorno. I lavoratori dipendenti possono ricevere fino a 1095 giorni.",
+        "dependants": "Serve per la maggiorazione di 5 punti, che richiede 3 o più figli e una retribuzione di riferimento di 500 euro al mese o meno.",
+        "hospitalisation": "Con ricovero ospedaliero o chirurgia ambulatoriale l'indennità è pagata dal primo giorno, senza periodo di carenza."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "total": "Totale stimato pagato dalla Segurança Social",
+        "paidDays": "Giorni pagati",
+        "waiting": "Giorni di carenza (non pagati dalla Segurança Social)",
+        "waitingValue": "{{days}} giorni, circa {{amount}} di stipendio netto",
+        "waitingNone": "Nessuno",
+        "reference": "Retribuzione di riferimento al giorno",
+        "netPay": "Stipendio netto normale al mese",
+        "firstGap": "Perdita di reddito nei primi 30 giorni",
+        "averageGap": "Perdita media mensile di reddito durante tutta la malattia",
+        "bandsTitle": "Per fascia di durata",
+        "bandLabel": "Giorni da {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} giorni pagati × {{daily}} = {{amount}}",
+        "increaseApplied": "Inclusa la maggiorazione di 5 punti per retribuzione bassa e 3 o più figli.",
+        "allWaiting": "Ogni giorno di questa malattia è di carenza, quindi la Segurança Social non paga nulla. Verifica se il contratto o il contratto collettivo obbliga il datore di lavoro a pagarli.",
+        "waitingNote": "La Segurança Social non paga i primi 3 giorni. Se li paga il datore di lavoro dipende dal contratto o dal contratto collettivo.",
+        "estimate": "Una stima per pianificare, non una decisione. La Segurança Social calcola l'importo reale dalle retribuzioni registrate.",
+        "limit": {
+          "none": "L'importo giornaliero è la percentuale della retribuzione di riferimento di ogni fascia; nessun limite applicato.",
+          "minimum": "L'importo giornaliero è stato portato al minimo di {{min}} (30% del salario minimo).",
+          "referencePay": "La retribuzione di riferimento è inferiore a {{min}} al giorno, quindi l'indennità è uguale a tale retribuzione.",
+          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento."
+        }
+      },
+      "checklist": {
+        "title": "Condizioni da verificare (non è una decisione)",
+        "certificate": "Hai un certificato di malattia (CIT) rilasciato da un medico e inviato per via telematica alla Segurança Social.",
+        "guarantee": "Hai 6 mesi di retribuzioni registrate (anche non consecutivi) il giorno in cui smetti di lavorare.",
+        "professionalIndex": "Hai lavorato almeno 12 giorni nei primi quattro degli ultimi sei mesi, contando il mese in cui smetti di lavorare.",
+        "waiting": "Non c'è periodo di carenza con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e prosegue oltre. Il calcolatore ha un'opzione solo per la prima.",
+        "note": "Solo la Segurança Social decide se hai diritto. Questo elenco è un promemoria, non un verdetto."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Un dipendente con {{gross}} al mese in 14 pagamenti, in malattia per {{days}} giorni senza ricovero. La retribuzione di riferimento è di {{reference}} al giorno. I giorni da 1 a 3 sono di carenza, quindi la prima fascia paga 27 giorni al 55% e i 15 successivi al 60%: {{total}} in totale. Lo stipendio netto normale è di {{net}} al mese; durante la malattia la perdita media è di {{gap}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento (RR) è la somma delle retribuzioni registrate nei 6 mesi più vecchi degli 8 precedenti il mese in cui inizia la malattia, senza mensilità aggiuntive, divisa per 180. Il calcolatore usa il tuo stipendio mensile diviso per 30.",
+        "methodBands": "L'indennità giornaliera è una percentuale della RR che cresce con la durata: 55% fino a 30 giorni, 60% dal giorno 31 al 90, 70% dal giorno 91 al 365 e 75% oltre, fino a 1095 giorni per i dipendenti. I giorni contano dal primo giorno, carenza inclusa.",
+        "methodWaiting": "I dipendenti hanno 3 giorni di carenza che la Segurança Social non paga. Con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e lo supera, il pagamento parte dal giorno 1.",
+        "methodMinimum": "L'indennità giornaliera non può essere inferiore a {{min}} (30% del salario minimo di {{rmmg}}). Se la RR stessa è più bassa, l'indennità è uguale alla RR.",
+        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando la RR è al massimo di 500 euro al mese e la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure figli con bonus per disabilità. Il calcolatore considera solo il numero di figli.",
+        "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di previdenza e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
+        "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive non vengono ricostituite per i giorni di malattia.",
+        "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedTuberculosis": "Tubercolosi, pagata all'80% o al 100% della RR in base ai familiari a carico, senza limite di tempo.",
+        "unsupportedSelfEmployed": "Lavoratori autonomi (10 giorni di carenza, fino a 365 giorni), assicurazione sociale volontaria e lavoratori domestici.",
+        "unsupportedShort": "Assenze brevi coperte dall'autodichiarazione di malattia dell'SNS 24: non ne abbiamo modellato le regole.",
+        "unsupportedOther": "Meno di 6 mesi di retribuzioni registrate, retribuzioni molto variabili, indennizzi per infortunio sul lavoro o malattia professionale e contratti collettivi che integrano l'indennità.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social. Il limite di 500 euro della maggiorazione di 5 punti proviene dalla legge consolidata e da fonti secondarie, perché il testo della guida non mostra la cifra. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
+      },
+      "nextStepHeadline": "Pianifica il calo temporaneo di reddito",
+      "nextStepDescription": "WonderMoney mostra la tua liquidità, le tue spese e per quanto tempo i risparmi coprono un reddito più basso.",
+      "nextStepCta": "Adatta il tuo budget al calo temporaneo di reddito"
+    },
     "vehicleTax": {
       "title": "Calcolo del bollo auto portoghese (IUC)",
       "shortName": "IUC",
@@ -2994,6 +3183,357 @@
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così la scadenza è già coperta.",
       "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale"
+    },
+    "propertyCapitalGains": {
+      "title": "Calcolatore delle plusvalenze sulla vendita di casa",
+      "shortName": "Plusvalenze immobiliari",
+      "subtitle": "Stima la plusvalenza dalla vendita di un immobile in Portogallo, l'IRS aggiuntivo che può generare e quanto del ricavato resta disponibile.",
+      "description": "Stima l'IRS sulla vendita di un immobile in Portogallo, con l'esclusione per reinvestimento.",
+      "pageTitle": "Calcolatore Plusvalenze Immobiliari Portogallo 2026: IRS sulla Vendita di Casa",
+      "pageDescription": "Stima la plusvalenza dalla vendita di un immobile in Portogallo nel 2026 con il coefficiente di svalutazione monetaria, le spese e il reinvestimento nell'abitazione principale, e vedi l'IRS aggiuntivo e il ricavato che resta.",
+      "sections": {
+        "property": "L'immobile",
+        "expenses": "Spese",
+        "income": "Il tuo reddito",
+        "reinvestment": "Abitazione principale"
+      },
+      "fields": {
+        "saleValue": "Prezzo di vendita",
+        "purchaseValue": "Valore di acquisto",
+        "purchaseYear": "Anno di acquisto",
+        "purchaseMonth": "Mese di acquisto",
+        "saleMonth": "Mese della vendita nel {{saleYear}}",
+        "purchaseExpenses": "Spese di acquisto",
+        "worksExpenses": "Lavori degli ultimi 12 anni",
+        "saleExpenses": "Spese di vendita",
+        "otherIncome": "Altro reddito annuo imponibile",
+        "joint": "Tassazione congiunta (coppia)",
+        "ownHome": "Era la mia abitazione principale e intendo reinvestire il ricavato",
+        "reinvested": "Importo reinvestito in un'altra abitazione principale",
+        "loanRepaid": "Capitale del mutuo estinto con la vendita"
+      },
+      "help": {
+        "dates": "Il coefficiente si applica solo se l'immobile è stato posseduto per più di 24 mesi. Il calcolatore copre le vendite del {{saleYear}}.",
+        "purchaseExpenses": "IMT e Imposto do Selo pagati all'acquisto, più notaio e registro e la provvigione dell'agenzia.",
+        "worksExpenses": "Solo lavori con fattura, degli ultimi 12 anni, che hanno aumentato il valore dell'immobile.",
+        "saleExpenses": "La provvigione dell'agenzia e gli altri costi della vendita, come l'attestato energetico.",
+        "otherIncome": "Gli altri redditi della famiglia soggetti a IRS nell'anno, dopo le deduzioni specifiche e prima delle detrazioni d'imposta. Indica 0 se non ce ne sono.",
+        "joint": "Divide il reddito per due, come nella tassazione congiunta. Lascialo spento per una dichiarazione individuale.",
+        "reinvested": "Conta gli acquisti da 24 mesi prima a 36 mesi dopo la vendita, in Portogallo o nell'UE/SEE.",
+        "loanRepaid": "La parte del ricavato che estingue il mutuo dell'immobile venduto."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "zero": "Inserisci un valore superiore a zero.",
+        "negative": "Inserisci un valore positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "yearTooOld": "Gli immobili acquistati prima del {{year}} hanno un regime proprio e non sono coperti.",
+        "yearTooNew": "Inserisci un anno di acquisto fino al {{saleYear}}.",
+        "month": "Scegli un mese dall'elenco.",
+        "afterSale": "L'acquisto non può essere successivo alla vendita.",
+        "loanTooLarge": "Il mutuo estinto non può superare il prezzo di vendita.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "extraTax": "IRS aggiuntivo stimato sulla plusvalenza",
+        "estimateNote": "Imposta con la plusvalenza meno imposta senza, per la dichiarazione annuale. Ignora le detrazioni d'imposta e la dichiarazione finale può differire.",
+        "loss": "La vendita si è chiusa in perdita, quindi nessun guadagno si aggiunge al tuo reddito.",
+        "zero": "Non c'è plusvalenza, quindi non c'è IRS aggiuntivo.",
+        "cashAfter": "Ricavato che resta dopo spese di vendita, mutuo estinto e IRS stimato",
+        "gain": "Plusvalenza (o minusvalenza)",
+        "adjustedPurchase": "Valore di acquisto rivalutato",
+        "coefficient": "Coefficiente di svalutazione",
+        "coefficientNone": "Non applicato ({{months}} mesi di possesso)",
+        "expenses": "Spese dedotte",
+        "exemptPercent": "Escluso per reinvestimento",
+        "taxableGain": "Plusvalenza da tassare",
+        "includedIncome": "Aggiunto al reddito (50%)"
+      },
+      "checklist": {
+        "title": "Condizioni da verificare per l'esclusione per reinvestimento",
+        "domicile": "La casa venduta era la tua abitazione principale, con il domicilio fiscale lì, nei 12 mesi precedenti la vendita.",
+        "reinvest": "Il ricavato, al netto del mutuo estinto, è reinvestito in un'altra abitazione principale, in un terreno per costruirla o in lavori su di essa, in Portogallo o nell'UE/SEE, tra 24 mesi prima e 36 mesi dopo la vendita.",
+        "declare": "Dichiari l'intenzione di reinvestire, e l'importo, nella dichiarazione IRS dell'anno della vendita.",
+        "occupy": "La nuova casa diventa la tua abitazione principale, con il domicilio fiscale lì, entro 12 mesi dal reinvestimento.",
+        "register": "Per terreno o costruzione, la registrazione è richiesta entro 48 mesi dalla vendita e la casa è usata come residenza fino alla fine del quinto anno successivo.",
+        "note": "Questo elenco è un promemoria, non un verdetto. È l'amministrazione fiscale a decidere se le condizioni sono rispettate."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Una casa acquistata nel {{purchaseYear}} per {{purchaseValue}} e venduta nel {{saleYear}} per {{saleValue}}. Il valore di acquisto è rivalutato con il coefficiente {{coefficient}} a {{adjustedPurchase}} e si dedudono {{expenses}} di spese, lasciando una plusvalenza di {{gain}}. La metà, {{included}}, si somma ad altri redditi di {{otherIncome}} e aggiunge circa {{extraTax}} di IRS.",
+        "methodTitle": "Come funziona la stima",
+        "methodGain": "Plusvalenza = prezzo di vendita meno il valore di acquisto rivalutato con il coefficiente, meno le spese di acquisto e di vendita e i lavori degli ultimi 12 anni (CIRS, articoli 46, 50 e 51).",
+        "methodCoefficient": "Il coefficiente di svalutazione monetaria dell'anno di acquisto si applica solo se l'immobile è stato posseduto per più di 24 mesi. I valori del {{saleYear}} provengono dalla {{portaria}} e sono memorizzati per acquisti dal {{firstYear}}.",
+        "methodExpenses": "Le spese devono essere necessarie, effettivamente pagate e documentate: IMT e Imposto do Selo dell'acquisto, provvigioni di agenzia e lavori degli ultimi 12 anni con fattura.",
+        "methodHalf": "Solo il 50% di una plusvalenza positiva si somma agli altri redditi dell'anno ed è tassato negli scaglioni progressivi dell'IRS del {{saleYear}}. L'IRS aggiuntivo mostrato è l'imposta con la plusvalenza meno l'imposta senza.",
+        "methodExemption": "La plusvalenza sull'abitazione principale è esclusa quando il ricavato, al netto del mutuo estinto, è reinvestito in un'altra entro i termini di legge. Se solo una parte è reinvestita, si esclude la stessa proporzione della plusvalenza.",
+        "methodCash": "Il ricavato che resta sottrae dal prezzo di vendita le spese di vendita, il mutuo estinto e l'IRS stimato. Non sottrae ciò che spendi per la casa successiva.",
+        "scopeTitle": "Cosa è coperto",
+        "scopeSupported": "Persone fisiche residenti fiscali in Portogallo che vendono nel {{saleYear}} un immobile del patrimonio privato acquistato dal {{firstYear}}.",
+        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività, successioni e donazioni, case con aiuto pubblico superiore al 30% del valore fiscale, vendite sotto il valore fiscale dell'immobile, la sovrattassa di solidarietà e le detrazioni d'imposta.",
+        "assumptionsTitle": "Ipotesi",
+        "assumptionBrackets": "L'IRS aggiuntivo usa gli scaglioni annuali dell'IRS del {{saleYear}} sul reddito indicato, come stima dell'effetto sulla dichiarazione annuale. La tassazione congiunta è modellata dividendo il reddito per due.",
+        "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento né il valore fiscale dell'immobile. I coefficienti sono stati letti da un riepilogo secondario della Portaria e vanno confermati nel Diário da República.",
+        "assumptionEducational": "Questa è una stima a scopo educativo, non una consulenza fiscale. Conta l'avviso di liquidazione dell'IRS dell'amministrazione fiscale.",
+        "sourcesTitle": "Fonti",
+        "sourceGains": "CIRS, articolo 43: plusvalenze e minusvalenze (consultato il 19 novembre 2026)",
+        "sourceExemption": "CIRS, articolo 10: esclusione per reinvestimento nell'abitazione principale (consultato il 19 novembre 2026)",
+        "sourceCoefficients": "{{portaria}}: coefficienti di svalutazione per il {{saleYear}}",
+        "reviewed": "Regole e coefficienti del {{saleYear}} rivisti il {{reviewed}}."
+      },
+      "nextStepHeadline": "Scopri quanto della vendita puoi davvero usare",
+      "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'imposta e a vedere cosa resta per la prossima casa.",
+      "nextStepCta": "Pianifica quanto del ricavato resta disponibile"
+    },
+    "christmasAllowance": {
+      "title": "Calcolatore della tredicesima in Portogallo 2026",
+      "shortName": "Tredicesima",
+      "subtitle": "Stima la tua tredicesima netta (subsídio de Natal): ritenuta IRS, previdenza sociale, anno di assunzione e pagamento in dodicesimi.",
+      "description": "Stima la tredicesima netta in Portogallo, con un primo anno parziale e il pagamento in dodicesimi.",
+      "pageTitle": "Calcolatore della Tredicesima in Portogallo 2026: Subsídio de Natal Netto",
+      "pageDescription": "Calcola la tua tredicesima netta in Portogallo con le tabelle di ritenuta IRS 2026 e l'11% di previdenza sociale, per un anno intero o parziale, in un'unica soluzione o in dodicesimi.",
+      "nextStepHeadline": "Decidi a cosa serve la tredicesima",
+      "nextStepDescription": "WonderMoney ti permette di assegnare un'entrata extra ai tuoi obiettivi e alle prossime spese, così non si perde nel mese.",
+      "nextStepCta": "Dividi la tredicesima tra obiettivi e spese",
+      "guide": {
+        "example": "Con uno stipendio base di {{salary}} al mese, non sposato e senza persone a carico, nel Portogallo continentale e occupato tutto l'anno, la tredicesima è di {{gross}} lordi. La ritenuta IRS è di {{withholding}} e la previdenza sociale di {{socialSecurity}}, quindi sul conto arrivano {{net}}.",
+        "ruleAmount": "La tredicesima equivale a una mensilità e va pagata entro il 15 dicembre (Código do Trabalho, art. 263, n. 1).",
+        "ruleHiringYear": "Nell'anno di assunzione è proporzionale al tempo lavorato nell'anno solare (art. 263, n. 2). Il calcolatore conta i giorni di calendario dalla data di inizio al 31 dicembre; alcuni datori di lavoro contano i mesi, con una differenza di pochi euro.",
+        "methodPlan": "Il netto è un'entrata extra che arriva una volta all'anno e rende di più con un piano: prima gli obiettivi, poi le spese che deve coprire."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Calcolatore della quattordicesima (ferie) in Portogallo 2026",
+      "shortName": "Subsídio de férias",
+      "subtitle": "Stima il tuo subsídio de férias netto, l'indennità di ferie: ritenuta IRS, previdenza sociale, anno di assunzione e pagamento in dodicesimi.",
+      "description": "Stima l'indennità di ferie netta in Portogallo, con l'anno di assunzione e il pagamento in dodicesimi.",
+      "pageTitle": "Calcolatore dell'Indennità di Ferie in Portogallo 2026: Subsídio de Férias Netto",
+      "pageDescription": "Calcola l'indennità di ferie netta in Portogallo con le tabelle di ritenuta IRS 2026 e l'11% di previdenza sociale, con la regola dei 2 giorni al mese dell'anno di assunzione e il pagamento in dodicesimi.",
+      "nextStepHeadline": "Trasforma l'indennità in una vacanza",
+      "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'indennità per il viaggio a cui è destinata, con un obiettivo e una data, invece di lasciarla sciogliersi nel mese.",
+      "nextStepCta": "Crea un fondo vacanze con l'importo ricevuto",
+      "guide": {
+        "example": "Hai iniziato il 15 marzo 2026 con uno stipendio base di {{salary}} al mese, non sposato e senza persone a carico, nel Portogallo continentale. Hai 9 mesi completi, quindi {{days}} giorni di ferie, e l'indennità di ferie è di {{gross}} lordi. La ritenuta IRS è di {{withholding}} e la previdenza sociale di {{socialSecurity}}, quindi sul conto arrivano {{net}}.",
+        "ruleAmount": "L'indennità di ferie copre la durata minima delle ferie, in aggiunta alla retribuzione del periodo di ferie (Código do Trabalho, art. 264, n. 2), e si paga prima dell'inizio delle ferie salvo diverso accordo scritto (n. 3). In un anno intero equivale a una mensilità.",
+        "ruleHiringYear": "Nell'anno di assunzione hai diritto a 2 giorni lavorativi di ferie per ogni mese completo di contratto, fino a 20 giorni (art. 239, n. 1). Il calcolatore pesa l'indennità per quei giorni sui 22 giorni lavorativi di un anno intero: 18 giorni danno 18/22 di una mensilità.",
+        "methodPlan": "Il netto è denaro pensato per riposarsi: conviene accantonarlo per il viaggio, con un obiettivo e una data, prima di spenderlo."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Come viene pagato l'importo",
+        "startDate": "Data di inizio (facoltativa)"
+      },
+      "modes": {
+        "lumpSum": "In un'unica soluzione",
+        "twelfths": "In dodicesimi (sommati a ogni stipendio mensile)"
+      },
+      "help": {
+        "gross": "Il tuo stipendio base prima di mensilità aggiuntive, previdenza sociale e IRS.",
+        "mode": "In un'unica soluzione si paga tutto insieme. In dodicesimi, l'importo si divide sui mesi lavorati nell'anno e si paga con ogni stipendio.",
+        "startDate": {
+          "christmas": "Lascia vuoto se hai lavorato tutto il {{year}}. Nell'anno in cui inizi, la tredicesima è proporzionale al tempo lavorato.",
+          "holiday": "Lascia vuoto se eri già occupato prima del {{year}}. Nell'anno di assunzione hai 2 giorni lavorativi di ferie per ogni mese completo, fino a 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Inserisci una data valida.",
+        "afterYear": "Questa pagina riguarda il {{year}}. Inserisci una data di inizio nel {{year}} o prima, oppure lascia vuoto.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "netAllowance": "Importo netto stimato",
+        "netTwelfth": "Importo netto extra in ogni stipendio mensile",
+        "gross": "Importo lordo",
+        "withholding": "Ritenuta IRS",
+        "socialSecurity": "Previdenza sociale (11%)",
+        "net": "Importo netto dell'anno",
+        "twelfthGross": "Dodicesimo lordo sommato a ogni stipendio",
+        "twelfthCount": "Numero di pagamenti mensili",
+        "proportion": "Quota di un importo completo: {{percent}}.",
+        "holidayDays": "Giorni di ferie conteggiati: {{days}} su 22 ({{percent}} di un importo completo).",
+        "noAllowanceYet": "Senza alcun mese completo nell'anno di assunzione, non c'è ancora un'indennità di ferie da pagare. I 2 giorni lavorativi al mese contano solo a mese completo.",
+        "noWithholdingOnTwelfth": "Ogni dodicesimo è tassato all'aliquota effettiva dell'importo intero, che a questo livello è 0%, quindi non c'è ritenuta IRS. Il tuo datore di lavoro può sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che trattiene di più."
+      },
+      "guide": {
+        "methodWithholding": "Ogni pagamento è tassato a parte con la tabella mensile 2026, senza essere sommato allo stipendio del mese: il Despacho n.º 233-A/2026 (n. 10) chiede ai datori di lavoro di indicare un'aliquota effettiva separata per ogni retribuzione, come nei mesi in cui si pagano l'indennità di ferie e la tredicesima.",
+        "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero). Ogni dodicesimo è tassato a parte all'aliquota effettiva dell'importo intero, la prassi abituale delle buste paga dalla Lei n.º 11/2013, art. 3 (non indicata nel Despacho). Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che di solito trattiene di più: controlla la busta paga.",
+        "methodSocialSecurity": "La previdenza sociale a carico del lavoratore è l'11% dell'importo lordo.",
+        "unsupportedNovember": "L'aggiustamento una tantum dei redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Un importo pagato a novembre avrebbe la ritenuta dimezzata.",
+        "unsupportedOther": "Conta solo lo stipendio base. Scatti di anzianità, altre voci retributive, cessazione o sospensione del contratto durante l'anno, contratti collettivi più generosi e costi del datore di lavoro restano fuori da questa stima.",
+        "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
+        "reviewed": "Regole riviste il 19 novembre 2026. La ritenuta separata su ogni pagamento del mese è stata verificata nel testo originale del Despacho n.º 233-A/2026, e gli articoli del Código do Trabalho in copie del testo consolidato. Il riferimento di 22 giorni lavorativi per l'indennità di ferie è prassi comune, non indicato in quei testi. Trattenere ogni dodicesimo all'aliquota effettiva dell'importo intero (Lei n.º 11/2013, art. 3) è la prassi abituale delle buste paga; quella legge non è stata verificata sul testo. L'aliquota dell'11% di previdenza sociale è stata verificata su fonti secondarie."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Calcolatore indennità di licenziamento in Portogallo 2026",
+      "shortName": "Indennità di licenziamento",
+      "subtitle": "Stima l'indennità per licenziamento collettivo, soppressione del posto o inidoneità in un contratto a tempo indeterminato, con i limiti e le aliquote in base alla data del contratto.",
+      "description": "Stima la tua indennità di licenziamento in Portogallo: aliquote per data del contratto, limiti e piano di incasso.",
+      "pageTitle": "Calcolatore Indennità di Licenziamento Portogallo 2026: Stima dell'art. 366",
+      "pageDescription": "Stima la compensação por despedimento in Portogallo per licenziamento collettivo o soppressione del posto: 12, 18, 20 o 30 giorni per anno in base alla data del contratto, il tetto di 12 mensilità e un piano di incasso.",
+      "fields": {
+        "baseMonthly": "Retribuzione base mensile (lorda)",
+        "seniorityPay": "Integrazioni mensili di anzianità (diuturnidades)",
+        "startDate": "Data di inizio del contratto",
+        "endDate": "Data di cessazione"
+      },
+      "help": {
+        "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima di previdenza e IRS. Non includere tredicesima, premi né straordinari.",
+        "seniorityPay": "Le diuturnidades sono integrazioni pagate per l'anzianità. Inserisci 0 se non ne hai.",
+        "startDate": "Il giorno in cui è iniziato il contratto a tempo indeterminato. In caso di gruppo di imprese o di un contratto precedente con lo stesso datore di lavoro, verifica come viene conteggiata la tua anzianità.",
+        "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}."
+      },
+      "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre contratti a termine, licenziamento per giusta causa, licenziamento illegittimo, risoluzione consensuale né il settore pubblico.",
+      "errors": {
+        "required": "Inserisci un valore valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "invalidDate": "Inserisci una data valida.",
+        "endBeforeStart": "La data di cessazione non può precedere la data di inizio.",
+        "startFuture": "Il contratto non può iniziare nel futuro.",
+        "endOutsideYear": "Questa stima copre le cessazioni nel {{year}}, l'anno del salario minimo usato dai limiti.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "compensation": "Indennità stimata",
+        "seniority": "Anzianità",
+        "seniorityValue": "{{years}} anni",
+        "regime": "Regole applicate",
+        "regimes": {
+          "before2011": "Contratto precedente al 1° novembre 2011",
+          "from2011": "Contratto dal 1° novembre 2011 al 30 settembre 2013",
+          "from2013": "Contratto dal 1° ottobre 2013"
+        },
+        "usedMonthly": "Importo mensile usato",
+        "daily": "Importo giornaliero (importo mensile diviso 30)",
+        "cap": "Tetto complessivo (12 importi mensili)",
+        "breakdownTitle": "Dettaglio per periodo",
+        "periods": {
+          "oneMonth": "{{years}} anni a {{days}} giorni per anno",
+          "twentyDays": "{{years}} anni a {{days}} giorni per anno",
+          "eighteenDays": "{{years}} anni a {{days}} giorni per anno",
+          "twelveDays": "{{years}} anni a {{days}} giorni per anno",
+          "fourteenDays": "{{years}} anni a {{days}} giorni per anno"
+        },
+        "caps": {
+          "none": "Nessun limite applicato.",
+          "monthlyBase": "L'importo mensile è stato limitato a 20 volte il salario minimo ({{limit}}; il salario minimo è {{rmmg}}).",
+          "total": "L'indennità è stata limitata a 12 importi mensili ({{cap}}).",
+          "earlyPart": "La parte fino al 30 settembre 2013 raggiunge già il tetto di {{cap}}, quindi il periodo successivo non viene sommato."
+        },
+        "payoutTitle": "Incasso ripartito sui prossimi mesi",
+        "payoutValue": "In {{months}} mesi: {{amount}} al mese (prima delle imposte)",
+        "payoutNote": "Solo un suggerimento per pianificare: il datore di lavoro di norma paga l'indennità alla fine del contratto, in un'unica soluzione.",
+        "estimate": "Una stima per imparare e pianificare, non una consulenza legale. Il datore di lavoro, un avvocato, l'ispettorato del lavoro (ACT) o il tuo sindacato possono confermare l'importo."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Chi guadagna {{base}} al mese più {{seniorityPay}} di diuturnidades, con un contratto iniziato il {{start}} e terminato il {{end}}, ha {{seniority}} anni di anzianità. L'importo giornaliero è {{daily}}. Il contratto è iniziato tra il 1° novembre 2011 e il 30 settembre 2013: {{twentyYears}} anni fino al 30 settembre 2013 contano 20 giorni ({{twentyAmount}}), {{eighteenYears}} anni completano i primi tre anni a 18 giorni ({{eighteenAmount}}), {{twelveYears}} anni fino al 30 aprile 2023 contano 12 giorni ({{twelveAmount}}) e gli ultimi {{fourteenYears}} anni contano 14 giorni ({{fourteenAmount}}). Il totale è {{total}}, sotto il tetto di {{cap}}.",
+        "methodTitle": "Come funziona la stima",
+        "methodBase": "La base è la retribuzione base mensile più le diuturnidades. L'importo giornaliero è quell'importo mensile diviso 30.",
+        "methodRates": "Per l'anzianità dal 1° maggio 2023, l'indennità è di 14 giorni di retribuzione base e diuturnidades per ogni anno completo (art. 366, n. 1, del Código do Trabalho, come modificato dalla Lei n.º 13/2023). L'anzianità precedente mantiene l'aliquota vecchia: 12 giorni per anno dal 1° ottobre 2013.",
+        "methodTransitional": "I contratti più vecchi mantengono le aliquote precedenti per il tempo già lavorato (art. 5 della Lei n.º 69/2013). Prima del 1° novembre 2011: un mese per anno fino al 31 ottobre 2012, poi 20 giorni per anno fino al 30 settembre 2013. Dal 1° novembre 2011 al 30 settembre 2013: 20 giorni per anno fino al 30 settembre 2013. Dal 1° ottobre 2013 al 30 aprile 2023 ogni contratto conta 12 giorni per anno, tranne che i primi tre anni di anzianità contano 18 giorni se il contratto aveva meno di tre anni il 1° ottobre 2013. Dal 1° maggio 2023 ogni anno conta 14 giorni.",
+        "methodCaps": "L'importo mensile non può superare 20 volte il salario minimo ({{baseCap}} con il salario minimo di {{rmmg}} del 2026) e l'indennità totale non può superare 12 importi mensili, al massimo {{totalCapRmmg}} (240 volte il salario minimo). Quando la parte fino al 30 settembre 2013 raggiunge già questo tetto, i periodi successivi non vengono sommati.",
+        "methodFraction": "Un anno incompleto conta in proporzione: il calcolatore conta gli anniversari completi della data di inizio più i giorni dall'ultimo, divisi per i giorni di quell'anno. La data di cessazione conta come giorno lavorato.",
+        "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
+        "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale indennità di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
+        "supportedTitle": "Situazioni coperte",
+        "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore, in un contratto a tempo indeterminato, con cessazione nel 2026.",
+        "unsupportedTitle": "Non coperto",
+        "unsupportedFixedTerm": "La scadenza dei contratti a termine (artt. 344 e 345 del Código do Trabalho), che ha aliquote e regole transitorie proprie.",
+        "unsupportedJustCause": "Il licenziamento per giusta causa (disciplinare), che segue altre regole.",
+        "unsupportedUnlawful": "Il licenziamento illegittimo, in cui il tribunale fissa l'indennità, in genere tra 15 e 45 giorni di retribuzione base per anno di anzianità.",
+        "unsupportedAgreement": "La risoluzione consensuale, in cui l'importo è negoziato e non c'è una formula di legge.",
+        "unsupportedPublic": "I dipendenti del settore pubblico, che seguono altre regole.",
+        "sourcesTitle": "Fonti",
+        "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regime transitorio dell'art. 5",
+        "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
+        "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
+        "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
+        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il tetto dell'art. 366 provengono dai riepiloghi di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. Informazione didattica, non consulenza legale."
+      },
+      "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
+      "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
+      "nextStepCta": "Pianifica l'incasso sui tuoi prossimi mesi"
+    },
+    "statePension": {
+      "title": "Calcolatore pensione di vecchiaia Portogallo 2026",
+      "shortName": "Pensione di vecchiaia",
+      "subtitle": "Stima la tua pensione di vecchiaia mensile in Portogallo, il tasso di sostituzione e il divario rispetto al tuo stipendio netto attuale.",
+      "description": "Stima la tua pensione di vecchiaia in Portogallo: importo mensile, tasso di sostituzione e divario rispetto allo stipendio.",
+      "pageTitle": "Calcolatore Pensione di Vecchiaia Portogallo 2026: Stima della Reforma",
+      "pageDescription": "Stima approssimativa della pensione di vecchiaia portoghese (pensão de velhice) per carriere iniziate nel 2002 o dopo: formula 2026, età di pensionamento, penalizzazione per l'uscita anticipata, pensioni minime e il divario rispetto allo stipendio.",
+      "ageValue": "{{years}} anni e {{months}} mesi",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile medio (euro di oggi)",
+        "years": "Anni di contributi al pensionamento",
+        "ageYears": "Età di pensionamento: anni",
+        "ageMonths": "Età di pensionamento: mesi in più"
+      },
+      "help": {
+        "gross": "Il tuo stipendio lordo medio su tutta la carriera in euro di oggi, pagato in 14 mensilità l'anno (tredicesima e quattordicesima a parte). Indica una media reale, non lo stipendio nominale di ogni anno.",
+        "years": "Anni con retribuzioni registrate. Per la pensione contano solo 40 anni; ne servono almeno 15 per avere una pensione di vecchiaia.",
+        "age": "L'età normale nel 2026 è {{normal}}. Dai 60 anni puoi andare in pensione prima con una penalizzazione e, fino ai 70, più tardi con un bonus."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "belowMinimum": "La pensione di vecchiaia richiede almeno {{min}} anni di contributi. Con meno, questa stima non si applica.",
+        "tooLongForAge": "I contributi iniziano a 16 anni al più presto, quindi a questa età il massimo è {{max}} anni.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Pensione lorda mensile stimata (14 mensilità)",
+        "replacement": "Tasso di sostituzione (pensione / stipendio lordo medio)",
+        "statutory": "Pensione prima dell'adeguamento per uscita anticipata o posticipata",
+        "rate": "Tasso globale di formazione",
+        "netPay": "Il tuo stipendio netto oggi (per mensilità)",
+        "gap": "Divario mensile rispetto allo stipendio netto",
+        "adjustment": {
+          "none": "Pensionamento all'età normale del 2026 ({{normal}}): nessuna penalizzazione e nessun bonus.",
+          "early": "Andare in pensione {{months}} mesi prima dell'età normale ({{normal}}) toglie {{penalty}} (0,5% al mese) e applica il fattore di sostenibilità 2026 di {{factor}}.",
+          "late": "Andare in pensione {{months}} mesi dopo l'età normale ({{normal}}) aggiunge un bonus di {{bonus}}.",
+          "lateCapped": "Andare in pensione {{months}} mesi dopo l'età normale ({{normal}}) aggiunge un bonus, che si ferma a {{bonus}} perché la pensione non può superare il 92% della retribuzione di riferimento."
+        },
+        "floorApplied": "La pensione è stata portata al minimo 2026 corrispondente alla tua carriera.",
+        "gapSome": "Per mantenere il tuo tenore di vita ti servirebbero circa {{gap}} al mese da risparmi e investimenti (prima delle imposte).",
+        "gapNone": "A questa età la pensione stimata copre il tuo stipendio netto attuale.",
+        "estimate": "Stima approssimativa per pianificare, non è una decisione né una consulenza. Il riferimento è il simulatore ufficiale della Segurança Social Direta, che usa il tuo storico contributivo reale.",
+        "limits": "Non coperto: carriere iniziate prima del 2002 (formula mista), dipendenti pubblici (CGA), regimi speciali e stipendi molto variabili.",
+        "simulatorLink": "Apri il simulatore ufficiale",
+        "fireLink": "Calcola il risparmio necessario con il calcolatore FIRE"
+      },
+      "nextStepHeadline": "Colma il divario con i tuoi investimenti",
+      "nextStepDescription": "WonderMoney riunisce portafoglio e patrimonio in un unico posto, per vedere fin dove arrivano i tuoi investimenti nel coprire il divario.",
+      "nextStepCta": "Monitora gli investimenti necessari per coprire il divario",
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Una persona con uno stipendio medio di {{gross}} al mese (euro di oggi, 14 mensilità), con {{years}} anni di contributi, va in pensione a {{age}}. La pensione statutaria è di {{statutory}} al mese, un tasso globale di formazione del {{rate}}. Andare in pensione {{months}} mesi prima dell'età normale toglie {{penalty}} e applica il fattore di sostenibilità, lasciando {{monthly}} al mese, cioè il {{replacement}} dello stipendio. Rispetto a uno stipendio netto stimato di {{net}}, il divario è di {{gap}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento è la media delle retribuzioni annuali di tutta la carriera, rivalutate con coefficienti legati ai prezzi al consumo e divise per 14. Il calcolatore lavora in euro di oggi: inserisci uno stipendio mensile medio reale e il risultato è anch'esso in euro di oggi.",
+        "methodRate": "Il tasso annuo dipende dagli scaglioni della retribuzione di riferimento in multipli dell'IAS ({{ias}} nel 2026): {{rates}} per le quote fino a 1,1, fino a 2, fino a 4, fino a 8 e oltre 8 volte l'IAS. Le carriere fino a 20 anni usano un 2% fisso. Il tasso si moltiplica per gli anni di contributi, al massimo 40, e dà il tasso globale di formazione.",
+        "methodAges": "L'età normale di accesso alla pensione di vecchiaia è {{normal2026}} nel 2026 ed è stata fissata a {{normal2027}} per il 2027. Il calcolatore usa il valore del 2026.",
+        "methodEarly": "Prima dell'età normale, dai 60 anni e con almeno 15 anni di contributi, ogni mese di anticipo toglie {{penalty}} e si applica anche il fattore di sostenibilità 2026 ({{factor}}, un taglio del 17,63%). I due si moltiplicano. Le eccezioni, come le carriere molto lunghe, non sono modellate.",
+        "methodLate": "Dopo l'età normale, fino a 70 anni, ogni mese aggiunge un bonus che dipende dagli anni di contributi: 0,33% da 15 anni, 0,50% da 25, 0,65% da 35 e 1% da 40. La pensione con il bonus non può superare il 92% della retribuzione di riferimento.",
+        "methodMinimum": "Se la formula dà meno della pensione minima 2026 per la tua carriera, viene mostrato il minimo: {{min15}} da 15 a 20 anni, {{min21}} da 21 a 30 e {{min31}} da 31 anni in su. Il minimo non si applica al pensionamento anticipato.",
+        "methodGap": "Il divario confronta la pensione lorda stimata, su 14 mensilità, con il tuo stipendio netto di oggi: lordo meno l'11% di previdenza sociale e la ritenuta IRS 2026 per una persona single senza familiari a carico sul continente. Anche la pensione paga l'IRS, quindi il divario reale può variare.",
+        "methodBudget": "Leggi il divario come l'importo mensile che i tuoi risparmi e investimenti dovrebbero coprire. Cambia con ogni ipotesi qui sopra.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedMixed": "Carriere iniziate prima del 2002 (formula mista, con le vecchie regole per gli anni fino al 2001). Questo calcolatore copre solo la formula dell'intera carriera per chi ha iniziato a versare contributi nel 2002 o dopo.",
+        "unsupportedSpecial": "Stipendi molto variabili nella carriera, buchi contributivi e carriere oltre i 40 anni.",
+        "unsupportedCga": "Dipendenti pubblici della CGA, lavoratori autonomi e altri regimi speciali.",
+        "unsupportedOther": "Regimi di pensionamento anticipato senza penalizzazione, pensioni di invalidità e adeguamenti della pensione dopo il pensionamento.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Guida della Segurança Social: pensione di vecchiaia",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, come modificato (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: età normale per il 2027 e fattore di sostenibilità per il 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: adeguamento delle pensioni 2026 e pensioni minime",
+        "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre."
+      }
     }
   },
   "resources": {

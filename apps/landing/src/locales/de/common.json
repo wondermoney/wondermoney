@@ -2913,6 +2913,195 @@
       "nextStepDescription": "WonderMoney macht aus Ihrem geschätzten Netto einen Plan, damit jeder Euro vor Monatsbeginn eine Aufgabe hat.",
       "nextStepCta": "Die Netto-Schätzung in einem Monatsplan nutzen"
     },
+    "unemploymentBenefit": {
+      "title": "Arbeitslosengeld-Rechner Portugal 2026",
+      "shortName": "Arbeitslosengeld",
+      "subtitle": "Schätzen Sie das monatliche Arbeitslosengeld (subsídio de desemprego), die Bezugsdauer und die Gesamtsumme mit den Grenzen für 2026.",
+      "description": "Schätzen Sie Ihr Arbeitslosengeld in Portugal: Monatsbetrag, Dauer und Gesamtsumme.",
+      "pageTitle": "Arbeitslosengeld-Rechner Portugal 2026: Betrag und Bezugsdauer",
+      "pageDescription": "Schätzen Sie das Arbeitslosengeld in Portugal: 65 % des Referenzentgelts, die IAS-Grenzen 2026, die Dauer nach Alter und Beitragszeit und ein reduziertes Einkommen für Ihr Budget.",
+      "fields": {
+        "grossMonthly": "Monatliches Bruttogehalt",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "age": "Alter bei Eintritt der Arbeitslosigkeit",
+        "contributionMonths": "Monate mit gemeldetem Entgelt",
+        "years20": "Jahre mit gemeldetem Entgelt in den letzten 20",
+        "household": "Haushalt",
+        "dependants": "Kinder oder Unterhaltsberechtigte"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
+        "twelfths": "In Zwölfteln (im Gehalt enthalten)"
+      },
+      "households": {
+        "alone": "Ich lebe allein oder mein Partner begründet keinen Zuschlag",
+        "partnerWorking": "Mein Partner arbeitet",
+        "partnerUnemployed": "Mein Partner ist ebenfalls arbeitslos (beim IEFP gemeldet)",
+        "singleParent": "Ich bin der einzige Elternteil im Haushalt"
+      },
+      "help": {
+        "gross": "Das Grundgehalt der letzten Monate vor Sozialversicherung und IRS. Die 12 gezählten Monate enthalten Urlaubs- und Weihnachtsgeld.",
+        "allowances": "Bei 14 Zahlungen zählt der Rechner das 14-Fache des Gehalts, in Zwölfteln das 12-Fache, weil die Zuschläge schon enthalten sind.",
+        "age": "Ihr Alter an dem Tag, an dem Sie arbeitslos wurden.",
+        "months": "Monate mit gemeldetem Entgelt seit dem letzten Bezug von Arbeitslosengeld. Die Tabelle beginnt bei 12 Monaten.",
+        "years20": "Volle Jahre mit gemeldetem Entgelt in den letzten 20 Jahren. Je 5 Jahre kommen zusätzliche Tage hinzu.",
+        "household": "Der Zuschlag von 10 % setzt Kinder oder Unterhaltsberechtigte voraus und entweder beide Partner arbeitslos und gemeldet oder einen Haushalt mit nur einem Elternteil. Er muss beantragt werden."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "belowTable": "Die Dauertabelle beginnt bei {{min}} Monaten mit gemeldetem Entgelt. Bei weniger gilt diese Schätzung nicht.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Geschätztes Arbeitslosengeld pro Monat (30 Tage)",
+        "daily": "Betrag pro Tag",
+        "duration": "Geschätzte Bezugsdauer",
+        "durationValue": "{{days}} Tage (etwa {{months}} Monate)",
+        "durationParts": "Davon Grundzeit und zusätzliche Tage",
+        "durationPartsValue": "{{base}} + {{extra}} Tage",
+        "total": "Geschätzte Gesamtsumme über den ganzen Zeitraum",
+        "netBefore": "Geschätztes Netto-Referenzentgelt pro Monat",
+        "drop": "Monatlicher Einkommensrückgang für Ihr Budget",
+        "increaseApplied": "Der Zuschlag von 10 % für Haushalte mit Kindern ist enthalten.",
+        "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Sozialversicherung berechnet den tatsächlichen Betrag aus Ihrem gemeldeten Entgelt.",
+        "limit": {
+          "none": "Der Betrag ist 65 % des Referenzentgelts; keine Grenze wurde angewendet.",
+          "max": "Der Betrag hat das Maximum von 2,5 IAS erreicht ({{max}} pro Monat).",
+          "netCap": "Der Betrag wurde auf 75 % des geschätzten Netto-Referenzentgelts begrenzt.",
+          "minimum": "Der Betrag wurde auf das Minimum von 1 IAS angehoben ({{ias}} pro Monat).",
+          "minimumWage": "Der Betrag wurde auf das 1,15-Fache des IAS angehoben, das Minimum, wenn das zugrunde liegende Entgelt mindestens dem Mindestlohn entspricht."
+        }
+      },
+      "checklist": {
+        "title": "Voraussetzungen zum Prüfen (keine Entscheidung)",
+        "involuntary": "Ihre Arbeitslosigkeit ist unfreiwillig, zum Beispiel durch Kündigung oder das Ende eines befristeten Vertrags.",
+        "contributions": "Sie haben mindestens 360 Tage gemeldetes Entgelt in den 24 Monaten vor der Arbeitslosigkeit.",
+        "registration": "Sie sind beim Arbeitsamt (IEFP) gemeldet.",
+        "ready": "Sie leben in Portugal und sind arbeitsfähig und verfügbar.",
+        "deadline": "Sie beantragen die Leistung innerhalb von 90 Tagen nach Eintritt der Arbeitslosigkeit.",
+        "note": "Nur die Sozialversicherung entscheidet über Ihren Anspruch. Diese Liste ist eine Erinnerung, kein Urteil."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine {{age}}-jährige Person mit {{gross}} im Monat in 14 Zahlungen, mit {{months}} Monaten und {{years}} Jahren gemeldetem Entgelt in den letzten 20 Jahren, die allein lebt. Das Referenzentgelt beträgt {{reference}} pro Tag, 65 % für 30 Tage ergeben also {{monthly}} im Monat ({{daily}} pro Tag). Die Dauer beträgt {{base}} Tage plus {{extra}} zusätzliche Tage, insgesamt {{days}} Tage, also etwa {{total}} über den gesamten Zeitraum. Gegenüber einem geschätzten Nettoentgelt von {{net}} im Monat beträgt der Einkommensrückgang {{drop}} im Monat.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodReference": "Das Referenzentgelt (RR) ist die Summe des gemeldeten Entgelts der ältesten 12 der 14 Monate vor dem Monat der Arbeitslosigkeit, einschließlich Urlaubs- und Weihnachtsgeld, geteilt durch 360. Der Rechner nimmt das 14- oder 12-Fache Ihres Monatsgehalts.",
+        "methodAmount": "Das Tagesgeld beträgt 65 % der RR. Der Monatsbetrag sind 30 Tage davon.",
+        "methodLimits": "Das monatliche Arbeitslosengeld darf 2,5 IAS ({{max}} im Jahr 2026) und 75 % der Netto-RR nicht überschreiten und nicht unter 1 IAS ({{ias}}) liegen, außer die Netto-RR liegt unter dem IAS. Entspricht das zugrunde liegende Entgelt mindestens dem Mindestlohn ({{rmmg}}), liegt das Minimum bei 1,15 IAS.",
+        "methodNet": "Die Netto-RR ist die RR abzüglich 11 % Sozialversicherung und des IRS-Abzugssatzes. Der Rechner schätzt diesen Satz anhand der Quellensteuertabellen 2026 für das Festland für Ihr Monatsgehalt, als Alleinstehender oder als Verheirateter mit zwei Verdienern, wenn Ihr Partner im Haushalt lebt.",
+        "methodIncrease": "Das Arbeitslosengeld steigt um 10 %, wenn beide Partner arbeitslos und gemeldet sind oder Sie der einzige Elternteil sind und Kinder oder Unterhaltsberechtigte vorhanden sind. Der Zuschlag muss beantragt werden. Der Rechner wendet ihn auf den bereits begrenzten Betrag an, nie über 2,5 IAS.",
+        "methodDuration": "Die Dauer hängt von Ihrem Alter und den Monaten mit gemeldetem Entgelt ab, plus Zusatztage für jede vollen 5 Jahre mit Entgelt in den letzten 20: 30 Tage bis 39 Jahre, 45 Tage von 40 bis 49 und 60 Tage ab 50.",
+        "methodNoReduction": "Die frühere Kürzung um 10 % nach 180 Bezugstagen wird nicht angewendet: Der Leitfaden der Sozialversicherung von 2026 nennt sie nicht.",
+        "methodTax": "Laut Leitfaden der Sozialversicherung muss die Leistung nicht in der IRS-Erklärung angegeben werden. Klären Sie Ihren Fall mit der Steuerbehörde.",
+        "methodBudget": "Der Monatsbetrag ist das Einkommen, mit dem Sie planen. Vergleichen Sie ihn mit Ihrem Nettogehalt, um den Rückgang zu sehen, und prüfen Sie dann, wie lange Ihre Ersparnisse die Lücke decken.",
+        "unsupportedTitle": "Nicht unterstützt",
+        "unsupportedTransitional": "Die Übergangstabelle für Personen, die die Beitragsvoraussetzung schon am 31. März 2012 erfüllten und seitdem nicht arbeitslos waren. Der Rechner nutzt nur die allgemeine Tabelle.",
+        "unsupportedSocial": "Das soziale Arbeitslosengeld (subsídio social de desemprego), das laut Leitfaden nur bis zum 30. Dezember 2026 beantragt werden kann.",
+        "unsupportedSelfEmployed": "Selbstständige, Geschäftsführer und Vorstände, Teilarbeitslosengeld, Lehrkräfte mit eigenen Regeln und frühere Invaliditätsrentner.",
+        "unsupportedOther": "Stark schwankende Gehälter in den 12 gezählten Monaten, Zeiten ohne gemeldetes Entgelt darin, sonstige Einkünfte und die einmalige Auszahlung für eine Existenzgründung.",
+        "sourcesTitle": "Quellen",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16. Oktober 2026), der auch den IAS 2026 von 537,13 Euro (Portaria n.º 480-A/2025/1) und den Mindestlohn von 920 Euro (Decreto-Lei n.º 139/2025) nennt",
+        "sourceLaw": "Decreto-Lei n.º 220/2006 in der geltenden Fassung: Regelung des Schutzes bei Arbeitslosigkeit",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: Zuschlag von 10 % für Haushalte mit Kindern und Minimum von 1,15 IAS",
+        "reviewed": "Regeln und Werte für 2026 am 19. November 2026 mit dem Leitfaden der Sozialversicherung und dem Text des Decreto-Lei n.º 119/2021 im Diário da República abgeglichen. Der IRS-Satz hinter der 75-%-Grenze und die Reihenfolge des 10-%-Zuschlags sind unsere Vereinfachungen, und das Ende der 10-%-Kürzung nach 180 Tagen stammt aus dem Leitfaden und der Presse, nicht aus dem konsolidierten Gesetz."
+      },
+      "nextStepHeadline": "Planen Sie das Polster, bevor das Einkommen sinkt",
+      "nextStepDescription": "WonderMoney zeigt Ihr Bargeld, Ihre monatlichen Ausgaben und wie lange Ihre Ersparnisse bei geringerem Einkommen reichen.",
+      "nextStepCta": "Schätzen Sie, wie lange Ihr Bargeldpolster reicht"
+    },
+    "sickPay": {
+      "title": "Krankengeld-Rechner Portugal 2026 (subsídio de doença)",
+      "shortName": "Krankengeld",
+      "subtitle": "Schätzen Sie das subsídio de doença bei einer Krankschreibung: Betrag je Dauerstufe, Karenztage und Einkommenslücke.",
+      "description": "Krankengeld in Portugal schätzen: Tagessatz, Gesamtbetrag, Karenztage und Lücke zum Nettogehalt.",
+      "pageTitle": "Krankengeld-Rechner Portugal 2026: Baixa Médica und Subsídio de Doença",
+      "pageDescription": "Schätzen Sie das subsídio de doença in Portugal: Referenzentgelt über 180 Tage, 55 % bis 75 % je nach Dauer, die 3 Karenztage, das Minimum von 9,20 € und Ihre Einkommenslücke während der Krankschreibung.",
+      "fields": {
+        "grossMonthly": "Monatsbruttogehalt",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "sickDays": "Tage der Krankschreibung",
+        "dependants": "Kinder bis 16 Jahre (oder 24 mit Kindergeld)",
+        "hospitalisation": "Krankenhausaufenthalt oder ambulante Operation"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
+        "twelfths": "In Zwölfteln (das Gehalt enthält sie bereits)"
+      },
+      "help": {
+        "gross": "Das Grundgehalt der berücksichtigten Monate, vor Sozialversicherung und IRS. Urlaubs- und Weihnachtsgeld zählen nicht zum Referenzentgelt.",
+        "allowances": "In Zwölfteln rechnet der Rechner die zwei Zahlungen heraus, um das Grundgehalt für das Referenzentgelt zu erhalten.",
+        "sickDays": "Gesamtzahl der Tage laut Krankschreibung (CIT), ab dem ersten Tag gezählt. Arbeitnehmer erhalten bis zu 1095 Tage.",
+        "dependants": "Für die Erhöhung um 5 Punkte, die 3 oder mehr Kinder und ein Referenzentgelt von höchstens 500 Euro im Monat voraussetzt.",
+        "hospitalisation": "Bei Krankenhausaufenthalt oder ambulanter Operation wird ab dem ersten Tag gezahlt, ohne Karenzzeit."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Geschätzte Gesamtzahlung der Segurança Social",
+        "paidDays": "Bezahlte Tage",
+        "waiting": "Karenztage (nicht von der Segurança Social bezahlt)",
+        "waitingValue": "{{days}} Tage, etwa {{amount}} Nettogehalt",
+        "waitingNone": "Keine",
+        "reference": "Referenzentgelt pro Tag",
+        "netPay": "Normales Nettogehalt pro Monat",
+        "firstGap": "Einkommenslücke in den ersten 30 Tagen",
+        "averageGap": "Durchschnittliche monatliche Einkommenslücke über die ganze Krankschreibung",
+        "bandsTitle": "Nach Dauerstufe",
+        "bandLabel": "Tage {{from}} bis {{to}} ({{percent}} %)",
+        "bandValue": "{{paid}} bezahlte Tage × {{daily}} = {{amount}}",
+        "increaseApplied": "Die Erhöhung um 5 Punkte bei niedrigem Entgelt und 3 oder mehr Kindern ist enthalten.",
+        "allWaiting": "Jeder Tag dieser Krankschreibung ist ein Karenztag, die Segurança Social zahlt daher nichts. Prüfen Sie, ob Ihr Vertrag oder Tarifvertrag den Arbeitgeber zur Zahlung verpflichtet.",
+        "waitingNote": "Die Segurança Social zahlt die ersten 3 Tage nicht. Ob der Arbeitgeber sie zahlt, hängt von Ihrem Vertrag oder Tarifvertrag ab.",
+        "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Segurança Social berechnet den tatsächlichen Betrag aus Ihren gemeldeten Entgelten.",
+        "limit": {
+          "none": "Der Tagessatz ist der Prozentsatz Ihres Referenzentgelts je Stufe; keine Grenze angewendet.",
+          "minimum": "Der Tagessatz wurde auf das Minimum von {{min}} angehoben (30 % des Mindestlohns).",
+          "referencePay": "Ihr Referenzentgelt liegt unter {{min}} pro Tag, daher entspricht das Krankengeld dem Referenzentgelt.",
+          "netCap": "Der Tagessatz wurde auf den geschätzten Nettowert Ihres Referenzentgelts begrenzt."
+        }
+      },
+      "checklist": {
+        "title": "Voraussetzungen zum Prüfen (keine Entscheidung)",
+        "certificate": "Sie haben eine ärztliche Krankschreibung (CIT), die elektronisch an die Segurança Social übermittelt wurde.",
+        "guarantee": "Sie haben am Tag, an dem Sie die Arbeit einstellen, 6 Monate gemeldetes Entgelt (nicht zwingend am Stück).",
+        "professionalIndex": "Sie haben in den ersten vier der letzten sechs Monate mindestens 12 Tage gearbeitet, den Monat des Arbeitsendes mitgezählt.",
+        "waiting": "Keine Karenzzeit gibt es bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht. Der Rechner hat nur für die erste Möglichkeit einen Schalter.",
+        "note": "Nur die Segurança Social entscheidet über Ihren Anspruch. Diese Liste ist eine Erinnerung, kein Urteil."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Ein Arbeitnehmer mit {{gross}} im Monat in 14 Zahlungen, {{days}} Tage krankgeschrieben und ohne Krankenhausaufenthalt. Das Referenzentgelt beträgt {{reference}} pro Tag. Die Tage 1 bis 3 sind Karenztage, daher zahlt die erste Stufe 27 Tage zu 55 % und die nächsten 15 Tage zu 60 %: insgesamt {{total}}. Das normale Nettogehalt beträgt {{net}} im Monat; über die Krankschreibung liegt die durchschnittliche Lücke bei {{gap}} im Monat.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodReference": "Das Referenzentgelt (RR) ist die Summe der gemeldeten Entgelte in den 6 ältesten der 8 Monate vor dem Monat des Krankheitsbeginns, ohne Urlaubs- und Weihnachtsgeld, geteilt durch 180. Der Rechner nutzt Ihr Monatsgehalt geteilt durch 30.",
+        "methodBands": "Das Tagesgeld ist ein Prozentsatz der RR, der mit der Dauer steigt: 55 % bis 30 Tage, 60 % von Tag 31 bis 90, 70 % von Tag 91 bis 365 und danach 75 %, für Arbeitnehmer bis 1095 Tage. Die Tage zählen ab dem ersten Tag, Karenztage eingeschlossen.",
+        "methodWaiting": "Arbeitnehmer haben 3 Karenztage, die die Segurança Social nicht zahlt. Bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht, beginnt die Zahlung am ersten Tag.",
+        "methodMinimum": "Das Tagesgeld darf nicht unter {{min}} liegen (30 % des Mindestlohns von {{rmmg}}). Liegt die RR selbst darunter, entspricht das Krankengeld der RR.",
+        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn die RR höchstens 500 Euro im Monat beträgt und der Haushalt 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder Kinder mit Behinderungszuschlag hat. Der Rechner berücksichtigt nur die Kinderzahl.",
+        "methodNetCap": "Das Tagesgeld darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Abzugssatz 2026 des Festlands für einen Alleinstehenden.",
+        "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
+        "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
+        "unsupportedTitle": "Nicht abgedeckt",
+        "unsupportedTuberculosis": "Tuberkulose, bezahlt mit 80 % oder 100 % der RR je nach Angehörigen, ohne Zeitlimit.",
+        "unsupportedSelfEmployed": "Selbstständige (10 Karenztage, bis 365 Tage), freiwillige Sozialversicherung und Hausangestellte.",
+        "unsupportedShort": "Kurze Abwesenheiten mit der Selbstauskunft über Krankheit des SNS 24: Wir haben ihre Regeln nicht abgebildet.",
+        "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
+        "sourcesTitle": "Quellen",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
+        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime",
+        "reviewed": "Regeln und Werte für 2026 am 19. November 2026 anhand des Leitfadens der Segurança Social geprüft. Die Grenze von 500 Euro für die Erhöhung um 5 Punkte stammt aus dem konsolidierten Gesetz und Sekundärquellen, weil der Leitfaden die Zahl nicht zeigt. Die Nettogehaltsschätzung hinter der Nettogrenze ist eine Vereinfachung von uns."
+      },
+      "nextStepHeadline": "Planen Sie die vorübergehende Einkommenslücke",
+      "nextStepDescription": "WonderMoney zeigt Ihr Geld, Ihre Ausgaben und wie lange Ihre Ersparnisse ein geringeres Einkommen decken.",
+      "nextStepCta": "Passen Sie Ihr Budget an die vorübergehende Einkommenslücke an"
+    },
     "vehicleTax": {
       "title": "Kfz-Steuer-Rechner (IUC)",
       "shortName": "Kfz-Steuer (IUC)",
@@ -2994,6 +3183,357 @@
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
       "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück"
+    },
+    "propertyCapitalGains": {
+      "title": "Rechner für den Veräußerungsgewinn beim Hausverkauf",
+      "shortName": "Veräußerungsgewinn Immobilie",
+      "subtitle": "Schätzen Sie den Gewinn aus dem Verkauf einer Immobilie in Portugal, die zusätzliche IRS und wie viel vom Verkaufserlös verfügbar bleibt.",
+      "description": "Schätzen Sie die IRS auf den Immobilienverkauf in Portugal, mit Reinvestitionsbefreiung.",
+      "pageTitle": "Immobilien-Veräußerungsgewinn Portugal 2026: IRS beim Hausverkauf berechnen",
+      "pageDescription": "Schätzen Sie den Gewinn aus dem Verkauf einer Immobilie in Portugal 2026 mit Geldentwertungskoeffizient, Kosten und Reinvestition in die eigene Hauptwohnung, samt zusätzlicher IRS und verbleibendem Erlös.",
+      "sections": {
+        "property": "Die Immobilie",
+        "expenses": "Kosten",
+        "income": "Ihr Einkommen",
+        "reinvestment": "Eigene Hauptwohnung"
+      },
+      "fields": {
+        "saleValue": "Verkaufspreis",
+        "purchaseValue": "Anschaffungswert",
+        "purchaseYear": "Kaufjahr",
+        "purchaseMonth": "Kaufmonat",
+        "saleMonth": "Verkaufsmonat in {{saleYear}}",
+        "purchaseExpenses": "Anschaffungskosten",
+        "worksExpenses": "Arbeiten der letzten 12 Jahre",
+        "saleExpenses": "Verkaufskosten",
+        "otherIncome": "Übriges steuerpflichtiges Jahreseinkommen",
+        "joint": "Zusammenveranlagung (Paar)",
+        "ownHome": "Es war meine Hauptwohnung und ich will den Erlös reinvestieren",
+        "reinvested": "In eine andere Hauptwohnung reinvestierter Betrag",
+        "loanRepaid": "Mit dem Verkauf getilgtes Darlehenskapital"
+      },
+      "help": {
+        "dates": "Der Koeffizient gilt nur, wenn die Immobilie länger als 24 Monate gehalten wurde. Der Rechner deckt Verkäufe in {{saleYear}} ab.",
+        "purchaseExpenses": "Beim Kauf gezahlte IMT und Imposto do Selo, dazu Notar- und Registerkosten und die Maklerprovision.",
+        "worksExpenses": "Nur Arbeiten mit Rechnung aus den letzten 12 Jahren, die den Wert der Immobilie erhöht haben.",
+        "saleExpenses": "Die Maklerprovision und weitere Verkaufskosten, etwa der Energieausweis.",
+        "otherIncome": "Das übrige IRS-pflichtige Einkommen des Haushalts im Jahr, nach den spezifischen Abzügen und vor den Steuerabzügen. Geben Sie 0 an, wenn es keines gibt.",
+        "joint": "Teilt das Einkommen durch zwei, wie bei der Zusammenveranlagung. Für eine Einzelveranlagung ausgeschaltet lassen.",
+        "reinvested": "Zählt Käufe von 24 Monaten vor bis 36 Monate nach dem Verkauf, in Portugal oder der EU/dem EWR.",
+        "loanRepaid": "Der Teil des Verkaufserlöses, der das Darlehen der verkauften Immobilie tilgt."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "zero": "Geben Sie einen Wert über null ein.",
+        "negative": "Geben Sie einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "yearTooOld": "Vor {{year}} gekaufte Immobilien unterliegen einer eigenen Regelung und sind nicht abgedeckt.",
+        "yearTooNew": "Geben Sie ein Kaufjahr bis {{saleYear}} ein.",
+        "month": "Wählen Sie einen Monat aus der Liste.",
+        "afterSale": "Der Kauf kann nicht nach dem Verkauf liegen.",
+        "loanTooLarge": "Das getilgte Darlehen darf den Verkaufspreis nicht übersteigen.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "extraTax": "Geschätzte zusätzliche IRS auf den Gewinn",
+        "estimateNote": "Steuer mit dem Gewinn minus Steuer ohne ihn, für die Jahreserklärung. Steuerabzüge bleiben unberücksichtigt, Ihre endgültige Erklärung kann abweichen.",
+        "loss": "Der Verkauf endete mit einem Verlust, daher wird Ihrem Einkommen kein Gewinn hinzugerechnet.",
+        "zero": "Es gibt keinen Gewinn, also keine zusätzliche IRS.",
+        "cashAfter": "Erlös nach Verkaufskosten, getilgtem Darlehen und geschätzter IRS",
+        "gain": "Gewinn (oder Verlust)",
+        "adjustedPurchase": "Aktualisierter Anschaffungswert",
+        "coefficient": "Geldentwertungskoeffizient",
+        "coefficientNone": "Nicht angewendet ({{months}} Monate gehalten)",
+        "expenses": "Abgezogene Kosten",
+        "exemptPercent": "Durch Reinvestition ausgenommen",
+        "taxableGain": "Zu versteuernder Gewinn",
+        "includedIncome": "Ihrem Einkommen hinzugerechnet (50 %)"
+      },
+      "checklist": {
+        "title": "Voraussetzungen für die Reinvestitionsbefreiung",
+        "domicile": "Die verkaufte Wohnung war Ihre Hauptwohnung, mit Ihrem steuerlichen Wohnsitz dort, in den 12 Monaten vor dem Verkauf.",
+        "reinvest": "Der Erlös, abzüglich des getilgten Darlehens, wird in eine andere Hauptwohnung, in Bauland dafür oder in Arbeiten daran reinvestiert, in Portugal oder der EU/dem EWR, zwischen 24 Monaten vor und 36 Monaten nach dem Verkauf.",
+        "declare": "Sie erklären die Reinvestitionsabsicht und den Betrag in der IRS-Erklärung des Verkaufsjahres.",
+        "occupy": "Die neue Wohnung wird innerhalb von 12 Monaten nach der Reinvestition Ihre Hauptwohnung, mit Ihrem steuerlichen Wohnsitz dort.",
+        "register": "Bei Grundstück oder Bau wird die Eintragung binnen 48 Monaten nach dem Verkauf beantragt und die Wohnung bis zum Ende des fünften Folgejahres als Wohnsitz genutzt.",
+        "note": "Diese Liste ist eine Erinnerung, kein Urteil. Ob die Voraussetzungen erfüllt sind, entscheidet die Steuerbehörde."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine {{purchaseYear}} für {{purchaseValue}} gekaufte und {{saleYear}} für {{saleValue}} verkaufte Wohnung. Der Anschaffungswert wird mit dem Koeffizienten {{coefficient}} auf {{adjustedPurchase}} angehoben und {{expenses}} Kosten werden abgezogen, es bleibt ein Gewinn von {{gain}}. Die Hälfte, {{included}}, wird dem übrigen Einkommen von {{otherIncome}} hinzugerechnet und erhöht die IRS um etwa {{extraTax}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodGain": "Gewinn = Verkaufspreis minus der mit dem Koeffizienten aktualisierte Anschaffungswert, minus Anschaffungs- und Verkaufskosten und Arbeiten der letzten 12 Jahre (CIRS, Artikel 46, 50 und 51).",
+        "methodCoefficient": "Der Geldentwertungskoeffizient des Kaufjahres gilt nur, wenn die Immobilie länger als 24 Monate gehalten wurde. Die Werte für {{saleYear}} stammen aus der {{portaria}} und sind für Käufe ab {{firstYear}} hinterlegt.",
+        "methodExpenses": "Kosten müssen notwendig, tatsächlich bezahlt und belegt sein: IMT und Imposto do Selo des Kaufs, Maklerprovisionen und Arbeiten der letzten 12 Jahre mit Rechnung.",
+        "methodHalf": "Nur 50 % eines positiven Gewinns werden dem übrigen Einkommen des Jahres hinzugerechnet und nach den progressiven IRS-Stufen von {{saleYear}} besteuert. Die gezeigte zusätzliche IRS ist die Steuer mit dem Gewinn minus die Steuer ohne ihn.",
+        "methodExemption": "Der Gewinn aus der eigenen Hauptwohnung wird ausgenommen, wenn der Erlös, abzüglich des getilgten Darlehens, innerhalb der gesetzlichen Fristen in eine andere reinvestiert wird. Wird nur ein Teil reinvestiert, wird derselbe Anteil des Gewinns ausgenommen.",
+        "methodCash": "Der verbleibende Erlös zieht vom Verkaufspreis die Verkaufskosten, das getilgte Darlehen und die geschätzte IRS ab. Was Sie in die nächste Wohnung stecken, wird nicht abgezogen.",
+        "scopeTitle": "Was abgedeckt ist",
+        "scopeSupported": "Natürliche Personen mit steuerlichem Wohnsitz in Portugal, die {{saleYear}} eine seit {{firstYear}} gekaufte Immobilie aus dem Privatvermögen verkaufen.",
+        "scopeUnsupported": "Nicht abgedeckt: Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, Verkäufe unter dem Steuerwert der Immobilie, der Solidaritätszuschlag und Steuerabzüge.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionBrackets": "Die zusätzliche IRS nutzt die Jahrestarifstufen der IRS von {{saleYear}} auf das eingegebene Einkommen, als Schätzung der Wirkung auf die Jahreserklärung. Die Zusammenveranlagung wird durch Teilung des Einkommens durch zwei abgebildet.",
+        "assumptionNotModelled": "Der Rechner prüft weder die Reinvestitionsvoraussetzungen noch den Steuerwert der Immobilie. Die Koeffizienten wurden aus einer Sekundärzusammenfassung der Portaria gelesen und sollten im Diário da República bestätigt werden.",
+        "assumptionEducational": "Dies ist eine Schätzung zu Lernzwecken, keine Steuerberatung. Maßgeblich ist der IRS-Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceGains": "CIRS, Artikel 43: Gewinne und Verluste (abgerufen am 19. November 2026)",
+        "sourceExemption": "CIRS, Artikel 10: Ausnahme bei Reinvestition in die eigene Hauptwohnung (abgerufen am 19. November 2026)",
+        "sourceCoefficients": "{{portaria}}: Entwertungskoeffizienten für {{saleYear}}",
+        "reviewed": "Regeln und Koeffizienten für {{saleYear}} geprüft am {{reviewed}}."
+      },
+      "nextStepHeadline": "Wissen, wie viel vom Verkauf Sie wirklich nutzen können",
+      "nextStepDescription": "WonderMoney hilft Ihnen, die Steuer zurückzulegen und zu sehen, was für die nächste Wohnung bleibt.",
+      "nextStepCta": "Planen Sie, wie viel vom Verkaufserlös verfügbar bleibt"
+    },
+    "christmasAllowance": {
+      "title": "Weihnachtsgeld-Rechner Portugal 2026",
+      "shortName": "Weihnachtsgeld",
+      "subtitle": "Schätzen Sie Ihr Netto-Weihnachtsgeld (subsídio de Natal): IRS-Quellensteuer, Sozialversicherung, Eintrittsjahr und Auszahlung in Zwölfteln.",
+      "description": "Schätzen Sie Ihr Netto-Weihnachtsgeld in Portugal, auch für ein angebrochenes erstes Jahr und bei Auszahlung in Zwölfteln.",
+      "pageTitle": "Weihnachtsgeld-Rechner Portugal 2026: Subsídio de Natal netto",
+      "pageDescription": "Berechnen Sie Ihr Netto-Weihnachtsgeld in Portugal mit den IRS-Quellensteuertabellen 2026 und 11 % Sozialversicherung, für ein volles oder angebrochenes Jahr, als Einmalzahlung oder in Zwölfteln.",
+      "nextStepHeadline": "Entscheiden Sie, wofür das Geld gedacht ist",
+      "nextStepDescription": "Mit WonderMoney weisen Sie eine Sonderzahlung Ihren Zielen und anstehenden Ausgaben zu, damit sie nicht im Monat versickert.",
+      "nextStepCta": "Das Weihnachtsgeld auf Ziele und Ausgaben aufteilen",
+      "guide": {
+        "example": "Bei einem Grundgehalt von {{salary}} im Monat, nicht verheiratet, ohne Unterhaltsberechtigte, in Festlandportugal und ganzjährig beschäftigt, beträgt das Weihnachtsgeld {{gross}} brutto. Die IRS-Quellensteuer liegt bei {{withholding}}, die Sozialversicherung bei {{socialSecurity}}, sodass {{net}} auf Ihrem Konto ankommen.",
+        "ruleAmount": "Das Weihnachtsgeld entspricht einem Monatsgehalt und ist bis zum 15. Dezember fällig (Código do Trabalho, Art. 263, Abs. 1).",
+        "ruleHiringYear": "Im Jahr der Einstellung ist es anteilig zur im Kalenderjahr geleisteten Arbeitszeit (Art. 263, Abs. 2). Der Rechner zählt Kalendertage vom Starttermin bis zum 31. Dezember; manche Arbeitgeber zählen Monate, was einige Euro Unterschied ergeben kann.",
+        "methodPlan": "Das Netto ist Geld, das einmal im Jahr zusätzlich kommt, und es wirkt am besten mit einem Plan: zuerst die Ziele, dann die Ausgaben, die es decken soll."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Urlaubsgeld-Rechner Portugal 2026",
+      "shortName": "Urlaubsgeld",
+      "subtitle": "Schätzen Sie Ihr Netto-Urlaubsgeld (subsídio de férias): IRS-Quellensteuer, Sozialversicherung, Eintrittsjahr und Auszahlung in Zwölfteln.",
+      "description": "Schätzen Sie Ihr Netto-Urlaubsgeld in Portugal, auch für das Eintrittsjahr und bei Auszahlung in Zwölfteln.",
+      "pageTitle": "Urlaubsgeld-Rechner Portugal 2026: Subsídio de Férias netto",
+      "pageDescription": "Berechnen Sie Ihr Netto-Urlaubsgeld in Portugal mit den IRS-Quellensteuertabellen 2026 und 11 % Sozialversicherung, inklusive der Regel von 2 Urlaubstagen pro Monat im Eintrittsjahr und der Auszahlung in Zwölfteln.",
+      "nextStepHeadline": "Machen Sie aus dem Urlaubsgeld einen Urlaub",
+      "nextStepDescription": "WonderMoney hilft Ihnen, das Urlaubsgeld für die Reise zurückzulegen, für die es gedacht ist, mit Ziel und Datum, statt es im Monat untergehen zu lassen.",
+      "nextStepCta": "Aus dem erhaltenen Betrag einen Urlaubsfonds anlegen",
+      "guide": {
+        "example": "Sie haben am 15. März 2026 mit einem Grundgehalt von {{salary}} im Monat begonnen, nicht verheiratet, ohne Unterhaltsberechtigte, in Festlandportugal. Sie haben 9 volle Monate und damit {{days}} Urlaubstage; das Urlaubsgeld beträgt {{gross}} brutto. Die IRS-Quellensteuer liegt bei {{withholding}}, die Sozialversicherung bei {{socialSecurity}}, sodass {{net}} auf Ihrem Konto ankommen.",
+        "ruleAmount": "Das Urlaubsgeld deckt die Mindestdauer des Urlaubs ab, zusätzlich zur Vergütung für die Urlaubszeit (Código do Trabalho, Art. 264, Abs. 2), und wird vor Urlaubsbeginn gezahlt, sofern nicht schriftlich anders vereinbart (Abs. 3). In einem vollen Jahr entspricht es einem Monatsgehalt.",
+        "ruleHiringYear": "Im Eintrittsjahr stehen Ihnen 2 Arbeitstage Urlaub pro vollem Vertragsmonat zu, höchstens 20 Tage (Art. 239, Abs. 1). Der Rechner gewichtet das Urlaubsgeld mit diesen Tagen im Verhältnis zu den 22 Arbeitstagen eines vollen Jahres: 18 Tage ergeben 18/22 eines Monatsgehalts.",
+        "methodPlan": "Das Netto ist Geld für die Auszeit. Es hilft, es für die Reise zurückzulegen, mit Ziel und Datum, bevor es ausgegeben ist."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Wie das Geld ausgezahlt wird",
+        "startDate": "Eintrittsdatum (optional)"
+      },
+      "modes": {
+        "lumpSum": "Einmalzahlung",
+        "twelfths": "In Zwölfteln (zu jedem Monatsgehalt addiert)"
+      },
+      "help": {
+        "gross": "Ihr Grundgehalt vor Sonderzahlungen, Sozialversicherung und IRS.",
+        "mode": "Bei einer Einmalzahlung wird alles auf einmal gezahlt. In Zwölfteln wird der Betrag auf die Monate verteilt, die Sie im Jahr arbeiten, und mit jedem Gehalt gezahlt.",
+        "startDate": {
+          "christmas": "Leer lassen, wenn Sie das ganze Jahr {{year}} gearbeitet haben. Im Eintrittsjahr ist das Weihnachtsgeld anteilig zur Arbeitszeit.",
+          "holiday": "Leer lassen, wenn Sie schon vor {{year}} beschäftigt waren. Im Eintrittsjahr stehen Ihnen 2 Arbeitstage Urlaub pro vollem Monat zu, höchstens 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Geben Sie ein gültiges Datum ein.",
+        "afterYear": "Diese Seite gilt für {{year}}. Geben Sie ein Eintrittsdatum in {{year}} oder früher ein oder lassen Sie das Feld leer.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "netAllowance": "Geschätztes Netto",
+        "netTwelfth": "Zusätzliches Netto in jedem Monatsgehalt",
+        "gross": "Brutto der Sonderzahlung",
+        "withholding": "IRS-Quellensteuer",
+        "socialSecurity": "Sozialversicherung (11 %)",
+        "net": "Netto der Sonderzahlung im Jahr",
+        "twelfthGross": "Brutto-Zwölftel, zu jedem Gehalt addiert",
+        "twelfthCount": "Anzahl der Monatszahlungen",
+        "proportion": "Anteil einer vollen Sonderzahlung: {{percent}}.",
+        "holidayDays": "Angerechnete Urlaubstage: {{days}} von 22 ({{percent}} einer vollen Sonderzahlung).",
+        "noAllowanceYet": "Ohne vollen Monat im Eintrittsjahr gibt es noch kein Urlaubsgeld. Die 2 Arbeitstage pro Monat zählen erst, wenn der Monat voll ist.",
+        "noWithholdingOnTwelfth": "Jedes Zwölftel wird mit dem effektiven Satz der gesamten Sonderzahlung besteuert, der auf diesem Niveau 0 % beträgt, daher wird keine IRS einbehalten. Ihr Arbeitgeber kann das Zwölftel zum Monatsgehalt addieren und auf die Summe einbehalten, was mehr einbehält."
+      },
+      "guide": {
+        "methodWithholding": "Jede Zahlung wird für sich mit der monatlichen Tabelle 2026 besteuert und nicht zum Monatsgehalt addiert: Das Despacho n.º 233-A/2026 (Nr. 10) verlangt von Arbeitgebern einen getrennten effektiven Satz je Vergütung, wie in den Monaten, in denen Urlaubs- und Weihnachtsgeld gezahlt werden.",
+        "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr). Jedes Zwölftel wird für sich mit dem effektiven Satz der gesamten Sonderzahlung besteuert, übliche Lohnabrechnungspraxis seit dem Lei n.º 11/2013, Art. 3 (nicht im Despacho geregelt). Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und auf die Summe einbehalten, was meist mehr einbehält: Prüfen Sie Ihre Gehaltsabrechnung.",
+        "methodSocialSecurity": "Die Sozialversicherung zulasten des Arbeitnehmers beträgt 11 % der Brutto-Sonderzahlung.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Eine im November gezahlte Sonderzahlung würde nur zur Hälfte einbehalten.",
+        "unsupportedOther": "Es zählt nur das Grundgehalt. Dienstalterszulagen, andere Vergütungsbestandteile, Vertragsende oder Ruhen im Jahr, großzügigere Tarifverträge und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
+        "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
+        "reviewed": "Regeln geprüft am 19. November 2026. Die getrennte Quellensteuer je Zahlung eines Monats wurde im Originaltext des Despacho n.º 233-A/2026 geprüft, die Artikel des Código do Trabalho in Kopien des konsolidierten Textes. Die Referenz von 22 Arbeitstagen beim Urlaubsgeld entspricht der gängigen Praxis und steht nicht in diesen Texten. Die Quellensteuer je Zwölftel mit dem effektiven Satz der gesamten Sonderzahlung (Lei n.º 11/2013, Art. 3) ist übliche Lohnabrechnungspraxis; dieses Gesetz wurde nicht am Text geprüft. Der Sozialversicherungssatz von 11 % wurde anhand von Sekundärquellen geprüft."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Abfindungsrechner Kündigung Portugal 2026",
+      "shortName": "Abfindung bei Kündigung",
+      "subtitle": "Schätze die Entschädigung bei Massenentlassung, Wegfall der Stelle oder Nichteignung in einem unbefristeten Vertrag, mit Obergrenzen und Sätzen nach Vertragsdatum.",
+      "description": "Schätze deine Abfindung bei Kündigung in Portugal: Sätze nach Vertragsdatum, Obergrenzen und Auszahlungsplan.",
+      "pageTitle": "Abfindungsrechner Portugal 2026: Schätzung nach Art. 366",
+      "pageDescription": "Schätze die compensação por despedimento in Portugal bei Massenentlassung oder Wegfall der Stelle: 12, 18, 20 oder 30 Tage pro Jahr je nach Vertragsdatum, die Grenze von 12 Monatsbeträgen und ein Auszahlungsplan.",
+      "fields": {
+        "baseMonthly": "Monatliches Grundgehalt (brutto)",
+        "seniorityPay": "Monatliche Dienstalterszulagen (diuturnidades)",
+        "startDate": "Vertragsbeginn",
+        "endDate": "Datum der Beendigung"
+      },
+      "help": {
+        "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
+        "seniorityPay": "Diuturnidades sind Zulagen für die Betriebszugehörigkeit. Gib 0 ein, wenn du keine hast.",
+        "startDate": "Der Tag, an dem der unbefristete Vertrag begann. Bei einem Konzern oder einem früheren Vertrag mit demselben Arbeitgeber prüfe, wie deine Betriebszugehörigkeit gezählt wird.",
+        "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}."
+      },
+      "scope": "Gilt für Massenentlassung, Wegfall der Stelle und Nichteignung in einem unbefristeten Vertrag. Nicht abgedeckt: befristete Verträge, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und der öffentliche Dienst.",
+      "errors": {
+        "required": "Gib einen gültigen Wert ein.",
+        "tooSmall": "Gib einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Gib einen Wert bis {{max}} ein.",
+        "invalidDate": "Gib ein gültiges Datum ein.",
+        "endBeforeStart": "Das Beendigungsdatum darf nicht vor dem Vertragsbeginn liegen.",
+        "startFuture": "Der Vertrag kann nicht in der Zukunft beginnen.",
+        "endOutsideYear": "Diese Schätzung gilt für Beendigungen im Jahr {{year}}, dessen Mindestlohn die Grenzen nutzen.",
+        "summary": "Prüfe die markierten Felder, um deine Schätzung zu sehen."
+      },
+      "result": {
+        "compensation": "Geschätzte Abfindung",
+        "seniority": "Betriebszugehörigkeit",
+        "seniorityValue": "{{years}} Jahre",
+        "regime": "Angewandte Regeln",
+        "regimes": {
+          "before2011": "Vertrag vor dem 1. November 2011",
+          "from2011": "Vertrag vom 1. November 2011 bis 30. September 2013",
+          "from2013": "Vertrag ab dem 1. Oktober 2013"
+        },
+        "usedMonthly": "Verwendeter Monatsbetrag",
+        "daily": "Tagesbetrag (Monatsbetrag geteilt durch 30)",
+        "cap": "Gesamtgrenze (12 Monatsbeträge)",
+        "breakdownTitle": "Aufschlüsselung nach Zeitraum",
+        "periods": {
+          "oneMonth": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "twentyDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "eighteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "twelveDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "fourteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr"
+        },
+        "caps": {
+          "none": "Keine Grenze angewandt.",
+          "monthlyBase": "Der Monatsbetrag wurde auf das 20-Fache des Mindestlohns begrenzt ({{limit}}; der Mindestlohn beträgt {{rmmg}}).",
+          "total": "Die Abfindung wurde auf 12 Monatsbeträge begrenzt ({{cap}}).",
+          "earlyPart": "Der Teil bis zum 30. September 2013 erreicht bereits die Grenze von {{cap}}, daher wird der spätere Zeitraum nicht addiert."
+        },
+        "payoutTitle": "Auszahlung auf die kommenden Monate verteilt",
+        "payoutValue": "Über {{months}} Monate: {{amount}} pro Monat (vor Steuern)",
+        "payoutNote": "Nur ein Vorschlag zur Planung: Der Arbeitgeber zahlt die Abfindung normalerweise am Ende des Vertrags in einer Summe.",
+        "estimate": "Eine Schätzung zum Lernen und Planen, keine Rechtsberatung. Dein Arbeitgeber, ein Anwalt, die Arbeitsinspektion (ACT) oder deine Gewerkschaft können den Betrag bestätigen."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Wer {{base}} im Monat plus {{seniorityPay}} Diuturnidades verdient, mit einem Vertrag, der am {{start}} begann und am {{end}} endete, hat {{seniority}} Jahre Betriebszugehörigkeit. Der Tagesbetrag beträgt {{daily}}. Der Vertrag begann zwischen dem 1. November 2011 und dem 30. September 2013: {{twentyYears}} Jahre bis zum 30. September 2013 zählen 20 Tage ({{twentyAmount}}), {{eighteenYears}} Jahre vervollständigen die ersten drei Jahre zu 18 Tagen ({{eighteenAmount}}), {{twelveYears}} Jahre bis zum 30. April 2023 zählen 12 Tage ({{twelveAmount}}) und die letzten {{fourteenYears}} Jahre zählen 14 Tage ({{fourteenAmount}}). Die Summe beträgt {{total}}, unter der Grenze von {{cap}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodBase": "Die Basis ist das monatliche Grundgehalt plus Diuturnidades. Der Tagesbetrag ist dieser Monatsbetrag geteilt durch 30.",
+        "methodRates": "Für die Betriebszugehörigkeit ab dem 1. Mai 2023 beträgt die Abfindung 14 Tage Grundgehalt und Diuturnidades pro vollem Jahr (Art. 366 Abs. 1 des Código do Trabalho in der Fassung der Lei n.º 13/2023). Frühere Zugehörigkeit behält den alten Satz: 12 Tage pro Jahr seit dem 1. Oktober 2013.",
+        "methodTransitional": "Ältere Verträge behalten die früheren Sätze für die bereits gearbeitete Zeit (Art. 5 der Lei n.º 69/2013). Vor dem 1. November 2011: ein Monat pro Jahr bis 31. Oktober 2012, danach 20 Tage pro Jahr bis 30. September 2013. Vom 1. November 2011 bis 30. September 2013: 20 Tage pro Jahr bis 30. September 2013. Vom 1. Oktober 2013 bis 30. April 2023 zählt jeder Vertrag 12 Tage pro Jahr, außer dass die ersten drei Jahre der Betriebszugehörigkeit 18 Tage zählen, wenn der Vertrag am 1. Oktober 2013 jünger als drei Jahre war. Ab dem 1. Mai 2023 zählt jedes Jahr 14 Tage.",
+        "methodCaps": "Der Monatsbetrag darf das 20-Fache des Mindestlohns nicht übersteigen ({{baseCap}} bei einem Mindestlohn von {{rmmg}} in 2026), und die gesamte Abfindung darf 12 Monatsbeträge nicht übersteigen, höchstens {{totalCapRmmg}} (240-facher Mindestlohn). Erreicht der Teil bis zum 30. September 2013 diese Grenze bereits, werden spätere Zeiträume nicht addiert.",
+        "methodFraction": "Ein unvollständiges Jahr zählt anteilig: Der Rechner zählt volle Jahrestage ab Vertragsbeginn plus die Tage seit dem letzten, geteilt durch die Tage dieses Jahres. Das Beendigungsdatum zählt als Arbeitstag.",
+        "methodTax": "Nur zur Information, nicht Teil der Zahl: Ein Teil der Abfindung kann nach Art. 2 Abs. 4 des CIRS von der IRS ausgenommen sein, bis zu einer Grenze, die an dein reguläres Entgelt der letzten 12 Monate und deine Dienstjahre gebunden ist. Der Rest ist steuerpflichtiges Einkommen. Frage die Steuerbehörde oder einen Steuerberater nach der genauen Grenze in deinem Fall.",
+        "methodBudget": "Die Abfindung ist ein einmaliger Betrag. Verteilst du sie auf die kommenden Monate, zusammen mit einem möglichen Arbeitslosengeld, siehst du, wie lange sie deine Ausgaben deckt.",
+        "supportedTitle": "Abgedeckt",
+        "supported": "Massenentlassung, Wegfall der Stelle und Nichteignung des Arbeitnehmers, in einem unbefristeten Vertrag, mit Beendigung im Jahr 2026.",
+        "unsupportedTitle": "Nicht abgedeckt",
+        "unsupportedFixedTerm": "Das Auslaufen befristeter Verträge (Art. 344 und 345 des Código do Trabalho), das eigene Sätze und Übergangsregeln hat.",
+        "unsupportedJustCause": "Kündigung aus wichtigem Grund (disziplinarisch), die anderen Regeln folgt.",
+        "unsupportedUnlawful": "Rechtswidrige Kündigung, bei der das Gericht die Entschädigung festlegt, in der Regel zwischen 15 und 45 Tagen Grundgehalt pro Dienstjahr.",
+        "unsupportedAgreement": "Aufhebungsvertrag, bei dem der Betrag verhandelt wird und es keine gesetzliche Formel gibt.",
+        "unsupportedPublic": "Beschäftigte im öffentlichen Dienst, für die andere Regeln gelten.",
+        "sourcesTitle": "Quellen",
+        "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelung des Art. 5",
+        "sourceLaw13": "APEL-Leitfaden zur Agenda do Trabalho Digno: Lei n.º 13/2023, die den Satz des Art. 366 Abs. 1 ab 1. Mai 2023 auf 14 Tage erhöhte",
+        "sourceCode": "Código do Trabalho, konsolidierter Text (PGDL): Art. 344, 345 und 366",
+        "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
+        "reviewed": "Regeln am 19. November 2026 geprüft anhand des Textes der Lei n.º 69/2013, veröffentlicht von der Assembleia da República, und des Mindestlohns 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage pro Jahr der Lei n.º 13/2023, in Kraft seit 1. Mai 2023, sowie die 12 Tage und die Grenze des Art. 366 stammen aus den Zusammenfassungen von APEL und DGERT und dem konsolidierten Código do Trabalho, nicht aus dem Text des Diário da República. Wir wenden die 14 Tage nur auf die Betriebszugehörigkeit ab 1. Mai 2023 an, die übliche Lesart der Übergangsregel. Zur Information, keine Rechtsberatung."
+      },
+      "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
+      "nextStepDescription": "WonderMoney zeigt deine Konten und monatlichen Ausgaben zusammen, damit du eine Abfindung auf die kommenden Monate verteilen kannst.",
+      "nextStepCta": "Die Auszahlung auf deine kommenden Monate verteilen"
+    },
+    "statePension": {
+      "title": "Rentenrechner Portugal 2026",
+      "shortName": "Altersrente",
+      "subtitle": "Schätzen Sie Ihre monatliche portugiesische Altersrente, die Ersatzrate und die Lücke zu Ihrem heutigen Nettogehalt.",
+      "description": "Schätzen Sie Ihre Altersrente in Portugal: Monatsbetrag, Ersatzrate und Lücke zum Gehalt.",
+      "pageTitle": "Rentenrechner Portugal 2026: Schätzung der Altersrente (Reforma)",
+      "pageDescription": "Grobe Schätzung der portugiesischen Altersrente (pensão de velhice) für Laufbahnen ab 2002: Formel 2026, Rentenalter, Abschlag bei früherem Rentenbeginn, Mindestrenten und die Lücke zu Ihrem Gehalt.",
+      "ageValue": "{{years}} Jahre und {{months}} Monate",
+      "fields": {
+        "grossMonthly": "Durchschnittliches Bruttomonatsgehalt (Euro von heute)",
+        "years": "Beitragsjahre bei Rentenbeginn",
+        "ageYears": "Rentenalter: Jahre",
+        "ageMonths": "Rentenalter: zusätzliche Monate"
+      },
+      "help": {
+        "gross": "Ihr durchschnittliches Bruttogehalt über die gesamte Laufbahn in Euro von heute, bei 14 Zahlungen im Jahr (Urlaubs- und Weihnachtsgeld getrennt). Geben Sie einen realen Durchschnitt an, nicht das nominale Gehalt jedes Jahres.",
+        "years": "Jahre mit erfassten Entgelten. Nur 40 Jahre zählen für die Rente; für eine Altersrente sind mindestens 15 nötig.",
+        "age": "Das Regelalter beträgt 2026 {{normal}}. Ab 60 können Sie mit Abschlag früher in Rente gehen, bis 70 später mit Zuschlag."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "belowMinimum": "Für eine Altersrente sind mindestens {{min}} Beitragsjahre nötig. Mit weniger gilt diese Schätzung nicht.",
+        "tooLongForAge": "Beiträge beginnen frühestens mit 16, daher sind in diesem Alter höchstens {{max}} Jahre möglich.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Geschätzte monatliche Bruttorente (14 Zahlungen)",
+        "replacement": "Ersatzrate (Rente / durchschnittliches Bruttogehalt)",
+        "statutory": "Rente vor Anpassung für früheren oder späteren Beginn",
+        "rate": "Globale Bildungsrate",
+        "netPay": "Ihr Nettogehalt heute (pro Zahlung)",
+        "gap": "Monatliche Lücke zu Ihrem Nettogehalt",
+        "adjustment": {
+          "none": "Rentenbeginn zum Regelalter 2026 ({{normal}}): kein Abschlag und kein Zuschlag.",
+          "early": "Rentenbeginn {{months}} Monate vor dem Regelalter ({{normal}}) zieht {{penalty}} ab (0,5 % pro Monat) und wendet den Nachhaltigkeitsfaktor 2026 von {{factor}} an.",
+          "late": "Rentenbeginn {{months}} Monate nach dem Regelalter ({{normal}}) fügt einen Zuschlag von {{bonus}} hinzu.",
+          "lateCapped": "Rentenbeginn {{months}} Monate nach dem Regelalter ({{normal}}) fügt einen Zuschlag hinzu, der bei {{bonus}} endet, weil die Rente 92 % des Referenzentgelts nicht übersteigen darf."
+        },
+        "floorApplied": "Die Rente wurde auf die Mindestrente 2026 für Ihre Laufbahn angehoben.",
+        "gapSome": "Um Ihren Lebensstandard zu halten, bräuchten Sie rund {{gap}} im Monat aus Ersparnissen und Investitionen (vor Steuern).",
+        "gapNone": "In diesem Alter deckt die geschätzte Rente Ihr heutiges Nettogehalt.",
+        "estimate": "Grobe Schätzung zur Planung, keine Entscheidung und keine Beratung. Maßgeblich ist der offizielle Rechner in der Segurança Social Direta, der Ihre tatsächlichen Beitragszeiten nutzt.",
+        "limits": "Nicht abgedeckt: Laufbahnen vor 2002 (Mischformel), Beamte (CGA), Sonderregime und stark schwankende Gehälter.",
+        "simulatorLink": "Offiziellen Rechner öffnen",
+        "fireLink": "Berechnen Sie den nötigen Sparbetrag mit dem FIRE-Rechner"
+      },
+      "nextStepHeadline": "Schließen Sie die Lücke mit eigenen Investitionen",
+      "nextStepDescription": "WonderMoney bündelt Ihr Portfolio und Ihr Vermögen an einem Ort, damit Sie sehen, wie weit Ihre Investitionen die Lücke decken.",
+      "nextStepCta": "Die nötigen Investitionen für Ihre Lücke verfolgen",
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Jemand mit durchschnittlich {{gross}} im Monat (Euro von heute, 14 Zahlungen) und {{years}} Beitragsjahren geht mit {{age}} in Rente. Die gesetzliche Rente beträgt {{statutory}} im Monat, eine globale Bildungsrate von {{rate}}. Rentenbeginn {{months}} Monate vor dem Regelalter zieht {{penalty}} ab und wendet den Nachhaltigkeitsfaktor an, es bleiben {{monthly}} im Monat, also {{replacement}} des Gehalts. Gegenüber einem geschätzten Nettogehalt von {{net}} beträgt die Lücke {{gap}} im Monat.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodReference": "Das Referenzentgelt ist der Durchschnitt der Jahresentgelte der gesamten Laufbahn, aufgewertet mit Verbraucherpreis-Koeffizienten und durch 14 geteilt. Der Rechner arbeitet in Euro von heute: Sie geben ein reales durchschnittliches Monatsgehalt ein, und das Ergebnis ist ebenfalls in Euro von heute.",
+        "methodRate": "Die Jahresrate hängt von Abschnitten des Referenzentgelts in Vielfachen des IAS ab ({{ias}} im Jahr 2026): {{rates}} für die Abschnitte bis 1,1, bis 2, bis 4, bis 8 und über dem 8-Fachen des IAS. Laufbahnen bis 20 Jahre nutzen pauschal 2 %. Die Rate wird mit den Beitragsjahren, höchstens 40, multipliziert und ergibt die globale Bildungsrate.",
+        "methodAges": "Das Regelalter für die Altersrente beträgt 2026 {{normal2026}} und wurde für 2027 auf {{normal2027}} festgelegt. Der Rechner nutzt den Wert von 2026.",
+        "methodEarly": "Vor dem Regelalter, ab 60 mit mindestens 15 Beitragsjahren, zieht jeder Monat des früheren Beginns {{penalty}} ab, und zusätzlich gilt der Nachhaltigkeitsfaktor 2026 ({{factor}}, eine Kürzung um 17,63 %). Beide werden multipliziert. Ausnahmen, etwa für sehr lange Laufbahnen, sind nicht abgebildet.",
+        "methodLate": "Nach dem Regelalter, bis 70, bringt jeder Monat einen Zuschlag je nach Beitragsjahren: 0,33 % ab 15 Jahren, 0,50 % ab 25, 0,65 % ab 35 und 1 % ab 40. Die Rente mit Zuschlag darf 92 % des Referenzentgelts nicht übersteigen.",
+        "methodMinimum": "Ergibt die Formel weniger als die Mindestrente 2026 für Ihre Laufbahn, wird das Minimum gezeigt: {{min15}} für 15 bis 20 Jahre, {{min21}} für 21 bis 30 und {{min31}} ab 31 Jahren. Die Mindestrente gilt nicht beim vorzeitigen Rentenbeginn.",
+        "methodGap": "Die Lücke vergleicht die geschätzte Bruttorente über 14 Zahlungen mit Ihrem heutigen Nettogehalt: Brutto minus 11 % Sozialversicherung und die IRS-Quellensteuer 2026 für eine alleinstehende Person ohne Angehörige auf dem Festland. Auch eine Rente unterliegt dem IRS, die tatsächliche Lücke kann abweichen.",
+        "methodBudget": "Lesen Sie die Lücke als den Monatsbetrag, den Ihre Ersparnisse und Investitionen decken müssten. Sie ändert sich mit jeder Annahme oben.",
+        "unsupportedTitle": "Nicht unterstützt",
+        "unsupportedMixed": "Laufbahnen, die vor 2002 begannen (Mischformel mit den alten Regeln für die Jahre bis 2001). Dieser Rechner deckt nur die Formel der gesamten Laufbahn für alle ab, die 2002 oder später mit den Beiträgen begonnen haben.",
+        "unsupportedSpecial": "Stark schwankende Gehälter, Beitragslücken und Laufbahnen über 40 Jahre.",
+        "unsupportedCga": "Beamte der CGA, Selbstständige und andere Sonderregime.",
+        "unsupportedOther": "Vorruhestandsregime ohne Abschlag, Invaliditätsrenten und Rentenanpassungen nach dem Rentenbeginn.",
+        "sourcesTitle": "Quellen",
+        "sourceGuide": "Leitfaden der Segurança Social: Altersrente",
+        "sourceLaw": "Decreto-Lei n.º 187/2007 in der geltenden Fassung (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: Regelalter für 2027 und Nachhaltigkeitsfaktor für 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: Rentenanpassung 2026 und Mindestrenten",
+        "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
+        "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns."
+      }
     }
   },
   "resources": {

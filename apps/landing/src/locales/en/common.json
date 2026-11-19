@@ -2913,6 +2913,195 @@
       "nextStepDescription": "WonderMoney turns your estimated take-home pay into a plan, so every euro has a job before the month starts.",
       "nextStepCta": "Use the net estimate in a monthly plan"
     },
+    "unemploymentBenefit": {
+      "title": "Portugal unemployment benefit calculator 2026",
+      "shortName": "Unemployment benefit",
+      "subtitle": "Estimate the monthly subsídio de desemprego, how long it lasts and the total, with the 2026 limits.",
+      "description": "Estimate your unemployment benefit in Portugal: monthly amount, duration and total.",
+      "pageTitle": "Unemployment Benefit Calculator Portugal 2026: Amount and Duration",
+      "pageDescription": "Estimate the subsídio de desemprego in Portugal: 65% of your reference pay, the 2026 IAS limits, the duration by age and contributions, and a reduced-income figure for your budget.",
+      "fields": {
+        "grossMonthly": "Gross monthly salary",
+        "allowances": "Allowances",
+        "age": "Age when you became unemployed",
+        "contributionMonths": "Months with registered pay",
+        "years20": "Years with registered pay in the last 20",
+        "household": "Household",
+        "dependants": "Children or dependants"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 payments (holiday and Christmas paid separately)",
+        "twelfths": "In twelfths (the salary already includes them)"
+      },
+      "households": {
+        "alone": "I live alone or my partner has no right to the increase",
+        "partnerWorking": "My partner is working",
+        "partnerUnemployed": "My partner is also unemployed (registered at IEFP)",
+        "singleParent": "I am the only parent in the household"
+      },
+      "help": {
+        "gross": "The base salary in the last months, before Social Security and IRS. The 12 months counted include the holiday and Christmas allowances.",
+        "allowances": "With 14 payments the calculator counts 14 times your salary; in twelfths it counts 12 times, because the allowances are already inside.",
+        "age": "Your age on the day you became unemployed.",
+        "months": "Months with registered pay since you last received unemployment benefit. The table starts at 12 months.",
+        "years20": "Full years with registered pay in the last 20 years. Every 5 years add extra days.",
+        "household": "The 10% increase needs children or dependants and either both partners unemployed and registered, or a single-parent household. It must be requested."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "belowTable": "The duration table starts at {{min}} months with registered pay. With less, this estimate does not apply.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthly": "Estimated monthly benefit (30 days)",
+        "daily": "Benefit per day",
+        "duration": "Estimated duration",
+        "durationValue": "{{days}} days (about {{months}} months)",
+        "durationParts": "Of which base period and extra days",
+        "durationPartsValue": "{{base}} + {{extra}} days",
+        "total": "Estimated total over the whole period",
+        "netBefore": "Estimated net reference pay per month",
+        "drop": "Monthly income drop for your budget",
+        "increaseApplied": "The 10% increase for households with children is included.",
+        "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
+        "limit": {
+          "none": "The amount is 65% of your reference pay; no limit applied.",
+          "max": "The amount reached the maximum of 2.5 times the IAS ({{max}} a month).",
+          "netCap": "The amount was limited to 75% of your estimated net reference pay.",
+          "minimum": "The amount was raised to the minimum, 1 IAS ({{ias}} a month).",
+          "minimumWage": "The amount was raised to 1.15 times the IAS, the minimum when the pay used is at least the minimum wage."
+        }
+      },
+      "checklist": {
+        "title": "Conditions to check (not a decision)",
+        "involuntary": "Your unemployment is involuntary, for example a dismissal or the end of a fixed-term contract.",
+        "contributions": "You have at least 360 days of registered pay in the 24 months before you became unemployed.",
+        "registration": "You are registered at the employment centre (IEFP).",
+        "ready": "You live in Portugal and are able and available to work.",
+        "deadline": "You request the benefit within 90 days of becoming unemployed.",
+        "note": "Only Segurança Social decides whether you are entitled. This list is a reminder, not a verdict."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone aged {{age}}, earning {{gross}} a month in 14 payments, with {{months}} months and {{years}} years of registered pay in the last 20, living alone. The reference pay is {{reference}} a day, so 65% for 30 days gives {{monthly}} a month ({{daily}} a day). The period is {{base}} days plus {{extra}} extra days, {{days}} days in total, so about {{total}} over the whole period. Compared with an estimated net pay of {{net}} a month, the income drop is {{drop}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference remuneration (RR) is all pay registered in the oldest 12 of the 14 months before the month you became unemployed, including the holiday and Christmas allowances, divided by 360. The calculator takes 14 or 12 times your monthly salary.",
+        "methodAmount": "The daily benefit is 65% of the RR. The monthly figure is 30 days of it.",
+        "methodLimits": "The monthly benefit cannot exceed 2.5 times the IAS ({{max}} in 2026) or 75% of the net RR, and cannot be below 1 IAS ({{ias}}), except when the net RR is lower than the IAS. When the pay used is at least the minimum wage ({{rmmg}}), the minimum is 1.15 IAS.",
+        "methodNet": "The net RR is the RR minus 11% Social Security and the IRS withholding rate. The calculator estimates that rate from the 2026 mainland withholding tables for your monthly salary, as a single holder, or as married with two earners if your partner is in the household.",
+        "methodIncrease": "The benefit goes up 10% when both partners are unemployed and registered, or you are the only parent, and there are children or dependants. It must be requested. The calculator applies it to the limited amount and never above 2.5 IAS.",
+        "methodDuration": "The duration depends on your age and months with registered pay, plus extra days for every full 5 years with registered pay in the last 20: 30 days up to age 39, 45 days from 40 to 49 and 60 days from 50.",
+        "methodNoReduction": "The old 10% cut after 180 days of payment is not applied: the 2026 Segurança Social guide does not list it.",
+        "methodTax": "The Segurança Social guide says the benefit does not have to be declared for IRS. Confirm your own case with the Tax Authority.",
+        "methodBudget": "The monthly benefit is the income to plan with. Compare it with your net pay to see the drop, then see how long your savings cover the gap.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedTransitional": "The transitional table for people who already met the contribution requirement on 31 March 2012 and have not been unemployed since. The calculator uses only the general table.",
+        "unsupportedSocial": "The social unemployment benefit (subsídio social de desemprego), which the guide says can only be requested until 30 December 2026.",
+        "unsupportedSelfEmployed": "Self-employed workers, company managers, partial unemployment benefit, teachers with their own contribution rules and former invalidity pensioners.",
+        "unsupportedOther": "Pay that varied a lot in the 12 months counted, periods without registered pay inside them, other income and the one-off lump-sum payment to start a business.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 October 2026), which also lists the 2026 IAS of 537.13 euros (Portaria n.º 480-A/2025/1) and the minimum wage of 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, as amended: the unemployment protection regime",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: the 10% increase for households with children and the 1.15 IAS minimum",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the Diário da República text of Decreto-Lei n.º 119/2021. The IRS rate behind the 75% cap and the order of the 10% increase are our simplifications, and the end of the 10% cut after 180 days is taken from the guide and press reports, not from the consolidated law."
+      },
+      "nextStepHeadline": "Before the income drops, plan the cushion",
+      "nextStepDescription": "WonderMoney shows your cash, your monthly spending and how long your savings last on a lower income.",
+      "nextStepCta": "Estimate how long your cash buffer will last"
+    },
+    "sickPay": {
+      "title": "Portugal sick pay calculator 2026 (subsídio de doença)",
+      "shortName": "Sick pay",
+      "subtitle": "Estimate the subsídio de doença for a baixa médica: amount by duration band, waiting days and the income gap.",
+      "description": "Estimate sick pay in Portugal: daily amount, total, waiting days and the gap against your net pay.",
+      "pageTitle": "Sick Pay Calculator Portugal 2026: Baixa Médica and Subsídio de Doença",
+      "pageDescription": "Estimate the subsídio de doença in Portugal: reference pay over 180 days, 55% to 75% by duration, the 3 waiting days, the 9.20 minimum and your income gap while on sick leave.",
+      "fields": {
+        "grossMonthly": "Gross monthly salary",
+        "allowances": "Allowances",
+        "sickDays": "Days of sick leave",
+        "dependants": "Children up to 16 (or 24 with child benefit)",
+        "hospitalisation": "Hospital stay or outpatient surgery"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 payments (holiday and Christmas paid separately)",
+        "twelfths": "In twelfths (the salary already includes them)"
+      },
+      "help": {
+        "gross": "The base salary in the months counted, before Social Security and IRS. Holiday and Christmas allowances are not part of the reference pay.",
+        "allowances": "In twelfths, the calculator takes out the two allowances to get the base salary the reference pay uses.",
+        "sickDays": "Total days on the sick note (CIT), counted from the first day. Employees can receive up to 1,095 days.",
+        "dependants": "Used for the 5-point increase, which needs 3 or more children and a reference pay of 500 euros a month or less.",
+        "hospitalisation": "With a hospital stay or outpatient surgery the benefit is paid from day 1, with no waiting period."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "total": "Estimated total paid by Segurança Social",
+        "paidDays": "Days paid",
+        "waiting": "Waiting days (not paid by Segurança Social)",
+        "waitingValue": "{{days}} days, about {{amount}} of net pay",
+        "waitingNone": "None",
+        "reference": "Reference pay per day",
+        "netPay": "Normal net pay per month",
+        "firstGap": "Income gap in the first 30 days",
+        "averageGap": "Average monthly income gap over the whole leave",
+        "bandsTitle": "By duration band",
+        "bandLabel": "Days {{from}} to {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} paid days × {{daily}} = {{amount}}",
+        "increaseApplied": "The 5-point increase for low pay and 3 or more children is included.",
+        "allWaiting": "Every day of this leave is a waiting day, so Segurança Social pays nothing. Check whether your contract or collective agreement makes your employer pay these days.",
+        "waitingNote": "Segurança Social does not pay the first 3 days. Whether your employer pays them depends on your contract or collective agreement.",
+        "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
+        "limit": {
+          "none": "The daily amount is the percentage of your reference pay for each band; no limit applied.",
+          "minimum": "The daily amount was raised to the minimum of {{min}} (30% of the minimum wage).",
+          "referencePay": "Your reference pay is below {{min}} a day, so the benefit equals the reference pay.",
+          "netCap": "The daily amount was limited to the estimated net value of your reference pay."
+        }
+      },
+      "checklist": {
+        "title": "Conditions to check (not a decision)",
+        "certificate": "You have a sick note (CIT) from a doctor, sent electronically to Segurança Social.",
+        "guarantee": "You have 6 months of registered pay (they do not have to be consecutive) on the day you stop working.",
+        "professionalIndex": "You worked at least 12 days in the first four of the last six months, counting the month you stop.",
+        "waiting": "There is no waiting period for a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it. The calculator only has a switch for the first.",
+        "note": "Only Segurança Social decides whether you are entitled. This list is a reminder, not a verdict."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "An employee earning {{gross}} a month in 14 payments, on sick leave for {{days}} days with no hospital stay. The reference pay is {{reference}} a day. Days 1 to 3 are waiting days, so the first band pays 27 days at 55% and the next 15 days at 60%: {{total}} in total. Normal net pay is {{net}} a month; over the leave the average shortfall is {{gap}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference pay (RR) is the pay registered in the 6 oldest of the 8 months before the month the sick leave starts, without holiday and Christmas allowances, divided by 180. The calculator uses your monthly salary divided by 30.",
+        "methodBands": "The daily benefit is a percentage of the RR that grows with the length of the leave: 55% up to 30 days, 60% from day 31 to 90, 70% from day 91 to 365 and 75% beyond that, up to 1,095 days for employees. The days count from the first day of the leave, waiting days included.",
+        "methodWaiting": "Employees have a waiting period of 3 days that Segurança Social does not pay. With a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it, payment starts on day 1.",
+        "methodMinimum": "The daily benefit cannot be below {{min}} (30% of the {{rmmg}} minimum wage). If the RR itself is lower, the benefit equals the RR.",
+        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when the RR is at most 500 euros a month and the household has 3 or more children up to 16 (or 24 with child benefit), or children with the disability bonus. The calculator only models the children count.",
+        "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
+        "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
+        "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedTuberculosis": "Tuberculosis, paid at 80% or 100% of the RR depending on dependants, with no time limit.",
+        "unsupportedSelfEmployed": "Self-employed workers (10 days of waiting, up to 365 days), voluntary social insurance and domestic workers.",
+        "unsupportedShort": "Short absences covered by the SNS 24 self-declaration of illness: we did not model their rules.",
+        "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide. The 500 euro limit for the 5-point increase comes from the consolidated law and secondary sources, because the guide text does not show the figure. The estimate of net pay behind the net cap is our simplification."
+      },
+      "nextStepHeadline": "Plan for the temporary income gap",
+      "nextStepDescription": "WonderMoney shows your cash, your spending and how long your savings cover a lower income.",
+      "nextStepCta": "Adjust your budget to the temporary income gap"
+    },
     "vehicleTax": {
       "title": "Vehicle tax (IUC) calculator",
       "shortName": "Vehicle tax (IUC)",
@@ -2994,6 +3183,357 @@
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
       "nextStepCta": "Set aside one twelfth of your annual car tax"
+    },
+    "propertyCapitalGains": {
+      "title": "Property capital gains calculator",
+      "shortName": "Property capital gains",
+      "subtitle": "Estimate the capital gain on selling a home in Portugal, the extra IRS it may cause and how much of the sale proceeds stays available.",
+      "description": "Estimate the Portuguese IRS on a property sale, with the reinvestment exclusion.",
+      "pageTitle": "Property Capital Gains Calculator Portugal 2026: IRS on Selling a Home",
+      "pageDescription": "Estimate the 2026 capital gain on selling a property in Portugal with the inflation coefficient, expenses and reinvestment in your own home, and see the extra IRS and the proceeds left.",
+      "sections": {
+        "property": "The property",
+        "expenses": "Expenses",
+        "income": "Your income",
+        "reinvestment": "Own permanent home"
+      },
+      "fields": {
+        "saleValue": "Sale value",
+        "purchaseValue": "Acquisition value",
+        "purchaseYear": "Year of purchase",
+        "purchaseMonth": "Month of purchase",
+        "saleMonth": "Month of sale in {{saleYear}}",
+        "purchaseExpenses": "Acquisition expenses",
+        "worksExpenses": "Works of the last 12 years",
+        "saleExpenses": "Sale expenses",
+        "otherIncome": "Other annual taxable income",
+        "joint": "Joint taxation (couple)",
+        "ownHome": "It was my permanent home and I plan to reinvest the proceeds",
+        "reinvested": "Amount reinvested in another permanent home",
+        "loanRepaid": "Loan capital repaid with the sale"
+      },
+      "help": {
+        "dates": "The coefficient applies only when the property was held for more than 24 months. The calculator covers sales in {{saleYear}}.",
+        "purchaseExpenses": "IMT and Imposto do Selo paid at the purchase, plus the notary and registry costs and the agency fee.",
+        "worksExpenses": "Only works with invoices, in the last 12 years, that raised the value of the property.",
+        "saleExpenses": "The agency fee and other costs of the sale, such as the energy certificate.",
+        "otherIncome": "The household's other income subject to IRS in the year, after the specific deductions and before deductions from tax. Enter 0 if none.",
+        "joint": "Splits the income in two, as in joint taxation. Leave it off for an individual return.",
+        "reinvested": "Counts purchases from 24 months before up to 36 months after the sale, in Portugal or the EU/EEA.",
+        "loanRepaid": "The part of the proceeds that repays the home loan of the sold property."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "zero": "Enter a value above zero.",
+        "negative": "Enter a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "yearTooOld": "Properties bought before {{year}} have their own regime and are not covered.",
+        "yearTooNew": "Enter a purchase year up to {{saleYear}}.",
+        "month": "Choose a month from the list.",
+        "afterSale": "The purchase cannot be after the sale.",
+        "loanTooLarge": "The loan repaid cannot exceed the sale value.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "extraTax": "Estimated extra IRS on the gain",
+        "estimateNote": "Tax with the gain minus tax without it, for the annual return. It ignores deductions from tax and your final return may differ.",
+        "loss": "The sale ended in a loss, so no gain is added to your income.",
+        "zero": "There is no gain, so there is no extra IRS.",
+        "cashAfter": "Proceeds left after selling costs, loan repaid and estimated IRS",
+        "gain": "Gain (or loss)",
+        "adjustedPurchase": "Updated acquisition value",
+        "coefficient": "Devaluation coefficient",
+        "coefficientNone": "Not applied ({{months}} months held)",
+        "expenses": "Expenses deducted",
+        "exemptPercent": "Excluded by reinvestment",
+        "taxableGain": "Gain left to tax",
+        "includedIncome": "Added to your income (50%)"
+      },
+      "checklist": {
+        "title": "Conditions to check for the reinvestment exclusion",
+        "domicile": "The sold home was your permanent home, with your tax domicile there, in the 12 months before the sale.",
+        "reinvest": "The proceeds, net of the loan repaid, are reinvested in another permanent home, in land to build one or in works on it, in Portugal or the EU/EEA, between 24 months before and 36 months after the sale.",
+        "declare": "You state the intention to reinvest, and the amount, in the IRS return for the year of the sale.",
+        "occupy": "The new home becomes your permanent home, with your tax domicile there, within 12 months of the reinvestment.",
+        "register": "For land or construction, the registry is requested within 48 months of the sale and the home is used as your residence until the end of the fifth year after it.",
+        "note": "This list is a reminder, not a verdict. The Tax Authority decides whether the conditions are met."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "A home bought in {{purchaseYear}} for {{purchaseValue}} and sold in {{saleYear}} for {{saleValue}}. The purchase value is updated by the {{coefficient}} coefficient to {{adjustedPurchase}}, and {{expenses}} of expenses are deducted, leaving a gain of {{gain}}. Half of it, {{included}}, is added to other income of {{otherIncome}}, which adds about {{extraTax}} of IRS.",
+        "methodTitle": "How the estimate works",
+        "methodGain": "Gain = sale value minus the acquisition value updated by the coefficient, minus the acquisition and sale expenses and the works of the last 12 years (CIRS articles 46, 50 and 51).",
+        "methodCoefficient": "The currency devaluation coefficient of the year of purchase applies only if the property was held for more than 24 months. The {{saleYear}} values come from {{portaria}} and are stored for purchases from {{firstYear}}.",
+        "methodExpenses": "Expenses must be necessary, effectively paid and supported by documents: IMT and Imposto do Selo of the purchase, agency fees, and works of the last 12 years with invoices.",
+        "methodHalf": "Only 50% of a positive gain is added to the other income of the year and taxed at the progressive {{saleYear}} IRS brackets. The extra IRS shown is the tax with the gain minus the tax without it.",
+        "methodExemption": "A gain on your own permanent home is excluded when the proceeds, net of the loan repaid, are reinvested in another one within the legal window. If only part is reinvested, the same proportion of the gain is excluded.",
+        "methodCash": "The proceeds left subtract the selling costs, the loan repaid and the estimated IRS from the sale value. It does not subtract what you spend on the next home.",
+        "scopeTitle": "What is covered",
+        "scopeSupported": "Individuals who are Portuguese tax residents selling a property held as a private asset, bought from {{firstYear}} on, in {{saleYear}}.",
+        "scopeUnsupported": "Not supported: non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, sales below the property's tax value, the solidarity surcharge and deductions from tax.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionBrackets": "The extra IRS uses the {{saleYear}} annual IRS brackets on the income you enter, as an estimate of the effect on the annual return. Joint taxation is modelled as splitting the income in two.",
+        "assumptionNotModelled": "The calculator does not check the reinvestment conditions or the value of the property for tax purposes. The coefficients were read from a secondary summary of the Portaria and should be confirmed on the Diário da República.",
+        "assumptionEducational": "This is an educational estimate, not tax advice. The IRS assessment from the Tax Authority is the one that counts.",
+        "sourcesTitle": "Sources",
+        "sourceGains": "CIRS, article 43: gains and losses (consulted 19 November 2026)",
+        "sourceExemption": "CIRS, article 10: exclusion for reinvestment in the own permanent home (consulted 19 November 2026)",
+        "sourceCoefficients": "{{portaria}}: devaluation coefficients for {{saleYear}}",
+        "reviewed": "Rules and coefficients for {{saleYear}} reviewed on {{reviewed}}."
+      },
+      "nextStepHeadline": "Know how much of the sale you can really use",
+      "nextStepDescription": "WonderMoney helps you set aside the tax and see what is left for your next home.",
+      "nextStepCta": "Plan how much sale proceeds remain available"
+    },
+    "christmasAllowance": {
+      "title": "Christmas allowance calculator Portugal 2026",
+      "shortName": "Christmas allowance",
+      "subtitle": "Estimate your net Christmas allowance (subsídio de Natal): IRS withholding, Social Security, partial years and payment in twelfths.",
+      "description": "Estimate your net Christmas allowance in Portugal, including a partial first year and payment in twelfths.",
+      "pageTitle": "Christmas Allowance Calculator Portugal 2026: Net Subsídio de Natal",
+      "pageDescription": "Work out your net Christmas allowance in Portugal with the 2026 IRS withholding tables and 11% Social Security, for a full or partial year and a lump sum or twelfths.",
+      "nextStepHeadline": "Decide what the allowance is for",
+      "nextStepDescription": "WonderMoney lets you assign an extra payment to your goals and your upcoming expenses, so it does not disappear into the month.",
+      "nextStepCta": "Split the allowance between goals and expenses",
+      "guide": {
+        "example": "With a base salary of {{salary}} a month, unmarried with no dependants, in mainland Portugal and employed for the whole year, the Christmas allowance is {{gross}} before deductions. IRS withholding is {{withholding}} and Social Security is {{socialSecurity}}, so {{net}} reaches your account.",
+        "ruleAmount": "The Christmas allowance equals one month's pay and is due by 15 December (Código do Trabalho, art. 263, n.º 1).",
+        "ruleHiringYear": "In the year you are hired, the allowance is proportional to the time worked in the calendar year (art. 263, n.º 2). The calculator counts calendar days from your start date to 31 December; some employers count months, which can differ by a few euros.",
+        "methodPlan": "The net figure is extra money that arrives once a year, so it works best with a plan: goals first, then the expenses it has to cover."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Holiday allowance calculator Portugal 2026",
+      "shortName": "Holiday allowance",
+      "subtitle": "Estimate your net holiday allowance (subsídio de férias): IRS withholding, Social Security, the hiring year and payment in twelfths.",
+      "description": "Estimate your net holiday allowance in Portugal, including the hiring year and payment in twelfths.",
+      "pageTitle": "Holiday Allowance Calculator Portugal 2026: Net Subsídio de Férias",
+      "pageDescription": "Work out your net holiday allowance in Portugal with the 2026 IRS withholding tables and 11% Social Security, including the 2-days-per-month rule of the hiring year and payment in twelfths.",
+      "nextStepHeadline": "Turn the allowance into a holiday",
+      "nextStepDescription": "WonderMoney helps you set aside the allowance for the trip it is meant for, with a target and a date, instead of letting it blend into the month.",
+      "nextStepCta": "Create a holiday fund from the amount received",
+      "guide": {
+        "example": "You started on 15 March 2026 with a base salary of {{salary}} a month, unmarried with no dependants, in mainland Portugal. You have 9 complete months, so you earn {{days}} holiday days, and the holiday allowance is {{gross}} before deductions. IRS withholding is {{withholding}} and Social Security is {{socialSecurity}}, so {{net}} reaches your account.",
+        "ruleAmount": "The holiday allowance covers the minimum length of holidays, on top of your holiday pay (Código do Trabalho, art. 264, n.º 2), and is paid before the holidays start unless agreed otherwise in writing (n.º 3). For a full year it equals one month's pay.",
+        "ruleHiringYear": "In the year you are hired you earn 2 working days of holiday per complete month of the contract, up to 20 days (art. 239, n.º 1). The calculator scales the allowance by those days over the 22 working days of a full year, so 18 days gives 18/22 of a month's pay.",
+        "methodPlan": "The net figure is money meant for time off, so it helps to set it aside for the trip, with a target and a date, before it is spent."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "How the allowance is paid",
+        "startDate": "Start date (optional)"
+      },
+      "modes": {
+        "lumpSum": "Lump sum",
+        "twelfths": "In twelfths (added to each monthly salary)"
+      },
+      "help": {
+        "gross": "Your base salary before allowances, Social Security and IRS.",
+        "mode": "A lump sum is paid in one go. In twelfths, the allowance is split over the months you work in the year and paid with each salary.",
+        "startDate": {
+          "christmas": "Leave empty if you worked the whole of {{year}}. In the year you start, the Christmas allowance is proportional to the time worked.",
+          "holiday": "Leave empty if you were already employed before {{year}}. In the year of hiring you earn 2 working days of holiday per complete month, up to 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Enter a valid date.",
+        "afterYear": "This page covers {{year}}. Enter a start date in {{year}} or earlier, or leave it empty.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "netAllowance": "Estimated net allowance",
+        "netTwelfth": "Extra net amount in each monthly salary",
+        "gross": "Gross allowance",
+        "withholding": "IRS withholding",
+        "socialSecurity": "Social Security (11%)",
+        "net": "Net allowance for the year",
+        "twelfthGross": "Gross twelfth added to each salary",
+        "twelfthCount": "Number of monthly payments",
+        "proportion": "Share of a full allowance: {{percent}}.",
+        "holidayDays": "Holiday days counted: {{days}} of 22 ({{percent}} of a full allowance).",
+        "noAllowanceYet": "With no complete month yet in the hiring year, there is no holiday allowance to pay. The 2 working days per month only start counting once a month is complete.",
+        "noWithholdingOnTwelfth": "Each twelfth is withheld at the effective rate of the whole allowance, which is 0% at this level, so no IRS is withheld on it. Your payroll may add the twelfth to the month's salary and withhold on the total, which withholds more."
+      },
+      "guide": {
+        "methodWithholding": "Each payment is withheld on its own with the 2026 monthly table, never added to the month's salary: Despacho n.º 233-A/2026 (n.º 10) asks employers to show a separate effective rate for each remuneration, as in the months the holiday and Christmas allowances are paid.",
+        "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year). Each twelfth is withheld on its own at the effective rate of the whole allowance, the usual payroll practice since Lei n.º 11/2013, art. 3 (not stated in the Despacho). Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
+        "methodSocialSecurity": "Employee Social Security is 11% of the gross allowance.",
+        "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. An allowance paid in November would be withheld at half.",
+        "unsupportedOther": "Only the base salary counts. Seniority supplements, other pay components, a contract ending or suspended during the year, collective agreements that pay more and employer costs are outside this estimate.",
+        "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
+        "reviewed": "Rules reviewed on 19 November 2026. The separate withholding on each payment of a month was checked in the original text of Despacho n.º 233-A/2026, and the Código do Trabalho articles in consolidated-text copies. The 22-working-day reference for the holiday allowance is common practice, not stated in those texts. Withholding each twelfth at the effective rate of the whole allowance (Lei n.º 11/2013, art. 3) is the usual payroll practice; that law was not checked against its text. The 11% Social Security rate was checked against secondary sources."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Portugal dismissal compensation calculator 2026",
+      "shortName": "Dismissal compensation",
+      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, with the caps and the rates by contract date.",
+      "description": "Estimate your dismissal compensation in Portugal: rates by contract date, caps and a payout plan.",
+      "pageTitle": "Dismissal Compensation Calculator Portugal 2026: Art. 366 Estimate",
+      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post: 12, 18, 20 or 30 days per year by contract date, the 12-month cap and a payout plan.",
+      "fields": {
+        "baseMonthly": "Monthly base pay (gross)",
+        "seniorityPay": "Monthly seniority supplements (diuturnidades)",
+        "startDate": "Contract start date",
+        "endDate": "Termination date"
+      },
+      "help": {
+        "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
+        "seniorityPay": "Diuturnidades are supplements paid for length of service. Enter 0 if you have none.",
+        "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
+        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}."
+      },
+      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: fixed-term contracts, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "errors": {
+        "required": "Enter a valid value.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "invalidDate": "Enter a valid date.",
+        "endBeforeStart": "The termination date cannot be before the start date.",
+        "startFuture": "The contract cannot start in the future.",
+        "endOutsideYear": "This estimate covers terminations in {{year}}, the year whose minimum wage the caps use.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "compensation": "Estimated compensation",
+        "seniority": "Seniority",
+        "seniorityValue": "{{years}} years",
+        "regime": "Rules applied",
+        "regimes": {
+          "before2011": "Contract before 1 November 2011",
+          "from2011": "Contract from 1 November 2011 to 30 September 2013",
+          "from2013": "Contract from 1 October 2013"
+        },
+        "usedMonthly": "Monthly amount used",
+        "daily": "Daily amount (monthly amount divided by 30)",
+        "cap": "Overall cap (12 monthly amounts)",
+        "breakdownTitle": "Breakdown by period",
+        "periods": {
+          "oneMonth": "{{years}} years at {{days}} days a year",
+          "twentyDays": "{{years}} years at {{days}} days a year",
+          "eighteenDays": "{{years}} years at {{days}} days a year",
+          "twelveDays": "{{years}} years at {{days}} days a year",
+          "fourteenDays": "{{years}} years at {{days}} days a year"
+        },
+        "caps": {
+          "none": "No cap applied.",
+          "monthlyBase": "The monthly amount was limited to 20 times the minimum wage ({{limit}}; the minimum wage is {{rmmg}}).",
+          "total": "The compensation was limited to 12 monthly amounts ({{cap}}).",
+          "earlyPart": "The part up to 30 September 2013 already reaches the cap of {{cap}}, so the later period is not added."
+        },
+        "payoutTitle": "Payout split over upcoming months",
+        "payoutValue": "Over {{months}} months: {{amount}} a month (before tax)",
+        "payoutNote": "A suggestion for planning only: the employer normally pays the compensation at the end of the contract, in one payment.",
+        "estimate": "An estimate for learning and planning, not legal advice. Your employer, a lawyer, the labour inspectorate (ACT) or your union can confirm the amount."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone earning {{base}} a month plus {{seniorityPay}} of diuturnidades, with a contract that began on {{start}} and ended on {{end}}, has {{seniority}} years of seniority. The daily amount is {{daily}}. The contract began between 1 November 2011 and 30 September 2013, so {{twentyYears}} years up to 30 September 2013 count 20 days ({{twentyAmount}}), {{eighteenYears}} years complete the first three years at 18 days ({{eighteenAmount}}), {{twelveYears}} years up to 30 April 2023 count 12 days ({{twelveAmount}}) and the last {{fourteenYears}} years count 14 days ({{fourteenAmount}}). The total is {{total}}, below the cap of {{cap}}.",
+        "methodTitle": "How the estimate works",
+        "methodBase": "The base is the monthly base pay plus diuturnidades. The daily amount is that monthly amount divided by 30.",
+        "methodRates": "For seniority from 1 May 2023, the compensation is 14 days of base pay and diuturnidades per full year (art. 366(1) of the Código do Trabalho, as amended by Lei n.º 13/2023). Seniority before that date keeps the earlier rate: 12 days a year from 1 October 2013.",
+        "methodTransitional": "Older contracts keep the earlier rates for the time already worked (art. 5 of Lei n.º 69/2013). Before 1 November 2011: one month per year until 31 October 2012, then 20 days a year until 30 September 2013. From 1 November 2011 to 30 September 2013: 20 days a year until 30 September 2013. From 1 October 2013 to 30 April 2023 every contract counts 12 days a year, except that the first three years of seniority count 18 days when the contract was less than three years old on 1 October 2013. From 1 May 2023 every year counts 14 days.",
+        "methodCaps": "The monthly amount cannot exceed 20 times the minimum wage ({{baseCap}} with the 2026 minimum wage of {{rmmg}}), and the whole compensation cannot exceed 12 monthly amounts, at most {{totalCapRmmg}} (240 times the minimum wage). When the part up to 30 September 2013 already reaches that cap, the later periods are not added.",
+        "methodFraction": "An incomplete year counts proportionally: the calculator counts whole anniversaries of the start date plus the days since the last one over the days of that year. The termination date counts as a day worked.",
+        "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
+        "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
+        "supportedTitle": "Supported",
+        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker, on a permanent contract, with termination in 2026.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedFixedTerm": "Expiry of fixed-term contracts (arts. 344 and 345 of the Código do Trabalho), which has its own rates and transitional rules.",
+        "unsupportedJustCause": "Dismissal with just cause (disciplinary), which follows different rules.",
+        "unsupportedUnlawful": "Unlawful dismissal, where the court sets the compensation, in general between 15 and 45 days of base pay per year of seniority.",
+        "unsupportedAgreement": "Termination by mutual agreement, where the amount is negotiated and there is no legal formula.",
+        "unsupportedPublic": "Public-sector workers, who follow different rules.",
+        "sourcesTitle": "Sources",
+        "sourceLaw69": "Lei n.º 69/2013, of 30 August (Diário da República): new wording of art. 366 and the transitional regime of art. 5",
+        "sourceLaw13": "APEL guide to the Agenda do Trabalho Digno: Lei n.º 13/2023, which raised the rate of art. 366(1) to 14 days from 1 May 2023",
+        "sourceCode": "Código do Trabalho, consolidated text (PGDL): arts. 344, 345 and 366",
+        "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
+        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. Educational, not legal advice."
+      },
+      "nextStepHeadline": "Plan the payout before it arrives",
+      "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
+      "nextStepCta": "Plan the payout across your upcoming months"
+    },
+    "statePension": {
+      "title": "Portugal state pension estimate 2026",
+      "shortName": "State pension",
+      "subtitle": "Estimate your monthly Portuguese old-age pension, the replacement rate and the gap against your net pay today.",
+      "description": "Estimate your state pension in Portugal: monthly amount, replacement rate and gap.",
+      "pageTitle": "State Pension Calculator Portugal 2026: Estimate Your Reforma",
+      "pageDescription": "Rough estimate of the Portuguese old-age pension (pensão de velhice) for careers that began in 2002 or later: 2026 formula, retirement age, early-retirement penalty, minimum pensions and the gap against your pay.",
+      "ageValue": "{{years}} years and {{months}} months",
+      "fields": {
+        "grossMonthly": "Average gross monthly salary (today's euros)",
+        "years": "Years of contributions at retirement",
+        "ageYears": "Retirement age: years",
+        "ageMonths": "Retirement age: extra months"
+      },
+      "help": {
+        "gross": "Your average gross salary over the whole career in today's euros, as paid 14 times a year (holiday and Christmas allowances separate). Enter a real average, not the nominal pay of each year.",
+        "years": "Years with registered pay. Only 40 years count towards the pension; at least 15 are needed for an old-age pension.",
+        "age": "The normal age in 2026 is {{normal}}. From 60 you can retire earlier with a penalty, and until 70 later with a bonus."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "belowMinimum": "An old-age pension needs at least {{min}} years of contributions. With fewer, this estimate does not apply.",
+        "tooLongForAge": "Contributions start at 16 at the earliest, so at this age {{max}} years is the most.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthly": "Estimated monthly gross pension (14 payments)",
+        "replacement": "Replacement rate (pension / average gross salary)",
+        "statutory": "Pension before early or late adjustment",
+        "rate": "Global formation rate",
+        "netPay": "Your net pay today (per payment)",
+        "gap": "Monthly gap against your net pay",
+        "adjustment": {
+          "none": "Retiring at the 2026 normal age ({{normal}}): no penalty and no bonus.",
+          "early": "Retiring {{months}} months before the normal age ({{normal}}) deducts {{penalty}} (0.5% a month) and applies the 2026 sustainability factor of {{factor}}.",
+          "late": "Retiring {{months}} months after the normal age ({{normal}}) adds a bonus of {{bonus}}.",
+          "lateCapped": "Retiring {{months}} months after the normal age ({{normal}}) adds a bonus, which stops at {{bonus}} because the pension cannot exceed 92% of your reference pay."
+        },
+        "floorApplied": "The pension was raised to the 2026 minimum for your career length.",
+        "gapSome": "To keep your standard of living you would need about {{gap}} a month from savings and investments (before tax).",
+        "gapNone": "At this age the estimated pension covers your net pay today.",
+        "estimate": "A rough estimate for planning, not a decision and not advice. The official simulator in Segurança Social Direta, which uses your real contribution record, is the reference.",
+        "limits": "Not covered: careers that began before 2002 (mixed formula), civil servants (CGA), special regimes and pay that varies a lot.",
+        "simulatorLink": "Open the official simulator",
+        "fireLink": "Work out the savings you need with the FIRE calculator"
+      },
+      "nextStepHeadline": "Close the gap with your own investments",
+      "nextStepDescription": "WonderMoney tracks your portfolio and net worth in one place, so you can see how far your investments go towards covering the gap.",
+      "nextStepCta": "Track the investments needed to cover your gap",
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month, or {{replacement}} of the salary. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
+        "methodRate": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
+        "methodAges": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
+        "methodEarly": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
+        "methodLate": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
+        "methodMinimum": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
+        "methodGap": "The gap compares the estimated gross pension, over 14 payments, with your net pay today: gross pay minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. A pension also pays IRS, so the real gap can differ.",
+        "methodBudget": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedMixed": "Careers that began before 2002 (mixed formula, with the older rules for the years up to 2001). This calculator only covers the whole-career formula for people who started contributing in 2002 or later.",
+        "unsupportedSpecial": "Pay that varies a lot over the career, gaps in contributions and careers longer than 40 years.",
+        "unsupportedCga": "Civil servants in the CGA, self-employed workers and other special regimes.",
+        "unsupportedOther": "Early-retirement regimes without penalty, disability pensions and updates to the pension after retirement.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social guide: old-age pension",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, as amended (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
+        "sourceSimulator": "Segurança Social Direta: official pension simulator",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours."
+      }
     }
   },
   "resources": {

@@ -1,0 +1,86 @@
+---
+import {
+  IAS_2026_CENTS,
+  MAX_IAS_HUNDREDTHS,
+  RMMG_2026_CENTS,
+  UNEMPLOYMENT_EXAMPLE,
+  computeUnemploymentBenefit,
+} from "@/lib/calculators/unemploymentBenefit";
+import { formatMoney } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.unemploymentBenefit.guide.${key}`;
+const example = computeUnemploymentBenefit(UNEMPLOYMENT_EXAMPLE);
+if (!example.ok) throw new Error("Invalid unemployment benefit worked example");
+
+const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
+const { result } = example;
+const values = {
+  age: String(UNEMPLOYMENT_EXAMPLE.age),
+  gross: formatMoney(locale, UNEMPLOYMENT_EXAMPLE.grossMonthly, { decimals: 0 }),
+  months: String(UNEMPLOYMENT_EXAMPLE.contributionMonths),
+  years: String(UNEMPLOYMENT_EXAMPLE.years20),
+  reference: money(result.referenceDailyCents),
+  monthly: money(result.monthlyCents),
+  daily: money(result.dailyCents),
+  base: String(result.duration.baseDays),
+  extra: String(result.duration.extraDays),
+  days: String(result.duration.totalDays),
+  total: money(result.totalCents),
+  net: money(result.netReferenceMonthlyCents),
+  drop: money(result.monthlyDropCents),
+};
+const limitValues = {
+  max: money(Math.round((IAS_2026_CENTS * MAX_IAS_HUNDREDTHS) / 100)),
+  ias: money(IAS_2026_CENTS),
+  rmmg: money(RMMG_2026_CENTS),
+};
+const sources = [
+  ["sourceGuide", "https://www.seg-social.pt/subsidio-de-desemprego"],
+  ["sourceLaw", "https://diariodarepublica.pt/dr/detalhe/decreto-lei/220-2006-546202"],
+  ["sourceIncrease", "https://diariodarepublica.pt/dr/detalhe/decreto-lei/119-2021-175983734"],
+] as const;
+const methods = [
+  "methodReference", "methodAmount", "methodLimits", "methodNet", "methodIncrease",
+  "methodDuration", "methodNoReduction", "methodTax", "methodBudget",
+];
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="unemployment-example">
+    <h2 id="unemployment-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="unemployment-method">
+    <h2 id="unemployment-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methods.map((key) => <li>{t(k(key), limitValues)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("unsupportedTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["unsupportedTransitional", "unsupportedSocial", "unsupportedSelfEmployed", "unsupportedOther"].map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key))}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
+  </section>
+</div>

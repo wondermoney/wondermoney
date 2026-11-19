@@ -56,12 +56,40 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolNetSalary",
   },
   {
+    sources: ["toolNetSalary", "toolHouseholdBudget", "toolSavingsGoal"],
+    destination: "toolChristmasAllowance",
+  },
+  {
+    sources: ["toolNetSalary", "toolChristmasAllowance", "toolSavingsGoal"],
+    destination: "toolHolidayAllowance",
+  },
+  {
     sources: ["toolNetSalary", "toolHouseholdBudget", "toolBorrowingCapacity"],
     destination: "toolWithholdingTables",
   },
   {
+    sources: ["toolNetSalary", "toolEmergencyFund", "toolHouseholdBudget"],
+    destination: "toolUnemploymentBenefit",
+  },
+  {
+    sources: ["toolUnemploymentBenefit", "toolEmergencyFund", "toolNetSalary"],
+    destination: "toolSickPay",
+  },
+  {
+    sources: ["toolUnemploymentBenefit", "toolNetSalary", "toolEmergencyFund"],
+    destination: "toolDismissalCompensation",
+  },
+  {
     sources: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
     destination: "toolVehicleTax",
+  },
+  {
+    sources: ["toolPurchaseTaxes", "toolPropertyTax", "toolMortgage"],
+    destination: "toolPropertyCapitalGains",
+  },
+  {
+    sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"],
+    destination: "toolStatePension",
   },
 ];
 
