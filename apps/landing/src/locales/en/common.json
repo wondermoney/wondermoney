@@ -3274,6 +3274,96 @@
         "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
         "reviewed": "Rules reviewed on 19 November 2026. The separate withholding on each payment of a month was checked in the original text of Despacho n.º 233-A/2026, and the Código do Trabalho articles in consolidated-text copies. The 22-working-day reference for the holiday allowance is common practice, not stated in those texts. Withholding each twelfth at the effective rate of the whole allowance (Lei n.º 11/2013, art. 3) is the usual payroll practice; that law was not checked against its text. The 11% Social Security rate was checked against secondary sources."
       }
+    },
+    "dismissalCompensation": {
+      "title": "Portugal dismissal compensation calculator 2026",
+      "shortName": "Dismissal compensation",
+      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, with the caps and the rates by contract date.",
+      "description": "Estimate your dismissal compensation in Portugal: rates by contract date, caps and a payout plan.",
+      "pageTitle": "Dismissal Compensation Calculator Portugal 2026: Art. 366 Estimate",
+      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post: 12, 18, 20 or 30 days per year by contract date, the 12-month cap and a payout plan.",
+      "fields": {
+        "baseMonthly": "Monthly base pay (gross)",
+        "seniorityPay": "Monthly seniority supplements (diuturnidades)",
+        "startDate": "Contract start date",
+        "endDate": "Termination date"
+      },
+      "help": {
+        "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
+        "seniorityPay": "Diuturnidades are supplements paid for length of service. Enter 0 if you have none.",
+        "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
+        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}."
+      },
+      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: fixed-term contracts, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "errors": {
+        "required": "Enter a valid value.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "invalidDate": "Enter a valid date.",
+        "endBeforeStart": "The termination date cannot be before the start date.",
+        "startFuture": "The contract cannot start in the future.",
+        "endOutsideYear": "This estimate covers terminations in {{year}}, the year whose minimum wage the caps use.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "compensation": "Estimated compensation",
+        "seniority": "Seniority",
+        "seniorityValue": "{{years}} years",
+        "regime": "Rules applied",
+        "regimes": {
+          "before2011": "Contract before 1 November 2011",
+          "from2011": "Contract from 1 November 2011 to 30 September 2013",
+          "from2013": "Contract from 1 October 2013"
+        },
+        "usedMonthly": "Monthly amount used",
+        "daily": "Daily amount (monthly amount divided by 30)",
+        "cap": "Overall cap (12 monthly amounts)",
+        "breakdownTitle": "Breakdown by period",
+        "periods": {
+          "oneMonth": "{{years}} years at {{days}} days a year",
+          "twentyDays": "{{years}} years at {{days}} days a year",
+          "eighteenDays": "{{years}} years at {{days}} days a year",
+          "twelveDays": "{{years}} years at {{days}} days a year"
+        },
+        "caps": {
+          "none": "No cap applied.",
+          "monthlyBase": "The monthly amount was limited to 20 times the minimum wage ({{limit}}; the minimum wage is {{rmmg}}).",
+          "total": "The compensation was limited to 12 monthly amounts ({{cap}}).",
+          "earlyPart": "The part up to 30 September 2013 already reaches the cap of {{cap}}, so the later period is not added."
+        },
+        "payoutTitle": "Payout split over upcoming months",
+        "payoutValue": "Over {{months}} months: {{amount}} a month (before tax)",
+        "payoutNote": "A suggestion for planning only: the employer normally pays the compensation at the end of the contract, in one payment.",
+        "estimate": "An estimate for learning and planning, not legal advice. Your employer, a lawyer, the labour inspectorate (ACT) or your union can confirm the amount."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Someone earning {{base}} a month plus {{seniorityPay}} of diuturnidades, with a contract that began on {{start}} and ended on {{end}}, has {{seniority}} years of seniority. The daily amount is {{daily}}. The contract began between 1 November 2011 and 30 September 2013, so {{twentyYears}} years up to 30 September 2013 count 20 days ({{twentyAmount}}), {{eighteenYears}} years complete the first three years at 18 days ({{eighteenAmount}}) and the remaining {{twelveYears}} years count 12 days ({{twelveAmount}}). The total is {{total}}, below the cap of {{cap}}.",
+        "methodTitle": "How the estimate works",
+        "methodBase": "The base is the monthly base pay plus diuturnidades. The daily amount is that monthly amount divided by 30.",
+        "methodRates": "For contracts that began on or after 1 October 2013, the compensation is 12 days of base pay and diuturnidades per full year of seniority (art. 366(1) of the Código do Trabalho).",
+        "methodTransitional": "Older contracts keep the earlier rates for the time already worked (art. 5 of Lei n.º 69/2013). Before 1 November 2011: one month per year until 31 October 2012, then 20 days a year until 30 September 2013. From 1 November 2011 to 30 September 2013: 20 days a year until 30 September 2013. From 1 October 2013 every contract counts 12 days a year, except that the first three years of seniority count 18 days when the contract was less than three years old on that date.",
+        "methodCaps": "The monthly amount cannot exceed 20 times the minimum wage ({{baseCap}} with the 2026 minimum wage of {{rmmg}}), and the whole compensation cannot exceed 12 monthly amounts, at most {{totalCapRmmg}} (240 times the minimum wage). When the part up to 30 September 2013 already reaches that cap, the later periods are not added.",
+        "methodFraction": "An incomplete year counts proportionally: the calculator counts whole anniversaries of the start date plus the days since the last one over the days of that year. The termination date counts as a day worked.",
+        "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
+        "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
+        "supportedTitle": "Supported",
+        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker, on a permanent contract, with termination in 2026.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedFixedTerm": "Expiry of fixed-term contracts (arts. 344 and 345 of the Código do Trabalho), which has its own rates and transitional rules.",
+        "unsupportedJustCause": "Dismissal with just cause (disciplinary), which follows different rules.",
+        "unsupportedUnlawful": "Unlawful dismissal, where the court sets the compensation, in general between 15 and 45 days of base pay per year of seniority.",
+        "unsupportedAgreement": "Termination by mutual agreement, where the amount is negotiated and there is no legal formula.",
+        "unsupportedPublic": "Public-sector workers, who follow different rules.",
+        "sourcesTitle": "Sources",
+        "sourceLaw69": "Lei n.º 69/2013, of 30 August (Diário da República): new wording of art. 366 and the transitional regime of art. 5",
+        "sourceCode": "Código do Trabalho, consolidated text (PGDL): arts. 344, 345 and 366",
+        "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
+        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 12 days per year of art. 366(1) and its cap were checked against the consolidated Código do Trabalho and the DGERT summary, not against the Diário da República consolidation. The 14 days a year that some sources attribute to Lei n.º 13/2023 was not found and is not used. Educational, not legal advice."
+      },
+      "nextStepHeadline": "Plan the payout before it arrives",
+      "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
+      "nextStepCta": "Plan the payout across your upcoming months"
     }
   },
   "resources": {

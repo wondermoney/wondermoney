@@ -1,0 +1,88 @@
+---
+import {
+  DISMISSAL_EXAMPLE,
+  RMMG_2026_CENTS,
+  computeDismissalCompensation,
+} from "@/lib/calculators/dismissalCompensation";
+import { formatMoney } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.dismissalCompensation.guide.${key}`;
+const example = computeDismissalCompensation(DISMISSAL_EXAMPLE);
+if (!example.ok) throw new Error("Invalid dismissal compensation worked example");
+
+const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
+const date = (iso: string) => new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+const years = (value: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+const { result } = example;
+const line = (key: string) => result.lines.find((entry) => entry.key === key);
+const values = {
+  base: formatMoney(locale, DISMISSAL_EXAMPLE.baseMonthly, { decimals: 0 }),
+  seniorityPay: formatMoney(locale, DISMISSAL_EXAMPLE.seniorityPay, { decimals: 0 }),
+  start: date(DISMISSAL_EXAMPLE.startDate),
+  end: date(DISMISSAL_EXAMPLE.endDate),
+  seniority: years(result.seniorityYears),
+  daily: money(result.dailyCents),
+  twentyYears: years(line("twentyDays")?.years ?? 0),
+  twentyAmount: money(line("twentyDays")?.amountCents ?? 0),
+  eighteenYears: years(line("eighteenDays")?.years ?? 0),
+  eighteenAmount: money(line("eighteenDays")?.amountCents ?? 0),
+  twelveYears: years(line("twelveDays")?.years ?? 0),
+  twelveAmount: money(line("twelveDays")?.amountCents ?? 0),
+  total: money(result.compensationCents),
+  cap: money(result.capCents),
+  rmmg: money(RMMG_2026_CENTS),
+  baseCap: money(20 * RMMG_2026_CENTS),
+  totalCapRmmg: money(240 * RMMG_2026_CENTS),
+};
+const sources = [
+  ["sourceLaw69", "https://diariodarepublica.pt/dr/detalhe/lei/69-2013-499541"],
+  ["sourceCode", "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?nid=1047&tabela=leis"],
+  ["sourceDgert", "https://www.dgert.gov.pt/compensacao-por-despedimento-coletivo-artigo-366-o"],
+] as const;
+const methods = [
+  "methodBase", "methodRates", "methodTransitional", "methodCaps", "methodFraction", "methodTax", "methodBudget",
+];
+const unsupported = ["unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful", "unsupportedAgreement", "unsupportedPublic"];
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="dismissal-example">
+    <h2 id="dismissal-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="dismissal-method">
+    <h2 id="dismissal-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {methods.map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("supportedTitle"))}</h3>
+    <p class="mt-3">{t(k("supported"))}</p>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("unsupportedTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {unsupported.map((key) => <li>{t(k(key))}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key))}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
+  </section>
+</div>

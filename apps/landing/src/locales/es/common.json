@@ -3274,6 +3274,96 @@
         "sourceCode": "Código do Trabalho, arts. 239, 263 y 264: duración de las vacaciones, paga de Navidad y paga de vacaciones",
         "reviewed": "Reglas revisadas el 19 de noviembre de 2026. La retención por separado de cada pago del mes se comprobó en el texto original del Despacho n.º 233-A/2026, y los artículos del Código do Trabalho en copias del texto consolidado. La referencia de 22 días hábiles de la paga de vacaciones es práctica habitual, no figura en esos textos. Retener cada doceava al tipo efectivo de la paga completa (Lei n.º 11/2013, art. 3) es la práctica habitual de las empresas; esa ley no se comprobó con su texto. El 11% de Seguridad Social se comprobó en fuentes secundarias."
       }
+    },
+    "dismissalCompensation": {
+      "title": "Calculadora de indemnización por despido en Portugal 2026",
+      "shortName": "Indemnización por despido",
+      "subtitle": "Estima la compensación por despido colectivo, extinción del puesto o inadaptación en un contrato indefinido, con los límites y las tasas según la fecha del contrato.",
+      "description": "Estima tu indemnización por despido en Portugal: tasas por fecha del contrato, límites y plan de cobro.",
+      "pageTitle": "Calculadora de Indemnización por Despido Portugal 2026: Estimación del art. 366",
+      "pageDescription": "Estima la compensación por despido (compensação por despedimento) en Portugal por despido colectivo o extinción del puesto: 12, 18, 20 o 30 días por año según la fecha del contrato, el límite de 12 meses y un plan de cobro.",
+      "fields": {
+        "baseMonthly": "Retribución base mensual (bruta)",
+        "seniorityPay": "Complementos mensuales de antigüedad (diuturnidades)",
+        "startDate": "Fecha de inicio del contrato",
+        "endDate": "Fecha de cese"
+      },
+      "help": {
+        "baseMonthly": "La retribución base (retribuição base) en euros al mes, antes de la Seguridad Social y del IRS. No incluyas pagas extra, bonus ni horas extra.",
+        "seniorityPay": "Las diuturnidades son complementos que se pagan por antigüedad. Indica 0 si no tienes.",
+        "startDate": "El día en que empezó el contrato indefinido. Si hubo grupo de empresas o un contrato anterior con el mismo empleador, comprueba cómo se cuenta tu antigüedad.",
+        "endDate": "El último día del contrato. Cuenta como día trabajado. Esta estimación cubre ceses en {{year}}."
+      },
+      "scope": "Cubre el despido colectivo, la extinción del puesto y la inadaptación en un contrato indefinido. No cubre contratos temporales, despido con justa causa, despido ilícito, cese por mutuo acuerdo ni el sector público.",
+      "errors": {
+        "required": "Introduce un valor válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "invalidDate": "Introduce una fecha válida.",
+        "endBeforeStart": "La fecha de cese no puede ser anterior a la de inicio.",
+        "startFuture": "El contrato no puede empezar en el futuro.",
+        "endOutsideYear": "Esta estimación cubre ceses en {{year}}, el año del salario mínimo que usan los límites.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "compensation": "Indemnización estimada",
+        "seniority": "Antigüedad",
+        "seniorityValue": "{{years}} años",
+        "regime": "Reglas aplicadas",
+        "regimes": {
+          "before2011": "Contrato anterior al 1 de noviembre de 2011",
+          "from2011": "Contrato del 1 de noviembre de 2011 al 30 de septiembre de 2013",
+          "from2013": "Contrato desde el 1 de octubre de 2013"
+        },
+        "usedMonthly": "Importe mensual usado",
+        "daily": "Importe diario (importe mensual dividido entre 30)",
+        "cap": "Límite global (12 importes mensuales)",
+        "breakdownTitle": "Desglose por periodo",
+        "periods": {
+          "oneMonth": "{{years}} años a {{days}} días por año",
+          "twentyDays": "{{years}} años a {{days}} días por año",
+          "eighteenDays": "{{years}} años a {{days}} días por año",
+          "twelveDays": "{{years}} años a {{days}} días por año"
+        },
+        "caps": {
+          "none": "No se aplicó ningún límite.",
+          "monthlyBase": "El importe mensual se limitó a 20 veces el salario mínimo ({{limit}}; el salario mínimo es {{rmmg}}).",
+          "total": "La indemnización se limitó a 12 importes mensuales ({{cap}}).",
+          "earlyPart": "La parte hasta el 30 de septiembre de 2013 ya alcanza el límite de {{cap}}, así que no se suma el periodo posterior."
+        },
+        "payoutTitle": "Cobro repartido en los próximos meses",
+        "payoutValue": "En {{months}} meses: {{amount}} al mes (antes de impuestos)",
+        "payoutNote": "Solo una sugerencia para planificar: el empleador suele pagar la indemnización al final del contrato, en un solo pago.",
+        "estimate": "Una estimación para aprender y planificar, no es asesoramiento jurídico. Tu empleador, un abogado, la inspección de trabajo (ACT) o tu sindicato pueden confirmar el importe."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Una persona que gana {{base}} al mes más {{seniorityPay}} de diuturnidades, con un contrato que empezó el {{start}} y terminó el {{end}}, tiene {{seniority}} años de antigüedad. El importe diario es {{daily}}. El contrato empezó entre el 1 de noviembre de 2011 y el 30 de septiembre de 2013, así que {{twentyYears}} años hasta el 30 de septiembre de 2013 cuentan 20 días ({{twentyAmount}}), {{eighteenYears}} años completan los tres primeros años a 18 días ({{eighteenAmount}}) y los {{twelveYears}} años restantes cuentan 12 días ({{twelveAmount}}). El total es {{total}}, por debajo del límite de {{cap}}.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodBase": "La base es la retribución base mensual más las diuturnidades. El importe diario es ese importe mensual dividido entre 30.",
+        "methodRates": "En los contratos iniciados a partir del 1 de octubre de 2013, la indemnización es de 12 días de retribución base y diuturnidades por cada año completo de antigüedad (art. 366.1 del Código do Trabalho).",
+        "methodTransitional": "Los contratos anteriores mantienen las tasas antiguas por el tiempo ya trabajado (art. 5 de la Lei n.º 69/2013). Antes del 1 de noviembre de 2011: un mes por año hasta el 31 de octubre de 2012 y luego 20 días por año hasta el 30 de septiembre de 2013. Del 1 de noviembre de 2011 al 30 de septiembre de 2013: 20 días por año hasta el 30 de septiembre de 2013. Desde el 1 de octubre de 2013 todos los contratos cuentan 12 días por año, salvo que los tres primeros años de antigüedad cuentan 18 días cuando el contrato tenía menos de tres años en esa fecha.",
+        "methodCaps": "El importe mensual no puede superar 20 veces el salario mínimo ({{baseCap}} con el salario mínimo de {{rmmg}} de 2026) y la indemnización total no puede superar 12 importes mensuales, como máximo {{totalCapRmmg}} (240 veces el salario mínimo). Cuando la parte hasta el 30 de septiembre de 2013 ya alcanza ese límite, no se suman los periodos posteriores.",
+        "methodFraction": "Un año incompleto cuenta de forma proporcional: la calculadora cuenta los aniversarios completos de la fecha de inicio más los días desde el último, divididos entre los días de ese año. La fecha de cese cuenta como día trabajado.",
+        "methodTax": "Solo informativo, no entra en la cifra: parte de la indemnización puede quedar excluida del IRS según el art. 2.4 del CIRS, hasta un límite ligado a tu retribución regular de los últimos 12 meses y a tus años de antigüedad. El resto es renta sujeta a impuesto. Pregunta a la Autoridad Tributaria o a un contable por el límite exacto en tu caso.",
+        "methodBudget": "La indemnización es un importe único. Repartirla en los próximos meses, junto con la prestación por desempleo a la que tengas derecho, muestra cuánto tiempo cubre tus gastos.",
+        "supportedTitle": "Situaciones cubiertas",
+        "supported": "Despido colectivo, extinción del puesto e inadaptación del trabajador, en un contrato indefinido, con cese en 2026.",
+        "unsupportedTitle": "No cubierto",
+        "unsupportedFixedTerm": "La caducidad de contratos temporales (arts. 344 y 345 del Código do Trabalho), que tiene tasas y reglas transitorias propias.",
+        "unsupportedJustCause": "El despido con justa causa (disciplinario), que sigue otras reglas.",
+        "unsupportedUnlawful": "El despido ilícito, en el que el tribunal fija la indemnización, en general entre 15 y 45 días de retribución base por año de antigüedad.",
+        "unsupportedAgreement": "El cese por mutuo acuerdo, en el que el importe se negocia y no hay fórmula legal.",
+        "unsupportedPublic": "Los trabajadores del sector público, que siguen otras reglas.",
+        "sourcesTitle": "Fuentes",
+        "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y régimen transitorio del art. 5",
+        "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344, 345 y 366",
+        "sourceDgert": "DGERT: compensación por despido colectivo (art. 366)",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 con el texto de la Lei n.º 69/2013, publicado por la Asamblea de la República, y el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 12 días por año del art. 366.1 y su límite se comprobaron en el Código do Trabalho consolidado y en el resumen de la DGERT, no en la consolidación del Diário da República. Los 14 días por año que algunas fuentes atribuyen a la Lei n.º 13/2023 no se encontraron y no se usan. Información para aprender, no es asesoramiento jurídico."
+      },
+      "nextStepHeadline": "Planifica el cobro antes de que llegue",
+      "nextStepDescription": "WonderMoney muestra tus cuentas y tus gastos mensuales juntos, para repartir una indemnización en los meses siguientes.",
+      "nextStepCta": "Planificar el cobro en tus próximos meses"
     }
   },
   "resources": {

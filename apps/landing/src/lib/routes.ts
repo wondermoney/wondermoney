@@ -448,6 +448,14 @@ const ROUTE_SLUGS = {
 		de: "arbeitslosengeld-rechner-portugal",
 		it: "calcolatore-sussidio-disoccupazione-portogallo",
 	},
+	toolDismissalCompensation: {
+		pt: "simulador-compensacao-despedimento",
+		en: "portugal-dismissal-compensation-calculator",
+		es: "calculadora-indemnizacion-despido-portugal",
+		fr: "calculateur-indemnite-licenciement-portugal",
+		de: "abfindungsrechner-kuendigung-portugal",
+		it: "calcolatore-indennita-licenziamento-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -576,6 +584,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolHolidayAllowance",
 	"toolWithholdingTables",
 	"toolUnemploymentBenefit",
+	"toolDismissalCompensation",
 	"toolVehicleTax",
 	"toolPropertyCapitalGains",
 ] as const satisfies ReadonlyArray<RouteId>
@@ -884,6 +893,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"unemployment-benefit-calculator": "toolUnemploymentBenefit",
 	"unemployment-benefit": "toolUnemploymentBenefit",
 	"subsidio-de-desemprego": "toolUnemploymentBenefit",
+	tooldismissalcompensation: "toolDismissalCompensation",
+	"dismissal-compensation": "toolDismissalCompensation",
+	"compensacao-por-despedimento": "toolDismissalCompensation",
 	toolvehicletax: "toolVehicleTax",
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",

@@ -3274,6 +3274,96 @@
         "sourceCode": "Código do Trabalho, art. 239, 263 et 264 : durée des congés, prime de Noël et prime de vacances",
         "reviewed": "Règles vérifiées le 19 novembre 2026. La retenue séparée de chaque versement du mois a été vérifiée dans le texte original du Despacho n.º 233-A/2026, et les articles du Código do Trabalho dans des copies du texte consolidé. La référence de 22 jours ouvrables de la prime de vacances relève de la pratique courante et ne figure pas dans ces textes. Retenir chaque douzième au taux effectif de la prime entière (Lei n.º 11/2013, art. 3) est la pratique habituelle des employeurs ; cette loi n'a pas été vérifiée dans son texte. Le taux de 11 % de sécurité sociale a été confirmé par des sources secondaires."
       }
+    },
+    "dismissalCompensation": {
+      "title": "Calculateur d'indemnité de licenciement au Portugal 2026",
+      "shortName": "Indemnité de licenciement",
+      "subtitle": "Estimez l'indemnité d'un licenciement collectif, d'une suppression de poste ou d'une inadaptation sur un contrat à durée indéterminée, avec les plafonds et les taux selon la date du contrat.",
+      "description": "Estimez votre indemnité de licenciement au Portugal : taux selon la date du contrat, plafonds et plan de versement.",
+      "pageTitle": "Calculateur d'Indemnité de Licenciement Portugal 2026 : Estimation de l'art. 366",
+      "pageDescription": "Estimez la compensation par licenciement (compensação por despedimento) au Portugal pour un licenciement collectif ou une suppression de poste : 12, 18, 20 ou 30 jours par an selon la date du contrat, le plafond de 12 mois et un plan de versement.",
+      "fields": {
+        "baseMonthly": "Salaire de base mensuel (brut)",
+        "seniorityPay": "Primes d'ancienneté mensuelles (diuturnidades)",
+        "startDate": "Date de début du contrat",
+        "endDate": "Date de fin du contrat"
+      },
+      "help": {
+        "baseMonthly": "Le salaire de base (retribuição base) en euros par mois, avant la Sécurité sociale et l'IRS. N'incluez pas les primes de vacances ou de Noël, les bonus ni les heures supplémentaires.",
+        "seniorityPay": "Les diuturnidades sont des compléments versés pour l'ancienneté. Indiquez 0 si vous n'en avez pas.",
+        "startDate": "Le jour où le CDI a commencé. En cas de groupe d'entreprises ou de contrat antérieur avec le même employeur, vérifiez comment votre ancienneté est comptée.",
+        "endDate": "Le dernier jour du contrat. Il compte comme un jour travaillé. Cette estimation couvre les fins de contrat en {{year}}."
+      },
+      "scope": "Couvre le licenciement collectif, la suppression de poste et l'inadaptation sur un contrat à durée indéterminée. Ne couvre pas les CDD, le licenciement pour faute grave, le licenciement illicite, la rupture d'un commun accord ni le secteur public.",
+      "errors": {
+        "required": "Saisissez une valeur valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "invalidDate": "Saisissez une date valide.",
+        "endBeforeStart": "La date de fin ne peut pas précéder la date de début.",
+        "startFuture": "Le contrat ne peut pas commencer dans le futur.",
+        "endOutsideYear": "Cette estimation couvre les fins de contrat en {{year}}, l'année du salaire minimum utilisé par les plafonds.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "compensation": "Indemnité estimée",
+        "seniority": "Ancienneté",
+        "seniorityValue": "{{years}} ans",
+        "regime": "Règles appliquées",
+        "regimes": {
+          "before2011": "Contrat antérieur au 1er novembre 2011",
+          "from2011": "Contrat du 1er novembre 2011 au 30 septembre 2013",
+          "from2013": "Contrat à partir du 1er octobre 2013"
+        },
+        "usedMonthly": "Montant mensuel retenu",
+        "daily": "Montant journalier (montant mensuel divisé par 30)",
+        "cap": "Plafond global (12 montants mensuels)",
+        "breakdownTitle": "Détail par période",
+        "periods": {
+          "oneMonth": "{{years}} ans à {{days}} jours par an",
+          "twentyDays": "{{years}} ans à {{days}} jours par an",
+          "eighteenDays": "{{years}} ans à {{days}} jours par an",
+          "twelveDays": "{{years}} ans à {{days}} jours par an"
+        },
+        "caps": {
+          "none": "Aucun plafond appliqué.",
+          "monthlyBase": "Le montant mensuel a été limité à 20 fois le salaire minimum ({{limit}} ; le salaire minimum est de {{rmmg}}).",
+          "total": "L'indemnité a été limitée à 12 montants mensuels ({{cap}}).",
+          "earlyPart": "La part jusqu'au 30 septembre 2013 atteint déjà le plafond de {{cap}}, la période suivante n'est donc pas ajoutée."
+        },
+        "payoutTitle": "Versement réparti sur les mois à venir",
+        "payoutValue": "Sur {{months}} mois : {{amount}} par mois (avant impôt)",
+        "payoutNote": "Une simple suggestion pour planifier : l'employeur verse normalement l'indemnité à la fin du contrat, en une seule fois.",
+        "estimate": "Une estimation pour apprendre et planifier, pas un conseil juridique. Votre employeur, un avocat, l'inspection du travail (ACT) ou votre syndicat peuvent confirmer le montant."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne qui gagne {{base}} par mois plus {{seniorityPay}} de diuturnidades, avec un contrat commencé le {{start}} et terminé le {{end}}, a {{seniority}} ans d'ancienneté. Le montant journalier est de {{daily}}. Le contrat a commencé entre le 1er novembre 2011 et le 30 septembre 2013 : {{twentyYears}} ans jusqu'au 30 septembre 2013 comptent 20 jours ({{twentyAmount}}), {{eighteenYears}} ans complètent les trois premières années à 18 jours ({{eighteenAmount}}) et les {{twelveYears}} ans restants comptent 12 jours ({{twelveAmount}}). Le total est de {{total}}, sous le plafond de {{cap}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodBase": "La base est le salaire de base mensuel plus les diuturnidades. Le montant journalier est ce montant mensuel divisé par 30.",
+        "methodRates": "Pour les contrats commencés à partir du 1er octobre 2013, l'indemnité est de 12 jours de salaire de base et de diuturnidades par année complète d'ancienneté (art. 366, n° 1, du Código do Trabalho).",
+        "methodTransitional": "Les contrats plus anciens gardent les taux antérieurs pour le temps déjà travaillé (art. 5 de la Lei n.º 69/2013). Avant le 1er novembre 2011 : un mois par an jusqu'au 31 octobre 2012, puis 20 jours par an jusqu'au 30 septembre 2013. Du 1er novembre 2011 au 30 septembre 2013 : 20 jours par an jusqu'au 30 septembre 2013. À partir du 1er octobre 2013, tout contrat compte 12 jours par an, sauf que les trois premières années d'ancienneté comptent 18 jours si le contrat avait moins de trois ans à cette date.",
+        "methodCaps": "Le montant mensuel ne peut dépasser 20 fois le salaire minimum ({{baseCap}} avec le salaire minimum de {{rmmg}} en 2026) et l'indemnité totale ne peut dépasser 12 montants mensuels, au plus {{totalCapRmmg}} (240 fois le salaire minimum). Quand la part jusqu'au 30 septembre 2013 atteint déjà ce plafond, les périodes suivantes ne sont pas ajoutées.",
+        "methodFraction": "Une année incomplète compte au prorata : le calculateur compte les anniversaires complets de la date de début plus les jours écoulés depuis le dernier, rapportés aux jours de cette année. La date de fin compte comme un jour travaillé.",
+        "methodTax": "À titre d'information, hors du résultat : une partie de l'indemnité peut être exclue de l'IRS selon l'art. 2, n° 4, du CIRS, jusqu'à une limite liée à votre rémunération régulière des 12 derniers mois et à vos années d'ancienneté. Le reste est un revenu imposable. Demandez à l'administration fiscale ou à un comptable la limite exacte pour votre cas.",
+        "methodBudget": "L'indemnité est un montant unique. La répartir sur les mois à venir, avec les allocations chômage auxquelles vous avez droit, montre combien de temps elle couvre vos dépenses.",
+        "supportedTitle": "Situations couvertes",
+        "supported": "Licenciement collectif, suppression de poste et inadaptation du salarié, sur un contrat à durée indéterminée, avec une fin de contrat en 2026.",
+        "unsupportedTitle": "Non couvert",
+        "unsupportedFixedTerm": "L'arrivée à terme des CDD (art. 344 et 345 du Código do Trabalho), qui a ses propres taux et règles transitoires.",
+        "unsupportedJustCause": "Le licenciement pour faute grave (disciplinaire), qui suit d'autres règles.",
+        "unsupportedUnlawful": "Le licenciement illicite, où le tribunal fixe l'indemnité, en général entre 15 et 45 jours de salaire de base par année d'ancienneté.",
+        "unsupportedAgreement": "La rupture d'un commun accord, où le montant est négocié sans formule légale.",
+        "unsupportedPublic": "Les agents du secteur public, qui suivent d'autres règles.",
+        "sourcesTitle": "Sources",
+        "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régime transitoire de l'art. 5",
+        "sourceCode": "Código do Trabalho, texte consolidé (PGDL) : art. 344, 345 et 366",
+        "sourceDgert": "DGERT : indemnité de licenciement collectif (art. 366)",
+        "reviewed": "Règles vérifiées le 19 novembre 2026 sur le texte de la Lei n.º 69/2013, publié par l'Assemblée de la République, et le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 12 jours par an de l'art. 366, n° 1, et son plafond ont été vérifiés dans le Código do Trabalho consolidé et le résumé de la DGERT, pas dans la consolidation du Diário da República. Les 14 jours par an que certaines sources attribuent à la Lei n.º 13/2023 n'ont pas été retrouvés et ne sont pas utilisés. Information pédagogique, pas un conseil juridique."
+      },
+      "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",
+      "nextStepDescription": "WonderMoney réunit vos comptes et vos dépenses mensuelles, pour répartir une indemnité sur les mois à venir.",
+      "nextStepCta": "Planifier le versement sur vos prochains mois"
     }
   },
   "resources": {
