@@ -2994,6 +2994,86 @@
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così la scadenza è già coperta.",
       "nextStepCta": "Accantona un dodicesimo del tuo bollo auto annuale"
+    },
+    "christmasAllowance": {
+      "title": "Calcolatore della tredicesima in Portogallo 2026",
+      "shortName": "Tredicesima",
+      "subtitle": "Stima la tua tredicesima netta (subsídio de Natal): ritenuta IRS, previdenza sociale, anno di assunzione e pagamento in dodicesimi.",
+      "description": "Stima la tredicesima netta in Portogallo, con un primo anno parziale e il pagamento in dodicesimi.",
+      "pageTitle": "Calcolatore della Tredicesima in Portogallo 2026: Subsídio de Natal Netto",
+      "pageDescription": "Calcola la tua tredicesima netta in Portogallo con le tabelle di ritenuta IRS 2026 e l'11% di previdenza sociale, per un anno intero o parziale, in un'unica soluzione o in dodicesimi.",
+      "nextStepHeadline": "Decidi a cosa serve la tredicesima",
+      "nextStepDescription": "WonderMoney ti permette di assegnare un'entrata extra ai tuoi obiettivi e alle prossime spese, così non si perde nel mese.",
+      "nextStepCta": "Dividi la tredicesima tra obiettivi e spese",
+      "guide": {
+        "example": "Con uno stipendio base di {{salary}} al mese, non sposato e senza persone a carico, nel Portogallo continentale e occupato tutto l'anno, la tredicesima è di {{gross}} lordi. La ritenuta IRS è di {{withholding}} e la previdenza sociale di {{socialSecurity}}, quindi sul conto arrivano {{net}}.",
+        "ruleAmount": "La tredicesima equivale a una mensilità e va pagata entro il 15 dicembre (Código do Trabalho, art. 263, n. 1).",
+        "ruleHiringYear": "Nell'anno di assunzione è proporzionale al tempo lavorato nell'anno solare (art. 263, n. 2). Il calcolatore conta i giorni di calendario dalla data di inizio al 31 dicembre; alcuni datori di lavoro contano i mesi, con una differenza di pochi euro.",
+        "methodPlan": "Il netto è un'entrata extra che arriva una volta all'anno e rende di più con un piano: prima gli obiettivi, poi le spese che deve coprire."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Calcolatore della quattordicesima (ferie) in Portogallo 2026",
+      "shortName": "Subsídio de férias",
+      "subtitle": "Stima il tuo subsídio de férias netto, l'indennità di ferie: ritenuta IRS, previdenza sociale, anno di assunzione e pagamento in dodicesimi.",
+      "description": "Stima l'indennità di ferie netta in Portogallo, con l'anno di assunzione e il pagamento in dodicesimi.",
+      "pageTitle": "Calcolatore dell'Indennità di Ferie in Portogallo 2026: Subsídio de Férias Netto",
+      "pageDescription": "Calcola l'indennità di ferie netta in Portogallo con le tabelle di ritenuta IRS 2026 e l'11% di previdenza sociale, con la regola dei 2 giorni al mese dell'anno di assunzione e il pagamento in dodicesimi.",
+      "nextStepHeadline": "Trasforma l'indennità in una vacanza",
+      "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'indennità per il viaggio a cui è destinata, con un obiettivo e una data, invece di lasciarla sciogliersi nel mese.",
+      "nextStepCta": "Crea un fondo vacanze con l'importo ricevuto",
+      "guide": {
+        "example": "Hai iniziato il 15 marzo 2026 con uno stipendio base di {{salary}} al mese, non sposato e senza persone a carico, nel Portogallo continentale. Hai 9 mesi completi, quindi {{days}} giorni di ferie, e l'indennità di ferie è di {{gross}} lordi. La ritenuta IRS è di {{withholding}} e la previdenza sociale di {{socialSecurity}}, quindi sul conto arrivano {{net}}.",
+        "ruleAmount": "L'indennità di ferie copre la durata minima delle ferie, in aggiunta alla retribuzione del periodo di ferie (Código do Trabalho, art. 264, n. 2), e si paga prima dell'inizio delle ferie salvo diverso accordo scritto (n. 3). In un anno intero equivale a una mensilità.",
+        "ruleHiringYear": "Nell'anno di assunzione hai diritto a 2 giorni lavorativi di ferie per ogni mese completo di contratto, fino a 20 giorni (art. 239, n. 1). Il calcolatore pesa l'indennità per quei giorni sui 22 giorni lavorativi di un anno intero: 18 giorni danno 18/22 di una mensilità.",
+        "methodPlan": "Il netto è denaro pensato per riposarsi: conviene accantonarlo per il viaggio, con un obiettivo e una data, prima di spenderlo."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Come viene pagato l'importo",
+        "startDate": "Data di inizio (facoltativa)"
+      },
+      "modes": {
+        "lumpSum": "In un'unica soluzione",
+        "twelfths": "In dodicesimi (sommati a ogni stipendio mensile)"
+      },
+      "help": {
+        "gross": "Il tuo stipendio base prima di mensilità aggiuntive, previdenza sociale e IRS.",
+        "mode": "In un'unica soluzione si paga tutto insieme. In dodicesimi, l'importo si divide sui mesi lavorati nell'anno e si paga con ogni stipendio.",
+        "startDate": {
+          "christmas": "Lascia vuoto se hai lavorato tutto il {{year}}. Nell'anno in cui inizi, la tredicesima è proporzionale al tempo lavorato.",
+          "holiday": "Lascia vuoto se eri già occupato prima del {{year}}. Nell'anno di assunzione hai 2 giorni lavorativi di ferie per ogni mese completo, fino a 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Inserisci una data valida.",
+        "afterYear": "Questa pagina riguarda il {{year}}. Inserisci una data di inizio nel {{year}} o prima, oppure lascia vuoto.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "netAllowance": "Importo netto stimato",
+        "netTwelfth": "Importo netto extra in ogni stipendio mensile",
+        "gross": "Importo lordo",
+        "withholding": "Ritenuta IRS",
+        "socialSecurity": "Previdenza sociale (11%)",
+        "net": "Importo netto dell'anno",
+        "twelfthGross": "Dodicesimo lordo sommato a ogni stipendio",
+        "twelfthCount": "Numero di pagamenti mensili",
+        "proportion": "Quota di un importo completo: {{percent}}.",
+        "holidayDays": "Giorni di ferie conteggiati: {{days}} su 22 ({{percent}} di un importo completo).",
+        "noAllowanceYet": "Senza alcun mese completo nell'anno di assunzione, non c'è ancora un'indennità di ferie da pagare. I 2 giorni lavorativi al mese contano solo a mese completo.",
+        "noWithholdingOnTwelfth": "Ogni dodicesimo resta sotto la soglia di esenzione mensile, quindi non subisce ritenuta IRS. Il tuo datore di lavoro può sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che trattiene di più."
+      },
+      "guide": {
+        "methodWithholding": "Ogni pagamento è tassato a parte con la tabella mensile 2026, senza essere sommato allo stipendio del mese: il Despacho n.º 233-A/2026 (n. 10) chiede ai datori di lavoro di indicare un'aliquota effettiva separata per ogni retribuzione, come nei mesi in cui si pagano l'indennità di ferie e la tredicesima.",
+        "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero) e questa pagina tassa ogni dodicesimo a parte. Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e trattenere sul totale, il che di solito trattiene di più: controlla la busta paga.",
+        "methodSocialSecurity": "La previdenza sociale a carico del lavoratore è l'11% dell'importo lordo.",
+        "unsupportedNovember": "L'aggiustamento una tantum dei redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Un importo pagato a novembre avrebbe la ritenuta dimezzata.",
+        "unsupportedOther": "Conta solo lo stipendio base. Scatti di anzianità, altre voci retributive, cessazione o sospensione del contratto durante l'anno, contratti collettivi più generosi e costi del datore di lavoro restano fuori da questa stima.",
+        "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
+        "reviewed": "Regole riviste il 19 novembre 2026. La ritenuta separata su ogni pagamento del mese è stata verificata nel testo originale del Despacho n.º 233-A/2026, e gli articoli del Código do Trabalho in copie del testo consolidato. Il riferimento di 22 giorni lavorativi per l'indennità di ferie e la ritenuta su ogni dodicesimo a parte sono prassi comune, non indicati in quei testi. L'aliquota dell'11% di previdenza sociale è stata verificata su fonti secondarie."
+      }
     }
   },
   "resources": {

@@ -77,6 +77,18 @@ export const TOOLS_CATALOG = [
 		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate"],
 	},
 	{
+		key: "christmasAllowance",
+		routeId: "toolChristmasAllowance",
+		group: "budgetAndSave",
+		related: ["toolHolidayAllowance", "toolNetSalary", "toolSavingsGoal"],
+	},
+	{
+		key: "holidayAllowance",
+		routeId: "toolHolidayAllowance",
+		group: "budgetAndSave",
+		related: ["toolChristmasAllowance", "toolNetSalary", "toolSavingsGoal"],
+	},
+	{
 		key: "withholdingTables",
 		routeId: "toolWithholdingTables",
 		group: "budgetAndSave",

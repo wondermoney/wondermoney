@@ -56,6 +56,14 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolNetSalary",
   },
   {
+    sources: ["toolNetSalary", "toolHouseholdBudget", "toolSavingsGoal"],
+    destination: "toolChristmasAllowance",
+  },
+  {
+    sources: ["toolNetSalary", "toolChristmasAllowance", "toolSavingsGoal"],
+    destination: "toolHolidayAllowance",
+  },
+  {
     sources: ["toolNetSalary", "toolHouseholdBudget", "toolBorrowingCapacity"],
     destination: "toolWithholdingTables",
   },

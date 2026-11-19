@@ -2994,6 +2994,86 @@
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
       "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück"
+    },
+    "christmasAllowance": {
+      "title": "Weihnachtsgeld-Rechner Portugal 2026",
+      "shortName": "Weihnachtsgeld",
+      "subtitle": "Schätzen Sie Ihr Netto-Weihnachtsgeld (subsídio de Natal): IRS-Quellensteuer, Sozialversicherung, Eintrittsjahr und Auszahlung in Zwölfteln.",
+      "description": "Schätzen Sie Ihr Netto-Weihnachtsgeld in Portugal, auch für ein angebrochenes erstes Jahr und bei Auszahlung in Zwölfteln.",
+      "pageTitle": "Weihnachtsgeld-Rechner Portugal 2026: Subsídio de Natal netto",
+      "pageDescription": "Berechnen Sie Ihr Netto-Weihnachtsgeld in Portugal mit den IRS-Quellensteuertabellen 2026 und 11 % Sozialversicherung, für ein volles oder angebrochenes Jahr, als Einmalzahlung oder in Zwölfteln.",
+      "nextStepHeadline": "Entscheiden Sie, wofür das Geld gedacht ist",
+      "nextStepDescription": "Mit WonderMoney weisen Sie eine Sonderzahlung Ihren Zielen und anstehenden Ausgaben zu, damit sie nicht im Monat versickert.",
+      "nextStepCta": "Das Weihnachtsgeld auf Ziele und Ausgaben aufteilen",
+      "guide": {
+        "example": "Bei einem Grundgehalt von {{salary}} im Monat, nicht verheiratet, ohne Unterhaltsberechtigte, in Festlandportugal und ganzjährig beschäftigt, beträgt das Weihnachtsgeld {{gross}} brutto. Die IRS-Quellensteuer liegt bei {{withholding}}, die Sozialversicherung bei {{socialSecurity}}, sodass {{net}} auf Ihrem Konto ankommen.",
+        "ruleAmount": "Das Weihnachtsgeld entspricht einem Monatsgehalt und ist bis zum 15. Dezember fällig (Código do Trabalho, Art. 263, Abs. 1).",
+        "ruleHiringYear": "Im Jahr der Einstellung ist es anteilig zur im Kalenderjahr geleisteten Arbeitszeit (Art. 263, Abs. 2). Der Rechner zählt Kalendertage vom Starttermin bis zum 31. Dezember; manche Arbeitgeber zählen Monate, was einige Euro Unterschied ergeben kann.",
+        "methodPlan": "Das Netto ist Geld, das einmal im Jahr zusätzlich kommt, und es wirkt am besten mit einem Plan: zuerst die Ziele, dann die Ausgaben, die es decken soll."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Urlaubsgeld-Rechner Portugal 2026",
+      "shortName": "Urlaubsgeld",
+      "subtitle": "Schätzen Sie Ihr Netto-Urlaubsgeld (subsídio de férias): IRS-Quellensteuer, Sozialversicherung, Eintrittsjahr und Auszahlung in Zwölfteln.",
+      "description": "Schätzen Sie Ihr Netto-Urlaubsgeld in Portugal, auch für das Eintrittsjahr und bei Auszahlung in Zwölfteln.",
+      "pageTitle": "Urlaubsgeld-Rechner Portugal 2026: Subsídio de Férias netto",
+      "pageDescription": "Berechnen Sie Ihr Netto-Urlaubsgeld in Portugal mit den IRS-Quellensteuertabellen 2026 und 11 % Sozialversicherung, inklusive der Regel von 2 Urlaubstagen pro Monat im Eintrittsjahr und der Auszahlung in Zwölfteln.",
+      "nextStepHeadline": "Machen Sie aus dem Urlaubsgeld einen Urlaub",
+      "nextStepDescription": "WonderMoney hilft Ihnen, das Urlaubsgeld für die Reise zurückzulegen, für die es gedacht ist, mit Ziel und Datum, statt es im Monat untergehen zu lassen.",
+      "nextStepCta": "Aus dem erhaltenen Betrag einen Urlaubsfonds anlegen",
+      "guide": {
+        "example": "Sie haben am 15. März 2026 mit einem Grundgehalt von {{salary}} im Monat begonnen, nicht verheiratet, ohne Unterhaltsberechtigte, in Festlandportugal. Sie haben 9 volle Monate und damit {{days}} Urlaubstage; das Urlaubsgeld beträgt {{gross}} brutto. Die IRS-Quellensteuer liegt bei {{withholding}}, die Sozialversicherung bei {{socialSecurity}}, sodass {{net}} auf Ihrem Konto ankommen.",
+        "ruleAmount": "Das Urlaubsgeld deckt die Mindestdauer des Urlaubs ab, zusätzlich zur Vergütung für die Urlaubszeit (Código do Trabalho, Art. 264, Abs. 2), und wird vor Urlaubsbeginn gezahlt, sofern nicht schriftlich anders vereinbart (Abs. 3). In einem vollen Jahr entspricht es einem Monatsgehalt.",
+        "ruleHiringYear": "Im Eintrittsjahr stehen Ihnen 2 Arbeitstage Urlaub pro vollem Vertragsmonat zu, höchstens 20 Tage (Art. 239, Abs. 1). Der Rechner gewichtet das Urlaubsgeld mit diesen Tagen im Verhältnis zu den 22 Arbeitstagen eines vollen Jahres: 18 Tage ergeben 18/22 eines Monatsgehalts.",
+        "methodPlan": "Das Netto ist Geld für die Auszeit. Es hilft, es für die Reise zurückzulegen, mit Ziel und Datum, bevor es ausgegeben ist."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Wie das Geld ausgezahlt wird",
+        "startDate": "Eintrittsdatum (optional)"
+      },
+      "modes": {
+        "lumpSum": "Einmalzahlung",
+        "twelfths": "In Zwölfteln (zu jedem Monatsgehalt addiert)"
+      },
+      "help": {
+        "gross": "Ihr Grundgehalt vor Sonderzahlungen, Sozialversicherung und IRS.",
+        "mode": "Bei einer Einmalzahlung wird alles auf einmal gezahlt. In Zwölfteln wird der Betrag auf die Monate verteilt, die Sie im Jahr arbeiten, und mit jedem Gehalt gezahlt.",
+        "startDate": {
+          "christmas": "Leer lassen, wenn Sie das ganze Jahr {{year}} gearbeitet haben. Im Eintrittsjahr ist das Weihnachtsgeld anteilig zur Arbeitszeit.",
+          "holiday": "Leer lassen, wenn Sie schon vor {{year}} beschäftigt waren. Im Eintrittsjahr stehen Ihnen 2 Arbeitstage Urlaub pro vollem Monat zu, höchstens 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Geben Sie ein gültiges Datum ein.",
+        "afterYear": "Diese Seite gilt für {{year}}. Geben Sie ein Eintrittsdatum in {{year}} oder früher ein oder lassen Sie das Feld leer.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "netAllowance": "Geschätztes Netto",
+        "netTwelfth": "Zusätzliches Netto in jedem Monatsgehalt",
+        "gross": "Brutto der Sonderzahlung",
+        "withholding": "IRS-Quellensteuer",
+        "socialSecurity": "Sozialversicherung (11 %)",
+        "net": "Netto der Sonderzahlung im Jahr",
+        "twelfthGross": "Brutto-Zwölftel, zu jedem Gehalt addiert",
+        "twelfthCount": "Anzahl der Monatszahlungen",
+        "proportion": "Anteil einer vollen Sonderzahlung: {{percent}}.",
+        "holidayDays": "Angerechnete Urlaubstage: {{days}} von 22 ({{percent}} einer vollen Sonderzahlung).",
+        "noAllowanceYet": "Ohne vollen Monat im Eintrittsjahr gibt es noch kein Urlaubsgeld. Die 2 Arbeitstage pro Monat zählen erst, wenn der Monat voll ist.",
+        "noWithholdingOnTwelfth": "Jedes Zwölftel liegt unter der monatlichen Freigrenze, daher wird darauf keine IRS einbehalten. Ihr Arbeitgeber kann das Zwölftel zum Monatsgehalt addieren und auf die Summe einbehalten, was mehr einbehält."
+      },
+      "guide": {
+        "methodWithholding": "Jede Zahlung wird für sich mit der monatlichen Tabelle 2026 besteuert und nicht zum Monatsgehalt addiert: Das Despacho n.º 233-A/2026 (Nr. 10) verlangt von Arbeitgebern einen getrennten effektiven Satz je Vergütung, wie in den Monaten, in denen Urlaubs- und Weihnachtsgeld gezahlt werden.",
+        "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr), und diese Seite besteuert jedes Zwölftel für sich. Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und auf die Summe einbehalten, was meist mehr einbehält: Prüfen Sie Ihre Gehaltsabrechnung.",
+        "methodSocialSecurity": "Die Sozialversicherung zulasten des Arbeitnehmers beträgt 11 % der Brutto-Sonderzahlung.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Eine im November gezahlte Sonderzahlung würde nur zur Hälfte einbehalten.",
+        "unsupportedOther": "Es zählt nur das Grundgehalt. Dienstalterszulagen, andere Vergütungsbestandteile, Vertragsende oder Ruhen im Jahr, großzügigere Tarifverträge und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
+        "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
+        "reviewed": "Regeln geprüft am 19. November 2026. Die getrennte Quellensteuer je Zahlung eines Monats wurde im Originaltext des Despacho n.º 233-A/2026 geprüft, die Artikel des Código do Trabalho in Kopien des konsolidierten Textes. Die Referenz von 22 Arbeitstagen beim Urlaubsgeld und die getrennte Besteuerung jedes Zwölftels entsprechen der gängigen Praxis und stehen nicht in diesen Texten. Der Sozialversicherungssatz von 11 % wurde anhand von Sekundärquellen geprüft."
+      }
     }
   },
   "resources": {

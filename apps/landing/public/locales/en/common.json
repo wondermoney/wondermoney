@@ -2994,6 +2994,86 @@
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
       "nextStepCta": "Set aside one twelfth of your annual car tax"
+    },
+    "christmasAllowance": {
+      "title": "Christmas allowance calculator Portugal 2026",
+      "shortName": "Christmas allowance",
+      "subtitle": "Estimate your net Christmas allowance (subsídio de Natal): IRS withholding, Social Security, partial years and payment in twelfths.",
+      "description": "Estimate your net Christmas allowance in Portugal, including a partial first year and payment in twelfths.",
+      "pageTitle": "Christmas Allowance Calculator Portugal 2026: Net Subsídio de Natal",
+      "pageDescription": "Work out your net Christmas allowance in Portugal with the 2026 IRS withholding tables and 11% Social Security, for a full or partial year and a lump sum or twelfths.",
+      "nextStepHeadline": "Decide what the allowance is for",
+      "nextStepDescription": "WonderMoney lets you assign an extra payment to your goals and your upcoming expenses, so it does not disappear into the month.",
+      "nextStepCta": "Split the allowance between goals and expenses",
+      "guide": {
+        "example": "With a base salary of {{salary}} a month, unmarried with no dependants, in mainland Portugal and employed for the whole year, the Christmas allowance is {{gross}} before deductions. IRS withholding is {{withholding}} and Social Security is {{socialSecurity}}, so {{net}} reaches your account.",
+        "ruleAmount": "The Christmas allowance equals one month's pay and is due by 15 December (Código do Trabalho, art. 263, n.º 1).",
+        "ruleHiringYear": "In the year you are hired, the allowance is proportional to the time worked in the calendar year (art. 263, n.º 2). The calculator counts calendar days from your start date to 31 December; some employers count months, which can differ by a few euros.",
+        "methodPlan": "The net figure is extra money that arrives once a year, so it works best with a plan: goals first, then the expenses it has to cover."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Holiday allowance calculator Portugal 2026",
+      "shortName": "Holiday allowance",
+      "subtitle": "Estimate your net holiday allowance (subsídio de férias): IRS withholding, Social Security, the hiring year and payment in twelfths.",
+      "description": "Estimate your net holiday allowance in Portugal, including the hiring year and payment in twelfths.",
+      "pageTitle": "Holiday Allowance Calculator Portugal 2026: Net Subsídio de Férias",
+      "pageDescription": "Work out your net holiday allowance in Portugal with the 2026 IRS withholding tables and 11% Social Security, including the 2-days-per-month rule of the hiring year and payment in twelfths.",
+      "nextStepHeadline": "Turn the allowance into a holiday",
+      "nextStepDescription": "WonderMoney helps you set aside the allowance for the trip it is meant for, with a target and a date, instead of letting it blend into the month.",
+      "nextStepCta": "Create a holiday fund from the amount received",
+      "guide": {
+        "example": "You started on 15 March 2026 with a base salary of {{salary}} a month, unmarried with no dependants, in mainland Portugal. You have 9 complete months, so you earn {{days}} holiday days, and the holiday allowance is {{gross}} before deductions. IRS withholding is {{withholding}} and Social Security is {{socialSecurity}}, so {{net}} reaches your account.",
+        "ruleAmount": "The holiday allowance covers the minimum length of holidays, on top of your holiday pay (Código do Trabalho, art. 264, n.º 2), and is paid before the holidays start unless agreed otherwise in writing (n.º 3). For a full year it equals one month's pay.",
+        "ruleHiringYear": "In the year you are hired you earn 2 working days of holiday per complete month of the contract, up to 20 days (art. 239, n.º 1). The calculator scales the allowance by those days over the 22 working days of a full year, so 18 days gives 18/22 of a month's pay.",
+        "methodPlan": "The net figure is money meant for time off, so it helps to set it aside for the trip, with a target and a date, before it is spent."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "How the allowance is paid",
+        "startDate": "Start date (optional)"
+      },
+      "modes": {
+        "lumpSum": "Lump sum",
+        "twelfths": "In twelfths (added to each monthly salary)"
+      },
+      "help": {
+        "gross": "Your base salary before allowances, Social Security and IRS.",
+        "mode": "A lump sum is paid in one go. In twelfths, the allowance is split over the months you work in the year and paid with each salary.",
+        "startDate": {
+          "christmas": "Leave empty if you worked the whole of {{year}}. In the year you start, the Christmas allowance is proportional to the time worked.",
+          "holiday": "Leave empty if you were already employed before {{year}}. In the year of hiring you earn 2 working days of holiday per complete month, up to 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Enter a valid date.",
+        "afterYear": "This page covers {{year}}. Enter a start date in {{year}} or earlier, or leave it empty.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "netAllowance": "Estimated net allowance",
+        "netTwelfth": "Extra net amount in each monthly salary",
+        "gross": "Gross allowance",
+        "withholding": "IRS withholding",
+        "socialSecurity": "Social Security (11%)",
+        "net": "Net allowance for the year",
+        "twelfthGross": "Gross twelfth added to each salary",
+        "twelfthCount": "Number of monthly payments",
+        "proportion": "Share of a full allowance: {{percent}}.",
+        "holidayDays": "Holiday days counted: {{days}} of 22 ({{percent}} of a full allowance).",
+        "noAllowanceYet": "With no complete month yet in the hiring year, there is no holiday allowance to pay. The 2 working days per month only start counting once a month is complete.",
+        "noWithholdingOnTwelfth": "Each twelfth is below the monthly exemption threshold, so no IRS is withheld on it. Your payroll may add the twelfth to the month's salary and withhold on the total, which withholds more."
+      },
+      "guide": {
+        "methodWithholding": "Each payment is withheld on its own with the 2026 monthly table, never added to the month's salary: Despacho n.º 233-A/2026 (n.º 10) asks employers to show a separate effective rate for each remuneration, as in the months the holiday and Christmas allowances are paid.",
+        "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year) and this page withholds each twelfth on its own. Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
+        "methodSocialSecurity": "Employee Social Security is 11% of the gross allowance.",
+        "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. An allowance paid in November would be withheld at half.",
+        "unsupportedOther": "Only the base salary counts. Seniority supplements, other pay components, a contract ending or suspended during the year, collective agreements that pay more and employer costs are outside this estimate.",
+        "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
+        "reviewed": "Rules reviewed on 19 November 2026. The separate withholding on each payment of a month was checked in the original text of Despacho n.º 233-A/2026, and the Código do Trabalho articles in consolidated-text copies. The 22-working-day reference for the holiday allowance and withholding on each twelfth on its own are common practice, not stated in those texts. The 11% Social Security rate was checked against secondary sources."
+      }
     }
   },
   "resources": {
