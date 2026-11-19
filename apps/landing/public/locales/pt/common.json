@@ -5914,7 +5914,11 @@
       "compass": "Desenho de linhas de uma bússola de bolso pousada sobre um mapa dobrado, com a agulha a apontar ao longo de um percurso tracejado até um ponto marcado.",
       "cardindex": "Desenho de linhas de um ficheiro de fichas em madeira, com porta-etiqueta e orifício para o dedo, cheio de fichas pautadas e separadores com abas.",
       "calendar": "Desenho de linhas de um calendário de secretária em pé, com argolas de arame e a grelha de um mês com um dia assinalado.",
-      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado."
+      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado.",
+      "house": "Desenho de linhas de uma pequena casa no seu terreno, com chaminé, porta, janelas e um caminho de pedras, cujas telhas vão sendo assentes à medida que o empréstimo é pago.",
+      "deed": "Desenho de linhas de uma escritura de imóvel com um selo de lacre e uma fita, com a chave de uma casa pousada em cima.",
+      "car": "Desenho de linhas de um pequeno carro compacto numa estrada, com as rodas a girar enquanto avança.",
+      "payslip": "Desenho de linhas de um recibo de vencimento com linhas de valores, ao lado de um envelope onde a parte líquida de uma linha está guardada como uma nota."
     }
   }
 }
