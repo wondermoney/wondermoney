@@ -3323,7 +3323,8 @@
           "oneMonth": "{{years}} años a {{days}} días por año",
           "twentyDays": "{{years}} años a {{days}} días por año",
           "eighteenDays": "{{years}} años a {{days}} días por año",
-          "twelveDays": "{{years}} años a {{days}} días por año"
+          "twelveDays": "{{years}} años a {{days}} días por año",
+          "fourteenDays": "{{years}} años a {{days}} días por año"
         },
         "caps": {
           "none": "No se aplicó ningún límite.",
@@ -3338,11 +3339,11 @@
       },
       "guide": {
         "exampleTitle": "Ejemplo práctico",
-        "example": "Una persona que gana {{base}} al mes más {{seniorityPay}} de diuturnidades, con un contrato que empezó el {{start}} y terminó el {{end}}, tiene {{seniority}} años de antigüedad. El importe diario es {{daily}}. El contrato empezó entre el 1 de noviembre de 2011 y el 30 de septiembre de 2013, así que {{twentyYears}} años hasta el 30 de septiembre de 2013 cuentan 20 días ({{twentyAmount}}), {{eighteenYears}} años completan los tres primeros años a 18 días ({{eighteenAmount}}) y los {{twelveYears}} años restantes cuentan 12 días ({{twelveAmount}}). El total es {{total}}, por debajo del límite de {{cap}}.",
+        "example": "Una persona que gana {{base}} al mes más {{seniorityPay}} de diuturnidades, con un contrato que empezó el {{start}} y terminó el {{end}}, tiene {{seniority}} años de antigüedad. El importe diario es {{daily}}. El contrato empezó entre el 1 de noviembre de 2011 y el 30 de septiembre de 2013, así que {{twentyYears}} años hasta el 30 de septiembre de 2013 cuentan 20 días ({{twentyAmount}}), {{eighteenYears}} años completan los tres primeros años a 18 días ({{eighteenAmount}}), {{twelveYears}} años hasta el 30 de abril de 2023 cuentan 12 días ({{twelveAmount}}) y los últimos {{fourteenYears}} años cuentan 14 días ({{fourteenAmount}}). El total es {{total}}, por debajo del límite de {{cap}}.",
         "methodTitle": "Cómo funciona la estimación",
         "methodBase": "La base es la retribución base mensual más las diuturnidades. El importe diario es ese importe mensual dividido entre 30.",
-        "methodRates": "En los contratos iniciados a partir del 1 de octubre de 2013, la indemnización es de 12 días de retribución base y diuturnidades por cada año completo de antigüedad (art. 366.1 del Código do Trabalho).",
-        "methodTransitional": "Los contratos anteriores mantienen las tasas antiguas por el tiempo ya trabajado (art. 5 de la Lei n.º 69/2013). Antes del 1 de noviembre de 2011: un mes por año hasta el 31 de octubre de 2012 y luego 20 días por año hasta el 30 de septiembre de 2013. Del 1 de noviembre de 2011 al 30 de septiembre de 2013: 20 días por año hasta el 30 de septiembre de 2013. Desde el 1 de octubre de 2013 todos los contratos cuentan 12 días por año, salvo que los tres primeros años de antigüedad cuentan 18 días cuando el contrato tenía menos de tres años en esa fecha.",
+        "methodRates": "Para la antigüedad desde el 1 de mayo de 2023, la indemnización es de 14 días de retribución base y diuturnidades por cada año completo (art. 366.1 del Código do Trabalho, según la Lei n.º 13/2023). La antigüedad anterior mantiene la tasa antigua: 12 días por año desde el 1 de octubre de 2013.",
+        "methodTransitional": "Los contratos anteriores mantienen las tasas antiguas por el tiempo ya trabajado (art. 5 de la Lei n.º 69/2013). Antes del 1 de noviembre de 2011: un mes por año hasta el 31 de octubre de 2012 y luego 20 días por año hasta el 30 de septiembre de 2013. Del 1 de noviembre de 2011 al 30 de septiembre de 2013: 20 días por año hasta el 30 de septiembre de 2013. Del 1 de octubre de 2013 al 30 de abril de 2023 todos los contratos cuentan 12 días por año, salvo que los tres primeros años de antigüedad cuentan 18 días cuando el contrato tenía menos de tres años el 1 de octubre de 2013. Desde el 1 de mayo de 2023 cada año cuenta 14 días.",
         "methodCaps": "El importe mensual no puede superar 20 veces el salario mínimo ({{baseCap}} con el salario mínimo de {{rmmg}} de 2026) y la indemnización total no puede superar 12 importes mensuales, como máximo {{totalCapRmmg}} (240 veces el salario mínimo). Cuando la parte hasta el 30 de septiembre de 2013 ya alcanza ese límite, no se suman los periodos posteriores.",
         "methodFraction": "Un año incompleto cuenta de forma proporcional: la calculadora cuenta los aniversarios completos de la fecha de inicio más los días desde el último, divididos entre los días de ese año. La fecha de cese cuenta como día trabajado.",
         "methodTax": "Solo informativo, no entra en la cifra: parte de la indemnización puede quedar excluida del IRS según el art. 2.4 del CIRS, hasta un límite ligado a tu retribución regular de los últimos 12 meses y a tus años de antigüedad. El resto es renta sujeta a impuesto. Pregunta a la Autoridad Tributaria o a un contable por el límite exacto en tu caso.",
@@ -3357,9 +3358,10 @@
         "unsupportedPublic": "Los trabajadores del sector público, que siguen otras reglas.",
         "sourcesTitle": "Fuentes",
         "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y régimen transitorio del art. 5",
+        "sourceLaw13": "Guía de APEL sobre la Agenda do Trabalho Digno: Lei n.º 13/2023, que subió la tasa del art. 366.1 a 14 días desde el 1 de mayo de 2023",
         "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344, 345 y 366",
         "sourceDgert": "DGERT: compensación por despido colectivo (art. 366)",
-        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 con el texto de la Lei n.º 69/2013, publicado por la Asamblea de la República, y el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 12 días por año del art. 366.1 y su límite se comprobaron en el Código do Trabalho consolidado y en el resumen de la DGERT, no en la consolidación del Diário da República. Los 14 días por año que algunas fuentes atribuyen a la Lei n.º 13/2023 no se encontraron y no se usan. Información para aprender, no es asesoramiento jurídico."
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 con el texto de la Lei n.º 69/2013, publicado por la Asamblea de la República, y el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días por año de la Lei n.º 13/2023, en vigor desde el 1 de mayo de 2023, y los 12 días y el límite del art. 366 proceden de los resúmenes de APEL y DGERT y del Código do Trabalho consolidado, no del texto del Diário da República. Aplicamos los 14 días solo a la antigüedad desde el 1 de mayo de 2023, la lectura habitual de la norma transitoria. Información para aprender, no es asesoramiento jurídico."
       },
       "nextStepHeadline": "Planifica el cobro antes de que llegue",
       "nextStepDescription": "WonderMoney muestra tus cuentas y tus gastos mensuales juntos, para repartir una indemnización en los meses siguientes.",

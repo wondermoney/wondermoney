@@ -53,12 +53,14 @@ describe("localized dismissal compensation tool page", () => {
     const { guide } = localeCopy(lang, "src");
     expect(guide.reviewed).toContain("2026");
     for (const key of [
-      "sourceLaw69", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
+      "sourceLaw69", "sourceLaw13", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
       "unsupportedAgreement", "unsupportedPublic", "supported",
     ]) {
       expect(guide[key]).toBeTruthy();
     }
     expect(guide.sourceLaw69).toContain("69/2013");
+    expect(guide.sourceLaw13).toContain("13/2023");
+    expect(guide.reviewed).toContain("1");
   });
 
   it.each(SUPPORTED_LANGS)("has the same translation keys, placeholders and public mirror in %s", (lang) => {

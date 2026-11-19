@@ -13,22 +13,36 @@ const run = (overrides: Partial<DismissalCompensationInput>) => {
   return outcome.result;
 };
 
+const byKey = (result: ReturnType<typeof run>) => Object.fromEntries(result.lines.map((line) => [line.key, line]));
+
 describe("dismissal compensation, contracts from 1 October 2013", () => {
-  it("pays 12 days of base pay per full year (art. 366(1))", () => {
-    // 2020-01-01 to 2026-12-31 is exactly 7 years: 7 x 12 days of 3000 / 30 = 100 euros a day.
+  it("pays 12 days up to 30 April 2023 and 14 days from 1 May 2023 (art. 366(1), Lei 13/2023)", () => {
+    // 2020-01-01 to 2026-12-31 is exactly 7 years; 100 euros a day (3000 / 30). 3 years and 120 of 365 days are before May 2023.
     const result = run({});
     expect(result.regime).toBe("from2013");
     expect(result.seniorityYears).toBeCloseTo(7, 10);
-    expect(result.lines).toHaveLength(1);
-    expect(result.compensationCents).toBe(7 * 12 * 10_000);
+    expect(result.lines.map((line) => line.key)).toEqual(["twelveDays", "fourteenDays"]);
+    const lines = byKey(result);
+    expect(lines.twelveDays.years).toBeCloseTo(3 + 120 / 365, 2);
+    expect(lines.fourteenDays.years).toBeCloseTo(7 - lines.twelveDays.years, 10);
+    expect(lines.twelveDays.amountCents).toBe(Math.round(lines.twelveDays.years * 12 * 10_000));
+    expect(lines.fourteenDays.amountCents).toBe(Math.round(lines.fourteenDays.years * 14 * 10_000));
+    expect(result.compensationCents).toBe(lines.twelveDays.amountCents + lines.fourteenDays.amountCents);
     expect(result.caps).toEqual({ monthlyBase: false, total: false, earlyPartExceedsCap: false });
   });
 
+  it("pays 14 days for every year of a contract that started after 1 May 2023", () => {
+    // 2023-06-01 to 2026-05-31 is exactly 3 years.
+    const result = run({ startDate: "2023-06-01", endDate: "2026-05-31" });
+    expect(result.lines.map((line) => line.key)).toEqual(["fourteenDays"]);
+    expect(result.compensationCents).toBe(3 * 14 * 10_000);
+  });
+
   it("counts a fraction of a year proportionally", () => {
-    // 2024-01-01 to 2026-06-30 is 2 years and 181 of 365 days.
+    // 2024-01-01 to 2026-06-30 is 2 years and 181 of 365 days, all after 1 May 2023.
     const result = run({ startDate: "2024-01-01", endDate: "2026-06-30" });
     expect(result.seniorityYears).toBeCloseTo(2 + 181 / 365, 10);
-    expect(result.compensationCents).toBe(Math.round((2 + 181 / 365) * 12 * 10_000));
+    expect(result.compensationCents).toBe(Math.round((2 + 181 / 365) * 14 * 10_000));
   });
 
   it("adds diuturnidades to the base", () => {
@@ -45,8 +59,11 @@ describe("dismissal compensation, transitional regimes (Lei 69/2013, art. 5)", (
     const lines = Object.fromEntries(result.lines.map((line) => [line.key, line]));
     expect(lines.twentyDays.years).toBeCloseTo(1, 10);
     expect(lines.eighteenDays.years).toBeCloseTo(2, 10);
-    expect(lines.twelveDays.years).toBeCloseTo(11, 10);
-    expect(result.compensationCents).toBe((1 * 20 + 2 * 18 + 11 * 12) * 10_000);
+    // 12 days from 1 Oct 2015 to 30 Apr 2023 (7 years and 212 of 365 days), then 14 days.
+    expect(lines.twelveDays.years).toBeCloseTo(7 + 212 / 365, 2);
+    expect(lines.fourteenDays.years).toBeCloseTo(14 - (10 + 212 / 365), 1);
+    expect(result.compensationCents).toBe(result.lines.reduce((sum, line) => sum + line.amountCents, 0));
+    expect(lines.eighteenDays.amountCents).toBe(Math.round(2 * 18 * 10_000));
   });
 
   it("pays only 12 days after 2013 when the contract was already three years old on 1 Oct 2013", () => {
@@ -56,7 +73,9 @@ describe("dismissal compensation, transitional regimes (Lei 69/2013, art. 5)", (
     const lines = Object.fromEntries(result.lines.map((line) => [line.key, line]));
     expect(lines.eighteenDays).toBeUndefined();
     expect(lines.oneMonth.years).toBeCloseTo(2 + 31 / 366 + 0, 1); // 2010-10-01 to 2012-11-01
-    expect(lines.twelveDays.years).toBeCloseTo(13, 10);
+    // Three years old on 1 Oct 2013: 12 days up to 30 Apr 2023, 14 days from 1 May 2023.
+    expect(lines.twelveDays.years).toBeCloseTo(9 + 212 / 365, 2);
+    expect(lines.fourteenDays.years).toBeCloseTo(16 - 12 - 212 / 365, 1);
   });
 
   it("uses a month per year up to 31 Oct 2012 and 20 days to 30 Sep 2013 for contracts before 1 Nov 2011", () => {
@@ -68,7 +87,7 @@ describe("dismissal compensation, transitional regimes (Lei 69/2013, art. 5)", (
     expect(lines.oneMonth.daysPerYear).toBe(30);
     expect(lines.oneMonth.years).toBeCloseTo(1 + 305 / 366, 2);
     expect(lines.twentyDays.years).toBeCloseTo(334 / 365, 2);
-    expect(lines.twelveDays.years).toBeCloseTo(result.seniorityYears - 3, 10);
+    expect(lines.twelveDays.years + lines.fourteenDays.years).toBeCloseTo(result.seniorityYears - 3, 10);
     expect(lines.oneMonth.amountCents).toBe(Math.round(lines.oneMonth.years * 30 * 5000));
   });
 });

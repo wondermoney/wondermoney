@@ -36,6 +36,8 @@ const values = {
   eighteenAmount: money(line("eighteenDays")?.amountCents ?? 0),
   twelveYears: years(line("twelveDays")?.years ?? 0),
   twelveAmount: money(line("twelveDays")?.amountCents ?? 0),
+  fourteenYears: years(line("fourteenDays")?.years ?? 0),
+  fourteenAmount: money(line("fourteenDays")?.amountCents ?? 0),
   total: money(result.compensationCents),
   cap: money(result.capCents),
   rmmg: money(RMMG_2026_CENTS),
@@ -44,6 +46,7 @@ const values = {
 };
 const sources = [
   ["sourceLaw69", "https://diariodarepublica.pt/dr/detalhe/lei/69-2013-499541"],
+  ["sourceLaw13", "https://www.apel.pt/wp-content/uploads/2023/05/Guia_APEL_AGENDA-TRABALHO.pdf"],
   ["sourceCode", "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?nid=1047&tabela=leis"],
   ["sourceDgert", "https://www.dgert.gov.pt/compensacao-por-despedimento-coletivo-artigo-366-o"],
 ] as const;

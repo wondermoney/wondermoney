@@ -3323,7 +3323,8 @@
           "oneMonth": "{{years}} anni a {{days}} giorni per anno",
           "twentyDays": "{{years}} anni a {{days}} giorni per anno",
           "eighteenDays": "{{years}} anni a {{days}} giorni per anno",
-          "twelveDays": "{{years}} anni a {{days}} giorni per anno"
+          "twelveDays": "{{years}} anni a {{days}} giorni per anno",
+          "fourteenDays": "{{years}} anni a {{days}} giorni per anno"
         },
         "caps": {
           "none": "Nessun limite applicato.",
@@ -3338,11 +3339,11 @@
       },
       "guide": {
         "exampleTitle": "Esempio pratico",
-        "example": "Chi guadagna {{base}} al mese più {{seniorityPay}} di diuturnidades, con un contratto iniziato il {{start}} e terminato il {{end}}, ha {{seniority}} anni di anzianità. L'importo giornaliero è {{daily}}. Il contratto è iniziato tra il 1° novembre 2011 e il 30 settembre 2013: {{twentyYears}} anni fino al 30 settembre 2013 contano 20 giorni ({{twentyAmount}}), {{eighteenYears}} anni completano i primi tre anni a 18 giorni ({{eighteenAmount}}) e i restanti {{twelveYears}} anni contano 12 giorni ({{twelveAmount}}). Il totale è {{total}}, sotto il tetto di {{cap}}.",
+        "example": "Chi guadagna {{base}} al mese più {{seniorityPay}} di diuturnidades, con un contratto iniziato il {{start}} e terminato il {{end}}, ha {{seniority}} anni di anzianità. L'importo giornaliero è {{daily}}. Il contratto è iniziato tra il 1° novembre 2011 e il 30 settembre 2013: {{twentyYears}} anni fino al 30 settembre 2013 contano 20 giorni ({{twentyAmount}}), {{eighteenYears}} anni completano i primi tre anni a 18 giorni ({{eighteenAmount}}), {{twelveYears}} anni fino al 30 aprile 2023 contano 12 giorni ({{twelveAmount}}) e gli ultimi {{fourteenYears}} anni contano 14 giorni ({{fourteenAmount}}). Il totale è {{total}}, sotto il tetto di {{cap}}.",
         "methodTitle": "Come funziona la stima",
         "methodBase": "La base è la retribuzione base mensile più le diuturnidades. L'importo giornaliero è quell'importo mensile diviso 30.",
-        "methodRates": "Per i contratti iniziati dal 1° ottobre 2013, l'indennità è di 12 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità (art. 366, n. 1, del Código do Trabalho).",
-        "methodTransitional": "I contratti più vecchi mantengono le aliquote precedenti per il tempo già lavorato (art. 5 della Lei n.º 69/2013). Prima del 1° novembre 2011: un mese per anno fino al 31 ottobre 2012, poi 20 giorni per anno fino al 30 settembre 2013. Dal 1° novembre 2011 al 30 settembre 2013: 20 giorni per anno fino al 30 settembre 2013. Dal 1° ottobre 2013 ogni contratto conta 12 giorni per anno, tranne che i primi tre anni di anzianità contano 18 giorni se il contratto aveva meno di tre anni in quella data.",
+        "methodRates": "Per l'anzianità dal 1° maggio 2023, l'indennità è di 14 giorni di retribuzione base e diuturnidades per ogni anno completo (art. 366, n. 1, del Código do Trabalho, come modificato dalla Lei n.º 13/2023). L'anzianità precedente mantiene l'aliquota vecchia: 12 giorni per anno dal 1° ottobre 2013.",
+        "methodTransitional": "I contratti più vecchi mantengono le aliquote precedenti per il tempo già lavorato (art. 5 della Lei n.º 69/2013). Prima del 1° novembre 2011: un mese per anno fino al 31 ottobre 2012, poi 20 giorni per anno fino al 30 settembre 2013. Dal 1° novembre 2011 al 30 settembre 2013: 20 giorni per anno fino al 30 settembre 2013. Dal 1° ottobre 2013 al 30 aprile 2023 ogni contratto conta 12 giorni per anno, tranne che i primi tre anni di anzianità contano 18 giorni se il contratto aveva meno di tre anni il 1° ottobre 2013. Dal 1° maggio 2023 ogni anno conta 14 giorni.",
         "methodCaps": "L'importo mensile non può superare 20 volte il salario minimo ({{baseCap}} con il salario minimo di {{rmmg}} del 2026) e l'indennità totale non può superare 12 importi mensili, al massimo {{totalCapRmmg}} (240 volte il salario minimo). Quando la parte fino al 30 settembre 2013 raggiunge già questo tetto, i periodi successivi non vengono sommati.",
         "methodFraction": "Un anno incompleto conta in proporzione: il calcolatore conta gli anniversari completi della data di inizio più i giorni dall'ultimo, divisi per i giorni di quell'anno. La data di cessazione conta come giorno lavorato.",
         "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
@@ -3357,9 +3358,10 @@
         "unsupportedPublic": "I dipendenti del settore pubblico, che seguono altre regole.",
         "sourcesTitle": "Fonti",
         "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regime transitorio dell'art. 5",
+        "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
         "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
         "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
-        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 12 giorni per anno dell'art. 366, n. 1, e il relativo tetto sono stati verificati nel Código do Trabalho consolidato e nel riepilogo della DGERT, non nella consolidazione del Diário da República. I 14 giorni per anno che alcune fonti attribuiscono alla Lei n.º 13/2023 non sono stati trovati e non sono usati. Informazione didattica, non consulenza legale."
+        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assemblea della Repubblica, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il tetto dell'art. 366 provengono dai riepiloghi di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. Informazione didattica, non consulenza legale."
       },
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
       "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",

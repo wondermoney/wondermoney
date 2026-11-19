@@ -3323,7 +3323,8 @@
           "oneMonth": "{{years}} ans à {{days}} jours par an",
           "twentyDays": "{{years}} ans à {{days}} jours par an",
           "eighteenDays": "{{years}} ans à {{days}} jours par an",
-          "twelveDays": "{{years}} ans à {{days}} jours par an"
+          "twelveDays": "{{years}} ans à {{days}} jours par an",
+          "fourteenDays": "{{years}} ans à {{days}} jours par an"
         },
         "caps": {
           "none": "Aucun plafond appliqué.",
@@ -3338,11 +3339,11 @@
       },
       "guide": {
         "exampleTitle": "Exemple chiffré",
-        "example": "Une personne qui gagne {{base}} par mois plus {{seniorityPay}} de diuturnidades, avec un contrat commencé le {{start}} et terminé le {{end}}, a {{seniority}} ans d'ancienneté. Le montant journalier est de {{daily}}. Le contrat a commencé entre le 1er novembre 2011 et le 30 septembre 2013 : {{twentyYears}} ans jusqu'au 30 septembre 2013 comptent 20 jours ({{twentyAmount}}), {{eighteenYears}} ans complètent les trois premières années à 18 jours ({{eighteenAmount}}) et les {{twelveYears}} ans restants comptent 12 jours ({{twelveAmount}}). Le total est de {{total}}, sous le plafond de {{cap}}.",
+        "example": "Une personne qui gagne {{base}} par mois plus {{seniorityPay}} de diuturnidades, avec un contrat commencé le {{start}} et terminé le {{end}}, a {{seniority}} ans d'ancienneté. Le montant journalier est de {{daily}}. Le contrat a commencé entre le 1er novembre 2011 et le 30 septembre 2013 : {{twentyYears}} ans jusqu'au 30 septembre 2013 comptent 20 jours ({{twentyAmount}}), {{eighteenYears}} ans complètent les trois premières années à 18 jours ({{eighteenAmount}}), {{twelveYears}} ans jusqu'au 30 avril 2023 comptent 12 jours ({{twelveAmount}}) et les {{fourteenYears}} derniers ans comptent 14 jours ({{fourteenAmount}}). Le total est de {{total}}, sous le plafond de {{cap}}.",
         "methodTitle": "Comment fonctionne l'estimation",
         "methodBase": "La base est le salaire de base mensuel plus les diuturnidades. Le montant journalier est ce montant mensuel divisé par 30.",
-        "methodRates": "Pour les contrats commencés à partir du 1er octobre 2013, l'indemnité est de 12 jours de salaire de base et de diuturnidades par année complète d'ancienneté (art. 366, n° 1, du Código do Trabalho).",
-        "methodTransitional": "Les contrats plus anciens gardent les taux antérieurs pour le temps déjà travaillé (art. 5 de la Lei n.º 69/2013). Avant le 1er novembre 2011 : un mois par an jusqu'au 31 octobre 2012, puis 20 jours par an jusqu'au 30 septembre 2013. Du 1er novembre 2011 au 30 septembre 2013 : 20 jours par an jusqu'au 30 septembre 2013. À partir du 1er octobre 2013, tout contrat compte 12 jours par an, sauf que les trois premières années d'ancienneté comptent 18 jours si le contrat avait moins de trois ans à cette date.",
+        "methodRates": "Pour l'ancienneté à partir du 1er mai 2023, l'indemnité est de 14 jours de salaire de base et de diuturnidades par année complète (art. 366, n° 1, du Código do Trabalho, tel que modifié par la Lei n.º 13/2023). L'ancienneté antérieure garde l'ancien taux : 12 jours par an depuis le 1er octobre 2013.",
+        "methodTransitional": "Les contrats plus anciens gardent les taux antérieurs pour le temps déjà travaillé (art. 5 de la Lei n.º 69/2013). Avant le 1er novembre 2011 : un mois par an jusqu'au 31 octobre 2012, puis 20 jours par an jusqu'au 30 septembre 2013. Du 1er novembre 2011 au 30 septembre 2013 : 20 jours par an jusqu'au 30 septembre 2013. Du 1er octobre 2013 au 30 avril 2023, tout contrat compte 12 jours par an, sauf que les trois premières années d'ancienneté comptent 18 jours si le contrat avait moins de trois ans au 1er octobre 2013. À partir du 1er mai 2023, chaque année compte 14 jours.",
         "methodCaps": "Le montant mensuel ne peut dépasser 20 fois le salaire minimum ({{baseCap}} avec le salaire minimum de {{rmmg}} en 2026) et l'indemnité totale ne peut dépasser 12 montants mensuels, au plus {{totalCapRmmg}} (240 fois le salaire minimum). Quand la part jusqu'au 30 septembre 2013 atteint déjà ce plafond, les périodes suivantes ne sont pas ajoutées.",
         "methodFraction": "Une année incomplète compte au prorata : le calculateur compte les anniversaires complets de la date de début plus les jours écoulés depuis le dernier, rapportés aux jours de cette année. La date de fin compte comme un jour travaillé.",
         "methodTax": "À titre d'information, hors du résultat : une partie de l'indemnité peut être exclue de l'IRS selon l'art. 2, n° 4, du CIRS, jusqu'à une limite liée à votre rémunération régulière des 12 derniers mois et à vos années d'ancienneté. Le reste est un revenu imposable. Demandez à l'administration fiscale ou à un comptable la limite exacte pour votre cas.",
@@ -3357,9 +3358,10 @@
         "unsupportedPublic": "Les agents du secteur public, qui suivent d'autres règles.",
         "sourcesTitle": "Sources",
         "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régime transitoire de l'art. 5",
+        "sourceLaw13": "Guide de l'APEL sur l'Agenda do Trabalho Digno : Lei n.º 13/2023, qui a porté le taux de l'art. 366, n° 1, à 14 jours depuis le 1er mai 2023",
         "sourceCode": "Código do Trabalho, texte consolidé (PGDL) : art. 344, 345 et 366",
         "sourceDgert": "DGERT : indemnité de licenciement collectif (art. 366)",
-        "reviewed": "Règles vérifiées le 19 novembre 2026 sur le texte de la Lei n.º 69/2013, publié par l'Assemblée de la République, et le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 12 jours par an de l'art. 366, n° 1, et son plafond ont été vérifiés dans le Código do Trabalho consolidé et le résumé de la DGERT, pas dans la consolidation du Diário da República. Les 14 jours par an que certaines sources attribuent à la Lei n.º 13/2023 n'ont pas été retrouvés et ne sont pas utilisés. Information pédagogique, pas un conseil juridique."
+        "reviewed": "Règles vérifiées le 19 novembre 2026 sur le texte de la Lei n.º 69/2013, publié par l'Assemblée de la République, et le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours par an de la Lei n.º 13/2023, en vigueur depuis le 1er mai 2023, ainsi que les 12 jours et le plafond de l'art. 366 proviennent des résumés de l'APEL et de la DGERT et du Código do Trabalho consolidé, pas du texte du Diário da República. Nous appliquons les 14 jours uniquement à l'ancienneté depuis le 1er mai 2023, la lecture habituelle de la règle transitoire. Information pédagogique, pas un conseil juridique."
       },
       "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",
       "nextStepDescription": "WonderMoney réunit vos comptes et vos dépenses mensuelles, pour répartir une indemnité sur les mois à venir.",

@@ -3323,7 +3323,8 @@
           "oneMonth": "{{years}} anos a {{days}} dias por ano",
           "twentyDays": "{{years}} anos a {{days}} dias por ano",
           "eighteenDays": "{{years}} anos a {{days}} dias por ano",
-          "twelveDays": "{{years}} anos a {{days}} dias por ano"
+          "twelveDays": "{{years}} anos a {{days}} dias por ano",
+          "fourteenDays": "{{years}} anos a {{days}} dias por ano"
         },
         "caps": {
           "none": "Não foi aplicado nenhum limite.",
@@ -3338,11 +3339,11 @@
       },
       "guide": {
         "exampleTitle": "Exemplo prático",
-        "example": "Quem ganha {{base}} por mês mais {{seniorityPay}} de diuturnidades, com um contrato que começou em {{start}} e terminou em {{end}}, tem {{seniority}} anos de antiguidade. O valor diário é {{daily}}. O contrato começou entre 1 de novembro de 2011 e 30 de setembro de 2013, por isso {{twentyYears}} anos até 30 de setembro de 2013 contam 20 dias ({{twentyAmount}}), {{eighteenYears}} anos completam os três primeiros anos a 18 dias ({{eighteenAmount}}) e os restantes {{twelveYears}} anos contam 12 dias ({{twelveAmount}}). O total é {{total}}, abaixo do limite de {{cap}}.",
+        "example": "Quem ganha {{base}} por mês mais {{seniorityPay}} de diuturnidades, com um contrato que começou em {{start}} e terminou em {{end}}, tem {{seniority}} anos de antiguidade. O valor diário é {{daily}}. O contrato começou entre 1 de novembro de 2011 e 30 de setembro de 2013, por isso {{twentyYears}} anos até 30 de setembro de 2013 contam 20 dias ({{twentyAmount}}), {{eighteenYears}} anos completam os três primeiros anos a 18 dias ({{eighteenAmount}}), {{twelveYears}} anos até 30 de abril de 2023 contam 12 dias ({{twelveAmount}}) e os últimos {{fourteenYears}} anos contam 14 dias ({{fourteenAmount}}). O total é {{total}}, abaixo do limite de {{cap}}.",
         "methodTitle": "Como funciona a estimativa",
         "methodBase": "A base é a retribuição base mensal mais as diuturnidades. O valor diário é esse valor mensal dividido por 30.",
-        "methodRates": "Nos contratos iniciados a partir de 1 de outubro de 2013, a compensação é de 12 dias de retribuição base e diuturnidades por cada ano completo de antiguidade (art. 366.º, n.º 1, do Código do Trabalho).",
-        "methodTransitional": "Os contratos mais antigos mantêm as taxas anteriores para o tempo já trabalhado (art. 5.º da Lei n.º 69/2013). Antes de 1 de novembro de 2011: um mês por ano até 31 de outubro de 2012 e depois 20 dias por ano até 30 de setembro de 2013. De 1 de novembro de 2011 a 30 de setembro de 2013: 20 dias por ano até 30 de setembro de 2013. A partir de 1 de outubro de 2013 todos os contratos contam 12 dias por ano, exceto que os três primeiros anos de antiguidade contam 18 dias quando o contrato tinha menos de três anos nessa data.",
+        "methodRates": "Para a antiguidade a partir de 1 de maio de 2023, a compensação é de 14 dias de retribuição base e diuturnidades por cada ano completo (art. 366.º, n.º 1, do Código do Trabalho, na redação da Lei n.º 13/2023). A antiguidade anterior mantém a taxa antiga: 12 dias por ano desde 1 de outubro de 2013.",
+        "methodTransitional": "Os contratos mais antigos mantêm as taxas anteriores para o tempo já trabalhado (art. 5.º da Lei n.º 69/2013). Antes de 1 de novembro de 2011: um mês por ano até 31 de outubro de 2012 e depois 20 dias por ano até 30 de setembro de 2013. De 1 de novembro de 2011 a 30 de setembro de 2013: 20 dias por ano até 30 de setembro de 2013. De 1 de outubro de 2013 a 30 de abril de 2023 todos os contratos contam 12 dias por ano, exceto que os três primeiros anos de antiguidade contam 18 dias quando o contrato tinha menos de três anos a 1 de outubro de 2013. A partir de 1 de maio de 2023 cada ano conta 14 dias.",
         "methodCaps": "O valor mensal não pode exceder 20 vezes o salário mínimo ({{baseCap}} com o salário mínimo de {{rmmg}} em 2026) e a compensação total não pode exceder 12 valores mensais, no máximo {{totalCapRmmg}} (240 vezes o salário mínimo). Quando a parte até 30 de setembro de 2013 já atinge esse limite, os períodos seguintes não são somados.",
         "methodFraction": "Um ano incompleto conta proporcionalmente: o simulador conta os aniversários completos da data de início mais os dias desde o último, a dividir pelos dias desse ano. A data de cessação conta como dia trabalhado.",
         "methodTax": "Só como informação, não entra no valor: parte da indemnização pode ficar excluída de IRS ao abrigo do art. 2.º, n.º 4, do CIRS, até um limite ligado à remuneração regular dos últimos 12 meses e aos anos de antiguidade. O resto é rendimento tributável. Pergunta à Autoridade Tributária ou a um contabilista qual é o limite exato no teu caso.",
@@ -3357,9 +3358,10 @@
         "unsupportedPublic": "Os trabalhadores da função pública, que seguem outras regras.",
         "sourcesTitle": "Fontes",
         "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nova redação do art. 366.º e regime transitório do art. 5.º",
+        "sourceLaw13": "Guia da APEL sobre a Agenda do Trabalho Digno: Lei n.º 13/2023, que subiu a taxa do art. 366.º, n.º 1, para 14 dias desde 1 de maio de 2023",
         "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344.º, 345.º e 366.º",
         "sourceDgert": "DGERT: compensação por despedimento coletivo (art. 366.º)",
-        "reviewed": "Regras revistas a 19 de novembro de 2026 com o texto da Lei n.º 69/2013, publicado pela Assembleia da República, e o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 12 dias por ano do art. 366.º, n.º 1, e o respetivo limite foram confirmados no Código do Trabalho consolidado e no resumo da DGERT, não na consolidação do Diário da República. Os 14 dias por ano que algumas fontes atribuem à Lei n.º 13/2023 não foram encontrados e não são usados. Informação para aprender, não é aconselhamento jurídico."
+        "reviewed": "Regras revistas a 19 de novembro de 2026 com o texto da Lei n.º 69/2013, publicado pela Assembleia da República, e o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias por ano da Lei n.º 13/2023, em vigor desde 1 de maio de 2023, e os 12 dias e o limite do art. 366.º vêm dos resumos da APEL e da DGERT e do Código do Trabalho consolidado, não do texto do Diário da República. Aplicamos os 14 dias só à antiguidade desde 1 de maio de 2023, a leitura habitual da norma transitória. Informação para aprender, não é aconselhamento jurídico."
       },
       "nextStepHeadline": "Planeia o recebimento antes de ele chegar",
       "nextStepDescription": "A WonderMoney mostra as tuas contas e as despesas mensais em conjunto, para repartires uma indemnização pelos meses seguintes.",

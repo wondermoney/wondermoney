@@ -16,6 +16,8 @@ export const TOTAL_CAP_MONTHS = 12;
 export const OCT_2013 = "2013-10-01";
 export const NOV_2011 = "2011-11-01";
 const NOV_2012 = "2012-11-01";
+/** Lei n.º 13/2023: 14 days a year for seniority from this date. */
+export const MAY_2023 = "2023-05-01";
 
 /** The only year whose minimum wage (RMMG) the caps use. */
 export const SUPPORTED_END_YEAR = 2026;
@@ -41,9 +43,9 @@ export const DISMISSAL_EXAMPLE: DismissalCompensationInput = {
   baseMonthly: 1500, seniorityPay: 50, startDate: "2012-03-01", endDate: "2026-12-31",
 };
 
-export type PeriodKey = "oneMonth" | "twentyDays" | "eighteenDays" | "twelveDays";
+export type PeriodKey = "oneMonth" | "twentyDays" | "eighteenDays" | "twelveDays" | "fourteenDays";
 /** The rule behind each line of the breakdown: days of pay per year of seniority. */
-const DAYS_PER_YEAR: Record<PeriodKey, number> = { oneMonth: 30, twentyDays: 20, eighteenDays: 18, twelveDays: 12 };
+const DAYS_PER_YEAR: Record<PeriodKey, number> = { oneMonth: 30, twentyDays: 20, eighteenDays: 18, twelveDays: 12, fourteenDays: 14 };
 
 export interface PeriodLine {
   key: PeriodKey;
@@ -154,14 +156,18 @@ export function computeDismissalCompensation(input: DismissalCompensationInput, 
     push("twentyDays", yearsBetween(input.startDate, OCT_2013));
   }
   const earlyCents = lines.reduce((sum, line) => sum + line.amountCents, 0);
-  // From 1 Oct 2013 the first three years of seniority count 18 days, but only for contracts younger than three years on
-  // that date (seniority below 3 then); every other year counts 12 days.
-  const after2013 = yearsBetween(regime === "from2013" ? input.startDate : OCT_2013, farFuture);
+  // From 1 Oct 2013 to 30 Apr 2023 every year counts 12 days, except that the first three years of seniority count 18 days
+  // when the contract was less than three years old on 1 Oct 2013 (seniority below 3 then). Seniority from 1 May 2023
+  // counts 14 days (Lei n.º 13/2023); earlier time keeps its rate.
+  const from = regime === "from2013" ? input.startDate : OCT_2013;
+  const middle = yearsBetween(from, MAY_2023);
   const seniorityAtOct2013 = regime === "from2013" ? 0 : seniority(start, at(OCT_2013));
+  const seniorityAtMay2023 = seniority(start, at(MAY_2023));
   const seniorityAtEnd = seniority(start, endExclusive);
-  const first3 = regime === "from2013" ? 0 : Math.max(0, Math.min(seniorityAtEnd, 3) - Math.min(seniorityAtOct2013, 3));
+  const first3 = regime === "from2013" ? 0 : Math.max(0, Math.min(seniorityAtMay2023, 3) - Math.min(seniorityAtOct2013, 3));
   push("eighteenDays", first3);
-  push("twelveDays", after2013 - first3);
+  push("twelveDays", middle - first3);
+  push("fourteenDays", yearsBetween(MAY_2023, farFuture));
 
   const uncappedCents = lines.reduce((sum, line) => sum + line.amountCents, 0);
   const capCents = TOTAL_CAP_MONTHS * usedMonthlyCents;

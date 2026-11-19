@@ -3323,7 +3323,8 @@
           "oneMonth": "{{years}} years at {{days}} days a year",
           "twentyDays": "{{years}} years at {{days}} days a year",
           "eighteenDays": "{{years}} years at {{days}} days a year",
-          "twelveDays": "{{years}} years at {{days}} days a year"
+          "twelveDays": "{{years}} years at {{days}} days a year",
+          "fourteenDays": "{{years}} years at {{days}} days a year"
         },
         "caps": {
           "none": "No cap applied.",
@@ -3338,11 +3339,11 @@
       },
       "guide": {
         "exampleTitle": "Worked example",
-        "example": "Someone earning {{base}} a month plus {{seniorityPay}} of diuturnidades, with a contract that began on {{start}} and ended on {{end}}, has {{seniority}} years of seniority. The daily amount is {{daily}}. The contract began between 1 November 2011 and 30 September 2013, so {{twentyYears}} years up to 30 September 2013 count 20 days ({{twentyAmount}}), {{eighteenYears}} years complete the first three years at 18 days ({{eighteenAmount}}) and the remaining {{twelveYears}} years count 12 days ({{twelveAmount}}). The total is {{total}}, below the cap of {{cap}}.",
+        "example": "Someone earning {{base}} a month plus {{seniorityPay}} of diuturnidades, with a contract that began on {{start}} and ended on {{end}}, has {{seniority}} years of seniority. The daily amount is {{daily}}. The contract began between 1 November 2011 and 30 September 2013, so {{twentyYears}} years up to 30 September 2013 count 20 days ({{twentyAmount}}), {{eighteenYears}} years complete the first three years at 18 days ({{eighteenAmount}}), {{twelveYears}} years up to 30 April 2023 count 12 days ({{twelveAmount}}) and the last {{fourteenYears}} years count 14 days ({{fourteenAmount}}). The total is {{total}}, below the cap of {{cap}}.",
         "methodTitle": "How the estimate works",
         "methodBase": "The base is the monthly base pay plus diuturnidades. The daily amount is that monthly amount divided by 30.",
-        "methodRates": "For contracts that began on or after 1 October 2013, the compensation is 12 days of base pay and diuturnidades per full year of seniority (art. 366(1) of the Código do Trabalho).",
-        "methodTransitional": "Older contracts keep the earlier rates for the time already worked (art. 5 of Lei n.º 69/2013). Before 1 November 2011: one month per year until 31 October 2012, then 20 days a year until 30 September 2013. From 1 November 2011 to 30 September 2013: 20 days a year until 30 September 2013. From 1 October 2013 every contract counts 12 days a year, except that the first three years of seniority count 18 days when the contract was less than three years old on that date.",
+        "methodRates": "For seniority from 1 May 2023, the compensation is 14 days of base pay and diuturnidades per full year (art. 366(1) of the Código do Trabalho, as amended by Lei n.º 13/2023). Seniority before that date keeps the earlier rate: 12 days a year from 1 October 2013.",
+        "methodTransitional": "Older contracts keep the earlier rates for the time already worked (art. 5 of Lei n.º 69/2013). Before 1 November 2011: one month per year until 31 October 2012, then 20 days a year until 30 September 2013. From 1 November 2011 to 30 September 2013: 20 days a year until 30 September 2013. From 1 October 2013 to 30 April 2023 every contract counts 12 days a year, except that the first three years of seniority count 18 days when the contract was less than three years old on 1 October 2013. From 1 May 2023 every year counts 14 days.",
         "methodCaps": "The monthly amount cannot exceed 20 times the minimum wage ({{baseCap}} with the 2026 minimum wage of {{rmmg}}), and the whole compensation cannot exceed 12 monthly amounts, at most {{totalCapRmmg}} (240 times the minimum wage). When the part up to 30 September 2013 already reaches that cap, the later periods are not added.",
         "methodFraction": "An incomplete year counts proportionally: the calculator counts whole anniversaries of the start date plus the days since the last one over the days of that year. The termination date counts as a day worked.",
         "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
@@ -3357,9 +3358,10 @@
         "unsupportedPublic": "Public-sector workers, who follow different rules.",
         "sourcesTitle": "Sources",
         "sourceLaw69": "Lei n.º 69/2013, of 30 August (Diário da República): new wording of art. 366 and the transitional regime of art. 5",
+        "sourceLaw13": "APEL guide to the Agenda do Trabalho Digno: Lei n.º 13/2023, which raised the rate of art. 366(1) to 14 days from 1 May 2023",
         "sourceCode": "Código do Trabalho, consolidated text (PGDL): arts. 344, 345 and 366",
         "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
-        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 12 days per year of art. 366(1) and its cap were checked against the consolidated Código do Trabalho and the DGERT summary, not against the Diário da República consolidation. The 14 days a year that some sources attribute to Lei n.º 13/2023 was not found and is not used. Educational, not legal advice."
+        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. Educational, not legal advice."
       },
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
